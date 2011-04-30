@@ -1,27 +1,28 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                        AdamsBashforthMoulton
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : AdamsBashforthMoulton.cpp
 // *** Created   : October 1, 2002
-// **************************************************************************
-// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
-// ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
-// ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
-// ***                                                                    ***
-// ***  This software is subject to the Sofware Usage Agreement described ***
-// ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
-// ***  must be included in any distribution.  Removal of this header is  ***
-// ***  strictly prohibited.                                              ***
-// ***                                                                    ***
-// ***                                                                    ***
-// ***  Header Version: July 12, 2002                                     ***
-// **************************************************************************
+// ***************************************************************************
+// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)      ***
+// ***  For:  Flight Dynamics Analysis Branch (Code 572)                   ***
+// ***  Under Contract:  P.O.  GSFC S-66617-G                              ***
+// ***                                                                     ***
+// ***  This software is subject to the Software Usage Agreement described ***
+// ***  by NASA Case Number GSC-14735-1.  The Software Usage Agreement     ***
+// ***  must be included in any distribution.  Removal of this header is   ***
+// ***  strictly prohibited.                                               ***
+// ***                                                                     ***
+// ***                                                                     ***
+// ***  Header Version: July 12, 2002                                      ***
+// ***************************************************************************
 // Module Type               : ANSI C++ Source
 // Development Environment   : Visual C++ 7.0
 // Modification History      : 11/26/2002 - D. Conway, Thinking Systems, Inc.
@@ -30,10 +31,11 @@
 //                           : 6/17/2004 - A. Greene, Mission Applications, GSFC
 //                             - Updated style using GMAT cpp style guide
 //                             - All double types to Real types, int to Integer
-// **************************************************************************
+// ***************************************************************************
 
 
 #include "AdamsBashforthMoulton.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // public
@@ -244,7 +246,7 @@ Real AdamsBashforthMoulton::EstimateError()
 }
 
 //------------------------------------------------------------------------------
-// Propagator* PrinceDormand78::Clone() const
+// Propagator* Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to restart the integrator, when appropriate

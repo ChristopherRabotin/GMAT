@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  OpenGlPlot
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -24,7 +26,7 @@
 #include "CoordinateSystem.hpp"
 #include <map>
 
-class OpenGlPlot : public Subscriber
+class GMAT_API OpenGlPlot : public Subscriber
 {
 public:
    OpenGlPlot(const std::string &name);
@@ -128,6 +130,7 @@ public:
                                           const std::string &value);
    
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual bool         HasRefObjectTypeArray();
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
@@ -144,9 +147,6 @@ protected:
                           bool show = true);
    bool     ClearSpacePointList();
    bool     RemoveSpacePoint(const std::string &name);
-   Integer  FindIndexOfElement(StringArray &labelArray,
-                               const std::string &label);
-   
    void     ClearDynamicArrays();
    void     UpdateObjectList(SpacePoint *sp, bool show = false);
    void     PutRvector3Value(Rvector3 &rvec3, Integer id,
@@ -158,6 +158,7 @@ protected:
    CoordinateSystem *mViewCoordSystem;
    CoordinateSystem *mViewUpCoordSystem;
    SpacePoint *mViewCoordSysOrigin;
+   SpacePoint *mViewUpCoordSysOrigin;
    SpacePoint *mViewPointRefObj;
    SpacePoint *mViewPointObj;
    SpacePoint *mViewDirectionObj;
@@ -205,6 +206,14 @@ protected:
    Integer mScCount;
    Integer mObjectCount;
    Integer mNonStdBodyCount;
+
+	std::string mEnableStars;
+	std::string mEnableConstellations;
+	Integer mStarCount;
+
+	Integer mMinFOV;
+	Integer mMaxFOV;
+	Integer mInitialFOV;
    
    StringArray mScNameArray;
    StringArray mObjectNameArray;
@@ -273,6 +282,12 @@ protected:
       UPDATE_PLOT_FREQUENCY,
       NUM_POINTS_TO_REDRAW,
       SHOW_PLOT,
+		STAR_COUNT,
+		ENABLE_STARS,
+		ENABLE_CONSTELLATIONS,
+		MIN_FOV,
+		MAX_FOV,
+		INITIAL_FOV,
       OpenGlPlotParamCount
    };
    

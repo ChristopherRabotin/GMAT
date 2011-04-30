@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              HarmonicField
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -50,9 +52,10 @@
 #include "HarmonicField.hpp"
 
 #include "PhysicalModel.hpp"
-#include "ForceModelException.hpp"
+#include "ODEModelException.hpp"
 #include "StringUtil.hpp"     // for ToString()
 #include "RealUtilities.hpp"
+#include "TimeTypes.hpp"
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
 #include "FileManager.hpp"
@@ -60,7 +63,6 @@
 
 /*
 #include <iostream>
- using namespace std; // ***************************** for debug only
  
 #define DEBUG_REFERENCE_SETTING
 */
@@ -132,10 +134,13 @@ inputCSName             ("EarthMJ2000Eq"),
 fixedCSName             ("EarthFixed"),
 targetCSName            ("EarthMJ2000Eq"),
 potPath                 (""),
+inputCS                 (NULL),
+fixedCS                 (NULL),
+targetCS                (NULL),
 offDiags                (NULL),
 abarCoeff1              (NULL),
 abarCoeff2              (NULL)
-//epoch                   (21545.0)
+//epoch                   (GmatTimeConstants::MJD_OF_J2000)
 {
    objectTypeNames.push_back("HarmonicField");
    parameterCount = HarmonicFieldParamCount;
@@ -223,6 +228,12 @@ inputCSName             (hf.inputCSName),
 fixedCSName             (hf.fixedCSName),
 targetCSName            (hf.targetCSName),
 potPath                 (hf.potPath),
+//inputCS                 (hf.inputCS),
+//fixedCS                 (hf.fixedCS),
+//targetCS                (hf.targetCS),
+inputCS                 (NULL),
+fixedCS                 (NULL),
+targetCS                (NULL),
 offDiags                (NULL),
 abarCoeff1              (NULL),
 abarCoeff2              (NULL)
@@ -263,6 +274,9 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    fixedCSName    = hf.fixedCSName;
    targetCSName   = hf.targetCSName;
    potPath        = hf.potPath;
+   inputCS        = hf.inputCS;
+   fixedCS        = hf.fixedCS;
+   targetCS       = hf.targetCS;
    offDiags       = NULL;
    abarCoeff1     = NULL;
    abarCoeff2     = NULL;
@@ -288,16 +302,16 @@ bool HarmonicField::Initialize()
    // if we want to use mu and radius from this file later
    //body->SetPotentialFilename(filename);
    
-   if (solarSystem == NULL) throw ForceModelException(
+   if (solarSystem == NULL) throw ODEModelException(
                             "Solar System undefined for Harmonic Field " 
                              + instanceName);
-   if (!inputCS) throw ForceModelException(
+   if (!inputCS) throw ODEModelException(
                  "Input coordinate system undefined for Harmonic Field "
                   + instanceName);
-   if (!fixedCS) throw ForceModelException(
+   if (!fixedCS) throw ODEModelException(
                  "Body fixed coordinate system undefined for Harmonic Field "
                   + instanceName);
-   //if (!targetCS) throw ForceModelException(
+   //if (!targetCS) throw ODEModelException(
    //               "Target coordinate system undefined for Harmonic Field "
    //               + instanceName);
    if (!targetCS) targetCS = inputCS;
@@ -391,7 +405,7 @@ bool HarmonicField::SetFilename(const std::string &fn)
       std::ifstream potfile(filename.c_str());
       if (!potfile) 
       {
-         throw ForceModelException
+         throw ODEModelException
             ("The file name \"" + filename + "\" does not exist.");
       }
       
@@ -475,7 +489,7 @@ bool HarmonicField::legendreP_init()
    
    Abar = new Real*[maxDegree+3];
    if ( !Abar ) {
-      throw ForceModelException("legendreP_init: memory allocation failed for Abar!");
+      throw ODEModelException("legendreP_init: memory allocation failed for Abar!");
    }
 
    Integer allocsize = 0;
@@ -491,7 +505,7 @@ bool HarmonicField::legendreP_init()
       
       if ( !Abar[cc] )
       {
-         throw ForceModelException("legendreP_init:  calloc failed!\a\n!");
+         throw ODEModelException("legendreP_init:  calloc failed!\a\n!");
       }
       else
       {
@@ -511,7 +525,7 @@ bool HarmonicField::legendreP_init()
    re = new Real[maxOrder+3];
    im = new Real[maxOrder+3];
    if ( !re || !im ) {
-      throw ForceModelException("legendreP_init:  calloc failed!\a\n!");
+      throw ODEModelException("legendreP_init:  calloc failed!\a\n!");
    }
 
    /* initalize recursion, Ref.[1] */
@@ -657,7 +671,7 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
       {
          std::stringstream buffer;
          buffer << value;
-         throw ForceModelException(
+         throw ODEModelException(
             "The value of \"" + buffer.str() + "\" for field \"" 
             + GetParameterText(id).c_str() + "\" on object \"" 
             + instanceName + "\" is not an allowed value.\n"
@@ -674,7 +688,7 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
       {
          std::stringstream buffer;
          buffer << value;
-         throw ForceModelException(
+         throw ODEModelException(
             "The value of \"" + buffer.str() + "\" for field \"" 
             + GetParameterText(id).c_str() + "\" on object \"" 
             + instanceName + "\" is not an allowed value.\n"
@@ -774,7 +788,12 @@ bool HarmonicField::SetStringParameter(const Integer id,
 {
    if (id == FILENAME)
    {
-      return SetFilename(value);  
+      std::string newValue = value;
+      // if value has no file extension, add .cof as default (loj: 2008.10.14)
+      if (value.find(".") == value.npos)
+         newValue = value + ".cof";
+      
+      return SetFilename(newValue);  
    }
    if (id == INPUT_COORD_SYSTEM)
    {
@@ -821,7 +840,15 @@ bool HarmonicField::SetStringParameter(const Integer id,
       {
          // set default potential file path for the body
          FileManager *fm = FileManager::Instance();
-         potPath = fm->GetAbsPathname(bodyName + "_POT_PATH");
+         try
+         {
+            potPath = fm->GetAbsPathname(bodyName + "_POT_PATH");
+         }
+         catch (BaseException &ex)
+         {
+            MessageInterface::ShowMessage("**** WARNING ****: %s\n",
+                  ex.GetFullMessage().c_str());
+         }
          
          #ifdef DEBUG_HARMONIC_FIELD
          MessageInterface::ShowMessage
@@ -869,6 +896,7 @@ bool HarmonicField::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
+
 //------------------------------------------------------------------------------
 //  GmatBase* GetRefObject(const Gmat::ObjectType type,
 //                         const std::string &name)
@@ -889,12 +917,16 @@ GmatBase* HarmonicField::GetRefObject(const Gmat::ObjectType type,
    switch (type)
    {
       case Gmat::COORDINATE_SYSTEM:
-         if ((inputCS) && (name == inputCSName))       return inputCS;
-         if ((fixedCS) && (name == fixedCSName))       return fixedCS;
-         if ((targetCS) && (name == targetCSName))     return targetCS;
+         if ((inputCS) && (name == inputCSName))
+            return inputCS;
+         if ((fixedCS) && (name == fixedCSName))
+            return fixedCS;
+         if ((targetCS) && (name == targetCSName))
+            return targetCS;
          break;
+
       default:
-            break;
+         break;
    }
    
    // Not handled here -- invoke the next higher GetRefObject call
@@ -1089,7 +1121,7 @@ bool HarmonicField::legendreP_rtq(Real *R )
    /* coordinate transformation, Ref.[3], Eqs.(7),(40) */
    r = sqrt( R[0]*R[0] + R[1]*R[1] + R[2]*R[2] );
    if (r == 0.0) {
-      throw ForceModelException (
+      throw ODEModelException (
                    "In HarmonicField::legendreP_rtq,  Radial distance is zero");
      // return false;
    }
@@ -1151,7 +1183,7 @@ bool HarmonicField::IsParameterReadOnly(const Integer id) const
       return PhysicalModel::IsParameterReadOnly(id);
    
    if (id >= HarmonicFieldParamCount)
-      throw ForceModelException(
+      throw ODEModelException(
          "Attempting to determine accessibility of a parameter outside of the "
          "scope of a HarmonicField object.");
    

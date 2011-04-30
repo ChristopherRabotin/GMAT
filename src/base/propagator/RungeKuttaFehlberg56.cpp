@@ -1,16 +1,19 @@
+//$Id$
 //------------------------------------------------------------------------------
-//                              RungeKuttaFehlberg56
+//                             RungeKuttaFehlberg56
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : rungekuttafehlberg56.cpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -27,10 +30,10 @@
 //
 //                           : 1/15/2003 - D. Conway, Thinking Systems, Inc.
 //                             Updated interfaces based on GSFC feedback
-//				      Changes
+//                                    Changes
 //                           : 02/26/2004 - L. Ruley, Missions Applications Branch
-//				              - Updated style using GMAT cpp style guide
-//				              - All Real types to Real types
+//                                            - Updated style using GMAT cpp style guide
+//                                            - All Real types to Real types
 //                            - All int types to Integer types
 // **************************************************************************
 
@@ -39,7 +42,7 @@
 
 /** \brief Constructor for the Fehlberg's 4(5) Runge-Kutta integrator */
 RungeKuttaFehlberg56::RungeKuttaFehlberg56(const std::string &nomme) :
-    RungeKutta      (8, 6, "RungeKuttaFehlberg56", nomme)
+    RungeKutta      (8, 6, "RungeKutta56" /*"RungeKuttaFehlberg56"*/, nomme)
 //    RungeKutta      (8, 6)
 {
 }

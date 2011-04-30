@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            BeginFiniteBurn
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS task
 // order 124.
@@ -39,28 +41,29 @@ public:
    BeginFiniteBurn(const BeginFiniteBurn& begman);
    BeginFiniteBurn&       operator=(const BeginFiniteBurn& begman);
    
-   virtual bool TakeAction(const std::string &action,  
+   virtual bool         TakeAction(const std::string &action,  
                            const std::string &actionData = "");
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const ObjectTypeArray&
-                       GetRefObjectTypeArray();
+                        GetRefObjectTypeArray();
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         SetRefObjectName(const Gmat::ObjectType type,
                                         const std::string &name);
    
-   virtual GmatBase*    GetObject(const Gmat::ObjectType type, 
+   virtual GmatBase*    GetGmatObject(const Gmat::ObjectType type, 
                                   const std::string objName = "");
 
    virtual GmatBase*    Clone() const;
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode,
-                                            const std::string &prefix,
-                                            const std::string &useName);
-
+                        GetGeneratingString(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
+   
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    
    virtual bool         Initialize();
@@ -84,6 +87,10 @@ protected:
    /// The thrusters that get activated
    std::vector<Thruster *>
                         thrusters;
+   bool                 firstTimeExecution;
+   
+   void ValidateThrusters();
+   
 };
 
 #endif // BeginFiniteBurn_hpp

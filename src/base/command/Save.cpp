@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Save
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
 // Created: 2004/02/26
@@ -711,8 +715,9 @@ void Save::UpdateOutputFileNames(Integer index, const std::string objName)
 void Save::WriteObject(UnsignedInt i, GmatBase *o)
 {
    #ifdef DEBUG_SAVE_OUTPUT
-      MessageInterface::ShowMessage("Save: %s has %d parameters\n", 
-         o->GetName().c_str(), o->GetParameterCount());
+      MessageInterface::ShowMessage("Save: %s <a %s> has %d parameters\n",
+         o->GetName().c_str(), o->GetTypeName().c_str(),
+         o->GetParameterCount());
    #endif
    
    std::string objectname = o->GetName();

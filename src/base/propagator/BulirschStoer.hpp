@@ -1,15 +1,19 @@
-//$Header$
+//$Id$
+//------------------------------------------------------------------------------
+//                             BulirschStoer
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : BulirschStoer.hpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -28,14 +32,14 @@
 //                             Updated interfaces based on GSFC feedback
 //
 //                           : 06/15/2004 - W. Waktola, Missions Applications Branch
-//				                 Changes:
-//				                 - Updated style using GMAT cpp style guide
-//				                 - All double types to Real types
-//				                 - All int types to Integer types
+//                                               Changes:
+//                                               - Updated style using GMAT cpp style guide
+//                                               - All double types to Real types
+//                                               - All int types to Integer types
 //                               - Added Parameter accessor methods
 //                           : 06/22/2004 - W. Waktola, Missions Applications Branch
-//				                 Removals:
-//				                 - SetParameter()
+//                                               Removals:
+//                                               - SetParameter()
 //                               - GetParameter()
 //                               - GetParameterName()
 //                               - GetType()
@@ -61,7 +65,7 @@
 class GMAT_API BulirschStoer : public Integrator
 {
 public:
-   BulirschStoer(const std::string &typeStr, const std::string &nomme = "");
+   BulirschStoer(const std::string &nomme = "");
    virtual ~BulirschStoer(void);
    BulirschStoer(const BulirschStoer& bs);
    BulirschStoer& operator=(const BulirschStoer& bs);
@@ -87,7 +91,7 @@ public:
    virtual Real    GetRealParameter(const std::string &label) const;
    virtual Real    SetRealParameter(const Integer id, const Real value);
    virtual Real    SetRealParameter(const std::string &label, const Real value);
-	
+        
 protected:
    enum
    {

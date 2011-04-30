@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  OrbitData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,14 +25,15 @@
 #include "ParameterException.hpp"
 #include "Rvector3.hpp"
 #include "RealUtilities.hpp"
+#include "GmatConstants.hpp"
+#include "Linear.hpp"
 #include "Keplerian.hpp"         // for Cartesian to Keplerian elements
 #include "AngleUtil.hpp"
-#include "UtilityException.hpp"
-#include "SphericalRADEC.hpp"    // for friend CartesianToSphericalRADEC/AZFPA()
+//#include "SphericalRADEC.hpp"    // for friend CartesianToSphericalRADEC/AZFPA()
 #include "ModKeplerian.hpp"      // for friend KeplerianToModKeplerian()
-#include "Equinoctial.hpp"
+//#include "Equinoctial.hpp"
 #include "CelestialBody.hpp"
-#include "OrbitTypes.hpp"        // for KEP_TOL, KEP_ZERO_TOL
+#include "StringUtil.hpp"        // for ToString()
 #include "MessageInterface.hpp"
 
 
@@ -40,6 +43,7 @@
 //#define DEBUG_CLONE
 //#define DEBUG_MA
 //#define DEBUG_HA
+//#define DEBUG_ORBITDATA_OBJREF_EPOCH
 
 using namespace GmatMathUtil;
 
@@ -59,19 +63,21 @@ OrbitData::VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount] =
 };
 
 
+const Real OrbitData::ORBIT_DATA_TOLERANCE     = 2.0e-10;
+
 //---------------------------------
 // public methods
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// OrbitData()
+// OrbitData(const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-OrbitData::OrbitData()
-   : RefData(),
+OrbitData::OrbitData(const std::string &name)
+   : RefData(name),
    stateTypeId (-1)
 {
    mCartState = Rvector6::RVECTOR6_UNDEFINED;
@@ -87,6 +93,8 @@ OrbitData::OrbitData()
    mOrigin = NULL;
    mInternalCoordSystem = NULL;
    mOutCoordSystem = NULL;
+
+   firstTimeEpochWarning = false;
 }
 
 
@@ -121,6 +129,8 @@ OrbitData::OrbitData(const OrbitData &data)
    mOrigin = data.mOrigin;
    mInternalCoordSystem = data.mInternalCoordSystem;
    mOutCoordSystem = data.mOutCoordSystem;
+
+   firstTimeEpochWarning = data.firstTimeEpochWarning;
 }
 
 
@@ -158,6 +168,8 @@ OrbitData& OrbitData::operator= (const OrbitData &right)
    
    stateTypeId = right.stateTypeId;
    
+   firstTimeEpochWarning = right.firstTimeEpochWarning;
+
    return *this;
 }
 
@@ -178,6 +190,77 @@ OrbitData::~OrbitData()
 
 
 //------------------------------------------------------------------------------
+// void SetReal(Integer item, Real rval)
+//------------------------------------------------------------------------------
+void OrbitData::SetReal(Integer item, Real rval)
+{
+   #if DEBUG_ORBITDATA_SET
+   MessageInterface::ShowMessage
+      ("OrbitData::SetReal() item=%d, rval=%f\n", item, rval);
+   #endif
+   
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   if (mSpacecraft == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("*** INTERNAL ERROR *** Cannot find Spacecraft object so returning %f\n",
+          GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
+   }
+   
+   switch (item)
+   {
+   case PX:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("X"), rval);
+      break;
+   case PY:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Y"), rval);
+      break;
+   case PZ:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Z"), rval);
+      break;
+   case VX:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VX"), rval);
+      break;
+   case VY:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VY"), rval);
+      break;
+   case VZ:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VZ"), rval);
+      break;
+   default:
+      throw ParameterException("OrbitData::SetReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(item));
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetRvector6(const Rvector6 &val)
+//------------------------------------------------------------------------------
+void OrbitData::SetRvector6(const Rvector6 &val)
+{
+   #if DEBUG_ORBITDATA_SET
+   MessageInterface::ShowMessage
+      ("OrbitData::SetRvector6() entered, rval=[%s]\n", rval.ToString().c_str());
+   #endif
+   
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   if (mSpacecraft == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("*** INTERNAL ERROR *** Cannot find Spacecraft object so returning %f\n",
+          GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
+   }
+   
+   mSpacecraft->SetState(val);
+}
+
+
+//------------------------------------------------------------------------------
 // Rvector6 GetCartState()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetCartState()
@@ -190,7 +273,8 @@ Rvector6 OrbitData::GetCartState()
    
    #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
-      ("OrbitData::GetCartState() mCartState=\n   %s\n", mCartState.ToString().c_str());
+      ("OrbitData::GetCartState() '%s' mCartState=\n   %s\n",
+       mSpacecraft->GetName().c_str(), mCartState.ToString().c_str());
    #endif
    
    // if origin dependent parameter, the relative position/velocity is computed in
@@ -214,16 +298,61 @@ Rvector6 OrbitData::GetCartState()
    {
       #ifdef DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() mOutCoordSystem:%s, Axis addr=%d\n",
+            ("OrbitData::GetCartState() mOutCoordSystem:%s(%s), Axis addr=%d\n",
              mOutCoordSystem->GetName().c_str(),
+             mOutCoordSystem->GetTypeName().c_str(),
              mOutCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, ""));
+         if (mOutCoordSystem->AreAxesOfType("ObjectReferencedAxes"))
+               MessageInterface::ShowMessage("OrbitData::GetCartState() <-- "
+                     "mOutCoordSystem IS of type ObjectReferencedAxes!!!\n");
+         else
+            MessageInterface::ShowMessage("OrbitData::GetCartState() <-- "
+                  "mOutCoordSystem IS NOT of type ObjectReferencedAxes!!!\n");
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() <-- Before convert: mCartEpoch=%f\nstate = %s\n", 
-             mCartEpoch, mCartState.ToString().c_str());
+            ("OrbitData::GetCartState() <-- Before convert: mCartEpoch=%f\n"
+                  "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
+         MessageInterface::ShowMessage
+            ("OrbitData::GetCartState() <-- firstTimeEpochWarning = %s\n",
+             (firstTimeEpochWarning? "true" : "false"));
+
       #endif
+
+      if ((mOutCoordSystem->AreAxesOfType("ObjectReferencedAxes")) && !firstTimeEpochWarning)
+      {
+         GmatBase *objRefOrigin = mOutCoordSystem->GetOrigin();
+         if (objRefOrigin->IsOfType("Spacecraft"))
+         {
+            std::string objRefScName = ((Spacecraft*) objRefOrigin)->GetName();
+            if (objRefScName != mSpacecraft->GetName())
+            {
+               // Get the epochs of the spacecraft to see if they are different
+               Real scEpoch   = mSpacecraft->GetRealParameter("A1Epoch");
+               Real origEpoch = ((Spacecraft*) objRefOrigin)->GetRealParameter("A1Epoch");
+               #ifdef DEBUG_ORBITDATA_OBJREF_EPOCH
+                  MessageInterface::ShowMessage("obj ref cs sc epoch = %12.10f\n", origEpoch);
+                  MessageInterface::ShowMessage("   and the sc epoch = %12.10f\n", scEpoch);
+               #endif
+               if (!GmatMathUtil::IsEqual(scEpoch, origEpoch, ORBIT_DATA_TOLERANCE))
+               {
+                  std::string errmsg = "Warning:  In Coordinate System \"";
+                  errmsg += mOutCoordSystem->GetName() + "\", \"";
+                  errmsg += mSpacecraft->GetName() + "\" and \"";
+                  errmsg += objRefScName + "\" have different epochs.\n";
+//                  MessageInterface::PopupMessage(Gmat::WARNING_, errmsg);
+                  MessageInterface::ShowMessage(errmsg);
+                  firstTimeEpochWarning = true;
+               }
+            }
+         }
+      }
       
       try
       {
+         #ifdef DEBUG_ORBITDATA_CONVERT
+            MessageInterface::ShowMessage("    --> Converting from %s to %s\n\n",
+                  mInternalCoordSystem->GetName().c_str(),
+                  mOutCoordSystem->GetName().c_str());
+         #endif
          mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
                                  mCartState, mOutCoordSystem, true);
          #ifdef DEBUG_ORBITDATA_CONVERT
@@ -235,11 +364,12 @@ Rvector6 OrbitData::GetCartState()
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() Faild to convert to %s coordinate system.\n   %s\n",
+            ("OrbitData::GetCartState() Failed to convert to %s coordinate system.\n   %s\n",
              mOutCoordSystem->GetName().c_str(), e.GetFullMessage().c_str());
-         throw ParameterException
-            ("OrbitData::GetCartState() Faild to convert to " +
-             mOutCoordSystem->GetName() + " coordinate system.\n");
+         std::string errmsg = "OrbitData::GetCartState() Failed to convert to " ;
+         errmsg += mOutCoordSystem->GetName() + " coordinate system.\n";
+         errmsg += "Message: " + e.GetFullMessage() + "\n";
+         throw ParameterException(errmsg);
       }
    }
    
@@ -301,7 +431,8 @@ Rvector6 OrbitData::GetSphRaDecState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   mSphRaDecState = CartesianToSphericalRADEC(state);
+//   mSphRaDecState = CartesianToSphericalRADEC(state);
+   mSphRaDecState = stateConverter.FromCartesian(state, "SphericalRADEC");
 
    #ifdef DEBUG_ORBITDATA_STATE
    MessageInterface::ShowMessage
@@ -323,7 +454,9 @@ Rvector6 OrbitData::GetSphAzFpaState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   mSphAzFpaState = CartesianToSphericalAZFPA(state);
+   //   mSphAzFpaState = CartesianToSphericalAZFPA(state);
+   mSphAzFpaState = stateConverter.FromCartesian(state, "SphericalAZFPA");
+
    
    return mSphAzFpaState;
 }
@@ -339,7 +472,9 @@ Rvector6 OrbitData::GetEquinState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   Rvector6 mEquinState = CartesianToEquinoctial(state, mGravConst);
+//   Rvector6 mEquinState = CartesianToEquinoctial(state, mGravConst);
+   stateConverter.SetMu(mGravConst);
+   Rvector6 mEquinState = stateConverter.FromCartesian(state, "Equinoctial");
    
    return mEquinState;
 }
@@ -391,7 +526,7 @@ Real OrbitData::GetKepReal(Integer item)
    Rvector3 vel(state[3], state[4], state[5]);   
    Real rMag = pos.GetMagnitude();
    
-   if (rMag < GmatOrbit::KEP_ZERO_TOL)
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
       throw ParameterException
          ("OrbitData::GetKepReal(" + GmatRealUtil::ToString(item) +
           ") position vector is zero. pos: " + pos.ToString() + " vel: " +
@@ -466,34 +601,48 @@ Real OrbitData::GetOtherKepReal(Integer item)
    Real sma = Keplerian::CartesianToSMA(mGravConst, pos, vel);   
    Real ecc = Keplerian::CartesianToECC(mGravConst, pos, vel);
    
+   if (GmatMathUtil::Abs(1.0 - ecc) <= GmatOrbitConstants::KEP_ECC_TOL)
+   {
+      throw ParameterException
+         ("In OrbitData, Error in conversion to Keplerian state: "
+          "The state results in an orbit that is nearly parabolic.\n");
+   } 
+
+  if (sma*(1 - ecc) < .001)
+   {
+      throw ParameterException
+         ("In OrbitData, Error in conversion to Keplerian state: "
+          "The state results in a singular conic section with radius of periapsis less than 1 m.\n");
+   } 
+   
    Real grav = mGravConst;
    
    switch (item)
    {
    case MM:
-      if (ecc < (1.0 + 1E-10))      // Ellipse
+      if (ecc < (1.0 - GmatOrbitConstants::KEP_ECC_TOL))      // Ellipse
          return Sqrt(grav / (sma*sma*sma));
-      else if (ecc > (1.0 - 1E-10)) // Hyperbola 
+      else if (ecc > (1.0 + GmatOrbitConstants::KEP_ECC_TOL)) // Hyperbola 
          return Sqrt(-(grav / (sma*sma*sma)));
-      else                          // Parabola
-         return 2.0 * Sqrt(grav);
+      else                         
+         return 2.0 * Sqrt(grav); // Parabola
    case VEL_APOAPSIS:
-      if (ecc > (1.0 - 1E-12))
-         return 0.0;
+      if ( (ecc < 1.0 - GmatOrbitConstants::KEP_ECC_TOL) || (ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL))  //Ellipse and Hyperbola
+         return Sqrt( (grav/sma)*((1-ecc)/(1+ecc)) );  
       else
-         return Sqrt( (grav/sma)*((1-ecc)/(1+ecc)) );
+         return 0.0; // Parabola  
    case VEL_PERIAPSIS:
       return Sqrt( (grav/sma)*((1+ecc)/(1-ecc)) );
    case ORBIT_PERIOD:
-      if (sma < 0)
-         return 0;
-      else
-         return GmatMathUtil::TWO_PI * Sqrt((sma * sma * sma)/ grav);
-   case RAD_APOAPSIS:
-      if (ecc > (1.0 - 1E-12)) // 2007.05.15 wcs - added - Bugs 192/224
+      if (sma < 0.0)
          return 0.0;
       else
+         return GmatMathConstants::TWO_PI * Sqrt((sma * sma * sma)/ grav);
+   case RAD_APOAPSIS:
+	   if ( (ecc < 1.0 - GmatOrbitConstants::KEP_ECC_TOL) || (ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL)) //Ellipse and Hyperbola
          return sma * (1.0 + ecc);
+	  else
+		 return 0.0;   // Parabola
    case RAD_PERIAPSIS:
       return sma * (1.0 - ecc);
    case C3_ENERGY:
@@ -629,7 +778,7 @@ Real OrbitData::GetAngularReal(Integer item)
             h = Sqrt(hVec3 * hVec3);
          }
          
-         if (h < GmatOrbit::KEP_TOL)
+         if (h < GmatOrbitConstants::KEP_TOL)
             return 0.0;
          else
             return (h / grav) * h;      // B M W; eq. 1.6-1
@@ -698,7 +847,7 @@ Real OrbitData::GetOtherAngleReal(Integer item)
          
          // Math Spec change: eq. 4.99 on 2006/12/11
          //Real betaAngle = ACos(hVec3*originToSun) * DEG_PER_RAD;
-         Real betaAngle = ASin(hVec3*originToSun) * DEG_PER_RAD;
+         Real betaAngle = ASin(hVec3*originToSun) * GmatMathConstants::DEG_PER_RAD;
          return betaAngle;
       }
    default:
@@ -733,7 +882,7 @@ Real OrbitData::GetEquinReal(Integer item)
    Rvector3 vel(state[3], state[4], state[5]);   
    Real rMag = pos.GetMagnitude();
    
-   if (rMag < GmatOrbit::KEP_ZERO_TOL)
+   if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
       throw ParameterException
          ("OrbitData::GetEquiReal(" + GmatRealUtil::ToString(item) +
           ") position vector is zero. pos: " + pos.ToString() + " vel: " +
@@ -775,6 +924,76 @@ Real OrbitData::GetEquinReal(Integer item)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// const Rmatrix66& GetStmRmat66(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Spacecraft Rmatrix66 data.
+ */
+//------------------------------------------------------------------------------
+const Rmatrix66& OrbitData::GetStmRmat66(Integer item)
+{
+   #ifdef DEBUG_SCDATA_GET
+   MessageInterface::ShowMessage
+      ("OrbitData::GetStmRmat66() entered, mSpacecraft=<%p>'%s'\n",
+       mSpacecraft, mSpacecraft ? mSpacecraft->GetName().c_str() : "NULL");
+   #endif
+   
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   switch (item)
+   {
+   case ORBIT_STM:
+      {
+         mSTM = mSpacecraft->GetRmatrixParameter("OrbitSTM");
+         return mSTM;
+      }
+   default:
+      // otherwise, there is an error   
+      throw ParameterException
+         ("OrbitData::GetStmRmat66() Unknown parameter id: " +
+          GmatStringUtil::ToString(item));
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// const Rmatrix33& GetStmRmat33(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Spacecraft Rmatrix33 data.
+ */
+//------------------------------------------------------------------------------
+const Rmatrix33& OrbitData::GetStmRmat33(Integer item)
+{
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   mSTM = mSpacecraft->GetRmatrixParameter("OrbitSTM");
+   
+   switch (item)
+   {
+   case ORBIT_STM_A:
+      mSTMSubset = mSTM.UpperLeft();
+      return mSTMSubset;
+   case ORBIT_STM_B:
+      mSTMSubset = mSTM.UpperRight();
+      return mSTMSubset;
+   case ORBIT_STM_C:
+      mSTMSubset = mSTM.LowerLeft();
+      return mSTMSubset;
+   case ORBIT_STM_D:
+      mSTMSubset = mSTM.LowerRight();
+      return mSTMSubset;
+   default:
+      // otherwise, there is an error   
+      throw ParameterException
+         ("OrbitData::GetStmRmat33() Unknown parameter id: " +
+          GmatStringUtil::ToString(item));
+   }
+}
 
 //-------------------------------------
 // Inherited methods from RefData
@@ -990,7 +1209,7 @@ void OrbitData::InitializeRefObjects()
    {
       mOutCoordSystem =
          (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
-   
+      
       if (mOutCoordSystem == NULL)
       {
          #ifdef DEBUG_ORBITDATA_INIT
@@ -1017,8 +1236,8 @@ void OrbitData::InitializeRefObjects()
          #endif
       
          throw ParameterException
-            ("Coordinate system origin: " + mOutCoordSystem->GetOriginName() +
-             " not found.");
+            ("OrbitData::InitializeRefObjects() The origin of CoordinateSystem \"" +
+             mOutCoordSystem->GetOriginName() + "\" is NULL");
       }
       
       // get gravity constant if out coord system origin is CelestialBody
@@ -1030,6 +1249,9 @@ void OrbitData::InitializeRefObjects()
    MessageInterface::ShowMessage
       ("OrbitData::InitializeRefObjects() exiting, mOrigin.Name=%s, mGravConst=%f, "
        "mOriginDep=%d\n",  mOrigin->GetName().c_str(), mGravConst, mOriginDep);
+   MessageInterface::ShowMessage
+      ("   mSpacecraft=<%p> '%s', mSolarSystem=<%p>, mOutCoordSystem=<%p>, mOrigin=<%p>\n",
+       mSpacecraft, mSpacecraft->GetName().c_str(),mSolarSystem, mOutCoordSystem, mOrigin);
    #endif
 }
 

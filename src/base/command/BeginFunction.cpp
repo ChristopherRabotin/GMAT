@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                            BeginFunction
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // order 124.
@@ -22,7 +24,7 @@
 #include "BeginFunction.hpp"
 #include "MessageInterface.hpp"
 #include "StopCondition.hpp"
-#include "ForceModel.hpp"
+#include "ODEModel.hpp"
 #include "PropSetup.hpp"
 
 #define DEBUG_OBJECT_MAPPING
@@ -1121,9 +1123,9 @@ void BeginFunction::BuildReferences(GmatBase *obj)
    obj->SetSolarSystem(solarSys);
    // PropSetup probably should do this...
    if ((obj->GetType() == Gmat::PROP_SETUP) ||
-       (obj->GetType() == Gmat::FORCE_MODEL))
+       (obj->GetType() == Gmat::ODE_MODEL))
    {
-      ForceModel *fm = ((PropSetup *)obj)->GetForceModel();
+      ODEModel *fm = ((PropSetup *)obj)->GetODEModel();
       fm->SetSolarSystem(solarSys);
 
 
@@ -1148,6 +1150,9 @@ void BeginFunction::BuildReferences(GmatBase *obj)
             }
             catch (CommandException &ex)
             {
+               // Use exception to remove Visual C++ warning
+               ex.GetMessageType();
+
                // Handle SandboxExceptions first.
                #ifdef DEBUG_SANDBOX_INIT
                   MessageInterface::ShowMessage(
@@ -1158,6 +1163,8 @@ void BeginFunction::BuildReferences(GmatBase *obj)
             }
             catch (BaseException &ex)
             {
+               // Use exception to remove Visual C++ warning
+               ex.GetMessageType();
                // Post a message and -- otherwise -- ignore the exceptions
                // Handle SandboxExceptions first.
                #ifdef DEBUG_SANDBOX_INIT
@@ -1170,6 +1177,8 @@ void BeginFunction::BuildReferences(GmatBase *obj)
       }
       catch (CommandException &ex)
       {
+         // Use exception to remove Visual C++ warning
+         ex.GetMessageType();
          // Handle SandboxExceptions first.
          #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage(
@@ -1180,6 +1189,9 @@ void BeginFunction::BuildReferences(GmatBase *obj)
       }
       catch (BaseException &ex) // Handles no refObject array
       {
+         // Use exception to remove Visual C++ warning
+         ex.GetMessageType();
+
          // Post a message and -- otherwise -- ignore the exceptions
          #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage(
@@ -1189,7 +1201,7 @@ void BeginFunction::BuildReferences(GmatBase *obj)
       }
 
 
-      if (obj->GetType() == Gmat::FORCE_MODEL)
+      if (obj->GetType() == Gmat::ODE_MODEL)
          return;
    }
 
@@ -1202,6 +1214,9 @@ void BeginFunction::BuildReferences(GmatBase *obj)
    }
    catch (CommandException &ex)
    {
+      // Use exception to remove Visual C++ warning
+      ex.GetMessageType();
+
       // Handle SandboxExceptions first.
       // For now, post a message and -- otherwise -- ignore exceptions
       #ifdef DEBUG_SANDBOX_INIT
@@ -1212,6 +1227,8 @@ void BeginFunction::BuildReferences(GmatBase *obj)
    }
    catch (BaseException &ex)
    {
+      // Use exception to remove Visual C++ warning
+      ex.GetMessageType();
       // Post a message and -- otherwise -- ignore the exceptions
       #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage("RefObjectName not found; ignoring " +
@@ -1235,6 +1252,8 @@ void BeginFunction::BuildReferences(GmatBase *obj)
          }
          catch (CommandException &ex)
          {
+            // Use exception to remove Visual C++ warning
+            ex.GetMessageType();
             // Handle SandboxExceptions first.
             #ifdef DEBUG_SANDBOX_INIT
                MessageInterface::ShowMessage(
@@ -1245,6 +1264,8 @@ void BeginFunction::BuildReferences(GmatBase *obj)
          }
          catch (BaseException &ex)
          {
+            // Use exception to remove Visual C++ warning
+            ex.GetMessageType();
             // Post a message and -- otherwise -- ignore the exceptions
             // Handle SandboxExceptions first.
             #ifdef DEBUG_SANDBOX_INIT
@@ -1257,6 +1278,8 @@ void BeginFunction::BuildReferences(GmatBase *obj)
    }
    catch (CommandException &ex)
    {
+      // Use exception to remove Visual C++ warning
+      ex.GetMessageType();
       // Handle SandboxExceptions first.
       #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage(
@@ -1267,6 +1290,8 @@ void BeginFunction::BuildReferences(GmatBase *obj)
    }
    catch (BaseException &ex) // Handles no refObject array
    {
+      // Use exception to remove Visual C++ warning
+      ex.GetMessageType();
       // Post a message and -- otherwise -- ignore the exceptions
       #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage(

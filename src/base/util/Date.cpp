@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Date
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -26,10 +28,12 @@
 #include "DateUtil.hpp"         // for ToHMSFromSecondsOfDay()
 #include "StringTokenizer.hpp"  // for calendar in string
 
+#include <cstdlib>			// Required for GCC 4.3
+
 //---------------------------------
 // static data
 //---------------------------------
-const std::string Date::DATA_DESCRIPTIONS[NUM_DATA] = 
+const std::string Date::DATA_DESCRIPTIONS[NUM_DATA] =
 {
    "Year", "Month", "Day", "Hour", "Minute", "Second"
 };
@@ -78,7 +82,7 @@ Integer Date::GetHour() const
    Integer hour;
    Integer min;
    Real sec;
-   
+
    ToHMSFromSecondsOfDay(secondsOfDayD, hour, min, sec);
    return hour;
 }
@@ -91,7 +95,7 @@ Integer Date::GetMinute() const
    Integer hour;
    Integer min;
    Real sec;
-   
+
    ToHMSFromSecondsOfDay(secondsOfDayD, hour, min, sec);
    return min;
 }
@@ -104,26 +108,26 @@ Real Date::GetSecond() const
    Integer hour;
    Integer min;
    Real sec;
-   
+
    ToHMSFromSecondsOfDay(secondsOfDayD, hour, min, sec);
    return sec;
 }
 
 //------------------------------------------------------------------------------
-//  GmatTimeUtil::DayName GetDayName() const
+//  GmatTimeConstants::DayName GetDayName() const
 //------------------------------------------------------------------------------
-GmatTimeUtil::DayName Date::GetDayName() const
+GmatTimeConstants::DayName Date::GetDayName() const
 {
    const Integer JD_OF_010172 = 2441318;
-   const GmatTimeUtil::DayName DAY_NAME_OF_010172  = GmatTimeUtil::SATURDAY;
+   const GmatTimeConstants::DayName DAY_NAME_OF_010172  = GmatTimeConstants::SATURDAY;
    Integer dayNumber;
 
    dayNumber = (Integer)(DateUtil::JulianDay(yearD, monthD, dayD))
       - JD_OF_010172;
-   
+
    dayNumber = (dayNumber + DAY_NAME_OF_010172) % 7;
 
-   return (GmatTimeUtil::DayName)dayNumber;
+   return (GmatTimeConstants::DayName)dayNumber;
 }
 
 //------------------------------------------------------------------------------
@@ -132,17 +136,17 @@ GmatTimeUtil::DayName Date::GetDayName() const
 Integer Date::GetDaysPerMonth() const
 {
    if(IsLeapYear(yearD))
-      return GmatTimeUtil::LEAP_YEAR_DAYS_IN_MONTH[monthD - 1];
+      return GmatTimeConstants::LEAP_YEAR_DAYS_IN_MONTH[monthD - 1];
    else
-      return GmatTimeUtil::DAYS_IN_MONTH[monthD - 1];
+      return GmatTimeConstants::DAYS_IN_MONTH[monthD - 1];
 }
 
 //------------------------------------------------------------------------------
-//  GmatTimeUtil::MonthName GetMonthName() const
+//  GmatTimeConstants::MonthName GetMonthName() const
 //------------------------------------------------------------------------------
-GmatTimeUtil::MonthName Date::GetMonthName() const
+GmatTimeConstants::MonthName Date::GetMonthName() const
 {
-   return (GmatTimeUtil::MonthName)monthD; 
+   return (GmatTimeConstants::MonthName)monthD;
 }
 
 //------------------------------------------------------------------------------
@@ -156,9 +160,9 @@ Real Date::ToPackedCalendarReal() const
 {
    Real ymd;
    Real hms;
-   
+
    ToYearMonDayHourMinSec(ymd, hms);
-    
+
 //    return ymd + (hms * 1e-9);
    return ymd + hms;
 }
@@ -171,18 +175,18 @@ std::string& Date::ToPackedCalendarString()
    std::ostringstream ss("");
    ss.precision(9);
    ss.setf(std::ios::fixed);
-   
+
    Real ymd;
    Real hms;
-   
+
    ToYearMonDayHourMinSec(ymd, hms);
-   
+
    // Get date in YMD
-   ss << ymd;   
+   ss << ymd;
    StringTokenizer stringToken(ss.str(), ".");
    std::string tempString = stringToken.GetToken(0);
-   
-   // Get time in HMS 
+
+   // Get time in HMS
    ss.str("");
    ss << hms;
    stringToken.Set(ss.str(), ".");
@@ -193,7 +197,7 @@ std::string& Date::ToPackedCalendarString()
    mPackedString = tempString;
 
    return mPackedString;
-} 
+}
 
 //------------------------------------------------------------------------------
 //  void ToYearDOYHourMinSec(Integer& year, Integer& dayOfYear,
@@ -205,13 +209,13 @@ void Date::ToYearDOYHourMinSec(Integer& year, Integer& dayOfYear,
    year = yearD;
    dayOfYear = ToDOYFromYearMonthDay(yearD, monthD, dayD);
    ToHMSFromSecondsOfDay(secondsOfDayD, hour, minute, second);
-}          
+}
 
 //------------------------------------------------------------------------------
-//  void ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day, 
+//  void ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day,
 //                              Integer& hour, Integer& minute, Real& second) const
 //------------------------------------------------------------------------------
-void Date::ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day, 
+void Date::ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day,
                                   Integer& hour, Integer& minute, Real& second) const
 {
    year = yearD;
@@ -228,13 +232,13 @@ void Date::ToYearMonDayHourMinSec(Real& ymd, Real& hms) const
    Integer h;
    Integer m;
    Real    s;
-   
+
    ToHMSFromSecondsOfDay(secondsOfDayD, h, m, s);
    ymd = (Real) (yearD * 10000.0 + monthD * 100.0 + dayD);
    hms = (Real) (h * 1.0e+07 + m * 100000.0) +  s * 1000.0;
 
    hms = hms/1.0e+09;
-   
+
 }
 
 //------------------------------------------------------------------------------
@@ -270,33 +274,33 @@ std::string* Date::ToValueStrings()
    Integer hour;
    Integer min;
    Real sec;
-   
+
    ToHMSFromSecondsOfDay(secondsOfDayD, hour, min, sec);
    std::stringstream ss("");
 
    ss << yearD;
    stringValues[0] = ss.str();
-   
+
    ss.str("");
    ss << monthD;
    stringValues[1] = ss.str();
-   
+
    ss.str("");
    ss << dayD;
    stringValues[2] = ss.str();
-   
+
    ss.str("");
    ss << hour;
    stringValues[3] = ss.str();
-   
+
    ss.str("");
    ss << min;
    stringValues[4] = ss.str();
-   
+
    ss.str("");
    ss << sec;
    stringValues[5] = ss.str();
-   
+
    return stringValues;
 }
 
@@ -313,10 +317,10 @@ Date::Date()
 }
 
 //------------------------------------------------------------------------------
-//  Date(Integer year, Integer month, Integer day, Integer hour, 
+//  Date(Integer year, Integer month, Integer day, Integer hour,
 //       Integer minute, Real second)
 //------------------------------------------------------------------------------
-Date::Date(Integer year, Integer month, Integer day, Integer hour, 
+Date::Date(Integer year, Integer month, Integer day, Integer hour,
            Integer minute, Real second)
 {
    // check time
@@ -340,7 +344,7 @@ Date::Date(Integer year, Integer dayOfYear, Integer hour, Integer minute,
 {
    yearD = year;
    ToMonthDayFromYearDOY(year, dayOfYear, monthD, dayD);
-   
+
    // check time
    if(!IsValidTime(yearD, monthD, dayD, hour, minute, second))
    {
@@ -356,12 +360,12 @@ Date::Date(Integer year, Integer month, Integer day, Real secondsOfDay)
 {
    Real    seconds;
    Integer hour, minute;
-   
+
    yearD = year;
    monthD = month;
    dayD = day;
    secondsOfDayD = secondsOfDay;
-   
+
    // check time
    ToHMSFromSecondsOfDay(secondsOfDay, hour, minute, seconds);
    if(!IsValidTime(yearD, monthD, dayD, hour, minute, seconds))
@@ -378,8 +382,8 @@ Date::Date(const GmatTimeUtil::CalDate &date)
    yearD = date.year;
    monthD = date.month;
    dayD = date.day;
-   secondsOfDayD = date.hour * GmatTimeUtil::SECS_PER_HOUR +
-      date.minute * GmatTimeUtil::SECS_PER_MINUTE + date.second;
+   secondsOfDayD = date.hour * GmatTimeConstants::SECS_PER_HOUR +
+      date.minute * GmatTimeConstants::SECS_PER_MINUTE + date.second;
 }
 
 //------------------------------------------------------------------------------
@@ -396,7 +400,7 @@ Date::Date(const std::string& time)
    Integer timePart;
    Integer year, month, day, hour, minute;
    Real    second;
-   
+
    datePart = atoi(tempTime);
    tempTime = strstr(tempTime, ".");
 
@@ -404,7 +408,7 @@ Date::Date(const std::string& time)
       timePart = atoi(tempTime + 1);
    else
       timePart = 1;
-   
+
    try
    {
       UnpackDate(datePart, year, month, day);
@@ -430,11 +434,56 @@ Date::Date(const Date &date)
    dayD = date.dayD;
    secondsOfDayD = date.secondsOfDayD;
 }
-      
+
 //------------------------------------------------------------------------------
 //  ~Date()
 //------------------------------------------------------------------------------
 Date::~Date()
 {
+}
+
+//------------------------------------------------------------------------------
+//  bool operator> (const Date &date) const
+//------------------------------------------------------------------------------
+/**
+ * Comparison operator >
+ */
+//------------------------------------------------------------------------------
+bool Date::operator> (const Date &date) const
+{
+    if (yearD > date.yearD)
+	return true;
+    else if ( yearD == date.yearD && monthD > date.monthD )
+	return true;
+    else if ( yearD == date.yearD && monthD == date.monthD && dayD > date.dayD)
+	return true;
+    else if ( yearD == date.yearD && monthD == date.monthD && dayD == date.dayD
+	      && secondsOfDayD > date.secondsOfDayD)
+	return true;
+    else
+	return false;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool operator< (const Date &date) const
+//------------------------------------------------------------------------------
+/**
+ * Comparison operator <
+ */
+//------------------------------------------------------------------------------
+bool Date::operator< (const Date &date) const
+{
+    if (yearD < date.yearD)
+	return true;
+    else if ( yearD == date.yearD && monthD < date.monthD )
+	return true;
+    else if ( yearD == date.yearD && monthD == date.monthD && dayD < date.dayD)
+	return true;
+    else if ( yearD == date.yearD && monthD == date.monthD && dayD == date.dayD
+	      && secondsOfDayD < date.secondsOfDayD)
+	return true;
+    else
+	return false;
 }
 

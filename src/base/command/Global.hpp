@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Global
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan
 // Created: 2008.03.14
@@ -25,7 +29,7 @@
 /**
  * Declaration of the Global command
  */
-class Global : public ManageObject
+class GMAT_API Global : public ManageObject
 {
 public:
    Global();

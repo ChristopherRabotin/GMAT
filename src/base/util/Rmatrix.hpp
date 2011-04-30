@@ -2,14 +2,15 @@
 //------------------------------------------------------------------------------
 //                                Rmatrix
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author: M. Weippert, T. McRoberts, E. Corderman
 // Created: 1996/06/30 for GSS project (originally Matrix)
 // Modified:
 //   2003/09/15 Linda Jun - Replaced GSSString with std::string.
@@ -31,7 +32,7 @@
 class Rvector;
 class Rvector3;
 
-class Rmatrix :  public TableTemplate<Real>
+class GMAT_API Rmatrix :  public TableTemplate<Real>
 {
 public:
    
@@ -56,9 +57,9 @@ public:
    virtual ~Rmatrix();
    
    virtual bool 
-   IsOrthogonal(Real accuracyRequired = GmatRealConst::REAL_EPSILON) const;
+   IsOrthogonal(Real accuracyRequired = GmatRealConstants::REAL_EPSILON) const;
    virtual bool 
-   IsOrthonormal(Real accuracyRequired = GmatRealConst::REAL_EPSILON) const;
+   IsOrthonormal(Real accuracyRequired = GmatRealConstants::REAL_EPSILON) const;
    
    const Rmatrix& operator=(const Rmatrix &m);
    bool operator==(const Rmatrix &m)const;
@@ -90,6 +91,7 @@ public:
    Rvector operator*(const Rvector &v) const;
    
    friend Rmatrix operator*(Real scalar, const Rmatrix &m);
+   friend Rmatrix operator/(Real scalar, const Rmatrix &m);
    
    virtual Real   Trace() const ;                            
    virtual Real   Determinant() const;            
@@ -102,7 +104,7 @@ public:
    
    // friends
    friend Rmatrix SkewSymmetric4by4(const Rvector3 &v);
-   friend Rmatrix TransposeTimesRmatrix(const Rmatrix &m1, const Rmatrix &m2);
+   friend Rmatrix TransposeTimesMatrix(const Rmatrix &m1, const Rmatrix &m2);
    friend Rmatrix MatrixTimesTranspose(const Rmatrix &m1, const Rmatrix &m2);
    friend Rmatrix TransposeTimesTranspose(const Rmatrix &m1, const Rmatrix &m2);
    
@@ -115,8 +117,10 @@ public:
    const StringArray& GetStringVals(Integer p = GmatGlobal::DATA_PRECISION,
                                     Integer w = GmatGlobal::DATA_WIDTH);
    
-   virtual std::string ToString(Integer precision, bool horizontal = true,
-                                const std::string &prefix = "") const;
+   virtual std::string ToString(Integer precision, Integer width = 1,
+                                bool horizontal = false,
+                                const std::string &prefix = "",
+                                bool appendEol = true) const;
    
    virtual std::string ToString(bool useCurrentFormat = true,
                                 bool scientific = false, bool showPoint = false,
@@ -125,6 +129,9 @@ public:
                                 bool horizontal = true, Integer spacing = 1,
                                 const std::string &prefix = "",
                                 bool appendEol = true) const;
+   
+   virtual std::string ToRowString(Integer row, Integer precision,
+                                   Integer width = 1, bool zeroFill = false) const;
    
 protected:   
    StringArray stringVals;

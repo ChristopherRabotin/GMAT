@@ -2,22 +2,26 @@
 //------------------------------------------------------------------------------
 //                                  ObjectReferencedAxes
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under
 // MOMS Task order 124.
 //
 // Author: Wendy C. Shoan
 // Created: 2005/03/02
 //
 /**
- * Implementation of the ObjectReferencedAxes class.  
+ * Implementation of the ObjectReferencedAxes class.
  *
  */
 //------------------------------------------------------------------------------
-
+#include <sstream>
+#include <iomanip>
+#include <algorithm>                    // Required by GCC 4.3
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "ObjectReferencedAxes.hpp"
@@ -27,10 +31,12 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OR_AXES
+//#define DEBUG_ROT_MATRIX
+
 
 #ifdef DEBUG_OR_AXES
 #include <iostream>
-using namespace std; // ***************************** for debug only
+
 
 #define DEBUG_ROT_MATRIX 1
 #define DEBUG_REFERENCE_SETTING
@@ -79,8 +85,8 @@ ObjectReferencedAxes::PARAMETER_TYPE[ObjectReferencedAxesParamCount - DynamicAxe
 //---------------------------------------------------------------------------
 ObjectReferencedAxes::ObjectReferencedAxes(const std::string &itsName) :
 DynamicAxes("ObjectReferenced",itsName),
-primaryName   (""),
-secondaryName (""),
+primaryName   ("Earth"),
+secondaryName ("Luna"),
 primary       (NULL),
 secondary     (NULL),
 xAxis         (""),
@@ -101,7 +107,6 @@ zAxis         ("")
  *
  * @param itsType Type for the object.
  * @param itsName Name for the object.
- *
  */
 //---------------------------------------------------------------------------
 ObjectReferencedAxes::ObjectReferencedAxes(const std::string &itsType,
@@ -139,7 +144,7 @@ xAxis         (orAxes.xAxis),
 yAxis         (orAxes.yAxis),
 zAxis         (orAxes.zAxis)
 {
-   parameterCount = ObjectReferencedAxesParamCount;
+   parameterCount = ObjectReferencedAxesParamCount;   
 }
 
 //---------------------------------------------------------------------------
@@ -168,6 +173,7 @@ const ObjectReferencedAxes& ObjectReferencedAxes::operator=(
    zAxis         = orAxes.zAxis;
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~ObjectReferencedAxes(void)
 //---------------------------------------------------------------------------
@@ -347,13 +353,26 @@ void ObjectReferencedAxes::ResetAxes()
 bool ObjectReferencedAxes::Initialize()
 {
    DynamicAxes::Initialize();
+   
+   // Commented out per Bug 1534 (LOJ: 2009.09.21)
+   // Setting ObjectReferencedAxes properties inside a GmatFunction does not
+   // work properly if not all axes are set. All setting inside a function
+   // is done by Assignment commands and this object can be initialized more
+   // than one time during function execution.
    // use defaults, per Steve's email of 2005.05.13
-   if (xAxis == "" && yAxis == "" && zAxis == "")
-   {
-      xAxis = "R";
-      zAxis = "N";
-      yAxis = "";
-   }
+   //if (xAxis == "" && yAxis == "" && zAxis == "")
+   //{
+   //   xAxis = "R";
+   //   zAxis = "N";
+   //   yAxis = "";
+   //}
+   
+   #ifdef DEBUG_ORA_INIT
+   MessageInterface::ShowMessage
+      ("ObjectReferencedAxes::Initialize() this=<%p>, xAxis='%s', yAxis='%s', "
+       "zAxis='%s'\n", this, xAxis.c_str(), yAxis.c_str(), zAxis.c_str());
+   #endif
+   
    return true;
 }
 
@@ -389,16 +408,16 @@ bool ObjectReferencedAxes::RenameRefObject(const Gmat::ObjectType type,
       ("ObjectReferencedAxes::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
-   
+
    if (type != Gmat::CALCULATED_POINT)
       return true;
 
    if (primaryName == oldName)
       primaryName = newName;
-   
+
    if (secondaryName == oldName)
       secondaryName = newName;
-   
+
    return true;
 }
 
@@ -441,7 +460,7 @@ Integer ObjectReferencedAxes::GetParameterID(const std::string &str) const
       if (str == PARAMETER_TEXT[i - DynamicAxesParamCount])
          return i;
    }
-   
+
    return DynamicAxes::GetParameterID(str);
 }
 
@@ -461,7 +480,7 @@ Gmat::ParameterType ObjectReferencedAxes::GetParameterType(const Integer id) con
 {
    if (id >= DynamicAxesParamCount && id < ObjectReferencedAxesParamCount)
       return PARAMETER_TYPE[id - DynamicAxesParamCount];
-   
+
    return DynamicAxes::GetParameterType(id);
 }
 
@@ -520,10 +539,14 @@ std::string ObjectReferencedAxes::GetStringParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-
 bool ObjectReferencedAxes::SetStringParameter(const Integer id,
                                               const std::string &value)
 {
+   #ifdef DEBUG_ORA_SET
+   MessageInterface::ShowMessage
+      ("ObjectReferencedAxes::SetStringParameter() entered, id=%d, value='%s'\n",
+       id, value.c_str());
+   #endif
    bool OK = false;
    if (id == X_AXIS)
    {
@@ -551,7 +574,7 @@ bool ObjectReferencedAxes::SetStringParameter(const Integer id,
       OK = true;
    }
    if (OK) return true;
-   
+
    return DynamicAxes::SetStringParameter(id, value);
 }
 
@@ -652,7 +675,7 @@ const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::Objec
          refs.push_back(originName);
       if (find(refs.begin(), refs.end(), j2000BodyName) == refs.end())
          refs.push_back(j2000BodyName);
-         
+
       #ifdef DEBUG_REFERENCE_SETTING
          MessageInterface::ShowMessage("+++ReferenceObjects:\n");
          for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
@@ -751,45 +774,68 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the ObjectReferencedAxes system.
  *
- * @param atEpoch  epoch at which to compute the roration matrix
+ * @param atEpoch  epoch at which to compute the rotation matrix
  */
 //---------------------------------------------------------------------------
 void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                                    bool forceComputation)
 {
    if (!primary)
-      throw CoordinateSystemException("Primary " + primaryName +
-         " is not set in object referenced!\n");
+      throw CoordinateSystemException("Primary \"" + primaryName +
+         "\" is not yet set in object referenced coordinate system!");
 
-   if ((xAxis == yAxis) || (xAxis == zAxis) ||
-       (yAxis == zAxis))
-      throw CoordinateSystemException(
-            "For object referenced axes, axes are improperly defined.");
+   if (!secondary)
+      throw CoordinateSystemException("Secondary \"" + secondaryName +
+         "\" is not yet set in object referenced coordinate system!");
+
+   
+   if ((xAxis == yAxis) || (xAxis == zAxis) || (yAxis == zAxis))
+   {
+      CoordinateSystemException cse;
+      cse.SetDetails("For object referenced axes, axes are improperly "
+                     "defined.\nXAxis = '%s', YAxis = '%s', ZAxis = '%s'",
+                     xAxis.c_str(), yAxis.c_str(), zAxis.c_str());
+      throw cse;
+   }
+   
    if ((xAxis != "") && (yAxis != "") && (zAxis != ""))
-      throw CoordinateSystemException(
-            "For object referenced axes, too many axes are defined.");
+   {
+      CoordinateSystemException cse;
+      cse.SetDetails("For object referenced axes, too many axes are defined.\n"
+                     "XAxis = '%s', YAxis = '%s', ZAxis = '%s'",
+                     xAxis.c_str(), yAxis.c_str(), zAxis.c_str());
+      throw cse;
+   }
+   
    SpacePoint *useAsSecondary = secondary;
-   if (!useAsSecondary)  useAsSecondary = origin;
+//   if (!useAsSecondary)  useAsSecondary = origin;
    Rvector6 rv     = useAsSecondary->GetMJ2000State(atEpoch) -
                      primary->GetMJ2000State(atEpoch);
-#ifdef DEBUG_ROT_MATRIX
-   if (visitCount == 0)
-   {
-      cout.precision(30);
-      cout << " ----------------- rv Primary to Secondary    = " << rv << endl;
-      visitCount++;
-   }
-#endif
-#ifdef DEBUG_ROT_MATRIX
-   if (visitCount == 0)
-   {
-      cout.precision(30);
-      cout << " ----------------- rv Earth to Moon (truncated)    = " << rv << endl;
-      visitCount++;
-   }
-#endif
-   Rvector3 a     =  useAsSecondary->GetMJ2000Acceleration(atEpoch) - 
+   #ifdef DEBUG_ROT_MATRIX
+      if (visitCount == 0)
+      {
+         MessageInterface::ShowMessage(" ------------ rv Primary to Secondary = %s\n",
+               rv.ToString().c_str());
+         visitCount++;
+      }
+   #endif
+
+   #ifdef DEBUG_ROT_MATRIX
+      if (visitCount == 0)
+      {
+         std::stringstream ss;
+         ss.precision(30);
+         ss << " ----------------- rv Earth to Moon (truncated)    = "
+              << rv << std::endl;
+
+         MessageInterface::ShowMessage("%s\n", ss.str().c_str());
+         visitCount++;
+      }
+   #endif
+
+   Rvector3 a     =  useAsSecondary->GetMJ2000Acceleration(atEpoch) -
                      primary->GetMJ2000Acceleration(atEpoch);
+   
    Rvector3 r      = rv.GetR();
    Rvector3 v      = rv.GetV();
    Rvector3 n     =  Cross(r,v);
@@ -804,6 +850,7 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Rvector3 nDot = (Cross(r,a) / nMag) - (nUnit / nMag) * (Cross(r,a) * nUnit);
    Rvector3 xUnit, yUnit, zUnit, xDot, yDot, zDot;
    bool     xUsed = true, yUsed = true, zUsed = true;
+
    // determine the x-axis
    if ((xAxis == "R") || (xAxis == "r"))
    {
@@ -940,7 +987,7 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    rotMatrix(2,0) = xUnit(2);
    rotMatrix(2,1) = yUnit(2);
    rotMatrix(2,2) = zUnit(2);
-   
+
    // Compute the rotation derivative matrix
    rotDotMatrix(0,0) = xDot(0);
    rotDotMatrix(0,1) = yDot(0);
@@ -952,21 +999,28 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    rotDotMatrix(2,1) = yDot(2);
    rotDotMatrix(2,2) = zDot(2);
 
-   //loj: 12/29/05 just debug
-//    MessageInterface::ShowMessage
-//       ("===> rotMatrix=%s\n", rotMatrix.ToString().c_str());
-   
-#ifdef DEBUG_ROT_MATRIX
-   cout.setf(ios::fixed);
-   cout.precision(30);
-   cout << " ----------------- rotMatrix    = " << rotMatrix << endl;
-   cout.setf(ios::scientific);
-   cout << " ----------------- rotDotMatrix = " << rotDotMatrix << endl;
-#endif
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage
+         ("rotMatrix=%s\n", rotMatrix.ToString().c_str());
 
-   // Check for orthogonality - is this correct?
-   // orthonormal instead? accuracy (tolerance)? 
-   if (!rotMatrix.IsOrthogonal(1.0e-15))
-      throw CoordinateSystemException(
-  "Object referenced axes definition does not result in an orthogonal system.");
+      std::stringstream ss;
+
+      ss.setf(std::ios::fixed);
+      ss.precision(30);
+      ss << " ----------------- rotMatrix    = " << rotMatrix << std::endl;
+      ss.setf(std::ios::scientific);
+      ss << " ----------------- rotDotMatrix = " << rotDotMatrix << std::endl;
+
+      MessageInterface::ShowMessage("%s\n", ss.str().c_str());
+   #endif
+
+//      if (!rotMatrix.IsOrthogonal(1.0e-14))
+   if (!rotMatrix.IsOrthonormal(1.0e-14))   // switch to orthonormal per S. Hughes 2010.02.12 wcs
+   {
+      std::stringstream errmsg("");
+      errmsg << "Object referenced axes definition does not result in an orthonormal system ";
+      errmsg << "(tolerance on orthonormality is 1e-14).  " << std::endl;
+      errmsg << "The rotation matrix is : " <<std::endl << rotMatrix.ToString(16, 20) << std::endl;
+      throw CoordinateSystemException(errmsg.str());
+   }
 }

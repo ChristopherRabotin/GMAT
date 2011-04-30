@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              TextTrajectoryFile
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // ** Legal **
 //
@@ -38,7 +42,20 @@ namespace GmatTraj
 
 typedef std::vector<GmatTraj::DataType> TrajectoryArray;
 
-class TextTrajectoryFile
+#ifdef EXPORT_TEMPLATES
+
+    // Instantiate STL template classes used in GMAT  
+    // This does not create an object. It only forces the generation of all
+    // of the members of the listed classes. It exports them from the DLL 
+    // and imports them into the .exe file.
+
+    // Fix vector of GmatTraj::DataType:
+    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<GmatTraj::DataType>;
+    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<GmatTraj::DataType>;
+
+#endif
+
+class GMAT_API TextTrajectoryFile
 {
 public:
     TextTrajectoryFile(const std::string &fileName = "");

@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -31,6 +33,14 @@
 //#define DEBUG_RENAME
 //#define DEBUG_FUNCTION
 
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
+
 //------------------------------------------------------------------------------
 //  MathTree()
 //------------------------------------------------------------------------------
@@ -54,13 +64,28 @@ MathTree::MathTree(const std::string &typeStr, const std::string &nomme) :
 //------------------------------------------------------------------------------
 MathTree::~MathTree()
 {
-   // Need to delete from the bottom nodes
+   // Need to delete all math nodes
    if (theTopNode)
    {
-      //MessageInterface::ShowMessage
-      //   ("==> MathTree::~MathTree() deleting theTopNode:%s, %s\n", GetTypeName().c_str(),
-      //    GetName().c_str());
-      delete theTopNode;
+      nodesToDelete.clear();
+      DeleteNode(theTopNode);
+      
+      for (std::vector<MathNode*>::iterator i = nodesToDelete.begin();
+           i != nodesToDelete.end(); ++i)
+      {
+         if ((*i) != NULL)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               ((*i), (*i)->GetName(), "MathTree::~MathTree()", (*i)->GetTypeName() +
+                " deleting math node");
+            #endif
+            
+            delete (*i);
+            (*i) = NULL;
+         }
+      }
+      nodesToDelete.clear();
    }
 }
 
@@ -116,7 +141,7 @@ const StringArray& MathTree::GetGmatFunctionNames()
 {
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("MathTree::GetGmatFunctionNames() theTopNode type=%s, desc='%s' returning "
+      ("MathTree::GetGmatFunctionNames() theTopNode type=%s, desc='%s'returning "
        "%d GmatFunctions\n", theTopNode->GetTypeName().c_str(),
        theTopNode->GetName().c_str(), theGmatFunctionNames.size());
    for (UnsignedInt i=0; i<theGmatFunctionNames.size(); i++)
@@ -178,26 +203,26 @@ void MathTree::SetFunction(Function *function)
 //------------------------------------------------------------------------------
 void MathTree::SetCallingFunction(FunctionManager *fm)
 {
-#ifdef DEBUG_FUNCTION
-MessageInterface::ShowMessage
-   ("MathTree::SetCallingFunction() fm=<%p>, name='%s'\n", fm,
-         (fm->GetName()).c_str());
-#endif
-
-if (theTopNode == NULL)
-   return;
-
-#ifdef DEBUG_FUNCTION
-MessageInterface::ShowMessage
-   ("   Calling SetCallingFunction() theTopNode type=%s, desc='%s'\n",
-    theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
-#endif
-
-SetCallingFunctionToRunner(theTopNode, fm);
-
-#ifdef DEBUG_FUNCTION
-MessageInterface::ShowMessage("MathTree::SetCallingFunction() returning\n");
-#endif
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetCallingFunction() fm=<%p>, name='%s'\n", fm,
+            (fm->GetFunctionName()).c_str());
+   #endif
+   
+   if (theTopNode == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Calling SetCallingFunction() theTopNode type=%s, desc='%s'\n",
+       theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
+   
+   SetCallingFunctionToRunner(theTopNode, fm);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetCallingFunction() returning\n");
+   #endif
 }
 
 
@@ -301,14 +326,14 @@ void MathTree::Finalize()
 {   
    if (theTopNode == NULL)
    {
-      #ifdef DEBUG_MATH_TREE_INIT
+      #ifdef DEBUG_MATH_TREE_FINALIZE
       MessageInterface::ShowMessage
          ("MathTree::Finalize() theTopNode is NULL, so just returning true\n");
       #endif
       return;
    }
    
-   #ifdef DEBUG_MATH_TREE_INIT
+   #ifdef DEBUG_MATH_TREE_FINALIZE
    MessageInterface::ShowMessage
       ("MathTree::Finalize() theTopNode=%s, %s\n", theTopNode->GetTypeName().c_str(),
        theTopNode->GetName().c_str());
@@ -397,7 +422,7 @@ void MathTree::SetGlobalObjectMap(ObjectMap *map)
 void MathTree::SetSolarSystem(SolarSystem *ss)
 {
    #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() ss=%p\n", ss);
+   MessageInterface::ShowMessage("MathTree::SetSolarSystem() ss=%p\n", ss);
    #endif
    
    if (theTopNode == NULL)
@@ -412,7 +437,7 @@ void MathTree::SetSolarSystem(SolarSystem *ss)
    SetSolarSystemToRunner(theTopNode, ss);
    
    #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() returning\n");
+   MessageInterface::ShowMessage("MathTree::SetSolarSystem() returning\n");
    #endif
 }
 
@@ -423,7 +448,7 @@ void MathTree::SetSolarSystem(SolarSystem *ss)
 void MathTree::SetInternalCoordSystem(CoordinateSystem *cs)
 {
    #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() cs=%p\n", cs);
+   MessageInterface::ShowMessage("MathTree::SetInternalCoordSystem() cs=%p\n", cs);
    #endif
    
    if (theTopNode == NULL)
@@ -438,7 +463,7 @@ void MathTree::SetInternalCoordSystem(CoordinateSystem *cs)
    SetInternalCoordSystemToRunner(theTopNode, cs);
    
    #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() returning\n");
+   MessageInterface::ShowMessage("MathTree::SetInternalCoordSystem() returning\n");
    #endif
 }
 
@@ -465,6 +490,32 @@ void MathTree::SetTransientForces(std::vector<PhysicalModel*> *tf)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage("MathTree::SetTransientForces() returning\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetPublisher(Publisher *pub)
+//------------------------------------------------------------------------------
+void MathTree::SetPublisher(Publisher *pub)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetPublisher() pub=<%p>\n", pub);
+   #endif
+   
+   if (theTopNode == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Calling SetPublisherToRunner() theTopNode type='%s', desc='%s'\n",
+       theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
+   
+   SetPublisherToRunner(theTopNode, pub);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetPublisher() returning\n");
    #endif
 }
 
@@ -725,13 +776,13 @@ void MathTree::SetFunctionToRunner(MathNode *node, Function *function)
 }
 
 //------------------------------------------------------------------------------
-// void SetCallingFunctionToRunner(MathNode *node, Function *function)
+// void SetCallingFunctionToRunner(MathNode *node, Function *fm)
 //------------------------------------------------------------------------------
 void MathTree::SetCallingFunctionToRunner(MathNode *node, FunctionManager *fm)
 {
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("MathTree::SetCallingFunctionToRunner() node=%p, function=%p\n", node, function);
+      ("MathTree::SetCallingFunctionToRunner() node=%p, function=%p\n", node, fm);
    #endif
    
    if (node == NULL)
@@ -923,6 +974,39 @@ void MathTree::SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalMo
 
 
 //------------------------------------------------------------------------------
+// void SetPublisherToRunner(MathNode *node, Publisher *pub)
+//------------------------------------------------------------------------------
+void MathTree::SetPublisherToRunner(MathNode *node, Publisher *pub)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetPublisherToRunner() node=<%p>, pub=<%p>\n", node, pub);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', desc='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->SetPublisher(pub);
+   
+   MathNode *left = node->GetLeft();
+   SetPublisherToRunner(left, pub);
+   
+   MathNode *right = node->GetRight();
+   SetPublisherToRunner(right, pub);
+}
+
+
+//------------------------------------------------------------------------------
 // bool RenameParameter(MathNode *node, const Gmat::ObjectType type,
 //                      const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
@@ -932,8 +1016,8 @@ bool MathTree::RenameParameter(MathNode *node, const Gmat::ObjectType type,
 {
    #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("MathTree::RenameParameter() oldName=<%s>, newName=<%s>\n", oldName.c_str(),
-       newName.c_str());
+      ("MathTree::RenameParameter() oldName=<%s>, newName=<%s>, node=<%s>\n",
+       oldName.c_str(), newName.c_str(), node ? node->GetName().c_str() : "NULL");
    #endif
    
    if (node == NULL)
@@ -946,12 +1030,12 @@ bool MathTree::RenameParameter(MathNode *node, const Gmat::ObjectType type,
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage("   old nodeName=<%s>\n", nodeName.c_str());
       #endif
-   
+      
       nodeName = GmatStringUtil::ReplaceName(nodeName, oldName, newName);
       node->SetName(nodeName);
-   
+      
       #ifdef DEBUG_RENAME
-      MessageInterface::ShowMessage("   new nodeName=<%s>\n", nodeName.c_str());
+      MessageInterface::ShowMessage("   new nodeName=<%s>\n", node->GetName().c_str());
       #endif
    }
    
@@ -986,7 +1070,7 @@ void MathTree::CreateParameterNameArray(MathNode *node)
    
    #ifdef DEBUG_MATH_WRAPPERS
    MessageInterface::ShowMessage
-      ("MathTree::GetRefObjectNameArray() node=%s\n", node->GetName().c_str());
+      ("MathTree::CreateParameterNameArray() node=%s\n", node->GetName().c_str());
    #endif
    
    if (!node->IsFunction())
@@ -998,7 +1082,7 @@ void MathTree::CreateParameterNameArray(MathNode *node)
          for (UnsignedInt i=0; i<refs.size(); i++)
          {
             #ifdef DEBUG_MATH_WRAPPERS
-            MessageInterface::ShowMessage("   %d, %s\n", i, refs[i].c_str());
+            MessageInterface::ShowMessage("   [%d] %s\n", i, refs[i].c_str());
             #endif
             
             // add if not found in the all ref array
@@ -1042,5 +1126,26 @@ void MathTree::CreateParameterNameArray(MathNode *node)
       MathNode *right = node->GetRight();
       CreateParameterNameArray(right);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void DeleteNode(MathNode *node)
+//------------------------------------------------------------------------------
+void MathTree::DeleteNode(MathNode *node)
+{
+   if (node == NULL)
+      return;
+   
+   // add node to delete   
+   nodesToDelete.push_back(node);
+   
+   MathNode *left = node->GetLeft();
+   if (left != NULL)
+      DeleteNode(left);
+   
+   MathNode *right = node->GetRight();
+   if (right != NULL)
+      DeleteNode(right);
 }
 

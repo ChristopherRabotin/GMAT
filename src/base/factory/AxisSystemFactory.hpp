@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                         AxisSystemFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G and MOMS Task order 124
@@ -27,6 +29,8 @@
 class GMAT_API AxisSystemFactory : public Factory
 {
 public:
+   AxisSystem*  CreateObject(const std::string &ofType,
+                             const std::string &withName = "");
    AxisSystem*  CreateAxisSystem(const std::string &ofType,
                                  const std::string &withName = "");
  

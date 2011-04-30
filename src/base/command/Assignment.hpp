@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                Assignment
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -51,6 +53,7 @@ public:
    virtual std::vector<Function*> GetFunctions() const;
    
    // inherited from GmatCommand
+   virtual void         SetPublisher(Publisher *pub);
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
@@ -58,6 +61,8 @@ public:
    virtual void         SetGlobalObjectMap(ObjectMap *map);
    
    virtual bool         InterpretAction();
+   virtual const StringArray& GetObjectList();
+   virtual bool         Validate();
    virtual bool         Initialize();
    virtual bool         Execute();
    virtual void         RunComplete();
@@ -97,9 +102,18 @@ protected:
    MathTree             *mathTree;
    /// Wrapper name and ElementWrapper pointer Map for RHS math element
    WrapperMap           mathWrapperMap;
+
+   /// Object pointer for clone management
+   GmatBase             *lhsOwner;
+   /// Object parameter ID if lhs is an attribute
+   Integer              lhsOwnerID;
    
    // methods
-   ElementWrapper* RunMathTree(ElementWrapper *lhsWrapper);
+   ElementWrapper* RunMathTree();
+   void HandleScPropertyChange(ElementWrapper *lhsWrapper);
+
+   void PassToClones();
+   void MatchAttribute(Integer id, GmatBase *owner, GmatBase *receiver);
 };
 
 #endif // Assignment_hpp

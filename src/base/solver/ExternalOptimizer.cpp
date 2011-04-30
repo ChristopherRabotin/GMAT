@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                         ExternalOptimizer
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -20,9 +22,8 @@
 
 
 #include "ExternalOptimizer.hpp"
-#include "MessageInterface.hpp"
 #include "FileManager.hpp"
-//#include "MatlabInterface.hpp"  // currently all static
+#include "MessageInterface.hpp"
 
 
 
@@ -48,6 +49,9 @@ ExternalOptimizer::PARAMETER_TYPE[ExternalOptimizerParamCount - OptimizerParamCo
 // public methods
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// ExternalOptimizer(std::string type, std::string name)
+//------------------------------------------------------------------------------
 ExternalOptimizer::ExternalOptimizer(std::string type, std::string name) :
    Optimizer               (type, name), 
    functionPath            (""),
@@ -63,11 +67,17 @@ ExternalOptimizer::ExternalOptimizer(std::string type, std::string name) :
 }
 
 
+//------------------------------------------------------------------------------
+// ~ExternalOptimizer()
+//------------------------------------------------------------------------------
 ExternalOptimizer::~ExternalOptimizer()
 {
    //FreeArrays();
 }
 
+//------------------------------------------------------------------------------
+// ExternalOptimizer(const ExternalOptimizer &opt) :
+//------------------------------------------------------------------------------
 ExternalOptimizer::ExternalOptimizer(const ExternalOptimizer &opt) :
    Optimizer               (opt),
    functionPath            (opt.functionPath),
@@ -80,12 +90,14 @@ ExternalOptimizer::ExternalOptimizer(const ExternalOptimizer &opt) :
 }
 
 
-ExternalOptimizer& 
-    ExternalOptimizer::operator=(const ExternalOptimizer& opt)
+//------------------------------------------------------------------------------
+// ExternalOptimizer& operator=(const ExternalOptimizer& opt)
+//------------------------------------------------------------------------------
+ExternalOptimizer& ExternalOptimizer::operator=(const ExternalOptimizer& opt)
 {
-    if (&opt == this)
-        return *this;
-
+   if (&opt == this)
+      return *this;
+   
    Optimizer::operator=(opt);
    
    functionPath        = opt.functionPath;
@@ -94,10 +106,13 @@ ExternalOptimizer&
    inSource            = opt.inSource;
    inSourceServer      = opt.inSourceServer;
    parameterCount      = opt.parameterCount;
-  
+   
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
 bool ExternalOptimizer::Initialize()
 {
    Optimizer::Initialize();
@@ -109,14 +124,15 @@ bool ExternalOptimizer::Initialize()
    try
    {
       if (functionPath == "")
-      {         
+      {
+         // matlab uses directory path
          if (sourceType == "MATLAB")
-            // matlab uses directory path
             pathname = fm->GetFullPathname("MATLAB_FUNCTION_PATH");
-            functionPath = pathname;
+         
+         functionPath = pathname;
       }
    }
-   catch (GmatBaseException &e)
+   catch (GmatBaseException &)
    {
       try
       {
@@ -124,12 +140,16 @@ bool ExternalOptimizer::Initialize()
          pathname = fm->GetFullPathname("FUNCTION_PATH");
          functionPath = pathname;
       }
-      catch (GmatBaseException &e)
+      catch (GmatBaseException &)
       {
          throw;  // for now, at least
       }
    }
    
+   #ifdef DEBUG_MATLAB_PATH
+   MessageInterface::ShowMessage
+      ("ExternalOptimizer::Initialize() functionPath='%s'\n", functionPath.c_str());
+   #endif
    return true;
 }
 

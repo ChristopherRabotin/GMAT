@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               ClearPlot
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
 // Created: 2004/02/26
@@ -20,17 +24,17 @@
 #define ClearPlot_hpp
 
 #include "GmatCommand.hpp"
-#include "TsPlot.hpp"
+#include "XyPlot.hpp"
 
 
 /**
  * Command used to remove data from an XY plot during a run
  */
-class ClearPlot : public GmatCommand
+class GMAT_API ClearPlot : public GmatCommand
 {
 public:
-	ClearPlot();
-	virtual          ~ClearPlot();
+        ClearPlot();
+        virtual          ~ClearPlot();
    ClearPlot(const ClearPlot &c);
    ClearPlot&        operator=(const ClearPlot &c);
    
@@ -47,7 +51,7 @@ public:
 
 protected:
    StringArray          plotNameList;   
-   std::vector<TsPlot*> thePlotList;
+   std::vector<XyPlot*> thePlotList;
 };
 
 #endif /* ClearPlot_hpp */

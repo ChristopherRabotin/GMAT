@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Rmatrix33
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -88,6 +90,14 @@ Rmatrix33::Rmatrix33(const Rmatrix33 &m)
 }
 
 //------------------------------------------------------------------------------
+//  const Rmatrix33(const Rmatrix &m)
+//------------------------------------------------------------------------------
+Rmatrix33::Rmatrix33(const Rmatrix &m) 
+  : Rmatrix(m)
+{
+}
+
+//------------------------------------------------------------------------------
 //  virtual ~Rmatrix33()
 //------------------------------------------------------------------------------
 Rmatrix33::~Rmatrix33() 
@@ -150,7 +160,7 @@ bool Rmatrix33::IsOrthogonal(Real accuracyRequired) const
     Rvector3 cVect1(elementD[1], elementD[4], elementD[7]);
     Rvector3 cVect2(elementD[2], elementD[5], elementD[8]);
 
-    return bool(GmatMathUtil::IsZero(cVect0*cVect1, accuracyRequired)\
+    return bool(GmatMathUtil::IsZero(cVect0*cVect1, accuracyRequired)
         && GmatMathUtil::IsZero(cVect0*cVect2, accuracyRequired)
         && GmatMathUtil::IsZero(cVect1*cVect2, accuracyRequired));
 }
@@ -333,16 +343,13 @@ const Rmatrix33& Rmatrix33::operator*=(Real scalar)
 //------------------------------------------------------------------------------
 Rmatrix33 Rmatrix33::operator/(Real scalar) const 
 {
-    if(scalar < 0.0001) throw Rmatrix::DivideByZero();
-    return Rmatrix33(elementD[0]/scalar,
-            elementD[1]/scalar,
-            elementD[2]/scalar, 
-            elementD[3]/scalar, 
-            elementD[4]/scalar, 
-            elementD[5]/scalar, 
-            elementD[6]/scalar, 
-            elementD[7]/scalar, 
-            elementD[8]/scalar);
+   // Why checking for less than 0.0001? Replaced with IsZero() (LOJ: 2009.03.30)
+   //if(scalar < 0.0001) throw Rmatrix::DivideByZero();
+   if (GmatMathUtil::IsZero(scalar))
+      throw Rmatrix::DivideByZero();
+   return Rmatrix33(elementD[0]/scalar, elementD[1]/scalar, elementD[2]/scalar, 
+                    elementD[3]/scalar, elementD[4]/scalar, elementD[5]/scalar, 
+                    elementD[6]/scalar, elementD[7]/scalar, elementD[8]/scalar);
 }
 
 //------------------------------------------------------------------------------
@@ -350,18 +357,21 @@ Rmatrix33 Rmatrix33::operator/(Real scalar) const
 //------------------------------------------------------------------------------
 const Rmatrix33& Rmatrix33::operator/=(Real scalar) 
 {
-    if(scalar == 0) throw Rmatrix::DivideByZero();
-    elementD[0] = elementD[0]/scalar;
-    elementD[1] = elementD[1]/scalar;
-    elementD[2] = elementD[2]/scalar; 
-    elementD[3] = elementD[3]/scalar; 
-    elementD[4] = elementD[4]/scalar;
-    elementD[5] = elementD[5]/scalar; 
-    elementD[6] = elementD[6]/scalar; 
-    elementD[7] = elementD[7]/scalar; 
-    elementD[8] = elementD[8]/scalar;
-    
-    return *this;
+   // Replaced with IsZero() (LOJ: 2009.03.30)
+   //if(scalar == 0) throw Rmatrix::DivideByZero();
+   if (GmatMathUtil::IsZero(scalar))
+      throw Rmatrix::DivideByZero();
+   elementD[0] = elementD[0]/scalar;
+   elementD[1] = elementD[1]/scalar;
+   elementD[2] = elementD[2]/scalar; 
+   elementD[3] = elementD[3]/scalar; 
+   elementD[4] = elementD[4]/scalar;
+   elementD[5] = elementD[5]/scalar; 
+   elementD[6] = elementD[6]/scalar; 
+   elementD[7] = elementD[7]/scalar; 
+   elementD[8] = elementD[8]/scalar;
+   
+   return *this;
 }
 
 //------------------------------------------------------------------------------

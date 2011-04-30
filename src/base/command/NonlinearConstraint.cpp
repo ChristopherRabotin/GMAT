@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 NonlinearConstraint
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -743,13 +745,13 @@ bool NonlinearConstraint::SetElementWrapper(ElementWrapper *toWrapper,
 
    if (toWrapper == NULL) return false;
    
-   if (toWrapper->GetWrapperType() == Gmat::ARRAY)
+   if (toWrapper->GetWrapperType() == Gmat::ARRAY_WT)
    {
       throw CommandException("A value of type \"Array\" on command \"" + typeName + 
                   "\" is not currently an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
-   //if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
+   //if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT_WT)
    //{
    //   throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
    //               "\" is not an allowed value.\nThe allowed values are:"

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Maneuver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -40,56 +42,56 @@
 class GMAT_API Maneuver : public GmatCommand
 {
 public:
-   Maneuver(void);
-   virtual ~Maneuver(void);
-    
+   Maneuver();
+   virtual ~Maneuver();
+   
    Maneuver(const Maneuver& m);
-   Maneuver&               operator=(const Maneuver& m);
-    
+   Maneuver&            operator=(const Maneuver& m);
+   
    // Methods used for configuration
-   virtual bool            SetObject(const std::string &name,
-                                     const Gmat::ObjectType type,
-                                     const std::string &associate = "",
-                                     const Gmat::ObjectType associateType =
-                                     Gmat::UNKNOWN_OBJECT);
-    
-   virtual bool            SetObject(GmatBase *obj,
-                                     const Gmat::ObjectType type);
-
-
+   virtual bool         SetObject(const std::string &name,
+                                  const Gmat::ObjectType type,
+                                  const std::string &associate = "",
+                                  const Gmat::ObjectType associateType =
+                                  Gmat::UNKNOWN_OBJECT);
+   
+   virtual bool         SetObject(GmatBase *obj,
+                                  const Gmat::ObjectType type);
+   
+   
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    virtual const std::string&
-                           GetGeneratingString(Gmat::WriteMode mode,
-                                               const std::string &prefix,
-                                               const std::string &useName);
-
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
+   
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
    virtual const ObjectTypeArray&
-                          GetRefObjectTypeArray();
+                        GetRefObjectTypeArray();
    virtual const StringArray&
-                          GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    
    // Parameter accessor methods -- overridden from GmatBase
-   virtual std::string     GetParameterText(const Integer id) const;
-   virtual Integer         GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                           GetParameterType(const Integer id) const;
-   virtual std::string     GetParameterTypeString(const Integer id) const;
-    
-   virtual std::string     GetStringParameter(const Integer id) const;
-   virtual bool            SetStringParameter(const Integer id, 
-                                              const std::string &value);
-    
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   
    // Methods used to run the command
-   virtual bool            InterpretAction(void);
-    
-   virtual bool            Initialize(void);
-   virtual bool            Execute(void);
-    
+   virtual bool         InterpretAction();
+   
+   virtual bool         Initialize();
+   virtual bool         Execute();
+   
 protected:
    /// The burn object used for the maneuver
    std::string              burnName;
@@ -105,6 +107,8 @@ protected:
    Integer                 burnNameID;
    /// ID for the spacecraft name
    Integer                 satNameID;
+
+   virtual void            BuildCommandSummaryString(bool commandCompleted = true);
 };
 
 #endif // Maneuver_hpp

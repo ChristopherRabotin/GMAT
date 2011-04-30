@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 ManageObject
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan
 // Created: 2008.03.12
@@ -337,7 +341,8 @@ bool ManageObject::InsertIntoGOS(GmatBase *obj, const std::string &withName)
    }
    GmatBase *mapObj;
    std::string ex;
-   std::string objType = obj->GetTypeName();
+   ////std::string objType = obj->GetTypeName();
+   Gmat::ObjectType objType = obj->GetType();
    // if it is already in the GOS, make sure the types match
    if (globalObjectMap->find(withName) != globalObjectMap->end())
    {
@@ -348,7 +353,8 @@ bool ManageObject::InsertIntoGOS(GmatBase *obj, const std::string &withName)
          ex += """, but of a different type, already exists in Global Object Store\n";
          throw CommandException(ex);
       }
-      if (objType == "Array")
+      ////if (objType == "Array")
+      if (objType == Gmat::PARAMETER && obj->GetTypeName() == "Array")
       {
          Integer r1, r2, c1, c2;
          ((Array*) mapObj)->GetSize(r1, c1);
@@ -360,18 +366,24 @@ bool ManageObject::InsertIntoGOS(GmatBase *obj, const std::string &withName)
             throw CommandException(ex);
          }
       }
+      
+      // This Warning is very annoying when GmatFunction is running in a loop,
+      // so defined macro here (loj: 2008.10.08)
+      #ifdef __SHOW_GOS_WARNING__
       ex = "ManageObject::InsertIntoGOS() Cannot add more than "
          "one object with name \"";
       ex += withName + "\" to the Global Object Store";
+      MessageInterface::ShowMessage("*** WARNING *** " + ex + ", So ignored.\n");
       // Let's just ignore for now to run TargetHohmannTransfer.gmf (loj: 2008.06.05) 
       //throw CommandException(ex);
-      MessageInterface::ShowMessage("*** WARNING *** " + ex + ", So ignored.\n");
+      #endif
+      
       // it is already in there, so we do not need to put this one in; clean it up
       #ifdef DEBUG_MANAGE_OBJECT
-            MessageInterface::ShowMessage(" Create::object %s was already in object store ...\n",
-                  withName.c_str());
-            MessageInterface::ShowMessage("  pointer for obj = <%p> and pointer for mapObj = <%p>\n",
-                  obj, mapObj);
+         MessageInterface::ShowMessage(" Create::object %s was already in object store ...\n",
+            withName.c_str());
+         MessageInterface::ShowMessage("  pointer for obj = <%p> and pointer for mapObj = <%p>\n",
+            obj, mapObj);
       #endif
       if (mapObj != obj) 
       {

@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  GmatCommand
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,21 +25,19 @@
 
 
 #include <map>              // for mapping between object names and types
-#include <algorithm>        // for find()
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "CommandException.hpp"
 
 // Headers used by commands that override InterpretAction
-#include "StringUtil.hpp"
 #include "TextParser.hpp"
 #include "ElementWrapper.hpp"
 
 // Headers for the referenced classes
-#include "SolarSystem.hpp"   // for SolarSystem
-#include "Publisher.hpp"     // For the Publisher and ...
-#include "Subscriber.hpp"    // ... base of the Subscribers
-#include "SpaceObject.hpp"   // for SpaceObjects
+#include "SolarSystem.hpp"    // for SolarSystem
+#include "Publisher.hpp"      // For the Publisher and ...
+#include "SpaceObject.hpp"    // for SpaceObjects
+#include "TriggerManager.hpp" // Trigger managers, usually from a plugin
 
 // Forward reference for the transient force vector
 class PhysicalModel;
@@ -103,11 +103,12 @@ public:
                                        Gmat::UNKNOWN_OBJECT);
    virtual bool         SetObject(GmatBase *obj,
                                   const Gmat::ObjectType type);
-   virtual GmatBase*    GetObject(const Gmat::ObjectType type, 
+   virtual GmatBase*    GetGmatObject(const Gmat::ObjectType type, 
                                   const std::string objName = "");
    
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual void         SetTriggerManagers(std::vector<TriggerManager*> *trigs);
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
    virtual ObjectMap*   GetObjectMap();
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
@@ -115,6 +116,10 @@ public:
    virtual void         SetPublisher(Publisher *p);
    virtual Publisher*   GetPublisher();
    
+   // Methods used in validation
+   virtual const StringArray& GetObjectList();
+   virtual bool         Validate();
+
    // Access methods inherited from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
@@ -195,7 +200,11 @@ public:
    virtual void        ConfigurationChanged(bool tf, bool setAll = false);
    virtual bool        HasAFunction();
    virtual bool        NeedsServerStartup();
+   virtual bool        IsExecuting();
    
+   virtual Integer     GetCloneCount();
+   virtual GmatBase*   GetClone(Integer cloneIndex = 0);
+
 protected:
    enum
    {
@@ -213,13 +222,12 @@ protected:
                      PARAMETER_TYPE[GmatCommandParamCount - GmatBaseParamCount];
    
    
-   /// Map containing names and associated types
-   std::map<std::string, Gmat::ObjectType> 
-                        association;
-   /// List of the associated objects
-   StringArray          objects;
    /// Flag used to determine if associations have been made
    bool                 initialized;
+   /// Map containing names and associated types
+   ObjectTypeMap        association;
+   /// List of the associated objects
+   StringArray          objects;
    // pointer to the function that contains this command
    Function            *currentFunction;
    // pointer to the function that is calling this command (ignored for all but
@@ -232,13 +240,14 @@ protected:
    /// Indicator of the current nesting level
    Integer              level;
    /// Object store obtained from the Sandbox
-   std::map<std::string, GmatBase *>
-                        *objectMap;
+   ObjectMap            *objectMap;
    /// Object store obtained from the Sandbox
-   std::map<std::string, GmatBase *>
-                        *globalObjectMap;
+   ////std::map<std::string, GmatBase *> *globalObjectMap;
+   ObjectMap            *globalObjectMap;
    /// Solar System, set by the local Sandbox
    SolarSystem          *solarSys;
+   /// Trigger managers, set by the local Sandbox
+   std::vector<TriggerManager*> *triggerManagers;
    /// Internal coordinate system, set by the local Sandbox
    CoordinateSystem     *internalCoordSys;
    /// transient forces to pass to the function
@@ -267,13 +276,18 @@ protected:
    StringArray          wrapperObjectNames;
    /// List used to initialize the local TextParser
    StringArray          commandNameList;
-      
+   
+   /// Count of owned objects created through cloning
+   Integer              cloneCount;
+
    virtual bool         AssignObjects();
    virtual bool         ClearObjects();
    virtual void         BuildCommandSummary(bool commandCompleted = true);
    virtual void         BuildCommandSummaryString(bool commandCompleted = true);
    virtual const std::string 
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
+   virtual const std::string
+                        BuildNumber(Real value, Integer length = 17);
 
    // for Debug
    virtual void         ShowCommand(const std::string &prefix,
@@ -311,10 +325,19 @@ protected:
    // Temporary -- replace when convenient
    void CartToKep(const Rvector6 in, Rvector6 &out);
    GmatBase* FindObject(const std::string &name);
-
    
    // Method(s) used for ParametersInCommands
    bool                SetWrapperReferences(ElementWrapper &wrapper);
+   
+   // Used for deleting old ElementWrappers
+   std::vector<ElementWrapper*> oldWrappers;   
+   void                ClearOldWrappers();
+   void                CollectOldWrappers(ElementWrapper **wrapper);
+   void                DeleteOldWrappers();
+
+   // Publish methods that are overridden as needed
+   virtual void        PrepareToPublish(bool publishAll = true);
+   virtual void        PublishData();
 };
 
 #endif // Command_hpp

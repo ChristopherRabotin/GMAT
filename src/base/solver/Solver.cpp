@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                Solver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -22,6 +24,7 @@
 #include "Solver.hpp"
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
+#include "OwnedPlot.hpp"            // Replace with a proxy
 
 //#define DEBUG_SOLVER_INIT
 //#define DEBUG_SOLVER_CALC
@@ -36,7 +39,7 @@ Solver::PARAMETER_TEXT[SolverParamCount - GmatBaseParamCount] =
 {
    "ShowProgress",
    "ReportStyle",
-   "TargeterTextFile", // should be "SolverTextFile",
+   "ReportFile",
    "Variables",
    "MaximumIterations",
    "NumberOfVariables",
@@ -55,8 +58,8 @@ const Gmat::ParameterType
 Solver::PARAMETER_TYPE[SolverParamCount - GmatBaseParamCount] =
 {
    Gmat::BOOLEAN_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::ENUMERATION_TYPE,
+   Gmat::FILENAME_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
@@ -125,7 +128,9 @@ Solver::Solver(const std::string &type, const std::string &name) :
    solverMode              (""),
    currentMode             (SOLVE),
    exitMode                (DISCARD),
-   status                  (CREATED)
+   status                  (CREATED),
+   plotCount               (0),
+   plotter                 (NULL)
 {
    objectTypes.push_back(Gmat::SOLVER);
    objectTypeNames.push_back("Solver");
@@ -145,9 +150,10 @@ Solver::Solver(const std::string &type, const std::string &name) :
 //------------------------------------------------------------------------------
 Solver::~Solver()
 {
-   // Added per Linda, 2/7/07
    if (textFile.is_open())
       textFile.close();
+   if (plotter != NULL)
+      delete plotter;
 }
 
 
@@ -183,13 +189,16 @@ Solver::Solver(const Solver &sol) :
    instanceNumber          (sol.instanceNumber),
    registeredVariableCount (sol.registeredVariableCount),
    registeredComponentCount(sol.registeredComponentCount),
+   AllowScaleFactors       (sol.AllowScaleFactors),
    AllowRangeLimits        (sol.AllowRangeLimits),
    AllowStepsizeLimit      (sol.AllowStepsizeLimit),
    AllowIndependentPerts   (sol.AllowIndependentPerts),
    solverMode              (sol.solverMode),
    currentMode             (sol.currentMode),
    exitMode                (sol.exitMode),
-   status                  (CREATED)
+   status                  (CREATED),
+   plotCount               (sol.plotCount),
+   plotter                 (NULL)
 {
    #ifdef DEBUG_SOLVER_INIT
       MessageInterface::ShowMessage(
@@ -218,6 +227,8 @@ Solver& Solver::operator=(const Solver &sol)
    if (&sol == this)
       return *this;
 
+   GmatBase::operator=(sol);
+
    registeredVariableCount  = sol.registeredVariableCount;
    registeredComponentCount = sol.registeredComponentCount;
    variableCount            = sol.variableCount;
@@ -245,6 +256,14 @@ Solver& Solver::operator=(const Solver &sol)
    currentMode           = sol.currentMode;
    exitMode              = sol.exitMode;
    status                = COPIED;
+   plotCount             = sol.plotCount;
+   plotter               = NULL;
+   
+   AllowScaleFactors     = sol. AllowScaleFactors;
+   AllowRangeLimits      = sol.AllowRangeLimits;
+   AllowStepsizeLimit    = sol.AllowStepsizeLimit;
+   AllowIndependentPerts = sol.AllowIndependentPerts;
+   
    return *this;
 }
 
@@ -284,40 +303,15 @@ bool Solver::Initialize()
          variableMaximumStep.push_back(9.999e300);
          perturbation.push_back(1.0e-04);
          pertDirection.push_back(1.0);
+         unscaledVariable.push_back(0.0);
       }
    }
-   catch(const std::exception &re)
+   catch(const std::exception &)
    {
       throw SolverException("Range error initializing Solver object %s\n",
             instanceName.c_str());
    }
-
-   #ifdef DEBUG_SOLVER_INIT
-      MessageInterface::ShowMessage(
-         "In Solver::Initialize - about to prepare text file for output\n");
-   #endif
-   // Prepare the text file for output
-   if (solverTextFile != "")
-   {
-      // Added per Linda, 2/7/07
-      FileManager *fm;
-      fm = FileManager::Instance();
-      std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
-      std::string fullSolverTextFile = outPath + solverTextFile;
    
-      if (textFile.is_open())
-         textFile.close();
-      
-      if (instanceNumber == 1)
-         textFile.open(fullSolverTextFile.c_str());
-      else
-         textFile.open(fullSolverTextFile.c_str(), std::ios::app);
-      if (!textFile.is_open())
-         throw SolverException("Error opening targeter text file " +
-                               solverTextFile);
-      textFile.precision(16);
-      WriteToTextFile();
-   }
    initialized = true; 
    iterationsTaken = 0;
    #ifdef DEBUG_SOLVER_INIT
@@ -326,6 +320,13 @@ bool Solver::Initialize()
    #endif
       
    status = INITIALIZED;
+//   if (plotter)
+//      delete plotter;
+//   if (plotCount > 0)
+//   {
+//      plotter = new OwnedPlot("");
+//      plotter->SetName(instanceName + "_masterPlot");
+//   }
    
    return true;
 }
@@ -371,7 +372,7 @@ Integer Solver::SetSolverVariables(Real *data, const std::string &name)
       variableInitialValues.at(variableCount) = data[0];
       perturbation.at(variableCount) = data[1];
    }
-   catch(const std::exception &re)
+   catch(const std::exception &)
    {
       throw SolverException(
               "Range error setting variable or perturbation in "
@@ -401,8 +402,9 @@ Integer Solver::SetSolverVariables(Real *data, const std::string &name)
       variableMinimum.at(variableCount)           = data[2];
       variableMaximum.at(variableCount)           = data[3];
       variableMaximumStep.at(variableCount)       = data[4];
+      unscaledVariable.at(variableCount)          = data[5];
    }
-   catch(const std::exception &re)
+   catch(const std::exception &)
    {
       throw SolverException(
             "Range error setting variable min/max in SetSolverVariables\n");
@@ -411,6 +413,86 @@ Integer Solver::SetSolverVariables(Real *data, const std::string &name)
    ++variableCount;
 
    return variableCount-1;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Solver::RefreshSolverVariables(Real *data, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Refreshes Variable data to the current Mission Control Sequence values.
+ *
+ * Updates the solver's variable parameters for elements that change as the
+ * result of previous commands -- for instance, Variable updates in a script,
+ * where the Variable is used to set a parameter on the Solver's variable data.
+ *
+ * @param <data> An array of data appropriate to the variables used in the
+ *               algorithm.
+ * @param <name> A label for the data parameter.
+ *
+ * @return true is the data was updated, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Solver::RefreshSolverVariables(Real *data, const std::string &name)
+{
+   bool retval = false;
+
+   // Find index of the variable
+   for (UnsignedInt n = 0; n < variableNames.size(); ++n)
+   {
+      std::string varName = variableNames[n];
+      if (varName == name)
+      {
+         try
+         {
+            variable.at(n) = data[0];
+            variableInitialValues.at(n) = data[0];
+            perturbation.at(n) = data[1];
+         }
+         catch(const std::exception &)
+         {
+            throw SolverException(
+                    "Range error setting variable or perturbation in "
+                    "SetSolverVariables\n");
+         }
+         // Sanity check min and max
+         if (data[2] >= data[3])
+         {
+            std::stringstream errMsg;
+            errMsg << "Minimum allowed variable value (received " << data[2]
+                   << ") must be less than maximum (received " << data[3] << ")";
+            throw SolverException(errMsg.str());
+         }
+         if (data[4] <= 0.0)
+         {
+            std::stringstream errMsg;
+            errMsg << "Largest allowed step must be positive! (received "
+                   << data[4] << ")";
+            throw SolverException(errMsg.str());
+         }
+
+         //variableMinimum[variableCount] = data[2];
+         //variableMaximum[variableCount] = data[3];
+         //variableMaximumStep[variableCount] = data[4];
+         try
+         {
+            variableMinimum.at(n)           = data[2];
+            variableMaximum.at(n)           = data[3];
+            variableMaximumStep.at(n)       = data[4];
+            unscaledVariable.at(n)          = data[5];
+         }
+         catch(const std::exception &)
+         {
+            throw SolverException(
+                  "Range error setting variable min/max in "
+                  "RefreshSolverVariables\n");
+         }
+
+         retval = true;
+      }
+   }
+
+   return retval;
 }
 
 
@@ -439,6 +521,26 @@ Real Solver::GetSolverVariable(Integer id)
    #endif
 
    return variable.at(id); 
+}
+
+//------------------------------------------------------------------------------
+// void SetUnscaledVariable(Integer id, Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the unscaled value of variables for reporting purposes
+ *
+ * @param id The ID of the variable
+ * @param value The unscaled value
+ */
+//------------------------------------------------------------------------------
+void Solver::SetUnscaledVariable(Integer id, Real value)
+{
+   if (id >= variableCount)
+      throw SolverException(
+         "Solver member requested a parameter outside the range "
+         "of the configured variables.");
+
+   unscaledVariable.at(id) = value;
 }
 
 //------------------------------------------------------------------------------
@@ -521,7 +623,7 @@ Solver::SolverState Solver::AdvanceState()
     ReportProgress();
     return currentState; 
 }
-    
+
 //------------------------------------------------------------------------------
 //  StringArray AdvanceNestedState(std::vector<Real> vars)
 //------------------------------------------------------------------------------
@@ -554,6 +656,25 @@ StringArray Solver::AdvanceNestedState(std::vector<Real> vars)
  */
 //------------------------------------------------------------------------------
 bool Solver::UpdateSolverGoal(Integer id, Real newValue)
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
+//  bool UpdateSolverTolerance(Integer id, Real newValue)
+//------------------------------------------------------------------------------
+/**
+ * Updates the targeter tolerances, for floating end point problems.
+ * 
+ * This default method just returns false.
+ * 
+ * @param id Id for the tolerance that is being reset.
+ * @param newValue The new tolerance value.
+ * 
+ * @return The ID used for this variable.
+ */
+//------------------------------------------------------------------------------
+bool Solver::UpdateSolverTolerance(Integer id, Real newValue)
 {
    return false;
 }
@@ -597,12 +718,30 @@ std::string Solver::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Solver::GetParameterID(const std::string &str) const
 {
+   // Write deprecated message per GMAT session
+   static bool writeDeprecatedMsg = true;
+   
+   // 1. This part will be removed for a future build:
+   std::string param_text = str;
+   if (param_text == "TargeterTextFile")
+   {
+      if (writeDeprecatedMsg)
+      {
+         MessageInterface::ShowMessage
+            (deprecatedMessageFormat.c_str(), "TargeterTextFile", GetName().c_str(),
+             "ReportFile");
+         writeDeprecatedMsg = false;
+      }
+      param_text = "ReportFile";
+   }
+   
+   // 2. This part is kept for a future build:
    for (Integer i = GmatBaseParamCount; i < SolverParamCount; ++i)
    {
-      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+      if (param_text == PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
    }
-
+   
    return GmatBase::GetParameterID(str);
 }
 
@@ -670,7 +809,7 @@ bool Solver::IsParameterReadOnly(const Integer id) const
        (id == SolverStatusID))
       return true;
 
-   return false;//GmatBase::IsParameterReadOnly(id);
+   return GmatBase::IsParameterReadOnly(id);
 }
 
 
@@ -1006,6 +1145,34 @@ const StringArray& Solver::GetStringArrayParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Returns the list of allowable settings for the enumerated parameters
+ *
+ * @param id The ID of the parameter
+ *
+ * @return A const string array with the allowed settings.
+ */
+//------------------------------------------------------------------------------
+const StringArray& Solver::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   enumStrings.clear();
+
+   if (id == ReportStyle)
+   {
+      enumStrings.push_back("Normal");
+      enumStrings.push_back("Concise");
+      enumStrings.push_back("Verbose");
+      enumStrings.push_back("Debug");
+      return enumStrings;
+   }
+   return GmatBase::GetPropertyEnumStrings(id);
+}
+
+
+//------------------------------------------------------------------------------
 //  void ReportProgress()
 //------------------------------------------------------------------------------
 /**
@@ -1049,13 +1216,16 @@ void Solver::SetDebugString(const std::string &str)
 //------------------------------------------------------------------------------
 void Solver::CompleteInitialization()
 {
-    currentState = NOMINAL;
-    
-    // Reset initial values if in DiscardAndContinue mode
-    if (exitMode == DISCARD)
-    {
-       ResetVariables();
-    }
+   OpenSolverTextFile();
+   WriteToTextFile();
+   
+   currentState = NOMINAL;
+   
+   // Reset initial values if in DiscardAndContinue mode
+   if (exitMode == DISCARD)
+   {
+      ResetVariables();
+   }
 }
 
 
@@ -1210,5 +1380,48 @@ void Solver::FreeArrays()
    variableMaximum.clear();
    variableMaximumStep.clear();
    pertDirection.clear();
+}
+
+
+//------------------------------------------------------------------------------
+// void OpenSolverTextFile();
+//------------------------------------------------------------------------------
+void Solver::OpenSolverTextFile()
+{
+   #ifdef DEBUG_SOLVER_INIT
+   MessageInterface::ShowMessage
+      ("Solver::OpenSolverTextFile() entered, showProgress=%d, solverTextFile='%s', "
+       "textFileOpen=%d", showProgress, solverTextFile.c_str(), textFile.is_open());
+   #endif
+   
+   if (!showProgress)
+      return;
+   
+   FileManager *fm;
+   fm = FileManager::Instance();
+   std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
+   std::string fullSolverTextFile = outPath + solverTextFile;
+   
+   if (textFile.is_open())
+      textFile.close();
+   
+   #ifdef DEBUG_SOLVER_INIT
+   MessageInterface::ShowMessage("   instanceNumber=%d\n", instanceNumber);
+   #endif
+   
+   if (instanceNumber == 1)
+      textFile.open(fullSolverTextFile.c_str());
+   else
+      textFile.open(fullSolverTextFile.c_str(), std::ios::app);
+   
+   if (!textFile.is_open())
+      throw SolverException("Error opening targeter text file " +
+                            solverTextFile);
+   
+   textFile.precision(16);
+   
+   #ifdef DEBUG_SOLVER_INIT
+   MessageInterface::ShowMessage("Solver::OpenSolverTextFile() leaving\n");
+   #endif
 }
 

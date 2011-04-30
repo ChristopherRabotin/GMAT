@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Parameter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -35,7 +37,18 @@ namespace GmatParam
    
    enum DepObject
    {
-      COORD_SYS, ORIGIN, NO_DEP, DepObjectCount
+      COORD_SYS, ORIGIN, NO_DEP, OWNED_OBJ, DepObjectCount
+   };
+   
+   enum CycleType
+   {
+      NOT_CYCLIC,
+      ZERO_90,
+      ZERO_180,
+      ZERO_360,
+      PLUS_MINUS_90,
+      PLUS_MINUS_180,
+      OTHER_CYCLIC
    };
 };
 
@@ -53,82 +66,93 @@ public:
    Parameter& operator= (const Parameter& right);
    virtual ~Parameter();
    
-   GmatParam::ParameterKey GetKey() const;
-   Gmat::ObjectType GetOwnerType() const;
-   Gmat::ParameterType GetReturnType() const;
-   bool IsTimeParameter() const;
-   bool IsPlottable() const;
-   bool IsReportable() const;
-   bool IsSettable() const;
-   bool IsCoordSysDependent() const;
-   bool IsOriginDependent() const;
-   bool NeedCoordSystem() const;
+   GmatParam::ParameterKey  GetKey() const;
+   Gmat::ObjectType         GetOwnerType() const;
+   Gmat::ParameterType      GetReturnType() const;
+   GmatParam::CycleType     GetCycleType() const;
    
-   void SetKey(const GmatParam::ParameterKey &key);
+   void  SetKey(const GmatParam::ParameterKey &key);
+   
+   bool  IsAngleParameter() const;
+   bool  IsTimeParameter() const;
+   bool  IsPlottable() const;
+   bool  IsReportable() const;
+   bool  IsSettable() const;
+   bool  IsCoordSysDependent() const;
+   bool  IsOriginDependent() const;
+   bool  NeedCoordSystem() const;
    
    bool operator==(const Parameter &right) const;
    bool operator!=(const Parameter &right) const;
-
-   virtual std::string ToString();
    
-   virtual Real GetReal() const;
-   virtual Rvector6 GetRvector6() const;
-   virtual const Rmatrix& GetRmatrix() const;
-   virtual std::string GetString() const;
+   virtual std::string        ToString();
    
-   virtual void SetReal(Real val);
-   virtual void SetRvector6(const Rvector6 &val);
-   virtual void SetRmatrix(const Rmatrix &mat);
-   virtual void SetString(const std::string &val);
+   virtual Real               GetReal() const;
+   virtual const Rvector6&    GetRvector6() const;
+   virtual const Rmatrix66&   GetRmatrix66() const;
+   virtual const Rmatrix33&   GetRmatrix33() const;
+   virtual const Rmatrix&     GetRmatrix() const;
+   virtual const std::string& GetString() const;
    
-   virtual Real EvaluateReal();
-   virtual Rvector6 EvaluateRvector6();
-   virtual Rmatrix EvaluateRmatrix();
-   virtual std::string EvaluateString();
+   virtual void               SetReal(Real val);
+   virtual void               SetRvector6(const Rvector6 &val);
+   virtual void               SetRmatrix66(const Rmatrix66 &mat);
+   virtual void               SetRmatrix33(const Rmatrix33 &mat);
+   virtual void               SetRmatrix(const Rmatrix &mat);
+   virtual void               SetString(const std::string &val);
+   
+   virtual Real               EvaluateReal();
+   virtual const Rvector6&    EvaluateRvector6();
+   virtual const Rmatrix66&   EvaluateRmatrix66();
+   virtual const Rmatrix33&   EvaluateRmatrix33();
+   virtual const Rmatrix&     EvaluateRmatrix();
+   virtual const std::string& EvaluateString();
    
    virtual const std::string* GetParameterList() const;
    
-   virtual CoordinateSystem* GetInternalCoordSystem();
+   virtual CoordinateSystem*  GetInternalCoordSystem();
    
-   virtual void SetInternalCoordSystem(CoordinateSystem *cs);
-   virtual void SetSolarSystem(SolarSystem *ss);
+   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
+   virtual void         SetSolarSystem(SolarSystem *ss);
    
-   virtual bool Initialize();
-   virtual bool Evaluate();
+   virtual bool         Initialize();
+   virtual bool         Evaluate();
    
    // methods all SYSTEM_PARAM should implement
-   virtual bool AddRefObject(GmatBase *object, bool replaceName = false);
-   virtual Integer GetNumRefObjects() const;
-   virtual bool Validate();
+   virtual bool         AddRefObject(GmatBase *object, bool replaceName = false);
+   virtual Integer      GetNumRefObjects() const;
+   virtual bool         Validate();
    
    // methods inherited from GmatBase
-   virtual void        Copy(const GmatBase*);
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+   virtual void         Copy(const GmatBase*);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer GetParameterID(const std::string &str) const;
-   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
-   virtual bool IsParameterReadOnly(const Integer id) const;
-
-   virtual UnsignedInt GetUnsignedIntParameter(const Integer id) const;
-   virtual UnsignedInt GetUnsignedIntParameter(const std::string &label) const;
-   virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-                                               const UnsignedInt value);
-   virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-                                               const UnsignedInt value);
-
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual std::string GetStringParameter(const std::string &label) const;
-   virtual bool SetStringParameter(const Integer id, const std::string &value);
-   virtual bool SetStringParameter(const std::string &label,
-                                   const std::string &value);
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
    
-   virtual const std::string  GetCommentLine(Integer which = 1);
-   virtual void               SetCommentLine(const std::string &comment,
-                                             Integer which = 0);
+   virtual UnsignedInt  GetUnsignedIntParameter(const Integer id) const;
+   virtual UnsignedInt  GetUnsignedIntParameter(const std::string &label) const;
+   virtual UnsignedInt  SetUnsignedIntParameter(const Integer id,
+                                                const UnsignedInt value);
+   virtual UnsignedInt  SetUnsignedIntParameter(const std::string &label,
+                                                const UnsignedInt value);
+   
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+   
+   virtual const std::string   GetCommentLine(Integer which = 1);
+   virtual void                SetCommentLine(const std::string &comment,
+                                              Integer which = 0);
    
 protected:
    
@@ -138,14 +162,18 @@ protected:
    std::string   mDesc;
    std::string   mUnit;
    std::string   mExpr;
+   std::string   mOwnerName;
    std::string   mDepObjectName;
    std::string   mCommentLine2;
+   std::string   mInitialValue;
    
-   Gmat::ObjectType   mOwnerType;
-   Gmat::ParameterType mReturnType;
+   Gmat::ObjectType     mOwnerType;
+   Gmat::ParameterType  mReturnType;
    GmatParam::DepObject mDepObj;
-   UnsignedInt   mColor;
+   GmatParam::CycleType mCycleType;
+   UnsignedInt          mColor;
    
+   bool mIsAngleParam;
    bool mIsTimeParam;
    bool mIsPlottable;
    bool mIsReportable;
@@ -158,6 +186,7 @@ protected:
    enum
    {
       OBJECT = GmatBaseParamCount,
+      INITIAL_VALUE,
       EXPRESSION,
       DESCRIPTION,
       UNIT,

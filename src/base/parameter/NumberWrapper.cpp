@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  NumberWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -48,7 +50,7 @@ NumberWrapper::NumberWrapper() :
    ElementWrapper()
 {
    value       = ElementWrapper::UNDEFINED_REAL;
-   wrapperType = Gmat::NUMBER;
+   wrapperType = Gmat::NUMBER_WT;
 }
 
 //---------------------------------------------------------------------------
@@ -88,6 +90,7 @@ const NumberWrapper& NumberWrapper::operator=(const NumberWrapper &nr)
 
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~NumberWrapper()
 //---------------------------------------------------------------------------
@@ -97,6 +100,18 @@ const NumberWrapper& NumberWrapper::operator=(const NumberWrapper &nr)
 //---------------------------------------------------------------------------
 NumberWrapper::~NumberWrapper()
 {
+}
+
+//------------------------------------------------------------------------------
+// virtual ElementWrapper* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* NumberWrapper::Clone() const
+{
+   return new NumberWrapper(*this);
 }
 
 //------------------------------------------------------------------------------
@@ -144,6 +159,7 @@ bool NumberWrapper::SetReal(const Real toValue)
    return true;
 }
 
+
 //---------------------------------------------------------------------------
 //  void SetupWrapper()
 //---------------------------------------------------------------------------
@@ -154,12 +170,18 @@ bool NumberWrapper::SetReal(const Real toValue)
 //---------------------------------------------------------------------------
 void NumberWrapper::SetupWrapper()
 {
+   // Changed this so that math equation such as "2+2" or "x" will work
+   // as GmatFunction input value(loj:2008.08.27)
    if (GmatStringUtil::ToReal(description, value) == false)
    {
-      std::string errmsg = "For number wrapper \"";
-      errmsg += description;
-      errmsg += 
+      if (!GmatStringUtil::IsMathEquation(description) &&
+          !GmatStringUtil::IsValidName(description))
+      {
+         std::string errmsg = "For number wrapper \"";
+         errmsg += description;
+         errmsg += 
             "\", the description string does not evaluate to a real number\n"; 
-      throw ParameterException(errmsg);
+         throw ParameterException(errmsg);
+      }
    }
 }

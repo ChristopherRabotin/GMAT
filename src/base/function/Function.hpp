@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                   Function
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -31,7 +33,7 @@
 /**
  * All function classes are derived from this base class.
  */
-class Function : public GmatBase
+class GMAT_API Function : public GmatBase
 {
 public:
    Function(const std::string &typeStr, const std::string &nomme);
@@ -46,9 +48,10 @@ public:
                                        IntegerArray &rowCounts,
                                        IntegerArray &colCounts);
    virtual bool         Initialize();
-   virtual bool         Execute(ObjectInitializer *objInit);
+   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize);
    virtual void         Finalize();
-   virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
+   virtual bool         IsFcsFinalized();
+   virtual void         SetObjectMap(ObjectMap *objMap);
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
@@ -60,19 +63,23 @@ public:
    virtual GmatCommand* GetFunctionControlSequence();
    virtual std::string  GetFunctionPathAndName();
    
-   virtual bool         SetInputElementWrapper(const std::string &forName, ElementWrapper *wrapper);
-   virtual ElementWrapper*
-                        GetOutputArgument(Integer argNumber);
-   virtual ElementWrapper*
-                        GetOutputArgument(const std::string &byName);
+   virtual bool         SetInputElementWrapper(const std::string &forName,
+                                               ElementWrapper *wrapper);
+   virtual ElementWrapper* GetOutputArgument(Integer argNumber);
+   virtual ElementWrapper* GetOutputArgument(const std::string &byName);
+   virtual WrapperArray&   GetWrappersToDelete();
+   virtual void         ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs);
    
    // methods to set/get the automatic objects
-   virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj);
-   virtual ObjectMap    GetAutomaticObjects() const;
+   virtual void         ClearAutomaticObjects();
+   virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj,
+                                           bool alreadyManaged);
+   virtual GmatBase*    FindAutomaticObject(const std::string &name);
+   virtual ObjectMap&   GetAutomaticObjects();
    
    // Inherited (GmatBase) methods
    virtual bool         TakeAction(const std::string &action,
-                                   const std::string &actionData = "");
+                                      const std::string &actionData = "");
    
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual std::string  GetParameterText(const Integer id) const;
@@ -93,9 +100,6 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    
-//   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-//                                     const std::string &name = "");
-
 protected:
    /// Fully-qualified path for function script
    std::string          functionPath;
@@ -107,16 +111,21 @@ protected:
    StringArray          outputNames;
    // @todo - should these next five items remain here or move to GmatFunction??
    /// Function input name and element wrapper map  // @todo - is this needed?
-   std::map<std::string, ElementWrapper*> inputArgMap;
+   WrapperMap           inputArgMap;
    /// Function output name element wrapper map
-   std::map<std::string, ElementWrapper*> outputArgMap;
+   WrapperMap           outputArgMap;
    /// Output wrapper type array
    WrapperTypeArray     outputWrapperTypes;
    /// Output row count used for returning one Array type
    IntegerArray         outputRowCounts;
    /// Output column count used for returning one Array type
    IntegerArray         outputColCounts;
-   
+   /// Old wrappers to delete
+   WrapperArray         wrappersToDelete;
+   /// Object array to delete
+   ObjectArray          objectsToDelete;
+   /// Objects already in the Sandbox object map
+   ObjectArray          sandboxObjects;
    /// Object store for the Function 
    ObjectMap            *objectStore;
    /// Object store obtained from the Sandbox
@@ -135,13 +144,11 @@ protected:
    bool                 fcsFinalized;
    /// objects automatically created on parsing (but for whom a references object cannot be
    /// set at that time)
-   std::map<std::string, GmatBase *>          
-                        automaticObjects;
+   ObjectMap            automaticObjectMap;
    // Validator used to create the ElementWrappers
    Validator            *validator;
    /// Object store needed by the validator
-   std::map<std::string, GmatBase *>
-                        validatorStore;
+   ObjectMap            validatorStore;
    /// the flag indicating script error found in function, this flag is set by Interpreter
    bool                 scriptErrorFound;
    /// the flag indicating local objects are initialized
@@ -164,8 +171,9 @@ protected:
    GmatBase* FindObject(const std::string &name);
    
    // for debug
+   void ShowObjectMap(ObjectMap *objMap, const std::string &title = "",
+                      const std::string &mapName = "");
    void ShowObjects(const std::string &title);
-   
 };
 
 

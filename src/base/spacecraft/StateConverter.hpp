@@ -1,10 +1,12 @@
-//$Header$ 
+//$Id$ 
 //------------------------------------------------------------------------------
 //                                 StateConverter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -56,9 +58,8 @@ public:
    // public method 
    Real GetMu() const { return mMu; }
    void SetMu(Real mu) { mMu = mu; }
-   bool     SetMu(const CoordinateSystem *cs);
-//    bool     SetMu(SolarSystem *solarSystem, const std::string &body);
-      
+   bool SetMu(const CoordinateSystem *cs);
+   
    Rvector6 FromCartesian(const Rvector6 &state, const std::string &toType,
                           const std::string &anomalyType = "TA");
    
@@ -77,10 +78,6 @@ public:
    Rvector6 FromEquinoctial(const Rvector6 &state, const std::string &toType,
                             const std::string &anomalyType = "TA");
    
-//    Rvector6 Convert(const Rvector6 &state, const std::string &fromType,
-//                     const std::string &toType,
-//                     Anomaly::AnomalyType anomalyType = Anomaly::TA);
-   
    Rvector6 Convert(const Rvector6 &state, const std::string &fromType,
                     const std::string &toType,
                     const std::string &anomalyType = "TA");
@@ -91,22 +88,31 @@ public:
    Rvector6 Convert(const Real *state, const std::string &fromType,
                     const std::string &toType, Anomaly &anomaly);
    
-//    Rvector6 Convert(const Real *state, const std::string &toType);
-   
    // Constant variable
-   static const Real DEFAULT_MU;// = 0.3986004415e+06;  // km^3/s^2
+   static const Real DEFAULT_MU;  // km^3/s^2
    
-   static std::string GetTypeString(const std::string &type);
-   static Integer GetTypeCount() { return StateTypeCount; }
+   static std::string        GetTypeString(const std::string &type);
+   static Integer            GetTypeCount() { return StateTypeCount; }
    static const std::string* GetStateTypeList();
+   static bool               RequiresCelestialBodyOrigin(const std::string &type);
    
 protected:
 
 private:
-//    std::string  mStateType;
    Real         mMu;
    
    static const std::string STATE_TYPE_TEXT[StateTypeCount];
+   static const bool        REQUIRES_CB_ORIGIN[StateTypeCount];
+
+   Rvector6 CartesianToEquinoctial(const Rvector6& cartesian, const Real& mu);
+   Rvector6 EquinoctialToCartesian(const Rvector6& equinoctial, const Real& mu);
+
+   Rvector6 CartesianToSphericalAZFPA(const Rvector6& cartesian);
+   Rvector6 SphericalAZFPAToCartesian(const Rvector6& spherical);
+
+   Rvector6 CartesianToSphericalRADEC(const Rvector6& cartesian);
+   Rvector6 SphericalRADECToCartesian(const Rvector6& spherical);
+
 };
 
 #endif // StateConverter_hpp

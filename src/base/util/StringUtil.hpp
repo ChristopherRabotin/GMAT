@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 StringUtil
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -31,107 +33,127 @@ namespace GmatStringUtil
       BOTH = 3,
    };
    
-   std::string RemoveAll(const std::string &str, char ch, Integer start = 0);
-   std::string RemoveLastNumber(const std::string &str, Integer &lastNumber);
-   std::string RemoveLastString(const std::string &str, const std::string &lastStr,
+   GMAT_API std::string RemoveAll(const std::string &str, char ch, Integer start = 0);
+   GMAT_API std::string RemoveLastNumber(const std::string &str, Integer &lastNumber);
+   GMAT_API std::string RemoveLastString(const std::string &str, const std::string &lastStr,
                                 bool removeAll = false);
    
-   std::string RemoveSpaceInBrackets(const std::string &str,
+   GMAT_API std::string RemoveSpaceInBrackets(const std::string &str,
                                      const std::string &bracketPair);
-   std::string Trim(const std::string &str, StripType stype = BOTH,
+   GMAT_API std::string Trim(const std::string &str, StripType stype = BOTH,
                     bool removeSemicolon = false, bool removeEol = false);
-   std::string Strip(const std::string &str, StripType stype = BOTH);
-   std::string ToUpper(const std::string &str);
-   std::string ToLower(const std::string &str);
-   std::string Capitalize(const std::string &str);
-   std::string Replace(const std::string &str, const std::string &from,
+   GMAT_API std::string Strip(const std::string &str, StripType stype = BOTH);
+   GMAT_API std::string ToUpper(const std::string &str, bool firstLetterOnly = false);
+   GMAT_API std::string ToLower(const std::string &str, bool firstLetterOnly = false);
+   GMAT_API std::string Capitalize(const std::string &str);
+   GMAT_API std::string Replace(const std::string &str, const std::string &from,
                        const std::string &to);
-   std::string ReplaceName(const std::string &str, const std::string &from,
+   GMAT_API std::string ReplaceName(const std::string &str, const std::string &from,
+                           const std::string &to);
+   GMAT_API std::string ReplaceNumber(const std::string &str, const std::string &from,
                            const std::string &to);
    
-   std::string ToString(const Real &val, Integer precision);
-   std::string ToString(const Integer &val, Integer width);
+   GMAT_API std::string ToString(const bool &val);
+   GMAT_API std::string ToString(const Real &val, Integer precision, bool showPoint = false,
+                        Integer width = 1);
+   GMAT_API std::string ToString(const Integer &val, Integer width);
    
-   std::string ToString(const Real &val, bool useCurrentFormat = true,
+   GMAT_API std::string ToString(const Real &val, bool useCurrentFormat = true,
                         bool scientific = false, bool showPoint = true, 
                         Integer precision = GmatGlobal::DATA_PRECISION,
                         Integer width = GmatGlobal::DATA_WIDTH);
-   std::string ToString(const Integer &val, bool useCurrentFormat = true,
+   GMAT_API std::string ToString(const Integer &val, bool useCurrentFormat = true,
                         Integer width = GmatGlobal::INTEGER_WIDTH);
    
-   std::string RemoveExtraParen(const std::string &str);
-   std::string RemoveOuterString(const std::string &str, const std::string &start,
+   GMAT_API std::string RemoveExtraParen(const std::string &str);
+   GMAT_API std::string RemoveOuterString(const std::string &str, const std::string &start,
                                  const std::string &end);
-   std::string RemoveEnclosingString(const std::string &str, const std::string &enStr);
+   GMAT_API std::string RemoveEnclosingString(const std::string &str, const std::string &enStr);
+   GMAT_API std::string RemoveInlineComment(const std::string &str, const std::string &cmStr);
+   GMAT_API std::string ParseFunctionName(const std::string &str);
+   GMAT_API std::string AddEnclosingString(const std::string &str, const std::string &enStr);
+   GMAT_API std::string GetInvalidNameMessageFormat();
    
-   char GetClosingBracket(const char &openBracket);
+   GMAT_API char GetClosingBracket(const char &openBracket);
    
-   StringArray SeparateBy(const std::string &str, const std::string &delim,
-                          bool putBracketsTogether = false);
-   StringArray SeparateByComma(const std::string &str);
-   StringArray SeparateDots(const std::string &str);
+   GMAT_API StringArray SeparateBy(const std::string &str, const std::string &delim,
+                          bool putBracketsTogether = false, bool insertDelim = false,
+                          bool insertComma = true);
+   GMAT_API StringArray SeparateByComma(const std::string &str);
+   GMAT_API StringArray SeparateDots(const std::string &str);
+   GMAT_API StringArray DecomposeBy(const std::string &str, const std::string &delim);
    
-   bool ToReal(const std::string &str, Real *value, bool trimParens = false);
-   bool ToReal(const std::string &str, Real &value, bool trimParens = false);
-   bool ToInteger(const std::string &str, Integer *value, bool trimParens = false);
-   bool ToInteger(const std::string &str, Integer &value, bool trimParens = false);
-   bool ToBoolean(const std::string &str, bool *value, bool trimParens = false);
-   bool ToBoolean(const std::string &str, bool &value, bool trimParens = false);
+   GMAT_API bool IsNumber(const std::string &str);
+   GMAT_API bool ToReal(const std::string &str, Real *value, bool trimParens = false);
+   GMAT_API bool ToReal(const std::string &str, Real &value, bool trimParens = false);
+   GMAT_API bool ToInteger(const std::string &str, Integer *value, bool trimParens = false);
+   GMAT_API bool ToInteger(const std::string &str, Integer &value, bool trimParens = false);
+   GMAT_API bool ToBoolean(const std::string &str, bool *value, bool trimParens = false);
+   GMAT_API bool ToBoolean(const std::string &str, bool &value, bool trimParens = false);
    
-   RealArray ToRealArray(const std::string &str);
-   IntegerArray ToIntegerArray(const std::string &str);
-   UnsignedIntArray ToUnsignedIntArray(const std::string &str);
+   GMAT_API RealArray ToRealArray(const std::string &str);
+   GMAT_API IntegerArray ToIntegerArray(const std::string &str);
+   GMAT_API UnsignedIntArray ToUnsignedIntArray(const std::string &str);
+   GMAT_API StringArray ToStringArray(const std::string &str);
+   GMAT_API BooleanArray ToBooleanArray(const std::string &str);
    
-   void ParseParameter(const std::string &str, std::string &type,
-                       std::string &owner, std::string &dep);
-   void GetArrayCommaIndex(const std::string &str, Integer &comma,
+   GMAT_API void ParseParameter(const std::string &str, std::string &type,
+                                std::string &owner, std::string &dep);
+   GMAT_API void GetArrayCommaIndex(const std::string &str, Integer &comma,
                            const std::string &bracketPair = "()");
-   void GetArrayIndex(const std::string &str, Integer &row, Integer &col,
+   GMAT_API void GetArrayIndex(const std::string &str, Integer &row, Integer &col,
                       std::string &name, const std::string &bracketPair = "()");
-   void GetArrayIndex(const std::string &str, std::string &rowStr,
+   GMAT_API void GetArrayIndex(const std::string &str, std::string &rowStr,
                       std::string &colStr, Integer &row, Integer &col,
                       std::string &name, const std::string &bracketPair = "()");
-   void GetArrayIndexVar(const std::string &str, std::string &rowStr,
+   GMAT_API void GetArrayIndexVar(const std::string &str, std::string &rowStr,
                          std::string &colStr, std::string &name,
                          const std::string &bracketPair = "()");
-   void FindFirstAndLast(const std::string &str, char ch, Integer &first,
+   GMAT_API void FindFirstAndLast(const std::string &str, char ch, Integer &first,
                          Integer &last);
-   void FindParenMatch(const std::string &str, Integer &open, Integer &close,
+   GMAT_API void FindParenMatch(const std::string &str, Integer &open, Integer &close,
                        bool &isOuterParen);
-   void FindMatchingParen(const std::string &str, Integer &openParen,
+   GMAT_API void FindMatchingParen(const std::string &str, Integer &openParen,
                           Integer &closeParen, bool &isOuterParen,
                           Integer start = 0);
-   void FindMatchingBracket(const std::string &str, Integer &openBracket,
+   GMAT_API void FindMatchingBracket(const std::string &str, Integer &openBracket,
                             Integer &closeBracket, bool &isOuterBracket,
                             const std::string &bracket, Integer start = 0);
-   void FindLastParenMatch(const std::string &str, Integer &openParen,
+   GMAT_API void FindLastParenMatch(const std::string &str, Integer &openParen,
                            Integer &closeParen, Integer start = 0);
    
-   bool IsEnclosedWith(const std::string &str, const std::string &enclosingStr);
-   bool IsEnclosedWithExtraParen(const std::string &str, bool checkOps = true);
-   bool IsBracketBalanced(const std::string &str, const std::string &bracketPair);
-   bool IsParenBalanced(const std::string &str);
-   bool AreAllBracketsBalanced(const std::string &str, const std::string &allPairs);
-   bool IsOuterParen(const std::string &str);
-   bool IsCommaPartOfArray(const std::string &str, Integer start = 0);
-   bool IsBracketPartOfArray(const std::string &str, const std::string &bracketPairs,
+   GMAT_API bool IsEnclosedWith(const std::string &str, const std::string &enclosingStr);
+   GMAT_API bool IsEnclosedWithExtraParen(const std::string &str, bool checkOps = true);
+   GMAT_API bool IsEnclosedWithBraces(const std::string &str);
+   GMAT_API bool IsEnclosedWithBrackets(const std::string &str);
+   GMAT_API bool IsBracketBalanced(const std::string &str, const std::string &bracketPair);
+   GMAT_API bool IsParenBalanced(const std::string &str);
+   GMAT_API bool AreAllBracketsBalanced(const std::string &str, const std::string &allPairs);
+   GMAT_API bool IsOuterParen(const std::string &str);
+   GMAT_API bool IsCommaPartOfArray(const std::string &str, Integer start = 0);
+   GMAT_API bool IsBracketPartOfArray(const std::string &str, const std::string &bracketPairs,
                              bool checkOnlyFirst);
-   bool IsParenPartOfArray(const std::string &str);
-   bool IsThereEqualSign(const std::string &str);
-   bool IsThereMathSymbol(const std::string &str);
-   bool HasNoBrackets(const std::string &str, bool parensForArraysAllowed = true);
-   bool IsSingleItem(const std::string &str);
-   bool StartsWith(const std::string &str, const std::string &value);
-   bool EndsWith(const std::string &str, const std::string &value);
-   bool IsValidNumber(const std::string &str);
-   bool IsValidName(const std::string &str, bool ignoreBracket = false);
-   bool IsBlank(const std::string &str, bool ignoreEol = false);
-   bool HasMissingQuote(const std::string &str, const std::string &quote);
-   bool IsMathEquation(const std::string &str);
+   GMAT_API bool IsParenPartOfArray(const std::string &str);
+   GMAT_API bool IsThereEqualSign(const std::string &str);
+   GMAT_API bool IsThereMathSymbol(const std::string &str);
+   GMAT_API bool HasNoBrackets(const std::string &str, bool parensForArraysAllowed = true);
+   GMAT_API bool IsSingleItem(const std::string &str);
+   GMAT_API bool StartsWith(const std::string &str, const std::string &value);
+   GMAT_API bool EndsWith(const std::string &str, const std::string &value);
+   GMAT_API bool EndsWithPathSeparator(const std::string &str); 
+   GMAT_API bool IsValidNumber(const std::string &str);
+   GMAT_API bool IsValidName(const std::string &str, bool ignoreBracket = false);
+   GMAT_API bool IsBlank(const std::string &str, bool ignoreEol = false);
+   GMAT_API bool HasMissingQuote(const std::string &str, const std::string &quote);
+   GMAT_API bool IsMathEquation(const std::string &str);
    
-   Integer NumberOfOccurrences(const std::string &str, const char c);
+   GMAT_API Integer NumberOfOccurrences(const std::string &str, const char c);
    
-   StringArray GetVarNames(const std::string &str);
+   GMAT_API StringArray GetVarNames(const std::string &str);
+   GMAT_API void WriteStringArray(const StringArray &strArray,
+                                  const std::string &desc = "",
+                                  const std::string &prefix = "");
+   
 }
 
 #endif // StringUtil_hpp

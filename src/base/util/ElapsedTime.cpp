@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ElapsedTime
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,8 +22,9 @@
 #include "ElapsedTime.hpp"
 #include "RealUtilities.hpp"
 
-using namespace GmatTimeUtil;  // for SECS_PER_DAY, SECS_PER_HOUR, etc.
+using namespace GmatTimeConstants;  // for SECS_PER_DAY, SECS_PER_HOUR, etc.
 using namespace GmatMathUtil;  // for Rem(), IsEqual()
+using namespace GmatMathConstants;  // for Rem(), IsEqual()
 
 //---------------------------------
 // static variables

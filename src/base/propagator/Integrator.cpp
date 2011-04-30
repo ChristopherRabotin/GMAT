@@ -1,18 +1,19 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              Integrator
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : Integrator.cpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -90,6 +91,7 @@ Integrator::PARAMETER_TEXT[IntegratorParamCount - PropagatorParamCount] =
     "MinStep",
     "MaxStep",
     "MaxStepAttempts",
+    "StopIfAccuracyIsViolated",
 };
 
 const Gmat::ParameterType
@@ -100,7 +102,8 @@ Integrator::PARAMETER_TYPE[IntegratorParamCount - PropagatorParamCount] =
     Gmat::REAL_TYPE,
     Gmat::REAL_TYPE,
     Gmat::REAL_TYPE,
-    Gmat::INTEGER_TYPE
+    Gmat::INTEGER_TYPE,
+    Gmat::BOOLEAN_TYPE,
 };
 
 //---------------------------------
@@ -127,6 +130,9 @@ Integrator::Integrator(const std::string &typeStr, const std::string &nomme)
       smallestTime            (1.0e-6),
       stepAttempts            (0),
       maxStepAttempts         (50),
+      stopIfAccuracyViolated  (true),
+      accuracyWarningTriggered(false),
+      typeSource              (typeStr),
       stepTaken               (0.0),
       timeleft                (stepSize),    
       ddt                     (NULL),
@@ -134,7 +140,8 @@ Integrator::Integrator(const std::string &typeStr, const std::string &nomme)
       errorThreshold          (0.10),
       derivativeOrder         (1)
 {
-    parameterCount = IntegratorParamCount;
+   objectTypeNames.push_back("Integrator");
+   parameterCount = IntegratorParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -156,6 +163,9 @@ Integrator::Integrator(const Integrator& i) :
     smallestTime            (i.smallestTime),
     stepAttempts            (0),
     maxStepAttempts         (i.maxStepAttempts),
+    stopIfAccuracyViolated  (i.stopIfAccuracyViolated),
+    accuracyWarningTriggered(false),
+    typeSource              (i.typeSource),
     stepTaken               (0.0),
     timeleft                (i.timeleft),    
     ddt                     (NULL),
@@ -163,7 +173,7 @@ Integrator::Integrator(const Integrator& i) :
     errorThreshold          (i.errorThreshold),
     derivativeOrder         (i.derivativeOrder)
 {
-    parameterCount = IntegratorParamCount;
+   parameterCount = IntegratorParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -181,23 +191,26 @@ Integrator& Integrator::operator=(const Integrator& i)
         return *this;
 
     Propagator::operator=(i);
-    tolerance = i.tolerance;
-    fixedStep = i.fixedStep;
-    fixedStepsize = i.fixedStepsize;
-    stepTaken = 0.0;
-    timeleft = i.timeleft;
+    tolerance              = i.tolerance;
+    fixedStep              = i.fixedStep;
+    fixedStepsize          = i.fixedStepsize;
+    stepTaken              = 0.0;
+    timeleft               = i.timeleft;
 
-    minimumStep = i.minimumStep;
-    maximumStep = i.maximumStep;
-    stepAttempts = 0;
-    maxStepAttempts = i.maxStepAttempts;
+    minimumStep            = i.minimumStep;
+    maximumStep            = i.maximumStep;
+    stepAttempts           = 0;
+    maxStepAttempts        = i.maxStepAttempts;
+    stopIfAccuracyViolated = i.stopIfAccuracyViolated;
+    accuracyWarningTriggered = i.accuracyWarningTriggered;
+    typeSource             = i.typeSource;
     
-    derivativeOrder = i.derivativeOrder;
+    derivativeOrder        = i.derivativeOrder;
     
-    smallestTime = i.smallestTime;  
-    ddt = NULL;
-    errorEstimates = NULL;
-    errorThreshold = i.errorThreshold;
+    smallestTime           = i.smallestTime;
+    ddt                    = NULL;
+    errorEstimates         = NULL;
+    errorThreshold         = i.errorThreshold;
 
     return *this;
 }
@@ -273,7 +286,7 @@ std::string Integrator::GetParameterTypeString(const Integer id) const
 {
     if (id >= PropagatorParamCount && id < IntegratorParamCount)
         return GmatBase::PARAM_TYPE_STRING
-		                      [GetParameterType(id - PropagatorParamCount)];
+                                      [GetParameterType(id - PropagatorParamCount)];
     else
         return Propagator::GetParameterTypeString(id);
 }
@@ -318,19 +331,19 @@ Real Integrator::GetRealParameter(const Integer id) const
    switch (id)
    {
       case ACCURACY:
-	     return tolerance;
-	  case ERROR_THRESHOLD:
-	     if (physicalModel)
+             return tolerance;
+          case ERROR_THRESHOLD:
+             if (physicalModel)
             return physicalModel->GetErrorThreshold();
-		 return errorThreshold;
-	  case SMALLEST_INTERVAL:
-	     return smallestTime;
-	  case MIN_STEP:
-	     return minimumStep;
-	  case MAX_STEP:
-	     return maximumStep;
-	  default:
-	     return Propagator::GetRealParameter(id);   
+                 return errorThreshold;
+          case SMALLEST_INTERVAL:
+             return smallestTime;
+          case MIN_STEP:
+             return minimumStep;
+          case MAX_STEP:
+             return maximumStep;
+          default:
+             return Propagator::GetRealParameter(id);   
    }    
 }
 
@@ -365,84 +378,50 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
    switch (id)
    {
    case ACCURACY:
-//      if (value <= 0.0)
-//         throw PropagatorException(
-//         "Integrator::SetRealParameter -- Accuracy value is set to <= 0.0");
-//      tolerance = value;
-//      return value;
-      if (value >= 0.0)
+      if (value > 0.0)
          tolerance = value;
       else
       {
          std::stringstream buffer;
          buffer << value;
-//         throw PropagatorException(
-//            "The value of " + buffer.str() + " for the integrator accuracy is not"
-//            " an allowed value. The allowed values are [Real Number >= 0.0].");
             throw PropagatorException(
                "The value of \"" + buffer.str() + "\" for field \"Accuracy\""
                " on object \"" + instanceName + "\" is not an allowed value.\n"
-               "The allowed values are: [ Real Number >= 0.0 ]. ");
+               "The allowed values are: [ Real Number > 0.0 ]. ");
       }
       return value;
    case MIN_STEP:
-//      if (value == 0.0)
-//         throw PropagatorException(
-//                   "Integrator::SetRealParameter --Minimum step is set to 0.0");
-//      minimumStep = fabs(value);
-//      return value;
       if (value >= 0.0)
          minimumStep = value;
       else
       {
          std::stringstream buffer;
          buffer << value;
-//         throw PropagatorException(
-//            "The value of " + buffer.str() + " for the integrator minimum step size "
-//            "is not an allowed value. The allowed values are "
-//            "[Real Number >= 0, MinStep <= MaxStep].");
-            throw PropagatorException(
-               "The value of \"" + buffer.str() + "\" for field \"Min Step\""
-               " on object \"" + instanceName + "\" is not an allowed value.\n"
-               "The allowed values are: [ Real Number >= 0.0, MinStep <= MaxStep ].");
+         throw PropagatorException(
+            "The value of \"" + buffer.str() + "\" for field \"Min Step\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [ Real Number >= 0.0, MinStep <= MaxStep ].");
       }
       return value;
    case MAX_STEP:
-      // @todo waw: temporarily commented out, to be uncommented 
-      // once Edwin updates his scripts to support this
-      // if (fabs(value) <= minimumStep)
-//      if (fabs(value) < minimumStep)
-//         throw PropagatorException(
-//      "Integrator::SetRealParameter -- Maximum step is set less than minimum step.");
-//      maximumStep = fabs(value);
-//      return value;
-      if (value >= 0.0)
-//       if (fabs(value) <= minimumStep)
-         if (fabs(value) < minimumStep)
-            throw PropagatorException(
-               "Integrator::SetRealParameter -- Maximum step is set less than minimum step.");
-         else
+      if ((value > 0.0) && fabs(value) >= minimumStep)
             maximumStep = value;
       else
       {
          std::stringstream buffer;
          buffer << value;
-//         throw PropagatorException(
-//            "The value of " + buffer.str() + " for the integrator minimum step size "
-//            "is not an allowed value. The allowed values are "
-//            "[Real Number >= 0, MinStep <= MaxStep].");
-            throw PropagatorException(
-               "The value of \"" + buffer.str() + "\" for field \"Max Step\""
-               " on object \"" + instanceName + "\" is not an allowed value.\n"
-               "The allowed values are: [ Real Number >= 0.0, MinStep <= MaxStep ].");
+         throw PropagatorException(
+            "The value of \"" + buffer.str() + "\" for field \"Max Step\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [ Real Number > 0.0, MinStep <= MaxStep ].");
       }
       return value;
    case ERROR_THRESHOLD:
       errorThreshold = fabs(value);
       if (physicalModel)
          physicalModel->SetErrorThreshold(errorThreshold);
-	  else
-	     throw PropagatorException(
+          else
+             throw PropagatorException(
                       "Integrator::SetRealParameter -- PhysicalModel is NULL.");
       return value;
    case SMALLEST_INTERVAL:
@@ -540,6 +519,88 @@ Integer Integrator::SetIntegerParameter(const std::string &label, const Integer 
     return SetIntegerParameter(GetParameterID(label), value);
 }
 
+//---------------------------------------------------------------------------
+//  bool GetBooleanParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return the boolean value for this parameter, or throw an exception if the
+ *         parameter access in invalid.
+ */
+//------------------------------------------------------------------------------
+bool Integrator::GetBooleanParameter(const Integer id) const
+{
+   if (id == STOP_IF_ACCURACY_VIOLATED)  return stopIfAccuracyViolated;
+
+   return Propagator::GetBooleanParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetBooleanParameter(const Integer id, const bool value)
+//---------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new value.
+ *
+ * @return the boolean value for this parameter, or throw an exception if the
+ *         parameter is invalid or not boolean.
+ */
+//------------------------------------------------------------------------------
+bool Integrator::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == STOP_IF_ACCURACY_VIOLATED)
+   {
+      stopIfAccuracyViolated = value;
+      return true;
+   }
+
+   return Propagator::SetBooleanParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string &action, const std::string &actionData)
+//------------------------------------------------------------------------------
+/**
+ * Performs custom actions
+ *
+ * For Integrators, this call resets the flag used to test the propagation
+ * accuracy
+ *
+ * @param action The specific action requested
+ * @param actionData Data associated with that action, if any
+ *
+ * @return true if an action was taken, false if not
+ */
+//------------------------------------------------------------------------------
+bool Integrator::TakeAction(const std::string &action,
+      const std::string &actionData)
+{
+   bool retval = false;
+
+   if (action == "PrepareForRun")
+   {
+      accuracyWarningTriggered = false;
+      retval = true;
+   }
+
+   if (action == "ChangeTypeSourceString")
+   {
+      typeSource = actionData;
+      retval = true;
+   }
+
+   retval = retval & Propagator::TakeAction(action, actionData);
+
+   return retval;
+}
+
 //------------------------------------------------------------------------------
 // void SetPhysicalModel(PhysicalModel *pPhyscialModel)
 //------------------------------------------------------------------------------
@@ -552,14 +613,14 @@ Integer Integrator::SetIntegerParameter(const std::string &label, const Integer 
  * @param pPhyscialModel Pointer to the physical model
  */
 //------------------------------------------------------------------------------
-void Integrator::SetPhysicalModel(PhysicalModel *pPhyscialModel)
+void Integrator::SetPhysicalModel(PhysicalModel *pPhysicalModel)
 {
-    Propagator::SetPhysicalModel(pPhyscialModel);
+    Propagator::SetPhysicalModel(pPhysicalModel);
     if (physicalModel != NULL) 
         physicalModel->SetErrorThreshold(errorThreshold);
-	else
-	   throw PropagatorException(
-                      "Integrator::SetPhysicalModel -- PhyscialModel is NULL.");
+        else
+           throw PropagatorException(
+                 "Integrator::SetPhysicalModel -- PhyscialModel is NULL.");
 }
 
 

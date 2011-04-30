@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               BranchCommand
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -56,10 +58,10 @@ public:
                                                const std::string &prefix = "",
                                                const std::string &useName = "");
    
-   virtual bool      RenameRefObject(const Gmat::ObjectType type,
-                                     const std::string &oldName,
-                                     const std::string &newName);
-
+   virtual bool            RenameRefObject(const Gmat::ObjectType type,
+                                           const std::string &oldName,
+                                           const std::string &newName);
+   
    virtual GmatCommand*    GetNext();
    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
    virtual void            SetTransientForces(std::vector<PhysicalModel*> *tf);
@@ -73,7 +75,10 @@ public:
                            GetCommandsWithGmatFunctions();
    virtual bool            HasAFunction();
    virtual void            SetCallingFunction(FunctionManager *fm);
+   virtual bool            IsExecuting();
 
+   virtual Integer         GetCloneCount();
+   virtual GmatBase*       GetClone(Integer cloneIndex);
 
 protected:
       

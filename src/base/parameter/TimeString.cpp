@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                TimeString
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -19,6 +21,9 @@
 //------------------------------------------------------------------------------
 
 #include "TimeString.hpp"
+#include "ParameterException.hpp"
+#include "StringUtil.hpp"               // for ParseParameter()
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // public methods
@@ -42,8 +47,13 @@ TimeString::TimeString(const std::string &name, const std::string &typeStr,
                        GmatBase *obj, const std::string &desc,
                        const std::string &unit)
    : StringVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-               GmatParam::NO_DEP, Gmat::SPACECRAFT, true)
+               GmatParam::NO_DEP, Gmat::SPACECRAFT, true),
+     TimeData(name)
 {
+   std::string type, ownerName, depObj;
+   GmatStringUtil::ParseParameter(name, type, ownerName, depObj);
+   mOwnerName = ownerName;
+   mExpr = name;
    AddRefObject(obj);
 }
 
@@ -101,13 +111,13 @@ TimeString::~TimeString()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// virtual std::string EvaluateString()
+// const virtual std::string& EvaluateString()
 //------------------------------------------------------------------------------
 /**
  * @return newly evaluated value of parameter
  */
 //------------------------------------------------------------------------------
-std::string TimeString::EvaluateString()
+const std::string& TimeString::EvaluateString()
 {
    Evaluate();
    return mStringValue;
@@ -176,7 +186,22 @@ bool TimeString::Initialize()
 {
    mInitialEpoch = 0.0;
    mIsInitialEpochSet = false;
-   InitializeRefObjects();
+
+   try
+   {
+      InitializeRefObjects();
+   }
+   catch (BaseException &e)
+   {
+      #if DEBUG_TIMESTRING
+      MessageInterface::ShowMessage
+         ("TimeString::Initialize() Fail to initialize Parameter '%s'\n",
+          this->GetName().c_str());
+      #endif
+      
+      throw ParameterException
+         ("WARNING:  " + e.GetFullMessage() + " in " + GetName() + "\n");
+   }
    
    return true;
 }
@@ -191,8 +216,8 @@ bool TimeString::Initialize()
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 bool TimeString::RenameRefObject(const Gmat::ObjectType type,
-                               const std::string &oldName,
-                               const std::string &newName)
+                                 const std::string &oldName,
+                                 const std::string &newName)
 {
    return TimeData::RenameRefObject(type, oldName, newName);
 }
@@ -288,5 +313,30 @@ bool TimeString::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
 {
    return TimeData::SetRefObject(obj, type, name);
+}
+
+
+//------------------------------------------------------------------------------
+// const std::string& GetGeneratingString(...)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+const std::string& TimeString::GetGeneratingString(Gmat::WriteMode mode,
+                                                   const std::string &prefix,
+                                                   const std::string &useName)
+{
+   #ifdef DEBUG_GEN_STRING
+   MessageInterface::ShowMessage
+      ("TimeString::GetGeneratingString() this=<%p>'%s' entered, mode=%d, prefix='%s', "
+       "useName='%s'\n", this, GetName().c_str(), mode, prefix.c_str(), useName.c_str());
+   MessageInterface::ShowMessage
+      ("   mExpr='%s', mDepObjectName='%s'\n", mExpr.c_str(), mDepObjectName.c_str());
+   #endif
+
+   // We want to skip StringVar::GetGeneratingString() since it is handled specially
+   // for String
+   return Parameter::GetGeneratingString(mode, prefix, useName);
 }
 

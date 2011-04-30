@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                Rvector
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -31,13 +33,13 @@
 //forward declaration for matrix operations
 class Rmatrix;
 
-class Rvector : public ArrayTemplate<Real>
+class GMAT_API Rvector : public ArrayTemplate<Real>
 {
 public:
    
    // exceptions
-   class IsZeroVector : public BaseException
-   { public:  IsZeroVector(const std::string &details = "")
+   class ZeroVector : public BaseException
+   { public:  ZeroVector(const std::string &details = "")
         : BaseException("Rvector error : vector is a zero vector", details) {}; };
    
    Rvector();
@@ -71,8 +73,9 @@ public:
    const Rvector& operator*=(const Rmatrix &m);
    Rvector operator/(const Rmatrix &m) const;
    const Rvector& operator/=(const Rmatrix &m);
-      
+   
    virtual bool MakeZeroVector();
+   virtual bool IsZeroVector() const;
    Real Norm();
    
    virtual std::string ToString(Integer precision, bool horizontal = true,

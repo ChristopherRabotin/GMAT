@@ -3,9 +3,11 @@
 //                             FactoryManager
 //------------------------------------------------------------------------------
 
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -28,7 +30,7 @@
 #include "Spacecraft.hpp"
 #include "Parameter.hpp"
 #include "Propagator.hpp"
-#include "ForceModel.hpp"
+#include "ODEModel.hpp"
 #include "PhysicalModel.hpp"
 #include "PropSetup.hpp"
 #include "StopCondition.hpp"
@@ -45,6 +47,15 @@
 #include "CoordinateSystem.hpp"
 #include "MathNode.hpp"
 #include "Attitude.hpp"
+
+class MeasurementModel;
+class CoreMeasurement;
+class DataFile;
+class ObType;
+class TrackingSystem;
+class TrackingData;
+class EphemerisFile;
+class Interface;
 
 /**
  * GMAT Factory Manager Class, the interface between the Moderator and the
@@ -89,6 +100,8 @@ public:
    Subscriber*            CreateSubscriber(const std::string &ofType,
                                            const std::string &withName = "",
                                            const std::string &fileName = "");
+   EphemerisFile*         CreateEphemerisFile(const std::string &ofType,
+                                              const std::string &withName = "");
    GmatCommand*           CreateCommand(const std::string &ofType,
                                         const std::string &withName = "");
    Burn*                  CreateBurn(const std::string &ofType,
@@ -106,18 +119,45 @@ public:
                                          const std::string &withName = "");
    Attitude*              CreateAttitude(const std::string &ofType,
                                          const std::string &withName = "");
+   SpacePoint*            CreateSpacePoint(const std::string &ofType,
+                                           const std::string &withName = "");
 
+   CoreMeasurement*       CreateMeasurement(const std::string &ofType,
+                                            const std::string &withName = "");
+
+   ObType*                CreateObType(const std::string &ofType,
+                                       const std::string &withName = "");
+   
+   Interface*             CreateInterface(const std::string &ofType,
+                                          const std::string &withName = "");
+   
    //----- Just container
    SolarSystem*           CreateSolarSystem(const std::string &withName = "");
    PropSetup*             CreatePropSetup(const std::string &withName = "");
-   ForceModel*            CreateForceModel(const std::string &withName = "");
+   ODEModel*              CreateODEModel(const std::string &ofType,
+                                         const std::string &withName = "");
    CoordinateSystem*      CreateCoordinateSystem(const std::string &withName = "");
-   
+
+   MeasurementModel*      CreateMeasurementModel(const std::string &withName);
+   DataFile*              CreateDataFile(const std::string &ofType,
+                                         const std::string &withName);
+   TrackingSystem*        CreateTrackingSystem(const std::string &ofType,
+                                               const std::string &withName);
+   TrackingData*          CreateTrackingData(const std::string &withName = "");
+
    // method to return a list of strings representing the objects of the input
    // type that may be created in the system
    const StringArray&     GetListOfItems(Gmat::ObjectType byType);
    const StringArray&     GetListOfAllItems();
+   const StringArray&     GetListOfAllItemsExcept(const ObjectTypeArray &types);
+   const StringArray&     GetListOfViewableItems(Gmat::ObjectType byType);
+   const StringArray&     GetListOfUnviewableItems(Gmat::ObjectType byType);
    
+   bool                   DoesObjectTypeMatchSubtype(
+                                const Gmat::ObjectType coreType,
+                                const std::string &theType,
+                                const std::string &theSubtype);
+
    // method to return the base type for the input string
    Gmat::ObjectType       GetBaseTypeOf(const std::string &typeName);
    
@@ -130,12 +170,16 @@ private:
    /// the list of factories that have been registered and which are available
    /// to create objects
    std::list<Factory*> factoryList;
+   /// the list of object types that factory can create
+   std::list<Gmat::ObjectType> factoryTypeList;
    /// pointer to the only instance allowed for this singleton class
    static FactoryManager* onlyInstance;
    
    // private methods 
    Factory*               FindFactory(Gmat::ObjectType ofType, const std::string &forType);
    const StringArray&     GetList(Gmat::ObjectType ofType);
+   const StringArray&     GetListOfViewables(Gmat::ObjectType ofType);
+   const StringArray&     GetListOfUnviewables(Gmat::ObjectType ofType);
    
    // Hide the default constructor and destructor to preserve singleton status
    // default constructor

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           ModKeplerian
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -26,12 +28,11 @@
 #include <sstream>
 #include "gmatdefs.hpp"
 #include "Rvector6.hpp"
-#include "RealTypes.hpp"
 #include "RealUtilities.hpp"
 #include "CoordUtil.hpp"
 #include "UtilityException.hpp"
 
-class ModKeplerian
+class GMAT_API ModKeplerian
 {
 public:
    ModKeplerian();

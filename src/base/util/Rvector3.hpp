@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Rvector3
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -26,7 +28,7 @@
 //forward declaration for matrix operations
 class Rmatrix33;
 
-class Rvector3 : public Rvector
+class GMAT_API Rvector3 : public Rvector
 {
 public:
 
@@ -62,13 +64,16 @@ public:
    Rvector3 operator/(const Rmatrix33 &m) const;
    const Rvector3& operator/=(const Rmatrix33 &m);
    
-   friend Rvector3 operator*(Real s, const Rvector3 &v);
-   friend Rmatrix33 Outerproduct(const Rvector3 &v1, const Rvector3 &v2);
-   friend Rvector3 Cross(const Rvector3 &v1, const Rvector3 &v2);
+   friend Rvector3 GMAT_API operator*(Real s, const Rvector3 &v);
+   friend Rmatrix33 GMAT_API Outerproduct(const Rvector3 &v1, const Rvector3 &v2);
+   friend Rvector3 GMAT_API Cross(const Rvector3 &v1, const Rvector3 &v2);
+   
+   static Real Normalize(const Real from[3], Real to[3]);
+   static void Copy(const Real from[3], Real to[3]);
    
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
-      
+   
 private:
    static const Integer NUM_DATA = 3;
    static const std::string DATA_DESCRIPTIONS[NUM_DATA];

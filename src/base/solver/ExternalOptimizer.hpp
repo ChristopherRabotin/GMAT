@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                         ExternalOptimizer
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -24,7 +26,9 @@
 #include "Optimizer.hpp"
 //#include "GmatServer.hpp"  
 #include "GmatInterface.hpp"  // a singleton
-#include "GmatServer.hpp"
+
+class GmatServer;             // Forward refefence the server
+
 
 class GMAT_API ExternalOptimizer : public Optimizer
 {
@@ -105,21 +109,17 @@ protected:
    /// flag indicating whether or not the interface was opened successfully
    /// and the supporting structures needed by the interface were found
    bool                sourceReady;
-   /// pointer to the interface object (as of 2006.07.13, two pointers
-   /// are needed - one to a MatlabInterface object, one to a GmatInterface,
-   /// per GMAT Architectural Specification document)
-   //MatlabInterface     *outSource;  // not necessary, as MI is all static 
+   /// Pointer to GmatInterface
    GmatInterface       *inSource;
-   // MatlabInterface is currently an all-static class, so just include
-   // the header where needed - outSoource
+   /// Pointer to GmatServer
    GmatServer          *inSourceServer;
-
+   
    static const std::string    PARAMETER_TEXT[ExternalOptimizerParamCount -
                                               OptimizerParamCount];
    static const Gmat::ParameterType
                                PARAMETER_TYPE[ExternalOptimizerParamCount -
                                               OptimizerParamCount];
- 
+   
    // Methods from Solver
    //virtual void                RunNominal();
    //virtual void                RunPerturbation();

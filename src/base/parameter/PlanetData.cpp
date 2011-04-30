@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  PlanetData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -22,6 +24,7 @@
 #include "gmatdefs.hpp"
 #include "PlanetData.hpp"
 #include "ParameterException.hpp"
+#include "GmatConstants.hpp"
 #include "CelestialBody.hpp"
 #include "AngleUtil.hpp"          // for PutAngleInDegRange()
 #include "Linear.hpp"             // for GmatRealUtil::ToString()
@@ -31,6 +34,7 @@
 
 //#define DEBUG_PLANETDATA_INIT
 //#define DEBUG_PLANETDATA_RUN
+//#define DEBUG_ALTITUDE
 
 using namespace GmatMathUtil;
 
@@ -142,7 +146,7 @@ PlanetData::~PlanetData()
 // Real GetPlanetReal(Integer item)
 //------------------------------------------------------------------------------
 /**
- * Retrives planet related parameters.
+ * Retrieves planet related parameters.
  */
 //------------------------------------------------------------------------------
 Real PlanetData::GetPlanetReal(Integer item)
@@ -214,7 +218,7 @@ Real PlanetData::GetPlanetReal(Integer item)
          //     defined by sc.centralbody.Longitude. so, if the central
          //     body is Mars, we convert the state to MarsFixed,
          //     if the central body is Venus, we convert to Venus fixed.
-         //     This gives us X_f, Y_f, and Z_f,  the cartesian coordinates
+         //     This gives us X_f, Y_f, and Z_f,  the Cartesian coordinates
          //     in the fixed system.
          // 2)  Longitude = atan2( Y_f, X_f )
          
@@ -224,7 +228,7 @@ Real PlanetData::GetPlanetReal(Integer item)
          mCoordConverter.Convert(A1Mjd(epoch), state, mInternalCoordSystem,
                                  outState, mOutCoordSystem);
          
-         Real longitude = ATan(outState[1], outState[0]) * DEG_PER_RAD;
+         Real longitude = ATan(outState[1], outState[0]) * GmatMathConstants::DEG_PER_RAD;
          longitude = AngleUtil::PutAngleInDegRange(longitude, -180.0, 180.0);
 
          #ifdef DEBUG_LONGITUDE
@@ -244,7 +248,8 @@ Real PlanetData::GetPlanetReal(Integer item)
          
          #ifdef DEBUG_ALTITUDE
          MessageInterface::ShowMessage
-            ("PlanetData::GetPlanetReal(%d) state=%s\n", item, state.ToString().c_str());
+            ("PlanetData::GetPlanetReal(%d) state=%s\n", item,
+                  intState.ToString().c_str());
          #endif
          
          Real epoch = mSpacecraft->GetRealParameter("A1Epoch");
@@ -290,7 +295,7 @@ Real PlanetData::GetPlanetReal(Integer item)
          {
             //return geolat * 180.0 / PI;
             // put latitude between -90 and 90
-            geolat = geolat * 180.0 / PI;
+            geolat = geolat * 180.0 / GmatMathConstants::PI;
             geolat = AngleUtil::PutAngleInDegRange(geolat, -90.0, 90.0);
             return geolat;
          }

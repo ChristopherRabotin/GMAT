@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              SpaceObject
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CI63P
@@ -23,7 +25,7 @@
 
 #include "GmatBase.hpp"
 #include "SpacePoint.hpp"
-#include "PropState.hpp"
+#include "GmatState.hpp"
 #include "SpaceObjectException.hpp"
 
 class GMAT_API SpaceObject : public SpacePoint
@@ -35,7 +37,7 @@ public:
    SpaceObject(const SpaceObject& so);
    SpaceObject&         operator=(const SpaceObject& so);
    
-   virtual PropState&   GetState();
+   virtual GmatState&   GetState();
    virtual Real         GetEpoch();
    virtual Real         SetEpoch(const Real ep);
    virtual bool         IsManeuvering();
@@ -48,11 +50,26 @@ public:
    virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual Real SetRealParameter(const std::string &label, const Real value);
+   
+   virtual Real         GetRealParameter(const Integer id, const Integer row,
+                                         const Integer col) const;
+   virtual Real         GetRealParameter(const std::string &label, 
+                                         const Integer row, 
+                                         const Integer col) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value,
+                                         const Integer row, const Integer col);
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value, const Integer row,
+                                         const Integer col);
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
 
    /// @todo Waiting for CoordinateSystems in Spacecraft, then see if needed
    virtual void SetOriginName(std::string cbName);
    virtual const std::string GetOriginName();
    virtual void SetOrigin(SpacePoint *cb);
+   virtual SpacePoint* GetOrigin();
    
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
@@ -65,11 +82,23 @@ public:
 
    virtual void ClearLastStopTriggered();
    virtual void SetLastStopTriggered(const std::string &stopCondName);
+   virtual const std::string GetLastStopTriggered();
    virtual bool WasLastStopTriggered(const std::string &stopCondName);
    
+   bool HasEphemPropagated();
+   void HasEphemPropagated(bool tf);
+   
+   /** 
+    * Start on a fix for bug 648; these methods are not currently used, but
+    * are in place for use when the single step publishing issues are ready 
+    * to be worked.
+    */
+   void         HasPublished(bool tf);
+   bool         HasPublished();
+
 protected:
    /// The spacecraft state
-   PropState         state;
+   GmatState         state;
    /// true when a finite burn needs to be applied to this SpaceObject
    bool              isManeuvering;
    /// Reference SpacePoint for the data
@@ -80,6 +109,10 @@ protected:
    bool              parmsChanged;
    /// The names of the last set of stopping conditions met
    StringArray       lastStopTriggered;
+   /// Flag indicating if object has published data - not currently used
+   bool              hasPublished;
+   /// Flag indicating if the object has been propagated via an ephem
+   bool					hasEphemPropagated;
 
    /// Enumerated parameter IDs   
    enum

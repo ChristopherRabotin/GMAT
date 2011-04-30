@@ -1,10 +1,12 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                                  ObjectPropertyWrapper
+//                          ObjectPropertyWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -44,6 +46,7 @@ public:
    virtual const StringArray&  GetRefObjectNames();
    virtual bool                SetRefObjectName(const std::string &name,
                                             Integer index);
+   virtual GmatBase*           GetRefObject(const std::string &name = "");
    virtual bool                SetRefObject(GmatBase *obj);
    virtual bool                RenameObject(const std::string &oldName, 
                                         const std::string &newName);
@@ -60,6 +63,10 @@ public:
    virtual bool                SetInteger(const Integer toValue); 
    virtual bool                SetObject(GmatBase* obj);
    
+   const Integer               GetPropertyId();
+
+   virtual bool                TakeRequiredAction() const;
+
 protected:  
 
    /// pointer to the base object

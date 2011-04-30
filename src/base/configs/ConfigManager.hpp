@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                ConfigManager
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
 // Created: 2003/10/27
@@ -21,7 +25,7 @@
 #include <vector>
 #include <map>
 
-#include "ForceModel.hpp"
+#include "ODEModel.hpp"
 #include "Subscriber.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
@@ -40,6 +44,13 @@
 #include "CoordinateSystem.hpp"
 #include "CalculatedPoint.hpp"
 
+class MeasurementModel;
+class CoreMeasurement;
+class DataFile;
+class ObType;
+class TrackingSystem;
+class TrackingData;
+
 
 /**
  * Class used to manage configured objects prior to cloning into the Sandbox.
@@ -49,16 +60,18 @@ class GMAT_API ConfigManager
 public:
    static ConfigManager*   Instance();
    
-   std::string         AddClone(const std::string &name);
    std::string         GetNewName(const std::string &name, Integer startCount);
    
+   void                AddObject(Gmat::ObjectType objType, GmatBase *obj);
+   std::string         AddClone(const std::string &name);
    void                AddPhysicalModel(PhysicalModel *pm);
    void                AddPropagator(Propagator *prop);
-   void                AddForceModel(ForceModel *fm);
+   void                AddODEModel(ODEModel *fm);
    void                AddSubscriber(Subscriber *subs);
    void                AddSolarSystem(SolarSystem *solarSys);
    void                AddPropSetup(PropSetup *propSetup);
    void                AddSpacecraft(SpaceObject *sc);
+   void                AddSpacePoint(SpacePoint *sp);
    void                AddHardware(Hardware *hw);
    void                AddStopCondition(StopCondition* stopCond);
    void                AddParameter(Parameter* parameter);
@@ -72,13 +85,23 @@ public:
    void                SetDefaultSolarSystem(SolarSystem *ss);
    void                SetSolarSystemInUse(SolarSystem *ss);
    bool                SetSolarSystemInUse(const std::string &name);
-   
+
+   void                AddMeasurementModel(MeasurementModel *mModel);
+   void                AddMeasurement(CoreMeasurement *meas);
+   void                AddDataFile(DataFile *meas);
+   void                AddObType(ObType *meas);
+   void                AddTrackingSystem(TrackingSystem *ts);
+   void                AddTrackingData(TrackingData *td);
+
    const StringArray&  GetListOfAllItems();
    const StringArray&  GetListOfItems(Gmat::ObjectType itemType);
+   const StringArray&  GetListOfItems(const std::string &typeName);
    const StringArray&  GetListOfItemsHas(Gmat::ObjectType type,
                                          const std::string &name,
                                          bool includeSysParam = true);
-   
+   GmatBase*           GetFirstItemUsing(Gmat::ObjectType type,
+                                         const std::string &name,
+                                         bool includeSysParam = true);
    GmatBase*           GetItem(const std::string &name);
    
    bool                RenameItem(Gmat::ObjectType itemType,
@@ -92,8 +115,9 @@ public:
    
    PhysicalModel*      GetPhysicalModel(const std::string &name);
    Propagator*         GetPropagator(const std::string &name);
-   ForceModel*         GetForceModel(const std::string &name);
+   ODEModel*           GetODEModel(const std::string &name);
    SpaceObject*        GetSpacecraft(const std::string &name);
+   SpacePoint*         GetSpacePoint(const std::string &name);
    Hardware*           GetHardware(const std::string &name);
    PropSetup*          GetPropSetup(const std::string &name);
    Subscriber*         GetSubscriber(const std::string &name);
@@ -108,7 +132,12 @@ public:
    Function*           GetFunction(const std::string &name);
    CoordinateSystem*   GetCoordinateSystem(const std::string &name);
    CalculatedPoint*    GetCalculatedPoint(const std::string &name);
-   
+   MeasurementModel*   GetMeasurementModel(const std::string &name);
+   TrackingSystem*     GetTrackingSystem(const std::string &name);
+   TrackingData*       GetTrackingData(const std::string &name);
+
+   DataFile *          GetDataStream(const std::string &name);
+
    bool                HasConfigurationChanged();
    void                ConfigurationChanged(bool tf);
    ObjectMap*          GetObjectMap();
@@ -119,6 +148,7 @@ private:
    static ConfigManager*               theConfigManager;
    /// The managed objects
    std::vector<GmatBase*>              objects;
+   std::vector<GmatBase*>              newObjects;
    /// A list of the names of the managed objects
    StringArray                         listOfItems;
    /// Mapping between the object names and their pointers

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Array
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -37,6 +39,7 @@ public:
    bool operator==(const Array &right) const;
    bool operator!=(const Array &right) const;
    
+   bool IsSized() { return mSizeSet; }
    bool SetSize(const Integer row, const Integer col);
    void GetSize(Integer &row, Integer &col) { row = mNumRows; col = mNumCols; }
    Integer GetRowCount() { return mNumRows; }
@@ -45,10 +48,10 @@ public:
    // methods inherited from Parameter
    virtual void SetRmatrix(const Rmatrix &mat);
    virtual const Rmatrix& GetRmatrix() const { return mRmatValue; }
-   virtual Rmatrix EvaluateRmatrix() { return mRmatValue; } /// assumes it has only numbers
+   virtual const Rmatrix& EvaluateRmatrix() { return mRmatValue; } /// assumes it has only numbers
    virtual std::string ToString();
    virtual const std::string* GetParameterList() const;
-
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
    virtual void Copy(const GmatBase*);
@@ -100,19 +103,26 @@ public:
    
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool SetStringParameter(const Integer id, const std::string &value);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value);
    
-   virtual const std::string& GetGeneratingString(Gmat::WriteMode mode,
-                                                  const std::string &prefix,
-                                                  const std::string &useName);
+   virtual const std::string&
+                        GetGeneratingString(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
 protected:
 
    Integer mNumRows;
    Integer mNumCols;
+   Integer mInitialValueType; // 1 = number, 2 = Variable or other Array
    bool mSizeSet;
    Rmatrix mRmatValue;
-
+   std::map<std::string, std::string> initialValueMap;
+   
    std::string GetArrayDefString() const;
-   std::string GetInitialValueString() const;
+   std::string GetInitialValueString(const std::string &prefix = "");
    
    enum
    {
@@ -123,6 +133,7 @@ protected:
       ROW_VALUE,
       COL_VALUE,
       INITIAL_VALUE,
+      INITIAL_VALUE_TYPE,
       ArrayParamCount
    };
    

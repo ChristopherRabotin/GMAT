@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  BplaneData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,6 +23,7 @@
 #include "ParameterException.hpp"
 #include "Rvector3.hpp"
 #include "RealUtilities.hpp"   // for Sqrt()
+#include "GmatConstants.hpp"
 #include "UtilityException.hpp"
 #include "CelestialBody.hpp"
 #include "Linear.hpp"           // for GmatRealUtil::ToString()
@@ -152,7 +155,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    if (item <= BplaneParamBegin || item >= BplaneParamEnd)
       throw ParameterException
          ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
-          GmatRealUtil::ToString(item, 2));
+          GmatRealUtil::ToString(item, false, 2));
    
    if (mSpacecraft == NULL || mSolarSystem == NULL || mOrigin == NULL ||
        mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
@@ -192,7 +195,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    // if eMag <= 1, then the method fails, orbit should be hyperbolic
    if (eMag <= 1.0)
       throw ParameterException
-         ("BplaneData::GetBplaneReal() ParamID: " + GmatRealUtil::ToString(item, 2) +
+         ("BplaneData::GetBplaneReal() ParamID: " + GmatRealUtil::ToString(item, false, 2) +
           "\n     eccentricity magnitude is <= 1.0. eMag: " +
           GmatRealUtil::ToString(eMag));
    
@@ -257,11 +260,11 @@ Real BplaneData::GetBplaneReal(Integer item)
    case B_VECTOR_MAG:
       return Sqrt(bDotT*bDotT + bDotR*bDotR);
    case B_VECTOR_ANGLE:
-      return ATan(bDotR, bDotT) * GmatMathUtil::DEG_PER_RAD;
+      return ATan(bDotR, bDotT) * GmatMathConstants::DEG_PER_RAD;
    default:
       throw ParameterException
          ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
-          GmatRealUtil::ToString(item, 2));
+          GmatRealUtil::ToString(item, false, 2));
    }
 }
 

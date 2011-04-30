@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              RealUtilities
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -13,7 +15,6 @@
 // Created: 2005/11/09
 //
 //------------------------------------------------------------------------------
-#include "RealTypes.hpp"
 #include "RealUtilities.hpp"
 #include "AttitudeUtil.hpp"
 #include <cmath>
@@ -266,7 +267,7 @@ void FloatAttUtil::ToQuat(float q[4], float p1x, float p1y, float p2x, float p2y
 void FloatAttUtil::ToQuat(float q[4], float mat[16])
 { 
    float a[4][4];
-   const static float ACCURACY = 1.19209290E-07;
+   const static float ACCURACY = (float)(1.19209290E-07);
 
    for (int i=0; i<4; i++)
       for (int j=0; j<4; j++)
@@ -274,31 +275,31 @@ void FloatAttUtil::ToQuat(float q[4], float mat[16])
    
    if ((1.0 + a[0][0] + a[1][1] + a[2][2] ) >= ACCURACY)
    {
-      q[3] = Sqrt (1.0 + a[0][0] + a[1][1] + a[2][2] ) / 2.0;
-      q[0] = ( a[1][2] - a[2][1] ) / (4.0 * q[3] );
-      q[1] = ( a[2][0] - a[0][2] ) / (4.0 * q[3] );
-      q[2] = ( a[0][1] - a[1][0] ) / (4.0 * q[3] );
+      q[3] = (float)(Sqrt (1.0 + a[0][0] + a[1][1] + a[2][2] ) / 2.0);
+      q[0] = (float)(( a[1][2] - a[2][1] ) / (4.0 * q[3] ));
+      q[1] = (float)(( a[2][0] - a[0][2] ) / (4.0 * q[3] ));
+      q[2] = (float)(( a[0][1] - a[1][0] ) / (4.0 * q[3] ));
    }
    else if ((1.0 + a[0][0] - a[1][1] - a[2][2] ) >= ACCURACY)
    {
-      q[0] = Sqrt (1.0 + a[0][0] - a[1][1] - a[2][2] ) / 2.0;
-      q[1] = ( a[0][1] + a[1][0] ) / (4.0 * q[0] );
-      q[2] = ( a[2][0] + a[0][2] ) / (4.0 * q[0] );
-      q[3] = ( a[1][2] - a[2][1] ) / (4.0 * q[0] );
+      q[0] = (float)(Sqrt (1.0 + a[0][0] - a[1][1] - a[2][2] ) / 2.0);
+      q[1] = (float)(( a[0][1] + a[1][0] ) / (4.0 * q[0] ));
+      q[2] = (float)(( a[2][0] + a[0][2] ) / (4.0 * q[0] ));
+      q[3] = (float)(( a[1][2] - a[2][1] ) / (4.0 * q[0] ));
    }
    else if ((1.0 - a[0][0] + a[1][1] - a[2][2] ) >= ACCURACY)
    {
-      q[1] = Sqrt (1.0 - a[0][0] + a[1][1] - a[2][2] ) / 2.0;
-      q[0] = ( a[0][1] + a[1][0] ) / (4.0 * q[1] );
-      q[2] = ( a[1][2] + a[2][1] ) / (4.0 * q[1] );
-      q[3] = ( a[2][0] - a[0][2] ) / (4.0 * q[1] );
+      q[1] = (float)(Sqrt (1.0 - a[0][0] + a[1][1] - a[2][2] ) / 2.0);
+      q[0] = (float)(( a[0][1] + a[1][0] ) / (4.0 * q[1] ));
+      q[2] = (float)(( a[1][2] + a[2][1] ) / (4.0 * q[1] ));
+      q[3] = (float)(( a[2][0] - a[0][2] ) / (4.0 * q[1] ));
    }
    else
    {
-      q[2] = Sqrt (1.0 - a[0][0] - a[1][1] + a[2][2] ) / 2.0;
-      q[0] = ( a[2][0] + a[0][2] ) / (4.0 * q[2] );
-      q[1] = ( a[1][2] + a[2][1] ) / (4.0 * q[2] );
-      q[3] = ( a[0][1] - a[1][0] ) / (4.0 * q[2] );
+      q[2] = (float)(Sqrt (1.0 - a[0][0] - a[1][1] + a[2][2] ) / 2.0);
+      q[0] = (float)(( a[2][0] + a[0][2] ) / (4.0 * q[2] ));
+      q[1] = (float)(( a[1][2] + a[2][1] ) / (4.0 * q[2] ));
+      q[3] = (float)(( a[0][1] - a[1][0] ) / (4.0 * q[2] ));
    }
 
    NormalizeQuat(q);
@@ -345,7 +346,7 @@ void FloatAttUtil::IdentityMat(float m[16])
    m[12] = 0.0;
    m[13] = 0.0;
    m[14] = 0.0;
-   m[16] = 1.0;
+   m[15] = 1.0;
    
 }
 

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Planet
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -68,16 +70,16 @@ public:
    // For the Earth, these methods need to update the Sun's information, as the 
    // Sun has no cental body and its initial epoch and keplerian elements need 
    // to be set and stored differently
-   virtual bool          SetAnalyticEpoch(const A1Mjd &toTime);
-   virtual bool          SetAnalyticElements(const Rvector6 &kepl);
+   virtual bool          SetTwoBodyEpoch(const A1Mjd &toTime);
+   virtual bool          SetTwoBodyElements(const Rvector6 &kepl);
    
    virtual Real          GetNutationUpdateInterval() const;
    virtual bool          SetNutationUpdateInterval(Real val);
-//   virtual Real          GetUpdateInterval() const;
-//   virtual bool          SetUpdateInterval(Real val);
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   // required method for all subclasses that can be copied in a script
+   virtual void      Copy(const GmatBase* orig);
 
    // Parameter access methods - overridden from GmatBase - may need these later??
    virtual std::string     GetParameterText(const Integer id) const;     
@@ -93,26 +95,15 @@ public:
    virtual Real            SetRealParameter(const std::string &label,
                                             const Real value);
                                             
+   virtual bool         IsParameterCloaked(const Integer id) const;
+   virtual bool         IsParameterEqualToDefault(const Integer id) const;
+   virtual bool         SaveAllAsDefault();
+   virtual bool         SaveParameterAsDefault(const Integer id);
+
 protected:
 
    enum
    {
-      MERCURY = 0,
-      VENUS,
-      EARTH,
-      MARS,
-      JUPITER,
-      SATURN,
-      URANUS,
-      NEPTUNE,
-      PLUTO,
-      NumberOfPlanets
-      /// @todo  add Sedna later??
-   };
-
-   enum
-   {
-//      UPDATE_INTERVAL = CelestialBodyParamCount,
       NUTATION_UPDATE_INTERVAL = CelestialBodyParamCount,
       PlanetParamCount
    };
@@ -121,29 +112,11 @@ protected:
    
    static const Gmat::ParameterType PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount];
    
-   // default values for CelestialBody data
-   static const Gmat::BodyType        DEFAULT_BODY_TYPE;
-   static const Gmat::PosVelSource    DEFAULT_POS_VEL_SOURCE;
-   static const Gmat::AnalyticMethod  DEFAULT_ANALYTIC_METHOD;
-   static const Integer               DEFAULT_BODY_NUMBER;
-   static const Integer               DEFAULT_REF_BODY_NUMBER;
-
-   static const Real                  EQUATORIAL_RADIUS[NumberOfPlanets];
-   static const Real                  FLATTENING[NumberOfPlanets];
-   static const Real                  MU[NumberOfPlanets];
-   static const Integer               ORDER[NumberOfPlanets];
-   static const Integer               DEGREE[NumberOfPlanets];
-   static const Rmatrix               SIJ[NumberOfPlanets];
-   static const Rmatrix               CIJ[NumberOfPlanets];
-   
-   static const Real                  ANALYTIC_EPOCH[NumberOfPlanets];
-   static const Rvector6              ANALYTIC_ELEMENTS[NumberOfPlanets];
-                                            
-//   Real                               updateInterval;
-   Real                               nutationUpdateInterval;
+   Real     nutationUpdateInterval;
    /// @todo add other ones as needed
+   /// default values for the parameter(s)
+   Real     default_nutationUpdateInterval;
 
-   void             InitializePlanet(const std::string &cBody);
                                           
 
 private:

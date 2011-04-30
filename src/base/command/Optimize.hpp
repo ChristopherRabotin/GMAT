@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                Optimize 
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -72,6 +74,9 @@ public:
 
 protected:
 
+   bool RunInternalSolver(Solver::SolverState state);
+   bool RunExternalSolver(Solver::SolverState state);
+   
    enum
    {
       OPTIMIZER_NAME = SolverBranchCommandParamCount,
@@ -88,14 +93,15 @@ protected:
    
    /// Flag indicating is the optimizer has converged
    bool                optimizerConverged;
+   /// Flag indicating optimizer in function initialized
+   bool                optimizerInFunctionInitialized;
    
    StringArray         callbackResults;
    std::string         callbackData;
     
-   // Parameter IDs 
-   //Integer             optimizerNameID;
-   //Integer             OptimizerConvergedID;
    bool                optimizerInDebugMode;
+
+   Integer             minimizeCount;
 };
 
 #endif /*Optimize_hpp*/

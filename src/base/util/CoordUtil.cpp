@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             CoordUtil
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,13 +22,17 @@
 #include "gmatdefs.hpp"
 #include "CoordUtil.hpp"
 #include "RealUtilities.hpp"     // for Sqrt(), IsZero()
+#include "GmatConstants.hpp"
 #include "UtilityException.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>               // for stringstream
 #include <math.h>
 
 using namespace GmatMathUtil;
+using namespace GmatMathConstants;
 
+//#define DEBUG_CART_TO_KEPL
+//#define DEBUG_KEPL_TO_CART
 
 const Real CoordUtil::ORBIT_TOL = 1.0E-10;
 const Real CoordUtil::ORBIT_TOL_SQ = 1.0E-20;
@@ -241,7 +247,7 @@ Integer CoordUtil::ComputeMeanToTrueAnomaly(Real ma, Real ecc, Real tol,
 //                                  Real elem[6], Real *ma)
 //------------------------------------------------------------------------------
 /*
- * @param <grav> input graviational constant
+ * @param <grav> input gravitational constant
  * @param <r>    input position vector in cartesian coordinate
  * @param <v>    input velocity vector in cartesian coordinate
  * @param <tfp>  output time from periapsis
@@ -258,6 +264,12 @@ Integer CoordUtil::ComputeMeanToTrueAnomaly(Real ma, Real ecc, Real tol,
 Integer CoordUtil::ComputeCartToKepl(Real grav, Real r[3], Real v[3], Real *tfp,
                                      Real elem[6], Real *ma)
 {
+   #ifdef DEBUG_CART_TO_KEPL
+      MessageInterface::ShowMessage("CoordUtil::ComputeCartToKepl called ... \n");
+      MessageInterface::ShowMessage("   grav = %12.10f\n", grav);
+      MessageInterface::ShowMessage("   KEP_ECC_TOL = %12.10f\n", GmatOrbitConstants::KEP_ECC_TOL);
+   #endif
+
    if (Abs(grav) < 1E-30)
       return(2);
    
@@ -269,10 +281,22 @@ Integer CoordUtil::ComputeCartToKepl(Real grav, Real r[3], Real v[3], Real *tfp,
    
    // eqn 4.2
    Real h = angMomentum.GetMagnitude();
+   #ifdef DEBUG_CART_TO_KEPL
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, pos = %12.10f  %12.10f  %12.10f \n", pos[0], pos[1], pos[2]);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, vel = %12.10f  %12.10f  %12.10f \n", vel[0], vel[1], vel[2]);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, angMomentum = %12.10f  %12.10f  %12.10f\n",
+            angMomentum[0], angMomentum[1], angMomentum[2]);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, h = %12.10f\n", h);
+   #endif
    
-   if (h < 1E-30) {
-      return 1;
-   }
+//   if (h < 1E-30)
+//   {
+//      return 1;
+//   }
    
    // eqn 4.3
    Rvector3 nodeVec = Cross(Rvector3(0,0,1), angMomentum);
@@ -290,20 +314,60 @@ Integer CoordUtil::ComputeCartToKepl(Real grav, Real r[3], Real v[3], Real *tfp,
    
    // eqn 4.9
    Real zeta = 0.5*velMag*velMag - grav/posMag;
+   #ifdef DEBUG_CART_TO_KEPL
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, nodeVec = %12.10f  %12.10f  %12.10f \n",
+            nodeVec[0], nodeVec[1], nodeVec[2]);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, n = %12.10f\n", n);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, posMag = %12.10f\n", posMag);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, velMag = %12.10f\n", velMag);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, eccVec = %12.10f  %12.10f  %12.10f \n", eccVec[0], eccVec[1], eccVec[2]);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, e = %12.10f\n", e);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, zeta = %12.10f\n", zeta);
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, Abs(1.0 - e) = %12.10f\n", Abs(1.0 - e));
+   #endif
    
-   if (Abs(1 - e) < 1E-30)
+   if ((Abs(1.0 - e)) <= GmatOrbitConstants::KEP_ECC_TOL)
    {
-      throw UtilityException
-         ("CoordUtil::CartesianToKeplerian() "
-          "Radius is near infinite in keplarian to cartesian conversion\n");
-   }
+      std::string errmsg = "Error in conversion to Keplerian state: ";
+      errmsg += "The state results in an orbit that is nearly parabolic.\n";
+      throw UtilityException(errmsg);
+   } 
    
    // eqn 4.10
    Real sma = -grav/(2*zeta);
-   
+   #ifdef DEBUG_CART_TO_KEPL
+      MessageInterface::ShowMessage(
+            "   in ComputeCartToKepl, sma = %12.10f\n", sma);
+   #endif
+
+
+   if (Abs(sma*(1 - e)) < .001)
+   {
+      throw UtilityException
+      ("Error in conversion from Cartesian to Keplerian state: "
+       "The state results in a singular conic section with radius of periapsis less than 1 m.\n");
+//         ("CoordUtil::CartesianToKeplerian() "
+//          "Warning: A nearly singular conic section was encountered while "
+//          "converting from the Cartesian state to the Keplerian elements.  The radius of "
+//          "periapsis must be greater than 1 meter.\n");
+
+   }
    // eqn 4.11
    Real i = ACos( angMomentum.Get(2)/h );
-   
+   if (i >= PI - GmatOrbitConstants::KEP_TOL)
+   {
+      throw UtilityException
+         ("Error in conversion to Keplerian state: "
+          "GMAT does not currently support orbits with inclination of 180 degrees.\n");
+   } 
    Real raan, argPeriapsis, trueAnom;
    raan=argPeriapsis=trueAnom=0;
    if ( e >= 1E-11 && i >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
@@ -376,6 +440,13 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
        raan = elem[3]*RAD_PER_DEG,
         per = elem[4]*RAD_PER_DEG,
        anom = elem[5]*RAD_PER_DEG;
+
+   if ((Abs(1.0 - ecc)) <= GmatOrbitConstants::KEP_ECC_TOL)
+   {
+      throw UtilityException
+         ("Error in conversion from Keplerian state: "
+          "The state results in an orbit that is nearly parabolic.\n");
+   } 
    
    // **************
    // taken from old code above; necessary to avoid crash, but not in spec
@@ -397,7 +468,11 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
    
    // radius near infinite
    //if (1-ecc*Cos(anom) < 1E-30) {
-   if (1+ecc*Cos(anom) < 1E-30) 
+   #ifdef DEBUG_KEPL_TO_CART
+      MessageInterface::ShowMessage("ecc = %12.10f, anom = %12.10f, Cos(anom) = %12.10f, 1+ecc*Cos(anom) = %12.10f\n",
+            ecc, anom, Cos(anom), (1+ecc*Cos(anom)));
+   #endif
+   if (Abs(1+ecc*Cos(anom)) < 1E-30)
    {
       MessageInterface::PopupMessage(Gmat::WARNING_,
              "Warning::Radius is near infinite in keplerian to cartesian conversion.\n");
@@ -467,6 +542,10 @@ Rvector6 CoordUtil::CartesianToKeplerian(const Rvector6 &cartVec, const Real gra
 //------------------------------------------------------------------------------
 Rvector6 CoordUtil::CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
 {
+   #ifdef DEBUG_CART_TO_KEPL
+      MessageInterface::ShowMessage("CoordUtil::CartesianToKeplerian called ... \n");
+   #endif
+
    Real kepl[6];
    Real r[3];
    Real v[3];

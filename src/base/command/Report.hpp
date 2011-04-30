@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                            Report
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Purchase
 // order MOMS418823
@@ -71,6 +73,7 @@ public:
                         GetWrapperObjectNameArray();
    virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
                                           const std::string &withName);
+   virtual void         ClearWrappers();
    
    // Object accessor methods
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
@@ -89,6 +92,7 @@ public:
    
    bool                 Initialize();
    virtual bool         Execute();
+   virtual void         RunComplete();
    
    // Generating string method
    virtual const std::string&
@@ -123,6 +127,7 @@ protected:
    void WriteHeaders(std::stringstream &datastream, Integer colWidth);
    bool AddParameter(const std::string &paramName, Integer index,
                      Parameter *param = NULL);
+   void DeleteParameters();
    
    enum
    {

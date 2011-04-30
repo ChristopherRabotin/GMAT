@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
-//                                  ClassName
+//                                  SandboxException
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
 // Created: 2003/mm/dd
@@ -24,9 +28,15 @@
 
 #include "SandboxException.hpp" // class's header file
 
-// class constructor
-SandboxException::SandboxException(std::string details) :
-    BaseException   ("Sandbox Exception: ", details)
+//------------------------------------------------------------------------------
+// SandboxException(std::string details, Gmat::MessageType mt = Gmat::ERROR_);
+//------------------------------------------------------------------------------
+/**
+ * class constructor
+ */
+//------------------------------------------------------------------------------
+SandboxException::SandboxException(std::string details, Gmat::MessageType mt) :
+   BaseException("Sandbox Exception: ", details, mt)
 {
 }
 

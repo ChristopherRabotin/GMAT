@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Target
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -19,10 +21,20 @@
 
  
 #include "Target.hpp"
+#include "MessageInterface.hpp"
 
+//#define DEBUG_TARGETER_PARSING
+//#define DEBUG_TARGETER
+//#define DEBUG_START_MODE
+//#define DEBUG_TARGET_COMMANDS
 
-// #define DEBUG_TARGETER_PARSING
-// #define DEBUG_TARGETER
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -36,6 +48,8 @@ Target::Target() :
    SolverBranchCommand("Target"),
 //   targeterName       (""),
    targeterConverged  (false),
+   targeterInFunctionInitialized (false),
+   targeterRunOnce(false),
    TargeterConvergedID(parameterCount),
    targeterInDebugMode(false)
 {
@@ -68,6 +82,8 @@ Target::~Target()
 Target::Target(const Target& t) :
    SolverBranchCommand (t),
    targeterConverged   (false),
+   targeterInFunctionInitialized (false),
+   targeterRunOnce (false),
    TargeterConvergedID (t.TargeterConvergedID),
    targeterInDebugMode (t.targeterInDebugMode)
 {
@@ -95,6 +111,8 @@ Target& Target::operator=(const Target& t)
    GmatCommand::operator=(t);
 
    targeterConverged   = false;
+   targeterInFunctionInitialized = false;
+   targeterRunOnce = false;
    TargeterConvergedID = t.TargeterConvergedID;
    targeterInDebugMode = t.targeterInDebugMode;
    localStore.clear();
@@ -457,16 +475,50 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type,
 bool Target::Initialize()
 {
    GmatBase *mapObj = NULL;
+   cloneCount = 0;
+
    if ((mapObj = FindObject(solverName)) == NULL) 
    {
       std::string errorString = "Target command cannot find targeter \"";
       errorString += solverName;
       errorString += "\"";
-      throw CommandException(errorString);
+      throw CommandException(errorString, Gmat::ERROR_);
    }
-
+   
    // Clone the targeter for local use
+   #ifdef DEBUG_TARGET_INIT
+   MessageInterface::ShowMessage
+      ("Target::Initialize() cloning mapObj <%p>'%s'\n", mapObj,
+       mapObj->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("mapObj maxIter=%d\n",
+       mapObj->GetIntegerParameter(mapObj->GetParameterID("MaximumIterations")));
+   #endif
+   
+   // Delete the old cloned solver
+   if (theSolver)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (theSolver, "local solver", "Target::Initialize()",
+          "deleting local cloned solver");
+      #endif
+      delete theSolver;
+   }
+   
    theSolver = (Solver *)(mapObj->Clone());
+   if (theSolver != NULL)
+      ++cloneCount;
+
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Add
+      (theSolver, theSolver->GetName(), "Target::Initialize()",
+       "theSolver = (Solver *)(mapObj->Clone())");
+   #endif
+   
+   theSolver->TakeAction("ResetInstanceCount");
+   mapObj->TakeAction("ResetInstanceCount");
+   
    theSolver->TakeAction("IncrementInstanceCount");
    mapObj->TakeAction("IncrementInstanceCount");
    
@@ -476,7 +528,7 @@ bool Target::Initialize()
          GetStringParameter(SOLVER_SOLVE_MODE));
    theSolver->SetStringParameter("ExitMode", 
          GetStringParameter(SOLVER_EXIT_MODE));
-    
+   
    // Set the local copy of the targeter on each node
    std::vector<GmatCommand*>::iterator node;
    GmatCommand *current;
@@ -517,7 +569,8 @@ bool Target::Initialize()
 
       retval = theSolver->Initialize();
    }
-        
+   
+   targeterInFunctionInitialized = false;
    return retval;
 }
 
@@ -538,8 +591,29 @@ bool Target::Initialize()
 //------------------------------------------------------------------------------
 bool Target::Execute()
 {
+   #ifdef DEBUG_TARGET_EXEC
+   MessageInterface::ShowMessage
+      ("Target::Execute() entered, theSolver=<%p>'%s'\n", (GmatBase*)theSolver,
+       theSolver->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("maxIter=%d\n",
+       theSolver->GetIntegerParameter(theSolver->GetParameterID("MaximumIterations")));
+   MessageInterface::ShowMessage
+      ("currentFunction=<%p>'%s'\n",
+       currentFunction, currentFunction ? ((GmatBase*)currentFunction)->GetName().c_str() : "NULL");
+   #endif
+   
+   // If targeting inside a function, we need to reinitialize since the local solver is
+   // cloned in Initialize(). All objects including solvers are initialized in
+   // assignment command which happens after Target::Initialize(). (LOJ: 2009.03.17)
+   if (currentFunction != NULL && !targeterInFunctionInitialized)
+   {
+      Initialize();
+      targeterInFunctionInitialized = true;
+   }
+   
    bool retval = true;
-
+   
    // Drive through the state machine.
    Solver::SolverState state = theSolver->GetState();
    
@@ -586,11 +660,19 @@ bool Target::Execute()
    if (branchExecuting)
    {
       retval = ExecuteBranch();
-      if (!branchExecuting && 
-          ((state == Solver::FINISHED) || (specialState == Solver::FINISHED)))
+      if (!branchExecuting)
       {
-         commandComplete = true;
-      }  
+         if ((state == Solver::FINISHED) || (specialState == Solver::FINISHED))
+         {
+            PenDownSubscribers();
+            LightenSubscribers(1);
+            commandComplete = true;
+         }
+         else
+         {
+            PenUpSubscribers();
+         }
+      }
    }
    else
    {
@@ -686,10 +768,16 @@ bool Target::Execute()
                      std::string type = currentCmd->GetTypeName();
                      if ((type == "Target") || (type == "Vary") ||
                          (type == "Achieve"))
+                     {
                         currentCmd->Execute();
+                        if ((type == "Vary") && (targeterRunOnce))
+                           currentCmd->TakeAction("SolverReset");
+                     }
                      currentCmd = currentCmd->GetNext();
                   }
                   StoreLoopData();
+                  GetActiveSubscribers();
+                  SetSubscriberBreakpoint();
                   break;
                      
                case Solver::NOMINAL:
@@ -697,6 +785,9 @@ bool Target::Execute()
                   if (!commandComplete) 
                   {
                      branchExecuting = true;
+                     ApplySubscriberBreakpoint();
+                     PenDownSubscribers();
+                     LightenSubscribers(1);
                      ResetLoopData();
                   }
                   break;
@@ -708,6 +799,9 @@ bool Target::Execute()
          
                case Solver::PERTURBING:
                   branchExecuting = true;
+                  ApplySubscriberBreakpoint();
+                  PenDownSubscribers();
+                  LightenSubscribers(4);
                   ResetLoopData();
                   break;
                      
@@ -719,12 +813,16 @@ bool Target::Execute()
                case Solver::FINISHED:
                   // Final clean-up
                   targeterConverged = true;
+                  targeterRunOnce = true;
                   
                   // Run once more to publish the data from the converged state
                   if (!commandComplete)
                   {
                      ResetLoopData();
                      branchExecuting = true;
+                     ApplySubscriberBreakpoint();
+                     PenDownSubscribers();
+                     LightenSubscribers(1);
                      publisher->SetRunState(Gmat::SOLVEDPASS);
                   }
                   break;
@@ -742,11 +840,13 @@ bool Target::Execute()
    {
       theSolver->AdvanceState();
 
-      if (theSolver->GetState() == Solver::FINISHED) {
+      if (theSolver->GetState() == Solver::FINISHED)
+      {
+         publisher->FlushBuffers();
          targeterConverged = true;
       }
    }
-
+   
    // Pass spacecraft data to the targeter for reporting in debug mode
    if (targeterInDebugMode)
    {
@@ -759,6 +859,13 @@ bool Target::Execute()
       theSolver->SetDebugString(dbgData);
    }
    BuildCommandSummary(true);
+   
+   #ifdef DEBUG_TARGET_EXEC
+   MessageInterface::ShowMessage
+      ("Target::Execute() returning %d, theSolver=<%p>'%s'\n", retval,
+       theSolver, theSolver->GetName().c_str());
+   #endif
+   
    return retval;
 }
 
@@ -774,8 +881,9 @@ void Target::RunComplete()
 {
    if (theSolver != NULL)
       theSolver->Finalize();
-
-   //Call RunComplete of parent (loj: 2/23/06)
-   //GmatCommand::RunComplete();
+   
+   // Free local data (LOJ: 2009.03.17)
+   FreeLoopData();
+   
    BranchCommand::RunComplete();
 }

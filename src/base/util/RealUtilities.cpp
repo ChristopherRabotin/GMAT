@@ -1,15 +1,16 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              RealUtilities
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author: M. Weippert, Chu-chi Li, E. Corderman, W. Shoan
 // Created: 1995/07/21 for GSS project
 // Modified:
 //   2003/09/15 Linda Jun - Used namespace GmatRealUtil
@@ -20,8 +21,8 @@
  */
 //------------------------------------------------------------------------------
 #include <math.h>             // for fabs()
-#include "RealTypes.hpp"
 #include "RealUtilities.hpp"
+#include "GmatConstants.hpp"
 #include "Linear.hpp"         // for GmatRealUtil::
 
 //#define DEBUG_MATH_UTIL
@@ -31,6 +32,7 @@
 #endif
 
 using namespace GmatMathUtil;
+using namespace GmatMathConstants;
 
 //------------------------------------------------------------------------------
 //  Integer Abs(Integer theNumber)
@@ -82,6 +84,15 @@ Real GmatMathUtil::Round(Real theNumber)
 Real GmatMathUtil::Floor(Real theNumber)
 {
    return floor(theNumber);
+}
+
+//------------------------------------------------------------------------------
+//  Real Fix(Real theNumber)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Fix(Real theNumber)
+{
+   Real towardZero = SignOf(theNumber) * Floor(Abs(theNumber));
+   return towardZero;
 }
 
 //------------------------------------------------------------------------------
@@ -212,6 +223,27 @@ Integer GmatMathUtil::SignOf (Real theNumber)
 }
 
 //------------------------------------------------------------------------------
+//  bool IsOdd(Integer theNumber)
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsOdd(Integer theNumber)   // MSVC doesn't like %?
+{
+   Integer byTwo = theNumber / 2;
+   if ((theNumber - (byTwo * 2)) == 0)  return false;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+//  bool IsEven(Integer theNumber)
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsEven(Integer theNumber)
+{
+   Integer byTwo = theNumber / 2;
+   if ((theNumber - (byTwo * 2)) == 0)  return true;
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 //  Real Rad (Real angleInDeg, bool modBy2Pi)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Rad (Real angleInDeg, bool modBy2Pi)
@@ -287,7 +319,7 @@ Real GmatMathUtil::Sin (Real angleInRad, Real cycleInRad)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::SinXOverX (Real angleInRad, Real cycleInRad)
 {
-   if ( Abs(angleInRad) > Pow(10.0,(-(GmatRealConst::REAL_DIG/2)))) 
+   if ( Abs(angleInRad) > Pow(10.0,(-(GmatRealConstants::REAL_DIG/2)))) 
    {
       Real sinValue = GmatMathUtil::Sin(angleInRad, cycleInRad);
       return sinValue/angleInRad;
@@ -358,28 +390,44 @@ Real GmatMathUtil::Tanh (Real angleInRad, Real cycleInRad)
 }
 
 //------------------------------------------------------------------------------
-//  Real ASin (Real x, Real cycleInRad)
+//  Real ASin (Real x, Real tol=GmatRealConstants::REAL_TOL, Real cycleInRad)
 //------------------------------------------------------------------------------
-Real GmatMathUtil::ASin (Real x, Real cycleInRad)
+Real GmatMathUtil::ASin (Real x, Real tol, Real cycleInRad)
 {
    if (cycleInRad <= 0.0) 
       throw RealUtilitiesExceptions::ArgumentError("ASin(angle, cycle <= 0.0)\n");
-   else if ((fabs(x) - 1.0) > GmatRealConst::REAL_TOL) 
-      throw RealUtilitiesExceptions::ArgumentError("ASin(value > 1.0, cycle)\n");
+//   else if ((fabs(x) - 1.0) > GmatRealConstants::REAL_TOL)
+//      throw RealUtilitiesExceptions::ArgumentError("ASin(value > 1.0, cycle)\n");
+   if ((fabs(x) - 1.0) > 0.0)
+   {
+      #ifdef DEBUG_MATH_UTIL
+      MessageInterface::ShowMessage
+         ("ACos() checking additional tolerance for x=%.16f\n", x);
+      #endif
+
+      if ((x > 1.0 - tol) && (x <= 1.0 + tol))
+         return PI_OVER_TWO;
+      else if ((x > -1.0 - tol) && (x <= -1.0 + tol))
+         return - PI_OVER_TWO;
+      else
+         throw RealUtilitiesExceptions::ArgumentError
+            ("The input \"" + GmatRealUtil::ToString(x, false, false, true, 17, 1) +
+             "\" to ASin() is not within -1.0 and 1.0.");
+   }
    
    return (cycleInRad/TWO_PI)*asin(x);
 }
 
 
 //------------------------------------------------------------------------------
-//  Real ACos (Real x, Real tol=0.0, Real cycleInRad)
+//  Real ACos (Real x, Real tol=GmatRealConstants::REAL_TOL, Real cycleInRad=TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::ACos (Real x, Real tol, Real cycleInRad)
 {
    if (cycleInRad <= 0.0)
       throw RealUtilitiesExceptions::ArgumentError("ACos(angle, cycle <= 0.0)\n");
    
-   if ((fabs(x) - 1.0) > GmatRealConst::REAL_TOL)
+   if ((fabs(x) - 1.0) > 0.0)
    {
       #ifdef DEBUG_MATH_UTIL
       MessageInterface::ShowMessage
@@ -392,7 +440,7 @@ Real GmatMathUtil::ACos (Real x, Real tol, Real cycleInRad)
          return PI;
       else
          throw RealUtilitiesExceptions::ArgumentError
-            ("The input \"" + GmatRealUtil::ToString(x, true, true) +
+            ("The input \"" + GmatRealUtil::ToString(x, false, false, true, 17, 1) +
              "\" to ACos() is not within -1.0 and 1.0.");
    }
    
@@ -712,7 +760,7 @@ void GmatMathUtil::SetRanKey(Real k)
 //---------------------------------------------------------------------------
 //  Real GmatMathUtil::R (Real g, Real f) 
 //  {
-//     if (GmatRealConst::REAL_DIG<11) 
+//     if (GmatRealConstants::REAL_DIG<11) 
 //     {
 //        const Real p0 =1.0;
 //        const Real p1 = -0.1113614403566;
@@ -745,16 +793,16 @@ void GmatMathUtil::SetRanKey(Real k)
 //------------------------------------------------------------------------------
 //  Real GmatMathUtil::Cot(Real x) 
 //  {
-//     static Real Epsilon = pow(GmatRealConst::SHORT_REAL_RADIX, 
-//                               -(GmatRealConst::REAL_MANT_DIG/2));
+//     static Real Epsilon = pow(GmatRealConstants::SHORT_REAL_RADIX, 
+//                               -(GmatRealConstants::REAL_MANT_DIG/2));
 //     static Real YMax = Real(Integer(PI *
-//                                     pow(2, (GmatRealConst::REAL_MANT_DIG/2))));
+//                                     pow(2, (GmatRealConstants::REAL_MANT_DIG/2))));
 //     Real y;
 //     Integer n;
 //     Real    xn;
 //     Real    f,g,x1,x2;
 //     Real    result;
-//     const Real epsilon1 = 1/GmatRealConst::REAL_MAX;
+//     const Real epsilon1 = 1/GmatRealConstants::REAL_MAX;
 //     const Real c1 = 1.57080078125;
 //     const Real c2 = -0.4454455103380768678308e-5;
 
@@ -910,3 +958,36 @@ Real GmatMathUtil::Pow(Real x, Integer y)
    return pow(x, y);
 }
 
+#ifdef _MSC_VER
+#include <float.h>  // for _isnan() on VC++
+#define isnan(x) _isnan(x)    // VC++ uses _isnan()  instead of isnan()
+#define isinf(x) !_finite(x)  // VC++ uses _finite() instead of isinf()
+
+//------------------------------------------------------------------------------
+// bool IsNaN(Real x)
+//------------------------------------------------------------------------------
+/**
+ * Tests if input value is not a number.
+ */
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsNaN(Real x)
+{
+   #ifdef _MSC_VER
+      return (isnan(x) == 0 ? false : true);
+   #else
+      return isnan(x);
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// bool IsInf(Real x)
+//------------------------------------------------------------------------------
+/**
+ * Tests if input value is a infinite number.
+ */
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsInf(Real x)
+{
+   return isinf(x);
+}
+#endif

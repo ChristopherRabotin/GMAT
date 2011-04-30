@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  EquatorAxes
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -28,7 +30,7 @@
 #include "Planet.hpp"
 #include "RealUtilities.hpp"
 #include "Linear.hpp"
-#include "TimeTypes.hpp"
+#include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
 #include "Attitude.hpp"
 #include "Rvector3.hpp"
@@ -43,7 +45,7 @@
 
 
 using namespace GmatMathUtil;      // for trig functions, etc.
-using namespace GmatTimeUtil;      // for JD offsets, etc.
+using namespace GmatTimeConstants;      // for JD offsets, etc.
 
 //---------------------------------
 // static data
@@ -303,9 +305,9 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       // convert epoch (A1 MJD) to TT MJD (for calculations)
       Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                    TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
-                   GmatTimeUtil::JD_JAN_5_1941);      
-      Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0;
-      Real tTDB  = (mjdTT + offset) / 36525.0;
+                   GmatTimeConstants::JD_JAN_5_1941);      
+      Real offset = GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_OF_J2000;
+      Real tTDB  = (mjdTT + offset) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
       
       if (overrideOriginInterval) updateIntervalToUse = 
                                   ((Planet*) origin)->GetNutationUpdateInterval();
@@ -366,7 +368,7 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       
    }
    else if ((originName == SolarSystem::MOON_NAME) && 
-           (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_FILE))
+           (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_405_FILE))
    {
       #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
          MessageInterface::ShowMessage(
@@ -468,7 +470,7 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    else  // use IAU data for all other bodies, and Luna (if DE file not selected)
    {
       #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
-         MessageInterface::ShowMessage("Equator for body %s with NO DE_FILE source ...\n",
+         MessageInterface::ShowMessage("Equator for body %s with NO DE_405_FILE source ...\n",
          originName.c_str());
       #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       // this method will return alpha (deg), delta (deg), 
@@ -480,8 +482,8 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       cartCoord   = ((CelestialBody*)origin)->
                       GetBodyCartographicCoordinates(atEpoch);
       
-      Real rot1           = GmatMathUtil::PI_OVER_TWO + Rad(cartC[0]);
-      Real rot2           = GmatMathUtil::PI_OVER_TWO - Rad(cartC[1]);
+      Real rot1           = GmatMathConstants::PI_OVER_TWO + Rad(cartC[0]);
+      Real rot2           = GmatMathConstants::PI_OVER_TWO - Rad(cartC[1]);
       // Don't care about W and Wdot here
       Real R3leftT[9] =  {Cos(rot1),-Sin(rot1),0.0,
                           Sin(rot1), Cos(rot1),0.0,

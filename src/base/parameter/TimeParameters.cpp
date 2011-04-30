@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             File: TimeParameters.cpp
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,7 +23,7 @@
  */
 //------------------------------------------------------------------------------
 #include "TimeParameters.hpp"
-
+#include "MessageInterface.hpp"
 
 //==============================================================================
 //                              CurrA1MJD
@@ -192,6 +194,13 @@ A1ModJulian::~A1ModJulian()
 bool A1ModJulian::Evaluate()
 {
    mRealValue = GetCurrentTimeReal(A1_MJD);
+
+   #ifdef DEBUG_TIMEPARAM_EVAL
+   MessageInterface::ShowMessage
+      ("A1ModJulian::Evaluate() <%p>'%s' evaluated to %f, spacecraft=<%p>'%s'\n",
+       this, GetName().c_str(), mRealValue, GetSpacecraft(),
+       GetSpacecraft()->GetName().c_str());
+   #endif
    
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;

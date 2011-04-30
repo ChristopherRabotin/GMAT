@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 CommandUtil
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -24,24 +26,28 @@
 
 namespace GmatCommandUtil
 {
-   GmatCommand* GetLastCommand(GmatCommand *cmd);
-   GmatCommand* GetNextCommand(GmatCommand *cmd);
-   GmatCommand* GetPreviousCommand(GmatCommand *from, GmatCommand *cmd);
-   GmatCommand* GetMatchingEnd(GmatCommand *cmd);
-   GmatCommand* GetParentCommand(GmatCommand *top, GmatCommand *cmd);
-   GmatCommand* GetSubParent(GmatCommand *brCmd, GmatCommand *cmd);
-   bool IsAfter(GmatCommand *cmd1, GmatCommand *cmd2);
-   bool FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
+   GmatCommand GMAT_API *GetFirstCommand(GmatCommand *cmd);
+   GmatCommand GMAT_API *GetLastCommand(GmatCommand *cmd);
+   GmatCommand GMAT_API *GetNextCommand(GmatCommand *cmd);
+   GmatCommand GMAT_API *GetPreviousCommand(GmatCommand *from, GmatCommand *cmd);
+   GmatCommand GMAT_API *GetMatchingEnd(GmatCommand *cmd);
+   GmatCommand GMAT_API *GetParentCommand(GmatCommand *top, GmatCommand *cmd);
+   GmatCommand GMAT_API *GetSubParent(GmatCommand *brCmd, GmatCommand *cmd);
+   GmatCommand GMAT_API *RemoveCommand(GmatCommand *seq, GmatCommand *cmd);
+   bool GMAT_API ClearCommandSeq(GmatCommand *seq, bool leaveFirstCmd = true,
+                        bool callRunComplete = true);
+   bool GMAT_API IsAfter(GmatCommand *cmd1, GmatCommand *cmd2);
+   bool GMAT_API FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
                    const std::string &objName, std::string &cmdName);
-   bool FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
+   bool GMAT_API FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
                                   Gmat::ObjectType objType,
                                   const std::string &objName, std::string &cmdName);
-   std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true,
+   std::string GMAT_API GetCommandSeqString(GmatCommand *cmd, bool showAddr = true,
                                    bool showGenStr = false);
-   void GetSubCommandString(GmatCommand* brCmd, Integer level,
+   void GMAT_API GetSubCommandString(GmatCommand* brCmd, Integer level,
                             std::string &cmdseq, bool showAddr = true,
                             bool showGenStr = false);
-   void ShowCommand(const std::string &title1, GmatCommand *cmd1,
+   void GMAT_API ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
 }
 

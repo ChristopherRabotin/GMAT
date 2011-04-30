@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Subscriber
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -42,7 +44,7 @@
 class GMAT_API Subscriber : public GmatBase
 {
 public:
-   Subscriber(std::string typeStr, std::string nomme);
+   Subscriber(const std::string &typeStr, const std::string &nomme);
    Subscriber(const Subscriber &);
    Subscriber& operator=(const Subscriber &);
    virtual ~Subscriber(void);
@@ -52,10 +54,18 @@ public:
    virtual bool         ReceiveData(const char * datastream);
    virtual bool         ReceiveData(const char * datastream, const Integer len);
    virtual bool         ReceiveData(const Real * datastream, const Integer len = 0);
-   virtual bool         FlushData();
+   virtual bool         FlushData(bool endOfDataBlock = true);
    virtual bool         SetEndOfRun();
    virtual void         SetRunState(Gmat::RunState rs);
-   
+   void                 SetManeuvering(GmatBase *maneuver, bool flag, Real epoch,
+                                       const std::string &satName,
+                                       const std::string &desc);
+   void                 SetManeuvering(GmatBase *maneuver, bool flag, Real epoch,
+                                       const StringArray &satNames,
+                                       const std::string &desc);
+   void                 SetScPropertyChanged(GmatBase *originator, Real epoch,
+                                             const std::string &satName,
+                                             const std::string &desc);
    Subscriber*          Next();
    bool                 Add(Subscriber *s);
    bool                 Remove(Subscriber *s, const bool del);
@@ -65,6 +75,8 @@ public:
    
    virtual void         SetProviderId(Integer id);
    virtual Integer      GetProviderId();
+   
+   virtual void         SetProvider(GmatBase *provider);
    virtual void         SetDataLabels(const StringArray& elements);
    virtual void         ClearDataLabels();
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
@@ -72,7 +84,7 @@ public:
    virtual void         SetDataMJ2000EqOrigin(CelestialBody *cb);
    virtual void         SetSolarSystem(SolarSystem *ss);
    
-   // methods for setting up the items to subscribe
+   // methods for element wrappers
    virtual const StringArray&
                         GetWrapperObjectNameArray();
    virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
@@ -125,39 +137,58 @@ public:
    
 protected:
    
-   std::string      mSolverIterations;
-   SolverIterOption mSolverIterOption;
+   std::string          mSolverIterations;
+   SolverIterOption     mSolverIterOption;
    
    /// Arrays used to track elements for published data
    std::vector<StringArray> theDataLabels;
    
-   const char       *data;
-   Subscriber       *next;
-   CoordinateSystem *theInternalCoordSystem;
-   CoordinateSystem *theDataCoordSystem;
-   CelestialBody    *theDataMJ2000EqOrigin;
-   SolarSystem      *theSolarSystem;
+   const char           *data;
+   Subscriber           *next;
+   CoordinateSystem     *theInternalCoordSystem;
+   CoordinateSystem     *theDataCoordSystem;
+   CelestialBody        *theDataMJ2000EqOrigin;
+   SolarSystem          *theSolarSystem;
+   GmatBase             *currentProvider;
    
-   bool active;
-   bool isEndOfReceive;
-   bool isEndOfRun;
-   bool isInitialized;
+   bool                 active;
+   bool                 isManeuvering;
+   bool                 isEndOfReceive;
+   bool                 isEndOfDataBlock;
+   bool                 isEndOfRun;
+   bool                 isInitialized;
+   bool                 isFinalized;
    
    /// The current run state, so actions based on state can be taken
-   Gmat::RunState runstate;
-   Integer        currentProvider;
+   Gmat::RunState       runstate;
+   Integer              currProviderId;
    
    /// The list of names of Wrapper objects
-   StringArray wrapperObjectNames;
+   StringArray          wrapperObjectNames;
    /// vector of pointers to ElementWrappers for the item
-   std::vector<ElementWrapper*> depParamWrappers;
-   std::vector<ElementWrapper*> paramWrappers;
+   WrapperArray         depParamWrappers;
+   WrapperArray         paramWrappers;
    
-   bool                SetWrapperReference(GmatBase *obj, const std::string &name);
-   virtual bool        Distribute(Integer len) = 0;
-   virtual bool        Distribute(const Real *dat, Integer len);
+   // For ElementWrapper
+   bool                 CloneWrappers(WrapperArray &toWrappers,
+                                      const WrapperArray &fromWrappers);
+   bool                 SetWrapperReference(GmatBase *obj, const std::string &name);
+   void                 WriteWrappers();
+   Integer              FindIndexOfElement(StringArray &labelArray,
+                                           const std::string &label);
    
+   // Methods that derived classes can override
+   virtual bool         Distribute(Integer len) = 0;
+   virtual bool         Distribute(const Real *dat, Integer len);
+   virtual void         HandleManeuvering(GmatBase *originator,
+                                          bool maneuvering, Real epoch,
+                                          const StringArray &satNames,
+                                          const std::string &desc);
+   virtual void         HandleScPropertyChange(GmatBase *originator, Real epoch,
+                                               const std::string &satName,
+                                               const std::string &desc);
    
+public:
    enum
    {
       SOLVER_ITERATIONS = GmatBaseParamCount,
@@ -173,7 +204,7 @@ protected:
 private:
    
    static const std::string SOLVER_ITER_OPTION_TEXT[SolverIterOptionCount];
-   
+   bool    wrappersCopied;
 };
 #endif // Subscribe_hpp
 

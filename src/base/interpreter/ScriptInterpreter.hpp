@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                               ScriptInterpreter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Waka Waktola
 // Created: 2006/08/25
@@ -24,7 +28,7 @@
 /**
  * The ScriptInterpreter class manages the script reading and writing process.
  */
-class ScriptInterpreter : public Interpreter
+class GMAT_API ScriptInterpreter : public Interpreter
 {
 public:        
    static ScriptInterpreter*   Instance();
@@ -66,10 +70,20 @@ private:
    
    /// A counter that counts the logical blocks of script as they are read.
    Integer logicalBlockCount; 
+   /// Flag indicating function file has function definition
+   bool functionDefined;
+   /// Flag indicating function file has more than one function definition, so ignoring the rest
+   bool ignoreRest;
+   /// Function definition line
+   std::string functionDef;
+   /// Function file name
+   std::string functionFilename;
    /// Name of the current script file
    std::string scriptFilename;
    /// Section delimiter comment
    StringArray sectionDelimiterString;
+   /// Script lines with Variable, Array, and String
+   StringArray userParameterLines;
    
    bool ParseDefinitionBlock(const StringArray &chunks, GmatCommand *inCmd,
                              GmatBase *obj);
@@ -82,12 +96,24 @@ private:
    void SetComments(GmatBase *obj, const std::string &preStr,
                     const std::string &inStr);
    
-   void WriteSectionDelimiter(const std::string &firstObj, const std::string &objDesc);
+   void WriteSectionDelimiter(const GmatBase *firstObj, const std::string &objDesc,
+                              bool forceWriting = false);
+   void WriteSectionDelimiter(const std::string &firstObj, const std::string &objDesc,
+                              bool forceWriting = false);
    void WriteObjects(StringArray &objs, const std::string &objDesc,
                      Gmat::WriteMode mode);
+   void WriteODEModels(StringArray &objs, Gmat::WriteMode mode);
+   void WritePropagators(StringArray &objs, const std::string &objDesc,
+         Gmat::WriteMode mode, const StringArray &odes);
    void WriteSpacecrafts(StringArray &objs, Gmat::WriteMode mode);
    void WriteHardwares(StringArray &objs, Gmat::WriteMode mode);
    void WriteVariablesAndArrays(StringArray &objs, Gmat::WriteMode mode);
+   void WriteArrayInitialValues(const ObjectArray &arrWithValList,
+                                Gmat::WriteMode mode);
+   void WriteVariableInitialValues(const ObjectArray &varWithValList,
+                                   Gmat::WriteMode mode);
+   void WriteStringInitialValues(const ObjectArray &strWithValList,
+                                 Gmat::WriteMode mode);
    void WriteOtherParameters(StringArray &objs, Gmat::WriteMode mode);
    void WriteSubscribers(StringArray &objs, Gmat::WriteMode mode);
    void WriteCommandSequence(Gmat::WriteMode mode);

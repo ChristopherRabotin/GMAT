@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  AxisSystem
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -27,29 +29,38 @@
 #include "RealUtilities.hpp"
 #include "AngleUtil.hpp"
 #include "Linear.hpp"
-#include "RealTypes.hpp"
-#include "TimeTypes.hpp"
+#include "GmatConstants.hpp"
 #include "Rvector3.hpp"
 #include "MessageInterface.hpp"
 #include "CoordinateSystemException.hpp"
 #include "SolarSystem.hpp"
 
 #include <iostream>
-using namespace std; //***************************** for debug only 
+
 
 using namespace GmatMathUtil;      // for trig functions, etc.
-using namespace GmatTimeUtil;      // for SECS_PER_DAY
+using namespace GmatMathConstants;      // for RAD_PER_ARCSEC, etc.
+using namespace GmatTimeConstants;      // for SECS_PER_DAY
 
-//#define DEBUG_ROT_MATRIX 1
 //static Integer visitCount = 0;
 
+//#define DEBUG_ROT_MATRIX 1
 //#define DEBUG_UPDATE
 //#define DEBUG_FIRST_CALL
-
+//#define DEBUG_a_MATRIX
 //#define DEBUG_ITRF_UPDATES
 //#define DEBUG_CALCS
 //#define DEBUG_DESTRUCTION
+//#define DEBUG_AXIS_SYSTEM_INIT
+//#define DEBUG_AXIS_SYSTEM_EOP
 
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -102,6 +113,7 @@ AxisSystem::PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount] =
 AxisSystem::AxisSystem(const std::string &itsType,
                        const std::string &itsName) :
 CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
+coordName        (""),
 eop              (NULL),
 itrf             (NULL),
 epochFormat      ("A1ModJulian"),
@@ -134,7 +146,7 @@ DpVals           (NULL)
    parameterCount = AxisSystemParamCount;
    rotMatrix    = Rmatrix33(false); // want zero matrix, not identity matrix
    rotDotMatrix = Rmatrix33(false); // want zero matrix, not identity matrix
-   epoch        = GmatTimeUtil::A1MJD_OF_J2000;
+   epoch        = GmatTimeConstants::A1MJD_OF_J2000;
    lastPRECEpoch       = A1Mjd(0.0); // 1941?  strange, but ...
    lastNUTEpoch        = A1Mjd(0.0); // 1941?  strange, but ...
    lastSTDerivEpoch    = A1Mjd(0.0); // 1941?  strange, but ...
@@ -156,6 +168,7 @@ CoordinateBase(axisSys),
 rotMatrix         (axisSys.rotMatrix),
 rotDotMatrix      (axisSys.rotDotMatrix),
 epoch             (axisSys.epoch),
+coordName         (axisSys.coordName),
 eop               (axisSys.eop),
 itrf              (axisSys.itrf),
 epochFormat       (axisSys.epochFormat),
@@ -205,6 +218,7 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    if (&axisSys == this)
       return *this;
    CoordinateBase::operator=(axisSys);
+   coordName      = axisSys.coordName;
    rotMatrix      = axisSys.rotMatrix;
    rotDotMatrix   = axisSys.rotDotMatrix;
    epoch          = axisSys.epoch;
@@ -225,6 +239,25 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    lastDPsi          = axisSys.lastDPsi;
    nutationSrc       = axisSys.nutationSrc;
    planetarySrc      = axisSys.planetarySrc;
+   
+   aVals             = NULL; 
+   apVals            = NULL;
+   precData          = NULL;
+   nutData           = NULL;
+   stData            = NULL;
+   stDerivData       = NULL;
+   pmData            = NULL;
+   AVals             = NULL;
+   BVals             = NULL;
+   CVals             = NULL;
+   DVals             = NULL;
+   EVals             = NULL;
+   FVals             = NULL;
+   ApVals            = NULL;
+   BpVals            = NULL;
+   CpVals            = NULL;
+   DpVals            = NULL;
+   
    Initialize();
    
    return *this;
@@ -238,22 +271,28 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
 //---------------------------------------------------------------------------
 AxisSystem::~AxisSystem()
 {
-//    for (Integer i = 0; i < 5; i++)
-//       delete aVals[i];
-//    for (Integer i = 0; i < 10; i++)
-//       delete apVals[i];
    #ifdef DEBUG_DESTRUCTION
    MessageInterface::ShowMessage("---> Entering AxisSystem destructor for %s\n",
    instanceName.c_str());
    #endif
-
+   
    if (aVals != NULL)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (aVals, "aVals", "AxisSystem::~AxisSystem()", "deleting aVals");
+      #endif
       delete [] aVals;
+   }
    if (apVals != NULL)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (apVals, "apVals", "AxisSystem::~AxisSystem()", "deleting apVals");
+      #endif
       delete [] apVals;
-  
-//   aVals = NULL;
-//   apVals = NULL;
+   }
+   
    #ifdef DEBUG_DESTRUCTION
    MessageInterface::ShowMessage("---> LEAVING AxisSystem destructor for %s\n",
    instanceName.c_str());
@@ -465,6 +504,13 @@ void AxisSystem::GetLastRotationDotMatrix(Real *mat) const
    
 }
 
+void AxisSystem::SetCoordinateSystemName(const std::string &csName)
+{
+   coordName = csName;
+}
+
+
+
 //---------------------------------------------------------------------------
 //  void AxisSystem::Initialize()
 //---------------------------------------------------------------------------
@@ -518,15 +564,8 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    CalculateRotationMatrix(epoch, forceComputation);
    
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
-   //Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
-   //Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
    tmpPosVecTo.Set(inState[0],inState[1], inState[2]);
    tmpVelVecTo.Set(inState[3],inState[4], inState[5]);
-   //const Real  *inData = inState.GetDataVector();
-   //const Real  *tmpPosTo = tmpPosVecTo.GetDataVector();
-   //const Real  *tmpVelTo = tmpVelVecTo.GetDataVector();
-   // rotMatrix * tmpPos;
-   // rotDotMatrix * tmpPos + rotMatrix * tmpVel
    
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
@@ -537,6 +576,11 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
       rotMatrix(0,0),rotMatrix(0,1),rotMatrix(0,2),
       rotMatrix(1,0),rotMatrix(1,1),rotMatrix(1,2),
       rotMatrix(2,0),rotMatrix(2,1),rotMatrix(2,2));
+      MessageInterface::ShowMessage(
+      "the rotation dot matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+      rotDotMatrix(0,0),rotDotMatrix(0,1),rotDotMatrix(0,2),
+      rotDotMatrix(1,0),rotDotMatrix(1,1),rotDotMatrix(1,2),
+      rotDotMatrix(2,0),rotDotMatrix(2,1),rotDotMatrix(2,2));
       //MessageInterface::ShowMessage(
       //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       //   tmpPosTo[0], tmpPosTo[1], tmpPosTo[2], tmpVelTo[0], tmpVelTo[1], tmpVelTo[2]);
@@ -559,9 +603,6 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                    rotData[p3+2]  * tmpVelTo[2]);
    }     
  
-   //Rvector3 outPos_2 = rotMatrix    * tmpPosVec; // old
-   //Rvector3 outVel_2 = (rotDotMatrix * tmpPosVec) + (rotMatrix * tmpVelVec);
-         
    outState.Set(6,outPos[0], outPos[1], outPos[2], 
                   outVel[0], outVel[1], outVel[2]);
    #ifdef DEBUG_CALCS
@@ -574,10 +615,10 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    #endif
 
    #ifdef DEBUG_FIRST_CALL
-      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
-            "RotateToMJ2000Eq check for %s\n", typeName.c_str());
+            "AxisSystem::RotateToMJ2000Eq check for %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
             "                     |%20.10lf %20.10lf %20.10lf|\n"
@@ -588,11 +629,11 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
          MessageInterface::ShowMessage(
             "   Epoch: %.12lf\n", epoch.Get());
          MessageInterface::ShowMessage(
-            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            "   AxisSystem::input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             inState[0], inState[1], inState[2], inState[3], inState[4], 
             inState[5]);
          MessageInterface::ShowMessage(
-            "   outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            "   AxisSystem::output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
             outVel[2]);
       }
@@ -619,31 +660,22 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
       rotMatrix(1,0),rotMatrix(1,1),rotMatrix(1,2),
       rotMatrix(2,0),rotMatrix(2,1),rotMatrix(2,2));
       MessageInterface::ShowMessage(
-      "the rotation matrix (as array) is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
-      rotData[0],rotData[1],rotData[2],rotData[3],rotData[4],
-      rotData[5],rotData[6],rotData[7],rotData[8]);
+      "the rotation dot matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+      rotDotMatrix(0,0),rotDotMatrix(0,1),rotDotMatrix(0,2),
+      rotDotMatrix(1,0),rotDotMatrix(1,1),rotDotMatrix(1,2),
+      rotDotMatrix(2,0),rotDotMatrix(2,1),rotDotMatrix(2,2));
+//      MessageInterface::ShowMessage(
+//      "the rotation matrix (as array) is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
+//      rotData[0],rotData[1],rotData[2],rotData[3],rotData[4],
+//      rotData[5],rotData[6],rotData[7],rotData[8]);
       //MessageInterface::ShowMessage(
       //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       //   tmpPosTo[0], tmpPosTo[1], tmpPosTo[2], tmpVelTo[0], tmpVelTo[1], tmpVelTo[2]);
    #endif
-   //Real  outPos[3];
-   //Real  outVel[3];
    Integer p3 = 0;
    for (Integer p = 0; p < 3; ++p)
    {
       p3 = 3*p;
-      /*
-      outPos[p] = rotData[p3]   * pos[0]   + 
-                  rotData[p3+1] * pos[1] + 
-                  rotData[p3+2] * pos[2];
-      outVel[p] = (rotDotData[p3]    * pos[0]   + 
-                   rotDotData[p3+1]  * pos[1] + 
-                   rotDotData[p3+2]  * pos[2])
-                  +
-                  (rotData[p3]    * vel[0]   + 
-                   rotData[p3+1]  * vel[1] + 
-                   rotData[p3+2]  * vel[2]);
-      */
       outState[p] = rotData[p3]   * pos[0]   + 
                     rotData[p3+1] * pos[1] + 
                     rotData[p3+2] * pos[2];
@@ -656,14 +688,6 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
                        rotData[p3+2]  * vel[2]);
    }    
    
-   /*
-   outState[0] = outPos[0]; 
-   outState[1] = outPos[1]; 
-   outState[2] = outPos[2]; 
-   outState[3] = outVel[0]; 
-   outState[4] = outVel[1]; 
-   outState[5] = outVel[2]; 
-   */
    
  
    #ifdef DEBUG_CALCS
@@ -676,7 +700,7 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
    #endif
 
    #ifdef DEBUG_FIRST_CALL
-      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
             "RotateToMJ2000Eq check for %s\n", typeName.c_str());
@@ -724,28 +748,23 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
                                     Rvector &outState,
                                     bool forceComputation)
 {
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromMJ2000Eq on object of type %s\n",
+            (GetTypeName()).c_str());
+   #endif
    static Rvector3 tmpPosVec;
    static Rvector3 tmpVelVec;
    static const Real  *tmpPos = tmpPosVec.GetDataVector();
    static const Real  *tmpVel = tmpVelVec.GetDataVector();
    CalculateRotationMatrix(epoch, forceComputation);
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("In AxisSystem::rotateFromMJ2000Eq, DONE computing rotation matrix\n");
+   #endif
    
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
-   ////Rvector3 tmpPos(inState[0],inState[1], inState[2]);
-   ////Rvector3 tmpVel(inState[3],inState[4], inState[5]);
-   ////Rmatrix33 tmpRot    = rotMatrix.Transpose();
-   ////Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
-   ////Rvector3 outPos     = tmpRot    * tmpPos ;
-   ////Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
    tmpPosVec.Set(inState[0],inState[1], inState[2]);
    tmpVelVec.Set(inState[3],inState[4], inState[5]);
 
-   ////Rvector3 tmpPosVec(inState[0],inState[1], inState[2]);
-   ////Rvector3 tmpVelVec(inState[3],inState[4], inState[5]);
-   //const Real tmpPos[3] = {inState[0], inState[1], inState[2]};
-   //const Real tmpVel[3] = {inState[3], inState[4], inState[5]};
-   // rotMatrix-T * tmpPos;
-   // rotDotMatrix-T * tmpPos + rotMatrix-T * tmpVel
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
          "Input vector to FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
@@ -755,9 +774,6 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
       rotMatrix(0,0),rotMatrix(0,1),rotMatrix(0,2),
       rotMatrix(1,0),rotMatrix(1,1),rotMatrix(1,2),
       rotMatrix(2,0),rotMatrix(2,1),rotMatrix(2,2));
-      //MessageInterface::ShowMessage(
-      //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
-      //   tmpPos[0], tmpPos[1], tmpPos[2], tmpVel[0], tmpVel[1], tmpVel[2]);
    #endif
    Real  outPos[3];
    Real  outVel[3];
@@ -794,10 +810,10 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
    #ifdef DEBUG_FIRST_CALL
-      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
-            "RotateFromMJ2000Eq check for %s\n", typeName.c_str());
+            "AxisSystem::RotateFromMJ2000Eq check for %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
             "                     |%20.10lf %20.10lf %20.10lf|\n"
@@ -808,11 +824,11 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
          MessageInterface::ShowMessage(
             "   Epoch: %.12lf\n", epoch.Get());
          MessageInterface::ShowMessage(
-            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            "   AxisSystem::input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             inState[0], inState[1], inState[2], inState[3], inState[4], 
             inState[5]);
          MessageInterface::ShowMessage(
-            "   outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            "   AxisSystem::output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
             outVel[2]);
          firstCallFired = true;
@@ -833,7 +849,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    Real vel[3] = {inState[3], inState[4], inState[5]};   
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Input vector to FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Input vector to AxisSystem::FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
       MessageInterface::ShowMessage(
       "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
@@ -868,14 +884,14 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    }     
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Output vector from FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Output vector from AxisSystem::FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
    #ifdef DEBUG_FIRST_CALL
-      if ((firstCallFired == false) || (epoch.Get() == 21545.0))
+      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
-            "RotateFromMJ2000Eq check for %s\n", typeName.c_str());
+            "AxisSystem::RotateFromMJ2000Eq check for %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
             "                     |%20.10lf %20.10lf %20.10lf|\n"
@@ -1036,7 +1052,6 @@ Real AxisSystem::SetRealParameter(const Integer id, const Real value)
    if (id == UPDATE_INTERVAL)
    {
       updateInterval = value;
-      //MessageInterface::ShowMessage("In AS, interval set to %f\n", value);
       return true;
    }
    return CoordinateBase::SetRealParameter(id,value);
@@ -1083,11 +1098,17 @@ bool AxisSystem::GetBooleanParameter(const Integer id) const
    return CoordinateBase::GetBooleanParameter(id); 
 }
 
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
 bool AxisSystem::GetBooleanParameter(const std::string &label) const
 {
    return GetBooleanParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
 bool AxisSystem::SetBooleanParameter(const Integer id,
                                      const bool value)
 {
@@ -1099,17 +1120,26 @@ bool AxisSystem::SetBooleanParameter(const Integer id,
    return CoordinateBase::SetBooleanParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
 bool AxisSystem::SetBooleanParameter(const std::string &label,
                                      const bool value)
 {
    return SetBooleanParameter(GetParameterID(label), value);
 }
 
-
+//------------------------------------------------------------------------------
+// void InitializeFK5()
+//------------------------------------------------------------------------------
 void AxisSystem::InitializeFK5()
 {
-   //if (originName == SolarSystem::EARTH_NAME)
-   //{
+   #ifdef DEBUG_AXIS_SYSTEM_INIT
+      MessageInterface::ShowMessage("Entering InitializeFK5 for coordinate system %s of type %s\n",
+            (GetName()).c_str(), (GetTypeName()).c_str());
+   #endif
+//   if (originName == SolarSystem::EARTH_NAME)
+//   {
       if (eop == NULL)
          throw CoordinateSystemException(
                "EOP file has not been set for " + instanceName);
@@ -1146,13 +1176,25 @@ void AxisSystem::InitializeFK5()
          MessageInterface::ShowMessage("In AxisSystem, after getting nutation data, A(%d) = %f\n", ii, A(ii));
       #endif
       
+      if (aVals)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (aVals, "aVals", "AxisSystem::InitializeFK5()", "deleting aVals");
+         #endif
+         delete [] aVals;
+      }
+      
       aVals = new Integer[numNut * 5];
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (aVals, "aVals", "AxisSystem::InitializeFK5()", "aVals = new Integer[numNut * 5]");
+      #endif
+      
       for (Integer i = 0; i < 5; i++)
       {
          for (Integer j=0; j< numNut; j++)
          {
-            // DJC changed; was this: 
-            //aVals[i*5+j] = (a.at(i)).at(j);
             aVals[i*numNut+j] = (a.at(i)).at(j);
          }
       }
@@ -1169,13 +1211,26 @@ void AxisSystem::InitializeFK5()
       {
          OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
          if (!OK) throw CoordinateSystemException("Error getting planetary data.");
-      
+
+         if (apVals)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (apVals, "apVals", "AxisSystem::InitializeFK5()", "deleting apVals");
+            #endif
+            delete [] apVals;
+         }
+         
          apVals = new Integer[numPlan*10];
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (apVals, "apVals", "AxisSystem::InitializeFK5()", "apVals = new Integer[numPlan*10]");
+         #endif
+         
          for (Integer i = 0; i < 10; i++)
          {
             for (Integer j=0; j< numPlan; j++)
             {
-               //apVals[i*10+j] = (ap.at(i)).at(j);
                apVals[i*numPlan+j] = (ap.at(i)).at(j);
             }
          }
@@ -1206,6 +1261,7 @@ void AxisSystem::InitializeFK5()
          BpVals = Bp.GetDataVector();
          CpVals = Cp.GetDataVector();
          DpVals = Dp.GetDataVector();
+//   }
 }   
 
 //------------------------------------------------------------------------------
@@ -1224,17 +1280,6 @@ void AxisSystem::InitializeFK5()
 //Rmatrix33 AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
 void AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
 {
-   //Real dt = Abs(atEpoch.Subtract(lastPRECEpoch)) * SECS_PER_DAY;
-   //if ( dt < updateIntervalToUse)
-   //{
-   //   #ifdef DEBUG_UPDATE
-   //      cout << ">>> Using previous saved PREC values ......" << endl;
-   //      cout << "lastPREC = "  << lastPREC << endl;
-   //   #endif
-   //   return lastPREC; 
-   //}
-   
-   //#define DEBUG_FIRST_CALL
 
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1245,7 +1290,7 @@ void AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
    #endif
    
    #ifdef DEBUG_ROT_MATRIX
-      cout << "**** tTDB = " << tTDB << endl;
+      MessageInterface::ShowMessage("**** tTDB = %12.10f\n",  tTDB);
    #endif
    Real tTDB2   = tTDB  * tTDB;
    Real tTDB3   = tTDB2 * tTDB;
@@ -1277,21 +1322,11 @@ void AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
              sinTheta*coszeta,
             -sinTheta*sinzeta,
              cosTheta);
-   //PREC(0,0) =  cosTheta*cosz*coszeta - sinz*sinzeta;
-   //PREC(0,1) = -sinzeta*cosTheta*cosz - sinz*coszeta;
-   //PREC(0,2) = -sinTheta*cosz;
-   //PREC(1,0) =  sinz*cosTheta*coszeta + sinzeta*cosz;
-   //PREC(1,1) = -sinz*sinzeta*cosTheta + cosz*coszeta;
-   //PREC(1,2) = -sinTheta*sinz;
-   //PREC(2,0) =  sinTheta*coszeta;
-   //PREC(2,1) = -sinTheta*sinzeta;
-   //PREC(2,2) =  cosTheta;
    #ifdef DEBUG_ROT_MATRIX
-      cout << "PREC = " << endl << PREC << endl;
+      MessageInterface::ShowMessage("PREC = %s\n", (PREC.ToString()).c_str());
    #endif
    lastPREC = PREC;
    lastPRECEpoch = atEpoch;
-//   return PREC;
 }
 
 //Rmatrix33 AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
@@ -1303,10 +1338,15 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
 {
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
+      {
+         MessageInterface::ShowMessage("firstCallFired set to TRUE!!!!\n");
          MessageInterface::ShowMessage(
             "   AxisSystem::ComputeNutationMatrix(%.12lf, %.12lf, %.12lf, "
             "%.12lf, %.12lf)\n", tTDB, atEpoch.Get(), dPsi, longAscNodeLunar, 
             cosEpsbar);
+      }
+      else
+         MessageInterface::ShowMessage("firstCallFired set to TRUE!!!!\n");
    #endif
 
    static const Real const125 = 125.04455501*RAD_PER_DEG;
@@ -1314,6 +1354,14 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    static const Real const357 = 357.52910918*RAD_PER_DEG;
    static const Real const93  =  93.27209062*RAD_PER_DEG;
    static const Real const297 = 297.85019547*RAD_PER_DEG;
+#ifdef DEBUG_UPDATE
+   MessageInterface::ShowMessage("static consts computed ... \n");
+   MessageInterface::ShowMessage("  const125 = %12.10f\n", const125);
+   MessageInterface::ShowMessage("  const134 = %12.10f\n", const134);
+   MessageInterface::ShowMessage("  const357 = %12.10f\n", const357);
+   MessageInterface::ShowMessage("  const93  = %12.10f\n", const93);
+   MessageInterface::ShowMessage("  const297 = %12.10f\n", const297);
+#endif
 
    register Real tTDB2   = tTDB  * tTDB;
    register Real tTDB3   = tTDB2 * tTDB;
@@ -1324,6 +1372,12 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // floor, roll around and under the door, down the stairs and into
    // the neighbor's yard.  It can also be used, but is not tested, 
    // with the 2000 Theory.
+#ifdef DEBUG_UPDATE
+   MessageInterface::ShowMessage("registers set up\n");
+   MessageInterface::ShowMessage("  tTDB2 = %12.10f\n", tTDB2);
+   MessageInterface::ShowMessage("  tTDB3 = %12.10f\n", tTDB3);
+   MessageInterface::ShowMessage("  tTDB4 = %12.10f\n", tTDB4);
+#endif
 
    // Compute values to be passed out first ... 
    longAscNodeLunar  = const125 + (  -6962890.2665*tTDB 
@@ -1336,36 +1390,31 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // if not enough time has passed, just return the last value
    Real dt = fabs(atEpoch.Subtract(lastNUTEpoch)) * SECS_PER_DAY;
    #ifdef DEBUG_UPDATE
-      cout.precision(30);
-      cout << "ENTERED ComputeNutation ....." << endl;
-      cout << "atEpoch = " << atEpoch.Get() << endl;
-      cout << "lastNUTEpoch = " << lastNUTEpoch.Get() << endl;
-      cout << "dt = " << dt << endl;
-      cout << "longAscNodeLunar = "  << longAscNodeLunar << endl;
-      cout << "cosEpsbar = "  << cosEpsbar << endl;
+      MessageInterface::ShowMessage("ENTERED ComputeNutation .....\n");
+      MessageInterface::ShowMessage("  longAscNodeLunar = %12.10f\n", longAscNodeLunar);
+      MessageInterface::ShowMessage("  Epsbar = %12.10f\n", Epsbar);
+      MessageInterface::ShowMessage("  cosEpsbar = %12.10f\n", cosEpsbar);
    #endif
    if (( dt < updateIntervalToUse) && (!forceComputation))
    {
       #ifdef DEBUG_UPDATE
-         cout << ">>> Using previous saved values ......" << endl;
-         cout << "lastDPsi = "  << lastDPsi << endl;
-         cout << "lastNUT = "  << lastNUT << endl;
+         MessageInterface::ShowMessage(">>> In ComputeNutationMatrix, using previously saved values ......\n");
       #endif
       dPsi = lastDPsi;
 
       #ifdef DEBUG_FIRST_CALL
          if (!firstCallFired)
             MessageInterface::ShowMessage(
-               "   Using buffered nutation data: %.13lf = 86400*(%.12lf - %.12lf)\n",
-               dt, atEpoch.Get(), lastNUTEpoch.Get());
+               "   Using buffered nutation data: %.13lf = %.12f*(%.12lf - %.12lf)\n",
+               dt, SECS_PER_DAY, atEpoch.Get(), lastNUTEpoch.Get());
       #endif
       
       return;
-//      return lastNUT; 
    }
 
    #ifdef DEBUG_UPDATE
-      cout << ">>> Computing brand new values ......" << endl;
+      MessageInterface::ShowMessage("----> Computing NEW NUT matrix at time %12.10f\n",
+         atEpoch.Get());
    #endif
    // otherwise, need to recompute all the nutation data
    dPsi      = 0.0;
@@ -1389,18 +1438,10 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    Real cosAp = 0.0;
    Real sinAp = 0.0;
    Integer nut = itrf->GetNumberOfNutationTerms();
-   /*
-   for (i = nut-1; i >= 0; i--)
-   {
-      apNut = (a.at(0)).at(i)*meanAnomalyMoon + (a.at(1)).at(i)*meanAnomalySun 
-      + (a.at(2)).at(i)*argLatitudeMoon + (a.at(3)).at(i)*meanElongationSun 
-      + (a.at(4)).at(i)*longAscNodeLunar;
-      cosAp = Cos(apNut);
-      sinAp = Sin(apNut);
-      dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
-      dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
-   }
-    */
+   #ifdef DEBUG_UPDATE
+      MessageInterface::ShowMessage(">>> After call to ITRF object ......\n");
+      MessageInterface::ShowMessage("   and nut = %d\n", nut);
+   #endif
 
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1523,9 +1564,6 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
 
    for (i = nut-1; i >= 0; i--)
    {
-      //apNut = aVals[0][i]*meanAnomalyMoon + aVals[1][i]*meanAnomalySun 
-      //+ aVals[2][i]*argLatitudeMoon + aVals[3][i]*meanElongationSun 
-      //+ aVals[4][i]*longAscNodeLunar;
       #ifdef DEBUG_a_MATRIX
          MessageInterface::ShowMessage("   a[%d}:  %8d %8d %8d %8d %8d\n", i+1,
             aVals[i], aVals[nut*1+i], aVals[nut*2+i], aVals[nut*3+i], 
@@ -1538,14 +1576,12 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       
       cosAp = cos(apNut);
       sinAp = sin(apNut);
-      //dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
-      //dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
       if (nutationSrc == GmatItrf::NUTATION_1980)
       {
          dPsi += (AVals[i] + BVals[i]*tTDB )*sinAp;
          dEps += (CVals[i] + DVals[i]*tTDB )*cosAp;
       }
-      else // 1996 amd 200 have E and F terms
+      else // 1996 amd 2000 have E and F terms
       {
          dPsi += (AVals[i] + BVals[i]*tTDB )*sinAp + EVals[i]*cosAp;
          dEps += (CVals[i] + DVals[i]*tTDB )*cosAp + FVals[i]*sinAp;
@@ -1574,7 +1610,7 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // NOTE - this part is commented out for now, per Steve Hughes
    // First, compute the mean Heliocentric longitudes of the planets, and the
    // general precession in longitude
-    Real dPsiAddend = 0.0, dEpsAddend = 0.0;
+   Real dPsiAddend = 0.0, dEpsAddend = 0.0;
    if (nutationSrc == GmatItrf::NUTATION_1996)
    {   
    
@@ -1621,7 +1657,6 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    } // end if nutationSrc == NUTATION_1996
    
     dPsi += dPsiAddend * RAD_PER_ARCSEC;
-    //dEps += dPsiAddend * RAD_PER_ARCSEC;
     dEps += dEpsAddend * RAD_PER_ARCSEC;
     
    #ifdef DEBUG_FIRST_CALL
@@ -1636,9 +1671,6 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // NOTE - do we delete this when we put in the planetary stuff above?
    // offset and rate correction to approximate GCRF, Ref.[1], Eq (3-63)  - SQ
    // This is Vallado Eq. 3-62 - WCS
-   // commented out per Steve Hughes 2006.05.03
-   //dPsi += (-0.0431 - 0.2957*tTDB )*RAD_PER_ARCSEC;
-   //dEps += (-0.0051 - 0.0277*tTDB )*RAD_PER_ARCSEC;
    
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1675,16 +1707,15 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    lastDPsi     = dPsi; 
    
    #ifdef DEBUG_ROT_MATRIX
-      cout << "atEpoch = " << endl << atEpoch.Get() << endl;
-      cout << "NUT = " << endl << NUT << endl;
-      cout << "longAscNodeLunar = " << endl << longAscNodeLunar << endl;
-      cout << "cosEpsbar = " << endl << cosEpsbar << endl;
-      cout << "dPsi = " << endl << dPsi << endl;
+      MessageInterface::ShowMessage("At end of ComputeNutationmatrix ...\n");
+      MessageInterface::ShowMessage("   atEpoch   = %12.10f\n", atEpoch.Get());
+      MessageInterface::ShowMessage("   longAscNodeLunar   = %12.10f\n", longAscNodeLunar);
+      MessageInterface::ShowMessage("   cosEpsbar   = %12.10f\n", cosEpsbar);
+      MessageInterface::ShowMessage("   dPsi   = %12.10f\n", dPsi);
    #endif
 //   return NUT;
 }
 
-//Rmatrix33 AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
 void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
                                                   const Real tUT1,
                                                   Real dPsi,
@@ -1717,26 +1748,19 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
       term2 = (0.00264 * sin(longAscNodeLunar))        * RAD_PER_ARCSEC;
       term3 = (0.000063 * sin(2.0 * longAscNodeLunar)) * RAD_PER_ARCSEC;
    }
-   //Real EQequinox = (dPsi * cosTEoE) + term2 + term3; 
    Real EQequinox = (dPsi * cosEpsbar) + term2 + term3;
    
    // Compute Greenwich Apparent Sidereal Time from the Greenwich Mean 
    // Sidereal Time and the Equation of the equinoxes
    // (Vallado Eq. 3-45)
    // NOTE: 1 sec = 15"; 1 hour (= 15 deg) = 54000"
-   Real sec2deg = 15.0 / 3600;
    Real hour2deg = 15.0;
-   //Real ThetaGmst = (1.00965822615e6 + 4.746600277219299e10*tUT1 
-   //                  + 1.396560*tUT12 + 9.3e-5*tUT13 )*RAD_PER_ARCSEC;
+   Real sec2deg = hour2deg / GmatTimeConstants::SECS_PER_HOUR;
    Real ThetaGmst = ((67310.54841 * sec2deg) + 
                      ((876600 * hour2deg) + (8640184.812866 * sec2deg))*tUT1 +
                      (0.093104 * sec2deg)*tUT12 - (6.2e-06 * sec2deg)*tUT13 )
                      * RAD_PER_DEG;
-   //Real ThetaGmst = ((67310.54841) + 
-   //                  ((876600 * 3600.0) + (8640184.812866)*tUT1 +
-   //                  (0.093104)*tUT12 - (6.2e-06)*tUT13 )) * sec2deg
-   //                  * RAD_PER_DEG;
-   ThetaGmst = AngleUtil::PutAngleInRadRange(ThetaGmst,0.0,GmatMathUtil::TWO_PI);
+   ThetaGmst = AngleUtil::PutAngleInRadRange(ThetaGmst,0.0,GmatMathConstants::TWO_PI);
    
    Real ThetaAst = ThetaGmst + EQequinox;
    
@@ -1749,15 +1773,6 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    ST.Set( cosAst, sinAst, 0.0,
           -sinAst, cosAst, 0.0,
               0.0,    0.0, 1.0);
-   //ST(0,0) =  cosAst;
-   //ST(0,1) =  sinAst;
-   //ST(0,2) =  0.0;
-   //ST(1,0) = -sinAst;
-   //ST(1,1) =  cosAst;
-   //ST(1,2) =  0.0;
-   //ST(2,0) =  0.0;
-   //ST(2,1) =  0.0;
-   //ST(2,2) =  1.0;
    
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -1768,13 +1783,12 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
             EQequinox, ThetaGmst, ThetaAst);
    #endif
    #ifdef DEBUG_ROT_MATRIX
-      cout << "ST = " << endl << ST << endl;
+      MessageInterface::ShowMessage("ST = %s\n", (ST.ToString()).c_str());
    #endif
 
 //   return ST;
 }
 
-//Rmatrix33 AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC, 
 void AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC, 
                                                      A1Mjd atEpoch,
                                                      Real cosAst, Real sinAst,
@@ -1788,50 +1802,49 @@ void AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
             cosAst, sinAst);
    #endif
 
-   Real dt = fabs(atEpoch.Subtract(lastSTDerivEpoch)) * SECS_PER_DAY;
-   if (( dt < updateIntervalToUse) && (!forceComputation))
-   {
-      #ifdef DEBUG_UPDATE
-         cout << ">>> Using previous saved STDeriv values ......" << endl;
-         cout << "lastSTDeriv = "  << lastSTDeriv << endl;
-      #endif
-      return;
-//      return lastSTDeriv; 
-   }
+//   Real dt = fabs(atEpoch.Subtract(lastSTDerivEpoch)) * SECS_PER_DAY;
+//   if (( dt < updateIntervalToUse) && (!forceComputation))
+//   {
+//      #ifdef DEBUG_UPDATE
+//         MessageInterface::ShowMessage(">>> In ComputeSiderealTimeDotRotation, using previous saved STDeriv values ......\n");
+//         MessageInterface::ShowMessage("lastSTderiv = %s\n", (lastSTDeriv.ToString()).c_str());
+//      #endif
+//      return;
+//   }
+   #ifdef DEBUG_UPDATE
+      MessageInterface::ShowMessage("----> Computing NEW STderiv matrix at time %12.10f\n",
+         atEpoch.Get());
+   #endif
    // Convert to MJD UTC to use for polar motion  and LOD 
    // interpolations
    // Get the polar motion and lod data
    Real lod = 0.0;
    Real x, y;
    eop->GetPolarMotionAndLod(mjdUTC,x,y,lod);
+   #ifdef DEBUG_AXIS_SYSTEM_EOP
+      MessageInterface::ShowMessage("in STderiv calc, mjdUtc     = %12.10f\n", mjdUTC);
+      MessageInterface::ShowMessage("                 atEpoch    = %12.10f\n", atEpoch.Get());
+      MessageInterface::ShowMessage("                 lod        = %12.10f\n", lod);
+      MessageInterface::ShowMessage("                 x          = %12.10f\n", x);
+      MessageInterface::ShowMessage("                 y          = %12.10f\n", y);
+   #endif
    
    // Compute the portion that has a significant time derivative
    Real omegaE = 7.29211514670698e-05 * (1.0 - (lod / SECS_PER_DAY));
    STderiv.Set(-omegaE * sinAst,  omegaE * cosAst, 0.0,
                -omegaE * cosAst, -omegaE * sinAst, 0.0,
                             0.0,              0.0, 0.0);
-   //STderiv(0,0) = -omegaE * sinAst;
-   //STderiv(0,1) =  omegaE * cosAst;
-   //STderiv(0,2) =  0.0;
-   //STderiv(1,0) = -omegaE * cosAst;
-   //STderiv(1,1) = -omegaE * sinAst;
-   //STderiv(1,2) =  0.0;
-   //STderiv(2,0) =  0.0;
-   //STderiv(2,1) =  0.0;
-   //STderiv(2,2) =  0.0;
    
    #ifdef DEBUG_ROT_MATRIX
-      cout << "lod = " << lod << endl;
-      cout << "STderiv = " << endl << STderiv << endl;
+      MessageInterface::ShowMessage("lod = %12,10f\n", lod);
+      MessageInterface::ShowMessage("STderiv = %s\n", (STderiv.ToString()).c_str());
    #endif
       
    lastSTDeriv      = STderiv;
    lastSTDerivEpoch = atEpoch;
    
-//   return STderiv;
 }
 
-//Rmatrix33 AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch)
 void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
                                             bool forceComputation)
 {
@@ -1842,20 +1855,30 @@ void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
             mjdUTC, atEpoch.Get());
    #endif
 
-   Real dt = fabs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
-   if (( dt < updateIntervalToUse) && (!forceComputation))
-   {
-      #ifdef DEBUG_UPDATE
-         cout << ">>> Using previous saved PM values ......" << endl;
-         cout << "lastPM = "  << lastPM << endl;
-      #endif
-      return;
-//      return lastPM; 
-   }
+//   Real dt = fabs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
+//   if (( dt < updateIntervalToUse) && (!forceComputation))
+//   {
+//      #ifdef DEBUG_UPDATE
+//         MessageInterface::ShowMessage(">>> In ComputePolarMotionRotation, using previous saved PM values ......\n");
+//         MessageInterface::ShowMessage("lastPM = %s\n", (lastPM.ToString()).c_str());
+//      #endif
+//      return;
+//   }
+   #ifdef DEBUG_UPDATE
+      MessageInterface::ShowMessage("----> Computing NEW PM matrix at time %12.10f\n",
+         atEpoch.Get());
+   #endif
    // Get the polar motion and lod data
    Real lod = 0.0;
    Real x, y;
    eop->GetPolarMotionAndLod(mjdUTC,x,y,lod);
+   #ifdef DEBUG_AXIS_SYSTEM_EOP
+      MessageInterface::ShowMessage("in PM calc,      mjdUtc     = %12.10f\n", mjdUTC);
+      MessageInterface::ShowMessage("                 atEpoch    = %12.10f\n", atEpoch.Get());
+      MessageInterface::ShowMessage("                 lod        = %12.10f\n", lod);
+      MessageInterface::ShowMessage("                 x          = %12.10f\n", x);
+      MessageInterface::ShowMessage("                 y          = %12.10f\n", y);
+   #endif
    
    // Compute useful trigonometric quantities
    Real cosX = cos(-x * RAD_PER_ARCSEC);
@@ -1867,19 +1890,10 @@ void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
    PM.Set( cosX,  sinX*sinY, -sinX*cosY,
             0.0,       cosY,       sinY,
            sinX, -cosX*sinY,  cosX*cosY); 
-   //PM(0,0) =  cosX;
-   //PM(0,1) =  sinX*sinY;
-   //PM(0,2) = -sinX*cosY;
-   //PM(1,0) =  0.0;
-   //PM(1,1) =  cosY;
-   //PM(1,2) =  sinY;
-   //PM(2,0) =  sinX;
-   //PM(2,1) = -cosX*sinY;
-   //PM(2,2) =  cosX*cosY;
 
    #ifdef DEBUG_ROT_MATRIX
-      cout << "x = " << x << " and y = " << y << endl;
-      cout << "PM = " << endl << PM << endl;
+      MessageInterface::ShowMessage("x = %12.10f  and y = %12.10f\n", x, y);
+      MessageInterface::ShowMessage("PM = %s\n", (PM.ToString()).c_str());
    #endif
       
    lastPM      = PM;
@@ -1897,7 +1911,5 @@ void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
       firstCallFired = true;
    #endif
 
-//   return PM;
 }
-
 

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Keplerian
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -22,13 +24,12 @@
 
 #include <iostream>
 #include "gmatdefs.hpp"
-#include "RealTypes.hpp"          // for Radians
 #include "Anomaly.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 #include "Anomaly.hpp"
 
-class Keplerian            
+class GMAT_API Keplerian            
 {
 public :
    

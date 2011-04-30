@@ -1,16 +1,23 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  AttitudeData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
+// Developed further jointly by NASA/GSFC, Thinking Systems, Inc., and 
+// Schafer Corp., under AFRL NOVA Contract #FA945104D03990003
+//
 // Author: Daniel Hunter
 // Created: 2006/6/26
+// Modified:  Dunn Idle (added MRPs)
+// Date:      2010/08/24
 //
 /**
  * Declares Attitude related data class.
@@ -68,6 +75,9 @@ protected:
       EULERANGLE1,
       EULERANGLE2,
       EULERANGLE3,
+      MRP_1,  // Dunn Added
+      MRP_2,  // Dunn Added
+      MRP_3,  // Dunn Added
       ANGVELX, 
       ANGVELY, 
       ANGVELZ,

@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  CalculatedPoint
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -100,13 +102,20 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+   virtual bool         HasRefObjectTypeArray();
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray& 
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         TakeAction(const std::string &action,  
                                    const std::string &actionData = "");
+   virtual bool         TakeRequiredAction(const Integer id);
+
    
+   virtual void         SetDefaultBody(const std::string &defBody);
+   virtual const StringArray&
+                        GetDefaultBodies() const;
+
 protected:
    
    enum
@@ -127,6 +136,9 @@ protected:
    std::vector<SpacePoint*> bodyList;
    /// list of body names
    StringArray              bodyNames;
+
+   // names of the default bodies to use
+   StringArray defaultBodies;
     
 private:
       

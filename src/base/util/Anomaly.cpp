@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             Anomaly 
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,6 +25,7 @@
 #include "MessageInterface.hpp"
 #include "Keplerian.hpp"
 #include "RealUtilities.hpp"
+#include "GmatConstants.hpp"
 #include "UtilityException.hpp"
 #include "StringUtil.hpp"
 #include <sstream>
@@ -30,6 +33,7 @@
 //#define DEBUG_ANOMALY 1
 
 using namespace GmatMathUtil;
+using namespace GmatMathConstants;
 
 //---------------------------------
 // static data
@@ -85,8 +89,8 @@ Anomaly::Anomaly(Real sma, Real ecc, Real value, AnomalyType type,
    
    #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage
-      ("Anomaly::Anomaly() mEcc=%f, mAnomalyInRad=%f, mType=%d\n",
-       mEcc, mAnomalyInRad, mType);
+      ("Anomaly::Anomaly() mEcc=%f, mAnomalyInRad=%f, mType=%d (%s)\n",
+       mEcc, mAnomalyInRad, mType, GetTypeString().c_str());
    #endif
 }
 
@@ -133,7 +137,7 @@ Anomaly::Anomaly(const Anomaly &anomaly) :
 //------------------------------------------------------------------------------
 Anomaly& Anomaly::operator=(const Anomaly &anomaly)
 {
-   if (this != &anomaly)
+   if (&anomaly != this)
    {
       mSma           = anomaly.mSma;
       mEcc           = anomaly.mEcc;
@@ -174,9 +178,9 @@ Anomaly::~Anomaly()
 void Anomaly::Set(Real sma, Real ecc, Real value, AnomalyType type,
                   bool valueInRadians)
 {
-   mSma = sma;
-   mEcc = ecc;
-   mType = type;
+   mSma   = sma;
+   mEcc   = ecc;
+   mType  = type;
    
    if (valueInRadians)
       mAnomalyInRad = value;
@@ -202,6 +206,10 @@ void Anomaly::Set(Real sma, Real ecc, Real value, AnomalyType type,
 void Anomaly::Set(Real sma, Real ecc, Real value, const std::string &type,
                   bool valueInRadians)
 {
+   #ifdef DEBUG_ANOMALY
+      MessageInterface::ShowMessage("Anomaly::Set called with AnomalyType = %s\n",
+            type.c_str());
+   #endif
    Set(sma, ecc, value, GetType(type), valueInRadians);
 }
 
@@ -314,6 +322,10 @@ Anomaly::AnomalyType Anomaly::GetType(const std::string &typeStr) const
 //------------------------------------------------------------------------------
 std::string Anomaly::GetTypeString() const
 {
+   #ifdef DEBUG_ANOMALY
+      MessageInterface::ShowMessage("Entering GetTypeString and mType = %d\n",
+            (Integer) mType);
+   #endif
    return ANOMALY_SHORT_TEXT[mType];
 }
 
@@ -644,6 +656,9 @@ std::string Anomaly::ToString(Integer precision)
 //------------------------------------------------------------------------------
 Anomaly::AnomalyType Anomaly::GetAnomalyType(const std::string &typeStr)
 {
+   #ifdef DEBUG_ANOMALY
+      MessageInterface::ShowMessage("GetAnomalyType (%s) called.\n", typeStr.c_str());
+   #endif
    for (int i=0; i<AnomalyTypeCount; i++)
    {
       if (typeStr == ANOMALY_LONG_TEXT[i])

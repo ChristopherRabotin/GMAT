@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              GmatInterface
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -225,8 +227,8 @@ char* GmatInterface::GetCallbackStatus()
       "GmatInterface::GetCallbackStatus being called ...\n");
    #endif
    static char dataString[MAX_PARAM_VAL_STRING];
-   static char *executingStr = "Executing\0";
-   static char *completedStr = "Completed\0";
+   static const char *executingStr = "Executing\0";
+   static const char *completedStr = "Completed\0";
    if (!callbackObj) // not running a callback - why are you asking?
    {
       sprintf(dataString, "%s", completedStr);
@@ -279,7 +281,7 @@ char* GmatInterface::GetCallbackResults()
       "GmatInterface::GetCallbackResults being called ...\n");
    #endif
    static char dataString[MAX_CALLBACK_DATA_VAL_STRING];
-   static char *errorStr = "ERROR!!\0";
+   static const char *errorStr = "ERROR!!\0";
    if (!callbackObj) // not running a callback - why are you asking?
    {
       sprintf(dataString, "%s", errorStr);
@@ -306,9 +308,9 @@ char* GmatInterface::GetCallbackResults()
 char* GmatInterface::GetRunState()
 {
    static char dataString[MAX_PARAM_VAL_STRING];
-   static char *runningStr = "Running\0";
-   static char *pausedStr = "Paused\0";
-   static char *idleStr = "Idle\0";
+   static const char *runningStr = "Running\0";
+   static const char *pausedStr = "Paused\0";
+   static const char *idleStr = "Idle\0";
    strcpy(dataString, idleStr);
    
    Gmat::RunState state = Moderator::Instance()->GetRunState();
@@ -350,7 +352,7 @@ char* GmatInterface::GetParameter(const std::string &name)
    #endif
    
    static char dataString[MAX_PARAM_VAL_STRING];
-   static char *undefindString = "-123456789.123456789\0";
+   static const char *undefindString = "-123456789.123456789\0";
    strcpy(dataString, undefindString);
    Parameter *param = NULL;
    GmatBase *obj = NULL;
@@ -359,7 +361,7 @@ char* GmatInterface::GetParameter(const std::string &name)
    {
       obj = Moderator::Instance()->GetInternalObject(name);
    }
-   catch (BaseException &e)
+   catch (BaseException &)
    {
       MessageInterface::ShowMessage
          ("*** WARNING *** Could not find \"%s\" in the Sandbox. "
@@ -426,7 +428,7 @@ char* GmatInterface::GetGmatObject(const std::string &name)
    #endif
    
    static char dataString[MAX_OBJECT_VAL_STRING];
-   static char *undefindString = "-123456789.123456789\0";
+   static const char *undefindString = "-123456789.123456789\0";
    strcpy(dataString, undefindString);
    GmatBase *obj = NULL;
    
@@ -434,7 +436,7 @@ char* GmatInterface::GetGmatObject(const std::string &name)
    {
       obj = Moderator::Instance()->GetInternalObject(name);
    }
-   catch (BaseException &e)
+   catch (BaseException &)
    {
       MessageInterface::ShowMessage
          ("*** WARNING *** Could not find \"%s\" in the Sandbox. "

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                OrbitRvec6
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -102,13 +104,13 @@ OrbitRvec6::~OrbitRvec6()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// virtual Rvector6 EvaluateRvector6()
+// virtual const Rvector6 EvaluateRvector6()
 //------------------------------------------------------------------------------
 /**
  * @return newly evaluated value of parameter
  */
 //------------------------------------------------------------------------------
-Rvector6 OrbitRvec6::EvaluateRvector6()
+const Rvector6& OrbitRvec6::EvaluateRvector6()
 {
    Evaluate();
    return mRvec6Value;

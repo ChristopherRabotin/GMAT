@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GravityField
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -22,7 +24,7 @@
  * @note original prolog information included at end of file prolog.
  */
 //
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
 // **Legal**
 //
@@ -89,7 +91,8 @@ public:
    bool            gravity_rtq(Real jday, Real F[]);
    
    virtual bool    GetDerivatives(Real * state, Real dt = 0.0, 
-                                                Integer order = 1);
+                                                Integer order = 1, 
+                                                const Integer id = -1);
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -107,6 +110,11 @@ public:
    virtual Real        GetRealParameter(const std::string &label) const;
    virtual Real        SetRealParameter(const std::string &label,
                                         const Real value);
+
+   // Methods used by the ODEModel to set the state indexes, etc
+   virtual bool SupportsDerivative(Gmat::StateElementId id);
+   virtual bool SetStart(Gmat::StateElementId id, Integer index, 
+                         Integer quantity);
 
 
 protected:
@@ -163,7 +171,9 @@ protected:
    Rvector6 frv;
    Rvector6 trv;
    A1Mjd    now;
-   Integer satcount;
+//   Integer satcount;
+   
+   
    
    Real     *sum2Diag;
    Real     *sum3Diag;
@@ -174,6 +184,15 @@ protected:
    Rmatrix33           rotMatrix;
    Rvector6            outState;
    Rvector6            theState;
+
+   /// Number of spacecraft in the state vector that use CartesianState
+   Integer              satCount;
+/// Start index for the Cartesian state
+   Integer              cartIndex;
+   /// Flag indicating if the Cartesian state should be populated
+   bool                 fillCartesian;
+
+
 };
 
 

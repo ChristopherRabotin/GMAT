@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  TextEphemFile
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,6 +23,7 @@
 #include "CubicSplineInterpolator.hpp"
 #include "Moderator.hpp"
 #include "MessageInterface.hpp"
+#include "TimeTypes.hpp"
 #include <iomanip>
 #include <cstdlib>
 
@@ -434,7 +437,7 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
          
          // Compute next output time, first data is time
          mCurrA1Mjd = dat[0];
-         mOutputA1Mjd = dat[0] + mIntervalInSec/86400.0;
+         mOutputA1Mjd = dat[0] + mIntervalInSec/GmatTimeConstants::SECS_PER_DAY;
          
          // Write first data
          WriteFirstData();
@@ -706,7 +709,7 @@ void TextEphemFile::WriteTime(Real epoch)
 {
    
    Real time = TimeConverterUtil::Convert(epoch, TimeConverterUtil::A1MJD, 
-                                          mEpochSysId, GmatTimeUtil::JD_JAN_5_1941);
+                                          mEpochSysId, GmatTimeConstants::JD_JAN_5_1941);
 
    dstream.width(mColWidth[0]);
    dstream.precision(precision);
@@ -759,7 +762,7 @@ void TextEphemFile::WriteData()
    mStopA1Mjd = mOutputA1Mjd;
    
    // Compute new output time
-   mOutputA1Mjd = mOutputA1Mjd + mIntervalInSec/86400.0;
+   mOutputA1Mjd = mOutputA1Mjd + mIntervalInSec/GmatTimeConstants::SECS_PER_DAY;
    
    #if DEBUG_EPHEMFILE_DATA
    MessageInterface::ShowMessage

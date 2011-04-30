@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                   Burn
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -19,28 +21,43 @@
 
 
 #include "Burn.hpp"
+#include "BurnException.hpp"
+#include "ObjectReferencedAxes.hpp"
 #include "MessageInterface.hpp"
+#include <algorithm>                    // for find()
 
-//#define DEBUG_BURN_PARAM 1
+//#define DEBUG_BURN_PARAM
+//#define DEBUG_BURN_GET
+//#define DEBUG_BURN_SET
+//#define DEBUG_BURN_INIT
+//#define DEBUG_BURN_CONVERT
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 // static data
 //---------------------------------
 
+/// Available local axes labels
+StringArray Burn::localAxesLabels;
+
 /// Labels used for the thruster element parameters.
 const std::string
 Burn::PARAMETER_TEXT[BurnParamCount - GmatBaseParamCount] =
 {
+   "CoordinateSystem",
    "Origin",
    "Axes",
-   "CoordinateSystem",
-   "VectorFormat",
+   "VectorFormat", // deprecated
    "Element1",
    "Element2",
    "Element3",
-   "Element1Label",
-   "Element2Label",
-   "Element3Label",
    "SpacecraftName",
 };
 
@@ -48,16 +65,13 @@ Burn::PARAMETER_TEXT[BurnParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
 {
+   Gmat::OBJECT_TYPE,         // "CoordinateSystem",
    Gmat::OBJECT_TYPE,         // "Origin",
    Gmat::ENUMERATION_TYPE,    // "Axes",
-   Gmat::STRING_TYPE,         // "CoordinateSystem", (Not ready to switch to OBJECT_TYPE)
-   Gmat::ENUMERATION_TYPE,    // "VectorFormat",
+   Gmat::ENUMERATION_TYPE,    // "VectorFormat", // deprecated
    Gmat::REAL_TYPE,           // "Element1",
    Gmat::REAL_TYPE,           // "Element2",
    Gmat::REAL_TYPE,           // "Element3",
-   Gmat::STRING_TYPE,         // "Element1Label",
-   Gmat::STRING_TYPE,         // "Element2Label",
-   Gmat::STRING_TYPE,         // "Element3Label",
    Gmat::OBJECT_TYPE,         // "SpacecraftName",
 };
 
@@ -70,46 +84,56 @@ Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
 //  Burn(std::string typeStr, std::string nomme)
 //------------------------------------------------------------------------------
 /**
- * Constructs the Burn object (default constructor).
+ * Constructs the Burn object (default constructor) with default VNB Local
+ * CoordinateSystem.
  * 
  * @param <type>    Gmat::ObjectTypes enumeration for the object.
  * @param <typeStr> String text identifying the object type
  * @param <nomme>   Name for the object
+ *
+ * @Note coordSystem, localOrigin, spacecraft, solarSystem, and j2000Body are
+ *       set through SetRefObject() during Sandbox initialization.
+ *       localCoordSystem is created during initialization or when new
+ *       spacecraft is set
  */
 //------------------------------------------------------------------------------
 Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
            const std::string &nomme) :
-   GmatBase        (type, typeStr, nomme),
-   coordAxes       ("Inertial"),
-   vectorFormat    ("Cartesian"),
-   coordinateSystem(""),
-   satName         (""),
-   sc              (NULL),
-   solarSystem     (NULL),
-   burnOriginName  ("Earth"),
-   burnOrigin      (NULL),
-   j2000BodyName   ("Earth"),
-   j2000Body       (NULL)
-
+   GmatBase             (type, typeStr, nomme),
+   solarSystem          (NULL),
+   localCoordSystem     (NULL),
+   coordSystem          (NULL),
+   localOrigin          (NULL),
+   j2000Body            (NULL),
+   spacecraft           (NULL),
+   coordSystemName      ("Local"),
+   localOriginName      ("Earth"),
+   localAxesName        ("VNB"),
+   j2000BodyName        ("Earth"),
+   satName              (""),
+   usingLocalCoordSys   (true),
+   isMJ2000EqAxes       (false),
+   isSpacecraftBodyAxes (false),
+   initialized          (false)
 {
    objectTypes.push_back(Gmat::BURN);
    objectTypeNames.push_back("Burn");
-   
    parameterCount = BurnParamCount;
    
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
-   frameman = new ManeuverFrameManager;
-
-   /// Load the default maneuver frame
-   frame = frameman->GetFrameInstance(coordAxes);
-
-   dvLabels[0] = frame->GetFrameLabel(1);
-   dvLabels[1] = frame->GetFrameLabel(2);
-   dvLabels[2] = frame->GetFrameLabel(3);
-    
+   deltaVInertial[0] = deltaVInertial[1] = deltaVInertial[2] = 0.0;
+   
    frameBasis[0][0] = frameBasis[1][1] = frameBasis[2][2] = 1.0;
    frameBasis[0][1] = frameBasis[1][0] = frameBasis[2][0] =
    frameBasis[0][2] = frameBasis[1][2] = frameBasis[2][1] = 0.0;
+      
+   // Available local axes labels
+   // Since it is static data, clear it first
+   localAxesLabels.clear();
+   localAxesLabels.push_back("VNB");
+   localAxesLabels.push_back("LVLH");
+   localAxesLabels.push_back("MJ2000Eq");
+   localAxesLabels.push_back("SpacecraftBody");
 }
 
 
@@ -121,8 +145,17 @@ Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 Burn::~Burn()
-{
-   delete frameman;
+{   
+   if (usingLocalCoordSys && localCoordSystem)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (localCoordSystem, "localCoordSystem", "Burn::~Burn()",
+          "deleting localCoordSystem");
+      #endif
+      delete localCoordSystem;
+      localCoordSystem = NULL;
+   }
 }
 
 
@@ -133,36 +166,43 @@ Burn::~Burn()
  * Constructs the Burn object (copy constructor).
  * 
  * @param <b> Object that is copied
+ *
+ * @Note coordSystem, localOrigin, spacecraft, solarSystem, and j2000Body are
+ *       set through SetRefObject() during Sandbox initialization.
+ *       localCoordSystem is created during initialization or when new
+ *       spacecraft is set
  */
 //------------------------------------------------------------------------------
 Burn::Burn(const Burn &b) :
-   GmatBase        (b),
-   coordAxes       (b.coordAxes),
-   vectorFormat    (b.vectorFormat),
-   coordinateSystem(b.coordinateSystem),
-   frame           (NULL),
-   satName         (b.satName),
-   sc              (NULL),
-   solarSystem     (b.solarSystem),
-   burnOriginName  (b.burnOriginName),
-   burnOrigin      (NULL),
-   j2000BodyName   (b.j2000BodyName),
-   j2000Body       (NULL)
+   GmatBase             (b),
+   solarSystem          (b.solarSystem),
+   localCoordSystem     (NULL),
+   coordSystem          (b.coordSystem),
+   localOrigin          (b.localOrigin),
+   j2000Body            (b.j2000Body),
+   spacecraft           (NULL),
+   coordSystemName      (b.coordSystemName),
+   localOriginName      (b.localOriginName),
+   localAxesName        (b.localAxesName),
+   j2000BodyName        (b.j2000BodyName),
+   satName              (b.satName),
+   vectorFormat         (b.vectorFormat),
+   usingLocalCoordSys   (b.usingLocalCoordSys),
+   isMJ2000EqAxes       (b.isMJ2000EqAxes),
+   isSpacecraftBodyAxes (b.isSpacecraftBodyAxes),
+   initialized          (false)
 {
    deltaV[0] = b.deltaV[0];
    deltaV[1] = b.deltaV[1];
    deltaV[2] = b.deltaV[2];
-   dvLabels[0] = b.dvLabels[0];
-   dvLabels[1] = b.dvLabels[1];
-   dvLabels[2] = b.dvLabels[2];
-    
+   
+   deltaVInertial[0] = 0.0;
+   deltaVInertial[1] = 0.0;
+   deltaVInertial[2] = 0.0;
+   
    for (Integer i = 0; i < 3; i++)
       for (Integer j = 0; j < 3; j++)
          frameBasis[i][j]  = b.frameBasis[i][j];
-   
-   parameterCount = b.parameterCount;
-   
-   frameman = new ManeuverFrameManager;
 }
 
 
@@ -175,41 +215,58 @@ Burn::Burn(const Burn &b) :
  * @param <b> The object that is copied.
  * 
  * @return this object, with the parameters set as needed.
+ *
+ * @Note coordSystem, localOrigin, spacecraft, solarSystem, and j2000Body are
+ *       set through SetRefObject() during Sandbox initialization.
+ *       localCoordSystem is created during initialization or when new
+ *       spacecraft is set
  */
 //------------------------------------------------------------------------------
 Burn& Burn::operator=(const Burn &b)
 {
-   if (this != &b)
-   {
-      GmatBase::operator=(b);
+   if (this == &b)
+      return *this;
    
-      coordAxes         = b.coordAxes;
-      vectorFormat      = b.vectorFormat;
-      coordinateSystem  = b.coordinateSystem;
-      frame             = NULL;
-      satName           = b.satName;
-      sc                = NULL;
-      solarSystem       = b.solarSystem;
-      burnOriginName    = b.burnOriginName;
-      burnOrigin        = NULL;
-      j2000BodyName     = b.j2000BodyName;
-      j2000Body         = NULL;
+   GmatBase::operator=(b);
    
-      deltaV[0]         = b.deltaV[0];
-      deltaV[1]         = b.deltaV[1];
-      deltaV[2]         = b.deltaV[2];
-      dvLabels[0]       = b.dvLabels[0];
-      dvLabels[1]       = b.dvLabels[1];
-      dvLabels[2]       = b.dvLabels[2];
-      
-      for (Integer i = 0; i < 3; i++)
-         for (Integer j = 0; j < 3; j++)
-            frameBasis[i][j]  = b.frameBasis[i][j];
-      
-      frameman = new ManeuverFrameManager;
-   }
-
+   solarSystem        = b.solarSystem;
+   localCoordSystem   = NULL;
+   coordSystem        = b.coordSystem;
+   localOrigin        = b.localOrigin;
+   j2000Body          = b.j2000Body;
+   spacecraft         = NULL;
+   coordSystemName    = b.coordSystemName;
+   localOriginName    = b.localOriginName;
+   localAxesName      = b.localAxesName;
+   j2000BodyName      = b.j2000BodyName;
+   satName            = b.satName;
+   vectorFormat       = b.vectorFormat;
+   usingLocalCoordSys = b.usingLocalCoordSys;
+   localAxesLabels    = b.localAxesLabels;
+   initialized        = false;
+   
+   deltaV[0] = b.deltaV[0];
+   deltaV[1] = b.deltaV[1];
+   deltaV[2] = b.deltaV[2];
+   
+   deltaVInertial[0] = 0.0;
+   deltaVInertial[1] = 0.0;
+   deltaVInertial[2] = 0.0;
+   
+   for (Integer i = 0; i < 3; i++)
+      for (Integer j = 0; j < 3; j++)
+         frameBasis[i][j]  = b.frameBasis[i][j];
+   
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsUsingLocalCoordSystem()
+//------------------------------------------------------------------------------
+bool Burn::IsUsingLocalCoordSystem()
+{
+   return usingLocalCoordSys;
 }
 
 
@@ -245,38 +302,79 @@ std::string Burn::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Burn::GetParameterID(const std::string &str) const
 {
-   #if DEBUG_BURN_PARAM
+   static bool vectorFormatFirstWarning = true;
+   static bool vFirstWarning = true;
+   static bool nFirstWarning = true;
+   static bool bFirstWarning = true;
+   
+   #ifdef DEBUG_BURN_PARAM
    MessageInterface::ShowMessage
-      ("Burn::GetParameterID() str=%s, dvLabels=%s, %s, %s, ", str.c_str(),
-       dvLabels[0].c_str(), dvLabels[1].c_str(), dvLabels[2].c_str());
+      ("Burn::GetParameterID() str=%s\n", str.c_str());
    #endif
    
    Integer id = -1;
    
-   // Let users ask for components (e.g. "V", "N", or "B" in VNB coordinates)
-   // directly
-   if (str == dvLabels[0])
-      id = DELTAV1;   
-   else if (str == dvLabels[1])
-      id = DELTAV2;        
-   else if (str == dvLabels[2])
-      id = DELTAV3;
-   else
+   if (str == "VectorFormat")
    {
-      for (Integer i = GmatBaseParamCount; i < BurnParamCount; i++)
+      if (vectorFormatFirstWarning)
       {
-         if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
-         {
-            id = i;
-            break;
-         }
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"VectorFormat\" field of Burn "
+             "is deprecated and will be removed from a future build.\n");
+         vectorFormatFirstWarning = false;
+      }
+      return VECTORFORMAT;
+   }
+   
+   if (str == "V")
+   {
+      if (vFirstWarning)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"V\" field of Burn is deprecated and will be "
+             "removed from a future build; please use \"Element1\" instead.\n");
+         vFirstWarning = false;
+      }
+      return DELTAV1;
+   }
+   
+   if (str == "N")
+   {
+      if (nFirstWarning)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"N\" field of Burn is deprecated and will be "
+             "removed from a future build; please use \"Element2\" instead.\n");
+         nFirstWarning = false;
+      }
+      return DELTAV2;
+   }
+   
+   if (str == "B")
+   {
+      if (bFirstWarning)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"B\" field of Burn is deprecated and will be "
+             "removed from a future build; please use \"Element3\" instead.\n");
+         bFirstWarning = false;
+      }
+      return DELTAV3;
+   }
+   
+   for (Integer i = GmatBaseParamCount; i < BurnParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+      {
+         id = i;
+         break;
       }
    }
    
    if (id != -1)
    {
-      #if DEBUG_BURN_PARAM
-      MessageInterface::ShowMessage("returning %d\n", id);
+      #ifdef DEBUG_BURN_PARAM
+      MessageInterface::ShowMessage("Burn::GetParameterID() returning %d\n", id);
       #endif
       
       return id;
@@ -337,10 +435,15 @@ std::string Burn::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Burn::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DELTAV1LABEL) || (id == DELTAV2LABEL) ||
-       (id == DELTAV3LABEL) || (id == SATNAME) ||
-       (id == COORDINATESYSTEM)) //loj:2007.11.15 until COORDINATESYSTEM works
+   if (id == SATNAME)
       return true;
+   
+   if (id == VECTORFORMAT)
+      return true;
+   
+   if ((id == BURNORIGIN || id == BURNAXES))
+      if (coordSystemName != "Local")
+         return true;
    
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -359,19 +462,23 @@ bool Burn::IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 Real Burn::GetRealParameter(const Integer id) const
 {
+   #ifdef DEBUG_BURN_GET
+   MessageInterface::ShowMessage("Burn::GetRealParameter() id=%d\n", id);
+   #endif
+   
    if (id == DELTAV1)
       return deltaV[0];
-        
+   
    if (id == DELTAV2)
       return deltaV[1];
-        
+   
    if (id == DELTAV3)
       return deltaV[2];
-        
+   
    return GmatBase::GetRealParameter(id);
 }
 
-      
+
 //------------------------------------------------------------------------------
 //  Real SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
@@ -386,12 +493,17 @@ Real Burn::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Burn::SetRealParameter(const Integer id, const Real value)
 {
+   #ifdef DEBUG_BURN_SET
+   MessageInterface::ShowMessage
+      ("Burn::SetRealParameter() id=%d, value=%f\n", id, value);
+   #endif
+   
    if (id == DELTAV1)
    {
       deltaV[0] = value;
       return deltaV[0];
    }
-        
+   
    if (id == DELTAV2)
    {
       deltaV[1] = value;
@@ -403,7 +515,7 @@ Real Burn::SetRealParameter(const Integer id, const Real value)
       deltaV[2] = value;
       return deltaV[2];
    }
-
+   
    return GmatBase::SetRealParameter(id, value);
 }
 
@@ -422,29 +534,20 @@ Real Burn::SetRealParameter(const Integer id, const Real value)
 std::string Burn::GetStringParameter(const Integer id) const
 {
    if (id == BURNORIGIN)
-      return burnOriginName;
-        
+      return localOriginName;
+   
    if (id == BURNAXES)
-      return coordAxes;
-        
+      return localAxesName;
+   
    if (id == COORDINATESYSTEM)
-      return coordinateSystem;
-        
-   if (id == VECTORFORMAT)
-      return vectorFormat;
-        
-   if (id == DELTAV1LABEL)
-      return dvLabels[0];
-        
-   if (id == DELTAV2LABEL)
-      return dvLabels[1];
-        
-   if (id == DELTAV3LABEL)
-      return dvLabels[2];
-        
+      return coordSystemName;
+   
    if (id == SATNAME)
       return satName;
-      
+   
+   if (id == VECTORFORMAT) // deprecated
+      return vectorFormat;
+   
    return GmatBase::GetStringParameter(id);
 }
 
@@ -463,84 +566,87 @@ std::string Burn::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Burn::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == BURNORIGIN)
+   #ifdef DEBUG_BURN_SET
+   MessageInterface::ShowMessage
+      ("Burn::SetStringParameter() this=<%p> '%s', id=%d, value='%s'\n", this,
+       GetName().c_str(), id, value.c_str());
+   #endif
+   
+   switch (id)
    {
-      burnOriginName = value;
+   case COORDINATESYSTEM:
+      coordSystemName = value;
+      if (coordSystemName == "Local")
+         usingLocalCoordSys = true;
+      else
+         usingLocalCoordSys = false;
       return true;
-   }
-           
-   if (id == BURNAXES)
-   {
-      /// @todo validate the input value when the CS code is incorporated.
-      // if (!IsValidFrame(value))
-      //    return false;
-      
-      // Burns know the frame options, so use that to detect if there is 
-      // an issue with the input
-      StringArray frames = GetStringArrayParameter(BURNAXES);
-      if (find(frames.begin(), frames.end(), value) == frames.end())
-      { 
-         // For now, keep "Inertial" as a deprecated option
-         if (value != "Inertial")
+   case BURNORIGIN:
+      localOriginName = value;
+      #ifdef DEBUG_BURN_SET
+      MessageInterface::ShowMessage
+         ("Burn::SetStringParameter() exiting, localOriginName set to '%s'\n",
+          value.c_str());
+      #endif
+      return true;
+   case BURNAXES:
+      {
+         localAxesName = value;
+         
+         // Do we need to determin Local CS here?
+         // Yes, old ImpulsiveBurn script doesn't have CoordinateSystem field, 
+         // so Axes should be used to determine Local CS or not
+         if (find(localAxesLabels.begin(), localAxesLabels.end(), localAxesName)
+             != localAxesLabels.end())
          {
-            std::string framelist = frames[0];
-            for (UnsignedInt n = 1; n < frames.size(); ++n)
-               framelist += ", " + frames[n];
-            throw BurnException(
-               "The value of \"" + value + "\" for field \"Axes\""
-               " on object \"" + instanceName + "\" is not an allowed value.\n"
-               "The allowed values are: [ " + framelist + " ]. ");
+            #ifdef DEBUG_BURN_SET
+            MessageInterface::ShowMessage
+               ("   Local axes '%s' found, so setting coordSystemName to Local\n",
+                localAxesName.c_str());
+            #endif
+            if (usingLocalCoordSys)
+               coordSystemName = "Local";
          }
          else
          {
-            MessageInterface::ShowMessage("\"Inertial\" maneuver frames are "
-               "deprecated and will be removed from a future build; please use "
-               "\"MJ2000Eq\" instead.\n");
-               coordAxes = "MJ2000Eq";
+            // write one warning per GMAT session
+            static bool firstTimeWarning = true;
+            std::string framelist = localAxesLabels[0];
+            for (UnsignedInt n = 1; n < localAxesLabels.size(); ++n)
+               framelist += ", " + localAxesLabels[n];
+            
+            std::string msg =
+               "The value of \"" + value + "\" for field \"Axes\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ " + framelist + " ]. ";
+            
+            if (firstTimeWarning)
+            {
+               firstTimeWarning = false;
+               
+               if (value == "Inertial")
+                  MessageInterface::ShowMessage("*** WARNING *** " + msg + "\n");
+               else
+                  throw BurnException(msg);
+            }
+            
+            if (value == "Inertial")
+            {
+               coordSystemName = "EarthMJ2000Eq";
+               usingLocalCoordSys = false;
+            }
+            else
+               throw BurnException(msg);
+            
          }
+         
+         return true;
       }
-      else
-         coordAxes = value;
-      frame = frameman->GetFrameInstance(coordAxes);
-
-      dvLabels[0] = frame->GetFrameLabel(1);
-      dvLabels[1] = frame->GetFrameLabel(2);
-      dvLabels[2] = frame->GetFrameLabel(3);
-      return true;
-   }
-        
-   if (id == COORDINATESYSTEM)
-   {
-      throw BurnException("Burns cannot use GMAT coordinate systems yet.");
-   }
-
-
-   if (id == VECTORFORMAT)
-   {
-      /// @todo added Spherical
-      if (value != "Cartesian")
-         throw BurnException(
-            "The value of \"" + value + "\" for field \"Vector Format\""
-            " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [ Cartesian ]. ");
+   case VECTORFORMAT: // deprecated
       vectorFormat = value;
       return true;
-   }
-        
-   // Cannot change the labels -- they are set internally
-   if (id == DELTAV1LABEL)
-      return false;
-        
-   if (id == DELTAV2LABEL)
-      return false;
-        
-   if (id == DELTAV3LABEL)
-      return false;
-        
-   if (id == SATNAME)
-   {
-      satName = value;
-      return true;
+   default:
+      break;
    }
    
    return GmatBase::SetStringParameter(id, value);
@@ -569,13 +675,10 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value,
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetStringArrayParameter(const Integer id) const
+//  const StringArray& GetPropertyEnumStrings(const Integer id) const
 //------------------------------------------------------------------------------
 /**
- * Access an array of string data.
- * 
- * For the Burn classes, calls to this method get passed to the maneuver frame
- * manager when the user requests the frames that are available for the system.
+ * Access an array of enumerated string data.
  *
  * @param <id> The integer ID for the parameter.
  *
@@ -583,12 +686,29 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value,
  *         StringArray.
  */
 //------------------------------------------------------------------------------
-const StringArray& Burn::GetStringArrayParameter(const Integer id) const
+const StringArray& Burn::GetPropertyEnumStrings(const Integer id) const
 {
    if (id == BURNAXES)
-      return frameman->GetSupportedFrames();
+      return localAxesLabels;
+   
+   return GmatBase::GetPropertyEnumStrings(id);
+}
 
-   return GmatBase::GetStringArrayParameter(id);
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetPropertyEnumStrings(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Access an array of enumerated string data.
+ *
+ * @param <label> The parameter name.
+ *
+ * @return The requested StringArray
+ */
+//------------------------------------------------------------------------------
+const StringArray& Burn::GetPropertyEnumStrings(const std::string &label) const
+{
+   return GetPropertyEnumStrings(GetParameterID(label));
 }
 
 
@@ -606,8 +726,10 @@ const ObjectTypeArray& Burn::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::SPACE_POINT);
-   //Spacecraft is not used
+   // Spacecraft is not known until Maneuver or BeginFiniteBurn
    //refObjectTypes.push_back(Gmat::SPACECRAFT);
+   if (!usingLocalCoordSys)
+      refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    return refObjectTypes;
 }
 
@@ -619,12 +741,17 @@ const StringArray& Burn::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    refObjectNames.clear();
    
-   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACECRAFT)
-      refObjectNames.push_back(satName);
-   
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
-      refObjectNames.push_back(burnOriginName);
-
+      refObjectNames.push_back(localOriginName);
+   
+   // Spacecraft is not known until Maneuver or BeginFiniteBurn
+   //if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACECRAFT)
+   //   refObjectNames.push_back(satName);
+   
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::COORDINATE_SYSTEM)
+      if (!usingLocalCoordSys)
+         refObjectNames.push_back(coordSystemName);
+   
    return refObjectNames;
 }
 
@@ -647,26 +774,40 @@ const StringArray& Burn::GetRefObjectNameArray(const Gmat::ObjectType type)
 bool Burn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                         const std::string &name)
 {
-   #if DEBUG_BURN_SET
+   #ifdef DEBUG_BURN_SET
    MessageInterface::ShowMessage
-      ("===> Burn::SetRefObject() objType=%d, objTypeName=%s, objName=%s, type=%d, "
-       "name=%s\n", obj->GetType(), obj->GetTypeName().c_str(), obj->GetName().c_str(),
-       type, name.c_str());
+      ("Burn::SetRefObject() this=<%p> '%s', objType=%d, objTypeName=%s, "
+       "objName=%s, type=%d, name=%s\n", this, GetName().c_str(), obj->GetType(),
+       obj->GetTypeName().c_str(), obj->GetName().c_str(), type, name.c_str());
    #endif
    
    switch (type)
    {
+   case Gmat::COORDINATE_SYSTEM:
+      {
+         if (coordSystemName == name)
+            coordSystem = (CoordinateSystem*)obj;
+         
+         return true;
+      }
    case Gmat::SPACE_POINT:
    case Gmat::CELESTIAL_BODY:
       {
-         burnOriginName = obj->GetName();
-         burnOrigin = (SpacePoint*)obj;
+         // Set j2000Body here for now(loj: 2008.11.13)
+         //@todo We need to make sure SetSolarSystem() is called during object
+         // initialization in ObjectInitializer
+         // localOriginName is set through SetStringParameter()
+         //localOriginName = obj->GetName();
+         if (localOriginName == obj->GetName())
+            localOrigin = (SpacePoint*)obj;
+         if (j2000BodyName == obj->GetName())
+            j2000Body = (CelestialBody*)obj;
          return true;
       }
    case Gmat::SPACECRAFT:
       {
          satName = obj->GetName();
-         sc = (Spacecraft*)obj;
+         spacecraft = (Spacecraft*)obj;
          return true;
       }
    default:
@@ -714,7 +855,41 @@ bool Burn::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 void Burn::SetSpacecraftToManeuver(Spacecraft *sat)
 {
-   sc = sat;
+   if (sat == NULL)
+      return;
+   
+   #ifdef DEBUG_BURN_SET
+   MessageInterface::ShowMessage
+      ("Burn::SetSpacecraftToManeuver() sat=<%p>'%s', usingLocalCoordSys=%d, "
+       "localCoordSystem=<%p>\n", sat, sat->GetName().c_str(), usingLocalCoordSys,
+       localCoordSystem);
+   #endif
+   
+   // If spcecraft is different, create new local coordinate system
+   if (spacecraft != sat)
+   {
+      spacecraft = sat;
+      satName = spacecraft->GetName();
+      
+      if (usingLocalCoordSys)
+      {
+         if (localCoordSystem)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (localCoordSystem, "localCoordSystem", "Burn::SetSpacecraftToManeuver()",
+                "deleting localCoordSystem");
+            #endif
+            delete localCoordSystem;
+            localCoordSystem = NULL;
+         }
+         localCoordSystem = CreateLocalCoordinateSystem();
+      }
+   }
+   
+   #ifdef DEBUG_BURN_SET
+   MessageInterface::ShowMessage("Burn::SetSpacecraftToManeuver() returning\n");
+   #endif
 }
 
 
@@ -729,34 +904,248 @@ void Burn::SetSpacecraftToManeuver(Spacecraft *sat)
 //------------------------------------------------------------------------------
 void Burn::SetSolarSystem(SolarSystem *ss)
 {
+   #ifdef DEBUG_BURN_SET
+   MessageInterface::ShowMessage
+      ("Burn::SetSolarSystem() ss=<%p> '%s'\n", ss, ss->GetName().c_str());
+   #endif
+   SolarSystem *oldSS = solarSystem;
    solarSystem = ss;
+   
+   if (solarSystem != oldSS)
+      Initialize();
 }
 
 
 //------------------------------------------------------------------------------
-//  bool Burn::Initialize()
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
- * Sets up the bodies used in teh burn calculations.
+ * Sets up the bodies used in the burn calculations.
  */
 //------------------------------------------------------------------------------
 bool Burn::Initialize()
 {
+   #ifdef DEBUG_BURN_INIT
+   MessageInterface::ShowMessage
+      ("Burn::Initialize() <%p>'%s' entered, spacecraft=<%p>\n", this,
+       GetName().c_str(), spacecraft);
+   #endif
+   
    bool retval = GmatBase::Initialize();
    
    if (retval)
    {
+      if ((!solarSystem))
+         throw BurnException("Unable to initialize the burn object \"" + 
+            instanceName + "\"; the SolarSystem was not set.");
+      
       j2000Body = solarSystem->GetBody(j2000BodyName);
-      if (!burnOrigin)
-         burnOrigin = solarSystem->GetBody(burnOriginName);
-   
-      if ((!burnOrigin) || (!j2000Body))
+      if (!localOrigin)
+         localOrigin = solarSystem->GetBody(localOriginName);
+      
+      if ((!localOrigin) || (!j2000Body))
          throw BurnException("Unable to initialize the burn object " + 
             instanceName + "; either " + j2000BodyName + " or " + 
-            burnOriginName + " was not set for the burn.");
+            localOriginName + " was not set for the burn.");
    }
-         
+   
+   // delete old local coordinate system
+   if (usingLocalCoordSys && localCoordSystem != NULL)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (localCoordSystem, "localCoordSystem", "Burn::Initialize()",
+          "deleting localCoordSystem");
+      #endif
+      delete localCoordSystem;
+      localCoordSystem = NULL;
+   }
+   
+   // If spacecraft is available, create new local coordinate system
+   if (usingLocalCoordSys && spacecraft != NULL)
+      localCoordSystem = CreateLocalCoordinateSystem();
+   
+   if (usingLocalCoordSys && localCoordSystem == NULL)
+      retval = false;
+   
+   #ifdef DEBUG_BURN_INIT
+   MessageInterface::ShowMessage
+      ("Burn::Initialize() <%p>'%s' returning %d, localCoordSystem=<%p>\n",
+       this, GetName().c_str(), retval, localCoordSystem);
+   #endif
+   
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* CreateLocalCoordinateSystem()
+//------------------------------------------------------------------------------
+CoordinateSystem* Burn::CreateLocalCoordinateSystem()
+{
+   #ifdef DEBUG_BURN_INIT
+   MessageInterface::ShowMessage
+      ("Burn::CreateLocalCoordinateSystem() '%s' entered, usingLocalCoordSys=%d, "
+       "spacecraft=<%p>, solarSystem=<%p>\n", GetName().c_str(), usingLocalCoordSys,
+       spacecraft, solarSystem);
+   #endif
+   
+   // Why solarSystem gets NULL when running MMS script?
+   // Added a check here for now (LOJ: 2009.04.22)
+   if (solarSystem == NULL)
+   {
+      #ifdef DEBUG_BURN_INIT
+      MessageInterface::ShowMessage
+         ("*** WARNING *** Burn::CreateLocalCoordinateSystem() Unable to create local "
+          "coordiante system, SolarSystem is NULL\n");
+      #endif
+      throw BurnException
+         ("*** WARNING *** Burn::CreateLocalCoordinateSystem() Unable to create "
+          "local coordiante system, SolarSystem is NULL\n");
+   }
+   
+   CoordinateSystem *localCS = NULL;
+   
+   // If coordinate system being used is local, then create
+   if (usingLocalCoordSys)
+   {
+      if (spacecraft == NULL)
+      {
+         // Since spacecraft is set later, just return NULL for now
+         #ifdef DEBUG_BURN_INIT
+         MessageInterface::ShowMessage
+            ("Burn::CreateLocalCoordinateSystem() spacecraft is not set so, "
+             "returning NULL\n");
+         #endif
+         return NULL;
+         //throw BurnException("Unable to initialize the Burn object " + 
+         //   instanceName + " " + satName + " was not set for the burn.");
+      }
+      
+      // Call CoordinateSystem static method to create a local coordinate system
+      localOrigin = solarSystem->GetBody(localOriginName);
+      localCS = CoordinateSystem::CreateLocalCoordinateSystem
+         ("Local", localAxesName, spacecraft, localOrigin, spacecraft,
+          j2000Body, solarSystem);
+      
+      if (localCS == NULL)
+         return NULL;
+      
+      if (localAxesName == "MJ2000Eq")
+         isMJ2000EqAxes = true;
+      else if (localAxesName == "SpacecraftBody")
+         isSpacecraftBodyAxes = true;
+      
+   }
+   else
+   {
+      // If not using local cooordinate system, then it is using configured CS and
+      // it should have been set by this time
+      if (coordSystem)
+      {
+         throw BurnException
+            ("Unable to initialize the Burn object " + 
+             instanceName + " " + coordSystemName + " was not set for the burn.");
+      }
+      localCS = coordSystem;
+   }
+   
+   #ifdef DEBUG_BURN_INIT
+   MessageInterface::ShowMessage
+      ("Burn::CreateLocalCoordinateSystem() returning <%p>\n", localCS);
+   #endif
+   
+   return localCS;
+}
+
+
+//------------------------------------------------------------------------------
+// void ConvertDeltaVToInertial(Real *dv, Real *dvInertial, Real epoch)
+//------------------------------------------------------------------------------
+void Burn::ConvertDeltaVToInertial(Real *dv, Real *dvInertial, Real epoch)
+{
+   #ifdef DEBUG_BURN_CONVERT
+   MessageInterface::ShowMessage
+      ("Burn::ConvertDeltaVToInertial(), usingLocalCoordSys=%d, coordSystemName='%s', "
+       "coordSystem=<%p>'%s'\n", usingLocalCoordSys, coordSystemName.c_str(),
+       coordSystem, coordSystem ? coordSystem->GetName().c_str() : "NULL");
+   #endif
+   
+   if (usingLocalCoordSys && localCoordSystem == NULL)
+   {      
+      throw BurnException
+         ("Unable to convert burn elements to Inertial, the local Coordinate "
+          "System has not been created");
+   }
+   else if (!usingLocalCoordSys && coordSystem == NULL)
+   {
+      throw BurnException
+         ("Unable to convert burn elements to Inertial, the Coordinate "
+          "System has not been set");      
+   }
+   
+   Real inDeltaV[6], outDeltaV[6];
+   for (Integer i=0; i<3; i++)
+      inDeltaV[i] = dv[i];
+   for (Integer i=3; i<6; i++)
+      inDeltaV[i] = 0.0;
+   
+   // if not using local CS, use ref CoordinateSystem
+   if (!usingLocalCoordSys)
+   {     
+      // Now rotate to MJ2000Eq axes, we don't want to translate so
+      // set coincident to true
+      coordSystem->ToMJ2000Eq(epoch, inDeltaV, outDeltaV, true);
+      
+      #ifdef DEBUG_BURN_CONVERT_ROTMAT
+      Rmatrix33 rotMat = coordSystem->GetLastRotationMatrix();
+      MessageInterface::ShowMessage
+         ("rotMat=\n%s\n", rotMat.ToString(16, 20).c_str());
+      #endif
+      
+      dvInertial[0] = outDeltaV[0];
+      dvInertial[1] = outDeltaV[1];
+      dvInertial[2] = outDeltaV[2];
+   }
+   else
+   {
+      // if MJ2000Eq axes rotation matrix is always identity matrix
+      if (isMJ2000EqAxes)
+      {
+         dvInertial[0] = dv[0];
+         dvInertial[1] = dv[1];
+         dvInertial[2] = dv[2];
+      }
+      else if (isSpacecraftBodyAxes)
+      {
+         Rvector3 inDeltaV(dv[0], dv[1], dv[2]);
+         Rvector3 outDeltaV;
+         // Get attitude matrix from Spacecraft and transpose since
+         // attitude matrix from spacecraft gives rotation matrix from
+         // inertial to body
+         Rmatrix33 inertialToBody = spacecraft->GetAttitude(epoch);
+         Rmatrix33 rotMat = inertialToBody.Transpose();
+         outDeltaV = inDeltaV * rotMat;
+         for (Integer i=0; i<3; i++)
+            dvInertial[i] = outDeltaV[i];
+      }
+      else
+      {         
+         // Now rotate to MJ2000Eq axes
+         localCoordSystem->ToMJ2000Eq(epoch, inDeltaV, outDeltaV, true);
+
+         dvInertial[0] = outDeltaV[0];
+         dvInertial[1] = outDeltaV[1];
+         dvInertial[2] = outDeltaV[2];
+      }
+   }
+   
+   #ifdef DEBUG_BURN_CONVERT
+   MessageInterface::ShowMessage
+      ("Burn::ConvertDeltaVToInertial() returning\n"
+       "           dv = %f %f %f\n   dvInertial = %f %f %f\n",
+       dv[0], dv[1], dv[2], dvInertial[0], dvInertial[1], dvInertial[2]);
+   #endif
 }
 
 
@@ -780,17 +1169,17 @@ void Burn::TransformJ2kToBurnOrigin(const Real *scState, Real *state,
          "   Input state =  [ %lf %lf %lf %.9lf %.9lf %.9lf ]\n", scState[0], 
          scState[1], scState[2], scState[3], scState[4], scState[5]);
    #endif
-
-   if ((j2000Body == NULL) || (burnOrigin == NULL))
-      Initialize();
       
+   if ((j2000Body == NULL) || (localOrigin == NULL))
+      Initialize();
+   
    memcpy(state, scState, 6*sizeof(Real));
-   if (j2000Body != burnOrigin)
+   if (j2000Body != localOrigin)
    {
       Rvector6 j2kState = j2000Body->GetMJ2000State(epoch);
-      Rvector6 originState = burnOrigin->GetMJ2000State(epoch);
+      Rvector6 originState = localOrigin->GetMJ2000State(epoch);
       Rvector6 delta = j2kState - originState;
-
+      
       #ifdef DEBUG_BURN_ORIGIN
          MessageInterface::ShowMessage(
             "   j2000       =  [ %lf %lf %lf %.9lf %.9lf %.9lf ]\n",

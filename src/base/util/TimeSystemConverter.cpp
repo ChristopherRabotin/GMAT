@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              TimeSystemConverter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -69,6 +71,7 @@ Integer TimeConverterUtil::GetTimeTypeID(std::string &str)
  *
  * @return Converted time from the specific data format 
  */
+//---------------------------------------------------------------------------
 Real TimeConverterUtil::Convert(const Real origValue,
                                 const Integer fromType,
                                 const Integer toType,
@@ -138,7 +141,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
     case TimeConverterUtil::A1MJD:
     case TimeConverterUtil::A1:
         return (origValue -
-             (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
+             (GmatTimeConstants::A1_TAI_OFFSET/GmatTimeConstants::SECS_PER_DAY));
     case TimeConverterUtil::TAIMJD:
     case TimeConverterUtil::TAI:
         return origValue;
@@ -147,11 +150,11 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
     {
         Real offsetValue = 0;
     
-        if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+        if (refJd != GmatTimeConstants::JD_NOV_17_1858)
         {
            // DJC: 6/16/05 Reversed order of difference so future times are positive
-           // offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
-           offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
+           // offsetValue = GmatTimeConstants::JD_NOV_17_1858 - refJd;
+           offsetValue = refJd - GmatTimeConstants::JD_NOV_17_1858;
         }
     
         //loj: 4/12/05 Added
@@ -168,47 +171,77 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
               "      CVT to TAI, Leap secs count = %.14lf\n", numLeapSecs);
         #endif
     
-        return (origValue + (numLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+        return (origValue + (numLeapSecs/GmatTimeConstants::SECS_PER_DAY));
     }
     case TimeConverterUtil::UT1MJD:
     case TimeConverterUtil::UT1:
     {
         if (theEopFile == NULL)
-           throw TimeFileException(
-                 "EopFile is unknown\n");
-   
+           throw TimeFileException("EopFile is unknown\n");
+        
         Real offsetValue = 0;
-  
-        if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+        
+        if (refJd != GmatTimeConstants::JD_NOV_17_1858)
         {
-           offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+           offsetValue = GmatTimeConstants::JD_NOV_17_1858 - refJd;
         }
     
         Real ut1Offset = theEopFile->GetUt1UtcOffset(origValue + offsetValue);
         Real utcOffset = theEopFile->GetUt1UtcOffset((origValue + offsetValue)
-            - (ut1Offset/GmatTimeUtil::SECS_PER_DAY));
-    
+            - (ut1Offset/GmatTimeConstants::SECS_PER_DAY));
+        
         return (TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::UTCMJD,
-                 (origValue - (utcOffset/GmatTimeUtil::SECS_PER_DAY)), refJd));
+                 (origValue - (utcOffset/GmatTimeConstants::SECS_PER_DAY)), refJd));
     }
     case TimeConverterUtil::TDBMJD:
     case TimeConverterUtil::TDB:
-          throw UnimplementedException(
-               "Not Implement - TDB to TAI");
-//      Real tdbJd = origValue + jdOffset;
-//      Real taiJd = ((tdbJd - ((TDB_COEFF1 *sin(m_E)) +
-//                    (TDB_COEFF2 * sin(2 * m_E)))) * T_TT_COEFF1) - T_TT_OFFSET;
-//      return (taiJd - jdOffset);
+    {
+       // This cleans up round-off error from differencing large numbers
+       Real tttOffset = T_TT_OFFSET - refJd;
+
+       // An approximation valid to the difference between TDB and TT; 1st term
+       // here should be in TT rather than the input TDB, but we do not know TT
+       Real t_TT = (origValue - tttOffset) / T_TT_COEFF1;
+       Real m_E = (M_E_OFFSET + (M_E_COEFF1 * t_TT)) *
+             GmatMathConstants::RAD_PER_DEG;
+
+       Real offset = ((TDB_COEFF1 *Sin(m_E)) + (TDB_COEFF2 * Sin(2 * m_E))) /
+             GmatTimeConstants::SECS_PER_DAY ;
+
+       Real ttJd = origValue - offset;
+       Real taiJd = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::TTMJD,
+             ttJd, 0.0);
+
+      #ifdef DEBUG_TDB
+          MessageInterface::ShowMessage("TDB -> MJD\n");
+          MessageInterface::ShowMessage("   T_TT_COEFF1 = %.15le\n", T_TT_COEFF1);
+          MessageInterface::ShowMessage("   T_TT_OFFSET = %.15le\n", T_TT_OFFSET);
+          MessageInterface::ShowMessage("   M_E_OFFSET  = %.15le\n", M_E_OFFSET);
+          MessageInterface::ShowMessage("   M_E_COEFF1  = %.15le\n", M_E_COEFF1);
+          MessageInterface::ShowMessage("   TDB_COEFF1  = %.15le\n", TDB_COEFF1);
+          MessageInterface::ShowMessage("   TDB_COEFF2  = %.15le\n", TDB_COEFF2);
+          MessageInterface::ShowMessage("   origValue   = %.15le\n", origValue);
+          MessageInterface::ShowMessage("   refJd       = %.15le\n", refJd);
+          MessageInterface::ShowMessage("   t_TT        = %.15le\n", t_TT);
+          MessageInterface::ShowMessage("   m_E         = %.15le\n", m_E);
+          MessageInterface::ShowMessage("   offset      = %.15le\n", offset);
+          MessageInterface::ShowMessage("   ttJd        = %.15le\n", ttJd);
+          MessageInterface::ShowMessage("   taiJd       = %.15le\n", taiJd);
+          MessageInterface::ShowMessage("   tai         = %.15le\n", taiJd - refJd);
+      #endif
+
+       return taiJd;
+    }
     case TimeConverterUtil::TCBMJD:
     case TimeConverterUtil::TCB:
           throw UnimplementedException(
-               "Not Implement - TCB to TAI");
+               "Not Implemented - TCB to TAI");
 //      Real tdbMjd;
 //      return ConvertToTaiMjd("TdbMjd", tdbMjd);    
     case TimeConverterUtil::TTMJD:
     case TimeConverterUtil::TT:
           return (origValue -
-             (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
+             (GmatTimeConstants::TT_TAI_OFFSET/GmatTimeConstants::SECS_PER_DAY));
     default:
          ;
    }
@@ -244,7 +277,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
              MessageInterface::ShowMessage("      In the 'a1' block\n");
           #endif
           return (origValue +
-                 (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));      
+                 (GmatTimeConstants::A1_TAI_OFFSET/GmatTimeConstants::SECS_PER_DAY));
       }
       case TimeConverterUtil::TAIMJD:
       case TimeConverterUtil::TAI:
@@ -263,10 +296,10 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
           #endif
           Real offsetValue = 0;
     
-          if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+          if (refJd != GmatTimeConstants::JD_NOV_17_1858)
           {
-             //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
-             offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
+             //offsetValue = GmatTimeConstants::JD_NOV_17_1858 - refJd;
+             offsetValue = refJd - GmatTimeConstants::JD_NOV_17_1858;
           }
     
           //loj: 4/12/05 Added
@@ -280,7 +313,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
           Real utcLeapSecs =
              theLeapSecsFileReader->
              NumberOfLeapSecondsFrom((origValue + offsetValue)
-                                     - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+                                     - (taiLeapSecs/GmatTimeConstants::SECS_PER_DAY));
     
           #ifdef DEBUG_TIMECONVERTER_DETAILS
              MessageInterface::ShowMessage("      offsetValue = %.17lf\n",
@@ -290,9 +323,9 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
           #endif
     
           if (utcLeapSecs == taiLeapSecs)
-             return (origValue - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+             return (origValue - (taiLeapSecs/GmatTimeConstants::SECS_PER_DAY));
           else
-             return (origValue - (utcLeapSecs/GmatTimeUtil::SECS_PER_DAY));
+             return (origValue - (utcLeapSecs/GmatTimeConstants::SECS_PER_DAY));
        }
       case TimeConverterUtil::UT1MJD:
       case TimeConverterUtil::UT1:
@@ -306,10 +339,10 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
     
           Real offsetValue = 0;
     
-          if (refJd != GmatTimeUtil::JD_NOV_17_1858)
+          if (refJd != GmatTimeConstants::JD_NOV_17_1858)
           {
-             //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
-             offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
+             //offsetValue = GmatTimeConstants::JD_NOV_17_1858 - refJd;
+             offsetValue = refJd - GmatTimeConstants::JD_NOV_17_1858;
           }
           // convert origValue to utc
           Real utcMjd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::UTCMJD, 
@@ -332,29 +365,31 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
     
           // add delta ut1 read from eop file
           //return (utcMjd + numOffset);
-          return (utcMjd + (numOffset/GmatTimeUtil::SECS_PER_DAY));
+          return (utcMjd + (numOffset/GmatTimeConstants::SECS_PER_DAY));
        }
       case TimeConverterUtil::TDBMJD:
       case TimeConverterUtil::TDB:      
-       {
-          #ifdef DEBUG_TIMECONVERTER_DETAILS
-             MessageInterface::ShowMessage("      In the 'tdb' block\n");
-          #endif
-          // convert time to tt
-          Real ttJd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::TTMJD, 
-                origValue, refJd);
-          // convert to ttJD
-          ttJd += refJd;
-    
-          // compute T_TT
-          Real t_TT = (ttJd - T_TT_OFFSET) / T_TT_COEFF1;
-          // compute M_E
-          Real m_E = (M_E_OFFSET + (M_E_COEFF1 * t_TT)) * GmatMathUtil::RAD_PER_DEG;
-          Real offset = ((TDB_COEFF1 *Sin(m_E)) + (TDB_COEFF2 * Sin(2 * m_E))) / 
-                        GmatTimeUtil::SECS_PER_DAY ;
-          Real tdbJd = ttJd + offset;
-          return tdbJd - refJd;
-       }      
+          {
+             #ifdef DEBUG_TIMECONVERTER_DETAILS
+                MessageInterface::ShowMessage("      In the 'tdb' block\n");
+             #endif
+             // convert time to tt
+             Real ttJd = TimeConverterUtil::ConvertFromTaiMjd(
+                   TimeConverterUtil::TTMJD, origValue, refJd);
+
+             // compute T_TT
+             // This cleans up round-off error from differencing large numbers
+             Real tttOffset = T_TT_OFFSET - refJd;
+             Real t_TT = (origValue - tttOffset) / T_TT_COEFF1;
+
+             // compute M_E
+             Real m_E = (M_E_OFFSET + (M_E_COEFF1 * t_TT)) *
+                   GmatMathConstants::RAD_PER_DEG;
+             Real offset = ((TDB_COEFF1 *Sin(m_E)) +
+                   (TDB_COEFF2 * Sin(2 * m_E))) / GmatTimeConstants::SECS_PER_DAY;
+             Real tdbJd = ttJd + offset;
+             return tdbJd;
+          }
        case TimeConverterUtil::TCBMJD:
        case TimeConverterUtil::TCB:
        {
@@ -366,10 +401,10 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
                 origValue, refJd);
           //Real jdValue = origValue;  // but this is TAI
           Real jdValue = tdbMjd;
-          //Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET) * GmatTimeUtil::SECS_PER_DAY;
+          //Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET) * GmatTimeConstants::SECS_PER_DAY;
           Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET);
           // units of offset are in seconds, so convert to fraction of days
-          //return ((offset / GmatTimeUtil::SECS_PER_DAY) + tdbMjd);
+          //return ((offset / GmatTimeConstants::SECS_PER_DAY) + tdbMjd);
           return (offset + tdbMjd);
        }
        case TimeConverterUtil::TTMJD:
@@ -379,7 +414,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
              MessageInterface::ShowMessage("      In the 'tt' block\n");
           #endif
           return (origValue +
-                 (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
+                 (GmatTimeConstants::TT_TAI_OFFSET/GmatTimeConstants::SECS_PER_DAY));
        }       
        default:
         ;
@@ -445,27 +480,35 @@ void TimeConverterUtil::GetTimeSystemAndFormat(const std::string &type,
 
 
 //---------------------------------------------------------------------------
-// std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd)
+// std::string ConvertMjdToGregorian(const Real mjd, Integer format = 1)
 //---------------------------------------------------------------------------
-std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd)
+/**
+ * Converts MJD to Gregorian date format.
+ *
+ * @param  format    1 = "01 Jan 2000 11:59:28.000"
+ *                   2 = "2000-01-01T11:59:28.000"
+ */
+//---------------------------------------------------------------------------
+std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd,
+                                                     Integer format)
 {
    A1Mjd a1Mjd(mjd);
    A1Date a1Date = a1Mjd.ToA1Date();
-   GregorianDate gregorianDate(&a1Date);
-    #ifdef DEBUG_GREGORIAN
+   GregorianDate gregorianDate(&a1Date, format);
+   #ifdef DEBUG_GREGORIAN
        MessageInterface::ShowMessage("------ In ConvertMjdToGregorian\n");
        MessageInterface::ShowMessage("------ input mjd     = %.18lf\n", mjd);
        MessageInterface::ShowMessage("------ A1Date        = %s\n", 
           (a1Date.ToPackedCalendarString()).c_str());
        MessageInterface::ShowMessage("------ GregorianDate = %s\n", 
           (gregorianDate.GetDate()).c_str());
-    #endif
+   #endif
    return gregorianDate.GetDate();
 }
 
 
 //---------------------------------------------------------------------------
-// Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
+// Real ConvertGregorianToMjd(const std::string &greg)
 //---------------------------------------------------------------------------
 Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
 {
@@ -510,7 +553,7 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
           jules);
     #endif
    }
-   catch (Date::TimeRangeError& e)
+   catch (Date::TimeRangeError& )
    {
       throw TimeFormatException(
          "Gregorian date '" + greg +"' appears to be out of range.");
@@ -526,7 +569,7 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
 //---------------------------------------------------------------------------
 // void Convert(const std::string &fromType, Real fromMjd,
 //              const std::string &fromStr, const std::string &toType,
-//              Real &toMjd, std::string &toStr)
+//              Real &toMjd, std::string &toStr, Integer format = 1)
 //---------------------------------------------------------------------------
 /*
  * Converts input time and time format to output format. If input fromMjd
@@ -537,13 +580,15 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
  * @param  fromStr   input time in string to be used if fromMjd is -999.999
  * @param  toType    output time system and format (A1ModJulian, etc)
  * @param  toMjd     output time in mjd Real if toType is ModJulian, -999.999 otherwise
- * @param  toStr     output time string in toType format
+ * @param  toStr     output time string in toType format (1)
+ * @param  format    1 = "01 Jan 2000 11:59:28.000"
+ *                   2 = "2000-01-01T11:59:28.000"
  */
 //---------------------------------------------------------------------------
 void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd, 
                                 const std::string &fromStr,
                                 const std::string &toType, Real &toMjd,
-                                std::string &toStr)
+                                std::string &toStr, Integer format)
 {
    #ifdef DEBUG_TIME_CONVERT
    MessageInterface::ShowMessage
@@ -624,7 +669,7 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
       Integer fromId = TimeConverterUtil::GetTimeTypeID(fromSystem);
       Integer toId = TimeConverterUtil::GetTimeTypeID(toSystem);
       toMjd = TimeConverterUtil::Convert(fromMjdVal, fromId, 
-                                         toId, GmatTimeUtil::JD_JAN_5_1941);
+                                         toId, GmatTimeConstants::JD_JAN_5_1941);
    }
    else
    {
@@ -638,7 +683,7 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    if (toFormat == "ModJulian")
       toStr = GmatStringUtil::ToString(toMjd, timePrecision);
    else
-      toStr = TimeConverterUtil::ConvertMjdToGregorian(toMjd);
+      toStr = TimeConverterUtil::ConvertMjdToGregorian(toMjd, format);
    
    #ifdef DEBUG_TIME_CONVERT
    MessageInterface::ShowMessage
@@ -653,7 +698,6 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
 //---------------------------------------------------------------------------
 bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 {
-   //for (Integer i = 0; i < 13; ++i)
    for (Integer i = 0; i < TimeSystemCount; ++i)
       if (TIME_SYSTEM_TEXT[i] == sys)
          return true;
@@ -664,10 +708,12 @@ bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 
 //---------------------------------------------------------------------------
 // bool TimeConverterUtil::ValidateTimeFormat(const std::string &format, 
-//                                            const std::string &value)
+//                                            const std::string &value,
+//                                            bool checkValue = true)
 //---------------------------------------------------------------------------
 bool TimeConverterUtil::ValidateTimeFormat(const std::string &format, 
-                                           const std::string &value)
+                                           const std::string &value,
+                                           bool checkValue)
 {
    bool retval = false;
    
@@ -683,19 +729,21 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
    
    if (timeFormat == "Gregorian")
    {
-      retval = DateUtil::IsValidGregorian(value);
+      retval = DateUtil::IsValidGregorian(value, false);
       
       if (!retval)
           throw TimeFormatException
              ("Gregorian date \"" + value + "\" is not valid.");
-      
-//       GregorianDate gregorianDate(value);
-      
-//       if (!gregorianDate.IsValid())
-//          throw TimeFormatException
-//             ("Gregorian date \"" + value + "\" is not valid.");
-      
-//       retval = true;
+
+      if (checkValue)
+      {
+         retval = DateUtil::IsValidGregorian(value, true);
+
+         if (!retval)
+             throw TimeFormatException
+                ("Gregorian date \"" + value + "\" is not valid - time specified must be \"04 Oct 1957 12:00:00.000\" or later");
+      }
+
    }
    else if (timeFormat == "ModJulian")
    {
@@ -703,14 +751,20 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
       if (GmatStringUtil::ToReal(value, rval))
       {
          // Sputnik launched Oct 4, 1957 = 6116 MJ; don't accept earlier epochs.
-         if (rval >= 6116)
-            retval = true;
+//         if (rval >= 6116)
+//            retval = true;
+         if ((checkValue) && (rval < 6116))
+         {
+            throw InvalidTimeException
+               ("ModJulian Time \"" + value + "\" is not valid - time specified must be >= 6116.00");
+         }
       }
-      
-      if (!retval)
+      else
+      {
+//      if (!retval)
          throw InvalidTimeException
             ("ModJulian Time \"" + value + "\" is not valid.");
-      
+      }
    }
    else
    {

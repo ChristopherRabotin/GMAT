@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                             PlotInterface
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -25,7 +27,11 @@
 #include "CoordinateSystem.hpp"
 #include "PlotReceiver.hpp"
 
-class PlotInterface
+
+/**
+ * Interface functions for the OpenGL and XY plot classes.
+ */
+class GMAT_API PlotInterface
 {
 
 public:
@@ -39,8 +45,10 @@ public:
                                   bool drawWireFrame, bool drawAxes, bool drawGrid,
                                   bool drawESLines, bool overlapPlot,
                                   bool usevpInfo, bool usepm,
-                                  Integer numPtsToRedraw);
-   
+                                  Integer numPtsToRedraw,
+                                                                                         bool drawStars, bool drawConstellations, Integer starCount);
+
+   static void SetViewType(GmatPlot::ViewType view);
    static void SetGlSolarSystem(const std::string &plotName, SolarSystem *ss);
    
    static void SetGlObject(const std::string &plotName,
@@ -49,6 +57,7 @@ public:
                            const std::vector<SpacePoint*> &objArray);
    
    static void SetGlCoordSystem(const std::string &plotName,
+                                CoordinateSystem *internalCs,
                                 CoordinateSystem *viewCs,
                                 CoordinateSystem *viewUpCs);
    
@@ -81,42 +90,85 @@ public:
                             const RealArray &posZ, const RealArray &velX,
                             const RealArray &velY, const RealArray &velZ,
                             const UnsignedIntArray &scColors, bool solving,
-                            Integer solverOption, bool updateCanvas);
+                            Integer solverOption, bool updateCanvas,
+                            bool inFunction = false);
    
    static bool TakeGlAction(const std::string &plotName,
                             const std::string &action);
    
    // for XY plot
-   static bool CreateTsPlotWindow(const std::string &plotName,
+   static bool CreateXyPlotWindow(const std::string &plotName,
                                   const std::string &oldName,
                                   const std::string &plotTitle,
                                   const std::string &xAxisTitle,
                                   const std::string &yAxisTitle,
                                   bool drawGrid = false);
-   static bool DeleteTsPlot(const std::string &plotName);
-   static bool AddTsPlotCurve(const std::string &plotName, int curveIndex,
+   static bool DeleteXyPlot(const std::string &plotName);
+   static bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
                               int yOffset, Real yMin, Real yMax,
                               const std::string &curveTitle,
                               UnsignedInt penColor);
-   static bool DeleteAllTsPlotCurves(const std::string &plotName,
+   static bool DeleteAllXyPlotCurves(const std::string &plotName,
                                      const std::string &oldName);
-   static bool DeleteTsPlotCurve(const std::string &plotName, int curveIndex);
-   static void ClearTsPlotData(const std::string &plotName);
-   static void TsPlotPenUp(const std::string &plotName);
-   static void TsPlotPenDown(const std::string &plotName);
-   
-   static void SetTsPlotTitle(const std::string &plotName,
+   static bool DeleteXyPlotCurve(const std::string &plotName, int curveIndex);
+   static void ClearXyPlotData(const std::string &plotName);
+   static void XyPlotPenUp(const std::string &plotName);
+   static void XyPlotPenDown(const std::string &plotName);
+   static void XyPlotDarken(const std::string &plotName, Integer factor,
+         Integer index = -1, Integer curveNumber = -1);
+   static void XyPlotLighten(const std::string &plotName, Integer factor,
+         Integer index = -1, Integer curveNumber = -1);
+   static void XyPlotMarkPoint(const std::string &plotName, Integer index = -1,
+         Integer curveNumber = -1);
+   static void XyPlotMarkBreak(const std::string &plotName, Integer index = -1,
+         Integer curveNumber = -1);
+   static void XyPlotClearFromBreak(const std::string &plotName,
+         Integer startBreakNumber = -1, Integer endBreakNumber = -1,
+         Integer curveNumber = -1);
+
+   static void XyPlotChangeWidth(const std::string &plotName,
+         Integer index = -1, Integer newWidth = 1, int forCurve = -1);
+   static void XyPlotChangeStyle(const std::string &plotName,
+         Integer index = -1, Integer newStyle = 100, int forCurve = -1);
+
+
+   static void XyPlotRescale(const std::string &plotName);
+
+   static void XyPlotCurveSettings(const std::string &plotName,
+                                   bool useLines = true,
+                                   Integer lineWidth = 1,
+                                   Integer lineStyle = 100,
+                                   bool useMarkers = false,
+                                   Integer markerSize = 3,
+                                   Integer marker = 1,
+                                   bool useHiLow = false,
+                                   Integer forCurve = -1);
+
+   static void SetXyPlotTitle(const std::string &plotName,
                               const std::string &plotTitle);
-   static void ShowTsPlotLegend(const std::string &plotName);
-   static bool RefreshTsPlot(const std::string &plotName);
-   static bool UpdateTsPlot(const std::string &plotName,
+   static void ShowXyPlotLegend(const std::string &plotName);
+   static bool RefreshXyPlot(const std::string &plotName);
+   static bool UpdateXyPlot(const std::string &plotName,
                             const std::string &oldName,
                             const Real &xval, const Rvector &yvals,
                             const std::string &plotTitle,
                             const std::string &xAxisTitle,
                             const std::string &yAxisTitle,
+                            Integer solverOption,
                             bool updateCanvas, bool drawGrid);
+   static bool UpdateXyPlotData(const std::string &plotName,
+                                const Real &xval, const Rvector &yvals,
+                                const Rvector &hiError,
+                                const Rvector &lowError);
    
+   static bool UpdateXyPlotCurve(const std::string &plotName,
+                     Integer whichCurve, const Real &xval, const Real &yval,
+                     const Real hi = 0.0, const Real low = 0.0);
+
+   static bool DeactivateXyPlot(const std::string &plotName);
+   static bool ActivateXyPlot(const std::string &plotName);
+
+
 private:
 
    PlotInterface();

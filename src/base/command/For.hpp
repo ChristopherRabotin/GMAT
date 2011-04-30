@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ForFor
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -34,7 +36,7 @@
  * The For command manages the for loop.  
  *
  */
-class For : public BranchCommand
+class GMAT_API For : public BranchCommand
 {
 public:
   // default constructor
@@ -58,10 +60,10 @@ public:
    // inherited from GmatBase
    virtual GmatBase*    Clone() const;
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode,
-                                            const std::string &prefix,
-                                            const std::string &useName);
-
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
+   
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -92,9 +94,6 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
-   //virtual bool         GetBooleanParameter(const Integer id) const; 
-   //virtual bool         GetBooleanParameter(const std::string &label) const; 
-   
    virtual const StringArray& 
                        GetWrapperObjectNameArray();
    virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
@@ -111,10 +110,6 @@ protected:
       START_NAME,
       END_NAME,
       INCREMENT_NAME,
-      //INDEX_IS_PARAM,
-      //START_IS_PARAM,
-      //END_IS_PARAM,
-      //INCR_IS_PARAM,
       ForParamCount
    };
 
@@ -129,7 +124,6 @@ protected:
    static const Real DEFAULT_END;
    static const Real DEFAULT_INCREMENT;
 
-   //std::string  forName;
    /// Start value for the For loop
    Real         startValue;
    /// End value for the For loop
@@ -138,33 +132,22 @@ protected:
    Real         stepSize;
    /// Current value for the For loop counter
    Real         currentValue;
-
-   //Parameter* indexParam;
-   //Parameter* startParam;
-   //Parameter* endParam;
-   //Parameter* incrParam;
-   ElementWrapper *index;
-   ElementWrapper *start;
-   ElementWrapper *end;
-   ElementWrapper *increment;
+   /// Number of passes to be made through the loop
+   int         numPasses;
+   /// Current pass number
+   int         currentPass;
+   
+   ElementWrapper *indexWrapper;
+   ElementWrapper *startWrapper;
+   ElementWrapper *endWrapper;
+   ElementWrapper *incrWrapper;
    
    std::string indexName;
    std::string startName;
    std::string endName;
    std::string incrName;
    
-   //std::string startParamName;
-   //std::string endParamName;
-   //std::string incrParamName;
-   
-   //bool indexIsParam;
-   //bool startIsParam;
-   //bool endIsParam;
-   //bool incrIsParam;
-   
    // method to evaluate the counter to see if we are still looping
    bool StillLooping();
-   //Parameter* GetArrayIndex(const std::string &arrayStr,
-   //                         Integer &row, Integer &col);
 };
 #endif  // For_hpp

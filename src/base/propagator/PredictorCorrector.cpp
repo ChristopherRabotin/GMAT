@@ -1,18 +1,19 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              PredictorCorrector
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : predictorcorrector.cpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -44,6 +45,7 @@
 
 
 #include "PredictorCorrector.hpp"
+#include "MessageInterface.hpp"
 #include <fstream>
 
 //---------------------------------
@@ -65,14 +67,14 @@ PredictorCorrector::PARAMETER_TEXT[PredictorCorrectorParamCount - IntegratorPara
 const Gmat::ParameterType
 PredictorCorrector::PARAMETER_TYPE[PredictorCorrectorParamCount - IntegratorParamCount] =
 {
-	Gmat::INTEGER_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::BOOLEAN_TYPE,
-	Gmat::INTEGER_TYPE,
-	Gmat::REAL_TYPE,
+        Gmat::INTEGER_TYPE,
+        Gmat::REAL_TYPE,
+        Gmat::REAL_TYPE,
+        Gmat::REAL_TYPE,
+        Gmat::REAL_TYPE,
+        Gmat::BOOLEAN_TYPE,
+        Gmat::INTEGER_TYPE,
+        Gmat::REAL_TYPE,
 };
 
 //---------------------------------
@@ -86,11 +88,11 @@ PredictorCorrector::PARAMETER_TYPE[PredictorCorrectorParamCount - IntegratorPara
 /**
  * The Predictor-Corrector Constructor 
  *
- * @param sc	Size of the Predictor-Corrector buffer needed to advance
+ * @param sc    Size of the Predictor-Corrector buffer needed to advance
  *                   the state (basically the amount of history that needs to be
  *                   preserved from step to step)
  *
- * @param order	Truncation order of the highest order term kept in the
+ * @param order Truncation order of the highest order term kept in the
  *                   series expansion used to construct the algorithm.  This
  *                   value, inverted, is used in the stepsize control algorithm
  *                   to determine new step sizes if the estimated error falls
@@ -116,8 +118,9 @@ PredictorCorrector::PredictorCorrector(Integer sc, Integer order,
     starter                         (NULL),
     invOrder                        (1.0/order)
 {
-    parameterCount = PredictorCorrectorParamCount;
-    tolerance = 1.0e-10;
+   objectTypeNames.push_back("PredictorCorrector");
+   parameterCount = PredictorCorrectorParamCount;
+   tolerance = 1.0e-10;
 }
 
 
@@ -130,7 +133,8 @@ PredictorCorrector::PredictorCorrector(Integer sc, Integer order,
 //------------------------------------------------------------------------------
 PredictorCorrector::~PredictorCorrector(void)
 {
-    if (history) {
+    if (history)
+    {
         for (int i = 0; i < stepCount; i++)
             if (history[i])
                 delete [] history[i];
@@ -208,7 +212,6 @@ PredictorCorrector& PredictorCorrector::operator=(const PredictorCorrector& pc)
     invOrder = pc.invOrder;
     initialized = false;
     
-    // ag: Added - is this right?
     ddt = NULL;
     history = NULL;
     pweights = NULL;
@@ -226,7 +229,7 @@ PredictorCorrector& PredictorCorrector::operator=(const PredictorCorrector& pc)
 /**
  * Used to create a copy of the object.
  * This method returns a copy of the current instance.  The copy has all of the
- * parameters set to the current values, but is not yet initialized becuse the 
+ * parameters set to the current values, but is not yet initialized because the
  * PhysicalModel pointer is not set, nor are the internal arrays that depend on 
  * the PhysicalModel allocated.
  *
@@ -253,10 +256,21 @@ bool PredictorCorrector::Initialize()
     if (stepCount <= 0)
         return initialized;
 
-    if (physicalModel) {
+    // Check the P-C error control tolerances
+    if ((lowerError >= targetError) || (targetError >= tolerance))
+       throw PropagatorException("Setup error in the " + typeName +
+             " Propagator; Predictor-Corrector integrators require that the "
+             "error control settings satisfy the relationship\n\n"
+             "   LowerError < TargetError < Accuracy\n\n"
+             "and work best if the settings differ from one another by at "
+             "least a factor of 10", Gmat::ERROR_);
+
+    if (physicalModel)
+    {
         dimension = physicalModel->GetDimension();
 
-        if (history) {
+        if (history)
+        {
             for (int i = 0; i < stepCount; i++)
                 if (history[i])
                     delete [] history[i];
@@ -264,45 +278,53 @@ bool PredictorCorrector::Initialize()
             history = NULL;
         }
 
-        if (pweights) {
+        if (pweights)
+        {
             delete [] pweights;
             pweights = NULL;
         }
 
-        if (cweights) {
+        if (cweights)
+        {
             delete [] cweights;
             cweights = NULL;
         }
 
-        if (predictorState) {
+        if (predictorState)
+        {
             delete [] predictorState;
             predictorState = NULL;
         }
 
-        if (correctorState) {
+        if (correctorState)
+        {
             delete [] correctorState;
             correctorState = NULL;
         }
 
-        if (errorEstimates) {
+        if (errorEstimates)
+        {
             delete [] errorEstimates;
             errorEstimates = NULL;
         }
 
         predictorState = new Real[dimension];
-        if (!predictorState) {
+        if (!predictorState)
+        {
             return initialized;
         }
 
         correctorState = new Real[dimension];
-        if (!correctorState) {
+        if (!correctorState)
+        {
             delete [] predictorState;
             predictorState = NULL;
             return initialized;
         }
 
         errorEstimates = new Real[dimension];
-        if (!errorEstimates) {
+        if (!errorEstimates)
+        {
             delete [] predictorState;
             predictorState = NULL;
             delete [] correctorState;
@@ -311,7 +333,8 @@ bool PredictorCorrector::Initialize()
         }
 
         pweights = new Real[stepCount];
-        if (!pweights) {
+        if (!pweights)
+        {
             delete [] predictorState;
             predictorState = NULL;
             delete [] correctorState;
@@ -322,7 +345,8 @@ bool PredictorCorrector::Initialize()
         }
 
         cweights = new Real[stepCount];
-        if (!cweights) {
+        if (!cweights)
+        {
             delete [] pweights;
             pweights = NULL;
             delete [] predictorState;
@@ -335,11 +359,15 @@ bool PredictorCorrector::Initialize()
         }
 
         history = new Real*[stepCount];
-        if (history) {
-            for (int i = 0; i < stepCount; i++) {
+        if (history)
+        {
+            for (int i = 0; i < stepCount; i++)
+            {
                 history[i] = new Real[dimension];
-                if (!history[i]) {
-                    for (int j = 0; j < i; j++) {
+                if (!history[i])
+                {
+                    for (int j = 0; j < i; j++)
+                    {
                         delete [] history[j];
                     }
                     delete [] history;
@@ -356,13 +384,15 @@ bool PredictorCorrector::Initialize()
                     errorEstimates = NULL;
                     return initialized;
                 }
-                if (SetWeights()) {
+                if (SetWeights())
+                {
                     ddt = physicalModel->GetDerivativeArray();
                     initialized = true;
                 }
             }
         }
-        else {
+        else
+        {
             delete [] pweights;
             pweights = NULL;
             delete [] cweights;
@@ -380,12 +410,28 @@ bool PredictorCorrector::Initialize()
             starter = new RungeKutta89;
 
         starter->SetPhysicalModel(physicalModel);
+
+        if (fabs(stepSizeBuffer) < minimumStep)
+           stepSizeBuffer = minimumStep * stepSign;
+        if (fabs(stepSizeBuffer) > maximumStep)
+           stepSizeBuffer = maximumStep * stepSign;
+
+        starter->SetRealParameter("InitialStepSize", stepSize);
+        starter->SetBooleanParameter(STOP_IF_ACCURACY_VIOLATED,
+                 stopIfAccuracyViolated);
+        starter->SetRealParameter(ACCURACY, tolerance);
+        starter->SetRealParameter(MIN_STEP, minimumStep);
+        starter->SetRealParameter(MAX_STEP, maximumStep);
+        starter->TakeAction("ChangeTypeSourceString",
+              "Starter for Predictor-Corrector");
         starter->Initialize();
 
         inState  = physicalModel->GetState();
         outState = physicalModel->GetState();
     }
     
+    accuracyWarningTriggered = false;
+
     return initialized;
 }
 
@@ -403,14 +449,18 @@ bool PredictorCorrector::Step(Real dt)
 //    bool stepFinished = false;
     timeleft = dt;
 
-    if (fabs(dt) != fabs(stepSize)) {
-        if (fabs(dt) < fabs(stepSize)) {
+    if (fabs(dt) != fabs(stepSize))
+    {
+        if (fabs(dt) < fabs(stepSize))
+        {
             stepSize = dt;
             Reset();
         }
-        else {
+        else
+        {
             Real ss = fabs(dt / stepSize);
-            if (fabs(ss - int(ss)) > smallestTime) {
+            if (fabs(ss - int(ss)) > smallestTime)
+            {
                 stepSize = dt / ((int)(ss+1));
                 Reset();
             }
@@ -420,7 +470,8 @@ bool PredictorCorrector::Step(Real dt)
     bool fixed = fixedStep;
     fixedStep = true;
     Real stepsign = ((stepSize > 0.0) ? 1.0 : -1.0);
-    do {
+    do
+    {
         if (!Step())
             return false;
     } while (timeleft * stepsign > smallestTime);
@@ -430,13 +481,13 @@ bool PredictorCorrector::Step(Real dt)
 }
 
 //------------------------------------------------------------------------------
-// bool PredictorCorrector::Step(void)
+// bool PredictorCorrector::Step()
 //------------------------------------------------------------------------------
 /**
  * Method used to advance the Predictor-Corrector one step
  */
 //------------------------------------------------------------------------------
-bool PredictorCorrector::Step(void)
+bool PredictorCorrector::Step()
 {
     if (!initialized)
         return false;
@@ -444,9 +495,12 @@ bool PredictorCorrector::Step(void)
     if (physicalModel->StateChanged())
         Reset();
 
-    do {
-        if (!startupComplete) {
-            if (ddt == NULL) {
+    do
+    {
+        if (!startupComplete)
+        {
+            if (ddt == NULL)
+            {
                 ddt = physicalModel->GetDerivativeArray();
                 if (ddt == NULL)
                     return false;
@@ -465,14 +519,16 @@ bool PredictorCorrector::Step(void)
             // enough for startup purposes
             maxError = 0.0;
         }
-        else {
+        else
+        {
             if (!Predict())
                 return false;
             if (!Correct())
                 return false;
             if (EstimateError() < 0.0)
                 return false;
-            if (maxError <= tolerance) {
+            if (maxError <= tolerance)
+            {
                 memcpy(outState, correctorState, dimension * sizeof(Real));
                 physicalModel->IncrementTime(stepSize);
                 stepTaken = stepSize;
@@ -485,7 +541,7 @@ bool PredictorCorrector::Step(void)
         }
 
         if (stepAttempts >= maxStepAttempts)
-            return false;
+              return false;
     } while (maxError > tolerance);
 
     return true;
@@ -493,13 +549,13 @@ bool PredictorCorrector::Step(void)
 
 
 //------------------------------------------------------------------------------
-// bool PredictorCorrector::RawStep(void)
+// bool PredictorCorrector::RawStep()
 //------------------------------------------------------------------------------
 /**
  * For the P-C integrators, this method just returns false.
  */
 //------------------------------------------------------------------------------
-bool PredictorCorrector::RawStep(void)
+bool PredictorCorrector::RawStep()
 {
     return false;
 }
@@ -518,22 +574,64 @@ bool PredictorCorrector::AdaptStep(Real maxError)
 {
     Real newStep = stepSize * pow(targetError / maxError, invOrder);
 
+    // The following code is in place to omit error control for steps
+    // at the minimum stepsize.  See the note above for more
+    // information.  Remove this block if the issue gets resolved.
+    if (GmatMathUtil::Abs(stepSize) == minimumStep)
+    {
+       if (stopIfAccuracyViolated)
+       {
+          throw PropagatorException(typeSource + ": Accuracy settings will be "
+                "violated with current step size values.\n");
+       }
+       else
+       {
+          if (!accuracyWarningTriggered)
+          {
+             accuracyWarningTriggered = true;
+             MessageInterface::ShowMessage("**** Warning **** %s: Accuracy "
+                   "settings will be violated with current step size values.\n",
+                   typeSource.c_str());
+          }
+          return true;
+       }
+    }
+
     // Make sure new step is in the accepted range
     if (fabs(newStep) < minimumStep)
         newStep = minimumStep * stepSign;
     if (fabs(newStep) > maximumStep)
         newStep = maximumStep * stepSign;
 
-    if (!fixedStep) {
+    if (!fixedStep)
+    {
         // Variable step mode
-        if (maxError > tolerance) {
+        if (maxError > tolerance)
+        {
             // Tried and failed at the minimum stepsize
-            if (fabs(stepSize) == minimumStep)
-                return false;
+            if (GmatMathUtil::IsEqual(GmatMathUtil::Abs(stepSize),minimumStep))
+            {
+               if (stopIfAccuracyViolated)
+               {
+                  throw PropagatorException(
+                        "PredictorCorrector: Accuracy settings will be violated with current step size values.\n");
+               }
+               else
+               {
+                  if (!accuracyWarningTriggered) // so only write the warning once per propagation command
+                  {
+                     accuracyWarningTriggered = true;
+                     MessageInterface::PopupMessage(Gmat::WARNING_,
+                        "PredictorCorrector: Accuracy settings will be violated with current step size values.\n");
+                  }
+                  return false;
+               }
+            }
             stepSize = newStep;
             ++stepAttempts;
         }
-        else {
+        else
+        {
             // Step can be "safely" increased -- but only up to twice old value
             if (newStep >= 2.0 * stepSize)
                 stepSize *= 2.0;
@@ -543,17 +641,21 @@ bool PredictorCorrector::AdaptStep(Real maxError)
             stepAttempts = 0;
         }
     }
-    else {
+    else
+    {
         // Fixed step mode: Adjust newStep to be a power of 2 different from
         // the current step
         Real twoStep = stepSize;
-        if (fabs(newStep) < fabs(stepSize)) {
-            do {
+        if (fabs(newStep) < fabs(stepSize))
+        {
+            do
+            {
                 twoStep /= 2.0;
             } while (fabs(twoStep) > fabs(newStep));
             stepSize = twoStep;
         }
-        else if (fabs(newStep) >= fabs(2.0 * stepSize)) {
+        else if (fabs(newStep) >= fabs(2.0 * stepSize))
+        {
             // Check to see if the step can safely be Reald, given the
             // remaining interval
             Real stepsToGo = timeleft / (2.0 * stepSize);
@@ -686,11 +788,11 @@ bool PredictorCorrector::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 Real PredictorCorrector::GetRealParameter(const Integer id) const
 {
-	if (id == MAXIMUM_ERROR)					return maxError;
-	else if (id == LOWEVER_ERROR)				return lowerError;
-	else if (id == TARGET_ERROR)	return targetError;
-	else if (id == STEP_SIGN)	return stepSign;
-	else if (id == INV_ORDER)				return invOrder;
+        if (id == MAXIMUM_ERROR)                return maxError;
+        else if (id == LOWEVER_ERROR)   return lowerError;
+        else if (id == TARGET_ERROR)    return targetError;
+        else if (id == STEP_SIGN)          return stepSign;
+        else if (id == INV_ORDER)               return invOrder;
 
    return Integrator::GetRealParameter(id);
 }
@@ -723,31 +825,31 @@ Real PredictorCorrector::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real PredictorCorrector::SetRealParameter(const Integer id, const Real value)
 {
-	if (id == MAXIMUM_ERROR)
-	{
-		maxError = value;
-		return maxError;
-	}
-	else if (id == LOWEVER_ERROR)
-	{
-		lowerError = value;
-		return lowerError;
-	}
-	else if (id == TARGET_ERROR)
-	{
-		targetError = value;
-		return targetError;
-	}
-	else if (id == STEP_SIGN)
-	{
-		stepSign = value;
-		return stepSign;
-	}
-	else if (id == INV_ORDER)
-	{
-		invOrder = value;
-		return invOrder;
-	}
+        if (id == MAXIMUM_ERROR)
+        {
+                maxError = value;
+                return maxError;
+        }
+        else if (id == LOWEVER_ERROR)
+        {
+                lowerError = value;
+                return lowerError;
+        }
+        else if (id == TARGET_ERROR)
+        {
+                targetError = value;
+                return targetError;
+        }
+        else if (id == STEP_SIGN)
+        {
+                stepSign = value;
+                return stepSign;
+        }
+        else if (id == INV_ORDER)
+        {
+                invOrder = value;
+                return invOrder;
+        }
 
    return Integrator::SetRealParameter(id, value);
 }
@@ -779,10 +881,10 @@ Real PredictorCorrector::SetRealParameter(const std::string &label, const Real v
 //------------------------------------------------------------------------------
 Integer PredictorCorrector::GetIntegerParameter(const Integer id) const
 {
-   if (id == STEP_COUNT)			     	return stepCount;
-	else if (id == STARTUP_COUNT)				return startupCount;
+   if (id == STEP_COUNT)                                return stepCount;
+        else if (id == STARTUP_COUNT)                   return startupCount;
 
-	return Integrator::GetIntegerParameter(id);
+        return Integrator::GetIntegerParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -800,19 +902,19 @@ Integer PredictorCorrector::GetIntegerParameter(const Integer id) const
  */
 //------------------------------------------------------------------------------
 Integer PredictorCorrector::SetIntegerParameter(const Integer id,
-											   const Integer value) // const?
+                                                                                                       const Integer value) // const?
 {
-	if (id == STEP_COUNT)
-	{
-		stepCount = value;
-		return stepCount;
-	}
-	else if (id == STARTUP_COUNT)
-	{
-		startupCount = value;
-		return startupCount;
-	}
-	return Integrator::SetIntegerParameter(id,value);
+        if (id == STEP_COUNT)
+        {
+                stepCount = value;
+                return stepCount;
+        }
+        else if (id == STARTUP_COUNT)
+        {
+                startupCount = value;
+                return startupCount;
+        }
+        return Integrator::SetIntegerParameter(id,value);
 }
 
 //------------------------------------------------------------------------------
@@ -830,9 +932,9 @@ Integer PredictorCorrector::SetIntegerParameter(const Integer id,
 //------------------------------------------------------------------------------
 bool PredictorCorrector::GetBooleanParameter(const Integer id) const
 {
-	if (id == STARTUP_COMPLETE)	return startupComplete;
+        if (id == STARTUP_COMPLETE)     return startupComplete;
 
-	return Integrator::GetBooleanParameter(id);
+        return Integrator::GetBooleanParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -851,13 +953,13 @@ bool PredictorCorrector::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool PredictorCorrector::SetBooleanParameter(const Integer id, const bool value)
 {
-	if (id ==  STARTUP_COMPLETE)
-	{
-		startupComplete = value;
-		return startupComplete;
-	}
+        if (id ==  STARTUP_COMPLETE)
+        {
+                startupComplete = value;
+                return startupComplete;
+        }
 
-	return Integrator::SetBooleanParameter(id,value);
+        return Integrator::SetBooleanParameter(id,value);
 }
 
 ////------------------------------------------------------------------------------

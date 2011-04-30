@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Subtract
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,7 +23,8 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_SUBTRACT 1
-//#define DEBUG_MATH_VALIDATE
+//#define DEBUG_INPUT_OUTPUT
+//#define DEBUG_EVALUATE
 
 //---------------------------------
 // public methods
@@ -90,7 +93,7 @@ void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
 {
    #if DEBUG_SUBTRACT
    MessageInterface::ShowMessage
-      ("Divide::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
+      ("Subtract::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
        GetName().c_str());
    #endif
    
@@ -110,7 +113,23 @@ void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
    #endif
    
    if ((type1 != type2) || (row1 != row2) || (col1 != col2))
-      throw MathException("Matrixes are not the same can not add.\n");    
+   {
+      // We want to allow 1x1 - MxN or MxN - 1x1, so check
+      if (row1 == 1 && col1 == 1)
+      {
+         type = type2;
+         rowCount = row2;
+         colCount = col2;
+      }
+      else if (row2 == 1 && col2 == 1)
+      {
+         type = type1;
+         rowCount = row1;
+         colCount = col1;
+      }
+      else
+         throw MathException("Matrixes are not the same can not subtract.\n");
+   }
    else
    {
       type = type1;
@@ -130,9 +149,17 @@ void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
 //------------------------------------------------------------------------------
 bool Subtract::ValidateInputs()
 {
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("\nSubtract::ValidateInputs() '%s' entered\n", GetName().c_str());
+   #endif
+   
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
    bool retval = false;
+   
+   if (!leftNode)
+      throw MathException("Subtract() - Missing input arguments");
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
@@ -140,19 +167,24 @@ bool Subtract::ValidateInputs()
    // Get the type(Real or Matrix), # rows and # columns of the right node
    rightNode->GetOutputInfo(type2, row2, col2);
    
-   #ifdef DEBUG_MATH_VALIDATE
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("Subtract::ValidateInputs() type1=%d, row1=%d, col1=%d, "
        "type2=%d, row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
    #endif
    
-   if (type1 == Gmat::REAL_TYPE && type2 == Gmat::REAL_TYPE)
+   // If any one side is 1x1, then it is valid, so check first
+   if ((row1 == 1 && col1 == 1) || (row2 == 1 && col2 == 1))
+   {
       retval = true;
+   }
    else if (type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)
+   {
       if (row1 == row2 && col1 == col2)
          retval = true;
+   }
    
-   #ifdef DEBUG_MATH_VALIDATE
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("Subtract::ValidateInputs() returning %d\n", retval);
    #endif
@@ -171,6 +203,10 @@ bool Subtract::ValidateInputs()
 //------------------------------------------------------------------------------
 Real Subtract::Evaluate()
 {
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage("Subtract::Evaluate() '%s' entered\n", GetName().c_str());
+   #endif
+   
    if (ValidateInputs())
       return leftNode->Evaluate() - rightNode->Evaluate();
    else
@@ -188,6 +224,10 @@ Real Subtract::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix Subtract::MatrixEvaluate()
 {
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage("Subtract::MatrixEvaluate() '%s' entered\n", GetName().c_str());
+   #endif
+   
    if (ValidateInputs())
       return leftNode->MatrixEvaluate() - rightNode->MatrixEvaluate();
    else

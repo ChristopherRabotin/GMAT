@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ElapsedTime
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,15 +23,15 @@
 
 #include "gmatdefs.hpp"
 #include "TimeTypes.hpp"
-#include "RealTypes.hpp"
+#include "GmatConstants.hpp"
 
 class GMAT_API ElapsedTime
 {
 public:
 
 //ElapsedTime();
-   ElapsedTime(const Real &secs = 0.0, const Real tol = GmatRealConst::REAL_EPSILON);
-   ElapsedTime(const ElapsedTime &elapsedTime, const Real tol = GmatRealConst::REAL_EPSILON);
+   ElapsedTime(const Real &secs = 0.0, const Real tol = GmatRealConstants::REAL_EPSILON);
+   ElapsedTime(const ElapsedTime &elapsedTime, const Real tol = GmatRealConstants::REAL_EPSILON);
    ElapsedTime& operator=(const ElapsedTime &right); 
    virtual ~ElapsedTime();
 

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Rvector6
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -88,14 +90,14 @@ Rvector6::Rvector6(const Rvector3 &r, const Rvector3 &v)
 
 //loj: 4/20/04 added
 //------------------------------------------------------------------------------
-//  Rvector6(Real vec[6])
+//  Rvector6(const Real vec[6])
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  * Creates an object from Real array
  */
 //------------------------------------------------------------------------------
-Rvector6::Rvector6(Real vec[6])
+Rvector6::Rvector6(const Real vec[6])
    : Rvector(6, vec[0], vec[1], vec[2], vec[3], vec[4], vec[5])
 {
 }
@@ -392,6 +394,19 @@ const Rvector6& Rvector6::operator*=(Real s)
     elementD[4] *= s;
     elementD[5] *= s;
     return *this;
+}
+
+//------------------------------------------------------------------------------
+//  Real operator*(const Rvector6& v) const        // dot product
+//------------------------------------------------------------------------------
+Real Rvector6::operator*(const Rvector6& v) const 
+{
+   Real sum = 0.0;
+   
+   for (int i=0; i<sizeD; i++)
+      sum += elementD[i] * v.elementD[i];
+   
+   return sum;
 }
 
 //------------------------------------------------------------------------------

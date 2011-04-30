@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  ObjectPropertyWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -18,17 +20,20 @@
  */
 //------------------------------------------------------------------------------
 
+#include <sstream>
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
-#include "ForceModel.hpp"             // for GetScriptAlias()
 #include "ObjectPropertyWrapper.hpp"
 #include "ParameterException.hpp"
 #include "StringUtil.hpp"
+
+#include "PropSetup.hpp"               // Handle owned Propagator special case
 
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RENAME_OBJ_PROP
 //#define DEBUG_OPW
+//#define DEBUG_OBJ_PROP_SET_STRING
 
 //---------------------------------
 // static data
@@ -53,7 +58,7 @@ ObjectPropertyWrapper::ObjectPropertyWrapper() :
    object        (NULL),
    propID        (-1)
 {
-   wrapperType = Gmat::OBJECT_PROPERTY;
+   wrapperType = Gmat::OBJECT_PROPERTY_WT;
 }
 
 //---------------------------------------------------------------------------
@@ -123,12 +128,22 @@ ObjectPropertyWrapper::~ObjectPropertyWrapper()
 //------------------------------------------------------------------------------
 Gmat::ParameterType ObjectPropertyWrapper::GetDataType() const
 {
+   #ifdef DEBUG_OPW
+   MessageInterface::ShowMessage
+      ("ObjectPropertyWrapper::GetDataType() entered, propID = %d\n", propID);
+   #endif
+   
    if (object == NULL)
       throw ParameterException
          ("ObjectPropertyWrapper::GetDataType() The object is NULL, "
           "so cannot get data type");
    
    Gmat::ParameterType propType = object->GetParameterType(propID);
+   
+   #ifdef DEBUG_OPW
+   MessageInterface::ShowMessage
+      ("ObjectPropertyWrapper::GetDataType() returning %d\n", propType);
+   #endif
    
    #ifdef DEBUG_OPW
    MessageInterface::ShowMessage
@@ -187,6 +202,19 @@ const StringArray& ObjectPropertyWrapper::GetRefObjectNames()
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * @see ElementWrapper
+ */
+//------------------------------------------------------------------------------
+GmatBase* ObjectPropertyWrapper::GetRefObject(const std::string &name)
+{
+   return object;
+}
+
+
 //---------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj)
 //---------------------------------------------------------------------------
@@ -232,7 +260,23 @@ bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
    if (obj->GetName() == refObjectNames[0])
    {
       object = obj;
-      propID = object->GetParameterID(propIDNames[0]);
+      
+      // Handle owned Propagators as a special case
+      try
+      {
+         propID = object->GetParameterID(propIDNames[0]);
+      }
+      catch (GmatBaseException ex)
+      {
+         // Handle the Propagator inside a PropSetup
+         if (obj->IsOfType(Gmat::PROP_SETUP))
+         {
+            object = (GmatBase*)(((PropSetup *)obj)->GetPropagator());
+            propID = object->GetParameterID(propIDNames[0]);
+         }
+         else
+            throw;
+      }
       #ifdef DEBUG_OPW
          MessageInterface::ShowMessage(
          "In ObjPropWrapper::SetRefObject, setting to object %s\n",
@@ -318,11 +362,13 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    }
    catch (BaseException &be)
    {
-      std::string errmsg = "Cannot return Real value for id \"" + propID; 
-      errmsg += "\" for object \"" + object->GetName();
-      errmsg += "\" - exception thrown: " + be.GetFullMessage();
-      throw ParameterException(errmsg);
-   }
+      std::stringstream errmsg;
+//      errmsg << "Cannot return Real value for id \"" << propID;
+//      errmsg << "\" for object \"" << object->GetName();
+//      errmsg << "\" - exception thrown: "<< be.GetFullMessage() << std::endl;
+      errmsg << be.GetFullMessage() << std::endl;
+      throw ParameterException(errmsg.str());
+  }
    
    return itsValue;
 }
@@ -344,6 +390,10 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
 
    try
    {
+      #ifdef DEBUG_OPW
+         MessageInterface::ShowMessage(
+         "In ObjPropWrapper::SetReal, about to set value to %.12f\n", toValue);
+      #endif
       object->SetRealParameter(propID, toValue);
       #ifdef DEBUG_OPW
          MessageInterface::ShowMessage(
@@ -352,10 +402,16 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
    }
    catch (BaseException &be)
    {
-      std::string errmsg = "Cannot set Real value for id \"" + propID; 
-      errmsg += "\" for object \"" + object->GetName();
-      errmsg += "\" - exception thrown: " + be.GetFullMessage();
-      throw ParameterException(errmsg);
+      #ifdef DEBUG_OPW
+         MessageInterface::ShowMessage(
+         "   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+      #endif
+      std::stringstream errmsg;
+//      errmsg << "Cannot set Real value for id \"" << propID;
+//      errmsg << "\" for object \"" << object->GetName();
+//      errmsg << "\" - exception thrown: "<< be.GetFullMessage() << std::endl;
+      errmsg << be.GetFullMessage() << std::endl;
+      throw ParameterException(errmsg.str());
    }
    
    return true;
@@ -367,11 +423,13 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
 std::string ObjectPropertyWrapper::EvaluateString() const
 {
    Gmat::ParameterType propType = GetDataType();
-   if (propType == Gmat::STRING_TYPE || propType == Gmat::ON_OFF_TYPE)
+   if (propType == Gmat::STRING_TYPE || propType == Gmat::ON_OFF_TYPE ||
+       propType == Gmat::ENUMERATION_TYPE || propType == Gmat::FILENAME_TYPE)
       return object->GetStringParameter(propID);
    else
       throw GmatBaseException
-         ("EvaluateString() method not valid for wrapper of non-String type.\n");
+         ("ObjectPropertyWrapper::EvaluateString() method not valid for "
+          "wrapper of non-String type.\n");
 }
 
 //---------------------------------------------------------------------------
@@ -379,13 +437,26 @@ std::string ObjectPropertyWrapper::EvaluateString() const
 //---------------------------------------------------------------------------
 bool ObjectPropertyWrapper::SetString(const std::string &toValue)
 {
+#ifdef DEBUG_OBJ_PROP_SET_STRING
+   MessageInterface::ShowMessage("Entering OBWrapper::SetString with toValue = %s\n",
+         toValue.c_str());
+   MessageInterface::ShowMessage("   and data type = %d\n", (Integer) GetDataType());
+#endif
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::STRING_TYPE ||
        propType == Gmat::ENUMERATION_TYPE ||
+       propType == Gmat::FILENAME_TYPE ||
        propType == Gmat::STRINGARRAY_TYPE ||
        propType == Gmat::OBJECT_TYPE) // Added OBJECT_TYPE to handle "DefaultFM.Drag = None;"
       return object->SetStringParameter(propID, toValue);
+   else if (propType == Gmat::BOOLEANARRAY_TYPE)
+   {
+      BooleanArray boolArray = GmatStringUtil::ToBooleanArray(toValue);
+      return object->SetBooleanArrayParameter(propID, boolArray);
+   }
    else if (propType == Gmat::UNSIGNED_INTARRAY_TYPE)
+      return object->SetStringParameter(propID, toValue);
+   else if (propType == Gmat::RVECTOR_TYPE)  // added to handle Rvectors with brackets
       return object->SetStringParameter(propID, toValue);
    else
       throw GmatBaseException
@@ -464,7 +535,11 @@ bool ObjectPropertyWrapper::SetInteger(const Integer toValue)
 {
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::INTEGER_TYPE)
-      return object->SetIntegerParameter(propID, toValue);
+   {
+      Integer retval = object->SetIntegerParameter(propID, toValue);
+      return (retval == 0 ? false : true);
+//      return true;
+   }
    else
       throw GmatBaseException
          ("SetInteger() method not valid for wrapper of non-Integer type.\n");
@@ -516,6 +591,27 @@ bool ObjectPropertyWrapper::SetObject(GmatBase *obj)
          ("ObjectPropertyWrapper::SetObject() method not valid for wrapper of non-Object type.\n");
    
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetPropertyId()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the object's property ID
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+const Integer ObjectPropertyWrapper::GetPropertyId()
+{
+   return propID;
+}
+
+
+bool ObjectPropertyWrapper::TakeRequiredAction() const
+{
+   return object->TakeRequiredAction(propID);
 }
 
 

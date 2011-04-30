@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  ObjectWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. 
 //
@@ -40,7 +42,7 @@ ObjectWrapper::ObjectWrapper() :
    ElementWrapper()
 {
    theObject   = NULL;
-   wrapperType = Gmat::OBJECT;
+   wrapperType = Gmat::OBJECT_WT;
 }
 
 
@@ -97,6 +99,21 @@ ObjectWrapper::~ObjectWrapper()
 
 
 //------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return ObjectWrapper value converted to std::string.
+ *
+ * @exception <GmatBaseException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+std::string ObjectWrapper::ToString()
+{
+   return theObject->GetGeneratingString(Gmat::NO_COMMENTS);
+}
+
+
+//------------------------------------------------------------------------------
 // Gmat::ParameterType GetDataType() const
 //------------------------------------------------------------------------------
 /**
@@ -109,6 +126,19 @@ ObjectWrapper::~ObjectWrapper()
 Gmat::ParameterType ObjectWrapper::GetDataType() const
 {
    return Gmat::OBJECT_TYPE;
+}
+
+
+//---------------------------------------------------------------------------
+// GmatBase* GetRefObject(const std::string &name = "")
+//---------------------------------------------------------------------------
+/*
+ * @see ElementWrapper
+ */
+//---------------------------------------------------------------------------
+GmatBase* ObjectWrapper::GetRefObject(const std::string &name)
+{
+   return theObject;
 }
 
 

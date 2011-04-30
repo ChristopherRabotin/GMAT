@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  GeocentricSolarEclipticAxes
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -29,7 +31,6 @@
 #include "CelestialBody.hpp"
 #include "RealUtilities.hpp"
 #include "Linear.hpp"
-#include "RealTypes.hpp"
 #include "TimeTypes.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
@@ -37,10 +38,10 @@
 #include "CoordinateSystemException.hpp"
 
 #include <iostream>
-using namespace std; // *********************
+
 
 using namespace GmatMathUtil;      // for trig functions, etc.
-using namespace GmatTimeUtil;      // for JD offsets, etc.
+using namespace GmatTimeConstants;      // for JD offsets, etc.
 
 //---------------------------------
 // static data

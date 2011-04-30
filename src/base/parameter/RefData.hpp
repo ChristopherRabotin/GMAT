@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  RefData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,17 +23,61 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
-#include <map>
+
+
+/**
+ * Moved out of the RefObjType class so that the Visual Studio exports could be implemented
+ */
+struct GMAT_API RefObjType
+{
+   Gmat::ObjectType objType;
+   std::string objName;
+   GmatBase *obj;
+
+   // Constructor -- default values required for the DevStudio export issues 
+   RefObjType(Gmat::ObjectType refType = Gmat::UNKNOWN_OBJECT, 
+      const std::string &refName = "", GmatBase *ref = NULL)
+      {
+         objType = refType;
+         objName = refName;
+         obj     = ref;
+      };
+
+   RefObjType& operator= (const RefObjType& right)
+      {
+         if (this == &right)
+            return *this;
+         objType = right.objType;
+         objName = right.objName;
+         obj     = right.obj;
+         return *this;
+      };
+};
+
+#ifdef EXPORT_TEMPLATES
+
+    // Instantiate STL template classes used in GMAT  
+    // This does not create an object. It only forces the generation of all
+    // of the members of the listed classes. It exports them from the DLL 
+    // and imports them into the .exe file.
+
+    // This fixes std::string:
+    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<RefObjType>;
+    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<RefObjType>;
+
+#endif
 
 class GMAT_API RefData
 {
 public:
 
-   RefData();
-   RefData(const RefData &copy);
-   RefData& operator= (const RefData &right);
+   RefData(const std::string &name = "");
+   RefData(const RefData &rd);
+   RefData& operator= (const RefData &rd);
    virtual ~RefData();
-
+   
+   GmatBase* GetSpacecraft();
+   
    Integer GetNumRefObjects() const;
    
    std::string GetRefObjectName(const Gmat::ObjectType type) const;
@@ -53,21 +99,35 @@ public:
 
 protected:
 
-   static const int MAX_OBJ_COUNT = 5;
+   //struct RefObjType
+   //{
+   //   Gmat::ObjectType objType;
+   //   std::string objName;
+   //   GmatBase *obj;
+   //   RefObjType(Gmat::ObjectType refType, const std::string &refName, GmatBase *ref)
+   //      {
+   //         objType = refType;
+   //         objName = refName;
+   //         obj     = ref;
+   //      };
+   //   RefObjType& operator= (const RefObjType& right)
+   //      {
+   //         if (this == &right)
+   //            return *this;
+   //         objType = right.objType;
+   //         objName = right.objName;
+   //         obj     = right.obj;
+   //         return *this;
+   //      };
+   //};
    
-   struct RefObjType
-   {
-      Gmat::ObjectType objType;
-      std::string objName;
-      GmatBase *obj;
-   };
-
-   RefObjType mRefObjList[MAX_OBJ_COUNT];
+   std::string mName;
+   std::vector<RefObjType> mRefObjList;
    
    StringArray mObjectTypeNames;
    StringArray mAllRefObjectNames;
    Integer mNumRefObjects;
-
+   
    bool AddRefObject(const Gmat::ObjectType type,
                      const std::string &name, GmatBase *obj = NULL,
                      bool replaceName = false);

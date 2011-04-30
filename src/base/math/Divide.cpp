@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Divide
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,7 +22,7 @@
 #include "Divide.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_DIVIDE 1
+//#define DEBUG_INPUT_OUTPUT 1
 
 //---------------------------------
 // public methods
@@ -87,7 +89,7 @@ GmatBase* Divide::Clone() const
 //------------------------------------------------------------------------------
 void Divide::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   #if DEBUG_DIVIDE
+   #if DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("Divide::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
        GetName().c_str());
@@ -110,22 +112,38 @@ void Divide::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
       throw MathException("Right node is NULL in " + GetTypeName() +
                           "::GetOutputInfo()\n");
    
-   #if DEBUG_DIVIDE
+   #if DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("Divide::GetOutputInfo() type1=%d, row1=%d, col1=%d, type2=%d, "
        "row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
    #endif
    
-   if (type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
-      if (col1 != col2 && row2 != row2)
-         throw MathException("Left and Right dimentions not same, can not divide.\n");
-   
-   if (type1 == Gmat::REAL_TYPE &&  type2 == Gmat::RMATRIX_TYPE)
-      throw MathException("Left and Right dimentions not same, can not divide.\n");
-   
    type = type1;
    rowCount = row1;
    colCount = col1;
+   
+   if ((type1 == Gmat::RMATRIX_TYPE) && (type2 == Gmat::RMATRIX_TYPE))
+   {
+      // Check for 1x1
+      if (row1 == 1 && col1 == 1)
+      {
+         type = type2;
+         rowCount = row2;
+         colCount = col2;
+      }
+      else if (row2 == 1 && col2 == 1)
+      {
+         type = type1;
+         rowCount = row1;
+         colCount = col1;            
+      }
+   }
+   else if (type2 == Gmat::RMATRIX_TYPE)
+   {
+      type = type2;
+      rowCount = row2;
+      colCount = col2;
+   }
 }
 
 
@@ -139,8 +157,20 @@ void Divide::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 bool Divide::ValidateInputs()
 {
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("\Divide::ValidateInputs() '%s' entered\n", GetName().c_str());
+   #endif
+   
+   if (leftNode == NULL)
+      throw MathException("Divide() - Missing input arguments");
+   
+   if (rightNode == NULL)
+      throw MathException("Divide() - Not enough input arguments");
+   
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
+   bool retval = false;
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
@@ -148,15 +178,30 @@ bool Divide::ValidateInputs()
    // Get the type(Real or Matrix), # rows and # columns of the right node
    rightNode->GetOutputInfo(type2, row2, col2);
    
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Divide::ValidateInputs() type1=%d, row1=%d, col1=%d, "
+       "type2=%d, row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
+   #endif
+   
    if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
-      return true;
+      retval = true;
    else if ((type1 == Gmat::RMATRIX_TYPE) && (type2 == Gmat::RMATRIX_TYPE))
       if ((row1 == row2) && (col1 == col2))
-         return true;
+         retval = true;
+      else if ((row1 == 1 && col1 == 1) || (row2 == 1 && col2 == 1))
+         retval = true;
       else
-         return false; 
+         retval = false; 
    else
-      return true;
+      retval = true;
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Divide::ValidateInputs() '%s' returning %d\n", GetName().c_str(), retval);
+   #endif
+   
+   return retval;
 }
 
 
@@ -184,6 +229,11 @@ Real Divide::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix Divide::MatrixEvaluate()
 {
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("\Divide::MatrixEvaluate() '%s' entered\n", GetName().c_str());
+   #endif
+   
    Integer type1, row1, col1; // Left node matrix
    Integer type2, row2, col2; // Right node matrix
    Rmatrix div;
@@ -197,9 +247,20 @@ Rmatrix Divide::MatrixEvaluate()
    // Divide matrix by matrix
    if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)
       div = leftNode->MatrixEvaluate() / rightNode->MatrixEvaluate();
+   
+   // Divide scalar by matrix
+   else if( type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
+      div = leftNode->Evaluate() / rightNode->MatrixEvaluate();
+   
+   // Divide matrix by scalar
    else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
       div = leftNode->MatrixEvaluate() / rightNode->Evaluate();
-
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Divide::MatrixEvaluate() '%s' returning %s\n", GetName().c_str(), div.ToString().c_str());
+   #endif
+   
    return div;
 }
 

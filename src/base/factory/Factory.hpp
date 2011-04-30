@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                             Factory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -29,7 +31,7 @@ class SpaceObject;
 class Parameter;
 class Burn;
 class Propagator;
-class ForceModel;
+class ODEModel;
 class PhysicalModel;
 class PropSetup;
 class StopCondition;
@@ -38,6 +40,7 @@ class CelestialBody;
 class SolarSystem;
 class Solver;
 class Subscriber;
+class EphemerisFile;
 class GmatCommand;
 class AtmosphereModel;
 class Function;
@@ -46,6 +49,19 @@ class AxisSystem;
 class CoordinateSystem;
 class MathNode;
 class Attitude;
+class SpacePoint;
+class Event;
+class Interface;
+
+class MeasurementModel;
+class CoreMeasurement;
+class DataFile;
+class ObType;
+class TrackingSystem;
+class TrackingData;
+
+
+/// @todo Find a clever way to allow user types here when we don't know them
 
 class GMAT_API Factory
 {
@@ -56,10 +72,12 @@ public:
 
    // methods to return objects of specified types
    virtual SpaceObject*     CreateSpacecraft(const std::string &ofType,
+                                             const std::string &withName = "");
+   virtual SpacePoint*      CreateSpacePoint(const std::string &ofType,
                                              const std::string &withName = "");        
    virtual Propagator*      CreatePropagator(const std::string &ofType,
                                              const std::string &withName = "");
-   virtual ForceModel*      CreateForceModel(const std::string &ofType,
+   virtual ODEModel*        CreateODEModel(const std::string &ofType,
                                              const std::string &withName = "");
    virtual PhysicalModel*   CreatePhysicalModel(const std::string &ofType,
                                                 const std::string &withName = "");
@@ -82,6 +100,8 @@ public:
    virtual Subscriber*      CreateSubscriber(const std::string &ofType,
                                              const std::string &withName = "",
                                              const std::string &fileName = "");
+   virtual EphemerisFile*   CreateEphemerisFile(const std::string &ofType,
+                                                const std::string &withName = "");
    virtual GmatCommand*     CreateCommand(const std::string &ofType,
                                           const std::string &withName = "");
    virtual AtmosphereModel* CreateAtmosphereModel(const std::string &ofType,
@@ -99,15 +119,39 @@ public:
                                            const std::string &withName = "");
    virtual Attitude*        CreateAttitude(const std::string &ofType,
                                            const std::string &withName = "");
-
+   virtual MeasurementModel*
+                            CreateMeasurementModel(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual CoreMeasurement* CreateMeasurement(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual DataFile*        CreateDataFile(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual ObType*          CreateObType(const std::string &ofType,
+                                         const std::string &withName = "");
+   virtual TrackingSystem*  CreateTrackingSystem(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual TrackingData*    CreateTrackingData(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual Event*           CreateEvent(const std::string &ofType,
+                                        const std::string &withName = "");
+   virtual Interface*       CreateInterface(const std::string &ofType,
+                                            const std::string &withName = "");
    
    // method to return list of types of objects that this factory can create
-   StringArray              GetListOfCreatableObjects(void) const;
+   StringArray              GetListOfCreatableObjects() const;
+   // method to check if a createable object type matches a subtype
+   virtual bool             DoesObjectTypeMatchSubtype(
+                                  const std::string &theType,
+                                  const std::string &theSubtype);
+   // method to return list of objects that can be viewed via GUI of this factory
+   StringArray              GetListOfViewableObjects();
+   // method to return list of objects that cannot be viewed via GUI of this factory
+   StringArray              GetListOfUnviewableObjects() const;
    // method to set the types of objects that this factory can create
    bool                     SetListOfCreatableObjects(StringArray newList);
    // method to add types of objects that this factory can create
    bool                     AddCreatableObjects(StringArray newList);
-
+   
    // method to return the type of factory this is
    Gmat::ObjectType         GetFactoryType() const;  
    bool                     IsTypeCaseSensitive() const;
@@ -132,6 +176,11 @@ protected:
    // a list of all of the specific types of objects (of type itsType) that
    // can be created by this factory.
    StringArray              creatables;
+   // a list of all of the types of objects that can be viewed from the GUI
+   // (This is automacally generated)
+   StringArray              viewables;
+   // a list of all of the types of objects that cannot be viewed from the GUI
+   StringArray              unviewables;
    // is type name case sensitive
    bool                     isCaseSensitive;
 
@@ -140,7 +189,3 @@ private:
 };
 
 #endif // Factory_hpp
-
-
-
-

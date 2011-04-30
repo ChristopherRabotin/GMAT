@@ -1,14 +1,19 @@
+//$Id$
+//------------------------------------------------------------------------------
+//                             dormandelmikkawyprince68
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : dormandelmikkawyprince68.cpp
 // *** Created   : January 28, 2003
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-67521-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -23,10 +28,10 @@
 // Modification History      : 1/28/03 - D. Conway, Thinking Systems, Inc.
 //                             Original delivery
 // **************************************************************************
-//				      Changes
+//                                    Changes
 //                           : 02/21/2004 - L. Ruley, Missions Applications Branch
-//				              - Updated style using GMAT cpp style guide
-//				              - All Real types to Real types
+//                                            - Updated style using GMAT cpp style guide
+//                                            - All Real types to Real types
 //                            - All int types to Integer types
 // **************************************************************************
 
@@ -35,7 +40,8 @@
 
 /** \brief The default constructor */
 DormandElMikkawyPrince68::DormandElMikkawyPrince68(const std::string &nomme) :
-    RungeKuttaNystrom           (9, 8, "DormandElMikkawyPrince68", nomme)
+    RungeKuttaNystrom           (9, 8, "RungeKutta68"
+          /*"DormandElMikkawyPrince68"*/, nomme)
 {
     derivativeError = true;
 }

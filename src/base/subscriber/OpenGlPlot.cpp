@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  OpenGlPlot
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -29,16 +31,18 @@
 
 #define __REMOVE_OBJ_BY_SETTING_FLAG__
 
-//#define DBGLVL_OPENGL_INIT 2
+//#define DBGLVL_OPENGL_INIT 1
 //#define DBGLVL_OPENGL_DATA 1
 //#define DBGLVL_OPENGL_DATA_LABELS 1
 //#define DBGLVL_OPENGL_ADD 1
 //#define DBGLVL_OPENGL_OBJ 2
 //#define DBGLVL_OPENGL_PARAM 1
+//#define DEBUG_OPENGL_PUT
 //#define DBGLVL_OPENGL_PARAM_STRING 2
 //#define DBGLVL_OPENGL_PARAM_RVEC3 1
 //#define DBGLVL_OPENGL_UPDATE 2
-//#define DBGLVL_REMOVE_ACTION 1
+//#define DBGLVL_TAKE_ACTION 1
+//#define DBGLVL_REMOVE_SP 1
 //#define DBGLVL_RENAME 1
 //#define DBGLVL_SOLVER_CURRENT_ITER 2
 
@@ -81,6 +85,12 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "UpdatePlotFrequency",
    "NumPointsToRedraw",
    "ShowPlot",
+        "StarCount",
+        "EnableStars",
+        "EnableConstellations",
+        "MinFOV",
+        "MaxFOV",
+        "InitialFOV",
 }; 
 
 
@@ -124,6 +134,13 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::INTEGER_TYPE,           //"NumPointsToRedraw"
    
    Gmat::BOOLEAN_TYPE,           //"ShowPlot"
+
+        Gmat::INTEGER_TYPE,                             //"StarCount"
+        Gmat::ON_OFF_TYPE,                              //"EnableStars"
+        Gmat::ON_OFF_TYPE,                              //"EnableConstellations"
+        Gmat::INTEGER_TYPE,                             //"MinFOV"
+        Gmat::INTEGER_TYPE,                             //"MaxFOV"
+        Gmat::INTEGER_TYPE,                             //"InitialFOV"
 };
 
 
@@ -150,6 +167,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
 {
    // GmatBase data
    parameterCount = OpenGlPlotParamCount;
+   objectTypes.push_back(Gmat::ORBIT_VIEW);
    objectTypeNames.push_back("OpenGLPlot");
    
    mEclipticPlane = "Off";
@@ -162,6 +180,16 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mUseInitialView = "On";
    mPerspectiveMode = "Off";
    mUseFixedFov = "Off";
+
+        // stars
+        mEnableStars = "On";
+        mEnableConstellations = "On";
+        mStarCount = 46000;
+
+        // FOV
+        mMinFOV = 0;
+        mMaxFOV = 90;
+        mInitialFOV = 45;
    
    mOldName = instanceName;
    mViewCoordSysName = "EarthMJ2000Eq";
@@ -184,6 +212,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mViewCoordSystem = NULL;
    mViewUpCoordSystem = NULL;
    mViewCoordSysOrigin = NULL;
+   mViewUpCoordSysOrigin = NULL;
    mViewPointRefObj = NULL;
    mViewPointObj = NULL;
    mViewDirectionObj = NULL;
@@ -281,9 +310,20 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mViewCoordSystem = ogl.mViewCoordSystem;
    mViewUpCoordSystem = ogl.mViewCoordSystem;
    mViewCoordSysOrigin = ogl.mViewCoordSysOrigin;
+   mViewUpCoordSysOrigin = ogl.mViewUpCoordSysOrigin;
    mViewPointRefObj = ogl.mViewPointRefObj;
    mViewPointObj = ogl.mViewPointObj;
    mViewDirectionObj = ogl.mViewDirectionObj;
+
+        // stars
+        mStarCount = ogl.mStarCount;
+        mEnableStars = ogl.mEnableStars;
+        mEnableConstellations = ogl.mEnableConstellations;
+
+        // FOV
+        mMinFOV = ogl.mMinFOV;
+        mMaxFOV = ogl.mMaxFOV;
+        mInitialFOV = ogl.mInitialFOV;
    
    mDataCollectFrequency = ogl.mDataCollectFrequency;
    mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
@@ -369,6 +409,7 @@ OpenGlPlot& OpenGlPlot::operator=(const OpenGlPlot& ogl)
    mViewCoordSystem = ogl.mViewCoordSystem;
    mViewUpCoordSystem = ogl.mViewCoordSystem;
    mViewCoordSysOrigin = ogl.mViewCoordSysOrigin;
+   mViewUpCoordSysOrigin = ogl.mViewUpCoordSysOrigin;
    mViewPointRefObj = ogl.mViewPointRefObj;
    mViewPointObj = ogl.mViewPointObj;
    mViewDirectionObj = ogl.mViewDirectionObj;
@@ -414,11 +455,21 @@ OpenGlPlot& OpenGlPlot::operator=(const OpenGlPlot& ogl)
 
 
 //------------------------------------------------------------------------------
-// ~OpenGlPlot(void)
+// ~OpenGlPlot()
 //------------------------------------------------------------------------------
-OpenGlPlot::~OpenGlPlot(void)
+/**
+ * Destructor
+ *
+ * @note This destructor does not delete OpenGL plot window, but clears data.
+ *       OpenGL plot window is deleted when it is closed by the user or GMAT
+ *       shuts down.
+ */
+//------------------------------------------------------------------------------
+OpenGlPlot::~OpenGlPlot()
 {
+   PlotInterface::TakeGlAction(instanceName, "ClearObjects");
 }
+
 
 //------------------------------------------------------------------------------
 // const StringArray& GetSpacePointList()
@@ -596,6 +647,9 @@ void OpenGlPlot::SetVector(const std::string &which, const Rvector3 &value)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Initialize()
 {
+   if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS)
+      return true;
+   
    Subscriber::Initialize();
    
    // theInternalCoordSys is used only by OpenGL plot so check. (2008.06.16)
@@ -610,8 +664,9 @@ bool OpenGlPlot::Initialize()
    
    #if DBGLVL_OPENGL_INIT
    MessageInterface::ShowMessage
-      ("OpenGlPlot::Initialize() this=<%p>'%s', isEndOfReceive = %d, mAllSpCount = %d\n",
-       this, GetName().c_str(), isEndOfReceive, mAllSpCount);
+      ("OpenGlPlot::Initialize() this=<%p>'%s', active=%d, isInitialized=%d, "
+       "isEndOfReceive=%d, mAllSpCount=%d\n", this, GetName().c_str(), active,
+       isInitialized, isEndOfReceive, mAllSpCount);
    #endif
    
    bool foundSc = false;
@@ -682,7 +737,8 @@ bool OpenGlPlot::Initialize()
           (instanceName, mOldName, (mEclipticPlane == "On"), (mXYPlane == "On"),
            (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
            (mSunLine == "On"), (mOverlapPlot == "On"), (mUseInitialView == "On"),
-           (mPerspectiveMode == "On"), mNumPointsToRedraw))
+           (mPerspectiveMode == "On"), mNumPointsToRedraw, 
+			  (mEnableStars == "On"), (mEnableConstellations == "On"), mStarCount))
       {
          #if DBGLVL_OPENGL_INIT
          MessageInterface::ShowMessage
@@ -754,18 +810,27 @@ bool OpenGlPlot::Initialize()
                ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewUpCoordSysName +
                 " not set\n");               
          
-         // get CoordinateSystem Origin pointer
+         // Get View CoordinateSystem Origin pointer
          mViewCoordSysOrigin = mViewCoordSystem->GetOrigin();
          
          if (mViewCoordSysOrigin != NULL)
             UpdateObjectList(mViewCoordSysOrigin);
          
+         // Get View Up CoordinateSystem Origin pointer
+         mViewUpCoordSysOrigin = mViewUpCoordSystem->GetOrigin();
+         
+         if (mViewUpCoordSysOrigin != NULL)
+            UpdateObjectList(mViewUpCoordSysOrigin);
+         
+         // Get ViewPointRef object pointer from the current SolarSystem
          if (mViewPointRefObj != NULL)
             UpdateObjectList(mViewPointRefObj);
          
+         // Get ViewPoint object pointer from the current SolarSystem
          if (mViewPointObj != NULL)
             UpdateObjectList(mViewPointObj);
          
+         // Get ViewDirection object pointer from the current SolarSystem
          if (mViewDirectionObj != NULL)
             UpdateObjectList(mViewDirectionObj);
          
@@ -814,20 +879,34 @@ bool OpenGlPlot::Initialize()
          //--------------------------------------------------------
          #if DBGLVL_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("   theInternalCoordSystem = <%p>, origin = %s\n"
-             "   theDataCoordSystem     = <%p>, origin = %s\n"
-             "   mViewCoordSystem       = <%p>, origin = %s\n"
-             "   mViewUpCoordSystem     = <%p>, origin = %s\n",
-             theInternalCoordSystem, theInternalCoordSystem->GetOriginName().c_str(),
-             theDataCoordSystem, theDataCoordSystem->GetOriginName().c_str(),
-             mViewCoordSystem, mViewCoordSystem->GetOriginName().c_str(),
-             mViewUpCoordSystem, mViewUpCoordSystem->GetOriginName().c_str());
+            ("   theInternalCoordSystem = <%p>, origin = <%p>'%s'\n"
+             "   theDataCoordSystem     = <%p>, origin = <%p>'%s'\n"
+             "   mViewCoordSystem       = <%p>, origin = <%p>'%s'\n"
+             "   mViewUpCoordSystem     = <%p>, origin = <%p>'%s'\n"
+             "   mViewPointRefObj       = <%p>'%s'\n"
+             "   mViewPointObj          = <%p>'%s'\n"
+             "   mViewDirectionObj      = <%p>'%s'\n",
+             theInternalCoordSystem, theInternalCoordSystem->GetOrigin(),
+             theInternalCoordSystem->GetOriginName().c_str(),
+             theDataCoordSystem, theDataCoordSystem->GetOrigin(),
+             theDataCoordSystem->GetOriginName().c_str(),
+             mViewCoordSystem, mViewCoordSystem->GetOrigin(),
+             mViewCoordSystem->GetOriginName().c_str(),
+             mViewUpCoordSystem, mViewUpCoordSystem->GetOrigin(),
+             mViewUpCoordSystem->GetOriginName().c_str(),
+             mViewPointRefObj,
+             mViewPointRefObj ? mViewPointRefObj->GetName().c_str() : "NULL",
+             mViewPointObj,
+             mViewPointObj ? mViewPointObj->GetName().c_str() : "NULL",
+             mViewDirectionObj,
+             mViewDirectionObj ? mViewDirectionObj->GetName().c_str() : "NULL");
+         
          MessageInterface::ShowMessage
             ("   calling PlotInterface::SetGlCoordSystem()\n");
          #endif
          
-         PlotInterface::SetGlCoordSystem(instanceName, mViewCoordSystem,
-                                         mViewUpCoordSystem);
+         PlotInterface::SetGlCoordSystem(instanceName, theInternalCoordSystem,
+                                         mViewCoordSystem, mViewUpCoordSystem);
          
          //--------------------------------------------------------
          // set viewpoint info
@@ -864,10 +943,14 @@ bool OpenGlPlot::Initialize()
    else
    {
       #if DBGLVL_OPENGL_INIT
-      MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::Initialize() Plot is active and initialized, "
+          "so calling DeleteGlPlot()\n");
       #endif
       
-      retval =  PlotInterface::DeleteGlPlot(instanceName);
+      // Why do we want to delete plot if active and initialized?
+      // This causes Global OpenGL plot not to show, so commented out (loj: 2008.10.08)
+      //retval =  PlotInterface::DeleteGlPlot(instanceName);
    }
    
    #if DBGLVL_OPENGL_INIT
@@ -890,11 +973,6 @@ void OpenGlPlot::Activate(bool state)
    #endif
    
    Subscriber::Activate(state);
-   
-//    if (state == true && !isInitialized)
-//    {
-//       Initialize();
-//    }
 }
 
 
@@ -976,9 +1054,10 @@ bool OpenGlPlot::SetName(const std::string &who, const std::string &oldName)
 bool OpenGlPlot::TakeAction(const std::string &action,
                             const std::string &actionData)
 {
-   #if DBGLVL_REMOVE_ACTION
-   MessageInterface::ShowMessage("OpenGlPlot::TakeAction() action=%s, actionData=%s\n",
-                                 action.c_str(), actionData.c_str());
+   #if DBGLVL_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::TakeAction() '%s' entered, action='%s', actionData='%s'\n",
+       GetName().c_str(), action.c_str(), actionData.c_str());
    #endif
    if (action == "Clear")
    {
@@ -987,6 +1066,10 @@ bool OpenGlPlot::TakeAction(const std::string &action,
    else if (action == "Remove")
    {
       return RemoveSpacePoint(actionData);
+   }
+   else if (action == "Finalize")
+   {
+      PlotInterface::DeleteGlPlot(instanceName);
    }
    
    return false;
@@ -1160,6 +1243,14 @@ Integer OpenGlPlot::GetIntegerParameter(const Integer id) const
       return mUpdatePlotFrequency;
    case NUM_POINTS_TO_REDRAW:
       return mNumPointsToRedraw;
+        case STAR_COUNT:
+                return mStarCount;
+        case MIN_FOV:
+                return mMinFOV;
+        case MAX_FOV:
+                return mMaxFOV;
+        case INITIAL_FOV:
+                return mInitialFOV;
    default:
       return Subscriber::GetIntegerParameter(id);
    }
@@ -1183,16 +1274,69 @@ Integer OpenGlPlot::SetIntegerParameter(const Integer id, const Integer value)
    switch (id)
    {
    case DATA_COLLECT_FREQUENCY:
-      mDataCollectFrequency = value;
-      if (mDataCollectFrequency <= 0)
-         mDataCollectFrequency = 1;
-      return mDataCollectFrequency;
+      if (value > 0)
+      {
+         mDataCollectFrequency = value;
+         return value;
+      }
+      else
+      {
+         SubscriberException se;
+         se.SetDetails(errorMessageFormat.c_str(),
+                       GmatStringUtil::ToString(value, 1).c_str(),
+                       "DataCollectFrequency", "Integer Number > 0");
+         throw se;
+      }
    case UPDATE_PLOT_FREQUENCY:
-      mUpdatePlotFrequency = value;
-      return value;
+      if (value > 0)
+      {
+         mUpdatePlotFrequency = value;
+         return value;
+      }
+      else
+      {
+         SubscriberException se;
+         se.SetDetails(errorMessageFormat.c_str(),
+                       GmatStringUtil::ToString(value, 1).c_str(),
+                       "UpdatePlotFrequency", "Integer Number > 0");
+         throw se;
+      }
    case NUM_POINTS_TO_REDRAW:
-      mNumPointsToRedraw = value;
-      return value;
+      if (value >= 0)
+      {
+         mNumPointsToRedraw = value;
+         return value;
+      }
+      else
+      {
+         SubscriberException se;
+         se.SetDetails(errorMessageFormat.c_str(),
+                       GmatStringUtil::ToString(value, 1).c_str(),
+                       "NumPointsToRedraw", "Integer Number >= 0");
+         throw se;
+      }
+        case STAR_COUNT:
+                if (value >= 0)
+                {
+                        mStarCount = value;
+                        return value;
+                }
+                else
+                {
+                        SubscriberException se;
+                        se.SetDetails(errorMessageFormat.c_str(),
+                                                        GmatStringUtil::ToString(value, 1).c_str(),
+                                                        "StarCount", "Integer Value >= 0");
+                }
+        case MIN_FOV:
+                mMinFOV = value;
+                return value;
+        case MAX_FOV:
+                mMaxFOV = value;
+                return value;
+        case INITIAL_FOV:
+                mInitialFOV = value;
+                return value;
    default:
       return Subscriber::SetIntegerParameter(id, value);
    }
@@ -1518,6 +1662,12 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    case VIEWPOINT_REF:
       WriteDeprecatedMessage(id);
       mViewPointRefName = value;
+      mViewPointRefType = "Object";
+      
+      // Handle deprecated value "Vector"
+      if (value == "Vector" || GmatStringUtil::IsNumber(value))
+         mViewPointRefType = "Vector";
+      
       if (value[0] == '[')
       {
          PutRvector3Value(mViewPointRefVector, id, value);
@@ -1526,6 +1676,12 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
       return true;
    case VIEWPOINT_REFERENCE:
       mViewPointRefName = value;
+      mViewPointRefType = "Object";
+      
+      // Handle deprecated value "Vector"
+      if (value == "Vector" || GmatStringUtil::IsNumber(value))
+         mViewPointRefType = "Vector";
+      
       if (value[0] == '[')
       {
          PutRvector3Value(mViewPointRefVector, id, value);
@@ -1536,6 +1692,12 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
       return true;
    case VIEWPOINT_VECTOR:
       mViewPointVecName = value;
+      mViewPointVecType = "Object";
+      
+      // Handle deprecated value "Vector"
+      if (value == "Vector" || GmatStringUtil::IsNumber(value))
+         mViewPointVecType = "Vector";
+      
       if (value[0] == '[')
       {
          PutRvector3Value(mViewPointVecVector, id, value);
@@ -1547,6 +1709,12 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
       return true;
    case VIEW_DIRECTION:
       mViewDirectionName = value;
+      mViewDirectionType = "Object";
+      
+      // Handle deprecated value "Vector"
+      if (value == "Vector" || GmatStringUtil::IsNumber(value))
+         mViewDirectionType = "Vector";
+      
       if (value[0] == '[')
       {
          PutRvector3Value(mViewDirectionVector, id, value);
@@ -1800,6 +1968,10 @@ std::string OpenGlPlot::GetOnOffParameter(const Integer id) const
       return mPerspectiveMode;
    case USE_FIXED_FOV:
       return mUseFixedFov;
+        case ENABLE_STARS:
+                return mEnableStars;
+        case ENABLE_CONSTELLATIONS:
+                return mEnableConstellations;
    default:
       return Subscriber::GetOnOffParameter(id);
    }
@@ -1856,6 +2028,12 @@ bool OpenGlPlot::SetOnOffParameter(const Integer id, const std::string &value)
    case USE_FIXED_FOV:
       mUseFixedFov = value;
       return true;
+        case ENABLE_STARS:
+                mEnableStars = value;
+                return true;
+        case ENABLE_CONSTELLATIONS:
+                mEnableConstellations = value;
+                return true;
    default:
       return Subscriber::SetOnOffParameter(id, value);
    }
@@ -1895,6 +2073,19 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
    #endif
    
    return Subscriber::GetRefObjectName(type);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool OpenGlPlot::HasRefObjectTypeArray()
+{
+   return true;
 }
 
 
@@ -2098,6 +2289,14 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
       }
       
+      #if DBGLVL_OPENGL_OBJ
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::SetRefObject() realName='%s', mViewPointRefName='%s', "
+          "mViewPointVecName='%s', mViewDirectionName='%s'\n", realName.c_str(),
+          mViewPointRefName.c_str(), mViewPointVecName.c_str(),
+          mViewDirectionName.c_str());
+      #endif
+      
       // ViewPoint info
       if (realName == mViewPointRefName)
          mViewPointRefObj = (SpacePoint*)obj;
@@ -2105,12 +2304,18 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (realName == mViewPointVecName)
          mViewPointObj = (SpacePoint*)obj;
       
-      else if (realName == mViewDirectionName)
+      if (realName == mViewDirectionName)
          mViewDirectionObj = (SpacePoint*)obj;
       
+      #if DBGLVL_OPENGL_OBJ
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::SetRefObject() mViewPointRefObj=<%p>, mViewPointObj=<%p>, "
+          "mViewDirectionObj=<%p>\n", mViewPointRefObj, mViewPointObj,
+          mViewDirectionObj);
+      #endif
       return true;
    }
-
+   
    return Subscriber::SetRefObject(obj, type, realName);
 }
 
@@ -2264,7 +2469,7 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
    //-------------------------------------------------------
    // remove from mScNameArray
    //-------------------------------------------------------
-   #if DBGLVL_REMOVE_ACTION
+   #if DBGLVL_REMOVE_SP
    MessageInterface::ShowMessage
       ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- Before remove from "
        "mScNameArray:\n", name.c_str());
@@ -2305,7 +2510,7 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
          mScTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
       }
       
-      #if DBGLVL_REMOVE_ACTION
+      #if DBGLVL_REMOVE_SP
       MessageInterface::ShowMessage("---After remove from mScNameArray:\n");
       MessageInterface::ShowMessage("mScCount=%d\n", mScCount);
       for (int i=0; i<mScCount; i++)
@@ -2323,7 +2528,7 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
    //-------------------------------------------------------
    // remove from mAllSpNameArray and mObjectNameArray
    //-------------------------------------------------------
-   #if DBGLVL_REMOVE_ACTION
+   #if DBGLVL_REMOVE_SP
    MessageInterface::ShowMessage
       ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- Before remove from "
        "mAllSpNameArray:\n", name.c_str());
@@ -2368,7 +2573,7 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
             mTargetColorArray[i] = mTargetColorMap[mAllSpNameArray[i]];
          }
          
-         #if DBGLVL_REMOVE_ACTION
+         #if DBGLVL_REMOVE_SP
          MessageInterface::ShowMessage("---After remove from mAllSpNameArray\n");
          MessageInterface::ShowMessage("mAllSpCount=%d\n", mAllSpCount);
          for (int i=0; i<mAllSpCount; i++)
@@ -2385,7 +2590,7 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
    //-------------------------------------------------------
    // remove from mObjectArray
    //-------------------------------------------------------
-   #if DBGLVL_REMOVE_ACTION
+   #if DBGLVL_REMOVE_SP
    MessageInterface::ShowMessage
       ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- Before remove from "
        "mObjectArray:\n", name.c_str());
@@ -2404,7 +2609,7 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
       }
    }
    
-   #if DBGLVL_REMOVE_ACTION
+   #if DBGLVL_REMOVE_SP
    MessageInterface::ShowMessage
       ("OpenGlPlot::RemoveSpacePoint() name=%s\n--- After remove from "
        "mObjectArray:\n", name.c_str());
@@ -2419,28 +2624,6 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
    return (removedFromScArray && removedFromAllSpArray);
    
    #endif
-}
-
-
-//------------------------------------------------------------------------------
-// Integer FindIndexOfElement(StringArray &labelArray, const std::string &label)
-//------------------------------------------------------------------------------
-/*
- * Finds the index of the element label from the element label array.
- *
- * Typical element label array contains:
- *    All.epoch, scName.X, scName.Y, scName.Z, scName.Vx, scName.Vy, scName.Vz.
- */
-//------------------------------------------------------------------------------
-Integer OpenGlPlot::FindIndexOfElement(StringArray &labelArray,
-                                       const std::string &label)
-{
-   std::vector<std::string>::iterator pos;
-   pos = find(labelArray.begin(), labelArray.end(),  label);
-   if (pos == labelArray.end())
-      return -1;
-   else
-      return distance(labelArray.begin(), pos);
 }
 
 
@@ -2475,13 +2658,13 @@ void OpenGlPlot::ClearDynamicArrays()
  */
 //------------------------------------------------------------------------------
 void OpenGlPlot::UpdateObjectList(SpacePoint *sp, bool show)
-{
+{   
    // Add all spacepoint objects
    std::string name = sp->GetName();
    StringArray::iterator pos = 
       find(mObjectNameArray.begin(), mObjectNameArray.end(), name);
-
-   // if name not found
+   
+   // if name not found, add to arrays
    if (pos == mObjectNameArray.end())
    {
       mObjectNameArray.push_back(name);
@@ -2798,6 +2981,9 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
        mScCount, len, runstate);
    #endif
    
+   if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS)
+      return true;
+   
    if (!active || mScCount <= 0)
       return true;
    
@@ -2853,7 +3039,7 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
    
    #if DBGLVL_OPENGL_UPDATE > 1
    MessageInterface::ShowMessage
-      ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=%d\n",
+      ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=<%p>\n",
        mNumData, mDataCollectFrequency, currentProvider);
    #endif
    
@@ -2869,17 +3055,18 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
           currentProvider, theDataLabels.size());
       #endif
       
-      if (currentProvider >= (Integer)theDataLabels.size())
-      {
-         SubscriberException se;
-         se.SetDetails
-            ("The provider id %d is invalid in OpenGL plot, expected id is "
-             "between 0 and %d\n", currentProvider, theDataLabels.size());
-         throw se;
-      }
+      #if DBGLVL_OPENGL_UPDATE > 2
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::Distribute() Using new Publisher code\n");
+      #endif
       
-      StringArray dataLabels = theDataLabels[currentProvider];
-      
+      // @note
+      // New Publisher code doesn't assign currentProvider anymore,
+      // it just copies current labels. There was an issue with
+      // provider id keep incrementing if data is regisgered and
+      // published inside a GmatFunction
+      StringArray dataLabels = theDataLabels[0];
+            
       #if DBGLVL_OPENGL_DATA_LABELS
       MessageInterface::ShowMessage("   Data labels for %s =\n   ", GetName().c_str());
       for (int j=0; j<(int)dataLabels.size(); j++)
@@ -2997,7 +3184,10 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       }
       
       
-      //MessageInterface::ShowMessage("==========> now update run plot\n");
+      #if DBGLVL_OPENGL_UPDATE > 0
+      MessageInterface::ShowMessage("==========> now update GL plot\n");
+      #endif
+      
       bool solving = false;
       UnsignedIntArray colorArray = mScOrbitColorArray;
       if (runstate == Gmat::SOLVING)

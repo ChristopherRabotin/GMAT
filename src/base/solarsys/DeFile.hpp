@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  DeFile
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -38,7 +40,7 @@
 
 #include <stdio.h> // for FILE, etc. (for JPL/JSC code (Hoffman))
 
-class DeFile : public PlanetaryEphem
+class GMAT_API DeFile : public PlanetaryEphem
 {
 public:
 
@@ -55,6 +57,7 @@ public:
    //loj: added so that constructor won't throw an exception
    // method to initialize the DeFile - must be done before De file can be read
    void Initialize();
+   
    
    // method to return the body ID for the requested body
    Integer  GetBodyID(std::string bodyName);
@@ -73,7 +76,8 @@ public:
    // at the specified time
    Real* GetPosVel(Integer forBody, A1Mjd atTime, 
                    bool overrideTimeSystem = false);
-                   
+   
+   /// method to return angles and rates (for Luna ONLY!!)                
    void  GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates, 
                            bool overrideTimeSystem = false);
 
@@ -82,8 +86,8 @@ public:
    Integer* GetStartDayAndYear();
 
    // method to convert an ASCII file to a binary file; this method assumes that
-   // there is  an appropriate header file in teh ssame directory as the
-   // ASCII file.
+   // there is  an appropriate header file in the same directory as the
+   // ASCII file.  @todo - code this method, as its implementation is currently TBD
    std::string Convert(std::string deFileNameAscii); 
 
 
@@ -104,7 +108,7 @@ public:
    static const Integer NUTATIONS_ID;
    static const Integer LIBRATIONS_ID;
 
-   static const Real    JD_MJD_OFFSET;// = 2430000.0;
+   static const Real    JD_MJD_OFFSET;// = GmatTimeConstants::JD_JAN_5_1941;
    // seconds offset to get from A1 to TDT (TT)
    static const Real    TT_OFFSET;//     = 32.184;
 
@@ -120,7 +124,7 @@ protected:
 
    // structs representing the state date (positiona nd velocity)
    // (from JPL/JSC code - Hoffman)
-   struct stateData{
+   struct GMAT_API stateData{
          double Position[3];
          double Velocity[3];
       };
@@ -131,7 +135,7 @@ protected:
    // (from JPL/JSC code - Hoffman)
    // wcs - added constructors, and operator=
 #pragma pack(push, 1)
-   struct recOneData {
+   struct GMAT_API recOneData {
       recOneData()  // default constructor
    {
          int i, j;
@@ -209,7 +213,7 @@ protected:
       #endif
    };
 
-   struct recTwoData {
+   struct GMAT_API recTwoData {
       // default constructor
       recTwoData()
    {
@@ -238,12 +242,12 @@ protected:
    typedef struct recTwoData recTwoType;
 
    // structs representing the formats of the header records - need ARRAY_SIZE?
-   struct headerOne {
+   struct GMAT_API headerOne {
          recOneType data;
          char pad[MAX_ARRAY_SIZE*sizeof(double) - sizeof(recOneType)];  // MAX
       };
 
-   struct headerTwo {
+   struct GMAT_API headerTwo {
       recTwoType data;
       char pad[MAX_ARRAY_SIZE*sizeof(double) - sizeof(recTwoType)];  // MAX
    };
@@ -277,6 +281,8 @@ private:
    FILE        *Ephemeris_File;
    double       Coeff_Array[MAX_ARRAY_SIZE];   // MAX
    double       T_beg , T_end , T_span;
+   /// The base epoch for internal time calculations
+   double       baseEpoch;
    double       mFileBeg;
       #if (USE_64_BIT_LONGS == 1)
          int numConst;

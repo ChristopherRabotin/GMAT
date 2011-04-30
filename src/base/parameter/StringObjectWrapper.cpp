@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  StringObjectWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -53,7 +55,7 @@ StringObjectWrapper::StringObjectWrapper() :
    stringVar     (NULL),
    stringName    ("")
 {
-   wrapperType = Gmat::STRING_OBJECT;
+   wrapperType = Gmat::STRING_OBJECT_WT;
 }
 
 //---------------------------------------------------------------------------
@@ -72,6 +74,8 @@ StringObjectWrapper::StringObjectWrapper(const StringObjectWrapper &sow) :
    stringVar     (NULL),
    stringName    (sow.stringName)
 {
+   if (sow.stringVar)
+      stringVar = (StringVar*)((sow.stringVar)->Clone());
 }
 
 //---------------------------------------------------------------------------
@@ -95,8 +99,12 @@ const StringObjectWrapper& StringObjectWrapper::operator=(
    stringVar     = NULL;  
    stringName    = sow.stringName;
 
+   if (sow.stringVar)
+      stringVar = (StringVar*)((sow.stringVar)->Clone());
+   
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~StringObjectWrapper()
 //---------------------------------------------------------------------------
@@ -106,6 +114,8 @@ const StringObjectWrapper& StringObjectWrapper::operator=(
 //---------------------------------------------------------------------------
 StringObjectWrapper::~StringObjectWrapper()
 {
+//    if (stringVar)
+//       delete stringVar;
 }
 
 //------------------------------------------------------------------------------
@@ -165,6 +175,10 @@ bool StringObjectWrapper::SetRefObject(GmatBase *obj)
    bool isOk   = false;
    if ( (obj->IsOfType("String")) && (obj->GetName() == stringName) )
    {
+      ///@todo
+//       if (stringVar)
+//          delete stringVar;
+//       stringVar = (StringVar*)((obj)->Clone());
       stringVar = (StringVar*) obj;
       #ifdef DEBUG_STRING_WRAPPER
          MessageInterface::ShowMessage("StringObjectWrapper:: Setting stringVar object %s\n",
@@ -281,6 +295,12 @@ bool StringObjectWrapper::SetString(const std::string &toValue)
    if (stringVar == NULL)
       throw ParameterException(
       "Cannot set value of String - object pointer is NULL\n");
+   
+   #ifdef DEBUG_STRING_WRAPPER
+   MessageInterface::ShowMessage
+      ("   stringVar=<%p>'%s'\n", stringVar, stringVar->GetName().c_str());
+   #endif
+   
    try
    {
       stringVar->SetStringParameter("Value",toValue);

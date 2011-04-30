@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              Formation
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CI63P
@@ -58,6 +60,10 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
+   
+   
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         GetRealParameter(const std::string &label) const;
    virtual Real         SetRealParameter(const Integer id, const Real value);
    virtual Real         SetRealParameter(const std::string &label, 
                                          const Real value);
@@ -93,6 +99,12 @@ public:
    // virtual void SetLastStopTriggered(const std::string &stopCondName);
    // virtual bool WasLastStopTriggered(const std::string &stopCondName);
    
+//   virtual Integer         GetPropItemID(const std::string &whichItem);
+   virtual Integer         SetPropItem(const std::string &propItem);
+   virtual StringArray     GetDefaultPropItems();
+   virtual Real*           GetPropItem(const Integer item);
+   virtual Integer         GetPropItemSize(const Integer item);
+   
 protected:
    /// List of the object names used in the formation
    StringArray                      componentNames;
@@ -109,6 +121,8 @@ protected:
       ADDED_SPACECRAFT = SpaceObjectParamCount,
       REMOVED_SPACECRAFT,
       CLEAR_NAMES,
+      FORMATION_STM,
+      FORMATION_CARTESIAN_STATE,
       FormationParamCount
    };
    

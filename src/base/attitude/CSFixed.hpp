@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 CSFixed
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan/GSFC
 // Created: 2006.03.24
@@ -72,7 +76,7 @@ protected:
 
 private:
    // Default constructor - not implemented
-   CSFixed();
+   //CSFixed(); // MSVC compiler gives warning: multiple default constructors specified
 
 };
 #endif /*CSFixed_hpp*/

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            PhysicalModelFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -29,6 +31,27 @@
 //---------------------------------
 //  public methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+//  CreatePhysicalModel(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested PhysicalModel 
+ * class.
+ *
+ * @param <ofType> the PhysicalModel object to create and return.
+ * @param <withName> the name to give the newly-created PhysicalModel object.
+ *
+ * @note As of 2003/10/14, we are ignoring the withName parameter.  Use of this
+ *       parameter may be added later.
+ */
+//------------------------------------------------------------------------------
+PhysicalModel* PhysicalModelFactory::CreateObject(const std::string &ofType,
+                                                  const std::string &withName)
+{
+   return CreatePhysicalModel(ofType, withName);
+}
+
 
 //------------------------------------------------------------------------------
 //  CreatePhysicalModel(const std::string &ofType, const std::string &withName)

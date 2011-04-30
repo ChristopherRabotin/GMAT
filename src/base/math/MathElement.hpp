@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -29,7 +31,7 @@
 #include "ElementWrapper.hpp"
 #include <map>
 
-class MathElement : public MathNode
+class GMAT_API MathElement : public MathNode
 {
 public:
    MathElement(const std::string &typeStr, const std::string &nomme);
@@ -38,7 +40,8 @@ public:
    MathElement& operator=(const MathElement &me);
    
    // for math elemement wrappers
-   void                 SetMathWrappers(std::map<std::string, ElementWrapper*> *wrapperMap);
+   ////void                 SetMathWrappers(std::map<std::string, ElementWrapper*> *wrapperMap);
+   virtual void         SetMathWrappers(WrapperMap *wrapperMap);
    
    // Inherited (MathNode) methods
    virtual void         SetMatrixValue(const Rmatrix &mat);
@@ -80,7 +83,7 @@ protected:
    /// The list of names of Wrapper objects
    StringArray wrapperObjectNames;
    /// Wrapper name and ElementWrapper pointer Map for RHS math element
-   std::map<std::string, ElementWrapper*> *theWrapperMap;
+   WrapperMap *theWrapperMap;
    
    void SetWrapperObjectNames(const std::string &name);
    void SetWrapperObject(GmatBase *obj, const std::string &name);

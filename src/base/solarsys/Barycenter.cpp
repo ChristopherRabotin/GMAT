@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Barycenter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan
 // Created: 2005/04/05
@@ -19,6 +23,10 @@
 #include "Barycenter.hpp"
 #include "SolarSystemException.hpp"
 #include "CelestialBody.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_BARYCENTER
+//#define DEBUG_BARYCENTER_BODIES
 
 //---------------------------------
 // static data
@@ -121,24 +129,43 @@ Barycenter::~Barycenter()
 const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
 {
    CheckBodies();
+   #ifdef DEBUG_BARYCENTER
+      MessageInterface::ShowMessage("Entering BaryCenter;:GetMJ2000EqState at time %12.10f\n",
+            atTime.Get());
+   #endif
    Real     bodyMass = 0.0;
    Rvector3 bodyPos(0.0,0.0,0.0);
    Rvector3 bodyVel(0.0,0.0,0.0);
    
    Real     sumMass  = 0.0;
+   Real     weight   = 0.0;
    Rvector3 sumMassPos(0.0,0.0,0.0);
    Rvector3 sumMassVel(0.0,0.0,0.0);
+
+   for (unsigned int ii = 0; ii < bodyList.size(); ii++)
+      sumMass +=  ((CelestialBody*) (bodyList.at(ii)))->GetMass();
+
    for (unsigned int i = 0; i < bodyList.size() ; i++)
    {
       bodyMass    = ((CelestialBody*) (bodyList.at(i)))->GetMass();
       bodyPos     = (bodyList.at(i))->GetMJ2000Position(atTime);
       bodyVel     = (bodyList.at(i))->GetMJ2000Velocity(atTime);
-      sumMass    += bodyMass;
-      sumMassPos += (bodyMass * bodyPos);
-      sumMassVel += (bodyMass * bodyVel);
+      weight      = bodyMass/sumMass;
+      #ifdef DEBUG_BARYCENTER
+         MessageInterface::ShowMessage("Mass (and weight) of body %s = %12.10f (%12.10f)\n",
+               ((bodyList.at(i))->GetName()).c_str(), bodyMass, weight);
+         MessageInterface::ShowMessage("    pos = %s\n", (bodyPos.ToString()).c_str());
+         MessageInterface::ShowMessage("    vel = %s\n", (bodyVel.ToString()).c_str());
+      #endif
+//      sumMassPos += (bodyMass * bodyPos);
+//      sumMassVel += (bodyMass * bodyVel);
+      sumMassPos += (weight * bodyPos);
+      sumMassVel += (weight * bodyVel);
    }
-   sumMassPos    /= sumMass;
-   sumMassVel    /= sumMass;
+   #ifdef DEBUG_BARYCENTER
+      MessageInterface::ShowMessage("sumMassPos = %s\n",
+            (sumMassPos.ToString()).c_str());
+   #endif
    return Rvector6(sumMassPos(0), sumMassPos(1), sumMassPos(2),
                    sumMassVel(0), sumMassVel(1), sumMassVel(2));
 }
@@ -177,6 +204,17 @@ const Rvector3 Barycenter::GetMJ2000Velocity(const A1Mjd &atTime)
    return (tmp.GetV());
 }
 
+
+//---------------------------------------------------------------------------
+//  Real GetMass()
+//---------------------------------------------------------------------------
+/**
+ * Method returning the total mass of the celestial bodies included in
+ * this Barycenter.
+ *
+ * @return total mass of the celestial bodies included in this Barycenter.
+ */
+//---------------------------------------------------------------------------
 Real Barycenter::GetMass() 
 {
    Real     sumMass  = 0.0;
@@ -186,6 +224,7 @@ Real Barycenter::GetMass()
    }
    return sumMass;
 }
+
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -300,6 +339,47 @@ void Barycenter::Copy(const GmatBase* orig)
 }
 
 
+//---------------------------------------------------------------------------
+//  bool Initialize()
+//---------------------------------------------------------------------------
+/**
+ * Method that initializes this Barycenter.
+ *
+ * @return success flag for initializing
+ */
+//---------------------------------------------------------------------------
+bool Barycenter::Initialize()
+{
+   #ifdef DEBUG_BARYCENTER_BODIES
+      MessageInterface::ShowMessage("Entering Barycenter::Initialize\n   bodyNames:\n");
+      for (unsigned int ii = 0; ii < bodyNames.size(); ii++)
+         MessageInterface::ShowMessage("   %d    %s\n", ii, (bodyNames.at(ii)).c_str());
+      MessageInterface::ShowMessage("and defaultBodies:\n");
+      for (unsigned int ii = 0; ii < defaultBodies.size(); ii++)
+         MessageInterface::ShowMessage("   %d    %s\n", ii, (defaultBodies.at(ii)).c_str());
+   #endif
+   if ((bodyNames.empty()) && !(defaultBodies.empty()))
+   {
+      for (unsigned int ii = 0; ii < defaultBodies.size(); ii++)
+         bodyNames.push_back(defaultBodies.at(ii));
+//      bodyNames = defaultBodies;
+   }
+   if (bodyNames.empty())
+   {
+      std::string errmsg = "No celestial body specified for Barycenter ";
+      errmsg += instanceName + "\n";
+      throw SolarSystemException(errmsg);
+   }
+   #ifdef DEBUG_BARYCENTER_BODIES
+      MessageInterface::ShowMessage("at end of Barycenter::Initialize\n   bodyNames:\n");
+      for (unsigned int ii = 0; ii < bodyNames.size(); ii++)
+         MessageInterface::ShowMessage("   %d    %s\n", ii, (bodyNames.at(ii)).c_str());
+   #endif
+   return CalculatedPoint::Initialize();
+}
+
+
+
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
@@ -316,6 +396,9 @@ void Barycenter::Copy(const GmatBase* orig)
 //------------------------------------------------------------------------------
 void Barycenter::CheckBodies()
 {
+   if (bodyNames.empty())
+      throw SolarSystemException("Attempting to use Barycenter with no bodies set ...\n");
+
    for (unsigned int i = 0; i < bodyList.size() ; i++)
       if ((bodyList.at(i))->GetType() != Gmat::CELESTIAL_BODY)
          throw SolarSystemException(

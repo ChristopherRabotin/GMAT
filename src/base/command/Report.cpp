@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                            Report
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Purchase
 // order MOMS418823
@@ -27,8 +29,17 @@
 //#define DEBUG_REPORT_SET
 //#define DEBUG_REPORT_INIT
 //#define DEBUG_REPORT_EXEC
-//#define DEBUG_WRAPPERS
+//#define DEBUG_WRAPPER_CODE
 //#define DEBUG_OBJECT_MAP
+//#define DEBUG_RENAME
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -81,6 +92,7 @@ Report::Report() :
 //------------------------------------------------------------------------------
 Report::~Report()
 {
+   DeleteParameters();
 }
 
 
@@ -288,9 +300,10 @@ const StringArray& Report::GetWrapperObjectNameArray()
 bool Report::SetElementWrapper(ElementWrapper *toWrapper,
                                const std::string &withName)
 {
-   #ifdef DEBUG_WRAPPERS   
+   #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("Report::SetElementWrapper() entered with toWrapper=<%p>, withName='%s'\n",
+      ("Report::SetElementWrapper() this=<%p> '%s' entered, toWrapper=<%p>, "
+       "withName='%s'\n", this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
        toWrapper, withName.c_str());
    #endif
    
@@ -302,11 +315,12 @@ bool Report::SetElementWrapper(ElementWrapper *toWrapper,
    
    bool retval = false;
    ElementWrapper *ew;
+   std::vector<ElementWrapper*> wrappersToDelete;
    
    //-------------------------------------------------------
    // check parameter names
    //-------------------------------------------------------
-   #ifdef DEBUG_WRAPPERS   
+   #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
       ("   Checking %d Parameters\n", actualParmNames.size());
    for (UnsignedInt i=0; i<actualParmNames.size(); i++)
@@ -318,7 +332,7 @@ bool Report::SetElementWrapper(ElementWrapper *toWrapper,
    {
       if (actualParmNames.at(i) == withName)
       {
-         #ifdef DEBUG_WRAPPERS   
+         #ifdef DEBUG_WRAPPER_CODE   
          MessageInterface::ShowMessage
             ("   Found wrapper name \"%s\" in actualParmNames\n", withName.c_str());
          #endif
@@ -326,6 +340,10 @@ bool Report::SetElementWrapper(ElementWrapper *toWrapper,
          {
             ew = parmWrappers.at(i);
             parmWrappers.at(i) = toWrapper;
+            // if wrapper not found, add to the list to delete
+            if (find(wrappersToDelete.begin(), wrappersToDelete.end(), ew) ==
+                wrappersToDelete.end())
+               wrappersToDelete.push_back(ew);
          }
          else
          {
@@ -336,7 +354,64 @@ bool Report::SetElementWrapper(ElementWrapper *toWrapper,
       }
    }
    
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("   There are %d wrappers to delete\n", wrappersToDelete.size());
+   #endif
+   
+   // Delete old ElementWrappers (loj: 2008.11.20)
+   for (std::vector<ElementWrapper*>::iterator ewi = wrappersToDelete.begin();
+        ewi < wrappersToDelete.end(); ewi++)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         ((*ewi), (*ewi)->GetDescription(), "Report::SetElementWrapper()",
+          GetGeneratingString(Gmat::NO_COMMENTS) + " deleting wrapper");
+      #endif
+      delete (*ewi);
+      (*ewi) = NULL;
+   }
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Report::SetElementWrapper() exiting with %d\n", retval);
+   #endif
+   
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearWrappers()
+//------------------------------------------------------------------------------
+void Report::ClearWrappers()
+{
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Report::ClearWrappers() this=<%p> '%s' entered\n   There are %d wrappers "
+       "allocated, these will be deleted if not NULL\n", this,
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), parmWrappers.size());
+   #endif
+   
+   std::vector<ElementWrapper*> wrappersToDelete;
+   
+   // delete wrappers (loj: 2008.11.20)
+   for (std::vector<ElementWrapper*>::iterator ewi = parmWrappers.begin();
+        ewi < parmWrappers.end(); ewi++)
+   {
+      if ((*ewi) == NULL)
+         continue;
+      
+      // if wrapper not found, add to the list to delete
+      if (find(wrappersToDelete.begin(), wrappersToDelete.end(), (*ewi)) ==
+          wrappersToDelete.end())
+         wrappersToDelete.push_back((*ewi));
+   }
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("   There are %d wrappers to delete\n", wrappersToDelete.size());
+   #endif
 }
 
 
@@ -367,14 +442,10 @@ bool Report::TakeAction(const std::string &action, const std::string &actionData
       actualParmNames.clear();
       parmRows.clear();
       parmCols.clear();
-      
-      // Why we need to clear? (loj: 2007.12.19 commented out)
-      // We want to preserve parameters to report for ReportFile
-      //if (reporter)
-      //{
-      //   reporter->TakeAction("Clear");
-      //   return true;
-      //}
+
+      // I think we also need to clear wrappers here (loj: 2008.11.24)
+      ClearWrappers();
+      parmWrappers.clear();      
    }
    
    return false;
@@ -534,7 +605,7 @@ bool Report::RenameRefObject(const Gmat::ObjectType type,
                              const std::string &oldName,
                              const std::string &newName)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Report::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
@@ -555,12 +626,13 @@ bool Report::RenameRefObject(const Gmat::ObjectType type,
          if (actualParmNames[i] == oldName)
             actualParmNames[i] = newName;
    }
-   // Since parameter name is composed of spacecraftName.dep.paramType or
-   // burnName.dep.paramType, check the type first
+   // Since parameter name is composed of spacecraftName.dep.paramType,
+   // spacecraftName.hardwareName.paramType, or burnName.dep.paramType
+   // check the type first
    else if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
-            type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
+            type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT ||
+            type == Gmat::HARDWARE)
    {
-      
       for (UnsignedInt i=0; i<parmNames.size(); i++)
          if (parmNames[i].find(oldName) != std::string::npos)
             parmNames[i] = GmatStringUtil::Replace(parmNames[i], oldName, newName);
@@ -570,6 +642,23 @@ bool Report::RenameRefObject(const Gmat::ObjectType type,
             actualParmNames[i] =
                GmatStringUtil::Replace(actualParmNames[i], oldName, newName);
       
+      // Go through wrappers
+      for (WrapperArray::iterator i = parmWrappers.begin(); i < parmWrappers.end(); i++)
+      {
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   before rename, wrapper desc = '%s'\n", (*i)->GetDescription().c_str());
+         #endif
+         
+         (*i)->RenameObject(oldName, newName);
+         
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   after  rename, wrapper desc = '%s'\n", (*i)->GetDescription().c_str());
+         #endif
+      }
+      
+      // Go through generating string
       generatingString = GmatStringUtil::Replace(generatingString, oldName, newName);
    }
    
@@ -624,6 +713,12 @@ const std::string& Report::GetGeneratingString(Gmat::WriteMode mode,
    
    generatingString = gen + ";";
    
+   #ifdef DEBUG_GEN_STRING
+   MessageInterface::ShowMessage
+      ("   generatingString=<%s>, \n   now returning GmatCommand::GetGeneratingString()\n",
+       generatingString.c_str());
+   #endif
+   
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
@@ -651,7 +746,7 @@ bool Report::Initialize()
    #endif
    
    parms.clear();
-   GmatBase *object, *mapObj;
+   GmatBase *mapObj = NULL;
    
    if ((mapObj = FindObject(rfName)) == NULL)
       throw CommandException(
@@ -674,19 +769,44 @@ bool Report::Initialize()
    
    for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
    {
-      object = FindObject(*i);
-      if (object == NULL)
-         throw CommandException("Object named " + (*i) + 
-            " cannot be found for the Report command '" +
-            GetGeneratingString() + "'"); 
-      if (!object->IsOfType("Parameter"))
+      #ifdef DEBUG_REPORT_INIT
+      MessageInterface::ShowMessage("   Now find object for '%s'\n", (*i).c_str());
+      #endif
+      
+      mapObj = FindObject(*i);
+      if (mapObj == NULL)
+      {
+         std::string msg = "Object named \"" + (*i) +
+            "\" cannot be found for the Report command '" +
+            GetGeneratingString(Gmat::NO_COMMENTS) + "'";
+         #ifdef DEBUG_REPORT_INIT
+         MessageInterface::ShowMessage("**** ERROR **** %s\n", msg.c_str());
+         #endif
+         //return false;
+         throw CommandException(msg);
+      }
+      
+      if (!mapObj->IsOfType("Parameter"))
          throw CommandException("Parameter type mismatch for " + 
-            object->GetName());
-      parms.push_back((Parameter *)object);
+            mapObj->GetName());
+      parms.push_back((Parameter *)mapObj);
+   }
+   
+   // Set Wrapper references (LOJ: 2009.04.01)
+   // We need this to use ReportFile::WriteData() in Execute()
+   for (WrapperArray::iterator i = parmWrappers.begin(); i < parmWrappers.end(); i++)
+   {
+      #ifdef DEBUG_REPORT_INIT
+      MessageInterface::ShowMessage
+         ("   wrapper desc = '%s'\n", (*i)->GetDescription().c_str());
+      #endif
+      
+      if (SetWrapperReferences(*(*i)) == false)
+         return false;      
    }
    
    #ifdef DEBUG_REPORT_INIT
-   MessageInterface::ShowMessage("Report::Initialize() returnin true.\n");
+   MessageInterface::ShowMessage("Report::Initialize() returning true.\n");
    #endif
    
    return true;
@@ -707,9 +827,14 @@ bool Report::Execute()
 {
    if (parms.empty())
       throw CommandException("Report command has no parameters to write\n");
+   if (reporter == NULL)
+      throw CommandException("Reporter is not yet set\n");
    
    #ifdef DEBUG_REPORT_EXEC
-   MessageInterface::ShowMessage("Report::Execute() entered, has %d Parameters\n", parms.size());
+   MessageInterface::ShowMessage
+      ("Report::Execute() this=<%p> '%s' entered, reporter <%s> '%s' has %d Parameters\n",
+       this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       reporter->GetName().c_str(), reporter->GetFileName().c_str(), parms.size());
    #endif
    
    // Build the data as a string
@@ -718,7 +843,8 @@ bool Report::Execute()
    // Set the stream to use the settings in the ReportFile
    // Note that this is done here, rather than during initialization, in case
    // the user has changed the values during the run.
-   datastream.precision(reporter->GetIntegerParameter(reporter->GetParameterID("Precision")));
+   Integer prec = reporter->GetIntegerParameter(reporter->GetParameterID("Precision"));
+   datastream.precision(prec);
    
    bool leftJustify = false;
    if (reporter->GetOnOffParameter(reporter->GetParameterID("LeftJustify")) == "On")
@@ -742,64 +868,28 @@ bool Report::Execute()
    if (zeroFill)
       datastream.setf(std::ios::showpoint);
    
-   // Added try/catch block for better error message (loj: 2008.08.06)
-   try
-   {
-      std::string desc;
-      for (std::vector<Parameter*>::iterator i = parms.begin(); i != parms.end(); ++i)
-      {
-         if (!(*i)->IsReportable())
-            continue;
-         
-         datastream.width(colWidth);
-         
-         #ifdef DEBUG_REPORT_EXEC
-         MessageInterface::ShowMessage
-            (">>>>> Report::Execute() parameter=%s, returnType=%d\n", (*i)->GetName().c_str(),
-             (*i)->GetReturnType());
-         #endif
-         
-         if ((*i)->GetReturnType() == Gmat::REAL_TYPE)
-         {
-            datastream << (*i)->EvaluateReal() << "   ";
-         }
-         else if ((*i)->GetReturnType() == Gmat::RMATRIX_TYPE)
-         {
-            Integer index = distance(parms.begin(), i);
-            if (parmRows[index] == -1 && parmCols[index] == -1)
-               datastream << (*i)->EvaluateRmatrix().ToString() << "   ";
-            else // do array indexing
-               datastream << (*i)->EvaluateRmatrix().GetElement
-                  (parmRows[index], parmCols[index]) << "   ";
-         }
-         else if ((*i)->GetReturnType() == Gmat::STRING_TYPE)
-         {
-            datastream << (*i)->EvaluateString() << "   ";
-         }
-      }
-      
-      // Publish it
-      // This is how it should be done:
-      //reportID = reporter->GetProviderId();
-      //#ifdef DEBUG_REPORT_OBJ
-      //   MessageInterface::ShowMessage("Reporting to subscriber %d\n", reportID);
-      //#endif
-      //publisher->Publish(reportID, "Here is some data");
-      
-      // Publisher seems broken right now -- do it by hand
-      std::string data = datastream.str();
-      reporter->TakeAction("ActivateForReport", "On");
-      bool retval = reporter->ReceiveData(data.c_str(), data.length());
-      reporter->TakeAction("ActivateForReport", "Off");
-      
-      BuildCommandSummary(true);   
-      return retval;
-   }
-   catch (BaseException &e)
-   {
-      throw CommandException(e.GetFullMessage() + " in line:\n   \"" +
-                             GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
-   }
+   // Write to report file using ReportFile::WriateData().
+   // This method takes ElementWrapper array to write data to stream
+   reporter->TakeAction("ActivateForReport", "On");
+   bool retval = reporter->WriteData(parmWrappers);
+   reporter->TakeAction("ActivateForReport", "Off");
+   BuildCommandSummary(true);
+   return retval;   
+}
+
+
+//------------------------------------------------------------------------------
+//  void RunComplete()
+//------------------------------------------------------------------------------
+void Report::RunComplete()
+{
+   #ifdef DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage
+      ("Report::RunComplete() this=<%p> '%s' entered\n", this,
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+   
+   GmatCommand::RunComplete();
 }
 
 
@@ -855,8 +945,9 @@ bool Report::AddParameter(const std::string &paramName, Integer index,
    }
    
    // Since numParam is incremented after adding to arrays, index range varies
-   // dependens on whether parameter ponter is NULL or not
-   if (param == NULL && index > numParams || param != NULL && index >= numParams)
+   // depends on whether parameter pointer is NULL or not
+   if ((param == NULL && index > numParams) ||
+       (param != NULL && index >= numParams))
    {
       #ifdef DEBUG_REPORT_SET
       MessageInterface::ShowMessage
@@ -910,4 +1001,58 @@ bool Report::AddParameter(const std::string &paramName, Integer index,
    
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// void DeleteParameters()
+//------------------------------------------------------------------------------
+void Report::DeleteParameters()
+{
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Report::DeleteParameters() this=<%p> '%s' entered\n   There are %d wrappers "
+       "allocated, these will be deleted if not NULL\n", this,
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), parmWrappers.size());
+   #endif
+   
+   std::vector<ElementWrapper*> wrappersToDelete;
+   
+   // delete wrappers (loj: 2008.11.20)
+   for (std::vector<ElementWrapper*>::iterator ewi = parmWrappers.begin();
+        ewi < parmWrappers.end(); ewi++)
+   {
+      if ((*ewi) == NULL)
+         continue;
+      
+      // if wrapper not found, add to the list to delete
+      if (find(wrappersToDelete.begin(), wrappersToDelete.end(), (*ewi)) ==
+          wrappersToDelete.end())
+         wrappersToDelete.push_back((*ewi));
+   }
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("   There are %d wrappers to delete\n", wrappersToDelete.size());
+   #endif
+   
+   // delete wrappers (loj: 2008.11.20)
+   for (std::vector<ElementWrapper*>::iterator ewi = wrappersToDelete.begin();
+        ewi < wrappersToDelete.end(); ewi++)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         ((*ewi), (*ewi)->GetDescription(), "Report::DeleteParameters()",
+          GetGeneratingString(Gmat::NO_COMMENTS) + " deleting wrapper");
+      #endif
+      delete (*ewi);
+      (*ewi) = NULL;
+   }
+   
+   parmWrappers.clear();   
+   actualParmNames.clear();
+   parms.clear();
+   parmRows.clear();
+   parmCols.clear();
+}
+
 

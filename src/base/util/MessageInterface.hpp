@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -30,17 +32,17 @@
  * implementation specific class rerived from teh abstract  MessageReceiver 
  * class.  Display to the user is handled in the derived MessageReceiver.
  */
-class MessageInterface
+class GMAT_API MessageInterface
 {
 public:
    static bool SetMessageReceiver(MessageReceiver *mr);
    static MessageReceiver* GetMessageReceiver();
 
    static void ShowMessage(const std::string &msg);
-   static void ShowMessage(const char *msg, ...);
+   static void ShowMessage(const char *format, ...);
 
    static void PopupMessage(Gmat::MessageType msgType, const std::string &msg);
-   static void PopupMessage(Gmat::MessageType msgType, const char *msg, ...);
+   static void PopupMessage(Gmat::MessageType msgType, const char *format, ...);
    
    static std::string GetLogFileName();
    static void SetLogEnable(bool flag);
@@ -51,11 +53,15 @@ public:
    static void LogMessage(const char *msg, ...);
 
    static void ClearMessage();
-
+   
+   static std::string GetQueuedMessage();
+   static void PutMessage(const std::string &msg);
+   static void ClearMessageQueue();
+   
 private:
    static MessageReceiver  *theMessageReceiver;
    static const int        MAX_MESSAGE_LENGTH;
-
+   
    MessageInterface();
    virtual ~MessageInterface();
 };

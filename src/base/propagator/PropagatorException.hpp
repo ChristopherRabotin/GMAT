@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            PropagatorException
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CI63P
@@ -21,11 +23,15 @@
 
 #include "BaseException.hpp"
 
-class PropagatorException : public BaseException
+class GMAT_API PropagatorException : public BaseException
 {
    public:
-      PropagatorException(const std::string& message = "Unspecified") 
-         : BaseException("Propagator Exception: ", message) {};
+      PropagatorException(const std::string& message = "Unspecified",
+            // Change to this when the repeated instances are fixed:
+   //         Gmat::MessageType mt = Gmat::ERROR_);
+            // Change to this if it's problematic:
+            Gmat::MessageType mt = Gmat::GENERAL_)
+         : BaseException("Propagator Exception: ", message, mt) {};
 };
 
 #endif

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  EopFile
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -32,6 +34,7 @@
 
 //#define DEBUG_OFFSET
 //#define DEBUG_EOP_READ
+//#define DEBUG_EOP_INITIALIZE
 
 //------------------------------------------------------------------------------
 // static data
@@ -145,6 +148,9 @@ EopFile::~EopFile()
 //------------------------------------------------------------------------------
 void EopFile::Initialize()
 {
+   #ifdef DEBUG_EOP_INITIALIZE
+      MessageInterface::ShowMessage("Initializing EopFile: eopFileName = %s\n", eopFileName.c_str());
+   #endif
    if (isInitialized) return;
    
    std::string   line;
@@ -188,9 +194,9 @@ void EopFile::Initialize()
                   "%d   %.12f   %.12f   %.12f   %.12f\n",
                   mjd, x, y, ut1_utc, lod);
             #endif
-            ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
+            ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeConstants::JD_NOV_17_1858);
             ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
-            polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
+            polarMotion->SetElement(tableSz,0,mjd + GmatTimeConstants::JD_NOV_17_1858);
             polarMotion->SetElement(tableSz,1,x);
             polarMotion->SetElement(tableSz,2,y);
             polarMotion->SetElement(tableSz,3,lod);
@@ -224,9 +230,9 @@ void EopFile::Initialize()
             }
             else
             {
-               ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
+               ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeConstants::JD_NOV_17_1858);
                ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
-               polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
+               polarMotion->SetElement(tableSz,0,mjd + GmatTimeConstants::JD_NOV_17_1858);
                polarMotion->SetElement(tableSz,1,x);
                polarMotion->SetElement(tableSz,2,y);
                polarMotion->SetElement(tableSz,3,lod*1.0e-03); // convert to seconds
@@ -284,10 +290,10 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
    
    if (!isInitialized)  Initialize();
    
-   if (lastUtcJd == (utcMjd + GmatTimeUtil::JD_NOV_17_1858)) return lastOffset;
+   if (lastUtcJd == (utcMjd + GmatTimeConstants::JD_NOV_17_1858)) return lastOffset;
    
    Integer         i = 0;
-   Real        utcJD = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
+   Real        utcJD = utcMjd + GmatTimeConstants::JD_NOV_17_1858;
    const Real* data  = ut1UtcOffsets->GetDataVector();
    Integer col     = ut1UtcOffsets->GetNumColumns();
    Real    off     = 0.0;
@@ -349,7 +355,7 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
          }
       }
    }
-   lastUtcJd = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
+   lastUtcJd = utcMjd + GmatTimeConstants::JD_NOV_17_1858;
    lastOffset = off;
    #ifdef DEBUG_OFFSET
       MessageInterface::ShowMessage
@@ -394,7 +400,7 @@ bool EopFile::GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
    if (!isInitialized)  Initialize();
    
    Integer i = 0;
-   Real    utcJD = forUtcMjd + GmatTimeUtil::JD_NOV_17_1858;
+   Real    utcJD = forUtcMjd + GmatTimeConstants::JD_NOV_17_1858;
    Integer col = polarMotion->GetNumColumns();
    const Real *data = polarMotion->GetDataVector();
    

@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                ConditionalBranch
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -18,13 +20,11 @@
 //------------------------------------------------------------------------------
 
 #include <sstream>
-#include <ctype.h>      // for isalpha
+#include <ctype.h>                // for isalpha
 #include "gmatdefs.hpp"
 #include "ConditionalBranch.hpp"
 #include "Parameter.hpp"
-#include "StringUtil.hpp"       // for GetArrayIndex()
-#include "Moderator.hpp"
-
+#include "StringUtil.hpp"         // for GetArrayIndex()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_CONDITIONS 1
@@ -33,6 +33,14 @@
 //#define DEBUG_CONDBR_GET_PARAM
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_OBJECT_MAP
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -363,12 +371,22 @@ bool ConditionalBranch::RemoveCondition(Integer atIndex)
    lhsList.erase(lhsList.begin() + atIndex);
    ew = lhsWrappers.at(atIndex);
    lhsWrappers.erase(lhsWrappers.begin() + atIndex);
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Remove
+      (ew, ew->GetDescription(), "ConditionalBranch::RemoveCondition()",
+       GetGeneratingString(Gmat::NO_COMMENTS) + " deleting lhsWrapper");
+   #endif
    delete ew;
    opStrings.erase(opStrings.begin() + atIndex);
    opList.erase(opList.begin() + atIndex);
    rhsList.erase(rhsList.begin() + atIndex);
    ew = rhsWrappers.at(atIndex);
    rhsWrappers.erase(rhsWrappers.begin() + atIndex);
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Remove
+      (ew, ew->GetDescription(), "ConditionalBranch::RemoveCondition()",
+       GetGeneratingString(Gmat::NO_COMMENTS) + " deleting rhsWrapper");
+   #endif
    delete ew;
    numberOfConditions--;
    return true;
@@ -833,6 +851,11 @@ bool ConditionalBranch::SetStringParameter(const Integer id,
       lhsList.at(index) = value;
       ew = lhsWrappers.at(index);
       lhsWrappers.at(index) = NULL;
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (ew, ew->GetDescription(), "ConditionalBranch::SetStringParameter()",
+          GetGeneratingString(Gmat::NO_COMMENTS) + " deleting lhsWrapper");
+      #endif
       delete ew;
       return true;
    }
@@ -856,6 +879,11 @@ bool ConditionalBranch::SetStringParameter(const Integer id,
       rhsList.at(index) = value;
       ew = rhsWrappers.at(index);
       rhsWrappers.at(index) = NULL;
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (ew, ew->GetDescription(), "ConditionalBranch::SetStringParameter()",
+          GetGeneratingString(Gmat::NO_COMMENTS) + " deleting rhsWrapper");
+      #endif
       delete ew;
       return true;
    }
@@ -983,7 +1011,6 @@ const StringArray& ConditionalBranch::GetWrapperObjectNameArray()
          wrapperObjectNames.push_back((*j));
    }
    
-   
    #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage
          ("ConditionalBranch::GetWrapperObjectNameArray() %s wrapper names are:\n",
@@ -1002,12 +1029,18 @@ const StringArray& ConditionalBranch::GetWrapperObjectNameArray()
 bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper, 
                                           const std::string &withName)
 {
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::SetElementWrapper() this=<%p> '%s' entered\n",
+       this, GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+   
    bool retval = false;
    ElementWrapper *ew;
 
    if (toWrapper == NULL) return false;
    // this would be caught by next part, but this message is more meaningful
-   if (toWrapper->GetWrapperType() == Gmat::ARRAY)
+   if (toWrapper->GetWrapperType() == Gmat::ARRAY_WT)
    {
       throw CommandException("A value of type \"Array\" on command \"" + typeName + 
                   "\" is not an allowed value.\nThe allowed values are:"
@@ -1015,11 +1048,11 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
    }
    CheckDataType(toWrapper, Gmat::REAL_TYPE, "ConditionalBranch", true);
    
-
+   
    #ifdef DEBUG_WRAPPER_CODE   
-   MessageInterface::ShowMessage(
-      "   Setting wrapper \"%s\" on Conditional Branch command\n", 
-      withName.c_str());
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::SetElementWrapper() Setting wrapper <%p> '%s'",
+       toWrapper, withName.c_str());
    #endif
    Integer sz = lhsList.size();
    for (Integer i = 0; i < sz; i++)
@@ -1034,10 +1067,18 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
          {
             ew = lhsWrappers.at(i);
             lhsWrappers.at(i) = toWrapper;
-
+            
             // Delete if wrapper name not found in the rhsList
             if (find(rhsList.begin(), rhsList.end(), withName) == rhsList.end())
+            {
+               #ifdef DEBUG_MEMORY
+               MemoryTracker::Instance()->Remove
+                  (ew, ew->GetDescription(), "ConditionalBranch::SetElementWrapper()",
+                   GetGeneratingString(Gmat::NO_COMMENTS) + " deleting lhsWrapper");
+               #endif
                delete ew;
+               ew = NULL;
+            }
          }
          else lhsWrappers.at(i) = toWrapper;
          retval = true;
@@ -1059,13 +1100,21 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
             
             // Delete if wrapper name not found in the lhsList
             if (find(lhsList.begin(), lhsList.end(), withName) == lhsList.end())
+            {
+               #ifdef DEBUG_MEMORY
+               MemoryTracker::Instance()->Remove
+                  (ew, ew->GetDescription(), "ConditionalBranch::SetElementWrapper()",
+                   GetGeneratingString(Gmat::NO_COMMENTS) + " deleting rhsWrapper");
+               #endif
                delete ew;
+               ew = NULL;
+            }
          }
          else rhsWrappers.at(i) = toWrapper;
          retval = true;
       }
    }
-      
+   
    return retval;
 }
 
@@ -1076,7 +1125,9 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
 void ConditionalBranch::ClearWrappers()
 {
    #ifdef DEBUG_WRAPPER_CODE
-   MessageInterface::ShowMessage("ConditionalBranch::ClearWrappers() entered\n");
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::ClearWrappers() this=<%p> '%s' entered\n",
+       this, GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
    
    std::vector<ElementWrapper*> temp;
@@ -1106,22 +1157,23 @@ void ConditionalBranch::ClearWrappers()
       }
    }
    
-   ElementWrapper *wrapper;
+   ElementWrapper *ew;
    for (UnsignedInt i = 0; i < temp.size(); ++i)
    {
-      wrapper = temp[i];
+      ew = temp[i];
       
-      if (wrapper != NULL)
+      if (ew != NULL)
       {
-         #ifdef DEBUG_WRAPPER_CODE
-         MessageInterface::ShowMessage
-            ("   deleting wrapper=(%p)'%s'\n", wrapper,
-             wrapper->GetDescription().c_str());
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (ew, ew->GetDescription(), "ConditionalBranch::ClearWrappers()",
+             //GetGeneratingString(Gmat::NO_COMMENTS) + " deleting lhsWrapper");
+             GetTypeName() + " deleting lhsWrapper");
          #endif
-         delete wrapper;
+         delete ew;
       }
       
-      wrapper = NULL;
+      ew = NULL;
    }
    
    #ifdef DEBUG_WRAPPER_CODE
@@ -1151,15 +1203,14 @@ void ConditionalBranch::ClearWrappers()
 //------------------------------------------------------------------------------
 bool ConditionalBranch::EvaluateCondition(Integer which)
 {
-      #ifdef DEBUG_CONDITIONS
-         MessageInterface::ShowMessage(
-         "ConditionalBranch::EvaluateCondition() entered; which = %d\n   "
-         "Number of Conditions: %d\n", which, numberOfConditions);      
-         MessageInterface::ShowMessage(
-         "      lhs wrapper = %s        rhsWrapper = %s\n", 
-         (lhsList.at(which)).c_str(), (rhsList.at(which)).c_str());      
-      
-      #endif
+   #ifdef DEBUG_CONDITIONS
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::EvaluateCondition() entered; which = %d\n   "
+       "Number of Conditions: %d\n", which, numberOfConditions);      
+   MessageInterface::ShowMessage
+      ("      lhs wrapper = %s        rhsWrapper = %s\n", 
+       (lhsList.at(which)).c_str(), (rhsList.at(which)).c_str());
+   #endif
    if ((which < 0) || (which >= numberOfConditions))
    {
       #ifdef DEBUG_CONDITIONS
@@ -1241,7 +1292,7 @@ bool ConditionalBranch::EvaluateAllConditions()
 {
    #ifdef DEBUG_CONDITIONS
       MessageInterface::ShowMessage(
-         "   Entering EvaluateAllConditions with number of conditons = %d\n", 
+         "   Entering EvaluateAllConditions with number of conditons = %d\n",
          numberOfConditions);
    #endif
    if (numberOfConditions == 0)
@@ -1252,30 +1303,66 @@ bool ConditionalBranch::EvaluateAllConditions()
       throw CommandException(
          "conditional statement incorrect - too few/many logical operators");
    
-   bool soFar = EvaluateCondition(0);
-   #ifdef DEBUG_CONDITIONS
-      MessageInterface::ShowMessage(
-         "   After EvaluateCondition, soFar = %s\n", (soFar? "true" : "false"));
-   #endif
-   
-   
-   Integer i = 1;
-   for (i=1; i < numberOfConditions; i++)
+   // divide into sets of higher-precedence AND operators, then OR them
+   // @todo Create a LogicTree for this type, allowing use of parentheses as well
+   bool         done            = false;
+   Integer      current         = 0;
+   bool         soFar           = false;
+   bool         setOfCmdsFound  = false;
+   bool         evalAnds        = true;
+   IntegerArray andConditions;
+   while (!done)
    {
-      switch (logicalOpList.at(i-1))
+      andConditions.clear();
+      setOfCmdsFound  = false;
+      evalAnds        = true;
+      while (!setOfCmdsFound)
       {
-         case AND:
-            soFar = soFar && EvaluateCondition(i);
-            break;
-         case OR:
-            soFar = soFar || EvaluateCondition(i);
-            break;
-         default:
-            throw CommandException(
-                  "Unknown logical operator in conditional statement.");
-            break;
+         andConditions.push_back(current);
+         if (current == (numberOfConditions-1)) // are we at the end of the list of conditions?
+         {
+            setOfCmdsFound = true;
+            done           = true;
+         }
+         else
+         {
+            if (logicalOpList.at(current) == OR) setOfCmdsFound = true; // or is the operator an OR?
+            current++;
+         }
       }
-   }
+      // found an OR, so evaluate the AND conditions
+      for (Integer ii = 0; ii < (Integer) andConditions.size(); ii++)
+      {
+         evalAnds = evalAnds && EvaluateCondition(andConditions.at(ii));
+      }
+      // previous result OR current result from group of AND conditions
+      soFar = soFar || evalAnds;
+   } // not done
+   andConditions.clear();
+//   bool soFar = EvaluateCondition(0);
+//   #ifdef DEBUG_CONDITIONS
+//      MessageInterface::ShowMessage(
+//         "   After EvaluateCondition, soFar = %s\n", (soFar? "true" : "false"));
+//   #endif
+//
+//
+//   Integer i = 1;
+//   for (i=1; i < numberOfConditions; i++)
+//   {
+//      switch (logicalOpList.at(i-1))
+//      {
+//         case AND:
+//            soFar = soFar && EvaluateCondition(i);
+//            break;
+//         case OR:
+//            soFar = soFar || EvaluateCondition(i);
+//            break;
+//         default:
+//            throw CommandException(
+//                  "Unknown logical operator in conditional statement.");
+//            break;
+//      }
+//   }
    
    #ifdef DEBUG_CONDITIONS
    if (soFar)

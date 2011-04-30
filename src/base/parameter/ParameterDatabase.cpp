@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                ParameterDatabase
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,8 +23,17 @@
 #include "ParameterDatabaseException.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_RENAME 1
-//#define DEBUG_PARAM_DB 1
+//#define DEBUG_RENAME
+//#define DEBUG_PARAM_DB
+//#define DEBUG_PARAMDB_ADD
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 // public
@@ -39,8 +50,13 @@ ParameterDatabase::ParameterDatabase()
 {
    mNumParams = 0;
    mStringParamPtrMap = new StringParamPtrMap;
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Add
+      (mStringParamPtrMap, "mStringParamPtrMap", "ParameterDatabase::ParameterDatabase()",
+       "mStringParamPtrMap = new StringParamPtrMap");
+   #endif
    
-   #if DEBUG_PARAM_DB
+   #ifdef DEBUG_PARAMDB
    MessageInterface::ShowMessage
       ("ParameterDatabase(default) mStringParamPtrMap.size()=%d, "
        "mNumParams=%d\n",  mStringParamPtrMap->size(), mNumParams);
@@ -55,7 +71,12 @@ ParameterDatabase::ParameterDatabase(const ParameterDatabase &copy)
 {
    mNumParams = copy.mNumParams;
    mStringParamPtrMap = new StringParamPtrMap;
-
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Add
+      (mStringParamPtrMap, "mStringParamPtrMap", "ParameterDatabase copy constructor",
+       "mStringParamPtrMap = new StringParamPtrMap");
+   #endif
+   
    StringParamPtrMap::iterator pos;
    
    for (pos = copy.mStringParamPtrMap->begin();
@@ -64,7 +85,7 @@ ParameterDatabase::ParameterDatabase(const ParameterDatabase &copy)
       Add(pos->first, pos->second);
    }
    
-   #if DEBUG_PARAM_DB
+   #ifdef DEBUG_PARAMDB
    MessageInterface::ShowMessage
       ("==> ParameterDatabase(copy) mStringParamPtrMap.size()=%d, "
        "mNumParams=%d\n",  mStringParamPtrMap->size(), mNumParams);
@@ -81,7 +102,23 @@ ParameterDatabase& ParameterDatabase::operator=(const ParameterDatabase &right)
       return *this;
    
    mNumParams = right.mNumParams;
+
+   if (mStringParamPtrMap)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (mStringParamPtrMap, "mStringParamPtrMap", "ParameterDatabase operator=",
+          "deleting old map");
+      #endif
+      delete mStringParamPtrMap;
+   }
+   
    mStringParamPtrMap = new StringParamPtrMap;
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Add
+      (mStringParamPtrMap, "mStringParamPtrMap", "ParameterDatabase operator=",
+       "mStringParamPtrMap = new StringParamPtrMap");
+   #endif
    
    StringParamPtrMap::iterator pos;
    
@@ -91,12 +128,12 @@ ParameterDatabase& ParameterDatabase::operator=(const ParameterDatabase &right)
       Add(pos->first, pos->second);
    }
    
-   #if DEBUG_PARAM_DB
+   #ifdef DEBUG_PARAMDB
    MessageInterface::ShowMessage
       ("==> ParameterDatabase(=) mStringParamPtrMap.size()=%d, "
        "mNumParams=%d\n",  mStringParamPtrMap->size(), mNumParams);
    #endif
-
+   
    return *this;
 }
 
@@ -110,6 +147,11 @@ ParameterDatabase& ParameterDatabase::operator=(const ParameterDatabase &right)
 //------------------------------------------------------------------------------
 ParameterDatabase::~ParameterDatabase()
 {
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Remove
+      (mStringParamPtrMap, "mStringParamPtrMap", "ParameterDatabase destructor",
+       "deleting old map");
+   #endif
    delete mStringParamPtrMap;
    mStringParamPtrMap = NULL;
 }
@@ -149,7 +191,7 @@ const StringArray& ParameterDatabase::GetNamesOfParameters()
       throw ParameterDatabaseException
          ("ParameterDatabase::GetNamesOfParameters() mStringParamPtrMap is NULL\n");
 
-   #if DEBUG_PARAM_DB
+   #ifdef DEBUG_PARAMDB
    MessageInterface::ShowMessage
       ("==> ParameterDatabase::GetNamesOfParameters() mStringParamPtrMap.size()=%d, "
        "mNumParams=%d\n",  mStringParamPtrMap->size(), mNumParams);
@@ -219,7 +261,7 @@ bool ParameterDatabase::HasParameter(const std::string &name) const
 bool ParameterDatabase::RenameParameter(const std::string &oldName,
                                         const std::string &newName)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
       ("ParameterDatabase::RenameParameter() oldName=%s, newName=%s\n",
        oldName.c_str(), newName.c_str());
@@ -353,15 +395,30 @@ void ParameterDatabase::Add(Parameter *param)
 //------------------------------------------------------------------------------
 void ParameterDatabase::Add(const std::string &name, Parameter *param)
 {
+   #ifdef DEBUG_PARAMDB_ADD
+   MessageInterface::ShowMessage
+      ("ParameterDatabase::Add() <%p> entered, name='%p', param=<%p>'%s'\n",
+       this, name.c_str(), param);
+   #endif
+   
    StringParamPtrMap::iterator pos;
-
+   
    pos = mStringParamPtrMap->find(name);
-
+   
    //if name already in the database, just ignore
    if (pos == mStringParamPtrMap->end())
    {
       mStringParamPtrMap->insert(StringParamPtrPair(name, param));
       mNumParams = mStringParamPtrMap->size();
+      #ifdef DEBUG_PARAMDB_ADD
+      MessageInterface::ShowMessage("   '%s' added to the map\n");
+      #endif
+   }
+   else
+   {
+      #ifdef DEBUG_PARAMDB_ADD
+      MessageInterface::ShowMessage("   '%s' already in the map, so ignored\n");
+      #endif
    }
 }
 

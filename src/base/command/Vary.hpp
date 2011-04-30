@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   Vary
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -45,67 +47,69 @@
  * 
  *
  */
-class Vary : public GmatCommand
+class GMAT_API Vary : public GmatCommand
 {
 public:
    Vary();
    virtual ~Vary();
-    
+   
    Vary(const Vary& t);
    Vary&              operator=(const Vary& t);
-
+   
    // inherited from GmatBase
    virtual GmatBase*  Clone() const;
    virtual const std::string&
-                      GetGeneratingString(Gmat::WriteMode mode,
-                                          const std::string &prefix,
-                                          const std::string &useName);
+                        GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
    // for Ref Objects
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
    virtual const ObjectTypeArray&
-                       GetRefObjectTypeArray();
+                        GetRefObjectTypeArray();
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    
    // Parameter accessors
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                       GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
-
-   virtual Real        GetRealParameter(const Integer id) const;
-   virtual Real        SetRealParameter(const Integer id,
-                                        const Real value);
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual bool        SetStringParameter(const Integer id, 
-                                          const std::string &value);
-
-// Multiple variables specified on the same line are not allowed in build 2
-//    virtual const StringArray& 
-//                        GetStringArrayParameter(const Integer id) const; 
-
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name = "");
-
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+   
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+   
    // Inherited methods overridden from the base class
-   virtual bool        InterpretAction();
+   virtual bool         InterpretAction();
    virtual const StringArray& 
-                       GetWrapperObjectNameArray();
-   virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
-                                         const std::string &withName);
-   virtual void        ClearWrappers();
+                        GetWrapperObjectNameArray();
+   virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
+                                          const std::string &withName);
+   virtual void         ClearWrappers();
+   
+   virtual bool         Initialize();
+   virtual bool         Execute();
+   virtual void         RunComplete();
+   virtual bool         TakeAction(const std::string &action,
+                                   const std::string &actionData = "");
 
-   virtual bool        Initialize();
-   virtual bool        Execute();
-   virtual void        RunComplete();
    
    // Used to apply corrections to the command
-   virtual void        SetInitialValue(Solver *theSolver);
-    
+   virtual void         SetInitialValue(Solver *theSolver);
+   
 protected:
    // Parameter IDs
    enum  
@@ -114,8 +118,8 @@ protected:
       VARIABLE_NAME,
       INITIAL_VALUE,
       PERTURBATION,
-      VARIABLE_MINIMUM,
-      VARIABLE_MAXIMUM,
+      VARIABLE_LOWER,
+      VARIABLE_UPPER,
       VARIABLE_MAXIMUM_STEP,
       ADDITIVE_SCALE_FACTOR,
       MULTIPLICATIVE_SCALE_FACTOR,
@@ -151,13 +155,13 @@ protected:
    /// A wrapper used for the variable perturbation
    ElementWrapper      *perturbation;
    /// Absolute minimum value
-   std::string         variableMinimumName;
+   std::string         variableLowerName;
    /// A wrapper used for the variable's minimum allowed value
-   ElementWrapper      *variableMinimum;
+   ElementWrapper      *variableLower;
    /// Absolute maximum value
-   std::string         variableMaximumName;
+   std::string         variableUpperName;
    /// A wrapper used for the variable's maximum allowed value
-   ElementWrapper      *variableMaximum;
+   ElementWrapper      *variableUpper;
    /// Maximum step allowed
    std::string         variableMaximumStepName;
    /// A wrapper used for to set the largest allowed change in the variable
@@ -177,9 +181,10 @@ protected:
    /// Flag used to finalize the solver data during execution
    bool                solverDataFinalized;
    
-   /// ???
-   std::string         variableValueString;
-
+   /// Used for wrapper name checking, wrapper name can be a number
+   bool IsThereSameWrapperName(int param, const std::string &wrapperName);
+   /// Method to refresh values of data from variables
+   void RefreshData();
 };
 
 

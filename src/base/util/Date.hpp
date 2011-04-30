@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                    Date
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,9 +25,10 @@
 
 #include "gmatdefs.hpp"
 #include "BaseException.hpp"
+#include "GmatConstants.hpp"
 #include "TimeTypes.hpp"
 
-class Date
+class GMAT_API Date
 {
 public:
    
@@ -44,9 +47,9 @@ public:
     Integer GetMinute() const;
     Real GetSecond() const;
 
-    GmatTimeUtil::DayName GetDayName() const;
+    GmatTimeConstants::DayName GetDayName() const;
     Integer GetDaysPerMonth() const;
-    GmatTimeUtil::MonthName GetMonthName() const;
+    GmatTimeConstants::MonthName GetMonthName() const;
 
     Real ToPackedCalendarReal() const;
     std::string& ToPackedCalendarString();  // "YYYYMMDD.hhmmssnnn"
@@ -75,7 +78,10 @@ protected:
     Date(const std::string &time); // "YYYYMMDD.hhmmssnnn"
     Date(const Date &date);
     ~Date();
-   
+
+    bool  operator>  (const Date &date) const;
+    bool  operator<  (const Date &date) const;
+    
     Integer  yearD;
     Integer  monthD;
     Integer  dayD;

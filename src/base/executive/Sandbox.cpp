@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 Sandbox
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -16,8 +18,6 @@
  * Implementation for the GMAT Sandbox class
  */
 //------------------------------------------------------------------------------
-
-
 
 #include "Sandbox.hpp"
 #include "Moderator.hpp"
@@ -38,21 +38,27 @@
 
 //#define DISALLOW_NESTED_GMAT_FUNCTIONS
 
-//#define DEBUG_SANDBOX_OBJ 1
-//#define DEBUG_SANDBOX_INIT 1  // there's something wrong with some debug here ... @todo
-//#define DEBUG_SANDBOX_INIT_CS 1
-//#define DEBUG_SANDBOX_INIT_PARAM 1
-//#define DEBUG_SANDBOX_RUN 1
-//#define DEBUG_SANDBOX_OBJECT_MAPS
+//#define DEBUG_SANDBOX_INIT
 //#define DEBUG_MODERATOR_CALLBACK
-//#define DEBUG_FM_INITIALIZATION
 //#define DEBUG_SANDBOX_GMATFUNCTION
-//#define DEBUG_SANDBOX_OBJINIT
-//#define DEBUG_SANDBOX_OBJ
+//#define DEBUG_SANDBOX_OBJ_INIT
+//#define DEBUG_SANDBOX_OBJ_ADD
 //#define DEBUG_SANDBOX_OBJECT_MAPS
+//#define DBGLVL_SANDBOX_RUN 1
+//#define DEBUG_SANDBOX_CLEAR
+//#define DEBUG_SANDBOX_CLONING
+//#define DEBUG_SS_CLONING
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 #ifdef DEBUG_SANDBOX_INIT
-      std::map<std::string, GmatBase *>::iterator omIter;
+   std::map<std::string, GmatBase *>::iterator omIter;
 #endif
 
 
@@ -75,43 +81,6 @@ Sandbox::Sandbox() :
    pollFrequency     (50),
    objInit           (NULL)
 {
-   #ifdef DEBUG_SANDBOX_CLONING
-      // List of the objects that can safely be cloned.  This list will be removed
-      // when the cloning has been tested for all of GMAT's classes.
-      clonable.push_back(Gmat::SPACECRAFT);
-      clonable.push_back(Gmat::FORMATION);
-      clonable.push_back(Gmat::SPACEOBJECT);
-      clonable.push_back(Gmat::GROUND_STATION);
-      clonable.push_back(Gmat::BURN);
-      clonable.push_back(Gmat::IMPULSIVE_BURN);
-      clonable.push_back(Gmat::FINITE_BURN);
-      clonable.push_back(Gmat::COMMAND);
-      clonable.push_back(Gmat::PROPAGATOR);
-      clonable.push_back(Gmat::FORCE_MODEL);
-      clonable.push_back(Gmat::PHYSICAL_MODEL);
-      clonable.push_back(Gmat::TRANSIENT_FORCE);
-      clonable.push_back(Gmat::INTERPOLATOR);
-      clonable.push_back(Gmat::SPACE_POINT);
-      clonable.push_back(Gmat::CELESTIAL_BODY);
-      clonable.push_back(Gmat::CALCULATED_POINT);
-      clonable.push_back(Gmat::LIBRATION_POINT);
-      clonable.push_back(Gmat::BARYCENTER);
-      clonable.push_back(Gmat::ATMOSPHERE);
-      clonable.push_back(Gmat::PARAMETER);
-      clonable.push_back(Gmat::STOP_CONDITION);
-      clonable.push_back(Gmat::SOLVER);
-      clonable.push_back(Gmat::SUBSCRIBER);
-      clonable.push_back(Gmat::PROP_SETUP);
-      clonable.push_back(Gmat::FUNCTION);
-      clonable.push_back(Gmat::FUEL_TANK);
-      clonable.push_back(Gmat::THRUSTER);
-      clonable.push_back(Gmat::HARDWARE);
-      clonable.push_back(Gmat::COORDINATE_SYSTEM);
-      clonable.push_back(Gmat::AXIS_SYSTEM);
-   #endif
-
-   // SolarSystem instances are handled separately from the other objects
-   // clonable.push_back(Gmat::SOLAR_SYSTEM);
 }
 
 
@@ -126,19 +95,41 @@ Sandbox::~Sandbox()
 {
    #ifndef DISABLE_SOLAR_SYSTEM_CLONING   
       if (solarSys)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (solarSys, solarSys->GetName(), "Sandbox::~Sandbox()",
+             " deleting cloned solarSys");
+         #endif
          delete solarSys;
+      }
    #endif
    
+   for (UnsignedInt i = 0; i < triggerManagers.size(); ++i)
+      delete triggerManagers[i];
+
    if (sequence)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (sequence, "sequence", "Sandbox::~Sandbox()",
+          " deleting mission sequence");
+      #endif
       delete sequence;
+   }
    
    if (objInit)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (objInit, "objInit", "Sandbox::~Sandbox()", " deleting objInit");
+      #endif
       delete objInit;
-
+   }
+   
    // Delete the local objects
    Clear();
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -147,7 +138,7 @@ Sandbox::~Sandbox()
 
 
 //------------------------------------------------------------------------------
-// bool AddObject(GmatBase *obj)
+// GmatBase* AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  *  Adds an object to the Sandbox's object container.
@@ -158,76 +149,73 @@ Sandbox::~Sandbox()
  *
  *  @param <obj> The object that needs to be included in the Sandbox.
  *
- *  @return true if the object was added to the Sandbox's container, false if
- *          it was not.
+ *  @return Cloned object pointer if the object was added to the Sandbox's
+ *          container, NULL if it was not.
  */
 //------------------------------------------------------------------------------
-bool Sandbox::AddObject(GmatBase *obj)
+//Changed to return GmatBase* (loj: 2008.11.06)
+GmatBase* Sandbox::AddObject(GmatBase *obj)
 {
    if (obj == NULL)
-      return false;
+      return NULL;
    
-   #ifdef DEBUG_SANDBOX_OBJ
+   #ifdef DEBUG_SANDBOX_OBJ_ADD
       MessageInterface::ShowMessage
          ("Sandbox::AddObject() objTypeName=%s, objName=%s\n",
           obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
-
+      
    if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
           MessageInterface::ShowMessage(
              "Unexpected state transition in the Sandbox\n");
 
    state = IDLE;
-
+   
    std::string name = obj->GetName();
    if (name == "")
-      return false;           // No unnamed objects in the Sandbox tables
-
-
+      return NULL;  // No unnamed objects in the Sandbox tables
+   
+   GmatBase *cloned = obj;
+   
    // Check to see if the object is already in the map
    //if (objectMap.find(name) == objectMap.end())
    if (FindObject(name) == NULL)
    {
       // If not, store the new object pointer
       #ifdef DEBUG_SANDBOX_CLONING
-      if (find(clonable.begin(), clonable.end(), obj->GetType()) !=
-          clonable.end())
-      {
+         MessageInterface::ShowMessage("Cloning %s <%p> -> ",
+               obj->GetName().c_str(), obj);
       #endif
          #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-            MessageInterface::ShowMessage(
-               "Cloning object %s of type %s\n", obj->GetName().c_str(),
-               obj->GetTypeName().c_str());
+         MessageInterface::ShowMessage(
+            "Cloning object %s of type %s\n", obj->GetName().c_str(),
+            obj->GetTypeName().c_str());
          #endif
-
-         // Subscribers are already cloned in AddSubscriber()
-         if (obj->GetType() == Gmat::SUBSCRIBER)
-            //objectMap[name] = obj;
-            SetObjectByNameInMap(name,obj);
-         else
-            //objectMap[name] = obj->Clone();
-            SetObjectByNameInMap(name, (obj->Clone()));
          
-         if (obj->GetType() == Gmat::SPACECRAFT)
-         {
-            if (solarSys)
-               ((Spacecraft*)(obj))->SetSolarSystem(solarSys);
-         }
+         cloned = obj->Clone();
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (cloned, obj->GetName(), "Sandbox::AddObject()",
+             "*cloned = obj->Clone()");
+         #endif
+         SetObjectByNameInMap(name, cloned);
       #ifdef DEBUG_SANDBOX_CLONING
-      }
-      else
-         //objectMap[name] = obj;
-         SetObjectByNameInMap(name, obj);
+         MessageInterface::ShowMessage("<%p>\n", cloned);
+
+         if (cloned->IsOfType(Gmat::PROP_SETUP))
+            MessageInterface::ShowMessage("   PropSetup propagator <%p> -> "
+                  "<%p>\n", ((PropSetup*)(obj))->GetPropagator(),
+                  ((PropSetup*)(cloned))->GetPropagator());
       #endif
    }
    else
    {
-      MessageInterface::ShowMessage("%s is already in the map\n", name.c_str());
+      MessageInterface::ShowMessage
+         ("in Sandbox::AddObject() %s is already in the map\n", name.c_str());
    }
-
-   return true;
+   
+   return cloned;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -269,7 +257,6 @@ bool Sandbox::AddCommand(GmatCommand *cmd)
 }
 
 
-
 //------------------------------------------------------------------------------
 // bool AddSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
@@ -287,21 +274,69 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
           MessageInterface::ShowMessage(
              "Unexpected state transition in the Sandbox\n");
    state = IDLE;
-
+   
    if (!ss)
       return false;
-
+   
 #ifdef DISABLE_SOLAR_SYSTEM_CLONING
    solarSys = ss;
 #else
-   MessageInterface::ShowMessage("Cloning the solar system in the Sandbox\n");
+   if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
+      MessageInterface::LogMessage("Cloning the solar system in the Sandbox\n");
+   
    solarSys = (SolarSystem*)(ss->Clone());
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Add
+      (solarSys, solarSys->GetName(), "Sandbox::AddSolarSystem()",
+       "solarSys = (SolarSystem*)(ss->Clone())");
+   #endif
    
    #ifdef DEBUG_SS_CLONING
    MessageInterface::ShowMessage("Sandbox cloned the solar system: %p\n", solarSys);
    #endif
 #endif
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool AddTriggerManagers(const std::vector<TriggerManager*> *trigs)
+//------------------------------------------------------------------------------
+/**
+ * This method...
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+bool Sandbox::AddTriggerManagers(const std::vector<TriggerManager*> *trigs)
+{
+   bool retval = true;
+
+   for (UnsignedInt i = 0; i < triggerManagers.size(); ++i)
+      delete triggerManagers[i];
+   triggerManagers.clear();
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Sandbox received %d trigger managers\n",
+            trigs->size());
+   #endif
+   
+   for (UnsignedInt i = 0; i < trigs->size(); ++i)
+   {
+      TriggerManager *trigMan = (*trigs)[i]->Clone();
+      if (trigMan != NULL)
+         triggerManagers.push_back(trigMan);
+      else
+      {
+         MessageInterface::ShowMessage("Unable to clone a TriggerManager -- "
+               "please check the copy constructor and assignment operator");
+         retval = false;
+      }
+   }
+
+   return retval;
 }
 
 
@@ -334,7 +369,6 @@ bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
 }
 
 
-
 //------------------------------------------------------------------------------
 // bool SetPublisher(Publisher *pub)
 //------------------------------------------------------------------------------
@@ -348,28 +382,24 @@ bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 bool Sandbox::SetPublisher(Publisher *pub)
 {
-
    if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
           MessageInterface::ShowMessage(
              "Unexpected state transition in the Sandbox\n");
    state = IDLE;
-
-
-   if (pub) {
+   
+   if (pub)
+   {
       publisher = pub;
       // Now publisher needs internal coordinate system
       publisher->SetInternalCoordSystem(internalCoordSys);
       return true;
    }
-
-
+   
    if (!publisher)
       return false;
-
-
+   
    return true;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -393,10 +423,8 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
    
    GmatBase* obj = NULL;
    
-   //if (objectMap.find(name) != objectMap.end()) 
    if ((obj = FindObject(name)) != NULL) 
    {
-      //obj = objectMap[name];
       if (type != Gmat::UNKNOWN_OBJECT)
       {
          if (obj->GetType() != type) 
@@ -467,11 +495,12 @@ bool Sandbox::Initialize()
 
    if (moderator == NULL)
       moderator = Moderator::Instance();
-
-
-   transientForces.empty();
-
-
+   
+   // this should be clear() (loj: 2008.11.03)
+   //transientForces.empty();
+   transientForces.clear();
+   
+   
    // Already initialized
    if (state == INITIALIZED)
       return true;
@@ -502,17 +531,30 @@ bool Sandbox::Initialize()
    // Set J2000 Body for all SpacePoint derivatives before anything else
    // NOTE - at this point, everything should be in the SandboxObjectMap,
    // and the GlobalObjectMap should be empty
-   #ifdef DEBUG_SANDBOX_OBJINIT
+   #ifdef DEBUG_SANDBOX_OBJ_INIT
       MessageInterface::ShowMessage("About to create the ObjectInitializer ... \n");
       MessageInterface::ShowMessage(" and the objInit pointer is %s\n",
             (objInit? "NOT NULL" : "NULL!!!"));
    #endif
 
-   if (objInit) delete objInit;  // if Initialize is called more than once, delete 'old' objInit
+   if (objInit)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (objInit, "objInit", "Sandbox::Initialize()", " deleting objInit");
+      #endif
+      delete objInit;  // if Initialize is called more than once, delete 'old' objInit
+   }
+   
    objInit = new ObjectInitializer(solarSys, &objectMap, &globalObjectMap, internalCoordSys);
+   
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Add
+      (objInit, "objInit", "Sandbox::Initialize()", "objInit = new ObjectInitializer");
+   #endif
    try
    {
-      #ifdef DEBUG_SANDBOX_OBJINIT
+      #ifdef DEBUG_SANDBOX_OBJ_INIT
          MessageInterface::ShowMessage(
                "About to call the ObjectInitializer::InitializeObjects ... \n");
       #endif
@@ -520,9 +562,13 @@ bool Sandbox::Initialize()
    }
    catch (BaseException &be)
    {
-      throw SandboxException("Error initializing objects in Sandbox.\n");
+      SandboxException se("");
+      se.SetDetails("Error initializing objects in Sandbox.\n%s\n",
+                    be.GetFullMessage().c_str());
+      throw se;
+      //throw SandboxException("Error initializing objects in Sandbox");
    }
-
+   
    // Move global objects to the Global Object Store
    combinedObjectMap = objectMap;
    StringArray movedObjects;
@@ -539,8 +585,8 @@ bool Sandbox::Initialize()
       {
          #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage(
-               "Sandbox::moving object %s to the Global Object Store\n",
-               (omi->first).c_str());
+               "Sandbox::moving object <%p>'%s' to the Global Object Store\n",
+               omi->second, (omi->first).c_str());
          #endif
          globalObjectMap.insert(*omi);
          movedObjects.push_back(omi->first);
@@ -562,80 +608,111 @@ bool Sandbox::Initialize()
                (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
    #endif
    
-   #if DEBUG_SANDBOX_INIT
+   #ifdef DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage(
          "Sandbox::Initialize() Initializing Commands...\n");
    #endif
    
-   
-   //MessageInterface::ShowMessage("=====> Initialize commands\n");
+   StringArray exceptions;
+   IntegerArray exceptionTypes;
+   UnsignedInt exceptionCount = 0;
+
    // Initialize commands
    while (current)
    {
-      #if DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage
-         ("Initializing %s command\n   \"%s\"\n",
-          current->GetTypeName().c_str(),
-          current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-      #endif
-      
-      #ifdef DEBUG_SANDBOX_GMATFUNCTION
-         MessageInterface::ShowMessage(
-               "Initializing %s command\n",
-               current->GetTypeName().c_str());
-      #endif
-         
-      current->SetObjectMap(&objectMap);
-      current->SetGlobalObjectMap(&globalObjectMap);
-      current->SetSolarSystem(solarSys);
-      current->SetTransientForces(&transientForces);
-      
-      // Handle GmatFunctions
-      if ((current->IsOfType("CallFunction")) ||
-          (current->IsOfType("Assignment")))
+      try
       {
-         #ifdef DEBUG_SANDBOX_GMATFUNCTION
-            MessageInterface::ShowMessage(
-               "CallFunction or Assignment found in MCS: calling HandleGmatFunction \n");
+         #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage
+            ("Initializing %s command\n   \"%s\"\n",
+             current->GetTypeName().c_str(),
+             current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
          #endif
-         HandleGmatFunction(current, &combinedObjectMap);
-         current->SetInternalCoordSystem(internalCoordSys);
-         //if (current->GetTypeName() == "CallFunction") 
-         //   ((CallFunction *)current)->SetInternalCoordSystem(internalCoordSys);
-      }
-      if (current->IsOfType("BranchCommand"))
-      {
-         std::vector<GmatCommand*> cmdList = ((BranchCommand*) current)->GetCommandsWithGmatFunctions();
-         Integer sz = (Integer) cmdList.size();
-         #ifdef DEBUG_SANDBOX_GMATFUNCTION
-            MessageInterface::ShowMessage("... returning %d functions with GmatFunctions\n", sz);
-         #endif
-         for (Integer jj = 0; jj < sz; jj++)
-         {
-            HandleGmatFunction(cmdList.at(jj), &combinedObjectMap);
-            (cmdList.at(jj))->SetInternalCoordSystem(internalCoordSys);
-            //if ((cmdList.at(jj))->GetTypeName() == "CallFunction") 
-            //   ((CallFunction *)cmdList.at(jj))->SetInternalCoordSystem(internalCoordSys);
-         }
-      }
-      //if (current->GetTypeName() == "CallFunction") 
-      //   ((CallFunction *)current)->SetInternalCoordSystem(internalCoordSys);
-      
-      rv = current->Initialize();
-      if (!rv)
-         return false;
-      
-      // Check to see if the command needs a server startup
-      if (current->NeedsServerStartup())
-         if (moderator->StartServer() == false)
-            throw SandboxException("Unable to start the server needed by the " +
-                     (current->GetTypeName()) + " command");
 
+         current->SetTriggerManagers(&triggerManagers);
+
+         #ifdef DEBUG_SANDBOX_GMATFUNCTION
+            MessageInterface::ShowMessage("Sandbox Initializing %s command\n",
+               current->GetTypeName().c_str());
+         #endif
+
+         current->SetObjectMap(&objectMap);
+         current->SetGlobalObjectMap(&globalObjectMap);
+         SetGlobalRefObject(current);
+
+         // Handle GmatFunctions
+         if ((current->IsOfType("CallFunction")) ||
+             (current->IsOfType("Assignment")))
+         {
+            #ifdef DEBUG_SANDBOX_GMATFUNCTION
+               MessageInterface::ShowMessage(
+                  "CallFunction or Assignment found in MCS: calling HandleGmatFunction \n");
+            #endif
+            HandleGmatFunction(current, &combinedObjectMap);
+         }
+         if (current->IsOfType("BranchCommand"))
+         {
+            std::vector<GmatCommand*> cmdList = ((BranchCommand*) current)->GetCommandsWithGmatFunctions();
+            Integer sz = (Integer) cmdList.size();
+            #ifdef DEBUG_SANDBOX_GMATFUNCTION
+               MessageInterface::ShowMessage("... returning %d functions with GmatFunctions\n", sz);
+            #endif
+            for (Integer jj = 0; jj < sz; jj++)
+            {
+               HandleGmatFunction(cmdList.at(jj), &combinedObjectMap);
+               (cmdList.at(jj))->SetInternalCoordSystem(internalCoordSys);
+            }
+         }
+
+         try
+         {
+            rv = current->Initialize();
+            if (!rv)
+               throw SandboxException("The Mission Control Sequence command\n\n" +
+                     current->GetGeneratingString(Gmat::SCRIPTING, "   ") +
+                     "\n\nfailed to initialize correctly.  Please correct the error "
+                     "and try again.");
+         }
+         catch (BaseException &)
+         {
+            // Call ValidateCommand to create wrappers and Initialize.(LOJ: 2010.08.24)
+            // This will fix bug 1918 for the following scenario in ScriptEvent.
+            // In ScriptEvent, x = 1 where x is undefined, save it.
+            // Add x from the ResourceTree and run the mission.
+            moderator->ValidateCommand(current);
+            rv = current->Initialize();
+         }
+
+         // Check to see if the command needs a server startup
+         if (current->NeedsServerStartup())
+            if (moderator->StartMatlabServer() == false)
+               throw SandboxException("Unable to start the server needed by the " +
+                        (current->GetTypeName()) + " command");
+      }
+      catch (BaseException &be)
+      {
+         ++exceptionCount;
+         exceptionTypes.push_back(be.GetMessageType());
+         exceptions.push_back(be.GetFullMessage());
+      }
       current = current->GetNext();
    }
+   
+   if (exceptionCount > 0)
+   {
+      for (UnsignedInt i = 0; i < exceptionCount; ++i)
+      {
+         // Add error count only if message type is Gmat::ERROR_ (Bug 2272 fix)
+         if (exceptionTypes[i] == Gmat::ERROR_)
+             MessageInterface::ShowMessage("%d: %s\n", i+1, exceptions[i].c_str());
+         else
+            MessageInterface::ShowMessage("%s\n", exceptions[i].c_str());
+      }
+      throw SandboxException("Errors were found in the mission control "
+            "sequence; please correct the errors listed in the message window");
+   }
 
-
-   #if DEBUG_SANDBOX_INIT
+   #ifdef DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage(
          "Sandbox::Initialize() Successfully initialized\n");
    #endif
@@ -645,8 +722,6 @@ bool Sandbox::Initialize()
    //MessageInterface::ShowMessage("=====> Initialize successful\n");
    return rv;
 }
-
-
 
 
 //------------------------------------------------------------------------------
@@ -666,7 +741,7 @@ bool Sandbox::Initialize()
 bool Sandbox::Execute()
 {
 
-   #if DEBUG_SANDBOX_RUN > 1
+   #if DBGLVL_SANDBOX_RUN > 1
    MessageInterface::ShowMessage("Sandbox::Execute() Here is the current object map:\n");
    for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
         i != objectMap.end(); ++i)
@@ -723,13 +798,13 @@ bool Sandbox::Execute()
             }
          }
          
-         #if DEBUG_SANDBOX_RUN
+         #if DBGLVL_SANDBOX_RUN
          if (current != prev)
          {
             MessageInterface::ShowMessage
                ("Sandbox::Execution running %s\n", current->GetTypeName().c_str());
             
-            #if DEBUG_SANDBOX_RUN > 1
+            #if DBGLVL_SANDBOX_RUN > 1
             MessageInterface::ShowMessage
                ("command = \n<%s>\n", current->GetGeneratingString().c_str());
             #endif
@@ -747,20 +822,29 @@ bool Sandbox::Execute()
          if (!rv)
          {
             std::string str = "\"" + current->GetTypeName() +
-               "\" Command failed to run to completion\nCommand Text is \"" +
-               current->GetGeneratingString() + "\"\n";
+               "\" Command failed to run to completion\n";
+            
+            #if DBGLVL_SANDBOX_RUN > 1
+            MessageInterface::ShowMessage
+               ("%sCommand Text is\n\"%s\n", str.c_str(),
+                current->GetGeneratingString().c_str());
+            #endif
+            
             throw SandboxException(str);
          }
-
+         
          prev = current;
          current = current->GetNext();
       }
    }
    catch (BaseException &e)
    {
+      // Use exception to remove Visual C++ warning
+      e.GetMessageType();
       sequence->RunComplete();
+      state = STOPPED;
       
-      #if DEBUG_SANDBOX_RUN
+      #if DBGLVL_SANDBOX_RUN
       MessageInterface::ShowMessage
          ("   Sandbox rethrowing %s\n", e.GetFullMessage().c_str());
       #endif
@@ -824,7 +908,6 @@ bool Sandbox::Interrupt()
 }
 
 
-
 //------------------------------------------------------------------------------
 // void Clear()
 //------------------------------------------------------------------------------
@@ -834,12 +917,16 @@ bool Sandbox::Interrupt()
 //------------------------------------------------------------------------------
 void Sandbox::Clear()
 {
+   #ifdef DEBUG_SANDBOX_CLEAR
+   MessageInterface::ShowMessage("Sandbox::Clear() entered\n");
+   #endif
+   
    sequence  = NULL;
    current   = NULL;
-
+   
    // Delete the all cloned objects
    std::map<std::string, GmatBase *>::iterator omi;
-
+   
    #ifdef DEBUG_SANDBOX_OBJECT_MAPS
    MessageInterface::ShowMessage("Sandbox OMI List\n");
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
@@ -856,85 +943,159 @@ void Sandbox::Clear()
          (omi->second)->GetTypeName().c_str());
    }
    #endif
-
-
+   
+   #ifdef DEBUG_SANDBOX_CLEAR
+   ShowObjectMap(objectMap, "Sandbox::Clear() clearing objectMap\n");
+   #endif
+   
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
    {
-      if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
-         publisher->Unsubscribe((Subscriber*)(omi->second));
-      
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-         MessageInterface::ShowMessage("Sandbox clearing %s\n",
+         MessageInterface::ShowMessage("Sandbox clearing <%p>'%s'\n", omi->second,
             (omi->first).c_str());
       #endif
 
-      #ifdef DEBUG_SANDBOX_CLONING
-         if (find(clonable.begin(), clonable.end(),
-             (omi->second)->GetType()) != clonable.end())
+      // if object is a SUBSCRIBER, let's unsubscribe it first
+      if ((omi->second != NULL) && (omi->second)->GetType() == Gmat::SUBSCRIBER)
+         publisher->Unsubscribe((Subscriber*)(omi->second));
+      
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+         MessageInterface::ShowMessage("   Deleting <%p>'%s'\n", omi->second,
+            (omi->second)->GetName().c_str());
       #endif
-      {
-         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-            MessageInterface::ShowMessage("Deleting '%s'\n",
-               (omi->second)->GetName().c_str());
-         #endif
-         delete omi->second;
-         //objectMap.erase(omi);
-      }
-      /// @todo Subscribers are cloned; where are they deleted?
+      #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (omi->second, omi->first, "Sandbox::Clear()",
+             " deleting cloned obj from objectMap");
+      #endif
+      delete omi->second;
+      omi->second = NULL;
+      //objectMap.erase(omi);
    }
+   #ifdef DEBUG_SANDBOX_CLEAR
+   MessageInterface::ShowMessage
+      ("--- Sandbox::Clear() deleting objects from objectMap done\n");
+   ShowObjectMap(globalObjectMap, "Sandbox::Clear() clearing globalObjectMap\n");
+   #endif
    for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); omi++)
    {
-      if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
-         publisher->Unsubscribe((Subscriber*)(omi->second));
-      
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-         MessageInterface::ShowMessage("Sandbox clearing %s\n",
+         MessageInterface::ShowMessage("Sandbox clearing <%p>%s\n", omi->second,
             (omi->first).c_str());
       #endif
 
-      #ifdef DEBUG_SANDBOX_CLONING
-         if (find(clonable.begin(), clonable.end(),
-             (omi->second)->GetType()) != clonable.end())
+      // if object is a SUBSCRIBER, let's unsubscribe it first
+      if ((omi->second != NULL) && (omi->second)->GetType() == Gmat::SUBSCRIBER)
+         publisher->Unsubscribe((Subscriber*)(omi->second));
+      
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+         MessageInterface::ShowMessage("   Deleting <%p>'%s'\n", omi->second,
+            (omi->second)->GetName().c_str());
       #endif
-      {
-         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-            MessageInterface::ShowMessage("Deleting '%s'\n",
-               (omi->second)->GetName().c_str());
-         #endif
-         delete omi->second;
-         //objectMap.erase(omi);
-      }
-      /// @todo Subscribers are cloned; where are they deleted?
+      #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (omi->second, omi->first, "Sandbox::Clear()",
+             " deleting cloned obj from globalObjectMap");
+      #endif
+      delete omi->second;
+      omi->second = NULL;
+      //globalObjectMap.erase(omi);
    }
-
+   
+   #ifdef DEBUG_SANDBOX_CLEAR
+   MessageInterface::ShowMessage
+      ("--- Sandbox::Clear() deleting objects from globalObjectMap done\n");
+   #endif
+   
+   // Clear published data
+   if (publisher)
+   {
+      publisher->ClearPublishedData();
+      #ifdef DEBUG_SANDBOX_CLEAR
+      MessageInterface::ShowMessage
+         ("--- Sandbox::Clear() publisher cleared published data\n");
+      #endif
+   }
+   
+   // Set publisher to NULL. The publisher is set before the run and this method
+   // Sandbox::Clear() can be called multiple times from the Moderator
    publisher = NULL;
-
+   
 #ifndef DISABLE_SOLAR_SYSTEM_CLONING
    if (solarSys != NULL)
    {
       #ifdef DEBUG_SS_CLONING
       MessageInterface::ShowMessage
-         ("Sandbox deleting the solar system clone: %p\n", solarSys);
+         ("--- Sandbox::Clear() deleting the solar system clone: %p\n", solarSys);
       #endif
       
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (solarSys, solarSys->GetName(), "Sandbox::Clear()", " deleting solarSys");
+      #endif
       delete solarSys;
    }
    
    solarSys = NULL;
 #endif
-
+   
+   #ifdef DEBUG_SANDBOX_CLEAR
+   MessageInterface::ShowMessage
+      ("--- Sandbox::Clear() now about to delete triggerManagers\n");
+   #endif
+   // Remove the TriggerManager clones
+   for (UnsignedInt i = 0; i < triggerManagers.size(); ++i)
+      delete triggerManagers[i];
+   triggerManagers.clear();
+   
+   #ifdef DEBUG_SANDBOX_CLEAR
+   MessageInterface::ShowMessage
+      ("--- Sandbox::Clear() triggerManagers are cleared\n");
+   #endif
+   
+   // who deletes objects?  ConfigManager::RemoveAllItems() deleletes them
    objectMap.clear();
    globalObjectMap.clear();
+   
+   #ifdef DEBUG_TRANSIENT_FORCES
+   MessageInterface::ShowMessage
+      ("Sandbox::Clear() transientForces<%p> has %d transient forces\n",
+       &transientForces, transientForces.size());
+   #endif
+   // Who pushes forces to transientForces?
+   //    BeginFiniteBurn::Execute() pushes burn force
+   // Should we delete transient forces here? (loj: 2008.11.03)
+   // @note transient forces are deleted in the BeginFiniteBurn destructor
+   // so we don't need to delete here. (LOJ: 2009.05.08)
+   #if 0
+   for (std::vector<PhysicalModel*>::iterator tf = transientForces.begin();
+        tf != transientForces.end(); ++tf)
+   {
+      #ifdef DEBUG_TRANSIENT_FORCES
+      MessageInterface::ShowMessage("   tf=<%p>\n", (*tf));
+      #endif
+      
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         ((*tf), (*tf)->GetName(), "Sandbox::Clear()", "deleting transient force");
+      #endif
+      delete (*tf);
+   }
+   #endif
+   
    transientForces.clear();
-
+   
    // Update the sandbox state
    if ((state != STOPPED) && (state != IDLE))
           MessageInterface::ShowMessage(
              "Unexpected state transition in the Sandbox\n");
 
    state     = IDLE;
+   
+   #ifdef DEBUG_SANDBOX_CLEAR
+   MessageInterface::ShowMessage("Sandbox::Clear() leaving\n");
+   #endif
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -943,119 +1104,24 @@ void Sandbox::Clear()
 /**
  *  Add Subcribers to the Sandbox and registers them with the Publisher.
  *
- *  @param <subsc> The subscriber.
+ *  @param <sub> The subscriber.
  *
  *  @return true if the Subscriber was registered.
  */
 //------------------------------------------------------------------------------
-bool Sandbox::AddSubscriber(Subscriber *subsc)
+bool Sandbox::AddSubscriber(Subscriber *sub)
 {
-   if ((state != STOPPED) && (state != INITIALIZED) && (state != IDLE))
-          MessageInterface::ShowMessage(
-             "Unexpected state transition in the Sandbox\n");
-   state     = IDLE;
-
-   Subscriber *sub = (Subscriber *)(subsc->Clone());
-   #ifdef DEBUG_SANDBOX_OBJ
-      MessageInterface::ShowMessage
-         ("Sandbox::AddSubscriber() name = %s\n",
-          sub->GetName().c_str());
-   #endif
-
-   publisher->Subscribe(sub);
-   return  AddObject(sub);
+   // add subscriber to sandbox by AddObject() so that cloned subscribers
+   // can be deleted when clear (loj: 2008.11.06)
+   Subscriber *newSub = (Subscriber*)AddObject(sub);
+   if (newSub != NULL)
+   {
+      publisher->Subscribe(newSub);
+      return true;
+   }
+   
+   return false;
 }
-
-
-
-//------------------------------------------------------------------------------
-// void BuildAssociations(GmatBase * obj)
-//------------------------------------------------------------------------------
-/**
- *  Assigns clones of objects to their owners.
- *
- *  This method finds referenced objects that need to be associated with the
- *  input object through cloning, creates the clones, and hands the cloned
- *  object to the owner.
- *
- *  An example of the associations that are made here are hardware elements that
- *  get associated with spacecraft.  Users configure a single element -- for
- *  example, a tank, and then can assign that element to many different
- *  spacecraft.  In order to avoid multiple objects using the same instance of
- *  the tank, clones are made for each spacecraft that has the tank associated
- *  with it.
- *
- *  @param <obj> The owner of the clones.
- */
-//------------------------------------------------------------------------------
-//void Sandbox::BuildAssociations(GmatBase * obj)
-//{
-//   // Spacecraft receive clones of the associated hardware objects
-//   if (obj->GetType() == Gmat::SPACECRAFT) {
-//      StringArray hw = obj->GetRefObjectNameArray(Gmat::HARDWARE);
-//      for (StringArray::iterator i = hw.begin(); i < hw.end(); ++i) {
-//
-//         #if DEBUG_SANDBOX
-//            MessageInterface::ShowMessage
-//               ("Sandbox::BuildAssociations() setting \"%s\" on \"%s\"\n",
-//                i->c_str(), obj->GetName().c_str());
-//         #endif
-//
-//         GmatBase *el = NULL;
-//         if ((el = FindObject(*i)) == NULL)
-//            throw SandboxException("Sandbox::BuildAssociations: Cannot find "
-//                                   "hardware element \"" + (*i) + "\"\n");
-//         //GmatBase *el = objectMap[*i];
-//         GmatBase *newEl = el->Clone();
-//         #if DEBUG_SANDBOX
-//            MessageInterface::ShowMessage
-//               ("Sandbox::BuildAssociations() created clone \"%s\" of type \"%s\"\n",
-//               newEl->GetName().c_str(), newEl->GetTypeName().c_str());
-//         #endif
-//         if (!obj->SetRefObject(newEl, newEl->GetType(), newEl->GetName()))
-//            MessageInterface::ShowMessage
-//               ("Sandbox::BuildAssociations() failed to set %s\n",
-//               newEl->GetName().c_str());
-//         ;
-//      }
-//
-//      obj->TakeAction("SetupHardware");
-//   }
-//}
-//
-//
-//
-////------------------------------------------------------------------------------
-//// SpacePoint* FindSpacePoint(const std::string &spname)
-////------------------------------------------------------------------------------
-///**
-// *  Finds a SpacePoint by name.
-// *
-// *  @param <spname> The name of the SpacePoint.
-// *
-// *  @return A pointer to the SpacePoint, or NULL if it does not exist in the
-// *          Sandbox.
-// */
-////------------------------------------------------------------------------------
-//SpacePoint * Sandbox::FindSpacePoint(const std::string &spName)
-//{
-//   SpacePoint *sp = solarSys->GetBody(spName);
-//
-//
-//   if (sp == NULL)
-//   {
-//      GmatBase *spObj;
-//      if ((spObj = FindObject(spName)) != NULL)
-//      {
-//         //if (objectMap[spName]->IsOfType(Gmat::SPACE_POINT))
-//         if (spObj->IsOfType(Gmat::SPACE_POINT))
-//            sp = (SpacePoint*)(spObj);
-//      }
-//   }
-//
-//
-//   return sp;
-//}
 
 
 //------------------------------------------------------------------------------
@@ -1100,45 +1166,45 @@ GmatBase* Sandbox::FindObject(const std::string &name)
  */
 //------------------------------------------------------------------------------
 bool Sandbox::SetObjectByNameInMap(const std::string &name,
-                             GmatBase *obj)
+                                   GmatBase *obj)
 {
-#ifdef DEBUG_SANDBOX_OBJ
+   #ifdef DEBUG_SANDBOX_OBJECT_MAPS
    MessageInterface::ShowMessage
       ("Sandbox::SetObjectByNameInMap() name = %s\n",
        name.c_str());
-#endif
+   #endif
    bool found = false;
    // if it's already in a map, set the object pointer for the name
    if (objectMap.find(name) != objectMap.end())
    {
       objectMap[name] = obj;
-#ifdef DEBUG_SANDBOX_OBJ
-   MessageInterface::ShowMessage
-      ("Sandbox::SetObjectByNameInMap() set object name = %s in objectMap\n",
-       name.c_str());
-#endif
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+      MessageInterface::ShowMessage
+         ("Sandbox::SetObjectByNameInMap() set object name = %s in objectMap\n",
+          name.c_str());
+      #endif
       found = true;
    }
    if (globalObjectMap.find(name) != globalObjectMap.end())
    {
       globalObjectMap[name] = obj;
-#ifdef DEBUG_SANDBOX_OBJ
-   MessageInterface::ShowMessage
-      ("Sandbox::SetObjectByNameInMap() set object name = %s in globalObjectMap\n",
-       name.c_str());
-#endif      
-   found = true;
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+      MessageInterface::ShowMessage
+         ("Sandbox::SetObjectByNameInMap() set object name = %s in globalObjectMap\n",
+          name.c_str());
+      #endif      
+      found = true;
    }
    // if not already in the map, add it to the objectMap
    // (globals are added to the globalObjectMap later)
    if (!found)
       objectMap.insert(std::make_pair(name,obj));
-
-#ifdef DEBUG_SANDBOX_OBJ
+   
+   #ifdef DEBUG_SANDBOX_OBJECT_MAPS
    MessageInterface::ShowMessage
       ("Sandbox::SetObjectByNameInMap() returning found = %s\n",
        (found? "TRUE" : "FALSE"));
-#endif   
+   #endif   
    return found;
 }
 
@@ -1158,8 +1224,8 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
  *  @return true if successful; flase otherwise
  */
 //------------------------------------------------------------------------------
-bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
-              std::map<std::string, GmatBase *> *usingMap)
+bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
+                                 GmatBase *> *usingMap)
 {
    #ifdef DEBUG_SANDBOX_GMATFUNCTION
       MessageInterface::ShowMessage(
@@ -1172,7 +1238,10 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
    std::string matlabExt = global->GetMatlabFuncNameExt();
    StringArray gfList;
    bool        isMatlabFunction = false;
-   if (cmd->GetTypeName() == "CallFunction") 
+   
+   SetGlobalRefObject(cmd);
+   
+   if (cmd->IsOfType("CallFunction"))
    {
       std::string cfName = cmd->GetStringParameter("FunctionName");
       gfList.push_back(cfName);
@@ -1210,17 +1279,21 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
       if (globalObjectMap.find(fName) == globalObjectMap.end())
       {
          if (isMatlabFunction)
-            f = moderator->CreateFunction("MatlabFunction",fName, false);
+            f = moderator->CreateFunction("MatlabFunction",fName, 0);
          else
-            f = moderator->CreateFunction("GmatFunction",fName, false);
+            f = moderator->CreateFunction("GmatFunction",fName, 0);
          if (!f) 
             throw SandboxException("Sandbox::HandleGmatFunction - error creating new function\n");
+         #ifdef DEBUG_SANDBOX_GMATFUNCTION
+         MessageInterface::ShowMessage
+            ("Adding function <%p>'%s' to the Global Object Store\n", f, fName.c_str());
+         #endif
          globalObjectMap.insert(std::make_pair(fName,f));
       }
       else // it's already in the GOS, so just grab it
          f = (Function*) globalObjectMap[fName];
-
-      if (cmd->GetTypeName() == "CallFunction")  
+      
+      if (cmd->IsOfType("CallFunction"))
       {
          ((CallFunction*)cmd)->SetRefObject(f,Gmat::FUNCTION,fName);
          cmd->SetStringParameter("FunctionName", fName);
@@ -1248,9 +1321,13 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
             "About to call InterpretGmatFunction for function %s\n",
             (f->GetStringParameter("FunctionName")).c_str());
          #endif
-         GmatCommand* fcs = moderator->InterpretGmatFunction(f, usingMap);
+         GmatCommand* fcs = moderator->InterpretGmatFunction(f, usingMap, solarSys);
+
+         // If FCS not created, throw an exception with Gmat::GENERAL_ so that it will not
+         // write error count again for function in Initialize()(Bug 2272 fix)
          if (fcs == NULL)
-            throw SandboxException("Sandbox::HandleGmatFunction - error creating FCS\n");
+            throw SandboxException("Sandbox::HandleGmatFunction - error creating FCS\n",
+                                   Gmat::GENERAL_);
          
          f->SetFunctionControlSequence(fcs);
          GmatCommand* fcsCmd = fcs;
@@ -1264,7 +1341,8 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
                throw SandboxException(errMsg);
             }
             #endif
-            if ((fcsCmd->GetTypeName() == "CallFunction") ||
+            
+            if ((fcsCmd->IsOfType("CallFunction")) ||
                 (fcsCmd->IsOfType("Assignment")))
             {
                #ifdef DEBUG_SANDBOX_GMATFUNCTION
@@ -1274,28 +1352,23 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
                   fcsCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
                #endif
                
-               // LOJ: Let's handle GmatFunction first (2008.06.02)
-               OK += HandleGmatFunction(fcsCmd, &globalObjectMap);
+               //Let's handle GmatFunction first
+               //compiler warning: '+=' : unsafe use of type 'bool' in operation
+               //OK += HandleGmatFunction(fcsCmd, &combinedObjectMap);
+               OK = HandleGmatFunction(fcsCmd, &combinedObjectMap) && OK;
                // do not set the non-global object map here; it will need to be
-               // setup y the FunctionManager at execution
+               // setup by the FunctionManager at execution
                fcsCmd->SetGlobalObjectMap(&globalObjectMap);
-               fcsCmd->SetSolarSystem(solarSys);
-               fcsCmd->SetTransientForces(&transientForces);
-               //OK += HandleGmatFunction(fcsCmd, &globalObjectMap); //(loj: moved up)
-               ////if (!(fcsCmd->Initialize())) 
-               ////   return false;
-               if (fcsCmd->GetTypeName() == "CallFunction") 
-                  ((CallFunction *)fcsCmd)->SetInternalCoordSystem(internalCoordSys);
             }
             if (fcsCmd->IsOfType("BranchCommand"))
             {
-               std::vector<GmatCommand*> cmdList = ((BranchCommand*) fcsCmd)->GetCommandsWithGmatFunctions();
+               std::vector<GmatCommand*> cmdList =
+                  ((BranchCommand*) fcsCmd)->GetCommandsWithGmatFunctions();
                Integer sz = (Integer) cmdList.size();
                for (Integer jj = 0; jj < sz; jj++)
                {
-                  HandleGmatFunction(cmdList.at(jj), &globalObjectMap);
-                  if ((cmdList.at(jj))->GetTypeName() == "CallFunction") 
-                     ((CallFunction *)cmdList.at(jj))->SetInternalCoordSystem(internalCoordSys);
+                  GmatCommand *childCmd = cmdList.at(jj);
+                  HandleGmatFunction(childCmd, &combinedObjectMap);
                }
             }
             fcsCmd = fcsCmd->GetNext();
@@ -1304,3 +1377,49 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
    }
    return OK;
 }
+
+
+//------------------------------------------------------------------------------
+// void SetGlobalRefObject(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/*
+ * Sets globally used object pointers to command
+ *
+ * @param cmd The command to set global object pointers to
+ */
+//------------------------------------------------------------------------------
+void Sandbox::SetGlobalRefObject(GmatCommand *cmd)
+{
+   #ifdef DEBUG_SANDBOX_GLOBAL_REF_OBJ
+   MessageInterface::ShowMessage
+      ("Sandbox::SetGlobalRefObject() Setting solarSystem <%p>, transientForces <%p>\n   "
+       "internalCoordSystem <%p>, publisher <%p>, to <%p>'%s'\n", solarSys,
+       &transientForces, internalCoordSys, publisher, cmd, cmd->GetTypeName().c_str());
+   #endif
+   cmd->SetSolarSystem(solarSys);
+   cmd->SetTransientForces(&transientForces);
+   cmd->SetInternalCoordSystem(internalCoordSys);
+   cmd->SetPublisher(publisher);
+}
+
+
+//------------------------------------------------------------------------------
+// void ShowObjectMap(ObjectMap &om, const std::string &title)
+//------------------------------------------------------------------------------
+void Sandbox::ShowObjectMap(ObjectMap &om, const std::string &title)
+{   
+   MessageInterface::ShowMessage(title);
+   MessageInterface::ShowMessage("object map = <%p>\n", &om);
+   if (om.size() > 0)
+   {
+      for (ObjectMap::iterator i = om.begin(); i != om.end(); ++i)
+      MessageInterface::ShowMessage
+         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
+   else
+   {
+      MessageInterface::ShowMessage("The object map is empty\n");
+   }
+}
+

@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Star
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan
 // Created: 2004/01/29
@@ -17,48 +21,12 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "Star.hpp"
-#include "PhysicalConstants.hpp"
+#include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 #include "A1Mjd.hpp"
 #include "AngleUtil.hpp"
 
 
-// initialize static default values
-// default values for CelesitalBody data
-const Gmat::BodyType        Star::BODY_TYPE           = Gmat::STAR;
- // 2006.01.31 Equatorial radius - to match STK; was 6.97E5;    
-const Real                  Star::EQUATORIAL_RADIUS   = 695990.0000;  // km
-const Real                  Star::FLATTENING          = 0.0; 
-// Units for MU are km^3/s^2
-const Real                  Star::MU                  = 132712440017.99;
-const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::DE_405;
-const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::LOW_FIDELITY;
-const Integer               Star::BODY_NUMBER         = 3;  
-const Integer               Star::REF_BODY_NUMBER     = 3;    
-const Integer               Star::ORDER               = 0;      
-const Integer               Star::DEGREE              = 0;
-const Rmatrix               Star::SIJ                 = Rmatrix(5,5); //zeroes
-const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
-      1.0, 0.0,             0.0,             0.0,             0.0,
-      0.0, 0.0,             0.0,             0.0,             0.0,
-      0.0, 0.0,             0.0,             0.0,             0.0,
-      0.0, 0.0,             0.0,             0.0,             0.0,
-      0.0, 0.0,             0.0,             0.0,             0.0);
-//const Integer               Star::COEFFICIENT_SIZE    = 4;
-
-// NOTE - these must change when Earth's default values change!!!!!!!!!!!!
-const Real                  Star::ANALYTIC_EPOCH           = 21544.500370768266;
-const Rvector6              Star::ANALYTIC_ELEMENTS        = Rvector6(
-      149653978.9783766,        0.01704556707314489,  23.439034090426388,
-      0.00018646554487906264, 281.7416388084352,     358.12708491129);
-
-// Units for radiant power are W / m^2
-const Real                  Star::STAR_RADIANT_POWER       = 1358.0;     
-// Units for reference distance are km (1 AU)
-const Real                  Star::STAR_REFERENCE_DISTANCE  = 1.49597870e8; 
-// Units for radius are meters
-const Real                  Star::STAR_PHOTOSPHERE_RADIUS  = 695990000.0;  
-/// @todo add other ones as needed
 
 //---------------------------------
 // static data
@@ -79,11 +47,6 @@ Star::PARAMETER_TYPE[StarParamCount - CelestialBodyParamCount] =
    Gmat::REAL_TYPE
 };
 
-const Real Star::alpha = 286.13;      // deg
-const Real Star::delta = 63.87;       // deg
-const Real Star::w1    = 84.10;       // deg
-const Real Star::w2    = 14.1844000;
-
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -103,7 +66,30 @@ CelestialBody       ("Star",name)
 {
    objectTypeNames.push_back("Star");
    parameterCount = StarParamCount;
-   InitializeStar();  // should this be the default?
+   
+   bodyType            = Gmat::STAR;
+   bodyNumber          = 3;
+   referenceBodyNumber = 3;
+   rotationSrc         = Gmat::IAU_SIMPLIFIED;  // ??
+   
+   // defaults for now ...
+   Rmatrix s(5,5,
+         0.0, 0.0,             0.0,             0.0,             0.0,
+         0.0, 0.0,             0.0,             0.0,             0.0,
+         0.0, 0.0,             0.0,             0.0,             0.0,
+         0.0, 0.0,             0.0,             0.0,             0.0,
+         0.0, 0.0,             0.0,             0.0,             0.0);
+   Rmatrix c(5,5,
+         0.0, 0.0,             0.0,             0.0,             0.0,
+         0.0, 0.0,             0.0,             0.0,             0.0,
+         0.0, 0.0,             0.0,             0.0,             0.0,
+         0.0, 0.0,             0.0,             0.0,             0.0,
+         0.0, 0.0,             0.0,             0.0,             0.0);
+   sij = s;
+   cij = c;
+
+   SaveAllAsDefault();
+//   InitializeStar();  // should this be the default?
 }
 
 //------------------------------------------------------------------------------
@@ -212,63 +198,46 @@ bool Star::SetRadiantPower(Real radPower, Real refDistance)
 }
 
 //------------------------------------------------------------------------------
-//  Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+//  bool SetPhotosphereRadius(Real rad)
 //------------------------------------------------------------------------------
 /**
- * This method returns the cartographic coordinates for the star.
+ * This method sets the photosphere radius for the star.
  *
- * @param <forTime>    time for which to compute the cartographic coordinates.
+ * @param <rad>    photosphere radius value.
  *
- * @return vector containing alpha, delta, W, Wdot.
- *
- * @note currently only implemented for our Star.
- *       See "Report of the IAU/IAG Working Group on
- *       Cartographic Coordinates and Rotational Elements of the Planets
- *       and Satellites: 2000"
+ * @return flag indicating success of the operation.
  *
  */
 //------------------------------------------------------------------------------
-Rvector Star::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+bool Star::SetPhotosphereRadius(Real rad)
 {
-   if (instanceName == SolarSystem::SUN_NAME)
-   {
-      Real d    = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
-      Real W    = Star::w1 + Star::w2 * d;
-      Real Wdot = Star::w2 * CelestialBody::dDot;
-      return Rvector(4, Star::alpha, Star::delta, W, Wdot);
-   }
-   return CelestialBody::GetBodyCartographicCoordinates(forTime);
+   photosphereRadius = rad;
+   return true;
 }
 
+
 //------------------------------------------------------------------------------
-//  Real GetHourAngle(A1Mjd atTime)
+//  bool IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 /**
- * This method returns the hour angle for the body, referenced from the
- * Prime Meridian, measured westward
+ * This method returns a boolean indicating whether or not the parameter
+ * referenced by the input id is a read-ony parameter for an object of this class.
  *
- * @param <atTime> time for which to compute the hour angle
+ * @param <id>    id of specified parameter
  *
- * @return hour angle for the body, in degrees, from the Prime Meridian
- *
- * @note algorithm 15, Vallado p. 192
- * @todo move this to Planet?  Add generic calculation here.
+ * @return true if the parameter is read-only; false otherwise
  *
  */
 //------------------------------------------------------------------------------
-Real  Star::GetHourAngle(A1Mjd atTime) 
+bool Star::IsParameterReadOnly(const Integer id) const
 {
-   if (instanceName == SolarSystem::SUN_NAME)
-   {
-      Real d         = GetJulianDaysFromTCBEpoch(atTime); 
-      Real hourAngle = Star::w1 + Star::w2 * d;
-      // reduce to a quantity within one day (86400 seconds, 360.0 degrees)
-      hourAngle = AngleUtil::PutAngleInDegRange(hourAngle,0.0,360.0);
-      return hourAngle;
-   }
-   return CelestialBody::GetHourAngle(atTime);
+   // do not write out these items
+   if ((id == RADIANT_POWER) || (id == REFERENCE_DISTANCE) ||
+       (id == PHOTOSPHERE_RADIUS))
+      return true;
+   
+   return CelestialBody::IsParameterReadOnly(id);
 }
-
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
@@ -284,6 +253,23 @@ GmatBase* Star::Clone(void) const
 {
    return (new Star(*this));
 }
+
+
+//---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Set this instance to match the one passed in.
+ *
+ * @param <orig> The object that is being copied.
+ */
+//---------------------------------------------------------------------------
+void Star::Copy(const GmatBase* orig)
+{
+   operator=(*((Star *)(orig)));
+}
+
+
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -410,61 +396,9 @@ Real        Star::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//  void  InitializeStar()
-//------------------------------------------------------------------------------
-/**
- * This method initializes the data values for the body.
- *
- */
-//------------------------------------------------------------------------------
-void Star::InitializeStar()
-{
-   CelestialBody::InitializeBody();
-   
-   // fill in with default values, for the Sun (all from CelestialBody)
-   bodyType            = Star::BODY_TYPE;
-   mu                  = Star::MU;
-   //mass                = Star::MASS;
-   mass                = mu /
-                         GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
-   equatorialRadius    = Star::EQUATORIAL_RADIUS;
-   flattening          = Star::FLATTENING;
-  // polarRadius         = Star::POLAR_RADIUS;
-   polarRadius         = (1.0 - flattening) * equatorialRadius;
-   posVelSrc           = Star::POS_VEL_SOURCE;
-   analyticMethod      = Star::ANALYTIC_METHOD;
-   theCentralBodyName  = "";
-   bodyNumber          = Star::BODY_NUMBER;
-   referenceBodyNumber = Star::REF_BODY_NUMBER;
-
-   // fill in default values for Star-specific stuff
-   radiantPower        = Star::STAR_RADIANT_POWER;
-   referenceDistance   = Star::STAR_REFERENCE_DISTANCE;
-   photosphereRadius   = Star::STAR_PHOTOSPHERE_RADIUS;
-
-   order               = Star::ORDER;
-   degree              = Star::DEGREE;
-   sij                 = Star::SIJ;
-   cij                 = Star::CIJ;
-   defaultMu           = Star::MU;
-   defaultEqRadius     = Star::EQUATORIAL_RADIUS;
-   
-   analyticEpoch       = Star::ANALYTIC_EPOCH;
-   analyticKepler      = Star::ANALYTIC_ELEMENTS;
-   
-   //coefficientSize     = Star::COEFFICIENT_SIZE;
-   //defaultSij          = Star::SIJ;
-   //defaultCij          = Star::CIJ;
-   //defaultCoefSize     = Star::COEFFICIENT_SIZE;
-   
-   if (instanceName != SolarSystem::SUN_NAME)
-      MessageInterface::ShowMessage(
-       "Unknown star created - please supply physical parameter values");
-}
 
 //------------------------------------------------------------------------------
-//  Rvector6 ComputeLowFidelity(const A1Mjd &forTime)
+//  Rvector6 ComputeTwoBody(const A1Mjd &forTime)
 //------------------------------------------------------------------------------
 /**
  * This method computes the position and velocity at time forTime, with respect 
@@ -474,7 +408,7 @@ void Star::InitializeStar()
  *
  */
 //------------------------------------------------------------------------------
-Rvector6 Star::ComputeLowFidelity(const A1Mjd &forTime)
+Rvector6 Star::ComputeTwoBody(const A1Mjd &forTime)
 {
    return KeplersProblem(forTime);   // already Earth-centered 
 }

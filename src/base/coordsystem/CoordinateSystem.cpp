@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  CoordinateSystem
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -26,8 +28,15 @@
 #include "CoordinateSystem.hpp"
 #include "CoordinateSystemException.hpp"
 #include "CoordinateBase.hpp"
+#include "ObjectReferencedAxes.hpp"
+#include "MJ2000EqAxes.hpp"
+#include "TopocentricAxes.hpp"
+#include "BodyFixedAxes.hpp"
 #include "Rmatrix33.hpp"
+#include "GmatGlobal.hpp"               // for GetEopFile(), GetItrfCoefficientsFile()
 #include "MessageInterface.hpp"
+
+#include <algorithm>                    // Required by GCC 4.3
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_INPUTS_OUTPUTS
@@ -35,6 +44,16 @@
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_CS_INIT 1
 //#define DEBUG_CS_SET_REF
+//#define DEBUG_TRANSLATION
+//#define DEBUG_CS_CREATE
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -110,7 +129,14 @@ CoordinateBase (coordSys)
 //axes           (coordSys.axes)
 {
    if (coordSys.axes)
+   {
       axes = (AxisSystem*)coordSys.axes->Clone();
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (axes, "clonedAxes", "CoordinateSystem Copy Constructor",
+          "(AxisSystem*) obj->Clone()");
+      #endif
+   }
    else
       axes = NULL;
 }
@@ -132,10 +158,26 @@ const CoordinateSystem& CoordinateSystem::operator=(
    if (&coordSys == this)
       return *this;
    CoordinateBase::operator=(coordSys);
-   //axes           = coordSys.axes;
+   
+   if (axes)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (axes, axes->GetTypeName(), "CoordinateSystem::operator=",
+          "deleting axes");
+      #endif
+      delete axes;
+   }
    
    if (coordSys.axes)
+   {
       axes = (AxisSystem*)coordSys.axes->Clone();
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (axes, "clonedAxes", "CoordinateSystem Assignment operator",
+          "(AxisSystem*) obj->Clone()");
+      #endif
+   }
    else
       axes = NULL;
    
@@ -181,7 +223,15 @@ CoordinateSystem::~CoordinateSystem()
    instanceName.c_str());
    #endif
    
-   if (axes) delete axes;
+   if (axes)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (axes, axes->GetTypeName(), "CoordinateSystem::~CoordinateSystem()",
+          "deleting axes");
+      #endif
+      delete axes;
+   }
    axes = NULL;
    #ifdef DEBUG_DESTRUCTION
    MessageInterface::ShowMessage("---> LEAVING CoordinateSystem destructor for %s\n",
@@ -366,6 +416,13 @@ void CoordinateSystem::GetLastRotationDotMatrix(Real *mat) const
    axes->GetLastRotationDotMatrix(mat);
 }
 
+bool CoordinateSystem::AreAxesOfType(const std::string &ofType) const
+{
+   if (!axes) return false;
+   return axes->IsOfType(ofType);
+}
+
+
 //---------------------------------------------------------------------------
 //  bool CoordinateSystem::Initialize()
 //---------------------------------------------------------------------------
@@ -381,29 +438,26 @@ bool CoordinateSystem::Initialize()
       ("CoordinateSystem::Initialize() csName=%s, axes=%p\n",
        GetName().c_str(), axes);
    #endif
-
+   
    CoordinateBase::Initialize();
    
    if (axes)
    {
       #if DEBUG_CS_INIT
       MessageInterface::ShowMessage
-         ("   originName=%s, origin=%s, j2000BodyName=%s, j2000Body=%s\n",
-          originName.c_str(), origin->GetName().c_str(),
-          j2000BodyName.c_str(), j2000Body->GetName().c_str());
+         ("   solar=<%p>, originName='%s', j2000BodyName='%s', origin=<%p>'%s', "
+          "j2000Body=<%p>'%s'\n", solar, originName.c_str(), j2000BodyName.c_str(),
+          origin, origin->GetName().c_str(), j2000Body, j2000Body->GetName().c_str());
       #endif
       
+      axes->SetSolarSystem(solar);
       axes->SetOriginName(originName);
       axes->SetJ2000BodyName(j2000BodyName);
       axes->SetRefObject(origin,Gmat::SPACE_POINT,originName);
       axes->SetRefObject(j2000Body,Gmat::SPACE_POINT,j2000BodyName);
-      axes->SetSolarSystem(solar);
+      axes->SetCoordinateSystemName(instanceName);
       axes->Initialize();
    }
-   // wcs: as of 2004.12.22, assume it is MJ2000Eq, if undefined
-   //if (!axes)
-   //   throw CoordinateSystemException(
-   //         "Axes are undefined for CoordinateSystem " + GetName());
    
    return true;
 }
@@ -430,11 +484,11 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 {
    static Rvector internalState;
    static Rvector finalState;
-    #ifdef DEBUG_INPUTS_OUTPUTS
+   #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
       "In CS::ToMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
-    #endif
+   #endif
    internalState.SetSize(inState.GetSize());
    finalState.SetSize(inState.GetSize());
    
@@ -449,16 +503,13 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 
    if (!coincident)
    {
-      //if (!TranslateToMJ2000Eq(epoch,internalState, internalState))
-      //   throw CoordinateSystemException("Error translating state to MJ2000Eq for "
-      //                                   + instanceName);
       if (!TranslateToMJ2000Eq(epoch,internalState, finalState))
          throw CoordinateSystemException("Error translating state to MJ2000Eq for "
                                          + instanceName);
-    #ifdef DEBUG_INPUTS_OUTPUTS
-      MessageInterface::ShowMessage(
-      "In CS::ToMJ2000Eq, translation happening\n");
-    #endif
+      #ifdef DEBUG_INPUTS_OUTPUTS
+         MessageInterface::ShowMessage(
+         "In CS::ToMJ2000Eq, translation happening\n");
+      #endif
    }
    else
       finalState = internalState;
@@ -477,32 +528,52 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    //return internalState; // implicit copy constructor
 }
 
+//------------------------------------------------------------------------------
+// void ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, Real *outState,
+//                 bool coincident, bool forceComputation)
+//------------------------------------------------------------------------------
 void CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
                                   Real *outState,     bool coincident,
                                   bool forceComputation)
 {
+   #ifdef DEBUG_INPUTS_OUTPUTS
+   MessageInterface::ShowMessage
+      ("In CS::ToMJ2000Eq, inState = \n   %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+       inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
+   MessageInterface::ShowMessage
+      ("   axes=<%p> '%s'\n", axes, axes ? axes->GetName().c_str() : "NULL");
+   #endif
    Real internalState[6];
    if (axes)
    {
-      if (!axes->RotateToMJ2000Eq(epoch,inState,internalState, forceComputation))
+      if (!axes->RotateToMJ2000Eq(epoch, inState, internalState, forceComputation))
          throw CoordinateSystemException("Error rotating state to MJ2000Eq for "
                                          + instanceName);
+      #ifdef DEBUG_INPUTS_OUTPUTS
+      Rvector6 rv(internalState);
+      MessageInterface::ShowMessage
+         ("In CS::ToMJ2000Eq, Rotated to MJ2000Eq, internalState=\n   %s\n",
+          rv.ToString().c_str());
+      #endif
    }
    else // assume this is MJ2000Eq, so no rotation is necessary
       for (Integer i=0; i<6;i++) internalState[i] = inState[i];
-
+   
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage("In ToMJ2000Eq for %s, coincident = %s\n",
+            instanceName.c_str(), (coincident? "TRUE" : "FALSE"));
+   #endif
    if (!coincident)
    {
-      //if (!TranslateToMJ2000Eq(epoch,internalState, internalState))
-      //   throw CoordinateSystemException("Error translating state to MJ2000Eq for "
-      //                                   + instanceName);
-      if (!TranslateToMJ2000Eq(epoch,internalState, outState))
+      if (!TranslateToMJ2000Eq(epoch, internalState, outState))
          throw CoordinateSystemException("Error translating state to MJ2000Eq for "
                                          + instanceName);
-    #ifdef DEBUG_INPUTS_OUTPUTS
-      MessageInterface::ShowMessage(
-      "In CS::ToMJ2000Eq, translation happening\n");
-    #endif
+      #ifdef DEBUG_INPUTS_OUTPUTS
+      Rvector6 rv(outState);
+      MessageInterface::ShowMessage
+         ("In CS::ToMJ2000Eq, translated to MJ2000Eq, outState=\n   %s\n",
+          rv.ToString().c_str());
+      #endif
    }
    else
       for (Integer i=0; i<6; i++)  outState[i] = internalState[i];
@@ -544,7 +615,7 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
                                          + instanceName);
     #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::FromMJ2000Eq, translation happening\n");
+      "In CS::FromMJ2000Eq (2), translation happening\n");
     #endif
    }
    else
@@ -592,7 +663,7 @@ void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
                                          + instanceName);
     #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::FromMJ2000Eq, translation happening\n");
+      "In CS::FromMJ2000Eq (1), translation happening\n");
     #endif
    }
    else
@@ -601,6 +672,10 @@ void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
 
    if (axes)
    {
+      #ifdef DEBUG_INPUTS_OUTPUTS
+         MessageInterface::ShowMessage("About to call RotateFromMJ2000Eq for object %s\n",
+               (GetName()).c_str());
+      #endif
       //if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
       //   throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
       //                                   + instanceName);
@@ -610,7 +685,13 @@ void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
                                          + instanceName);
    }
    else
+   {
+      #ifdef DEBUG_INPUTS_OUTPUTS
+         MessageInterface::ShowMessage("AXES are NULL in CS::FromMJ2000Eq (1) for c.s.of type %s\n",
+               (GetTypeName()).c_str());
+      #endif
       for (Integer i=0; i<6; i++) outState[i]    = internalState[i];
+   }
                                          
 }
 
@@ -679,7 +760,8 @@ bool CoordinateSystem::RenameRefObject(const Gmat::ObjectType type,
 //---------------------------------------------------------------------------
 bool CoordinateSystem::IsParameterReadOnly(const Integer id) const
 {
-   if (id == EPOCH)
+   if ((id == EPOCH) || (id == UPDATE_INTERVAL) ||
+       (id == OVERRIDE_ORIGIN_INTERVAL))
       return true;
    
    return CoordinateBase::IsParameterReadOnly(id);
@@ -893,11 +975,13 @@ Real CoordinateSystem::SetRealParameter(const std::string &label, const Real val
 std::string CoordinateSystem::GetStringParameter(const Integer id) const
 {
    if (id == AXES)
+   {
       if (axes)
          return axes->GetTypeName();
       else
          throw CoordinateSystemException("Axis system not set for "
                                          + instanceName);
+   }
       
    return CoordinateBase::GetStringParameter(id);
 }
@@ -1023,6 +1107,16 @@ GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
    {
       case Gmat::AXIS_SYSTEM:
          return axes;
+      // This is a way to get origin, primary and secondary from GmatFunction
+      // without casting CoordinateSystem * (LOJ: 2009.12.18)
+      // @see GmatFunction::BuildUnusedGlobalObjectList()
+      case Gmat::SPACE_POINT:
+         if (name == "_GFOrigin_")
+            return origin;
+         if (name == "_GFPrimary_")
+            return GetPrimaryObject();
+         if (name == "_GFSecondary_")
+            return GetSecondaryObject();
       default:
          break;
    }
@@ -1064,6 +1158,19 @@ GmatBase* CoordinateSystem::GetOwnedObject(Integer whichOne)
       return axes;
 
    return CoordinateBase::GetOwnedObject(whichOne);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::HasRefObjectTypeArray()
+{
+   return true;
 }
 
 
@@ -1171,8 +1278,9 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name)
 {
    #ifdef DEBUG_CS_SET_REF
-      MessageInterface::ShowMessage("Entering CS::SetRefObject with obj of type %s and name '%s'\n",
-            (obj->GetTypeName()).c_str(), name.c_str());
+      MessageInterface::ShowMessage
+         ("Entering CS::SetRefObject with obj of type %s and name '%s'\n",
+          (obj->GetTypeName()).c_str(), name.c_str());
    #endif
    if (obj == NULL)
       return false;
@@ -1183,26 +1291,39 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       case Gmat::AXIS_SYSTEM:
       {
-//          MessageInterface::ShowMessage
-//             ("===> CoordinateSystem::SetRefObject() %s, before axes=%p, obj=%p\n",
-//              GetName().c_str(), axes, obj);
-         #ifdef DEBUG_CS_SET_REF
-            MessageInterface::ShowMessage("CS::SetRefObject - object is of type AXIS_SYSTEM\n");
+         #ifdef DEBUG_CS_SET_AXIS
+         MessageInterface::ShowMessage
+            ("CoordinateSystem::SetRefObject() %s, before axes=%p, obj=%p\n",
+             GetName().c_str(), axes, obj);
+         MessageInterface::ShowMessage("CS::SetRefObject - object is of type AXIS_SYSTEM\n");
          #endif
-
+         
          AxisSystem *oldAxis = axes;
          
          axes = (AxisSystem*) obj->Clone();
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (axes, "clonedAxes", "CoordinateSystem::SetRefObject()",
+             "(AxisSystem*) obj->Clone()");
+         #endif
          axes->SetName("");
          ownedObjectCount = 1;
          
-//          MessageInterface::ShowMessage
-//             ("===> CoordinateSystem::SetRefObject() %s, after axes=%p\n",
-//              GetName().c_str(), axes);
-
+         #ifdef DEBUG_CS_SET_AXIS
+         MessageInterface::ShowMessage
+            ("CoordinateSystem::SetRefObject() %s, after axes=%p\n",
+             GetName().c_str(), axes);
+         #endif
          if (oldAxis)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (oldAxis, oldAxis->GetTypeName(), "CoordinateSystem::SetRefObject()",
+                "deleting oldAxis");
+            #endif
             delete oldAxis;
-         
+            oldAxis = NULL;
+         }
          return true;
       }
       default:
@@ -1226,12 +1347,204 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return CoordinateBase::SetRefObject(obj, type, name);
 }
 
+
+//----------------------------
+// public static methods
+//----------------------------
+//------------------------------------------------------------------------------
+// static CoordinateSystem* CreateLocalCoordinateSystem(
+//                     const std::string &csName, const std::string &axesType,
+//                     SpacePoint *origin, SpacePoint *primary,
+//                     SpacePoint *secondary, SpacePoint *j2000Body,
+//                     SolarSystem *solarSystem)
+//------------------------------------------------------------------------------
+/**
+ * Creates CoordinateSystem with VNB, LVLH, MJ2000Eq, and SpacecraftBody axis.
+ *
+ * @param  csName      Name of the cooridnate system
+ * @param  axesType    Axes system type name
+ * @param  origin      Axes system origin body pointer
+ * @param  primary     Axes system primary body pointer
+ * @param  secondary   Axes system secondary body pointer
+ * @param  j2000Body   Axes system J2000 body pointer
+ * @param  solarSystem Solar system pointer
+ *
+ * @return new CoordinateSystem pointer if successful, NULL otherwise
+ */
+//------------------------------------------------------------------------------
+CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
+                     const std::string &csName, const std::string &axesType,
+                     SpacePoint *origin, SpacePoint *primary,
+                     SpacePoint *secondary, SpacePoint *j2000Body,
+                     SolarSystem *solarSystem)
+{
+   #ifdef DEBUG_CS_CREATE
+   MessageInterface::ShowMessage
+      ("CoordinateSystem::CreateLocalCoordinateSystem() entered\n   csName='%s', "
+       "axesType='%s', origin=<%p>, primary=<%p>, secondary=<%p>\n   j2000Body=<%p>, "
+       "solarSystem=<%p>\n", csName.c_str(), axesType.c_str(), origin, primary,
+       secondary, j2000Body, solarSystem);
+   #endif
+   // check for NULL pointers
+   if (origin == NULL || j2000Body == NULL || solarSystem == NULL)
+      return NULL;
+   
+   CoordinateSystem *localCS = NULL;
+   AxisSystem       *theAxes = NULL;
+   
+   // check for supported axes name - these are used at least in the Burn code
+   if (axesType == "VNB" || axesType == "LVLH" || axesType == "SpacecraftBody")
+   {
+      if (primary == NULL || secondary == NULL)
+         return NULL;
+      
+      localCS  = new CoordinateSystem("CoordinateSystem",csName);
+      theAxes  = new ObjectReferencedAxes(csName);
+      
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (localCS, "localCS", "CoordinateSystem::CreateLocalCoordinateSystem()",
+          "new CoordinateSystem()");
+      MemoryTracker::Instance()->Add
+         (theAxes, "theAxes", "CoordinateSystem::CreateLocalCoordinateSystem()",
+          "new ObjectReferencedAxes()");
+      #endif
+      
+      theAxes->SetStringParameter("Primary", primary->GetName());
+      theAxes->SetStringParameter("Secondary", secondary->GetName());
+      theAxes->SetRefObject(origin, Gmat::SPACE_POINT, origin->GetName());
+      theAxes->SetRefObject(primary, Gmat::SPACE_POINT, primary->GetName());
+      theAxes->SetRefObject(secondary, Gmat::SPACE_POINT, secondary->GetName());
+      
+      if (axesType == "VNB")
+      {
+         theAxes->SetStringParameter("XAxis", "V");
+         theAxes->SetStringParameter("YAxis", "N");
+         localCS->SetStringParameter("Origin", secondary->GetName());
+         localCS->SetRefObject(secondary, Gmat::SPACE_POINT, secondary->GetName());
+      }
+      else if (axesType == "LVLH")
+      {
+         theAxes->SetStringParameter("XAxis", "-R");
+         theAxes->SetStringParameter("YAxis", "-N");
+         localCS->SetStringParameter("Origin", secondary->GetName());
+         localCS->SetRefObject(secondary, Gmat::SPACE_POINT, secondary->GetName());
+      }
+      else if (axesType == "SpacecraftBody")
+      {
+         localCS->SetStringParameter("Origin", j2000Body->GetName());
+      }
+      
+      localCS->SetRefObject(theAxes, Gmat::AXIS_SYSTEM, theAxes->GetName());
+      localCS->SetRefObject(j2000Body, Gmat::SPACE_POINT, j2000Body->GetName());
+      localCS->SetSolarSystem(solarSystem);
+      localCS->Initialize();
+      
+      #ifdef DEBUG_CS_CREATE
+      MessageInterface::ShowMessage
+         ("   Local CS %s<%p> created with AxisSystem <%p>:\n"
+          "      axesType    = '%s'\n      Origin      = <%p>'%s'\n"
+          "      Primary     = <%p>'%s'\n      Secondary   = <%p>'%s'\n"
+          "      j2000body   = <%p>'%s'\n", csName.c_str(), localCS, theAxes, axesType.c_str(),
+          localCS->GetOrigin(), localCS->GetOriginName().c_str(), localCS->GetPrimaryObject(),
+          localCS->GetPrimaryObject() ? localCS->GetPrimaryObject()->GetName().c_str() : "NULL",
+          localCS->GetSecondaryObject(),
+          localCS->GetSecondaryObject() ? localCS->GetSecondaryObject()->GetName().c_str() : "NULL",
+          localCS->GetJ2000Body(),
+          localCS->GetJ2000Body() ? localCS->GetJ2000Body()->GetName().c_str() : "NULL");
+      #endif
+      
+      // Since CoordinateSystem clones AxisSystem, delete it from here
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (theAxes, "theAxes", "CoordinateSystem::CreateLocalCoordinateSystem()",
+          "deleting theAxes");
+      #endif
+      delete theAxes;
+      return localCS;
+   }
+   // these are needed at least by the Measurement code
+   else if ((axesType == "MJ2000Eq") || (axesType == "Topocentric") ||
+            (axesType == "BodyFixed" ))
+   {
+      localCS = new CoordinateSystem("CoordinateSystem",csName);
+      if (axesType == "MJ2000Eq")
+         theAxes = new MJ2000EqAxes(csName);
+      else if (axesType == "Topocentric")
+         theAxes = new TopocentricAxes(csName);
+      else
+         theAxes = new BodyFixedAxes(csName);
+      
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (localCS, "localCS", "CreateLocalCoordinateSystem()",
+          "new CoordinateSystem()");
+      MemoryTracker::Instance()->Add
+         (theAxes, "theAxes", "CreateLocalCoordinateSystem()",
+          "new ObjectReferencedAxes()");
+      #endif
+      
+      GmatGlobal *gmatGlobal = GmatGlobal::Instance();
+      
+      #ifdef DEBUG_CS_CREATE
+      MessageInterface::ShowMessage
+         ("   eop=<%p>, itrf=<%p>\n", gmatGlobal->GetEopFile(),
+          gmatGlobal->GetItrfCoefficientsFile());
+      #endif
+      
+      if (theAxes->UsesEopFile() == GmatCoordinate::REQUIRED)
+         theAxes->SetEopFile(gmatGlobal->GetEopFile());
+      
+      if (theAxes->UsesItrfFile() == GmatCoordinate::REQUIRED)
+         theAxes->SetCoefficientsFile(gmatGlobal->GetItrfCoefficientsFile());
+      
+      localCS->SetStringParameter("Origin", origin->GetName());
+      localCS->SetRefObject(origin, Gmat::SPACE_POINT, origin->GetName());
+      localCS->SetRefObject(theAxes, Gmat::AXIS_SYSTEM, theAxes->GetName());
+      localCS->SetRefObject(j2000Body, Gmat::SPACE_POINT, j2000Body->GetName());
+      localCS->SetSolarSystem(solarSystem);
+      localCS->Initialize();
+      
+      #ifdef DEBUG_CS_CREATE
+      MessageInterface::ShowMessage
+         ("   Local CS %s<%p> created with AxisSystem <%p>:\n"
+          "      axesType    = '%s'\n      Origin      = <%p>'%s'\n"
+          "      Primary     = <%p>'%s'\n      Secondary   = <%p>'%s'\n"
+          "      j2000body   = <%p>'%s'\n", csName.c_str(), localCS, theAxes, axesType.c_str(),
+          localCS->GetOrigin(), localCS->GetOriginName().c_str(), localCS->GetPrimaryObject(),
+          localCS->GetPrimaryObject() ? localCS->GetPrimaryObject()->GetName().c_str() : "NULL",
+          localCS->GetSecondaryObject(),
+          localCS->GetSecondaryObject() ? localCS->GetSecondaryObject()->GetName().c_str() : "NULL",
+          localCS->GetJ2000Body(),
+          localCS->GetJ2000Body() ? localCS->GetJ2000Body()->GetName().c_str() : "NULL");
+      #endif
+      
+      // Since CoordinateSystem clones AxisSystem, delete it from here
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (theAxes, "theAxes", "CoordinateSystem::CreateLocalCoordinateSystem()",
+          "deleting theAxes");
+      #endif
+      delete theAxes;
+      return localCS;
+   }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** CoordinateSystem::CreateLocalCoordinateSystem() cannot "
+          "create CoordinateSystem, axes name \"%s\" is not supported\n", axesType.c_str());
+      return NULL;
+   }
+   
+}
+
+
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //  bool  TranslateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                            Rvector &outState//,SpacePoint *j2000Body)
+//                            Rvector &outState)
 //------------------------------------------------------------------------------
 /**
  * This method translates the input state, in "this" axisSystem to the MJ2000Eq
@@ -1240,7 +1553,6 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @param epoch      epoch for which to do the conversion.
  * @param inState    input state to convert.
  * @param outState   output (converted) state.
- * @param j2000Body  origin of the MJ2000Eq system. // currently set on the object
  *
  * @return true if successful; false if not.
  *
@@ -1248,9 +1560,13 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
                                            const Rvector &inState,
-                                           Rvector &outState) //,
-                                           //SpacePoint *j2000Body)
+                                           Rvector &outState)
 {
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage(
+            "In TranslateToMJ2000Eq, coord. system is %s, origin is %s and j2000Body is %s\n",
+            (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+   #endif
    if (origin == j2000Body)  
       outState = inState;
    else
@@ -1260,20 +1576,69 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
       Rvector6 rif =  origin->GetMJ2000State(epoch) - 
                       (j2000Body->GetMJ2000State(epoch));
       outState = inState + rif;
+      #ifdef DEBUG_TRANSLATION
+         Rvector6 tmpOrigin = origin->GetMJ2000State(epoch);
+         MessageInterface::ShowMessage(
+            "In translation, origin state is %12.17f  %12.17f  %12.17f \n",
+            tmpOrigin[0], tmpOrigin[1], tmpOrigin[2]);
+         MessageInterface::ShowMessage(
+            "                                %12.17f  %12.17f  %12.17f \n",
+            tmpOrigin[3], tmpOrigin[4], tmpOrigin[5]);
+         Rvector6 tmpJ2000 = j2000Body->GetMJ2000State(epoch);
+         MessageInterface::ShowMessage(
+            "In translation, J2000Body state is %12.17f  %12.17f  %12.17f \n",
+            tmpJ2000[0], tmpJ2000[1], tmpJ2000[2]);
+         MessageInterface::ShowMessage(
+            "                                %12.17f  %12.17f  %12.17f \n",
+            tmpJ2000[3], tmpJ2000[4], tmpJ2000[5]);
+         MessageInterface::ShowMessage(
+            "In translation, outState is %12.17f  %12.17f  %12.17f \n",
+            outState[0], outState[1], outState[2]);
+         MessageInterface::ShowMessage(
+            "                            %12.17f  %12.17f  %12.17f \n",
+            outState[3], outState[4], outState[5]);
+      #endif
    }
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool TranslateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
+//                          Real *outState)
+//------------------------------------------------------------------------------
 bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
                                            const Real *inState,
                                            Real *outState)
 {
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage(
+            "In TranslateToMJ2000Eq, coord. system is %s, origin is %s and j2000Body is %s\n",
+            (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+   #endif
+   #ifdef DEBUG_INPUTS_OUTPUTS
+   MessageInterface::ShowMessage
+      ("In CS::TranslateToMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  "
+       "%.17f\n", inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
+   #endif
    if (origin == j2000Body)  
       for (Integer i=0; i<6; i++) outState[i] = inState[i];
    else
    {
-      Rvector6 rif =  origin->GetMJ2000State(epoch) - 
+      #ifdef DEBUG_INPUTS_OUTPUTS
+      Rvector6 originState = origin->GetMJ2000State(epoch);
+      Rvector6 j2000BodyState = j2000Body->GetMJ2000State(epoch);
+      MessageInterface::ShowMessage
+         ("   originState =\n   %s\n", originState.ToString().c_str());
+      MessageInterface::ShowMessage
+         ("   j2000BodyState =\n   %s\n", j2000BodyState.ToString().c_str());
+      #endif
+      
+      Rvector6 rif =  origin->GetMJ2000State(epoch) -
                       (j2000Body->GetMJ2000State(epoch));
+      
+      #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage("   rif = %s\n", rif.ToString().c_str());
+      #endif
       const Real *toRif = rif.GetDataVector();
       for (Integer i=0; i<6; i++)  outState[i] = inState[i] + toRif[i];
    }
@@ -1282,7 +1647,7 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
 
 //------------------------------------------------------------------------------
 //  bool  TranslateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                              Rvector &outState//,SpacePoint *j2000Body)
+//                              Rvector &outState)
 //------------------------------------------------------------------------------
 /**
  * This method translates the input state, in MJ2000Eq axisSystem to 'this'
@@ -1291,7 +1656,6 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
  * @param epoch      epoch for which to do the conversion.
  * @param inState    input state to convert.
  * @param outState   output (converted) state.
- * @param j2000Body  origin of the MJ2000Eq system. // currently set on the object
  *
  * @return true if successful; false if not.
  *
@@ -1299,9 +1663,13 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
 //------------------------------------------------------------------------------
 bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
                                              const Rvector &inState,
-                                             Rvector &outState) //,
-                                             //SpacePoint *j2000Body)
+                                             Rvector &outState)
 {
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage(
+            "In TranslateFromMJ2000Eq, coord. system is %s, origin is %s and j2000Body is %s\n",
+            (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+   #endif
    if (origin == j2000Body)  
       outState = inState;
    else
@@ -1315,11 +1683,19 @@ bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool TranslateFromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
+//                            Real *outState)
+//------------------------------------------------------------------------------
 bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
                                              const Real *inState,
-                                             Real *outState) //,
-                                             //SpacePoint *j2000Body)
+                                             Real *outState)
 {
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage(
+            "In TranslateFromMJ2000Eq, coord. system is %s, origin is %s and j2000Body is %s\n",
+            (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+   #endif
    if (origin == j2000Body)  
       for (Integer i=0; i<6; i++) outState[i] = inState[i];
    else

@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Interpreter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
 // Created: 2003/08/28
@@ -32,7 +36,7 @@ class Spacecraft;
 class Formation;
 class Hardware;
 class Propagator;
-class ForceModel;
+class ODEModel;
 class PropSetup;
 class PhysicalModel;
 class SolarSystem;
@@ -46,6 +50,7 @@ class Burn;
 class Function;
 class Moderator;
 class Validator;
+class Interface;
 
 /**
  * Interpreter is the base class for the GMAT Interpreter subsystem.  
@@ -94,11 +99,16 @@ public:
                                       const std::string &depName = "");
    
    const StringArray& GetListOfObjects(Gmat::ObjectType type);
+   const StringArray& GetListOfObjects(const std::string &typeName);
+   const StringArray& GetListOfViewableSubtypesOf(Gmat::ObjectType type);
+   const StringArray& GetListOfViewableCommands();
+   
    GmatBase* GetConfiguredObject(const std::string &name);
    GmatBase* FindObject(const std::string &name, const std::string &ofType = "");
    GmatBase* CreateObject(const std::string &type, const std::string &name,
-                          Integer manage = 1);
+                          Integer manage = 1, bool createDefault = false);
    
+   void SetConfiguredObjectMap();
    void SetSolarSystemInUse(SolarSystem *ss);
    SolarSystem* GetSolarSystemInUse();
    void SetObjectMap(ObjectMap *objMap, bool forFunction = false);
@@ -110,6 +120,9 @@ public:
    void SetHeaderComment(const std::string &comment){headerComment = comment;}
    void SetFooterComment(const std::string &comment){footerComment = comment;}
    
+   bool IsObjectType(const std::string &type);
+   Gmat::ObjectType GetObjectType(const std::string &type);
+   
    // to check commands
    bool ValidateCommand(GmatCommand *cmd);
    // to check subscriber
@@ -118,6 +131,14 @@ public:
    bool SetForceModelProperty(GmatBase *obj, const std::string &prop,
                               const std::string &value, GmatBase *fromObj);
    
+   bool SetMeasurementModelProperty(GmatBase *obj, const std::string &prop,
+                              const std::string &value);
+   bool SetTrackingDataProperty(GmatBase *obj, const std::string &prop,
+                              const std::string &value);
+   bool SetTrackingSystemProperty(GmatBase *obj, const std::string &prop,
+                              const std::string &value);
+   bool SetDataStreamProperty(GmatBase *obj, const std::string &property,
+                              const std::string &value);
    bool FindOwnedObject(GmatBase *owner, const std::string toProp,
                         GmatBase **ownedObj, Integer &id, Gmat::ParameterType &type);
    
@@ -125,13 +146,18 @@ public:
                        Integer &id, Gmat::ParameterType &type);
    
    void BuildCreatableObjectMaps();
-   StringArray GetCreatableList(Gmat::ObjectType type, Integer subType = 0);
-
+   StringArray GetCreatableList(Gmat::ObjectType type,
+                                const std::string subType = "");
+   
    virtual void SetInputFocus();
    virtual void NotifyRunCompleted();
    virtual void UpdateView(Integer type = 7);
    virtual void CloseCurrentProject();
-   virtual void StartServer();
+   virtual void StartMatlabServer();
+   
+   Interface* GetMatlabInterface();
+   bool OpenMatlabEngine();
+   bool CloseMatlabEngine();   
    
 protected:
    
@@ -153,6 +179,7 @@ protected:
    bool         initialized;
    bool         parsingDelayedBlock;
    bool         ignoreError;
+   bool         inScriptEvent;
    
    /// For handling GmatFunction
    bool         inFunctionMode;
@@ -212,37 +239,37 @@ protected:
    GmatBase* MakeAssignment(const std::string &lhs, const std::string &rhs);
    
    // for setting whole object
-   bool SetObjectToObject(GmatBase *toObj, GmatBase *fromObj);
-   bool SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
+   bool SetObjectToObject(GmatBase *toObj, GmatBase *fromObj, const std::string &rhs);
+   bool SetObjectToProperty(GmatBase *toObj, GmatBase *fromOwner,
                             const std::string &fromProp);
-   bool SetArrayToObject(GmatBase *toObj, const std::string &fromArray);
-   bool SetValueToObject(GmatBase *toObj, const std::string &value);
+   bool SetObjectToArray(GmatBase *toObj, const std::string &fromArray);
+   bool SetObjectToValue(GmatBase *toObj, const std::string &value);
    
    // for setting property
-   bool SetObjectToProperty(GmatBase *toOwner, const std::string &toProp,
+   bool SetPropertyToObject(GmatBase *toOwner, const std::string &toProp,
                             GmatBase *fromObj);
    bool SetPropertyToProperty(GmatBase *toOwner, const std::string &toProp,
                               GmatBase *fromOwner, const std::string &fromProp);
-   bool SetArrayToProperty(GmatBase *toOwner, const std::string &toProp,
+   bool SetPropertyToArray(GmatBase *toOwner, const std::string &toProp,
                            const std::string &fromArray);
-   bool SetValueToProperty(GmatBase *toOwner, const std::string &toProp,
+   bool SetPropertyToValue(GmatBase *toOwner, const std::string &toProp,
                            const std::string &value);
    
    // for setting array
-   bool SetObjectToArray(GmatBase *toArrObj, const std::string &toArray,
+   bool SetArrayToObject(GmatBase *toArrObj, const std::string &toArray,
                          GmatBase *fromObj);
-   bool SetPropertyToArray(GmatBase *toArrObj, const std::string &toArray,
+   bool SetArrayToProperty(GmatBase *toArrObj, const std::string &toArray,
                            GmatBase *fromOwner, const std::string &fromProp);
    bool SetArrayToArray(GmatBase *toArrObj, const std::string &toArray,
                         GmatBase *fromArrObj, const std::string &fromArray);
-   bool SetValueToArray(GmatBase *toArrObj, const std::string &toArray,
+   bool SetArrayToValue(GmatBase *toArrObj, const std::string &toArray,
                         const std::string &value);
    
    // for setting/getting property value
    bool SetPropertyValue(GmatBase *obj, const Integer id,
                          const Gmat::ParameterType type,
                          const std::string &value,
-                         const Integer index = -1);
+                         const Integer index = -1, const Integer colIndex = -1);
    bool SetPropertyObjectValue(GmatBase *obj, const Integer id,
                                const Gmat::ParameterType type,
                                const std::string &value,
@@ -280,6 +307,11 @@ protected:
    bool CheckBranchCommands(const IntegerArray &lineNumbers,
                             const StringArray &lines);
    
+   // for setting object inside branch command
+   void SetObjectInBranchCommand(GmatCommand *brCmd, const std::string &branchType,
+                                 const std::string &childType,
+                                 const std::string &objName);
+   
    // Final setting of reference object pointers needed by the GUI
    bool FinalPass();
    
@@ -293,6 +325,10 @@ protected:
    bool BuildFunctionDefinition(const std::string &str);
    void ClearTempObjectNames();
    
+   bool ValidateMcsCommands(GmatCommand *first, GmatCommand *parent = NULL,
+         StringArray *missingObjects = NULL, std::string
+         *accumulatedErrors = NULL);
+
 private:
       
    StringArray   commandList;
@@ -301,16 +337,28 @@ private:
    StringArray   axisSystemList;
    StringArray   burnList;
    StringArray   calculatedPointList;
+   StringArray   dataFileList;
+   StringArray   ephemFileList;
    StringArray   functionList;
    StringArray   hardwareList;
+   StringArray   measurementList;
+   StringArray   trackingSystemList;
+   StringArray   obtypeList;
+   StringArray   odeModelList;
    StringArray   parameterList;
    StringArray   physicalModelList;
    StringArray   propagatorList;
    StringArray   solverList;
    StringArray   stopcondList;
    StringArray   subscriberList;
+   StringArray   spacePointList;
+   StringArray   celestialBodyList;
    
-   bool IsObjectType(const std::string &type);
+   StringArray   matlabFunctionNames;
+   
+   static StringArray   allObjectTypeList;
+   static StringArray   viewableCommandList;
+   static std::map<std::string, Gmat::ObjectType> objectTypeMap;
    bool IsParameterType(const std::string &desc);
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);

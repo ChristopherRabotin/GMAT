@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              LeapSecsFileReader
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Allison R. Greene
 // Created: 2005/01/26
@@ -15,13 +17,14 @@
  *
  * File found at : ftp://maia.usno.navy.mil/ser7/tai-utc.dat
  *
- * @note The MJD-JD offset used is 2400000.5
+ * @note The MJD-JD offset used is GmatTimeConstants::JD_NOV_17_1858
  */
 //------------------------------------------------------------------------------
 
 #include "LeapSecsFileReader.hpp"
 #include "MessageInterface.hpp"
 #include "StringTokenizer.hpp"
+#include "GmatConstants.hpp"
 #include "UtilityException.hpp"
 
 #include <fstream>
@@ -29,7 +32,8 @@
 #include <sstream>
 #include <iomanip>
 
-using namespace std;
+#include <cstdlib>			// Required for GCC 4.3
+
 
 //---------------------------------
 // static data
@@ -111,8 +115,8 @@ bool LeapSecsFileReader::Initialize()
 //------------------------------------------------------------------------------
 /**
  * Parses each line to add leap second information to the table
- * 
- * Format of the line is: 
+ *
+ * Format of the line is:
  *       YYYY MMM  D =JD jDate  TAI-UTC= off1 S + (MJD - off2) X off3 S
  * @return true if the file parses successfully
  */
@@ -121,17 +125,17 @@ bool LeapSecsFileReader::Parse(std::string line)
 {
 //   MessageInterface::ShowMessage("LeapSecsFileReader::Parse()\n");
    Real jDate, off1, off2, off3;
-    
+
    StringTokenizer stringToken(line," ");
    Integer count = stringToken.CountTokens();
-   
+
    if (count == 15)
    {
       jDate = atof(stringToken.GetToken(4).c_str());
       off1 = atof(stringToken.GetToken(6).c_str());
       off2 = atof(stringToken.GetToken(11).c_str());
       off3 = atof(stringToken.GetToken(13).c_str());
-   
+
       LeapSecondInformation leapSecInfo = {jDate, off1, off2, off3};
       lookUpTable.push_back(leapSecInfo);
       return true;
@@ -147,7 +151,7 @@ bool LeapSecsFileReader::Parse(std::string line)
 /**
  * Converts utcmjd to utcjd and then looks it up from the table.  If file is not
  * read, 0 is returned.
- * 
+ *
  * @return number of leap seconds
  * @note Assumes that JD from table is utcjd.
  */
@@ -156,7 +160,7 @@ Real LeapSecsFileReader::NumberOfLeapSecondsFrom(UtcMjd utcMjd)
 {
    if (isInitialized)
    {
-      Real jd = utcMjd + GmatTimeUtil::JD_MJD_OFFSET;
+      Real jd = utcMjd + GmatTimeConstants::JD_MJD_OFFSET;
 
       // look up each entry in the table to see if value is greater then the
       // julian date

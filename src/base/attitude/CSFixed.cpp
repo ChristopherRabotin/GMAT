@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               CSFixed
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan/GSFC
 // Created: 2006.03.24
@@ -148,7 +152,7 @@ GmatBase* CSFixed::Clone(void) const
 //------------------------------------------------------------------------------
 void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 {
-   //if (!isInitialized)  Initialize();
+   if (isInitialized && needsReinit)  Initialize();
    #ifdef DEBUG_CSFIXED
    MessageInterface::ShowMessage(
    "Entering CSFixed::Compute ... angVel = %.12f %.12f %.12f\n",

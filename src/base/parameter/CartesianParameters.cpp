@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            File: CartesianParameters.cpp
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,10 +22,11 @@
 
 #include "CartesianParameters.hpp"
 #include "ColorTypes.hpp"
-#include "OrbitTypes.hpp"
 
 //#define DEBUG_CARTESIAN_PARAM 1
 
+// To use preset colors, uncomment this line:
+//#define USE_PREDEFINED_COLORS
 
 //==============================================================================
 //                              CartX
@@ -48,7 +51,9 @@ CartX::CartX(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
 }
 
 
@@ -114,10 +119,25 @@ bool CartX::Evaluate()
 {
    mRealValue = OrbitData::GetCartReal(PX);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CartX::SetReal(Real val)
+{
+   OrbitData::SetReal(PX, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -161,7 +181,9 @@ CartY::CartY(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::GREEN32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::GREEN32;
+   #endif
 }
 
 
@@ -227,10 +249,25 @@ bool CartY::Evaluate()
 {
    mRealValue = OrbitData::GetCartReal(PY);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CartY::SetReal(Real val)
+{
+   OrbitData::SetReal(PY, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -274,7 +311,9 @@ CartZ::CartZ(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
 }
 
 
@@ -339,10 +378,25 @@ bool CartZ::Evaluate()
 {
    mRealValue = OrbitData::GetCartReal(PZ);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CartZ::SetReal(Real val)
+{
+   OrbitData::SetReal(PZ, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -386,7 +440,9 @@ CartVx::CartVx(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
 }
 
 
@@ -452,10 +508,25 @@ bool CartVx::Evaluate()
 {
    mRealValue = OrbitData::GetCartReal(VX);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CartVx::SetReal(Real val)
+{
+   OrbitData::SetReal(VX, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -499,7 +570,9 @@ CartVy::CartVy(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::GREEN32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::GREEN32;
+   #endif
 }
 
 
@@ -565,10 +638,25 @@ bool CartVy::Evaluate()
 {
    mRealValue = OrbitData::GetCartReal(VY);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CartVy::SetReal(Real val)
+{
+   OrbitData::SetReal(VY, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -612,7 +700,9 @@ CartVz::CartVz(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
 }
 
 
@@ -678,10 +768,25 @@ bool CartVz::Evaluate()
 {
    mRealValue = OrbitData::GetCartReal(VZ);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CartVz::SetReal(Real val)
+{
+   OrbitData::SetReal(VZ, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -801,7 +906,22 @@ bool CartState::Evaluate()
        mRvec6Value.ToString().c_str());
    #endif
    
-   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetRvector6(const Rvector6 &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CartState::SetRvector6(const Rvector6 &val)
+{
+   OrbitData::SetRvector6(val);
+   Rvec6Var::SetRvector6(val);
 }
 
 

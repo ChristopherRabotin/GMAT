@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                ParameterInfo
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,7 +22,7 @@
 #include "ParameterInfo.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_PARAM_INFO 1
+//#define DEBUG_PARAM_INFO
 
 //---------------------------------
 // static data
@@ -195,33 +197,60 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
                         const std::string &name, GmatParam::DepObject depType,
                         bool isPlottable, bool isReportable, bool isSettable)
 {
+   #ifdef DEBUG_PARAM_INFO
+   MessageInterface::ShowMessage
+      ("ParameterInfo::Add() entered, type='%s', objectType=%d\n   name='%s', "
+       "depType=%d, isPlottable=%d, isReportable=%d, isSettable=%d\n", type.c_str(),
+       objectType, name.c_str(), depType, isPlottable, isReportable, isSettable);
+   #endif
+   
+   // Check for dot first
+   std::string::size_type pos = name.find_last_of(".");
+   if (pos == name.npos)
+   {
+      #ifdef DEBUG_PARAM_INFO
+      MessageInterface::ShowMessage
+         ("ParameterInfo::Add() leaving, '%s' was not added, it's not a System Parameter\n",
+          type.c_str());
+      #endif
+      return;
+   }
+   
+   // Check for the same property
+   if (mParamObjectTypeMap.find(type) != mParamObjectTypeMap.end())
+   {
+      #ifdef DEBUG_PARAM_INFO
+      MessageInterface::ShowMessage
+         ("ParameterInfo::Add() leaving, '%s' was not added, it's been already added\n",
+          type.c_str());
+      #endif
+      return;
+   }
+   
    // add property objectType
    mParamObjectTypeMap[type] = objectType;
    
    // add property name
-   std::string::size_type pos = name.find_last_of(".");
    std::string propertyName = name.substr(pos+1, name.npos-pos);
    
    mParamDepObjMap[propertyName] = depType;
-
+   
    // add plottable
    mParamPlottableMap[type] = isPlottable;
-
+   
    // add reportable
    mParamReportableMap[type] = isReportable;
-
+   
    // add settable
    mParamSettableMap[type] = isSettable;
    
-   #if DEBUG_PARAM_INFO
-   MessageInterface::ShowMessage
-      ("ParameterInfo::Add() propertyName:%s with objectType=%d, depType:%d\n"
-       "isPlottable=%d, isReportable=%d, isSettable=%d\n",
-       propertyName.c_str(), objectType, depType, isPlottable, isReportable,
-       isSettable);
-   #endif
-   
    mNumParams = mParamDepObjMap.size();
+   
+   #ifdef DEBUG_PARAM_INFO
+   MessageInterface::ShowMessage
+      ("ParameterInfo::Add() leaving, propertyName:'%s' was added. There are "
+       "total %d Parameters\n", propertyName.c_str(), mNumParams);
+   #endif
 }
 
 

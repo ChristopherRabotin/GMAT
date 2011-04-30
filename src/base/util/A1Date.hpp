@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  A1Date
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -29,7 +31,7 @@
 
 class UtcDate;
 
-class A1Date : public Date
+class GMAT_API A1Date : public Date
 {
 public:
     A1Date ();
@@ -42,6 +44,8 @@ public:
     A1Date (const std::string &dateString);      // "YYYYMMDD.hhmmssnnn"
     A1Date (const A1Date &a1date);               // copy constructor
     A1Date  operator=  (const A1Date &a1date);
+    bool  operator>  (const A1Date &a1date) const;
+    bool  operator<  (const A1Date &a1date) const;
     ~A1Date ();
 
 //loj: Do this later if we need.

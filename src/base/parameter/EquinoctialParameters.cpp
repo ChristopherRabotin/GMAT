@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
-//                            File: EquinoctialParameters.cpp
+//                            EquinoctialParameters.cpp
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,16 +22,21 @@
 
 #include "EquinoctialParameters.hpp"
 #include "ColorTypes.hpp"
-#include "OrbitTypes.hpp"
 
 //#define DEBUG_CARTESIAN_PARAM 1
+
+
+// To use preset colors, uncomment this line:
+//#define USE_PREDEFINED_COLORS
 
 EquinSma::EquinSma(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Sma", obj, "Equinoctial Sma", "?", GmatParam::COORD_SYS, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
 }
 
 EquinSma::EquinSma(const EquinSma &copy)
@@ -54,7 +61,7 @@ bool EquinSma::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinSma");
    mRealValue = OrbitData::GetEquinReal(SMA);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -72,7 +79,9 @@ EquinEy::EquinEy(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::GREEN32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::GREEN32;
+   #endif
 }
 
 EquinEy::EquinEy(const EquinEy&copy)
@@ -97,7 +106,7 @@ bool EquinEy::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinEy");
    mRealValue = OrbitData::GetEquinReal(EY);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -115,7 +124,9 @@ EquinEx::EquinEx(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
 }
 
 EquinEx::EquinEx(const EquinEx &copy)
@@ -140,7 +151,7 @@ bool EquinEx::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinEx");
    mRealValue = OrbitData::GetEquinReal(EX);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -158,7 +169,9 @@ EquinNy::EquinNy(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::YELLOW32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::YELLOW32;
+   #endif
 }
 
 EquinNy::EquinNy(const EquinNy &copy)
@@ -183,7 +196,7 @@ bool EquinNy::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinNy");
    mRealValue = OrbitData::GetEquinReal(NY);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -201,7 +214,9 @@ EquinNx::EquinNx(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::GREEN32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::GREEN32;
+   #endif
 }
 
 EquinNx::EquinNx(const EquinNx &copy)
@@ -226,7 +241,7 @@ bool EquinNx::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinNx");
    mRealValue = OrbitData::GetEquinReal(NX);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -244,7 +259,9 @@ EquinMlong::EquinMlong(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
 }
 
 EquinMlong::EquinMlong(const EquinMlong &copy)
@@ -269,7 +286,7 @@ bool EquinMlong::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinMlong");
    mRealValue = OrbitData::GetEquinReal(MLONG);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -323,7 +340,7 @@ bool EquinState::Evaluate()
        mRvec6Value.ToString().c_str());
    #endif
    
-   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
 }
 
 

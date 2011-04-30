@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Parameter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -37,9 +39,10 @@ Parameter::PARAMETER_KEY_STRING[GmatParam::KeyCount] =
 };
 
 const std::string
-Parameter::PARAMETER_TEXT[ParameterParamCount] =
+Parameter::PARAMETER_TEXT[ParameterParamCount - GmatBaseParamCount] =
 {
    "Object",
+   "InitialValue",
    "Expression",
    "Description",
    "Unit",
@@ -48,9 +51,10 @@ Parameter::PARAMETER_TEXT[ParameterParamCount] =
 };
 
 const Gmat::ParameterType
-Parameter::PARAMETER_TYPE[ParameterParamCount] =
+Parameter::PARAMETER_TYPE[ParameterParamCount - GmatBaseParamCount] =
 {
    Gmat::OBJECT_TYPE,          //"Object",
+   Gmat::STRING_TYPE,          //"InitialValue"
    Gmat::STRING_TYPE,          //"Expression",
    Gmat::STRING_TYPE,          //"Description",
    Gmat::STRING_TYPE,          //"Unit",
@@ -129,13 +133,15 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    
    mExpr = "";
    mUnit = unit;
+   mOwnerName = "";
    mDepObjectName = "";
    mCommentLine2 = "";
+   mInitialValue = "";
    mIsCommentFromCreate = true;
    mOwnerType = ownerType;
    mDepObj = depObj;
+   mCycleType = GmatParam::NOT_CYCLIC;
    mColor = 0; // black
-   
    mNeedCoordSystem = false;
    mIsCoordSysDependent = false;
    mIsOriginDependent = false;
@@ -145,6 +151,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    else if (depObj == GmatParam::ORIGIN)
       mIsOriginDependent = true;
    
+   mIsAngleParam = false;
    mIsTimeParam = isTimeParam;
    mIsSettable = isSettable;
    mIsPlottable = isPlottable;
@@ -176,13 +183,17 @@ Parameter::Parameter(const Parameter &copy)
    mExpr = copy.mExpr;
    mDesc = copy.mDesc;
    mUnit = copy.mUnit;
+   mOwnerName = copy.mOwnerName;
    mDepObjectName = copy.mDepObjectName;
    mCommentLine2 = copy.mCommentLine2;
+   mInitialValue = copy.mInitialValue;
    mIsCommentFromCreate = copy.mIsCommentFromCreate;
    mOwnerType = copy.mOwnerType;
    mReturnType = copy.mReturnType;
    mDepObj = copy.mDepObj;
+   mCycleType = copy.mCycleType;
    mColor = copy.mColor;
+   mIsAngleParam = copy.mIsAngleParam;
    mIsTimeParam = copy.mIsTimeParam;
    mIsSettable = copy.mIsSettable;
    mIsPlottable = copy.mIsPlottable;
@@ -218,11 +229,14 @@ Parameter& Parameter::operator= (const Parameter& right)
    mUnit = right.mUnit;
    mDepObjectName = right.mDepObjectName;
    mCommentLine2 = right.mCommentLine2;
+   mInitialValue = right.mInitialValue;
    mIsCommentFromCreate = right.mIsCommentFromCreate;
    mOwnerType = right.mOwnerType;
    mReturnType = right.mReturnType;
    mDepObj = right.mDepObj;
+   mCycleType = right.mCycleType;
    mColor = right.mColor;
+   mIsAngleParam = right.mIsAngleParam;
    mIsTimeParam = right.mIsTimeParam;
    mIsSettable = right.mIsSettable;
    mIsPlottable = right.mIsPlottable;
@@ -281,6 +295,32 @@ Gmat::ObjectType Parameter::GetOwnerType() const
 Gmat::ParameterType Parameter::GetReturnType() const
 {
    return mReturnType;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatParam::CycleType GetCycleType() const
+//------------------------------------------------------------------------------
+/**
+ * @return enumeration value of return parameter type.
+ */
+//------------------------------------------------------------------------------
+GmatParam::CycleType  Parameter::GetCycleType() const
+{
+   return mCycleType;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsAngleParameter() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter outputs angle value
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsAngleParameter() const
+{
+   return mIsAngleParam;
 }
 
 
@@ -452,7 +492,7 @@ Real Parameter::GetReal() const
 
 
 //------------------------------------------------------------------------------
-// Rvector6 GetRvector6() const
+// const Rvector6& GetRvector6() const
 //------------------------------------------------------------------------------
 /**
  * @return parameter value without evaluating.
@@ -460,7 +500,7 @@ Real Parameter::GetReal() const
  * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
-Rvector6 Parameter::GetRvector6() const
+const Rvector6& Parameter::GetRvector6() const
 {
    throw ParameterException
       ("Parameter: GetRvector6(): " + this->GetTypeName() + " has no "
@@ -470,7 +510,43 @@ Rvector6 Parameter::GetRvector6() const
 
 
 //------------------------------------------------------------------------------
-// Rmatrix GetRmatrix() const
+// const Rmatrix66& GetRmatrix66() const
+//------------------------------------------------------------------------------
+/**
+ * @return parameter value without evaluating.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+const Rmatrix66& Parameter::GetRmatrix66() const
+{
+   throw ParameterException
+      ("Parameter: GetRmatrix66(): " + this->GetTypeName() + " has no "
+       "implementation of GetRmatrix66().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
+//------------------------------------------------------------------------------
+// const Rmatrix33& GetRmatrix33() const
+//------------------------------------------------------------------------------
+/**
+ * @return parameter value without evaluating.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+const Rmatrix33& Parameter::GetRmatrix33() const
+{
+   throw ParameterException
+      ("Parameter: GetRmatrix33(): " + this->GetTypeName() + " has no "
+       "implementation of GetRmatrix33().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
+//------------------------------------------------------------------------------
+// const Rmatrix& GetRmatrix() const
 //------------------------------------------------------------------------------
 /**
  * @return parameter value without evaluating.
@@ -488,7 +564,7 @@ const Rmatrix& Parameter::GetRmatrix() const
 
 
 //------------------------------------------------------------------------------
-// std::string GetString() const
+// const std::string& GetString() const
 //------------------------------------------------------------------------------
 /**
  * @return parameter value without evaluating.
@@ -496,7 +572,7 @@ const Rmatrix& Parameter::GetRmatrix() const
  * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
-std::string Parameter::GetString() const
+const std::string& Parameter::GetString() const
 {
    throw ParameterException
       ("Parameter: GetString(): " + this->GetTypeName() + " has no "
@@ -537,6 +613,42 @@ void Parameter::SetRvector6(const Rvector6 &val)
    throw ParameterException
       ("Parameter: SetRvector6(): " + this->GetTypeName() + " has no "
        "implementation of SetRvector6().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
+//------------------------------------------------------------------------------
+// void SetRmatrix66(const Rmatrix66 &mat)
+//------------------------------------------------------------------------------
+/**
+ * Sets Rmatrix66 value of parameter.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetRmatrix66(const Rmatrix66 &mat)
+{
+   throw ParameterException
+      ("Parameter: SetRmatrix66(): " + this->GetTypeName() + " has no "
+       "implementation of SetRmatrix66().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
+//------------------------------------------------------------------------------
+// void SetRmatrix33(const Rmatrix33 &mat)
+//------------------------------------------------------------------------------
+/**
+ * Sets Rmatrix33 value of parameter.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetRmatrix33(const Rmatrix33 &mat)
+{
+   throw ParameterException
+      ("Parameter: SetRmatrix33(): " + this->GetTypeName() + " has no "
+       "implementation of SetRmatrix33().\nMay be an invalid call to this "
        "function.\n");
 }
 
@@ -596,7 +708,7 @@ Real Parameter::EvaluateReal()
 
 
 //------------------------------------------------------------------------------
-// Rvector6 EvaluateRvector6()
+// const Rvector6& EvaluateRvector6()
 //------------------------------------------------------------------------------
 /**
  * @return newly evaluated parameter value.
@@ -604,7 +716,7 @@ Real Parameter::EvaluateReal()
  * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
-Rvector6 Parameter::EvaluateRvector6()
+const Rvector6& Parameter::EvaluateRvector6()
 {
    throw ParameterException
       ("Parameter: EvaluateRvector6(): " + this->GetTypeName() + " has no "
@@ -614,7 +726,7 @@ Rvector6 Parameter::EvaluateRvector6()
 
 
 //------------------------------------------------------------------------------
-// Rmatrix EvaluateRmatrix()
+// const Rmatrix66& EvaluateRmatrix66()
 //------------------------------------------------------------------------------
 /**
  * @return newly evaluated parameter value.
@@ -622,7 +734,43 @@ Rvector6 Parameter::EvaluateRvector6()
  * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
-Rmatrix Parameter::EvaluateRmatrix()
+const Rmatrix66& Parameter::EvaluateRmatrix66()
+{
+   throw ParameterException
+      ("Parameter: EvaluateRmatrix66(): " + this->GetTypeName() + " has no "
+       "implementation of EvaluateRmatrix66().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
+//------------------------------------------------------------------------------
+// const Rmatrix33& EvaluateRmatrix33()
+//------------------------------------------------------------------------------
+/**
+ * @return newly evaluated parameter value.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+const Rmatrix33& Parameter::EvaluateRmatrix33()
+{
+   throw ParameterException
+      ("Parameter: EvaluateRmatrix33(): " + this->GetTypeName() + " has no "
+       "implementation of EvaluateRmatrix33().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+
+//------------------------------------------------------------------------------
+// const Rmatrix& EvaluateRmatrix()
+//------------------------------------------------------------------------------
+/**
+ * @return newly evaluated parameter value.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+const Rmatrix& Parameter::EvaluateRmatrix()
 {
    throw ParameterException
       ("Parameter: EvaluateRmatrix(): " + this->GetTypeName() + " has no "
@@ -632,7 +780,7 @@ Rmatrix Parameter::EvaluateRmatrix()
 
 
 //------------------------------------------------------------------------------
-// std::string EvaluateString()
+// const std::string& EvaluateString()
 //------------------------------------------------------------------------------
 /**
  * @return newly evaluated parameter value.
@@ -640,7 +788,7 @@ Rmatrix Parameter::EvaluateRmatrix()
  * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
-std::string Parameter::EvaluateString()
+const std::string& Parameter::EvaluateString()
 {
    throw ParameterException
       ("Parameter: EvaluateString(): " + this->GetTypeName() + " has no "
@@ -860,7 +1008,7 @@ std::string Parameter::GetParameterTypeString(const Integer id) const
 bool Parameter::IsParameterReadOnly(const Integer id) const
 {
    if ((id == DESCRIPTION) || (id == UNIT) || (id == DEP_OBJECT) ||
-       (id == COLOR) || (id == EXPRESSION))
+       (id == COLOR) || (id == EXPRESSION) || id == INITIAL_VALUE)
       return true;
    
    return GmatBase::IsParameterReadOnly(id);
@@ -940,6 +1088,8 @@ std::string Parameter::GetStringParameter(const Integer id) const
          return GetRefObjectName(mOwnerType);
       else
          return "";
+   case INITIAL_VALUE:
+      return mInitialValue;
    case EXPRESSION:
       return mExpr;
    case DESCRIPTION:
@@ -968,7 +1118,7 @@ std::string Parameter::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 {
-   #ifdef DEBUG_PARAMETER
+   #ifdef DEBUG_SET_STRING
    MessageInterface::ShowMessage("Parameter::SetStringParameter() id=%d, value=%s\n",
                                  id, value.c_str());
    #endif
@@ -977,6 +1127,12 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
    {
    case OBJECT:
       return SetRefObjectName(mOwnerType, value);
+   case INITIAL_VALUE:
+      #ifdef DEBUG_SET_STRING
+      MessageInterface::ShowMessage("   InitialValue = '%s'\n", value.c_str());
+      #endif
+      mInitialValue = value;
+      return true;
    case EXPRESSION:
       mExpr = value;
       return true;

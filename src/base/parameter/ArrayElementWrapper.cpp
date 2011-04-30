@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ArrayElementWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -18,6 +20,7 @@
  */
 //------------------------------------------------------------------------------
 
+#include <sstream>
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "ArrayElementWrapper.hpp"
@@ -25,10 +28,17 @@
 #include "RealUtilities.hpp"
 #include "StringUtil.hpp"
 #include "UtilityException.hpp"
-
 #include "MessageInterface.hpp"
 
 //#define DEBUG_AE_WRAPPER
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -57,7 +67,7 @@ ArrayElementWrapper::ArrayElementWrapper() :
    rowName       (""),
    columnName    ("")
 {
-   wrapperType = Gmat::ARRAY_ELEMENT;
+   wrapperType = Gmat::ARRAY_ELEMENT_WT;
 }
 
 //---------------------------------------------------------------------------
@@ -109,6 +119,7 @@ const ArrayElementWrapper& ArrayElementWrapper::operator=(
 
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~ArrayElementWrapper()
 //---------------------------------------------------------------------------
@@ -118,8 +129,25 @@ const ArrayElementWrapper& ArrayElementWrapper::operator=(
 //---------------------------------------------------------------------------
 ArrayElementWrapper::~ArrayElementWrapper()
 {
-   if (row)    delete row;
-   if (column) delete column;
+   if (row)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (row, row->GetDescription(), "ArrayElementWrapper::~ArrayElementWrapper()",
+          "deleting row");
+      #endif
+      delete row;
+   }
+   
+   if (column)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (column, column->GetDescription(), "ArrayElementWrapper::~ArrayElementWrapper()",
+          "deleting column");
+      #endif
+      delete column;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -175,6 +203,23 @@ const StringArray& ArrayElementWrapper::GetRefObjectNames()
    #endif
    
    return refObjectNames;
+}
+
+//------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * This method retrives a reference object for the wrapper name
+ * 
+ * @param <name> name of the wrapper
+ *
+ * @return reference for success; NULL if name not found
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ArrayElementWrapper::GetRefObject(const std::string &name)
+{
+   return array;
 }
 
 //---------------------------------------------------------------------------
@@ -344,49 +389,70 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
    Integer rowInt    = -99;
    Integer columnInt = -99;
 
+   // get the row value
+   Real rowVal        = row->EvaluateReal();
+   Real rowNearestInt = GmatMathUtil::NearestInt(rowVal);
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage(
+         "AEWrapper::SetReal(%s) - rowVal and rowNearestInt evaluate to %d and %d\n",
+         arrayName.c_str(), (Integer) rowVal, (Integer) rowNearestInt);
+   #endif
+   if (rowNearestInt == 0)
+   {
+      std::string errmsg = "Cannot evaluate ArrayElement - ";
+      errmsg += "row Element evaluates to zero\n";
+      throw ParameterException(errmsg);
+   }
+   if ((GmatMathUtil::Mod(rowVal, rowNearestInt) != 0.0))
+   {
+      std::string errmsg = "Cannot evaluate ArrayElement - ";
+      errmsg += "row Element evaluates to a non-Integer value\n";
+      throw ParameterException(errmsg);
+   }
+   rowInt = (Integer) rowNearestInt - 1;
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage(
+         "AEWrapper::SetReal(%s) - and then rowInt evaluates to %d\n",
+         arrayName.c_str(),(Integer) rowInt);
+   #endif
+   // get the column value
+   Real colVal        = column->EvaluateReal();
+   Real colNearestInt = GmatMathUtil::NearestInt(colVal);
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage(
+         "AEWrapper::SetReal(%s) - colVal and colNearestInt evaluate to %d and %dn",
+         arrayName.c_str(), (Integer) colVal, (Integer) colNearestInt);
+   #endif
+   if (colNearestInt == 0)
+   {
+      std::string errmsg = "Cannot evaluate ArrayElement - ";
+      errmsg += "column Element evaluates to zero\n";
+      throw ParameterException(errmsg);
+   }
+   if ((GmatMathUtil::Mod(colVal, colNearestInt) != 0.0))
+   {
+      std::string errmsg = "Cannot evaluate ArrayElement - ";
+      errmsg += "column Element evaluates to a non-Integer value\n";
+      throw ParameterException(errmsg);
+   }
+   columnInt = (Integer) colNearestInt - 1;
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage(
+         "AEWrapper::SetReal(%s) - and then columnInt evaluates to %d\n",
+         arrayName.c_str(),(Integer) columnInt);
+   #endif
    try
    {
-      // get the row value
-      Real rowVal        = row->EvaluateReal();
-      Real rowNearestInt = GmatMathUtil::NearestInt(rowVal);
-      #ifdef DEBUG_AE_WRAPPER
-         MessageInterface::ShowMessage(
-            "AEWrapper::SetReal(%s) - row evaluates to %d\n", 
-            arrayName.c_str(),(Integer) rowNearestInt);
-      #endif
-      if ((GmatMathUtil::Mod(rowVal, rowNearestInt) != 0.0))
-      {
-         std::string errmsg = "Cannot evaluate ArrayElement - ";
-         errmsg += "row Element evaluates to a non-Integer value\n";
-         throw ParameterException(errmsg);
-      }
-      rowInt = (Integer) rowNearestInt - 1;
-      // get the column value
-      Real colVal        = column->EvaluateReal();
-      Real colNearestInt = GmatMathUtil::NearestInt(colVal);
-      #ifdef DEBUG_AE_WRAPPER
-         MessageInterface::ShowMessage(
-            "AEWrapper::SetReal(%s) - col evaluates to %d\n", 
-            arrayName.c_str(),(Integer) colNearestInt);
-      #endif
-      if ((GmatMathUtil::Mod(colVal, colNearestInt) != 0.0))
-      {
-         std::string errmsg = "Cannot evaluate ArrayElement - ";
-         errmsg += "column Element evaluates to a non-Integer value\n";
-         throw ParameterException(errmsg);
-      }
-      columnInt = (Integer) colNearestInt - 1;
 
       array->SetRealParameter("SingleValue", toValue, rowInt, columnInt);
    }
    catch (BaseException &be)
    {
-      std::string errmsg = "Cannot set Real value for array " + 
-                            array->GetName(); 
-      errmsg += " with row " + rowInt;
-      errmsg += " and column " + columnInt;
-      errmsg += " - exception thrown: " + be.GetFullMessage();
-      throw ParameterException(errmsg);
+      std::stringstream errmsg("");
+      errmsg << "Cannot set Real value for array " << array->GetName();
+      errmsg << " with row " << rowInt << " and column " << columnInt;
+      errmsg << " - exception thrown: " << be.GetFullMessage() << std::endl;
+      throw ParameterException(errmsg.str());
    }
          
    return true;
@@ -430,7 +496,7 @@ void ArrayElementWrapper::SetupWrapper()
       GmatStringUtil::GetArrayIndexVar(description, rowName, columnName,
                                        arrayName);
    }
-   catch (UtilityException &ue)
+   catch (UtilityException &)
    {
       std::string errmsg = "Unable to set up ArrayElementWrapper \"" +
                            description;
@@ -439,7 +505,7 @@ void ArrayElementWrapper::SetupWrapper()
    }
    #ifdef DEBUG_AE_WRAPPER
       MessageInterface::ShowMessage(
-         "AEWrapper::SetupWrapper for array named %s- \n", arrayName.c_str());
+         "AEWrapper::SetupWrapper for array named '%s' \n", arrayName.c_str());
       MessageInterface::ShowMessage("   description = %s\n", description.c_str());
       MessageInterface::ShowMessage("   rowName     = %s\n", rowName.c_str());
       MessageInterface::ShowMessage("   columnName  = %s\n", columnName.c_str());

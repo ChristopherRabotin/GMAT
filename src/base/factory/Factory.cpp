@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            Factory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -19,6 +21,8 @@
 //------------------------------------------------------------------------------
 #include "Factory.hpp"
 #include "FactoryException.hpp"
+#include "MessageInterface.hpp"
+#include <algorithm>              // for find()
 
 //---------------------------------
 //  public methods
@@ -42,7 +46,8 @@
 GmatBase* Factory::CreateObject(const std::string &ofType,
                                 const std::string &withName)
 {
-   throw FactoryException("Generic factory creation method not implemented");
+   throw FactoryException("Generic factory creation method not implemented for " +
+                          ofType);
 }
 
 //------------------------------------------------------------------------------
@@ -67,6 +72,37 @@ SpaceObject* Factory::CreateSpacecraft(const std::string &ofType,
                                        const std::string &withName)
 {
    throw FactoryException("requested object must be of type SpaceObject");
+}
+
+//------------------------------------------------------------------------------
+//  SpacePoint* CreateSpacePoint(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Must be implemented by derived classes that create SpacePoint objects -
+ * in that case, it returns a new SpacePoint object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type Spacecraft.
+ * 
+ * This method is used to create objects that have a physical location modeled 
+ * in a GMAT mission: GroundStation objects, other objects used for modeling 
+ * contact events, and other fixed or mobile objects that are needed to model
+ * mission details.  Note that the Spacecraft and CelestialBody objects are
+ * created using different Factory methods; this method should be used for 
+ * SpacePoints that fall outside of those categories.
+ *
+ * @param <ofType>   specific type of SpacePoint object to create.
+ * @param <withName> name to give to the newly created SpacePoint object.
+ *
+ * @return pointer to a new SpacePoint object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of type SpacePoint.
+ */
+//------------------------------------------------------------------------------
+SpacePoint* Factory::CreateSpacePoint(const std::string &ofType,
+                                      const std::string &withName)        
+{
+   throw FactoryException("requested object must be of type SpacePoint");
 }
 
 //------------------------------------------------------------------------------
@@ -166,27 +202,27 @@ Parameter* Factory::CreateParameter(const std::string &ofType,
 }
 
 //------------------------------------------------------------------------------
-//  ForceModel* CreateForceModel(const std::string &ofType, const std::string &withName)
+//  ODEModel* CreateODEModel(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * Must be implemented by derived classes that create  ForceModel objects -
- * in that case, it returns a new  ForceModel object.  Otherwise, it
+ * Must be implemented by derived classes that create  ODEModel objects -
+ * in that case, it returns a new  ODEModel object.  Otherwise, it
  * throws an exception indicating that the class does not create objects of
- * type  ForceModel.
+ * type  ODEModel.
  *
- * @param <ofType>   specific type of  ForceModel object to create.
- * @param <withName> name to give to the newly created  ForceModel object.
+ * @param <ofType>   specific type of  ODEModel object to create.
+ * @param <withName> name to give to the newly created  ODEModel object.
  *
- * @return pointer to a new  ForceModel object.
+ * @return pointer to a new  ODEModel object.
  *
  * @exception <FactoryException> thrown if the factory does not create
- * objects of type  ForceModel.
+ * objects of type  ODEModel.
  */
 //------------------------------------------------------------------------------
-ForceModel* Factory::CreateForceModel(const std::string &ofType,
+ODEModel* Factory::CreateODEModel(const std::string &ofType,
                                       const std::string &withName)
 {
-   throw FactoryException("requested object must be of type ForceModel");
+   throw FactoryException("requested object must be of type ODEModel");
 }
 
 //------------------------------------------------------------------------------
@@ -420,6 +456,31 @@ Subscriber* Factory::CreateSubscriber(const std::string &ofType,
 }
 
 //------------------------------------------------------------------------------
+//  EphemerisFile* CreateEphemerisFile(const std::string &ofType, 
+//                                     const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Must be implemented by derived classes that create  EphemerisFile objects -
+ * in that case, it returns a new  EphemerisFile object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type  EphemerisFile.
+ *
+ * @param <ofType>   specific type of  EphemerisFile object to create.
+ * @param <withName> name to give to the newly created  EphemerisFile object.
+ *
+ * @return pointer to a new  EphemerisFile object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of type  EphemerisFile.
+ */
+//------------------------------------------------------------------------------
+EphemerisFile* Factory::CreateEphemerisFile(const std::string &ofType,
+                                            const std::string &withName)
+{
+   throw FactoryException("requested object must be of type EphemerisFile");
+}
+
+//------------------------------------------------------------------------------
 //  GmatCommand* CreateCommand(const std::string &ofType,
 //                             const std::string &withName)
 //------------------------------------------------------------------------------
@@ -646,7 +707,236 @@ Attitude* Factory::CreateAttitude(const std::string &ofType,
 
 
 //------------------------------------------------------------------------------
-//  StringArray GetListOfCreatableObjects(void) const
+// MeasurementModel *CreateMeasurementModel(const std::string & ofType,
+//    const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a MeasurementModel object.
+ *
+ * Must be implemented by derived classes that create MeasurementModel objects -
+ * in that case, it returns a new MeasurementModel object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type MeasurementModel.
+ *
+ * @param <ofType>   specific type of MeasurementModel object to create.
+ * @param <withName> name to give to the newly created MeasurementModel object.
+ *
+ * @return pointer to a new MeasurementModel object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type MeasurementModel.
+ */
+//------------------------------------------------------------------------------
+MeasurementModel* Factory::CreateMeasurementModel(const std::string & ofType,
+                                         const std::string & withName)
+{
+   throw FactoryException
+   ("Factory::CreateMeasurementModel() must be implemented by a "
+         "MeasurementModelFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// CoreMeasurement* CreateMeasurement(const std::string & ofType,
+//    const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a fundamental measurement object.
+ *
+ * Must be implemented by derived classes that create CoreMeasurement objects -
+ * in that case, it returns a new CoreMeasurement object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type CoreMeasurement.
+ *
+ * @param <ofType>   specific type of CoreMeasurement object to create.
+ * @param <withName> name to give to the newly created CoreMeasurement object.
+ *
+ * @return pointer to a new CoreMeasurement object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type CoreMeasurement.
+ */
+//------------------------------------------------------------------------------
+CoreMeasurement* Factory::CreateMeasurement(const std::string & ofType,
+                                        const std::string & withName)
+{
+   throw FactoryException
+   ("Factory::CreateMeasurement() must be implemented by a MeasurementFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// DataFile* Factory::CreateDataFile(const std::string & ofType,
+//                                   const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a DataFile object.
+ *
+ * Must be implemented by derived classes that create DataFile objects -
+ * in that case, it returns a new DataFile object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type DataFile.
+ *
+ * @param <ofType>   specific type of DataFile object to create.
+ * @param <withName> name to give to the newly created DataFile object.
+ *
+ * @return pointer to a new DataFile object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type DataFile.
+ */
+//------------------------------------------------------------------------------
+DataFile* Factory::CreateDataFile(const std::string & ofType,
+                                  const std::string & withName)
+{
+   throw FactoryException
+      ("Factory::CreateDataFile() must be implemented by a DataFileFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// ObType* CreateObType(const std::string & ofType, const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates an ObType object.
+ *
+ * Must be implemented by derived classes that create ObType objects -
+ * in that case, it returns a new ObType object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type ObType.
+ *
+ * @param <ofType>   specific type of ObType object to create.
+ * @param <withName> name to give to the newly created ObType object.
+ *
+ * @return pointer to a new ObType object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type ObType.
+ */
+//------------------------------------------------------------------------------
+ObType* Factory::CreateObType(const std::string & ofType,
+      const std::string & withName)
+{
+   throw FactoryException
+   ("Factory::CreateObType() must be implemented by an ObTypeFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// Event* CreateEvent(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates an Event object.
+ *
+ * Must be implemented by derived classes that create Event objects -
+ * in that case, it returns a new Event object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type Event.
+ *
+ * @param <ofType>   specific type of Event object to create.
+ * @param <withName> name to give to the newly created Event object.
+ *
+ * @return pointer to a new Event object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type Event.
+ */
+//------------------------------------------------------------------------------
+Event* Factory::CreateEvent(const std::string &ofType, const std::string &withName)
+{
+   throw FactoryException
+         ("Factory::CreateEvent() must be implemented by an EventFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// Interface* CreateInterface(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates an Interface object.
+ *
+ * Must be implemented by derived classes that create Interface objects -
+ * in that case, it returns a new Interface object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type Interface.
+ *
+ * @param <ofType>   specific type of Interface object to create.
+ * @param <withName> name to give to the newly created Interface object.
+ *
+ * @return pointer to a new Interface object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type Interface.
+ */
+//------------------------------------------------------------------------------
+Interface* Factory::CreateInterface(const std::string &ofType, const std::string &withName)
+{
+   throw FactoryException
+         ("Factory::CreateInterface() must be implemented by an InterfaceFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// TrackingSystem* Factory::CreateTrackingSystem(const std::string &ofType,
+//                                         const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a TrackingSystem object.
+ *
+ * Must be implemented by derived classes that create TrackingSystem objects -
+ * in that case, it returns a new TrackingSystem object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type TrackingSystem.
+ *
+ * @param <ofType>   specific type of TrackingSystem object to create.
+ * @param <withName> name to give to the newly created TrackingSystem object.
+ *
+ * @return pointer to a new TrackingSystem object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type TrackingSystem.
+ */
+//------------------------------------------------------------------------------
+TrackingSystem* Factory::CreateTrackingSystem(const std::string &ofType,
+         const std::string &withName)
+{
+   throw FactoryException
+      ("Factory::CreateTrackingSystem() must be implemented by a "
+               "TrackingSystemFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// TrackingData* Factory::CreateTrackingData(const std::string &ofType,
+//                                         const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a TrackingData object.
+ *
+ * Must be implemented by derived classes that create TrackingData objects -
+ * in that case, it returns a new TrackingData object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type TrackingData.
+ *
+ * @param <ofType>   specific type of TrackingData object to create.
+ * @param <withName> name to give to the newly created TrackingData object.
+ *
+ * @return pointer to a new TrackingData object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type TrackingData.
+ */
+//------------------------------------------------------------------------------
+TrackingData* Factory::CreateTrackingData(const std::string &ofType,
+         const std::string &withName)
+{
+   throw FactoryException
+      ("Factory::CreateTrackingData() must be implemented by a "
+               "TrackingDataFactory\n");
+}
+
+//------------------------------------------------------------------------------
+//  StringArray GetListOfCreatableObjects() const
 //------------------------------------------------------------------------------
 /**
 * This method returns the list of creatable objects for the factory.
@@ -655,13 +945,97 @@ Attitude* Factory::CreateAttitude(const std::string &ofType,
  *
  */
 //------------------------------------------------------------------------------
-StringArray Factory::GetListOfCreatableObjects(void) const
+StringArray Factory::GetListOfCreatableObjects() const
 {
    return creatables;
 }
 
+
 //------------------------------------------------------------------------------
-//  bool SetListOfCreatableObjects(void) const
+// bool DoesObjectTypeMatchSubtype(const std::string &theType,
+//       const std::string &theSubtype)
+//------------------------------------------------------------------------------
+/**
+ * Checks if a creatable object type matches a subtype.
+ *
+ * Occasionally GMAT factories will build types that are subtyped at a
+ * granularity finer than is supported in the Gmat::ObjectType enumeration.
+ * This method allows detection of the fine grained subtyping.  An example is
+ * the Solver subsystem, which provides for targeters and related boundary value
+ * solvers, optimizers, estimators, simulators, and parametric scanners.  This
+ * method, when overridden in solver factories, can be used to distinguish these
+ * subtypes.
+ *
+ * @param theType The script identifier for the object type
+ * @param theSubtype The subtype being checked
+ *
+ * @return true if the scripted type and subtype match, false if the type does
+ *         not match the subtype
+ */
+//------------------------------------------------------------------------------
+bool Factory::DoesObjectTypeMatchSubtype(const std::string &theType,
+      const std::string &theSubtype)
+{
+   // Default is to return false, meaning objects are not subtyped
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+//  StringArray GetListOfViewableObjects()
+//------------------------------------------------------------------------------
+/**
+* This method creates and returns the list of viewable objects via GUI.
+ *
+ * @return list of viewable objects of this factory.
+ *
+ */
+//------------------------------------------------------------------------------
+StringArray Factory::GetListOfViewableObjects()
+{
+   #ifdef DEBUG_FACTORY_VIEWABLES
+   MessageInterface::ShowMessage
+      ("Factory::GetListOfViewableObjects() entered, there are %d creatables, %d unviewables, "
+       "%d viewables\n", creatables.size(), unviewables.size(), viewables.size());
+   #endif
+   
+   if (viewables.empty())
+   {
+      // Add all creatable objects types not in the unviewables to viewables
+      StringArray::iterator pos;
+      for (pos = creatables.begin(); pos != creatables.end(); ++pos)
+      {
+         if (find(unviewables.begin(), unviewables.end(), *pos) == unviewables.end())
+            viewables.push_back(*pos);
+      }
+   }
+   
+   #ifdef DEBUG_FACTORY_VIEWABLES
+   MessageInterface::ShowMessage
+      ("Factory::GetListOfViewableObjects() leaving, there are %d creatables, %d unviewables, "
+       "%d viewables\n", creatables.size(), unviewables.size(), viewables.size());
+   #endif
+   
+   return viewables;
+}
+
+//------------------------------------------------------------------------------
+//  StringArray GetListOfUnviewableObjects() const
+//------------------------------------------------------------------------------
+/**
+* This method returns the list of unviewable objects via GUI.
+ *
+ * @return list of unviewable objects of this factory.
+ *
+ */
+//------------------------------------------------------------------------------
+StringArray Factory::GetListOfUnviewableObjects() const
+{
+   return unviewables;
+}
+
+//------------------------------------------------------------------------------
+//  bool SetListOfCreatableObjects(StringArray itsList)
 //------------------------------------------------------------------------------
 /**
 * This method sets the list of creatable objects for the factory.
@@ -798,6 +1172,9 @@ Factory::Factory(const Factory& fact) :
    if (!creatables.empty())
       creatables.clear();
    creatables = fact.creatables;
+   if (!unviewables.empty())
+      unviewables.clear();
+   unviewables = fact.unviewables;
 }
 
 //------------------------------------------------------------------------------

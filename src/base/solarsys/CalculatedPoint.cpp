@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  CalculatedPoint
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan
 // Created: 2005/04/04
@@ -15,11 +19,18 @@
 //------------------------------------------------------------------------------
 
 #include <vector>
+#include <algorithm>              // for find()
 #include "gmatdefs.hpp"
 #include "SpacePoint.hpp"
 #include "CalculatedPoint.hpp"
 #include "SolarSystemException.hpp"
-#include <algorithm>              // for find()
+#include "MessageInterface.hpp"
+#include "StringUtil.hpp"
+
+//#define DEBUG_CP_OBJECT
+//#define DEBUG_CP_BODIES
+//#define DEBUG_CP_SET_STRING
+//#define DEBUG_CP_ACTION
 
 //---------------------------------
 // static data
@@ -36,7 +47,6 @@ CalculatedPoint::PARAMETER_TYPE[CalculatedPointParamCount - SpacePointParamCount
 {
    Gmat::INTEGER_TYPE,
    Gmat::OBJECTARRAY_TYPE,
-//   Gmat::STRINGARRAY_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -77,6 +87,9 @@ numberOfBodies (0)
 CalculatedPoint::CalculatedPoint(const CalculatedPoint &cp) :
 SpacePoint          (cp)
 {
+   bodyNames.clear();
+   bodyList.clear();
+   defaultBodies.clear();
    // copy the list of body pointers
    for (unsigned int i = 0; i < (cp.bodyList).size(); i++)
    {
@@ -88,6 +101,12 @@ SpacePoint          (cp)
       bodyNames.push_back((cp.bodyNames).at(i));
    }
    numberOfBodies = (Integer) bodyList.size();
+
+   // copy the list of default body names
+   for (unsigned int i = 0; i < (cp.defaultBodies).size(); i++)
+   {
+      defaultBodies.push_back((cp.defaultBodies).at(i));
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -110,6 +129,7 @@ CalculatedPoint& CalculatedPoint::operator=(const CalculatedPoint &cp)
    SpacePoint::operator=(cp);
    bodyNames.clear();
    bodyList.clear();
+   defaultBodies.clear();
    // copy the list of body pointers
    for (unsigned int i = 0; i < (cp.bodyList).size(); i++)
    {
@@ -121,6 +141,13 @@ CalculatedPoint& CalculatedPoint::operator=(const CalculatedPoint &cp)
       bodyNames.push_back((cp.bodyNames).at(i));
    }
    numberOfBodies = (Integer) bodyList.size();
+
+   // copy the list of default body names
+   for (unsigned int i = 0; i < (cp.defaultBodies).size(); i++)
+   {
+      defaultBodies.push_back((cp.defaultBodies).at(i));
+   }
+
    return *this;
 }
 
@@ -133,7 +160,9 @@ CalculatedPoint& CalculatedPoint::operator=(const CalculatedPoint &cp)
 //------------------------------------------------------------------------------
 CalculatedPoint::~CalculatedPoint()
 {
-   // nothing to do here ..... hm .. hm .. hm
+   bodyNames.clear();
+   bodyList.clear();
+   defaultBodies.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -317,7 +346,7 @@ std::string CalculatedPoint::GetStringParameter(const Integer id,
       {
          return bodyNames.at(index);
       }
-      catch (const std::exception &oor)
+      catch (const std::exception &)
       {
          throw SolarSystemException("CalculatedPoint error: index out-of-range.");
       }
@@ -387,14 +416,37 @@ std::string CalculatedPoint::GetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 bool CalculatedPoint::SetStringParameter(const Integer id, 
                                          const std::string &value)
-{        
+{
+   #ifdef DEBUG_CP_SET_STRING
+      MessageInterface::ShowMessage("Entering CalculatedPoint::SetString with id = %d (%s), value = %s\n",
+            id, GetParameterText(id).c_str(), value.c_str());
+   #endif
    if (id == BODY_NAMES)
    {
-      if (find(bodyNames.begin(), bodyNames.end(), value) == bodyNames.end())
+      std::string value1 = GmatStringUtil::Trim(value);
+      if (GmatStringUtil::IsEnclosedWithBraces(value1))
       {
-         bodyNames.push_back(value);
+//         bodyNames.clear();
+         TakeAction("ClearBodies");
+         bodyNames = GmatStringUtil::ToStringArray(value1);
+      }
+      else
+      {
+         if (find(bodyNames.begin(), bodyNames.end(), value) == bodyNames.end())
+         {
+            #ifdef DEBUG_CP_OBJECT
+               MessageInterface::ShowMessage("Adding %s to body name list for object %s\n",
+                     value.c_str(), instanceName.c_str());
+            #endif
+            bodyNames.push_back(value);
+         }
       }
       
+      #ifdef DEBUG_CP_SET_STRING
+         MessageInterface::ShowMessage("Exiting CalculatedPoint::SetString: BodyNames are: \n");
+         for (unsigned int ii = 0; ii < bodyNames.size(); ii++)
+            MessageInterface::ShowMessage("   %d     %s\n", (Integer) ii, (bodyNames.at(ii)).c_str());
+      #endif
       return true;
    }
 
@@ -445,13 +497,19 @@ bool  CalculatedPoint::SetStringParameter(const Integer id,
                                           const std::string &value,
                                           const Integer index) 
 {
+   #ifdef DEBUG_CP_SET_STRING
+      MessageInterface::ShowMessage(
+            "Entering CalculatedPoint::SetString with id = %d (%s), index = %d, and value = %s\n",
+            id, GetParameterText(id).c_str(), index, value.c_str());
+   #endif
    if (id == BODY_NAMES)
    {
       if ((index < 0) || (index > (Integer) bodyNames.size()))
          return false;  // throw an exception here?
       if (index == (Integer) bodyNames.size())
       {
-         bodyNames.push_back(value);
+         if (find(bodyNames.begin(), bodyNames.end(), value) == bodyNames.end())
+            bodyNames.push_back(value);
          return true;
       }
       else  // replace current name
@@ -504,7 +562,8 @@ const StringArray& CalculatedPoint::GetStringArrayParameter(const Integer id) co
 {
    if (id == BODY_NAMES)
    {
-      return bodyNames;
+      if (!bodyNames.empty()) return bodyNames;
+      else                    return defaultBodies;
    }
    
    return SpacePoint::GetStringArrayParameter(id);
@@ -548,13 +607,13 @@ GmatBase* CalculatedPoint::GetRefObject(const Gmat::ObjectType type,
                                         const std::string &name,
                                         const Integer index)
 {
-   if (type == Gmat::SPACE_POINT) 
+   if (type == Gmat::SPACE_POINT)
    {
       try
       {
          return bodyList.at(index);
       }
-      catch (const std::exception &oor)
+      catch (const std::exception &)
       {
          throw SolarSystemException(
                "CalculatedPoint error: index out-of-range.");
@@ -584,14 +643,54 @@ bool CalculatedPoint::SetRefObject(GmatBase *obj,
 {
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
-      // first check to see if it's already in the list
+      // check to see if it's already in the list
       std::vector<SpacePoint*>::iterator pos =
          find(bodyList.begin(), bodyList.end(), obj);
+      if (pos != bodyList.end())
+      {
+         #ifdef DEBUG_CP_OBJECT
+         MessageInterface::ShowMessage
+            ("CalculatedPoint::SetRefObject() the body <%p> '%s' already exist, so "
+             "returning true\n", (*pos), name.c_str());
+         #endif
+         return true;
+      }
       
-      if (pos == bodyList.end())
-            bodyList.push_back((SpacePoint*) obj);
+      // If ref object has the same name, reset it (loj: 2008.10.24)      
+      pos = bodyList.begin();
+      std::string bodyName;
+      bool bodyFound = false;
+      while (pos != bodyList.end())
+      {
+         bodyName = (*pos)->GetName();         
+         if (bodyName == name)
+         {
+            #ifdef DEBUG_CP_OBJECT
+            MessageInterface::ShowMessage
+               ("CalculatedPoint::SetRefObject() resetting the pointer of body '%s' <%p> to "
+                "<%p>\n", bodyName.c_str(), (*pos), (SpacePoint*)obj);
+            #endif
+            
+            (*pos) = (SpacePoint*)obj;
+            bodyFound = true;
+         }
+         ++pos;
+      }
       
-      numberOfBodies++;
+      // If ref object not found, add it (loj: 2008.10.24)
+      if (!bodyFound)
+      {
+         #ifdef DEBUG_CP_OBJECT
+         MessageInterface::ShowMessage
+            ("CalculatedPoint::SetRefObject() this=<%p> '%s', adding <%p> '%s' "
+             "to bodyList for object %s\n", this, GetName().c_str(), obj, name.c_str(),
+             instanceName.c_str());
+         #endif
+         
+         bodyList.push_back((SpacePoint*) obj);         
+         numberOfBodies++;
+      }
+      
       return true;
    }
    
@@ -617,15 +716,33 @@ bool CalculatedPoint::RenameRefObject(const Gmat::ObjectType type,
                                       const std::string &oldName,
                                       const std::string &newName)
 {
-   if (type == Gmat::CALCULATED_POINT)
+   if ((type == Gmat::SPACE_POINT) || (type == Gmat::CALCULATED_POINT))
    {
       for (unsigned int i=0; i< bodyNames.size(); i++)
       {
          if (bodyNames[i] == oldName)
              bodyNames[i] = newName;
       }
+      for (unsigned int i=0; i< defaultBodies.size(); i++)
+      {
+         if (defaultBodies[i] == oldName)
+            defaultBodies[i] = newName;
+      }
    }
    return SpacePoint::RenameRefObject(type, oldName, newName);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool CalculatedPoint::HasRefObjectTypeArray()
+{
+   return true;
 }
 
 
@@ -663,7 +780,10 @@ const StringArray& CalculatedPoint::GetRefObjectNameArray(const Gmat::ObjectType
 {
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
-      return bodyNames;
+      if (!bodyNames.empty())
+         return bodyNames;
+      else
+         return defaultBodies;
    }
    
    // Not handled here -- invoke the next higher GetRefObject call
@@ -685,14 +805,71 @@ const StringArray& CalculatedPoint::GetRefObjectNameArray(const Gmat::ObjectType
 bool CalculatedPoint::TakeAction(const std::string &action,
                                  const std::string &actionData)
 {
+   #ifdef DEBUG_CP_ACTION
+      MessageInterface::ShowMessage(
+            "Entering CP::TakeAction with action = \"%s\", actionData = \"%s\"\n",
+            action.c_str(), actionData.c_str());
+   #endif
    if (action == "ClearBodies")
    {
       bodyNames.clear();
       bodyList.clear();
+//      defaultBodies.clear();
       numberOfBodies = 0;
       return true; 
    }
    return SpacePoint::TakeAction(action, actionData);
+}
+
+//---------------------------------------------------------------------------
+//  bool TakeRequiredAction(const Integer id))
+//---------------------------------------------------------------------------
+/**
+ * Tells object to take whatever action it needs to take before the value
+ * of the specified parameter is set (e.g. clearing out arrays)
+ *
+ * @param <id> parameter for which to take prerequisite action.
+ *
+ * @return true if the action was performed (or none needed), false if not.
+ */
+//------------------------------------------------------------------------------
+bool CalculatedPoint::TakeRequiredAction(const Integer id)
+{
+   #ifdef DEBUG_CP_ACTION
+      MessageInterface::ShowMessage(
+            "Entering CP::TakeRequiredAction with id = %d (%s)\n",
+            id, (GetParameterText(id)).c_str());
+   #endif
+   if (id == BODY_NAMES) return TakeAction("ClearBodies");
+   return SpacePoint::TakeRequiredAction(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  void SetDefaultBody(const std::string &defBody)
+//---------------------------------------------------------------------------
+/**
+ * Method returning the total mass of the celestial bodies included in
+ * this Barycenter.
+ *
+ * @return total mass of the celestial bodies included in this Barycenter.
+ */
+//---------------------------------------------------------------------------
+void CalculatedPoint::SetDefaultBody(const std::string &defBody)
+{
+   if (find(defaultBodies.begin(), defaultBodies.end(), defBody) == defaultBodies.end())
+   {
+      #ifdef DEBUG_CP_BODIES
+         MessageInterface::ShowMessage("Adding %s to DEFAULT body name list for object %s\n",
+               defBody.c_str(), instanceName.c_str());
+      #endif
+      defaultBodies.push_back(defBody);
+   }
+}
+
+const StringArray& CalculatedPoint::GetDefaultBodies() const
+{
+   return defaultBodies;
 }
 
 

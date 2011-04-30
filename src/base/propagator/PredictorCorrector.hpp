@@ -1,18 +1,19 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              PredictorCorrector
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : PredictorCorrector.hpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -83,7 +84,7 @@ class GMAT_API PredictorCorrector : public Integrator
 {
 public:
    PredictorCorrector(Integer sc, Integer order, const std::string &typeStr,
-			   const std::string &nomme = "");
+                           const std::string &nomme = "");
    virtual ~PredictorCorrector(void);
 
    PredictorCorrector(const PredictorCorrector&);
@@ -115,7 +116,7 @@ public:
    virtual Real    SetRealParameter(const std::string &label, const Real value);
    virtual Integer GetIntegerParameter(const Integer id) const;
    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
-	virtual bool    GetBooleanParameter(const Integer id) const; 
+        virtual bool    GetBooleanParameter(const Integer id) const; 
    virtual bool    SetBooleanParameter(const Integer id, const bool value);
 
 protected:

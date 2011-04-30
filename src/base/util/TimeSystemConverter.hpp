@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 TimeSystemConverter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -26,31 +28,32 @@
 #include "BaseException.hpp"
 #include "EopFile.hpp"
 #include "LeapSecsFileReader.hpp"
+#include "GmatConstants.hpp"
 
 // struct TimeSystemConverterExceptions
 // {
-   class UnimplementedException : public BaseException
+   class GMAT_API UnimplementedException : public BaseException
    {
       public:
          UnimplementedException(const std::string &message =
          "TimeSystemConverter: Conversion not implemented: ")
          : BaseException(message) {};
    };
-   class TimeFileException : public BaseException
+   class GMAT_API TimeFileException : public BaseException
    {
       public:
          TimeFileException(const std::string &message =
          "TimeSystemConverter: File is unknown: ")
          : BaseException(message) {};
    };
-   class TimeFormatException : public BaseException
+   class GMAT_API TimeFormatException : public BaseException
    {
       public:
          TimeFormatException(const std::string &message =
          "TimeSystemConverter: Requested format not implemented: ")
          : BaseException(message) {};
    };
-   class InvalidTimeException : public BaseException
+   class GMAT_API InvalidTimeException : public BaseException
    {
       public:
          InvalidTimeException(const std::string &message =
@@ -66,11 +69,11 @@ namespace TimeConverterUtil
    static const Real TDB_COEFF2                    = 0.00001385;
    static const Real M_E_OFFSET                    = 357.5277233;
    static const Real M_E_COEFF1                    = 35999.05034;
-   static const Real T_TT_OFFSET                   = 2451545.0;
-   static const Real T_TT_COEFF1                   = 36525;
+   static const Real T_TT_OFFSET                   = GmatTimeConstants::JD_OF_J2000;
+   static const Real T_TT_COEFF1                   = GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    static const Real L_B                           = 1.550505e-8;
    static const Real TCB_JD_MJD_OFFSET             = 2443144.5;
-   static const Real NUM_SECS                      = 86400;
+   static const Real NUM_SECS                      = GmatTimeConstants::SECS_PER_DAY;
 
    enum TimeSystemTypes
    {
@@ -100,7 +103,7 @@ namespace TimeConverterUtil
       "TdbMjd",
       "TcbMjd",
       "TtMjd",
-      // New entried added by DJC
+      // New entries added by DJC
       "A1",
       "TAI",
       "UTC",
@@ -113,41 +116,42 @@ namespace TimeConverterUtil
 /*   Real Convert(const Real origValue,
                       const std::string &fromType,
                       const std::string &toType,
-                      Real refJd = GmatTimeUtil::JD_NOV_17_1858);
+                      Real refJd = GmatTimeConstants::JD_NOV_17_1858);
 
    Real ConvertToTaiMjd(std::string fromType, Real origValue,
-      Real refJd= GmatTimeUtil::JD_NOV_17_1858);
+      Real refJd= GmatTimeConstants::JD_NOV_17_1858);
    Real ConvertFromTaiMjd(std::string toType, Real origValue,
-      Real refJd= GmatTimeUtil::JD_NOV_17_1858);
+      Real refJd= GmatTimeConstants::JD_NOV_17_1858);
  */
    
-   Integer GetTimeTypeID(std::string &str);
+   Integer GMAT_API GetTimeTypeID(std::string &str);
       
-   Real Convert(const Real origValue,
+   Real GMAT_API Convert(const Real origValue,
                 const Integer fromType,
                 const Integer toType,
                 Real refJd);
    
-   Real ConvertToTaiMjd(Integer fromType, Real origValue,
-      Real refJd= GmatTimeUtil::JD_NOV_17_1858);
-   Real ConvertFromTaiMjd(Integer toType, Real origValue,
-      Real refJd= GmatTimeUtil::JD_NOV_17_1858);   
+   Real GMAT_API ConvertToTaiMjd(Integer fromType, Real origValue,
+      Real refJd= GmatTimeConstants::JD_NOV_17_1858);
+   Real GMAT_API ConvertFromTaiMjd(Integer toType, Real origValue,
+      Real refJd= GmatTimeConstants::JD_NOV_17_1858);
 
-   void SetEopFile(EopFile *eopFile);
-   void SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
+   void GMAT_API SetEopFile(EopFile *eopFile);
+   void GMAT_API SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
    
-   void GetTimeSystemAndFormat(const std::string &type, std::string &system,
+   void GMAT_API GetTimeSystemAndFormat(const std::string &type, std::string &system,
                                std::string &format);
    
-   std::string ConvertMjdToGregorian(const Real mjd);   
-   Real ConvertGregorianToMjd(const std::string &greg);
-   void Convert(const std::string &fromType, Real fromMjd,
+   std::string GMAT_API ConvertMjdToGregorian(const Real mjd, Integer format = 1);   
+   Real GMAT_API ConvertGregorianToMjd(const std::string &greg);
+   void GMAT_API Convert(const std::string &fromType, Real fromMjd,
                 const std::string &fromStr, const std::string &toType,
-                Real &toMjd, std::string &toStr);
+                Real &toMjd, std::string &toStr, Integer format = 1);
    
-   bool ValidateTimeSystem(std::string sys);   
-   bool ValidateTimeFormat(const std::string &format, const std::string &value);
-   StringArray GetValidTimeRepresentations();
+   bool GMAT_API ValidateTimeSystem(std::string sys);   
+   bool GMAT_API ValidateTimeFormat(const std::string &format, const std::string &value,
+                           bool checkValue = true);
+   StringArray GMAT_API GetValidTimeRepresentations();
 }
 
 #endif // TimeSystemConverter_hpp

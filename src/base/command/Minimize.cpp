@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Minimize
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -578,8 +580,7 @@ bool Minimize::InterpretAction()
 const StringArray& Minimize::GetWrapperObjectNameArray()
 {
    wrapperObjectNames.clear();
-
-   wrapperObjectNames.push_back(objectiveName);  
+   wrapperObjectNames.push_back(objectiveName);
       
    return wrapperObjectNames;
 }
@@ -590,19 +591,19 @@ bool Minimize::SetElementWrapper(ElementWrapper *toWrapper, const std::string &w
 
    if (toWrapper == NULL) return false;
    
-   if (toWrapper->GetWrapperType() == Gmat::ARRAY)
+   if (toWrapper->GetWrapperType() == Gmat::ARRAY_WT)
    {
       throw CommandException("A value of type \"Array\" on command \"" + typeName + 
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Variable, Array Element, or Parameter ]. "); 
    }
-   if (toWrapper->GetWrapperType() == Gmat::NUMBER)
+   if (toWrapper->GetWrapperType() == Gmat::NUMBER_WT)
    {
       throw CommandException("A value of type \"Number\" on command \"" + typeName + 
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Variable, Array Element, or Parameter ]. "); 
    }
-   //if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
+   //if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT_WT)
    //{
    //   throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
    //               "\" is not an allowed value.\nThe allowed values are:"
@@ -619,6 +620,8 @@ bool Minimize::SetElementWrapper(ElementWrapper *toWrapper, const std::string &w
    if (objectiveName == withName)
    {
       objective = toWrapper;
+      // Reset the generating string so initialization works correctly
+      GetGeneratingString(Gmat::SCRIPTING, "", "");
       retval = true;
    }
    

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            AttitudeFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // Order 124.
@@ -23,6 +25,9 @@
 #include "Attitude.hpp"   // for Attitude class
 #include "CSFixed.hpp"
 #include "Spinner.hpp"
+#ifdef __USE_SPICE__
+   #include "SpiceAttitude.hpp"
+#endif
 //#include "ThreeAxis.hpp"
 
 
@@ -50,6 +55,10 @@ Attitude* AttitudeFactory::CreateAttitude(const std::string &ofType,
       return new Spinner(withName);
 //   //else if (ofType == "ThreeAxis")   // TBD
 //   //   return new ThreeAxis(withName);
+   #ifdef __USE_SPICE__
+      else if (ofType == "SpiceAttitude")
+         return new SpiceAttitude();
+   #endif
    else
    {
       return NULL;   // doesn't match any known type of Attitude Model
@@ -75,6 +84,10 @@ Factory(Gmat::ATTITUDE)
       //creatables.push_back("CSFixed");
       creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
+      #ifdef __USE_SPICE__
+         creatables.push_back("SpiceAttitude");
+      #endif
+
       //creatables.push_back("ThreeAxis");
       // others TBD
    }
@@ -99,6 +112,9 @@ Factory(createList,Gmat::ATTITUDE)
       //creatables.push_back("CSFixed");
       creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
+      #ifdef __USE_SPICE__
+         creatables.push_back("SpiceAttitude");
+      #endif
       //creatables.push_back("ThreeAxis");
       // others TBD
    }
@@ -122,6 +138,9 @@ Factory(fact)
       //creatables.push_back("CSFixed");
       creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
+      #ifdef __USE_SPICE__
+         creatables.push_back("SpiceAttitude");
+      #endif
       //creatables.push_back("ThreeAxis");
       // others TBD
    }
@@ -148,6 +167,9 @@ AttitudeFactory& AttitudeFactory::operator= (const AttitudeFactory& fact)
       //creatables.push_back("CSFixed");
       creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
+      #ifdef __USE_SPICE__
+         creatables.push_back("SpiceAttitude");
+      #endif
       //creatables.push_back("ThreeAxis");
       // others TBD
    }

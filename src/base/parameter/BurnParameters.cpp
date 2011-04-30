@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            File: BurnParameters.cpp
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -13,8 +15,8 @@
 // Created: 2005/05/27
 //
 /**
- * Implements Burn related parameter classes.
- *   DeltaVDir1, DeltaVDir2, DeltaVDir3
+ * Implements Burn related Parameter classes.
+ *   ImpBurnElements
  */
 //------------------------------------------------------------------------------
 
@@ -24,36 +26,51 @@
 //#define DEBUG_BURN_PARAM 1
 
 
+// To use preset colors, uncomment this line:
+//#define USE_PREDEFINED_COLORS
+
 //==============================================================================
-//                              DeltaVDir1
+//                              ImpBurnElements
 //==============================================================================
 /**
- * Implements DeltaV first compoment.
+ * Implements ImpulsiveBurn element Parameters.
+ *    Element1, Element2, Element3
  */
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// DeltaVDir1(const std::string &name, const std::string &typeName, GmatBase *obj)
+// ImpBurnElements(const std::string &type, const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
+ * @param <type> type of the parameter
  * @param <name> name of the parameter
- * @param <typeName> name of the parameter type
  * @param <obj> reference object pointer
  */
 //------------------------------------------------------------------------------
-DeltaVDir1::DeltaVDir1(const std::string &name, const std::string &typeName,
-                       GmatBase *obj)
-   : BurnReal(name, typeName, Gmat::IMPULSIVE_BURN, obj,
-              "ImpulsiveBurn Element1", "Km/s", GmatParam::NO_DEP, true)
+ImpBurnElements::ImpBurnElements(const std::string &type, const std::string &name,
+                                 GmatBase *obj)
+   : BurnReal(name, type, Gmat::IMPULSIVE_BURN, obj,
+              "ImpulsiveBurn Element", "Km/s", GmatParam::NO_DEP, false)
 {
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
+   
+   if (type == "Element1" || type == "V")
+      mElementId = ELEMENT1;
+   else if (type == "Element2" || type == "N")
+      mElementId = ELEMENT2;
+   else if (type == "Element3" || type == "B")
+      mElementId = ELEMENT3;
+   else
+      mElementId = -1;
 }
 
 
 //------------------------------------------------------------------------------
-// DeltaVDir1(const DeltaVDir1 &copy)
+// ImpBurnElements(const ImpBurnElements &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
@@ -61,14 +78,15 @@ DeltaVDir1::DeltaVDir1(const std::string &name, const std::string &typeName,
  * @param <copy> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-DeltaVDir1::DeltaVDir1(const DeltaVDir1 &copy)
+ImpBurnElements::ImpBurnElements(const ImpBurnElements &copy)
    : BurnReal(copy)
 {
+   mElementId = copy.mElementId;
 }
 
 
 //------------------------------------------------------------------------------
-// DeltaVDir1& operator=(const DeltaVDir1 &right)
+// ImpBurnElements& operator=(const ImpBurnElements &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -76,23 +94,26 @@ DeltaVDir1::DeltaVDir1(const DeltaVDir1 &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-DeltaVDir1& DeltaVDir1::operator=(const DeltaVDir1 &right)
+ImpBurnElements& ImpBurnElements::operator=(const ImpBurnElements &right)
 {
    if (this != &right)
+   {
       BurnReal::operator=(right);
-
+      mElementId = right.mElementId;
+   }
+   
    return *this;
 }
 
 
 //------------------------------------------------------------------------------
-// ~DeltaVDir1()
+// ~ImpBurnElements()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-DeltaVDir1::~DeltaVDir1()
+ImpBurnElements::~ImpBurnElements()
 {
 }
 
@@ -110,13 +131,13 @@ DeltaVDir1::~DeltaVDir1()
  * @return true if parameter value successfully evaluated; false otherwise
  */
 //------------------------------------------------------------------------------
-bool DeltaVDir1::Evaluate()
+bool ImpBurnElements::Evaluate()
 {
-   mRealValue = BurnData::GetBurnReal(ELEMENT1);
+   mRealValue = BurnData::GetReal(mElementId);
 
    #ifdef DEBUG_BURN_EVAL
    MessageInterface::ShowMessage
-      ("DeltaVDir1::Evaluate() mRealValue=%f\n", mRealValue);
+      ("ImpBurnElements::Evaluate() mRealValue=%f\n", mRealValue);
    #endif
    
    if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
@@ -134,9 +155,9 @@ bool DeltaVDir1::Evaluate()
  *
  */
 //------------------------------------------------------------------------------
-void DeltaVDir1::SetReal(Real val)
+void ImpBurnElements::SetReal(Real val)
 {
-   BurnData::SetBurnReal(ELEMENT1, val);
+   BurnData::SetReal(mElementId, val);
    RealVar::SetReal(val);
 }
 
@@ -152,246 +173,9 @@ void DeltaVDir1::SetReal(Real val)
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-GmatBase* DeltaVDir1::Clone(void) const
+GmatBase* ImpBurnElements::Clone(void) const
 {
-   return new DeltaVDir1(*this);
-}
-
-
-//==============================================================================
-//                              DeltaVDir2
-//==============================================================================
-/**
- * Implements DeltaV second compoment.
- */
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// DeltaVDir2(const std::string &name, const std::string &typeName, GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <typeName> name of the parameter type
- * @param <obj> reference object pointer
- */
-//------------------------------------------------------------------------------
-DeltaVDir2::DeltaVDir2(const std::string &name, const std::string &typeName,
-                       GmatBase *obj)
-   : BurnReal(name, typeName, Gmat::IMPULSIVE_BURN, obj,
-              "Impulsive Burn Element2", "Km/s", GmatParam::NO_DEP, true)
-{
-   mColor = GmatColor::GREEN32;
-}
-
-
-//------------------------------------------------------------------------------
-// DeltaVDir2(const DeltaVDir2 &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-DeltaVDir2::DeltaVDir2(const DeltaVDir2 &copy)
-   : BurnReal(copy)
-{
-}
-
-
-//------------------------------------------------------------------------------
-// DeltaVDir2& operator=(const DeltaVDir2 &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-DeltaVDir2& DeltaVDir2::operator=(const DeltaVDir2 &right)
-{
-   if (this != &right)
-      BurnReal::operator=(right);
-
-   return *this;
-}
-
-
-//------------------------------------------------------------------------------
-// ~DeltaVDir2()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-DeltaVDir2::~DeltaVDir2()
-{
-}
-
-
-//-------------------------------------
-// methods inherited from Parameter
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool DeltaVDir2::Evaluate()
-{
-   mRealValue = BurnData::GetBurnReal(ELEMENT2);
-    
-   #ifdef DEBUG_BURN_EVAL
-   MessageInterface::ShowMessage
-      ("DeltaVDir2::Evaluate() mRealValue=%f\n", mRealValue);
-   #endif
-   
-   if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
-      return false;
-   else
-      return true;
-}
-
-
-//-------------------------------------
-// methods inherited from GmatBase
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual GmatBase* Clone(void) const
-//------------------------------------------------------------------------------
-/**
- * Method used to create a copy of the object
- */
-//------------------------------------------------------------------------------
-GmatBase* DeltaVDir2::Clone(void) const
-{
-   return new DeltaVDir2(*this);
-}
-
-
-//==============================================================================
-//                              DeltaVDir3
-//==============================================================================
-/**
- * Implements DeltaV third compoment.
- */
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// DeltaVDir3(const std::string &name, const std::string &typeName, GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <typeName> name of the parameter type
- * @param <obj> reference object pointer
- */
-//------------------------------------------------------------------------------
-DeltaVDir3::DeltaVDir3(const std::string &name, const std::string &typeName,
-                       GmatBase *obj)
-   : BurnReal(name, typeName, Gmat::IMPULSIVE_BURN, obj,
-              "Impulsive Burn Element3", "Km/s", GmatParam::NO_DEP, true)
-{
-   mColor = GmatColor::BLUE32;
-}
-
-
-//------------------------------------------------------------------------------
-// DeltaVDir3(const DeltaVDir3 &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-DeltaVDir3::DeltaVDir3(const DeltaVDir3 &copy)
-   : BurnReal(copy)
-{
-}
-
-//------------------------------------------------------------------------------
-// DeltaVDir3& operator=(const DeltaVDir3 &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-DeltaVDir3& DeltaVDir3::operator=(const DeltaVDir3 &right)
-{
-   if (this != &right)
-      BurnReal::operator=(right);
-
-   return *this;
-}
-
-
-//------------------------------------------------------------------------------
-// ~DeltaVDir3()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-DeltaVDir3::~DeltaVDir3()
-{
-}
-
-
-//--------------------------------------
-// methods inherited from Parameter
-//--------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool DeltaVDir3::Evaluate()
-{
-   mRealValue = BurnData::GetBurnReal(ELEMENT3);    
-
-   #ifdef DEBUG_BURN_EVAL
-   MessageInterface::ShowMessage
-      ("DeltaVDir3::Evaluate() mRealValue=%f\n", mRealValue);
-   #endif
-   
-   if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
-      return false;
-   else
-      return true;
-}
-
-
-//-------------------------------------
-// methods inherited from GmatBase
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual GmatBase* Clone(void) const
-//------------------------------------------------------------------------------
-/**
- * Method used to create a copy of the object
- */
-//------------------------------------------------------------------------------
-GmatBase* DeltaVDir3::Clone(void) const
-{
-   return new DeltaVDir3(*this);
+   return new ImpBurnElements(*this);
 }
 
 

@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -139,6 +141,15 @@ void MathNode::SetMatrixValue(const Rmatrix &mat)
        "theColCount=%d, matarix=\n%s\n", theReturnType, theRowCount, theColCount,
        ss.str().c_str());
    #endif
+}
+
+
+//---------------------------------------------------------------------------
+// virtual void SetMathWrappers(WrapperMap *wrapperMap)
+//---------------------------------------------------------------------------
+void MathNode::SetMathWrappers(WrapperMap *wrapperMap)
+{
+   // do nothing here
 }
 
 

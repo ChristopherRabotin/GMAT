@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                               Factory Manager
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -80,6 +82,8 @@ bool FactoryManager::RegisterFactory(Factory* fact)
    //   ("FactoryManager::RegisterFactory() adding factory %d\n", fact->GetFactoryType());
    
    factoryList.push_back(fact);  // better to put it at the back of the list?
+   factoryTypeList.push_back(fact->GetFactoryType());
+   
    return true;
 }
 
@@ -99,7 +103,7 @@ bool FactoryManager::RegisterFactory(Factory* fact)
  */
 //------------------------------------------------------------------------------
 GmatBase* FactoryManager::CreateObject(const Gmat::ObjectType generalType,
-                                               const std::string &ofType,
+                                       const std::string &ofType,
                                        const std::string &withName)
 {
    Factory* f = FindFactory(generalType, ofType);
@@ -171,14 +175,25 @@ Parameter* FactoryManager::CreateParameter(const std::string &ofType,
 Propagator* FactoryManager::CreatePropagator(const std::string &ofType,
                                              const std::string &withName)
 {
+   #ifdef DEBUG_CREATION
+      MessageInterface::ShowMessage("Creating an integrator of type %s with "
+            "name %s\n", ofType.c_str(), withName.c_str());
+   #endif
+
    Factory* f = FindFactory(Gmat::PROPAGATOR, ofType);
+
+   #ifdef DEBUG_CREATION
+      MessageInterface::ShowMessage("Factory pointer: %p\n", f);
+   #endif
+
    if (f != NULL)
       return f->CreatePropagator(ofType, withName);
    return NULL;
 }
 
 //------------------------------------------------------------------------------
-//  Force* CreatePhysicalModel(const std::string &ofType, const std::string &withName)
+//  Force* CreatePhysicalModel(const std::string &ofType,
+//       const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type PhysicalModel, with the name withName, and of the
@@ -315,8 +330,39 @@ Subscriber* FactoryManager::CreateSubscriber(const std::string &ofType,
 
    if (f != NULL)
       return f->CreateSubscriber(ofType, withName, fileName);
+   
+   #ifdef DEBUG_FACTORY_MANAGER
+   MessageInterface::ShowMessage("Could not find Factory for %s\n", ofType.c_str());
+   #endif
+   
+   return NULL;
+}
 
-   MessageInterface::ShowMessage("      Could not find Factory for %s\n", ofType.c_str());
+//------------------------------------------------------------------------------
+//  EphemerisFile* CreateEphemerisFile(const std::string &ofType,
+//                                     const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type EphemerisFile, with the name withName.
+ *
+ * @param <ofType>   type name of the new EphemerisFile object.
+ * @param <withName> name of the new EphemerisFile object.
+ *
+ * @return pointer to the newly-created EphemerisFile object
+ */
+//------------------------------------------------------------------------------
+EphemerisFile* FactoryManager::CreateEphemerisFile(const std::string &ofType,
+                                                   const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::EPHEMERIS_FILE, ofType);
+   
+   if (f != NULL)
+      return f->CreateEphemerisFile(ofType, withName);
+   
+   #ifdef DEBUG_FACTORY_MANAGER
+   MessageInterface::ShowMessage("Could not find Factory for %s\n", ofType.c_str());
+   #endif
+   
    return NULL;
 }
 
@@ -506,6 +552,27 @@ FactoryManager::CreateAttitude(const std::string &ofType,
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// SpacePoint* CreateSpacePoint(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type SpacePoint, with the name withName.
+ *
+ * @param <ofType> type of the new SpacePoint object.
+ * @param <withName> name of the new SpacePoint object.
+ *
+ * @return pointer to the newly-created SpacePoint object
+ */
+//------------------------------------------------------------------------------
+SpacePoint* FactoryManager::CreateSpacePoint(const std::string &ofType,
+                                             const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::SPACE_POINT, ofType);
+   if (f != NULL)
+      return f->CreateSpacePoint(ofType,withName);
+   return NULL;
+}
+
 //----- Just container
 //------------------------------------------------------------------------------
 //  SolarSystem* CreateSolarSystem(const std::string &withName)
@@ -548,21 +615,151 @@ PropSetup* FactoryManager::CreatePropSetup(const std::string &withName)
 
 
 //------------------------------------------------------------------------------
-//  ForceModel* CreateForceModel(const std::string &withName)
+// CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
+//                                          const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * Create an object of type ForceModel, with the name withName.
+ * This method creates the measurement primitive used in a MeasurementModel
  *
- * @param <withName> name of the new ForceModel object.
+ * @param ofType The type of measuremetn primitive
+ * @param withName The name of the measurement prinitive.  This should be an
+ *                 empty string in the current implementation.
  *
- * @return pointer to the newly-created ForceModel object
+ * @return The pointer to the new object
  */
 //------------------------------------------------------------------------------
-ForceModel* FactoryManager::CreateForceModel(const std::string &withName)
+CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
+                                         const std::string &withName)
 {
-   Factory* f = FindFactory(Gmat::FORCE_MODEL, "ForceModel");
+   Factory* f = FindFactory(Gmat::CORE_MEASUREMENT, ofType);
    if (f != NULL)
-      return f->CreateForceModel("ForceModel", withName);
+      return f->CreateMeasurement(ofType, withName);
+   return NULL;
+}
+
+TrackingSystem* FactoryManager::CreateTrackingSystem(const std::string &ofType,
+         const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::TRACKING_SYSTEM, ofType);
+   if (f != NULL)
+      return f->CreateTrackingSystem(ofType, withName);
+   return NULL;
+}
+
+TrackingData* FactoryManager::CreateTrackingData(const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::TRACKING_DATA, "TrackingData");
+   if (f != NULL)
+      return f->CreateTrackingData("TrackingData", withName);
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// ObType* FactoryManager::CreateObType(const std::string &ofType,
+//                                      const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates the ObType used in a DataFile
+ *
+ * @param ofType The type of ObType
+ * @param withName The name of the ObType.  This should be an
+ *                 empty string in the current implementation.
+ *
+ * @return The pointer to the new object
+ */
+//------------------------------------------------------------------------------
+ObType* FactoryManager::CreateObType(const std::string &ofType,
+                                     const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::OBTYPE, ofType);
+   if (f != NULL)
+      return f->CreateObType(ofType, withName);
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// Interface* FactoryManager::CreateInterface(const std::string &ofType,
+//                                            const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates the Interface used in a DataFile
+ *
+ * @param ofType The type of Interface
+ * @param withName The name of the Interface.  This should be an
+ *                 empty string in the current implementation.
+ *
+ * @return The pointer to the new object
+ */
+//------------------------------------------------------------------------------
+Interface* FactoryManager::CreateInterface(const std::string &ofType,
+                                           const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::INTERFACE, ofType);
+   if (f != NULL)
+      return f->CreateInterface(ofType, withName);
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// MeasurementModel* CreateMeasurementModel(const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type MeasurementModel, with the name withName.
+ *
+ * @param withName name of the new MeasurementModel object.
+ *
+ * @return pointer to the newly-created MeasurementModel object
+ */
+//------------------------------------------------------------------------------
+MeasurementModel* FactoryManager::CreateMeasurementModel(const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::MEASUREMENT_MODEL, "MeasurementModel");
+   if (f != NULL)
+      return f->CreateMeasurementModel("MeasurementModel", withName);
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// DataFile* FactoryManager::CreateDataFile(const std::string &ofType,
+//                                          const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type DataFile, with the name withName.
+ *
+ * @param ofType   type of the new DataFile object.
+ * @param withName name of the new DataFile object.
+ *
+ * @return pointer to the newly-created DataFile object
+ */
+//------------------------------------------------------------------------------
+DataFile* FactoryManager::CreateDataFile(const std::string &ofType,
+                                         const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::DATA_FILE, ofType);
+   if (f != NULL)
+      return f->CreateDataFile(ofType, withName);
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+//  ODEModel* CreateODEModel(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type ODEModel, with the name withName.
+ *
+ * @param <withName> name of the new ODEModel object.
+ *
+ * @return pointer to the newly-created ODEModel object
+ */
+//------------------------------------------------------------------------------
+ODEModel* FactoryManager::CreateODEModel(const std::string &ofType,
+                                         const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::ODE_MODEL, ofType);
+   if (f != NULL)
+      return f->CreateODEModel(ofType, withName);
    return NULL;
 }
 
@@ -617,25 +814,126 @@ const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType)
 const StringArray& FactoryManager::GetListOfAllItems()
 {
    entireList.clear();
-   
+
    // Build all creatable object list
-   GetList(Gmat::COMMAND);
-   GetList(Gmat::ATMOSPHERE);
-   GetList(Gmat::ATTITUDE);
-   GetList(Gmat::AXIS_SYSTEM);
-   GetList(Gmat::BURN);
-   GetList(Gmat::CALCULATED_POINT);
-   GetList(Gmat::FUNCTION);
-   GetList(Gmat::HARDWARE);
-   GetList(Gmat::PARAMETER);
-   GetList(Gmat::PROPAGATOR);
-   GetList(Gmat::PHYSICAL_MODEL);
-   GetList(Gmat::SOLVER);
-   GetList(Gmat::STOP_CONDITION);
-   GetList(Gmat::SUBSCRIBER);
+   // Now we can do this since data member factoryTypeList was added (LOJ: 2010.08.19)
+   // factoryTypeList is filled when factory is registered in the Moderator
+   std::list<Gmat::ObjectType>::iterator ftype = factoryTypeList.begin();
+   while (ftype != factoryTypeList.end())
+   {
+      GetList(*ftype);
+      ftype++;
+   }
+   
+//    // Build all creatable object list
+//    GetList(Gmat::COMMAND);
+//    GetList(Gmat::ATMOSPHERE);
+//    GetList(Gmat::ATTITUDE);
+//    GetList(Gmat::AXIS_SYSTEM);
+//    GetList(Gmat::BURN);
+//    GetList(Gmat::CALCULATED_POINT);
+//    GetList(Gmat::FUNCTION);
+//    GetList(Gmat::HARDWARE);
+//    GetList(Gmat::PARAMETER);
+//    GetList(Gmat::PROPAGATOR);
+//    GetList(Gmat::PHYSICAL_MODEL);
+//    GetList(Gmat::SOLVER);
+//    GetList(Gmat::SPACE_POINT);
+//    GetList(Gmat::STOP_CONDITION);
+//    GetList(Gmat::SUBSCRIBER);
+//    GetList(Gmat::CELESTIAL_BODY);
+//    GetList(Gmat::DATA_FILE);
    
    return entireList;
 }
+
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfAllItemsExcept(const ObjectTypeArray &types)
+//------------------------------------------------------------------------------
+/**
+ * Return a list of all items that can be created except input types
+ *
+ * @param <type> object types to be excluded
+ *
+ * @return list of all creatable items excluding input types
+ */
+//------------------------------------------------------------------------------
+const StringArray& FactoryManager::GetListOfAllItemsExcept(const ObjectTypeArray &types)
+{
+   entireList.clear();
+   
+   // Build all creatable object list except given types
+   std::list<Gmat::ObjectType>::iterator ftype = factoryTypeList.begin();
+   while (ftype != factoryTypeList.end())
+   {
+      if (find(types.begin(), types.end(), *ftype) == types.end())
+         GetList((*ftype));
+      
+      ftype++;
+   }
+   
+   return entireList;
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfViewableItems(Gmat::ObjectType byType)
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type byType that can be viewed via GUI.
+ *
+ * @param <byType> type of items of which to return a list.
+ *
+ * @return list of viewable items of type byType.
+ */
+//------------------------------------------------------------------------------
+const StringArray& FactoryManager::GetListOfViewableItems(Gmat::ObjectType byType)
+{
+   entireList.clear();
+   return GetListOfViewables(byType);
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfUnviewableItems(Gmat::ObjectType byType)
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type byType that cannot be viewed via GUI.
+ *
+ * @param <byType> type of items of which to return a list.
+ *
+ * @return list of unviewable items of type byType.
+ */
+//------------------------------------------------------------------------------
+const StringArray& FactoryManager::GetListOfUnviewableItems(Gmat::ObjectType byType)
+{
+   entireList.clear();
+   return GetListOfUnviewables(byType);
+}
+
+
+//------------------------------------------------------------------------------
+// bool DoesObjectTypeMatchSubtype(const std::string &theType,
+//       const std::string &theSubtype)
+//------------------------------------------------------------------------------
+/**
+ * Checks if a creatable object type matches a subtype.
+ *
+ * @param coreType The ObjectType of the candidate object
+ * @param theType The script identifier for the object type
+ * @param theSubtype The subtype being checked
+ *
+ * @return true if the scripted type and subtype match, false if the type does
+ *         not match the subtype
+ */
+//------------------------------------------------------------------------------
+bool FactoryManager::DoesObjectTypeMatchSubtype(const Gmat::ObjectType coreType,
+      const std::string &theType, const std::string &theSubtype)
+{
+   Factory* theFactory = FactoryManager::FindFactory(coreType, theType);
+   if (theFactory == NULL)
+      return false;
+   return theFactory->DoesObjectTypeMatchSubtype(theType, theSubtype);
+}
+
 
 //------------------------------------------------------------------------------
 // Gmat::ObjectType GetBaseTypeOf(const std::string &typeName)
@@ -749,27 +1047,19 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
          {
             StringArray::iterator s = listObj.begin();
             std::string objType = forType;
+            
+            // Make sure that all type name begins with upper case if
+            // factory expects case sensitive type names since all GMAT type names
+            // begin with upper case.
+            // Currently only math types are NOT case sensitive, so we can
+            // have for example, both Transpose and transpose, Inverse and inverse
+            // for compatibility with MATLAB.
             if (isCaseSensitive)
                objType = GmatStringUtil::Capitalize(objType);
             
-            while (s != listObj.end())
-            {
-               #ifdef DEBUG_FACTORY_CREATE
-               MessageInterface::ShowMessage(
-               "    -> now comparing \"%s\" with \"%s\"\n",
-               (*s).c_str(), objType.c_str());
-               #endif
-               
-               if ((*s).compare(objType) == 0)
-               {
-                  //MessageInterface::ShowMessage
-                  //   ("FactoryManager::FindFactory() Found factory:%s\n", forType.c_str());
-                  return (*f);
-               }
-               ++s;
-            }
+            if (find(listObj.begin(), listObj.end(), objType) != listObj.end())
+               return (*f);
          }
-
       }
       ++f;
    }
@@ -794,7 +1084,6 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
 const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType)
 {
    //entireList.clear();
-   
    std::list<Factory*>::iterator f = factoryList.begin();
    while (f != factoryList.end())
    {
@@ -805,6 +1094,68 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType)
          if (!objs.empty())
             entireList.insert(entireList.end(), objs.begin(), objs.end());
             
+         // There may be multiple factories of a given type, so keep looking
+         //break;
+      }
+      ++f;
+   }
+   return entireList;
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfViewables(Gmat::ObjectType ofType) const
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type ofType that can be viewed via GUI.
+ *
+ * @param <ofType> type of viewable objects of which to return a list.
+ *
+ * @return list of viewable items of type ofType.
+ */
+//------------------------------------------------------------------------------
+const StringArray& FactoryManager::GetListOfViewables(Gmat::ObjectType ofType)
+{
+   std::list<Factory*>::iterator f = factoryList.begin();
+   while (f != factoryList.end())
+   {
+      if ((*f)->GetFactoryType() == ofType)
+      {
+         // Add the name(s) to the list 
+         StringArray objs = (*f)->GetListOfViewableObjects();
+         if (!objs.empty())
+            entireList.insert(entireList.end(), objs.begin(), objs.end());
+         
+         // There may be multiple factories of a given type, so keep looking
+         //break;
+      }
+      ++f;
+   }
+   return entireList;
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfUnviewables(Gmat::ObjectType ofType) const
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type ofType that can be viewed via GUI.
+ *
+ * @param <ofType> type of viewable objects of which to return a list.
+ *
+ * @return list of viewable items of type ofType.
+ */
+//------------------------------------------------------------------------------
+const StringArray& FactoryManager::GetListOfUnviewables(Gmat::ObjectType ofType)
+{
+   std::list<Factory*>::iterator f = factoryList.begin();
+   while (f != factoryList.end())
+   {
+      if ((*f)->GetFactoryType() == ofType)
+      {
+         // Add the name(s) to the list 
+         StringArray objs = (*f)->GetListOfUnviewableObjects();
+         if (!objs.empty())
+            entireList.insert(entireList.end(), objs.begin(), objs.end());
+         
          // There may be multiple factories of a given type, so keep looking
          //break;
       }

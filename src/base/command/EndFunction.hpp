@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            EndFunction
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // order 124.
@@ -26,7 +28,7 @@
 #include "GmatCommand.hpp"
 
 
-class EndFunction : public GmatCommand
+class GMAT_API EndFunction : public GmatCommand
 {
 public:
    EndFunction();

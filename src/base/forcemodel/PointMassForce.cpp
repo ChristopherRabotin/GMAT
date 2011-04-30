@@ -1,18 +1,19 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             PointMassForce
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : PointMassForce.cpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -63,7 +64,9 @@
 #include "MessageInterface.hpp"
 #include "SolarSystem.hpp"
 #include "Rvector6.hpp"
-#include "ForceModelException.hpp"
+#include "GmatDefaults.hpp"
+#include "ODEModelException.hpp"
+#include "TimeTypes.hpp"
 
 //#define DEBUG_PMF_BODY 0
 //#define DEBUG_PMF_DERV 0
@@ -71,7 +74,7 @@
 //#define DEBUG_FORCE_MODEL
 //#define DEBUG_FORCE_ORIGIN
 //#define DUMP_PLANET_DATA
-
+//#define DEBUG_INDIRECT_TERM
 //---------------------------------
 // static data
 //---------------------------------
@@ -98,24 +101,33 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// PointMassForce::PointMassForce(const std::string &name, Integer satcount)
+// PointMassForce::PointMassForce(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Constructor for point mass gravitational model
  */
 //------------------------------------------------------------------------------
-PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
+PointMassForce::PointMassForce(const std::string &name) :
    PhysicalModel          (Gmat::PHYSICAL_MODEL, "PointMassForce", name),
-   mu                     (398600.4415),
+   mu                     (GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH]),
    estimationMethod       (1.0),
-   isPrimaryBody          (true)
+   isPrimaryBody          (true),
+   satCount               (0),
+   cartIndex              (0),
+   fillCartesian          (false),
+   stmCount               (0),
+   stmIndex               (0),
+   fillSTM                (false)
 {
    parameterCount = PointMassParamCount;
-   dimension = 6 * satcount;
+   dimension = 6 * satCount;
    body = NULL;
-    
+   
    // create default body
    bodyName = SolarSystem::EARTH_NAME; //loj: 5/20/04 added
+   
+   derivativeIds.push_back(Gmat::CARTESIAN_STATE);
+   derivativeIds.push_back(Gmat::ORBIT_STATE_TRANSITION_MATRIX);
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +161,12 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
    orig                   (pmf.orig),
    rv                     (pmf.rv),
    now                    (pmf.now),
-   satCount               (pmf.satCount)
+   satCount               (pmf.satCount),
+   cartIndex              (pmf.cartIndex),
+   fillCartesian          (pmf.fillCartesian),
+   stmCount               (pmf.stmCount),
+   stmIndex               (pmf.stmIndex),
+   fillSTM                (pmf.fillSTM)
 {
    parameterCount = PointMassParamCount;
    dimension = pmf.dimension;
@@ -185,6 +202,11 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
    rv               = pmf.rv;
    now              = pmf.now;
    satCount         = pmf.satCount;
+   cartIndex        = pmf.cartIndex;
+   fillCartesian    = pmf.fillCartesian;
+   stmCount         = pmf.stmCount;
+   stmIndex         = pmf.stmIndex;
+   fillSTM          = pmf.fillSTM;
 
    return *this;
 }
@@ -233,7 +255,7 @@ bool PointMassForce::Initialize()
             "PointMassForce::Initialize() body \"%s\" is not in the solar "
             "system\n", bodyName.c_str());
          initialized = false;
-         throw ForceModelException("PointMassForce::Initialize() body \"" +
+         throw ODEModelException("PointMassForce::Initialize() body \"" +
             bodyName + "\" is not in the solar system\n");
       }
    }
@@ -242,21 +264,14 @@ bool PointMassForce::Initialize()
       MessageInterface::ShowMessage(
          "PointMassForce::Initialize() solarSystem is NULL\n");
       initialized = false;
-      throw ForceModelException(
+      throw ODEModelException(
          "PointMassForce::Initialize() solarSystem is NULL\n");
    }
-    
-   satCount = (Integer)(dimension / 6);
-   if (dimension != satCount * 6) 
-   {
-      initialized = false;
-      return false;
-   }
-
+   
    Integer i6;
    for (Integer i = 0; i < satCount; i++) 
    {
-      i6 = i*6;
+      i6 = cartIndex + i*6;
       modelState[i6]   = 7000.0 + 200.0 * i;
       modelState[i6+1] = 300.0 * i;
       modelState[i6+2] = 1000.0 - 100.0 * i;
@@ -289,127 +304,263 @@ bool PointMassForce::Initialize()
  * @param order  Order of the derivative being calculated
  */
 //------------------------------------------------------------------------------
-bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
+bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order, 
+      const Integer id)
 {
-   if (order > 2)
-      return false;
-
-   if ((state == NULL) || (deriv == NULL))
-      // throw("Arrays not yet initialized -- exiting");
-      return false;
-
-   Real radius, r3, mu_r, rbb3, mu_rbb, a_indirect[3];
+#ifdef DEBUG_PMF_DERV
+   MessageInterface::ShowMessage("Evaluating PointMassForce; "
+      "state pointer = %d, time offset = %le, order = %d, id = %d "
+      "satCount = %d\n", state, dt, order, id, satCount);
+#endif
+   
    Integer i6;
 
-   now = epoch + dt/86400.0;
-   Real relativePosition[3];
-   bodyrv = body->GetState(now);
-   orig = forceOrigin->GetState(now);
-   
-   #ifdef DUMP_PLANET_DATA
-      MessageInterface::ShowMessage("%s, %17.12lf, %17.12lf, %17.12lf, "
-         "%17.12lf, %17.16lf, %17.16lf, %17.16lf, %s, %17.12lf, %17.12lf, "
-         "%17.12lf, %17.12lf, %17.16lf, %17.16lf, %s, %17.12lf, %17.12lf, "
-         "%17.12lf, %17.12lf, %17.16lf, %17.16lf\n", 
-         body->GetName().c_str(), now.Get(), bodyrv[0], bodyrv[1], bodyrv[2], 
-         bodyrv[3], bodyrv[4], bodyrv[5], "SC_Data", state[0], state[1], 
-         state[2], state[3], state[4], state[5], "origin", orig[0], orig[1],
-         orig[2], orig[3], orig[4], orig[5]);
-   #endif
-
-   const Real *brv = bodyrv.GetDataVector(), *orv = orig.GetDataVector();
-   Real rv[3];
-   rv[0] = brv[0] - orv[0];
-   rv[1] = brv[1] - orv[1];
-   rv[2] = brv[2] - orv[2];
-
-   // The vector from the force origin to the gravitating body
-   // Precalculations for the indirect effect term
-   rbb3 = rv[0]*rv[0]+rv[1]*rv[1]+rv[2]*rv[2];
-   if (rbb3 != 0.0) {
-      //rbb3 *= sqrt(rbb3);
-   	rbb3 = sqrt(rbb3 * rbb3 * rbb3);
-      mu_rbb = mu / rbb3;
-      a_indirect[0] = mu_rbb * rv[0];
-      a_indirect[1] = mu_rbb * rv[1];
-      a_indirect[2] = mu_rbb * rv[2];
-   }
-   else
-      a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
-
-   #ifdef DEBUG_FORCE_ORIGIN
-      MessageInterface::ShowMessage(
-         "Epoch:  %16.11lf\n  Origin:  [%s]\n  J2KBod:  [%s]\n",
-         now.Get(), orig.ToString().c_str(), bodyrv.ToString().c_str());
-      MessageInterface::ShowMessage(
-         "Now = %16.11lf rbb3 = %16.11le rv = [%16lf %16lf %16lf]\n",
-         now, rbb3, rv[0], rv[1], rv[2]);
-   #endif
-
-	#if DEBUG_PMF_BODY
-	   ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
-	                 body->GetName(), now, rv);
-	#endif
-
-	#if DEBUG_PMF_DERV
-	   ShowDerivative("PointMassForce::GetDerivatives() BEFORE compute", state, 
-	      satCount);
-	#endif
-   
-   for (Integer i = 0; i < satCount; i++) 
+   if (fillCartesian || fillSTM)
    {
-      i6 = i * 6;
+      if (order > 2)
+         return false;
+   
+      if ((state == NULL) || (deriv == NULL) || (theState == NULL))
+         // throw("Arrays not yet initialized -- exiting");
+         return false;
+   
+      Real radius, r3, mu_r, rbb3, mu_rbb, a_indirect[3];
+   
+      epoch = theState->GetEpoch();
+      now = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
+      Real relativePosition[3];
+      bodyrv = body->GetState(now);
+      orig = forceOrigin->GetState(now);
       
-      relativePosition[0] = rv[0] - state[ i6 ];
-      relativePosition[1] = rv[1] - state[i6+1];
-      relativePosition[2] = rv[2] - state[i6+2];
+      #ifdef DUMP_PLANET_DATA
+         MessageInterface::ShowMessage("%s, %17.12lf, %17.12lf, %17.12lf, "
+            "%17.12lf, %17.16lf, %17.16lf, %17.16lf, %s, %17.12lf, %17.12lf, "
+            "%17.12lf, %17.12lf, %17.16lf, %17.16lf, %s, %17.12lf, %17.12lf, "
+            "%17.12lf, %17.12lf, %17.16lf, %17.16lf\n", 
+            body->GetName().c_str(), now.Get(), bodyrv[0], bodyrv[1], bodyrv[2], 
+            bodyrv[3], bodyrv[4], bodyrv[5], "SC_Data", state[0], state[1], 
+            state[2], state[3], state[4], state[5], "origin", orig[0], orig[1],
+            orig[2], orig[3], orig[4], orig[5]);
+      #endif
+   
+      const Real *brv = bodyrv.GetDataVector(), *orv = orig.GetDataVector();
+      Real rv[3];
+      rv[0] = brv[0] - orv[0];
+      rv[1] = brv[1] - orv[1];
+      rv[2] = brv[2] - orv[2];
+   
+      // The vector from the force origin to the gravitating body
+      // Precalculations for the indirect effect term
+      rbb3 = rv[0]*rv[0]+rv[1]*rv[1]+rv[2]*rv[2];
+      if (rbb3 != 0.0) 
+      {
+         //rbb3 *= sqrt(rbb3);
+        rbb3 = sqrt(rbb3 * rbb3 * rbb3);
+         mu_rbb = mu / rbb3;
+         a_indirect[0] = mu_rbb * rv[0];
+         a_indirect[1] = mu_rbb * rv[1];
+         a_indirect[2] = mu_rbb * rv[2];
+      }
+      else
+         a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
+   
+      #ifdef DEBUG_FORCE_ORIGIN
+         MessageInterface::ShowMessage(
+            "Epoch:  %16.11lf\n  Origin:  [%s]\n  J2KBod:  [%s]\n",
+            now.Get(), orig.ToString().c_str(), bodyrv.ToString().c_str());
+         MessageInterface::ShowMessage(
+            "Now = %16.11lf rbb3 = %16.11le rv = [%16lf %16lf %16lf]\n",
+            now.Get(), rbb3, rv[0], rv[1], rv[2]);
+      #endif
 
-      r3 = relativePosition[0]*relativePosition[0] + 
-           relativePosition[1]*relativePosition[1] + 
-           relativePosition[2]*relativePosition[2];
+      #ifdef DEBUG_INDIRECT_TERM
+         MessageInterface::ShowMessage("Indirect term for %s with mu %.15le:\n",
+               body->GetName().c_str(), mu);
+         MessageInterface::ShowMessage("   Origin   = [%16le %16le %16le]\n",
+               orig[0], orig[1], orig[2]);
+         MessageInterface::ShowMessage("   Position = [%16le %16le %16le]\n",
+               bodyrv[0], bodyrv[1], bodyrv[2]);
+         MessageInterface::ShowMessage("   a_indirect = [%16le %16le %16le]\n",
+               body->GetName().c_str(), a_indirect[0],
+               a_indirect[1], a_indirect[2]);
+      #endif
+
+        #if DEBUG_PMF_BODY
+           ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
+                         body->GetName(), now, rv);
+        #endif
+   
+        #if DEBUG_PMF_DERV
+           ShowDerivative("PointMassForce::GetDerivatives() BEFORE compute", state, 
+              satCount);
+        #endif
       
-      radius = sqrt(r3);
-      r3 *= radius;
-      mu_r = mu / r3;
+           if (fillCartesian)
+           {
+         for (Integer i = 0; i < satCount; i++) 
+         {
+            i6 = cartIndex + i * 6;
+            
+            relativePosition[0] = rv[0] - state[ i6 ];
+            relativePosition[1] = rv[1] - state[i6+1];
+            relativePosition[2] = rv[2] - state[i6+2];
+      
+            r3 = relativePosition[0]*relativePosition[0] + 
+                 relativePosition[1]*relativePosition[1] + 
+                 relativePosition[2]*relativePosition[2];
+            
+            radius = sqrt(r3);
+            r3 *= radius;
+            mu_r = mu / r3;
+      
+            #ifdef DEBUG_INDIRECT_TERM
+               MessageInterface::ShowMessage("   Raw acc for sp %d:  ", i);
+               MessageInterface::ShowMessage("[%16le %16le %16le]\n",
+                     relativePosition[0] * mu_r, relativePosition[1] * mu_r,
+                     relativePosition[2] * mu_r);
+               MessageInterface::ShowMessage("   Corrected acc =     [%16le "
+                     "%16le %16le]\n",
+                     relativePosition[0] * mu_r - a_indirect[0],
+                     relativePosition[1] * mu_r - a_indirect[1],
+                     relativePosition[2] * mu_r - a_indirect[2]);
+            #endif
 
-      if (order == 1) 
+            if (order == 1) 
+            {
+               // Do dv/dt first, in case deriv = state
+               deriv[3 + i6] = relativePosition[0] * mu_r - a_indirect[0];
+               deriv[4 + i6] = relativePosition[1] * mu_r - a_indirect[1];
+               deriv[5 + i6] = relativePosition[2] * mu_r - a_indirect[2];
+               // dr/dt = v, but only fill this piece for the central body
+               if (rbb3 == 0.0)
+               {
+                  deriv[i6]     = state[3 + i6];
+                  deriv[1 + i6] = state[4 + i6];
+                  deriv[2 + i6] = state[5 + i6];
+               }
+               else
+                  deriv[i6] = deriv[1 + i6] = deriv[2 + i6] = 0.0;
+                  
+            } 
+            else 
+            {
+               // Feed accelerations to corresponding components directly for RKN
+               deriv[ i6 ] = relativePosition[0] * mu_r - a_indirect[0]; 
+               deriv[i6+1] = relativePosition[1] * mu_r - a_indirect[1]; 
+               deriv[i6+2] = relativePosition[2] * mu_r - a_indirect[2]; 
+               deriv[i6+3] = 0.0; 
+               deriv[i6+4] = 0.0; 
+               deriv[i6+5] = 0.0; 
+            }
+         }
+           }   
+      #if DEBUG_PMF_DERV
+         ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, 
+            satCount);
+      #endif
+   
+      #ifdef DEBUG_FORCE_MODEL
+         MessageInterface::ShowMessage(
+            "%s%s%s%16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10lf, %16.10lf, "
+            "%16.10lf%s%16.10le, %16.10le, %16.10le]\n",
+            "Point mass force for ", body->GetName().c_str(), " at epoch ", 
+            now.Get(), "\n   Sat position:  [", state[0], state[1], state[2],
+            "]\n   Body position: [", rv[cartIndex + 0], rv[cartIndex + 1], 
+            rv[cartIndex + 2], "]\n   Acceleration:  [", deriv[cartIndex + 3], 
+            deriv[cartIndex + 4], deriv[cartIndex + 5]);
+      #endif
+      if (fillSTM)
       {
-         // Do dv/dt first, in case deriv = state
-         deriv[3 + i6] = relativePosition[0] * mu_r - a_indirect[0];
-         deriv[4 + i6] = relativePosition[1] * mu_r - a_indirect[1];
-         deriv[5 + i6] = relativePosition[2] * mu_r - a_indirect[2];
-         // dr/dt = v
-         deriv[i6]     = state[3 + i6];
-         deriv[1 + i6] = state[4 + i6];
-         deriv[2 + i6] = state[5 + i6];
-      } 
-      else 
-      {
-         // Feed accelerations to corresponding components directly for RKN
-         deriv[ i6 ] = relativePosition[0] * mu_r - a_indirect[0]; 
-         deriv[i6+1] = relativePosition[1] * mu_r - a_indirect[1]; 
-         deriv[i6+2] = relativePosition[2] * mu_r - a_indirect[2]; 
-         deriv[i6+3] = 0.0; 
-         deriv[i6+4] = 0.0; 
-         deriv[i6+5] = 0.0; 
+         Real aTilde[36];
+         Integer associate, element;
+         for (Integer i = 0; i < stmCount; ++i)
+         {
+            i6 = stmIndex + i * 36;
+            associate = theState->GetAssociateIndex(i6);
+            
+            relativePosition[0] = rv[0] - state[ associate ];
+            relativePosition[1] = rv[1] - state[associate+1];
+            relativePosition[2] = rv[2] - state[associate+2];
+      
+            r3 = relativePosition[0]*relativePosition[0] + 
+                 relativePosition[1]*relativePosition[1] + 
+                 relativePosition[2]*relativePosition[2];
+            
+            radius = sqrt(r3);
+            r3 *= radius;
+            mu_r = mu / r3;
+            
+            // Calculate A-tilde
+            
+            // A = D = 0
+            aTilde[ 0] = aTilde[ 1] = aTilde[ 2] = 
+            aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
+            aTilde[12] = aTilde[13] = aTilde[14] =
+            aTilde[21] = aTilde[22] = aTilde[23] = 
+            aTilde[27] = aTilde[28] = aTilde[29] =
+            aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
+            
+            // Contributions for the origin term only:
+            if (rbb3 == 0.0)
+            {
+               // B = I
+               aTilde[ 3] = aTilde[10] = aTilde[17] = 1.0;
+               aTilde[ 4] = aTilde[ 5] = aTilde[ 9] =
+               aTilde[11] = aTilde[15] = aTilde[16] = 0.0;
+            }
+            else
+            {
+               aTilde[ 3] = aTilde[10] = aTilde[17] = 
+               aTilde[ 4] = aTilde[ 5] = aTilde[ 9] =
+               aTilde[11] = aTilde[15] = aTilde[16] = 0.0;
+            }
+               
+            // Math spec, equ 6.69, broken into separate pieces
+            aTilde[18] = - mu_r + 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[0] * relativePosition[0];
+            
+            aTilde[19] = 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[0] * relativePosition[1];
+            
+            aTilde[20] = 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[0] * relativePosition[2];
+            
+            aTilde[24] = 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[1] * relativePosition[0];
+            
+            aTilde[25] = - mu_r + 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[1] * relativePosition[1];
+            
+            aTilde[26] = 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[1] * relativePosition[2];
+            
+            aTilde[30] = 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[2] * relativePosition[0];
+            
+            aTilde[31] = 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[2] * relativePosition[1];
+            
+            aTilde[32] = - mu_r + 3.0 * mu_r / (radius*radius) * 
+                             relativePosition[2] * relativePosition[2];
+            
+            // Now Phi_dot = A_tilde Phi
+            for (Integer j = 0; j < 6; ++j)
+            {
+               for (Integer k = 0; k < 6; ++k)
+               {
+                  element = j * 6 + k;
+                  deriv[i6+element] = 0.0;
+                  for (Integer l = 0; l < 6; ++l)
+                  {
+                     deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
+                  }
+               }
+            }
+         }
       }
    }
-
-   #if DEBUG_PMF_DERV
-      ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, 
-         satCount);
-   #endif
-
-   #ifdef DEBUG_FORCE_MODEL
-      MessageInterface::ShowMessage(
-         "%s%s%s%16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10lf, %16.10lf, "
-         "%16.10lf%s%16.10le, %16.10le, %16.10le]\n",
-         "Point mass force for ", body->GetName().c_str(), " at epoch ", now.Get(),
-         "\n   Sat position:  [", state[0], state[1], state[2],
-         "]\n   Body position: [", rv[0], rv[1], rv[2],
-         "]\n   Acceleration:  [", deriv[3], deriv[4], deriv[5]);
-   #endif
-
+   
+   
    return true;
 }
 
@@ -442,11 +593,9 @@ bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
    if (order != 1)
       return false;
 
-   // Calculate how many spacecraft are in the model
-   Integer satCount = (Integer)(dimension / 6);
    for (Integer i = 0; i < satCount; i++) 
    {
-      i6 = i * 6;
+      i6 = cartIndex + i * 6;
 
       map[ i6 ] = i6 + 3;
       map[i6+1] = i6 + 4;
@@ -528,7 +677,7 @@ Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* PointMassForce::Clone(void) const
+GmatBase* PointMassForce::Clone() const
 {
    return (new PointMassForce(*this));
 }
@@ -668,13 +817,13 @@ Real PointMassForce::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 std::string PointMassForce::GetStringParameter(const Integer id) const
 {
-   switch (id)
-   {
-  // case BODY:
-  //    return bodyName;
-   default:
+//   switch (id)
+//   {
+//   case BODY:
+//      return bodyName;
+//   default:
       return PhysicalModel::GetStringParameter(id);
-   }
+//   }
 }
 
 //------------------------------------------------------------------------------
@@ -695,14 +844,14 @@ bool PointMassForce::SetStringParameter(const Integer id,
    //   "PointMassForce::SetStringParameter() id = %d, value = %s\n",
    //   id, value.c_str());
 
-   switch (id)
-   {
-   //case BODY:
-   //   SetBodyName(value);
-   //   return true;
-   default:
+//   switch (id)
+//   {
+//   case BODY:
+//      SetBodyName(value);
+//      return true;
+//   default:
       return PhysicalModel::SetStringParameter(id, value);
-   }
+//   }
 }
 
 //------------------------------------------------------------------------------
@@ -756,6 +905,85 @@ bool PointMassForce::SetBooleanParameter(const Integer id, const bool value)
    return PhysicalModel::SetBooleanParameter(id,value);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SupportsDerivative(Gmat::StateElementId id)
+//------------------------------------------------------------------------------
+/**
+ * Function used to determine if the physical model supports derivative 
+ * information for a specified type.
+ * 
+ * @param id State Element ID for the derivative type
+ * 
+ * @return true if the type is supported, false otherwise. 
+ */
+//------------------------------------------------------------------------------
+bool PointMassForce::SupportsDerivative(Gmat::StateElementId id)
+{
+   #ifdef DEBUG_REGISTRATION
+      MessageInterface::ShowMessage(
+            "PointMassForce checking for support for id %d\n", id);
+   #endif
+      
+   if (id == Gmat::CARTESIAN_STATE)
+      return true;
+   
+   if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+      return true;
+   
+   return PhysicalModel::SupportsDerivative(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStart(Gmat::StateElementId id, Integer index, Integer quantity)
+//------------------------------------------------------------------------------
+/**
+ * Function used to set the start point and size information for the state 
+ * vector, so that the derivative information can be placed in the correct place 
+ * in the derivative vector.
+ * 
+ * @param id State Element ID for the derivative type
+ * @param index Starting index in the state vector for this type of derivative
+ * @param quantity Number of objects that supply this type of data
+ * 
+ * @return true if the type is supported, false otherwise. 
+ */
+//------------------------------------------------------------------------------
+bool PointMassForce::SetStart(Gmat::StateElementId id, Integer index, 
+                      Integer quantity)
+{
+   #ifdef DEBUG_REGISTRATION
+      MessageInterface::ShowMessage("PointMassForce setting start data for id "
+            "= %d to index %d; %d objects identified\n", id, index, quantity);
+   #endif
+   
+   bool retval = false;
+   
+   switch (id)
+   {
+      case Gmat::CARTESIAN_STATE:
+         satCount = quantity;
+         cartIndex = index;
+         fillCartesian = true;
+         retval = true;
+         break;
+         
+      case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
+         stmCount = quantity;
+         stmIndex = index;
+         fillSTM = true;
+         retval = true;
+         break;
+         
+      default:
+         break;
+   }
+   
+   return retval;
+}
+
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -808,7 +1036,7 @@ void  PointMassForce::ShowDerivative(const std::string &header, Real *state,
       
          for (Integer i = 0; i < satCount; i++) 
          {
-            i6 = i * 6;
+            i6 = cartIndex + i * 6;
             MessageInterface::ShowMessage
                ("sc#=%d  state=%s\n", i, stateVec.ToString().c_str());
          

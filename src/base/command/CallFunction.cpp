@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 CallFunction
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -20,13 +22,11 @@
 #include "BeginFunction.hpp"
 #include "StringTokenizer.hpp"
 #include "StringUtil.hpp"          // for Replace()
+#include "FileUtil.hpp"            // for ParseFileName()
+#include "FileManager.hpp"         // for GetAllMatlabFunctionPaths()
 #include "MessageInterface.hpp"
-
 #include <sstream>
 
-#if defined __USE_MATLAB__
-#include "MatlabInterface.hpp"     // for Matlab Engine functions
-#endif
 
 //#define DEBUG_CALL_FUNCTION_PARAM
 //#define DEBUG_CALL_FUNCTION_INIT
@@ -34,11 +34,26 @@
 //#define DEBUG_SEND_PARAM
 //#define DEBUG_UPDATE_VAR
 //#define DEBUG_UPDATE_OBJECT
-//#define DEBUG_USE_ARRAY
+//#define DEBUG_SHOW_ARRAY
 //#define DEBUG_GMAT_FUNCTION_INIT
 //#define DEBUG_GET_OUTPUT
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_GLOBAL_OBJECT_MAP
+//#define DEBUG_RUN_COMPLETE
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+//#ifndef DEBUG_TRACE
+//#define DEBUG_TRACE
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
+#ifdef DEBUG_TRACE
+#include <ctime>                 // for clock()
+#endif
 
 //---------------------------------
 // static data
@@ -64,17 +79,20 @@ CallFunction::PARAMETER_TYPE[CallFunctionParamCount - GmatCommandParamCount] =
 
 
 //------------------------------------------------------------------------------
-// CallFunction::CallFunction()
+// CallFunction::CallFunction(const std::string &type)
 //------------------------------------------------------------------------------
-CallFunction::CallFunction() :
-   GmatCommand      ("CallFunction"),
-   callcmds         (NULL),
-   mFunction        (NULL),
-   mFunctionName    ("")
+CallFunction::CallFunction(const std::string &type) :
+   GmatCommand          (type),
+   callcmds             (NULL),
+   mFunction            (NULL),
+   mFunctionName        (""),
+   mFunctionPathAndName (""),
+   isGmatFunction       (false),
+   isMatlabFunction     (false)
 {
    mNumInputParams = 0;
    mNumOutputParams = 0;
-
+   
    parameterCount = CallFunctionParamCount;
    objectTypeNames.push_back("CallFunction");
 }
@@ -94,24 +112,26 @@ CallFunction::~CallFunction()
 // CallFunction(const CallFunction& cf) :
 //------------------------------------------------------------------------------
 CallFunction::CallFunction(const CallFunction& cf) :
-   GmatCommand     (cf),
-   callcmds        (NULL),
-   mFunction       (cf.mFunction),
-   mFunctionName   (cf.mFunctionName),
-   fm              (cf.fm)
+   GmatCommand           (cf),
+   callcmds              (NULL),
+   mFunction             (cf.mFunction),
+   mFunctionName         (cf.mFunctionName),
+   mFunctionPathAndName  (cf.mFunctionPathAndName),
+   fm                    (cf.fm)
 {
    mNumInputParams = cf.mNumInputParams;
    mNumOutputParams = cf.mNumOutputParams;
-
+   
    objectArray = cf.objectArray;
    mInputList = cf.mInputList;
    mOutputList = cf.mOutputList;
    callcmds = NULL;           // Commands must be reinitialized
+   isGmatFunction = cf.isGmatFunction;
+   isMatlabFunction = cf.isMatlabFunction;
    
-   mInputListNames  = cf.mInputListNames;
-   mOutputListNames = cf.mOutputListNames;
-
-
+   mInputNames  = cf.mInputNames;
+   mOutputNames = cf.mOutputNames;
+   
    parameterCount = CallFunctionParamCount;
 }
 
@@ -128,6 +148,7 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
    
    mFunction = cf.mFunction;
    mFunctionName = cf.mFunctionName;
+   mFunctionPathAndName = cf.mFunctionPathAndName;
    mNumInputParams = cf.mNumInputParams;
    mNumOutputParams = cf.mNumOutputParams;
    
@@ -135,11 +156,13 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
    mInputList = cf.mInputList;
    mOutputList = cf.mOutputList;
    callcmds = NULL;           // Commands must be reinitialized
+   isGmatFunction = cf.isGmatFunction;
+   isMatlabFunction = cf.isMatlabFunction;
    
-   mInputListNames  = cf.mInputListNames;
-   mOutputListNames = cf.mOutputListNames;
+   mInputNames  = cf.mInputNames;
+   mOutputNames = cf.mOutputNames;
    fm               = cf.fm;
-
+   
    return *this;
 }
 
@@ -151,28 +174,32 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
 //------------------------------------------------------------------------------
 std::string CallFunction::FormEvalString()
 {
+   #ifdef DEBUG_MATLAB_EVAL
+   MessageInterface::ShowMessage
+      ("CallFunction::FormEvalString() entered, mFunction=<%p>'%s'\n",
+       mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
+   #endif
    std::string evalString = "";
-
-
+   
    // left hand side of evaluation string and equals (if necessary)
    if (mOutputList.size() > 1)
    {
       evalString = evalString + "[";
       Parameter *param = (Parameter *)mOutputList[0];
       evalString = evalString + param->GetName();
-
+      
       for (unsigned int i=1; i<mOutputList.size(); i++)
       {
          param = (Parameter *)mOutputList[i];
          evalString = evalString +", " + param->GetName();
       }
-
+      
       evalString = evalString + "] = ";
    }
    else if (mOutputList.size() == 1)
    {
       Parameter *param = (Parameter *)mOutputList[0];
-      evalString = evalString + param->GetName();
+      evalString = "[" + evalString + param->GetName() + "]";
       evalString = evalString +" = ";
    }
    else if (mOutputList.size() == 0)
@@ -183,8 +210,8 @@ std::string CallFunction::FormEvalString()
    {
       // need to throw an exception here
    }
-
-
+   
+   
    // right hand side of evaluation string
    // function name and left parenthesis
    evalString = evalString + mFunction->GetName().c_str() + "(";
@@ -202,10 +229,10 @@ std::string CallFunction::FormEvalString()
          evalString = evalString + ", " + param->GetName();
       }
    }
-
+   
    // right parenthesis and semi-colon
    evalString = evalString + ");";
-
+   
    return evalString;
 }
 
@@ -217,8 +244,8 @@ bool CallFunction::AddInputParameter(const std::string &paramName, Integer index
 {
    if (paramName != "" && index == mNumInputParams)
    {
-      mInputListNames.push_back(paramName);
-      mNumInputParams = mInputListNames.size();
+      mInputNames.push_back(paramName);
+      mNumInputParams = mInputNames.size();
       mInputList.push_back(NULL);
       fm.AddInput(paramName);
       return true;
@@ -235,8 +262,8 @@ bool CallFunction::AddOutputParameter(const std::string &paramName, Integer inde
 {
    if (paramName != "" && index == mNumOutputParams)
    {
-      mOutputListNames.push_back(paramName);
-      mNumOutputParams = mOutputListNames.size();
+      mOutputNames.push_back(paramName);
+      mNumOutputParams = mOutputNames.size();
       mOutputList.push_back(NULL);
       fm.AddOutput(paramName);      
       return true;
@@ -328,6 +355,18 @@ bool CallFunction::HasAFunction()
 
 
 //------------------------------------------------------------------------------
+// virtual bool IsMatlabFunctionCall()
+//------------------------------------------------------------------------------
+bool CallFunction::IsMatlabFunctionCall()
+{
+   if (isMatlabFunction)
+      return true;
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
 /**
@@ -390,13 +429,13 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
    if (mode != Gmat::NO_COMMENTS)
       gen = prefix + "GMAT ";
    
-   if (mOutputListNames.size() > 0)
+   if (mOutputNames.size() > 0)
    {
       gen += "[";
-      for (StringArray::iterator i = mOutputListNames.begin();
-           i != mOutputListNames.end(); ++i)
+      for (StringArray::iterator i = mOutputNames.begin();
+           i != mOutputNames.end(); ++i)
       {
-         if (i != mOutputListNames.begin())
+         if (i != mOutputNames.begin())
             gen += ", ";
          gen += *i;
       }
@@ -405,13 +444,13 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
    
    gen += mFunctionName;
    
-   if (mInputListNames.size() > 0)
+   if (mInputNames.size() > 0)
    {
       gen += "(";
-      for (StringArray::iterator i = mInputListNames.begin();
-           i != mInputListNames.end(); ++i)
+      for (StringArray::iterator i = mInputNames.begin();
+           i != mInputNames.end(); ++i)
       {
-         if (i != mInputListNames.begin())
+         if (i != mInputNames.begin())
             gen += ", ";
          gen += *i;
       }
@@ -514,14 +553,16 @@ std::string CallFunction::GetStringParameter(const std::string &label) const
 bool CallFunction::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_CALL_FUNCTION_PARAM
-      MessageInterface::ShowMessage("CallFunction::SetStringParameter with id = %d and value = %s\n",
-            id, value.c_str());
+      MessageInterface::ShowMessage
+         ("CallFunction::SetStringParameter with id = %d and value = %s\n",
+          id, value.c_str());
    #endif
-
+      
    switch (id)
    {
    case FUNCTION_NAME:
       mFunctionName = value;
+      mFunctionPathAndName = value;
       fm.SetFunctionName(value);
       return true;
    case ADD_INPUT:
@@ -585,9 +626,9 @@ const StringArray& CallFunction::GetStringArrayParameter(const Integer id) const
    switch (id)
    {
    case ADD_INPUT:
-      return mInputListNames;
+      return mInputNames;
    case ADD_OUTPUT:
-      return mOutputListNames;
+      return mOutputNames;
    default:
       return GmatCommand::GetStringArrayParameter(id);
    }
@@ -644,22 +685,22 @@ bool CallFunction::TakeAction(const std::string &action,
 //------------------------------------------------------------------------------
 // StringArray GetRefObjectNameArray(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
-StringArray CallFunction::GetRefObjectNameArray(const Gmat::ObjectType type) const
+const StringArray& CallFunction::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   StringArray result;
-
+   refObjectNames.clear();
+   
    switch (type) {
       case Gmat::PARAMETER:         // Input/Output
-         for (unsigned int i=0; i<mInputListNames.size(); i++)
-            result.push_back(mInputListNames[i]);
-         for (unsigned int i=0; i<mOutputListNames.size(); i++)
-            result.push_back(mOutputListNames[i]);
-         return result;
+         for (unsigned int i=0; i<mInputNames.size(); i++)
+            refObjectNames.push_back(mInputNames[i]);
+         for (unsigned int i=0; i<mOutputNames.size(); i++)
+            refObjectNames.push_back(mOutputNames[i]);
+         return refObjectNames;
       default:
          break;
    }
-
-   return result;
+   
+   return refObjectNames;
 }
 
 
@@ -685,20 +726,20 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
    else if (type == Gmat::PARAMETER)
    {
       // parameters - go through input and output
-      for (unsigned int i=0; i<mInputListNames.size(); i++)
+      for (unsigned int i=0; i<mInputNames.size(); i++)
       {
-         if (mInputListNames[i] == oldName)
+         if (mInputNames[i] == oldName)
          {
-            mInputListNames[i] = newName;
+            mInputNames[i] = newName;
             break;
          }
       }
 
-      for (unsigned int i=0; i<mOutputListNames.size(); i++)
+      for (unsigned int i=0; i<mOutputNames.size(); i++)
       {
-         if (mOutputListNames[i] == oldName)
+         if (mOutputNames[i] == oldName)
          {
-            mOutputListNames[i] = newName;
+            mOutputNames[i] = newName;
             break;
          }
       }
@@ -709,15 +750,15 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
             type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
    {
       
-      for (UnsignedInt i=0; i<mInputListNames.size(); i++)
-         if (mInputListNames[i].find(oldName) != std::string::npos)
-            mInputListNames[i] =
-               GmatStringUtil::Replace(mInputListNames[i], oldName, newName);
+      for (UnsignedInt i=0; i<mInputNames.size(); i++)
+         if (mInputNames[i].find(oldName) != std::string::npos)
+            mInputNames[i] =
+               GmatStringUtil::Replace(mInputNames[i], oldName, newName);
       
-      for (UnsignedInt i=0; i<mOutputListNames.size(); i++)
-         if (mOutputListNames[i].find(oldName) != std::string::npos)
-            mOutputListNames[i] =
-               GmatStringUtil::Replace(mOutputListNames[i], oldName, newName);
+      for (UnsignedInt i=0; i<mOutputNames.size(); i++)
+         if (mOutputNames[i].find(oldName) != std::string::npos)
+            mOutputNames[i] =
+               GmatStringUtil::Replace(mOutputNames[i], oldName, newName);
    }
 
    return true;
@@ -736,13 +777,13 @@ GmatBase* CallFunction::GetRefObject(const Gmat::ObjectType type,
       case Gmat::PARAMETER:
          for (int i=0; i<mNumInputParams; i++)
          {
-            if (mInputListNames[i] == name)
+            if (mInputNames[i] == name)
                return mInputList[i];
          }
          
          for (int i=0; i<mNumOutputParams; i++)
          {
-            if (mOutputListNames[i] == name)
+            if (mOutputNames[i] == name)
                return mOutputList[i];
          }
          
@@ -791,7 +832,7 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    case Gmat::PARAMETER:
       for (int i=0; i<mNumInputParams; i++)
       {
-         if (mInputListNames[i] == name)
+         if (mInputNames[i] == name)
          {
             mInputList[i] = (Parameter*)obj;
             return true;
@@ -800,7 +841,7 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
       for (int i=0; i<mNumOutputParams; i++)
       {
-         if (mOutputListNames[i] == name)
+         if (mOutputNames[i] == name)
          {
             mOutputList[i] = (Parameter*)obj;
             return true;
@@ -811,8 +852,13 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (name == mFunctionName)
       {
          mFunction = (Function *)obj;
+         mFunctionPathAndName = mFunction->GetFunctionPathAndName();
          if (mFunction && mFunction->GetTypeName() == "GmatFunction")
+         {
             fm.SetFunction(mFunction);
+            isGmatFunction = true;
+            isMatlabFunction = false;
+         }
       }
       return true;
       
@@ -864,7 +910,11 @@ ObjectArray& CallFunction::GetRefObjectArray(const Gmat::ObjectType type)
 bool CallFunction::Initialize()
 {
    #ifdef DEBUG_CALL_FUNCTION_INIT
-      MessageInterface::ShowMessage("In CallFunction::Initialize()\n");
+      MessageInterface::ShowMessage
+         ("CallFunction::Initialize() this=<%p> entered, command = '%s'\n   "
+          "function type is '%s', callingFunction is '%s'\n", this,
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str(), mFunction->GetTypeName().c_str(),
+          callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL");
    #endif
    
    GmatCommand::Initialize();
@@ -873,115 +923,34 @@ bool CallFunction::Initialize()
    ShowObjectMaps("In CallFunction::Initialize()");
    #endif
    
-   //GmatBase *mapObj;  // 2008.04.28 - wcs - already found when globalObjectMap set
-   //if ((mapObj = FindObject(mFunctionName))  == NULL)
-   //   throw CommandException("CallFunction command cannot find Function " +
-   //            mFunctionName + "\n");
-   //mFunction = (Function *)mapObj;
-   //fm->SetFunction(mFunction);   
-   
+   isGmatFunction = false;
+   isMatlabFunction = false;
    
    bool rv = true;  // Initialization return value
    if (mFunction == NULL)
       throw CommandException("CallFunction::Initialize() the function pointer is NULL");
    
-   if (mFunction->GetTypeName() != "GmatFunction")
-   {
-      // need to initialize input parameters
-      mInputList.clear();
-      GmatBase *mapObj;
-      for (StringArray::iterator i = mInputListNames.begin();
-           i != mInputListNames.end(); ++i)
-      {
-         if ((mapObj = FindObject(*i))  == NULL)
-            throw CommandException("CallFunction command cannot find Parameter " +
-                  *i + " in script line\n   \"" +
-                  GetGeneratingString(Gmat::SCRIPTING) + "\"");
-         
-         #ifdef DEBUG_CALL_FUNCTION_INIT
-            MessageInterface::ShowMessage("Adding input parameter %s\n", i->c_str());
-         #endif
-            
-         mInputList.push_back((Parameter *)mapObj);
-      }
-      
-      // need to initialize output parameters
-      mOutputList.clear();
-      
-      for (StringArray::iterator i = mOutputListNames.begin();
-           i != mOutputListNames.end();++i)
-      {
-         if ((mapObj = FindObject(*i))  == NULL)
-            throw CommandException("CallFunction command cannot find Parameter " + (*i));
-         
-         #ifdef DEBUG_CALL_FUNCTION_INIT
-            MessageInterface::ShowMessage("Adding output parameter %s\n", i->c_str());
-         #endif
-         
-         mOutputList.push_back((Parameter *)mapObj);
-      }      
-      
-      if (mInputList.size() > 0)
-         if (mInputList[0] == NULL)
-         {
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_,
-                "CallFunction::Initialize() CallFunction will not be created.\n"
-                "The first parameter selected as input for the CallFunction is NULL\n");
-            return false;
-         }
-      
-      if (mOutputList.size() > 0)
-         if (mOutputList[0] == NULL)
-         {
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_,
-                "CallFunction::Initialize() CallFunction will not be created.\n"
-                "The first parameter selected as output for the CallFunction is NULL\n");
-            return false;
-         }
-   }
-   
-   // Handle additional initialization for GmatFunctions
    if (mFunction->GetTypeName() == "GmatFunction")
-   {
-      #ifdef DEBUG_GMAT_FUNCTION_INIT
-         MessageInterface::ShowMessage("CallFunction::Initialize: Initializing GmatFunction '%s'\n",
-            mFunction->GetName().c_str());
-      #endif
-      fm.SetSolarSystem(solarSys);
-      fm.SetTransientForces(forces);
-      fm.SetGlobalObjectMap(globalObjectMap);
-      ;  // NoOp, for now at least 
-      /*   
-      if (callcmds == NULL)
-         throw CommandException(
-            "Error initializing the function call for this command:\n" +
-            GetGeneratingString(Gmat::SCRIPTING));
-      
-      callcmds->TakeAction("ClearLocalData");
-      callcmds->SetPublisher(publisher);
-      callcmds->SetObjectMap(objectMap);
-      callcmds->SetGlobalObjectMap(globalObjectMap);
-      callcmds->SetSolarSystem(solarSys);
-      
-      if (callcmds->GetTypeName() == "BeginFunction")
-         ((BeginFunction *)callcmds)->SetInternalCoordSystem(internalCoordSys);
-      
-      // Pass in the input and output object names
-      for (StringArray::iterator i = mInputListNames.begin();
-           i != mInputListNames.end(); ++i)
-         callcmds->SetStringParameter("CallFunctionInput", *i);
-      
-      for (StringArray::iterator i = mOutputListNames.begin();
-           i != mOutputListNames.end(); ++i)
-         callcmds->SetStringParameter("CallFunctionOutput", *i);
-      
-      rv = callcmds->Initialize();
-      */
-      
-   }
-
+      isGmatFunction = true;
+   else if (mFunction->GetTypeName() == "MatlabFunction")
+      isMatlabFunction = true;
+   
+   if (!isGmatFunction && !isMatlabFunction)
+      throw CommandException
+         ("CallFunction::Initialize() the function is neither GmatFunction nor MatlabFunction");
+   
+   mFunctionPathAndName = mFunction->GetFunctionPathAndName();
+   std::string fname = GmatFileUtil::ParseFileName(mFunctionPathAndName);
+   if (fname == "")
+      mFunctionPathAndName += mFunctionName;
+   
+   #ifdef DEBUG_CALL_FUNCTION_INIT
+   MessageInterface::ShowMessage
+      ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s', "
+       "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
+       mFunctionPathAndName.c_str());
+   #endif
+   
    return rv;
 }
 
@@ -992,34 +961,30 @@ bool CallFunction::Initialize()
 bool CallFunction::Execute()
 {
    bool status = false;
-
+   
    if (mFunction == NULL)
       throw CommandException("Function is not defined for CallFunction");
-
-   #ifdef DEBUG_CALL_FUNCTION_EXEC
-      MessageInterface::ShowMessage("CallFunction::Execute()\n");
+   
+   #ifdef DEBUG_TRACE
+   static Integer callCount = 0;
+   callCount++;      
+   clock_t t1 = clock();
+   MessageInterface::ShowMessage
+      ("=== CallFunction::Execute() entered, '%s' Count = %d\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
    #endif
-
-   #ifdef __USE_MATLAB__
-      if (mFunction->GetTypeName() == "MatlabFunction")
-      {
-         status = ExecuteMatlabFunction();
-
-         BuildCommandSummary(true);
-         return status;
-      }
-   #endif
-      
-   if (mFunction->GetTypeName() == "GmatFunction")
-   {
-      status = fm.Execute(callingFunction);
-   }
    
    #ifdef DEBUG_CALL_FUNCTION_EXEC
-      MessageInterface::ShowMessage("Executed command\n");
+      MessageInterface::ShowMessage
+         ("CallFunction::Execute() this=<%p> entered, command = '%s'\n   "
+          "function type is '%s', callingFunction is '%s'\n", this,
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str(), mFunction->GetTypeName().c_str(),
+          callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL");
+      #ifdef DEBUG_OBJECT_MAP
+      ShowObjectMaps("object maps at the start");
+      #endif
    #endif
-
-   BuildCommandSummary(true);
+      
    return status;
 }
 
@@ -1031,273 +996,20 @@ void CallFunction::RunComplete()
 {
    #ifdef DEBUG_RUN_COMPLETE
    MessageInterface::ShowMessage
-      ("CallFunction::RunComplete() calling FunctionManager::Finalize()\n");
-   #endif
-   fm.Finalize();
-   GmatCommand::RunComplete();
-}
-
-
-//------------------------------------------------------------------------------
-// bool ExecuteMatlabFunction()
-//------------------------------------------------------------------------------
-bool CallFunction::ExecuteMatlabFunction()
-{
-   bool status = false;
-
-   #ifdef __USE_MATLAB__
-      MatlabInterface::Open();
-
-      // set format long so that we don't loose precision between string transmission
-      MatlabInterface::EvalString("format long");
-      
-      // add path to matlab workspace
-      // send string to matlab - path(path ,'a:\')
-      Integer pathId = mFunction->GetParameterID("FunctionPath");
-      std::string thePath = mFunction->GetStringParameter(pathId);      
-      
-      // Clear last errormsg
-      MatlabInterface::EvalString("clear errormsg");
-      
-      if (thePath != "")
-      {
-         std::string setPath = "path(path ,'" + thePath + "')";
-         MatlabInterface::EvalString(setPath);
-      }
-      
-      // send the in parameters
-      for (unsigned int i=0; i<mInputList.size(); i++)
-      {
-         Parameter *param = (Parameter *)mInputList[i];
-         SendInParam(param);
-      }
-      
-      //  Eval String
-      std::string evalString = FormEvalString();
-      EvalMatlabString(evalString);
-      
-      // get the value for the out parameters
-      GetOutParams();
-      
-      status = true;
-      
-   #endif
-      
-   return status;
-}
-
-
-//------------------------------------------------------------------------------
-// void SendInParam(Parameter *param)
-//------------------------------------------------------------------------------
-void CallFunction::SendInParam(Parameter *param)
-{
-   #ifdef DEBUG_SEND_PARAM
-   MessageInterface::ShowMessage("CallFunction::SendInParam()");
+      ("CallFunction::RunComplete() entered for this=<%p> '%s',\n   "
+       "FCS %sfinalized\n", this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       fm.IsFinalized() ? "already " : "NOT ");
    #endif
    
-   #ifdef __USE_MATLAB__
-      if (param == NULL)
-      {
-         MessageInterface::ShowMessage("Parameter was null");
-         return;
-      }
-      
-      #ifdef DEBUG_SEND_PARAM
-      MessageInterface::ShowMessage
-         ("Parameter name=%s, type=%s\n", param->GetName().c_str(),
-          param->GetTypeName().c_str());
+   if (!fm.IsFinalized())
+   {
+      #ifdef DEBUG_RUN_COMPLETE
+      MessageInterface::ShowMessage("   calling FunctionManager::Finalize()\n");
       #endif
-      
-      if (param->GetTypeName() == "Array")
-      {
-         Array *array = (Array *)param;
-         int numRows = array->GetIntegerParameter("NumRows");
-         int numCols = array->GetIntegerParameter("NumCols");
-         std::ostringstream os;
-         
-         os.precision(18);
-         
-         Rmatrix rmatrix = array->GetRmatrix();
-         
-         for (int j=0; j<numRows; j++)
-         {
-            os << "[";
-            for (int k=0; k<numCols; k++)
-               os << rmatrix(j, k) << ",";
-            os << "], \n";
-         }
-         
-         std::string inParamString = array->GetName() + " = [" +os.str() + "];";
-         EvalMatlabString(inParamString);
-      }
-      else if (param->GetTypeName() == "Variable")
-      {
-          std::ostringstream os;
-          os.precision(18);
-          os << param->EvaluateReal();
-          
-          std::string inParamString = param->GetName() +" = " + os.str() +";";
-          
-          #ifdef DEBUG_SEND_PARAM
-          MessageInterface::ShowMessage
-             ("Sent string %s to matlab\n", inParamString.c_str());
-          #endif
-          
-          EvalMatlabString(inParamString);
-      }
-      else if (param->GetTypeName() == "String")
-      {
-         StringVar *stringVar = (StringVar *)param;
-         std::string inParamString = param->GetName() +" = '" +
-            stringVar->GetString() +"';";
-         
-         EvalMatlabString(inParamString);
-      }
-      else // it is any object
-      {
-         if (param->GetTypeName() == "Spacecraft")
-            param->TakeAction("UpdateEpoch");
-         
-         std::string inParamString =
-            param->GetGeneratingString(Gmat::MATLAB_STRUCT);
-         
-         #ifdef DEBUG_SEND_PARAM
-         MessageInterface::ShowMessage
-            ("Generated param string :\n%s\n", inParamString.c_str());
-         #endif
-         
-         EvalMatlabString(inParamString);
-      }
-   #endif  //__USE_MATLAB__
-}
-
-
-//------------------------------------------------------------------------------
-// void GetOutParams()
-//------------------------------------------------------------------------------
-void CallFunction::GetOutParams()
-{
-#ifdef __USE_MATLAB__
-   try
-   {
-      for (unsigned int i=0; i<mOutputList.size(); i++)
-      {
-         Parameter *param = (Parameter *)mOutputList[i];
-         std::string varName = param->GetName();
-         
-         #ifdef DEBUG_GET_OUTPUT
-         MessageInterface::ShowMessage
-            ("CallFunction::GetOutParams() OutParamType=%s, name=%s\n",
-             param->GetTypeName().c_str(), varName.c_str());
-         #endif
-         
-         if (param->GetTypeName() == "Array")
-         {
-            Array *array = (Array *)param;
-            int numRows = array->GetIntegerParameter("NumRows");
-            int numCols = array->GetIntegerParameter("NumCols");
-            int totalCells = numRows * numCols;            
-            double *outArray = new double[totalCells];
-            
-            MatlabInterface::GetRealArray(varName, totalCells, outArray);
-            
-            // create rmatrix
-            Rmatrix rmatrix = Rmatrix (numRows, numCols);
-            
-            for (int j=0; j<numCols; j++)
-               for (int k=0; k<numRows; k++)
-                  rmatrix(k, j) = outArray[(j*numRows) + k];
-            
-            #ifdef DEBUG_USE_ARRAY
-            for (int j=0; j<numRows; j++)
-            {
-               for (int k=0; k<numCols; k++)
-                  MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
-               MessageInterface::ShowMessage("\n");
-            }
-            #endif
-            
-            // assign rmatrix to array
-            array->SetRmatrixParameter("RmatValue", rmatrix);
-            
-            delete [] outArray;
-            
-         }
-         else if (param->GetTypeName() == "Variable")
-         {
-            double *outArray = new double[1];
-            
-            MatlabInterface::GetRealArray(varName, 1, outArray);
-            
-            param->SetReal(outArray[0]);
-            std::ostringstream ss;
-            ss.precision(18);
-            ss << outArray[0];
-            param->SetStringParameter("Expression", ss.str());
-            
-            #ifdef DEBUG_UPDATE_VAR
-            MessageInterface::ShowMessage
-               ("The EvaluateReal is %f\n",  param->EvaluateReal());
-            MessageInterface::ShowMessage
-               ("The GetReal is %f\n", param->GetReal());
-            #endif
-            
-            delete [] outArray;
-         }
-         else if (param->GetTypeName() == "String")
-         {
-            // need to output string value to buffer         
-            char buffer[512];
-            MatlabInterface::OutputBuffer(buffer, 512);
-            EvalMatlabString(varName);
-            
-            // get rid of "var ="
-            char *ptr = strtok((char *)buffer, "=");
-            ptr = strtok(NULL, "\n");
-            
-            param->SetStringParameter("Expression", ptr);
-         }
-         else // objects
-         {
-            //MessageInterface::ShowMessage("==>Handle Object\n");
-            
-            char buffer[8192];
-            MatlabInterface::OutputBuffer(buffer, 8192);
-            
-            // need to output string value to buffer
-            EvalMatlabString(varName);
-            
-            //MessageInterface::ShowMessage("==>buffer=\n%s\n", buffer);
-            
-            // assign new value to object
-            UpdateObject(param, buffer);
-         }
-      }
-   }
-   catch (BaseException &e)
-   {
-      std::string moreMsg = e.GetFullMessage() + " in \n" +
-         GetGeneratingString(Gmat::SCRIPTING);
-      e.SetMessage("");
-      e.SetDetails(moreMsg);
-      throw;
+      fm.Finalize();
    }
    
-#endif  //__USE_MATLAB__
-}
-
-
-//------------------------------------------------------------------------------
-// void EvalMatlabString(std::string evalString)
-//------------------------------------------------------------------------------
-void CallFunction::EvalMatlabString(std::string evalString)
-{
-#ifdef __USE_MATLAB__
-
-   MatlabInterface::RunMatlabString(evalString);
-   
-#endif
+   GmatCommand::RunComplete();
 }
 
 
@@ -1307,7 +1019,7 @@ void CallFunction::EvalMatlabString(std::string evalString)
 void CallFunction::ClearInputParameters()
 {
    mInputList.clear();
-   mInputListNames.clear();
+   mInputNames.clear();
    mNumInputParams = 0;
 }
 
@@ -1318,7 +1030,7 @@ void CallFunction::ClearInputParameters()
 void CallFunction::ClearOutputParameters()
 {
    mOutputList.clear();
-   mOutputListNames.clear();
+   mOutputNames.clear();
    mNumOutputParams = 0;
 }
 
@@ -1330,8 +1042,6 @@ void CallFunction::ClearOutputParameters()
  *  Sets the internal coordinate system used by the Sandbox.
  *
  *  @param <cs> The internal coordinate system.
- *
- *  @return true if the command was added to the sequence, false if not.
  */
 //------------------------------------------------------------------------------
 void CallFunction::SetInternalCoordSystem(CoordinateSystem *cs)
@@ -1344,90 +1054,22 @@ void CallFunction::SetInternalCoordSystem(CoordinateSystem *cs)
 
 
 //------------------------------------------------------------------------------
-// void UpdateObject(GmatBase *obj, char *buffer)
+// void SetPublisher(Publisher *pub)
 //------------------------------------------------------------------------------
-void CallFunction::UpdateObject(GmatBase *obj, char *buffer)
+/**
+ *  Passes the Publisher used by the Sandbox to FunctionManager
+ *
+ *  @param <pub> The publisher
+ */
+//------------------------------------------------------------------------------
+void CallFunction::SetPublisher(Publisher *pub)
 {
-   StringTokenizer st(buffer, ": \n");
-   StringArray tokens = st.GetAllTokens();
-
-   #ifdef DEBUG_UPDATE_OBJECT
-   for (unsigned int i=0; i<tokens.size(); i++)
-      MessageInterface::ShowMessage("tokens[%d]=<%s>\n", i, tokens[i].c_str());
-   #endif
-   
-   int id;
-   Gmat::ParameterType type;
-   std::string newstr;
-
-   // actual parameter starts at 2
-   for (unsigned int i=2; i<tokens.size(); i+=2)
-   {
-      //MessageInterface::ShowMessage("tokens[%d]=<%s>\n", i, tokens[i].c_str());
-      id = obj->GetParameterID(tokens[i]);
-      type = obj->GetParameterType(id);
-      
-      switch (type)
-      {
-      case Gmat::STRING_TYPE:
-      {
-         //MessageInterface::ShowMessage
-         //   ("tokens[i+1]=<%s>, length=%d\n", tokens[i+1].c_str(),
-         //    tokens[i+1].length());
-                  
-         if (((tokens[i+1].c_str())[0] == '\'')&&
-            ((tokens[i+1].c_str())[tokens[i+1].length()-1] == '\''))
-            newstr = tokens[i+1].substr(1, tokens[i+1].length()-2);
-         else if ((tokens[i+1].c_str())[0] == '\'')
-         {
-            // assume it is a gregorian date then DD MMM YYYY hh:mm:ss.sss
-            // this probably isn't the best way, but it will do for now...
-            
-            // DD
-            newstr = tokens[i+1].substr(1, tokens[i+1].length()-1) + " ";
-            i++;
-            
-            // MMM
-            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()) + " "; 
-            i++;
-            
-            // YYYY
-            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()) + " "; 
-            i++;
-            
-            // hh:
-            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()) + ":"; 
-            i++;
-            
-            // mm:                          
-            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()) + ":"; 
-            i++;
-
-            // ss.sss
-            newstr = newstr + tokens[i+1].substr(0, tokens[i+1].length()-1); 
-
-         }
-         else
-            newstr = tokens[i+1].substr(1, tokens[i+1].length()-2);
-            
-         //MessageInterface::ShowMessage("newstr=<%s>\n", newstr.c_str());
-         obj->SetStringParameter(id, newstr);
-         break;
-      }
-      case Gmat::REAL_TYPE:
-         obj->SetRealParameter(id, atof(tokens[i+1].c_str()));
-         break;
-      default:
-         throw CommandException
-            ("\nCurrently CallFunction cannot update output object for "
-             "parameter type: " + GmatBase::PARAM_TYPE_STRING[type] + "\n");
-      }
-   }
-
-   #ifdef DEBUG_UPDATE_OBJECT
+   #ifdef DEBUG_PUBLISHER
    MessageInterface::ShowMessage
-      ("new %s=\n%s\n", obj->GetName().c_str(),
-       obj->GetGeneratingString(Gmat::MATLAB_STRUCT).c_str());
+      ("CallFunction::SetPublisher() setting publiser <%p> to FunctionManager\n", pub);
    #endif
+   GmatCommand::SetPublisher(pub);
+   fm.SetPublisher(pub);
 }
+
 

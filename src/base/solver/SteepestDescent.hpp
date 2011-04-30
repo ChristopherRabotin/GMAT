@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -36,7 +38,7 @@
  * @note The steepest descent optimizer is not yet implemented; once a line 
  * search utility exists, it can be completed.
  */
-class SteepestDescent : public InternalOptimizer
+class GMAT_API SteepestDescent : public InternalOptimizer
 {
 public:
 	SteepestDescent(const std::string &name);

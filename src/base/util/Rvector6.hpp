@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Rvector6
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -25,10 +27,11 @@
 #include "GmatGlobal.hpp"      // for DATA_PRECISION
 
 class Rvector3;
+class Rmatrix66;
 
 #define NUM_DATA_INIT 6
 
-class Rvector6 : public Rvector
+class GMAT_API Rvector6 : public Rvector
 {
 public:
 
@@ -36,7 +39,7 @@ public:
    Rvector6(const Real e1, const Real e2, const Real e3, const Real e4,
             const Real e5, const Real e6);
    Rvector6(const Rvector3 &r, const Rvector3 &v);
-   Rvector6(Real vec[6]);
+   Rvector6(const Real vec[6]);
    Rvector6(const Rvector6 &v);
    Rvector6& operator=(const Rvector6 &v);
    virtual ~Rvector6();
@@ -52,7 +55,7 @@ public:
    void Set(const Real v[6]);
    void SetR(const Rvector3 &v);
    void SetV(const Rvector3 &v);
-
+   
    bool operator==(const Rvector6 &v)const;
    bool operator!=(const Rvector6 &v)const;
    Rvector6 operator-() const;                    // negation 
@@ -62,8 +65,15 @@ public:
    const Rvector6& operator-=(const Rvector6 &v);
    Rvector6 operator*(Real s) const;
    const Rvector6& operator*=(Real s);
+   Real operator*(const Rvector6 &v) const;       // dot product
    Rvector6 operator/(Real s) const;
    const Rvector6& operator/=(Real s);
+   
+   friend class Rmatrix66;
+   Rvector6 operator*(const Rmatrix66 &m) const; 
+   const Rvector6& operator*=(const Rmatrix66 &m);
+   Rvector6 operator/(const Rmatrix66 &m) const;
+   const Rvector6& operator/=(const Rmatrix66 &m);
    
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;

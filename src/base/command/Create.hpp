@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Create
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan
 // Created: 2008.03.14
@@ -25,7 +29,7 @@
 /**
  * Declaration of the Create command
  */
-class Create : public ManageObject
+class GMAT_API Create : public ManageObject
 {
 public:
    Create();
@@ -53,6 +57,7 @@ public:
    
    bool                 Initialize();
    bool                 Execute();
+   virtual void         RunComplete();
 
 protected:
    enum
@@ -61,12 +66,11 @@ protected:
       CreateParamCount
    };
    static const std::string PARAMETER_TEXT[CreateParamCount - ManageObjectParamCount];
-
+   
    static const Gmat::ParameterType PARAMETER_TYPE[CreateParamCount - ManageObjectParamCount];
-
+   
    std::string  objType;
    GmatBase     *refObj;
-   //ObjectArray  creations; 
    /// object names and sizes  when the object type is an Array
    StringArray  arrayNames;
    IntegerArray rows;

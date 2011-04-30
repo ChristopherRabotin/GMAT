@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                               BranchCommand
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -23,18 +25,27 @@
 #include "MessageInterface.hpp"
 #include "CallFunction.hpp"
 #include "Assignment.hpp"
+#include "CommandUtil.hpp"      // for GetCommandSeqString()
 #include <sstream>              // for stringstream
 
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 //#define DEBUG_BRANCHCOMMAND_APPEND
 //#define DEBUG_BRANCHCOMMAND_INSERT
-//#define DEBUG_BRANCHCOMMAND_REMOVE 1
+//#define DEBUG_BRANCHCOMMAND_REMOVE
 //#define DEBUG_BRANCHCOMMAND_ADD
 //#define DEBUG_BRANCHCOMMAND_PREV_CMD
 //#define DEBUG_BRANCHCOMMAND_EXECUTION
 //#define DEBUG_BRANCHCOMMAND_GEN_STRING
-//#define DEBUG_RUN_COMPLETE 1
+//#define DEBUG_RUN_COMPLETE
 //#define DEBUG_BRANCHCOMMAND_GMATFUNCTIONS
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //------------------------------------------------------------------------------
 // public methods
@@ -79,12 +90,15 @@ BranchCommand::~BranchCommand()
 {
    #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
       MessageInterface::ShowMessage
-         ("In BranchCommand::~BranchCommand() this=%s\n",
+         ("In BranchCommand::~BranchCommand() this=<%p> '%s'\n", this,
           this->GetTypeName().c_str());
+      MessageInterface::ShowMessage("branch.size()=%d\n", branch.size());
+      std::string cmdstr = GmatCommandUtil::GetCommandSeqString(this);
+      MessageInterface::ShowMessage("%s\n", cmdstr.c_str());
    #endif
    std::vector<GmatCommand*>::iterator node;
-   GmatCommand* current;
-
+   GmatCommand *current = NULL;
+   
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       // Find the end for each branch and disconnect it from the start
@@ -92,17 +106,17 @@ BranchCommand::~BranchCommand()
       if (current != NULL)
       {
          #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-            MessageInterface::ShowMessage
-               ("   current=%s\n", current->GetTypeName().c_str());
+         ShowCommand("   ", "current=", current);
          #endif
-            
-         while (current->GetNext() != this)
+         
+         // Why I need to add current != current->GetNext() to avoid
+         // infinite loop? It used to work!! (loj: 2008.12.02)
+         //while (current->GetNext() != this)
+         while (current->GetNext() != this && current != current->GetNext())
          {
             current = current->GetNext();
             if (current == NULL)
-            {
                break;
-            }
          }
          
          // Calling Remove this way just sets the next pointer to NULL
@@ -116,7 +130,15 @@ BranchCommand::~BranchCommand()
          }
          
          if (*node)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               ((*node), (*node)->GetTypeName(), (*node)->GetTypeName() +
+                " deleting child command");
+            #endif
             delete *node;
+            *node = NULL;
+         }
       }
       else
          break;
@@ -255,6 +277,10 @@ void BranchCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
 //------------------------------------------------------------------------------
 bool BranchCommand::Initialize()
 {
+   #ifdef DEBUG_BRANCHCOMMAND_INIT
+   ShowCommand("BranchCommand::Initialize() entered ", "this=", this);
+   #endif
+   
    GmatCommand::Initialize();
    
    std::vector<GmatCommand*>::iterator node;
@@ -266,6 +292,9 @@ bool BranchCommand::Initialize()
       currentPtr = *node;
       while (currentPtr != this)
       {
+         #ifdef DEBUG_BRANCHCOMMAND_INIT
+         ShowCommand("About to initialize child in ", "child=", currentPtr);
+         #endif
          if (!currentPtr->Initialize())
                retval = false;
          currentPtr = currentPtr->GetNext();
@@ -634,14 +663,15 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
    {
       current = branch[which];
-      tempNext = current->GetNext();
-      
-      #ifdef DEBUG_BRANCHCOMMAND_REMOVE
-      ShowCommand("BranchCommand::", "Remove() current = ", current, ", tempNext = ", tempNext);
-      #endif
       
       if (current != NULL)
       {
+         tempNext = current->GetNext();
+      
+         #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+         ShowCommand("BranchCommand::", "Remove() current = ", current, ", tempNext = ", tempNext);
+         #endif
+         
          fromBranch = current->Remove(cmd);
          
          #ifdef DEBUG_BRANCHCOMMAND_REMOVE
@@ -1041,7 +1071,8 @@ bool BranchCommand::ExecuteBranch(Integer which)
 {
    #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
    MessageInterface::ShowMessage
-      ("In BranchCommand (%s), executing branch %d\n", typeName.c_str(), which);
+      ("In BranchCommand (%s) '%s', executing branch %d\n", typeName.c_str(),
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), which);
    #endif
    bool retval = true;
    
@@ -1049,16 +1080,7 @@ bool BranchCommand::ExecuteBranch(Integer which)
       current = branch[which];
    
    #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
-   if (current != NULL)
-   {
-      std::string curName = current->GetTypeName();
-      MessageInterface::ShowMessage
-         ("In ExecuteBranch (%s) - current = %s\n", 
-      typeName.c_str(), curName.c_str());
-   }
-   else
-      MessageInterface::ShowMessage
-         ("In ExecuteBranch (%s)  - current = NULL\n", typeName.c_str());
+   ShowCommand("In ExecuteBranch:", "current = ", current, "this    = ", this);
    #endif
    
    if (current == this)
@@ -1080,31 +1102,49 @@ bool BranchCommand::ExecuteBranch(Integer which)
       current = NULL;
    }
    
-   //while ((current != NULL) && (current != this))
    if (current != NULL)
    {
       #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
-      MessageInterface::ShowMessage
-         ("   Calling %s->Execute()\n", current->GetTypeName().c_str());
+      ShowCommand("   Calling in ", "current = ", current);
       #endif
       
       try
       {
+         // Save current command and set it after current command finished executing
+         // incase for calling GmatFunction.
+         GmatCommand *curcmd = current;
          if (current->Execute() == false)
-         {
             retval = false;
-            //break;
-         }
          
+         current = curcmd;
          // check for user interruption here (loj: 2007.05.11 Added)
          if (GmatGlobal::Instance()->GetRunInterrupted())
             throw CommandException
                ("Branch command \"" + generatingString + "\" interrupted!");
          
-         current = current->GetNext();
+         // Check for NULL pointer here (loj: 2008.09.25 Added)
+         // Why current pointer is reset to NULL running recursive function?
+         // Is this an error or can it be ignored?
+         // Without this change, Factorial_FR testing will not work.
+         if (current == NULL)
+         {
+            #ifdef __THROW_EXCEPTION__            
+            throw CommandException
+               ("Branch command \"" + generatingString + "\" has NULL current pointer!");
+            #endif
+         }
+         
+         if (current != NULL)
+            current = current->GetNext();
+         
+         branchExecuting = true;
+         // Set commandExecuting to true if branch is executing (LOJ: 2010.08.06)
+         commandExecuting = true;
       }
       catch (BaseException &e)
       {
+         // Use exception to remove Visual C++ warning
+         e.GetMessageType();
          #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
          MessageInterface::ShowMessage
             ("   BranchCommand rethrowing %s\n", e.GetFullMessage().c_str());
@@ -1113,6 +1153,13 @@ bool BranchCommand::ExecuteBranch(Integer which)
          throw;
       }
    }
+   
+   #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+   ShowCommand("Exiting ExecuteBranch:", "current = ", current, "this    = ", this);
+   MessageInterface::ShowMessage
+      ("   branchExecuting=%d, commandExecuting=%d, commandComplete=%d\n",
+       branchExecuting, commandExecuting, commandComplete);
+   #endif
    
    return retval;
 } // ExecuteBranch()
@@ -1131,7 +1178,7 @@ bool BranchCommand::ExecuteBranch(Integer which)
 //------------------------------------------------------------------------------
 void BranchCommand::RunComplete()
 {
-   #if DEBUG_RUN_COMPLETE
+   #ifdef DEBUG_RUN_COMPLETE
    ShowCommand("BranchCommand::", "BranchCommand::RunComplete() this = ", this);
    #endif
    
@@ -1336,3 +1383,101 @@ void BranchCommand::SetCallingFunction(FunctionManager *fm)
    }
 }
 
+//------------------------------------------------------------------------------
+// bool IsExecuting()
+//------------------------------------------------------------------------------
+/**
+ * Indicates whether the command is executing or not.
+ *
+ * @return true if command is executing
+ */
+//------------------------------------------------------------------------------
+bool BranchCommand::IsExecuting()
+{
+   return branchExecuting;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetCloneCount()
+//------------------------------------------------------------------------------
+/**
+ * Determines how many clones are available in the branch command
+ *
+ * @return The number of clones
+ */
+//------------------------------------------------------------------------------
+Integer BranchCommand::GetCloneCount()
+{
+   cloneCount = 0;
+
+   // Count 'em up from the branch control sequence(s)
+   std::vector<GmatCommand*>::iterator node;
+   GmatCommand *currentPtr;
+
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      currentPtr = *node;
+      while (currentPtr != this)
+      {
+         cloneCount += currentPtr->GetCloneCount();
+         currentPtr = currentPtr->GetNext();
+         if (currentPtr == NULL)
+            throw CommandException("Branch command \"" + generatingString +
+                                   "\" was not terminated!");
+      }
+   }
+
+   #ifdef DEBUG_CLONE_UPDATES
+      MessageInterface::ShowMessage("CloneCount for branch command %s = %d\n",
+            typeName.c_str(), cloneCount);
+   #endif
+
+   return cloneCount;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetClone(Integer cloneIndex)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a clone pointer from the branch command
+ *
+ * @param cloneIndex Index to the desired clone
+ *
+ * @return The pointer to the clone
+ */
+//------------------------------------------------------------------------------
+GmatBase* BranchCommand::GetClone(Integer cloneIndex)
+{
+   GmatBase *retptr = NULL;
+   Integer currentCount = 0, nodeCount;
+   std::vector<GmatCommand*>::iterator node;
+   GmatCommand *currentPtr;
+
+   if ((cloneIndex < cloneCount) && (cloneIndex >= 0))
+   {
+      for (node = branch.begin(); node != branch.end(); ++node)
+      {
+         currentPtr = *node;
+         while (currentPtr != this)
+         {
+            nodeCount = currentPtr->GetCloneCount();
+
+            if (cloneIndex < currentCount + nodeCount)
+            {
+               retptr = currentPtr->GetClone(cloneIndex - currentCount);
+               break;
+            }
+
+            currentCount += nodeCount;
+            currentPtr = currentPtr->GetNext();
+            if (currentPtr == NULL)
+               throw CommandException("Branch command \"" + generatingString +
+                                      "\" was not terminated!");
+         }
+      }
+   }
+
+   return retptr;
+}

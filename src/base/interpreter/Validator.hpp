@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Validator
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CCA54C
@@ -47,10 +49,12 @@ public:
    void SetObjectMap(ObjectMap *objMap);
    void SetFunction(Function *func);
    
-   bool StartServer(GmatCommand *cmd);
+   bool StartMatlabServer(GmatCommand *cmd);
    bool CheckUndefinedReference(GmatBase *obj, bool contOnError = true);
    bool ValidateCommand(GmatCommand *cmd, bool contOnError = true,
                         Integer manage = 1);
+   
+   void HandleCcsdsEphemerisFile(ObjectMap *objMap, bool deleteOld = false);
    
    ElementWrapper* CreateElementWrapper(const std::string &desc,
                                         bool parametersFirst = false,
@@ -65,6 +69,12 @@ public:
                               const std::string &ownerName = "",
                               const std::string &depName = "",
                               Integer manage = 1);
+   Parameter* CreateAutoParameter(const std::string &type,
+                                  const std::string &name,
+                                  bool &alreadyManaged,
+                                  const std::string &ownerName = "",
+                                  const std::string &depName = "",
+                                  Integer manage = 1);
    Parameter* CreateArray( const std::string &arrayStr, Integer manage = 1);   
    Parameter* CreateSystemParameter(bool &paramCreated, const std::string &str,
                                     Integer manage = 1);
@@ -110,6 +120,7 @@ private:
    bool CreateForceModelProperty(GmatBase *obj, const std::string &prop,
                                  const std::string &value);
    bool HandleError(bool addFunction = true);
+   void ShowObjectMap(const std::string &label = "");
    
    Interpreter     *theInterpreter;
    Moderator       *theModerator;
@@ -120,6 +131,9 @@ private:
    StringArray     theParameterList;
    
    std::string     theDescription;
+   /// If object not found, it will automatically create StringWrapper
+   /// This flag indicates whether or not to create default StringWrapper
+   bool            createDefaultStringWrapper;
    
    /// Error handling data
    bool            continueOnError;

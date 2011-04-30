@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           ModKeplerian
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -24,6 +26,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_MOD_KEPLERIAN 1
+//#define DEBUG_MODKEP_TO_KEP
 
 //---------------------------------
 //  static data
@@ -178,7 +181,7 @@ Rvector6 KeplerianToModKeplerian(const Rvector6& keplerian)
       throw UtilityException("ModKeplerian::KeplerianToModKeplerian: " 
                              "If ECC > 1, SMA must be negative");
    
-   // Check for  exaclty parabolic orbit or infinite semi-major axis
+   // Check for  exactly parabolic orbit or infinite semi-major axis
    // then send the error message
    if ( a == 1 || a == std::numeric_limits<Real>::infinity() )
       throw UtilityException("ModKeplerian::KeplerianToModKeplerian: " 
@@ -187,10 +190,23 @@ Rvector6 KeplerianToModKeplerian(const Rvector6& keplerian)
    
    // Check for parabolic orbit to machine precision
    // then send the error message
-   if ( GmatMathUtil::Abs(e - 1) < 2*GmatRealConst::REAL_EPSILON)
-      throw UtilityException("ModKeplerian::KeplerianToModKeplerian: " 
-                             "Orbit is nearly parabolic and state conversion "
-                             "routine is near numerical singularity");
+   if ( GmatMathUtil::Abs(e - 1) < 2*GmatRealConstants::REAL_EPSILON)
+   {
+//      throw UtilityException("ModKeplerian::KeplerianToModKeplerian: "
+//                             "Orbit is nearly parabolic and state conversion "
+//                             "routine is near numerical singularity");
+      std::string errmsg =
+            "Error in conversion from Keplerian to ModKeplerian state: ";
+      errmsg += "The state results in an orbit that is nearly parabolic.\n";
+      throw UtilityException(errmsg);
+   }
+   // Check for a singular conic section
+   if (GmatMathUtil::Abs(a*(1 - e) < .001))
+   {
+      throw UtilityException
+         ("Error in conversion from Keplerian to ModKeplerian state: "
+          "The state results in a singular conic section with radius of periapsis less than 1 m.\n");
+   }
    
    // Convert into radius of periapsis and apoapsis
    Real radPer = a*(1.0 - e);
@@ -215,13 +231,17 @@ Rvector6 KeplerianToModKeplerian(const Rvector6& keplerian)
 //------------------------------------------------------------------------------
 Rvector6 ModKeplerianToKeplerian(const Rvector6& modKeplerian)
 {
+   #ifdef DEBUG_MODKEP_TO_KEP
+      MessageInterface::ShowMessage("Entering ModKepToKep, radPer = %12.10f, radApo = %12.10f\n",
+            modKeplerian[0], modKeplerian[1]);
+   #endif
    Real radPer = modKeplerian[0];     // Radius of Periapsis
    Real radApo = modKeplerian[1];     // Radius of Apoapsis 
 
    // Check validity
    if (radApo < radPer && radApo > 0)
-      throw UtilityException("ModKeplerian::ModKeplerianToKeplerian: " 
-                             "If RadApo < RadPer then RadApo must be negative");
+      throw UtilityException("ModKeplerian::ModKeplerianToKeplerian: If RadApo < RadPer then RadApo must be negative.  "
+                             "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.");
 
    if (radPer <= 0)
       throw UtilityException("ModKeplerian::ModKeplerianToKeplerian: " 

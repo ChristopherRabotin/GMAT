@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  GmatCommand
 //------------------------------------------------------------------------------
-// GMAT: Goddard MiHeaderssion Analysis Tool.
+// GMAT: General MiHeaderssion Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -19,16 +21,20 @@
 
 
 #include "GmatCommand.hpp"       // class's header file
+#include "CommandException.hpp"
+#include "StateConverter.hpp"
 #include "MessageInterface.hpp"  // MessageInterface
-#include "Spacecraft.hpp"
-#include "StringUtil.hpp"        // for ToString
+#include "TimeSystemConverter.hpp"
+#include "GmatDefaults.hpp"
 
+#include <algorithm>             // for find()
 #include <sstream>               // for command summary generation
 #include <cmath>                 // for Cartesian to Keplerian conversion; 
                                  // remove it when the real conversions are
                                  // used.
-
-
+#include <iostream>
+#include <iomanip>
+#include "OrbitalParameters.hpp"
 //#define DEBUG_COMMAND_DEALLOCATION
 //#define DEBUG_COMMAND_SUMMARY_LIST
 //#define DEBUG_COMMAND_INIT 1
@@ -44,6 +50,14 @@
 //#define DEBUG_IS_FUNCTION
 //#define DEBUG_INTERPRET_PREFACE
 //#define DEBUG_CMD_CALLING_FUNCTION
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 //  static members
@@ -97,6 +111,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    objectMap            (NULL),
    globalObjectMap      (NULL),
    solarSys             (NULL),
+   triggerManagers      (NULL),
    internalCoordSys     (NULL),
    publisher            (NULL),
    streamID             (-1),
@@ -104,6 +119,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    commandChangedState  (false),
 //   comment              (""),
    commandChanged       (false),
+   cloneCount           (0),
    epochData            (NULL),
    stateData            (NULL),
    parmData             (NULL)
@@ -147,25 +163,56 @@ GmatCommand::~GmatCommand()
       //    this->GetTypeName().c_str(), nextStr.c_str());
    #endif
       
-   if (this->IsOfType("BranchEnd"))
-      return;
-   
-   // Delete the subsequent GmatCommands
-   if (next) {
-      #ifdef DEBUG_COMMAND_DEALLOCATION
+   // We need to clean up summary data, so removed return if BranchEnd (loj: 2008.12.19)
+   if (!this->IsOfType("BranchEnd"))
+   {      
+      // Delete the subsequent GmatCommands
+      if (next) {
+         #ifdef DEBUG_COMMAND_DEALLOCATION
          MessageInterface::ShowMessage("   Deleting (%p)%s\n", next, 
                                        next->GetTypeName().c_str());
-      #endif
-      delete next;   
+         #endif
+         
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (next, next->GetTypeName(), this->GetTypeName() +
+             "::~GmatCommand() deleting child command");
+         #endif
+         delete next;   
+      }
    }
-
+   
    // Clean up the summary buffers
    if (epochData)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (epochData, "epochData", this->GetTypeName() +
+          "::~GmatCommand() deleting epochData");
+      #endif
       delete [] epochData;
+      epochData = NULL;
+   }
    if (stateData)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (stateData, "stateData", this->GetTypeName() +
+          "::~GmatCommand() deleting stateData");
+      #endif
       delete [] stateData;
+      stateData = NULL;
+   }
    if (parmData)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (parmData, "parmData", this->GetTypeName() +
+          "::~GmatCommand() deleting parmData");
+      #endif
       delete [] parmData;
+      parmData = NULL;
+   }
 }
 
 
@@ -184,9 +231,9 @@ GmatCommand::~GmatCommand()
 //------------------------------------------------------------------------------
 GmatCommand::GmatCommand(const GmatCommand &c) :
    GmatBase             (c),
+   initialized          (false),
    association          (c.association),
    objects              (c.objects),
-   initialized          (false),
    currentFunction      (c.currentFunction),
    callingFunction      (c.callingFunction),
    next                 (NULL),
@@ -202,12 +249,12 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
 //   comment              (c.comment),
    commandChanged       (c.commandChanged),
    settables            (c.settables),
+   cloneCount           (0),
    epochData            (NULL),
    stateData            (NULL),
    parmData             (NULL)
 {
    generatingString = c.generatingString;
-   //parameterCount = GmatCommandParamCount;  // wrong!
 }
 
 
@@ -254,6 +301,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    streamID = c.streamID;
 //   comment = c.comment;
    commandChanged = c.commandChanged;
+   cloneCount     = 0;
    settables      = c.settables;
    
    epochData = NULL;
@@ -325,10 +373,10 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
       empty = "% Generating string not set for " + typeName + " command.";
       return empty;
    }
-
+   
    if (mode == Gmat::NO_COMMENTS)
       return generatingString;
-
+   
    
    std::string commentLine = GetCommentLine();
    std::string inlineComment = GetInlineComment();
@@ -468,6 +516,8 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
    }
    catch (BaseException &be)
    {
+      // Use exception to remove Visual C++ warning
+      be.GetMessageType();
       // will need to check data type of object property 
       // wrappers on initialization
       if (!ignoreUnsetReference)
@@ -560,8 +610,8 @@ bool GmatCommand::SetObject(const std::string &name,
  *         is an internal object.
  */
 //------------------------------------------------------------------------------
-GmatBase* GmatCommand::GetObject(const Gmat::ObjectType type, 
-                             const std::string objName)
+GmatBase* GmatCommand::GetGmatObject(const Gmat::ObjectType type, 
+                                  const std::string objName)
 {
    return NULL;
 }
@@ -609,6 +659,21 @@ void GmatCommand::SetSolarSystem(SolarSystem *ss)
    solarSys = ss;
 }
 
+
+//------------------------------------------------------------------------------
+// void SetTriggerManagers(std::vector<TriggerManager*> *trigs)
+//------------------------------------------------------------------------------
+/**
+ * Sets the trigger manager pointers
+ *
+ * @param trigs A vector of TriggerManager pointers passed in from the local
+ *              Sandbox.
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetTriggerManagers(std::vector<TriggerManager*> *trigs)
+{
+   triggerManagers = trigs;
+}
 
 //------------------------------------------------------------------------------
 // virtual void SetInternalCoordSystem(CoordinateSystem *cs)
@@ -712,6 +777,42 @@ void GmatCommand::SetPublisher(Publisher *p)
 Publisher* GmatCommand::GetPublisher()
 {
    return publisher;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetObjectList()
+//------------------------------------------------------------------------------
+/**
+ * Returns a list of objects referenced by the command, so that the command can
+ * be validated as only referencing existing objects.
+ *
+ * Derived classes can override this method to build different lists, or to add
+ * to the objects list.
+ *
+ * @return The list of objects
+ */
+//------------------------------------------------------------------------------
+const StringArray& GmatCommand::GetObjectList()
+{
+   return objects;
+}
+
+//------------------------------------------------------------------------------
+// bool Validate()
+//------------------------------------------------------------------------------
+/**
+ * Performs internal validation of the command
+ *
+ * This method is called during the final pass of script reading to verify that
+ * the command has internal consistency.
+ *
+ * @return true if the command is internally consistent, false if not.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::Validate()
+{
+   return GmatBase::Validate();
 }
 
 
@@ -1165,7 +1266,8 @@ bool GmatCommand::Initialize()
       throw CommandException(errorstr);
    }
    
-   if (solarSys == NULL) {
+   if (solarSys == NULL)
+   {
       std::string errorstr("Solar system has not been initialized for ");
       errorstr += GetTypeName();
       throw CommandException(errorstr);
@@ -1174,21 +1276,33 @@ bool GmatCommand::Initialize()
    initialized = AssignObjects();
    if (publisher == NULL)
       publisher = Publisher::Instance();
-      
+   
    if (epochData != NULL)
    {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (epochData, "epochData", this->GetTypeName() + " deleting epochData");
+      #endif
       delete [] epochData;
       epochData = NULL;
    }
    
    if (stateData != NULL)
    {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (stateData, "stateData", this->GetTypeName() + " deleting stateData");
+      #endif
       delete [] stateData;
       stateData = NULL;
    }
    
    if (parmData != NULL)
    {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (parmData, "parmData", this->GetTypeName() + " deleting parmData");
+      #endif
       delete [] parmData;
       parmData = NULL;
    }
@@ -1607,6 +1721,10 @@ void GmatCommand::RunComplete()
       ("GmatCommand::RunComplete for (%p)%s\n", this, typeName.c_str());
    #endif
    
+   // Reset stream ID and initialized flag
+   streamID = -1;
+   initialized = false;
+   
    if (this->IsOfType("BranchEnd"))
       return;
    
@@ -1614,8 +1732,8 @@ void GmatCommand::RunComplete()
    if (next)
    {
       #if DEBUG_RUN_COMPLETE
-      MessageInterface::ShowMessage("   Next cmd is a (%p)%s\n", next,
-                                    (next->GetTypeName()).c_str());
+      MessageInterface::ShowMessage("   Next cmd is a <%p><%s>'%s'\n", next,
+                                    (next->GetTypeName()).c_str(), next->GetGeneratingString().c_str());
       if (next->IsOfType("BranchEnd"))
          MessageInterface::ShowMessage
             ("   .. and that cmd is a branchEnd!!!!!!!!! %s\n",
@@ -1657,8 +1775,8 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
       {
          // Build summary data for each spacecraft in the object list
          GmatBase *obj;
-         for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
-              i != objectMap->end(); ++i)
+         for (std::map<std::string, GmatBase *>::iterator i =
+               objectMap->begin(); i != objectMap->end(); ++i)
          {
             #ifdef DEBUG_COMMAND_SUMMARY_LIST
                MessageInterface::ShowMessage("Examining %s\n", i->first.c_str());
@@ -1687,16 +1805,13 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                ++satsInMaps;
             }
          }
-         //epochData = new Real[satsInMaps];
-         //stateData = new Real[6*satsInMaps];
-         //parmData = new Real[6*satsInMaps];
       }
       if (globalObjectMap != NULL)
       {
          // Add summary data for each spacecraft in the global object list
          GmatBase *obj;
-         for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
-              i != globalObjectMap->end(); ++i)
+         for (std::map<std::string, GmatBase *>::iterator i =
+               globalObjectMap->begin(); i != globalObjectMap->end(); ++i)
          {
             #ifdef DEBUG_COMMAND_SUMMARY_LIST
                MessageInterface::ShowMessage("Examining %s\n", i->first.c_str());
@@ -1725,18 +1840,53 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                ++satsInMaps;
             }
          }
-         //epochData = new Real[satsInMaps];
-         //stateData = new Real[6*satsInMaps];
-         //parmData = new Real[6*satsInMaps];
       }
       if (satsInMaps > 0)
       {
+         if (epochData != NULL)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (epochData, "epochData", this->GetTypeName() + "::BuildCommandSummary()",
+                "deleting epochData");
+            #endif
+            delete [] epochData;
+         }
+         if (stateData != NULL)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (stateData, "stateData", this->GetTypeName() + "::BuildCommandSummary()",
+                "deleting stateData");
+            #endif
+            delete [] stateData;
+         }
+         if (parmData != NULL)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (parmData, "parmData", this->GetTypeName() + "::BuildCommandSummary()",
+                "deleting parmData");
+            #endif
+            delete [] parmData;
+         }
          epochData = new Real[satsInMaps];
          stateData = new Real[6*satsInMaps];
          parmData = new Real[6*satsInMaps];
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (epochData, "epochData", this->GetTypeName() + "::BuildCommandSummary()",
+             "epochData = new Real[satsInMaps]");
+         MemoryTracker::Instance()->Add
+            (stateData, "stateData", this->GetTypeName() + "::BuildCommandSummary()",
+             "stateData = new Real[satsInMaps]");
+         MemoryTracker::Instance()->Add
+            (parmData, "parmData", this->GetTypeName() + "::BuildCommandSummary()",
+             "parmData = new Real[satsInMaps]");
+         #endif
       }
    }
-
+   
    #if DEBUG_BUILD_CMD_SUMMARY
    MessageInterface::ShowMessage
       ("GmatCommand::BuildCommandSummary() Now fill in data...\n   "
@@ -1749,7 +1899,8 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
    {
       i6 = i * 6;
       epochData[i] = satVector[i]->GetRealParameter(satEpochID);
-      memcpy(&stateData[i6], satVector[i]->GetState().GetState(), 6*sizeof(Real));
+      memcpy(&stateData[i6], satVector[i]->GetState().GetState(),
+            6*sizeof(Real));
       parmData[i6] = satVector[i]->GetRealParameter(satCdID);
       parmData[i6+1] = satVector[i]->GetRealParameter(satDragAreaID);
       parmData[i6+2] = satVector[i]->GetRealParameter(satCrID);
@@ -1776,20 +1927,21 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    std::stringstream data;
    StateConverter    stateConverter;
 
-   if (((objectMap == NULL) && (globalObjectMap == NULL))|| (satVector.size() == 0))
+   if (((objectMap == NULL) && (globalObjectMap == NULL)) ||
+       (satVector.size() == 0))
    {
       data << "Command Summary: " << typeName << " Command\n"
            << "Execute the script to generate command summary data\n";
    }
    else
    {
-      data << "Command Summary: " << typeName << " Command\n";
+      //data << "Command Summary: " << typeName << " Command\n";
       if (!commandCompleted)
          data << "Execute the script to generate command summary data\n";
       else
       {
-         data << "-------------------------------------------"
-              << "-------------------------------------------\n";
+        // data << "-------------------------------------------"
+        //      << "-------------------------------------------\n";
    
          GmatBase *obj;
          // Build summary data for each spacecraft in the object list
@@ -1797,61 +1949,131 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
          {
             obj = satVector[i];
 
-            Rvector6 rawState = &stateData[i*6];
-            Rvector6 newState = rawState;
-                                   
-            data.precision(16);
-            data << "  Spacecraft " << obj->GetName() << "\n"
-                 << "     A.1 Modified Julian Epoch: "
-                 << epochData[i] << "\n\n"
-                 << "    Coordinate System: EarthMJ2000Eq \n\n"
-                 << "    Cartesian State:\n"
-                 << "        X  = " << newState[0] << " km\n"
-                 << "        Y  = " << newState[1] << " km\n"
-                 << "        Z  = " << newState[2] << " km\n"
-                 << "        VX = " << newState[3] << " km/s\n"
-                 << "        VY = " << newState[4] << " km/s\n"
-                 << "        VZ = " << newState[5] << " km/s\n";
-   
-            //obj->SetStringParameter("StateType", "Keplerian");
-               
-            CartToKep(rawState, newState);
+            Rvector6 rawState  = &stateData[i*6];
+            Rvector6 cartState = rawState;
+            Rvector6 kepState      = stateConverter.FromCartesian(rawState,
+                  "Keplerian");
+            Rvector6 sphStateAZFPA = stateConverter.FromCartesian(rawState,
+                  "SphericalAZFPA");
+            Rvector6 sphStateRADEC = stateConverter.FromCartesian(rawState,
+                  "SphericalRADEC");
 
-            data << "\n    Keplerian State:\n"
-                 << "        SMA  = " << newState[0] << " km\n"
-                 << "        ECC  = " << newState[1] << "\n"
-                 << "        INC  = " << newState[2] << " deg\n"
-                 << "        RAAN = " << newState[3] << " deg\n"
-                 << "        AOP  = " << newState[4] << " deg\n"
-                 << "        TA   = " << newState[5] << " deg\n";
+            //TimeConverterUtil::Convert
+            Real utcModJulEpoch = TimeConverterUtil::Convert(epochData[i],
+                  TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+                  GmatTimeConstants::JD_JAN_5_1941);
+            Real taiModJulEpoch = TimeConverterUtil::Convert(epochData[i],
+                  TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+                  GmatTimeConstants::JD_JAN_5_1941);
+            Real ttModJulEpoch = TimeConverterUtil::Convert(epochData[i],
+                  TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+                  GmatTimeConstants::JD_JAN_5_1941);
+            Real tdbModJulEpoch = TimeConverterUtil::Convert(epochData[i],
+                  TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
+                  GmatTimeConstants::JD_JAN_5_1941);
+            std::string utcString =
+                  TimeConverterUtil::ConvertMjdToGregorian(utcModJulEpoch);
+            std::string taiString =
+                  TimeConverterUtil::ConvertMjdToGregorian(taiModJulEpoch);
+            std::string ttString =
+                  TimeConverterUtil::ConvertMjdToGregorian(ttModJulEpoch);
+            std::string tdbString =
+                  TimeConverterUtil::ConvertMjdToGregorian(tdbModJulEpoch);
 
-            data << "\n\n    Spacecraft properties:\n"
-                 << "        Cd = " 
-                 << parmData[i*6] << "\n"
-                 << "        Drag area = " 
-                 << parmData[i*6+1] << " m^2\n"
-                 << "        Cr = " 
-                 << parmData[i*6+2] << "\n"
+            data.flags(std::ios::left);
+            data.precision(10);
+            data.setf(std::ios::fixed,std::ios::floatfield);
+            data.fill('0');
+            data.width(20);
+
+            // Add a between-spacecraft break
+            if (i > 0)
+               data << "\n   ================================================="
+                     "=======================\n\n";
+
+            //  Write the epoch data
+            data << "        Spacecraft       : " << obj->GetName() << "\n"
+                 << "        Coordinate System: EarthMJ2000Eq \n\n"
+
+                 << "        Time System   Gregorian                     "
+                 << "Modified Julian  \n"
+                 << "        --------------------------------------------"
+                 << "--------------------------    \n"
+                 << "        UTC Epoch:    " << utcString << "      "
+                 << utcModJulEpoch <<"\n"
+                 << "        TAI Epoch:    " << taiString << "      "
+                 << taiModJulEpoch <<"\n"
+                 << "        TT  Epoch:    " << ttString  << "      "
+                 << ttModJulEpoch  <<"\n"
+                 << "        TDB Epoch:    " << tdbString << "      "
+                 << tdbModJulEpoch <<"\n\n";
+
+            data.unsetf(std::ios::fixed);
+            data.unsetf(std::ios::floatfield);
+            data.precision(15);
+            data.width(20);
+
+            data << "        Cartesian State                       "
+                 << "Keplerian State\n"
+                                     << "        ---------------------------           "
+                                     << "-------------------------------- \n"
+                 << "        X  = " << BuildNumber(cartState[0]) << " km     "
+                 << "        SMA  = " << BuildNumber(kepState[0]) << " km\n"
+                 << "        Y  = " << BuildNumber(cartState[1]) << " km     "
+                 << "        ECC  = " << BuildNumber(kepState[1]) << "\n"
+                 << "        Z  = " << BuildNumber(cartState[2]) << " km     "
+                 << "        INC  = " << BuildNumber(kepState[2]) << " deg\n"
+                 << "        VX = " << BuildNumber(cartState[3]) << " km/sec "
+                 << "        RAAN = " << BuildNumber(kepState[3]) << " deg\n"
+                 << "        VY = " << BuildNumber(cartState[4]) << " km/sec "
+                 << "        AOP  = " << BuildNumber(kepState[4]) << " deg\n"
+                 << "        VZ = " << BuildNumber(cartState[5]) << " km/sec "
+                 << "        TA   = " << BuildNumber(kepState[5]) << " deg\n"
+                 << "\n        Spherical State:\n"
+                 << "        ---------------------------       \n"
+                 << "        RMAG = " << BuildNumber(sphStateAZFPA[0])
+                 << " km\n"
+                 << "        RA   = " << BuildNumber(sphStateAZFPA[1])
+                 << " deg\n"
+                 << "        DEC  = " << BuildNumber(sphStateAZFPA[2])
+                 << " deg\n"
+                 << "        VMAG = " << BuildNumber(sphStateAZFPA[3])
+                 << " km/s\n"
+                 << "        AZI  = " << BuildNumber(sphStateAZFPA[4])
+                 << " deg\n"
+                 << "        VFPA = " << BuildNumber(sphStateAZFPA[5])
+                 << " deg\n"
+                 << "        RAV  = " << BuildNumber(sphStateRADEC[4])
+                 << " deg\n"
+                 << "        DECV = " << BuildNumber(sphStateRADEC[5])
+                 << " deg\n"
+                 << "\n\n        Spacecraft properties:\n"
+                 << "        ------------------------------\n"
+                 << "        Cd =                    "
+                 << BuildNumber(parmData[i*6], 10) << "\n"
+                 << "        Drag area =             "
+                 << BuildNumber(parmData[i*6+1], 10) << " m^2\n"
+                 << "        Cr =                    "
+                 << BuildNumber(parmData[i*6+2], 10) << "\n"
                  << "        Reflective (SRP) area = " 
-                 << parmData[i*6+3] << " m^2\n";
-                 
-            data << "        Dry mass = "
-                 << parmData[i*6+4] << " kg\n";
+                 << BuildNumber(parmData[i*6+3], 10) << " m^2\n";
+
+            data << "        Dry mass =              "
+                 << BuildNumber(parmData[i*6+4]) << " kg\n";
+            data << "        Total mass =            "
+                 << BuildNumber(parmData[i*6+5]) << " kg\n";
 
             StringArray tanks = obj->GetStringArrayParameter(satTankID);
             if (tanks.size() > 0)
             {
-               data << "        Tanks:\n";
+               data << "\n        Tank masses:\n";
                for (StringArray::iterator i = tanks.begin();
                     i != tanks.end(); ++i)
-                  data << "           " << (*i) << "\n";
+                  data << "           " << (*i) << ":   "
+                       << BuildNumber(obj->GetRefObject(Gmat::HARDWARE, (*i))->
+                             GetRealParameter("FuelMass")) << " kg\n";
             }
                  
-            data << "        Total mass = " 
-                 << parmData[i*6+5] << " kg\n";
-
-            data << "-------------------------------------------"
-                 << "-------------------------------------------\n";
          }
       }
    }
@@ -1884,6 +2106,46 @@ const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head
    }
    
    return missionSummary;
+}
+
+
+//------------------------------------------------------------------------------
+// const std::string BuildNumber(Real value, Integer length)
+//------------------------------------------------------------------------------
+/**
+ * Builds a formatted string containing a Real, so the Real can be serialized to
+ * the display
+ *
+ * @param value The Real that needs to be serialized
+ * @param length The size of the desired string
+ *
+ * @return The formatted string
+ */
+//------------------------------------------------------------------------------
+const std::string GmatCommand::BuildNumber(Real value, Integer length)
+{
+   std::string retval = "Invalid number";
+
+   if (length < 100)
+   {
+      char temp[100], defstr[40];
+      Integer fraction = 1;
+
+      Real shift = GmatMathUtil::Abs(value);
+      while (shift > 10.0)
+      {
+         ++fraction;
+         shift *= 0.1;
+      }
+      fraction = length - 3 - fraction;
+
+      sprintf(defstr, "%%%d.%dlf", length, fraction);
+      sprintf(temp, defstr, value);
+
+      retval = temp;
+   }
+
+   return retval;
 }
 
 
@@ -1953,6 +2215,55 @@ bool GmatCommand::NeedsServerStartup()
 }
 
 //------------------------------------------------------------------------------
+// bool IsExecuting()
+//------------------------------------------------------------------------------
+/**
+ * Indicates whether the command is executing or not.
+ *
+ * @return true if command is executing
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::IsExecuting()
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetCloneCount()
+//------------------------------------------------------------------------------
+/**
+ * Returns the number of clones the object created, so the Assignment command
+ * can change their attributes
+ *
+ * @return The clone count
+ */
+//------------------------------------------------------------------------------
+Integer GmatCommand::GetCloneCount()
+{
+   return cloneCount;
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat* GetClone(Integer cloneIndex = 0)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a pointer to a clone
+ *
+ * @param cloneIndex The index of the clone used by objects that have more than
+ *                   one clone
+ *
+ * @return The pointer
+ */
+//------------------------------------------------------------------------------
+GmatBase* GmatCommand::GetClone(Integer cloneIndex)
+{
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
 // void ShowCommand(const std::string &prefix = "",
 //                  const std::string &title1, GmatCommand *cmd1,
 //                  const std::string &title2 = "", GmatCommand *cmd2 = NULL)
@@ -1968,30 +2279,20 @@ void GmatCommand::ShowCommand(const std::string &prefix,
 {
    if (title2 == "")
    {
-      if (cmd1 == NULL)
-         MessageInterface::ShowMessage
-            ("%s%s::%sNULL(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
-             title1.c_str(), cmd1);
-      else
-         MessageInterface::ShowMessage
-            ("%s%s::%s%s(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
-             title1.c_str(), cmd1->GetTypeName().c_str(), cmd1);
+      MessageInterface::ShowMessage
+         ("%s%s: %s<%p><%s>[%s]\n", prefix.c_str(), this->GetTypeName().c_str(),
+          title1.c_str(), cmd1, cmd1 ? cmd1->GetTypeName().c_str() : "NULL",
+          cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
    }
    else
    {
-      if (cmd1 == NULL)
-         MessageInterface::ShowMessage
-            ("%s%s::%sNULL(%p)%s%s(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
-             title1.c_str(), cmd1, title2.c_str(), cmd2->GetTypeName().c_str(), cmd2);
-      else if (cmd2 == NULL)
-         MessageInterface::ShowMessage
-            ("%s%s::%s%s(%p)%sNULL(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
-             title1.c_str(), cmd1->GetTypeName().c_str(), cmd1, title2.c_str(), cmd2);
-      else
-         MessageInterface::ShowMessage
-            ("%s%s::%s%s(%p)%s%s(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
-             title1.c_str(), cmd1->GetTypeName().c_str(), cmd1,
-             title2.c_str(), cmd2->GetTypeName().c_str(), cmd2);
+      MessageInterface::ShowMessage
+         ("%s%s:\n   %s<%p><%s>[%s]\n   %s<%p><%s>[%s]\n", prefix.c_str(),
+          this->GetTypeName().c_str(), title1.c_str(), cmd1,
+          cmd1 ? cmd1->GetTypeName().c_str() : "NULL",
+          cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL",
+          title2.c_str(), cmd2, cmd2 ? cmd2->GetTypeName().c_str() : "NULL",
+          cmd2 ? cmd2->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
    }
 }
 
@@ -2011,21 +2312,21 @@ void GmatCommand::ShowObjectMaps(const std::string &str)
    if (objectMap)
    {
       MessageInterface::ShowMessage
-         ("Here is the Command local object map for %s:\n", this->GetTypeName().c_str());
+         ("Here is the local object map for %s:\n", this->GetTypeName().c_str());
       for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
            i != objectMap->end(); ++i)
          MessageInterface::ShowMessage
-            ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
    if (globalObjectMap)
    {
       MessageInterface::ShowMessage
-         ("Here is the Command global object map for %s:\n", this->GetTypeName().c_str());
+         ("Here is the global object map for %s:\n", this->GetTypeName().c_str());
       for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
            i != globalObjectMap->end(); ++i)
          MessageInterface::ShowMessage
-            ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
    MessageInterface::ShowMessage
@@ -2172,7 +2473,13 @@ bool GmatCommand::SeparateEquals(const std::string &description,
 //------------------------------------------------------------------------------
 void GmatCommand::CartToKep(const Rvector6 in, Rvector6 &out)
 {
-   Real mu = 398600.4415;
+   GmatBase* earth = FindObject(GmatSolarSystemDefaults::EARTH_NAME);
+   if (!earth)
+      throw CommandException(
+            "GmatCommand::CartToKep failed to find object named \"" +
+            GmatSolarSystemDefaults::EARTH_NAME + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
+
+   Real mu = ((CelestialBody*)earth)->GetGravitationalConstant();
    Real r = sqrt(in[0]*in[0]+in[1]*in[1]+in[2]*in[2]);
    Real v2 = in[3]*in[3]+in[4]*in[4]+in[5]*in[5];
    Real rdotv = in[0]*in[3] + in[1]*in[4] + in[2]*in[5];
@@ -2241,30 +2548,59 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
        newName.c_str());
    #endif
    
-   #ifdef DEBUG_FIND_OBJECT
+   #ifdef DEBUG_OBJECT_MAP
    ShowObjectMaps();
    #endif
-
+   
    // Check for SolarSystem (loj: 2008.06.25)
    if (name == "SolarSystem")
+   {
       if (solarSys)
          return solarSys;
       else
          return NULL;
+   }
    
    // Check for the object in the Local Object Store (LOS) first
    if (objectMap && objectMap->find(newName) != objectMap->end())
+   {
+      #ifdef DEBUG_FIND_OBJECT
+      MessageInterface::ShowMessage
+         ("GmatCommand::FindObject() '%s' found in LOS, so returning <%p>\n",
+          newName.c_str(), (*objectMap)[newName]);
+      #endif
       return (*objectMap)[newName];
+   }
    
    // If not found in the LOS, check the Global Object Store (GOS)
    if (globalObjectMap && globalObjectMap->find(newName) != globalObjectMap->end())
+   {
+      #ifdef DEBUG_FIND_OBJECT
+      MessageInterface::ShowMessage
+         ("GmatCommand::FindObject() '%s' found in GOS, so returning <%p>\n",
+          newName.c_str(), (*globalObjectMap)[newName]);
+      #endif
       return (*globalObjectMap)[newName];
+   }
    
    // Let's try SolarSystem (loj: 2008.06.04)
    if (solarSys && solarSys->GetBody(newName))
+   {
+      #ifdef DEBUG_FIND_OBJECT
+      MessageInterface::ShowMessage
+         ("GmatCommand::FindObject() '%s' found in SolarSystem, so returning <%p>\n",
+          newName.c_str(), (GmatBase*)(solarSys->GetBody(newName)));
+      #endif
       return (GmatBase*)(solarSys->GetBody(newName));
+   }
    
-   return NULL;   
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("GmatCommand::FindObject() '%s' not found, so returning NULL\n",
+       newName.c_str());
+   #endif
+   
+   return NULL;
 }
 
 
@@ -2286,11 +2622,14 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
       {
          std::string name = *j;
          #ifdef DEBUG_WRAPPER_CODE
-         MessageInterface::ShowMessage("      name='%s'\n", name.c_str());
+         MessageInterface::ShowMessage("      name='%s', now finding object...\n", name.c_str());
          #endif
          GmatBase *obj = FindObject(name);
          if (obj == NULL)
          {
+            if (name == "")
+               continue;
+            
             throw CommandException(
                   "GmatCommand::SetWrapperReferences failed to find object named \"" + 
                   name + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
@@ -2312,6 +2651,126 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
       throw CommandException("GmatCommand::SetWrapperReferences was passed a "
          "NULL object instead of a wrapper in:\n   \"" + generatingString + "\"\n");
    
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("GmatCommand::SetWrapperReferences() returning true\n");
+   #endif
+   
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// void ClearOldWrappers()
+//------------------------------------------------------------------------------
+void GmatCommand::ClearOldWrappers()
+{
+   oldWrappers.clear();
+}
+
+
+//------------------------------------------------------------------------------
+// void CollectOldWrappers(ElementWrapper **wrapper)
+//------------------------------------------------------------------------------
+void GmatCommand::CollectOldWrappers(ElementWrapper **wrapper)
+{
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("GmatCommand::CollectOldWrappers() <%p>'%s' entered, wrapper=<%p>\n",
+       this, GetTypeName().c_str(), *wrapper);
+   MessageInterface::ShowMessage("   There are %d old wrappers\n", oldWrappers.size());
+   #endif
+   
+   if (*wrapper)
+   {
+      if (find(oldWrappers.begin(), oldWrappers.end(), *wrapper) == oldWrappers.end())
+      {
+         oldWrappers.push_back(*wrapper);
+         *wrapper = NULL;
+      }
+   }
+   
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("GmatCommand::CollectOldWrappers() <%p>'%s' leaving\n", this, GetTypeName().c_str());
+   MessageInterface::ShowMessage("   There are %d old wrappers\n", oldWrappers.size());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void DeleteOldWrappers()
+//------------------------------------------------------------------------------
+void GmatCommand::DeleteOldWrappers()
+{
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("GmatCommand::DeleteOldWrappers() <%p>'%s' entered, has %d old wrappers\n",
+       this, GetTypeName().c_str(), oldWrappers.size());
+   #endif
+   
+   ElementWrapper *wrapper;
+   WrapperArray wrappersToDelete;
+   
+   // Add wrappers to delete
+   for (UnsignedInt i = 0; i < oldWrappers.size(); ++i)
+   {
+      wrapper = oldWrappers[i];
+      if (find(wrappersToDelete.begin(), wrappersToDelete.end(), wrapper) ==
+          wrappersToDelete.end())
+      {
+         wrappersToDelete.push_back(wrapper);
+         #ifdef DEBUG_WRAPPER_CODE
+         MessageInterface::ShowMessage("   <%p> added to wrappersToDelete\n", wrapper);
+         #endif
+      }
+   }
+   
+   // Delete wrappers
+   for (UnsignedInt i = 0; i < wrappersToDelete.size(); ++i)
+   {
+      wrapper = wrappersToDelete[i];
+      #ifdef DEBUG_WRAPPER_CODE
+      MessageInterface::ShowMessage
+         ("   wrapper=<%p>'%s'\n", wrapper, wrapper ? wrapper->GetDescription().c_str() : "NULL");
+      #endif
+      if (wrapper)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (wrapper, wrapper->GetDescription(), "GmatCommand::ClearWrappers()",
+             GetTypeName() + " deleting wrapper");
+         #endif
+         delete wrapper;
+         wrapper = NULL;
+      }
+   }
+   
+   oldWrappers.clear();
+   
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("GmatCommand::DeleteOldWrappers() <%p>'%s' leaving, has %d old wrappers\n",
+       this, GetTypeName().c_str(), oldWrappers.size());
+   #endif
+}
+
+
+void GmatCommand::PrepareToPublish(bool publishAll)
+{
+   StringArray owners, elements;
+
+   if (publishAll)
+   {
+      owners.push_back("All");
+      elements.push_back("All.epoch");
+   }
+
+   streamID = publisher->RegisterPublishedData(this, streamID, owners,
+         elements);
+}
+
+
+void GmatCommand::PublishData()
+{
+   publisher->Publish(this, streamID, NULL, 0);
+}

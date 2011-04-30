@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -19,10 +21,12 @@
 #ifndef LineSearch_hpp
 #define LineSearch_hpp
 
+#include "gmatdefs.hpp"
+
 /**
  * Definition for the line search class.  This class is not yet implemented.
  */
-class LineSearch
+class GMAT_API LineSearch
 {
 public:
 	LineSearch();

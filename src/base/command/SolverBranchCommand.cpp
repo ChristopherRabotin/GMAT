@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                            SolverBranchCommand
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -22,8 +24,20 @@
 #include "SolverBranchCommand.hpp"
 #include "Spacecraft.hpp"
 #include "Formation.hpp"
+#include "Vary.hpp"                // For SetInitialValue() method
+#include "Subscriber.hpp"
+#include "MessageInterface.hpp"
 
-#include "Vary.hpp"           // For SetInitialValue() method
+//#define DEBUG_PARSING
+//#define DEBUG_OPTIONS
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //------------------------------------------------------------------------------
 //  SolverBranchCommand(const std::string &typeStr)
@@ -65,7 +79,14 @@ SolverBranchCommand::SolverBranchCommand(const std::string &typeStr) :
 SolverBranchCommand::~SolverBranchCommand()
 {
    if (theSolver)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (theSolver, "local solver", "SolverBranchCommand::~SolverBranchCommand()",
+          "deleting local solver");
+      #endif
       delete theSolver;
+   }
 }
 
 
@@ -168,17 +189,28 @@ void SolverBranchCommand::StoreLoopData()
    // loop iterations
    // Check the Local Object Store first
    std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
-   GmatBase *obj;
-    
+   GmatBase *obj = NULL;
+   
    // Loop through the object map, looking for objects we'll need to restore.
    while (pair != objectMap->end()) 
    {
       obj = (*pair).second;
+      
+      if (obj == NULL)
+         throw CommandException
+            (typeName + "::StoreLoopData() cannot continue "
+             "due to NULL object pointer in " + generatingString);
+      
       // Save copies of all of the spacecraft
       if (obj->GetType() == Gmat::SPACECRAFT)
       {
          Spacecraft *orig = (Spacecraft*)(obj);
          Spacecraft *sc = new Spacecraft(*orig);
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            ((GmatBase*)sc, "cloned local sc", "SolverBranchCommand::StoreLoopData()",
+             "Spacecraft *sc = new Spacecraft(*orig)");
+         #endif
          // Handle CoordinateSystems
          if (orig->GetInternalCoordSystem() == NULL)
             MessageInterface::ShowMessage(
@@ -198,6 +230,12 @@ void SolverBranchCommand::StoreLoopData()
       {
          Formation *orig = (Formation*)(obj);
          Formation *form  = new Formation(*orig);
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            ((GmatBase*)form, "cloned local form", "SolverBranchCommand::StoreLoopData()",
+             "Formation *form  = new Formation(*orig)");
+         #endif
+         
          localStore.push_back(form);
       }
       ++pair;
@@ -214,6 +252,11 @@ void SolverBranchCommand::StoreLoopData()
       {
          Spacecraft *orig = (Spacecraft*)(obj);
          Spacecraft *sc = new Spacecraft(*orig);
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            ((GmatBase*)sc, "cloned local sc", "SolverBranchCommand::StoreLoopData()",
+             "Spacecraft *sc = new Spacecraft(*orig)");
+         #endif
          // Handle CoordinateSystems
          if (orig->GetInternalCoordSystem() == NULL)
             MessageInterface::ShowMessage(
@@ -233,6 +276,11 @@ void SolverBranchCommand::StoreLoopData()
       {
          Formation *orig = (Formation*)(obj);
          Formation *form  = new Formation(*orig);
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            ((GmatBase*)form, "cloned local form", "SolverBranchCommand::StoreLoopData()",
+             "Formation *form  = new Formation(*orig)");
+         #endif
          localStore.push_back(form);
       }
       ++globalPair;
@@ -280,6 +328,9 @@ void SolverBranchCommand::ResetLoopData()
 //         cmd->TakeAction("ResetLoopData");
 //      cmd = cmd->GetNext();
 //   }
+
+   // Now push the current data point to the subscribers to avoid a data gap
+
 }
 
 
@@ -296,6 +347,11 @@ void SolverBranchCommand::FreeLoopData()
    while (!localStore.empty()) {
       obj = *(--localStore.end());
       localStore.pop_back();
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (obj, obj->GetName(), "SolverBranchCommand::FreeLoopData()",
+          "deleting local obj");
+      #endif
       delete obj;
    }
 }
@@ -444,36 +500,21 @@ void SolverBranchCommand::CheckForOptions(std::string &opts)
 
 std::string SolverBranchCommand::GetSolverOptionText()
 {
+   #ifdef DEBUG_OPTIONS
+      MessageInterface::ShowMessage("Entering GetSolverOptionText with startMode = %d, and exitMode = %d\n",
+            (Integer) startMode, (Integer) exitMode);
+   #endif
    std::string optionString = "";
-   
-   if (!((startMode == RUN_AND_SOLVE) && (exitMode == DISCARD_AND_CONTINUE)))
-   {
-      bool startModeSet = false;
-      optionString += " {";
-      
-      // Handle the SolveMode options
-      if (startMode == RUN_INITIAL_GUESS)
-      {
-         optionString += "SolveMode = RunInitialGuess";
-         startModeSet = true;
-      }
-      
-      // Next handle the ExitMode options
-      if (exitMode == SAVE_AND_CONTINUE)
-      {
-         if (startModeSet)
-            optionString += ", ";
-         optionString += "ExitMode = SaveAndContinue";
-      }
-      if (exitMode == STOP)
-      {
-         if (startModeSet)
-            optionString += ", ";
-         optionString += "ExitMode = Stop";
-      }
-      
-      optionString += "}";
-   }
+   optionString += " {SolveMode = ";
+   optionString += GetStringParameter(SOLVER_SOLVE_MODE);
+   optionString += ", ExitMode = ";
+   optionString += GetStringParameter(SOLVER_EXIT_MODE);
+   optionString += "}";
+
+   #ifdef DEBUG_OPTIONS
+      MessageInterface::ShowMessage("Exiting GetSolverOptionText and optionString = %s\n",
+            optionString.c_str());
+   #endif
    
    return optionString;
 }
@@ -777,4 +818,218 @@ void SolverBranchCommand::ApplySolution()
          current = current->GetNext();
       }
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void GetActiveSubscribers()
+//------------------------------------------------------------------------------
+/**
+ * Builds a list of subscribers that are active for use in color changes and
+ * pen up/down actions
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::GetActiveSubscribers()
+{
+   // Builds a table of Subscribers that are currently receiving data
+   // Currently only set to work with XY Plots
+
+   activeSubscribers.clear();
+
+   for (ObjectMap::iterator i = objectMap->begin(); i != objectMap->end(); ++i)
+   {
+      GmatBase *obj = i->second;
+      if (obj->IsOfType(Gmat::SUBSCRIBER))
+      {
+         // Here's where we go XY specific
+         if (obj->IsOfType("XYPlot"))
+         {
+            if (obj->GetBooleanParameter("Drawing"))
+               activeSubscribers.push_back((Subscriber*)(obj));
+         }
+      }
+   }
+
+   for (ObjectMap::iterator i = globalObjectMap->begin();
+         i != globalObjectMap->end(); ++i)
+   {
+      GmatBase *obj = i->second;
+      if (obj->IsOfType(Gmat::SUBSCRIBER))
+      {
+         // Here's where we go XY specific
+         if (obj->IsOfType("XYPlot"))
+         {
+            if (obj->GetBooleanParameter("Drawing"))
+               activeSubscribers.push_back((Subscriber*)(obj));
+         }
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void PenUpSubscribers()
+//------------------------------------------------------------------------------
+/**
+ * Sends a PenUp command to all active subscribers
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::PenUpSubscribers()
+{
+   for (UnsignedInt i = 0; i < activeSubscribers.size(); ++i)
+      activeSubscribers[i]->TakeAction("PenUp");
+}
+
+
+//------------------------------------------------------------------------------
+// void PenDownSubscribers()
+//------------------------------------------------------------------------------
+/**
+ * Sends a PenDown command to all active subscribers
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::PenDownSubscribers()
+{
+   for (UnsignedInt i = 0; i < activeSubscribers.size(); ++i)
+   {
+      activeSubscribers[i]->TakeAction("PenDown");
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void DarkenSubscribers(Integer denominator = 1)
+//------------------------------------------------------------------------------
+/**
+ * Darkens subscribers by a specified amount
+ *
+ * This method darkens by 1 / denominator
+ *
+ * @param denominator The darkening factor
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::DarkenSubscribers(Integer denominator)
+{
+//   MessageInterface::ShowMessage("Darkening by %d\n", denominator);
+
+   std::stringstream factor;
+   factor << denominator;
+   for (UnsignedInt i = 0; i < activeSubscribers.size(); ++i)
+      activeSubscribers[i]->TakeAction("Darken", factor.str().c_str());
+}
+
+
+//------------------------------------------------------------------------------
+// void LightenSubscribers(Integer denominator = 1)
+//------------------------------------------------------------------------------
+/**
+ * Lightens subscribers by a specified amount
+ *
+ * This method lightens by 1 / denominator
+ *
+ * @param denominator The lightening factor
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::LightenSubscribers(Integer denominator)
+{
+   std::stringstream factor;
+   factor << denominator;
+   for (UnsignedInt i = 0; i < activeSubscribers.size(); ++i)
+      activeSubscribers[i]->TakeAction("Lighten", factor.str().c_str());
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSubscriberBreakpoint()
+//------------------------------------------------------------------------------
+/**
+ * Marks a break point on a plot
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::SetSubscriberBreakpoint()
+{
+   for (UnsignedInt i = 0; i < activeSubscribers.size(); ++i)
+      activeSubscribers[i]->TakeAction("MarkBreak");
+}
+
+//------------------------------------------------------------------------------
+// void ApplySubscriberBreakpoint(Integer bp = -1)
+//------------------------------------------------------------------------------
+/**
+ * Breaks the curves on the subscribers, throwing away data beyond the break
+ * point
+ *
+ * @param bp The index of the breakpoint
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::ApplySubscriberBreakpoint(Integer bp)
+{
+   std::stringstream breakpoint;
+   breakpoint << bp;
+   for (UnsignedInt i = 0; i < activeSubscribers.size(); ++i)
+      activeSubscribers[i]->TakeAction("ClearFromBreak", breakpoint.str());
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetCloneCount()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the clone count for the members of the solver control sequence
+ *
+ * @return The count
+ */
+//------------------------------------------------------------------------------
+Integer SolverBranchCommand::GetCloneCount()
+{
+   cloneCount = BranchCommand::GetCloneCount();
+   if (theSolver != NULL)
+      ++cloneCount;
+
+   return cloneCount;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetClone(Integer cloneIndex = 0)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a pointer to a clone so its attributes can be accessed
+ *
+ * @param cloneIndex The index into the clone array
+ *
+ * @return The clone pointer, or NULL if no clone exists
+ */
+//------------------------------------------------------------------------------
+GmatBase* SolverBranchCommand::GetClone(Integer cloneIndex)
+{
+   GmatBase *retPtr = NULL;
+
+   if (cloneIndex == 0)
+      retPtr = theSolver;
+   else
+      retPtr = BranchCommand::GetClone(cloneIndex - 1);
+
+   return retPtr;
+}
+
+
+void SolverBranchCommand::PrepareToPublish(bool publishAll)
+{
+   StringArray owners, elements;
+
+   if (publishAll)
+   {
+      owners.push_back("All");
+      elements.push_back("All.epoch");
+   }
+
+   streamID = publisher->RegisterPublishedData(this, streamID, owners,
+         elements);
+}
+
+
+void SolverBranchCommand::PublishData()
+{
+   publisher->Publish(this, streamID, NULL, 0);
 }

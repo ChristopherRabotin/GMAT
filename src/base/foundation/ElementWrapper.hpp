@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  ElementWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -46,10 +48,12 @@ public:
    // destructor
    virtual ~ElementWrapper();
    
+   virtual std::string        ToString();
+   virtual ElementWrapper*    Clone() const;
    virtual void               SetDescription(const std::string &str);
    virtual std::string        GetDescription() const;
    Gmat::WrapperDataType      GetWrapperType() const;
-
+   
    virtual void               ClearRefObjectNames();
    virtual const StringArray& GetRefObjectNames();
    virtual bool               SetRefObjectName(const std::string &name,
@@ -60,10 +64,18 @@ public:
    virtual bool               RenameObject(const std::string &oldName, 
                                            const std::string &newName);
    
+   // This method tells a wrapper's object to take whatever action it needs to take
+   // before the value for the specified parameter is set (e.g. clearing arrays).
+   // This must be implemented in any wrapper type that handles a parameter
+   // for which pre-action(s) must be taken.
+   virtual bool               TakeRequiredAction() const;
+
+
+
    // static functions
    static bool SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper,
                         SolarSystem *solarSys, ObjectMap *objMap,
-                        ObjectMap *globalObjMap);
+                        ObjectMap *globalObjMap, bool setRefObj = true);
    
    static GmatBase* FindObject(const std::string &name, SolarSystem *solarSys,
                                ObjectMap *objMap, ObjectMap *globalObjMap);
@@ -110,7 +122,7 @@ public:
 //---------------------------------------------------------------------------
    virtual bool            SetReal(const Real toValue) = 0;
    
-   virtual Rmatrix         EvaluateArray() const;
+   virtual const Rmatrix&  EvaluateArray() const;
    virtual bool            SetArray(const Rmatrix &toValue); 
    virtual std::string     EvaluateString() const;
    virtual bool            SetString(const std::string &toValue); 
@@ -149,4 +161,11 @@ protected:
    
    
 };
+
+// Required for Visual Studio dll exports
+#ifdef EXPORT_TEMPLATES
+   EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<ElementWrapper*>;
+   EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<ElementWrapper*>;
+#endif
+
 #endif // ElementWrapper_hpp

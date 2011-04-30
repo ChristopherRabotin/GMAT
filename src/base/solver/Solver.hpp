@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                Solver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -25,6 +27,10 @@
 
 #include "GmatBase.hpp"
 #include "SolverException.hpp"
+
+// This should be switched to a forward reference, but cannot be yet because
+// of plugin dependencies
+#include "OwnedPlot.hpp"
 
 
 /**
@@ -48,6 +54,11 @@ public:
       PERTURBING,
       ITERATING,
       CALCULATING,
+      ACCUMULATING,
+      ESTIMATING,
+      SIMULATING,
+      PROPAGATING,
+      LOCATING,
       CHECKINGRUN,
       RUNEXTERNAL,
       RUNSPECIAL,             // Run initial state or solution w/o solving
@@ -109,6 +120,7 @@ public:
    virtual SolverState AdvanceState();
    virtual StringArray AdvanceNestedState(std::vector<Real> vars);
    virtual bool        UpdateSolverGoal(Integer id, Real newValue);
+   virtual bool        UpdateSolverTolerance(Integer id, Real newValue);
    
    // Access methods overriden from the base class
    virtual std::string GetParameterText(const Integer id) const;
@@ -142,6 +154,8 @@ public:
 
    virtual const StringArray&
                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                       GetPropertyEnumStrings(const Integer id) const;
    virtual bool        GetBooleanParameter(const Integer id) const;
    virtual bool        SetBooleanParameter(const Integer id,
                                            const bool value);
@@ -155,8 +169,11 @@ public:
     
    virtual Integer     SetSolverVariables(Real *data,
                                           const std::string &name);
+   virtual bool        RefreshSolverVariables(Real *data,
+                                          const std::string &name);
 
    virtual Real        GetSolverVariable(Integer id);
+   virtual void        SetUnscaledVariable(Integer id, Real value);
     
    //---------------------------------------------------------------------------
    //  Integer SetSolverResults(Real *data, std::string name)
@@ -212,6 +229,8 @@ protected:
    StringArray         variableNames;
    /// Array used to track the variables in the solver run
    std::vector<Real>   variable;
+   /// Array used to track the unscaled variables in the solver run
+   std::vector<Real>   unscaledVariable;
    /// Array used to track the variables in the solver run
    std::vector<Real>   variableInitialValues;
    /// The number of iterations taken (increments when the matrix is inverted)
@@ -266,7 +285,7 @@ protected:
    bool                 AllowIndependentPerts;
    /// Solver mode used for this instance
    std::string          solverMode;
-   /// State macjhine setting for the solver mode
+   /// State machine setting for the solver mode
    MachineMode          currentMode;
    /// String specifying the exit mode
    std::string          exitModeText;
@@ -274,6 +293,11 @@ protected:
    ExitMode             exitMode;
    /// The most recent results of using this solver
    SolverStatus         status;
+
+   /// Number of plot subscribers that are used
+   Integer              plotCount;
+   /// Plot subscriber used for graphical progress elements
+   OwnedPlot               *plotter;
       
    /// Generic solver parameters.
    enum
@@ -321,7 +345,8 @@ protected:
    
    virtual std::string GetProgressString();
    virtual void        FreeArrays();
-    
+   void                OpenSolverTextFile();
+   
    //---------------------------------------------------------------------------
    //  void WriteToTextFile()
    //---------------------------------------------------------------------------

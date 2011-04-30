@@ -1,18 +1,19 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              Integrator
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : Integrator.hpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -137,13 +138,18 @@ public:
     virtual Integer GetIntegerParameter(const std::string &label) const;
     virtual Integer SetIntegerParameter(const Integer id, const Integer value);
     virtual Integer SetIntegerParameter(const std::string &label, const Integer value);
+    virtual bool    GetBooleanParameter(const Integer id) const;
+    virtual bool    SetBooleanParameter(const Integer id, const bool value);
+
+    virtual bool         TakeAction(const std::string &action,
+                                    const std::string &actionData = "");
 
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
     
     virtual Real GetStepTaken();
     
     //--------------------------------------------------------------------------
-    // virtual void Initialize(void)
+    // virtual void Initialize()
     //--------------------------------------------------------------------------
     /**
      * Method used to initialize the integrator
@@ -209,7 +215,7 @@ protected:
      */
     //------------------------------------------------------------------------------
     virtual bool AdaptStep(Real maxerror) = 0;
-	
+        
     enum
     {
         ACCURACY = PropagatorParamCount,  // Accuracy parameter for Integrators
@@ -218,14 +224,15 @@ protected:
         MIN_STEP,          // Minimum stepsize for the Integrator -- smaller steps fail
         MAX_STEP,          // Maximum stepsize for the Integrator -- larger steps get truncated
         MAX_STEP_ATTEMPTS, // Number of attempts to take before giving up
+        STOP_IF_ACCURACY_VIOLATED,
         IntegratorParamCount
     };
     
     // Start with the parameter IDs and associates strings
     static const std::string 
-	              PARAMETER_TEXT[IntegratorParamCount - PropagatorParamCount];
+                      PARAMETER_TEXT[IntegratorParamCount - PropagatorParamCount];
     static const Gmat::ParameterType 
-	              PARAMETER_TYPE[IntegratorParamCount - PropagatorParamCount];
+                      PARAMETER_TYPE[IntegratorParamCount - PropagatorParamCount];
         
     /// The level of "acceptable" relative error for the integrator
     Real tolerance;
@@ -243,6 +250,13 @@ protected:
     Integer stepAttempts;
     /// Number of failed attempts allowed before reporting failure
     Integer maxStepAttempts;
+    /// Flag indicating whether or not execution should stop if/when the accuracy is violated
+    bool    stopIfAccuracyViolated;
+    /// Flag indicating whether or not the warning for the accuracy violation has already been
+    /// written, for this integrator, for this run
+    bool    accuracyWarningTriggered;
+    /// String used to indicate object type in some warning messages
+    std::string typeSource;
     /// Actual interval taken by the step
     Real stepTaken;
     /// Remaining time for a specified or fixed timestep

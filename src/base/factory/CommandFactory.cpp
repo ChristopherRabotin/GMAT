@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                            CommandFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -17,11 +19,12 @@
  *  creating Command objects.
  */
 //------------------------------------------------------------------------------
- 
+
 #include "gmatdefs.hpp"
-#include "Factory.hpp"
 #include "CommandFactory.hpp"
+#include "GmatGlobal.hpp"     // for IsMatlabAvailable()
 #include "NoOp.hpp"           // for NoOp command
+#include "BeginMissionSequence.hpp" // for BeginMissionSequence command
 #include "Toggle.hpp"         // for Toggle command
 #include "Propagate.hpp"      // for Propagate command
 #include "Maneuver.hpp"       // for Maneuver command
@@ -29,7 +32,7 @@
 #include "Vary.hpp"           // for Vary command
 #include "Achieve.hpp"        // for Achieve command
 #include "EndTarget.hpp"      // for EndTarget command
-#include "For.hpp"            // for FOR command
+#include "For.hpp"            // for For command
 #include "EndFor.hpp"         // for EndFor command
 #include "If.hpp"             // for IF command
 #include "Else.hpp"           // for Else command
@@ -39,15 +42,13 @@
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Report.hpp"         // for Report command
 #include "Save.hpp"           // for Save command  
+#include "SaveMission.hpp"    // for SaveMission command  
 #include "Stop.hpp"           // for Save command  
-#include "CallFunction.hpp"   // for CallFunction command
-#include "Assignment.hpp"     // for Assignment command
+#include "CallGmatFunction.hpp"   // for CallGmatFunction command
 #include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
 #include "EndFiniteBurn.hpp"  // for EndFiniteBurn command
 #include "BeginScript.hpp"    // for BeginScript command
 #include "EndScript.hpp"      // for EndScript command
-#include "BeginFunction.hpp"  // for BeginFunction command
-#include "EndFunction.hpp"    // for EndFunction command
 #include "Optimize.hpp"       // for Optimize command
 #include "EndOptimize.hpp"    // for EndOptimize command
 #include "Minimize.hpp"       // for Minimize command
@@ -56,6 +57,7 @@
 #include "ClearPlot.hpp"      // for ClearPlot command
 #include "PenUp.hpp"          // for PenUp command
 #include "PenDown.hpp"        // for PenDown command
+#include "MarkPoint.hpp"      // for MarkPoint command
 #include "Global.hpp"         // for Global command
 #include "Create.hpp"         // for Create command
 
@@ -93,6 +95,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
 {
     if (ofType == "NoOp")
         return new NoOp;
+    if (ofType == "BeginMissionSequence")
+        return new BeginMissionSequence;
     else if (ofType == "Propagate")
         return new Propagate;
     else if (ofType == "Toggle")
@@ -125,16 +129,21 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
 #endif
     else if (ofType == "EndIf")
         return new EndIf;
-    else if (ofType == "GMAT")
+    else if (ofType == "GMAT" || ofType == "Equation" || ofType == "Assignment")
         return new Assignment;
     else if (ofType == "Report")
         return new Report;
     else if (ofType == "Save")
         return new Save;
-    else if (ofType == "CallFunction")
-        return new CallFunction;
-    else if (ofType == "Assignment")
-         return new Assignment;
+    else if (ofType == "SaveMission")
+        return new SaveMission;
+    // Actual creating of CallFunction is not allowed, but it should
+    // be added to allowed creatables so that Interpreter can continue
+    // with creating proper CallGmatFunction
+    //else if (ofType == "CallFunction")
+    //   return new CallFunction;
+    else if (ofType == "CallGmatFunction")
+        return new CallGmatFunction;
     else if (ofType == "BeginFiniteBurn")
         return new BeginFiniteBurn;
     else if (ofType == "EndFiniteBurn")
@@ -143,10 +152,6 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new BeginScript;
     else if (ofType == "EndScript")
          return new EndScript;
-    else if (ofType == "BeginFunction")
-        return new BeginFunction;
-    else if (ofType == "EndFunction")
-         return new EndFunction;
     else if (ofType == "Stop")
         return new Stop;
     else if (ofType == "Optimize")
@@ -163,6 +168,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new PenUp;
     else if (ofType == "PenDown")
         return new PenDown;
+    else if (ofType == "MarkPoint")
+        return new MarkPoint;
     else if (ofType == "Global")
         return new Global;
     else if (ofType == "Create")
@@ -190,46 +197,90 @@ CommandFactory::CommandFactory() :
 {
    if (creatables.empty())
    {
-      creatables.push_back("NoOp");  // default type for this factory
-      creatables.push_back("Toggle");  // default type for this factory
-      creatables.push_back("Propagate");  // default type for this factory
-      creatables.push_back("Maneuver");
-      // Commands related to the targeter
-      creatables.push_back("Target");
-      creatables.push_back("Vary");
       creatables.push_back("Achieve");
-      creatables.push_back("EndTarget");
-      creatables.push_back("For");
-      creatables.push_back("EndFor");
-      creatables.push_back("If");
+      creatables.push_back("Assignment");
+      creatables.push_back("BeginFiniteBurn");
+      creatables.push_back("BeginMissionSequence");
+      creatables.push_back("BeginScript");
+      creatables.push_back("CallFunction");
+      creatables.push_back("CallGmatFunction");
+      creatables.push_back("ClearPlot");
+      creatables.push_back("Create");
       creatables.push_back("Else");
 #ifdef __INCLUDE_ELSEIF__
       creatables.push_back("ElseIf");
 #endif
+      creatables.push_back("EndFor");
       creatables.push_back("EndIf");
-      creatables.push_back("While");
-      creatables.push_back("EndWhile");
-      creatables.push_back("GMAT");
-      creatables.push_back("Report");
-      creatables.push_back("Save");
-      creatables.push_back("CallFunction");
-      creatables.push_back("Assignment");
-      creatables.push_back("BeginFiniteBurn");
-      creatables.push_back("EndFiniteBurn");
-      creatables.push_back("BeginScript");
-      creatables.push_back("EndScript");
-      creatables.push_back("BeginFunction");
-      creatables.push_back("EndFunction");
-      creatables.push_back("Stop");
-      creatables.push_back("Optimize");
       creatables.push_back("EndOptimize");
+      creatables.push_back("EndTarget");
+      creatables.push_back("EndWhile");
+      creatables.push_back("EndScript");
+      creatables.push_back("EndFiniteBurn");
+      creatables.push_back("Equation");
+      creatables.push_back("For");
+      creatables.push_back("If");
+      creatables.push_back("GMAT");
+      creatables.push_back("Global");
+      creatables.push_back("Maneuver");
+      creatables.push_back("MarkPoint");
       creatables.push_back("Minimize");
       creatables.push_back("NonlinearConstraint");
-      creatables.push_back("ClearPlot");
+      creatables.push_back("NoOp");
+      creatables.push_back("Optimize");
       creatables.push_back("PenUp");
       creatables.push_back("PenDown");
-      creatables.push_back("Global");
-      creatables.push_back("Create");
+      creatables.push_back("Propagate");
+      creatables.push_back("Report");
+      creatables.push_back("Save");
+      creatables.push_back("SaveMission");
+      creatables.push_back("ScriptEvent");
+      creatables.push_back("Stop");
+      creatables.push_back("Target");
+      creatables.push_back("Toggle");
+      creatables.push_back("Vary");
+      creatables.push_back("While");
+   }
+   
+   // Now fill in unviewable commands
+   // We don't want to show these commands in the MissionTree menu
+   if (unviewables.empty())
+   {
+      // These commands do nothing
+      unviewables.push_back("NoOp");
+      unviewables.push_back("BeginMissionSequence");
+      
+      // These commands show as Equation in the MissionTree menu
+      unviewables.push_back("Assignment");
+      unviewables.push_back("GMAT");
+      
+      // These commands show as ScriptEvent in the MissionTree menu
+      unviewables.push_back("BeginScript");
+      
+      // These commands only works in object setup mode and inside a GmatFunction
+      unviewables.push_back("Create");
+      
+      // CallFunction is parent command of CallGmatFunction and CallMatlabFunction
+      unviewables.push_back("CallFunction");
+      
+      // These commands are only viewable under Target or Optimize
+      unviewables.push_back("Achieve");
+      unviewables.push_back("Minimize");
+      unviewables.push_back("NonlinearConstraint");
+      unviewables.push_back("Vary");
+      
+      // These commands are automatically created via GUI
+      unviewables.push_back("For");
+      unviewables.push_back("If");
+      unviewables.push_back("Else");
+      unviewables.push_back("ElseIf");
+      unviewables.push_back("While");
+      unviewables.push_back("EndFor");
+      unviewables.push_back("EndIf");
+      unviewables.push_back("EndOptimize");
+      unviewables.push_back("EndTarget");
+      unviewables.push_back("EndWhile");
+      unviewables.push_back("EndScript");
    }
 }
 
@@ -261,47 +312,6 @@ CommandFactory::CommandFactory(StringArray createList) :
 CommandFactory::CommandFactory(const CommandFactory& fact) :
     Factory(fact)
 {
-   if (creatables.empty())
-   {
-      creatables.push_back("NoOp");  // default type for this factory
-      creatables.push_back("Toggle");  // default type for this factory
-      creatables.push_back("Propagate");  // default type for this factory
-      creatables.push_back("Maneuver");
-      // Commands related to the targeter
-      creatables.push_back("Target");
-      creatables.push_back("Vary");
-      creatables.push_back("Achieve");
-      creatables.push_back("EndTarget");
-      creatables.push_back("For");
-      creatables.push_back("EndFor");
-      creatables.push_back("If");
-      creatables.push_back("Else");
-      creatables.push_back("ElseIf");
-      creatables.push_back("EndIf");
-      creatables.push_back("While");
-      creatables.push_back("EndWhile");
-      creatables.push_back("GMAT");
-      creatables.push_back("Report");
-      creatables.push_back("Save");
-      creatables.push_back("CallFunction");
-      creatables.push_back("Assignment");
-      creatables.push_back("BeginFiniteBurn");
-      creatables.push_back("EndFiniteBurn");
-      creatables.push_back("BeginScript");
-      creatables.push_back("EndScript");
-      creatables.push_back("BeginFunction");
-      creatables.push_back("EndFunction");
-      creatables.push_back("Stop");
-      creatables.push_back("Optimize");
-      creatables.push_back("EndOptimize");
-      creatables.push_back("Minimize");
-      creatables.push_back("NonlinearConstraint");
-      creatables.push_back("ClearPlot");
-      creatables.push_back("PenUp");
-      creatables.push_back("PenDown");
-      creatables.push_back("Global");
-      creatables.push_back("Create");
-   }
 }
 
 //------------------------------------------------------------------------------
@@ -332,12 +342,4 @@ CommandFactory::~CommandFactory()
 {
    // deletes handled by Factory destructor
 }
-
-//---------------------------------
-//  protected methods
-//---------------------------------
-
-//---------------------------------
-//  private methods
-//---------------------------------
 

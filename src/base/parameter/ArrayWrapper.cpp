@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  ArrayWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -52,7 +54,7 @@ ArrayWrapper::ArrayWrapper() :
    array         (NULL),
    arrayName     ("")
 {
-   wrapperType = Gmat::ARRAY;
+   wrapperType = Gmat::ARRAY_WT;
 }
 
 //---------------------------------------------------------------------------
@@ -68,7 +70,7 @@ ArrayWrapper::ArrayWrapper() :
 //---------------------------------------------------------------------------
 ArrayWrapper::ArrayWrapper(const ArrayWrapper &aw) :
    ElementWrapper(aw),
-   array         (NULL),
+   array         (aw.array),
    arrayName     (aw.arrayName)
 {
 }
@@ -84,18 +86,18 @@ ArrayWrapper::ArrayWrapper(const ArrayWrapper &aw) :
  * @return Reference to this object
  */
 //---------------------------------------------------------------------------
-const ArrayWrapper& ArrayWrapper::operator=(
-                             const ArrayWrapper &aw)
+const ArrayWrapper& ArrayWrapper::operator=(const ArrayWrapper &aw)
 {
    if (&aw == this)
       return *this;
-
+   
    ElementWrapper::operator=(aw);
-   array        = NULL;  
+   array        = aw.array;  
    arrayName    = aw.arrayName;
 
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~ArrayWrapper()
 //---------------------------------------------------------------------------
@@ -106,6 +108,22 @@ const ArrayWrapper& ArrayWrapper::operator=(
 ArrayWrapper::~ArrayWrapper()
 {
 }
+
+
+//------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return ArrayWrapper value converted to std::string.
+ *
+ * @exception <GmatBaseException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+std::string ArrayWrapper::ToString()
+{
+   return array->ToString();
+}
+
 
 //------------------------------------------------------------------------------
 //  Gmat::ParameterType GetDataType() const
@@ -139,7 +157,6 @@ const StringArray& ArrayWrapper::GetRefObjectNames()
    // start with the array name ...
    refObjectNames.push_back(arrayName);
    
-          
    #ifdef DEBUG_ARRAY_WRAPPER
       MessageInterface::ShowMessage("ArrayWrapper:: Returning ref object names:\n");
       for (Integer ii = 0; ii < (Integer) refObjectNames.size(); ii++)
@@ -148,6 +165,24 @@ const StringArray& ArrayWrapper::GetRefObjectNames()
    
    return refObjectNames;
 }
+
+//------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * This method retrives a reference object for the wrapper name
+ * 
+ * @param <name> name of the wrapper
+ *
+ * @return reference for success; NULL if name not found
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ArrayWrapper::GetRefObject(const std::string &name)
+{
+   return array;
+}
+
 
 //---------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj)
@@ -226,10 +261,13 @@ bool ArrayWrapper::RenameObject(const std::string &oldName,
 //---------------------------------------------------------------------------
 Real ArrayWrapper::EvaluateReal() const
 {
-   throw GmatBaseException(
-      "EvaluateReal() method not valid for wrapper of Array type.\n");
+   if (array->GetRowCount() == 1 && array->GetColCount() == 1)
+      return array->GetRealParameter("SingleValue", 0, 0);
+   else
+      throw GmatBaseException(
+         "ArrayWrapper::EvaluateReal() method not valid for wrapper of Array type.\n");
 }
-   
+
 //---------------------------------------------------------------------------
 //  bool SetReal(const Real toValue)
 //---------------------------------------------------------------------------
@@ -248,7 +286,7 @@ bool ArrayWrapper::SetReal(const Real toValue)
 }
 
 //---------------------------------------------------------------------------
-//  Rmatrix EvaluateArray() const
+//  const Rmatrix& EvaluateArray() const
 //---------------------------------------------------------------------------
 /**
  * Method to return the Array (Rmatrix) value of the wrapped object.
@@ -257,7 +295,7 @@ bool ArrayWrapper::SetReal(const Real toValue)
  * 
  */
 //---------------------------------------------------------------------------
-Rmatrix ArrayWrapper::EvaluateArray() const
+const Rmatrix& ArrayWrapper::EvaluateArray() const
 {
    #ifdef DEBUG_ARRAY_WRAPPER
       MessageInterface::ShowMessage(

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           ExponentialAtmosphere
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -24,6 +26,7 @@
 
 
 #include "AtmosphereModel.hpp"
+#include "TimeTypes.hpp"
 
 
 /**
@@ -53,13 +56,13 @@
 class GMAT_API ExponentialAtmosphere : public AtmosphereModel
 {
 public:
-   ExponentialAtmosphere();
+   ExponentialAtmosphere(const std::string &name = "");
    virtual ~ExponentialAtmosphere();
    ExponentialAtmosphere(const ExponentialAtmosphere& atm);
    ExponentialAtmosphere&  operator=(const ExponentialAtmosphere& atm);
     
    virtual bool            Density(Real *position, Real *density, 
-                                   Real epoch=21545.0,
+                                   Real epoch = GmatTimeConstants::MJD_OF_J2000,
                                    Integer count = 1);
 
 protected: 
@@ -75,7 +78,6 @@ protected:
    bool                    smoothDensity;
     
    virtual void            SetConstants(void);
-   Real                    CalculateHeight(Real *loc);
    Integer                 FindBand(Real height);
    Real                    Smooth(Real height, Integer index);
 

@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 Create
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan
 // Created: 2008.03.14
@@ -23,6 +27,21 @@
 #include "Array.hpp"
 
 //#define DEBUG_CREATE
+//#define DEBUG_CREATE_INIT
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+//#ifndef DEBUG_PERFORMANCE
+//#define DEBUG_PERFORMANCE
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
+#ifdef DEBUG_PERFORMANCE
+#include <ctime>                 // for clock()
+#endif
 
 //---------------------------------
 // static data
@@ -50,7 +69,6 @@ Create::Create() :
    ManageObject("Create"),
    refObj       (NULL)
 {
-   //creations.clear();
 }
 
 
@@ -63,9 +81,17 @@ Create::Create() :
 //------------------------------------------------------------------------------
 Create::~Create()
 {
-   //creations.clear();
-   if (refObj) delete refObj;
-   // assuming objects inseted into a valid Object Store (Sandbox, Function, or Global)
+   // Delete if refObj is not CelestialBody since it is added to SolarSystem
+   // and it is deleted when SolarSysem is destroyed (LOJ: 2010.05.03)
+   if (refObj && !refObj->IsOfType(Gmat::CELESTIAL_BODY))
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (refObj, refObj->GetName(), "Create::~Create()", " deleting refObj");
+      #endif
+      delete refObj;
+   }
+   // assuming objects inserted into a valid Object Store (Sandbox, Function, or Global)
    // will be deleted as members of those stores at the appropriate time; objects created 
    // in the Create command that were not successfully inserted into an object store will
    // need to be deleted in the Execute method; therefore, no objects, other than the
@@ -84,8 +110,7 @@ Create::~Create()
 //------------------------------------------------------------------------------
 Create::Create(const Create &cr) :
    ManageObject(cr),
-   objType  (cr.objType)//,
-   //creations(cr.creations)
+   objType  (cr.objType)
 {
    if (cr.refObj)  refObj = (cr.refObj)->Clone();
    else            refObj = NULL;
@@ -111,14 +136,15 @@ Create& Create::operator=(const Create &cr)
       objType    = cr.objType;
       if (refObj) delete refObj;
       refObj     = (cr.refObj)->Clone();
-      //creations.clear();
-      //creations  = cr.creations; // do I want to do this? I don't think so
    }
    
    return *this;
 }
 
 // Parameter access methods - overridden from GmatBase
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
 std::string Create::GetParameterText(const Integer id) const
 {
    if (id >= ManageObjectParamCount && id < CreateParamCount)
@@ -126,6 +152,9 @@ std::string Create::GetParameterText(const Integer id) const
    return ManageObject::GetParameterText(id);
 }
 
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
 Integer Create::GetParameterID(const std::string &str) const
 {
    for (Integer i = ManageObjectParamCount; i < CreateParamCount; i++)
@@ -137,6 +166,9 @@ Integer Create::GetParameterID(const std::string &str) const
    return ManageObject::GetParameterID(str);
 }
 
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
 Gmat::ParameterType Create::GetParameterType(const Integer id) const
 {
    if (id >= ManageObjectParamCount && id < CreateParamCount)
@@ -145,12 +177,18 @@ Gmat::ParameterType Create::GetParameterType(const Integer id) const
    return ManageObject::GetParameterType(id);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
 std::string Create::GetParameterTypeString(const Integer id) const
 {
    return ManageObject::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
 std::string Create::GetStringParameter(const Integer id) const
 {
    if (id == OBJECT_TYPE)
@@ -160,11 +198,17 @@ std::string Create::GetStringParameter(const Integer id) const
    return ManageObject::GetStringParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
 std::string Create::GetStringParameter(const std::string &label) const
 {
    return GetStringParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
 bool Create::SetStringParameter(const Integer id, 
                                 const std::string &value)
 {
@@ -181,6 +225,9 @@ bool Create::SetStringParameter(const Integer id,
    return ManageObject::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
 bool Create::SetStringParameter(const std::string &label, 
                                 const std::string &value)
 {
@@ -188,6 +235,9 @@ bool Create::SetStringParameter(const std::string &label,
 }
 
 
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
 GmatBase* Create::GetRefObject(const Gmat::ObjectType type,
                                const std::string &name)
 {
@@ -197,6 +247,10 @@ GmatBase* Create::GetRefObject(const Gmat::ObjectType type,
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name)
+//------------------------------------------------------------------------------
 bool Create::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                           const std::string &name)
 {
@@ -217,6 +271,7 @@ bool Create::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             "Reference object for Create command already set.\n"); 
    }
    refObj = obj;
+   refObj->TakeAction("WasMcsCreated");
    return true;
 }
 
@@ -247,24 +302,25 @@ GmatBase* Create::Clone() const
 //------------------------------------------------------------------------------
 bool Create::Initialize()
 {
-   #ifdef DEBUG_CREATE
+   #ifdef DEBUG_PERFORMANCE
+   static Integer callCount = 0;
+   callCount++;      
+   clock_t t1 = clock();
+   MessageInterface::ShowMessage
+      ("=== Create::Initialize() entered, '%s' Count = %d\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
+   #endif
+   
+   #ifdef DEBUG_CREATE_INIT
       MessageInterface::ShowMessage("Create::Initialize() entered, for object type %s\n",
             objType.c_str());
-      std::map<std::string, GmatBase *>::iterator omi;
-      MessageInterface::ShowMessage("   and at the start,  LOS contains:\n");
-      for (omi = objectMap->begin(); omi != objectMap->end(); ++omi)
-         MessageInterface::ShowMessage("    <%p>  %s of type %s\n", omi->second,
-               (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage("   and at the start, GOS contains:\n");
-      for (omi = globalObjectMap->begin(); omi != globalObjectMap->end(); ++omi)
-         MessageInterface::ShowMessage("    %s of type %s\n",
-               (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage("Create::Initialize() executing for objects (objectNames):\n");
+      ShowObjectMaps("object maps at the start");
+      MessageInterface::ShowMessage("   Create command has %d objectName(s):\n", objectNames.size());
       for (unsigned int ii = 0; ii < objectNames.size(); ii++)
-         MessageInterface::ShowMessage(" ........ %s\n", (objectNames.at(ii)).c_str());
-      MessageInterface::ShowMessage("Create::Initialize() executing for objects (arrayNames):\n");
+         MessageInterface::ShowMessage("   ........ %s\n", (objectNames.at(ii)).c_str());
+      MessageInterface::ShowMessage("   Create command has %d arrayName(s):\n", arrayNames.size());
       for (unsigned int ii = 0; ii < arrayNames.size(); ii++)
-         MessageInterface::ShowMessage(" ........ %s\n", (arrayNames.at(ii)).c_str());
+         MessageInterface::ShowMessage("   ........ %s\n", (arrayNames.at(ii)).c_str());
    #endif
       
    ManageObject::Initialize();
@@ -280,8 +336,8 @@ bool Create::Initialize()
    }
    
    //---------------------------------- debug
-   #ifdef DEBUG_CREATE
-   MessageInterface::ShowMessage("Create command has a reference object of type %s \n", 
+   #ifdef DEBUG_CREATE_INIT
+   MessageInterface::ShowMessage("   Create command has a reference object of type %s \n", 
          (refObj->GetTypeName()).c_str());
    #endif
    //---------------------------------- debug
@@ -297,97 +353,76 @@ bool Create::Initialize()
    Integer numNames = (Integer) useNames.size();
    for (Integer jj = 0; jj < numNames; jj++)
    {
+      // Skip CelestialBodies since those are added to SolarSystem
+      if (refObj->IsOfType(Gmat::CELESTIAL_BODY))
+         continue;
+      
       GmatBase *newObj = refObj->Clone();
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (newObj, useNames.at(jj), "Create::Initialize()", "newObj = refObj->Clone()");
+      #endif
+      
       newObj->SetName(useNames.at(jj));
+      newObj->TakeAction("WasMcsCreated");
       if (refObj->GetType() == Gmat::COORDINATE_SYSTEM)
          newObj->SetSolarSystem(((CoordinateBase*)refObj)->GetSolarSystem());
-      #ifdef DEBUG_CREATE
-      MessageInterface::ShowMessage("... Creating object of type %s with name %s \n", 
+      #ifdef DEBUG_CREATE_INIT
+      MessageInterface::ShowMessage("   Creating object of type %s with name '%s' \n", 
             (newObj->GetTypeName()).c_str(), (useNames.at(jj)).c_str());
       #endif
-      //creations.push_back(newObj);
-      //creations.at(jj)->SetName(useNames.at(jj));
       if (objType == "Array") 
          ((Array*) (newObj))->SetSize(rows.at(jj), columns.at(jj));
-         //((Array*) (creations.at(jj)))->SetSize(rows.at(jj), columns.at(jj));
       InsertIntoObjectStore(newObj, useNames.at(jj));
    }
-   #ifdef DEBUG_CREATE
+   
+   #ifdef DEBUG_CREATE_INIT
       MessageInterface::ShowMessage("Exiting Create::Initialize()\n");
-      MessageInterface::ShowMessage("   and at the end,  LOS contains:\n");
-      for (omi = objectMap->begin(); omi != objectMap->end(); ++omi)
-         MessageInterface::ShowMessage("    <%p>  %s of type %s\n", omi->second,
-               (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage("   and at the end, GOS contains:\n");
-      for (omi = globalObjectMap->begin(); omi != globalObjectMap->end(); ++omi)
-         MessageInterface::ShowMessage("    %s of type %s\n",
-               (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
-     //MessageInterface::ShowMessage("  and creations list is:\n");
-      //for (unsigned int ii=0;ii<creations.size();ii++)
-      //   MessageInterface::ShowMessage("   %d: %s\n", ii, ((creations.at(ii))->GetName()).c_str());
+      #ifdef DEBUG_OBJECT_MAP
+      ShowObjectMaps("object maps at the end");
+      #endif
    #endif
+   
+   #ifdef DEBUG_PERFORMANCE
+   clock_t t2 = clock();
+   MessageInterface::ShowMessage
+      ("=== Create::Initialize() exiting, '%s' Count = %d, Run Time: %f seconds\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount, (Real)(t2-t1)/CLOCKS_PER_SEC);
+   #endif
+   
    return true;
 }
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  bool GmatCommand::Execute()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * The method that is fired to perform this Create command.
  *
  * @return true if the Create runs to completion, false if an error
  *         occurs.
  */
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool Create::Execute()
 {
-//   #ifdef DEBUG_CREATE
-//      MessageInterface::ShowMessage("Create::Execute() entered, for object type %s\n",
-//            objType.c_str());
-//      std::map<std::string, GmatBase *>::iterator omi;
-//      MessageInterface::ShowMessage("   and at the start,  LOS contains:\n");
-//      for (omi = objectMap->begin(); omi != objectMap->end(); ++omi)
-//         MessageInterface::ShowMessage("    <%p>  %s of type %s\n", omi->second,
-//               (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
-//      MessageInterface::ShowMessage("   and at the start, GOS contains:\n");
-//      for (omi = globalObjectMap->begin(); omi != globalObjectMap->end(); ++omi)
-//         MessageInterface::ShowMessage("    %s of type %s\n",
-//               (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
-//      MessageInterface::ShowMessage("Create::Execute() executing for objects (objectNames):\n");
-//      for (unsigned int ii = 0; ii < objectNames.size(); ii++)
-//         MessageInterface::ShowMessage(" ........ %s\n", (objectNames.at(ii)).c_str());
-//      MessageInterface::ShowMessage("Create::Execute() executing for objects (arrayNames):\n");
-//      for (unsigned int ii = 0; ii < arrayNames.size(); ii++)
-//         MessageInterface::ShowMessage(" ........ %s\n", (arrayNames.at(ii)).c_str());
-//   #endif
-//
-//   bool isGlobalObj = false;
-//   StringArray useNames = objectNames;
-//   // If the type is Array, use the names without the indices
-//   if (objType == "Array")  useNames = arrayNames;
-//
-//   //put the objects onto the LOS or GOS, as appropriate, if not already there
-//   for (Integer ii = 0; ii < (Integer) creations.size(); ii++)
-//   {
-//      InsertIntoObjectStore(creations.at(ii), useNames.at(ii));
-//   }
-//   #ifdef DEBUG_CREATE
-//      std::map<std::string, GmatBase *>::iterator omIter;
-//      MessageInterface::ShowMessage("Exiting Create::Execute()\n");
-//      MessageInterface::ShowMessage("   and LOS contains:\n");
-//      for (omIter = objectMap->begin(); omIter != objectMap->end(); ++omIter)
-//         MessageInterface::ShowMessage("    %s of type %s\n",
-//               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-//      MessageInterface::ShowMessage("   and GOS contains:\n");
-//      for (omIter = globalObjectMap->begin(); omIter != globalObjectMap->end(); ++omIter)
-//         MessageInterface::ShowMessage("    %s of type %s\n",
-//               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-//   #endif
-//   creations.clear();
+   // do nothing here
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// void RunComplete()
+//------------------------------------------------------------------------------
+void Create::RunComplete()
+{
+   // do nothing here
+}
+
+
+//------------------------------------------------------------------------------
+// void Create::SetArrayInfo()
+//------------------------------------------------------------------------------
 void Create::SetArrayInfo()
 {
    // Extract the array names, number of rows, and number of columns from the
@@ -413,12 +448,14 @@ void Create::SetArrayInfo()
    }
 }
 
-
+//------------------------------------------------------------------------------
+// bool InsertIntoLOS(GmatBase *obj, const std::string &withName)
+//------------------------------------------------------------------------------
 bool Create::InsertIntoLOS(GmatBase *obj, const std::string &withName)
 {
-   #ifdef DEBUG_CREATE
-      MessageInterface::ShowMessage("Entering InsertIntoLOS, with obj = <%p> and name = %s\n",
-            obj, withName.c_str());
+   #ifdef DEBUG_CREATE_INIT
+      MessageInterface::ShowMessage("   InsertIntoLOS: entered with obj = <%p> "
+         "and name = %s\n", obj, withName.c_str());
    #endif
    GmatBase *mapObj;
    std::string ex;
@@ -426,85 +463,164 @@ bool Create::InsertIntoLOS(GmatBase *obj, const std::string &withName)
    if (objectMap->find(withName) != objectMap->end())
    {
       mapObj = (*objectMap)[withName];
-      if (!mapObj->IsOfType(objType))
+      
+      // if mapObj is NULL, throw exception (loj: 2008.09.23)
+      if (mapObj == NULL)
       {
-         ex = "Object of name """ + withName;
-         ex += """, but of a different type, already exists in Local Object Store\n";
+         ex = "Create::InsertIntoLOS() '" + withName +
+            "' has NULL pointer in Local Object Store";
          throw CommandException(ex);
       }
-      if (objType == "Array")
+      else
       {
-         Integer r1, r2, c1, c2;
-         ((Array*) mapObj)->GetSize(r1, c1);
-         ((Array*) obj)->GetSize(r2, c2);
-         if ((r1 != r2) || (c1 != c2))
+         if (!mapObj->IsOfType(objType))
          {
-            ex = "Array of name """ + withName;
-            ex += """, but with different dimensions already exists in Local Object Store\n";
+            ex = "Object of name """ + withName;
+            ex += """, but of a different type, already exists in Local Object Store\n";
             throw CommandException(ex);
          }
+         if (objType == "Array")
+         {
+            Integer r1, r2, c1, c2;
+            ((Array*) mapObj)->GetSize(r1, c1);
+            ((Array*) obj)->GetSize(r2, c2);
+            if ((r1 != r2) || (c1 != c2))
+            {
+               ex = "Array of name """ + withName;
+               ex += """, but with different dimensions already exists in Local Object Store\n";
+               throw CommandException(ex);
+            }
+         }
       }
-      #ifdef DEBUG_CREATE
-            MessageInterface::ShowMessage(" Create::object %s was already in object store ...\n",
-                  withName.c_str());
-            MessageInterface::ShowMessage("  pointer for obj = <%p> and pointer for mapObj = <%p>\n",
-                  obj, mapObj);
+      #ifdef DEBUG_CREATE_INIT
+         MessageInterface::ShowMessage("   InsertIntoLOS: object '%s' was already "
+             "in object store ...\n", withName.c_str());
+         MessageInterface::ShowMessage("   InsertIntoLOS: pointer for obj = <%p> "
+             "and pointer for mapObj = <%p>\n", obj, mapObj);
       #endif
       // it is already in there, so we do not need to put this one in; clean it up
       if (mapObj != obj)  
       {
-            #ifdef DEBUG_CREATE
-                  MessageInterface::ShowMessage(" Create:: object is not the same, though\n",
-                        withName.c_str());
+         // Should we replace old with new (LOJ: 2008.11.24)
+         // If we replace old objcet, APT_Func_CartToKep_CF.script doesn't work!!
+         // If object is ODE_MODEL replace (LOJ: 2011.04.18 Bug 2409 fix)
+         bool replaceObj = false;
+         if (obj->IsOfType(Gmat::ODE_MODEL))
+            replaceObj = true;
+         
+         if (replaceObj)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+            (mapObj, mapObj->GetName(), "Create::InsertIntoLOS()",
+             GetGeneratingString(Gmat::NO_COMMENTS) + " deleting old mapObj");
+            #endif
+            delete mapObj;
+            (*objectMap)[withName] = obj;
+            return true;
+         }
+         else
+         {
+            #ifdef DEBUG_CREATE_INIT
+            MessageInterface::ShowMessage("   InsertIntoLOS: returning false, "
+               "object '%s' is not the same\n", withName.c_str());
             #endif
             return false;
+         }
       }
    }
    else
+   {
+      #ifdef DEBUG_CREATE_INIT
+      MessageInterface::ShowMessage
+         ("   InsertIntoLOS: inserting '%s' into objectMap\n", withName.c_str());
+      #endif
       // put it into the LOS
+      obj->SetIsLocal(true);
       objectMap->insert(std::make_pair(withName, obj));
+   }
+   #ifdef DEBUG_CREATE_INIT
+   MessageInterface::ShowMessage("   InsertIntoLOS: returning true\n");
+   #endif
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool InsertIntoObjectStore(GmatBase *obj, const std::string &withName)
+//------------------------------------------------------------------------------
 bool Create::InsertIntoObjectStore(GmatBase *obj, const std::string &withName)
 {
+   // if object is a type of CeletialBody, it goes into SolarSyatem, so
+   // ignore here
+   if (obj->IsOfType(Gmat::CELESTIAL_BODY))
+      return true;
+   
    // check to see if the object is a(n automatic) global
    bool isGlobalObj = obj->GetIsGlobal();
    if (!isGlobalObj)
    {
-      #ifdef DEBUG_CREATE
-            MessageInterface::ShowMessage(" Create::InsertIntoObjectStore ... object is NOT global\n");
+      #ifdef DEBUG_CREATE_INIT
+         MessageInterface::ShowMessage("   InsertIntoObjectStore: object "
+            "'%s' is NOT global\n", withName.c_str());
       #endif
       // insert the object into the LOS; if not successful, delete this object
       // to avoid a memory leak
       if (!(InsertIntoLOS(obj, withName)))
+      {
+         #ifdef DEBUG_CREATE_INIT
+         MessageInterface::ShowMessage
+            ("   InsertIntoObjectStore: '%s' was not successfully inserted to LOS, so deleting...\n",
+             withName.c_str());
+         #endif
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (obj, obj->GetName(), "Create::InsertIntoObjectStore()",
+             GetGeneratingString(Gmat::NO_COMMENTS) + ", failed to add to LOS so deleting obj");
+         #endif
          delete obj;
+      }
       else
       {
-         #ifdef DEBUG_CREATE
-         MessageInterface::ShowMessage("...  %s was put into the LOS\n", 
+         #ifdef DEBUG_CREATE_INIT
+         MessageInterface::ShowMessage("   InsertIntoObjectStore: '%s' was put into the LOS\n", 
                (withName).c_str());
          #endif
       }
-
    }
    else
    {
-      #ifdef DEBUG_CREATE
-            MessageInterface::ShowMessage(" Create::InsertIntoObjectStore ... object IS global\n");
+      #ifdef DEBUG_CREATE_INIT
+         MessageInterface::ShowMessage("   InsertIntoObjectStore, object "
+            "'%s' IS global\n", withName.c_str());
       #endif
       // insert the object into the GOS; if not successful, delete this object
       // to avoid a memory leak
       if (!(InsertIntoGOS(obj, withName)))
+      {
+         #ifdef DEBUG_CREATE_INIT
+         MessageInterface::ShowMessage
+            ("   InsertIntoObjectStore: '%s' was not successfully inserted to GOS, so deleting...\n",
+             withName.c_str());
+         #endif
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (obj, obj->GetName(), "Create::InsertIntoObjectStore()",
+             GetGeneratingString(Gmat::NO_COMMENTS) + " deleting obj");
+         #endif
          delete obj;
+      }
       else
       {
-         #ifdef DEBUG_CREATE
-         MessageInterface::ShowMessage("...  %s was put into the GOS\n", 
+         #ifdef DEBUG_CREATE_INIT
+         MessageInterface::ShowMessage("   InsertIntoObjectStore: '%s' was put into the GOS\n", 
                (withName).c_str());
          #endif
       }
    }
+   
+   #ifdef DEBUG_CREATE_INIT
+   MessageInterface::ShowMessage("   InsertIntoObjectStore: returning true\n");
+   #endif
    return true;
 }
 

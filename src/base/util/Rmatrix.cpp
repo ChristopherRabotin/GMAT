@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                Rmatrix
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,13 +22,17 @@
 #include "Rvector.hpp"
 #include "Rvector3.hpp"
 #include "RealUtilities.hpp"
+#include "UtilityException.hpp"
 #include "Linear.hpp"         // for operator<<, operator >>
+#include "StringUtil.hpp"     // for Replace()
 #include <stdarg.h>
 #include <sstream>
+#include <stdio.h>            // Fix for header rearrangement in gcc 4.4
+#include "MessageInterface.hpp"
 
-//---------------------------------
-//  public
-//---------------------------------
+//#define DEBUG_DETERMINANT
+//#define DEBUG_MULTIPLY
+//#define DEBUG_DIVIDE
 
 //---------------------------------
 //  public
@@ -91,7 +97,7 @@ Rmatrix::~Rmatrix()
 
 //------------------------------------------------------------------------------
 //  virtual bool IsOrthogonal(Real accuracyRequired)= 
-//                            GmatRealConst::REAL_EPSILON) const
+//                            GmatRealConstants::REAL_EPSILON) const
 //------------------------------------------------------------------------------
 bool Rmatrix::IsOrthogonal(Real accuracyRequired) const 
 {
@@ -142,7 +148,7 @@ bool Rmatrix::IsOrthogonal(Real accuracyRequired) const
 
 //------------------------------------------------------------------------------
 //  virtual bool IsOrthonormal(Real accuracyRequired) = 
-//                             GmatRealConst::REAL_EPSILON)const
+//                             GmatRealConstants::REAL_EPSILON)const
 //------------------------------------------------------------------------------
 bool Rmatrix::IsOrthonormal (Real accuracyRequired) const 
 {
@@ -220,7 +226,7 @@ bool Rmatrix::operator==(const Rmatrix &m)const
                //loj: 5/5/06 used epsilon
                //if (elementD[ii*colsD+jj] != m(ii,jj))
                if (GmatMathUtil::Abs(elementD[ii*colsD+jj] - m(ii,jj)) >
-                   GmatRealConst::REAL_TOL)
+                   GmatRealConstants::REAL_TOL)
                {
                   return false;
                }
@@ -231,7 +237,7 @@ bool Rmatrix::operator==(const Rmatrix &m)const
       {
          return false;
       }    
-   }    
+   }
    return true;
 }
 
@@ -251,19 +257,43 @@ bool Rmatrix::operator!=(const Rmatrix &m)const
 Rmatrix Rmatrix::operator+(const Rmatrix &m) const 
 {
    if ((isSizedD == false) || (m.IsSized() == false))
-   {
       throw TableTemplateExceptions::UnsizedTable();
-   }
-
+   
+   // Added handling of 1x1 - MxN or MxN - 1x1 (LOJ: 2010.10.29)
+   bool oneByOnePlusMatrix = false;
+   bool matrixPlusOneByOne = false;
+   
    if (rowsD != m.rowsD || colsD != m.colsD)
-      throw TableTemplateExceptions::DimensionError();
-   Rmatrix sum(rowsD, colsD);
-    
-   int i;
-   for (i = 0; i < rowsD*colsD; i++)
    {
-      sum.elementD[i] = elementD[i] + m.elementD[i];
+      if (rowsD == 1 && colsD == 1)
+         oneByOnePlusMatrix = true;
+      else if (m.rowsD == 1 && m.colsD == 1)
+         matrixPlusOneByOne = true;
+      else
+         throw TableTemplateExceptions::DimensionError();
    }
+   
+   Rmatrix sum(rowsD, colsD);
+   
+   if (oneByOnePlusMatrix)
+   {
+      sum.SetSize(m.rowsD, m.colsD);
+      Real oneByOne = GetElement(0, 0);
+      for (int i = 0; i < m.rowsD*m.colsD; i++)
+         sum.elementD[i] = oneByOne + m.elementD[i];
+   }
+   else if (matrixPlusOneByOne)
+   {
+      Real oneByOne = m.GetElement(0, 0);
+      for (int i = 0; i < rowsD*colsD; i++)
+         sum.elementD[i] = elementD[i] + oneByOne;
+   }
+   else
+   {
+      for (int i = 0; i < rowsD*colsD; i++)
+         sum.elementD[i] = elementD[i] + m.elementD[i];
+   }
+   
    return sum;
 }
 
@@ -274,19 +304,10 @@ Rmatrix Rmatrix::operator+(const Rmatrix &m) const
 const Rmatrix& Rmatrix::operator+=(const Rmatrix &m) 
 {
    if ((isSizedD == false) || (m.IsSized() == false))
-   {
       throw TableTemplateExceptions::UnsizedTable();
-   }
-
-   if (rowsD != m.rowsD || colsD != m.colsD)
-      throw TableTemplateExceptions::DimensionError();
-
-   int i;
-   for (i = 0; i < rowsD*colsD; i++)
-   {
-      elementD[i] = elementD[i] + m.elementD[i];
-   }
-
+   
+   *this = *this + m;
+   
    return *this;
 }
 
@@ -297,20 +318,43 @@ const Rmatrix& Rmatrix::operator+=(const Rmatrix &m)
 Rmatrix Rmatrix::operator-(const Rmatrix &m) const 
 {
    if ((isSizedD == false) || (m.IsSized() == false))
-   {
       throw TableTemplateExceptions::UnsizedTable();
-   }
-
+   
+   // Added handling of 1x1 - MxN or MxN - 1x1 (LOJ: 2010.10.29)
+   bool oneByOneMinusMatrix = false;
+   bool matrixMinusOneByOne = false;
+   
    if (rowsD != m.rowsD || colsD != m.colsD)
-      throw TableTemplateExceptions::DimensionError();
-   Rmatrix diff(rowsD, colsD);
-
-   int i;
-   for (i = 0; i < rowsD*colsD; i++)
    {
-      diff.elementD[i] = elementD[i] - m.elementD[i];
+      if (rowsD == 1 && colsD == 1)
+         oneByOneMinusMatrix = true;
+      else if (m.rowsD == 1 && m.colsD == 1)
+         matrixMinusOneByOne = true;
+      else
+         throw TableTemplateExceptions::DimensionError();
    }
-
+   
+   Rmatrix diff(rowsD, colsD);
+   
+   if (oneByOneMinusMatrix)
+   {
+      diff.SetSize(m.rowsD, m.colsD);
+      Real oneByOne = GetElement(0, 0);
+      for (int i = 0; i < m.rowsD*m.colsD; i++)
+         diff.elementD[i] = oneByOne - m.elementD[i];
+   }
+   else if (matrixMinusOneByOne)
+   {
+      Real oneByOne = m.GetElement(0, 0);
+      for (int i = 0; i < rowsD*colsD; i++)
+         diff.elementD[i] = elementD[i] - oneByOne;
+   }
+   else
+   {
+      for (int i = 0; i < rowsD*colsD; i++)
+         diff.elementD[i] = elementD[i] - m.elementD[i];
+   }
+   
    return diff;
 }
 
@@ -321,18 +365,10 @@ Rmatrix Rmatrix::operator-(const Rmatrix &m) const
 const Rmatrix& Rmatrix::operator-=(const Rmatrix &m) 
 {
    if ((isSizedD == false) || (m.IsSized() == false))
-   {
       throw TableTemplateExceptions::UnsizedTable();
-   }
-
-   if (rowsD != m.rowsD || colsD != m.colsD)
-      throw TableTemplateExceptions::DimensionError();
-
-   int i;
-   for (i = 0; i < rowsD*colsD; i++)
-   {
-      elementD[i] = elementD[i] - m.elementD[i];
-   }
+   
+   *this = *this - m;
+   
    return *this;
 }
 
@@ -342,28 +378,85 @@ const Rmatrix& Rmatrix::operator-=(const Rmatrix &m)
 //------------------------------------------------------------------------------
 Rmatrix Rmatrix::operator*(const Rmatrix &m) const 
 {
+   #ifdef DEBUG_MULTIPLY
+   MessageInterface::ShowMessage
+      ("Rmatrix::operator*() entered this=%s, m=%s\n", this->ToString().c_str(),
+       m.ToString().c_str());
+   #endif
+   
    if ((isSizedD == false) || (m.IsSized() == false))
-   {
       throw TableTemplateExceptions::UnsizedTable();
-   }
-
+   
+   // Added handling of 1x1 * MxN or MxN * 1x1 (LOJ: 2010.10.29)
+   bool oneByOneTimesMatrix = false;
+   bool matrixTimesOneByOne = false;
+   
+   #ifdef DEBUG_MULTIPLY
+   MessageInterface::ShowMessage
+      ("   rowsD=%d, colsD=%d, m.rowsD=%d, m.colsD=%d\n", rowsD, colsD, m.rowsD, m.colsD);
+   #endif
+   
    if (colsD != m.rowsD)
-      throw TableTemplateExceptions::DimensionError();
-   Rmatrix prod(rowsD, m.colsD);  // declare a zero matrix
-    
-   int i, j, k;
-   for (i = 0; i < rowsD; i++)
    {
-      for (j = 0; j < m.colsD; j++)
-      {
-         for (k = 0; k < colsD; k++)
-         {
-            prod(i, j) += elementD[i*colsD + k]*m(k, j);
-         }
-      }
+      if (rowsD == 1 && colsD == 1)
+         oneByOneTimesMatrix = true;
+      else if (m.rowsD == 1 && m.colsD == 1)
+         matrixTimesOneByOne = true;
+      else
+         throw TableTemplateExceptions::DimensionError();
    }
    
-   return prod;
+   #ifdef DEBUG_MULTIPLY
+   MessageInterface::ShowMessage
+      ("   oneByOneTimesMatrix=%d, matrixTimesOneByOne=%d\n",
+       oneByOneTimesMatrix, matrixTimesOneByOne);
+   #endif
+   
+   if (oneByOneTimesMatrix)
+   {
+      Rmatrix prod(m.rowsD, m.colsD);  // declare a zero matrix
+      Real oneByOne = GetElement(0, 0);
+      
+      for (int i = 0; i < m.rowsD; i++)
+         for (int j = 0; j < m.colsD; j++)
+            prod(i, j) = m.GetElement(i, j) * oneByOne;
+      
+      #ifdef DEBUG_MULTIPLY
+      MessageInterface::ShowMessage
+         ("Rmatrix::operator*() returning OneByOne*Matrix %s\n", prod.ToString().c_str());
+      #endif
+      return prod;
+   }
+   else if ( matrixTimesOneByOne)
+   {
+      Rmatrix prod(rowsD, colsD);  // declare a zero matrix
+      Real oneByOne = m.GetElement(0, 0);
+      
+      for (int i = 0; i < rowsD; i++)
+         for (int j = 0; j < colsD; j++)
+            prod(i, j) = GetElement(i, j) * oneByOne;
+      
+      #ifdef DEBUG_MULTIPLY
+      MessageInterface::ShowMessage
+         ("Rmatrix::operator*() returning Matrix*OneByOne %s\n", prod.ToString().c_str());
+      #endif
+      return prod;
+   }
+   else
+   {
+      Rmatrix prod(rowsD, m.colsD);  // declare a zero matrix
+      
+      for (int i = 0; i < rowsD; i++)
+         for (int j = 0; j < m.colsD; j++)
+            for (int k = 0; k < colsD; k++)
+               prod(i, j) += elementD[i*colsD + k] * m(k, j);
+      
+      #ifdef DEBUG_MULTIPLY
+      MessageInterface::ShowMessage
+         ("Rmatrix::operator*() returning %s\n", prod.ToString().c_str());
+      #endif
+      return prod;
+   }
 }
 
 
@@ -373,10 +466,8 @@ Rmatrix Rmatrix::operator*(const Rmatrix &m) const
 const Rmatrix& Rmatrix::operator*=(const Rmatrix &m) 
 {
    if ((isSizedD == false) || (m.IsSized() == false))
-   {
       throw TableTemplateExceptions::UnsizedTable();
-   }
-
+   
    *this = *this * m;  
    return *this;
 }
@@ -387,12 +478,66 @@ const Rmatrix& Rmatrix::operator*=(const Rmatrix &m)
 //------------------------------------------------------------------------------
 Rmatrix Rmatrix::operator/( const Rmatrix &m) const
 { 
+   #ifdef DEBUG_DIVIDE
+   MessageInterface::ShowMessage
+      ("Rmatrix::operator/() entered this=%s, m=%s\n", this->ToString().c_str(),
+       m.ToString().c_str());
+   #endif
+   
    if ((isSizedD == false) || (m.IsSized() == false))
-   {
       throw TableTemplateExceptions::UnsizedTable();
+   
+   bool oneByOneDivideMatrix = false;
+   bool matrixDivideOneByOne = false;
+   
+   #ifdef DEBUG_DIVIDE
+   MessageInterface::ShowMessage
+      ("   rowsD=%d, colsD=%d, m.rowsD=%d, m.colsD=%d\n", rowsD, colsD, m.rowsD, m.colsD);
+   #endif
+   
+   if (rowsD == 1 && colsD == 1)
+      oneByOneDivideMatrix = true;
+   else if (m.rowsD == 1 && m.colsD == 1)
+      matrixDivideOneByOne = true;
+   
+   #ifdef DEBUG_DIVIDE
+   MessageInterface::ShowMessage
+      ("   oneByOneDivideMatrix=%d, matrixDivideOneByOne=%d\n",
+       oneByOneDivideMatrix, matrixDivideOneByOne);
+   #endif
+   
+   if (oneByOneDivideMatrix)
+   {
+      Rmatrix div(m.rowsD, m.colsD);
+      Real oneByOne = GetElement(0, 0);
+      
+      for (int i = 0; i < m.rowsD; i++)
+         for (int j = 0; j < m.colsD; j++)
+            div(i, j) = oneByOne / m.GetElement(i, j);
+      
+      #ifdef DEBUG_DIVIDE
+      MessageInterface::ShowMessage
+         ("Rmatrix::operator/() returning OneByOne/Matrix %s\n", div.ToString().c_str());
+      #endif
+      return div;
    }
-
-   return (*this)*m.Inverse();
+   else if (matrixDivideOneByOne)
+   {
+      Rmatrix div(rowsD, colsD);
+      Real oneByOne = m.GetElement(0, 0);
+      
+      for (int i = 0; i < rowsD; i++)
+         for (int j = 0; j < colsD; j++)
+            div(i, j) = GetElement(i, j) / oneByOne;
+      
+      #ifdef DEBUG_DIVIDE
+      MessageInterface::ShowMessage
+         ("Rmatrix::operator/() returning Matrix/OneByOne %s\n", div.ToString().c_str());
+      #endif
+      return div;
+   }
+   else
+      return (*this)*m.Inverse();
 }
 
 
@@ -571,6 +716,24 @@ Rmatrix operator*(Real scalar, const Rmatrix &m)
 
 
 //------------------------------------------------------------------------------
+//  <friend>
+//  Rmatrix operator/(Real scalar, const Rmatrix &m)
+//------------------------------------------------------------------------------
+Rmatrix operator/(Real scalar, const Rmatrix &m) 
+{
+   if (m.IsSized() == false)
+      throw TableTemplateExceptions::UnsizedTable();
+   
+   Rmatrix div(m);
+   
+   for (int i = 0; i < m.rowsD*m.colsD; i++)
+      div.elementD[i] = scalar / m.elementD[i];
+   
+   return div;
+}
+
+
+//------------------------------------------------------------------------------
 //  virtual real Trace() const
 //------------------------------------------------------------------------------
 Real Rmatrix::Trace() const
@@ -599,6 +762,9 @@ Real Rmatrix::Trace() const
 //------------------------------------------------------------------------------
 Real Rmatrix::Determinant() const
 {
+   #ifdef DEBUG_DETERMINANT
+      MessageInterface::ShowMessage("Entering Determinant with rowsD = %d and colsD = %d\n", rowsD, colsD);
+   #endif
    if (isSizedD == false)
    {
       throw TableTemplateExceptions::UnsizedTable();
@@ -609,23 +775,59 @@ Real Rmatrix::Determinant() const
    Real D;
 
    if (rowsD == 1)
+   {
+      #ifdef DEBUG_DETERMINANT
+         MessageInterface::ShowMessage("Entering Determinant rowsD == 1 clause\n");
+      #endif
       D = elementD[0];
+   }
    else if (rowsD == 2)
+   {
+      #ifdef DEBUG_DETERMINANT
+         MessageInterface::ShowMessage("Entering Determinant rowsD == 2 clause\n");
+      #endif
       D = elementD[0]*elementD[3] - elementD[1]*elementD[2];
+   }
    else if (rowsD == 3)
-      D = elementD[0]*elementD[4]*elementD[8] + 
-         elementD[1]*elementD[5]*elementD[6] + 
-         elementD[2]*elementD[3]*elementD[7] - 
-         elementD[0]*elementD[5]*elementD[7] - 
+   {
+      #ifdef DEBUG_DETERMINANT
+         MessageInterface::ShowMessage("Entering Determinant rowsD == 3 clause\n");
+      #endif
+      D = elementD[0]*elementD[4]*elementD[8] +
+         elementD[1]*elementD[5]*elementD[6] +
+         elementD[2]*elementD[3]*elementD[7] -
+         elementD[0]*elementD[5]*elementD[7] -
          elementD[1]*elementD[3]*elementD[8] -
          elementD[2]*elementD[4]*elementD[6];
-   else {
+   }
+   else
+   {
+      // Currently limited by inefficiencies in the algorithm
+      if (rowsD > 9)
+      {
+         std::string errmsg = "GMAT Determinant method not yet optimized.  ";
+         errmsg += "Currently limited to matrices of size 9x9 or smaller.";
+         throw UtilityException(errmsg);
+      }
+      #ifdef DEBUG_DETERMINANT
+         MessageInterface::ShowMessage("Entering Determinant else clause\n");
+      #endif
       D = 0.0;
       int i;
       for (i = 0; i < colsD; i++)
       {
-         D += elementD[i]*Cofactor(0,i);
+         Real c = Cofactor(0,i);
+         #ifdef DEBUG_DETERMINANT
+            MessageInterface::ShowMessage("Cofactor(0,%d) = %12.10f\n", (Integer) i, c);
+            MessageInterface::ShowMessage("   now multiplying by element[%d] (%12.10f) to get %12.10f\n",
+                  (Integer) i, elementD[i], (elementD[i] * c));
+         #endif
+         D += elementD[i] * c;
+//         D += elementD[i]*Cofactor(0,i);
       }
+      #ifdef DEBUG_DETERMINANT
+         MessageInterface::ShowMessage("... at end of summation, D = %12.10f\n", D);
+      #endif
    }
    
    return D;
@@ -635,8 +837,12 @@ Real Rmatrix::Determinant() const
 //------------------------------------------------------------------------------
 //  virtual Real Cofactor(int r, int c) const
 //------------------------------------------------------------------------------
-Real Rmatrix::Cofactor(int r, int c)const 
+Real Rmatrix::Cofactor(int r, int c) const
 {
+   #ifdef DEBUG_DETERMINANT
+      MessageInterface::ShowMessage("Entering Cofactor with r     = %d and c     = %d\n", r, c);
+      MessageInterface::ShowMessage("                   and rowsD = %d and colsD = %d\n", rowsD, colsD);
+   #endif
    if (isSizedD == false)
    {
       throw TableTemplateExceptions::UnsizedTable();
@@ -644,6 +850,12 @@ Real Rmatrix::Cofactor(int r, int c)const
 
    if (rowsD != colsD)
       throw Rmatrix::NotSquare();
+   if (rowsD > 9)
+   {
+      std::string errmsg = "GMAT Cofactor method not yet optimized.  ";
+      errmsg += "Currently limited to matrices of size 9x9 or smaller.";
+      throw UtilityException(errmsg);
+   }
    Rmatrix Minor(rowsD - 1, colsD - 1);
    Real Cof;
   
@@ -664,6 +876,9 @@ Real Rmatrix::Cofactor(int r, int c)const
          } // for (j = ...
       } // if (i != r)
    } // for (i = ...
+   #ifdef DEBUG_DETERMINANT
+      MessageInterface::ShowMessage("about to call Determinant on minor: \n%s\n", (Minor.ToString()).c_str());
+   #endif
 
    Cof = Minor.Determinant();
 
@@ -728,7 +943,7 @@ Rmatrix Rmatrix::Inverse() const
    int i, n, j;
    for (n = 0; n < IndexRange; n++) 
    {
-      PivotElement = GmatRealConst::REAL_EPSILON;
+      PivotElement = GmatRealConstants::REAL_EPSILON;
 
       // find pivot element
       for (i = 0; i < IndexRange; i++) 
@@ -821,7 +1036,7 @@ Rmatrix Rmatrix::Pseudoinverse() const
    } 
    else if (rowsD > colsD) 
    {
-      m2 = TransposeTimesRmatrix(*this, *this);
+      m2 = TransposeTimesMatrix(*this, *this);
       if (!GmatMathUtil::IsZero(m2.Determinant(),accuracyRequired))
          InverseM = m2.Inverse()*Transpose();
       else 
@@ -899,9 +1114,9 @@ Rmatrix SkewSymmetric4by4(const Rvector3 &v)
 
 //------------------------------------------------------------------------------
 //  <friend>
-//  Rmatrix TransposeTimesRmatrix(const Rmatrix &m1, const Rmatrix &m2)
+//  Rmatrix TransposeTimesMatrix(const Rmatrix &m1, const Rmatrix &m2)
 //------------------------------------------------------------------------------
-Rmatrix TransposeTimesRmatrix(const Rmatrix &m1, const Rmatrix &m2) 
+Rmatrix TransposeTimesMatrix(const Rmatrix &m1, const Rmatrix &m2) 
 {
    if ((m1.IsSized() == false) || (m2.IsSized() == false))
    {
@@ -1016,10 +1231,10 @@ std::ostream& operator<< (std::ostream &output, const Rmatrix &a)
 Rvector Rmatrix::GetRow(int r) const
 {
    Rvector rvec(colsD);
-  
+   
    for (int i=0; i<colsD; i++)
       rvec.SetElement(i, GetElement(r, i));
-
+   
    return rvec;
 }
 
@@ -1061,24 +1276,27 @@ const StringArray& Rmatrix::GetStringVals(Integer p, Integer w)
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(Integer precision, bool horizontal,
-//                      const std::string &prefix = "") const
+// std::string ToString(Integer precision, Integer width, bool horizontal,
+//                      const std::string &prefix, bool appendEol) const
 //------------------------------------------------------------------------------
 /*
  * Formats Rmatrix value to String.
  *
- * @param  precision  Precision to be used in formatting
+ * @param  precision   Precision to be used in formatting
+ * @param  width       Width to be used in formatting (1)
  * @param  horizontal  Format horizontally if true (false)
- * @param  prefix  Prefix to be used in vertical formatting ("")
+ * @param  prefix      Prefix to be used in vertical formatting ("")
+ * @param  appendEol   Appends eol if true (true)
  *
  * @return Formatted Rmatrix value string
  */
 //------------------------------------------------------------------------------
-std::string Rmatrix::ToString(Integer precision, bool horizontal,
-                              const std::string &prefix) const
+std::string Rmatrix::ToString(Integer precision, Integer width, bool horizontal,
+                              const std::string &prefix, bool appendEol) const
 {
    GmatGlobal *global = GmatGlobal::Instance();
-   global->SetActualFormat(false, false, precision, 0, horizontal, 1, prefix);
+   global->SetActualFormat(false, false, precision, width, horizontal, 1, prefix,
+                           appendEol);
    
    std::stringstream ss("");
    ss << *this;
@@ -1122,4 +1340,85 @@ std::string Rmatrix::ToString(bool useCurrentFormat, bool scientific,
    ss << *this;
    return ss.str();
 }
+
+
+//------------------------------------------------------------------------------
+// std::string ToRowString(Integer row, Integer precision, Integer width,
+//                         bool showPoint)
+//------------------------------------------------------------------------------
+/*
+ * Formats Rmatrix row value to String.
+ *
+ * @param  row         Row values to format
+ * @param  precision   Precision to be used in formatting
+ * @param  width       Width to be used in formatting (1)
+ * @param  showPoint   True if showing point (false)
+ *
+ * @return Formatted Rmatrix value string
+ */
+//------------------------------------------------------------------------------
+std::string Rmatrix::ToRowString(Integer row, Integer precision, Integer width,
+                                 bool showPoint) const
+{
+   #ifdef DEBUG_TO_ROW_STRING
+   MessageInterface::ShowMessage
+      ("Rmatrix::ToRowString() row=%d, prec=%d, width=%d, showPoint=%d\n",
+       row, precision, width, showPoint);
+   #endif
+   
+   // Use c-style formatting
+   //-----------------------------------------------------------------
+   #if 1
+   //-----------------------------------------------------------------
+   
+   Integer w = width;
+   char format[50], buffer[200];
+   
+   if (showPoint)
+      sprintf(format, "%s %d.%de", "%", w, precision);
+   else
+      sprintf(format, "%s %d.%dg", "%", w, precision);
+   
+   Rvector rowVec = GetRow(row);
+   Integer size = rowVec.GetSize();
+   std::stringstream ss("");
+   
+   for (int i=0; i<size; i++)
+   {
+      sprintf(buffer, format, rowVec[i]);
+      
+      // How do I specify 2 digints of the exponent? (LOJ: 2010.05.03)
+      // Manually remove extra 0 in the exponent of scientific notation.
+      // ex) 1.23456e-015 to 1.23456e-15
+      //ss << buffer;
+      
+      std::string sval = buffer;
+      if ((sval.find("e-0") != sval.npos) && (sval.size() - sval.find("e-0")) == 5)
+         sval = GmatStringUtil::Replace(sval, "e-0", "e-");
+      if ((sval.find("e+0") != sval.npos) && (sval.size() - sval.find("e+0")) == 5)
+         sval = GmatStringUtil::Replace(sval, "e+0", "e+");
+      
+      ss << sval;
+      ss << " ";
+   }
+   
+   return ss.str();
+   
+   //-----------------------------------------------------------------
+   #else
+   //-----------------------------------------------------------------
+   
+   GmatGlobal *global = GmatGlobal::Instance();
+   global->SetActualFormat(false, showPoint, precision, width, true, 1, "", false);
+   Rvector rowVec = GetRow(row);
+   std::stringstream ss("");
+   ss << rowVec << " ";
+   
+   return ss.str();
+   
+   //-----------------------------------------------------------------
+   #endif
+   //-----------------------------------------------------------------
+}
+
 

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            AxisSystemFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G and MOMS Task order 124
@@ -38,13 +40,32 @@
 #include "MODEcAxes.hpp"
 #include "GeocentricSolarEclipticAxes.hpp"
 #include "GeocentricSolarMagneticAxes.hpp"
+#include "TopocentricAxes.hpp"
 
 //---------------------------------
 //  public methods
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateAxisSystem(std::string ofType, std::string withName)
+//  CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested ODEModel class
+ * in generic way.
+ *
+ * @param <ofType> the ODEModel object to create and return.
+ * @param <withName> the name to give the newly-created ODEModel object.
+ *
+ */
+//------------------------------------------------------------------------------
+AxisSystem* AxisSystemFactory::CreateObject(const std::string &ofType,
+                                            const std::string &withName)
+{
+   return CreateAxisSystem(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+// AxisSystem* CreateAxisSystem(std::string ofType, std::string withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an AxisSystem object of the requested 
@@ -124,6 +145,10 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    {
       withAxes = new GeocentricSolarMagneticAxes(withName);
    }
+   else if (ofType == "Topocentric")
+   {
+      withAxes = new TopocentricAxes(withName);
+   }
    return withAxes;
 }
 
@@ -159,6 +184,7 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
       creatables.push_back("BodyInertial");
       creatables.push_back("GSE");
       creatables.push_back("GSM");
+      creatables.push_back("Topocentric");
    }
 }
 

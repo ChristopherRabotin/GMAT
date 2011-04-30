@@ -1,18 +1,19 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              Propagator
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : Propagator.cpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -68,14 +69,17 @@
 //
 // **************************************************************************
 
+#include <sstream>
 #include "Propagator.hpp"
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "PhysicalModel.hpp"
+#include "ODEModel.hpp"
 #include "MessageInterface.hpp"
 
 
 //#define DEBUG_PROP_RERUN
+//#define DEBUG_INITIALIZATION
 
 //---------------------------------
 // static data
@@ -83,27 +87,35 @@
 const std::string
 Propagator::PARAMETER_TEXT[PropagatorParamCount - GmatBaseParamCount] =
 {
-    "InitialStepSize"
+    "InitialStepSize",
+    "AlwaysUpdateStepsize"
 };
 
 const Gmat::ParameterType
 Propagator::PARAMETER_TYPE[PropagatorParamCount - GmatBaseParamCount] =
 {
-    Gmat::REAL_TYPE
+    Gmat::REAL_TYPE,
+    Gmat::BOOLEAN_TYPE
 };
 
+const Real Propagator::STEP_SIZE_TOLERANCE = 0.0001;   // 0.1 millisec
 //---------------------------------
 // public
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Propagator::Propagator(void)
+// Propagator(const std::string &typeStr, const std::string &nomme)
 //------------------------------------------------------------------------------
 /**
  * Default base class constructor
+ *
  * The default constructor for the Propagator class sets the stepSize to 60 
  * seconds, sets the member pointers to NULL, the dimension to 0, and the 
  * initialized flag to false.
+ *
+ * @param typeStr The scripted subtype for this Propagator
+ * @param nomme The name of the object that gets constructed
+ *
  */
 //------------------------------------------------------------------------------
 Propagator::Propagator(const std::string &typeStr,
@@ -113,11 +125,16 @@ Propagator::Propagator(const std::string &typeStr,
       stepSizeBuffer      (60.0),
       initialized         (false),
       resetInitialData    (true),
+      alwaysUpdateStepsize(false),
       inState             (NULL),
       outState            (NULL),
       dimension           (0),
       physicalModel       (NULL),
-      finalStep           (false)
+      finalStep           (false),
+      j2kBodyName         ("Earth"),
+      j2kBody             (NULL),
+      centralBody         ("Earth"),
+      propOrigin          (NULL)
 {
     // GmatBase data
    objectTypes.push_back(Gmat::PROPAGATOR);
@@ -142,6 +159,8 @@ Propagator::~Propagator()
 //------------------------------------------------------------------------------
 /**
  * The copy constructor
+ *
+ * @param p The object that is copied into this new one
  */
 //------------------------------------------------------------------------------
 Propagator::Propagator(const Propagator& p)
@@ -150,14 +169,17 @@ Propagator::Propagator(const Propagator& p)
       stepSizeBuffer      (p.stepSizeBuffer),
       initialized         (false),
       resetInitialData    (true),
+      alwaysUpdateStepsize(p.alwaysUpdateStepsize),
       inState             (NULL),
       outState            (NULL),
       dimension           (p.dimension),
       physicalModel       (NULL),
-      finalStep           (false)
+      finalStep           (false),
+      j2kBodyName         (p.j2kBodyName),
+      j2kBody             (NULL),
+      centralBody         (p.centralBody),
+      propOrigin          (NULL)
 {
-    // GmatBase data
-    parameterCount = PropagatorParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -165,12 +187,18 @@ Propagator::Propagator(const Propagator& p)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
+ *
+ * @param p The object that is provides data for into this one
+ *
+ * @return This propagator, configured to match p.
  */
 //------------------------------------------------------------------------------
 Propagator& Propagator::operator=(const Propagator& p)
 {
     if (this == &p)
         return *this;
+
+    GmatBase::operator=(p);
 
     stepSize       = p.stepSize;
     stepSizeBuffer = p.stepSizeBuffer;
@@ -181,7 +209,13 @@ Propagator& Propagator::operator=(const Propagator& p)
 
     initialized = false;
     resetInitialData = true;
+    alwaysUpdateStepsize = p.alwaysUpdateStepsize;
     finalStep = false;    
+
+    j2kBodyName = p.j2kBodyName;
+    j2kBody     = NULL;
+    centralBody = p.centralBody;
+    propOrigin  = NULL;
 
     return *this;
 }
@@ -233,13 +267,11 @@ std::string Propagator::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Propagator::GetParameterID(const std::string &str) const
 {
-    for (Integer i = GmatBaseParamCount; i < PropagatorParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
-            return i;
-    }
+   for (Integer i = GmatBaseParamCount; i < PropagatorParamCount; ++i)
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
         
-    return GmatBase::GetParameterID(str);
+   return GmatBase::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -271,6 +303,46 @@ std::string Propagator::GetParameterTypeString(const Integer id) const
     else
         return GmatBase::GetParameterTypeString(id);
 }
+
+
+//------------------------------------------------------------------------------
+// bool Propagator::IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Identifies parameters that are or are not scripted
+ *
+ * @param id ID of the parameter in question
+ *
+ * @return true if the parameter is not scripted, false if it is scripted
+ */
+//------------------------------------------------------------------------------
+bool Propagator::IsParameterReadOnly(const Integer id) const
+{
+   if (id == AlwaysUpdateStepsize)
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool Propagator::IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Identifies parameters that are or are not scripted
+ *
+ * @param label The script string of the parameter in question
+ *
+ * @return true if the parameter is not scripted, false if it is scripted
+ */
+//------------------------------------------------------------------------------
+bool Propagator::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
+
 
 //------------------------------------------------------------------------------
 // Real Propagator::GetRealParameter(const Integer id) const
@@ -306,12 +378,18 @@ Real Propagator::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real Propagator::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == INITIAL_STEP_SIZE)
-    {
-        stepSizeBuffer = value;
-        return stepSize;
-    }
-    return GmatBase::SetRealParameter(id, value);
+   if (id == INITIAL_STEP_SIZE)
+   {
+      if (GmatMathUtil::IsEqual(value, 0.0, STEP_SIZE_TOLERANCE))
+      {
+         std::stringstream ss;
+         ss << "Initial Step Size must not be zero (tolerance = " << STEP_SIZE_TOLERANCE << " seconds).";
+         throw PropagatorException(ss.str());
+      }
+      stepSizeBuffer = value;
+      return stepSizeBuffer;
+   }
+   return GmatBase::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -321,6 +399,248 @@ Real Propagator::SetRealParameter(const std::string &label, const Real value)
 {
     return SetRealParameter(GetParameterID(label), value);
 }
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Pass through method for getting a real parameter
+ *
+ * @param id The parameter ID
+ * @param index Array index for the parameter
+ *
+ * @return The parameter value after the call
+ */
+//------------------------------------------------------------------------------
+Real Propagator::GetRealParameter(const Integer id, const Integer index) const
+{
+   return GmatBase::GetRealParameter(id, index);
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer row,
+//       const Integer col) const
+//------------------------------------------------------------------------------
+/**
+ * Pass through method for getting a real parameter
+ *
+ * @param id The parameter ID
+ * @param row Array row index for the parameter
+ * @param col Array column index for the parameter
+ *
+ * @return The parameter value after the call
+ */
+//------------------------------------------------------------------------------
+Real Propagator::GetRealParameter(const Integer id, const Integer row,
+      const Integer col) const
+{
+   return GmatBase::GetRealParameter(id, row, col);
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Pass through method for setting a real parameter
+ *
+ * @param id The parameter ID
+ * @param value The new parameter value
+ * @param index Array index for the parameter
+ *
+ * @return The parameter value after the call
+ */
+//------------------------------------------------------------------------------
+Real Propagator::SetRealParameter(const Integer id, const Real value,
+      const Integer index)
+{
+   return GmatBase::SetRealParameter(id, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value, const Integer row,
+//       const Integer col)
+//------------------------------------------------------------------------------
+/**
+ * Pass through method for getting a real parameter
+ *
+ * @param id The parameter ID
+ * @param value The new parameter value
+ * @param row Array row index for the parameter
+ * @param col Array column index for the parameter
+ *
+ * @return The parameter value after the call
+ */
+//------------------------------------------------------------------------------
+Real Propagator::SetRealParameter(const Integer id, const Real value,
+      const Integer row, const Integer col)
+{
+   return GmatBase::SetRealParameter(id, value, row, col);
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves Boolean parameters
+ *
+ * @param id ID of the parameter
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+bool Propagator::GetBooleanParameter(const Integer id) const
+{
+   if (id == AlwaysUpdateStepsize)
+      return alwaysUpdateStepsize;
+
+   return GmatBase::GetBooleanParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * Sets Boolean parameters
+ *
+ * @param id ID of the parameter
+ * @param value The new parameter value
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+bool Propagator::SetBooleanParameter(const Integer id, const bool value)
+{
+   MessageInterface::ShowMessage("Setting ID %d to %s\n", id,
+         (value ? "true" : "false"));
+
+   if (id == AlwaysUpdateStepsize)
+   {
+      alwaysUpdateStepsize = value;
+      return alwaysUpdateStepsize;
+   }
+
+   return GmatBase::SetBooleanParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves Boolean parameters from an array of Booleans
+ *
+ * @param id ID of the parameter
+ * @param index The parameter's index in the array
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+bool Propagator::GetBooleanParameter(const Integer id, const Integer index) const
+{
+   return GmatBase::GetBooleanParameter(id, index);
+}
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets Boolean parameters in an array of Booleans
+ *
+ * @param id ID of the parameter
+ * @param value The new parameter value
+ * @param index The parameter's index in the array
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+bool Propagator::SetBooleanParameter(const Integer id, const bool value,
+                                 const Integer index)
+{
+   return GmatBase::SetBooleanParameter(id, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+* Retrieves Boolean parameters
+*
+* @param label Script label for the parameter
+*
+* @return The parameter value
+ */
+//------------------------------------------------------------------------------
+bool Propagator::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * Sets Boolean parameters
+ *
+ * @param label Script label for the parameter
+ * @param value The new parameter value
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+bool Propagator::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves Boolean parameters from an array of Booleans
+ *
+ * @param label Script label for the parameter
+ * @param index The parameter's index in the array
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+bool Propagator::GetBooleanParameter(const std::string &label,
+                                 const Integer index) const
+{
+   return GetBooleanParameter(GetParameterID(label), index);
+}
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets Boolean parameters in an array of Booleans
+ *
+ * @param label Script label for the parameter
+ * @param value The new parameter value
+ * @param index The parameter's index in the array
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+bool Propagator::SetBooleanParameter(const std::string &label, const bool value,
+                                     const Integer index)
+{
+   return SetBooleanParameter(GetParameterID(label), value, index);
+}
+
+
+
 
 //------------------------------------------------------------------------------
 // bool Propagator::Initialize()
@@ -336,31 +656,39 @@ Real Propagator::SetRealParameter(const std::string &label, const Real value)
 //------------------------------------------------------------------------------
 bool Propagator::Initialize()
 {
-   if (physicalModel != NULL) 
+   if (UsesODEModel())
    {
-       #ifdef DEBUG_INITIALIZATION
-          MessageInterface::ShowMessage(
-             "Propagator::Initialize() calling physicalModel->Initialize() \n");
-       #endif
-       if ( physicalModel->Initialize() )
-          initialized = true;
+      if (physicalModel != NULL)
+      {
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("Propagator::Initialize() calling "
+                  "physicalModel->Initialize() \n");
+         #endif
 
-       #ifdef DEBUG_INITIALIZATION
-          MessageInterface::ShowMessage(
-             "Propagator::Initialize() initialized = %d\n", initialized);
-       #endif
+         if ( physicalModel->Initialize() )
+            initialized = true;
 
-       inState  = physicalModel->GetState();
-       outState = physicalModel->GetState();
-       
-       if (resetInitialData)
-       {
-          stepSize = stepSizeBuffer;
-          resetInitialData = false;
-       }
-    }
-    else
-       throw PropagatorException("Propagator::Initialize -- Force model is not defined");
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage(
+               "Propagator::Initialize() initialized = %d\n", initialized);
+         #endif
+
+         inState  = physicalModel->GetState();
+         outState = physicalModel->GetState();
+
+         if ((resetInitialData) || (alwaysUpdateStepsize))
+         {
+            stepSize = stepSizeBuffer;
+            resetInitialData = false;
+         }
+      }
+      else
+         throw PropagatorException("Propagator::Initialize -- Force model is "
+               "not defined");
+   }
+   else
+      initialized = true;
+
     
     if (!initialized)
        throw PropagatorException("Propagator failed to initialize");
@@ -386,7 +714,7 @@ void Propagator::SetPhysicalModel(PhysicalModel *pPhysicalModel)
 // void Propagator::Update()
 //------------------------------------------------------------------------------
 /**
- * Envoked to force a propagator reset if the PhysicalModel changes
+ * Invoked to force a propagator reset if the PhysicalModel changes
  */
 //------------------------------------------------------------------------------
 void Propagator::Update(bool forwards)
@@ -448,13 +776,228 @@ Integer Propagator::GetPropagatorOrder() const
     return 0;
 }
 
+
 //------------------------------------------------------------------------------
-// bool Propagator::Step(Real dt)
+// bool UsesODEModel()
+//------------------------------------------------------------------------------
+/**
+ * Used to tell the PropSetup if an ODE model is needed for the propagator
+ *
+ * @return true if an ODEModel is required, false if not
+ */
+//------------------------------------------------------------------------------
+bool Propagator::UsesODEModel()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetPropStateManager(PropagationStateManager *sm)
+//------------------------------------------------------------------------------
+/**
+ * Interface used by derived classes to set the PSM for propagators that need it
+ *
+ * This method by default does nothing.  Propagators that do not use an ODEModel
+ * override the method to set the PSM for state updates.
+ *
+ * @param sm The propagation state manager
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ */
+//------------------------------------------------------------------------------
+void Propagator::SetPropStateManager(PropagationStateManager *sm)
+{
+   if (physicalModel)
+      if (physicalModel->IsOfType(Gmat::ODE_MODEL))
+         ((ODEModel*)(physicalModel))->SetPropStateManager(sm);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetDimension()
+//------------------------------------------------------------------------------
+/**
+ * Returns the size of the propagation state vector
+ *
+ * @return The vector size
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ */
+//------------------------------------------------------------------------------
+Integer Propagator::GetDimension()
+{
+   if (physicalModel)
+      return physicalModel->GetDimension();
+   return 0;
+}
+
+
+//------------------------------------------------------------------------------
+// Real* GetState()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the propagation state vector
+ *
+ * @return The vector
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ */
+//------------------------------------------------------------------------------
+Real* Propagator::GetState()
+{
+   if (physicalModel)
+      return physicalModel->GetState();
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// Real* GetJ2KState()
+//------------------------------------------------------------------------------
+/**
+ * Retrieces the J2000 body referenced propagation state vector
+ *
+ * @return The state vector in the correct coordinate frame
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ */
+//------------------------------------------------------------------------------
+Real* Propagator::GetJ2KState()
+{
+   if (physicalModel)
+      return physicalModel->GetJ2KState();
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateSpaceObject(Real newEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Updates the propagated objects with data in the propagation state vector
+ *
+ * @param newEpoch The epoch for the data updates
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ */
+//------------------------------------------------------------------------------
+void Propagator::UpdateSpaceObject(Real newEpoch)
+{
+   if (physicalModel)
+      if (physicalModel->IsOfType(Gmat::ODE_MODEL))
+         ((ODEModel*)(physicalModel))->UpdateSpaceObject(newEpoch);
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateFromSpaceObject()
+//------------------------------------------------------------------------------
+/**
+ * Updates the propagation state vector from the data in the propagating objects
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ */
+//------------------------------------------------------------------------------
+void Propagator::UpdateFromSpaceObject()
+{
+   if (physicalModel)
+      if (physicalModel->IsOfType(Gmat::ODE_MODEL))
+         ((ODEModel*)(physicalModel))->UpdateFromSpaceObject();
+}
+
+
+//------------------------------------------------------------------------------
+// void RevertSpaceObject()
+//------------------------------------------------------------------------------
+/**
+ * Restores a propagation state vector that was buffered in the BufferState()
+ * method.
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ */
+//------------------------------------------------------------------------------
+void Propagator::RevertSpaceObject()
+{
+   if (physicalModel)
+      if (physicalModel->IsOfType(Gmat::ODE_MODEL))
+         ((ODEModel*)(physicalModel))->RevertSpaceObject();
+}
+
+
+//------------------------------------------------------------------------------
+// void BufferState()
+//------------------------------------------------------------------------------
+/**
+ * Saves the propagation state vector so it can be reset later.
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ */
+//------------------------------------------------------------------------------
+void Propagator::BufferState()
+{
+   if (physicalModel)
+      if (physicalModel->IsOfType(Gmat::ODE_MODEL))
+         ((ODEModel*)(physicalModel))->BufferState();
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetTime()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the propagator's time tracking parameter.
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ *
+ * @return The time tracking parameter
+ */
+//------------------------------------------------------------------------------
+Real Propagator::GetTime()
+{
+   if (physicalModel != NULL)
+      return physicalModel->GetTime();
+
+   return 0.0;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetTime(Real t)
+//------------------------------------------------------------------------------
+/**
+ * Sets the propagator's time tracking parameter.
+ *
+ * This method is provided so that the Propagator derivatives that do not use
+ * an ODE model support interfaces needed by the PropagationEnabledCommands.
+ *
+ * @param t The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+void Propagator::SetTime(Real t)
+{
+   if (physicalModel != NULL)
+      physicalModel->SetTime(t);
+}
+
+
+
+//------------------------------------------------------------------------------
+// bool Step(Real dt)
 //------------------------------------------------------------------------------
 /**
  * Evolves the physical model over the specified time
  * This method sets the default timestep to the input value, and then advances 
- * the system by one timestep.  If the ssytem has not been initialized, then
+ * the system by one timestep.  If the system has not been initialized, then
  * no action is taken.  
  * If the step is taken successfully, the method returns true; otherwise, it 
  * returns false.
@@ -519,3 +1062,35 @@ bool Propagator::RawStep(Real dt)
     return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// Protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void MoveToOrigin(Real newEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Provides the interface that Propagators that do not use ODEModels use to
+ * translate from the J2000 body to the propagator's central body
+ *
+ * @param newEpoch The epoch of the state that is translated
+ */
+//------------------------------------------------------------------------------
+void Propagator::MoveToOrigin(Real newEpoch)
+{
+}
+
+//------------------------------------------------------------------------------
+// void ReturnFromOrigin(Real newEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Provides the interface that Propagators that do not use ODEModels use to
+ * translate from the propagator's central body to the J2000 body
+ *
+ * @param newEpoch The epoch of the state that is translated
+ */
+//------------------------------------------------------------------------------
+void Propagator::ReturnFromOrigin(Real newEpoch)
+{
+}

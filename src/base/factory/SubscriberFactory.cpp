@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            SubscriberFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -24,12 +26,31 @@
 #include "TextEphemFile.hpp"
 #include "MessageWindow.hpp"
 #include "OpenGlPlot.hpp"
-#include "TsPlot.hpp"
-#include "MatlabWs.hpp"
+#include "XyPlot.hpp"
+#include "EphemerisFile.hpp"
+#include "OrbitView.hpp"
 
 //---------------------------------
 //  public methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+//  CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested ODEModel class
+ * in generic way.
+ *
+ * @param <ofType> the ODEModel object to create and return.
+ * @param <withName> the name to give the newly-created ODEModel object.
+ *
+ */
+//------------------------------------------------------------------------------
+Subscriber* SubscriberFactory::CreateObject(const std::string &ofType,
+                                          const std::string &withName)
+{
+   return CreateSubscriber(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 //  CreateSubscriber(const std::string &ofType, const std::string &withName,
@@ -54,14 +75,16 @@ Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
       return new TextEphemFile(ofType, withName, fileName);
    else if (ofType == "MessageWindow")
       return new MessageWindow(withName);
-   else if (ofType == "OpenGLPlot")
-      return new OpenGlPlot(withName);
    else if (ofType == "XYPlot")
-      return new TsPlot(withName);
-   else if (ofType == "TSPlot")
-      return new TsPlot(withName);
-   else if (ofType == "MatlabWS")
-      return new MatlabWs(withName);
+      return new XyPlot(withName);
+   else if (ofType == "EphemerisFile")
+      return new EphemerisFile(withName);
+   else if (ofType == "OpenGLPlot")
+      return new OrbitView(withName);
+   else if (ofType == "Enhanced3DView")
+      return new OrbitView(withName);
+   else if (ofType == "OrbitView")
+      return new OrbitView(withName);
    
    return NULL;
 }
@@ -85,9 +108,20 @@ Factory(Gmat::SUBSCRIBER)
       creatables.push_back("ReportFile");
       creatables.push_back("TextEphemFile");
       creatables.push_back("MessageWindow");
-      creatables.push_back("OpenGLPlot");
       creatables.push_back("XYPlot");
-      creatables.push_back("MatlabWS");
+      creatables.push_back("EphemerisFile");
+      creatables.push_back("OpenGLPlot");
+      creatables.push_back("Enhanced3DView");
+      creatables.push_back("OrbitView");
+   }
+   
+   // Now fill in unviewable subscribers
+   // We don't want to show these items in the ResourceTree menu
+   if (unviewables.empty())
+   {
+      // These commands do nothing
+      unviewables.push_back("OpenGLPlot");
+      unviewables.push_back("Enhanced3DView");
    }
 }
 

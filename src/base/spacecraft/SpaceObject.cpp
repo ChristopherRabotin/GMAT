@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              SpaceObject
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CI63P
@@ -22,7 +24,7 @@
 #include "MessageInterface.hpp"
 
 
-// #define DEBUG_J2000_STATE 1
+//#define DEBUG_J2000_STATE 1
 // #define DEBUG_STOPCONDITION_TRACKING
 
 //---------------------------------
@@ -62,10 +64,13 @@ const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount -
 SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
                          const std::string &instName) :
    SpacePoint        (typeId, typeStr, instName),
+   state             (6),
    isManeuvering     (false),
    originName        ("Earth"),
    origin            (NULL),
-   parmsChanged      (true)
+   parmsChanged      (true),
+   hasPublished      (false),
+   hasEphemPropagated(false)
 {
    objectTypes.push_back(Gmat::SPACEOBJECT);
    objectTypeNames.push_back("SpaceObject");
@@ -100,7 +105,9 @@ SpaceObject::SpaceObject(const SpaceObject& so) :
    originName        (so.originName),
    origin            (so.origin),
    parmsChanged      (true),
-   lastStopTriggered (so.lastStopTriggered)
+   lastStopTriggered (so.lastStopTriggered),
+   hasPublished      (so.hasPublished),
+   hasEphemPropagated(so.hasEphemPropagated)
 {
    j2000Body = so.j2000Body;
 }
@@ -129,20 +136,22 @@ SpaceObject& SpaceObject::operator=(const SpaceObject& so)
    origin        = so.origin;
    parmsChanged  = true;       // Always update after using assignment
    lastStopTriggered = so.lastStopTriggered;
+   hasPublished  = so.hasPublished;
+   hasEphemPropagated = so.hasEphemPropagated;
    return *this;
 }
 
 
 //------------------------------------------------------------------------------
-// PropState& GetState()
+// GmatState& GetState()
 //------------------------------------------------------------------------------
 /**
- * Accessor for the PropState of the object.
+ * Accessor for the GmatState of the object.
  *
- * @return The embedded PropState.
+ * @return The embedded GmatState.
  */
 //------------------------------------------------------------------------------
-PropState& SpaceObject::GetState()
+GmatState& SpaceObject::GetState()
 {
    return state;
 }
@@ -253,6 +262,11 @@ void SpaceObject::SetOriginName(std::string cbName)
    originName = cbName;
 }
 
+SpacePoint* SpaceObject::GetOrigin()
+{
+   return origin;
+}
+
 const std::string SpaceObject::GetOriginName()
 {
    return originName;
@@ -291,11 +305,13 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
          "SpaceObject::GetMJ2000State MJ2000 body not yet set for " +
          instanceName + "\n");
          
-   PropState ps = GetState();
+   GmatState ps = GetState();
    
    Real *st = ps.GetState();
 
    #ifdef DEBUG_J2000_STATE
+      MessageInterface::ShowMessage("   Object state: [%lf %lf %lf %lf %lf "
+            "%lf]\n", st[0], st[1], st[2], st[3], st[4], st[5]);
       MessageInterface::ShowMessage("   Accessing J2000 body state for %s\n",
          j2000Body->GetName().c_str());
    #endif
@@ -307,29 +323,32 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
          bodyState[5]);
    #endif
 
-   // If origin is NULL, assume it is set at the J2000 origin.
-   if (origin)
-   {
-      #ifdef DEBUG_J2000_STATE
-         MessageInterface::ShowMessage("   Accessing origin state for %s\n",
-            origin->GetName().c_str());
-      #endif
-      
-      Rvector6 offset = origin->GetMJ2000State(atTime);
-      
-      #ifdef DEBUG_J2000_STATE
-         MessageInterface::ShowMessage("   origin: [%lf %lf %lf %lf %lf %lf]\n",
-            offset[0], offset[1], offset[2], offset[3], offset[4], offset[5]);
-      #endif
-      
-      bodyState -= offset;
-      
-      #ifdef DEBUG_J2000_STATE
-         MessageInterface::ShowMessage("   Diff: [%lf %lf %lf %lf %lf %lf]\n",
-            bodyState[0], bodyState[1], bodyState[2], bodyState[3], bodyState[4], 
-            bodyState[5]);
-      #endif
-   }
+//   // If origin is NULL, assume it is set at the J2000 origin.
+//   if (origin)
+//   {
+//      if (origin != j2000Body)
+//      {
+//         #ifdef DEBUG_J2000_STATE
+//            MessageInterface::ShowMessage("   Accessing origin state for %s\n",
+//               origin->GetName().c_str());
+//         #endif
+//
+//         Rvector6 offset = origin->GetMJ2000State(atTime);
+//
+//         #ifdef DEBUG_J2000_STATE
+//            MessageInterface::ShowMessage("   origin: [%lf %lf %lf %lf %lf %lf]\n",
+//               offset[0], offset[1], offset[2], offset[3], offset[4], offset[5]);
+//         #endif
+//
+//         bodyState -= offset;
+//
+//         #ifdef DEBUG_J2000_STATE
+//            MessageInterface::ShowMessage("   Diff: [%lf %lf %lf %lf %lf %lf]\n",
+//               bodyState[0], bodyState[1], bodyState[2], bodyState[3], bodyState[4],
+//               bodyState[5]);
+//         #endif
+//      }
+//   }
    
    Rvector6 j2kState;
    
@@ -340,6 +359,12 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
    j2kState[3] = st[3] - bodyState[3];
    j2kState[4] = st[4] - bodyState[4];
    j2kState[5] = st[5] - bodyState[5];
+
+   #ifdef DEBUG_J2000_STATE
+      MessageInterface::ShowMessage("   J2K state: [%lf %lf %lf %lf %lf %lf]\n",
+            j2kState[0], j2kState[1], j2kState[2], j2kState[3], j2kState[4],
+            j2kState[5]);
+   #endif
 
    return j2kState;
 }
@@ -520,7 +545,7 @@ Real SpaceObject::SetRealParameter(const Integer id, const Real value)
 {
    if (id == EPOCH_PARAM)
       return state.SetEpoch(value);
-   return SpacePoint::GetRealParameter(id);
+   return SpacePoint::SetRealParameter(id, value);
 }
 
 
@@ -541,6 +566,53 @@ Real SpaceObject::SetRealParameter(const std::string &label, const Real value)
    return SetRealParameter(GetParameterID(label), value);
 }
 
+Real SpaceObject::GetRealParameter(const Integer id, const Integer row,
+                                   const Integer col) const
+{
+   return SpacePoint::GetRealParameter(id, row, col);
+}
+
+Real SpaceObject::GetRealParameter(const std::string &label, 
+                                      const Integer row, 
+                                      const Integer col) const
+{
+   return GetRealParameter(GetParameterID(label), row, col);
+}
+
+Real SpaceObject::SetRealParameter(const Integer id, const Real value,
+                                      const Integer row, const Integer col)
+{
+   return SpacePoint::SetRealParameter(id, value, row, col);
+}
+
+Real SpaceObject::SetRealParameter(const std::string &label,
+                                      const Real value, const Integer row,
+                                      const Integer col)
+{
+   return SetRealParameter(GetParameterID(label), value, row, col);
+}
+
+//---------------------------------------------------------------------------
+//  Real SetRealParameter(const Integer id, const Real value, Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Set the value for a Real parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new parameter value.
+ * @param index Index for parameters in arrays.  Use -1 or the index free
+ *              version to add the value to the end of the array.
+ *
+ * @return the parameter value at the end of this call, or
+ *         REAL_PARAMETER_UNDEFINED if the parameter id is invalid or the
+ *         parameter type is not Real.
+ */
+//------------------------------------------------------------------------------
+Real SpaceObject::SetRealParameter(const Integer id, const Real value,
+                                   const Integer index)
+{
+    return SpacePoint::SetRealParameter(id, value, index);
+}
 
 //------------------------------------------------------------------------------
 // void ClearLastStopTriggered()
@@ -579,6 +651,22 @@ void SpaceObject::SetLastStopTriggered(const std::string &stopCondName)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// const std::string SpaceObject::GetLastStopTriggered()
+//------------------------------------------------------------------------------
+/**
+ * This method returns the first entry in the list of triggered stopping
+ * conditions, for use in debugging
+ *
+ * @return The name of the triggered stop
+ */
+//------------------------------------------------------------------------------
+const std::string SpaceObject::GetLastStopTriggered()
+{
+   if (lastStopTriggered.size() > 0)
+      return lastStopTriggered[0];
+   return "";
+}
 
 //------------------------------------------------------------------------------
 // bool WasLastStopTriggered(const std::string &stopCondName)
@@ -605,4 +693,52 @@ bool SpaceObject::WasLastStopTriggered(const std::string &stopCondName)
          lastStopTriggered.end())
       return true;
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool HasEphemPropagated()
+//------------------------------------------------------------------------------
+/**
+ * Queries to see if the object has been propagated using an EphemerisPropagator
+ *
+ * This method is accessed from EphemerisPropagators so that epoch/state data
+ * can be managed by that class of propagators.
+ *
+ * @return true if an ephem propagator has been used, false if not
+ */
+//------------------------------------------------------------------------------
+bool SpaceObject::HasEphemPropagated()
+{
+   return hasEphemPropagated;
+}
+
+
+//------------------------------------------------------------------------------
+// void HasEphemPropagated(bool tf)
+//------------------------------------------------------------------------------
+/**
+ * Tells the object it has been propagated using an EphemerisPropagator.
+ *
+ * This method is accessed from EphemerisPropagators so that epoch/state data
+ * can be managed by that class of propagators.
+ *
+ * @param tf true if an ephem propagator has been used, false if not
+ */
+//------------------------------------------------------------------------------
+void SpaceObject::HasEphemPropagated(bool tf)
+{
+   hasEphemPropagated = tf;
+}
+
+// Start on a fix for bug 648; these methods are not currently used, but are in 
+// place for use when the single step publishing issues are ready to be worked.
+void SpaceObject::HasPublished(bool tf)
+{
+   hasPublished = tf;
+}
+
+bool SpaceObject::HasPublished()
+{
+   return hasPublished;
 }

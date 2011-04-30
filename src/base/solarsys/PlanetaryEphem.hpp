@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  PlanetaryEphem
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,19 +25,20 @@
 #include "gmatdefs.hpp"
 #include "A1Mjd.hpp"
 
-namespace Gmat  // does this belong in DeFIle.hpp???????????????
+namespace Gmat  // does this belong in DeFile.hpp???????????????
 {
    // different types of DE files
    enum DeFileType
    {
-      DE102 = 0,
-      DE200,
-      DE202,
-      DE403,
-      DE405,
-      DE406
+//      DE102 = 0,
+//      DE200,
+//      DE202,
+//      DE403,
+      DE_DE405,
+//      DE406.
+//      DE_421,
    };
-   
+
    // different types of DE files
    enum DeFileFormat
    {
@@ -44,7 +47,7 @@ namespace Gmat  // does this belong in DeFIle.hpp???????????????
    };
 };
 
-class PlanetaryEphem
+class GMAT_API PlanetaryEphem
 {
 public:
 
@@ -72,7 +75,7 @@ public:
     */
    //------------------------------------------------------------------------------
    virtual Integer GetBodyID(std::string bodyName) = 0;
-   
+
    //------------------------------------------------------------------------------
    //  Real* GetPosVel(Integer forBody, A1Mjd atTime)
    //------------------------------------------------------------------------------
@@ -88,7 +91,7 @@ public:
     *         time.
     */
    //------------------------------------------------------------------------------
-   virtual Real* GetPosVel(Integer forBody, A1Mjd atTime, 
+   virtual Real* GetPosVel(Integer forBody, A1Mjd atTime,
                            bool overrideTimeSystem = false) = 0;
 
    // method to return the day-of-year and year of the start time of the
@@ -104,10 +107,10 @@ public:
    //------------------------------------------------------------------------------
    virtual Integer* GetStartDayAndYear() = 0;
 
-  
+
 protected:
    // file type (from Swingby - added constructors, operator=, destructor
-   struct dcb_type
+   struct GMAT_API dcb_type
    {
       dcb_type()
    {

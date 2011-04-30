@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  SolarSystem
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -34,8 +36,13 @@
 #include "GmatBase.hpp"
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
-#include "SlpFile.hpp"
 #include "DeFile.hpp"
+#include "GmatDefaults.hpp"
+#ifdef __USE_SPICE__
+#include "SpiceOrbitKernelReader.hpp"
+#endif
+
+class CoordinateSystem;
 
 /**
  * SolarSystem class, containing pointers to all of the objects currently in
@@ -45,7 +52,7 @@
  * specified Solar System.  NOTE - For Build 2, the default Solar System
  * contains only the Sun, Earth, and Moon.
  */
-class SolarSystem : public GmatBase
+class GMAT_API SolarSystem : public GmatBase
 {
 public:
    // class default constructor - creates default solar system
@@ -60,20 +67,24 @@ public:
    
    virtual bool Initialize();
    
-   // method for planetary ephemris files
+   // method for planetary ephemeris files
    void CreatePlanetarySource(bool setDefault = true);
    
    const StringArray& GetPlanetarySourceTypes();
    const StringArray& GetPlanetarySourceNames();
    const StringArray& GetPlanetarySourceTypesInUse();
-   const StringArray& GetAnalyticModelNames();
-   bool SetAnalyticModelToUse(const std::string &modelName);
    bool SetPlanetarySourceName(const std::string &sourceType,
                                const std::string &fileName);
    Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes); 
    Integer GetPlanetarySourceId(const std::string &sourceType);
    std::string GetPlanetarySourceName(const std::string &sourceType);
    std::string GetCurrentPlanetarySource();
+   void        SetIsSpiceAllowedForDefaultBodies(const bool allowSpice);
+   bool        IsSpiceAllowedForDefaultBodies() const;
+#ifdef __USE_SPICE__
+   void        LoadSpiceKernels();
+#endif
+
    
    void ResetToDefaults();
    
@@ -81,6 +92,8 @@ public:
    bool                 AddBody(CelestialBody* cb);
    // method to return a body of the solar system, given its name
    CelestialBody*       GetBody(std::string withName);
+   // method to remove a body from the solar system
+   bool                 DeleteBody(const std::string &withName);
    
    // method to return an array of the names of the bodies included in
    // this solar system
@@ -88,10 +101,11 @@ public:
    // method to return a flag indicating whether or not the specified
    // body is in use for this solar system
    bool                 IsBodyInUse(std::string theBody);
+   const StringArray&   GetDefaultBodies() const;
+   const StringArray&   GetUserDefinedBodies() const;
    
-   // methods to gt the source and analytic model flags
+   // methods to get the source and analytic model flags
    Gmat::PosVelSource   GetPosVelSource() const;
-   Gmat::AnalyticMethod GetAnalyticMethod() const;
    std::string          GetSourceFileName() const;
    bool                 GetOverrideTimeSystem() const;
    Real                 GetEphemUpdateInterval() const;
@@ -103,8 +117,8 @@ public:
    bool SetSource(Gmat::PosVelSource pvSrc);
    bool SetSource(const std::string &pvSrc);
    bool SetSourceFile(PlanetaryEphem *src);
-   bool SetAnalyticMethod(Gmat::AnalyticMethod aM);
-   bool SetAnalyticMethod(const std::string &aM);
+   bool SetSPKFile(const std::string &spkFile);
+   bool SetLSKFile(const std::string &lskFile);
    
    bool SetOverrideTimeSystem(bool overrideIt);
    bool SetEphemUpdateInterval(Real intvl);
@@ -112,6 +126,11 @@ public:
                           const std::string &theModel);
    bool RemoveValidModelName(Gmat::ModelType m, const std::string &forBody,
                              const std::string &theModel);
+   
+   // methods used by internal functions
+   Rvector6 GetCelestialBodyState(const std::string &bodyName, 
+                                  CoordinateSystem *cs, const A1Mjd &epoch);
+   
    
    // Parameter access methods
    virtual std::string  GetParameterText(const Integer id) const;
@@ -134,6 +153,8 @@ public:
                                             const bool value);
    virtual bool         SetBooleanParameter(const std::string &label,
                                             const bool value);
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value);
    virtual bool         SetStringParameter(const std::string &label, 
@@ -145,7 +166,13 @@ public:
    
    virtual Integer      GetOwnedObjectCount();
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
-   
+
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterCloaked(const Integer id) const;
+   virtual bool         IsParameterEqualToDefault(const Integer id) const;
+   virtual bool         SaveAllAsDefault();
+   virtual bool         SaveParameterAsDefault(const Integer id);
+
    // all classes derived from GmatBase must supply this Clone method
    virtual SolarSystem* Clone(void) const;
    
@@ -227,64 +254,47 @@ public:
    // add other moons, asteroids, comets, as needed
    // what do we do about libration points??
    
+
 protected:
    enum
    {
       BODIES_IN_USE = GmatBaseParamCount,
       NUMBER_OF_BODIES,
-      EPHEMERIS,
+      EPHEMERIS,   // deprecated!!!!!!
+      EPHEMERIS_SOURCE, 
+      DE_FILE_NAME,
+      SPK_FILE_NAME,
+      LSK_FILE_NAME,
       OVERRIDE_TIME_SYSTEM,
       EPHEM_UPDATE_INTERVAL,
       SolarSystemParamCount
    };
-   
-   
+      
+
    static const std::string
       PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount];
    
    static const Gmat::ParameterType
       PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount];
-   
-   
+      
    Gmat::PosVelSource    pvSrcForAll;
-   Gmat::AnalyticMethod  anMethodForAll;
    PlanetaryEphem*       thePlanetaryEphem;
    bool                  overrideTimeForAll;
    Real                  ephemUpdateInterval;
 
 private:
    
-   enum
-   {
-      ANALYTIC = 0,
-      SLP,
-      DE200,
-      DE405,
-      PlanetarySourceCount,
-   };
-   
-   enum
-   {
-      LOW_FIDELITY = 0,
-      AnalyticModelCount,
-   };
-   
    std::string theCurrentPlanetarySource;
-   Integer thePlanetarySourcePriority[PlanetarySourceCount];
-   bool isPlanetarySourceInUse[PlanetarySourceCount];
-   static const std::string PLANETARY_SOURCE_STRING[PlanetarySourceCount];
-   static const std::string ANALYTIC_MODEL_STRING[AnalyticModelCount];
+   Integer thePlanetarySourcePriority[Gmat::PosVelSourceCount];
+   bool isPlanetarySourceInUse[Gmat::PosVelSourceCount];
    static const Integer HIGHEST_PRIORITY = 10;
    
    // list for planetary source
    StringArray thePlanetarySourceTypes;
    StringArray thePlanetarySourceNames;
    StringArray thePlanetarySourceTypesInUse;
-   StringArray theAnalyticModelNames;
    StringArray theTempFileList;
-   Gmat::AnalyticMethod theAnalyticMethod;
    
-   SlpFile *theDefaultSlpFile;
    DeFile *theDefaultDeFile;
    
    /// list of the celestial bodies that are included in this solar system
@@ -292,6 +302,28 @@ private:
    
    /// the names of the bodies in use
    StringArray bodyStrings;  // is this needed, or just a convenience?
+   StringArray defaultBodyStrings;
+   StringArray userDefinedBodyStrings;
+#ifdef __USE_SPICE__
+   SpiceOrbitKernelReader *planetarySPK;
+#endif
+   /// flag indicating whether or not SPICE is allowed as a position/velocity 
+   /// source for default bodies
+   bool        allowSpiceForDefaultBodies;
+   bool        spiceAvailable;
+   /// name of the SPK file for the default bodies
+   std::string theSPKFilename;
+   /// name of the leap second kernel
+   std::string lskKernelName;
+   
+   // default values for parameters
+   StringArray default_planetarySourceTypesInUse;  // deprecated!!
+   std::string default_ephemerisSource;
+   std::string default_DEFilename;
+   std::string default_SPKFilename;
+   std::string default_LSKFilename;
+   bool        default_overrideTimeForAll;
+   Real        default_ephemUpdateInterval;
    
    // method to find a body in the solar system, given its name
    CelestialBody* FindBody(std::string withName);
@@ -301,10 +333,44 @@ private:
    
    // methods to create planetary source file
    void SetDefaultPlanetarySource();
-   bool CreateSlpFile(const std::string &fileName);
    bool CreateDeFile(const Integer id, const std::string &fileName,
                      Gmat::DeFileFormat format = Gmat::DE_BINARY);
    
+//   // default values for CelestialBody data
+   static const Gmat::PosVelSource    PLANET_POS_VEL_SOURCE;
+   static const Integer               PLANET_ORDER[GmatSolarSystemDefaults::NumberOfDefaultPlanets];
+   static const Integer               PLANET_DEGREE[GmatSolarSystemDefaults::NumberOfDefaultPlanets];
+   static const Integer               PLANET_NUM_GRAVITY_MODELS[GmatSolarSystemDefaults::NumberOfDefaultPlanets];
+   static const Integer               PLANET_NUM_ATMOSPHERE_MODELS[GmatSolarSystemDefaults::NumberOfDefaultPlanets];
+   static const Integer               PLANET_NUM_MAGNETIC_MODELS[GmatSolarSystemDefaults::NumberOfDefaultPlanets];
+   static const Integer               PLANET_NUM_SHAPE_MODELS[GmatSolarSystemDefaults::NumberOfDefaultPlanets];
+   static const std::string           PLANET_GRAVITY_MODELS[];
+   static const std::string           PLANET_ATMOSPHERE_MODELS[];
+   static const std::string           PLANET_MAGNETIC_MODELS[];
+   static const std::string           PLANET_SHAPE_MODELS[]; // @todo add Shape Models
+   static const Gmat::PosVelSource    MOON_POS_VEL_SOURCE[GmatSolarSystemDefaults::NumberOfDefaultMoons];
+   static const Integer               MOON_ORDER[GmatSolarSystemDefaults::NumberOfDefaultMoons];
+   static const Integer               MOON_DEGREE[GmatSolarSystemDefaults::NumberOfDefaultMoons];
+   static const Integer               MOON_NUM_GRAVITY_MODELS[GmatSolarSystemDefaults::NumberOfDefaultMoons];
+   static const Integer               MOON_NUM_ATMOSPHERE_MODELS[GmatSolarSystemDefaults::NumberOfDefaultMoons];
+   static const Integer               MOON_NUM_MAGNETIC_MODELS[GmatSolarSystemDefaults::NumberOfDefaultMoons];
+   static const Integer               MOON_NUM_SHAPE_MODELS[GmatSolarSystemDefaults::NumberOfDefaultMoons];
+   static const std::string           MOON_GRAVITY_MODELS[];
+   static const std::string           MOON_ATMOSPHERE_MODELS[];
+   static const std::string           MOON_MAGNETIC_MODELS[];
+   static const std::string           MOON_SHAPE_MODELS[]; // @todo add Shape Models
+   static const Gmat::PosVelSource    STAR_POS_VEL_SOURCE;
+   static const Integer               STAR_ORDER;
+   static const Integer               STAR_DEGREE;
+   static const Integer               STAR_NUM_GRAVITY_MODELS;
+   static const Integer               STAR_NUM_ATMOSPHERE_MODELS;
+   static const Integer               STAR_NUM_MAGNETIC_MODELS;
+   static const Integer               STAR_NUM_SHAPE_MODELS;
+   static const std::string           STAR_GRAVITY_MODELS;
+   static const std::string           STAR_ATMOSPHERE_MODELS;
+   static const std::string           STAR_MAGNETIC_MODELS;
+   static const std::string           STAR_SHAPE_MODELS; // @todo add Shape Models
+
 };
 
 #endif // SolarSystem_hpp

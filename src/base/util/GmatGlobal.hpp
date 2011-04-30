@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 GmatGlobal
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,9 +23,35 @@
 
 #include "gmatdefs.hpp"
 
+// forward references
+class EopFile;
+class ItrfCoefficientsFile;
+
 class GMAT_API GmatGlobal
 {
 public:
+
+   enum RunMode
+   {
+      NORMAL = 10,
+      EXIT_AFTER_RUN,
+      TESTING,
+      TESTING_NO_PLOTS,
+   };
+   
+   enum GuiMode
+   {
+      NORMAL_GUI = 20,
+      MINIMIZED_GUI,
+   };
+   
+   ///@note MatlabInterface uses the same enum
+   enum MatlabMode
+   {
+      SINGLE_USE = 30,
+      SHARED,
+      NO_MATLAB,  // MATLAB is not installed
+   };
    
    static GmatGlobal* Instance();
    
@@ -34,46 +62,63 @@ public:
    static const Integer TIME_WIDTH;
    static const Integer INTEGER_WIDTH;
    
-   Integer GetDataPrecision() { return currentSetting.mDataPrecision; }
-   Integer GetTimePrecision() { return currentSetting.mTimePrecision; }
-   Integer GetDataWidth() { return currentSetting.mDataWidth; }
-   Integer GetTimeWidth() { return currentSetting.mTimeWidth; }
-   Integer GetIntegerWidth() { return currentSetting.mIntegerWidth; }
-   std::string GetOutputPath() { return currentSetting.mOutputPath; }
+   Integer GetDataPrecision();
+   Integer GetTimePrecision();
+   Integer GetDataWidth();
+   Integer GetTimeWidth();
+   Integer GetIntegerWidth();
+   std::string GetOutputPath();
+
+   // Data Precision and Width
+   void SetDataPrecision(Integer p);
+   void SetTimePrecision(Integer p);
+   void SetDataWidth(Integer w);
+   void SetTimeWidth(Integer w);
+   void SetIntegerWidth(Integer w);
+   void SetOutputPath(const std::string &path);
    
-   void SetDataPrecision(Integer p) { currentSetting.mDataPrecision = p; }
-   void SetTimePrecision(Integer p) { currentSetting.mTimePrecision = p; }
-   void SetDataWidth(Integer w) { currentSetting.mDataWidth = w; }
-   void SetTimeWidth(Integer w) { currentSetting.mTimeWidth = w; }
-   void SetIntegerWidth(Integer w) { currentSetting.mIntegerWidth = w; }
-   void SetOutputPath(const std::string &path) { currentSetting.mOutputPath = path; }
+   // MatlabFunction name extension
+   void SetMatlabFuncNameExt(const std::string &ext);
+   std::string GetMatlabFuncNameExt();
    
    // MatlabFunction name extension
    void SetMatlabFuncNameExt(const std::string &ext) { matlabExt = ext; }
    std::string GetMatlabFuncNameExt() { return matlabExt; }
    
    // Run mode
-   bool IsBatchMode() { return isBatchMdoe; }
-   void SetBatchMode(bool flag) { isBatchMdoe = flag; }
-   bool GetRunInterrupted() { return runInterrupted; }
-   void SetRunInterrupted(bool flag) { runInterrupted = flag; }
+   bool IsBatchMode();
+   void SetBatchMode(bool flag);
+   bool GetRunInterrupted();
+   void SetRunInterrupted(bool flag);
+   Integer GetRunMode();
+   void SetRunMode(Integer mode);
+   Integer GetGuiMode();
+   void SetGuiMode(Integer mode);
    
+   // MATLAB
+   Integer GetMatlabMode();
+   void SetMatlabMode(Integer mode);
+   bool IsMatlabAvailable();
+   void SetMatlabAvailable(bool flag);
+   bool IsMatlabDebugOn();
+   void SetMatlabDebug(bool flag);
+
    // IO formatting
-   bool IsScientific() { return actualFormat.mScientific; }
-   bool ShowPoint() { return actualFormat.mShowPoint; }
-   bool IsHorizontal() { return actualFormat.mHorizontal; }
-   bool IsBinaryIn() { return actualFormat.mBinaryIn; }
-   bool IsBinaryOut() { return actualFormat.mBinaryOut; }
-   Integer GetSpacing() { return currentFormat.mSpacing; }
+   bool IsScientific();
+   bool ShowPoint();
+   bool IsHorizontal();
+   bool IsBinaryIn();
+   bool IsBinaryOut();
+   Integer GetSpacing();
    
-   void SetScientific(bool flag) { actualFormat.mScientific = flag; }
-   void SetShowPoint(bool flag) { actualFormat.mShowPoint = flag; }
-   void SetHorizontal(bool flag) { actualFormat.mHorizontal = flag; }
-   void SetBinaryIn(bool flag) { actualFormat.mBinaryIn = flag; }
-   void SetBinaryOut(bool flag) { actualFormat.mBinaryOut = flag; }
-   void SetSpacing(Integer sp) { actualFormat.mSpacing = sp; }
-   void SetPrefix(const std::string &prefix) { actualFormat.mPrefix = prefix; }
-   void SetAppendEol(bool flag) { actualFormat.mAppendEol = flag; }
+   void SetScientific(bool flag);
+   void SetShowPoint(bool flag);
+   void SetHorizontal(bool flag);
+   void SetBinaryIn(bool flag);
+   void SetBinaryOut(bool flag);
+   void SetSpacing(Integer sp);
+   void SetPrefix(const std::string &prefix);
+   void SetAppendEol(bool flag);
    
    void SetDefaultFormat();
    void SetCurrentFormat(bool scientific = false, bool showPoint = false,
@@ -91,14 +136,19 @@ public:
                         Integer width, bool horizontal = true, Integer spacing = 1,
                         const std::string &prefix = "", bool appendEol = true);
    
-   void SetToDefaultFormat() { actualFormat = defaultFormat; }
-   void SetToCurrentFormat() { actualFormat = currentFormat; }
+   void SetToDefaultFormat();
+   void SetToCurrentFormat();
    
+   // Files
+   EopFile* GetEopFile();
+   ItrfCoefficientsFile* GetItrfCoefficientsFile();
+   void SetEopFile(EopFile *eop);
+   void SetItrfCoefficientsFile(ItrfCoefficientsFile *itrf);
    
 private:
 
    // Global setting
-   struct Setting
+   struct GMAT_API Setting
    {
       Setting(Integer dp = DATA_PRECISION, Integer tp = TIME_PRECISION,
               Integer dw = DATA_WIDTH, Integer tw = TIME_WIDTH,
@@ -121,7 +171,7 @@ private:
    };
    
    // I/O formatting   
-   struct IoFormat
+   struct GMAT_API IoFormat
    {
       IoFormat(bool scientific = false, bool showPoint = false,
                Integer precision = GmatGlobal::DATA_PRECISION,
@@ -157,14 +207,22 @@ private:
    Setting defaultSetting;
    Setting currentSetting;
    
-   bool isBatchMdoe;
+   bool isBatchMode;
    bool runInterrupted;
+   bool isMatlabAvailable;
+   bool isMatlabDebugOn;
    
+   Integer runMode;
+   Integer guiMode;
+   Integer matlabMode;
    IoFormat defaultFormat;
    IoFormat currentFormat;
    IoFormat actualFormat;
    
    std::string matlabExt;
+
+   EopFile *theEopFile;
+   ItrfCoefficientsFile *theItrfFile;
    
    /// The singleton instance
    static GmatGlobal *theGmatGlobal;

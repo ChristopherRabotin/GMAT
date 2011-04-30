@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                TimeString
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -36,7 +38,7 @@ public:
    virtual ~TimeString();
 
    // methods inherited from Parameter
-   virtual std::string EvaluateString();
+   virtual const std::string& EvaluateString();
    
    virtual Integer GetNumRefObjects() const;
    virtual bool Validate();
@@ -56,6 +58,10 @@ public:
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
+   virtual const std::string&
+                    GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                        const std::string &prefix = "",
+                                        const std::string &useName = "");
 protected:
    
 

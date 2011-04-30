@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 Moderator
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -13,7 +15,7 @@
 // Created: 2003/08/25
 //
 /**
- * Declares opeartions of the GMAT executive. It is a singleton class -
+ * Declares operations of the GMAT executive. It is a singleton class -
  * only one instance of this class can be created.
  */
 //------------------------------------------------------------------------------
@@ -23,7 +25,6 @@
 #include "gmatdefs.hpp"
 // executive
 #include "Sandbox.hpp"
-// #include "GuiInterpreter.hpp"
 #include "ScriptInterpreter.hpp"
 #include "FactoryManager.hpp"
 #include "ConfigManager.hpp"
@@ -39,7 +40,7 @@
 #include "Function.hpp"
 #include "Hardware.hpp"
 #include "PhysicalModel.hpp"
-#include "ForceModel.hpp"
+#include "ODEModel.hpp"
 #include "Propagator.hpp"
 #include "Spacecraft.hpp"
 #include "Formation.hpp"
@@ -59,6 +60,11 @@
 #include "LeapSecsFileReader.hpp"
 // plug-in code
 #include "DynamicLibrary.hpp"
+#include "TriggerManager.hpp"
+
+class DataFile;
+class ObType;
+class Interface;
 
 namespace Gmat
 {
@@ -70,10 +76,15 @@ class GMAT_API Moderator
 public:
 
    static Moderator* Instance();
-   bool Initialize(bool isFromGui = false);
+   bool Initialize(const std::string &startupFile = "", bool isFromGui = false);
    void Finalize();
    void SetRunReady(bool flag = true);
    void SetShowFinalState(bool flag = true);
+   
+   //----- Matlab engine
+   Interface* GetMatlabInterface();
+   bool OpenMatlabEngine();
+   bool CloseMatlabEngine();
    
    //----- Plug-in code
    void LoadPlugins();
@@ -96,14 +107,32 @@ public:
    
    //----- object map
    void SetObjectMap(ObjectMap *objMap);
+   void SetObjectManageOption(Integer option);
+   Integer GetObjectManageOption();
+   void ResetObjectPointer(ObjectMap *objMap, GmatBase *newobj,
+                           const std::string &name);
    
    //----- factory
    const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
    const StringArray& GetListOfAllFactoryItems();
+   const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
+   const StringArray& GetListOfViewableItems(Gmat::ObjectType type);
+   const StringArray& GetListOfViewableItems(const std::string &typeName);
+   const StringArray& GetListOfUnviewableItems(Gmat::ObjectType type);
+   const StringArray& GetListOfUnviewableItems(const std::string &typeName);
+   bool               DoesObjectTypeMatchSubtype(
+                            const Gmat::ObjectType coreType,
+                            const std::string &theType,
+                            const std::string &theSubtype);
    
    //----- configuration
-   const StringArray& GetListOfObjects(Gmat::ObjectType type);
+   ObjectMap* GetConfiguredObjectMap();
+   const StringArray& GetListOfObjects(Gmat::ObjectType type,
+                                       bool excludeDefaultObjects = false);
+   const StringArray& GetListOfObjects(const std::string &typeName,
+                                       bool excludeDefaultObjects = false);
    GmatBase* GetConfiguredObject(const std::string &name);
+   bool ReconfigureItem(GmatBase *newobj, const std::string &name);
    std::string GetNewName(const std::string &name, Integer startCount);
    std::string AddClone(const std::string &name);
    bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
@@ -141,6 +170,11 @@ public:
    SpaceObject* GetSpacecraft(const std::string &name);
    std::string GetSpacecraftNotInFormation();
    
+   // SpacePoints
+   SpacePoint* CreateSpacePoint(const std::string &type,
+                                 const std::string &name);
+   SpacePoint* GetSpacePoint(const std::string &name);
+   
    // Hardware
    Hardware* CreateHardware(const std::string &type,
                             const std::string &name);
@@ -152,6 +186,7 @@ public:
    Propagator* GetPropagator(const std::string &name);
    
    // PhysicalModel
+   PhysicalModel* CreateDefaultPhysicalModel(const std::string &name);
    PhysicalModel* CreatePhysicalModel(const std::string &type,
                                       const std::string &name);
    PhysicalModel* GetPhysicalModel(const std::string &name);
@@ -164,24 +199,34 @@ public:
    
    // Burn
    Burn* CreateBurn(const std::string &type,
-                    const std::string &name);
+                    const std::string &name, bool createDefault = false);
    Burn* GetBurn(const std::string &name);
    
    // Parameter
    bool IsParameter(const std::string &type);
+   Parameter* CreateAutoParameter(const std::string &type,
+                                  const std::string &name,
+                                  bool &alreadyManaged,
+                                  const std::string &ownerName = "",
+                                  const std::string &depName = "",
+                                  Integer manage = 1);
    Parameter* CreateParameter(const std::string &type,
                               const std::string &name,
                               const std::string &ownerName = "",
                               const std::string &depName = "",
                               Integer manage = 1);
    Parameter* GetParameter(const std::string &name);
+   void SetParameterRefObject(Parameter *param, const std::string &type,
+                              const std::string &name,
+                              const std::string &ownerName,
+                              const std::string &depName, Integer manage);
    
-   // ForceModel
-   ForceModel* CreateForceModel(const std::string &name, Integer manage = 0);
-   ForceModel* GetForceModel(const std::string &name);
-   bool AddToForceModel(const std::string &forceModelName,
+   // ODEModel
+   ODEModel* CreateDefaultODEModel(const std::string &name);
+   ODEModel* CreateODEModel(const std::string &type, const std::string &name);
+   ODEModel* GetODEModel(const std::string &name);
+   bool AddToODEModel(const std::string &odeModelName,
                         const std::string &forceName);
-   bool ReconfigureItem(GmatBase *newobj, const std::string &name);
    
    // Solver
    Solver* CreateSolver(const std::string &type,
@@ -190,10 +235,37 @@ public:
    
    // PropSetup
    PropSetup* CreateDefaultPropSetup(const std::string &name);
-   PropSetup* CreatePropSetup(const std::string &name,
-                              const std::string &propagatorName = "",
-                              const std::string &forceModelName = "");
+   PropSetup* CreatePropSetup(const std::string &name);
    PropSetup* GetPropSetup(const std::string &name);
+   
+   // MeasurementModel
+   MeasurementModel* CreateMeasurementModel(const std::string &name);
+   MeasurementModel* GetMeasurementModel(const std::string &name);
+   
+   // TrackingSystem
+   TrackingSystem* CreateTrackingSystem(const std::string &type,
+                                        const std::string &name);
+   TrackingSystem* GetTrackingSystem(const std::string &name);
+
+   // TrackingData
+   TrackingData* CreateTrackingData(const std::string &name);
+   TrackingData* GetTrackingData(const std::string &name);
+
+   // Core Measurement
+   CoreMeasurement* CreateMeasurement(const std::string &type,
+         const std::string &name);
+   CoreMeasurement* GetMeasurement(const std::string &type,
+         const std::string &name);
+   
+   // DataFile
+   DataFile* CreateDataFile(const std::string &type,
+                            const std::string &name);
+   DataFile* GetDataFile(const std::string &name);
+   
+   // ObType
+   ObType* CreateObType(const std::string &type,
+                        const std::string &name);
+   ObType* GetObType(const std::string &name);
    
    // Interpolator
    Interpolator* CreateInterpolator(const std::string &type,
@@ -205,8 +277,8 @@ public:
                                             bool createDefault = false,
                                             bool internal = false,
                                             Integer manage = 1);
-   CoordinateSystem* GetCoordinateSystem(const std::string &name,
-                                         Integer manage = 1);
+   CoordinateSystem* GetCoordinateSystem(const std::string &name);
+   const StringArray& GetDefaultCoordinateSystemNames();
    
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
@@ -215,11 +287,21 @@ public:
                                 bool createDefault = false);
    Subscriber* GetSubscriber(const std::string &name);
    
+   // EphemerisFile
+   Subscriber* CreateEphemerisFile(const std::string &type,
+                                   const std::string &name);
+   Subscriber* GetEphemerisFile(const std::string &name);
+   void        HandleCcsdsEphemerisFile(ObjectMap *objMap, bool deleteOld = false);
+   
    // Function
    Function* CreateFunction(const std::string &type,
                             const std::string &name,
                             Integer manage = 1);
    Function* GetFunction(const std::string &name);
+   
+   // Create other object
+   GmatBase* CreateOtherObject(Gmat::ObjectType objType, const std::string &type,
+                               const std::string &name, bool createDefault = false);
    
    //----- Non-Configurable Items
    // StopCondition
@@ -242,7 +324,8 @@ public:
    // GmatCommand
    GmatCommand* InterpretGmatFunction(const std::string &fileName);
    GmatCommand* InterpretGmatFunction(Function *funct,
-                                      ObjectMap *objMap = NULL);
+                                      ObjectMap *objMap = NULL,
+                                      SolarSystem *ss = NULL);
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name, bool &retFlag);
    GmatCommand* CreateDefaultCommand(const std::string &type,
@@ -257,6 +340,7 @@ public:
    bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                       Integer sandboxNum = 1);
    void SetCommandsUnchanged(Integer whichList = 0); 
+   void ValidateCommand(GmatCommand *cmd);
    
    // CoordinateSystem
    CoordinateSystem* GetInternalCoordinateSystem();
@@ -265,8 +349,8 @@ public:
    const StringArray& GetPlanetarySourceTypes();
    const StringArray& GetPlanetarySourceNames();
    const StringArray& GetPlanetarySourceTypesInUse();
-   const StringArray& GetAnalyticModelNames();
-   bool SetAnalyticModelToUse(const std::string &modelName);
+//   const StringArray& GetAnalyticModelNames();
+//   bool SetAnalyticModelToUse(const std::string &modelName);
    bool SetPlanetarySourceName(const std::string &sourceType,
                                const std::string &fileName);
    Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes); 
@@ -288,7 +372,8 @@ public:
    bool ClearResource();
    
    // Mission sequence
-   bool ClearCommandSeq(Integer sandboxNum = 1);
+   bool ClearCommandSeq(bool leaveFirstCmd = true, bool callRunComplete = true,
+                        Integer sandboxNum = 1);
    
    // Sandbox
    void ClearAllSandboxes();
@@ -308,8 +393,11 @@ public:
    Integer RunScript(Integer sandboxNum = 1);
    
    // MATLAB Server Startup Interface
-   bool StartServer();
+   bool StartMatlabServer();
    
+   // Plugin GUI data
+   std::vector<Gmat::PluginResource*> *GetPluginResourceList();
+
 private:
    
    // initialization
@@ -328,14 +416,13 @@ private:
    // Parameter reference object setting
    void CheckParameterType(Parameter *param, const std::string &type,
                            const std::string &ownerName);
-   void SetParameterRefObject(Parameter *param, const std::string &type,
-                              const std::string &name,
-                              const std::string &ownerName,
-                              const std::string &depName, Integer manage);
    
    // object map
-   GmatBase* FindObject(const std::string &name, Integer manage = 1);
+   GmatBase* FindObject(const std::string &name);
    bool AddObject(GmatBase *obj);
+   void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
+                                   bool forFunction,
+                                   const std::string &callFrom = "");
    
    // default objects
    Spacecraft* GetDefaultSpacecraft();
@@ -351,19 +438,11 @@ private:
    
    // sandbox
    void AddSolarSystemToSandbox(Integer index);
+   void AddTriggerManagersToSandbox(Integer index);
    void AddInternalCoordSystemToSandbox(Integer index);
    void AddPublisherToSandbox(Integer index);
-   void AddCoordSystemToSandbox(Integer index);
-   void AddSpacecraftToSandbox(Integer index);
-   void AddFormationToSandbox(Integer index);
-   void AddPropSetupToSandbox(Integer index);
-   void AddPropagatorToSandbox(Integer index);
-   void AddForceModelToSandbox(Integer index);
-   void AddBurnToSandbox(Integer index);
-   void AddSolverToSandbox(Integer index);
    void AddSubscriberToSandbox(Integer index);
-   void AddParameterToSandbox(Integer index);
-   void AddFunctionToSandbox(Integer index);
+   void AddOtherObjectsToSandbox(Integer index);   
    void AddCommandToSandbox(Integer index);
    void InitializeSandbox(Integer index);
    void ExecuteSandbox(Integer index);
@@ -371,7 +450,7 @@ private:
    // for Debug
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
-   void ShowObjectMap(const std::string &title);
+   void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
    
    Moderator();
    virtual ~Moderator();
@@ -382,10 +461,14 @@ private:
    bool isFromGui;
    bool endOfInterpreter;
    bool showFinalState;
+   Integer objectManageOption;
    std::vector<Sandbox*> sandboxes;
+   std::vector<TriggerManager*> triggerManagers;
    std::vector<GmatCommand*> commands;
    
    ObjectMap *objectMapInUse;
+   Function *currentFunction;
+   ObjectArray unmanagedFunctions;
    
    static Moderator *instance;
    static ScriptInterpreter *theUiInterpreter;
@@ -399,14 +482,17 @@ private:
    SolarSystem *theSolarSystemInUse;
    SolarSystem *theInternalSolarSystem;
    CoordinateSystem *theInternalCoordSystem;
-   StringArray theSpacePointList;
+   StringArray defaultCoordSystemNames;
+   StringArray tempObjectNames;
    EopFile *theEopFile;
    ItrfCoefficientsFile *theItrfFile;
    LeapSecsFileReader *theLeapSecsFile;
+   Interface *theMatlabInterface;
    Gmat::RunState runState;
 
    // Dynamic library data table
    std::map<std::string, DynamicLibrary*>   userLibraries;
+   std::vector<Gmat::PluginResource*>  userResources;
 };
 
 #endif // Moderator_hpp

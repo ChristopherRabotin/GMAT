@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                           ScriptReadWriter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -333,7 +335,20 @@ std::string ScriptReadWriter::CrossPlatformGetLine()
    
    while (inStream->get(ch) && ch != '\r' && ch != '\n' && ch != '\0' &&
           !inStream->eof()) 
+   {
+      if (result.length() < 3)
+      {
+         // Test 1st 3 bytes for non-ANSI encoding -- anything with the top bit set
+         if (ch < 0)
+         {
+            throw InterpreterException("Non-standard characters were "
+                  "encountered in the script file; please check the file to "
+                  "be sure it is saved as an ASCII file, and not formatted "
+                  "for Unicode or UTDF.");
+         }
+      }
       result += ch;
+   }
    
    if ((ch == '\0') || (inStream->eof()))
    {

@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  StringVar
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -72,9 +74,12 @@ StringVar::StringVar(const std::string &name, const std::string &typeStr,
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
                false, false, true)
 {  
+   objectTypes.push_back(Gmat::STRING);
    objectTypeNames.push_back("String");
    mStringValue = STRING_PARAMETER_UNDEFINED;
    mReturnType = Gmat::STRING_TYPE;
+   // Don't set name to expression, but leave it blank if not set (LOJ: 2010.11.29)
+   //mExpr = name;
 }
 
 
@@ -193,7 +198,7 @@ std::string StringVar::ToString()
 
 
 //------------------------------------------------------------------------------
-// std::string GetString() const
+// const std::string& GetString() const
 //------------------------------------------------------------------------------
 /**
  * Retrieves string value of parameter.
@@ -201,14 +206,14 @@ std::string StringVar::ToString()
  * @return string value.
  */
 //------------------------------------------------------------------------------
-std::string StringVar::GetString() const
+const std::string& StringVar::GetString() const
 {
    return mStringValue;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string EvaluateString()
+// const std::string& EvaluateString()
 //------------------------------------------------------------------------------
 /**
  * Retrieves string value of parameter.
@@ -216,7 +221,7 @@ std::string StringVar::GetString() const
  * @return string value.
  */
 //------------------------------------------------------------------------------
-std::string StringVar::EvaluateString()
+const std::string& StringVar::EvaluateString()
 {
    return mStringValue;
 }
@@ -301,7 +306,8 @@ bool StringVar::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_STRINGVAR
    MessageInterface::ShowMessage
-      ("StringVar::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
+      ("StringVar::SetStringParameter() this=<%p>, id=%d, value='%s'\n", this,
+       id, value.c_str());
    #endif
    
    switch (id)
@@ -338,7 +344,7 @@ bool StringVar::SetStringParameter(const std::string &label,
 {
    #ifdef DEBUG_STRINGVAR
    MessageInterface::ShowMessage
-      ("StringVar::SetStringParameter() label=%s value=%s\n",
+      ("StringVar::SetStringParameter() label=%s value='%s'\n",
        label.c_str(), value.c_str());
    #endif
    
@@ -375,10 +381,10 @@ const std::string& StringVar::GetGeneratingString(Gmat::WriteMode mode,
    // @note
    // Do not write "Create name" since multiple Strings per line will be written from
    // the ScriptInterpreter
-      
+   
    // Write value if it is not blank or blank and SHOW_SCRIPT mode
-   if (mExpr != "" ||
-       mExpr == "" && mode == Gmat::SHOW_SCRIPT)
+   if ( mExpr != "" ||
+       (mExpr == "" && mode == Gmat::SHOW_SCRIPT))
    {
       // if value is other StringVar object, do not put quotes
       if (mExpr != "" && mExpr == mDepObjectName)

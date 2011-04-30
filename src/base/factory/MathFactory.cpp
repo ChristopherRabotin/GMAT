@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              MathFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -142,9 +144,9 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
       mathNode = new Atan2(withName);
    
    // Unit conversion functions
-   else if (newType == "DegToRad")
+   else if (newType == "DegToRad" || newType == "Deg2Rad")
       mathNode = new DegToRad(withName);
-   else if (newType == "RadToDeg")
+   else if (newType == "RadToDeg" || newType == "Rad2Deg")
       mathNode = new RadToDeg(withName);
    
    else if (newType == "FunctionRunner")
@@ -165,7 +167,7 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
 MathFactory::MathFactory()
    : Factory(Gmat::MATH_NODE)
 {
-   isCaseSensitive = false;
+   isCaseSensitive = true;
    
    if (creatables.empty())
       BuildCreatables();
@@ -261,33 +263,35 @@ void MathFactory::BuildCreatables()
    creatables.push_back("Subtract");
    creatables.push_back("Multiply");
    creatables.push_back("Divide");
-   creatables.push_back("sqrt");
-   creatables.push_back("abs");
    
-   // Power, Log functions
+   // Math functions
+   creatables.push_back("Sqrt");
+   creatables.push_back("Abs");
    creatables.push_back("Power");
-   creatables.push_back("exp");
-   creatables.push_back("log");
-   creatables.push_back("log10");
+   creatables.push_back("Exp");
+   creatables.push_back("Log");
+   creatables.push_back("Log10");
    
    // Matrix functions
-   creatables.push_back("transpose");
-   creatables.push_back("det");
-   creatables.push_back("inv");
-   creatables.push_back("norm");
+   creatables.push_back("Transpose");
+   creatables.push_back("Det");
+   creatables.push_back("Inv");
+   creatables.push_back("Norm");
    
    // Trigonometric functions
-   creatables.push_back("sin");
-   creatables.push_back("cos");
-   creatables.push_back("tan");
-   creatables.push_back("asin");
-   creatables.push_back("acos");
-   creatables.push_back("atan");
-   creatables.push_back("atan2");
+   creatables.push_back("Sin");
+   creatables.push_back("Cos");
+   creatables.push_back("Tan");
+   creatables.push_back("Asin");
+   creatables.push_back("Acos");
+   creatables.push_back("Atan");
+   creatables.push_back("Atan2");
    
    // Unit conversion functions
-   creatables.push_back("degToRad");  
-   creatables.push_back("radToDeg");
+   creatables.push_back("DegToRad");  
+   creatables.push_back("RadToDeg");
+   creatables.push_back("Deg2Rad");  
+   creatables.push_back("Rad2Deg");
    
    // GmatFunction
    creatables.push_back("FunctionRunner");  

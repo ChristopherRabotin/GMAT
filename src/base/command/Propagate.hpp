@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Propagate
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,7 +23,7 @@
 #ifndef Propagate_hpp
 #define Propagate_hpp
 
-#include "GmatCommand.hpp"
+#include "PropagationEnabledCommand.hpp"
 #include "ElementWrapper.hpp"
 #include <list>
 
@@ -51,7 +53,7 @@
  * interpolator (see KnotAKnotInterpolator) to generate an estimated stop epoch, 
  * and then refines that epoch if necessary using a secant solver.
  */
-class GMAT_API Propagate : public GmatCommand
+class GMAT_API Propagate : public PropagationEnabledCommand
 {
 public:
    Propagate();
@@ -79,7 +81,7 @@ public:
                                   const Gmat::ObjectType associateType =
                                   Gmat::UNKNOWN_OBJECT);
    virtual bool         SetObject(GmatBase *obj, const Gmat::ObjectType type);
-   virtual GmatBase*    GetObject(const Gmat::ObjectType type, 
+   virtual GmatBase*    GetGmatObject(const Gmat::ObjectType type, 
                                   const std::string objName = "");
    virtual void         ClearObject(const Gmat::ObjectType type);
    
@@ -140,12 +142,14 @@ public:
    
    // Methods used for interpreting the command
    virtual bool         InterpretAction();
+//   virtual bool         Validate();
    
    // Methods used for setting ElementWrapper
    virtual const StringArray& 
                         GetWrapperObjectNameArray();
    virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
                                           const std::string &withName);
+   virtual void         ClearWrappers();
    
    // Methods used for running the command
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
@@ -155,6 +159,7 @@ public:
    virtual GmatCommand* GetNext();
    virtual bool         Execute();
    virtual void         RunComplete();
+   virtual GmatBase*    GetClone(Integer cloneIndex = 0);
    
 protected:
    /// Name of the propagator setup(s) used in this command
@@ -180,7 +185,7 @@ protected:
    /// The propagator(s) used by this command
    std::vector<PropSetup*>      prop;
    /// The spacecraft and formations that are propagated
-   std::vector<SpaceObject *>   sats;
+   ObjectArray                  sats;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
    /// The time step that we need to interpolate across
@@ -202,11 +207,11 @@ protected:
    
    /// The spacecraft used by the stopping conditions
    std::vector<SpaceObject *>   stopSats;
-   /// Stopping condition evaluation requires propagation; the satBuffer lets us
-   /// restore the Spacecraft and Formations to the state needed for the last 
-   /// step 
-   std::vector<Spacecraft *>    satBuffer;
-   std::vector<Formation *>     formBuffer;
+//   /// Stopping condition evaluation requires propagation; the satBuffer lets us
+//   /// restore the Spacecraft and Formations to the state needed for the last
+//   /// step
+//   std::vector<Spacecraft *>    satBuffer;
+//   std::vector<Formation *>     formBuffer;
    /// The object array used in GetRefObjectArray()
    ObjectArray                  objectArray;
    
@@ -218,7 +223,9 @@ protected:
    /// The Propagator
    std::vector<Propagator*>     p;
    /// The ForceModel
-   std::vector<ForceModel*>     fm;
+   std::vector<ODEModel*>       fm;
+   /// The Propagation State Managers
+   std::vector<PropagationStateManager*>  psm;
    
    // Members used to flag most recent detected stop, so we don't stop multiple 
    // times at the same point
@@ -252,6 +259,8 @@ protected:
    Real                    firstStepTolerance;
    /// Dimension used for (local) state vector
    Integer                 dim;
+   /// Dimension used for (local) state vector's Cartesian elements
+   Integer                 cartDim;
    /// Identifies when the command is in single step mode
    bool                    singleStepMode;
    /// List of forces that can be turned on or off by other commands
@@ -316,12 +325,13 @@ protected:
    virtual bool            TakeAStep(Real propStep = 0.0);
    
    
-   void                    AddTransientForce(StringArray *sats, ForceModel *p);
+   void                    AddTransientForce(StringArray *sats, ODEModel *p,
+                                 PropagationStateManager *propMan);
    void                    ClearTransientForces();
    
-   void                    AddToBuffer(SpaceObject *so);
-   void                    EmptyBuffer();
-   void                    BufferSatelliteStates(bool fillingBuffer = true);
+//   void                    AddToBuffer(SpaceObject *so);
+//   void                    EmptyBuffer();
+//   void                    BufferSatelliteStates(bool fillingBuffer = true);
    bool                    CheckFirstStepStop(Integer i);
    
    Real                    InterpolateToStop(StopCondition *sc);

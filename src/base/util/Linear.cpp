@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Linear
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,13 +23,13 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "RealTypes.hpp"
 #include "RealUtilities.hpp"     // for PI, TWO_PI, Acos(), Atan()
 #include "Rvector.hpp"
 #include "Rvector3.hpp"
 #include "Rmatrix.hpp"
 #include "Linear.hpp"
 #include "GmatGlobal.hpp"        // for Global settings
+#include "StringUtil.hpp"        // for Replace()
 #include "MessageInterface.hpp"
 
 using namespace GmatRealUtil;
@@ -57,7 +59,7 @@ GmatRealUtil::RaCodec GmatRealUtil::CartesianToRaCodec(const Rvector3 &r)
       else if( r[2]<0.0 ) 
       {
          s.radiusD = -r[2];
-         s.coDeclinationD = GmatMathUtil::PI;
+         s.coDeclinationD = GmatMathConstants::PI;
          s.rightAscensionD = 0.0;
       } 
       else if( r[2]>0.0) 
@@ -99,13 +101,13 @@ GmatRealUtil::RaDec GmatRealUtil::CartesianToRaDec(const Rvector3 &r)
       {
          RD.radiusD = -r[2];
          RD.rightAscensionD = 0.0;
-         RD.declinationD = -GmatMathUtil::PI_OVER_TWO;
+         RD.declinationD = -GmatMathConstants::PI_OVER_TWO;
       } 
       else if(r[2]>0.0) 
       {
          RD.radiusD = r[2];
          RD.rightAscensionD = 0.0;
-         RD.declinationD  = GmatMathUtil::PI_OVER_TWO;
+         RD.declinationD  = GmatMathConstants::PI_OVER_TWO;
       }
    } 
    else 
@@ -139,7 +141,7 @@ GmatRealUtil::RaDec GmatRealUtil::RaCodecToRaDec(const RaCodec &r)
    RaDec rD;
    rD.radiusD = r.radiusD;
    rD.rightAscensionD = r.rightAscensionD;
-   rD.declinationD = GmatMathUtil::PI_OVER_TWO - r.coDeclinationD;
+   rD.declinationD = GmatMathConstants::PI_OVER_TWO - r.coDeclinationD;
    return rD;
 }
 
@@ -165,7 +167,7 @@ GmatRealUtil::RaCodec GmatRealUtil::RaDecToRaCodec(const RaDec &r)
    RaCodec s;
    s.radiusD = r.radiusD;
    s.rightAscensionD = r.rightAscensionD;
-   s.coDeclinationD = GmatMathUtil::PI_OVER_TWO - r.declinationD;
+   s.coDeclinationD = GmatMathConstants::PI_OVER_TWO - r.declinationD;
    return s;
 }
 
@@ -249,8 +251,6 @@ std::istream& GmatRealUtil::operator>> (std::istream &input, Rvector &a)
 //------------------------------------------------------------------------------
 std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a) 
 {
-   using namespace std;
-   
    GmatGlobal *global = GmatGlobal::Instance();
    Integer size = a.GetSize();
    Integer p, w, spacing;
@@ -279,7 +279,10 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
          
          for (int i=0; i<size; i++)
          {
-            output << setw(w) << setprecision(p) << a[i];
+            // Use ToString() for consistent formatting
+            //output << setw(w) << setprecision(p) << a[i];
+            std::string sval = ToString(a[i], false, scientific, showPoint, p, w);
+            output << sval;
             if (i < size-1)
                output << spaces;
          }
@@ -291,9 +294,14 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
       {
          for (int i=0; i<size; i++)
          {
-            output << setw(w) << setprecision(p) << prefix << a[i];
-            if (i < size-1)
-               output << std::endl;
+            // Use ToString() for consistent formatting
+            //output << setw(w) << setprecision(p) << prefix << a[i];
+            output << prefix;
+            std::string sval = ToString(a[i], false, scientific, showPoint, p, w);
+            output << sval;
+            if (appendEol)
+               if (i < size-1)
+                  output << std::endl;
          }
       }
    }
@@ -351,7 +359,7 @@ std::istream& GmatRealUtil::operator>> (std::istream &input, Rmatrix &a)
 //------------------------------------------------------------------------------
 std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a) 
 {
-   using namespace std;
+//   using namespace std;
    
    GmatGlobal *global = GmatGlobal::Instance();
    int row = a.GetNumRows();
@@ -384,9 +392,13 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
       if (horizontal) 
       {
          for (int i=0; i<row; i++) 
-            for (int j=0; j<column; j++) 
-               output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
-         
+            for (int j=0; j<column; j++)
+            {
+               // Use ToString() for consistent formatting
+               //output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
+               std::string sval = ToString(a.GetElement(i,j), false, scientific, showPoint, p, w);
+               output << sval << spaces;
+            }
          if (appendEol)
             output << std::endl;
       }
@@ -397,9 +409,17 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
             output << prefix;
             
             for (int j=0; j<column; j++)
-               output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
+            {
+               // Use ToString() for consistent formatting
+               //output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
+               std::string sval = ToString(a.GetElement(i,j), false, scientific, showPoint, p, w);
+               output << sval << spaces;
+            }
             
-            output << std::endl;
+            if (i < row-1)
+               output << std::endl;
+            else if (appendEol)
+               output << std::endl;
          }
       }
    }
@@ -451,15 +471,35 @@ std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
    std::stringstream ss("");
    ss.width(w);
    ss.precision(p);
+   ss.setf(std::ios::left);
    
    if (isShowPointSet)
       ss.setf(std::ios::showpoint);
    
    if (isScientific)
       ss.setf(std::ios::scientific);
-   
+
    ss << rval;
-   return ss.str();
+   //return ss.str();
+   
+   // How do I specify 2 digints of the exponent? (LOJ: 2010.05.03)
+   // (This is what I got from internet search)
+   // There is no way to configure using C++ manipulators only.
+   // The reason is in the C library. C++ specifies that 'scientific' shall
+   // cause the output to be the same as %e (or %E if 'uppercase' is set) in
+   // fprintf. In C++ %e causes output of as many digits in the exponent as
+   // necessary to represent the exponent. On your system 'double' has
+   // probably three digits of the exponent.
+   // So manually remove extra 0 in the exponent of scientific notation.
+   // ex) 1.23456e-015 to 1.23456e-15
+   
+   std::string sval = ss.str();
+   if ((sval.find("e-0") != sval.npos) && (sval.size() - sval.find("e-0")) == 5)
+      sval = GmatStringUtil::Replace(sval, "e-0", "e-");
+   if ((sval.find("e+0") != sval.npos) && (sval.size() - sval.find("e+0")) == 5)
+      sval = GmatStringUtil::Replace(sval, "e+0", "e+");
+   
+   return sval;
 }
 
 

@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  ParameterWrapper
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -26,6 +28,8 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PW
+//#define DEBUG_PW_REFOBJ
+//#define DEBUG_PARAMETER_WRAPPER
 
 //---------------------------------
 // static data
@@ -49,7 +53,7 @@ ParameterWrapper::ParameterWrapper() :
    ElementWrapper(),
    param         (NULL)
 {
-   wrapperType = Gmat::PARAMETER_OBJECT;
+   wrapperType = Gmat::PARAMETER_WT;
 }
 
 //---------------------------------------------------------------------------
@@ -83,10 +87,10 @@ const ParameterWrapper& ParameterWrapper::operator=(const ParameterWrapper &pw)
 {
    if (&pw == this)
       return *this;
-
+   
    ElementWrapper::operator=(pw);
    param = pw.param;
-
+   
    return *this;
 }
 
@@ -99,6 +103,23 @@ const ParameterWrapper& ParameterWrapper::operator=(const ParameterWrapper &pw)
 //---------------------------------------------------------------------------
 ParameterWrapper::~ParameterWrapper()
 {
+   #ifdef DEBUG_PW_REFOBJ
+   MessageInterface::ShowMessage
+      ("ParameterWrapper::~ParameterWrapper() <%p>'%s' entered, param=<%p><%s>\n",
+       this, description.c_str(), param, param ? param->GetName().c_str() : "NULL");
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// virtual ElementWrapper* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* ParameterWrapper::Clone() const
+{
+   return new ParameterWrapper(*this);
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +172,7 @@ GmatBase* ParameterWrapper::GetRefObject(const std::string &name)
 //---------------------------------------------------------------------------
 bool ParameterWrapper::SetRefObject(GmatBase *obj)
 {
-   #ifdef DEBUG_PW_SET
+   #ifdef DEBUG_PW_REFOBJ
    MessageInterface::ShowMessage
       ("ParameterWrapper::SetRefObject() obj=<%p><%s>\n", obj,
        obj ? obj->GetName().c_str() : "NULL");
@@ -169,8 +190,7 @@ bool ParameterWrapper::SetRefObject(GmatBase *obj)
 //      errmsg += "\" was expected.\n";
 //      throw ParameterException(errmsg);
 //   }
-   if ( (obj->GetName() == refObjectNames[0]) ||
-        (obj->IsOfType("Parameter")) )
+   if ( (obj->GetName() == refObjectNames[0]) || (obj->IsOfType("Parameter")) )
    {
       param = (Parameter*) obj;
       return true;
@@ -215,6 +235,48 @@ bool ParameterWrapper::SetReal(const Real toValue)
       throw ParameterException(
       "Cannot set value of Parameter - pointer is NULL\n");
    param->SetReal(toValue);
+   return true;
+}
+
+
+//---------------------------------------------------------------------------
+//  const Rmatrix& EvaluateArray() const
+//---------------------------------------------------------------------------
+/**
+ * Method to return the Rmatrix value of the wrapped object.
+ *
+ * @return Rmatrix value of the wrapped number object.
+ * 
+ */
+//---------------------------------------------------------------------------
+const Rmatrix& ParameterWrapper::EvaluateArray() const
+{
+   if (param == NULL)
+      throw ParameterException(
+      "Cannot return value of Parameter - pointer is NULL\n");
+   #ifdef DEBUG_PW
+      MessageInterface::ShowMessage(
+      "In ParameterWrapper::EvaluateArray, value is %.12f\n", param->EvaluateRmatrix());
+   #endif
+   return param->EvaluateRmatrix();
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetArray(const Rmatrix &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Method to set the Real value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ParameterWrapper::SetArray(const Rmatrix &toValue)
+{
+   if (param == NULL)
+      throw ParameterException(
+      "Cannot set value of Parameter - pointer is NULL\n");
+   param->SetRmatrix(toValue);
    return true;
 }
 

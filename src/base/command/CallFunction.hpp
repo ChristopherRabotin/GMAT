@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 CallFunction
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -16,34 +18,25 @@
  * Definition for the CallFunction command class
  */
 //------------------------------------------------------------------------------
-
-
-
 #ifndef CallFunction_hpp
 #define CallFunction_hpp
-
 
 #include "GmatCommand.hpp"
 #include "Function.hpp"
 #include "FunctionManager.hpp"
-
-
 #include "Parameter.hpp"
 #include "Array.hpp"
 #include "StringVar.hpp"
 
+// Forward references for GMAT core objects
+class Publisher;
 
-//#include <map>
-#include <iostream>
-#include <iomanip>
-
-
-class CallFunction : public GmatCommand
+class GMAT_API CallFunction : public GmatCommand
 {
 public:
-   CallFunction();
+   CallFunction(const std::string &type);
    virtual ~CallFunction();
-
+   
    CallFunction(const CallFunction& cf);
    CallFunction&        operator=(const CallFunction& cf);
    
@@ -58,9 +51,11 @@ public:
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    
    // override these to set on FunctionManager (and find function object in GOS)
+   virtual void         SetPublisher(Publisher *pub);
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
    virtual bool         HasAFunction();
+   virtual bool         IsMatlabFunctionCall();
    
    // override GmatBase methods
    virtual GmatBase*    Clone() const;
@@ -72,8 +67,8 @@ public:
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
    
-   StringArray          GetRefObjectNameArray(const Gmat::ObjectType type) const;
-
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
@@ -107,37 +102,29 @@ public:
 
 protected:
 
-private:
    ObjectArray objectArray;
    std::vector<Parameter*> mInputList;
    std::vector<Parameter*> mOutputList;
-   // Changed 8/31/05, DJC
-   //   ObjectArray callcmds;
    GmatCommand *callcmds;
    
-   StringArray mInputListNames;
-   StringArray mOutputListNames;
+   StringArray mInputNames;
+   StringArray mOutputNames;
    
    Integer mNumInputParams;
    Integer mNumOutputParams;
    
    Function *mFunction;
    std::string mFunctionName;
-   
-   /// CoordinateSystem used internally
-   // Added this to GmatCommand (loj: 2008.06.18)
-   ////CoordinateSystem *internalCoordSys;
+   std::string mFunctionPathAndName;
    
    /// the manager for the Function
    FunctionManager fm;
    
-   bool ExecuteMatlabFunction();
-   void SendInParam(Parameter *param);
-   void GetOutParams();
-   void EvalMatlabString(std::string evalString);
+   bool isGmatFunction;
+   bool isMatlabFunction;
+   
    void ClearInputParameters();
    void ClearOutputParameters();
-   void UpdateObject(GmatBase *obj, char *buffer);
    
    enum
    {
@@ -153,9 +140,6 @@ private:
       PARAMETER_TEXT[CallFunctionParamCount - GmatCommandParamCount];
    static const Gmat::ParameterType
       PARAMETER_TYPE[CallFunctionParamCount - GmatCommandParamCount];
-   
-   
 };
-
-
 #endif // CallFunction_hpp
+

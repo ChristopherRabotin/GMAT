@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  MODEqAxes
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -23,7 +25,7 @@
 #include "Planet.hpp"
 #include "MODEqAxes.hpp"
 #include "MeanOfDateAxes.hpp"
-#include "TimeTypes.hpp"
+#include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
 
 
@@ -249,15 +251,15 @@ void MODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    // convert epoch (A1 MJD) to TT MJD (for calculations)
    // 20.02.06 - arg: changed to use enum types instead of strings
 //   Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-//                "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);      
+//                "A1Mjd", "TtMjd", GmatTimeConstants::JD_JAN_5_1941);      
    Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                 TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
-                GmatTimeUtil::JD_JAN_5_1941);      
-   //Real jdTT  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+                GmatTimeConstants::JD_JAN_5_1941);      
+   //Real jdTT  = mjdTT + GmatTimeConstants::JD_JAN_5_1941;
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   //Real tTDB  = (jdTT - 2451545.0) / 36525.0;
-   Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0;
-   Real tTDB   = (mjdTT + offset) / 36525.0;
+   //Real tTDB  = (jdTT - GmatTimeConstants::JD_OF_J2000) / GmatTimeUtil::DAYS_PER_JULIAN_CENTURY;
+   Real offset = GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_OF_J2000;
+   Real tTDB   = (mjdTT + offset) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetNutationUpdateInterval();

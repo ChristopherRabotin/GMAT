@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              LeapSecsFileReader
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Allison R. Greene
 // Created: 2005/01/26
@@ -23,6 +25,26 @@
 #include "gmatdefs.hpp"
 #include "TimeTypes.hpp"
 
+/** 
+ * Structure defining internal leap second information.
+ *
+ * Moved here from inside of the LeapSecsFileReader class to clean up import/
+ * export issues with Visual Studio
+ */
+struct LeapSecondInformation
+{
+   Real julianDate;         // arg: 2/1/05 assumed to be utc
+   Real offset1;
+   Real offset2;
+   Real offset3;
+};    
+
+// Required for Visual Studio dll exports
+#ifdef EXPORT_TEMPLATES
+   EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<LeapSecondInformation>;
+   EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<LeapSecondInformation>;
+#endif
+
 class GMAT_API LeapSecsFileReader
 {
 public:
@@ -37,14 +59,6 @@ public:
 private:
 
    bool Parse(std::string line);
-
-   struct LeapSecondInformation
-   {
-      Real julianDate;         // arg: 2/1/05 assumed to be utc
-      Real offset1;
-      Real offset2;
-      Real offset3;
-   };    
 
    // member data
    bool isInitialized;

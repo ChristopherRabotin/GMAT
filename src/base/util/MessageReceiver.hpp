@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -28,19 +30,8 @@
 #include <queue>                   // for queue
 #include "BaseException.hpp"
 #include "GmatGlobal.hpp"          // for RunBachMode()
+#include "gmatdefs.hpp"            // for MessageTypes
 
-
-namespace Gmat
-{
-   enum MessageType
-   {
-      ERROR_ = 10, //loj: cannot have ERROR
-      WARNING_,
-      INFO_,
-      DEBUG_
-   };
-
-}
 
 /**
  * MessageReceiver is an abstract class designed to receive messages from GMAT's 
@@ -52,7 +43,7 @@ namespace Gmat
  * 
  * The derived classes are best implemented as singletons.
  */
-class MessageReceiver
+class GMAT_API MessageReceiver
 {
 public:
    // Derived classes should implement a singleton accessor, like this:
@@ -75,9 +66,13 @@ public:
 
    virtual void ClearMessage() = 0;
 
+   virtual std::string GetMessage() = 0;
+   virtual void PutMessage(const std::string &msg) = 0;
+   virtual void ClearMessageQueue() = 0;
+   
 protected:
-	MessageReceiver();
-	virtual ~MessageReceiver();
+        MessageReceiver();
+        virtual ~MessageReceiver();
 };
 
 #endif /*MESSAGERECEIVER_HPP_*/

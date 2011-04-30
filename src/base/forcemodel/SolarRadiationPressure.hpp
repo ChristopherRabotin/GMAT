@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              SolarRadiationPressure
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -69,16 +71,17 @@ class GMAT_API SolarRadiationPressure : public PhysicalModel
 {
 public:
    SolarRadiationPressure(const std::string &name = ""); //loj: 5/28/04 added default
-   virtual ~SolarRadiationPressure(void);
+   virtual ~SolarRadiationPressure();
    SolarRadiationPressure(const SolarRadiationPressure &srp);
    SolarRadiationPressure& operator=(const SolarRadiationPressure &srp);
 
-   virtual bool Initialize(void);
+   virtual bool Initialize();
    virtual bool SetCentralBody();
-   virtual bool GetDerivatives(Real *state, Real dt = 0.0,Integer order = 1);
+   virtual bool GetDerivatives(Real *state, Real dt = 0.0, Integer order = 1, 
+         const Integer id = -1);
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
 
    // Parameter access methods - overridden from GmatBase
    virtual std::string         GetParameterText(const Integer id) const;
@@ -96,8 +99,17 @@ public:
    
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
+                                      const Real parm,
+                                      const Integer parmID = -1);
+   virtual void SetSatelliteParameter(const Integer i,
+                                      Integer parmID,
                                       const Real parm);
    virtual void ClearSatelliteParameters(const std::string parmName = "");
+   
+   // Methods used by the ODEModel to set the state indexes, etc
+   virtual bool SupportsDerivative(Gmat::StateElementId id);
+   virtual bool SetStart(Gmat::StateElementId id, Integer index, 
+                         Integer quantity);
 
 protected:
    // Parameter IDs
@@ -142,7 +154,7 @@ protected:
    /// Flag used to indicate that there are other bodies casting shadows
    bool hasMoons;
 
-   /// Basically the reflectivity of the body experiancing the force
+   /// Basically the reflectivity of the body experiencing the force
    std::vector<Real> cr;
    /// Reflective surface area of the body, in square meters
    std::vector<Real> area;
@@ -172,7 +184,25 @@ protected:
    Rvector6 sunrv;
    Rvector6 cbrv;
 
+   /// Number of spacecraft in the state vector that use CartesianState
+   Integer              satCount;
+   /// Start index for the Cartesian state
+   Integer              cartIndex;
+   /// Flag indicating if the Cartesian state should be populated
+   bool                 fillCartesian;
    
+   /// Number of spacecraft in the state vector that use OrbitSTM
+   Integer              stmCount;
+   /// Start index for the OrbitSTM
+   Integer              stmIndex;
+   /// Flag indicating if the OrbitSTM should be populated
+   bool                 fillSTM;
+
+   Integer massID;
+   Integer crID;
+   Integer areaID;
+
+
    void FindShadowState(bool &lit, bool &dark, Real *state);
    Real ShadowFunction(Real *state);
 

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              StringTokenizer
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,16 +22,15 @@
 #ifndef StringTokenizer_hpp
 #define StringTokenizer_hpp
 
-#include <string>
-#include <vector>
-#include <iterator>
 #include "gmatdefs.hpp"
 
-class StringTokenizer
+class GMAT_API StringTokenizer
 {
 public:
    StringTokenizer();
    StringTokenizer(const std::string &str, const std::string &delim);
+   StringTokenizer(const std::string &str, const std::string &delim,
+                   bool insertDelim);
    ~StringTokenizer();
    
    // inline methods
@@ -38,17 +39,19 @@ public:
    
    Integer CountTokens() const; 
    std::string GetToken(const Integer loc) const;
-   std::vector<std::string> GetAllTokens() const;
+   const StringArray& GetAllTokens() const;
    
    void Set(const std::string &str, const std::string &delim);
+   void Set(const std::string &str, const std::string &delim, bool insertDelim);
    
 private:
    
-   std::vector<std::string> stringTokens;
-   std::string              delimiters;
-   Integer                  countTokens;
+   StringArray  stringTokens;
+   std::string  delimiters;
+   Integer      countTokens;
    
    void Parse(const std::string &str);
+   void Parse(const std::string &str, bool insertDelim);
    
 };
 

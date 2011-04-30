@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  ExpressionParser
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -35,7 +37,9 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 #include <iostream>
-using namespace std;
+
+#include <cstdlib>			// Required for GCC 4.3
+
 
 //#define DEBUG_EXP_PARSER 1
 
@@ -51,7 +55,7 @@ ExpressionParser::ExpressionParser()
 {
    mExp = NULL;
    mParamDb = NULL;
-   
+
    for (int i=0; i<NUM_VARS; i++)
       mVars[i] = 0.0;
 }
@@ -81,12 +85,12 @@ Real ExpressionParser::EvalExp(const char *exp)
    Real result;
    mExp = exp;
    *mToken = '\0';
-   
+
 #if DEBUG_EXP_PARSER
    MessageInterface::ShowMessage
       ("ExpressionParser::EvalExp() exp=%s\n", exp);
 #endif
-   
+
    GetToken();
 
    if (!*mToken)
@@ -100,7 +104,7 @@ Real ExpressionParser::EvalExp(const char *exp)
    if (*mToken)
       HandleSyntaxError(SYNTAX_ERROR); // last token must be null
 
-   
+
    return result;
 }
 
@@ -123,7 +127,7 @@ void ExpressionParser::SetParameterDatabase(ParameterDatabase *pdb)
 //---------------------------------
 // private methods
 //---------------------------------
- 
+
 //------------------------------------------------------------------------------
 // void EvalTwoTerms(Real &result)
 //------------------------------------------------------------------------------
@@ -221,7 +225,7 @@ void ExpressionParser::EvalExponent(Real &result)
       // This will not work for 10^.5
       //for (t=(int)temp-1; t>0; --t)
       //   result = result * (Real)ex;
-      
+
       result = pow(result, temp);
       //MessageInterface::ShowMessage
       //   ("===> result=%f, ex=%f, temp=%f\n", result, ex, temp);
@@ -242,7 +246,7 @@ void ExpressionParser::EvalUnary(Real &result)
 
    op = 0;
 
-   if ((mTokenType == DELIMITER) && *mToken == '+' || *mToken == '-')
+   if (((mTokenType == DELIMITER) && *mToken == '+') || *mToken == '-')
    {
       op = *mToken;
       GetToken();
@@ -295,7 +299,7 @@ void ExpressionParser::GetValue(Real &result)
    MessageInterface::ShowMessage
       ("ExpressionParser::GetValue() mToken=%s\n", mToken);
 #endif
-   
+
    switch (mTokenType)
    {
    case VARIABLE:
@@ -339,7 +343,7 @@ Real ExpressionParser::EvalVariable(char *var)
    //   MessageInterface::ShowMessage
    //      ("ExpressionParser::EvalVariable() In mParamDb: %s\n", paramNames[i].c_str());
 #endif
-   
+
    if (param != NULL)
    {
       return param->EvaluateReal();
@@ -350,7 +354,7 @@ Real ExpressionParser::EvalVariable(char *var)
          ("ExpressionParser::EvalVariable() Requested parameter: " + varName +
           " has NULL pointer. Make sure to call SetRefObject() of variable.\n");
    }
-   
+
 }
 
 
@@ -384,7 +388,7 @@ void ExpressionParser::GetToken()
    {
       while (!IsDelimiter(*mExp))
          *temp++ = *mExp++;
-      
+
       mTokenType = VARIABLE;
    }
    //else if (isdigit(*mExp))
@@ -392,7 +396,7 @@ void ExpressionParser::GetToken()
    {
       while (!IsDelimiter(*mExp))
          *temp++ = *mExp++;
-      
+
       mTokenType = NUMBER;
    }
 
@@ -425,7 +429,7 @@ bool ExpressionParser::IsDelimiter(char c)
 //------------------------------------------------------------------------------
 void ExpressionParser::HandleSyntaxError(int error)
 {
-   static char *errMsg[] =
+   static const char *errMsg[] =
    {
       "Syntax Error\n",
       "Unbalanced Parentheses\n",

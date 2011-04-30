@@ -2,15 +2,22 @@
 //------------------------------------------------------------------------------
 //                                  AttitudeData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
+// Developed further jointly by NASA/GSFC, Thinking Systems, Inc., and 
+// Schafer Corp., under AFRL NOVA Contract #FA945104D03990003
+//
 // Author: Daniel Hunter
 // Created: 2006/6/26
+// Modified:  Dunn Idle (added MRPs)
+// Date:      2010/08/24
 //
 /**
  * Implements Attitude related data class.
@@ -20,6 +27,7 @@
 #include "AttitudeData.hpp"
 #include "Attitude.hpp"
 #include "Linear.hpp"              // for GmatRealUtil::ToString()
+#include "GmatConstants.hpp"
 #include "RealUtilities.hpp"
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
@@ -81,7 +89,7 @@ AttitudeData::~AttitudeData()
 // Real GetAttitudeReal(Integer item)
 //------------------------------------------------------------------------------
 /**
- * Retrives Attitude element.
+ * Retrieves Attitude element.
  */
 //------------------------------------------------------------------------------
 Real AttitudeData::GetAttitudeReal(Integer item)
@@ -94,7 +102,7 @@ Real AttitudeData::GetAttitudeReal(Integer item)
    // get the basics - cosine matrix, angular velocity, euler angle sequence
    Rmatrix33        cosMat        = mSpacecraft->GetAttitude(epoch);
    Rvector3         angVel        = mSpacecraft->GetAngularVelocity(epoch) 
-                                    * GmatMathUtil::DEG_PER_RAD;
+                                    * GmatMathConstants::DEG_PER_RAD;
    UnsignedIntArray seq           = mSpacecraft->GetEulerAngleSequence();
    Rvector3         euler;
    
@@ -122,21 +130,30 @@ Real AttitudeData::GetAttitudeReal(Integer item)
       euler = Attitude::ToEulerAngles(cosMat, 
               (Integer) seq[0], 
               (Integer) seq[1], 
-              (Integer) seq[2]) * GmatMathUtil::DEG_PER_RAD;
+              (Integer) seq[2]) * GmatMathConstants::DEG_PER_RAD;
       return euler[item - EULERANGLE1];
+   }
+   // Dunn added conversion below with the comment that this
+   // is slightly hacked!  We might want to change to a more
+   // obvious method of index control.
+   if ((item >= MRP_1) && (item <= MRP_3))
+   {
+      Rvector  quat = Attitude::ToQuaternion(cosMat);
+      Rvector3 mrp  = Attitude::ToMRPs(quat);
+      return mrp[item - MRP_1];
    }           
    if ((item >= EULERANGLERATE1) && (item <= EULERANGLERATE3))
    {
       euler = Attitude::ToEulerAngles(cosMat, 
               (Integer) seq[0], 
               (Integer) seq[1], 
-              (Integer) seq[2]) * GmatMathUtil::DEG_PER_RAD;
+              (Integer) seq[2]) * GmatMathConstants::DEG_PER_RAD;
       Rvector3 eulerRates = Attitude::ToEulerAngleRates(
-                            angVel * GmatMathUtil::RAD_PER_DEG, 
-                            euler  * GmatMathUtil::RAD_PER_DEG,
+                            angVel * GmatMathConstants::RAD_PER_DEG,
+                            euler  * GmatMathConstants::RAD_PER_DEG,
                             (Integer) seq[0], 
                             (Integer) seq[1], 
-                            (Integer) seq[2]) * GmatMathUtil::DEG_PER_RAD;
+                            (Integer) seq[2]) * GmatMathConstants::DEG_PER_RAD;
       return eulerRates[item - EULERANGLERATE1];
    }        
    

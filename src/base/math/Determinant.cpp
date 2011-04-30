@@ -1,9 +1,12 @@
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Determinant
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -108,6 +111,9 @@ void Determinant::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
 //------------------------------------------------------------------------------
 bool Determinant::ValidateInputs()
 {
+   if (leftNode == NULL)
+      throw MathException("Determinant() - Missing input arguments.\n");
+   
    Integer type1, row1, col1; // Left node
 
    #if DEBUG_DETERMINANT
@@ -118,12 +124,8 @@ bool Determinant::ValidateInputs()
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
-      
-   if (type1 == Gmat::RMATRIX_TYPE)
-      return true;
-   else
-      return false;
    
+   return true;
 }
 
 
@@ -137,6 +139,17 @@ bool Determinant::ValidateInputs()
 //------------------------------------------------------------------------------
 Real Determinant::Evaluate()
 {
-   return (leftNode->MatrixEvaluate()).Determinant();
+   Integer type, rowCount, colCount;
+   leftNode->GetOutputInfo(type, rowCount, colCount);
+   
+   if (type == Gmat::RMATRIX_TYPE)
+   {
+      return (leftNode->MatrixEvaluate()).Determinant();
+   }
+   else
+   {
+      return leftNode->Evaluate();
+   }
 }
+
 

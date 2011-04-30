@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               Epoch
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -17,10 +19,12 @@
  */
 //------------------------------------------------------------------------------
 
+#include <sstream>
 #include "Epoch.hpp"
 #include "StringTokenizer.hpp"
 #include "UtilityException.hpp"
 #include "MessageInterface.hpp"
+#include "TimeTypes.hpp"
 
 // #define DEBUG_EPOCH 1 
 
@@ -192,7 +196,7 @@ std::string Epoch::GetValue(const std::string &mFormat) const
    catch(TimeConverter::TimeConverterException &tce)
    {
       std::string msg = "\nEpoch::GetValue() -> Get error from " +
-                         tce.GetMessage() + "\n";
+                         tce.GetFullMessage() + "\n";
       throw EpochException(msg);
    }
 }
@@ -269,7 +273,7 @@ bool Epoch::UpdateValue(const Real mValue)
                                                    format);
       value = newValue;
    }
-   catch (TimeConverter::TimeConverterException &tce) 
+   catch (TimeConverter::TimeConverterException &) 
    {
       return false;
    }
@@ -301,7 +305,7 @@ bool Epoch::SetValue(const std::string &mFormat)
           value = timeConverter.Convert(value,format,mFormat);
           format = mFormat;
        }
-       catch(UtilityException &ue)
+       catch(UtilityException &)
        {
           return false; 
        }
@@ -490,7 +494,9 @@ std::string Epoch::GetLabel() const
 void Epoch::DefineDefault()
 {
    format = FORMAT[TAI_MJD];
-   value = "21545.0";
+   std::stringstream epochString("");
+   epochString << GmatTimeConstants::MJD_OF_J2000;
+   value = epochString.str();
 }
 
 //---------------------------------------------------------------------------

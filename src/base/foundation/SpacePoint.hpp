@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  SpacePoint
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G and MOMS Task order 124
@@ -34,6 +36,10 @@
 #include "A1Mjd.hpp"
 #include "Rvector6.hpp"
 #include "Rvector3.hpp"
+#include "Rmatrix33.hpp"
+
+// forward reference for SolarSystem
+class SolarSystem;
 
 class GMAT_API SpacePoint : public GmatBase
 {
@@ -49,12 +55,23 @@ public:
    // destructor
    virtual ~SpacePoint();
    
+   virtual void       SetSolarSystem(SolarSystem *ss);
+   
    // methods for accessing the bodyName or body pointer
    virtual bool       RequiresJ2000Body();
    const std::string  GetJ2000BodyName() const;
    SpacePoint*        GetJ2000Body() const;
    bool               SetJ2000BodyName(const std::string &toName);
    void               SetJ2000Body(SpacePoint* toBody);
+
+   virtual bool       IsParameterCloaked(const Integer id) const;
+   virtual bool       IsParameterEqualToDefault(const Integer id) const;
+   virtual bool       SaveAllAsDefault();
+   virtual bool       SaveParameterAsDefault(const Integer id);
+   
+   // methods for accessing attitude
+   virtual bool       HasAttitude() const;
+   virtual const Rmatrix33& GetAttitude(Real a1mjdTime);
    
    //---------------------------------------------------------------------------
    //  const Rvector6 GetMJ2000State(const A1Mjd &atTime)
@@ -106,6 +123,9 @@ public:
    
    virtual const Rvector3 GetMJ2000Acceleration(const A1Mjd &atTime);
 
+   virtual void           RemoveSpiceKernelName(const std::string &kernelType,
+                                                const std::string &fileName);
+
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
    //virtual GmatBase*       Clone(void) const;
@@ -119,7 +139,12 @@ public:
 
    virtual bool            IsParameterReadOnly(const Integer id) const;
    virtual bool            IsParameterReadOnly(const std::string &label) const;
-   
+
+   virtual Integer         GetIntegerParameter(const Integer id) const;
+   virtual Integer         GetIntegerParameter(const std::string &label) const;
+   virtual Integer         SetIntegerParameter(const Integer id,
+                                               const Integer value);
+
    virtual std::string     GetStringParameter(const Integer id) const;
    virtual bool            SetStringParameter(const Integer id, 
                                               const std::string &value);
@@ -142,6 +167,9 @@ public:
    virtual bool            SetStringParameter(const std::string &label, 
                                               const std::string &value, 
                                               const Integer index);
+   const StringArray&      GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
    virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
                                         const std::string &name, 
                                         const Integer index);
@@ -155,6 +183,12 @@ protected:
    enum
    {
       J2000_BODY_NAME = GmatBaseParamCount,
+      NAIF_ID,
+      NAIF_ID_REFERENCE_FRAME,
+      ORBIT_SPICE_KERNEL_NAME,
+      ATTITUDE_SPICE_KERNEL_NAME,
+      SC_CLOCK_SPICE_KERNEL_NAME,
+      FRAME_SPICE_KERNEL_NAME,
       SpacePointParamCount
    };
    
@@ -162,12 +196,44 @@ protected:
    
    static const Gmat::ParameterType PARAMETER_TYPE[SpacePointParamCount - GmatBaseParamCount];
    
+   static const Integer UNDEFINED_NAIF_ID;
+   static const Integer UNDEFINED_NAIF_ID_REF_FRAME;
    
+   
+   /// the solar system to which this body belongs
+   SolarSystem     *theSolarSystem;
+   /// Inertial coordinate system to be unsed in GetAttitude()
+   CoordinateSystem *inertialCS;
+   /// BodyFixed coordinate system to be unsed in GetAttitude()
+   CoordinateSystem *bodyFixedCS;
    /// Origin for the return coordinate system (aligned with the MJ2000 Earth
    /// Equatorial coordinate system)
    SpacePoint      *j2000Body;  
    /// Name for the J2000 body
    std::string     j2000BodyName;
+   /// NAIF Id (for SPICE)
+   Integer         naifId;
+   /// NAIF Id for the body/spacecraft reference frame
+   Integer         naifIdRefFrame;
+
+   // saved default values
+   std::string     default_j2000BodyName;
+   /// default value for NAIF ID
+   Integer         default_naifId;
+   /// default value for NAIF ID for the body/spacecraft reference frame
+   Integer         default_naifIdRefFrame;
    
+   /// Orbit SPICE kernel name(s)
+   StringArray     orbitSpiceKernelNames;
+   /// Attitude SPICE kernel name(s)
+   StringArray     attitudeSpiceKernelNames;
+   /// SC Clock SPICE kernel name(s)
+   StringArray     scClockSpiceKernelNames;
+   /// Frame SPICE kernel name(s)
+   StringArray     frameSpiceKernelNames;
+   
+   /// Current rotation matrix (from inertial to body)
+   bool      hasAttitude;
+   Rmatrix33 cosineMat;
 };
 #endif // SpacePoint_hpp

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Rmatrix33
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -22,13 +24,12 @@
 #define Rmatrix33_hpp
 
 #include "gmatdefs.hpp"
-#include "RealTypes.hpp"
 #include "Rmatrix.hpp"
 
 // Forward declarations for operations with vector
 class Rvector3;
 
-class Rmatrix33 : public Rmatrix
+class GMAT_API Rmatrix33 : public Rmatrix
 {
 public:
    Rmatrix33(bool IsIdentityMatrix = true);
@@ -36,19 +37,20 @@ public:
              Real a10, Real a11, Real a12,
              Real a20, Real a21, Real a22);
    Rmatrix33(const Rmatrix33 &m);
+   Rmatrix33(const Rmatrix &m);
    virtual ~Rmatrix33();
    const Rmatrix33& operator=(const Rmatrix33 &m);
    bool operator==(const Rmatrix33 &m)const;
    bool operator!=(const Rmatrix33 &m)const;
-
+   
    void Set(Real a00, Real a01, Real a02,
             Real a10, Real a11, Real a12,
             Real a20, Real a21, Real a22);
    
    bool IsOrthogonal(Real accuracyRequired = 
-                     GmatRealConst::REAL_EPSILON) const;
+                     GmatRealConstants::REAL_EPSILON) const;
    bool IsOrthonormal(Real accuracyRequired = 
-                      GmatRealConst::REAL_EPSILON) const;
+                      GmatRealConstants::REAL_EPSILON) const;
    
    Rmatrix33 operator+(const Rmatrix33& m) const;
    const Rmatrix33& operator+=(const Rmatrix33& m);

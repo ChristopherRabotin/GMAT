@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  GmatFunction
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -34,9 +36,12 @@ public:
    GmatFunction(const GmatFunction &copy);
    GmatFunction& operator=(const GmatFunction &right);
    
+   bool IsNewFunction();
+   void SetNewFunction(bool flag);
+   
    // inherited from Function
    virtual bool         Initialize();
-   virtual bool         Execute(ObjectInitializer *objInit);
+   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize);
    virtual void         Finalize();
    
    // inherited from GmatBase
@@ -48,6 +53,18 @@ public:
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
 protected:
+   
+   bool         mIsNewFunction;
+   StringArray  *unusedGlobalObjectList;
+   
+   bool InitializeLocalObjects(ObjectInitializer *objInit,
+                               GmatCommand *current,
+                               bool ignoreException);
+   void BuildUnusedGlobalObjectList();
+   
+   // for debug
+   void ShowTrace(Integer count, Integer t1, const std::string &label = "",
+                  bool showMemoryTracks = false, bool addEol = false);
    
    enum
    {

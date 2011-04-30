@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               Interpolator  
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -31,17 +33,20 @@
 class GMAT_API Interpolator : public GmatBase
 {
 public:
-    Interpolator(const std::string &name, const std::string &typestr,
-                 Integer dim = 1);
-    virtual ~Interpolator();
-
-    Interpolator(const Interpolator &i);
-    Interpolator&   operator=(const Interpolator &i);
-
-    virtual bool    AddPoint(const Real ind, const Real *data);
-    virtual void    Clear();
-    virtual Integer GetBufferSize();
-
+   Interpolator(const std::string &name, const std::string &typestr,
+                Integer dim = 1);
+   virtual ~Interpolator();
+   
+   Interpolator(const Interpolator &i);
+   Interpolator&   operator=(const Interpolator &i);
+   
+   virtual Integer IsInterpolationFeasible(Real ind);
+   virtual void    SetForceInterpolation(bool flag);
+   virtual bool    GetForceInterpolation();
+   virtual bool    AddPoint(const Real ind, const Real *data);
+   virtual void    Clear();
+   virtual Integer GetBufferSize();
+   
    //---------------------------------------------------------------------------
    // bool Interpolate(const Real ind, Real *results)
    //---------------------------------------------------------------------------
@@ -59,38 +64,40 @@ public:
     * @return true on success, false (or throw) on failure.
     */
    //---------------------------------------------------------------------------
-    virtual bool    Interpolate(const Real ind, Real *results) = 0;
-
+   virtual bool    Interpolate(const Real ind, Real *results) = 0;
+   
 protected:
-    /// Data array used for the independent variable
-    Real *independent;
-    /// The data that gets interpolated
-    Real **dependent;
-    /// Previous independent value, used to determine direction data is going
-    Real previousX; 
-
-    // Parameters
-    /// Number of dependent points to be interpolated
-    Integer dimension;
-    /// Number of points required to interpolate
-    Integer requiredPoints;
-    /// Number of points managed by the interpolator
-    Integer bufferSize;
-    /// Number of points fed to the interpolator
-    Integer pointCount;
-    /// Pointer to most recent point, for the ring buffer implementation
-    Integer latestPoint;
-    /// Valid range for the data points
-    Real range[2];
-    /// Flag used to detect if range has already been calculated
-    bool rangeCalculated;
-    /// Flag used to determine if independent variable increases or decreases
-    bool dataIncreases;
-    
-    virtual void AllocateArrays();
-    virtual void CleanupArrays();
-    virtual void CopyArrays(const Interpolator &i);
-    void SetRange();
+   /// Data array used for the independent variable
+   Real *independent;
+   /// The data that gets interpolated
+   Real **dependent;
+   /// Previous independent value, used to determine direction data is going
+   Real previousX; 
+   
+   // Parameters
+   /// Number of dependent points to be interpolated
+   Integer dimension;
+   /// Number of points required to interpolate
+   Integer requiredPoints;
+   /// Number of points managed by the interpolator
+   Integer bufferSize;
+   /// Number of points fed to the interpolator
+   Integer pointCount;
+   /// Pointer to most recent point, for the ring buffer implementation
+   Integer latestPoint;
+   /// Valid range for the data points
+   Real range[2];
+   /// Flag used to detect if range has already been calculated
+   bool rangeCalculated;
+   /// Flag used to determine if independent variable increases or decreases
+   bool dataIncreases;
+   /// Flag used for additional feasiblity checking
+   bool forceInterpolation;
+   
+   virtual void AllocateArrays();
+   virtual void CleanupArrays();
+   virtual void CopyArrays(const Interpolator &i);
+   void SetRange();
 };
 
 

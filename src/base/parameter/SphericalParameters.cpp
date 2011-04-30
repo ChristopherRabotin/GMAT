@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              SphericalParameters
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -14,12 +16,11 @@
 //
 /**
  * Implements Spacecraft Spehrical parameter classes.
- *   SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV, SphElem
+ *   SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV, SphAzi, SphElem
  */
 //------------------------------------------------------------------------------
 
 #include "SphericalParameters.hpp"
-#include "OrbitTypes.hpp"
 
 //==============================================================================
 //                              SphRMag
@@ -111,7 +112,7 @@ bool SphRMag::Evaluate()
 {
    mRealValue = OrbitData::GetSphRaDecReal(RD_RMAG);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -159,6 +160,8 @@ SphRA::SphRA(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsAngleParam = true;
+   mCycleType = GmatParam::PLUS_MINUS_180;
 }
 
 
@@ -224,7 +227,7 @@ bool SphRA::Evaluate()
 {
    mRealValue = OrbitData::GetSphRaDecReal(RD_RRA);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -272,6 +275,8 @@ SphDec::SphDec(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsAngleParam = true;
+   mCycleType = GmatParam::PLUS_MINUS_90;
 }
 
 
@@ -337,7 +342,7 @@ bool SphDec::Evaluate()
 {
    mRealValue = OrbitData::GetSphRaDecReal(RD_RDEC);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -450,7 +455,7 @@ bool SphVMag::Evaluate()
 {
    mRealValue = OrbitData::GetSphRaDecReal(RD_VMAG);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -498,6 +503,8 @@ SphRAV::SphRAV(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsAngleParam = true;
+   mCycleType = GmatParam::PLUS_MINUS_180;
 }
 
 
@@ -563,7 +570,7 @@ bool SphRAV::Evaluate()
 {
    mRealValue = OrbitData::GetSphRaDecReal(RD_RAV);    
    
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -611,6 +618,8 @@ SphDecV::SphDecV(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsAngleParam = true;
+   mCycleType = GmatParam::PLUS_MINUS_90;
 }
 
 
@@ -674,7 +683,7 @@ bool SphDecV::Evaluate()
 {
    mRealValue = OrbitData::GetSphRaDecReal(RD_DECV);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -722,6 +731,8 @@ SphAzi::SphAzi(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsAngleParam = true;
+   mCycleType = GmatParam::PLUS_MINUS_180;
 }
 
 
@@ -787,7 +798,7 @@ bool SphAzi::Evaluate()
 {
    mRealValue = OrbitData::GetSphAzFpaReal(AF_AZI);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -899,7 +910,7 @@ bool SphFPA::Evaluate()
 {
    mRealValue = OrbitData::GetSphAzFpaReal(AF_FPA);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -1015,7 +1026,7 @@ bool SphRaDecElem::Evaluate()
 {
    mRvec6Value = GetSphRaDecState();
 
-   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
 }
 
 
@@ -1128,7 +1139,7 @@ bool SphAzFpaElem::Evaluate()
 {
    mRvec6Value = GetSphAzFpaState();
 
-   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
 }
 
 

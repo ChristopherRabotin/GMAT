@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              AtmosphereModel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -23,6 +25,7 @@
 #include "GmatBase.hpp"
 #include "SolarFluxFileReader.hpp"
 #include "AtmosphereException.hpp"
+#include "TimeTypes.hpp"
 
 class SolarSystem;          // Forward reference
 class CelestialBody;
@@ -35,15 +38,15 @@ class CelestialBody;
 class GMAT_API AtmosphereModel : public GmatBase
 {
 public:
-   AtmosphereModel(const std::string &typeStr);
+   AtmosphereModel(const std::string &typeStr, const std::string &name = "");
    virtual ~AtmosphereModel();
-    
+   
    // copy constructor - needed by child classes (for Clone)
    AtmosphereModel(const AtmosphereModel& am);
    AtmosphereModel& operator=(const AtmosphereModel& am);
     
    //---------------------------------------------------------------------------
-   // bool Density(Real *position, Real *density, Real epoch = 21545.0,
+   // bool Density(Real *position, Real *density, Real epoch = GmatTimeConstants::MJD_OF_J2000,
    //              Integer count = 1)
    //---------------------------------------------------------------------------
    /**
@@ -62,13 +65,21 @@ public:
     * @return true on success, false if a problem is encountered.
     */
    //---------------------------------------------------------------------------
-   virtual bool Density(Real *position, Real *density, Real epoch = 21545.0,
+   virtual bool Density(Real *position, Real *density, Real epoch = GmatTimeConstants::MJD_OF_J2000,
                         Integer count = 1) = 0;
 
    void SetSunVector(Real *sv);
    void SetCentralBodyVector(Real *cv);
    virtual void SetSolarSystem(SolarSystem *ss);
-   void SetCentralBody(CelestialBody *cb);
+   virtual void SetCentralBody(CelestialBody *cb);
+   void SetUpdateParameters(Real interval, GmatEpoch epoch = -1.0);
+   virtual void SetInternalCoordSystem(CoordinateSystem *cs);
+   void SetFixedCoordinateSystem(CoordinateSystem *cs);
+   Real* GetAngularVelocity(const Real GmatEpoch = -1.0);
+   void BuildAngularVelocity(const Real GmatEpoch);
+   void UpdateAngularVelocity(const Real GmatEpoch);
+   void SetKpApConversionMethod(Integer method);
+   Real ConvertKpToAp(const Real kp);
 
    // Methods overridden from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
@@ -106,10 +117,12 @@ protected:
    Real                    *centralBodyLocation;
    /// Central body radius
    Real                    cbRadius;
-   /// New file?
-   bool newFile;
-   /// File read?
-   bool fileRead;
+   /// Central body flattening factor
+   Real                    cbFlattening;
+   /// Flag indicating that the flux file name is set to a new value
+   bool                    newFile;
+   /// Flag indicating that the flux file has been opened and read once already
+   bool                    fileRead;
     
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.
@@ -120,8 +133,36 @@ protected:
    Real                    nominalKp;
    /// Nominal geomagnetic planetary amplitude, calculated via Vallado eq. 8-31.
    Real                    nominalAp;
+   /// Index used to select Kp/Ap conversion method.  Default is a table lookup
+   Integer                 kpApConversion;
+   /// Internal coordinate system used for conversions
+   CoordinateSystem        *mInternalCoordSystem;
+   /// Body fixed CS for the central body
+   CoordinateSystem        *cbFixed;
+   /// Angular velocity of the central body
+   Real                    angVel[3];
+   /// Update interval for the angular momentum vector
+   Real                    wUpdateInterval;
+   /// Most recent update epoch for the angular momentum
+   GmatEpoch               wUpdateEpoch;
+   /// Most recent geodetic height calculated
+   Real                    geoHeight;
+   /// Most recent geodetic latitude calculated
+   Real                    geoLat;
+   /// Most recent geodetic longitude calculated
+   Real                    geoLong;
+   /// Most recent GHA calculated
+   Real                    gha;
+   /// GHA epoch
+   Real                    ghaEpoch;
+
+   /// Conversion routines to go to the fixed frame
+//   CoordinateConverter     mCoordConverter;
+
    
-   Real                    ConvertKpToAp(const Real kp);
+   Real                    CalculateGeodetics(Real *position,
+                                 GmatEpoch when = -1.0,
+                                 bool includeLatLong = false);
 
    enum {
       NOMINAL_FLUX = GmatBaseParamCount,

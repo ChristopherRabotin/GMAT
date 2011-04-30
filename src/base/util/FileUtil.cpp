@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 FileUtil
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -25,6 +27,7 @@
 #include "StringUtil.hpp"          // for ToString()
 #include "FileTypes.hpp"           // for GmatFile::MAX_PATH_LEN
 #include <algorithm>               // for set_difference()
+#include <iterator>                // For back_inserter() with VC++ 2010
 
 #ifndef _MSC_VER  // if not Microsoft Visual C++
 #include <dirent.h>
@@ -34,7 +37,7 @@
 #include <windows.h>
 #endif
 
-using namespace std;
+
 using namespace GmatStringUtil;
 
 //#define DBGLVL_COMPARE_REPORT 1
@@ -55,7 +58,7 @@ std::string GmatFileUtil::GetPathSeparator()
    buffer = getenv("OS");
    if (buffer != NULL)
    {
-      #ifdef DBGLVL_FILE_UTIL
+      #ifdef DEBUG_FILE_UTIL
       MessageInterface::ShowMessage
          ("GmatFileUtil::GetPathSeparator() Current OS is %s\n", buffer);
       #endif
@@ -88,7 +91,13 @@ std::string GmatFileUtil::GetCurrentPath()
    
 #ifndef _MSC_VER  // if not Microsoft Visual C++
    char buffer[GmatFile::MAX_PATH_LEN];
-   getcwd(buffer, GmatFile::MAX_PATH_LEN);
+   // Intentionally get the return and then ignore it to move warning from
+   // system libraries to GMAT code base.  The "unused variable" warning
+   // here can be safely ignored.
+//   char *ch = getcwd(buffer, GmatFile::MAX_PATH_LEN);
+   // This clears a warning message
+   if (getcwd(buffer, GmatFile::MAX_PATH_LEN) != buffer)
+      ;
    currPath = buffer;
 #else
    MessageInterface::ShowMessage
@@ -102,19 +111,61 @@ std::string GmatFileUtil::GetCurrentPath()
 
 
 //------------------------------------------------------------------------------
-// std::string ParsePathName(const std::string &fullPath)
+// std::string ParseFirstPathName(const std::string &fullPath, bool appendSep = true)
 //------------------------------------------------------------------------------
 /*
- * This function parses file name from given full path name.
+ * This function parses first path name from given full path name.
  *
  * @param  fullPath  input full path name
+ * @param  appendSep appends path separator if true
  * @return  The file name from the full path
  *
  */
 //------------------------------------------------------------------------------
-std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
+std::string GmatFileUtil::ParseFirstPathName(const std::string &fullPath,
+                                             bool appendSep)
 {
-   #ifdef DBGLVL_PARSE_FILENAME
+   #ifdef DEBUG_PARSE_FILENAME
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParseFirstPathName() fullPath=<%s>\n", fullPath.c_str());
+   #endif
+   
+   std::string filePath;
+   std::string::size_type firstSlash = fullPath.find_first_of("/\\");
+   
+   if (firstSlash != filePath.npos)
+   {
+      if (appendSep)
+         filePath = fullPath.substr(0, firstSlash + 1);
+      else
+         filePath = fullPath.substr(0, firstSlash);
+   }
+   
+   #ifdef DEBUG_PARSE_FILENAME
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParseFirstPathName() returning <%s>\n", filePath.c_str());
+   #endif
+   
+   return filePath;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ParsePathName(const std::string &fullPath, bool appendSep = true)
+//------------------------------------------------------------------------------
+/*
+ * This function parses whole path name from given full path name.
+ *
+ * @param  fullPath  input full path name
+ * @param  appendSep appends path separator if true
+ * @return  The file name from the full path
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ParsePathName(const std::string &fullPath,
+                                        bool appendSep)
+{
+   #ifdef DEBUG_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParsePathName() fullPath=<%s>\n", fullPath.c_str());
    #endif
@@ -123,9 +174,14 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
    std::string::size_type lastSlash = fullPath.find_last_of("/\\");
    
    if (lastSlash != filePath.npos)
-      filePath = fullPath.substr(0, lastSlash+1);
+   {
+      if (appendSep)
+         filePath = fullPath.substr(0, lastSlash + 1);
+      else
+         filePath = fullPath.substr(0, lastSlash);
+   }
    
-   #ifdef DBGLVL_PARSE_FILENAME
+   #ifdef DEBUG_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParsePathName() returning <%s>\n", filePath.c_str());
    #endif
@@ -135,19 +191,20 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
 
 
 //------------------------------------------------------------------------------
-// std::string ParseFileName(const std::string &fullPath)
+// std::string ParseFileName(const std::string &fullPath, bool removeExt = false)
 //------------------------------------------------------------------------------
 /*
  * This function parses file name from given full path name.
  *
  * @param  fullPath  input full path name
+ * @param  removeExt  Set this flag to true if file extension to be removed [false]
  * @return  The file name from the full path
  *
  */
 //------------------------------------------------------------------------------
-std::string GmatFileUtil::ParseFileName(const std::string &fullPath)
+std::string GmatFileUtil::ParseFileName(const std::string &fullPath, bool removeExt)
 {
-   #ifdef DBGLVL_PARSE_FILENAME
+   #ifdef DEBUG_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParseFileName() fullPath=<%s>\n", fullPath.c_str());
    #endif
@@ -158,29 +215,38 @@ std::string GmatFileUtil::ParseFileName(const std::string &fullPath)
    if (lastSlash != fileName.npos)
       fileName = fileName.substr(lastSlash+1);
    
-   #ifdef DBGLVL_PARSE_FILENAME
+   #ifdef DEBUG_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParseFileName() returning <%s>\n", fileName.c_str());
    #endif
+   
+   if (removeExt)
+   {
+      std::string::size_type index1 = fileName.find_first_of(".");
+      if (index1 != fileName.npos)
+         fileName = fileName.substr(0, index1);
+   }
    
    return fileName;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string ParseFileExtension(const std::string &fullPath)
+// std::string ParseFileExtension(const std::string &fullPath, bool prependDot)
 //------------------------------------------------------------------------------
 /*
  * This function parses file extension (string after .) from given full path name.
  *
  * @param  fullPath  input full path name
+ * @param  prependDot  prepends dot(.) if this is true [false]
  * @return  The file extension from the full path
  *
  */
 //------------------------------------------------------------------------------
-std::string GmatFileUtil::ParseFileExtension(const std::string &fullPath)
+std::string GmatFileUtil::ParseFileExtension(const std::string &fullPath,
+                                             bool prependDot)
 {
-   #ifdef DBGLVL_PARSE_FILENAME
+   #ifdef DEBUG_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParseFileExtension() fullPath=<%s>\n", fullPath.c_str());
    #endif
@@ -189,9 +255,25 @@ std::string GmatFileUtil::ParseFileExtension(const std::string &fullPath)
    
    std::string::size_type lastDot = fullPath.find_last_of(".");
    if (lastDot != fullPath.npos)
-      fileExt = fullPath.substr(lastDot+1);
+   {
+      if (lastDot < fullPath.size())
+      {
+         fileExt = fullPath.substr(lastDot+1);
+         
+         #ifdef DEBUG_PARSE_FILENAME
+         MessageInterface::ShowMessage("   fileExt='%s'\n", fileExt.c_str());
+         #endif
+         
+         // Check for path separator
+         if (fileExt[0] == '/' || fileExt[0] == '\\')
+            fileExt = "";
+      }
+   }
    
-   #ifdef DBGLVL_PARSE_FILENAME
+   if (fileExt != "" && prependDot)
+      fileExt = "." + fileExt;
+   
+   #ifdef DEBUG_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParseFileExtension() returning <%s>\n", fileExt.c_str());
    #endif
@@ -201,26 +283,122 @@ std::string GmatFileUtil::ParseFileExtension(const std::string &fullPath)
 
 
 //------------------------------------------------------------------------------
-// bool DoesDirectoryExist(const std::string &dirPath)
+// std::string GetInvalidFileNameMessage(Integer option = 1)
+//------------------------------------------------------------------------------
+/**
+ * Returns invalid file name message.
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetInvalidFileNameMessage(Integer option)
+{
+   std::string msg;
+   
+   if (option == 1)
+      msg = "Maximum of 232 chars of non-blank name without containing any of "
+         "the following characters: \\/:*?\"<>| ";
+   else if (option == 2)
+      msg = "A file name cannot be blank or contain any of the following characters:\n"
+      "   \\/:*?\"<>|";
+   
+   return msg;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GmatFileUtil::IsValidFileName(const std::string &fname, bool blankIsOk = true)
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsValidFileName(const std::string &fname, bool blankIsOk)
+{
+   if (fname == "")
+   {
+      if (blankIsOk)
+         return true;
+      else
+         return false;
+   }
+   
+   std::string filename = ParseFileName(fname);
+   bool retval = false;
+   
+   // Check for invalid characters
+   std::string invalidChars = "\\/:*?\"<>|";
+   if (filename.find_first_of(invalidChars) == filename.npos)
+      retval = true;
+   else
+      retval = false;
+   
+   // Check for name too long
+   if (retval)
+   {
+      if ((Integer) filename.size() > GmatFile::MAX_FILE_LEN)
+         retval = false;
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GmatFileUtil::IsSameFileName(const std::string &fname1, const std::string &fname2)
 //------------------------------------------------------------------------------
 /*
- * Note: This function calls opendir() which is defined in <dirent>. There is a
- *       problem compling with VC++ compiler, so until it is resolved, it will
- *       always return false if it is compiled with VC++ compiler.
- *
+ * @return  true  If two file names are same, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsSameFileName(const std::string &fname1, const std::string &fname2)
+{
+   if (fname1 == "" || fname2 == "")
+      return false;
+
+   std::string name1 = fname1;
+   std::string name2 = fname2;
+   
+   // Replace \ with /
+   name1 = GmatStringUtil::Replace(name1, "\\", "/");
+   name2 = GmatStringUtil::Replace(name2, "\\", "/");
+   if (name1 == name2)
+      return true;
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool DoesDirectoryExist(const std::string &fullPath, bool blankIsOk = true)
+//------------------------------------------------------------------------------
+/*
  * @return  true  If directory exist, false otherwise
  */
 //------------------------------------------------------------------------------
-bool GmatFileUtil::DoesDirectoryExist(const std::string &dirPath)
+bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool blankIsOk)
 {
-   if (dirPath == "")
-      return false;
+   #ifdef DEBUG_DIR_EXIST
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::DoesDirectoryExist() entered, fullPath='%s'\n", fullPath.c_str());
+   #endif
+   
+   if (fullPath == "")
+   {
+      if (blankIsOk)
+         return true;
+      else
+         return false;
+   }
    
    bool dirExist = false;
+   std::string dirName = ParsePathName(fullPath, true);
+   
+   // empty dir name is OK.
+   if (dirName == "")
+      return true;
+   
+   #ifdef DEBUG_DIR_EXIST
+   MessageInterface::ShowMessage("   ==> dirName='%s'\n", dirName.c_str());
+   #endif
    
 #ifndef _MSC_VER  // if not Microsoft Visual C++
    DIR *dir = NULL;
-   dir = opendir(dirPath.c_str());
+   dir = opendir(dirName.c_str());
    
    if (dir != NULL)
    {
@@ -228,10 +406,20 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &dirPath)
       closedir(dir);
    }
 #else
-   MessageInterface::ShowMessage
-      ("*** WARNING *** GmatFileUtil::DoesDirectoryExist() \n"
-       "Cannot compile opendir() with MSVC, so jsut returning false\n");
+   TCHAR currDir[BUFFER_SIZE];
+   
+   // Save current directory
+   DWORD ret = GetCurrentDirectory(BUFFER_SIZE, currDir);
+   // Try setting to requested direcotry
+   dirExist = (SetCurrentDirectory(dirName.c_str()) == 0 ? false : true);
+   // Set back to current directory
+   SetCurrentDirectory(currDir);
 #endif
+   
+   #ifdef DEBUG_DIR_EXIST
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::DoesDirectoryExist() returning %d\n", dirExist);
+   #endif
    
    return dirExist;
 }
@@ -242,7 +430,7 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &dirPath)
 //------------------------------------------------------------------------------
 bool GmatFileUtil::DoesFileExist(const std::string &filename)
 {
-   #ifdef DBGLVL_FILE_CHECK
+   #ifdef DEBUG_FILE_CHECK
    MessageInterface::ShowMessage
       ("GmatFileUtil::DoesFileExist() filename=<%s>\n",
        filename.c_str());
@@ -257,7 +445,7 @@ bool GmatFileUtil::DoesFileExist(const std::string &filename)
       fileExist = true;
    }
    
-   #ifdef DBGLVL_FILE_CHECK
+   #ifdef DEBUG_FILE_CHECK
    MessageInterface::ShowMessage
       ("GmatFileUtil::DoesFileExist() returning %d\n", fileExist);
    #endif
@@ -294,6 +482,112 @@ bool GmatFileUtil::GetLine(std::istream *is, std::string &line)
    return true;
 }
 
+//#define DEBUG_APP_INSTALLATION
+//------------------------------------------------------------------------------
+// bool IsAppInstalled(const std::string &appName)
+//------------------------------------------------------------------------------
+/**
+ * Asks system if requested application is installed
+ *
+ * @param  appName  Name of the application, such as MATLAB
+ * @return  true requested application is installed on the system
+ * @note GMAT currently checks for only MATLAB installation
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsAppInstalled(const std::string &appName, std::string &appLoc)
+{
+#ifdef __WIN32__
+   #ifdef DEBUG_APP_INSTALLATION
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::IsAppInstalled() entered, appName='%s'\n", appName.c_str());
+   #endif
+   
+   if (appName != "MATLAB")
+   {
+      MessageInterface::ShowMessage
+         ("GMAT currently checks for only MATLAB installation\n");
+      return false;
+   }
+   
+   long lRet;
+   HKEY hKey;
+   char temp[150];
+   DWORD dwBufLen;
+   HKEY tree = HKEY_LOCAL_MACHINE;
+
+   // @todo
+   // Should we check other versions by querying sub keys?
+   // See RegEnumKeyEx(), RegEnumValue() example in
+   // http://msdn.microsoft.com/en-us/library/ms724256%28VS.85%29.aspx
+   //std::string ver75 = "7.5"; // 2007b
+   std::string ver79 = "7.9"; // 2009b
+   
+   std::string matlabFolder = "Software\\MathWorks\\MATLAB\\";
+
+   std::string folder = matlabFolder + ver79;
+   std::string key = "MATLABROOT";
+   
+   #ifdef DEBUG_APP_INSTALLATION
+   MessageInterface::ShowMessage("   About to open '%s'\n", folder.c_str());
+   #endif
+   
+   // Open location
+   lRet = RegOpenKeyEx(tree, folder.c_str(), 0, KEY_QUERY_VALUE, &hKey);
+   if (lRet != ERROR_SUCCESS)
+   {
+      #ifdef DEBUG_APP_INSTALLATION
+      MessageInterface::ShowMessage
+         ("   Failed on RegOpenKeyEx(), return code is %ld\n", lRet);
+      #endif
+      
+      return false;
+   }
+   else
+   {
+      #ifdef DEBUG_APP_INSTALLATION
+      MessageInterface::ShowMessage("   hKey is %ld\n", hKey);
+      #endif
+   }
+   
+   // Get key
+   dwBufLen = sizeof(temp);
+   lRet = RegQueryValueEx( hKey, key.c_str(), NULL, NULL, (BYTE*)&temp, &dwBufLen );
+   if (lRet != ERROR_SUCCESS)
+   {
+      #ifdef DEBUG_APP_INSTALLATION
+      MessageInterface::ShowMessage
+         ("   Failed on RegQueryValueEx(), rReturn code is %ld\n", lRet);
+      #endif
+      return false;
+   }
+   
+   #ifdef DEBUG_APP_INSTALLATION
+   MessageInterface::ShowMessage("   Key value: %s\n", temp);
+   #endif
+   
+   // Close key
+   lRet = RegCloseKey( hKey );
+   if (lRet != ERROR_SUCCESS)
+   {
+      #ifdef DEBUG_APP_INSTALLATION
+      MessageInterface::ShowMessage
+         ("   Failed on RegCloseKey(), return code is %ld\n", lRet);
+      #endif
+      return false;
+   }
+   
+   appLoc = temp;
+   
+   // Got this far, then key exists
+   #ifdef DEBUG_APP_INSTALLATION
+   MessageInterface::ShowMessage("GmatFileUtil::IsAppInstalled() returning true\n");
+   #endif
+   return true;
+   
+#else // other operating system
+   return true;
+#endif
+}
 
 //------------------------------------------------------------------------------
 // WrapperTypeArray GetFunctionOutputTypes(std::istream *inStream,
@@ -305,6 +599,7 @@ bool GmatFileUtil::GetLine(std::istream *is, std::string &line)
  * the order of outputs.
  *
  * @param  inStream  the input function stream
+ * @param  inputs    the input name list
  * @param  outputs   the output name list
  * @param  errMsg    the error message to be set if any
  * @param  outputRows  the array of row count to be set
@@ -314,7 +609,7 @@ bool GmatFileUtil::GetLine(std::istream *is, std::string &line)
  */
 //------------------------------------------------------------------------------
 WrapperTypeArray
-GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
+GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream, const StringArray &inputs,
                                      const StringArray &outputs, std::string &errMsg,
                                      IntegerArray &outputRows, IntegerArray &outputCols)
 {
@@ -322,19 +617,22 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
    
    #if DBGLVL_FUNCTION_OUTPUT
    MessageInterface::ShowMessage
-      ("GmatFileUtil::GetFunctionOutputTypes() outputSize = %d\n", outputSize);
+      ("GmatFileUtil::GetFunctionOutputTypes() inputSize = %d, outputSize = %d\n",
+       inputs.size(), outputSize);
+   for (UnsignedInt i=0; i<inputs.size(); i++)
+      MessageInterface::ShowMessage("   inputs[%d]='%s'\n", i, inputs[i].c_str());
    for (UnsignedInt i=0; i<outputs.size(); i++)
       MessageInterface::ShowMessage("   outputs[%d]='%s'\n", i, outputs[i].c_str());
    #endif
    
    WrapperTypeArray outputWrapperTypes;
    std::string line;
-   StringArray outputTypes, outputNames, outputDefs, multiples;
+   StringArray outputTypes, outputNames, outputDefs, multiples, globals;
    errMsg = "";
    std::string errMsg1, errMsg2;
    std::string name;
    Integer row, col;
-
+   
    // if no output, just return
    if (outputSize == 0)
       return outputWrapperTypes;
@@ -371,11 +669,13 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
       outputDefs.push_back("");;
    }
    
-   // Go through each line in the function file
+   // Go through each line in the function file, ignoring after % inline comment
    while (!inStream->eof())
    {
       if (GetLine(inStream, line))
       {
+         // remove inline comments and trim
+         line = GmatStringUtil::RemoveInlineComment(line, "%");         
          line = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true, true);
          
          // Skip empty line or comment line
@@ -383,35 +683,47 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
             continue;
          
          StringArray parts = GmatStringUtil::SeparateBy(line, " ,", true);
-         if (parts[0] != "Create")
-            continue;
          
-         #if DBGLVL_FUNCTION_OUTPUT > 1
-         for (UnsignedInt i=0; i<parts.size(); i++)
-            MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
-         #endif
-         
-         for (UnsignedInt i=0; i<outputSize; i++)
+         if (parts[0] == "Global")
          {
-            for (UnsignedInt j=2; j<parts.size(); j++)
+            #if DBGLVL_FUNCTION_OUTPUT > 1
+            for (UnsignedInt i=0; i<parts.size(); i++)
+               MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
+            #endif
+            
+            for (UnsignedInt j=1; j<parts.size(); j++)
+               globals.push_back(parts[j]);
+            
+         }
+         else if (parts[0] == "Create")
+         {
+            #if DBGLVL_FUNCTION_OUTPUT > 1
+            for (UnsignedInt i=0; i<parts.size(); i++)
+               MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
+            #endif
+         
+            for (UnsignedInt i=0; i<outputSize; i++)
             {
-               GmatStringUtil::GetArrayIndex(parts[j], row, col, name, "[]");
-               
-               if (name == outputs[i])
+               for (UnsignedInt j=2; j<parts.size(); j++)
                {
-                  // add multiple output defs
-                  if (find(outputNames.begin(), outputNames.end(), name) != outputNames.end())
-                     multiples.push_back(name);
+                  GmatStringUtil::GetArrayIndex(parts[j], row, col, name, "[]");
                   
-                  outputNames[i] = name;
-                  outputTypes[i] = parts[1];
-                  outputDefs[i] = parts[j];
-                  
-                  #if DBGLVL_FUNCTION_OUTPUT > 1
-                  MessageInterface::ShowMessage
-                     ("   i=%d, type='%s', name='%s', def='%s'\n", i, parts[1].c_str(),
-                      name.c_str(), parts[j].c_str());
-                  #endif                  
+                  if (name == outputs[i])
+                  {
+                     // add multiple output defs
+                     if (find(outputNames.begin(), outputNames.end(), name) != outputNames.end())
+                        multiples.push_back(name);
+                     
+                     outputNames[i] = name;
+                     outputTypes[i] = parts[1];
+                     outputDefs[i] = parts[j];
+                     
+                     #if DBGLVL_FUNCTION_OUTPUT > 1
+                     MessageInterface::ShowMessage
+                        ("   i=%d, type='%s', name='%s', def='%s'\n", i, parts[1].c_str(),
+                         name.c_str(), parts[j].c_str());
+                     #endif                  
+                  }
                }
             }
          }
@@ -430,7 +742,10 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
    
    #if DBGLVL_FUNCTION_OUTPUT
    MessageInterface::ShowMessage
-      ("   missing.size()=%d, multiples.size()=%d\n", missing.size(), multiples.size());
+      ("   missing.size()=%d, multiples.size()=%d, globals.size()=%d\n",
+       missing.size(), multiples.size(), globals.size());
+   for (UnsignedInt i=0; i<globals.size(); i++)
+      MessageInterface::ShowMessage("   globals[%d] = '%s'\n", i, globals[i].c_str());
    #endif
    
    if (missing.size() == 0 && multiples.size() == 0)
@@ -440,7 +755,7 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
       {
          if (outputTypes[i] == "Variable")
          {
-            outputWrapperTypes.push_back(Gmat::VARIABLE);
+            outputWrapperTypes.push_back(Gmat::VARIABLE_WT);
             outputRows.push_back(-1);
             outputCols.push_back(-1);
          }
@@ -453,7 +768,7 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
                ("   name='%s', row=%d, col=%d\n", name.c_str(), row, col);
             #endif
             
-            outputWrapperTypes.push_back(Gmat::ARRAY);
+            outputWrapperTypes.push_back(Gmat::ARRAY_WT);
             outputRows.push_back(row);
             outputCols.push_back(col);
          }
@@ -463,9 +778,23 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
    {
       if (missing.size() > 0)
       {
-         errMsg1 = "Missing output declaration of";
+         StringArray reallyMissing;
          for (UnsignedInt i=0; i<missing.size(); i++)
-            errMsg1 = errMsg1 + " \"" + missing[i] + "\"";
+         {
+            // Check if missing output declarations are in the input names or
+            // globals. If output names are not in the inputs or globals, it is an
+            // error condition as in the GMAT Function requirements 1.6, 1.7, 1.8
+            if (find(inputs.begin(), inputs.end(), missing[i]) == inputs.end() &&
+                find(globals.begin(), globals.end(), missing[i]) == globals.end())
+               reallyMissing.push_back(missing[i]);
+         }
+         
+         if (reallyMissing.size() > 0)
+         {
+            errMsg1 = "Missing output declaration of";
+            for (UnsignedInt i=0; i<reallyMissing.size(); i++)
+               errMsg1 = errMsg1 + " \"" + reallyMissing[i] + "\"";
+         }
       }
       
       if (multiples.size() > 0)
@@ -517,7 +846,7 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
 StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
                                                    bool addPath)
 {
-   #ifdef DBGLVL_FILELIST
+   #ifdef DEBUG_FILELIST
    MessageInterface::ShowMessage
       ("GmatFileUtil::GetFileListFromDirectory() dirName=<%s>\n",
        dirName.c_str());
@@ -571,7 +900,7 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
             outFile = pathName + findData.cFileName;
          fileList.push_back(outFile);
          
-         #ifdef DBGLVL_FILELIST
+         #ifdef DEBUG_FILELIST
          MessageInterface::ShowMessage
             ("   > added %s to file list\n", findData.cFileName);
          #endif
@@ -589,7 +918,7 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
                outFile = pathName + findData.cFileName;
             fileList.push_back(outFile);
             
-            #ifdef DBGLVL_FILELIST
+            #ifdef DEBUG_FILELIST
             MessageInterface::ShowMessage
                ("   > added %s to file list\n", findData.cFileName);
             #endif
@@ -617,7 +946,7 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
    // add other operating system here
    #endif
    
-   #ifdef DBGLVL_FILELIST
+   #ifdef DEBUG_FILELIST
    MessageInterface::ShowMessage
       ("GmatFileUtil::GetFileListFromDirectory() returning %d files\n",
        fileList.size());
@@ -686,8 +1015,8 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    #endif
    
    // open file
-   ifstream in1(filename1.c_str());
-   ifstream in2(filename2.c_str());
+   std::ifstream in1(filename1.c_str());
+   std::ifstream in2(filename2.c_str());
    
    if (!in1)
    {
@@ -849,7 +1178,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    // report the difference summary
    std::string outLine;
    outLine = "Total lines compared: " + ToString(count) + ",   Tolerance: " +
-      ToString(tol, false, true, 7, 6) + "\n\n";
+      ToString(tol, false, true, true, 7, 6) + "\n\n";
    textBuffer.push_back(outLine);
 
    #if DBGLVL_COMPARE_REPORT
@@ -894,17 +1223,17 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
 
       if (colTitles.size() == 0)
       {
-         outLine = ToString(i+1) + "     " + ToString(minDiffs[i], false, true, 7, 6) +
+         outLine = ToString(i+1) + "     " + ToString(minDiffs[i], false, true, true, 7, 6) +
             "   " + ToString(minLines[i]) + "    " +
-            ToString(maxDiffs[i], false, true, 7, 6) + "   " + ToString(maxLines[i]) +
+            ToString(maxDiffs[i], false, true, true, 7, 6) + "   " + ToString(maxLines[i]) +
             "       " + minGtTol + "         " + maxGtTol + "\n";
       }
       else
       {
          sprintf(title, "%-30.30s", colTitles[i].c_str());
          outLine = ToString(i+1) + "     " + title + "   " +
-            ToString(minDiffs[i], false, true, 7, 6) + "   " + ToString(minLines[i]) +
-            "    " + ToString(maxDiffs[i], false, true, 7, 6) + "   " +
+            ToString(minDiffs[i], false, true, true, 7, 6) + "   " + ToString(minLines[i]) +
+            "    " + ToString(maxDiffs[i], false, true, true, 7, 6) + "   " +
             ToString(maxLines[i]) + "       " + minGtTol + "         " +
             maxGtTol + "\n";
       }
@@ -953,12 +1282,12 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    #endif
    
    // open base file
-   ifstream baseIn(basefilename.c_str());
+   std::ifstream baseIn(basefilename.c_str());
 
    // open compare files
-   ifstream in1(filename1.c_str());
-   ifstream in2(filename2.c_str());
-   ifstream in3(filename3.c_str());
+   std::ifstream in1(filename1.c_str());
+   std::ifstream in2(filename2.c_str());
+   std::ifstream in3(filename3.c_str());
    
    if (!baseIn)
    {
@@ -1212,7 +1541,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    // report the difference summary
    std::string outLine;
    outLine = "Total lines compared: " + ToString(count) + ",   Tolerance: " +
-      ToString(tol, false, true, 7, 6) + "\n\n";
+      ToString(tol, false, true, true, 7, 6) + "\n\n";
    textBuffer.push_back(outLine);
 
    #if DBGLVL_COMPARE_REPORT
@@ -1260,15 +1589,15 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       if (numDirsToCompare == 2)
       {
          outLine = ToString(i+1) + "     " +
-            ToString(maxDiffs1[i], false, true, 7, 6) + "      " + maxGtTol1 + "       " +
-            ToString(maxDiffs2[i], false, true, 7, 6) + "      " + maxGtTol2 + "\n";
+            ToString(maxDiffs1[i], false, true, true, 7, 6) + "      " + maxGtTol1 + "       " +
+            ToString(maxDiffs2[i], false, true, true, 7, 6) + "      " + maxGtTol2 + "\n";
       }
       else if (numDirsToCompare == 3)
       {
          outLine = ToString(i+1) + "     " +
-            ToString(maxDiffs1[i], false, true, 7, 6) + "      " + maxGtTol1 + "       " +
-            ToString(maxDiffs2[i], false, true, 7, 6) + "      " + maxGtTol2 + "       " +
-            ToString(maxDiffs3[i], false, true, 7, 6) + "      " + maxGtTol3 + "\n";
+            ToString(maxDiffs1[i], false, true, true, 7, 6) + "      " + maxGtTol1 + "       " +
+            ToString(maxDiffs2[i], false, true, true, 7, 6) + "      " + maxGtTol2 + "       " +
+            ToString(maxDiffs3[i], false, true, true, 7, 6) + "      " + maxGtTol3 + "\n";
       }
       
       textBuffer.push_back(outLine);
@@ -1320,12 +1649,12 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    #endif
    
    // open base file
-   ifstream baseIn(basefilename.c_str());
+   std::ifstream baseIn(basefilename.c_str());
 
    // open compare files
-   ifstream in1(filename1.c_str());
-   ifstream in2(filename2.c_str());
-   ifstream in3(filename3.c_str());
+   std::ifstream in1(filename1.c_str());
+   std::ifstream in2(filename2.c_str());
+   std::ifstream in3(filename3.c_str());
    
    if (!baseIn)
    {
@@ -1487,7 +1816,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
 //------------------------------------------------------------------------------
 // bool SkipHeaderLines(ifstream &in, StringArray &tokens)
 //------------------------------------------------------------------------------
-bool GmatFileUtil::SkipHeaderLines(ifstream &in, StringArray &tokens)
+bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, StringArray &tokens)
 {
    char buffer[BUFFER_SIZE];
    bool dataFound = false;

@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -31,6 +33,7 @@ class FunctionManager;
 class SolarSystem;
 class PhysicalModel;
 class CoordinateSystem;
+class Publisher;
 
 class GMAT_API MathTree : public GmatBase
 {
@@ -67,6 +70,7 @@ public:
    void                 SetSolarSystem(SolarSystem *ss);
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    void                 SetTransientForces(std::vector<PhysicalModel*> *tf);
+   void                 SetPublisher(Publisher *pub);
    
    // Inherited (GmatBase) methods
    virtual GmatBase*    Clone(void) const;
@@ -93,6 +97,7 @@ protected:
    StringArray theAllParamArray;
    StringArray theGmatFunctionNames;
    std::vector<Function*> theFunctions;
+   std::vector<MathNode*> nodesToDelete;
    
    bool InitializeParameter(MathNode *node);
    void FinalizeFunctionRunner(MathNode *node);
@@ -104,9 +109,11 @@ protected:
    void SetSolarSystemToRunner(MathNode *node, SolarSystem *ss);
    void SetInternalCoordSystemToRunner(MathNode *node, CoordinateSystem *cs);
    void SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalModel*> *tf);
+   void SetPublisherToRunner(MathNode *node, Publisher *pub);
    bool RenameParameter(MathNode *node, const Gmat::ObjectType type,
                         const std::string &oldName, const std::string &newName);
    void CreateParameterNameArray(MathNode *node);
+   void DeleteNode(MathNode *node);
    
 };
 

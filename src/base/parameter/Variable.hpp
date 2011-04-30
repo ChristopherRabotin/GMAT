@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                Variable
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -13,10 +15,7 @@
 // Created: 2004/09/15
 //
 /**
- * Declares Variable class which provides methods for general variable evaluation.
- *    Such as: 100 * Sat1.X; where Sat1.X is already defined
- *             Sat1.X + Sat1.X;
- *             A * B; where A and B are already defined
+ * Declares Variable class.
  */
 //------------------------------------------------------------------------------
 #ifndef Variable_hpp
@@ -38,7 +37,7 @@ public:
    virtual ~Variable();
 
    // methods inherited from RealVar
-   virtual Real GetReal();
+   virtual Real GetReal() const;
    virtual Real EvaluateReal();
    
    // methods inherited from GmatBase
@@ -67,10 +66,18 @@ public:
                                                   const std::string &prefix,
                                                   const std::string &useName);
 protected:
-
+   
+   // Currently simple math expression (+-*/^) is no longer allowed in object mode.
+   // Math equations are allowed in only command mode.
+   // Save this for future? (LOJ: 2010.11.24)
+   #ifdef __ALLOW_SIMPLE_VAR_EXP__
    ParameterDatabase *mParamDb;
    ExpressionParser *mExpParser;
-      
+   void CreateSimpleExpression();
+   void CopySimpleExpression(const Variable &copy);
+   void AssignSimpleExpression(const Variable &right);
+   void DeleteSimpleExpression();
+   #endif
 };
 
 #endif // Variable_hpp

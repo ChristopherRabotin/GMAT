@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             File: KeplerianParameters.cpp
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,7 +22,6 @@
 //------------------------------------------------------------------------------
 
 #include "KeplerianParameters.hpp"
-#include "OrbitTypes.hpp"
 
 //==============================================================================
 //                              KepSMA
@@ -111,7 +112,7 @@ bool KepSMA::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(SMA);    
    
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -224,7 +225,7 @@ bool KepEcc::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(ECC);
    
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -271,6 +272,8 @@ KepInc::KepInc(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsAngleParam = true;
+   mCycleType = GmatParam::ZERO_180;
 }
 
 
@@ -336,7 +339,7 @@ bool KepInc::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(INC);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -384,6 +387,8 @@ KepAOP::KepAOP(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsAngleParam = true;
+   mCycleType = GmatParam::ZERO_360;
 }
 
 
@@ -449,7 +454,7 @@ bool KepAOP::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(AOP);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -497,6 +502,8 @@ KepRAAN::KepRAAN(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsAngleParam = true;
+   mCycleType = GmatParam::ZERO_360;
 }
 
 
@@ -562,7 +569,7 @@ bool KepRAAN::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(RAAN);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -674,7 +681,7 @@ bool KepRADN::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(RADN);    
    
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -722,6 +729,8 @@ KepTA::KepTA(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   mIsAngleParam = true;
+   mCycleType = GmatParam::ZERO_360;
 }
 
 
@@ -787,7 +796,7 @@ bool KepTA::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(TA);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -835,6 +844,8 @@ KepMA::KepMA(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   mIsAngleParam = true;
+   mCycleType = GmatParam::ZERO_360;
 }
 
 
@@ -900,7 +911,7 @@ bool KepMA::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(MA);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -948,6 +959,8 @@ KepEA::KepEA(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   mIsAngleParam = true;
+   mCycleType = GmatParam::ZERO_360;
 }
 
 
@@ -1013,7 +1026,7 @@ bool KepEA::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(EA);    
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -1061,6 +1074,8 @@ KepHA::KepHA(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   mIsAngleParam = true;
+   mCycleType = GmatParam::ZERO_360;
 }
 
 
@@ -1126,7 +1141,7 @@ bool KepHA::Evaluate()
 {
    mRealValue = OrbitData::GetKepReal(HA);    
    
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -1238,7 +1253,7 @@ bool KepMM::Evaluate()
 {
    mRealValue = OrbitData::GetOtherKepReal(MM);
     
-   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -1353,7 +1368,7 @@ bool KepElem::Evaluate()
 {
    mRvec6Value = OrbitData::GetKepState();
 
-   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
 }
 
 
@@ -1466,7 +1481,7 @@ bool ModKepElem::Evaluate()
 {
    mRvec6Value = OrbitData::GetModKepState();
 
-   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
 }
 
 

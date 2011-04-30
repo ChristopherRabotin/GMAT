@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  BodyFixedAxes
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -31,6 +33,7 @@
 #include "EopFile.hpp"
 #include "DeFile.hpp"
 #include "ItrfCoefficientsFile.hpp"
+#include "CelestialBody.hpp"
 
 class GMAT_API BodyFixedAxes : public DynamicAxes
 {
@@ -61,6 +64,10 @@ public:
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
    virtual GmatBase*       Clone(void) const;
+   // We need to override this method from CoordinateBase
+   // to check for a CelestialBody origin only
+   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                        const std::string &name = "");
 
    // Parameter access methods - overridden from GmatBase
    /*
@@ -76,8 +83,7 @@ public:
    virtual bool            SetStringParameter(const std::string &label, 
                                               const std::string &value);
     */
-   
-   
+
 protected:
 
    enum
@@ -93,15 +99,12 @@ protected:
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);
-   
-   //Rmatrix33      precT, nutT, stT, stDerivT, pmT;
-   
-   //const Real *precData;  // moved to AxisSystem
-   //const Real *nutData;
-   //const Real *stData;
-   //const Real *stDerivData;
-   //const Real *pmData;
-   
-   DeFile     *de;
+
+   DeFile                   *de;
+   Real                     prevEpoch;
+   Real                     prevUpdateInterval;
+   Real                     prevOriginUpdateInterval;
+   Gmat::RotationDataSource prevLunaSrc;
+
 };
 #endif // BodyFixedAxes_hpp

@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                            SolverBranchCommand
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -25,7 +27,9 @@
 #include "BranchCommand.hpp"
 #include "Solver.hpp"
 
-class SolverBranchCommand : public BranchCommand
+class Subscriber;
+
+class GMAT_API SolverBranchCommand : public BranchCommand
 {
 public:
         SolverBranchCommand(const std::string &typeStr);
@@ -58,7 +62,9 @@ public:
                        GetStringArrayParameter(const std::string &label) const;
 
    virtual bool        NeedsServerStartup();
-   
+   virtual Integer     GetCloneCount();
+   virtual GmatBase*   GetClone(Integer cloneIndex = 0);
+
 protected:
    // Mode definitions for the state machine overrrides
    enum solverStartMode
@@ -90,10 +96,13 @@ protected:
    /// Local store of the objects that we'll need to reset
    ObjectArray         localStore;
 
+   /// Active subscribers (only XY plots for now) so the penups can be managed
+   std::vector<Subscriber*> activeSubscribers;
+
    /// Parsing function for SolveMode and ExitMode
    void                CheckForOptions(std::string &opts);
    /// Returns the text for options that are not set to the default values
-   std::string GetSolverOptionText();
+   std::string         GetSolverOptionText();
    
    // Methods used to save the starting point for the loops
    virtual void        StoreLoopData();
@@ -102,6 +111,16 @@ protected:
    
    virtual void        ApplySolution();
    
+   virtual void        GetActiveSubscribers();
+   virtual void        PenUpSubscribers();
+   virtual void        PenDownSubscribers();
+   virtual void        DarkenSubscribers(Integer denominator = 1);
+   virtual void        LightenSubscribers(Integer denominator = 1);
+   virtual void        SetSubscriberBreakpoint();
+   virtual void        ApplySubscriberBreakpoint(Integer bp = -1);
+   virtual void        PrepareToPublish(bool publishAll = true);
+   virtual void        PublishData();
+
    enum
    {
       SOLVER_NAME_ID  = BranchCommandParamCount,

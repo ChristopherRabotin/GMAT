@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                    A1Mjd
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -27,7 +29,7 @@
 #include "UtcDate.hpp"
 #include "A1Date.hpp"
 
-class A1Mjd
+class GMAT_API A1Mjd
 {
 public:
 
@@ -58,12 +60,14 @@ public:
    bool operator!= (const A1Mjd &right) const;
    bool operator>= (const A1Mjd &right) const { return mMjd >= right.mMjd; }
    bool operator<= (const A1Mjd &right) const { return mMjd <= right.mMjd; }
-
+   
    Real Subtract(const A1Mjd &right) const { return (mMjd - right.mMjd); }
    Real Subtract(const Real &right) const { return (mMjd - right); }
-
+   
    Real Get() const { return mMjd; }
    void Set(Real val) { mMjd = val; }
+   Real GetReal() const { return mMjd; }
+   void SetReal(Real val) { mMjd = val; }
 
    UtcDate ToUtcDate();
    A1Date ToA1Date();
@@ -92,7 +96,7 @@ private:
 //                                       MinuteOfHour minute, Real second);
 
    Real mMjd;
-   Real mTolerance;
+   static const Real mTolerance;
 
    static const Integer NUM_DATA = 1;
    static const std::string DATA_DESCRIPTIONS[NUM_DATA];

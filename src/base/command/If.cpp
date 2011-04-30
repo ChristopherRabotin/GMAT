@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                If
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -24,7 +26,7 @@
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_IF
+//#define DEBUG_IF_EXEC
 //#define DEBUG_IF_APPEND
 
 
@@ -173,22 +175,20 @@ bool If::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool If::Execute()
 {
-//#ifdef DEBUG_IF
-//   MessageInterface::ShowMessage
-//   ("In If::Execute ............\n");
-//#endif
    bool retval = true;
-      
+   
    if (branchExecuting)
    {
-#ifdef DEBUG_IF
+      #ifdef DEBUG_IF_EXEC
       MessageInterface::ShowMessage
       ("In If::Execute - Branch Executing -------------\n");
-#endif
+      #endif
       retval = ExecuteBranch(branchToExecute);
-      #ifdef DEBUG_IF
+      #ifdef DEBUG_IF_EXEC
          MessageInterface::ShowMessage
          ("In If:: retval returned from ExecuteBranch = %s\n", (retval? "true" : "false"));
+         MessageInterface::ShowMessage
+         ("        branchExecuting=%d\n", branchExecuting);
       #endif
       if (!branchExecuting)
       {
@@ -198,20 +198,20 @@ bool If::Execute()
    }
    else 
    {
-#ifdef DEBUG_IF
+      #ifdef DEBUG_IF_EXEC
       MessageInterface::ShowMessage
       ("In If::Execute - Branch NOT Executing -------------\n");
-#endif
+      #endif
       if (!commandExecuting)
          ConditionalBranch::Execute();
       
       //if (EvaluateCondition(0)) // must deal with multiple conditions later
       if (EvaluateAllConditions()) 
       {
-#ifdef DEBUG_IF
+         #ifdef DEBUG_IF_EXEC
          MessageInterface::ShowMessage
          ("In If::Execute all conditions are true - executing first branch\n");
-#endif
+         #endif
          branchToExecute = 0;
          branchExecuting = true;
          commandComplete = false;
@@ -219,10 +219,10 @@ bool If::Execute()
       }
       else if ((Integer)branch.size() > 1)  // there could be an 'Else'
       {
-#ifdef DEBUG_IF
+         #ifdef DEBUG_IF_EXEC
          MessageInterface::ShowMessage
          ("In If::Execute some conditions are FALSE - executing second branch\n");
-#endif
+         #endif
          branchExecuting = true;
          branchToExecute = 1; // @todo - add ElseIf (more than two branches)
          commandComplete = false;
@@ -230,11 +230,11 @@ bool If::Execute()
       }
       else
       {
-#ifdef DEBUG_IF
+         #ifdef DEBUG_IF_EXEC
          MessageInterface::ShowMessage
          ("In If::Execute - conditions are FALSE - no other branch to execute\n");
          //("In If::Execute - ERROR with number of branches - more than two not yet implemented\n");
-#endif
+         #endif
          branchToExecute = 0;
          commandComplete  = true;
          commandExecuting = false;
@@ -243,12 +243,14 @@ bool If::Execute()
    }
    
    BuildCommandSummary(true);
-#ifdef DEBUG_IF
+   #ifdef DEBUG_IF_EXEC
    MessageInterface::ShowMessage
       ("If::BuildCommandSummary completed\n");
-#endif
+   #endif
    return retval;
-}
+} // Execute()
+
+
 //bool If::Initialize()
 //{
 //   ConditionalBranch::Initialize();

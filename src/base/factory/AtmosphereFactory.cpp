@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            AtmosphereFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -24,6 +26,7 @@
 #include "ExponentialAtmosphere.hpp"
 #include "Msise90Atmosphere.hpp"
 #include "JacchiaRobertsAtmosphere.hpp"
+#include "SimpleExponentialAtmosphere.hpp"
 
 
 //---------------------------------
@@ -53,11 +56,13 @@ AtmosphereFactory::CreateAtmosphereModel(const std::string &ofType,
                                          const std::string &forBody)
 {
    if (ofType == "Exponential")
-      return new ExponentialAtmosphere();
+      return new ExponentialAtmosphere(withName);
+   if (ofType == "Simple")
+      return new SimpleExponentialAtmosphere(withName);
    else if (ofType == "MSISE90")
-      return new Msise90Atmosphere();
-   else if (ofType == "JacchiaRoberts") //loj: 10/28/04 Changed from Jacchia-Roberts
-      return new JacchiaRobertsAtmosphere();
+      return new Msise90Atmosphere(withName);
+   else if (ofType == "JacchiaRoberts")
+      return new JacchiaRobertsAtmosphere(withName);
    return NULL;
 }
 
@@ -78,6 +83,7 @@ Factory(Gmat::ATMOSPHERE)
    if (creatables.empty())
    {
       creatables.push_back("Exponential");
+      creatables.push_back("Simple");
       creatables.push_back("MSISE90");
       creatables.push_back("JacchiaRoberts");
    }

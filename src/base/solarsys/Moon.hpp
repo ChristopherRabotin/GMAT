@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Moon
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -45,30 +47,12 @@ public:
    virtual ~Moon();
 
    virtual Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
-   virtual Real    GetHourAngle(A1Mjd atTime); 
    
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   // required method for all subclasses that can be copied in a script
+   virtual void      Copy(const GmatBase* orig);
 
-
-   // default values for CelestialBody data
-   static const Gmat::BodyType        BODY_TYPE;
-   static const Gmat::PosVelSource    POS_VEL_SOURCE;
-   static const Gmat::AnalyticMethod  ANALYTIC_METHOD;
-   static const Integer               ORDER;
-   static const Integer               DEGREE;
-
-   static const Integer               LUNA_BODY_NUMBER;
-   static const Integer               LUNA_REF_BODY_NUMBER;
-
-   static const Real                  LUNA_EQUATORIAL_RADIUS;
-   static const Real                  LUNA_FLATTENING;
-   static const Real                  LUNA_MU;
-   static const Rmatrix               LUNA_SIJ;
-   static const Rmatrix               LUNA_CIJ;
-   
-   static const Real                  ANALYTIC_EPOCH;
-   static const Rvector6              ANALYTIC_ELEMENTS;
 
 protected:
    enum
@@ -81,8 +65,6 @@ protected:
    
    //static const Gmat::ParameterType 
    //                         PARAMETER_TYPE[MoonParamCount - CelestialBodyParamCount];
-
-   void             InitializeMoon(const std::string &cBody);
    
 
 private:

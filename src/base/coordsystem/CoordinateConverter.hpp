@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  CoordinateConverter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -59,9 +61,11 @@ public:
                 bool forceNutationComputation = false, bool omitTranslation = false);
    // method to return the rotation matrix used to do the last conversion
    Rmatrix33    GetLastRotationMatrix() const;
+   Rmatrix33    GetLastRotationDotMatrix() const;
 
 protected:
    Rmatrix33 lastRotMatrix;
+   Rmatrix33 lastRotDotMatrix;
    /*
    Rvector internalState;
    Rmatrix33 toMJ2000RotMatrix;

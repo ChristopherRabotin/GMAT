@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                               ScriptInterpreter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Waka Waktola
 // Created: 2006/08/25
@@ -21,19 +25,31 @@
 #include "NoOp.hpp"
 #include "CommandUtil.hpp"     // for GmatCommandUtil::GetCommandSeqString()
 #include "StringUtil.hpp"      // for GmatStringUtil::
+#include "TimeTypes.hpp"       // for GmatTimeUtil::FormatCurrentTime()
 
 // to allow object creation in command mode, such as inside ScriptEvent
 //#define __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
 
 
-//#define DEBUG_READ_FIRST_PASS 1
-//#define DEBUG_SCRIPT_READING 1
-//#define DEBUG_SCRIPT_WRITING 1
-//#define DEBUG_DELAYED_BLOCK 1
-//#define DEBUG_PARSE 1
-//#define DEBUG_PARSE_FOOTER 1
-//#define DEBUG_SET_COMMENTS 1
+//#define DEBUG_READ_FIRST_PASS
+//#define DEBUG_DELAYED_BLOCK
+//#define DEBUG_PARSE
+//#define DEBUG_PARSE_FOOTER
+//#define DEBUG_SET_COMMENTS
+//#define DEBUG_SCRIPT_WRITING
+//#define DEBUG_SCRIPT_WRITING_PARAMETER
+//#define DEBUG_SECTION_DELIMITER
+//#define DEBUG_SCRIPT_WRITING_COMMANDS
+//#define DBGLVL_SCRIPT_READING 1
 //#define DBGLVL_GMAT_FUNCTION 1
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -64,17 +80,22 @@ ScriptInterpreter* ScriptInterpreter::Instance()
 ScriptInterpreter::ScriptInterpreter() : Interpreter()
 {
    logicalBlockCount = 0;
+   functionDefined = false;
+   ignoreRest = false;
    
-   scriptFilename = "";
-   currentBlock   = "";
-   headerComment  = "";
-   footerComment  = "";
+   functionDef      = "";
+   functionFilename = "";
+   scriptFilename   = "";
+   currentBlock     = "";
+   headerComment    = "";
+   footerComment    = "";
    
    inCommandMode = false;
    inRealCommandMode = false;
    
    // Initialize the section delimiter comment
-   sectionDelimiterString.clear();   
+   sectionDelimiterString.clear();
+   userParameterLines.clear();
    sectionDelimiterString.push_back("\n%----------------------------------------\n");
    sectionDelimiterString.push_back("%---------- ");
    sectionDelimiterString.push_back("\n%----------------------------------------\n");
@@ -106,7 +127,7 @@ ScriptInterpreter::~ScriptInterpreter()
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::Interpret()
 {
-   #if DEBUG_SCRIPT_READING
+   #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("ScriptInterpreter::Interpret() entered, Calling Initialize()\n");
    #endif
@@ -115,9 +136,10 @@ bool ScriptInterpreter::Interpret()
    
    inCommandMode = false;
    inRealCommandMode = false;
+   userParameterLines.clear();
    
    // Before parsing script, check for unmatching control logic
-   #if DEBUG_SCRIPT_READING
+   #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage("   Calling ReadFirstPass()\n");
    #endif
    
@@ -135,7 +157,7 @@ bool ScriptInterpreter::Interpret()
    for (UnsignedInt i=0; i<errorList.size(); i++)
       MessageInterface::ShowMessage("%d: %s\n", i+1, errorList[i].c_str());
    
-   #if DEBUG_SCRIPT_READING
+   #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("ScriptInterpreter::Interpret() Leaving retval1=%d, retval2=%d\n",
        retval1, retval2);
@@ -162,7 +184,7 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
 {
    Initialize();
    
-   #if DEBUG_SCRIPT_READING
+   #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("ScriptInterpreter::Interpret(%p) Entered inCmd=%s, skipHeader=%d, "
        "functionMode=%d\n", inCmd, inCmd->GetTypeName().c_str(), skipHeader,
@@ -174,6 +196,8 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    inFunctionMode = functionMode;
    inCommandMode = true;
    inRealCommandMode = true;
+   functionDefined = false;
+   ignoreRest = false;
    
    // Before parsing script, check for unmatching control logic
    bool retval0 = ReadFirstPass();
@@ -195,7 +219,7 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    for (UnsignedInt i=0; i<errorList.size(); i++)
       MessageInterface::ShowMessage("%d: %s\n", i+1, errorList[i].c_str());
    
-   #if DEBUG_SCRIPT_READING
+   #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("ScriptInterpreter::Interpret(GmatCommand) Leaving retval1=%d, retval2=%d\n",
        retval1, retval2);
@@ -238,7 +262,7 @@ bool ScriptInterpreter::Interpret(const std::string &scriptfile)
 // GmatCommand* InterpretGmatFunction(const std::string fileName)
 //------------------------------------------------------------------------------
 /**
- * Retrieves a function object pointer by given name.
+ * Builds function cmmand sequence by parsing the function file.
  *
  * @param <fileName>  Full path and name of the GmatFunction file.
  *
@@ -249,7 +273,8 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
 {
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::InterpretGmatFunction()\n   filename = %s\n",
+      ("======================================================================\n",
+       "ScriptInterpreter::InterpretGmatFunction()\n   filename = %s\n",
        fileName.c_str());
    #endif
    
@@ -281,12 +306,16 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    }
    
    // Now function file is ready to parse
+   functionFilename = fileName;
    continueOnError = true;
    bool retval = false;
    std::ifstream funcFile(fileName.c_str());
    SetInStream(&funcFile);
    GmatCommand *noOp = new NoOp;
-   
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Add
+      (noOp, "NoOp", "ScriptInterpreter::InterpretGmatFunction()", "*noOp = new NoOp");
+   #endif
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
       ("ScriptInterpreter::InterpretGmatFunction() Create <%p>NoOp\n", noOp);
@@ -296,7 +325,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    hasFunctionDefinition = true;
    currentFunction->SetScriptErrorFound(false);
    
-   // Clear temporay object names which currently holding MatlabFunction names
+   // Clear temporary object names which currently holding MatlabFunction names
    ClearTempObjectNames();
    
    // We don't want parse first comment as header, so set skipHeader to true.
@@ -321,7 +350,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    MessageInterface::ShowMessage
       ("ScriptInterpreter::InterpretGmatFunction() retval=%d\n", retval);
    #endif
-   
+
    // Just return noOP for now
    if (retval)
    {
@@ -374,7 +403,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(Function *funct)
        "filename = %s\n", funct, fileName.c_str());
    #endif
    
-   // Set urrent function
+   // Set current function
    SetFunction(funct);
    
    #if DBGLVL_GMAT_FUNCTION
@@ -400,7 +429,9 @@ bool ScriptInterpreter::Build(Gmat::WriteMode mode)
 {
    if (!initialized)
       Initialize();
-    
+
+   // set configured object map first
+   SetConfiguredObjectMap();
    return WriteScript(mode);
 }
 
@@ -449,7 +480,7 @@ bool ScriptInterpreter::Build(const std::string &scriptfile, Gmat::WriteMode mod
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::SetInStream(std::istream *str)
 {
-   #ifdef DEBUG_SCRIPT_READING
+   #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("ScriptInterpreter::SetInStream() entered str=<%p>\n", str);
    #endif
@@ -491,7 +522,7 @@ bool ScriptInterpreter::SetOutStream(std::ostream *str)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::ReadFirstPass()
 {
-   #if DEBUG_READ_FIRST_PASS
+   #ifdef DEBUG_READ_FIRST_PASS
    MessageInterface::ShowMessage
       ("ScriptInterpreter::ReadFirstPass() entered, inStream=<%p>\n", inStream);
    #endif
@@ -539,7 +570,7 @@ bool ScriptInterpreter::ReadFirstPass()
             newLine = newLine.substr(0, index);
          }
          
-         #if DEBUG_READ_FIRST_PASS
+         #ifdef DEBUG_READ_FIRST_PASS
          MessageInterface::ShowMessage("newLine=%s\n", newLine.c_str());
          #endif
          
@@ -578,7 +609,7 @@ bool ScriptInterpreter::ReadFirstPass()
    inStream->clear();
    inStream->seekg(std::ios::beg);
    
-   #if DEBUG_READ_FIRST_PASS
+   #ifdef DEBUG_READ_FIRST_PASS
    for (UnsignedInt i=0; i<lineNumbers.size(); i++)
       MessageInterface::ShowMessage
          ("     %d: %s\n", lineNumbers[i], controlLines[i].c_str());
@@ -587,7 +618,7 @@ bool ScriptInterpreter::ReadFirstPass()
    // Check for unbalaced branch command Begin/End
    bool retval = CheckBranchCommands(lineNumbers, controlLines);
    
-   #if DEBUG_READ_FIRST_PASS
+   #ifdef DEBUG_READ_FIRST_PASS
    MessageInterface::ShowMessage
       ("ScriptInterpreter::ReadFirstPass() returning %d\n", retval);
    #endif
@@ -643,7 +674,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    if (inCmd == NULL)
       headerComment = tempHeader;
    
-   #if DEBUG_SCRIPT_READING
+   #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("===> currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
    MessageInterface::ShowMessage
@@ -654,18 +685,18 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    {
       try
       {
-         #if DEBUG_SCRIPT_READING
+         #if DBGLVL_SCRIPT_READING
          MessageInterface::ShowMessage("==========> Calling EvaluateBlock()\n");
          #endif
          
          currentBlockType = theTextParser.EvaluateBlock(currentBlock);
          
-         #if DEBUG_SCRIPT_READING > 1
+         #if DBGLVL_SCRIPT_READING > 1
          MessageInterface::ShowMessage
             ("===> after EvaluateBlock() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
          #endif
          
-         #if DEBUG_SCRIPT_READING
+         #if DBGLVL_SCRIPT_READING
          MessageInterface::ShowMessage
             ("==========> Calling Parse() currentBlockType=%d\n", currentBlockType);
          #endif
@@ -673,12 +704,13 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
          // Keep previous retval1 value
          retval1 = Parse(inCmd) && retval1;
          
-         #if DEBUG_SCRIPT_READING > 1
+         #if DBGLVL_SCRIPT_READING > 1
          MessageInterface::ShowMessage
             ("===> after Parse() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
          MessageInterface::ShowMessage
             ("===> currentBlockType:%d, retval1=%d\n", currentBlockType, retval1);
          #endif
+         
       }
       catch (BaseException &e)
       {
@@ -689,7 +721,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
       
       if (!retval1 && !continueOnError)
       {
-         #if DEBUG_SCRIPT_READING
+         #if DBGLVL_SCRIPT_READING
          MessageInterface::ShowMessage
             ("ScriptInterpreter::ReadScript() Leaving retval1=%d, "
              "continueOnError=%d\n", retval1, continueOnError);
@@ -698,13 +730,16 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
          return false;
       }
       
-      #if DEBUG_SCRIPT_READING
+      if (ignoreRest)
+         break;
+      
+      #if DBGLVL_SCRIPT_READING
       MessageInterface::ShowMessage("===> Read next logical block\n");
       #endif
       
       currentBlock = theReadWriter->ReadLogicalBlock();
       
-      #if DEBUG_SCRIPT_READING
+      #if DBGLVL_SCRIPT_READING
       MessageInterface::ShowMessage
          ("===> currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
       #endif
@@ -715,7 +750,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    bool retval2 = true;
    inCommandMode = false;
    
-   #if DEBUG_DELAYED_BLOCK
+   #ifdef DEBUG_DELAYED_BLOCK
    MessageInterface::ShowMessage
       ("===> ScriptInterpreter::ReadScript() Start parsing delayed blocks. count=%d\n",
        delayedBlocks.size());
@@ -725,7 +760,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    
    for (Integer i = 0; i < delayedCount; i++)
    {
-      #if DEBUG_DELAYED_BLOCK
+      #ifdef DEBUG_DELAYED_BLOCK
       MessageInterface::ShowMessage
          ("===> delayedBlocks[%d]=%s\n", i, delayedBlocks[i].c_str());
       #endif
@@ -735,16 +770,21 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
       currentBlock = delayedBlocks[i];
       currentBlockType = theTextParser.EvaluateBlock(currentBlock);
       
+      #ifdef DEBUG_DELAYED_BLOCK
+      MessageInterface::ShowMessage
+         ("==========> Calling Parse() currentBlockType=%d\n", currentBlockType);
+      #endif
+      
       // Keep previous retval1 value
       retval2 = Parse(inCmd) && retval2;
       
-      #if DEBUG_DELAYED_BLOCK
+      #ifdef DEBUG_DELAYED_BLOCK
       MessageInterface::ShowMessage("===> delayedCount:%d, retval2=%d\n", i, retval2);
       #endif
       
       if (!retval2 && !continueOnError)
       {
-         #if DEBUG_SCRIPT_READING
+         #if DBGLVL_SCRIPT_READING
          MessageInterface::ShowMessage
             ("In delayed block: Leaving retval1=%d, "
              "continueOnError=%d\n", retval1, continueOnError);
@@ -754,7 +794,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
       }
    }
    
-   #if DEBUG_SCRIPT_READING
+   #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("Leaving ReadScript() retval1=%d, retval2=%d\n", retval1, retval2);
    #endif
@@ -798,9 +838,15 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    for (Integer i = 0; i < count; i++)
       if (sarray[i] == "")
          emptyChunks++;
+   #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("   emptyChunks=%d, count=%d\n",
+       emptyChunks, count);
+   #endif
    
    if (emptyChunks == count)
-      return false;
+      return true;   // ignore lines with just a semicolon
+ //     return false;
    
    // actual script line
    std::string actualScript = sarray[count-1];
@@ -808,10 +854,33 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    // check for function definition line
    if (currentBlockType == Gmat::FUNCTION_BLOCK)
    {
-      if (BuildFunctionDefinition(sarray[count-1]))
+      // Check if function already defined
+      // GMAT function test criteria states:
+      // 2.11 The system must only allow one function to be defined inside of a function file. 
+      // 2.12 If more than one function is present in a file, a warning shall be thrown
+      //      and only the first function in the file shall be used.
+      if (functionDefined)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "*** WARNING *** There are more than one function "
+             "defined in the function file \"%s\". \nOnly the first function \"%s\" "
+             "will be used and \"%s\" and the rest of the file will be ignored.\n",
+             functionFilename.c_str(), functionDef.c_str(), sarray[2].c_str());
+         ignoreRest = true;
          return true;
+      }
       else
-         throw InterpreterException("Failed to interpret function definition");
+      {
+         functionDef = sarray[2];
+         
+         if (BuildFunctionDefinition(sarray[count-1]))
+         {
+            functionDefined = true;
+            return true;
+         }
+         else
+            throw InterpreterException("Failed to interpret function definition");
+      }
    }
    
    // Decompose by block type
@@ -822,6 +891,9 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    }
    catch (BaseException &e)
    {
+      // Use exception to remove Visual C++ warning
+      e.GetMessageType();
+
       // if in function mode, throw better message 
       if (inFunctionMode && currentFunction != NULL)
       {
@@ -955,7 +1027,7 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
       break;
    }
    
-   #if DEBUG_PARSE
+   #ifdef DEBUG_PARSE
    MessageInterface::ShowMessage("ScriptInterpreter::Parse() retval=%d\n", retval);
    #endif
    
@@ -976,22 +1048,96 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
 {
    #ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::WriteScript() entered\n");
+      ("ScriptInterpreter::WriteScript() entered, headerComment='%s'\n",
+       headerComment.c_str());
    #endif
-   
+
    if (outStream == NULL)
       return false;
    
    //-----------------------------------
    // Header Comment
    //-----------------------------------
-   if (headerComment != "")
+   //if (headerComment == "")
+   if (GmatStringUtil::IsBlank(headerComment, true))
+      theReadWriter->WriteText
+         ("%General Mission Analysis Tool(GMAT) Script\n%Created: " +
+          GmatTimeUtil::FormatCurrentTime(3) + "\n\n");
+   else
       theReadWriter->WriteText(headerComment);
    
    StringArray::iterator current;
    StringArray objs;
    std::string objName;
    GmatBase *object =  NULL;
+   
+   //-----------------------------------
+   // The Solar System
+   //-----------------------------------
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found Solar Systems In Use\n");
+   #endif
+   // Write if not modified by user
+   if (!theSolarSystem->IsObjectCloaked())
+   {
+      objs.clear();
+      objs.push_back("SolarSystem");
+      WriteObjects(objs, "Solar System User-Modified Values", mode);
+   }
+   
+   //-----------------------------------
+   // Celestial Bodies (for now, only user-defined or modified ones)
+   //-----------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::CELESTIAL_BODY);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d CelestialBodys\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+   {
+      bool        foundUserDefinedBodies = false;
+      bool        foundModifiedBodies    = false;
+      StringArray userDefinedBodies;
+      StringArray modifiedBodies;
+      for (current = objs.begin(); current != objs.end(); ++current)
+      {
+         #ifdef DEBUG_SCRIPT_WRITING
+         MessageInterface::ShowMessage("      body name = '%s'\n", (*current).c_str());
+         #endif
+         
+         object = FindObject(*current);
+         if (object == NULL)
+            throw InterpreterException("Cannot write NULL object \"" + (*current) + "\"");
+         
+         if (!(object->IsOfType("CelestialBody")))
+            throw InterpreterException("Error writing invalid celestial body \"" + (*current) + "\"");
+         CelestialBody *theBody = (CelestialBody*) object;
+         if (theBody->IsUserDefined())
+         {
+            foundUserDefinedBodies = true;
+            userDefinedBodies.push_back(*current);
+         }
+         else if (!theBody->IsObjectCloaked())
+         {
+            foundModifiedBodies = true;
+            modifiedBodies.push_back(*current);
+         }
+      }
+      if (foundModifiedBodies)  
+         WriteObjects(modifiedBodies, "User-Modified Default Celestial Bodies", mode);
+      if (foundUserDefinedBodies) 
+         WriteObjects(userDefinedBodies, "User-Defined Celestial Bodies", mode);
+   }
+   
+   //-----------------------------------
+   // Libration Points and Barycenters
+   //-----------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d Calculated Points\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "Calculated Points", mode);
+   
    
    //-----------------------------------
    // Spacecraft
@@ -1024,14 +1170,23 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       WriteObjects(objs, "Formation", mode);
    
    //-----------------------------------
+   // Ground stations
+   //-----------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::GROUND_STATION);
+   #ifdef DEBUG_SCRIPT_WRITING
+     MessageInterface::ShowMessage("   Found %d GroundStations\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "GroundStations", mode);
+   
+   //-----------------------------------
    // Force Model
    //-----------------------------------
-   objs = theModerator->GetListOfObjects(Gmat::FORCE_MODEL);
+   StringArray odeObjs = theModerator->GetListOfObjects(Gmat::ODE_MODEL);
    #ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage("   Found %d Force Models\n", objs.size());
    #endif
-   if (objs.size() > 0)
-      WriteObjects(objs, "ForceModels", mode);
+   WriteODEModels(odeObjs, mode);
    
    //-----------------------------------
    // Propagator
@@ -1041,17 +1196,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    MessageInterface::ShowMessage("   Found %d Propagators\n", objs.size());
    #endif
    if (objs.size() > 0)
-      WriteObjects(objs, "Propagators", mode);
-   
-   //-----------------------------------
-   // Libration Points and Barycenters
-   //-----------------------------------
-   objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
-   #ifdef DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage("   Found %d Calculated Points\n", objs.size());
-   #endif
-   if (objs.size() > 0)
-      WriteObjects(objs, "Calculated Points", mode);
+      WritePropagators(objs, "Propagators", mode, odeObjs);
    
    //-----------------------------------
    // Burn
@@ -1064,19 +1209,26 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       WriteObjects(objs, "Burns", mode);
    
    //-----------------------------------
-   // Array and Variable
+   // Array, Variable and String
    //-----------------------------------
    objs = theModerator->GetListOfObjects(Gmat::PARAMETER);
    #ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage("   Found %d Parameters\n", objs.size());
    #endif
    bool foundVarsAndArrays = false;
-   bool foundOtherParameter = false;
+   bool foundOtherParameter = false; // such as Create X pos; where X is Parameter name
    if (objs.size() > 0)
    {
       for (current = objs.begin(); current != objs.end(); ++current)
       {
+         #ifdef DEBUG_SCRIPT_WRITING
+         MessageInterface::ShowMessage("      name = '%s'\n", (*current).c_str());
+         #endif
+         
          object = FindObject(*current);
+         if (object == NULL)
+            throw InterpreterException("Cannot write NULL object \"" + (*current) + "\"");
+         
          if ((object->GetTypeName() == "Array") ||
              (object->GetTypeName() == "Variable") ||
              (object->GetTypeName() == "String"))
@@ -1095,13 +1247,55 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    //-----------------------------------
    // Coordinate System
    //-----------------------------------
-   objs = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
+   // Don't write default coordinate systems since they are automatically created
+   objs = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM, true);
    #ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage("   Found %d Coordinate Systems\n", objs.size());
    #endif
    if (objs.size() > 0)
       WriteObjects(objs, "Coordinate Systems", mode);
    
+   //-----------------------------------
+   // Measurement Data Files
+   //-----------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::DATASTREAM);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d Datastreams\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "DataStreams", mode);
+
+   objs = theModerator->GetListOfObjects(Gmat::DATA_FILE);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d Datafiles\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "DataFiles", mode);
+
+   //---------------------------------------------
+   // Measurement Models and Tracking Data/Systems
+   //---------------------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::MEASUREMENT_MODEL);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d Measurement Models\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "MeasurementModels", mode);
+
+   objs = theModerator->GetListOfObjects(Gmat::TRACKING_DATA);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d TrackingData Objects\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "TrackingData", mode);
+
+   objs = theModerator->GetListOfObjects(Gmat::TRACKING_SYSTEM);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d Tracking Systems\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "TrackingSystems", mode);
+
    //-----------------------------------
    // Solver
    //-----------------------------------
@@ -1347,9 +1541,14 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
       // check for .. in the command block
       if (chunks[1].find("..") != currentBlock.npos)
       {
-         InterpreterException ex("Found invalid syntax \"..\"");
-         HandleError(ex);
-         return false;
+         // allow relative path using ..
+         if (chunks[1].find("../") == currentBlock.npos &&
+             chunks[1].find("..\\") == currentBlock.npos)
+         {
+            InterpreterException ex("Found invalid syntax \"..\"");
+            HandleError(ex);
+            return false;
+         }
       }
       
       obj = (GmatBase*)CreateCommand(chunks[0], chunks[1], retval, inCmd);
@@ -1405,9 +1604,14 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    if (chunks[0].find("..") != chunks[0].npos ||
        chunks[1].find("..") != chunks[1].npos)
    {
-      InterpreterException ex("Found invalid syntax \"..\"");
-      HandleError(ex);
-      return false;
+      // allow relative path using ..
+      if (chunks[1].find("../") == currentBlock.npos &&
+          chunks[1].find("..\\") == currentBlock.npos)
+      {
+         InterpreterException ex("Found invalid syntax \"..\"");
+         HandleError(ex);
+         return false;
+      }
    }
    
    // check for missing RHS
@@ -1476,7 +1680,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       StringArray lhsParts = theTextParser.SeparateDots(lhs);
       if (lhsParts[1] == "LogFile")
       {
-         #if DEBUG_PARSE
+         #ifdef DEBUG_PARSE
          MessageInterface::ShowMessage
             ("   Found Global.LogFile, so calling MI::SetLogFile(%s)\n",
              rhs.c_str());
@@ -1495,7 +1699,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    Integer paramID = -1;
    Gmat::ParameterType paramType;
    
-   #if DEBUG_PARSE
+   #ifdef DEBUG_PARSE
    MessageInterface::ShowMessage("   before check, inCommandMode=%d\n", inCommandMode);
    #endif
    
@@ -1506,36 +1710,54 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       
       try
       {
-         if (mp.IsEquation(rhs))
+         if (mp.IsEquation(rhs, true))
          {
-            #if DEBUG_PARSE
+            #ifdef DEBUG_PARSE
             MessageInterface::ShowMessage("   It is a math equation\n");
             #endif
             
             // check if LHS is object.property
             if (FindPropertyID(obj, lhs, &owner, paramID, paramType))
             {
+               Gmat::ParameterType paramType = obj->GetParameterType(paramID);
                // Since string can have minus sign, check it first
-               if (obj->GetParameterType(paramID) != Gmat::STRING_TYPE)
+               if (paramType != Gmat::STRING_TYPE && paramType != Gmat::ENUMERATION_TYPE &&
+                   paramType != Gmat::FILENAME_TYPE)
                   inCommandMode = true;
             }
             else
             {
                // check if LHS is a parameter
-               GmatBase *tempObj = FindObject(lhs);
-               if (tempObj && tempObj->GetType() == Gmat::PARAMETER)
-                  if (((Parameter*)tempObj)->GetReturnType() == Gmat::REAL_TYPE)
+               GmatBase *tempLhsObj = FindObject(lhs);
+               if (tempLhsObj && tempLhsObj->GetType() == Gmat::PARAMETER)
+               {
+                  Parameter *tempLhsParam = (Parameter*)tempLhsObj;
+                  #ifdef DEBUG_PARSE
+                  MessageInterface::ShowMessage
+                     ("   LHS return type = %d, Gmat::RMATRIX_TYPE = %d, "
+                      "inRealCommandMode = %d\n", tempLhsParam->GetReturnType(),
+                      Gmat::RMATRIX_TYPE, inRealCommandMode);
+                  #endif
+                  
+                  if (tempLhsParam->GetReturnType() == Gmat::REAL_TYPE ||
+                      tempLhsParam->GetReturnType() == Gmat::RMATRIX_TYPE)
                   {
                      if (inRealCommandMode)
                         inCommandMode = true;
+                     // If LHS is Array, it is assignment, so commented out (LOJ: 2010.09.21)
+                     //else if (tempLhsParam->GetTypeName() == "Array")
+                     //   inCommandMode = true;
                      else
                         inCommandMode = false;
                   }
+               }
             }
          }
       }
       catch (BaseException &e)
       {
+         // Use exception to remove Visual C++ warning
+         e.GetMessageType();
          #ifdef DEBUG_PARSE
          MessageInterface::ShowMessage(e.GetFullMessage());
          #endif
@@ -1596,14 +1818,28 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    if (createAssignment)
       obj = (GmatBase*)CreateAssignmentCommand(lhs, rhs, retval, inCmd);
    else
+   {
       obj = MakeAssignment(lhs, rhs);
+
+      // Save script if lhs is Variable, Array, and String so those can be
+      // written out as they are read
+      GmatBase *lhsObj = FindObject(lhs);
+      if (lhsObj != NULL && (lhsObj->IsOfType("Variable") || lhsObj->IsOfType("Array") ||
+                             lhsObj->IsOfType("String")))
+         userParameterLines.push_back(preStr + lhs + " = " + rhs + inStr);
+   }
    
    if (obj == NULL)
    {
-      #if DEBUG_PARSE
-      MessageInterface::ShowMessage("   obj is NULL, so just return false\n");
+      #ifdef DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("   obj is NULL, and %singoring the error, so returning %s\n",
+          ignoreError ? "" : "NOT ", ignoreError ? "true" : "false");
       #endif
-      return false;
+      if (ignoreError)
+         return true;
+      else
+         return false;
    }
    
    // paramID will be assigned from call to Interpreter::FindPropertyID()
@@ -1641,15 +1877,18 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::IsOneWordCommand(const std::string &str)
 {
+   // Note: The interpreter really should ask the command this!
+   // but this information is needed before a command is created
    bool retval = false;
    
-   if ((str.find("End")           != str.npos  &&
-        str.find("EndFiniteBurn") == str.npos) ||
-       (str.find("BeginScript")   != str.npos) ||
-       (str.find("NoOp")          != str.npos) ||
-       (str.find("Else")          != str.npos  &&
-        str.find("ElseIf")        == str.npos) ||
-       (str.find("Stop")          != str.npos))
+   if ((str.find("End")                  != str.npos  &&
+        str.find("EndFiniteBurn")        == str.npos) ||
+       (str.find("BeginScript")          != str.npos) ||
+       (str.find("NoOp")                 != str.npos) ||
+       (str.find("BeginMissionSequence") != str.npos) ||
+       (str.find("Else")                 != str.npos  &&
+        str.find("ElseIf")               == str.npos) ||
+       (str.find("Stop")                 != str.npos))
    {
       retval = true;
    }
@@ -1671,7 +1910,7 @@ bool ScriptInterpreter::IsOneWordCommand(const std::string &str)
 void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
                                     const std::string &inStr)
 {
-   #if DEBUG_SET_COMMENTS
+   #ifdef DEBUG_SET_COMMENTS
    MessageInterface::ShowMessage
       ("ScriptInterpreter::SetComments() %s<%s>\n   preStr=%s\n    inStr=%s\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str(), preStr.c_str(),
@@ -1704,32 +1943,54 @@ void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
 
 
 //------------------------------------------------------------------------------
-// void WriteSectionDelimiter(const std::string &firstObj,
-//                            const std::string &objDesc)
+// void WriteSectionDelimiter(const GmatBase *firstObj,
+//                            const std::string &objDesc, bool forceWriting = false)
 //------------------------------------------------------------------------------
-void ScriptInterpreter::WriteSectionDelimiter(const std::string &firstObj,
-                                              const std::string &objDesc)
+void ScriptInterpreter::WriteSectionDelimiter(const GmatBase *firstObj,
+                                              const std::string &objDesc,
+                                              bool forceWriting)
 {
-   GmatBase *object;
-   object = FindObject(firstObj);
-   if (object == NULL)
+   if (firstObj == NULL)
       return;
    
-   std::string comment = object->GetCommentLine();
+   std::string comment = firstObj->GetCommentLine();
    
-   #if DEBUG_SCRIPT_WRITING
+   #ifdef DEBUG_SECTION_DELIMITER
    MessageInterface::ShowMessage
       ("WriteSectionDelimiter() PrefaceComment of %s=<%s>\n",
-       object->GetName().c_str(), comment.c_str());
+       firstObj->GetName().c_str(), comment.c_str());
    #endif
    
    // Write if section delimiter not found
-   if (comment.find("----------------------------------------") == comment.npos)
+   if (comment.find(sectionDelimiterString[0]) == comment.npos || forceWriting)
    {
       theReadWriter->WriteText(sectionDelimiterString[0]);
       theReadWriter->WriteText(sectionDelimiterString[1] + objDesc);
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteSectionDelimiter(const std::string &firstObj,
+//                            const std::string &objDesc, bool forceWriting = false)
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WriteSectionDelimiter(const std::string &firstObj,
+                                              const std::string &objDesc,
+                                              bool forceWriting)
+{
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("WriteSectionDelimiter() entered, firstObj='%s', objDesc='%s'\n",
+       firstObj.c_str(), objDesc.c_str());
+   #endif
+   
+   GmatBase *object;
+   object = FindObject(firstObj);
+   if (object == NULL)
+      return;
+   
+   WriteSectionDelimiter(object, objDesc, forceWriting);
 }
 
 
@@ -1744,6 +2005,15 @@ void ScriptInterpreter::WriteSectionDelimiter(const std::string &firstObj,
 void ScriptInterpreter::WriteObjects(StringArray &objs, const std::string &objDesc,
                                      Gmat::WriteMode mode)
 {
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("SI::WriteObjects() entered, objs.size=%d, objDesc='%s', mode=%d\n",
+       objs.size(), objDesc.c_str(), mode);
+   #endif
+   
+   if (objs.empty())
+      return;
+   
    StringArray::iterator current;
    GmatBase *object =  NULL;
    
@@ -1760,6 +2030,158 @@ void ScriptInterpreter::WriteObjects(StringArray &objs, const std::string &objDe
          theReadWriter->WriteText(object->GetGeneratingString(mode));
       }
    }
+   
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("SI::WriteObjects() returning for '%s'\n", objDesc.c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteODEModels(StringArray &objs, Gmat::WriteMode mod)
+//------------------------------------------------------------------------------
+/*
+ * This method writes ODEModel objects.
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WriteODEModels(StringArray &objs, Gmat::WriteMode mode)
+{
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("SI::WriteODEModels() entered, objs.size=%d\n", objs.size());
+   #endif
+   
+   StringArray propOdes;
+   ObjectArray props;
+   
+   // Since actual ODEModel used are written from the PropSetup, check for the
+   // same name first to avoid duplicate writing.
+   
+   StringArray propNames = theModerator->GetListOfObjects(Gmat::PROP_SETUP);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d Propagators\n", propNames.size());
+   #endif
+   
+   for (StringArray::iterator i = propNames.begin(); i != propNames.end(); ++i)
+   {
+      PropSetup *ps = (PropSetup*)FindObject(*i);
+      if (ps != NULL)
+      {
+         ODEModel *ode = ps->GetODEModel();
+         if (ode != NULL)
+         {
+            props.push_back(ps);
+            propOdes.push_back(ode->GetName());
+         }
+      }
+   }
+   
+   // Make a list of configured ODEs not in PropSetups
+   StringArray odes;
+
+   // set_difference requires SORTED sets, so this does not work:
+   // set_difference(objs.begin(), objs.end(), propOdes.begin(),
+   //               propOdes.end(), back_inserter(odes));
+
+   // Instead, we'll difference "by hand":
+   for (UnsignedInt i = 0; i < objs.size(); ++i)
+   {
+      bool matchFound = false;
+      for (UnsignedInt j = 0; j < propOdes.size(); ++j)
+         if (objs[i] == propOdes[j])
+            matchFound = true;
+      if (!matchFound)
+         odes.push_back(objs[i]);
+   }
+
+   
+   #ifdef DEBUG_SCRIPT_WRITING
+   GmatStringUtil::WriteStringArray(objs, "   Input objects", "      ");
+   GmatStringUtil::WriteStringArray(propOdes, "   Propagator ODEs", "      ");
+   GmatStringUtil::WriteStringArray(odes, "   Configured ODEs", "      ");
+   #endif
+   // Write configured ODEModels not in PropSetups
+   if (odes.size() > 0)
+      WriteObjects(odes, "ForceModels", mode);
+   
+   // Write ODEModel from PropSetup
+   if (propOdes.size() > 0)
+   {
+      if (odes.empty())
+      {
+         ///WriteSectionDelimiter(props[0], "ForceModels");
+         WriteSectionDelimiter(propOdes[0], "ForceModels");
+      }
+      
+      for (ObjectArray::iterator i = props.begin(); i != props.end(); ++i)
+      {
+         ODEModel *ode = ((PropSetup*)(*i))->GetODEModel();
+         if (ode != NULL)
+         {
+            theReadWriter->WriteText("\n");
+            theReadWriter->WriteText(ode->GetGeneratingString(mode));
+         }
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void WritePropagators(StringArray &objs, const std::string &objDesc,
+//       Gmat::WriteMode mode, const StringArray &odes)
+//------------------------------------------------------------------------------
+/**
+ * This method writes out PropSetup objects, including ODEModels that were not
+ * previously written
+ *
+ * @param objs The list of prop setup objects
+ * @param objDesc The section opener for the script file
+ * @param mode The scripting mode
+ * @param odes The ODEModels that have been written already
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WritePropagators(StringArray &objs,
+      const std::string &objDesc, Gmat::WriteMode mode, const StringArray &odes)
+{
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("SI::WritePropagators() entered, objs.size=%d, objDesc='%s', mode=%d\n",
+       objs.size(), objDesc.c_str(), mode);
+   #endif
+
+   if (objs.empty())
+      return;
+
+   StringArray::iterator current;
+   GmatBase *object =  NULL;
+
+   WriteSectionDelimiter(objs[0], objDesc);
+
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         if (object->GetCommentLine() == "")
+            theReadWriter->WriteText("\n");
+
+         if (!object->IsOfType(Gmat::PROP_SETUP))
+            throw InterpreterException("In ScriptInterpreter::WritePropagators,"
+                  " the object " + (*current) + " should be a PropSetup, but "
+                  "it is a " + object->GetTypeName());
+
+         PropSetup *prop = (PropSetup*)object;
+         prop->TakeAction("ExcludeODEModel");  // WriteODEModels wrote them all
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         prop->TakeAction("IncludeODEModel");
+      }
+   }
+
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("SI::WritePropagators() returning for '%s'\n", objDesc.c_str());
+   #endif
 }
 
 
@@ -1775,22 +2197,33 @@ void ScriptInterpreter::WriteSpacecrafts(StringArray &objs, Gmat::WriteMode mode
    StringArray::iterator current;
    GmatBase *object =  NULL;
    
-   WriteSectionDelimiter(objs[0], "Spacecrafts");
-   
-   // Setup the coordinate systems on Spacecraft so they can perform conversions
-   CoordinateSystem *ics = theModerator->GetInternalCoordinateSystem(), *sccs;
+   WriteSectionDelimiter(objs[0], "Spacecraft");
    
    for (current = objs.begin(); current != objs.end(); ++current)
    {
-      Spacecraft *sc = (Spacecraft*)(FindObject(*current));
-      sc->SetInternalCoordSystem(ics);
-      sccs = (CoordinateSystem*)
-         FindObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
-      
-      if (sccs)
-         sc->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
-      
-      sc->Initialize();
+      // I cannot recall why we need to initialize spacecraft here.
+      // We may not need this any more, so set to 0 for now (LOJ: 2009.09.24)
+      //==============================================================
+      #if 0
+      //==============================================================
+      // Setup the coordinate systems on Spacecraft so they can perform conversions
+      CoordinateSystem *ics = theModerator->GetInternalCoordinateSystem();
+      CoordinateSystem *sccs = NULL;
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         object->SetInternalCoordSystem(ics);
+         sccs = (CoordinateSystem*)
+            FindObject(object->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
+         
+         if (sccs)
+            object->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
+         
+         object->Initialize();
+      }
+      //==============================================================
+      #endif
+      //==============================================================
       
       object = FindObject(*current);
       if (object != NULL)
@@ -1843,6 +2276,21 @@ void ScriptInterpreter::WriteHardwares(StringArray &objs, Gmat::WriteMode mode)
             theReadWriter->WriteText(object->GetGeneratingString(mode));
          }
    }
+
+   // Other Hardware
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+         if ((object->GetTypeName() != "FuelTank") &&
+                  (object->GetTypeName() != "Thruster"))
+         {
+            if (object->GetCommentLine() == "")
+               theReadWriter->WriteText("\n");
+            theReadWriter->WriteText(object->GetGeneratingString(mode));
+         }
+   }
+
 }
 
 
@@ -1858,8 +2306,8 @@ void ScriptInterpreter::WriteSubscribers(StringArray &objs, Gmat::WriteMode mode
    StringArray::iterator current;
    GmatBase *object =  NULL;
    
-   WriteSectionDelimiter(objs[0], "Plots and Reports");
-      
+   WriteSectionDelimiter(objs[0], "Subscribers");
+   
    for (current = objs.begin(); current != objs.end(); ++current)
    {
       object = FindObject(*current);
@@ -1887,29 +2335,24 @@ void ScriptInterpreter::WriteSubscribers(StringArray &objs, Gmat::WriteMode mode
 void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
                                                 Gmat::WriteMode mode)
 {
-   // Added varWithObjList and strWithObjList, so that Variables and Strings
-   // initially assigned to another Variables or Strings can be written
-   // as these are read in. These Variables and Strings will be written after
-   // Variables and Strings initialized with Real values or string literals (loj: 2008.08.13)
-   // For example:
-   // GMAT str31 = 'This is str31';
-   // GMAT str32 = 'This is str32';
-   // GMAT str1  = str31; %% str1 will be written after str31 and str32
-   // GMAT str2  = str32; %% str2 will be written after str31 and str32
+   #ifdef DEBUG_SCRIPT_WRITING_PARAMETER
+   MessageInterface::ShowMessage("WriteVariablesAndArrays() entered\n");
+   #endif
+   
+   // Updated to write Variable and Array as they appear in the script. (LOJ: 2010.09.23)
+   // It uses userParameterLines which are saved during the parsing.
    
    StringArray::iterator current;
-   std::vector<GmatBase*> arrList;
-   std::vector<GmatBase*> arrWithValList;
-   std::vector<GmatBase*> varList;
-   std::vector<GmatBase*> varWithValList;
-   std::vector<GmatBase*> varWithObjList;
-   std::vector<GmatBase*> strList;
-   std::vector<GmatBase*> strWithValList;
-   std::vector<GmatBase*> strWithObjList;
+   ObjectArray arrList;
+   ObjectArray varList;
+   ObjectArray strList;
+   ObjectArray arrWithValList;
+   ObjectArray varWithValList;
+   ObjectArray strWithValList;
    std::string genStr;
    GmatBase *object =  NULL;
-   
-   WriteSectionDelimiter(objs[0], "Variables, Arrays, Strings");
+   std::string sectionStr = "Arrays, Variables, Strings";
+   WriteSectionDelimiter(objs[0], sectionStr, true);
    
    //-----------------------------------------------------------------
    // Fill in proper arrays
@@ -1919,9 +2362,10 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       object = FindObject(*current);
       if (object != NULL)
       {
+         genStr = object->GetGeneratingString(Gmat::NO_COMMENTS);
+         
          if (object->GetTypeName() == "Array")
          {
-            genStr = object->GetGeneratingString(Gmat::NO_COMMENTS);
             arrList.push_back(object);
             
             // if initial value found
@@ -1930,7 +2374,6 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
          }
          else if (object->GetTypeName() == "Variable")
          {
-            genStr = object->GetGeneratingString(Gmat::NO_COMMENTS);            
             varList.push_back(object);
             
             // if initial value found
@@ -1938,18 +2381,23 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
             {
                std::string::size_type equalPos = genStr.find("=");
                std::string rhs = genStr.substr(equalPos + 1);
+               std::string rhsComment = "";
+               if (rhs.find('%') != std::string::npos)
+               {
+                  rhsComment = rhs.substr(rhs.find('%'));
+                  rhs = rhs.substr(0, rhs.find('%'));
+                  MessageInterface::ShowMessage("Variable with value and comment\n   Value: %s\n   Comment: %s\n",
+                        rhs.c_str(), rhsComment.c_str());
+               }
                rhs = GmatStringUtil::Trim(rhs, GmatStringUtil::BOTH, true, true);
                Real rval;
                // check if initial value is Real number or other Variable object
                if (GmatStringUtil::ToReal(rhs, rval))
                   varWithValList.push_back(object);
-               else
-                  varWithObjList.push_back(object);
             }
          }
          else if (object->GetTypeName() == "String")
          {
-            genStr = object->GetGeneratingString(Gmat::NO_COMMENTS);            
             strList.push_back(object);
             
             // if initial value found
@@ -1961,96 +2409,19 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
                // check if initial value is string literal or other String object
                if (GmatStringUtil::IsEnclosedWith(rhs, "'"))
                   strWithValList.push_back(object);
-               else
-                  strWithObjList.push_back(object);
             }
          }
       }
    }
    
-   
    //-----------------------------------------------------------------
-   // Write 10 Variables without initial values per line;
+   // Write Create Array ...
+   // Write 10 Arrays without initial values per line
    //-----------------------------------------------------------------
    Integer counter = 0;
-   UnsignedInt size = varList.size();
+   UnsignedInt size = arrList.size();
    
-   #if DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage
-      ("WriteVariablesAndArrays() Writing %d Variables without initial values \n", size);
-   #endif
-   
-   for (UnsignedInt i = 0; i<size; i++)
-   {
-      counter++;
-      
-      // Write comment line
-      if (i == 0)
-      {
-         if (((Parameter*)varList[i])->GetCommentLine(1) == "")
-            theReadWriter->WriteText("\n");
-         else
-            theReadWriter->WriteText(((Parameter*)varList[i])->GetCommentLine(1));
-      }
-      
-      if (counter == 1)
-         theReadWriter->WriteText("Create Variable");
-      
-      theReadWriter->WriteText(" " + varList[i]->GetName());
-      
-      if ((counter % 10) == 0 || (i == size-1))
-      {
-         counter = 0;
-         theReadWriter->WriteText(";\n");
-      }
-   }
-   
-   
-   //-----------------------------------------------------------------
-   // Write Variables with initial values
-   //-----------------------------------------------------------------
-   size = varWithValList.size();
-   
-   #if DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage
-      ("WriteVariablesAndArrays() Writing %d Variables with initial Real values \n", size);
-   #endif
-   
-   for (UnsignedInt i = 0; i<size; i++)
-   {
-      if (i == 0)
-         theReadWriter->WriteText(((Parameter*)varWithValList[i])->GetCommentLine(2));
-      
-      theReadWriter->WriteText(varWithValList[i]->GetGeneratingString(mode));
-   }
-   
-   
-   //-----------------------------------------------------------------
-   // Write Variables with initial Variable
-   //-----------------------------------------------------------------
-   size = varWithObjList.size();
-   
-   #if DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage
-      ("WriteVariablesAndArrays() Writing %d Variables with initial Variable \n", size);
-   #endif
-   
-   for (UnsignedInt i = 0; i<size; i++)
-   {
-      if (i == 0)
-         theReadWriter->WriteText(((Parameter*)varWithObjList[i])->GetCommentLine(2));
-      
-      theReadWriter->WriteText(varWithObjList[i]->GetGeneratingString(mode));
-   }
-   
-   
-   //-----------------------------------------------------------------
-   // Write 10 Arrays without initial values per line;
-   //-----------------------------------------------------------------
-   counter = 0;
-   size = arrList.size();
-   
-   #if DEBUG_SCRIPT_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING_PARAMETER
    MessageInterface::ShowMessage
       ("WriteVariablesAndArrays() Writing %d Arrays without initial values \n", size);
    #endif
@@ -2061,7 +2432,19 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       
       // Write comment line
       if (i == 0)
-         theReadWriter->WriteText(((Parameter*)arrList[i])->GetCommentLine(1));
+      {
+         if (((Parameter*)arrList[i])->GetCommentLine(1) == "")
+            theReadWriter->WriteText("\n");
+         else
+         {
+            // Write comment line if non section delimiter
+            std::string comment = ((Parameter*)arrList[i])->GetCommentLine(1);
+            if (comment.find(sectionStr) == comment.npos)
+               theReadWriter->WriteText(comment);
+            else
+               theReadWriter->WriteText("\n");
+         }
+      }
       
       if (counter == 1)
          theReadWriter->WriteText("Create Array");
@@ -2076,32 +2459,49 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    }
    
    //-----------------------------------------------------------------
-   // Write Arrays with initial values
+   // Write Create Variable ...
+   // Write 10 Variables without initial values per line
    //-----------------------------------------------------------------
-   size = arrWithValList.size();
+   counter = 0;
+   size = varList.size();
    
-   #if DEBUG_SCRIPT_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING_PARAMETER
    MessageInterface::ShowMessage
-      ("WriteVariablesAndArrays() Writing %d Arrays with initial values \n", size);
+      ("WriteVariablesAndArrays() Writing %d Variables without initial values \n", size);
    #endif
    
    for (UnsignedInt i = 0; i<size; i++)
    {
-      // Write comment line
-      if (i == 0)
-         theReadWriter->WriteText(((Parameter*)arrWithValList[0])->GetCommentLine(2));
+      counter++;
       
-      theReadWriter->WriteText(arrWithValList[i]->GetStringParameter("InitialValue"));
+      // Write comment line if non section delimiter
+      if (i == 0)
+      {
+         std::string comment = ((Parameter*)varList[i])->GetCommentLine(1);
+         if (comment.find(sectionStr) == comment.npos)
+            theReadWriter->WriteText(comment);
+      }
+      
+      if (counter == 1)
+         theReadWriter->WriteText("Create Variable");
+      
+      theReadWriter->WriteText(" " + varList[i]->GetName());
+      
+      if ((counter % 10) == 0 || (i == size-1))
+      {
+         counter = 0;
+         theReadWriter->WriteText(";\n");
+      }
    }
    
-   
    //-----------------------------------------------------------------
-   // Write 10 Strings without initial values per line;
+   // Write Create String ...
+   // Write 10 Strings without initial values per line
    //-----------------------------------------------------------------
    counter = 0;   
    size = strList.size();
    
-   #if DEBUG_SCRIPT_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING_PARAMETER
    MessageInterface::ShowMessage
       ("WriteVariablesAndArrays() Writing %d Strings without initial values \n", size);
    #endif
@@ -2110,9 +2510,13 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    {
       counter++;
       
-      // Write comment line
+      // Write comment line if non section delimiter
       if (i == 0)
-         theReadWriter->WriteText(((Parameter*)strList[i])->GetCommentLine(1));
+      {
+         std::string comment = ((Parameter*)strList[i])->GetCommentLine(1);
+         if (comment.find(sectionStr) == comment.npos)
+            theReadWriter->WriteText(comment);
+      }
       
       if (counter == 1)
          theReadWriter->WriteText("Create String");
@@ -2126,22 +2530,106 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       }
    }
    
+   // Write initial values created or changed via the GUI
+   WriteArrayInitialValues(arrWithValList, mode);
+   WriteVariableInitialValues(varWithValList, mode);
+   WriteStringInitialValues(strWithValList, mode);
+   theReadWriter->WriteText("\n");
+     
+   #ifdef DEBUG_SCRIPT_WRITING_PARAMETER
+   MessageInterface::ShowMessage("WriteVariablesAndArrays() leaving\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteArrayInitialValues(const ObjectArray &arrWithValList, Gmat::WriteMode mode)
+//------------------------------------------------------------------------------
+/*
+ * This method writes initial value of Variables
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WriteArrayInitialValues(const ObjectArray &arrWithValList,
+                                                Gmat::WriteMode mode)
+{
+   //-----------------------------------------------------------------
+   // Write Arrays with initial values
+   //-----------------------------------------------------------------
    
+   UnsignedInt size = arrWithValList.size();
+   
+   #ifdef DEBUG_SCRIPT_WRITING_PARAMETER
+   MessageInterface::ShowMessage
+      ("WriteArrayInitialValues() Writing %d Arrays with initial values \n", size);
+   #endif
+   
+   for (UnsignedInt i = 0; i < size; i++)
+   {
+      // Write comment line
+      if (i == 0)
+         theReadWriter->WriteText(((Parameter*)arrWithValList[0])->GetCommentLine(2));
+      
+      theReadWriter->WriteText(arrWithValList[i]->GetStringParameter("InitialValue"));
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteVariableInitialValues(const ObjectArray &varWithValList, Gmat::WriteMode mode)
+//------------------------------------------------------------------------------
+/*
+ * This method writes initial value of Variables
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WriteVariableInitialValues(const ObjectArray &varWithValList,
+                                                   Gmat::WriteMode mode)
+{
+   //-----------------------------------------------------------------
+   // Write Variables with initial values
+   //-----------------------------------------------------------------
+   UnsignedInt size = varWithValList.size();
+   
+   #ifdef DEBUG_SCRIPT_WRITING_PARAMETER
+   MessageInterface::ShowMessage
+      ("WriteVariablesAndArrays() Writing %d Variables with initial Real values \n", size);
+   #endif
+   
+   for (UnsignedInt i = 0; i < size; i++)
+   {
+      if (i == 0)
+         theReadWriter->WriteText(((Parameter*)varWithValList[i])->GetCommentLine(2));
+      
+      theReadWriter->WriteText(varWithValList[i]->GetGeneratingString(mode));
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteStringInitialValues(const ObjectArray &strWithValList, Gmat::WriteMode mode)
+//------------------------------------------------------------------------------
+/*
+ * This method writes initial value of Variables
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WriteStringInitialValues(const ObjectArray &strWithValList,
+                                                 Gmat::WriteMode mode)
+{
    //-----------------------------------------------------------------
    // Write Strings with initial values by string literal
    //-----------------------------------------------------------------
-   size = strWithValList.size();
+   UnsignedInt size = strWithValList.size();
    
-   #if DEBUG_SCRIPT_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING_PARAMETER
    MessageInterface::ShowMessage
-      ("WriteVariablesAndArrays() Writing %d Strings with initial values \n", size);
+      ("WriteStringInitialValues() Writing %d Strings with initial values \n", size);
    #endif
    
    for (UnsignedInt i = 0; i<size; i++)
    {
       // If no new value has been assigned, skip
-      if (strWithValList[i]->GetName() ==
-          strWithValList[i]->GetStringParameter("Expression"))
+      //if (strWithValList[i]->GetName() ==
+      //    strWithValList[i]->GetStringParameter("Expression"))
+      if (strWithValList[i]->GetName() == "")
          continue;
       
       // Write comment line
@@ -2150,40 +2638,15 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       
       theReadWriter->WriteText(strWithValList[i]->GetGeneratingString(mode));
    }
-
-   
-   //-----------------------------------------------------------------
-   // Write Strings with initial values with other String object
-   //-----------------------------------------------------------------
-   size = strWithObjList.size();
-   
-   #if DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage
-      ("WriteVariablesAndArrays() Writing %d Strings with initial String object\n", size);
-   #endif
-   
-   for (UnsignedInt i = 0; i<size; i++)
-   {
-      // If no new value has been assigned, skip
-      if (strWithObjList[i]->GetName() ==
-          strWithObjList[i]->GetStringParameter("Expression"))
-         continue;
-      
-      // Write comment line
-      if (i == 0)
-         theReadWriter->WriteText(((Parameter*)strWithObjList[i])->GetCommentLine(2));
-      
-      theReadWriter->WriteText(strWithObjList[i]->GetGeneratingString(mode));
-   }
 }
 
 
 //------------------------------------------------------------------------------
-// void WriteOtherParameters(StringArray &objs, Gmat::WriteMode mod)
+// void WriteOtherParameters(StringArray &objs, Gmat::WriteMode mode)
 //------------------------------------------------------------------------------
 /*
- * This method writes 10 variables and arrays per line.
- * If variable or array was initialzied (non zero), it writes after Create line.
+ * This method writes other Parameters, such as X in Create X pos;
+ * where X is calculated (system) Parameter name.
  */
 //------------------------------------------------------------------------------
 void ScriptInterpreter::WriteOtherParameters(StringArray &objs,
@@ -2210,13 +2673,13 @@ void ScriptInterpreter::WriteOtherParameters(StringArray &objs,
             {
                if (isFirstTime)
                {
-                  WriteSectionDelimiter(objs[0], "Other Paraemters");
+                  WriteSectionDelimiter(objs[0], "Other Parameters");
                   isFirstTime = false;
                }
                
                std::string genStr = object->GetGeneratingString(mode);
                
-               #if DEBUG_SCRIPT_WRITING
+               #ifdef DEBUG_SCRIPT_WRITING
                MessageInterface::ShowMessage
                   ("WriteOtherParameters() writing typeName=<%s>\n", typeName.c_str());
                #endif
@@ -2251,22 +2714,68 @@ void ScriptInterpreter::WriteCommandSequence(Gmat::WriteMode mode)
    if (cmd == NULL)
       return;
    
-   #if DEBUG_SCRIPT_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING_COMMANDS
    MessageInterface::ShowMessage
       ("WriteCommandSequence() Writing Command Sequence\nPrefaceComment of %s=%s\n",
        cmd->GetTypeName().c_str(), cmd->GetCommentLine().c_str());
    #endif
    
-   if (GmatStringUtil::IsBlank(cmd->GetCommentLine(), true))
+   GmatCommand *nextCmd = cmd->GetNext();
+   bool writeMissionSeqDelim = false;
+   
+   // Since second command should be BeginMissionSequence, check for the next one for comment
+   if (nextCmd != NULL &&
+       GmatStringUtil::IsBlank(cmd->GetCommentLine(), true) &&
+       GmatStringUtil::IsBlank(nextCmd->GetCommentLine(), true))
+   {
+      theReadWriter->WriteText("\n");
+      writeMissionSeqDelim = true;
+   }
+   else
+   {
+      std::string comment1 = cmd->GetCommentLine();
+      std::string comment2;
+      
+      #ifdef DEBUG_SCRIPT_WRITING_COMMANDS
+      MessageInterface::ShowMessage("==> curr comment = '%s'\n", comment1.c_str());
+      #endif
+      
+      if (nextCmd != NULL)
+      {
+         comment2 = nextCmd->GetCommentLine();
+         
+         #ifdef DEBUG_SCRIPT_WRITING_COMMANDS
+         MessageInterface::ShowMessage("==> next comment = '%s'\n", comment2.c_str());
+         #endif
+         
+         // Swap comments if second comment has Mission Sequence
+         if (comment2.find("Mission Sequence") != comment2.npos)
+         {
+            cmd->SetCommentLine(comment2);
+            nextCmd->SetCommentLine(comment1);
+         }
+      }
+      
+      // We don't want to write section delimiter multiple times, so check for it
+      if (comment1.find("Mission Sequence") == comment1.npos &&
+          comment2.find("Mission Sequence") == comment2.npos)
+      {
+         writeMissionSeqDelim = true;
+      }
+   }
+   
+   // Write section delimiter
+   if (writeMissionSeqDelim)
    {
       theReadWriter->WriteText(sectionDelimiterString[0]);
       theReadWriter->WriteText(sectionDelimiterString[1] + "Mission Sequence");
       theReadWriter->WriteText(sectionDelimiterString[2]);
+      theReadWriter->WriteText("\n");      
    }
    
    while (cmd != NULL) 
    {
-      #ifdef DEBUG_SCRIPT_WRITING
+      #ifdef DEBUG_SCRIPT_WRITING_COMMANDS
       MessageInterface::ShowMessage
          ("ScriptInterpreter::WriteCommandSequence() before write cmd=%s, mode=%d, "
           "inTextMode=%d\n", cmd->GetTypeName().c_str(), mode, inTextMode);

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              AtmosphereModel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -19,11 +21,20 @@
 
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
+#include "CelestialBody.hpp"        // To retrieve radius, flattening factor
+#include "CoordinateSystem.hpp"
+#include "GmatConstants.hpp"
+#include "AngleUtil.hpp"            // For lat, long range setting
+#include "CoordinateConverter.hpp"
+
+
 //#include "RealUtilities.hpp"        // Inadequate for my needs here, so...
 #include <cmath>                    // for exp
 
 
-// #define CHECK_KP2AP
+//#define CHECK_KP2AP
+//#define DEBUG_ANGVEL
+//#define DEBUG_COORDINATE_TRANSFORMS
 
 //---------------------------------
 // static data
@@ -52,28 +63,47 @@ AtmosphereModel::PARAMETER_TYPE[AtmosphereModelParamCount-GmatBaseParamCount] =
  *  Constructor.
  *
  *  @param <typeStr> The type of the derived atmosphere model.
+ *  @param <name> The name of the derived atmosphere model.
  */
 //------------------------------------------------------------------------------
-AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
-   GmatBase            (Gmat::ATMOSPHERE, typeStr),
-   fileReader          (NULL),
-   mCentralBody        (NULL),
-   sunVector           (NULL),
-   centralBody         ("Earth"),
-   centralBodyLocation (NULL),
-   cbRadius            (6378.14),
-   newFile             (false),
-   fileRead            (false),
-   nominalF107         (150.0),
-   nominalF107a        (150.0),
-   nominalKp           (3.0)
+AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &name) :
+   GmatBase             (Gmat::ATMOSPHERE, typeStr, name),
+   fileReader           (NULL),
+   solarSystem          (NULL),
+   mCentralBody         (NULL),
+   solarFluxFile        (NULL),
+   fileName             (""),        // Set to a default when working
+   sunVector            (NULL),
+   centralBody          ("Earth"),
+   centralBodyLocation  (NULL),
+   cbRadius             (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]),
+   cbFlattening         (0.0),       // Default is spherical
+   newFile              (false),
+   fileRead             (false),
+   nominalF107          (150.0),
+   nominalF107a         (150.0),
+   nominalKp            (3.0),
+   kpApConversion       (0),
+   mInternalCoordSystem (NULL),
+   cbFixed              (NULL),
+   wUpdateInterval      (0.0),     // Default to always update
+   wUpdateEpoch         (0.0),
+   geoHeight            (0.0),
+   geoLat               (0.0),
+   geoLong              (0.0),
+   gha                  (0.0),
+   ghaEpoch             (0.0)
 {
    objectTypes.push_back(Gmat::ATMOSPHERE);
    objectTypeNames.push_back("AtmosphereModel");
 
-   fileName = "";
    parameterCount = AtmosphereModelParamCount;
    nominalAp = ConvertKpToAp(nominalKp);
+
+   // Default to nominal Earth angular velocity
+   angVel[0]      = 0.0;
+   angVel[1]      = 0.0;
+   angVel[2]      = 7.29211585530e-5;
 
    #ifdef CHECK_KP2AP
       MessageInterface::ShowMessage("K_p to A_p conversions:\n");
@@ -104,19 +134,33 @@ AtmosphereModel::~AtmosphereModel()
  */
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
-   GmatBase            (am),
-   fileReader          (NULL),
-   sunVector           (NULL),
-   centralBody         (am.centralBody),
-   centralBodyLocation (NULL),
-   cbRadius            (am.cbRadius),
-   newFile             (am.newFile),
-   fileRead            (am.fileRead),
-   nominalF107         (am.nominalF107),
-   nominalF107a        (am.nominalF107a),
-   nominalKp           (am.nominalKp)
+   GmatBase             (am),
+   fileReader           (NULL),
+   solarSystem          (am.solarSystem),
+   mCentralBody         (am.mCentralBody),
+   solarFluxFile        (NULL),
+   fileName             (am.fileName),
+   sunVector            (NULL),
+   centralBody          (am.centralBody),
+   centralBodyLocation  (NULL),
+   cbRadius             (am.cbRadius),
+   cbFlattening         (am.cbFlattening),
+   newFile              (false),
+   fileRead             (false),
+   nominalF107          (am.nominalF107),
+   nominalF107a         (am.nominalF107a),
+   nominalKp            (am.nominalKp),
+   kpApConversion       (am.kpApConversion),
+   mInternalCoordSystem (am.mInternalCoordSystem),
+   cbFixed              (am.cbFixed),
+   wUpdateInterval      (am.wUpdateInterval),
+   wUpdateEpoch         (am.wUpdateEpoch),
+   geoHeight            (0.0),
+   geoLat               (0.0),
+   geoLong              (0.0),
+   gha                  (0.0),
+   ghaEpoch             (0.0)
 {
-   fileName = am.fileName;
    parameterCount = AtmosphereModelParamCount;
    nominalAp = ConvertKpToAp(nominalKp);
 }
@@ -139,18 +183,32 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
         
    GmatBase::operator=(am);
    
-   fileReader          = NULL;
-   sunVector           = NULL;
-   centralBodyLocation = NULL;
-   fileName            = am.fileName;
-   centralBody         = am.centralBody;
-   cbRadius            = am.cbRadius;
-   newFile             = am.newFile;
-   fileRead            = am.fileRead;
-   nominalF107         = am.nominalF107;
-   nominalF107a        = am.nominalF107a;
-   nominalKp           = am.nominalKp;
-   nominalAp = ConvertKpToAp(nominalKp);
+   fileReader           = NULL;
+   solarSystem          = am.solarSystem;
+   mCentralBody         = am.mCentralBody;
+   solarFluxFile        = NULL;
+   sunVector            = NULL;
+   centralBodyLocation  = NULL;
+   fileName             = am.fileName;
+   centralBody          = am.centralBody;
+   cbRadius             = am.cbRadius;
+   cbFlattening         = am.cbFlattening;
+   newFile              = false;
+   fileRead             = false;
+   nominalF107          = am.nominalF107;
+   nominalF107a         = am.nominalF107a;
+   nominalKp            = am.nominalKp;
+   nominalAp            = ConvertKpToAp(nominalKp);
+   kpApConversion       = am.kpApConversion;
+   mInternalCoordSystem = am.mInternalCoordSystem;
+   cbFixed              = am.cbFixed;
+   wUpdateInterval      = am.wUpdateInterval;
+   wUpdateEpoch         = am.wUpdateEpoch;
+   geoHeight            = 0.0;
+   geoLat               = 0.0;
+   geoLong              = 0.0;
+   gha                  = 0.0;
+   ghaEpoch             = 0.0;
 
    return *this;
 }
@@ -184,6 +242,351 @@ void AtmosphereModel::SetCentralBodyVector(Real *cv)
 }
 
 //------------------------------------------------------------------------------
+// void SetUpdateParameters(Real interval, GmatEpoch epoch)
+//------------------------------------------------------------------------------
+/**
+ * Sets the update interval and, if selected, and epoch to apply
+ *
+ * @param interval The update interval, in days
+ * @param epoch An update epoch
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetUpdateParameters(Real interval, GmatEpoch epoch)
+{
+   wUpdateInterval = interval;
+   if ((epoch >= 0.0) && (cbFixed != NULL))
+      UpdateAngularVelocity(epoch);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ * Sets the internal coordinate system used to construct the angular momentum
+ * vector
+ *
+ * @param cs The coordinate system
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   mInternalCoordSystem = cs;
+}
+
+//------------------------------------------------------------------------------
+// void SetFixedCoordinateSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ * Sets the body fixed coordinate system used to construct the angular momentum
+ * vector
+ *
+ * @param cs The coordinate system
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetFixedCoordinateSystem(CoordinateSystem *cs)
+{
+   cbFixed = cs;
+}
+
+//------------------------------------------------------------------------------
+// Real* GetAngularVelocity(const GmatEpoch when)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the angular momentum vector, optionally at a specified epoch
+ *
+ * @note This method return the pointer to a data member.  If that pointer is
+ * stored, subsequent updates will change the data pointed to so that the user
+ * need not refresh this data pointer.
+ *
+ * @param when The epoch for the desired vector.  If not specified or less than
+ * 0.0, the last calculated vector is returned.
+ *
+ * @return A pointer to the angular momentum vector
+ */
+//------------------------------------------------------------------------------
+Real* AtmosphereModel::GetAngularVelocity(const GmatEpoch when)
+{
+   if (when >= 0.0)
+      UpdateAngularVelocity(when);
+   return angVel;
+}
+
+
+//------------------------------------------------------------------------------
+// void BuildAngularVelocity(const GmatEpoch when)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the angular velocity vector at the specified epoch.
+ *
+ * @param when The epoch
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::BuildAngularVelocity(const GmatEpoch when)
+{
+    Real in[3];
+    Rmatrix33 rotMat = cbFixed->GetLastRotationMatrix();
+    Rmatrix33 rotDotMat = cbFixed->GetLastRotationDotMatrix();
+
+    // Build angVel from R' * Rdot
+    in[0] = rotMat(0,2)*rotDotMat(0,1) + rotMat(1,2)*rotDotMat(1,1) +
+          rotMat(2,2)*rotDotMat(2,1);
+    in[1] = rotMat(0,0)*rotDotMat(0,2) + rotMat(1,0)*rotDotMat(1,2) +
+          rotMat(2,0)*rotDotMat(2,2);
+    in[2] = rotMat(0,1)*rotDotMat(0,0) + rotMat(1,1)*rotDotMat(1,0) +
+          rotMat(2,1)*rotDotMat(2,0);
+
+    // Rotate into the J2000 frame
+    angVel[0] = rotMat(0,0)*in[0] + rotMat(0,1)*in[1] + rotMat(0,2)*in[2];
+    angVel[1] = rotMat(1,0)*in[0] + rotMat(1,1)*in[1] + rotMat(1,2)*in[2];
+    angVel[2] = rotMat(2,0)*in[0] + rotMat(2,1)*in[1] + rotMat(2,2)*in[2];
+
+    wUpdateEpoch = when;
+
+    #ifdef DEBUG_ANGVEL
+       MessageInterface::ShowMessage("Rotation Matrix:\n");
+       for (Integer m = 0; m < 3; ++m)
+       {
+          MessageInterface::ShowMessage("   [");
+          for (Integer n = 0; n < 3; ++n)
+             MessageInterface::ShowMessage(" %.14lf ",rotMat(m,n));
+          if (m < 2)
+             MessageInterface::ShowMessage(";\n");
+          else
+             MessageInterface::ShowMessage("]\n");
+       }
+
+       MessageInterface::ShowMessage("Rotation Dot Matrix:\n");
+       for (Integer m = 0; m < 3; ++m)
+       {
+          MessageInterface::ShowMessage("   [");
+          for (Integer n = 0; n < 3; ++n)
+             MessageInterface::ShowMessage(" %.14lf ",rotDotMat(m,n));
+          if (m < 2)
+             MessageInterface::ShowMessage(";\n");
+          else
+             MessageInterface::ShowMessage("]\n");
+       }
+
+       MessageInterface::ShowMessage("AtmosphereModel::"
+             "UpdateAngularVelocity(%.12lf) -> [%.12le %.12le %.12le]\n",
+             when, angVel[0], angVel[1], angVel[2]);
+    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateAngularVelocity(const GmatEpoch when)
+//------------------------------------------------------------------------------
+/**
+ * Updates the angular momentum vector based on the input epoch.
+ *
+ * Updates are only performed if the update epoch is outside of the update
+ * interval period.
+ *
+ * @param when The epoch (in a.1 ModJulian format) of the desired update.
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::UpdateAngularVelocity(const GmatEpoch when)
+{
+   if (wUpdateInterval >= 0.0)
+   {
+      if (fabs(when - wUpdateEpoch) > wUpdateInterval)
+      {
+         if (cbFixed == NULL)
+            throw AtmosphereException("The body-fixed coordinate system is "
+                  "not set");
+         Real in[3], out[3];
+         cbFixed->ToMJ2000Eq(when, in, out, true, true);
+         BuildAngularVelocity(when);
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetKpApConversionMethod(Integer method)
+//------------------------------------------------------------------------------
+/**
+ * Selects the Kp -> Ap conversion method
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetKpApConversionMethod(Integer method)
+{
+   kpApConversion = method;
+   nominalAp = ConvertKpToAp(nominalKp);
+}
+
+
+//------------------------------------------------------------------------------
+// Real ConvertKpToAp(const Real kp)
+//------------------------------------------------------------------------------
+/**
+ * Routine to convert Kp values into Ap values
+ *
+ * This method provides several different Kp->Ap, conversion methods.  The
+ * method used is selected by the value of kpApConversion.  The implemented
+ * approaches are as follows:
+ *
+ *   kpApConversion = 0: Table lookup using table 8-3 from Vallado,  3rd edition
+ *
+ *   kpApConversion = 1: Exponential approximation from Vallado 2nd Edition,
+ *   (eq 8-31).  Ap is calculated using
+ *
+ *       \f[a_p = \exp\left(\frac{k_p + 1.6} {1.75}\right)\f]
+ *
+ *   kpApConversion = 2: A secant method that solves the transcendental equation
+ *
+ *       \f[28 K_p + 0.03 e^{K_p} = A_p + 100 (1 - e^{-0.08 A_p})\f]
+ *
+ *   using an iterative secant method.
+ *
+ * The default method is the table lookup
+ *
+ * @param <kp> The geomagnetic index, Kp.
+ *
+ * @return the corresponding geomagnetic amplitude, Ap.
+ */
+//------------------------------------------------------------------------------
+Real AtmosphereModel::ConvertKpToAp(const Real kp)
+{
+   Real ap = 15.0;
+
+   switch (kpApConversion)
+   {
+      case 0:  // Table lookup
+         {
+            Integer index = (Integer)((kp + .01) * 3);
+            switch (index)
+            {
+               case 0:
+                  ap = 0.0;
+                  break;
+               case 1:
+                  ap = 2.0;
+                  break;
+               case 2:
+                  ap = 3.0;
+                  break;
+               case 3:
+                  ap = 4.0;
+                  break;
+               case 4:
+                  ap = 5.0;
+                  break;
+               case 5:
+                  ap = 6.0;
+                  break;
+               case 6:
+                  ap = 7.0;
+                  break;
+               case 7:
+                  ap = 9.0;
+                  break;
+               case 8:
+                  ap = 12.0;
+                  break;
+               /// case 9 is the default, below
+               case 10:
+                  ap = 18.0;
+                  break;
+               case 11:
+                  ap = 22.0;
+                  break;
+               case 12:
+                  ap = 27.0;
+                  break;
+               case 13:
+                  ap = 32.0;
+                  break;
+               case 14:
+                  ap = 39.0;
+                  break;
+               case 15:
+                  ap = 48.0;
+                  break;
+               case 16:
+                  ap = 56.0;
+                  break;
+               case 17:
+                  ap = 67.0;
+                  break;
+               case 18:
+                  ap = 80.0;
+                  break;
+               case 19:
+                  ap = 94.0;
+                  break;
+               case 20:
+                  ap = 111.0;
+                  break;
+               case 21:
+                  ap = 132.0;
+                  break;
+               case 22:
+                  ap = 154.0;
+                  break;
+               case 23:
+                  ap = 179.0;
+                  break;
+               case 24:
+                  ap = 207.0;
+                  break;
+               case 25:
+                  ap = 236.0;
+                  break;
+               case 26:
+                  ap = 300.0;
+                  break;
+               case 27:
+                  ap = 400.0;
+                  break;
+               case 9:
+               default:
+                  ap = 15.0;
+                  break;
+            }
+         }
+         break;
+
+      case 1:  // Vallado, 2nd edition
+         ap = exp((kp + 1.6) / 1.75);
+         break;
+
+      case 2:
+      default:
+      {
+         Real r = 28.0 * kp + 0.03 * exp(kp) - 100.0;
+
+         Real x[3], y[2];
+         x[0] = 0.0;
+         x[1] = 500.0;
+
+         Real epsilon = 1.0e-6;
+         Integer maxIterations = 15, i = 0;
+
+         do
+         {
+            y[0] = 100.0 * exp(-0.08 * x[0]) + r - x[0];
+            y[1] = 100.0 * exp(-0.08 * x[1]) + r - x[1];
+
+            x[2] = x[1] - y[1] * (x[1] - x[0]) / (y[1] - y[0]);
+            x[0] = x[1];
+            x[1] = x[2];
+
+            if (i++ > maxIterations)
+               throw AtmosphereException("ConvertKpToAp failed; too "
+                     "many iterations");
+         } while (fabs(y[1]) > epsilon);
+
+         ap = x[2];
+      }
+   }
+   return ap;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 /**
@@ -208,7 +611,18 @@ void AtmosphereModel::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetCentralBody(CelestialBody *cb)
 {
-   mCentralBody = cb;
+   if (mCentralBody != cb)
+   {
+      mCentralBody = cb;
+      cbRadius     = mCentralBody->GetEquatorialRadius();
+      cbFlattening = mCentralBody->GetFlattening();
+
+      #ifdef DEBUG_CB_PROPERTIES
+         MessageInterface::ShowMessage("Body set to %s; radius = %.12lf, "
+               "flattening = %.12lf\n", mCentralBody->GetName().c_str(),
+               cbRadius, cbFlattening);
+      #endif
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -420,44 +834,136 @@ void AtmosphereModel::CloseFile()
 
 
 //------------------------------------------------------------------------------
-// Real ConvertKpToAp(const Real kp)
+// Real CalculateGeodetics(Real *position, bool includeLatLong)
 //------------------------------------------------------------------------------
 /**
- * Routine to convert Kp values into Ap values, using a secant method.
- * 
- * This method solves the transcendental equation
- * 
- *    \f[28 K_p + 0.03 e^{K_p} = A_p + 100 (1 - e^{-0.08 A_p})\f]
- * 
- * using an iterative secant method.
- * 
- * @param <kp> The geomagnetic index, Kp.
- * 
- * @return the corresponding geomagnetic amplitude, Ap. 
+ * Calculates the geodetic height, latitude and longitude for the input state
+ *
+ * The method used here is the same as used in the parameter code.  We may want
+ * to refactor so that both call a common, low level source.
+ *
+ * @param position The cb-centered MJ2000 Cartesian state for the calculations
+ * @param includeLatLong true to calculate latitude and longitude, false to skip
+ * @param when Epoch for the lat/long calculations
+ *
+ * @return The geodetic height.  The latitude and longitude are filled in to
+ *         class variables
  */
 //------------------------------------------------------------------------------
-Real AtmosphereModel::ConvertKpToAp(const Real kp)
+Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
+      bool includeLatLong)
 {
-   Real r = 28.0 * kp + 0.03 * exp(kp) - 100.0;
-   
-   Real x[3], y[2];
-   x[0] = 0.0;
-   x[1] = 500.0;
-   
-   Real epsilon = 1.0e-6;
-   Integer maxIterations = 15, i = 0;
-   
-   do {
-      y[0] = 100.0 * exp(-0.08 * x[0]) + r - x[0];
-      y[1] = 100.0 * exp(-0.08 * x[1]) + r - x[1];
-      
-      x[2] = x[1] - y[1] * (x[1] - x[0]) / (y[1] - y[0]);
-      x[0] = x[1];
-      x[1] = x[2];
-      
-      if (i++ > maxIterations)
-         throw AtmosphereException("ConvertKpToAp failed; too many iterations");
-   } while (fabs(y[1]) > epsilon);
-   
-   return x[2];
+   Rvector6 instate(position), state;
+
+   if (when == -1.0)
+      when = wUpdateEpoch;
+
+   #ifdef DEBUG_COORDINATE_TRANSFORMS
+      MessageInterface::ShowMessage("Geodetic calculations at epoch %.12lf\n",
+            when);
+      MessageInterface::ShowMessage("Internal CS:\n%s\nFixed:\n%s\n",
+            mInternalCoordSystem->GetGeneratingString(
+                  Gmat::NO_COMMENTS).c_str(),
+            cbFixed->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+
+   CoordinateConverter mCoordConverter;
+   mCoordConverter.Convert(A1Mjd(when), instate, mInternalCoordSystem,
+                           state, cbFixed);
+
+   // Build angular momentum
+   if (wUpdateEpoch != when)
+      BuildAngularVelocity(when);
+
+   // Get the body fixed geodetic height
+   // Vallado algorithm 12 (Vallado, 2nd ed, p. 177)
+   Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
+   geoLat = atan2(state[2], rxy);
+
+   Real delta = 1.0;
+   Real geodeticTolerance = 1.0e-7;    // Better than 0.0001 degrees
+   Real ecc2 = cbFlattening * (2.0 - cbFlattening);
+
+   Real cFactor, oldlat, sinlat;
+   while (delta > geodeticTolerance)
+   {
+      oldlat = geoLat;
+      sinlat = sin(oldlat);
+      cFactor = cbRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
+      geoLat = atan2(state[2] + cFactor*ecc2*sinlat, rxy);
+      delta = fabs(geoLat - oldlat);
+   }
+
+   sinlat = sin(geoLat);
+   cFactor = cbRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
+   geoHeight = rxy / cos(geoLat) - cFactor;
+
+   // Only do lat/long (in degrees) if needed
+   if (includeLatLong)
+   {
+      geoLat = geoLat * GmatMathConstants::DEG_PER_RAD;
+      geoLat = AngleUtil::PutAngleInDegRange(geoLat, -90.0, 90.0);
+      geoLong = atan2(state[1], state[0]) * GmatMathConstants::DEG_PER_RAD;
+      geoLong = AngleUtil::PutAngleInDegRange(geoLong, -180.0, 180.0);
+   }
+
+   #ifdef DEBUG_COORDINATE_TRANSFORMS
+      MessageInterface::ShowMessage("Geodetics:\n   Height = %.6lf\n   "
+            "Latitude = %.6lf\n   Longitude = %.6lf\n", geoHeight, geoLat,
+            (includeLatLong ? geoLong : -999999.999999));
+   #endif
+
+   return geoHeight;
+
+//   // Compute the geocentric latitude in radians
+//   // (atan2() is safer than atan() since it avoids division by 0)
+//   Real rPlane2 = position[0]*position[0] + position[1]*position[1];
+//   Real phi = atan2(position[2], sqrt(rPlane2));
+//
+//   // Correct phi for geodesy
+//   phi += cbFlattening * sin(2.0 * phi);
+//
+//   // Compute the cosine of phi
+//   Real cos_phi = cos(phi);
+//
+//   // Compute the magnitude of position vector
+//   Real d = sqrt(rPlane2 + position[2]*position[2]);
+//
+//   // Calculate the geodetic height
+//   if (cbFlattening == 0.0)
+//      geoHeight = d - cbRadius;
+//   else
+//      geoHeight = d - cbRadius * (1 - cbFlattening) /
+//            sqrt(1.0 - cbFlattening * (2.0 - cbFlattening) * cos_phi * cos_phi);
+//
+//   if (includeLatLong)
+//   {
+//      if (ghaEpoch != when)
+//      {
+//         if (when == -1.0)
+//            when = wUpdateEpoch;
+//         gha = mCentralBody->GetHourAngle(when);
+//      }
+//
+//      Real ra = atan2(position[1], position[0]) * GmatMathUtil::DEG_PER_RAD;
+//
+//      // Compute east longitude
+//      geoLong = ra - gha;
+//
+//      // Range check because the lst calculation needs 0 < lon < 360
+//      if (geoLong < 0.0) geoLong += 360.0;
+//      if (geoLong > 360.0) geoLong -= 360.0;
+//
+//
+//      // Now geodetic latitude
+//      Real arg = position[2] / d;
+//      arg = ((fabs(arg) <= 1.0) ? arg : arg / fabs(arg));
+//      Real radlat = GmatMathUtil::PI_OVER_TWO - acos(arg);
+//
+//      // Convert to geodetic latitude, in degrees
+//      radlat += cbFlattening * sin(2.0 * radlat);
+//      geoLat = radlat * GmatMathUtil::DEG_PER_RAD;
+//   }
+//
+//   return geoHeight;
 }

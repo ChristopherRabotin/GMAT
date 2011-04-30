@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Rvector3
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -106,7 +108,7 @@ Rvector3 Rvector3::GetUnitVector() const
    Real mag = GetMagnitude();
 
    if (GmatMathUtil::IsZero(mag))
-      throw IsZeroVector(" from Rvector3::GetUnitVector()\n");
+      throw ZeroVector(" from Rvector3::GetUnitVector()\n");
    
    return Rvector3(elementD[0]/mag, elementD[1]/mag, elementD[2]/mag);
 }
@@ -120,7 +122,7 @@ const Rvector3& Rvector3::Normalize()
    Real mag = GetMagnitude();
    
    if (GmatMathUtil::IsZero(mag))
-      throw IsZeroVector(" from Rvector3::Normalize()\n");
+      throw ZeroVector(" from Rvector3::Normalize()\n");
    
    elementD[0] /= mag;
    elementD[1] /= mag;
@@ -360,6 +362,30 @@ Rmatrix33 Outerproduct(const Rvector3 &v1, const Rvector3 &v2)
                     v1.elementD[2] * v2.elementD[1],
                     v1.elementD[2] * v2.elementD[2]);
 }
+
+//------------------------------------------------------------------------------
+// static Real Rvector3::Normalize(const Real from[3], Real to[3])
+//------------------------------------------------------------------------------
+Real Rvector3::Normalize(const Real from[3], Real to[3])
+{
+   Real mag = GmatMathUtil::Sqrt(from[0]*from[0] + from[1]*from[1] + from[2]*from[2]);
+   to[0] = from[0]/mag;
+   to[1] = from[1]/mag;
+   to[2] = from[2]/mag;
+   return mag;
+}
+
+
+//------------------------------------------------------------------------------
+// static void Rvector3::Copy(const Real from[3], Real to[3])
+//------------------------------------------------------------------------------
+void Rvector3::Copy(const Real from[3], Real to[3])
+{
+   to[0] = from[0];
+   to[1] = from[1];
+   to[2] = from[2];
+}
+
 
 //------------------------------------------------------------------------------
 // Integer GetNumData() const

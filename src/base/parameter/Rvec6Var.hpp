@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Rvec6Var
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -41,16 +43,16 @@ public:
    bool operator==(const Rvec6Var &right) const;
    bool operator!=(const Rvec6Var &right) const;
    
-   virtual std::string ToString();
+   virtual std::string  ToString();
    
-   virtual Rvector6 GetRvector6() const;
-   virtual void SetRvector6(const Rvector6 &val); //loj: 1/26/05 Added
-   virtual Rvector6 EvaluateRvector6();
+   virtual const        Rvector6& GetRvector6() const;
+   virtual void         SetRvector6(const Rvector6 &val);
+   virtual const        Rvector6& EvaluateRvector6();
    
 protected:
-       
+   
    Rvector6 mRvec6Value;
-      
+   
 private:
 
 };

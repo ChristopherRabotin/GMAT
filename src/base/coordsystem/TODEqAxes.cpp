@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  TODEqAxes
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -23,7 +25,7 @@
 #include "Planet.hpp"
 #include "TODEqAxes.hpp"
 #include "TrueOfDateAxes.hpp"
-#include "TimeTypes.hpp"
+#include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
 
 //#define DEBUG_TODEQ_AXES
@@ -262,9 +264,9 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    // convert epoch (A1 MJD) to TT MJD (for calculations)
    Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                 TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
-                GmatTimeUtil::JD_JAN_5_1941);      
-   Real offset = GmatTimeUtil::JD_JAN_5_1941 - 2451545.0;
-   Real tTDB  = (mjdTT + offset) / 36525.0;
+                GmatTimeConstants::JD_JAN_5_1941);      
+   Real offset = GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_OF_J2000;
+   Real tTDB  = (mjdTT + offset) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetNutationUpdateInterval();

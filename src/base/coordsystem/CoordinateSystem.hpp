@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  CoordinateSystem
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -27,6 +29,7 @@
 #include "AxisSystem.hpp"
 #include "Rvector.hpp"
 #include "A1Mjd.hpp"
+
 
 class GMAT_API CoordinateSystem : public CoordinateBase
 {
@@ -77,6 +80,7 @@ public:
    virtual void                  GetLastRotationMatrix(Real *mat) const;
    virtual Rmatrix33             GetLastRotationDotMatrix() const;
    virtual void                  GetLastRotationDotMatrix(Real *mat) const;
+   virtual bool                  AreAxesOfType(const std::string &ofType) const;
    
    
    // initializes the CoordinateSystem
@@ -138,12 +142,19 @@ public:
                                      const std::string &name);
    virtual bool         IsOwnedObject(Integer id) const;
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
+   virtual bool         HasRefObjectTypeArray();
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
+   
+   static CoordinateSystem* CreateLocalCoordinateSystem(
+                            const std::string &csName, const std::string &axesType,
+                            SpacePoint *origin, SpacePoint *primary,
+                            SpacePoint *secondary, SpacePoint *j2000Body,
+                            SolarSystem *solarSystem);
    
 protected:
 

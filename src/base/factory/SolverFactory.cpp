@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            SolverFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -22,14 +24,9 @@
 #include "SolverFactory.hpp"
 
 // Headers for the supported Solvers
-//#include "QuasiNewton.hpp"
-#include "SteepestDescent.hpp"
-
-#ifdef __USE_MATLAB__
-#include "FminconOptimizer.hpp"
-#endif
-
 #include "DifferentialCorrector.hpp"
+//#include "QuasiNewton.hpp"
+//#include "SteepestDescent.hpp"
 //#include "Broyden.hpp"
 //#include "ParametricScanner.hpp"
 //#include "MonteCarlo.hpp"
@@ -59,16 +56,11 @@ Solver* SolverFactory::CreateSolver(const std::string &ofType,
 {
    if (ofType == "DifferentialCorrector")
       return new DifferentialCorrector(withName);
-   
-   #if defined __USE_MATLAB__
-   if (ofType == "FminconOptimizer")
-      return new FminconOptimizer(withName);
-   #endif
-   
+     
    //if (ofType == "QuasiNewton") 
    //   return new QuasiNewton(withName);
-//   else if (ofType == "SteepestDescent")
-//      return new SteepestDescent(withName);
+   //else if (ofType == "SteepestDescent")
+   //   return new SteepestDescent(withName);
    // else if (ofType == "Broyden")
    //   return new Broyden(withName);
    //else if (ofType == "ParametricScanner")
@@ -94,12 +86,7 @@ SolverFactory::SolverFactory() :
    if (creatables.empty())
    {
       //creatables.push_back("QuasiNewton");
-//      creatables.push_back("SteepestDescent");
-      
-      #if defined __USE_MATLAB__
-      creatables.push_back("FminconOptimizer");
-      #endif
-      
+      //creatables.push_back("SteepestDescent");
       creatables.push_back("DifferentialCorrector");
       //creatables.push_back("Broyden");
       //creatables.push_back("ParametricScanner");
@@ -138,12 +125,7 @@ SolverFactory::SolverFactory(const SolverFactory& fact) :
    if (creatables.empty())
    {
       //creatables.push_back("QuasiNewton");
-//      creatables.push_back("SteepestDescent");
-      
-      #if defined __USE_MATLAB__
-      creatables.push_back("FminconOptimizer");
-      #endif
-      
+      //creatables.push_back("SteepestDescent");
       creatables.push_back("DifferentialCorrector");
       //creatables.push_back("Broyden");
       //creatables.push_back("ParametricScanner");
@@ -180,6 +162,37 @@ SolverFactory& SolverFactory::operator=(const SolverFactory& fact)
 SolverFactory::~SolverFactory()
 {
 }
+
+
+//------------------------------------------------------------------------------
+// bool DoesObjectTypeMatchSubtype(const std::string &theType,
+//       const std::string &theSubtype)
+//------------------------------------------------------------------------------
+/**
+ * Checks if a creatable solver type matches a subtype.
+ *
+ * @param theType The script identifier for the object type
+ * @param theSubtype The subtype being checked
+ *
+ * @return true if the scripted type and subtype match, false if the type does
+ *         not match the subtype
+ */
+//------------------------------------------------------------------------------
+bool SolverFactory::DoesObjectTypeMatchSubtype(const std::string &theType,
+      const std::string &theSubtype)
+{
+   bool retval = false;
+
+   if ((theType == "Boundary Value Solvers") || (theType == "Targeter"))
+   {
+      if (theSubtype == "DifferentialCorrector")
+         retval = true;
+   }
+
+   return retval;
+}
+
+
 
 //---------------------------------
 //  protected methods

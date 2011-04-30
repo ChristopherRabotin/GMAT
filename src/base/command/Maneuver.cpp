@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 Maneuver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -17,11 +19,14 @@
  */
 //------------------------------------------------------------------------------
 
- 
+
 #include "Maneuver.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_MANEUVER 1
 //#define DEBUG_MANEUVER_PARSE
+//#define DEBUG_MANEUVER_INIT
+//#define DEBUG_MANEUVER_EXEC
 
 //------------------------------------------------------------------------------
 // Maneuver()
@@ -51,7 +56,7 @@ Maneuver::Maneuver() :
  * Destructor.
  */
 //------------------------------------------------------------------------------
-Maneuver::~Maneuver(void)
+Maneuver::~Maneuver()
 {
 }
 
@@ -186,12 +191,12 @@ GmatBase* Maneuver::Clone() const
  */
 //------------------------------------------------------------------------------
 const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
-                                                  const std::string &prefix,
-                                                  const std::string &useName)
+                                                 const std::string &prefix,
+                                                 const std::string &useName)
 {
    generatingString = prefix + "Maneuver ";
    generatingString += burnName + "(" + satName + ");";
-
+   
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
@@ -219,10 +224,10 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
          ("Maneuver::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
           GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
-   
+
    if (type != Gmat::SPACECRAFT && type != Gmat::IMPULSIVE_BURN)
       return true;
-   
+
    if (type == Gmat::SPACECRAFT)
    {
       if (satName == oldName)
@@ -238,7 +243,7 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
          burnName = newName;
       }
    }
-   
+
    return true;
 }
 
@@ -250,7 +255,7 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
  * Retrieves the list of ref object types used by the Maneuver.
  *
  * @return the list of object types.
- * 
+ *
  */
 //------------------------------------------------------------------------------
 const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
@@ -270,9 +275,9 @@ const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
  *
  * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
  *               full list.
- * 
+ *
  * @return the list of object names.
- * 
+ *
  */
 //------------------------------------------------------------------------------
 const StringArray& Maneuver::GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -280,27 +285,27 @@ const StringArray& Maneuver::GetRefObjectNameArray(const Gmat::ObjectType type)
    #ifdef DEBUG_MANEUVER_REFOBJ
    MessageInterface::ShowMessage("Maneuver::GetRefObjectNameArray(%d)\n", type);
    #endif
-   
+
    refObjectNames.clear();
-   
+
    if (type == Gmat::UNKNOWN_OBJECT ||
        type == Gmat::IMPULSIVE_BURN)
    {
       refObjectNames.push_back(burnName);
    }
-   
+
    if (type == Gmat::UNKNOWN_OBJECT ||
        type == Gmat::SPACECRAFT)
    {
       refObjectNames.push_back(satName);
    }
-   
+
    #ifdef DEBUG_MANEUVER_REFOBJ
    MessageInterface::ShowMessage("===> returning\n");
    for (UnsignedInt i=0; i<refObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
    #endif
-   
+
    return refObjectNames;
 }
 
@@ -321,11 +326,11 @@ std::string Maneuver::GetParameterText(const Integer id) const
    if (id == burnNameID) {
       return "Burn";
    }
-   
+
    else if (id == satNameID) {
       return "Spacecraft";
    }
-   
+
    return GmatCommand::GetParameterText(id);
 }
 
@@ -346,7 +351,7 @@ Integer Maneuver::GetParameterID(const std::string &str) const
    if (str == "Burn") {
       return burnNameID;
    }
-    
+
    else if (str == "Spacecraft") {
       return satNameID;
    }
@@ -371,11 +376,11 @@ Gmat::ParameterType Maneuver::GetParameterType(const Integer id) const
    if (id == burnNameID) {
       return Gmat::STRING_TYPE;
    }
-    
+
    if (id == satNameID) {
       return Gmat::STRING_TYPE;
    }
-    
+
    return GmatCommand::GetParameterType(id);
 }
 
@@ -395,10 +400,10 @@ std::string Maneuver::GetParameterTypeString(const Integer id) const
 {
    if (id == burnNameID)
       return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-    
+
    if (id == satNameID)
       return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-    
+
    return GmatCommand::GetParameterTypeString(id);
 }
 
@@ -419,10 +424,10 @@ std::string Maneuver::GetStringParameter(const Integer id) const
 {
    if (id == burnNameID)
       return burnName;
-    
+
    if (id == satNameID)
       return satName;
-    
+
    return GmatCommand::GetStringParameter(id);
 }
 
@@ -446,12 +451,12 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
       burnName = value;
       return true;
    }
-   
+
    if (id == satNameID) {
       satName = value;
       return true;
    }
-   
+
    return GmatCommand::SetStringParameter(id, value);
 }
 
@@ -476,16 +481,16 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
 bool Maneuver::InterpretAction()
 {
    StringArray chunks = InterpretPreface();
-   
+
    // Find and set the burn object name ...
    StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
-   
+
    if (currentChunks.size() < 2)
       throw CommandException("Missing Maneuver parameter. Expecting "
                              "\"ImpulsiveBurnName(SpacecraftName)\"\n");
-   
+
    SetStringParameter(burnNameID, currentChunks[0]);
-   
+
    #ifdef DEBUG_MANEUVER_PARSE
       MessageInterface::ShowMessage("In Maneuver, after Decompose, currentChunks = \n");
       for (unsigned int ii=0; ii<currentChunks.size(); ii++)
@@ -500,9 +505,9 @@ bool Maneuver::InterpretAction()
    #endif
    if (currentChunks.size() > 1)
       throw CommandException("Unexpected text after spacecraft name in Maneuver command\n");
-      
+
    SetStringParameter(satNameID, currentChunks[0]);
-   
+
    return true;
 }
 
@@ -516,8 +521,14 @@ bool Maneuver::InterpretAction()
  * @return true if the GmatCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool Maneuver::Initialize(void)
+bool Maneuver::Initialize()
 {
+   #ifdef DEBUG_MANEUVER_INIT
+   MessageInterface::ShowMessage
+      ("Maneuver::Initialize() this=<%p>'%s' entered\n", this,
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+   
    GmatCommand::Initialize();
 
    GmatBase *mapObj = NULL;
@@ -526,13 +537,30 @@ bool Maneuver::Initialize(void)
    burn = (Burn *)mapObj;
    if (!burn)
       return false;
-    
+
    if ((mapObj = FindObject(satName)) == NULL)
       throw CommandException("Maneuver command cannot find Spacecraft");
    sat = (Spacecraft *)mapObj;
    if (!sat)
       return false;
-    
+   
+   // Register this Maneuver to the Publisher (LOJ: 2009.11.10)
+   // Do we need to register? Currently Maneuver does not publish any data.
+   // Just remove it for now.
+   #ifdef __REGISTER_MANEUVER__
+   StringArray owners, elements;
+   owners.push_back(satName);
+   elements.push_back(satName + ".epoch");
+   streamID = publisher->RegisterPublishedData(this, streamID, owners, elements);
+   
+   #ifdef DEBUG_MANEUVER_INIT
+   MessageInterface::ShowMessage("   streamID=%d\n", streamID);
+   MessageInterface::ShowMessage
+      ("Maneuver::Initialize() this=<%p>'%s' returning true\n", this,
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+   #endif
+   
    return true;
 }
 
@@ -550,9 +578,136 @@ bool Maneuver::Initialize(void)
 //------------------------------------------------------------------------------
 bool Maneuver::Execute()
 {
+   #ifdef DEBUG_MANEUVER_EXEC
+      MessageInterface::ShowMessage("Maneuver::Execute this=<%p> maneuvering %s\n",
+            this, ((sat == NULL) ? "a NULL spaceecraft" : sat->GetName().c_str()));
+   #endif
+      
    Real epoch = sat->GetRealParameter("A1Epoch");
+   
+   #ifdef DEBUG_MANEUVER_EXEC
+   Rvector6 state = sat->GetState(0); // Get cartesian state
+   MessageInterface::ShowMessage
+      ("   state before maneuver at epoch %f\n   %s\n", epoch, state.ToString().c_str());
+   #endif
+   
    burn->SetSpacecraftToManeuver(sat);
+   
+   // Set maneuvering to Publisher so that any subscriber can do its own action
+   publisher->SetManeuvering(this, true, epoch, satName, "ImpulsiveBurn");
+   
    bool retval = burn->Fire(NULL, epoch);
+   
+   // Reset maneuvering to Publisher so that any subscriber can do its own action
+   publisher->SetManeuvering(this, false, epoch, satName, "ImpulsiveBurn");
+   
+   #ifdef DEBUG_MANEUVER_EXEC
+   state = sat->GetState(0); // Get cartesian state
+   MessageInterface::ShowMessage
+      ("   state after  maneuver at epoch %f \n   %s", epoch, state.ToString().c_str());
+   #endif
+   
    BuildCommandSummary(true);
+   
+   #ifdef DEBUG_MANEUVER_EXEC
+      MessageInterface::ShowMessage("Maneuver::Execute this=<%p> complete\n", this);
+   #endif
+
    return retval;
+}
+
+
+//-------------------------------------------
+// Protected Methods
+//-------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// void BuildCommandSummary(bool commandCompleted)
+//------------------------------------------------------------------------------
+/**
+ * This method...
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+void Maneuver::BuildCommandSummaryString(bool commandCompleted)
+{
+   GmatCommand::BuildCommandSummaryString(commandCompleted);
+
+   if (commandCompleted)
+   {
+      std::stringstream data;
+
+      data << "\n"
+           << "\n        Maneuver Summary:"
+           << "\n        -----------------"
+           << "\n           Impulsive Burn:     " << burnName
+           << "\n           Spacecraft:         "
+           << burn->GetStringParameter(burn->GetParameterID("SpacecraftName"))
+           << "\n           Coordinate System:  "
+           << burn->GetStringParameter(burn->GetParameterID("CoordinateSystem"))
+           << "\n           Origin:             "
+           << burn->GetStringParameter(burn->GetParameterID("Origin"))
+           << "\n           Axes:               "
+           << burn->GetStringParameter(burn->GetParameterID("Axes"))
+
+           << "\n           Burn Vector:"
+           << "\n              Element 1:  "
+           << BuildNumber(burn->GetRealParameter(
+                 burn->GetParameterID("Element1")))
+           << "\n              Element 2:  "
+           << BuildNumber(burn->GetRealParameter(
+                 burn->GetParameterID("Element2")))
+           << "\n              Element 3:  "
+           << BuildNumber(burn->GetRealParameter(
+                 burn->GetParameterID("Element3")))
+           << "\n";
+
+      if (burn->GetBooleanParameter(burn->GetParameterID("DecrementMass")))
+      {
+         Real thrust, tx, ty, tz;
+         tx = burn->GetRealParameter(burn->GetParameterID("Element1"));
+         ty = burn->GetRealParameter(burn->GetParameterID("Element2"));
+         tz = burn->GetRealParameter(burn->GetParameterID("Element3"));
+         thrust = GmatMathUtil::Sqrt(tx*tx + ty*ty + tz*tz);
+
+         StringArray tanks =
+               burn->GetStringArrayParameter(burn->GetParameterID("Tank"));
+         std::string tanklist;
+
+         if (tanks.size() == 1)
+            tanklist = tanks[0];
+         else
+         {
+            for (UnsignedInt i = 0; i < tanks.size(); ++i)
+            {
+               tanklist += tanks[i];
+               tanklist += ", ";
+               if (i == (tanks.size() - 2))
+                  tanklist += "and ";
+            }
+         }
+
+         data << "\n        Mass depletion from " << tanklist <<":  "
+              << "\n           Thrust:       "
+              << BuildNumber(thrust) << " N"
+              << "\n           Isp:          "
+              << BuildNumber(burn->GetRealParameter(
+                    burn->GetParameterID("Isp"))) << " s"
+              << "\n           Mass change:  "
+              << BuildNumber(burn->GetRealParameter(
+                    burn->GetParameterID("DeltaTankMass"))) << " kg"
+              << "\n";
+
+      }
+      else
+         data << "\n"
+              << "\n        No mass depletion\n";
+
+
+      commandSummary = commandSummary + data.str();
+   }
 }

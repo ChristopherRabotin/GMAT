@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              BeginScript
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
 // Created: 2004/02/25
@@ -156,14 +160,24 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    std::string commentLine = GetCommentLine();
    std::string inlineComment = GetInlineComment();
    std::string beginPrefix = prefix;
-   
-   IndentComment(gen, commentLine, prefix);
-   gen << prefix << "BeginScript";
-   
-   if (inlineComment != "")
-      gen << inlineComment << "\n";
-   else
-      gen << "\n";
+
+   if (mode != Gmat::GUI_EDITOR)
+   {
+      if (mode == Gmat::NO_COMMENTS)
+      {
+         gen << prefix << "BeginScript" << "\n";
+      }
+      else
+      {
+         IndentComment(gen, commentLine, prefix);
+         gen << prefix << "BeginScript";   
+         
+         if (inlineComment != "")
+            gen << inlineComment << "\n";
+         else
+            gen << "\n";
+      }
+   }
    
    #if DBGLVL_GEN_STRING
    MessageInterface::ShowMessage
@@ -172,7 +186,11 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
        useName.c_str());
    #endif
    
-   indent = "   ";
+   if (mode == Gmat::GUI_EDITOR)
+      indent = "";
+   else
+      indent = "   ";
+   
    GmatCommand *current = next;
    while (current != NULL)
    {      
@@ -195,8 +213,11 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
       }
       else
       {
-         // Indent whole block within Begin/EndScript
-         IndentChildString(gen, current, indent, mode, beginPrefix, useName, true);
+         if (mode != Gmat::GUI_EDITOR)
+         {
+            // Indent whole block within Begin/EndScript
+            IndentChildString(gen, current, indent, mode, beginPrefix, useName, true);
+         }
          current = NULL;
       }
    }
@@ -327,7 +348,8 @@ void BeginScript::IndentChildString(std::stringstream &gen, GmatCommand* cmd,
    ShowCommand("", "BeginScript::IndentChildString() cmd = ", cmd);
    MessageInterface::ShowMessage
       ("BeginScript::IndentChildString() indent='%s', mode=%d, prefix='%s', "
-       "useName='%s'\n", indent.c_str(), mode, prefix.c_str(), useName.c_str());
+       "useName='%s', indentCommentOnly=%d\n", indent.c_str(), mode, prefix.c_str(),
+       useName.c_str(), indentCommentOnly);
    #endif
    
    std::string cmdstr;
@@ -338,6 +360,10 @@ void BeginScript::IndentChildString(std::stringstream &gen, GmatCommand* cmd,
    
    StringArray textArray = tp.DecomposeBlock(cmdstr);
    UnsignedInt size = textArray.size();
+   
+   #if DBGLVL_GEN_STRING
+   MessageInterface::ShowMessage("   There are %d text lines\n", size);
+   #endif
    
    if (size > 0 && textArray[0] != "")
    {

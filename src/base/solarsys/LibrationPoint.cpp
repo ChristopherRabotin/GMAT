@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  LibrationPoint
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan
 // Created: 2005/04/04
@@ -28,7 +32,10 @@
 #include "MessageInterface.hpp"
 
 #include <iostream>
-using namespace std;
+
+
+//#define DEBUG_CHECK_BODIES
+//#define DEBUG_LP_OBJECT
 
 //---------------------------------
 // static data
@@ -150,11 +157,27 @@ LibrationPoint::~LibrationPoint()
 //---------------------------------------------------------------------------
 const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
 {
+   #ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage
+      ("LibrationPoint::GetMJ2000State() '%s' entered, atTime=%f, "
+       "primaryBody=<%p> '%s', secondaryBody=<%p> '%s'\n", GetName().c_str(),
+       atTime.GetReal(), primaryBody, primaryBody->GetName().c_str(),
+       secondaryBody, secondaryBody->GetName().c_str());
+   #endif
+   
    CheckBodies();
    // Compute position and velocity from primary to secondary
    Rvector6 primaryState = primaryBody->GetMJ2000State(atTime);
-   Rvector6 pToS = (secondaryBody->GetMJ2000State(atTime)) -
-                   primaryState;
+   Rvector6 secondaryState = secondaryBody->GetMJ2000State(atTime);
+   
+   #ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage
+      ("   primaryState =\n   %s\n", primaryState.ToString().c_str());
+   MessageInterface::ShowMessage
+      ("   secondaryState =\n   %s\n", secondaryState.ToString().c_str());
+   #endif
+   
+   Rvector6 pToS = (secondaryBody->GetMJ2000State(atTime)) - primaryState;
    Rvector3 r    = pToS.GetR();
    Rvector3 v    = pToS.GetV();
    Rvector3 a    = (secondaryBody->GetMJ2000Acceleration(atTime)) -
@@ -173,14 +196,13 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
       throw SolarSystemException(
             "Primary and secondary bodies for LibrationPoint are massless");
    Real muStar = massSecondary / (massPrimary + massSecondary);
-   /*
-   cout.setf(ios::fixed);
-   cout.precision(30);
+   #ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage
+      ("   Mass of the primary is %f\n", massPrimary);
+   MessageInterface::ShowMessage
+      ("   Mass of the secondary is %f\n", massSecondary);
+   #endif
    
-   cout << "Mass of the primary is "  << massPrimary << endl;
-   cout << "Mass of the secondary is " << massSecondary << endl;
-   cout << "Mu(star) = " << muStar << endl;
-   */
    Real gamma = 0.0;
    Real gamma2 = 0.0, gamma3 = 0.0, gamma4 = 0.0, gamma5 = 0.0, gammaPrev = 0.0;
    Real F = 0.0, Fdot = 0.0;
@@ -192,7 +214,6 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
       else  gamma = GmatMathUtil::Pow((muStar / (3.0 * (1.0 - muStar))),
                                       (1.0 / 3.0));
       
-      //cout << ">>>>>> gamma to start is : " << gamma << endl;
 
       Integer counter = 0;
       Real diff = 999.99;
@@ -236,13 +257,7 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
          counter++;
          gammaPrev = gamma;
          gamma     = gammaPrev - (F / Fdot);
-         diff      = GmatMathUtil::Abs(gamma - gammaPrev);/*
-         if (whichPoint == "L3" && counter <= 4)
-         {
-            cout << ">>>>>>>>>>> F  = " << F << endl;
-            cout << ">>>>>>>>>>> Fdot  = " << Fdot << endl;
-            cout << ">>>>>>>>>>> Gamma  = " << gamma << endl;
-         }*/
+         diff      = GmatMathUtil::Abs(gamma - gammaPrev);
       }
    }
    Real x = 0.0;
@@ -273,7 +288,8 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
       y = - GmatMathUtil::Sqrt(3.0) / 2.0;
    }
    else // ERROR
-      throw SolarSystemException("Illegal value for libration point.");
+      throw SolarSystemException
+         ("\"" + whichPoint + "\" is illegal value for libration point.");
    
    // Express position and velocity of the libration point in the rotating
    // system with the origin centered on the primary body
@@ -283,10 +299,6 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
    ri         = rMag * ri;
    Real vMult = (v * r) / rMag;
    vi         = vMult * vi;
-   /*
-   cout << "ri = " << endl << ri << endl;
-   cout << "vi = " << endl << vi << endl;
-   */
    // Determine the rotation matrix and its derivative
    Rvector3 xHat    = r / r.GetMagnitude();  // unit vector
    Rvector3 zHat    = (Cross(r,v)).GetUnitVector();
@@ -318,14 +330,20 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
    RDot(2,0) = xDotHat(2);
    RDot(2,1) = yDotHat(2);
    RDot(2,2) = zDotHat(2);
-
+   
    Rvector3 rLi = R * ri;
    Rvector3 vLi = RDot * ri + R * vi;
-
+   
    Rvector6 rvFK5(rLi(0), rLi(1), rLi(2), vLi(0), vLi(1), vLi(2));
    
    // Translate so that the origin is at the j2000Body
    Rvector6 rvResult = rvFK5 + primaryState;
+   
+   #ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage
+      ("LibrationPoint::GetMJ2000State() returning\n   %s\n",
+       rvResult.ToString().c_str());
+   #endif
    return rvResult;
 }
 
@@ -514,14 +532,14 @@ bool LibrationPoint::SetStringParameter(const Integer id,
 {     
    if (id == PRIMARY_BODY_NAME)             
    {
-      // since we don't know the order of setting, we cannot do the ckecking
+      // since we don't know the order of setting, we cannot do the checking
       // of primary and secondary bodies are the same
       primaryBodyName = value;
       return true;
    }
    if (id == SECONDARY_BODY_NAME)             
    {
-      // since we don't know the order of setting, we cannot do the ckecking
+      // since we don't know the order of setting, we cannot do the checking
       // of primary and secondary bodies are the same
       secondaryBodyName = value;
       return true;
@@ -678,11 +696,15 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
 {
    if (obj == NULL)
       return false;
-
+   
    #ifdef DEBUG_LP_OBJECT
    MessageInterface::ShowMessage
-      ("LibrationPoint::SetRefObject() this=%s, obj=<%p><%s> entered\n",
-       GetName().c_str(), obj, obj->GetName().c_str());
+      ("LibrationPoint::SetRefObject() this=<%p> '%s', obj=<%p><%s> entered\n",
+       this, GetName().c_str(), obj, obj->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("   primaryBodyName='%s', primaryBody=<%p>\n   secondaryBodyName='%s', "
+       "secondaryBody=<%p>\n", primaryBodyName.c_str(), primaryBody,
+       secondaryBodyName.c_str(), secondaryBody);
    #endif
    
    if (obj->IsOfType(Gmat::SPACE_POINT))
@@ -692,6 +714,15 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
       else if (name == secondaryBodyName)
          secondaryBody = (SpacePoint*)obj;
    }
+   #ifdef DEBUG_LP_OBJECT
+   MessageInterface::ShowMessage
+      ("   end of SetRefObject() this=<%p> '%s', obj=<%p><%s> entered\n",
+       this, GetName().c_str(), obj, obj->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("   primaryBodyName='%s', primaryBody=<%p>\n   secondaryBodyName='%s', "
+       "secondaryBody=<%p>\n", primaryBodyName.c_str(), primaryBody,
+       secondaryBodyName.c_str(), secondaryBody);
+   #endif
    
    // Call parent class to add objects to bodyList
    return CalculatedPoint::SetRefObject(obj, type, name);
@@ -750,6 +781,12 @@ void LibrationPoint::CheckBodies()
 {
    bool foundPrimary   = false;
    bool foundSecondary = false;
+   
+   #ifdef DEBUG_CHECK_BODIES
+   MessageInterface::ShowMessage
+      ("LibrationPoint::CheckBodies() this=<%p> '%s' has %d body names, and %d body"
+       " pointers\n", this, GetName().c_str(), bodyNames.size(), bodyList.size());
+   #endif
    for (unsigned int i = 0; i < bodyList.size() ; i++)
    {
       #ifdef DEBUG_CHECK_BODIES
@@ -775,13 +812,17 @@ void LibrationPoint::CheckBodies()
    }
    if (!foundPrimary)
       throw SolarSystemException(
-            "Primary body not found for LibrationPoint");
+            "Primary body \"" + primaryBodyName + "\" not found for LibrationPoint " +
+            "\"" + GetName() + "\"");
    if (!foundSecondary)
       throw SolarSystemException(
-            "Secondary body not found for LibrationPoint");
+            "Secondary body \"" + secondaryBodyName + "\" not found for LibrationPoint " +
+            "\"" + GetName() + "\"");
    if (primaryBody == secondaryBody)
       throw SolarSystemException(
-            "Primary and Secondary bodies cannot be the same for LibrationPoint");
+            "Primary body \"" + primaryBodyName + "\" and Secondary body \"" +
+            secondaryBodyName + "\" cannot be the same for LibrationPoint " +
+            "\"" + GetName() + "\"");
 }
 
 

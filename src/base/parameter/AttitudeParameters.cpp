@@ -1,25 +1,40 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  AttitudeParameters
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
+// Developed further jointly by NASA/GSFC, Thinking Systems, Inc., and 
+// Schafer Corp., under AFRL NOVA Contract #FA945104D03990003
+//
+//
 // Author: Daniel Hunter
 // Created: 2006/6/26
+// Modified:  Dunn Idle (added MRPs)
+// Date:      2010/08/24
 //
 /**
  * Implements Attitude related parameter classes.
- *    Quat1, Quat2, Quat3, Quat4
+ *    DCM11, DCM12, DCM13, DCM21, DCM22, DCM23, DCM31, DCM32, DCM33,
+ *    Quat1, Quat2, Quat3, Quat4, EulerAngle1, EulerAngle2, EulerAngle3,
+ *    MRP1 , MRP2 , MRP3 , AngVelX, AngVelY, AngVelZ, 
+ *    EulerAngleRate1, EulerAngleRate2, EulerAngleRate3
  */
 //------------------------------------------------------------------------------
 
 #include "AttitudeParameters.hpp"
 #include "ColorTypes.hpp"
+
+
+// To use preset colors, uncomment this line:
+//#define USE_PREDEFINED_COLORS
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -36,7 +51,9 @@
 DCM11::DCM11(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM11", obj, "Direction Cosine Matrix 1,1", "")
 {
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM11(const DCM11 &copy)
@@ -91,7 +108,9 @@ GmatBase* DCM11::Clone(void) const
 DCM12::DCM12(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM12", obj, "Direction Cosine Matrix 1,2", "")
 {
-   mColor = GmatColor::YELLOW32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::YELLOW32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM12(const DCM12 &copy)
@@ -145,7 +164,9 @@ GmatBase* DCM12::Clone(void) const
 DCM13::DCM13(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM13", obj, "Direction Cosine Matrix 1,3", "")
 {
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM13(const DCM13 &copy)
@@ -199,7 +220,9 @@ GmatBase* DCM13::Clone(void) const
 DCM21::DCM21(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM21", obj, "Direction Cosine Matrix 2,1", "")
 {
-   mColor = GmatColor::GREEN32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::GREEN32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM21(const DCM21 &copy)
@@ -253,7 +276,9 @@ GmatBase* DCM21::Clone(void) const
 DCM22::DCM22(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM22", obj, "Direction Cosine Matrix 2,2", "")
 {
-   mColor = GmatColor::ORANGE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::ORANGE32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM22(const DCM22 &copy)
@@ -307,7 +332,9 @@ GmatBase* DCM22::Clone(void) const
 DCM23::DCM23(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM23", obj, "Direction Cosine Matrix 2,3", "")
 {
-   mColor = GmatColor::CHESTNUT; 
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::CHESTNUT;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM23(const DCM23 &copy)
@@ -361,7 +388,9 @@ GmatBase* DCM23::Clone(void) const
 DCM31::DCM31(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM31", obj, "Direction Cosine Matrix 3,1", "")
 {
-   mColor = GmatColor::PURPLE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::PURPLE32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM31(const DCM31 &copy)
@@ -415,7 +444,9 @@ GmatBase* DCM31::Clone(void) const
 DCM32::DCM32(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM32", obj, "Direction Cosine Matrix 3,2", "")
 {
-   mColor = GmatColor::LIME32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::LIME32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM32(const DCM32 &copy)
@@ -469,7 +500,9 @@ GmatBase* DCM32::Clone(void) const
 DCM33::DCM33(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "DCM33", obj, "Direction Cosine Matrix 3,3", "")
 {
-   mColor = GmatColor::AQUA32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::AQUA32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // DCM33(const DCM33 &copy)
@@ -528,7 +561,11 @@ GmatBase* DCM33::Clone(void) const
 EulerAngle1::EulerAngle1(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "EulerAngle1", obj, "Euler Angle 1", "deg")
 {
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
+   mIsAngleParam = true;
+   mCycleType = GmatParam::PLUS_MINUS_180;
 }
 //------------------------------------------------------------------------------
 // EulerAngle1(const EulerAngle1 &copy)
@@ -582,7 +619,11 @@ GmatBase* EulerAngle1::Clone(void) const
 EulerAngle2::EulerAngle2(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "EulerAngle2", obj, "Euler Angle 2", "deg")
 {
-   mColor = GmatColor::YELLOW32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::YELLOW32;
+   #endif
+   mIsAngleParam = true;
+   mCycleType = GmatParam::PLUS_MINUS_180;
 }
 //------------------------------------------------------------------------------
 // EulerAngle2(const EulerAngle2 &copy)
@@ -636,7 +677,11 @@ GmatBase* EulerAngle2::Clone(void) const
 EulerAngle3::EulerAngle3(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "EulerAngle3", obj, "Euler Angle 3", "deg")
 {
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
+   mIsAngleParam = true;
+   mCycleType = GmatParam::PLUS_MINUS_180;
 }
 //------------------------------------------------------------------------------
 // EulerAngle3(const EulerAngle3 &copy)
@@ -681,6 +726,178 @@ GmatBase* EulerAngle3::Clone(void) const
    return new EulerAngle3(*this);
 }
 
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  Modified Rodrigues Parameters - Added by Dunn ------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  MRP1
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// MRP1::MRP1(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+MRP1::MRP1(const std::string &name, GmatBase *obj)
+: AttitudeReal(name, "MRP1", obj, "Mod Rod Param 1", "")
+{
+   mColor = GmatColor::RED32;
+}
+//------------------------------------------------------------------------------
+// MRP1(const MRP1 &copy)
+//------------------------------------------------------------------------------
+MRP1::MRP1(const MRP1 &copy)
+: AttitudeReal(copy)
+{
+}
+//------------------------------------------------------------------------------
+// MRP1& operator=(const MRP1 &right)
+//------------------------------------------------------------------------------
+MRP1& MRP1::operator=(const MRP1 &right)
+{
+   if (this != &right)
+      AttitudeReal::operator=(right);
+
+   return *this;
+}
+//------------------------------------------------------------------------------
+// ~MRP1()
+//------------------------------------------------------------------------------
+MRP1::~MRP1()
+{
+}
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool MRP1::Evaluate()
+{
+   mRealValue = AttitudeData::GetAttitudeReal(MRP_1);
+
+   if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+//------------------------------------------------------------------------------
+// GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* MRP1::Clone(void) const
+{
+   return new MRP1(*this);
+}
+
+
+//------------------------------------------------------------------------------
+//  MRP2 - Added by Dunn
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// MRP2::MRP2(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+MRP2::MRP2(const std::string &name, GmatBase *obj)
+: AttitudeReal(name, "MRP2", obj, "Mod Rod Param 2", "")
+{
+   mColor = GmatColor::GREEN32;
+}
+//------------------------------------------------------------------------------
+// MRP2(const MRP2 &copy)
+//------------------------------------------------------------------------------
+MRP2::MRP2(const MRP2 &copy)
+: AttitudeReal(copy)
+{
+}
+//------------------------------------------------------------------------------
+// MRP2& operator=(const MRP2 &right)
+//------------------------------------------------------------------------------
+MRP2& MRP2::operator=(const MRP2 &right)
+{
+   if (this != &right)
+      AttitudeReal::operator=(right);
+
+   return *this;
+}
+//------------------------------------------------------------------------------
+// ~MRP2()
+//------------------------------------------------------------------------------
+MRP2::~MRP2()
+{
+}
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool MRP2::Evaluate()
+{
+   mRealValue = AttitudeData::GetAttitudeReal(MRP_2);
+
+   if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+//------------------------------------------------------------------------------
+// GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* MRP2::Clone(void) const
+{
+   return new MRP2(*this);
+}
+
+
+//------------------------------------------------------------------------------
+//  MRP3 - Added by Dunn
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// MRP3::MRP3(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+MRP3::MRP3(const std::string &name, GmatBase *obj)
+: AttitudeReal(name, "MRP3", obj, "Mod Rod Param 3", "")
+{
+   mColor = GmatColor::BLUE32;
+}
+//------------------------------------------------------------------------------
+// MRP3(const MRP3 &copy)
+//------------------------------------------------------------------------------
+MRP3::MRP3(const MRP3 &copy)
+: AttitudeReal(copy)
+{
+}
+//------------------------------------------------------------------------------
+// MRP3& operator=(const MRP3 &right)
+//------------------------------------------------------------------------------
+MRP3& MRP3::operator=(const MRP3 &right)
+{
+   if (this != &right)
+      AttitudeReal::operator=(right);
+
+   return *this;
+}
+//------------------------------------------------------------------------------
+// ~MRP3()
+//------------------------------------------------------------------------------
+MRP3::~MRP3()
+{
+}
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool MRP3::Evaluate()
+{
+   mRealValue = AttitudeData::GetAttitudeReal(MRP_3);
+
+   if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+//------------------------------------------------------------------------------
+// GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* MRP3::Clone(void) const
+{
+   return new MRP3(*this);
+}
+
+
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //  Quaternions  ---------------------------------------------------------------
@@ -696,7 +913,9 @@ GmatBase* EulerAngle3::Clone(void) const
 Quat1::Quat1(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "Q1", obj, "Quaternion 1", "")
 {
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // Quat1(const Quat1 &copy)
@@ -750,7 +969,9 @@ GmatBase* Quat1::Clone(void) const
 Quat2::Quat2(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "Q2", obj, "Quaternion 2", "")
 {
-   mColor = GmatColor::YELLOW32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::YELLOW32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // Quat2(const Quat2 &copy)
@@ -804,7 +1025,9 @@ GmatBase* Quat2::Clone(void) const
 Quat3::Quat3(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "Q3", obj, "Quaternion 3", "")
 {
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // Quat3(const Quat3 &copy)
@@ -858,7 +1081,9 @@ GmatBase* Quat3::Clone(void) const
 Quat4::Quat4(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "Q4", obj, "Quaternion 4", "")
 {
-   mColor = GmatColor::GREEN32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::GREEN32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // Quat4(const Quat4 &copy)
@@ -918,7 +1143,9 @@ GmatBase* Quat4::Clone(void) const
 AngVelX::AngVelX(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "AngularVelocityX", obj, "Angular Velocity X", "deg/sec")
 {
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // AngVelX(const AngVelX &copy)
@@ -972,7 +1199,9 @@ GmatBase* AngVelX::Clone(void) const
 AngVelY::AngVelY(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "AngularVelocityY", obj, "Angular Velocity Y", "deg/sec")
 {
-   mColor = GmatColor::YELLOW32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::YELLOW32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // AngVelY(const AngVelY &copy)
@@ -1026,7 +1255,9 @@ GmatBase* AngVelY::Clone(void) const
 AngVelZ::AngVelZ(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "AngularVelocityZ", obj, "Angular Velocity Z", "deg/sec")
 {
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // AngVelZ(const AngVelZ &copy)
@@ -1085,7 +1316,9 @@ GmatBase* AngVelZ::Clone(void) const
 EulerAngleRate1::EulerAngleRate1(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "EulerAngleRate1", obj, "Euler Angle Rate 1", "deg/sec")
 {
-   mColor = GmatColor::RED32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // EulerAngleRate1(const EulerAngleRate1 &copy)
@@ -1139,7 +1372,9 @@ GmatBase* EulerAngleRate1::Clone(void) const
 EulerAngleRate2::EulerAngleRate2(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "EulerAngleRate2", obj, "Euler Angle Rate 2", "deg/sec")
 {
-   mColor = GmatColor::YELLOW32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::YELLOW32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // EulerAngleRate2(const EulerAngleRate2 &copy)
@@ -1193,7 +1428,9 @@ GmatBase* EulerAngleRate2::Clone(void) const
 EulerAngleRate3::EulerAngleRate3(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "EulerAngleRate3", obj, "Euler Angle Rate 3", "deg/sec")
 {
-   mColor = GmatColor::BLUE32;
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
 }
 //------------------------------------------------------------------------------
 // EulerAngleRate3(const EulerAngleRate3 &copy)

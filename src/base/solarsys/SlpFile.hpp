@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  SlpFile
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -27,7 +29,7 @@
 #include "PlanetaryEphem.hpp"
 #include "A1Mjd.hpp"
 
-class SlpFile : public PlanetaryEphem
+class GMAT_API SlpFile : public PlanetaryEphem
 {
 public:
 
@@ -76,7 +78,7 @@ public:
    static const Integer NEPTUNE_ID;
    static const Integer PLUTO_ID;
 
-   static const Real    JD_MJD_OFFSET;// = 2430000.0;  // NOTE - SLP code uses this as a long int!!!!
+   static const Real    JD_MJD_OFFSET;// = GmatTimeConstants::JD_JAN_5_1941;  // NOTE - SLP code uses this as a long int!!!!
 
    // maximum length of path name
    static const Integer MAX_PATH_LEN;

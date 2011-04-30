@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  Subscriber
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -38,10 +40,22 @@
 #include "StringUtil.hpp"          // for Replace()
 #include "MessageInterface.hpp"
 
+// Cloning wrapper is not ready
+//#define __ENABLE_CLONING_WRAPPERS__
+
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_SUBSCRIBER
 //#define DEBUG_SUBSCRIBER_PARAM
+//#define DEBUG_RECEIVE_DATA
 //#define DEBUG_RENAME
+
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -73,27 +87,34 @@ Subscriber::PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Subscriber(std::string typeStr, std::string nomme)
+// Subscriber(const std::string &typeStr, const std::string &nomme)
 //------------------------------------------------------------------------------
-Subscriber::Subscriber(std::string typeStr, std::string nomme) :
+Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    GmatBase (Gmat::SUBSCRIBER, typeStr, nomme),
-   data (NULL),
-   next (NULL),
-   theInternalCoordSystem (NULL),
-   theDataCoordSystem (NULL),
-   theSolarSystem (NULL),
-   active (true),
+   data(NULL),
+   next(NULL),
+   theInternalCoordSystem(NULL),
+   theDataCoordSystem(NULL),
+   theDataMJ2000EqOrigin(NULL),
+   theSolarSystem(NULL),
+   currentProvider(NULL),
+   active(true),
+   isManeuvering(false),
    isEndOfReceive(false),
+   isEndOfDataBlock(false),
    isEndOfRun(false),
    isInitialized(false),
+   isFinalized(false),
    runstate(Gmat::IDLE),
-   currentProvider(0)
+   currProviderId(0)
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
    objectTypeNames.push_back("Subscriber");
    
    mSolverIterations = "Current";
    mSolverIterOption = SI_CURRENT;
+   
+   wrappersCopied = false;
 }
 
 
@@ -101,23 +122,41 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
 // Subscriber(const Subscriber &copy)
 //------------------------------------------------------------------------------
 Subscriber::Subscriber(const Subscriber &copy) :
-   GmatBase (copy),
-   data (NULL),
-   next (NULL),
-   theInternalCoordSystem (NULL),
-   theDataCoordSystem (NULL),
-   theSolarSystem (NULL),
-   active (copy.active),
+   GmatBase(copy),
+   data(NULL),
+   next(NULL),
+   theInternalCoordSystem(copy.theInternalCoordSystem),
+   theDataCoordSystem(copy.theDataCoordSystem),
+   theDataMJ2000EqOrigin(copy.theDataMJ2000EqOrigin),
+   theSolarSystem(copy.theSolarSystem),
+   currentProvider(NULL),
+   active(copy.active),
+   isManeuvering(copy.isManeuvering),
    isEndOfReceive(copy.isEndOfReceive),
    isEndOfRun(copy.isEndOfRun),
    isInitialized(copy.isInitialized),
+   isFinalized(copy.isFinalized),
    runstate(copy.runstate),
-   currentProvider(copy.currentProvider),
-   wrapperObjectNames(copy.wrapperObjectNames),
-   paramWrappers(copy.paramWrappers)
+   currProviderId(copy.currProviderId),
+   wrapperObjectNames(copy.wrapperObjectNames)
 {
    mSolverIterations = copy.mSolverIterations;
    mSolverIterOption = copy.mSolverIterOption;
+   wrappersCopied = true;
+   
+#ifdef __ENABLE_CLONING_WRAPPERS__
+   // Create new wrappers by cloning (LOJ: 2009.03.10)
+   CloneWrappers(depParamWrappers, copy.depParamWrappers);
+   CloneWrappers(paramWrappers, copy.paramWrappers);   
+#else
+   // Copy wrappers
+   depParamWrappers = copy.depParamWrappers;
+   paramWrappers = copy.paramWrappers;
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("Subscriber(copy) copied wrappers\n");
+   WriteWrappers();
+   #endif
+#endif
 }
 
 
@@ -137,18 +176,42 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    
    data = rhs.data;
    next = rhs.next;
+   
+   theInternalCoordSystem = rhs.theInternalCoordSystem;
+   theDataCoordSystem = rhs.theDataCoordSystem;
+   theDataMJ2000EqOrigin = rhs.theDataMJ2000EqOrigin;
+   theSolarSystem = rhs.theSolarSystem;
+   currentProvider = NULL;
+   
    active = rhs.active;
-   isEndOfReceive = rhs.isEndOfReceive;
+   active = rhs.active;
+   isManeuvering = rhs.isManeuvering;
    isEndOfRun = rhs.isEndOfRun;
    isInitialized = rhs.isInitialized;
+   isFinalized = rhs.isFinalized;
    runstate = rhs.runstate;
-   currentProvider = rhs.currentProvider;
-   theInternalCoordSystem = NULL;
-   theDataCoordSystem = NULL;
+   currProviderId = rhs.currProviderId;
+   
    wrapperObjectNames = rhs.wrapperObjectNames;
-   paramWrappers = rhs.paramWrappers;
    mSolverIterations = rhs.mSolverIterations;
    mSolverIterOption = rhs.mSolverIterOption;
+   wrappersCopied = true;
+   
+#ifdef __ENABLE_CLONING_WRAPPERS__
+   // Clear old wrappers
+   ClearWrappers();
+   // Create new wrappers by cloning (LOJ: 2009.03.10)
+   CloneWrappers(depParamWrappers, rhs.depParamWrappers);
+   CloneWrappers(paramWrappers, rhs.paramWrappers);
+#else
+   // Copy wrappers
+   depParamWrappers = rhs.depParamWrappers;
+   paramWrappers = rhs.paramWrappers;
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("Subscriber(=) copied wrappers\n");
+   WriteWrappers();
+   #endif
+#endif
    
    return *this;
 }
@@ -159,6 +222,28 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
 //------------------------------------------------------------------------------
 Subscriber::~Subscriber()
 {
+#ifdef __ENABLE_CLONING_WRAPPERS__
+   ClearWrappers();
+#else
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("~Subscriber() <%p>'%s' entered, wrappersCopied = %d\n", this, GetName().c_str(),
+       wrappersCopied);
+   #endif
+   
+   // Since we just copies wrappers, we can only delete if it is not a cloned
+   if (!wrappersCopied)
+   {
+      ClearWrappers();
+   }
+   else
+   {
+      //@todo We should delete wrappers here
+      //Func_BallisticMassParamTest.script leaves memory trace
+      //If we clear wrappers, APT_AttitudeTest.script crashes
+      //ClearWrappers();
+   }
+#endif
 }
 
 
@@ -168,7 +253,10 @@ Subscriber::~Subscriber()
 bool Subscriber::Initialize()
 {
    isEndOfReceive = false;
+   isEndOfDataBlock = false;
    isEndOfRun = false;
+   isInitialized = false;
+   isFinalized = false;
    return true;
 }
 
@@ -202,21 +290,40 @@ bool Subscriber::ReceiveData(const char *datastream,  const int len)
 {
    #ifdef DEBUG_RECEIVE_DATA
    MessageInterface::ShowMessage
-      ("Subscriber::ReceiveData() active=%d, data='%s', len=%d\n",
-       active, datastream, len);
+      ("Subscriber::ReceiveData(char*, int) <%p>'%s' entered, active=%d, len=%d\n"
+       "data='%s'\n", this, GetName().c_str(), active, len, datastream);
    #endif
    
    if (!active)        // Not currently processing data
+   {
+      #ifdef DEBUG_RECEIVE_DATA
+      MessageInterface::ShowMessage
+         ("Subscriber::ReceiveData() '%s' is not active, so just returning true\n",
+          GetName().c_str());
+      #endif
       return true;
+   }
    
    data = datastream;
    if (!Distribute(len))
    {
       data = NULL;
+      #ifdef DEBUG_RECEIVE_DATA
+      MessageInterface::ShowMessage
+         ("Subscriber::ReceiveData() '%s' failed to distribute, so just returning false\n",
+          GetName().c_str());
+      #endif
       return false;
    }
    
    data = NULL;
+   
+   #ifdef DEBUG_RECEIVE_DATA
+   MessageInterface::ShowMessage
+      ("Subscriber::ReceiveData() '%s' was successful, returning true\n",
+       GetName().c_str());
+   #endif
+   
    return true;
 }
 
@@ -226,12 +333,27 @@ bool Subscriber::ReceiveData(const char *datastream,  const int len)
 //------------------------------------------------------------------------------
 bool Subscriber::ReceiveData(const double *datastream, const int len)
 {
+   #ifdef DEBUG_RECEIVE_DATA
+   MessageInterface::ShowMessage
+      ("Subscriber::ReceiveData(double*) <%p>'%s' entered, active=%d, len=%d\n",
+       this, GetName().c_str(), active, len);
+   if (len > 0)
+      MessageInterface::ShowMessage("   data[0]=%f\n", datastream[0]);
+   #endif
+   
    if (!active)        // Not currently processing data
+   {
+      #ifdef DEBUG_RECEIVE_DATA
+      MessageInterface::ShowMessage
+         ("Subscriber::ReceiveData() '%s' is not active, so just returning true\n",
+          GetName().c_str());
+      #endif
       return true;
-
+   }
+   
    if (len == 0)
       return true;
-
+   
    if (!Distribute(datastream, len))
    {
       return false;
@@ -242,14 +364,16 @@ bool Subscriber::ReceiveData(const double *datastream, const int len)
 
 
 //------------------------------------------------------------------------------
-// bool FlushData()
+// bool FlushData(bool endOfDataBlock = true)
 //------------------------------------------------------------------------------
-bool Subscriber::FlushData()
+bool Subscriber::FlushData(bool endOfDataBlock)
 {
+   isEndOfDataBlock = endOfDataBlock;
    isEndOfReceive = true;
    Distribute(0);
    Distribute(NULL, 0);
    isEndOfReceive = false;
+   
    return true;
 }
 
@@ -260,10 +384,12 @@ bool Subscriber::FlushData()
 bool Subscriber::SetEndOfRun()
 {
    isEndOfReceive = true;
+   isEndOfDataBlock = true;
    isEndOfRun = true;
    Distribute(0);
    Distribute(NULL, 0);
    isEndOfReceive = false;
+   isEndOfDataBlock = false;
    isEndOfRun = false;
    return true;
 }
@@ -281,6 +407,76 @@ bool Subscriber::SetEndOfRun()
 void Subscriber::SetRunState(Gmat::RunState rs)
 {
    runstate = rs;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetManeuvering(GmatBase *originator, bool flag, Real epoch,
+//                     const std::string &satName, const std::string &desc)
+//------------------------------------------------------------------------------
+/**
+ * Sets spacecraft maneuvering flag.
+ * 
+ * @param originator  The maneuver command pointer who is maneuvering
+ * @param flag  Set to true if maneuvering
+ * @param epoch  Epoch of maneuver
+ * @param satName  Name of the maneuvering spacecraft
+ * @param desc  Description of maneuver (e.g. impulsive or finite)
+ */
+//------------------------------------------------------------------------------
+void Subscriber::SetManeuvering(GmatBase *originator, bool flag, Real epoch,
+                                const std::string &satName,
+                                const std::string &desc)
+{
+   static StringArray satNames;
+   satNames.clear();
+   isManeuvering = flag;
+   satNames.push_back(satName);
+   HandleManeuvering(originator, flag, epoch, satNames, desc);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetManeuvering(GmatBase *originator, bool flag, Real epoch,
+//                     const StringArray &satNames, const std::string &desc)
+//------------------------------------------------------------------------------
+/**
+ * Sets spacecraft maneuvering flag.
+ * 
+ * @param originator  The maneuver command pointer who is maneuvering
+ * @param flag Set to true if maneuvering
+ * @param epoch Epoch of maneuver
+ * @param satNames Names of the maneuvering spacecraft
+ * @param desc Description of maneuver (e.g. impulsive or finite)
+ */
+//------------------------------------------------------------------------------
+void Subscriber::SetManeuvering(GmatBase *originator, bool flag, Real epoch,
+                                const StringArray &satNames,
+                                const std::string &desc)
+{
+   isManeuvering = flag;
+   HandleManeuvering(originator, flag, epoch, satNames, desc);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetScPropertyChanged(GmatBase *originator, Real epoch,
+//                           const std::string &satName, const std::string &desc)
+//------------------------------------------------------------------------------
+/**
+ * Sets spacecraft property change.
+ * 
+ * @param originator  The assignment command pointer who is setting
+ * @param epoch  Epoch of spacecraft at property change
+ * @param satName  Name of the spacecraft
+ * @param desc  Description of property change
+ */
+//------------------------------------------------------------------------------
+void Subscriber::SetScPropertyChanged(GmatBase *originator, Real epoch,
+                                      const std::string &satName,
+                                      const std::string &desc)
+{
+   HandleScPropertyChange(originator, epoch, satName, desc);
 }
 
 
@@ -358,7 +554,7 @@ void Subscriber::SetProviderId(Integer id)
       ("Subscriber::SetProviderId() <%s> entered, id=%d\n", GetName().c_str(), id);
    #endif
    
-   currentProvider = id;
+   currProviderId = id;
 }
 
 
@@ -367,20 +563,36 @@ void Subscriber::SetProviderId(Integer id)
 //------------------------------------------------------------------------------
 Integer Subscriber::GetProviderId()
 {
-   return currentProvider;
+   return currProviderId;
 }
 
+//------------------------------------------------------------------------------
+// virtual void SetProvider(GmatBase *provider);
+//------------------------------------------------------------------------------
+void Subscriber::SetProvider(GmatBase *provider)
+{
+   currentProvider = provider;
+}
 
 //------------------------------------------------------------------------------
 // void SetDataLabels(const StringArray& elements)
 //------------------------------------------------------------------------------
 void Subscriber::SetDataLabels(const StringArray& elements)
 {
-   theDataLabels.push_back(elements);
+   #ifdef DEBUG_SUBSCRIBER_SET_LABELS
+   MessageInterface::ShowMessage
+      ("==> Subscriber::SetDataLabels() Using new Publisher code\n");
+   #endif
+   
+   // Publisher new code always sets current labels
+   if (theDataLabels.empty())
+      theDataLabels.push_back(elements);
+   else
+      theDataLabels[0] = elements;
    
    #ifdef DEBUG_SUBSCRIBER_DATA
    MessageInterface::ShowMessage
-      ("Subscriber::SetDataLabels() <%s> entered, theDataLabels.size()=%d, "
+      ("Subscriber::SetDataLabels() <%s> leaving, theDataLabels.size()=%d, "
        "first label is '%s'\n", GetName().c_str(), theDataLabels.size(),
        elements[0].c_str());
    #endif
@@ -420,11 +632,11 @@ void Subscriber::SetInternalCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void Subscriber::SetDataCoordSystem(CoordinateSystem *cs)
 {
-   #ifdef DEBUG_SUBSCRIBER
+   //#ifdef DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage
       ("Subscriber::SetDataCoordSystem()<%s> set to %s<%p>\n",
        instanceName.c_str(), cs->GetName().c_str(), cs);
-   #endif
+   //#endif
    
    theDataCoordSystem = cs;
 }
@@ -469,9 +681,9 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
       return false;
    
    #ifdef DEBUG_WRAPPER_CODE   
-   MessageInterface::ShowMessage(
-      "Subscriber::SetElementWrapper() Setting wrapper \"%s\" size=%d in %s \"%s\"\n",
-      name.c_str(), wrapperObjectNames.size(), GetTypeName().c_str(), instanceName.c_str());
+   MessageInterface::ShowMessage
+      ("Subscriber::SetElementWrapper() <%p>'%s' entered, toWrapper=<%p>, name='%s'\n",
+       this, GetName().c_str(), toWrapper, name.c_str());
    #endif
    
    Integer sz = wrapperObjectNames.size();
@@ -483,11 +695,16 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
          MessageInterface::ShowMessage
             ("   Found wrapper name \"%s\", wrapper=%p\n", name.c_str(), paramWrappers.at(i));
          #endif
-                  
+         
          if (paramWrappers.at(i) != NULL)
          {
             ew = paramWrappers.at(i);
             paramWrappers.at(i) = toWrapper;
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (ew, ew->GetDescription(), "Subscriber::SetElementWrapper",
+                "deleting old wrapper");
+            #endif
             delete ew;
          }
          else
@@ -509,108 +726,6 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
 
 
 //------------------------------------------------------------------------------
-// bool SetWrapperReference(GmatBase *obj, const std::string &name)
-//------------------------------------------------------------------------------
-bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
-{
-   Integer sz = paramWrappers.size();
-   std::string refname, desc;
-   Gmat::WrapperDataType wrapperType;
-   bool nameFound = false;
-   
-   #ifdef DEBUG_WRAPPER_CODE   
-   MessageInterface::ShowMessage
-      ("Subscriber::SetWrapperReference() obj=(%p)%s, name=%s, size=%d\n",
-       obj, obj->GetName().c_str(), name.c_str(), sz);
-   #endif
-   
-   for (Integer i = 0; i < sz; i++)
-   {
-      if (paramWrappers[i] == NULL)
-         throw SubscriberException
-            ("Subscriber::SetWrapperReference() \"" + GetName() +
-             "\" failed to set reference for object named \"" + name +
-             ".\" The wrapper is NULL.\n");
-      
-      refname = paramWrappers[i]->GetDescription();
-      if (paramWrappers[i]->GetWrapperType() == Gmat::ARRAY_ELEMENT)
-         refname = refname.substr(0, refname.find('('));
-      if (refname == name)
-      {
-         nameFound = true;
-         break;
-      }
-   }
-   
-   if (!nameFound)
-      throw SubscriberException
-         ("Subscriber::SetWrapperReference() \"" + GetName() +
-          "\" failed to find object named \"" +  name + "\"\n");
-   
-   #ifdef DEBUG_WRAPPER_CODE   
-   MessageInterface::ShowMessage("   setting ref object of wrappers\n");
-   #endif
-   
-   // set ref object of wrappers
-   for (Integer i = 0; i < sz; i++)
-   {
-      desc = paramWrappers[i]->GetDescription();
-      wrapperType = paramWrappers[i]->GetWrapperType();
-      
-      #ifdef DEBUG_WRAPPER_CODE   
-      MessageInterface::ShowMessage
-         ("   paramWrappers[%d]=\"%s\", wrapperType=%d\n", i, desc.c_str(),
-          wrapperType);
-      #endif
-      
-      refname = desc;
-      
-      switch (wrapperType)
-      {
-      case Gmat::OBJECT_PROPERTY:
-         if (refname == name)
-         {
-            Parameter *param = (Parameter*)obj;
-            StringArray onames = paramWrappers[i]->GetRefObjectNames();
-            for (UnsignedInt j=0; j<onames.size(); j++)
-            {
-               paramWrappers[i]->
-                  SetRefObject(param->GetRefObject(param->GetOwnerType(), onames[j]));
-            }
-            return true;
-         }
-      case Gmat::ARRAY_ELEMENT:
-         // for array element, we need to go through all array elements set
-         // ref object, so break insted of return
-         refname = refname.substr(0, refname.find('('));
-         if (refname == name)
-            paramWrappers[i]->SetRefObject(obj);
-         break;
-      default:
-         // Others, such as VARIABLE, PARAMETER_OBJECT
-         if (refname == name)
-         {
-            #ifdef DEBUG_WRAPPER_CODE   
-            MessageInterface::ShowMessage
-               ("   Found wrapper name \"%s\" in SetWrapperReference\n", name.c_str());
-            #endif
-            
-            paramWrappers[i]->SetRefObject(obj);
-            return true;
-         }
-      }
-   }
-   
-   #ifdef DEBUG_WRAPPER_CODE   
-   MessageInterface::ShowMessage
-      ("Subscriber::SetWrapperReference() ArrayElement set. Leaving\n");
-   #endif
-   
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
 // void ClearWrappers()
 //------------------------------------------------------------------------------
 /*
@@ -620,7 +735,9 @@ bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
 void Subscriber::ClearWrappers()
 {
    #ifdef DEBUG_WRAPPER_CODE
-   MessageInterface::ShowMessage("Subscriber::ClearWrappers() entered\n");
+   MessageInterface::ShowMessage
+      ("Subscriber::ClearWrappers() <%p>'%s' entered\n", this, GetName().c_str());
+   WriteWrappers();
    #endif
    
    ElementWrapper *wrapper;
@@ -635,11 +752,16 @@ void Subscriber::ClearWrappers()
           paramWrappers.end())
       {
          #ifdef DEBUG_WRAPPER_CODE
-         MessageInterface::ShowMessage
-            ("   deleting wrapper=(%p)'%s'\n", wrapper,
-             wrapper->GetDescription().c_str());
+         MessageInterface::ShowMessage("   deleting depParamWrapper = <%p>\n", wrapper);
+         #endif
+         
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (wrapper, wrapper->GetDescription(), "Subscriber::ClearWrappers()",
+             "deleting old dep wrapper");
          #endif
          delete wrapper;
+         wrapper = NULL;
       }
       
       depParamWrappers[i] = NULL;
@@ -649,21 +771,30 @@ void Subscriber::ClearWrappers()
    {
       wrapper = paramWrappers[i];
       
+      #ifdef DEBUG_WRAPPER_CODE
+      MessageInterface::ShowMessage("   deleting paramWrapper = <%p>\n", wrapper);
+      #endif
+      
       if (wrapper != NULL)
       {
-         #ifdef DEBUG_WRAPPER_CODE
-         MessageInterface::ShowMessage
-            ("   deleting wrapper=(%p)'%s'\n", wrapper,
-             wrapper->GetDescription().c_str());
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (wrapper, wrapper->GetDescription(), "Subscriber::ClearWrappers()",
+             "deleting old wrapper");
          #endif
          delete wrapper;
+         wrapper = NULL;
       }
       
       paramWrappers[i] = NULL;
    }
    
+   depParamWrappers.clear();
+   paramWrappers.clear();
+   
    #ifdef DEBUG_WRAPPER_CODE
-   MessageInterface::ShowMessage("Subscriber::ClearWrappers() leaving\n");
+   MessageInterface::ShowMessage
+      ("Subscriber::ClearWrappers() <%p>'%s' leaving\n", this, GetName().c_str());
    #endif
 }
 
@@ -1057,9 +1188,190 @@ bool Subscriber::SetOnOffParameter(const std::string &label,
 }
 
 
+//------------------------------------------------------------------------------
+// const std::string* GetSolverIterOptionList()
+//------------------------------------------------------------------------------
+const std::string* Subscriber::GetSolverIterOptionList()
+{
+   return SOLVER_ITER_OPTION_TEXT;
+}
+
+
 //---------------------------------
 //  protected methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+// bool CloneWrappers(WrapperArray &toWrappers, const WrapperArray &fromWrappers);
+//------------------------------------------------------------------------------
+bool Subscriber::CloneWrappers(WrapperArray &toWrappers,
+                               const WrapperArray &fromWrappers)
+{
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("Subscriber::CloneWrappers() <%p>'%s' entered\n", this, GetName().c_str());
+   #endif
+   for (UnsignedInt i=0; i<fromWrappers.size(); i++)
+   {
+      if (fromWrappers[i] != NULL)
+      {
+         ElementWrapper *ew = fromWrappers[i]->Clone();
+         toWrappers.push_back(ew);
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (ew, ew->GetDescription(), "Subscriber::CloneWrappers()",
+             "ew = fromWrappers[i]->Clone()");
+         #endif         
+      }
+   }
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetWrapperReference(GmatBase *obj, const std::string &name)
+//------------------------------------------------------------------------------
+bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
+{
+   Integer sz = paramWrappers.size();
+   std::string refname, desc;
+   Gmat::WrapperDataType wrapperType;
+   bool nameFound = false;
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Subscriber::SetWrapperReference() obj=<%p>'%s', name='%s', size=%d\n",
+       obj, obj->GetName().c_str(), name.c_str(), sz);
+   #endif
+   
+   for (Integer i = 0; i < sz; i++)
+   {
+      if (paramWrappers[i] == NULL)
+         throw SubscriberException
+            ("Subscriber::SetWrapperReference() \"" + GetName() +
+             "\" failed to set reference for object named \"" + name +
+             ".\" The wrapper is NULL.\n");
+      
+      refname = paramWrappers[i]->GetDescription();
+      if (paramWrappers[i]->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)
+         refname = refname.substr(0, refname.find('('));
+      if (refname == name)
+      {
+         nameFound = true;
+         break;
+      }
+   }
+   
+   if (!nameFound)
+      throw SubscriberException
+         ("Subscriber::SetWrapperReference() \"" + GetName() +
+          "\" failed to find object named \"" +  name + "\"\n");
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage("   setting ref object of wrappers\n");
+   #endif
+   
+   // set ref object of wrappers
+   for (Integer i = 0; i < sz; i++)
+   {
+      desc = paramWrappers[i]->GetDescription();
+      wrapperType = paramWrappers[i]->GetWrapperType();
+      
+      #ifdef DEBUG_WRAPPER_CODE   
+      MessageInterface::ShowMessage
+         ("   paramWrappers[%d]=\"%s\", wrapperType=%d\n", i, desc.c_str(),
+          wrapperType);
+      #endif
+      
+      refname = desc;
+      
+      switch (wrapperType)
+      {
+      case Gmat::OBJECT_PROPERTY_WT:
+         if (refname == name)
+         {
+            Parameter *param = (Parameter*)obj;
+            StringArray onames = paramWrappers[i]->GetRefObjectNames();
+            for (UnsignedInt j=0; j<onames.size(); j++)
+            {
+               paramWrappers[i]->
+                  SetRefObject(param->GetRefObject(param->GetOwnerType(), onames[j]));
+            }
+            return true;
+         }
+      case Gmat::ARRAY_ELEMENT_WT:
+         // for array element, we need to go through all array elements set
+         // ref object, so break insted of return
+         refname = refname.substr(0, refname.find('('));
+         if (refname == name)
+            paramWrappers[i]->SetRefObject(obj);
+         break;
+      default:
+         // Others, such as VARIABLE, PARAMETER_OBJECT
+         if (refname == name)
+         {
+            #ifdef DEBUG_WRAPPER_CODE   
+            MessageInterface::ShowMessage
+               ("   Found wrapper name \"%s\" in SetWrapperReference\n", name.c_str());
+            #endif
+            
+            paramWrappers[i]->SetRefObject(obj);
+            return true;
+         }
+      }
+   }
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Subscriber::SetWrapperReference() ArrayElement set. Leaving\n");
+   #endif
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteWrappers()
+//------------------------------------------------------------------------------
+void Subscriber::WriteWrappers()
+{
+   MessageInterface::ShowMessage
+      ("Subscriber::WriteWrappers() <%p>'%s' has %d depParamWrappers and %d "
+       "paramWrappers\n", this, GetName().c_str(), depParamWrappers.size(),
+       paramWrappers.size());
+   
+   ElementWrapper *wrapper;
+   for (UnsignedInt i = 0; i < depParamWrappers.size(); ++i)
+   {
+      wrapper = depParamWrappers[i];
+      MessageInterface::ShowMessage
+         ("   depPaWrapper = <%p> '%s'\n", wrapper, wrapper->GetDescription().c_str());
+   }
+   
+   for (UnsignedInt i = 0; i < paramWrappers.size(); ++i)
+   {
+      wrapper = paramWrappers[i];
+      MessageInterface::ShowMessage
+         ("   paramWrapper = <%p> '%s'\n", wrapper, wrapper->GetDescription().c_str());
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Integer FindIndexOfElement(StringArray &labelArray, const std::string &label)
+//------------------------------------------------------------------------------
+Integer Subscriber::FindIndexOfElement(StringArray &labelArray,
+                                       const std::string &label)
+{
+   std::vector<std::string>::iterator pos;
+   pos = find(labelArray.begin(), labelArray.end(),  label);
+   if (pos == labelArray.end())
+      return -1;
+   else
+      return distance(labelArray.begin(), pos);
+}
+
 
 //------------------------------------------------------------------------------
 // bool Distribute(const double *dat, int len)
@@ -1071,10 +1383,47 @@ bool Subscriber::Distribute(const double *dat, int len)
 
 
 //------------------------------------------------------------------------------
-// const std::string* GetSolverIterOptionList()
+// virtual void HandleManeuvering(GmatBase *originator, bool maneuvering, Real epoch,
+//                                const StringArray &satNames,
+//                                const std::string &desc)
 //------------------------------------------------------------------------------
-const std::string* Subscriber::GetSolverIterOptionList()
+/**
+ * Handles maneuvering on or off.
+ * 
+ * @param originator  The maneuver command pointer who is maneuvering
+ * @param maneuvering  Set to true if maneuvering
+ * @param epoch  Epoch of maneuver on or off
+ * @param satNames  Names of the maneuvering spacecraft
+ * @param desc  Description of maneuver (e.g. impulsive or finite)
+ */
+//------------------------------------------------------------------------------
+void Subscriber::HandleManeuvering(GmatBase *originator, bool maneuvering,
+                                   Real epoch, const StringArray &satNames,
+                                   const std::string &desc)
 {
-   return SOLVER_ITER_OPTION_TEXT;
+   // do nothing here
 }
+
+
+//------------------------------------------------------------------------------
+// void HandleScPropertyChange(GmatBase *originator, Real epoch,
+//                             const std::string &satName, const std::string &desc)
+//------------------------------------------------------------------------------
+/**
+ * Handles spacecraft property change.
+ * 
+ * @param originator  The assignment command pointer who is setting
+ * @param epoch  Epoch of spacecraft at property change
+ * @param satName  Name of the spacecraft
+ * @param desc  Description of property change
+ */
+//------------------------------------------------------------------------------
+void Subscriber::HandleScPropertyChange(GmatBase *originator, Real epoch,
+                                        const std::string &satName,
+                                        const std::string &desc)
+{
+   // do nothing here
+}
+
+
 

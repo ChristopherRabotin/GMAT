@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  GeocentricSolarMagneticAxes
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -30,8 +32,7 @@
 #include "Planet.hpp"
 #include "RealUtilities.hpp"
 #include "Linear.hpp"
-#include "RealTypes.hpp"
-#include "TimeTypes.hpp"
+#include "GmatConstants.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 #include "TimeSystemConverter.hpp"
@@ -39,10 +40,10 @@
 #include "MessageInterface.hpp"
 
 #include <iostream>
-using namespace std; // *********************
+
 
 using namespace GmatMathUtil;      // for trig functions, etc.
-using namespace GmatTimeUtil;      // for JD offsets, etc.
+using namespace GmatTimeConstants;      // for JD offsets, etc.
 
 //#define ROT_MAT_DEBUG
 //#define DEBUG_TIME_CALC
@@ -50,8 +51,8 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
 // static data
 //---------------------------------
 // wcs - 2006.05.01 added negative sign per Bug 260
-const Real GeocentricSolarMagneticAxes::lambdaD = -70.1 * GmatMathUtil::RAD_PER_DEG;  // degrees West
-const Real GeocentricSolarMagneticAxes::phiD    = 78.6 * GmatMathUtil::RAD_PER_DEG;  // degrees North
+const Real GeocentricSolarMagneticAxes::lambdaD = -70.1 * GmatMathConstants::RAD_PER_DEG;  // degrees West
+const Real GeocentricSolarMagneticAxes::phiD    = 78.6 * GmatMathConstants::RAD_PER_DEG;  // degrees North
 
 
 //------------------------------------------------------------------------------
@@ -276,9 +277,9 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                   JD_JAN_5_1941);
    //Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
                                              // Compute elapsed Julian centuries (UT1)
-   //Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
-   offset =  JD_JAN_5_1941 - 2451545.0;
-   Real tUT1     = (mjdUT1 + offset) / 36525.0;
+   //Real tUT1     = (jdUT1 - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
+   offset =  JD_JAN_5_1941 - JD_OF_J2000;
+   Real tUT1     = (mjdUT1 + offset) / DAYS_PER_JULIAN_CENTURY;
    
 
    // convert input A1 MJD to TT MJD (for most calculations)
@@ -291,8 +292,8 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real jdTT    = mjdTT + JD_JAN_5_1941; // right?
                                           // Compute Julian centuries of TDB from the base epoch (J2000)
                                           // NOTE - this is really TT, an approximation of TDB *********
-   //Real tTDB    = (jdTT - 2451545.0) / 36525.0;
-   Real tTDB    = (mjdTT + offset) / 36525.0;
+   //Real tTDB    = (jdTT - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
+   Real tTDB    = (mjdTT + offset) / DAYS_PER_JULIAN_CENTURY;
 
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetNutationUpdateInterval();

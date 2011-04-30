@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            NotAKnotInterpolator
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -69,7 +71,8 @@ NotAKnotInterpolator::NotAKnotInterpolator(const std::string &name,
  */
 //------------------------------------------------------------------------------
 NotAKnotInterpolator::~NotAKnotInterpolator()
-{
+{   
+   CleanupArrays();
 }
 
 
@@ -82,12 +85,11 @@ NotAKnotInterpolator::~NotAKnotInterpolator()
  * @param csi The original that is being copied.
  */
 //------------------------------------------------------------------------------
-NotAKnotInterpolator::NotAKnotInterpolator
-                                          (const NotAKnotInterpolator &csi) :
+NotAKnotInterpolator::NotAKnotInterpolator(const NotAKnotInterpolator &csi) :
    Interpolator       (csi),
    lastX              (csi.lastX)
 {
-	B[0]  = NULL;
+   B[0]  = NULL;
    B[1]  = NULL;
    B[2]  = NULL;
    s[0]  = NULL;
@@ -110,8 +112,8 @@ NotAKnotInterpolator::NotAKnotInterpolator
       
    for (i = 0; i < 3; i++)
    {
-   	   for (j = 0; j < 3; j++)
-   	      A[i][j] = csi.A[i][j];
+      for (j = 0; j < 3; j++)
+         A[i][j] = csi.A[i][j];
    }
 }
 
@@ -132,17 +134,11 @@ NotAKnotInterpolator& NotAKnotInterpolator::operator=
 {
    if (&csi == this)
       return *this;
-        
-   B[0]  = NULL;
-   B[1]  = NULL;
-   B[2]  = NULL;
-   s[0]  = NULL;
-   s[1]  = NULL;
-   s[2]  = NULL;
-   s[3]  = NULL;
-   s[4]  = NULL;
+   
+   CleanupArrays();
+   
    lastX = csi.lastX;
-        
+   
    CopyArrays(csi);
    
    Integer i, j;
@@ -152,8 +148,8 @@ NotAKnotInterpolator& NotAKnotInterpolator::operator=
       
    for (i = 0; i < 3; i++)
    {
-   	   for (j = 0; j < 3; j++)
-   	      A[i][j] = csi.A[i][j];
+      for (j = 0; j < 3; j++)
+         A[i][j] = csi.A[i][j];
    }
    
    return *this;
@@ -186,6 +182,17 @@ bool NotAKnotInterpolator::Interpolate(const Real ind, Real *results)
       retval = Estimate(ind, results);
       
    #ifdef DUMP_SPLINE_POINTS
+      MessageInterface::ShowMessage("Cubic spline uses these points:\n");
+      for (Integer i = 0; i < 5; ++i)
+      {
+         MessageInterface::ShowMessage("   %.12lf:", x[i]);
+         for (Integer j = 0; j < dimension; ++j)
+            MessageInterface::ShowMessage("   %.12lf", y[i][j]);
+         MessageInterface::ShowMessage("\n");
+      }
+            
+         
+   
       MessageInterface::ShowMessage("Cubic spline (not a knot) data points:\n");
       
       Real increment = (x[bufferSize - 1] - x[0]) / 100.0, xval;
@@ -199,6 +206,10 @@ bool NotAKnotInterpolator::Interpolate(const Real ind, Real *results)
             MessageInterface::ShowMessage("   %.12lf", dumpData[j]);
          MessageInterface::ShowMessage("\n");
       } 
+      
+      MessageInterface::ShowMessage("Spline Estimate:\n");
+      for (Integer i = 0; i < dimension; ++i)
+         MessageInterface::ShowMessage("   %02d:   %.12lf\n", i, results[i]);
       
       delete [] dumpData;   
    #endif

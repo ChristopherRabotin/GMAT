@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  A1Date
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -144,6 +146,31 @@ A1Date A1Date::operator= (const A1Date &a1date)
       Date::operator=(a1date);
    
    return *this;
+}
+
+//------------------------------------------------------------------------------
+//  bool operator> (const A1Date &a1date) const
+//------------------------------------------------------------------------------
+/**
+ * Comparison operator >
+ */
+//------------------------------------------------------------------------------
+bool A1Date::operator> (const A1Date &a1date) const
+{
+   return Date::operator>(a1date);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool operator< (const A1Date &a1date) const
+//------------------------------------------------------------------------------
+/**
+ * Comparison operator <
+ */
+//------------------------------------------------------------------------------
+bool A1Date::operator< (const A1Date &a1date) const
+{
+   return Date::operator<(a1date);
 }
 
 //------------------------------------------------------------------------------

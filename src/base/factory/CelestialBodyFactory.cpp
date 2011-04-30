@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            CelestialBodyFactory
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,6 +25,8 @@
 #include "Star.hpp"
 #include "Planet.hpp"
 #include "Moon.hpp"
+#include "Comet.hpp"
+#include "Asteroid.hpp"
 
 
 //---------------------------------
@@ -53,7 +57,11 @@ CelestialBody* CelestialBodyFactory::CreateCelestialBody(
       return new Planet(withName);
    else if (ofType == "Moon")
       return new Moon(withName);
-   // add more here .......
+   else if (ofType == "Comet")
+      return new Comet(withName);
+   else if (ofType == "Asteroid")
+      return new Asteroid(withName);
+   // add more here ??  KBOs?  .......
    else
    {
       return NULL;   // doesn't match any known type of command
@@ -78,6 +86,8 @@ Factory(Gmat::CELESTIAL_BODY)
       creatables.push_back("Star");
       creatables.push_back("Planet");
       creatables.push_back("Moon");
+      creatables.push_back("Comet");
+      creatables.push_back("Asteroid");
    }
 }
 
@@ -100,6 +110,8 @@ Factory(createList,Gmat::CELESTIAL_BODY)
       creatables.push_back("Star");
       creatables.push_back("Planet");
       creatables.push_back("Moon");
+      creatables.push_back("Comet");
+      creatables.push_back("Asteroid");
    }
 }
 
@@ -121,6 +133,8 @@ Factory(fact)
       creatables.push_back("Star");
       creatables.push_back("Planet");
       creatables.push_back("Moon");
+      creatables.push_back("Comet");
+      creatables.push_back("Asteroid");
    }
 }
 
@@ -146,6 +160,8 @@ CelestialBodyFactory& CelestialBodyFactory::operator= (
       creatables.push_back("Star");
       creatables.push_back("Planet");
       creatables.push_back("Moon");
+      creatables.push_back("Comet");
+      creatables.push_back("Asteroid");
    }
    return *this;
 }

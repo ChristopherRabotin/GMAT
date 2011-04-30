@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  MatlabFunction
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,7 +25,7 @@
 #include "StringUtil.hpp"        // for Trim()
 #include "MessageInterface.hpp"
 
-//#defin DEBUG_MATLAB_FUNCTION
+//#define DEBUG_MATLAB_FUNCTION
 
 
 //------------------------------------------------------------------------------
@@ -46,11 +48,13 @@ MatlabFunction::MatlabFunction(const std::string &name) :
    try
    {
       // matlab uses directory path
-      pathname = fm->GetFullPathname("MATLAB_FUNCTION_PATH");
+      pathname = fm->GetMatlabFunctionPath(name);
       functionPath = pathname;
    }
    catch (GmatBaseException &e)
    {
+      // Use exception to remove Visual C++ warning
+      e.GetMessageType();
       #ifdef DEBUG_MATLAB_FUNCTION
       MessageInterface::ShowMessage(e.GetFullMessage());
       #endif
@@ -63,6 +67,8 @@ MatlabFunction::MatlabFunction(const std::string &name) :
       }
       catch (GmatBaseException &e)
       {
+         // Use exception to remove Visual C++ warning
+         e.GetMessageType();
          #ifdef DEBUG_MATLAB_FUNCTION
          MessageInterface::ShowMessage(e.GetFullMessage());
          #endif

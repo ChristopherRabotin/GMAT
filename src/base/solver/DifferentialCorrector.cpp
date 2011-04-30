@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                         DifferentialCorrector
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -13,7 +15,7 @@
 // Created: 2003/12/29
 //
 /**
- * Implementation for the differential corrector targeter. 
+ * Implementation for the differential corrector targeter.
  *
  * @todo Rework the mathematics using Rvector code.
  */
@@ -47,22 +49,16 @@ const std::string
 DifferentialCorrector::PARAMETER_TEXT[DifferentialCorrectorParamCount -
                                       SolverParamCount] =
 {
-   //"TargeterTextFile",
-   //"Variables",
    "Goals",
-   //"MaximumIterations",
-   "UseCentralDifferences"
+   "DerivativeMethod"
 };
 
 const Gmat::ParameterType
 DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
                                       SolverParamCount] =
 {
-   //Gmat::STRING_TYPE,
-   //Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   // Gmat::INTEGER_TYPE,
-   Gmat::BOOLEAN_TYPE
+   Gmat::ENUMERATION_TYPE
 };
 
 
@@ -70,108 +66,96 @@ DifferentialCorrector::PARAMETER_TYPE[DifferentialCorrectorParamCount -
 // public methods
 //---------------------------------
 
+//------------------------------------------------------------------------------
+// DifferentialCorrector(std::string name)
+//------------------------------------------------------------------------------
 DifferentialCorrector::DifferentialCorrector(std::string name) :
    Solver                  ("DifferentialCorrector", name),
-   //variableCount           (0),
    goalCount               (0),
-   //iterationsTaken         (0),
-   //maxIterations           (25),
-   //variable                (NULL),
-   //perturbation            (NULL),
-   //variableMinimum         (NULL),
-   //variableMaximum         (NULL),
-   //variableMaximumStep     (NULL),
    goal                    (NULL),
    tolerance               (NULL),
    nominal                 (NULL),
    achieved                (NULL),
+   backAchieved            (NULL),
    jacobian                (NULL),
    inverseJacobian         (NULL),
    indx                    (NULL),
    b                       (NULL),
-   useCentralDifferences   (false)  //,
-   //initialized             (false),
-   //instanceNumber          (0)       // 0 indicates 1st instance w/ this name
+   derivativeMethod        ("ForwardDifference"),
+   diffMode                (1),
+   firstPert               (true),
+   incrementPert           (true)
 {
    #if DEBUG_DC_INIT
    MessageInterface::ShowMessage
       ("DifferentialCorrector::DC(constructor) entered\n");
    #endif
    objectTypeNames.push_back("DifferentialCorrector");
-   objectTypeNames.push_back("Targeter");  // should go in a Targeter class ...
    parameterCount = DifferentialCorrectorParamCount;
-   // textFileMode = "Verbose";
-   //solverTextFile = "targeter_";
-   //solverTextFile += instanceName;
-   //solverTextFile += ".data";
+   
+   AllowScaleFactors = false;
 }
 
 
+//------------------------------------------------------------------------------
+// DifferentialCorrector::~DifferentialCorrector()
+//------------------------------------------------------------------------------
 DifferentialCorrector::~DifferentialCorrector()
 {
    FreeArrays();
 }
 
 
+//------------------------------------------------------------------------------
+// DifferentialCorrector(const DifferentialCorrector &dc) :
+//------------------------------------------------------------------------------
 DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
    Solver                  (dc),
-   //variableCount           (dc.variableCount),
    goalCount               (dc.goalCount),
-   //iterationsTaken         (0),
-   //maxIterations           (dc.maxIterations),
-   //variable                (NULL),
-   //perturbation            (NULL),
-   //variableMinimum         (NULL),
-   //variableMaximum         (NULL),
-   //variableMaximumStep     (NULL),
    goal                    (NULL),
    tolerance               (NULL),
    nominal                 (NULL),
    achieved                (NULL),
+   backAchieved            (NULL),
    jacobian                (NULL),
    inverseJacobian         (NULL),
-   //pertNumber              (dc.pertNumber),
    indx                    (NULL),
    b                       (NULL),
-   useCentralDifferences   (dc.useCentralDifferences)  //,
-   //initialized             (false),
-   //solverTextFile          (dc.solverTextFile),
-   //instanceNumber          (dc.instanceNumber)
+   derivativeMethod        (dc.derivativeMethod),
+   diffMode                (dc.diffMode),
+   firstPert               (dc.firstPert),
+   incrementPert           (dc.incrementPert)
 {
    #if DEBUG_DC_INIT
    MessageInterface::ShowMessage
       ("DifferentialCorrector::DC(COPY constructor) entered\n");
    #endif
-  //variableNames.clear(); -> Solver
-  goalNames.clear();
-  
+   goalNames.clear();
+
    parameterCount = dc.parameterCount;
 }
 
 
-DifferentialCorrector& 
-    DifferentialCorrector::operator=(const DifferentialCorrector& dc)
+//------------------------------------------------------------------------------
+// operator=(const DifferentialCorrector& dc)
+//------------------------------------------------------------------------------
+DifferentialCorrector&
+DifferentialCorrector::operator=(const DifferentialCorrector& dc)
 {
-    if (&dc == this)
-        return *this;
+   if (&dc == this)
+      return *this;
 
    Solver::operator=(dc);
-   
+
    FreeArrays();
-   
-   //variableNames.clear();
    goalNames.clear();
 
-   //variableCount         = dc.variableCount;
-   goalCount             = dc.goalCount;
-   //iterationsTaken       = 0;
-   //maxIterations         = dc.maxIterations;
-   useCentralDifferences = dc.useCentralDifferences;
-   //initialized           = false;
-   //solverTextFile        = dc.solverTextFile;
-   //instanceNumber        = dc.instanceNumber;
-   //pertNumber            = dc.pertNumber;
-   
+   goalCount        = dc.goalCount;
+   derivativeMethod = dc.derivativeMethod;
+   diffMode         = dc.diffMode;
+   firstPert        = dc.firstPert;
+   incrementPert    = dc.incrementPert;
+
    return *this;
 }
 
@@ -197,7 +181,7 @@ GmatBase* DifferentialCorrector::Clone() const
 //---------------------------------------------------------------------------
 /**
  * Sets this object to match another one.
- * 
+ *
  * @param orig The original that is being copied.
  */
 //---------------------------------------------------------------------------
@@ -240,6 +224,23 @@ std::string DifferentialCorrector::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer DifferentialCorrector::GetParameterID(const std::string &str) const
 {
+   // Write deprecated message per GMAT session
+   static bool writeDeprecatedMsg = true;
+
+   // 1. This part will be removed for a future build:
+   if (str == "UseCentralDifferences")
+   {
+      if (writeDeprecatedMsg)
+      {
+         MessageInterface::ShowMessage
+            (deprecatedMessageFormat.c_str(), "UseCentralDifferences", GetName().c_str(),
+             "DerivativeMethod");
+         writeDeprecatedMsg = false;
+      }
+      return derivativeMethodID;
+   }
+
+   // 2. This part is kept for a future build:
    for (Integer i = SolverParamCount; i < DifferentialCorrectorParamCount; ++i)
    {
       if (str == PARAMETER_TEXT[i - SolverParamCount])
@@ -304,7 +305,7 @@ Integer DifferentialCorrector::GetIntegerParameter(const Integer id) const
 {
    //if (id == maxIterationsID)
    //   return maxIterations;
-        
+
    return Solver::GetIntegerParameter(id);
 }
 
@@ -335,7 +336,7 @@ Integer DifferentialCorrector::SetIntegerParameter(const Integer id,
    //         instanceName.c_str(), value);
    //   return maxIterations;
    //}
-    
+
    return Solver::SetIntegerParameter(id, value);
 }
 
@@ -355,9 +356,9 @@ Integer DifferentialCorrector::SetIntegerParameter(const Integer id,
 //------------------------------------------------------------------------------
 bool DifferentialCorrector::GetBooleanParameter(const Integer id) const
 {
-    if (id == useCentralDifferencingID)
-        return useCentralDifferences;
-        
+//    if (id == useCentralDifferencingID)
+//        return useCentralDifferences;
+
     return Solver::GetBooleanParameter(id);
 }
 
@@ -378,12 +379,12 @@ bool DifferentialCorrector::GetBooleanParameter(const Integer id) const
 bool DifferentialCorrector::SetBooleanParameter(const Integer id,
                                                 const bool value)
 {
-   if (id == useCentralDifferencingID)
-   {
-      useCentralDifferences = value;
-      return useCentralDifferences;
-   }
-        
+//   if (id == useCentralDifferencingID)
+//   {
+//      useCentralDifferences = value;
+//      return useCentralDifferences;
+//   }
+
    return Solver::SetBooleanParameter(id, value);
 }
 
@@ -404,8 +405,11 @@ std::string DifferentialCorrector::GetStringParameter(const Integer id) const
 {
     //if (id == solverTextFileID)
     //    return solverTextFile;
-        
-    return Solver::GetStringParameter(id);
+
+   if (id == derivativeMethodID)
+      return derivativeMethod;
+
+   return Solver::GetStringParameter(id);
 }
 
 
@@ -416,8 +420,8 @@ std::string DifferentialCorrector::GetStringParameter(const Integer id) const
  * This method sets a string or string array parameter value, given the input
  * parameter ID.
  *
- * @param <id>    ID for the requested parameter.
- * @param <value> string value for the parameter.
+ * @param id    ID for the requested parameter.
+ * @param value string value for the parameter.
  *
  * @return  The value of the parameter at the completion of the call.
  */
@@ -425,22 +429,47 @@ std::string DifferentialCorrector::GetStringParameter(const Integer id) const
 bool DifferentialCorrector::SetStringParameter(const Integer id,
                                                const std::string &value)
 {
-    //if (id == solverTextFileID) {
-    //    solverTextFile = value;
-    //    return true;
-    //}
-        
-    //if (id == variableNamesID) {
-    //    variableNames.push_back(value);
-    //    return true;
-    //}
-    
-    if (id == goalNamesID) {
-        goalNames.push_back(value);
-        return true;
-    }
-    
-    return Solver::SetStringParameter(id, value);
+   if (id == goalNamesID)
+   {
+      goalNames.push_back(value);
+      return true;
+   }
+
+   if (id == derivativeMethodID)
+   {
+      bool retval = true;
+      //   This is to handle deprecated value UseCentralDifferences = true
+      if (value == "true")
+         derivativeMethod = "CentralDifference";
+      //   This is to handle deprecated value UseCentralDifferences = false
+      else if (value == "false")
+         derivativeMethod = "ForwardDifference";
+      // Allowed values for DerivativeMethod
+      else if (value == "ForwardDifference" || value == "CentralDifference" ||
+               value == "BackwardDifference")
+      {
+         derivativeMethod = value;
+         if (derivativeMethod == "ForwardDifference")
+         {
+            diffMode = 1;
+         }
+         else if(derivativeMethod == "CentralDifference")
+         {
+            diffMode = 0;
+         }
+         else if(derivativeMethod == "BackwardDifference")
+         {
+            diffMode = -1;
+         }
+      }
+      //  All other values are not allowed!
+      else
+         retval = false;
+
+      return retval;
+   }
+
+   return Solver::SetStringParameter(id, value);
 }
 
 
@@ -461,10 +490,10 @@ const StringArray& DifferentialCorrector::GetStringArrayParameter(
 {
     //if (id == variableNamesID)
     //    return variableNames;
-        
+
     if (id == goalNamesID)
         return goalNames;
-        
+
     return Solver::GetStringArrayParameter(id);
 }
 
@@ -489,12 +518,18 @@ const StringArray& DifferentialCorrector::GetStringArrayParameter(
 bool DifferentialCorrector::TakeAction(const std::string &action,
                                        const std::string &actionData)
 {
+   if (action == "ResetInstanceCount")
+   {
+      instanceNumber = 0;
+      return true;
+   }
+
    if (action == "IncrementInstanceCount")
    {
       ++instanceNumber;
       return true;
    }
- 
+
    if (action == "Reset")
    {
       currentState = INITIALIZING;
@@ -526,12 +561,12 @@ bool DifferentialCorrector::TakeAction(const std::string &action,
 //------------------------------------------------------------------------------
 /**
  * Sets up the data fields used for the results of an iteration.
- * 
+ *
  * @param <data> An array of data appropriate to the results used in the
  *               algorithm (for instance, tolerances for targeter goals).
  * @param <name> A label for the data parameter.  Defaults to the empty
  *               string.
- * 
+ *
  * @return The ID used for this variable.
  */
 //------------------------------------------------------------------------------
@@ -553,10 +588,10 @@ Integer DifferentialCorrector::SetSolverResults(Real *data,
 //------------------------------------------------------------------------------
 /**
  * Updates the targeter goals, for floating end point targeting.
- * 
+ *
  * @param <id>       Id for the goal that is being reset.
  * @param <newValue> The new goal value.
- * 
+ *
  * @return true on success, throws on failure.
  */
 //------------------------------------------------------------------------------
@@ -576,11 +611,38 @@ bool DifferentialCorrector::UpdateSolverGoal(Integer id, Real newValue)
 
 
 //------------------------------------------------------------------------------
+// bool UpdateSolverTolerance(Integer id, Real newValue)
+//------------------------------------------------------------------------------
+/**
+ * Updates the targeter tolerances, for floating end point targeting.
+ *
+ * @param <id>       Id for the tolerance that is being reset.
+ * @param <newValue> The new tolerance value.
+ *
+ * @return true on success, throws on failure.
+ */
+//------------------------------------------------------------------------------
+bool DifferentialCorrector::UpdateSolverTolerance(Integer id, Real newValue)
+{
+   // Only update during nominal runs
+   if (currentState == NOMINAL) {
+      if (id >= goalCount)
+         throw SolverException(
+            "DifferentialCorrector member requested a parameter outside the "
+            "range of the configured goals.");
+
+      tolerance[id] = newValue;
+   }
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetResultValue(Integer id, Real value)
 //------------------------------------------------------------------------------
 /**
  * Passes in the results obtained from a run in the DifferentialCorrector loop.
- * 
+ *
  * @param <id>    The ID used for this result.
  * @param <value> The corresponding result.
  */
@@ -590,15 +652,20 @@ void DifferentialCorrector::SetResultValue(Integer id, Real value,
 {
    #ifdef DEBUG_STATE_MACHINE
       MessageInterface::ShowMessage(
-            "   State %d received id %d    value = %.12lf\n", currentState, id, 
+            "   State %d received id %d    value = %.12lf\n", currentState, id,
             value);
    #endif
-    if (currentState == NOMINAL) {
+    if (currentState == NOMINAL)
+    {
         nominal[id] = value;
     }
-        
-    if (currentState == PERTURBING) {
-        achieved[pertNumber][id] = value;
+
+    if (currentState == PERTURBING)
+    {
+       if (firstPert)
+          achieved[pertNumber][id] = value;
+       else
+          backAchieved[pertNumber][id] = value;
     }
 }
 
@@ -621,29 +688,31 @@ bool DifferentialCorrector::Initialize()
       ("DifferentialCorrector::Initialize() localVariableCount=%d, "
        "localGoalCount=%d\n", localVariableCount, localGoalCount);
    #endif
-   
+
    if (localVariableCount == 0 || localGoalCount == 0)
    {
       std::string errorMessage = "Targeter cannot initialize: ";
       errorMessage += "No goals or variables are set.\n";
       throw SolverException(errorMessage);
    }
-   
+
    FreeArrays();
-   
+
    // Setup the goal data structures
    goal      = new Real[localGoalCount];
    tolerance = new Real[localGoalCount];
    nominal   = new Real[localGoalCount];
-   
+
    // And the sensitivity matrix
    Integer i;
    achieved        = new Real*[localVariableCount];
+   backAchieved    = new Real*[localVariableCount];
    jacobian        = new Real*[localVariableCount];
    for (i = 0; i < localVariableCount; ++i)
    {
       jacobian[i]        = new Real[localGoalCount];
       achieved[i]        = new Real[localGoalCount];
+      backAchieved[i]    = new Real[localGoalCount];
    }
 
    inverseJacobian = new Real*[localGoalCount];
@@ -651,13 +720,13 @@ bool DifferentialCorrector::Initialize()
    {
       inverseJacobian[i] = new Real[localVariableCount];
    }
-      
+
    Solver::Initialize();
-   
+
    // Allocate the LU arrays
    indx = new Integer[variableCount];
    b = new Real[variableCount];
-    
+
    #if DEBUG_DC_INIT
       MessageInterface::ShowMessage
             ("DifferentialCorrector::Initialize() completed\n");
@@ -698,7 +767,7 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                   CompleteInitialization();
                   status = INITIALIZED;
                   break;
-                     
+
                case NOMINAL:
                   #ifdef DEBUG_STATE_MACHINE
                      MessageInterface::ShowMessage(
@@ -708,7 +777,7 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                   currentState = FINISHED;
                   status = RUN;
                   break;
-                  
+
                case FINISHED:
                default:
                   #ifdef DEBUG_STATE_MACHINE
@@ -720,12 +789,12 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                   break;
             }
          break;
-         
+
       case SOLVE:
       default:
          #ifdef DEBUG_TARGETING_MODES
             MessageInterface::ShowMessage(
-                  "Running in SOLVE or default mode; state = %d\n", 
+                  "Running in SOLVE or default mode; state = %d\n",
                   currentState);
          #endif
          switch (currentState)
@@ -741,7 +810,7 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                CompleteInitialization();
                status = INITIALIZED;
                break;
-                  
+
             case NOMINAL:
                #ifdef DEBUG_STATE_MACHINE
                   MessageInterface::ShowMessage(
@@ -752,7 +821,7 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                ReportProgress();
                status = RUN;
                break;
-              
+
             case PERTURBING:
                #ifdef DEBUG_STATE_MACHINE
                   MessageInterface::ShowMessage(
@@ -761,7 +830,7 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                ReportProgress();
                RunPerturbation();
                break;
-              
+
             case CALCULATING:
                #ifdef DEBUG_STATE_MACHINE
                   MessageInterface::ShowMessage(
@@ -770,24 +839,24 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                ReportProgress();
                CalculateParameters();
                break;
-              
+
             case CHECKINGRUN:
                 #ifdef DEBUG_STATE_MACHINE
                   MessageInterface::ShowMessage(
                         "Entered state machine; CHECKINGRUN\n");
                #endif
-              CheckCompletion();
+               CheckCompletion();
                ++iterationsTaken;
-               if (iterationsTaken > maxIterations)
+               if (iterationsTaken >= maxIterations)
                {
                   MessageInterface::ShowMessage(
                         "Differential corrector %s %s\n", instanceName.c_str(),
-                        "has exceeded to maximum number of allowed "
+                        "has exceeded the maximum number of allowed "
                         "iterations.");
                   currentState = FINISHED;
                }
                break;
-              
+
             case FINISHED:
                #ifdef DEBUG_STATE_MACHINE
                   MessageInterface::ShowMessage(
@@ -796,7 +865,7 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
                RunComplete();
                ReportProgress();
                break;
-              
+
             case ITERATING:             // Intentional drop-through
             default:
                #ifdef DEBUG_STATE_MACHINE
@@ -808,7 +877,7 @@ Solver::SolverState DifferentialCorrector::AdvanceState()
          }
          break;
    }
-     
+
    return currentState;
 }
 
@@ -841,7 +910,8 @@ void DifferentialCorrector::RunPerturbation()
    if (pertNumber != -1)
       // Back out the last pert applied
       variable.at(pertNumber) = lastUnperturbedValue;
-   ++pertNumber;
+   if (incrementPert)
+      ++pertNumber;
 
    if (pertNumber == variableCount)  // Current set of perts have been run
    {
@@ -851,20 +921,70 @@ void DifferentialCorrector::RunPerturbation()
    }
 
    lastUnperturbedValue = variable.at(pertNumber);
-   variable.at(pertNumber) += perturbation.at(pertNumber);
-   pertDirection.at(pertNumber) = 1.0;
-   
+   if (diffMode == 1)      // Forward difference
+   {
+      firstPert = true;
+      variable.at(pertNumber) += perturbation.at(pertNumber);
+      pertDirection.at(pertNumber) = 1.0;
+   }
+   else if (diffMode == 0) // Central difference
+   {
+      if (incrementPert)
+      {
+         firstPert = true;
+         incrementPert = false;
+         variable.at(pertNumber) += perturbation.at(pertNumber);
+         pertDirection.at(pertNumber) = 1.0;
+      }
+      else
+      {
+         firstPert = false;
+         incrementPert = true;
+         variable.at(pertNumber) -= perturbation.at(pertNumber);
+         pertDirection.at(pertNumber) = -1.0;
+      }
+   }
+   else                    // Backward difference
+   {
+      firstPert = true;
+      variable.at(pertNumber) -= perturbation.at(pertNumber);
+      pertDirection.at(pertNumber) = -1.0;
+   }
+
    if (variable[pertNumber] > variableMaximum[pertNumber])
    {
-      pertDirection.at(pertNumber) = -1.0;
-      variable[pertNumber] -= 2.0 * perturbation[pertNumber];
-   }    
+      if (diffMode == 0)
+      {
+         // Warn user that central differencing violates constraint and continue
+         MessageInterface::ShowMessage("Warning!  Perturbation violates the "
+               "maximum value for variable %s, but is being applied anyway to "
+               "perform central differencing in the differential corrector "
+               "%s\n", variableNames[pertNumber].c_str(), instanceName.c_str());
+      }
+      else
+      {
+         pertDirection.at(pertNumber) = -1.0;
+         variable[pertNumber] -= 2.0 * perturbation[pertNumber];
+      }
+   }
+
    if (variable[pertNumber] < variableMinimum[pertNumber])
    {
-      pertDirection.at(pertNumber) = -1.0;
-      variable[pertNumber] -= 2.0 * perturbation[pertNumber];
+      if (diffMode == 0)
+      {
+         // Warn user that central differencing violates constraint and continue
+         MessageInterface::ShowMessage("Warning!  Perturbation violates the "
+               "minimum value for variable %s, but is being applied anyway to "
+               "perform central differencing in the differential corrector "
+               "%s\n", variableNames[pertNumber].c_str(), instanceName.c_str());
+      }
+      else
+      {
+         pertDirection.at(pertNumber) = -1.0;
+         variable[pertNumber] -= 2.0 * perturbation[pertNumber];
+      }
    }
-       
+
    WriteToTextFile();
 }
 
@@ -881,7 +1001,7 @@ void DifferentialCorrector::CalculateParameters()
    // Build and invert the sensitivity matrix
    CalculateJacobian();
    InvertJacobian();
-    
+
    std::vector<Real> delta;
 
    // Apply the inverse Jacobian to build the next set of variables
@@ -891,38 +1011,38 @@ void DifferentialCorrector::CalculateParameters()
       for (Integer j = 0; j < goalCount; j++)
          delta[i] += inverseJacobian[j][i] * (goal[j] - nominal[j]);
    }
-    
+
    Real multiplier = 1.0, maxDelta;
-    
+
    // First validate the variable changes
    for (Integer i = 0; i < variableCount; ++i)
-   {    
+   {
       if (fabs(delta.at(i)) > variableMaximumStep.at(i))
       {
          maxDelta = fabs(variableMaximumStep.at(i) / delta.at(i));
          if (maxDelta < multiplier)
-            multiplier = maxDelta; 
+            multiplier = maxDelta;
       }
    }
-    
+
    #ifdef DEBUG_VARIABLES_CALCS
       MessageInterface::ShowMessage("Variable Values; Multiplier = %.15lf\n",
             multiplier);
    #endif
 
    for (Integer i = 0; i < variableCount; ++i)
-   {    
+   {
       // Ensure that delta is not larger than the max allowed step
       try
       {
          #ifdef DEBUG_VARIABLES_CALCS
             MessageInterface::ShowMessage(
                   "   %d:  %.15lf  +  %.15lf  *  %.15lf", i, variable.at(i),
-                  delta.at(i), multiplier);                       
+                  delta.at(i), multiplier);
          #endif
          variable.at(i) += delta.at(i) * multiplier;
          #ifdef DEBUG_VARIABLES_CALCS
-            MessageInterface::ShowMessage("  ->  %.15lf\n", variable.at(i));                       
+            MessageInterface::ShowMessage("  ->  %.15lf\n", variable.at(i));
          #endif
 
          // Ensure that variable[i] is in the allowed range
@@ -931,12 +1051,12 @@ void DifferentialCorrector::CalculateParameters()
          if (variable.at(i) > variableMaximum.at(i))
             variable.at(i) = variableMaximum.at(i);
       }
-      catch(std::exception &re)
+      catch(std::exception &)
       {
          throw SolverException("Range error in Solver::CalculateParameters\n");
       }
    }
-    
+
    WriteToTextFile();
    currentState = NOMINAL;
 }
@@ -953,23 +1073,29 @@ void DifferentialCorrector::CheckCompletion()
 {
    WriteToTextFile();
    bool converged = true;          // Assume convergence
-    
+
    // check for lack of convergence
    for (Integer i = 0; i < goalCount; ++i)
    {
-      //if (fabs(nominal[i] - goal[i]) > tolerance[i])
-      //loj: 4/4/05 Changed to use GmatMathUtil::Abs()
       if (GmatMathUtil::Abs(nominal[i] - goal[i]) > tolerance[i])
          converged = false;
    }
 
    if (!converged)
    {
-      // Set to run perts if not converged
-      pertNumber = -1;
-      // Build the first perturbation
-      currentState = PERTURBING;
-      RunPerturbation();
+      if (iterationsTaken < maxIterations-1)
+      {
+         // Set to run perts if not converged
+         pertNumber = -1;
+         // Build the first perturbation
+         currentState = PERTURBING;
+         RunPerturbation();
+      }
+      else
+      {
+         currentState = FINISHED;
+         status = EXCEEDED_ITERATIONS;
+      }
    }
    else
    {
@@ -997,20 +1123,34 @@ void DifferentialCorrector::RunComplete()
 //  void CalculateJacobian()
 //------------------------------------------------------------------------------
 /**
- * Calculates the matrix of derivatives of the goals with respect to the 
+ * Calculates the matrix of derivatives of the goals with respect to the
  * variables.
  */
 //------------------------------------------------------------------------------
 void DifferentialCorrector::CalculateJacobian()
 {
    Integer i, j;
-    
-   for (i = 0; i < variableCount; ++i)
+
+   if (diffMode != 0)
    {
-      for (j = 0; j < goalCount; ++j)
+      for (i = 0; i < variableCount; ++i)
       {
-          jacobian[i][j] = achieved[i][j] - nominal[j];
-          jacobian[i][j] /= (pertDirection.at(i) * perturbation.at(i));
+         for (j = 0; j < goalCount; ++j)
+         {
+             jacobian[i][j] = achieved[i][j] - nominal[j];
+             jacobian[i][j] /= (pertDirection.at(i) * perturbation.at(i));
+         }
+      }
+   }
+   else        // Central differencing
+   {
+      for (i = 0; i < variableCount; ++i)
+      {
+         for (j = 0; j < goalCount; ++j)
+         {
+             jacobian[i][j] = achieved[i][j] - backAchieved[i][j]; // nominal[j];
+             jacobian[i][j] /= (2.0 * perturbation.at(i));
+         }
       }
    }
 }
@@ -1027,7 +1167,7 @@ void DifferentialCorrector::CalculateJacobian()
 void DifferentialCorrector::InvertJacobian()
 {
    #ifdef DEBUG_JACOBIAN
-      MessageInterface::ShowMessage("Inverting %d by %d Jacobian\n", 
+      MessageInterface::ShowMessage("Inverting %d by %d Jacobian\n",
             variableCount, goalCount);
    #endif
    Rmatrix jac(variableCount, goalCount);
@@ -1035,30 +1175,30 @@ void DifferentialCorrector::InvertJacobian()
       for (Integer j = 0; j < goalCount; ++j)
       {
          #ifdef DEBUG_JACOBIAN
-            MessageInterface::ShowMessage("   jacobian[%d][%d] = %.14lf\n", i, 
+            MessageInterface::ShowMessage("   jacobian[%d][%d] = %.14lf\n", i,
                   j, jacobian[i][j]);
          #endif
          jac(i,j) = jacobian[i][j];
       }
-         
+
    Rmatrix inv;
    if (variableCount == goalCount)
       inv = jac.Inverse();
    else
       inv = jac.Pseudoinverse();
-   
+
    #ifdef DEBUG_JACOBIAN
-      MessageInterface::ShowMessage("Inverse Jacobian is %d by %d\n", 
+      MessageInterface::ShowMessage("Inverse Jacobian is %d by %d\n",
             variableCount, goalCount);
    #endif
 
    #ifdef DEBUG_DC_INVERSIONS
       std::string preface = "   ";
       if (variableCount == goalCount)
-         MessageInterface::ShowMessage("Inverse:\n%s\n", 
+         MessageInterface::ShowMessage("Inverse:\n%s\n",
                (inv.ToString(16, false, preface).c_str()));
       else
-         MessageInterface::ShowMessage("PseudoInverse:\n%s\n", 
+         MessageInterface::ShowMessage("PseudoInverse:\n%s\n",
                inv.ToString(16, false, preface).c_str());
    #endif
 
@@ -1068,7 +1208,7 @@ void DifferentialCorrector::InvertJacobian()
          inverseJacobian[i][j] = inv(i,j);
          #ifdef DEBUG_JACOBIAN
             MessageInterface::ShowMessage(
-                  "   inverseJacobian[%d][%d] = %.14lf\n", i, j, 
+                  "   inverseJacobian[%d][%d] = %.14lf\n", i, j,
                   inverseJacobian[i][j]);
          #endif
       }
@@ -1079,8 +1219,8 @@ void DifferentialCorrector::InvertJacobian()
 //  void FreeArrays()
 //------------------------------------------------------------------------------
 /**
- * Frees the memory used by the targeter, so it can be reused later in the 
- * sequence.  This method is also called by the destructor when the script is 
+ * Frees the memory used by the targeter, so it can be reused later in the
+ * sequence.  This method is also called by the destructor when the script is
  * cleared.
  */
 //------------------------------------------------------------------------------
@@ -1105,13 +1245,21 @@ void DifferentialCorrector::FreeArrays()
       delete [] nominal;
       nominal = NULL;
    }
-    
+
    if (achieved)
    {
       for (Integer i = 0; i < variableCount; ++i)
          delete [] achieved[i];
       delete [] achieved;
       achieved = NULL;
+   }
+
+   if (backAchieved)
+   {
+      for (Integer i = 0; i < variableCount; ++i)
+         delete [] backAchieved[i];
+      delete [] backAchieved;
+      backAchieved = NULL;
    }
 
    if (jacobian)
@@ -1129,13 +1277,13 @@ void DifferentialCorrector::FreeArrays()
       delete [] inverseJacobian;
       inverseJacobian = NULL;
    }
-    
+
    if (indx)
    {
       delete [] indx;
       indx = NULL;
    }
-    
+
    if (b)
    {
       delete [] b;
@@ -1202,7 +1350,7 @@ std::string DifferentialCorrector::GetProgressString()
                if (solverMode != "")
                   progress << "\n   SolverMode:  "
                            << solverMode;
-               
+
 
                progress << "\n****************************"
                         << "****************************";
@@ -1218,7 +1366,10 @@ std::string DifferentialCorrector::GetProgressString()
             {
                if (current != variableNames.begin())
                   progress << ", ";
-               progress << *current << " = " << variable.at(i++);
+               progress << *current << " = " << unscaledVariable.at(i);
+               if (textFileMode == "Verbose")
+                  progress << "; targeter scaled value: " << variable[i];
+               ++i;
             }
             break;
 
@@ -1226,8 +1377,10 @@ std::string DifferentialCorrector::GetProgressString()
             progress << "   Completed iteration " << iterationsTaken
                      << ", pert " << pertNumber+1 << " ("
                      << variableNames[pertNumber] << " = "
-                     << variable.at(pertNumber) << ")\n";
-                     //<< variable[pertNumber] << ")\n";
+                     << unscaledVariable.at(pertNumber);
+            if (textFileMode == "Verbose")
+               progress << "; targeter scaled value: " << variable[pertNumber];
+            progress << ")";
             break;
 
          case CALCULATING:
@@ -1241,7 +1394,7 @@ std::string DifferentialCorrector::GetProgressString()
             for (current = goalNames.begin(), i = 0;
                  current != goalNames.end(); ++current)
             {
-               progress << "      " << *current 
+               progress << "      " << *current
                         << "  Desired: " << goal[i]
                         << "  Achieved: " << nominal[i]
                         << "  Variance: " << (goal[i] - nominal[i])
@@ -1259,13 +1412,13 @@ std::string DifferentialCorrector::GetProgressString()
                            << "***\n   Variable Values:\n";
                   for (current = variableNames.begin(), i = 0;
                        current != variableNames.end(); ++current)
-                     progress << "      " << *current 
-                              << " = " << variable.at(i++) << "\n";
+                     progress << "      " << *current
+                              << " = " << unscaledVariable.at(i++) << "\n";
                   progress << "\n   Goal Values:\n";
                   for (current = goalNames.begin(), i = 0;
                        current != goalNames.end(); ++current)
                   {
-                     progress << "      " << *current 
+                     progress << "      " << *current
                               << "  Desired: " << goal[i]
                               << "  Achieved: " << nominal[i]
                               << "  Variance: " << (goal[i] - nominal[i])
@@ -1273,12 +1426,12 @@ std::string DifferentialCorrector::GetProgressString()
                      ++i;
                   }
                   break;
-                  
+
                case SOLVE:
                default:
                   progress << "\n*** Targeting Completed in " << iterationsTaken
                            << " iterations";
-                           
+
                   if (iterationsTaken > maxIterations)
                      progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                            << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
@@ -1290,8 +1443,8 @@ std::string DifferentialCorrector::GetProgressString()
                   // Iterate through the variables, writing them to the string
                   for (current = variableNames.begin(), i = 0;
                        current != variableNames.end(); ++current)
-                     progress << "   " << *current << " = " 
-                              << variable.at(i++) << "\n";
+                     progress << "   " << *current << " = "
+                              << unscaledVariable.at(i++) << "\n";
             }
             break;
 
@@ -1303,7 +1456,7 @@ std::string DifferentialCorrector::GetProgressString()
    }
    else
       return Solver::GetProgressString();
-      
+
    return progress.str();
 }
 
@@ -1317,6 +1470,19 @@ std::string DifferentialCorrector::GetProgressString()
 //------------------------------------------------------------------------------
 void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
 {
+   #ifdef DEBUG_SOLVER_WRITE
+   MessageInterface::ShowMessage
+      ("DC::WriteToTextFile() entered, stateToUse=%d, solverTextFile='%s', "
+       "textFileOpen=%d, initialized=%d\n", stateToUse, solverTextFile.c_str(),
+       textFile.is_open(), initialized);
+   #endif
+
+   if (!showProgress)
+      return;
+
+   if (!textFile.is_open())
+      OpenSolverTextFile();
+
    StringArray::iterator current;
    Integer i, j;
    if (initialized)
@@ -1348,9 +1514,9 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                {
                   textFile << *current << "\n***    ";
                }
-                 
+
                textFile << "\n*** Goals:\n***    ";
-                 
+
                for (current = goalNames.begin(), i = 0;
                     current != goalNames.end(); ++current)
                {
@@ -1367,7 +1533,7 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                         << std::endl;
             }
             break;
-            
+
          case NOMINAL:
             textFile << "Iteration " << iterationsTaken+1
                      << "\nRunning Nominal Pass\nVariables:\n   ";
@@ -1375,12 +1541,15 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               //textFile << *current << " = " << variable[i++] << "\n   ";
-               textFile << *current << " = " << variable.at(i++) << "\n   ";
+               textFile << *current << " = " << unscaledVariable.at(i);
+               if ((textFileMode == "Verbose") || (textFileMode == "Debug"))
+                     textFile << "; targeter scaled value: " << variable.at(i);
+               textFile << "\n   ";
+               ++i;
             }
             textFile << std::endl;
             break;
-            
+
          case PERTURBING:
             if ((textFileMode == "Verbose") || (textFileMode == "Debug"))
             {
@@ -1388,7 +1557,7 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                {
                   // Iterate through the goals, writing them to the file
                   textFile << "Goals and achieved values:\n   ";
-                   
+
                   for (current = goalNames.begin(), i = 0;
                        current != goalNames.end(); ++current)
                   {
@@ -1403,12 +1572,15 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                for (current = variableNames.begin(), i = 0;
                     current != variableNames.end(); ++current)
                {
-                  //textFile << *current << " = " << variable[i++] << "\n   ";
-                  textFile << *current << " = " << variable.at(i++) << "\n   ";
+                  textFile << *current << " = " << unscaledVariable.at(i);
+                  if ((textFileMode == "Verbose") || (textFileMode == "Debug"))
+                        textFile << "; targeter scaled value: " << variable.at(i);
+                  textFile << "\n   ";
+                  ++i;
                }
                textFile << std::endl;
             }
-            
+
             if (textFileMode == "Debug")
             {
                textFile << "------------------------------------------------\n"
@@ -1416,17 +1588,17 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                         << debugString << "\n"
                         << "------------------------------------------------\n";
             }
-                
+
             break;
-            
+
          case CALCULATING:
             if (textFileMode == "Verbose")
             {
                textFile << "Calculating" << std::endl;
-                   
+
                // Iterate through the goals, writing them to the file
                textFile << "Goals and achieved values:\n   ";
-                   
+
                for (current = goalNames.begin(), i = 0;
                     current != goalNames.end(); ++current)
                {
@@ -1437,7 +1609,7 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                }
                textFile << std::endl;
             }
-                
+
             textFile << "\nJacobian (Sensitivity matrix):\n";
             for (i = 0; i < variableCount; ++i)
             {
@@ -1447,7 +1619,7 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                }
                textFile << "\n";
             }
-            
+
             textFile << "\n\nInverse Jacobian:\n";
             for (i = 0; i < goalCount; ++i)
             {
@@ -1457,8 +1629,8 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                }
                textFile << "\n";
             }
-            
-            textFile << "\n\nNew variable estimates:\n   ";
+
+            textFile << "\n\nNew scaled variable estimates:\n   ";
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
@@ -1467,11 +1639,11 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
             }
             textFile << std::endl;
             break;
-            
+
          case CHECKINGRUN:
             // Iterate through the goals, writing them to the file
             textFile << "Goals and achieved values:\n   ";
-                
+
             for (current = goalNames.begin(), i = 0;
                  current != goalNames.end(); ++current)
             {
@@ -1481,12 +1653,12 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                         << "\n   ";
                ++i;
             }
-                
+
             textFile << "\n*****************************"
                      << "***************************\n"
                      << std::endl;
             break;
-            
+
          case FINISHED:
             textFile << "\n****************************"
                      << "****************************\n"
@@ -1495,9 +1667,9 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
                      << "\n****************************"
                      << "****************************\n"
                      << std::endl;
-                         
+
             break;
-            
+
          case ITERATING:     // Intentional fall through
          default:
             throw SolverException(

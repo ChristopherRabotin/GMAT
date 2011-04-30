@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                         Optimizer
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -38,6 +40,7 @@ Optimizer::PARAMETER_TEXT[OptimizerParamCount -SolverParamCount] =
    "Tolerance",
    "EqualityConstraintNames",
    "InequalityConstraintNames",
+   "PlotCost",
 };
 
 const Gmat::ParameterType
@@ -47,6 +50,7 @@ Optimizer::PARAMETER_TYPE[OptimizerParamCount - SolverParamCount] =
    Gmat::REAL_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
+   Gmat::BOOLEAN_TYPE,
 };
 
 const Integer Optimizer::EQ_CONST_START   = 1000;
@@ -130,7 +134,8 @@ bool Optimizer::IsParameterReadOnly(const Integer id) const
 {
    if ((id == OBJECTIVE_FUNCTION) ||
        (id == EQUALITY_CONSTRAINT_NAMES) ||
-       (id == INEQUALITY_CONSTRAINT_NAMES))
+       (id == INEQUALITY_CONSTRAINT_NAMES) ||
+       (id == PLOT_COST_FUNCTION))
       return true;
       
    return Solver::IsParameterReadOnly(id);
@@ -564,6 +569,12 @@ Real Optimizer::SetRealParameter(const Integer id, const Real value)
 {
    if (id == OPTIMIZER_TOLERANCE)
    {
+      if (value <= 0.0)
+         throw SolverException(
+               "The value entered for the optimizer tolerance on " +
+               instanceName + " is not an allowed value. The allowed value "
+               "is: [Real > 0.0].");
+
       tolerance = value;
       return tolerance;
    }

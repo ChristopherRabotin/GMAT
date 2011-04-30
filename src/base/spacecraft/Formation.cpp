@@ -2,15 +2,21 @@
 //------------------------------------------------------------------------------
 //                              Formation
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CI63P
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: 2004/7/24
+// Modified: 
+//    2010.03.25 Thomas Grubb 
+//      - Modified IsParameterReadOnly to correctly set CartesianState and
+//        A1Epoch to true
 //
 /**
  * Implements the class used for formations. 
@@ -35,7 +41,9 @@ Formation::PARAMETER_TEXT[FormationParamCount - SpaceObjectParamCount] =
 {
    "Add",
    "Remove",
-   "Clear"
+   "Clear",
+   "STM",
+   "CartesianState",
 };
 
 
@@ -44,7 +52,9 @@ Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 {
    Gmat::OBJECTARRAY_TYPE,
    Gmat::OBJECT_TYPE,     
-   Gmat::BOOLEAN_TYPE
+   Gmat::BOOLEAN_TYPE,
+   Gmat::RMATRIX_TYPE,      // FORMATION_STM,
+   Gmat::REAL_TYPE,        // FORMATION_CARTESIAN_STATE,
 };
 
 
@@ -176,7 +186,7 @@ const Rvector6 Formation::GetMJ2000State(const A1Mjd &atTime)
    // First calculate the geometric center of the formation
    Rvector6 centerState;
 
-   PropState ps = GetState();
+   GmatState ps = GetState();
    Real *st = ps.GetState();
    
    if (satCount == 0)
@@ -186,7 +196,7 @@ const Rvector6 Formation::GetMJ2000State(const A1Mjd &atTime)
       return centerState;
    }
 
-   // The Formation PropState contains state data for the spacecraft, tanks, and
+   // The Formation GmatState contains state data for the spacecraft, tanks, and
    // (eventually) attitude.  The first 6*satcount elements are the spacecraft
    // position and velocity data.
    for (UnsignedInt i = 0; i < satCount; ++i)
@@ -318,6 +328,11 @@ std::string Formation::GetParameterText(const Integer id) const
 {
    if (id >= SpaceObjectParamCount && id < FormationParamCount)
       return PARAMETER_TEXT[id - SpaceObjectParamCount];
+   
+   if ((id >= FORMATION_CARTESIAN_STATE) && 
+       (id < FORMATION_CARTESIAN_STATE + dimension))
+      return PARAMETER_TEXT[FORMATION_CARTESIAN_STATE - SpaceObjectParamCount];
+      
    return SpaceObject::GetParameterText(id);
 }
 
@@ -360,6 +375,10 @@ Gmat::ParameterType Formation::GetParameterType(const Integer id) const
 {
    if (id >= SpaceObjectParamCount && id < FormationParamCount)
       return PARAMETER_TYPE[id - SpaceObjectParamCount];
+
+   if ((id >= FORMATION_CARTESIAN_STATE) && 
+       (id < FORMATION_CARTESIAN_STATE + dimension))
+      return PARAMETER_TYPE[FORMATION_CARTESIAN_STATE - SpaceObjectParamCount];
       
    return SpaceObject::GetParameterType(id);
 }
@@ -378,7 +397,14 @@ Gmat::ParameterType Formation::GetParameterType(const Integer id) const
 //---------------------------------------------------------------------------
 bool Formation::IsParameterReadOnly(const Integer id) const
 {
+   if (id == EPOCH_PARAM)
+      return true;
+
    if ((id == REMOVED_SPACECRAFT) || (id == CLEAR_NAMES))
+      return true;
+   
+   if ((id >= FORMATION_CARTESIAN_STATE) && 
+       (id <= FORMATION_CARTESIAN_STATE + dimension))
       return true;
 
    return SpaceObject::IsParameterReadOnly(id);
@@ -549,24 +575,35 @@ bool Formation::SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 Real Formation::SetRealParameter(const Integer id, const Real value)
 {
-   Real retval = SpaceObject::SetRealParameter(id, value);
-      
-   if (id == EPOCH_PARAM)
+   Real retval = -1.0;
+
+   if ((id >= FORMATION_CARTESIAN_STATE) && 
+       (id < FORMATION_CARTESIAN_STATE + dimension))
    {
-      if (retval != value)
-         throw SpaceObjectException(
-            "Formation update returned incorrect epoch");
-      // Update the epoch on the constituent pieces
-      for (std::vector<SpaceObject*>::iterator i = components.begin();
-           i != components.end(); ++i)
+      state[id - FORMATION_CARTESIAN_STATE] = value;
+      retval = value;
+   }
+   else
+   {
+      retval = SpaceObject::SetRealParameter(id, value);
+         
+      if (id == EPOCH_PARAM)
       {
-         retval = (*i)->SetRealParameter(id, value);
          if (retval != value)
             throw SpaceObjectException(
-               "Formation constituent returned incorrect epoch");
+               "Formation update returned incorrect epoch");
+         // Update the epoch on the constituent pieces
+         for (std::vector<SpaceObject*>::iterator i = components.begin();
+              i != components.end(); ++i)
+         {
+            retval = (*i)->SetRealParameter(id, value);
+            if (retval != value)
+               throw SpaceObjectException(
+                  "Formation constituent returned incorrect epoch");
+         }
       }
-   }
-   
+   }   
+
    return retval;
 }
 
@@ -758,7 +795,7 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       so = ((SpaceObject*)(obj));
       if (find(components.begin(), components.end(), so) == components.end())
       {
-         PropState *ps = &(so->GetState());
+         GmatState *ps = &(so->GetState());
          Integer size = ps->GetSize();
          dimension += size;
          Real newepoch = so->GetEpoch();
@@ -878,7 +915,7 @@ ObjectArray& Formation::GetRefObjectArray(const std::string& typeString)
 // void BuildState()
 //------------------------------------------------------------------------------
 /**
- * Constructs a PropState for a Formation.
+ * Constructs a GmatState for a Formation.
  */
 //------------------------------------------------------------------------------
 void Formation::BuildState()
@@ -893,10 +930,10 @@ void Formation::BuildState()
       throw SpaceObjectException(
          "Error building Formation state; no spacecraft are set");
 
-   // Setup the PropState
+   // Setup the GmatState
    Real *data = new Real[dimension], *st;
    Integer j = 0, k;
-   PropState *ps;
+   GmatState *ps;
 
    if (state.GetSize() < dimension)
       state.SetSize(dimension);
@@ -935,7 +972,14 @@ void Formation::BuildState()
    #endif
    
    if (!state.SetState(data, dimension))
+   {
+      delete [] data;
       throw SpaceObjectException("Error building Formation state");
+   }
+   
+   // as per kw report
+   // Shouldn't we delete data here since GmatState::SetState() copies the data
+   delete [] data;
 }
 
 
@@ -943,13 +987,13 @@ void Formation::BuildState()
 // void UpdateElements()
 //------------------------------------------------------------------------------
 /**
- * Updates the member SpaceObjects using the data in the Formation PropState.
+ * Updates the member SpaceObjects using the data in the Formation GmatState.
  */
 //------------------------------------------------------------------------------
 void Formation::UpdateElements()
 {
    Integer size, index = 0;
-   PropState *ps;
+   GmatState *ps;
    for (std::vector<SpaceObject*>::iterator i = components.begin();
         i != components.end(); ++i)
    {
@@ -967,13 +1011,13 @@ void Formation::UpdateElements()
 // void UpdateState()
 //------------------------------------------------------------------------------
 /**
- * Updates the internal PropState data from the member SpaceObjects.
+ * Updates the internal GmatState data from the member SpaceObjects.
  */
 //------------------------------------------------------------------------------
 void Formation::UpdateState()
 {
    Integer size, index = 0;
-   PropState *ps;
+   GmatState *ps;
    
    Real ep0 = 0.0, ep;
    for (std::vector<SpaceObject*>::iterator i = components.begin();
@@ -1146,3 +1190,187 @@ bool Formation::RemoveSpacecraft(const std::string &name)
 
    return false;
 }
+
+
+Integer Formation::SetPropItem(const std::string &propItem)
+{
+   if (propItem == "CartesianState")
+      return Gmat::CARTESIAN_STATE;
+   if (propItem == "STM")
+      return Gmat::ORBIT_STATE_TRANSITION_MATRIX;
+   
+   return SpaceObject::SetPropItem(propItem);
+}
+
+
+StringArray Formation::GetDefaultPropItems()
+{
+   StringArray defaults = SpaceObject::GetDefaultPropItems();
+   defaults.push_back("CartesianState");
+   return defaults;
+}
+
+
+Real* Formation::GetPropItem(const Integer item)
+{
+   Real* retval = NULL;
+   switch (item)
+   {
+      case Gmat::CARTESIAN_STATE:
+         retval = state.GetState();
+         break;
+         
+      case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
+//         retval = stm;
+         break;
+         
+      case Gmat::MASS_FLOW:
+         // todo: Access tanks for mass information to handle mass flow
+         break;
+         
+      // All other values call up the class heirarchy
+      default:
+         retval = SpaceObject::GetPropItem(item);
+   }
+   
+   return retval;
+}
+
+Integer Formation::GetPropItemSize(const Integer item)
+{
+   Integer retval = -1;
+   switch (item)
+   {
+      case Gmat::CARTESIAN_STATE:
+         retval = state.GetSize();
+         break;
+         
+      case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
+         retval = 36 * satCount;
+         break;
+         
+      case Gmat::MASS_FLOW:
+         // todo: Access tanks for mass information to handle mass flow
+         break;
+         
+      // All other values call up the heirarchy
+      default:
+         retval = SpaceObject::GetPropItemSize(item);
+   }
+   
+   return retval;
+}
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//  Real GetRealParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for a Real parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The parameter's value.
+ */
+Real Formation::GetRealParameter(const Integer id) const
+{
+   #ifdef DEBUG_GET_REAL
+      MessageInterface::ShowMessage(
+      "In Formation::GetReal, asking for parameter %d, whose string is \"%s\"\n", 
+      id, (GetParameterText(id)).c_str());
+      //for (Integer i=0; i<6;i++)
+      //   MessageInterface::ShowMessage("   state(%d) = %.12f\n",
+      //   i, state[i]);
+      //MessageInterface::ShowMessage("    and stateType = %s\n",
+      //   stateType.c_str());
+   #endif
+
+   if (id >= FORMATION_CARTESIAN_STATE )
+      return state[id - FORMATION_CARTESIAN_STATE];
+   
+   return SpaceObject::GetRealParameter(id);
+}
+
+//---------------------------------------------------------------------------
+//  Real GetRealParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for a Real parameter.
+ *
+ * @param <label> The label of the parameter.
+ *
+ * @return The parameter's value.
+ */
+Real Formation::GetRealParameter(const std::string &label) const
+{
+   // Performance!
+    if (label == "A1Epoch")
+       return state.GetEpoch();
+   
+    return GetRealParameter(GetParameterID(label));
+}
+
+////---------------------------------------------------------------------------
+////  Real SetRealParameter(const Integer id, const Real value)
+////---------------------------------------------------------------------------
+///**
+// * Set the value for a Real parameter.
+// *
+// * @param <id> The integer ID for the parameter.
+// * @param <value> The new parameter value.
+// *
+// * @return the parameter value at the end of this call, or 
+// *         REAL_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+// *         parameter type is not Real.
+// */
+//Real Formation::SetRealParameter(const Integer id, const Real value)
+//{
+//   #ifdef DEBUG_SPACECRAFT_SET
+//   MessageInterface::ShowMessage("In Formation::SetRealParameter, "
+//         "id = %d and value = %.12f\n", id, value);
+//   #endif
+//   if (id >= CARTESIAN_STATE )
+//   {
+//      state[id - FORMATION_CARTESIAN_STATE] = value;
+//      return state[id - FORMATION_CARTESIAN_STATE];
+//   }
+//   
+//   return SpaceObject::SetRealParameter(id, value);
+//}
+//
+////---------------------------------------------------------------------------
+////  Real SetRealParameter(const std::string &label, const Real value)
+////---------------------------------------------------------------------------
+///**
+// * Set the value for a Real parameter.
+// *
+// * @param <label> The label of the parameter.
+// * @param <value> The new parameter value.
+// *
+// * @return the parameter value at the end of this call, or 
+// *         REAL_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+// *         parameter type is not Real.
+// */
+//Real Formation::SetRealParameter(const std::string &label, const Real value)
+//{
+//   #ifdef DEBUG_SPACECRAFT_SET
+//   MessageInterface::ShowMessage
+//      ("In Formation::SetRealParameter(label), label = %s and value = %.12f\n",
+//       label.c_str(), value);
+//   #endif
+//
+//   
+//   return SpaceObject::SetRealParameter(label, value);
+//}
+
+
+

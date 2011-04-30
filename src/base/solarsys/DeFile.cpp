@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  DeFile
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -44,6 +46,7 @@
 //#define DEBUG_DEFILE
 //#define DEBUG_DEFILE_READ
 //#define DEBUG_DEFILE_INIT
+//#define DEBUG_DEFILE_GET
 
 // DE file code from JPL/JSC (Hoffman) includes
 #include <stdio.h>
@@ -52,7 +55,7 @@
 #include <ctype.h>
 
 #include <iostream>
-using namespace std;  //********************
+
 
 #ifndef TRUE
 #define TRUE 1
@@ -84,8 +87,8 @@ const Integer DeFile::LIBRATIONS_ID       = 14;
 //const Integer DeFile::MAX_ARRAY_SIZE      = 1018;
 
 
-const Real DeFile::JD_MJD_OFFSET = 2430000.0;
-const Real DeFile::TT_OFFSET     = 32.184;
+const Real DeFile::JD_MJD_OFFSET = GmatTimeConstants::JD_JAN_5_1941;
+const Real DeFile::TT_OFFSET     = GmatTimeConstants::TT_TAI_OFFSET;
 
 //------------------------------------------------------------------------------
 // public methods
@@ -115,6 +118,8 @@ PlanetaryEphem(fileName)
    theFileFormat = fmt;
    theFileName = fileName;
    
+   baseEpoch = GmatTimeConstants::JD_JAN_5_1941;
+
    Initialize();
 }
 
@@ -148,6 +153,9 @@ PlanetaryEphem(def)
    T_beg          = def.T_beg;
    T_end          = def.T_end;
    T_span         = def.T_span;
+   baseEpoch      = def.baseEpoch;
+   
+   theFileName    = def.theFileName;
 
    EPHEMERIS      = def.EPHEMERIS; 
 }
@@ -185,6 +193,9 @@ DeFile& DeFile::operator=(const DeFile& def)
    T_beg          = def.T_beg;
    T_end          = def.T_end;
    T_span         = def.T_span;
+   baseEpoch      = def.baseEpoch;
+
+   theFileName    = def.theFileName;
 
    EPHEMERIS      = def.EPHEMERIS;
    return *this;
@@ -199,7 +210,8 @@ DeFile& DeFile::operator=(const DeFile& def)
 //------------------------------------------------------------------------------
 DeFile::~DeFile()
 {
-   // nothing to do ... la la la la la
+   // close the file, if it's open
+   if (Ephemeris_File != NULL) fclose(Ephemeris_File);
 }
 
 
@@ -221,7 +233,6 @@ void DeFile::Initialize()
       throw PlanetaryEphemException(pe.GetFullMessage());
    }
 }
-
 
 //------------------------------------------------------------------------------
 //  Integer GetBodyID(std::string bodyName)
@@ -272,6 +283,12 @@ Integer  DeFile::GetBodyID(std::string bodyName)
 //------------------------------------------------------------------------------
 Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
 {
+   #ifdef DEBUG_DEFILE_GET
+   MessageInterface::ShowMessage
+      ("DeFile::GetPosVel() entered, forBody=%d, atTime=%f, overrideTimeSystem=%d, reading file %s\n",
+       forBody, atTime.GetReal(), overrideTimeSystem, itsName.c_str());
+   #endif
+   
    static Real      result[6];
    // if we're asking for the Earth state, return 0.0 (since we're
    // currently assuming Earth-Centered Equatorial
@@ -286,60 +303,54 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
       return result;
    }
    
-//   stateType* rv = new stateType;
    stateType rv;
-   // add to the MJD to get the absolute Julian Date
-   //double absJD = atTime.Get() + 2430000.5;
-   //double absJD = atTime.Get() + 2430000.0;
-   //double absJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
-   //double tmpJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
    double absJD = 0.0;
    if (overrideTimeSystem)
    {
-      // 20.02.06 - arg: changed to use enum types instead of strings
-//         double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
-//                                         "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
-       double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
-                       TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
-                       GmatTimeUtil::JD_JAN_5_1941);
-           absJD        = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
-        }
-        else
-    {
-      // 20.02.06 - arg: changed to use enum types instead of strings
-//         double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
-//                                         "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
-       double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
-                       TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
-                       GmatTimeUtil::JD_JAN_5_1941);
-           absJD         = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
-    }
+      double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
+                      TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+                      GmatTimeConstants::JD_JAN_5_1941);
+
+      absJD = mjdTT;
+
+      #ifdef DEBUG_DEFILE_GET
+         MessageInterface::ShowMessage
+            ("DeFile::GetPosVel() : mjdTT = %12.10f\n", mjdTT);
+         MessageInterface::ShowMessage
+            ("DeFile::GetPosVel() : absJD = %12.10f\n", absJD);
+      #endif
+   }
+   else
+   {
+      double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
+                      TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
+                      GmatTimeConstants::JD_JAN_5_1941);
+
+      absJD = mjdTDB;
+
+      #ifdef DEBUG_DEFILE_GET
+         MessageInterface::ShowMessage
+            ("DeFile::GetPosVel() : mjdTDB = %12.10f\n", mjdTDB);
+         MessageInterface::ShowMessage
+            ("DeFile::GetPosVel() : absJD = %12.10f\n", absJD);
+      #endif
+   }
    
-   //cout << "absJd = " << absJD << endl;
-
-
+   
    // if we're asking for the moon state, just get it and return it, as
    // it is supposed to be a geocentric state from the DE file
-
+   
    // interpolate the data to get the state
-//   Interpolate_State(absJD, forBody, rv);
    Interpolate_State(absJD, forBody, &rv);
 
    if (forBody == DeFile::MOON_ID)
    {
-//      result[0] = (Real) rv->Position[0]; // temporary
-//      result[1] = (Real) rv->Position[1];
-//      result[2] = (Real) rv->Position[2];
-//      result[3] = (Real) rv->Velocity[0] ; //* GmatTimeUtil::SECS_PER_DAY;
-//      result[4] = (Real) rv->Velocity[1] ; //* GmatTimeUtil::SECS_PER_DAY;
-//      result[5] = (Real) rv->Velocity[2] ; //* GmatTimeUtil::SECS_PER_DAY;
-//      delete rv;
       result[0] = (Real) rv.Position[0]; // temporary
       result[1] = (Real) rv.Position[1];
       result[2] = (Real) rv.Position[2];
-      result[3] = (Real) rv.Velocity[0] ; //* GmatTimeUtil::SECS_PER_DAY;
-      result[4] = (Real) rv.Velocity[1] ; //* GmatTimeUtil::SECS_PER_DAY;
-      result[5] = (Real) rv.Velocity[2] ; //* GmatTimeUtil::SECS_PER_DAY;
+      result[3] = (Real) rv.Velocity[0] ; //* GmatTimeConstants::SECS_PER_DAY;
+      result[4] = (Real) rv.Velocity[1] ; //* GmatTimeConstants::SECS_PER_DAY;
+      result[5] = (Real) rv.Velocity[2] ; //* GmatTimeConstants::SECS_PER_DAY;
       return result;
    }
 
@@ -347,54 +358,12 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    // coordinates), then get the Earth-Moon state in SSBarycentric,
    // then get the Earth state from that (using the Moon state in
    // geocentric), then figure out the body's state wrt the Earth
-//   stateType* emrv = new stateType;
-//   stateType* mrv  = new stateType;
    stateType emrv, mrv;
-
-//   // earth-moon barycenter rel to solar system barycenter
-//   Interpolate_State(absJD,(int)DeFile::EARTH_ID, emrv);
-//   // moon state (geocentric)
-//   Interpolate_State(absJD,(int)DeFile::MOON_ID, mrv);
-//
-//   // compute Earth state in Solar System barycenter coordinates
-//   Rvector6 earthMoonRv(emrv->Position[0],emrv->Position[1],emrv->Position[2],
-//                        emrv->Velocity[0],emrv->Velocity[1],emrv->Velocity[2]);
-//   Rvector6 moonRv(mrv->Position[0],mrv->Position[1],mrv->Position[2],
-//                   mrv->Velocity[0],mrv->Velocity[1],mrv->Velocity[2]);
-//   Rvector6 earthRv = earthMoonRv - (moonRv / (R1.EMRAT + 1.0));
-//
-//   // now compute the state of the requested body wrt the Earth
-//   Rvector6 bodyRv(rv->Position[0],rv->Position[1],rv->Position[2],
-//                   rv->Velocity[0],rv->Velocity[1],rv->Velocity[2]);
-//   Rvector6 bodyWrtEarth = bodyRv - earthRv;
-//
-//   result[0] = bodyWrtEarth.Get(0);
-//   result[1] = bodyWrtEarth.Get(1);
-//   result[2] = bodyWrtEarth.Get(2);
-//   result[3] = bodyWrtEarth.Get(3) ; //* GmatTimeUtil::SECS_PER_DAY;
-//   result[4] = bodyWrtEarth.Get(4) ; //* GmatTimeUtil::SECS_PER_DAY;
-//   result[5] = bodyWrtEarth.Get(5) ; //* GmatTimeUtil::SECS_PER_DAY;
-//
-//   delete rv;
-//   delete emrv;
-//   delete mrv;
    // earth-moon barycenter rel to solar system barycenter
    Interpolate_State(absJD,(int)DeFile::EARTH_ID, &emrv);
    // moon state (geocentric)
    Interpolate_State(absJD,(int)DeFile::MOON_ID, &mrv);
-
-   // compute Earth state in Solar System barycenter coordinates
-   //Rvector6 earthMoonRv(emrv.Position[0],emrv.Position[1],emrv.Position[2],
-   //                     emrv.Velocity[0],emrv.Velocity[1],emrv.Velocity[2]);
-   //Rvector6 moonRv(mrv.Position[0],mrv.Position[1],mrv.Position[2],
-   //                mrv.Velocity[0],mrv.Velocity[1],mrv.Velocity[2]);
-   //Rvector6 earthRv = earthMoonRv - (moonRv / (R1.EMRAT + 1.0));
-
-   // now compute the state of the requested body wrt the Earth
-   //Rvector6 bodyRv(rv.Position[0],rv.Position[1],rv.Position[2],
-   //                rv.Velocity[0],rv.Velocity[1],rv.Velocity[2]);
-   //Rvector6 bodyWrtEarth = bodyRv - earthRv;
-
+   
    stateType bwe;
    
    for (int i=0; i<3; i++)
@@ -404,32 +373,28 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
       bwe.Velocity[i] = rv.Velocity[i] -
          (emrv.Velocity[i] - (mrv.Velocity[i] / (R1.EMRAT + 1.0)));
    }
-
-//    result[0] = bodyWrtEarth.Get(0);
-//    result[1] = bodyWrtEarth.Get(1);
-//    result[2] = bodyWrtEarth.Get(2);
-//    result[3] = bodyWrtEarth.Get(3) ; //* GmatTimeUtil::SECS_PER_DAY;
-//    result[4] = bodyWrtEarth.Get(4) ; //* GmatTimeUtil::SECS_PER_DAY;
-//    result[5] = bodyWrtEarth.Get(5) ; //* GmatTimeUtil::SECS_PER_DAY;
-
-//    static Real result2[6];
+   
    result[0] = bwe.Position[0];
    result[1] = bwe.Position[1];
    result[2] = bwe.Position[2];
    result[3] = bwe.Velocity[0];
    result[4] = bwe.Velocity[1];
    result[5] = bwe.Velocity[2];
-
-//    MessageInterface::ShowMessage
-//       ("==> result1=%f, %f, %f, %f, %f, %f\n", result[0], result[1], result[2],
-//        result[3], result[4], result[5]);
-//    MessageInterface::ShowMessage
-//       ("==> result2=%f, %f, %f, %f, %f, %f\n", result2[0], result2[1], result2[2],
-//        result2[3], result2[4], result2[5]);
+   
+   #ifdef DEBUG_DEFILE_GET
+   MessageInterface::ShowMessage
+      ("DeFile::GetPosVel() returning %f, %f, %f, %f, %f, %f\n",
+       result[0], result[1], result[2], result[3], result[4], result[5]);
+   #endif
+   
    return result;
 }
 
 
+//------------------------------------------------------------------------------
+// void GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates, 
+//                        bool overrideTimeSystem)
+//------------------------------------------------------------------------------
 void  DeFile::GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates, 
                                 bool overrideTimeSystem)
 {
@@ -439,15 +404,15 @@ void  DeFile::GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates,
    {
        double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
                        TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
-                       GmatTimeUtil::JD_JAN_5_1941);
-      absJD        = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+                       GmatTimeConstants::JD_JAN_5_1941);
+       absJD        = mjdTT;
    }
    else
    {
        double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
                        TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
-                       GmatTimeUtil::JD_JAN_5_1941);
-      absJD         = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
+                       GmatTimeConstants::JD_JAN_5_1941);
+       absJD         = mjdTDB;
    }
 
    #ifdef DEBUG_DEFILE_LIB
@@ -479,6 +444,8 @@ Integer* DeFile::GetStartDayAndYear()
    uTime.ToYearDOYHourMinSec(y,doy,h,min,sec);
    res[0]   = doy;
    res[1]   = y;
+   
+   delete a;
    return res;
 }
 
@@ -546,13 +513,14 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
       binaryFileName = fName;
    }
 
-   if (defType == Gmat::DE200)
-   {
-
-      arraySize = DeFile::ARRAY_SIZE_200;
-      EPHEMERIS = 200;
-   }
-   else if (defType == Gmat::DE405)
+//   if (defType == Gmat::DE200)
+//   {
+//
+//      arraySize = DeFile::ARRAY_SIZE_200;
+//      EPHEMERIS = 200;
+//   }
+//   else if (defType == Gmat::DE_DE405)
+   if (defType == Gmat::DE_DE405)
    {
       arraySize = DeFile::ARRAY_SIZE_405;
       EPHEMERIS = 405;
@@ -575,7 +543,7 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
    jdMjdOffset          = (double) DeFile::JD_MJD_OFFSET;
    
    // store file begin time (loj: 9/15/05 Added)
-   mFileBeg = T_beg;
+   mFileBeg = T_beg - baseEpoch;
 
    #ifdef DEBUG_DEFILE_INIT
    MessageInterface::ShowMessage("   T_beg=%.9f, addr=%p\n", T_beg, &T_beg);
@@ -657,10 +625,10 @@ void DeFile::Read_Coefficients( double Time )
   if ( Time < T_beg )                    /* Compute backwards location offset */
      {
        T_delta = T_beg - Time;
-       Offset  = (int) -ceil(T_delta/T_span); 
+       Offset  = (int) - ceil(T_delta/T_span);
      }
 
-  if ( Time > T_end )                    /* Compute forewards location offset */
+  if ( Time > T_end )                    /* Compute forwards location offset */
      {
        T_delta = Time - T_end;
        Offset  = (int) ceil(T_delta/T_span);
@@ -681,11 +649,17 @@ void DeFile::Read_Coefficients( double Time )
   // if time is less than file begin time, do not update time info.
   if (Time > mFileBeg) //loj: 9/15/05 Added
   {
-     fseek(Ephemeris_File,(Offset-1)*arraySize*sizeof(double),SEEK_CUR); // wcs
-     fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);        // wcs
+     fseek(Ephemeris_File,(Offset-1)*arraySize*sizeof(double),SEEK_CUR);
 
-     T_beg  = Coeff_Array[0];
-     T_end  = Coeff_Array[1];
+     // Intentionally get the return and then ignore it to move warning from
+     // system libraries to GMAT code base.  The "unused variable" warning here
+     // can be safely ignored.
+     size_t len = fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);
+     if ((Integer)len != arraySize)
+        throw PlanetaryEphemException("Requested epoch is not on the DE file");
+
+     T_beg  = Coeff_Array[0] - baseEpoch;
+     T_end  = Coeff_Array[1] - baseEpoch;
      T_span = T_end - T_beg;
   }
   
@@ -754,9 +728,9 @@ int DeFile::Initialize_Ephemeris( char *fileName )
        //fread(&H1,sizeof(double),ARRAY_SIZE,Ephemeris_File);
        //fread(&H2,sizeof(double),ARRAY_SIZE,Ephemeris_File);
        //fread(&Coeff_Array,sizeof(double),ARRAY_SIZE,Ephemeris_File);
-       fread(&H1,sizeof(double),arraySize,Ephemeris_File);           // wcs
-       fread(&H2,sizeof(double),arraySize,Ephemeris_File);           // wcs
-       fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);  // wcs
+       size_t len = fread(&H1,sizeof(double),arraySize,Ephemeris_File);
+       len += fread(&H2,sizeof(double),arraySize,Ephemeris_File);
+       len += fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);
 
 
             
@@ -766,8 +740,8 @@ int DeFile::Initialize_Ephemeris( char *fileName )
               
        /*..........................................Set current time variables */
 
-       T_beg  = Coeff_Array[0];
-       T_end  = Coeff_Array[1];
+       T_beg  = Coeff_Array[0] - baseEpoch;
+       T_end  = Coeff_Array[1] - baseEpoch;
        T_span = T_end - T_beg;
 
        /*..............................Convert header ephemeris ID to integer */
@@ -1021,9 +995,9 @@ void DeFile::Interpolate_Libration( double Time , int Target ,
         for ( j=N-1 ; j>-1 ; j-- )  sum[i]     = sum[i] + A[j+i*N] * Cp[j];
         for ( j=N-1 ; j>0  ; j-- )  rateSum[i] = rateSum[i] + A[j+i*N] * Up[j];
         //X.Position[i] = P_Sum[i];
-        //X.Velocity[i] = V_Sum[i] * 2.0 * ((double) G) / (T_span * 86400.0);
+        //X.Velocity[i] = V_Sum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
         Libration[i] = sum[i];
-        rates[i]     = rateSum[i] * 2.0 * ((double) G) / (T_span * 86400.0);
+        rates[i]     = rateSum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
       }
   /*--------------------------------------------------------------------------*/
   /* Compute interpolated the rates.                                          */
@@ -1402,9 +1376,9 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
   //   {
   //     printf("\n  In: Interpolate_State\n");
   //     printf("\n  Target = %2d",Target);
-  //     printf("\n  C      = %4d (before)",C);
-  //     printf("\n  N      = %4d",N);
-  //     printf("\n  G      = %4d\n",G);
+  //     printf("\n  C      = %4ld (before)",C);
+  //     printf("\n  N      = %4ld",N);
+  //     printf("\n  G      = %4ld\n",G);
   //   }
 
   /*--------------------------------------------------------------------------*/
@@ -1491,7 +1465,7 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
         for ( j=N-1 ; j>0  ; j-- )  V_Sum[i] = V_Sum[i] + A[j+i*N] * Up[j];
 
         X.Position[i] = P_Sum[i];
-        X.Velocity[i] = V_Sum[i] * 2.0 * ((double) G) / (T_span * 86400.0);
+        X.Velocity[i] = V_Sum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
       }
 
   /*--------------------------------------------------------------------------*/
@@ -1628,7 +1602,7 @@ double DeFile::Gregorian_to_Julian( int     year ,  int     month   ,
   /*  Compute the day fraction:                                               */
   /*--------------------------------------------------------------------------*/
 
-  D = D  +  (H / 24.0)  +  (N / 1440.0)  +  (seconds / 86400.0);
+  D = D  +  (H / 24.0)  +  (N / 1440.0)  +  (seconds / GmatTimeConstants::SECS_PER_DAY);
 
   /*--------------------------------------------------------------------------*/
   /*  Compute the Julian date.                                                */
@@ -1636,7 +1610,7 @@ double DeFile::Gregorian_to_Julian( int     year ,  int     month   ,
 
   A  = floor(Y/100.0);
   B  = 2.0 - A + floor(A/4.0);  
-  JD = floor(365.25*(Y+4716.0)) + floor(30.6001*(M+1.0)) + D + B - 1524.5;
+  JD = floor(GmatTimeConstants::DAYS_PER_YEAR*(Y+4716.0)) + floor(30.6001*(M+1.0)) + D + B - 1524.5;
   
   return JD;
 }
@@ -1705,7 +1679,12 @@ int DeFile::Read_File_Line( FILE *inFile, int filter, char lineBuffer[82])
 
   if ( (strlen(lineBuffer) == 81) && (lineBuffer[80] != '\n') )
      {
-       fgets(ignore,40,inFile);                 /* Read past next end of line */
+       // Intentionally get the return and then ignore it to move warning from
+       // system libraries to GMAT code base.  The "unused variable" warning
+       // here can be safely ignored.
+       char* ch = fgets(ignore,40,inFile);      /* Read past next end of line */
+       if (ch == NULL)
+          throw PlanetaryEphemException("Unable to read line from the DE file");
        lineBuffer[81] = '\0';
      }
 

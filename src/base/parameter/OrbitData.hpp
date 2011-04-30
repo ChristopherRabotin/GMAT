@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  OrbitData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,16 +25,19 @@
 #include "GmatBase.hpp"
 #include "RefData.hpp"
 #include "Rvector6.hpp"
+#include "Rmatrix66.hpp"
+#include "Rmatrix33.hpp"
 #include "Spacecraft.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
+#include "StateConverter.hpp"
 
 class GMAT_API OrbitData : public RefData
 {
 public:
 
-   OrbitData();
+   OrbitData(const std::string &name = "");
    OrbitData(const OrbitData &data);
    OrbitData& operator= (const OrbitData& right);
    virtual ~OrbitData();
@@ -43,7 +48,10 @@ public:
    Rvector6 GetSphRaDecState();
    Rvector6 GetSphAzFpaState();
    Rvector6 GetEquinState();
-
+   
+   void SetReal(Integer item, Real rval);
+   void SetRvector6(const Rvector6 &val);
+   
    Real GetCartReal(Integer item);
    Real GetCartReal(const std::string &str);
    
@@ -64,20 +72,23 @@ public:
    
    Real GetOtherAngleReal(Integer item);
    Real GetOtherAngleReal(const std::string &str);
-
+   
    Real GetEquinReal(Integer item);
    Real GetEquinReal(const std::string &str);
-
+   
+   const Rmatrix66& GetStmRmat66(Integer item);
+   const Rmatrix33& GetStmRmat33(Integer item);
+   
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
-      
+   
 protected:
-
+   
    bool mOriginDep;
    SolarSystem* GetSolarSystem();
    CoordinateSystem* GetInternalCoordSys();
-      
+   
    void SetInternalCoordSys(CoordinateSystem *cs);
    Rvector6 GetRelativeCartState(SpacePoint *origin);
    Real GetPositionMagnitude(SpacePoint *origin);
@@ -92,6 +103,9 @@ protected:
    Rvector6 mSphRaDecState;
    Rvector6 mSphAzFpaState;
    
+   Rmatrix66  mSTM;
+   Rmatrix33  mSTMSubset;
+   
    Real mCartEpoch;
    Real mGravConst;
    
@@ -103,6 +117,10 @@ protected:
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mOutCoordSystem;
    
+   StateConverter   stateConverter;
+
+   bool        firstTimeEpochWarning;
+
    // only one CoordinateConverter needed
    static CoordinateConverter mCoordConverter;
    
@@ -114,6 +132,7 @@ protected:
          RAD_PERIAPSIS, C3_ENERGY, ENERGY};
    enum {SEMILATUS_RECTUM, HMAG, HX, HY, HZ, BETA_ANGLE};
    enum {EQ_SMA, EY, EX, NY, NX, MLONG};
+   enum {ORBIT_STM, ORBIT_STM_A, ORBIT_STM_B, ORBIT_STM_C, ORBIT_STM_D};
    
    enum
    {
@@ -125,6 +144,7 @@ protected:
    };
    
    static const std::string VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount];
+   static const Real        ORBIT_DATA_TOLERANCE;
 };
 #endif // OrbitData_hpp
 

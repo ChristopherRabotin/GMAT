@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               Spinner
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy C. Shoan/GSFC
 // Created: 2006.03.24
@@ -129,7 +133,7 @@ bool Spinner::Initialize()
       Rvector bogus2 = refCS->FromMJ2000Eq(epoch, bogus, true);
       RiI  = (refCS->GetLastRotationMatrix()).Transpose();
    }
-   catch (BaseException &be)
+   catch (BaseException &)
    {
       #ifdef DEBUG_SPINNER_INIT
       MessageInterface::ShowMessage(
@@ -211,15 +215,15 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
    angVel[2] * GmatMathUtil::DEG_PER_RAD);
    #endif
-   if (!isInitialized) Initialize();
+   if (isInitialized && needsReinit) Initialize();
    // now, RB0I and currentwIBB have been computed by Initialize
    
    // Calculate RBIt, where t = atTime
    Real      dt             = (atTime - epoch) * 
-                              GmatTimeUtil::SECS_PER_DAY;
+                              GmatTimeConstants::SECS_PER_DAY;
    // Compute the Euler angle
    Real      theEAngle      = initialwMag * dt;
-   Rmatrix33 RBB0t          = EulerAxisAndAngleToDCM(
+   Rmatrix33 RBB0t          = Attitude::EulerAxisAndAngleToDCM(
                               initialeAxis, theEAngle);
    
    cosMat                   = RBB0t * RB0I;

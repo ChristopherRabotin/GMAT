@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Multiply
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,7 +22,7 @@
 #include "Multiply.hpp"
 #include "MessageInterface.hpp"
 
-//#if DEBUG_MULTIPLY 1
+//#define DEBUG_INPUT_OUTPUT 1
 
 //---------------------------------
 // public methods
@@ -87,16 +89,29 @@ GmatBase* Multiply::Clone() const
 //------------------------------------------------------------------------------
 void Multiply::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Multiply::GetOutputInfo() '%s' entered\n", GetName().c_str());
+   #endif
+   
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
+   if (leftNode)
+      leftNode->GetOutputInfo(type1, row1, col1);
+   else
+      throw MathException("Left node is NULL in " + GetTypeName() +
+                          "::GetOutputInfo()\n");
    
    // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->GetOutputInfo(type2, row2, col2);
-
-   #if DEBUG_MULTIPLY
+   if (rightNode)
+      rightNode->GetOutputInfo(type2, row2, col2);
+   else
+      throw MathException("Right node is NULL in " + GetTypeName() +
+                          "::GetOutputInfo()\n");
+   
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("Multiply::GetOutputInfo() type1=%d, row1=%d, col1=%d, type2=%d, "
        "row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
@@ -112,13 +127,23 @@ void Multiply::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
       {
          rowCount = row1;
          colCount = col2;
-         if (rowCount == 1 && colCount == 1)
-            type = Gmat::REAL_TYPE;
       }
       else
       {
-         throw MathException
-            (GetName() + ":Inner matrix dimensions must agree to multiply.\n");
+         // Check for 1x1
+         if (row1 == 1 && col1 == 1)
+         {
+            rowCount = row2;
+            colCount = col2;
+         }
+         else if (row2 == 1 && col2 == 1)
+         {
+            rowCount = row1;
+            colCount = col1;            
+         }
+         else
+            throw MathException
+               (GetName() + ":Inner matrix dimensions must agree to multiply.\n");
       }
    }
    else if (type2 == Gmat::RMATRIX_TYPE)
@@ -127,11 +152,11 @@ void Multiply::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
       rowCount = row2;
       colCount = col2;
    }
-
-   #if DEBUG_MULTIPLY
+   
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
-      ("Multiply::GetOutputInfo() type=%d, rowCount=%d, colCount=%d\n",
-       type, rowCount, colCount);
+      ("Multiply::GetOutputInfo() '%s' leaving, type=%d, rowCount=%d, colCount=%d\n",
+       GetName().c_str(), type, rowCount, colCount);
    #endif
 }
 
@@ -146,8 +171,20 @@ void Multiply::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
 //------------------------------------------------------------------------------
 bool Multiply::ValidateInputs()
 {
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("\nMultiply::ValidateInputs() '%s' entered\n", GetName().c_str());
+   #endif
+   
+   if (leftNode == NULL)
+      throw MathException("Multiply() - Missing input arguments");
+   
+   if (rightNode == NULL)
+      throw MathException("Multiply() - Not enough input arguments");
+   
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
+   bool retval = false;
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
@@ -155,15 +192,30 @@ bool Multiply::ValidateInputs()
    // Get the type(Real or Matrix), # rows and # columns of the right node
    rightNode->GetOutputInfo(type2, row2, col2);
    
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Multiply::ValidateInputs() type1=%d, row1=%d, col1=%d, "
+       "type2=%d, row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
+   #endif
+   
    if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
-      return true;
+      retval = true;
    else if ((type1 == Gmat::RMATRIX_TYPE) && (type2 == Gmat::RMATRIX_TYPE))
       if (col1 == row2)
-         return true;
+         retval = true;
+      else if ((row1 == 1 && col1 == 1) || (row2 == 1 && col2 == 1))
+         retval = true;
       else
-         return false; 
+         retval = false;
    else
-      return true;
+      retval = true;
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Multiply::ValidateInputs() '%s' returning %d\n", GetName().c_str(), retval);
+   #endif
+   
+   return retval;
 }
 
 
@@ -186,7 +238,6 @@ Real Multiply::Evaluate()
    {
       return (leftNode->Evaluate() * rightNode->Evaluate());
    }
-
    
    // Handle column vector * row vector resulting scalar
    if (row1 == col2)
@@ -232,9 +283,7 @@ Rmatrix Multiply::MatrixEvaluate()
    
    // Multiply matrix by scalar
    else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
-   {
       prod = leftNode->MatrixEvaluate() * rightNode->Evaluate();
-   }
    
    return prod;
 }

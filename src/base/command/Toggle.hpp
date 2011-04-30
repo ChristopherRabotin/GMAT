@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Toggle
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
 // Created: 2003/mm/dd
@@ -30,7 +34,7 @@
 /**
  * Command used to turn subscribers on and off
  */
-class Toggle : public GmatCommand
+class GMAT_API Toggle : public GmatCommand
 {
 public:
    Toggle();

@@ -1,9 +1,12 @@
+//$Id$
 //------------------------------------------------------------------------------
 //                                  RadToDeg
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -80,16 +83,13 @@ GmatBase* RadToDeg::Clone() const
 
 
 //------------------------------------------------------------------------------
-// Real Evaluate()
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-/**
- * @return the RadToDeg of left node
- *
- */
-//------------------------------------------------------------------------------
-Real RadToDeg::Evaluate()
+void RadToDeg::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   return GmatMathUtil::RadToDeg(leftNode->Evaluate());
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
 }
 
 //------------------------------------------------------------------------------
@@ -102,30 +102,47 @@ Real RadToDeg::Evaluate()
 //------------------------------------------------------------------------------
 bool RadToDeg::ValidateInputs()
 {
-   if ( leftNode->ValidateInputs() )
-   {
-      try
-      {
-         leftNode->Evaluate();
-         return true;
-      }
-      catch (MathException &e)
-      {
-         return false;
-      } 
-   }
+   if (leftNode == NULL)
+      throw MathException("RadToDeg() - Missing input arguments.\n");
+   
+   Integer type1, row1, col1; // Left node
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+   
+   // Only Real type is allowed
+   if (type1 == Gmat::REAL_TYPE)
+      return true;
    else
       return false;
+   
+//    if ( leftNode->ValidateInputs() )
+//    {
+//       try
+//       {
+//          leftNode->Evaluate();
+//          return true;
+//       }
+//       catch (MathException &e)
+//       {
+//          return false;
+//       } 
+//    }
+//    else
+//       return false;
 }
 
 //------------------------------------------------------------------------------
-// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+// Real Evaluate()
 //------------------------------------------------------------------------------
-void RadToDeg::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+/**
+ * @return the RadToDeg of left node
+ *
+ */
+//------------------------------------------------------------------------------
+Real RadToDeg::Evaluate()
 {
-   type = Gmat::REAL_TYPE;
-   rowCount = 1;
-   colCount = 1;
+   return GmatMathUtil::RadToDeg(leftNode->Evaluate());
 }
 
 //------------------------------------------------------------------------------

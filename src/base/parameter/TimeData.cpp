@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                  TimeData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -21,6 +23,7 @@
 #include "TimeData.hpp"
 #include "ParameterException.hpp"
 #include "TimeSystemConverter.hpp"
+#include "TimeTypes.hpp"
 #include "Linear.hpp"               // for GmatRealUtil::ToString()
 #include "MessageInterface.hpp"
 
@@ -30,7 +33,7 @@
 // static data
 //---------------------------------
 
-//const Real TimeData::MJD_OFFSET = 2430000.0; 
+//const Real TimeData::MJD_OFFSET = GmatTimeConstants::JD_JAN_5_1941;
 const Real TimeData::TIME_REAL_UNDEFINED = -9876543210.1234;
 const std::string TimeData::TIME_STRING_UNDEFINED = "INVALID_TIME";
 
@@ -46,14 +49,14 @@ TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// TimeData()
+// TimeData(const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-TimeData::TimeData()
-   : RefData()
+TimeData::TimeData(const std::string &name)
+   : RefData(name)
 {
    mInitialEpoch = 0.0;
    mIsInitialEpochSet = false;
@@ -179,9 +182,15 @@ Real TimeData::GetCurrentTimeReal(Integer id)
    // Get current time from Spacecraft
    if (mSpacecraft == NULL)
       InitializeRefObjects();
-
+   
    Real a1mjd = mSpacecraft->GetEpoch();
 
+   #ifdef DEBUG_TIMEDATA_GET
+   MessageInterface::ShowMessage
+      ("TimeData::GetCurrentTimeReal() mSpacecraft=<%p>'%s', a1mjd=%f\n",
+       mSpacecraft, mSpacecraft->GetName().c_str(), a1mjd);
+   #endif
+   
    Real time = -9999.999;
    
    switch (id)
@@ -192,37 +201,37 @@ Real TimeData::GetCurrentTimeReal(Integer id)
    case TAI_MJD:
       time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::TAIMJD,
-                                        GmatTimeUtil::JD_JAN_5_1941);
+                                        GmatTimeConstants::JD_JAN_5_1941);
       break;
    case TT_MJD:
       time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::TTMJD,
-                                        GmatTimeUtil::JD_JAN_5_1941);
+                                        GmatTimeConstants::JD_JAN_5_1941);
       break;
    case TDB_MJD:
       time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::TDBMJD,
-                                        GmatTimeUtil::JD_JAN_5_1941);
+                                        GmatTimeConstants::JD_JAN_5_1941);
       break;
    case TCB_MJD:
       time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::TCBMJD,
-                                        GmatTimeUtil::JD_JAN_5_1941);
+                                        GmatTimeConstants::JD_JAN_5_1941);
       break;
    case UTC_MJD:
       time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::UTCMJD,
-                                        GmatTimeUtil::JD_JAN_5_1941);
+                                        GmatTimeConstants::JD_JAN_5_1941);
       break;
    case JD:
-      time = a1mjd + GmatTimeUtil::JD_JAN_5_1941;
+      time = a1mjd + GmatTimeConstants::JD_JAN_5_1941;
       break;
    default:
       throw ParameterException("TimeData::GetCurrentTimeReal() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
    }
-
-   #ifdef DEBUG_TIMEDATA
+   
+   #ifdef DEBUG_TIMEDATA_GET
    MessageInterface::ShowMessage
       ("TimeData::GetCurrentTimeReal() id=%d, a1mjd=%.10f, return time=%.10f\n",
        id, a1mjd, time);
@@ -284,7 +293,7 @@ Real TimeData::GetElapsedTimeReal(Integer id)
    //case HOURS:
    //case MINS:
    case SECS:
-      return (a1mjd - mInitialEpoch)* 86400;
+      return (a1mjd - mInitialEpoch)* GmatTimeConstants::SECS_PER_DAY;
    default:
       throw ParameterException("TimeData::GetElapsedTimeReal() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
@@ -349,13 +358,16 @@ void TimeData::InitializeRefObjects()
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    if (mSpacecraft == NULL)
    {
+      std::string scName = GetRefObjectName(Gmat::SPACECRAFT);
       #ifdef DEBUG_TIMEDATA
       MessageInterface::ShowMessage
-         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object\n");
+         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object named "
+          "\"%s\"\n", scName.c_str());
       #endif
       
       throw ParameterException
-         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object\n");
+         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object named \"" + 
+          scName + "\"\n");
    }
    else
    {

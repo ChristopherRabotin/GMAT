@@ -1,18 +1,19 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              RungeKutta89
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : RungeKutta89.cpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -31,12 +32,12 @@
 //                             Updated interfaces based on GSFC feedback
 //
 //                           : 09/24/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
 //
 //                           : 10/21/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
+//                              Changes:
+//                                - All double types to Real types
 // **************************************************************************
 
 #include "gmatdefs.hpp"

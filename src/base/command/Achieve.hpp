@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Achieve
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -30,7 +32,7 @@
 /**
  * Command that manages processing for targeter goals.
  */
-class Achieve : public GmatCommand
+class GMAT_API Achieve : public GmatCommand
 {
 public:
    Achieve(void);
@@ -82,8 +84,8 @@ public:
    
    virtual const std::string&
                        GetGeneratingString(Gmat::WriteMode mode,
-                                           const std::string &prefix,
-                                           const std::string &useName);
+                                           const std::string &prefix = "",
+                                           const std::string &useName = "");
     
 protected:
    /// The name of the targeter
@@ -91,46 +93,21 @@ protected:
    /// Name of the goal
    std::string         goalName;
    /// Target value for the goal
-   //Real                goal;
    ElementWrapper      *goal;   // can be any kind of wrapper except a NumberWrapper
    /// String form of target value for the goal
    std::string         achieveName;  // arg1
    /// Parameter used for floating end point goals
-   //Parameter           *achieveParm;
    ElementWrapper      *achieve;   // arg1
    /// Accuracy needed for the goal
-   //Real                tolerance;
    std::string         toleranceName;
    /// the tolerance object
    ElementWrapper      *tolerance;
-   /// Pointer to the object that owns the goal
-   //GmatBase            *goalObject;
    /// Targeter ID for the goal 
    Integer             goalId;
    /// The targeter instance used to manage the targeter state machine
    Solver              *targeter;
    /// Flag used to finalize the targeter data during execution
    bool                targeterDataFinalized;
-   /// String of goal array name
-   //std::string         achieveArrName;
-   /// Goal array row index variable name
-   //std::string         achieveArrRowStr;
-   /// Goal array column index variable name
-   //std::string         achieveArrColStr;
-   /// Goal array row index
-   //Integer             achieveArrRow;
-   /// Goal array row index
-   //Integer             achieveArrCol;
-   //Parameter           *achieveArrRowParm;
-   //Parameter           *achieveArrColParm;
-   /// Flag use to indicate goal target is a parameter
-   //bool                isAchieveParm;
-   /// Flag use to indicate goal target is a array
-   //bool                isAchieveArray;
-   /// Object ID for the parameter
-   //Integer             parmId;
-   /// Class that performs the goal calculation
-   //Parameter           *goalParm;
    
    void SetTolerance(Real value);
    
@@ -147,12 +124,6 @@ protected:
    static const Gmat::ParameterType
                      PARAMETER_TYPE[AchieveParamCount - GmatCommandParamCount];
 
-
-   //bool                InterpretParameter(const std::string text,
-   //                              std::string &paramType,
-   //                              std::string &paramObj,
-   //                              std::string &parmSystem);
-   //bool                ConstructGoal(const char* str);
 };
 
 

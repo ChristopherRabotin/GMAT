@@ -1,18 +1,19 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              PhysicalModel
 //------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 // *** File Name : PhysicalModel.hpp
 // *** Created   : October 1, 2002
 // **************************************************************************
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
-// ***                                                                    ***
-// ***  Copyright U.S. Government 2002                                    ***
-// ***  Copyright United States Government as represented by the          ***
-// ***  Administrator of the National Aeronautics and Space               ***
-// ***  Administration                                                    ***
 // ***                                                                    ***
 // ***  This software is subject to the Sofware Usage Agreement described ***
 // ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
@@ -33,23 +34,28 @@
 //                           : 2/5/2003 - D. Conway, Thinking Systems, Inc.
 //                             Incorporated the Derivative class into this
 //                             class and removed Derivative from the class
-//                             heirarchy
+//                             hierarchy
 //
 //                           : 3/3/2003 - D. Conway, Thinking Systems, Inc.
 //                             Updated parameter strings to include units;
 //                             Added code to switch between relative and 
-//                             absolute erro
+//                             absolute error
 //
-//                           : 09/24/2003 - W. Waktola, Missions Applications Branch
+//                           : 09/24/2003 - W. Waktola, Missions Applications
+//                                          Branch
 //                              Changes:
 //                                - Updated style using GMAT cpp style guide
 //
-//                           : 10/15/2003 - W. Waktola, Missions Applications Branch
+//                           : 10/15/2003 - W. Waktola, Missions Applications
+//                                          Branch
 //                              Changes:
 //                                - All double types to Real types
 //                                - All primitive int types to Integer types
-//                                - virtual char* GetParameterName(const int parm) const to
-//                                  virtual std::string GetParameterName(const int parm) const
+//                                - virtual char* GetParameterName(
+//                                                   const int parm) const
+//                                  to
+//                                  virtual std::string GetParameterName(
+//                                                   const int parm) const
 //                              Removals:
 //                                - static Real parameterUndefined
 //                                - SetUndefinedValue()
@@ -66,18 +72,23 @@
 //                                - GetRealParameter()
 //                                - SetRealParameter()
 //
-//                           : 10/20/2003 - W. Waktola, Missions Applications Branch
+//                           : 10/20/2003 - W. Waktola, Missions Applications
+//                                          Branch
 //                              Changes:
 //                                - Fixed format.
 //                              Removals:
 //                                - GetParameterName()
 //
 //                           : 10/23/2003 - D. Conway, Thinking Systems, Inc. &
-//                                          W. Waktola, Missions Applications Branch
+//                                          W. Waktola, Missions Applications
+//                                          Branch
 //                              Changes:
-//                                - Changed constructor from PhysicalModel::PhysicalModel(void) to
-//                                  PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
-//                                  const std::string &nomme = "")
+//                                - Changed constructor from
+//                                    PhysicalModel::PhysicalModel(void)
+//                                  to
+//                                    PhysicalModel(Gmat::ObjectType typeId,
+//                                          const std::string &typeStr,
+//                                          const std::string &nomme = "")
 //                                - Added parameterCount = 1 in constructors
 //
 // **************************************************************************
@@ -93,9 +104,9 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "Spacecraft.hpp"
+#include "GmatState.hpp"
 
-
-#include "ForceModelException.hpp"
+#include "ODEModelException.hpp"
 
 #include <math.h>
 
@@ -109,8 +120,8 @@
  * Propagators fall into two basic subclasses: Integrators and analytic 
  * solutions.  The analytic solutions typically require minimal interaction with
  * the system; for example, for two body orbit propagation, the PhysicalModel
- * supplies the gravitational constant for the centralbody.  Integrators require
- * more detailed information to evolve their models; see the text of the 
+ * supplies the gravitational constant for the central body.  Integrators
+ * require more detailed information to evolve their models; see the text of the
  * PhysicalModelIntegrator class description for details of their requirements.
  */
 class GMAT_API PhysicalModel : public GmatBase
@@ -128,14 +139,14 @@ public:
    //void SetBody(CelestialBody *body);
    //bool SetBody(const std::string &name);
 
-   virtual bool Initialize(void);
+   virtual bool Initialize();
 
    virtual CelestialBody* GetBody();
    virtual std::string    GetBodyName();
-   virtual Integer        GetDimension(void);
-   virtual Real *         GetState(void);
+   virtual Integer        GetDimension();
+   virtual Real *         GetState();
    virtual Real*          GetJ2KState();
-   const Real *           GetDerivativeArray(void);
+   const Real *           GetDerivativeArray();
 
    virtual bool SetBody(const std::string& theBody);
    virtual void SetBodyName(const std::string& theBody);
@@ -143,21 +154,33 @@ public:
    virtual void SetForceOrigin(CelestialBody* toBody);
    virtual void SetDimension(Integer);
    virtual void SetState(const Real * st);
+   virtual void SetState(GmatState * st);
 
-   Real GetErrorThreshold(void) const;
+   Real GetErrorThreshold() const;
    bool SetErrorThreshold(const Real thold = 0.10);
 
    virtual void IncrementTime(Real dt);
-   virtual Real GetTime(void);
+   virtual Real GetTime();
    virtual void SetTime(Real t);
 
-   virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
+   virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1, 
+         const Integer id = -1);
    virtual Real EstimateError(Real * diffs, Real * answer) const;
-   virtual bool GetComponentMap(Integer * map, Integer order = 1) const;
-    
+   virtual bool GetComponentMap(Integer * map, Integer order = 1, 
+         Integer id = -1) const;
+
+   // Support for extra derivative calcs -- the STM contribution, for example
+   virtual const IntegerArray& GetSupportedDerivativeIds();
+   virtual const StringArray&  GetSupportedDerivativeNames();
+
+   
    virtual void SetSolarSystem(SolarSystem *ss);
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
+                                      const Real parm,
+                                      const Integer parmID = -1);
+   virtual void SetSatelliteParameter(const Integer i,
+                                      Integer parmID,
                                       const Real parm);
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
@@ -166,8 +189,15 @@ public:
    virtual bool StateChanged(bool reset = true);
    
    virtual bool IsTransient();
+   virtual bool DepletesMass();
    virtual bool IsUserForce();
-   virtual void SetPropList(std::vector<SpaceObject *> *soList);
+   virtual void SetPropList(ObjectArray *soList);
+   
+   // Methods used by the ODEModel to set the state indexes, etc
+   virtual bool SupportsDerivative(Gmat::StateElementId id);
+   virtual bool SetStart(Gmat::StateElementId id, Integer index, 
+                         Integer quantity);
+   
 
    // Parameter accessor methods -- inherited from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
@@ -190,14 +220,19 @@ public:
    const StringArray&  GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name = "");
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                              const std::string &name, const Integer index);
+   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                              const std::string &name, const Integer index);
+
 protected:
       
    /// pointer to the body for which this force is computed
-   CelestialBody           *body;
+   CelestialBody *body;
    /// pointer to the origin used in propagation
-   CelestialBody           *forceOrigin;
+   CelestialBody *forceOrigin;
    /// name of the body
-   std::string             bodyName;
+   std::string bodyName;
    /// Number of parameters being modeled
    Integer dimension;
    /// Flag used to tell the readiness of the model for use
@@ -205,6 +240,8 @@ protected:
    /// Flag that is set when SetState() or SetTime() is called
    bool stateChanged;
    
+   /// GMAT state that the physical model uses
+   GmatState *theState;
    /// Array of data parameters containing the model data
    Real *modelState;
    /// The state vector in J2000BodyMJ2000Eq coordinates.
@@ -217,6 +254,10 @@ protected:
    Real prevElapsedTime;
    /// Array containing the most recent derivative calculation, when needed
    Real * deriv;
+   /// IDs for each element of the derivative vector 
+   IntegerArray derivativeIds;
+   /// Text names for each element of the derivative vector 
+   StringArray derivativeNames;
    /// Threshold for switching between relative and absolute error control
    Real relativeErrorThreshold;
    /// Pointer to the solar system model used as a data provider for the forces
@@ -230,6 +271,7 @@ protected:
       EPOCH = GmatBaseParamCount, 
       ELAPSED_SECS,
       BODY_NAME,
+      DERIVATIVE_ID,
       PhysicalModelParamCount
    };
 

@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Rvec6Var
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -54,6 +56,7 @@ Rvec6Var::Rvec6Var(const std::string &name, const std::string &typeStr,
                false, false, false)
 {
    mRvec6Value = Rvector6::RVECTOR6_UNDEFINED;
+   mReturnType = Gmat::RVECTOR_TYPE;
 }
 
 
@@ -144,13 +147,13 @@ std::string Rvec6Var::ToString()
 }
 
 //------------------------------------------------------------------------------
-// Rvector6 GetRvector6() const
+// const Rvector6& GetRvector6() const
 //------------------------------------------------------------------------------
 /**
  * @return Rvector6 value of parameter without evaluating.
  */
 //------------------------------------------------------------------------------
-Rvector6 Rvec6Var::GetRvector6() const
+const Rvector6& Rvec6Var::GetRvector6() const
 {
    return mRvec6Value;
 }
@@ -164,29 +167,23 @@ void Rvec6Var::SetRvector6(const Rvector6 &val)
 }
 
 //------------------------------------------------------------------------------
-// Rvector6 EvaluateRvector6()
+// const Rvector6& EvaluateRvector6()
 //------------------------------------------------------------------------------
 /**
  * Evaluates Real value of parameter. The derived class should implement this
  * method.
  */
 //------------------------------------------------------------------------------
-Rvector6 Rvec6Var::EvaluateRvector6()
+const Rvector6& Rvec6Var::EvaluateRvector6()
 {
    if (mKey == GmatParam::SYSTEM_PARAM)
    {
-      throw ParameterException("Parameter: EvaluateReal() should be implemented "
+      throw ParameterException("Parameter: EvaluateRvector6() should be implemented "
                                "for Parameter Type:" + GetTypeName());
    }
    else
    {
-      //loj: Parse the expresstion, then evaluate
-      //loj: Should we use mDesc field instead of creating new exp. field?
-      return mRvec6Value; //loj: temp code
+      return mRvec6Value;
    }
-
-   return Rvector6(REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED,
-                   REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED,
-                   REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED);
 }
 
