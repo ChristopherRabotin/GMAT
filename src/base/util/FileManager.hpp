@@ -1,10 +1,12 @@
-//$Id:FileManager.hpp 5553 2008-06-03 16:46:30Z djcinsb $
+//$Id$
 //------------------------------------------------------------------------------
 //                                  FileManager
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -27,6 +29,7 @@
 
 #include "gmatdefs.hpp"
 #include <map>
+#include <list>
 #include <fstream>
 
 class GMAT_API FileManager
@@ -37,10 +40,10 @@ public:
    enum FileType
    {
       // file path
-      SPLASH_PATH = 0,
+      BEGIN_OF_PATH = 0,
       OUTPUT_PATH,
-      SLP_PATH,
       DE_PATH,
+      SPK_PATH,
       EARTH_POT_PATH,
       LUNA_POT_PATH,
       VENUS_POT_PATH,
@@ -48,6 +51,14 @@ public:
       PLANETARY_COEFF_PATH,
       TIME_PATH,
       TEXTURE_PATH, //Notes: TEXTURE_PATH is used in SetPathname()
+      MEASUREMENT_PATH,
+      EPHEM_PATH,
+      GUI_CONFIG_PATH,
+      SPLASH_PATH,
+      ICON_PATH,
+      STAR_PATH,
+      MODEL_PATH,
+      END_OF_PATH,
       
       // general file name
       LOG_FILE,
@@ -58,10 +69,8 @@ public:
       // specific file name
       //    Notes: Don't add general planet potential files here. They are handled
       //    when gmat_startup_file are read by following naming convention.
-      SLP_FILE,
-      DE200_FILE,
-      DE202_FILE,
       DE405_FILE,
+      PLANETARY_SPK_FILE,
       JGM2_FILE,
       JGM3_FILE,
       EGM96_FILE,
@@ -72,6 +81,13 @@ public:
       PLANETARY_COEFF_FILE,
       NUTATION_COEFF_FILE,
       LEAP_SECS_FILE,
+      LSK_FILE,
+      PERSONALIZATION_FILE,
+      MAIN_ICON_FILE,
+      STAR_FILE,
+      CONSTELLATION_FILE,
+      SPACECRAFT_MODEL_FILE,
+      HELP_FILE,
       FileTypeCount,
    };
    
@@ -82,18 +98,26 @@ public:
    std::string GetCurrentPath();
    bool DoesDirectoryExist(const std::string &dirPath);
    bool DoesFileExist(const std::string &filename);
+   bool RenameFile(const std::string &oldName, const std::string &newName,
+                   Integer &retCode, bool overwriteIfExists = false);
    
+   std::string GetStartupFileDir();
+   std::string GetStartupFileName();
+   std::string GetFullStartupFilePath();
    void ReadStartupFile(const std::string &fileName = "");
    void WriteStartupFile(const std::string &fileName = "");
    
    std::string GetRootPath();
    
+   // Methods returning path
    std::string GetPathname(const FileType type);
    std::string GetPathname(const std::string &typeName);
    
+   // Methods returning filename
    std::string GetFilename(const FileType type);
    std::string GetFilename(const std::string &typeName);
    
+   // Methods returning full path and filename
    //loj: Why the name "GetFullPathName()" doesn't work? Reserved word?
    // I'm getting unresolved ref on GetFullPathNameA()
    std::string GetFullPathname(const FileType type);
@@ -107,12 +131,13 @@ public:
    void SetAbsPathname(const std::string &type, const std::string &newpath);
    
    void ClearGmatFunctionPath();
-   void AddGmatFunctionPath(const std::string &path);
+   void AddGmatFunctionPath(const std::string &path, bool addFront = true);
    std::string GetGmatFunctionPath(const std::string &name);
    const StringArray& GetAllGmatFunctionPaths();
    
    void ClearMatlabFunctionPath();
-   void AddMatlabFunctionPath(const std::string &path);
+   void AddMatlabFunctionPath(const std::string &path, bool addFront = true);
+   std::string GetMatlabFunctionPath(const std::string &name);
    const StringArray& GetAllMatlabFunctionPaths();
    
    // Plug-in code
@@ -120,7 +145,11 @@ public:
    
 private:
    
-   static const std::string VERSION_DATE;
+   enum FunctionType
+   {
+      GMAT_FUNCTION = 101,
+      MATLAB_FUNCTION,
+   };
    
    struct FileInfo
    {
@@ -131,19 +160,35 @@ private:
          { mPath = path; mFile = file; }
    };
    
+   std::string mPathSeparator;
+   std::string mStartupFileDir;
    std::string mStartupFileName;
+   std::string mRunMode;
+   std::string mMatlabMode;
+   std::string mDebugMatlab;
    std::ifstream mInStream;
    std::map<std::string, std::string> mPathMap;
    std::map<std::string, FileInfo*> mFileMap;
-   StringArray mGmatFunctionPaths;
-   StringArray mMatlabFunctionPaths;
+   std::list<std::string> mGmatFunctionPaths;
+   std::list<std::string> mMatlabFunctionPaths;
    StringArray mGmatFunctionFullPaths;
    StringArray mMatlabFunctionFullPaths;
+   StringArray mSavedComments;
+   StringArray mPathWrittenOuts;
+   StringArray mFileWrittenOuts;
    
    StringArray mPluginList;
    
+   std::string GetFunctionPath(FunctionType type, std::list<std::string> &pathList,
+                               const std::string &funcName);
    void AddFileType(const std::string &type, const std::string &name);
    void AddAvailablePotentialFiles();
+   void WriteHeader(std::ofstream &outStream);
+   void WriteFiles(std::ofstream &outStream, const std::string &type);
+   void RefreshFiles();
+   
+   // For debugging
+   void ShowMaps(const std::string &msg);
    
    static FileManager *theInstance;
    static const std::string FILE_TYPE_STRING[FileTypeCount];

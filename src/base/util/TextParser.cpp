@@ -2,9 +2,11 @@
 //-------------------------------------------------------------------------------
 //                              TextParser
 //-------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,12 +25,16 @@
 #include "UtilityException.hpp"
 #include "MessageInterface.hpp"
 
+#include <algorithm>          // Required for GCC 4.3
+#include <iterator>           // For back_inserter() with VC++ 2010
+
 //#define DEBUG_TP 1
 //#define DEBUG_TP_EVAL_BLOCK 2
 //#define DEBUG_TP_CHUNK_LINE 1
 //#define DEBUG_TP_DECOMPOSE 2
 //#define DEBUG_TP_SEP_BRACKETS 2
 //#define DEBUG_TP_DECOMPOSE_BLOCK 1
+//#define GMAT_TP_SEPARATEBY
 
 using namespace GmatStringUtil;
 
@@ -91,18 +97,18 @@ void TextParser::Reset()
 StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
 {
    Integer length = logicalBlock.size();
-   
+
    #if DEBUG_TP_DECOMPOSE_BLOCK
    MessageInterface::ShowMessage
       ("TextParser::DecomposeBlock() length=%d\n", length);
    #endif
-   
+
    std::string str = logicalBlock;
    std::string block;
    Integer lastPos = 0;
    Integer lineCounter = 0;
    StringArray lines;
-   
+
    // put logicalBlock into StringArray, ending LF or CR
    for (int i=0; i<length; i++)
    {
@@ -110,30 +116,30 @@ StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
       MessageInterface::ShowMessage
          ("   ===> TextParser::DecomposeBlock() str[%d]=%c, %d\n", i, str[i], str[i]);
       #endif
-      
+
       if (str[i] == '\n' || str[i] == '\r')
       {
          // Remove end-of-line character
          block = str.substr(lastPos, i-lastPos+1);
          lines.push_back(block);
-         
+
          #if DEBUG_TP_DECOMPOSE_BLOCK > 1
          MessageInterface::ShowMessage
             ("   ===> TextParser::DecomposeBlock() i=%d, lastPos=%d, block=%s\n",
              i, lastPos, block.c_str());
          #endif
-         
+
          lastPos = i+1;
          lineCounter++;
       }
    }
-   
-   
+
+
    if (lineCounter == 0)
       lines.push_back(str);
    else if (lastPos < length)
       lines.push_back(str.substr(lastPos));
-   
+
    return lines;
 }
 
@@ -167,48 +173,48 @@ StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
 Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
 {
    Integer length = logicalBlock.size();
-   
+
    #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage
       ("TextParser::EvaluateBlock() length=%d\n", length);
    #endif
-   
+
    #if DEBUG_TP_EVAL_BLOCK > 1
    MessageInterface::ShowMessage
       ("TextParser::EvaluateBlock() logicalBlock=\n<<<%s>>>\n", logicalBlock.c_str());
    #endif
-   
+
    // first break into string array
    StringArray lines = DecomposeBlock(logicalBlock);
-   
+
    Integer count = lines.size();
-   
+
    #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage
       ("TextParser::EvaluateBlock() count=%d\n", count);
    #endif
-   
+
    Integer commentCounter = 0;
    Integer noCommentLine = -1;
    std::string str, keyword, substr;
    std::string::size_type index1, index2, index3, index4;
-   
+
    Reset();
-   
+
    #if DEBUG_TP_EVAL_BLOCK > 1
    for (int i=0; i<count; i++)
       MessageInterface::ShowMessage("   lines[%d]=<%s>\n", i, lines[i].c_str());
    #endif
-   
+
    // first find block type
    for (int i=0; i<count; i++)
    {
       str = lines[i];
       length = str.size();
-      
+
       // Remove leading blank spaces
       str = GmatStringUtil::Trim(str, GmatStringUtil::LEADING);
-      
+
       // Remove GMAT keyword
       index1 = str.find("GMAT ");
       if (index1 == 0)
@@ -217,7 +223,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          index3 = str.find_first_not_of(whiteSpace, index2);
          str = str.substr(index3, length-index3+1);
       }
-      
+
       index1 = str.find_first_not_of(whiteSpace);
       if (index1 != str.npos)
       {
@@ -227,10 +233,10 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             commentCounter++;
             continue;
          }
-         
+
          // find keyword, and remove semicolon
          index2 = str.find_first_of(whiteSpace, index1);
-         
+
          //If white space found (Added for VC++)
          if (index2 != str.npos)
          {
@@ -243,16 +249,16 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          {
             keyword = str.substr(index1);
          }
-         
+
          // remove any eol or semicoln from keyword
          keyword = GmatStringUtil::Trim(keyword, GmatStringUtil::BOTH, true, true);
-         
+
          // make sure keyword is before open parenthesis
          std::string::size_type openIndex = keyword.find("(");
          if (openIndex != keyword.npos)
             keyword = keyword.substr(0, openIndex);
-         
-         // check for "function" 
+
+         // check for "function"
          if (keyword == "function")
          {
             theBlockType = Gmat::FUNCTION_BLOCK;
@@ -273,16 +279,16 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          {
             theBlockType = Gmat::ASSIGNMENT_BLOCK;
             noCommentLine = i;
-            
+
             // check for CallFunction
             // ex) [a b c] = function(d, e, f);
-            
+
             //if (str.find("[") != str.npos) // Is this checking enough?
-            
+
             // check for RVECTOR_TYPE or UNSIGNED_INTARRAY_TYPE setting
             // ex) opengl.OrbitColor = [100 200 300 ];
             //     opengl.ViewPointVectorVector = [0, 0, 50000];
-            
+
             std::string::size_type index1 = str.find("[");
             if (index1 != str.npos)
             {
@@ -293,7 +299,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
                   isFunctionCall = true;
                }
             }
-            
+
             /// @todo: This is a work around for a call function with
             /// without any return parameters.  It should be updated in
             /// the design to handle this situation.
@@ -301,7 +307,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             std::string noInline = str;
             if (commentPos != str.npos)
                noInline = str.substr(0, commentPos);
-            
+
             // Since we are allowed to pass string literal, string literal can
             // be anything letters including equal sign, so we need additional checking.
             // String literals are enclosed with single quotes (loj: 2008.05.19)
@@ -312,27 +318,27 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
                isFunctionCall = true;
             }
          }
-         
+
          if (noCommentLine >= 0)
          {
             // if % found in the no-comment line, it is inline comment
             index3 = str.find("%", index2);
-            
+
             #if DEBUG_TP_EVAL_BLOCK
             MessageInterface::ShowMessage
             ("   index1=%d, index2=%u, index3=%u\n", index1, index2, index3);
             #endif
-            
+
             // if inline comment
             if (index3 != str.npos)
             {
                // find last non-blank
                index4 = str.find_last_not_of(whiteSpace, index3-1);
-               
+
                // remove eol char from inlineComment
                inlineComment = str.substr(index4+1);
                inlineComment = inlineComment.substr(0, inlineComment.size()-1);
-               
+
                theInstruction = str.substr(index1, index4-index1+1);
             }
             else
@@ -342,21 +348,21 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          }
       }
    }
-   
+
    //MessageInterface::ShowMessage("===> theInstruction=%s\n", theInstruction.c_str());
-   
+
    if (commentCounter == count)
       theBlockType = Gmat::COMMENT_BLOCK;
-   
+
    // remove ending ; from the instruction
    theInstruction =
       GmatStringUtil::Trim(theInstruction, GmatStringUtil::TRAILING, true, true);
-   
+
    theChunks.clear();
    theChunks.push_back(prefaceComment);
    theChunks.push_back(inlineComment);
    theChunks.push_back(theInstruction);
-   
+
    #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage
       ("   keyword=<%s>, blockType=%d, isFunctionCall=%d\n", keyword.c_str(),
@@ -365,7 +371,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
       ("   prefaceComment=<%s>\n   inlineComment=<%s>\n   theInstruction=<%s>\n",
        prefaceComment.c_str(), inlineComment.c_str(), theInstruction.c_str());
    #endif
-   
+
    return theBlockType;
 }
 
@@ -384,7 +390,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
  * @return array of constituent parts.
  *    The object definition instructions returns in the following format:
  *       <"Create"> <ObjectType> <Name1> [<Name2> ...]
- 
+
  *    The command definition instructions returns in the following format:
  *       <Command> <CommandExpression>   <-- command, EndFiniteBurn
  *       <Command>                       <-- End* command
@@ -456,7 +462,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
  *   ----- Function Call:
  *   var2 = MyFunction(); <== RHS is variable
  *      <var2> <MyFunction()>
- *   
+ *
  */
 //-------------------------------------------------------------------------------
 StringArray TextParser::ChunkLine()
@@ -466,14 +472,14 @@ StringArray TextParser::ChunkLine()
       ("TextParser::ChunkLine() theInstruction=<%s>\n   theBlockType=%d, "
        "isFunctionCall=%d\n", theInstruction.c_str(), theBlockType, isFunctionCall);
    #endif
-   
+
    std::string str = theInstruction;
    std::string space;
    std::string::size_type index1, index2, index3 = 123456;
-   
+
    Integer length = str.size();
    StringArray chunks;
-   
+
    //------------------------------------------------------------
    // object definition block
    //------------------------------------------------------------
@@ -488,7 +494,7 @@ StringArray TextParser::ChunkLine()
                  "found in the definition block\n   \"%s\"\n", str.c_str());
          MessageInterface::ShowMessage("%s", errorMsg);
          #endif
-         
+
          sprintf(errorMsg, "The keyword \"Create\" not found in the definition block");
          throw UtilityException(errorMsg);
       }
@@ -497,9 +503,9 @@ StringArray TextParser::ChunkLine()
          // find object type
          index2 = str.find_first_of(whiteSpace, index1);
          chunks.push_back(str.substr(index1, index2-index1));
-         
+
          index1 = str.find_first_not_of(whiteSpace, index2);
-         
+
          if (index1 == str.npos)
          {
             #if DEBUG_TP_CHUNK_LINE
@@ -507,7 +513,7 @@ StringArray TextParser::ChunkLine()
                     "found in the definition block\n   \"%s\"\n", str.c_str());
             MessageInterface::ShowMessage("%s", errorMsg);
             #endif
-            
+
             sprintf(errorMsg, "Object type not found in the definition block");
             throw UtilityException(errorMsg);
          }
@@ -515,9 +521,9 @@ StringArray TextParser::ChunkLine()
          {
             index2 = str.find_first_of(whiteSpace, index1);
             chunks.push_back(str.substr(index1, index2-index1));
-            
+
             index1 = str.find_first_not_of(whiteSpace, index2);
-            
+
             if (index1 == str.npos)
             {
                #if DEBUG_TP_CHUNK_LINE
@@ -525,7 +531,7 @@ StringArray TextParser::ChunkLine()
                        "found in the definition block\n   \"%s\"\n", str.c_str());
                MessageInterface::ShowMessage("%s", errorMsg);
                #endif
-               
+
                sprintf(errorMsg, "Object name not found in the definition block");
                throw UtilityException(errorMsg);
             }
@@ -549,14 +555,14 @@ StringArray TextParser::ChunkLine()
                  "in the command block\n   \"%s\"\n", str.c_str());
          MessageInterface::ShowMessage("%s", errorMsg);
          #endif
-         
+
          sprintf(errorMsg, "Command name not found in the command block");
          throw UtilityException(errorMsg);
       }
       else
       {
          index2 = str.find_first_of(whiteSpace, index1);
-         
+
          if (index2 == str.npos)
          {
             chunks.push_back(str);
@@ -564,11 +570,11 @@ StringArray TextParser::ChunkLine()
          else
          {
             chunks.push_back(str.substr(index1, index2-index1));
-            
+
             index1 = str.find_first_not_of(whiteSpace, index2);
-            
+
             if (index1 != str.npos)
-               chunks.push_back(str.substr(index1, length-index1));            
+               chunks.push_back(str.substr(index1, length-index1));
          }
       }
    }
@@ -579,7 +585,7 @@ StringArray TextParser::ChunkLine()
    {
       // find equal sign
       index1 = str.find_first_not_of(whiteSpace);
-      
+
       if (index1 == str.npos)
       {
          #if DEBUG_TP_CHUNK_LINE
@@ -587,14 +593,14 @@ StringArray TextParser::ChunkLine()
                  "found in the assignment block\n   \"%s\"\n", str.c_str());
          MessageInterface::ShowMessage("%s", errorMsg);
          #endif
-         
+
          sprintf(errorMsg, "No assignment expression found in the assignment block");
          throw UtilityException(errorMsg);
       }
       else
       {
          index2 = str.find_first_of("=", index1);
-         
+
          if (index2 == str.npos)
          {
             // set "" to lhs
@@ -605,11 +611,11 @@ StringArray TextParser::ChunkLine()
          {
             if (index2 != 0)
                index3 = str.find_last_not_of(whiteSpace, index2-1);
-            
+
             #if DEBUG_TP_CHUNK_LINE
             MessageInterface::ShowMessage("   index3=%u, index2=%u\n", index3, index2);
             #endif
-            
+
             if (index3 == str.npos || index2 == 0)
             {
                #if DEBUG_TP_CHUNK_LINE
@@ -617,16 +623,16 @@ StringArray TextParser::ChunkLine()
                        "the assignment block\n   \"%s\"\n", str.c_str());
                MessageInterface::ShowMessage("%s", errorMsg);
                #endif
-               
+
                sprintf(errorMsg, "LHS of \"=\" not found in the assignment block");
                throw UtilityException(errorMsg);
             }
             else
             {
                // found lhs
-               chunks.push_back(str.substr(index1, index3-index1+1));               
+               chunks.push_back(str.substr(index1, index3-index1+1));
                index1 = str.find_first_not_of(whiteSpace, index2+1);
-               
+
                if (index1 == str.npos)
                {
                   #if DEBUG_TP_CHUNK_LINE
@@ -634,7 +640,7 @@ StringArray TextParser::ChunkLine()
                           "the assignment block\n   \"%s\"\n", str.c_str());
                   MessageInterface::ShowMessage("%s", errorMsg);
                   #endif
-                  
+
                   sprintf(errorMsg, "RHS of \"=\" not found in the assignment block");
                   throw UtilityException(errorMsg);
                }
@@ -646,13 +652,13 @@ StringArray TextParser::ChunkLine()
          }
       }
    }
-   
+
    #if DEBUG_TP_CHUNK_LINE
    MessageInterface::ShowMessage("   Returning:\n");
    for (unsigned int i=0; i<chunks.size(); i++)
       MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, chunks[i].c_str());
    #endif
-   
+
    return chunks;
 }
 
@@ -707,16 +713,17 @@ StringArray TextParser::Decompose(const std::string &chunk,
 {
    #if DEBUG_TP_DECOMPOSE
    MessageInterface::ShowMessage
-      ("TextParser::Decompose() chunk='%s', bracketPair='%s', removeOuterBracket=%d\n",
-       chunk.c_str(), bracketPair.c_str(), removeOuterBracket);
+      ("TextParser::Decompose() chunk='%s', bracketPair='%s', checkForArray=%d, "
+       "removeOuterBracket=%d\n", chunk.c_str(), bracketPair.c_str(), checkForArray,
+       removeOuterBracket);
    #endif
    
    std::string str1 = chunk;
-   
+
    // If checking for array, first remove blank spaces inside array bracket
    if (checkForArray && chunk[0] != bracketPair[0])
       str1 = RemoveSpaceInBrackets(chunk, bracketPair);
-   
+
    int length = str1.size();
    std::string::size_type openBracketIndex;
    Integer open, close;
@@ -728,17 +735,17 @@ StringArray TextParser::Decompose(const std::string &chunk,
    {
       GmatStringUtil::FindMatchingBracket(str1, open, close, isOuterBracket,
                                           bracketPair, 0);
-      
+
       #if DEBUG_TP_DECOMPOSE
       MessageInterface::ShowMessage
          ("   open=%d, close=%d, isOuterBracket=%d\n", open, close,
           isOuterBracket);
       #endif
-      
+
       if (removeOuterBracket && isOuterBracket)
       {
          str1 = str1.substr(1, length-2);
-         
+
          #if DEBUG_TP_DECOMPOSE
          MessageInterface::ShowMessage("   str1=%s\n", str1.c_str());
          #endif
@@ -755,9 +762,14 @@ StringArray TextParser::Decompose(const std::string &chunk,
    if (openBrace != str1.npos && closeBrace != str1.npos)
    {
       UnsignedInt firstComma = str1.find_last_of(",", openBrace);
+      ////loj:UnsignedInt firstComma = str1.find_last_of(", ", openBrace);
       
       if (closeBrace == str1.size()-1)
       {
+//          if (firstComma != str1.npos)
+//             parts.push_back(str1.substr(0, firstComma));
+//          else
+//             parts.push_back(str1.substr(0, openBrace));
          parts.push_back(str1.substr(0, firstComma));
          parts.push_back(str1.substr(openBrace));
          
@@ -776,27 +788,27 @@ StringArray TextParser::Decompose(const std::string &chunk,
    //-----------------------------------------------------------------
    // now separate by space and comma and put brackets together
    //-----------------------------------------------------------------
-   std::string openBrackets = "([{";   
+   std::string openBrackets = "([{";
    openBracketIndex = str1.find_first_of(openBrackets);
-   
+
    bool hasOpenBracket = false;
    bool isArray = false;
-   
+
    // if open bracket found,
    if (openBracketIndex != str1.npos)
    {
       bool isBracketPartOfArray = false;
       hasOpenBracket = true;
       isArray = true;
-      
+
       GmatStringUtil::FindMatchingBracket(str1, open, close, isOuterBracket,
                                           bracketPair, openBracketIndex);
-      
+
       #if DEBUG_TP_DECOMPOSE > 1
       MessageInterface::ShowMessage
          ("   open=%d, close=%d, isOuterBracket=%d\n", open, close, isOuterBracket);
       #endif
-      
+
       if (checkForArray)
       {
          if (open == -1 && close == -1)
@@ -806,20 +818,20 @@ StringArray TextParser::Decompose(const std::string &chunk,
             isBracketPartOfArray =
                IsBracketPartOfArray(str1.substr(open, close-open+1), "([)]", true);
       }
-      
+
       #if DEBUG_TP_DECOMPOSE > 1
       MessageInterface::ShowMessage("   isBracketPartOfArray=%d\n", isBracketPartOfArray);
       #endif
-      
+
       if (!isBracketPartOfArray)
          isArray = false;
    }
-   
+
    #if DEBUG_TP_DECOMPOSE > 1
    MessageInterface::ShowMessage
       ("   hasOpenBracket=%d, isArray=%d\n", hasOpenBracket, isArray);
    #endif
-   
+
    // if no Array found, just separate by comma and space
    if (!hasOpenBracket && !isArray)
    {
@@ -833,21 +845,21 @@ StringArray TextParser::Decompose(const std::string &chunk,
          str2 = GmatStringUtil::Trim(str2);
          parts.push_back(str2);
       }
-      
+
       parts.push_back(str1.substr(openBracketIndex, length-openBracketIndex));
-      
+
    }
    else
    {
       parts = GmatStringUtil::SeparateBy(str1, " ", true);
-   }   
-   
+   }
+
    #if DEBUG_TP_DECOMPOSE
    MessageInterface::ShowMessage("   Returning: %d parts\n", parts.size());
    for (unsigned int i=0; i<parts.size(); i++)
       MessageInterface::ShowMessage("   parts[%d] = %s\n", i, parts[i].c_str());
    #endif
-   
+
    return parts;
 }
 
@@ -883,8 +895,9 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
 {
    #if DEBUG_TP_SEP_BRACKETS
    MessageInterface::ShowMessage
-      ("TextParser::SeparateBrackets() chunk='%s', bracketPair='%s', delim='%s'\n",
-       chunk.c_str(), bracketPair.c_str(), delim.c_str());
+      ("TextParser::SeparateBrackets() chunk='%s', bracketPair='%s', delim='%s', "
+       "checkOuterBracket=%d\n", chunk.c_str(), bracketPair.c_str(), delim.c_str(),
+       checkOuterBracket);
    #endif
    
    std::string str1 = chunk;
@@ -909,11 +922,11 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
       {
          sprintf(errorMsg, "TextParser::SeparateBrackets() \"%s\" is not enclosed "
                  "with \"%s\"", str1.c_str(), bracketPair.c_str());
-         
+
          #if DEBUG_TP_SEP_BRACKETS
          MessageInterface::ShowMessage("%s\n", errorMsg);
          #endif
-         
+
          sprintf(errorMsg, "\"%s\" is not enclosed with \"%s\"", str1.c_str(),
                  bracketPair.c_str());
          throw UtilityException(errorMsg);
@@ -943,7 +956,69 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
    #endif
    
    return parts;
+}
+
+
+//-------------------------------------------------------------------------------
+// StringArray SeparateAllBrackets(const std::string &chunk)
+//-------------------------------------------------------------------------------
+StringArray TextParser::SeparateAllBrackets(const std::string &chunk,
+                                            const std::string &bracketPair)
+{
+   #if DEBUG_TP_SEP_BRACKETS
+   MessageInterface::ShowMessage
+      ("TextParser::SeparateAllBrackets() chunk='%s', bracketPair='%s'\n",
+       chunk.c_str(), bracketPair.c_str());
+   #endif
    
+   std::string str1 = chunk;
+   std::string parenPair = "()";
+   std::string openBracket, closeBracket;
+   openBracket = bracketPair[0];
+   if (bracketPair.size() > 1)
+      closeBracket = bracketPair[1];
+   
+   // First remove blank spaces inside array bracket
+   if (chunk[0] != parenPair[0])
+      str1 = RemoveSpaceInBrackets(chunk, parenPair);
+   
+   #if DEBUG_TP_SEP_BRACKETS
+   MessageInterface::ShowMessage("   str1=%s\n", str1.c_str());
+   #endif
+   
+   StringArray parts, parts1, parts2;
+   parts1 = GmatStringUtil::SeparateBy(str1, "}", false, true);
+   
+   for (Integer i = 0; i < (Integer)parts1.size(); i++)
+   {
+      #if DEBUG_TP_SEP_BRACKETS
+      MessageInterface::ShowMessage
+         ("   parts1[%d] = %s\n", i, parts1[i].c_str());
+      #endif
+      parts2 = GmatStringUtil::SeparateBy(parts1[i], "{", false, false);
+      for (unsigned int j=0; j<parts2.size(); j++)
+      {
+         #if DEBUG_TP_SEP_BRACKETS
+         MessageInterface::ShowMessage
+            ("   parts2[%d] = %s\n", j, parts2[j].c_str());
+         #endif
+         // If closeBracket found at the end, insert openBracket back if not found
+         if ((parts2[j][0] != '{') &&
+             (parts2[j].find(closeBracket) == parts2[j].size()-1))
+            parts2[j].insert(0, openBracket);
+      }
+      copy(parts2.begin(), parts2.end(), back_inserter(parts));
+   }
+   
+   #if DEBUG_TP_SEP_BRACKETS
+   MessageInterface::ShowMessage
+      ("TextParser::SeparateAllBrackets() returning %d parts:\n", parts.size());
+   for (unsigned int i=0; i<parts.size(); i++)
+      MessageInterface::ShowMessage
+         ("   parts[%d]  = %s\n", i, parts[i].c_str());
+   #endif
+   
+   return parts;
 }
 
 
@@ -962,7 +1037,7 @@ StringArray TextParser::SeparateSpaces(const std::string &chunk)
 {
    StringTokenizer st(chunk, " ,\t");
    StringArray parts = st.GetAllTokens();
-   
+
    #if DEBUG_SEP_SPACE
    for (UnsignedInt i=0; i<parts.size(); i++)
       MessageInterface::ShowMessage
@@ -999,7 +1074,7 @@ StringArray TextParser::SeparateDots(const std::string &chunk)
       StringTokenizer st(chunk, ".");
       parts = st.GetAllTokens();
    }
-   
+
    #if DEBUG_SEP_DOTS
    for (UnsignedInt i=0; i<parts.size(); i++)
       MessageInterface::ShowMessage
@@ -1024,19 +1099,26 @@ StringArray TextParser::SeparateDots(const std::string &chunk)
 //-------------------------------------------------------------------------------
 StringArray TextParser::SeparateBy(const std::string &chunk, const std::string &delim)
 {
+   #ifdef GMAT_TP_SEPARATEBY
+   MessageInterface::ShowMessage
+      ("TextParser::SeparateBy() chunk='%s', delim='%s'\n", chunk.c_str(), delim.c_str());
+   #endif
+   
    StringTokenizer st(chunk, delim);
    StringArray parts = st.GetAllTokens();
    int count = parts.size();
-
+   
    for (int i=0; i<count; i++)
       parts[i] = GmatStringUtil::Strip(parts[i], GmatStringUtil::BOTH);
    
-   #if DEBUG_TP > 1
+   #ifdef GMAT_TP_SEPARATEBY
+   MessageInterface::ShowMessage
+      ("TextParser::SeparateBy() returning:\n");
    for (int i=0; i<count; i++)
       MessageInterface::ShowMessage
          ("   parts[%d]=%s\n", i, parts[i].c_str());
    #endif
-
+   
    return parts;
 }
 
@@ -1047,11 +1129,11 @@ StringArray TextParser::SeparateBy(const std::string &chunk, const std::string &
 bool TextParser::IsCommand(const std::string &str)
 {
    bool found = false;
-   
+
    if (find(theCommandList.begin(), theCommandList.end(), str)
        != theCommandList.end())
       found = true;
-   
+
    return found;
 }
 
@@ -1071,9 +1153,11 @@ char TextParser::GetClosingBracket(const char &openBracket)
       return '}';
    case '<':
       return '>';
-      
+
    default:
       sprintf(errorMsg, "TextParser found unknown open bracket: %c", openBracket);
       throw UtilityException(errorMsg);
    }
 }
+
+

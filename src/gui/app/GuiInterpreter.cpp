@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              GuiInterpreter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -57,9 +59,11 @@ GuiInterpreter::~GuiInterpreter()
 bool GuiInterpreter::Interpret(GmatCommand *inCmd, std::istringstream *ss)
 {   
    SetInStream(ss);
-
+   inScriptEvent = true;
    // We don't want parse first comment as header, so set skipHeader to true.
-   return ScriptInterpreter::Interpret(inCmd, true);
+   bool retval = ScriptInterpreter::Interpret(inCmd, true);
+   inScriptEvent = false;
+   return retval;
 }
 
 
@@ -95,6 +99,44 @@ GmatBase* GuiInterpreter::GetRunningObject(const std::string &name)
 const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 {
    return theModerator->GetListOfFactoryItems(type);
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfAllFactoryItems()
+//------------------------------------------------------------------------------
+/**
+ * Return a list of all items that can be created.
+ *
+ * @return list of all creatable items.
+ */
+//------------------------------------------------------------------------------
+const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
+{
+   return theModerator->GetListOfAllFactoryItems();
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types)
+//------------------------------------------------------------------------------
+/**
+ * Return a std::string of all items that can be created except input object types
+ *
+ * @param <type> object types to be excluded
+ *
+ * @return list of all creatable items.
+ */
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types)
+{
+   StringArray creatables = theModerator->GetListOfAllFactoryItemsExcept(types);
+   std::string str;
+   
+   for (UnsignedInt i = 0; i < creatables.size(); i++)
+      str = str + creatables[i] + " ";
+   
+   return str;
 }
 
 
@@ -206,7 +248,25 @@ bool GuiInterpreter::HasConfigurationChanged(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void GuiInterpreter::ConfigurationChanged(GmatBase *obj, bool tf)
 {
+   #if !defined __CONSOLE_APP__
+   
+   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    theModerator->ConfigurationChanged(obj, tf);
+   
+   if (tf == true)
+   {
+      #ifdef DEBUG_SYNC_STATUS
+      MessageInterface::ShowMessage
+         ("GuiInterpreter::ConfigurationChanged() Setting GUI dirty\n");
+      #endif
+      mainFrame->UpdateGuiScriptSyncStatus(2, 0); // Set GUI dirty
+   }
+   
+   #else
+   
+   theModerator->ConfigurationChanged(obj, tf);
+   
+   #endif
 }
 
 
@@ -224,6 +284,43 @@ void GuiInterpreter::ResetConfigurationChanged(bool resetResource,
 
 
 //------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string &type, const std::string &name,
+//                        Integer manage, bool createDefault)
+//------------------------------------------------------------------------------
+/**
+ * Creates an object by calling Interpreter::CreateObject()
+ */
+//------------------------------------------------------------------------------
+GmatBase* GuiInterpreter::CreateObject(const std::string &type,
+                                       const std::string &name,
+                                       Integer manage, bool createDefault)
+{
+   #if !defined __CONSOLE_APP__
+   
+   #ifdef DEBUG_SYNC_STATUS
+   MessageInterface::ShowMessage
+      ("GuiInterpreter::CreateObject() type='%s', name='%s', Setting GUI dirty\n",
+       type.c_str(), name.c_str());
+   #endif
+   
+   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
+   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault);
+   if (obj == NULL)
+      mainFrame->UpdateGuiScriptSyncStatus(3, 0); // Set GUI error
+   else
+      mainFrame->UpdateGuiScriptSyncStatus(2, 0); // Set GUI dirty
+   
+   return obj;
+   
+   #else
+   
+   return Interpreter::CreateObject(type, name, manage, createDefault);
+   
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // SolarSystem* GetDefaultSolarSystem()
 //------------------------------------------------------------------------------
 /**
@@ -235,6 +332,20 @@ void GuiInterpreter::ResetConfigurationChanged(bool resetResource,
 SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
 {
    return theModerator->GetDefaultSolarSystem();
+}
+
+//------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystemInUse()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the solar system is use object pointer.
+ *
+ * @return a default solar system object pointer
+ */
+//------------------------------------------------------------------------------
+SolarSystem* GuiInterpreter::GetSolarSystemInUse()
+{
+   return theModerator->GetSolarSystemInUse();
 }
 
 
@@ -325,6 +436,8 @@ Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
                                              const std::string &filename,
                                              bool createDefault)
 {
+   // Set object manage option to configuration object
+   theModerator->SetObjectManageOption(1);
    return theModerator->
       CreateSubscriber(type, name, filename, createDefault);
 }
@@ -346,6 +459,10 @@ GmatBase* GuiInterpreter::CreateDefaultPropSetup(const std::string &name)
    return (GmatBase*)theModerator->CreateDefaultPropSetup(name);
 }
 
+GmatBase* GuiInterpreter::CreateNewODEModel(const std::string &name)
+{
+   return theModerator->CreateODEModel("ODEModel", name);
+}
 
 //------------------------------------------------------------------------------
 // CoordinateSystem* GetInternalCoordinateSystem()
@@ -412,27 +529,27 @@ const StringArray& GuiInterpreter::GetPlanetarySourceTypesInUse()
 }
 
 
-//------------------------------------------------------------------------------
-// const StringArray& GetAnalyticModelNames()
-//------------------------------------------------------------------------------
-/*
- * @return analytic model name used of the solar system in use.
- */
-//------------------------------------------------------------------------------
-const StringArray& GuiInterpreter::GetAnalyticModelNames()
-{
-   return theModerator->GetAnalyticModelNames();
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetAnalyticModelToUse(const std::string &modelName)
-//------------------------------------------------------------------------------
-bool GuiInterpreter::SetAnalyticModelToUse(const std::string &modelName)
-{
-   return theModerator->SetAnalyticModelToUse(modelName);
-}
-
+////------------------------------------------------------------------------------
+//// const StringArray& GetAnalyticModelNames()
+////------------------------------------------------------------------------------
+///*
+// * @return analytic model name used of the solar system in use.
+// */
+////------------------------------------------------------------------------------
+//const StringArray& GuiInterpreter::GetAnalyticModelNames()
+//{
+//   return theModerator->GetAnalyticModelNames();
+//}
+//
+//
+////------------------------------------------------------------------------------
+//// bool SetAnalyticModelToUse(const std::string &modelName)
+////------------------------------------------------------------------------------
+//bool GuiInterpreter::SetAnalyticModelToUse(const std::string &modelName)
+//{
+//   return theModerator->SetAnalyticModelToUse(modelName);
+//}
+//
 
 //------------------------------------------------------------------------------
 // bool SetPlanetarySourceName(const std::string &sourceType,
@@ -605,7 +722,16 @@ bool GuiInterpreter::LoadDefaultMission()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::ClearCommandSeq(Integer sandboxNum)
 {
-   return theModerator->ClearCommandSeq(sandboxNum);
+   return theModerator->ClearCommandSeq(true, true, sandboxNum);
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearAllSandboxes()
+//------------------------------------------------------------------------------
+void GuiInterpreter::ClearAllSandboxes()
+{
+   theModerator->ClearAllSandboxes();
 }
 
 
@@ -801,15 +927,15 @@ void GuiInterpreter::CloseCurrentProject()
 
 
 //------------------------------------------------------------------------------
-// void StartServer()
+// void StartMatlabServer()
 //------------------------------------------------------------------------------
 /*
  * Starts the MATLAB server.
  */
 //------------------------------------------------------------------------------
-void GuiInterpreter::StartServer()
+void GuiInterpreter::StartMatlabServer()
 {
-   GmatAppData::Instance()->GetMainFrame()->StartServer();   
+   GmatAppData::Instance()->GetMainFrame()->StartMatlabServer();   
 }
 
 
@@ -842,4 +968,9 @@ GuiInterpreter::GuiInterpreter(const GuiInterpreter&)
 GuiInterpreter& GuiInterpreter::operator=(const GuiInterpreter &guiInterpreter)
 {
    return *this;
+}
+
+std::vector<Gmat::PluginResource*> *GuiInterpreter::GetUserResources()
+{
+   return theModerator->GetPluginResourceList();
 }

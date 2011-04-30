@@ -9,6 +9,8 @@ else   # PowerPC ...
 export DYLD_LIBRARY_PATH=$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
 fi
 export PATH=$FORTRANFORGMAT/lib:$PATH
+# for CSPICE
+ulimit -s 61440
 here="${0%/*}"
 cmd='GMAT'
 

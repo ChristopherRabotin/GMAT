@@ -230,7 +230,6 @@ namespace GmatTree
       LIBRATION_POINT,
 
       SOLVER = 41400,
-      SOLVER,
       DIFF_CORR,
       BROYDEN,
       QUASI_NEWTON,

@@ -1,10 +1,12 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                             PlotInterface
+//                             PlotReceiver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -27,20 +29,35 @@
 /**
  * PlotReceiver defines the interfaces used for 3D and XY plot classes.
  */
-class PlotReceiver
+
+namespace GmatPlot
+{
+   enum ViewType
+   {
+      TRAJECTORY_PLOT,
+      ENHANCED_3D_VIEW,
+   };
+};
+
+class GMAT_API PlotReceiver
 {
 public:
+
    // for OpenGL Plot
+   void               SetViewType(GmatPlot::ViewType view);
+   GmatPlot::ViewType GetViewType();
+   
    virtual bool CreateGlPlotWindow(const std::string &plotName,
                            const std::string &oldName,
                            bool drawEcPlane, bool drawEqPlane,
                            bool drawWireFrame, bool drawAxes, bool drawGrid,
                            bool drawESLines, bool overlapPlot,
                            bool usevpInfo, bool usepm,
-                           Integer numPtsToRedraw) = 0;
+                           Integer numPtsToRedraw,
+                           bool drawStars, bool drawConstellations, Integer starCount) = 0;
    
-   virtual void SetGlSolarSystem(const std::string &plotName, 
-                    SolarSystem *ss) = 0;
+   virtual void SetGlSolarSystem(const std::string &plotName,
+                                 SolarSystem *ss) = 0;
    
    virtual void SetGlObject(const std::string &plotName,
                     const StringArray &objNames,
@@ -48,6 +65,7 @@ public:
                     const std::vector<SpacePoint*> &objArray) = 0;
    
    virtual void SetGlCoordSystem(const std::string &plotName,
+                         CoordinateSystem *internalCs,
                          CoordinateSystem *viewCs,
                          CoordinateSystem *viewUpCs) = 0;
    
@@ -81,44 +99,88 @@ public:
                      const RealArray &posZ, const RealArray &velX,
                      const RealArray &velY, const RealArray &velZ,
                      const UnsignedIntArray &scColors, bool solving,
-                     Integer solverOption, bool updateCanvas) = 0;
+                     Integer solverOption, bool updateCanvas,
+                     bool inFunction) = 0;
    
    virtual bool TakeGlAction(const std::string &plotName,
                      const std::string &action) = 0;
    
    // for XY plot
-   virtual bool CreateTsPlotWindow(const std::string &plotName,
+   virtual bool CreateXyPlotWindow(const std::string &plotName,
                            const std::string &oldName,
                            const std::string &plotTitle,
                            const std::string &xAxisTitle,
                            const std::string &yAxisTitle,
                            bool drawGrid = false) = 0;
-   virtual bool DeleteTsPlot(const std::string &plotName) = 0;
-   virtual bool AddTsPlotCurve(const std::string &plotName, int curveIndex,
+   virtual bool DeleteXyPlot(const std::string &plotName) = 0;
+   virtual bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
                        int yOffset, Real yMin, Real yMax,
                        const std::string &curveTitle,
                        UnsignedInt penColor) = 0;
-   virtual bool DeleteAllTsPlotCurves(const std::string &plotName,
+   virtual bool DeleteAllXyPlotCurves(const std::string &plotName,
                               const std::string &oldName) = 0;
-   virtual bool DeleteTsPlotCurve(const std::string &plotName, 
+   virtual bool DeleteXyPlotCurve(const std::string &plotName, 
                        int curveIndex) = 0;
-   virtual void ClearTsPlotData(const std::string &plotName) = 0;
-   virtual void TsPlotPenUp(const std::string &plotName) = 0;
-   virtual void TsPlotPenDown(const std::string &plotName) = 0;
-   
-   virtual void SetTsPlotTitle(const std::string &plotName,
+   virtual void ClearXyPlotData(const std::string &plotName) = 0;
+   virtual void XyPlotPenUp(const std::string &plotName) = 0;
+   virtual void XyPlotPenDown(const std::string &plotName) = 0;
+   virtual void XyPlotDarken(const std::string &plotName, Integer factor,
+         Integer index = -1, Integer forCurve = -1) = 0;
+   virtual void XyPlotLighten(const std::string &plotName, Integer factor,
+            Integer index = -1, Integer forCurve = -1) = 0;
+
+   virtual void XyPlotMarkPoint(const std::string &plotName, Integer index = -1,
+         Integer forCurve = -1) = 0;
+   virtual void XyPlotMarkBreak(const std::string &plotName, Integer index = -1,
+         Integer curveNumber = -1) = 0;
+   virtual void XyPlotClearFromBreak(const std::string &plotName,
+         Integer breakNumber, Integer index = -1, Integer curveNumber = -1) = 0;
+
+   virtual void XyPlotChangeColor(const std::string &plotName,
+         Integer index = -1, UnsignedInt newColor = 0xffffff,
+         Integer forCurve = -1) = 0;
+   virtual void XyPlotChangeMarker(const std::string &plotName,
+         Integer index = -1, Integer newMarker = -1, int forCurve = -1) = 0;
+   virtual void XyPlotChangeWidth(const std::string &plotName,
+         Integer index = -1, Integer newWidth = 1, int forCurve = -1) = 0;
+   virtual void XyPlotChangeStyle(const std::string &plotName,
+         Integer index = -1, Integer newStyle = 100, int forCurve = -1) = 0;
+
+   virtual void XyPlotRescale(const std::string &plotName) = 0;
+   virtual void XyPlotCurveSettings(const std::string &plotName,
+         bool useLines = true,
+         Integer lineWidth = 1,
+         Integer lineStyle = 100,
+         bool useMarkers = false,
+         Integer markerSize = 3,
+         Integer marker = 1,
+         bool useHiLow = false,
+         Integer forCurve = -1) = 0;
+
+   virtual void SetXyPlotTitle(const std::string &plotName,
                        const std::string &plotTitle) = 0;
-   virtual void ShowTsPlotLegend(const std::string &plotName) = 0;
-   virtual bool RefreshTsPlot(const std::string &plotName) = 0;
-   virtual bool UpdateTsPlot(const std::string &plotName,
+   virtual void ShowXyPlotLegend(const std::string &plotName) = 0;
+   virtual bool RefreshXyPlot(const std::string &plotName) = 0;
+   virtual bool UpdateXyPlot(const std::string &plotName,
                      const std::string &oldName,
                      const Real &xval, const Rvector &yvals,
                      const std::string &plotTitle,
                      const std::string &xAxisTitle,
                      const std::string &yAxisTitle,
                      bool updateCanvas, bool drawGrid) = 0;
-   
+   virtual bool UpdateXyPlotData(const std::string &plotName, const Real &xval,
+                     const Rvector &yvals, const Rvector *yhis = NULL,
+                     const Rvector *ylows = NULL) = 0;
+   virtual bool UpdateXyPlotCurve(const std::string &plotName,
+                     const Integer whichCurve, const Real xval,
+                     const Real yval, const Real yhi = 0.0,
+                     const Real ylow = 0.0) = 0;
+
+   virtual bool DeactivateXyPlot(const std::string &plotName) = 0;
+   virtual bool ActivateXyPlot(const std::string &plotName) = 0;
+
 protected:
+   GmatPlot::ViewType currentView;
    PlotReceiver();
    virtual ~PlotReceiver();
 };

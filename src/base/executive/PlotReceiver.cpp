@@ -1,10 +1,12 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                             PlotInterface
+//                             PlotReceiver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -21,6 +23,24 @@
 #include "PlotReceiver.hpp"
 
 //------------------------------------------------------------------------------
+// void SetViewType(GmatPlot::ViewType view)
+//------------------------------------------------------------------------------
+void PlotReceiver::SetViewType(GmatPlot::ViewType view)
+{
+   currentView = view;
+}
+
+
+//------------------------------------------------------------------------------
+// ViewType GetViewType()
+//------------------------------------------------------------------------------
+GmatPlot::ViewType PlotReceiver::GetViewType()
+{
+   return currentView;
+}
+
+
+//------------------------------------------------------------------------------
 // PlotReceiver()
 //------------------------------------------------------------------------------
 /**
@@ -29,6 +49,7 @@
 //------------------------------------------------------------------------------
 PlotReceiver::PlotReceiver()
 {
+   currentView = GmatPlot::TRAJECTORY_PLOT;
 }
 
 

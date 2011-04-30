@@ -498,7 +498,6 @@ OBJECTS = \
     util/ElapsedTime.o \
     util/EopFile.o \
     util/FileManager.o \
-    util/FileManager.o \
     util/FileUtil.o \
     util/GmatGlobal.o \
     util/GravityFile.o \

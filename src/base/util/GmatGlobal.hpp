@@ -81,10 +81,6 @@ public:
    void SetMatlabFuncNameExt(const std::string &ext);
    std::string GetMatlabFuncNameExt();
    
-   // MatlabFunction name extension
-   void SetMatlabFuncNameExt(const std::string &ext) { matlabExt = ext; }
-   std::string GetMatlabFuncNameExt() { return matlabExt; }
-   
    // Run mode
    bool IsBatchMode();
    void SetBatchMode(bool flag);

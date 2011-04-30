@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              GuiInterpreter
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -23,7 +25,8 @@
 #include "gmatdefs.hpp"
 #include <sstream>      // for std::istringstream
 
-class GMAT_API GuiInterpreter : public ScriptInterpreter
+// GMAT_API not used here because the GuiInterpreter is not exported from a dll
+class GuiInterpreter : public ScriptInterpreter
 {
 public:
 
@@ -39,6 +42,8 @@ public:
    
    //----- factory
    const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
+   const StringArray& GetListOfAllFactoryItems();
+   std::string GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    
    //----- configuration
    std::string GetNewName(const std::string &name, Integer startCount);
@@ -52,8 +57,14 @@ public:
    void ResetConfigurationChanged(bool resetResource = true,
                                   bool resetCommands = true,
                                   Integer sandboxNum = 1);
+   
+   // General Object
+   GmatBase* CreateObject(const std::string &type, const std::string &name,
+                          Integer manage = 1, bool createDefault = false);
+   
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
+   SolarSystem* GetSolarSystemInUse();
    CoordinateSystem* GetInternalCoordinateSystem();
    bool IsDefaultCoordinateSystem(const std::string &name);
    
@@ -73,13 +84,14 @@ public:
                                 bool createDefault = true);
    
    GmatBase* CreateDefaultPropSetup(const std::string &name);
+   GmatBase* CreateNewODEModel(const std::string &name);
    
    // Planetary source
    const StringArray& GetPlanetarySourceTypes();
    const StringArray& GetPlanetarySourceNames();
    const StringArray& GetPlanetarySourceTypesInUse();
-   const StringArray& GetAnalyticModelNames();
-   bool SetAnalyticModelToUse(const std::string &modelName);
+//   const StringArray& GetAnalyticModelNames();
+//   bool SetAnalyticModelToUse(const std::string &modelName);
    bool SetPlanetarySourceName(const std::string &sourceType,
                                const std::string &filename);
    Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes);
@@ -137,8 +149,10 @@ public:
    void UpdateResourceTree();
    void UpdateMissionTree();
    void UpdateOutputTree();
-   virtual void StartServer();
+   virtual void StartMatlabServer();
    
+   std::vector<Gmat::PluginResource*> *GetUserResources();
+
 private:
 
    GuiInterpreter();

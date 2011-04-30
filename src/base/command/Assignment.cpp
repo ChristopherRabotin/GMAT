@@ -497,15 +497,6 @@ bool Assignment::InterpretAction()
    if (rhs.find(";") != rhs.npos)
       throw CommandException("Is there a missing \"%\" for inline comment?");
    
-   // check for common use of ./ (path) in GmatFunction to avoid creating MathTree(loj: 2008.09.08)
-   if (rhs.find("./") != rhs.npos)
-   {
-      if (currentFunction != NULL &&
-          (!GmatStringUtil::IsEnclosedWith(rhs, "'")))
-         throw CommandException("The string literal \"" + rhs + "\" must be "
-                                "enclosed with single quotes");
-   }
-   
    // Check if rhs is an equation
    if (!isRhsString)
    {
@@ -1184,7 +1175,6 @@ const StringArray& Assignment::GetWrapperObjectNameArray()
       }
       
       if (rhs != "" && rhs != "Not_Set")
-      {
       {
          wrapperObjectNames.push_back(rhs);
       }

@@ -1,10 +1,12 @@
-//$Id$
+//$Id: ObjectInitializer.hpp 9457 2011-04-21 18:40:34Z lindajun $
 //------------------------------------------------------------------------------
 //                                  ObjectInitializer
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CCA54C
@@ -39,18 +41,18 @@ class GMAT_API ObjectInitializer
 {
 public:
    ObjectInitializer(SolarSystem *solSys, ObjectMap *objMap,
-                     ObjectMap *globalObjMap, CoordinateSystem* internalCS, bool useGOS = false);
+                     ObjectMap *globalObjMap, CoordinateSystem* intCS,
+                     bool useGOS = false, bool fromFunction = false);
    ObjectInitializer(const ObjectInitializer &objInit);
    ObjectInitializer& operator= (const ObjectInitializer &objInit);
    virtual ~ObjectInitializer();
    
    void SetSolarSystem(SolarSystem *solSys);
    void SetObjectMap(ObjectMap *objMap);
-   void SetCoordinateSystem(CoordinateSystem* internalCS);
-   //   void SetGlobalObjectMap(ObjectMap *globalObjMap);
-   //   void SetCoordinateSystem(CoordinateSystem *internalCS);
-   
-   bool InitializeObjects(bool registerSubs = false);
+   void SetInternalCoordinateSystem(CoordinateSystem* cs);
+   bool InitializeObjects(bool registerSubs = false,
+                          Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT,
+                          StringArray *unusedGOL = NULL);
    
 protected:
    
@@ -58,29 +60,34 @@ protected:
    ObjectMap        *LOS;
    ObjectMap        *GOS;
    Moderator        *mod;
-   CoordinateSystem *cs;
+   CoordinateSystem *internalCS;
    Publisher        *publisher;
    
-   bool            includeGOS;
-
-   void            InitializeInternalObjects();
-
-   //*********************  TEMPORARY  *****************************************
-   void  InitializeCoordinateSystem(CoordinateSystem *cs);
-   //*********************  END OF TEMPORARY  **********************************
-
-   void            BuildReferences(GmatBase *obj);
-   void            SetRefFromName(GmatBase *obj,
-                                  const std::string &oName);
-   void            BuildAssociations(GmatBase * obj);
-   SpacePoint *    FindSpacePoint(const std::string &spName);
+   bool includeGOS;
+   bool registerSubscribers;
+   bool inFunction;
    
-   GmatBase*       FindObject(const std::string &name);
+   void SetObjectJ2000Body(ObjectMap *objMap);
+   void InitializeObjectsInTheMap(ObjectMap *objMap, Gmat::ObjectType objType,
+                                  bool usingGOS = false,
+                                  StringArray *unusedGOL = NULL);
+   void InitializeSystemParamters(ObjectMap *objMap);
+   void InitializeAllOtherObjects(ObjectMap *objMap);
+   void InitializeInternalObjects();
+   void InitializeCoordinateSystem(GmatBase *obj);
+   void BuildReferencesAndInitialize(GmatBase *obj);
+   void BuildReferences(GmatBase *obj);
+   void SetRefFromName(GmatBase *obj, const std::string &oName);
+   void BuildAssociations(GmatBase * obj);
+   
+   SpacePoint* FindSpacePoint(const std::string &spName);
+   GmatBase*   FindObject(const std::string &name);
+   void        ShowObjectMaps(const std::string &title = "");
    
 private:
    
    ObjectInitializer();
-
+   
 };
 
 #endif // ObjectInitializer_hpp

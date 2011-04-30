@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              TextParser
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -65,11 +67,12 @@ public:
                                 const std::string &bracketPair,
                                 const std::string &delim,
                                 bool checkOuterBracket = true);
-   
+   StringArray SeparateAllBrackets(const std::string &chunk,
+                                   const std::string &bracketPair);
    StringArray SeparateSpaces(const std::string &chunk);
    StringArray SeparateDots(const std::string &chunk);
    StringArray SeparateBy(const std::string &chunk, const std::string &delim);
-      
+   
    
 protected:
       

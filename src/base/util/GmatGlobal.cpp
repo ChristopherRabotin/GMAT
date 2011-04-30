@@ -566,7 +566,6 @@ GmatGlobal::GmatGlobal()
    guiMode = NORMAL_GUI;
    matlabMode = SHARED;
    matlabExt = "__m__";
-   matlabExt = "__m__";
 }
 
 
