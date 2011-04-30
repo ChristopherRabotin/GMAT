@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           TestScriptInterpreter driver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
 // Created: 2003/08/28
@@ -40,6 +44,7 @@ Integer RunBatch(std::string& batchfilename);
 void SaveScript(std::string filename = "Output.script");
 void ShowCommandSummary(std::string filename = "");
 void TestSyncModeAccess(std::string filename = "Output.script");
+void DumpDEData(double secsToStep, double spanInSecs = 86400.0);
 int main(int argc, char *argv[]);
 
 #endif /* driver_hpp */

@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  PrintUtility
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Wendy Shoan
 // Created: 2004/11/23
@@ -23,16 +27,14 @@
 #include "gmatdefs.hpp"
 #include "GmatCommand.hpp"
 
-class GMAT_API PrintUtility
+// No GMAT_API here because this class is used in the exe, not in a DLL
+class PrintUtility
 {
 public:
 
    static PrintUtility* Instance();
-
    bool PrintEntireSequence(GmatCommand* firstCmd);
-   
    ~PrintUtility();
-
 
 protected:
 

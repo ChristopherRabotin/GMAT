@@ -1,0 +1,61 @@
+# $Id$
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+#  Copyright (c) 2002-2011 United States Government as represented by the
+#  Administrator of The National Aeronautics and Space Administration.
+#  All Other Rights Reserved.
+
+# 
+# Mac OSX (Leopard) makefile for GMAT, using Eclipse
+# wcs - 2010.04.13 - updated to work for all 3 platforms
+
+include BuildEnv.mk
+ifeq ($(LINUX_MAC),1)
+PROGRAM_EXTENSION =
+else
+PROGRAM_EXTENSION =.exe
+endif
+
+ifeq ($(CONSOLE_APP),1)
+PROGRAM = gmatConsole(PROGRAM_EXTENSION)
+LIBRARY = base/lib/libGmatConsole.a
+else
+PROGRAM = gmat$(PROGRAM_EXTENSION)
+LIBRARY = base/lib/libGmatBase.a
+endif
+
+TARGET = ../application/bin/$(PROGRAM)
+
+all: $(TARGET)
+
+clean:
+	cd base; make -f MakeBase.eclipse clean
+	cd gui; make -f MakeGui.eclipse clean
+	cd console; make -f MakeConsole.eclipse clean
+	rm -rf $(TARGET) $(LIBRARY) gui/$(PROGRAM)
+
+	
+base: $(LIBRARY)
+
+ifeq ($(CONSOLE_APP),1)
+$(TARGET): $(LIBRARY) console/$(PROGRAM)
+else
+$(TARGET): $(LIBRARY) gui/$(PROGRAM)
+endif
+
+gui/$(PROGRAM):
+	cd base; make -f MakeBase.eclipse all
+	cd gui; make -f MakeGui.eclipse all
+
+console/$(PROGRAM):
+	cd base; make -f MakeBase.eclipse all
+	cd console; make -f MakeConsole.eclipse all
+
+$(LIBRARY):
+	cd base; make -f MakeBase.eclipse all
+
+ifeq ($(CONSOLE_APP),1)
+../application/bin/$(PROGRAM): base/lib/libGmatConsole.a
+	cd console; make -f MakeConsole.eclipse
+endif

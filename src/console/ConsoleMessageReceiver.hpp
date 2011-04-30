@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -52,8 +54,11 @@ public:
    virtual void OpenLogFile(const std::string &filename, bool append = false);
    virtual void CloseLogFile();
    
+   virtual std::string GetMessage();
+   virtual void PutMessage(const std::string &msg);
+   virtual void ClearMessageQueue();
+   
    // Other methods not implemented for the ConsoleMessageReceiver
-   //virtual std::string GetMessage();
    //virtual int  GetNumberOfMessageLines();
    //virtual void PopupAbortContinue(const std::string &abortMsg,
    //                               const std::string &continueMsg,

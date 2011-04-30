@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -29,6 +31,8 @@
 #include "BaseException.hpp"
 #include "FileManager.hpp"         // for GetFullPathname()
 #include "GmatGlobal.hpp"          // for RunBachMode()
+
+#include <cstdlib>                  // For GCC4.4 support
 
 //---------------------------------
 //  static data
@@ -99,23 +103,23 @@ void ConsoleMessageReceiver::ShowMessage(const char *msg, ...)
    // msg is vsprintf format
    // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
-   //LogMessage("strlen(msg)=%d, size=%d\n", strlen(msg), size);
    
-   if( (msgBuffer = (char *)malloc(size)) != NULL )
-   {
-      va_start(marker, msg);      
-      ret = vsprintf(msgBuffer, msg, marker);
-      va_end(marker);
-      //LogMessage("ret from vsprintf()=%d\n", ret);
-   }
-   else
-   {
-      msgBuffer = 
-         "*** WARNING *** Cannot allocate enough memory to show the message.\n";
-   }
+   // Note: 'new' throws an exception of type std::bad_alloc on failure.
+   // (Note that if an exception is thrown, no memory will have been
+   // allocated, so there will be no memory leak.)
+   msgBuffer = new char[size];
+
+   // For older C++ compilers, duplicate that behavior by hand.
+   if (!msgBuffer)
+      throw std::bad_alloc();
+
+   // Process the message
+   va_start(marker, msg);
+   ret = vsprintf(msgBuffer, msg, marker);
+   va_end(marker);
    
    LogMessage(std::string(msgBuffer));
-   free(msgBuffer);
+   delete [] msgBuffer;
 }
 
 //------------------------------------------------------------------------------
@@ -175,25 +179,26 @@ void ConsoleMessageReceiver::PopupMessage(Gmat::MessageType msgType,
    // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    
-   if ( (msgBuffer = (char *)malloc(size)) != NULL )
-   {
-      va_start(marker, msg);      
-      ret = vsprintf(msgBuffer, msg, marker);      
-      va_end(marker);
-      
-      // if no EOL then append it
-      if (msgBuffer[strlen(msgBuffer)-1] != '\n')
-         msgBuffer[strlen(msgBuffer)] = '\n';
-   }
-   else
-   {
-      msgBuffer = 
-         "*** WARNING *** Cannot allocate enough memory to show the message.\n";
-   }
-   
+   // Note: 'new' throws an exception of type std::bad_alloc on failure.
+   // (Note that if an exception is thrown, no memory will have been
+   // allocated, so there will be no memory leak.)
+   msgBuffer = new char[size];
+
+   // For older C++ compilers, duplicate that behavior by hand.
+   if (!msgBuffer)
+      throw std::bad_alloc();
+
+   // Process the message
+   va_start(marker, msg);
+   ret = vsprintf(msgBuffer, msg, marker);
+   va_end(marker);
+
+   // if no EOL then append it
+   if (msgBuffer[strlen(msgBuffer)-1] != '\n')
+       msgBuffer[strlen(msgBuffer)] = '\n';
+
    LogMessage(std::string(msgBuffer) + "\n");
-   
-   free(msgBuffer);
+   delete [] msgBuffer;
 }
 
 //------------------------------------------------------------------------------
@@ -364,6 +369,9 @@ void ConsoleMessageReceiver::CloseLogFile()
 {
    if (logFile)
       fclose(logFile);
+   
+   logFile = NULL;
+   logFileSet = false;
 }
 
 
@@ -430,19 +438,22 @@ void ConsoleMessageReceiver::LogMessage(const char *msg, ...)
    // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    
-   if ( (msgBuffer = (char *)malloc(size)) != NULL )
-   {
-      va_start(marker, msg);      
-      ret = vsprintf(msgBuffer, msg, marker);      
-      va_end(marker);
-   }
-   else
-   {
-      msgBuffer = "*** WARNING *** Cannot allocate enough memory to log the message.\n";
-   }
-   
+   // Note: 'new' throws an exception of type std::bad_alloc on failure.
+   // (Note that if an exception is thrown, no memory will have been
+   // allocated, so there will be no memory leak.)
+   msgBuffer = new char[size];
+
+   // For older C++ compilers, duplicate that behavior by hand.
+   if (!msgBuffer)
+      throw std::bad_alloc();
+
+   // Process the message
+   va_start(marker, msg);
+   ret = vsprintf(msgBuffer, msg, marker);
+   va_end(marker);
+
    LogMessage(std::string(msgBuffer));
-   free(msgBuffer);
+   delete [] msgBuffer;
 }
 
 //------------------------------------------------------------------------------
@@ -454,6 +465,44 @@ void ConsoleMessageReceiver::LogMessage(const char *msg, ...)
 //------------------------------------------------------------------------------
 void ConsoleMessageReceiver::ClearMessage()
 {
+}
+
+//------------------------------------------------------------------------------
+//  std::string GetMessage()
+//------------------------------------------------------------------------------
+/**
+ * Pops the messages off the message queue and concatenates them together.
+ * 
+ * @return The concatenated messages.
+ */
+//------------------------------------------------------------------------------
+std::string ConsoleMessageReceiver::GetMessage()
+{
+   return "";
+}
+
+//------------------------------------------------------------------------------
+// void PutMessage(const std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Push the message into queue
+ */
+//------------------------------------------------------------------------------
+void ConsoleMessageReceiver::PutMessage(const std::string &msg)
+{
+   ; // do nothing here
+}
+
+//------------------------------------------------------------------------------
+// void ClearMessageQueue()
+//------------------------------------------------------------------------------
+/**
+ * Tells the MessageReceiver to clear the message queue.
+ */
+//------------------------------------------------------------------------------
+void ConsoleMessageReceiver::ClearMessageQueue()
+{
+   ; // do nothing here
 }
 
 
@@ -469,8 +518,10 @@ void ConsoleMessageReceiver::ClearMessage()
  */
 //------------------------------------------------------------------------------
 ConsoleMessageReceiver::ConsoleMessageReceiver() :
-   MAX_MESSAGE_LENGTH       (10000),
-   logFile                  (NULL)
+   MAX_MESSAGE_LENGTH      (10000),
+   logFile                 (NULL),
+   logEnabled              (false),
+   logFileSet              (false)
 {
    messageQueue.push("ConsoleMessageReceiver: Starting GMAT ...");
 }
