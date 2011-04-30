@@ -1,5 +1,5 @@
 /* XPM */
-static char * pluto_xpm[] = {
+static const char * pluto_xpm[] = {
 "32 32 13 1",
 " 	c None",
 ".	c #000000",

@@ -1,5 +1,5 @@
 /* XPM */
-static char * triton_xpm[] = {
+static const char * triton_xpm[] = {
 "32 32 31 1",
 " 	c None",
 ".	c #000000",

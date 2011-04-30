@@ -1,5 +1,5 @@
 /* XPM */
-static char * optimize_xpm[] = {
+static const char * optimize_xpm[] = {
 "16 16 74 1",
 " 	c #FFFFFF",
 ".	c #C6DFF7",

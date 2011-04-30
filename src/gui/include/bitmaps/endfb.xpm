@@ -1,5 +1,5 @@
 /* XPM */
-static char * endfb_xpm[] = {
+static const char * endfb_xpm[] = {
 "16 16 39 1",
 " 	c #818181",
 ".	c #CCCACC",

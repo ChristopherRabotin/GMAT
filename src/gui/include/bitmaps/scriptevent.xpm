@@ -1,5 +1,5 @@
 /* XPM */
-static char * scriptevent_xpm[] = {
+static const char * scriptevent_xpm[] = {
 "16 16 102 2",
 "  	c #FEFEFE",
 ". 	c #D8E7F5",

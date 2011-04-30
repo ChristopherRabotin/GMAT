@@ -1,5 +1,5 @@
 /* XPM */
-static char * coordinatesystem_xpm[] = {
+static const char * coordinatesystem_xpm[] = {
 "16 16 35 1",
 " 	c None",
 ".	c #535AC3",

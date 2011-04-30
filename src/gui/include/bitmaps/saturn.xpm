@@ -1,5 +1,5 @@
 /* XPM */
-static char * saturn_xpm[] = {
+static const char * saturn_xpm[] = {
 "32 32 45 1",
 " 	c None",
 ".	c #000000",

@@ -1,5 +1,5 @@
 /* XPM */
-static char * toggle_xpm[] = {
+static const char * toggle_xpm[] = {
 "16 16 19 1",
 " 	c #FFFFFF",
 ".	c #E8E8E8",

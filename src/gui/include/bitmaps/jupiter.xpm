@@ -1,5 +1,5 @@
 /* XPM */
-static char * jupiter_xpm[] = {
+static const char * jupiter_xpm[] = {
 "32 32 54 1",
 " 	c None",
 ".	c #000000",

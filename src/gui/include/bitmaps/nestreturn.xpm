@@ -1,5 +1,5 @@
 /* XPM */
-static char * nestreturn_xpm[] = {
+static const char * nestreturn_xpm[] = {
 "16 16 25 1",
 " 	c #FFFFFF",
 ".	c #010101",

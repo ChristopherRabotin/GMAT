@@ -1,5 +1,5 @@
 /* XPM */
-static char * build_xpm[] = {
+static const char * build_xpm[] = {
 "32 32 10 1",
 " 	c None",
 ".	c #D6D3CE",

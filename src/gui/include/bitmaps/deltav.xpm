@@ -1,5 +1,5 @@
 /* XPM */
-static char * deltav_xpm[] = {
+static const char * deltav_xpm[] = {
 "16 16 53 1",
 " 	c #FFFFFF",
 ".	c #F5FAFE",

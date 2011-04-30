@@ -1,5 +1,5 @@
 /* XPM */
-static char * network_xpm[] = {
+static const char * network_xpm[] = {
 "32 32 69 1",
 " 	c None",
 ".	c #FFFFFF",

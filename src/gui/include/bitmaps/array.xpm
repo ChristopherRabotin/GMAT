@@ -1,5 +1,5 @@
 /* XPM */
-static char *array_xpm[] = {
+static const char *array_xpm[] = {
 "16 16 4 1 0 0",
 "  c #000000",
 "! c #4B4A87",

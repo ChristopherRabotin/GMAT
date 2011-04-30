@@ -1,5 +1,5 @@
 /* XPM */
-static char * pendown_xpm[] = {
+static const char * pendown_xpm[] = {
 "16 16 100 2",
 "  	c #FFFFFF",
 ". 	c #1678DD",

@@ -1,5 +1,5 @@
 /* XPM */
-static char * equalsign_xpm[] = {
+static const char * equalsign_xpm[] = {
 "16 16 82 1",
 " 	c #FFFFFF",
 ".	c #1581F7",

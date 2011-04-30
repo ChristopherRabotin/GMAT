@@ -1,5 +1,5 @@
 /* XPM */
-static char * xyplot_xpm[] = {
+static const char * xyplot_xpm[] = {
 "16 16 84 1",
 " 	c None",
 ".	c #848284",

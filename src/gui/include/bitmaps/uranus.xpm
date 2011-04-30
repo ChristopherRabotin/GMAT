@@ -1,5 +1,5 @@
 /* XPM */
-static char * uranus_xpm[] = {
+static const char * uranus_xpm[] = {
 "32 32 30 1",
 " 	c None",
 ".	c #000000",

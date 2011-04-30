@@ -1,5 +1,5 @@
 /* XPM */
-static char * mercury_xpm[] = {
+static const char * mercury_xpm[] = {
 "32 32 40 1",
 " 	c None",
 ".	c #000000",

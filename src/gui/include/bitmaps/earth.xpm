@@ -1,5 +1,5 @@
 /* XPM */
-static char * earth_xpm[] = {
+static const char * earth_xpm[] = {
 "32 32 21 1",
 " 	c None",
 ".	c #000000",

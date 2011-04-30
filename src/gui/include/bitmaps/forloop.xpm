@@ -1,5 +1,5 @@
 /* XPM */
-static char * forloop_xpm[] = {
+static const char * forloop_xpm[] = {
 "16 16 91 1",
 " 	c #F7F7F7",
 ".	c #463839",

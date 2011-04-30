@@ -1,5 +1,5 @@
 /* XPM */
-static char * neptune_xpm[] = {
+static const char * neptune_xpm[] = {
 "32 32 26 1",
 " 	c None",
 ".	c #000000",

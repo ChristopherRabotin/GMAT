@@ -1,5 +1,5 @@
 /* XPM */
-static char * saveobject_xpm[] = {
+static const char * saveobject_xpm[] = {
 "16 16 40 1",
 " 	c #A4BEE4",
 ".	c #8DABD8",

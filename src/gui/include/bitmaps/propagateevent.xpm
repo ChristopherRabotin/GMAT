@@ -1,5 +1,5 @@
 /* XPM */
-static char * propagateevent_xpm[] = {
+static const char * propagateevent_xpm[] = {
 "16 16 60 1",
 " 	c #FFFFFF",
 ".	c #267DE4",

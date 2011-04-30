@@ -1,5 +1,5 @@
 /* XPM */
-static char * if_xpm[] = {
+static const char * if_xpm[] = {
 "16 16 41 1",
 " 	c #FFFFFF",
 ".	c #E7F2FC",

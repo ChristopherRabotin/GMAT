@@ -1,5 +1,5 @@
 /* XPM */
-static char * minimize_xpm[] = {
+static const char * minimize_xpm[] = {
 "16 16 34 1",
 " 	c #F7F7F7",
 ".	c #8EBBE8",

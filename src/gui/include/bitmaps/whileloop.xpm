@@ -1,5 +1,5 @@
 /* XPM */
-static char * whileloop_xpm[] = {
+static const char * whileloop_xpm[] = {
 "16 16 86 1",
 " 	c #FFFFFF",
 ".	c #FAFAFB",

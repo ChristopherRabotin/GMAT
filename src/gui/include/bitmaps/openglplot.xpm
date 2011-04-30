@@ -1,5 +1,5 @@
 /* XPM */
-static char * openglplot_xpm[] = {
+static const char * openglplot_xpm[] = {
 "16 16 119 2",
 "  	c None",
 ". 	c #FFFFFF",

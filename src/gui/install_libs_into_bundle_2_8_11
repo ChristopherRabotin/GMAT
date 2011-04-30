@@ -1,0 +1,161 @@
+# copy all of the necessary dynamic wx libraries into the Frameworks directory
+LOC=$1
+BASE_LOC=$2
+BASE_LIB_NAME=$3
+PCRE_LOC=$4
+cp /usr/local/lib/libwx*.dylib ../../application/bin/$LOC.app/Contents/Frameworks
+cp $BASE_LOC/$BASE_LIB_NAME.dylib ../../application/bin/$LOC.app/Contents/Frameworks
+cp $PCRE_LOC/libpcrecpp.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks
+
+# tell the libraries they are now inside the bundle
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon_net-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_net-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon_net-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_net-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon_net-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_net-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_xml-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_xml-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_xml-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_adv-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_adv-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_aui-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_aui-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_aui-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_core-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_core-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_core-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_core-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_core-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_gl-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_gl-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_gl-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_html-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_html-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_html-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_qa-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_qa-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_qa-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_richtext-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_richtext-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_richtext-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.7.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_xrc-2.8.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_xrc-2.8.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_mac_xrc-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.7.0.dylib
+
+install_name_tool -id @executable_path/../Frameworks/$BASE_LIB_NAME.dylib ../../application/bin/$LOC.app/Contents/Frameworks/$BASE_LIB_NAME.dylib
+
+# tell the application that the libraries are now inside the bundle
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_base_carbon_net-2.8.dylib @executable_path/../Frameworks/libwx_base_carbon_net-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_base_carbon_net-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_net-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_base_carbon_net-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_base_carbon_net-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_aui-2.8.dylib @executable_path/../Frameworks/libwx_mac_aui-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_aui-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_aui-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_aui-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_mac_aui-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_gl-2.8.dylib @executable_path/../Frameworks/libwx_mac_gl-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_gl-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_gl-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_gl-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_mac_gl-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_qa-2.8.dylib @executable_path/../Frameworks/libwx_mac_qa-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_qa-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_qa-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_qa-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_mac_qa-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_richtext-2.8.dylib @executable_path/../Frameworks/libwx_mac_richtext-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_richtext-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_richtext-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_richtext-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_mac_richtext-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_xrc-2.8.dylib @executable_path/../Frameworks/libwx_mac_xrc-2.8.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_xrc-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_xrc-2.8.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change /usr/local/lib/libwx_mac_xrc-2.8.0.7.0.dylib @executable_path/../Frameworks/libwx_mac_xrc-2.8.0.7.0.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+
+install_name_tool -change lib/$BASE_LIB_NAME.dylib @executable_path/../Frameworks/$BASE_LIB_NAME.dylib ../../application/bin/$LOC.app/Contents/MacOS/GMAT
+
+# tell the libraries where to find the other libraries they need
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_net-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_net-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_net-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_xml-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_xml-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_base_carbon_xml-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_adv-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_aui-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_core-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_core-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_core-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_gl-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_html-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_qa-2.8.0.7.0.dylib"
+
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_richtext-2.8.0.7.0.dylib"
+
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_core-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_core-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_base_carbon_xml-2.8.0.dylib @executable_path/../Frameworks/libwx_base_carbon_xml-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_adv-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_adv-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.7.0.dylib"
+install_name_tool -change /usr/local/lib/libwx_mac_html-2.8.0.dylib @executable_path/../Frameworks/libwx_mac_html-2.8.0.dylib "../../application/bin/$LOC.app/Contents/Frameworks/libwx_mac_xrc-2.8.0.7.0.dylib"

@@ -1,5 +1,5 @@
 /* XPM */
-static char *animation_options_xpm[]={
+static const char *animation_options_xpm[]={
 "16 16 5 1",
 "      c #000000",
 "0     c #FFFFFF",

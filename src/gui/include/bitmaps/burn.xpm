@@ -1,5 +1,5 @@
 /* XPM */
-static char * burn_xpm[] = {
+static const char * burn_xpm[] = {
 "16 16 94 2",
 "  	c None",
 ". 	c #FFFFFF",

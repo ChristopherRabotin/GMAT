@@ -1,5 +1,5 @@
 /* XPM */
-static char * achieveevent_xpm[] = {
+static const char * achieveevent_xpm[] = {
 "16 16 112 2",
 "  	c #FFFFFF",
 ". 	c #ECF4FC",
