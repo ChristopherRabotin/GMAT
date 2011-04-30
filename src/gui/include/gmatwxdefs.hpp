@@ -1,8 +1,10 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
-//
-// **Legal**
+// GMAT: General Mission Analysis Tool
+// 
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -15,8 +17,8 @@
  * use wxWindows.
  */
 //------------------------------------------------------------------------------
-#ifndef gmatwxdefs_h
-#define gmatwxdefs_h
+#ifndef gmatwxdefs_hpp
+#define gmatwxdefs_hpp
 
 #ifdef _MSC_VER
 #pragma warning( disable : 4267 )  // Disable warning messages 4267 
@@ -35,7 +37,14 @@
 #endif
     
 #ifdef _MSC_VER
+
 #pragma warning( default : 4267 )  // Reset warning messages 4267
+
+// VS 2010 defines M_PI in math.h
+#if _MSC_VER >= 1600
+#undef M_PI
+#endif
+
 #endif
 
 #ifdef __BORLANDC__
@@ -59,4 +68,16 @@
 #  include "wx/glcanvas.h"
 #endif
 
-#endif // gmatwxdefs_h
+#ifdef __WXMSW__  // Windows
+   #define GUI_ACCEL_KEY "&"
+   #define wxGMAT_FILTER_NUMERIC wxFILTER_NUMERIC
+#else
+   #define GUI_ACCEL_KEY ""
+   #ifdef __WXMAC__
+     #define wxGMAT_FILTER_NUMERIC wxFILTER_NONE
+   #else
+      #define wxGMAT_FILTER_NUMERIC wxFILTER_NUMERIC
+   #endif
+#endif // End of OS nits
+
+#endif // gmatwxdefs_hpp

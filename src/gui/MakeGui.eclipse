@@ -1,4 +1,12 @@
 # $Id$
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+#  Copyright (c) 2002-2011 United States Government as represented by the
+#  Administrator of The National Aeronautics and Space Administration.
+#  All Other Rights Reserved.
+
+# 
 # Eclipse makefile for the GMAT GUI
 # Initial Version - D. Conway - 2005/06/17
 # Modifed for Mac OS 10.3  W. Shoan - 2005.11.10
@@ -14,18 +22,14 @@ else
 EXTENSION = .exe
 endif
 
-ifeq ($(USE_MATLAB),1)
-WXTARGET = gmat$(EXTENSION)
-else
-WXTARGET = gmatNoMatlab$(EXTENSION)
-endif
+#ifeq ($(USE_MATLAB),1)
+   WXTARGET = GMAT$(EXTENSION)
+#else
+#   WXTARGET = GMAT_NoMatlab$(EXTENSION)
+#endif
 
 ifdef MAC_SPECIFIC
-ifeq ($(USE_MATLAB),1)
-TARGETS = $(WXTARGET) macrez macosx macmatlab
-else
-TARGETS = $(WXTARGET) macrez macosx macnomatlab
-endif
+TARGETS = $(WXTARGET) macstacksize macrez macosx
 CLEANTARGET = archclean cleanmacosx
 else
 TARGETS = $(WXTARGET)
@@ -42,73 +46,102 @@ else
 SHARED_EXTENSION = .so
 endif
 
-ifeq ($(USE_MATLAB),1)
-LIBS = -L../base/lib -lGmatBase
+BASELIBNAME = libGmatBase
+#ifeq ($(USE_MATLAB),1)
+LIBS = -L../base -L../base/lib -lGmatBase
 LIBNAME = ../base/lib/libGmatBase$(SHARED_EXTENSION)
-else
-LIBS = -L../base/lib -lGmatBaseNoMatlab
-LIBNAME = ../base/lib/libGmatBaseNoMatlab$(SHARED_EXTENSION)
-endif
+#else
+#LIBS = -L../base -L../base/lib -lGmatBaseNoMatlab
+#LIBNAME = ../base/lib/libGmatBaseNoMatlab$(SHARED_EXTENSION)
+#endif
 
 else
 
-ifeq ($(USE_MATLAB),1)
+#ifeq ($(USE_MATLAB),1)
 LIBNAME = ../base/lib/libGmatBase.dll
 LIBS = $(LIBNAME)
-else
-LIBNAME = ../base/lib/libGmatBaseNoMatlab.dll
-LIBS = $(LIBNAME)
-endif
+#else
+#LIBNAME = ../base/lib/libGmatBaseNoMatlab.dll
+#LIBS = $(LIBNAME)
+#endif
 
 endif
 
 
 else
 
-ifeq ($(USE_MATLAB),1)
+#ifeq ($(USE_MATLAB),1)
 LIBS = ../base/lib/libGmatBase.a
+#else
+#LIBS = ../base/lib/libGmatBaseNoMatlab.a
+#endif
+
+endif
+
+ifeq ($(USE_STC_EDITOR),1)
+STC_EDITOR_OBJECTS = \
+    view/Editor.o \
+    view/EditorPanel.o \
+    view/EditorPreferences.o \
+    view/EditorPrintout.o \
+    view/FindReplaceDialog.o
 else
-LIBS = ../base/lib/libGmatBaseNoMatlab.a
+STC_EDITOR_OBJECTS =
 endif
 
+ifeq ($(USE_SPICE),1)
+SPICE_OBJECTS = \
+	 spacecraft/SpicePanel.o
+else
+SPICE_OBJECTS =
 endif
 
+
+#ifeq ($(USE_MATLAB),1)
 all: prep $(TARGETS) 
+	rm -f GMAT
+#else
+#all: prep $(TARGETS) 
+#	rm -f GMAT_NoMatlab
+#endif
 
 gui: $(WXTARGET)
 
 prep:
-	mkdir -p ../../bin
+	mkdir -p ../../application/bin
 	rm -f app/AboutDialog.o
 
 HEADERS = -I../base/include \
+          -I../base/asset \
           -I../base/attitude \
-          -I../base/foundation \
-          -I../base/executive \
-          -I../base/spacecraft \
-          -I../base/forcemodel \
-          -I../base/propagator \
-          -I../base/subscriber \
-          -I../base/command \
-          -I../base/solarsys \
-          -I../base/factory \
-          -I../base/stopcond \
-          -I../base/interpreter \
-          -I../base/util \
-          -I../base/interpolator \
-          -I../base/interface \
-          -I../base/parameter \
-          -I../base/configs \
           -I../base/burn \
-          -I../base/solver \
-          -I../base/function \
-          -I../base/math \
+          -I../base/command \
+          -I../base/configs \
           -I../base/coordsystem \
+          -I../base/executive \
+          -I../base/factory \
+          -I../base/forcemodel \
+          -I../base/foundation \
+          -I../base/function \
+          -I../base/hardware \
+          -I../base/interface \
+          -I../base/interpolator \
+          -I../base/interpreter \
+          -I../base/math \
+          -I../base/parameter \
           -I../base/plugin \
+          -I../base/propagator \
+          -I../base/solarsys \
+          -I../base/solver \
+          -I../base/spacecraft \
+          -I../base/stopcond \
+          -I../base/subscriber \
+          -I../base/util \
           -Iinclude \
           -Iinclude/bitmaps \
           -Iinclude/il \
           -Iapp \
+          -Iasset \
           -Iburn \
           -Icommand \
           -Icontrollogic \
@@ -119,11 +152,12 @@ HEADERS = -I../base/include \
           -Ihardware \
           -Imission \
           -Ioutput \
-          -Iplot \
           -Ipropagator \
+          -Irendering \
           -Isolarsys \
           -Isolver \
           -Ispacecraft \
+          -Isubscriber \
           -Iview
 
 clean : $(CLEANTARGET)
@@ -151,6 +185,7 @@ OBJECTS = \
     app/GmatConnection.o \
     app/GmatMainFrame.o \
     app/GmatMenuBar.o \
+    app/GmatToolBar.o \
     app/GuiInterpreter.o \
     app/GuiMessageReceiver.o \
     app/GmatNotebook.o \
@@ -164,6 +199,8 @@ OBJECTS = \
     app/ScriptPanel.o \
     app/SetPathDialog.o \
     app/TextEphemFileDialog.o \
+    app/WelcomePanel.o \
+    asset/GroundStationPanel.o \
     burn/FiniteBurnSetupPanel.o \
     burn/ImpulsiveBurnSetupPanel.o \
     command/AchievePanel.o \
@@ -171,6 +208,7 @@ OBJECTS = \
     command/BeginFiniteBurnPanel.o \
     command/CallFunctionPanel.o \
     command/EndFiniteBurnPanel.o \
+    command/GmatCommandPanel.o \
     command/ManeuverPanel.o \
     command/MinimizePanel.o \
     command/NonlinearConstraintPanel.o \
@@ -182,18 +220,17 @@ OBJECTS = \
     command/TargetPanel.o \
     command/TogglePanel.o \
     command/VaryPanel.o \
-    controllogic/ForDialog.o \
     controllogic/ForPanel.o \
-    controllogic/IfPanel.o \
-    controllogic/WhilePanel.o \
+    controllogic/ConditionPanel.o \
     coordsystem/CoordPanel.o \
     coordsystem/CoordSysCreateDialog.o \
     coordsystem/CoordSystemConfigPanel.o \
     forcemodel/DragInputsDialog.o \
-    foundation/ArraySetupPanel.o \
+    foundation/ArraySetupDialog.o \
     foundation/GmatDialog.o \
     foundation/GmatMdiChildFrame.o \
     foundation/GmatPanel.o \
+    foundation/GmatBaseSetupPanel.o \
     foundation/GmatSavePanel.o \
     foundation/GmatStaticBoxSizer.o \
     foundation/GuiItemManager.o \
@@ -204,8 +241,10 @@ OBJECTS = \
     foundation/ShowScriptDialog.o \
     foundation/ShowSummaryDialog.o \
     foundation/SinglePathSetupPanel.o \
+    foundation/UserInputValidator.o \
     function/FunctionSetupPanel.o \
     function/MatlabFunctionSetupPanel.o \
+    hardware/BurnThrusterPanel.o \
     hardware/TankConfigPanel.o \
     hardware/ThrusterCoefficientDialog.o \
     hardware/ThrusterConfigPanel.o \
@@ -214,24 +253,23 @@ OBJECTS = \
     output/CompareReportPanel.o \
     output/OutputTree.o \
     output/ReportFilePanel.o \
-    plot/MdiChildTrajFrame.o \
-    plot/MdiChildTsFrame.o \
-    plot/MdiGlPlotData.o \
-    plot/MdiTsPlotData.o \
-    plot/OpenGlOptionDialog.o \
-    plot/OpenGlPlotSetupPanel.o \
-    plot/ReportFileSetupPanel.o \
-    plot/TrajPlotCanvas.o \
-    plot/TsPlotCanvas.o \
-    plot/TsPlotXYCanvas.o \
-    plot/TsPlotCurve.o \
-    plot/TsPlotOptionsDialog.o \
-    plot/XyPlotSetupPanel.o \
     propagator/PropagationConfigPanel.o \
     propagator/PropagatorSelectDialog.o \
+    rendering/Camera.o \
+    rendering/GLStars.o \
+    rendering/GmatOpenGLSupport.o \
+    rendering/Light.o \
+    rendering/Load3ds.o \
+    rendering/LoadPOV.o \
+    rendering/ModelManager.o \
+    rendering/ModelObject.o \
+    rendering/Rendering.o \
     solarsys/BarycenterPanel.o \
     solarsys/CelesBodySelectDialog.o \
+    solarsys/CelestialBodyOrbitPanel.o \
+    solarsys/CelestialBodyOrientationPanel.o \
     solarsys/CelestialBodyPanel.o \
+    solarsys/CelestialBodyPropertiesPanel.o \
     solarsys/LibrationPointPanel.o \
     solarsys/SolarSystemWindow.o \
     solarsys/UniversePanel.o \
@@ -249,27 +287,48 @@ OBJECTS = \
     spacecraft/SpaceObjectSelectDialog.o \
     spacecraft/TankPanel.o \
     spacecraft/ThrusterPanel.o \
+    spacecraft/VisualModelCanvas.o \
+    spacecraft/VisualModelPanel.o \
+    subscriber/EphemerisFilePanel.o \
+    subscriber/MdiChild3DViewFrame.o \
+    subscriber/MdiChildViewFrame.o \
+    subscriber/MdiChildTsFrame.o \
+    subscriber/MdiGlPlotData.o \
+    subscriber/MdiTsPlotData.o \
+    subscriber/OrbitViewPanel.o \
+    subscriber/ReportFileSetupPanel.o \
+    subscriber/SubscriberSetupPanel.o \
+    subscriber/ViewCanvas.o \
+    subscriber/OrbitViewCanvas.o \
+    subscriber/TsPlotCanvas.o \
+    subscriber/TsPlotXYCanvas.o \
+    subscriber/TsPlotCurve.o \
+    subscriber/TsPlotOptionsDialog.o \
+    subscriber/XyPlotSetupPanel.o \
     view/ViewTextDialog.o \
-    view/ViewTextFrame.o 
+    view/ViewTextFrame.o \
+    $(STC_EDITOR_OBJECTS) \
+    $(SPICE_OBJECTS)
 
 ifeq ($(SHARED_BASE), 1)
 
 ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
-   $(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
-   cp -f $(WXTARGET) ../../bin/.
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	cp -f $(WXTARGET) ../../application/bin/.
+	cp -f $(LIBNAME) ../../application/bin/.
 else
 
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
-	mv -f $(WXTARGET)* ../../bin/.
-	cp -f $(LIBNAME) ../../bin/.
+	mv -f $(WXTARGET)* ../../application/bin/.
+	cp -f $(LIBNAME) ../../application/bin/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
-	mv -f $(WXTARGET)* ../../bin/.
-	cp -f $(LIBNAME) ../../bin/.
+	mv -f $(WXTARGET)* ../../application/bin/.
+	cp -f $(LIBNAME) ../../application/bin/.
 endif
 
 endif
@@ -279,17 +338,17 @@ else
 ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
-	cp -f $(WXTARGET) ../../bin/.
+	cp -f $(WXTARGET) ../../application/bin/.
 else
 
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
-	mv -f $(WXTARGET)* ../../bin/.
+	mv -f $(WXTARGET)* ../../application/bin/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBS)
 	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
-	mv -f $(WXTARGET)* ../../bin/.
+	mv -f $(WXTARGET)* ../../application/bin/.
 endif
 
 endif
@@ -299,48 +358,28 @@ endif
 macrez:
 	echo "linking Carbon and wx resource files ......."
 	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
-	cp -f $(WXTARGET) ../../bin/.
-	@chmod -R 755 ../../bin
+	cp -f $(WXTARGET) ../../application/bin/.
+#	@chmod -R 755 ../../application/bin
 #  $(REZ) -o $(WXTARGET)
 
 macosx: 
 	echo "building Mac application bundle ......."
-	/Developer/Tools/SetFile -a C $(TOP_DIR)/bin/$(WXTARGET)
+	/Developer/Tools/SetFile -a C $(TOP_DIR)/application/bin/$(WXTARGET)
 	mkdir -p $(CONTENTS_DIR)
 	mkdir -p $(MACOS_DIR)
 	mkdir -p $(RES_DIR)
 	mkdir -p $(LIBS_DIR)
-#  echo -n "APPL????" > $(MAC_PKGINFO)
-#  ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
-#  cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-#  ./install_libs_into_bundle
-
-macmatlab:
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMATML/" $(GMAT_INFO) >$(MAC_PKG)
+	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
-	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
-	ln -f $(TOP_DIR)/src/gui/RunGMATML $(MAC_SCRIPT_DIR)/RunGMATML
+	ln -f $(TOP_DIR)/application/bin/$(WXTARGET) $(MAC_APP)
+	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./$(INSTALL_WX_LIBS) GMAT
+	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/lib $(BASELIBNAME) $(PCRE_LIB_LOC)
 
-macnomatlab:
-	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMATNoML/" $(GMAT_INFO) >$(MAC_PKG)
-	echo -n "APPL????" > $(MAC_PKGINFO)
-	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
-	ln -f $(TOP_DIR)/src/gui/RunGMATNoML $(MAC_SCRIPT_DIR)/RunGMATNoML
-	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./$(INSTALL_WX_LIBS) GMATNoMatlab
-
-#macnomatlab:
-#	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-#	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" $(GMAT_INFO) >$(MAC_PKG)
-#	echo -n "APPL????" > $(MAC_PKGINFO)
-#	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
-#	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-#	./$(INSTALL_WX_LIBS) GMATNoMatlab
-#	./install_libs_into_bundle
+macstacksize:
+	echo "setting stack size needed for SPICE"
+	$(SPICE_STACKSIZE)
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
@@ -349,4 +388,4 @@ macnomatlab:
 	$(C) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
 
 $(GMAT_ICON_O):
-	windres -o $(GMAT_ICON_O) $(GMAT_ICON_RC)
+	windres -o $(GMAT_ICON_O) $(GMAT_ICON_RC) -I$(GMAT_ICON_DIR)
