@@ -5,6 +5,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GMAT", "VC-wxGUI\VC-wxGUI.v
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GMATConsole", "VC-Console\VC-Console.vcproj", "{29772D27-C2BC-4660-8BD5-C995D9056E70}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GmatBaseDll", "VC-GmatBaseDll\VC-GmatBaseDll.vcproj", "{16B980AC-B63B-4BCD-87FD-5D68983D4AE9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MatlabInterfaceDll", "VC-MatlabInterfaceDll\VC-MatlabInterfaceDll.vcproj", "{8EB9E754-3ACE-40D1-92E6-7D2AD5B4E24C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GmatGuiExe", "VC-GmatGuiExe\VC-GmatGuiExe.vcproj", "{F98BEF66-BC45-4A53-B0EF-1D4BC4378A85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -16,9 +22,17 @@ Global
 		{A9F8600B-733F-476F-9660-56B5410F4287}.Release|Win32.ActiveCfg = Release|Win32
 		{A9F8600B-733F-476F-9660-56B5410F4287}.Release|Win32.Build.0 = Release|Win32
 		{29772D27-C2BC-4660-8BD5-C995D9056E70}.Debug|Win32.ActiveCfg = Debug|Win32
-		{29772D27-C2BC-4660-8BD5-C995D9056E70}.Debug|Win32.Build.0 = Debug|Win32
 		{29772D27-C2BC-4660-8BD5-C995D9056E70}.Release|Win32.ActiveCfg = Release|Win32
 		{29772D27-C2BC-4660-8BD5-C995D9056E70}.Release|Win32.Build.0 = Release|Win32
+		{16B980AC-B63B-4BCD-87FD-5D68983D4AE9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{16B980AC-B63B-4BCD-87FD-5D68983D4AE9}.Release|Win32.ActiveCfg = Release|Win32
+		{16B980AC-B63B-4BCD-87FD-5D68983D4AE9}.Release|Win32.Build.0 = Release|Win32
+		{8EB9E754-3ACE-40D1-92E6-7D2AD5B4E24C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8EB9E754-3ACE-40D1-92E6-7D2AD5B4E24C}.Release|Win32.ActiveCfg = Release|Win32
+		{8EB9E754-3ACE-40D1-92E6-7D2AD5B4E24C}.Release|Win32.Build.0 = Release|Win32
+		{F98BEF66-BC45-4A53-B0EF-1D4BC4378A85}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F98BEF66-BC45-4A53-B0EF-1D4BC4378A85}.Release|Win32.ActiveCfg = Release|Win32
+		{F98BEF66-BC45-4A53-B0EF-1D4BC4378A85}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
