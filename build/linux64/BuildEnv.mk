@@ -2,7 +2,7 @@
 # Build environment file for Linux
 
 # Flags used to control the build
-USE_SPICE = 0
+USE_SPICE = 1
 USE_DEVIL = 0
 CONSOLE_APP = 0
 DEBUG_BUILD = 0
@@ -13,7 +13,7 @@ USE_STC_EDITOR = 0
 SHARED_BASE = 1
 
 # For 64-bit versions of Linux, this variable should be set equal to 1
-USE_64_BIT_LONGS = 0
+USE_64_BIT_LONGS = 1
 
 # If the copy of wx-config you need is not in your path, enter the path to the
 # file here, including a terminating slash.  (The commented version is an 

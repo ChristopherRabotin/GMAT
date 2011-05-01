@@ -26,6 +26,8 @@ VERSION = 2005-07-13
 #-------------------------------------------------------------------------------
 ROOT_PATH            = ./files/
 #-----------------------------------------------------------
+RUN_MODE             = TESTING
+#-----------------------------------------------------------
 OUTPUT_PATH          = ./output/
 LOG_FILE             = ./GmatLog.txt
 #REPORT_FILE         = OUTPUT_PATH/GmatReport.txt
@@ -34,7 +36,8 @@ GMAT_FUNCTION_PATH   = ./GmatFunctions/
 #GMAT_FUNCTION_PATH   = 
 MATLAB_FUNCTION_PATH = ./matlab/
 FUNCTION_PATH        = ./functions/
-#PLUGIN              = 
+PLUGIN               = libGmatEstimation
+PLUGIN               = libMatlabInterface
 #-----------------------------------------------------------
 SPLASH_PATH          = ROOT_PATH/splash/
 SPLASH_FILE          = SPLASH_PATH/GMATSplashScreen.tif
@@ -45,12 +48,15 @@ MAIN_ICON_FILE       = ICON_PATH/GMATWin32.ico
 #MAIN_ICON_FILE      = ICON_PATH/GMATMac.icn
 #MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.ico
 #-----------------------------------------------------------
-SLP_PATH             = ROOT_PATH/planetary_ephem/slp/
-SLP_FILE             = SLP_PATH/DBS_mn2000.pc
+#SLP_PATH             = ROOT_PATH/planetary_ephem/slp/
+#SLP_FILE             = SLP_PATH/DBS_mn2000.pc
 #-----------------------------------------------------------
 DE_PATH              = ROOT_PATH/planetary_ephem/de/
 DE200_FILE           = DE_PATH/leDE1941.200
 DE405_FILE           = DE_PATH/leDE1941.405
+#-----------------------------------------------------------
+SPK_PATH             = ROOT_PATH/planetary_ephem/spk
+PLANETARY_SPK_FILE   = SPK_PATH/de421.bsp
 #-----------------------------------------------------------
 EARTH_POT_PATH       = ROOT_PATH/gravity/earth/
 JGM2_FILE            = EARTH_POT_PATH/JGM2.cof
@@ -74,6 +80,7 @@ NUTATION_COEFF_FILE  = PLANETARY_COEFF_PATH/NUTATION.DAT
 #-----------------------------------------------------------
 TIME_PATH            = ROOT_PATH/time/
 LEAP_SECS_FILE       = TIME_PATH/tai-utc.dat
+LSK_FILE             = TIME_PATH/naif0009.tls
 #-----------------------------------------------------------
 TEXTURE_PATH         = ROOT_PATH/plot/texture/
 SUN_TEXTURE_FILE     = TEXTURE_PATH/Sun.jpg

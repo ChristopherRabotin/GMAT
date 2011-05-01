@@ -28,19 +28,29 @@ ROOT_PATH            = ./files/
 #-----------------------------------------------------------
 OUTPUT_PATH          = ./output/
 LOG_FILE             = ./GmatLog.txt
-#-----------------------------------------------------------
-#PLUGIN              = libVF13Optimizer
+#REPORT_FILE         = OUTPUT_PATH/GmatReport.txt
 #-----------------------------------------------------------
 GMAT_FUNCTION_PATH   = ./GmatFunctions/
+#GMAT_FUNCTION_PATH   = 
 MATLAB_FUNCTION_PATH = ./matlab/
 FUNCTION_PATH        = ./functions/
+#PLUGIN              = 
+#-----------------------------------------------------------
+SPLASH_PATH          = ROOT_PATH/splash/
+SPLASH_FILE          = SPLASH_PATH/GMATSplashScreen.tif
+#-----------------------------------------------------------
+ICON_PATH            = ROOT_PATH/icons
+MAIN_ICON_FILE       = ICON_PATH/GMATWin32.ico
+#MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.xpm
+#MAIN_ICON_FILE      = ICON_PATH/GMATMac.icn
+#MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.ico
+#-----------------------------------------------------------
+SLP_PATH             = ROOT_PATH/planetary_ephem/slp/
+SLP_FILE             = SLP_PATH/DBS_mn2000.pc
 #-----------------------------------------------------------
 DE_PATH              = ROOT_PATH/planetary_ephem/de/
 DE200_FILE           = DE_PATH/leDE1941.200
 DE405_FILE           = DE_PATH/leDE1941.405
-#-----------------------------------------------------------
-SPK_PATH             = ROOT_PATH/planetary_ephem/spk
-PLANETARY_SPK_FILE   = SPK_PATH/de421.bsp
 #-----------------------------------------------------------
 EARTH_POT_PATH       = ROOT_PATH/gravity/earth/
 JGM2_FILE            = EARTH_POT_PATH/JGM2.cof
@@ -51,18 +61,11 @@ EARTH_POT_FILE       = EARTH_POT_PATH/JGM2.cof
 LUNA_POT_PATH        = ROOT_PATH/gravity/luna/
 LUNA_POT_FILE        = LUNA_POT_PATH/LP165P.cof
 #-----------------------------------------------------------
-MARS_POT_PATH        = ROOT_PATH/gravity/mars/
-MARS_POT_FILE        = MARS_POT_PATH/Mars50c.cof
-#-----------------------------------------------------------
 VENUS_POT_PATH       = ROOT_PATH/gravity/venus/
 VENUS_POT_FILE       = VENUS_POT_PATH/MGNP180U.cof
 #-----------------------------------------------------------
-MERCURY_POT_PATH     = ROOT_PATH/gravity/mercury/
-JUPITER_POT_PATH     = ROOT_PATH/gravity/jupiter/
-NEPTUNE_POT_PATH     = ROOT_PATH/gravity/neptune/
-PLUTO_POT_PATH       = ROOT_PATH/gravity/pluto/
-SATURN_POT_PATH      = ROOT_PATH/gravity/saturn/
-URANUS_POT_PATH      = ROOT_PATH/gravity/uranus/
+MARS_POT_PATH        = ROOT_PATH/gravity/mars/
+MARS_POT_FILE        = MARS_POT_PATH/Mars50c.cof
 #-----------------------------------------------------------
 PLANETARY_COEFF_PATH = ROOT_PATH/planetary_coeff/
 EOP_FILE             = PLANETARY_COEFF_PATH/eopc04.62-now
@@ -85,12 +88,4 @@ NEPTUNE_TEXTURE_FILE = TEXTURE_PATH/Neptune_BjornJonsson.jpg
 PLUTO_TEXTURE_FILE   = TEXTURE_PATH/Pluto_JPLCaltech.jpg
 LUNA_TEXTURE_FILE    = TEXTURE_PATH/Moon_HermesCelestiaMotherlode.jpg
 #-----------------------------------------------------------
-SPLASH_PATH          = ROOT_PATH/splash/
-SPLASH_FILE          = SPLASH_PATH/GMATSplashScreen.tif
-#-----------------------------------------------------------
-ICON_PATH            = ROOT_PATH/icons
-MAIN_ICON_FILE       = ICON_PATH/GMATWin32.ico
-#MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.xpm
-#MAIN_ICON_FILE      = ICON_PATH/GMATMac.icn
-#MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.ico
-#-----------------------------------------------------------
+

@@ -1,0 +1,114 @@
+GMAT Installation for Linux -- Release R2011a  (An Alpha Release) 
+---
+
+Welcome to the wonderful world of GMAT!
+
+This readme file provides instructions for setting up the Linux version of GMAT, 
+including guidelines for launching the application and setting up an application 
+launcher on your desktop.  
+
+The Linux build of GMAT is considered an alpha release.  The system has been 
+tested extensively to validate script based execution and numerical correctness, 
+but the graphical user interface has only been lightly tested.
+
+The Linux application included in this package was built on Ubuntu Linux 10.10 
+64-bit (Maverick Meerkat).  Files that are needed to run GMAT (startup and data 
+files, along with a shell script launcher, sample missions, and several GMAT 
+plugins) are included.  The build files and source code can be downloaded from 
+the GMAT website:
+	
+	http://gmat.gsfc.nasa.gov
+
+or from Sourceforge:
+
+	http://sourceforge.net/projects/gmat
+
+
+INSTALLATION AND CONFIGURATION
+
+GMAT for Linux is released as a gzipped tarball archive.  The tarball is 
+installed by running the command
+
+	tar -zxf gmat-linux-x64-R2011a-Alpha.tar.gz
+
+This command extracts the GMAT system into a folder named GMAT-R2011a.  Inside 
+of that folder you will find eight subfolders: bin, data, docs, matlab, output, 
+plugins, samples, and userfunctions.  The GMAT executable is located in the bin 
+folder, along with libraries that GMAT uses and two application launchers, 
+RunGmat.sh and RunGmatLauncher.sh.  
+
+The Linux application (Alpha version) includes the ability to make calls to 
+MATLAB based functions from GMAT scripts.  Calls cannot be made from MATLAB to 
+GMAT with the current application.  To use MATLAB with GMAT, the application 
+must include the path to MATLAB's shared libraries in the load library path used 
+when the application is launched.  If you are planning to use MATLAB with GMAT, 
+you should open each of the shell script launchers and update the path 
+information to identify the location of MATLAB on your system.  MATLAB is 
+configured to launch from /opt/matlab/R2009b on the Linux build machine, so that 
+is the setting in the shell scripts.
+
+The shell script RunGmatLauncher.sh contains information about where GMAT is 
+installed on your system as part of a change directory (cd) command.  The 
+default location is ~/GMAT-R2011a; update that location if you installed GMAT to 
+a different folder.  
+
+The Linux application is launched by running one of the RunGmat... shell 
+scripts.  Each script file sets GMAT's load library path, and then launches the 
+application.  If you would like to create a desktop shortcut to launch GMAT, set 
+your launcher to run the "RunGmatLauncher" shell script.  You might want to set 
+the icon for the launcher as well; GMAT's icon images are located in the 
+GMAT-R2011a/data/graphics/icons folder.
+
+
+LIBRARY DEPENDENCIES
+
+There are two system dependencies for the Linux build of GMAT 2011a:
+
+* GMAT is written in C++, and requires a recent version of libstdc++ (the C++ 
+  shared libraries) to run.
+
+* GMAT 2011a uses the Fortran shared library for MSISE90 atmospheric modeling, 
+  so you will need to install GFortran 4.4 or later.  This dependency will be 
+  removed from later builds.
+
+
+RUNNING GMAT
+
+The Linux (and Mac) builds of GMAT do not support the interface to the fmincon 
+optimizer.  For that reason, some of the sample missions that run on Windows - 
+those that use fmincon based optimization - will not run in the Linux build.  
+However, the other sample missions included in this Linux distribution do run 
+successfully, and provide an excellent introduction to using GMAT.  (Sample 
+missions that use the VF13ad optimizer require a plugin that cannot be delivered 
+with GMAT.  Please see GMAT's forum pages for instructions about this 
+optimizer.)  
+
+To run the sample missions:
+
+1. Start GMAT by double-clicking on the RunGmatLauncher.sh shell script 
+   (alternatively, you may open a terminal window, cd to bin folder of the 
+   directory where GMAT was installed, and type "./RunGmat.sh").
+
+2. Open one of the sample missions preloaded as a recent script on the Welcome 
+   Panel.
+
+3. Press the green "Run" button on the toolbar.  The script should run, and 
+   display the output from the selected script.
+
+
+ADDITIONAL SUPPORT
+
+For additional help configuring and running GMAT, the GMAT team has a set of 
+forums and wiki pages located at
+
+	GMAT Forums:      http://gmat.ed-pages.com/forum/index.php
+	GMAT Wiki Pages:  http://gmat.ed-pages.com/wiki/tiki-index.php
+
+Please feel free to contact the GMAT team for further information, to make 
+suggestions, or for assistance with any problems you encounter running the 
+system.  We're glad to help!
+
+---
+Darrel Conway
+GMAT Linux developer
+e-mail:  gmat@thinksysinc.com

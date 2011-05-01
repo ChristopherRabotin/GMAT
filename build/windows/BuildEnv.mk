@@ -2,23 +2,98 @@
 # Build environment file for Windows
 
 # Flags used to control the build
-USE_MATLAB = 1
+USE_SPICE = 1
 USE_DEVIL = 0
 CONSOLE_APP = 0
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
+WX_SHARED = 1
 SHARED_BASE = 1
-#WX_SHARED = 1
+USE_STC_EDITOR = 1
+USE_WX_EMAIL = 1
+SHOW_HELP_BUTTON = 1
+SMART_APPLY_BUTTON = 1
 
-# MATLAB specific data
-MATLAB_INCLUDE = -IC:/Program\ Files/MATLAB/R2007B/extern/include
-MATLAB_LIB = -LC:/Program\ Files/MATLAB/R2007B/bin/win32
-MATLAB_LIBRARIES = -leng -lmx -lmat
+# GMAT application icon for Windows only
+# location of GmatIcon
+GMAT_ICON_DIR = C:/Projects/GmatDev/src/gui/resource
+GMAT_ICON_RC = $(GMAT_ICON_DIR)/GmatIcon.rc
+GMAT_ICON_O  = $(GMAT_ICON_DIR)/GmatIcon.o
+
+# The Console app does not support MATLAB linkage or shared base libraries for now
+ifeq ($(CONSOLE_APP), 1)
+USE_STC_EDITOR = 0
+CONSOLE_FLAGS = -D__CONSOLE_APP__
+else
+CONSOLE_FLAGS =
+endif
+
+# MATLAB data
+# location of MATLAB headers and libraries
+# Removed MATLAB dependency
+
+# SPICE data
+# location of CSPICE headers and libraries
+ifeq ($(USE_SPICE), 1)
+SPICE_DIR = C:/cspice
+SPICE_INCLUDE = -I$(SPICE_DIR)/include
+SPICE_CPP_FLAGS = -D__USE_SPICE__ $(SPICE_INCLUDE)
+SPICE_LIB_DIR = $(SPICE_DIR)/lib
+SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
+else
+SPICE_INCLUDE =
+SPICE_CPP_FLAGS =
+SPICE_LIB_DIR =
+SPICE_LIBRARIES =
+endif
 
 # DevIL data
-IL_HEADERS = -ID:/DevIL/include/il -ID:/DevIL/include
-IL_LIBRARIES = -LD:/devIL/dlls -lilu -lilut -lDevIL
+# location of DevIL headers and libraries
+ifeq ($(USE_DEVIL), 1)
+IL_CPP_FLAGS = -IC:/DevIL/include/il -IC:/DevIL/include
+IL_LIBRARIES = -LC:/devIL/dlls -lilu -lilut -lDevIL
+else
+IL_CPP_FLAGS = -DSKIP_DEVIL
+IL_LIBRARIES =
+endif
+
+# STC editor (wxStyledTextCtrl) data
+# location of STC headers and libraries
+ifeq ($(USE_STC_EDITOR), 1)
+STC_CPP_FLAGS = -D__USE_STC_EDITOR__ -I/C:/wxWidgets-2.8.11/contrib/include
+STC_LIBRARIES = -LC:/wxWidgets-2.8.11/lib -lwx_msw_stc-2.8 
+else
+STC_CPP_FLAGS =
+STC_LIBRARIES =
+endif
+
+# wxEmail
+# location of wxEmail headers and libraries
+ifeq ($(USE_WX_EMAIL), 1)
+EMAIL_CPP_FLAGS = -D__ENABLE_EMAIL__ -I/C:/wxWidgets-2.8.11/contrib/include
+EMAIL_LIBRARIES = -LC:/wxWidgets-2.8.11/lib -lwx_msw_netutils-2.8 
+else
+EMAIL_CPP_FLAGS =
+EMAIL_LIBRARIES =
+endif
+
+ifeq ($(SHOW_HELP_BUTTON), 1)
+ifeq ($(SMART_APPLY_BUTTON), 1)
+GUI_CPP_FLAGS = -D__SHOW_HELP_BUTTON__ -D__SMART_APPLY_BUTTON__
+else
+GUI_CPP_FLAGS = -D__SHOW_HELP_BUTTON__
+endif
+else
+ifeq ($(SMART_APPLY_BUTTON), 1)
+GUI_CPP_FLAGS = -D__SMART_APPLY_BUTTON__
+else
+GUI_CPP_FLAGS =
+endif
+endif
+
+GMAT_CPP_FLAGS = $(SPICE_CPP_FLAGS) $(IL_CPP_FLAGS) $(STC_CPP_FLAGS) $(EMAIL_CPP_FLAGS) $(GUI_CPP_FLAGS) 
+GMAT_LINK_FLAGS = $(SPICE_LIBRARIES) $(IL_LIBRARIES) $(STC_LIBRARIES) $(EMAIL_LIBRARIES) 
 
 # wxWidgets settings
 ifeq ($(WX_28_SYNTAX), 1)
@@ -27,21 +102,15 @@ else
 WX_28_DEFINES = 
 endif
 
-# The Console app does not support MATLAB linkage or shared base libraries for now
-ifeq ($(CONSOLE_APP), 1)
-USE_MATLAB = 0
-SHARED_BASE = 0
-endif
-
-# GMAT application icon for Windows only
-GMAT_ICON_RC = D:/Projects/GMAT/Icons/GmatIcon.rc
-GMAT_ICON_O  = D:/Projects/GMAT/Icons/GmatIcon.o
-
 # Compiler options
 CPP = g++
 C = gcc
 FORTRAN = g77
+ifeq ($(USE_SPICE), 1)
+FORTRAN_LIB =
+else
 FORTRAN_LIB = -LC:/MinGW/lib -lg2c
+endif
 
 ifeq ($(PROFILE_BUILD), 1)
 PROFILE_FLAGS = -pg
@@ -50,13 +119,7 @@ PROFILE_FLAGS =
 endif
 
 ifeq ($(SHARED_BASE), 1)
-
-ifeq ($(USE_MATLAB), 1)
-SHARED_LIB_FLAGS = $(FORTRAN_LIB) $(MATLAB_LIB) $(MATLAB_LIBRARIES) -shared -Wl --out-implib
-else
-SHARED_LIB_FLAGS = $(FORTRAN_LIB) -shared -Wl --out-implib
-endif
-
+SHARED_LIB_FLAGS = $(FORTRAN_LIB) $(GMAT_LINK_FLAGS) -shared -Wl --out-implib
 else
 SHARED_LIB_FLAGS = 
 endif
@@ -73,19 +136,9 @@ OPTIMIZATIONS =  -DwxUSE_UNIX=0 -D_X86_=1 -DWIN32 -DWINVER=0x0400 -D__WIN95__ \
 # Do not edit below this line -- here we build up longer compile/link strings
 LINUX_MAC = 0
 
-# Build specific flags
-MATLAB_FLAGS = -D__USE_MATLAB__=1
-
 WXCPPFLAGS = `/usr/local/bin/wx-config --cppflags`
 WXLINKFLAGS = `/usr/local/bin/wx-config --libs --gl-libs --static=no` \
                -lopengl32 -lglu32
-
-
-ifeq ($(CONSOLE_APP),1)
-CONSOLE_FLAGS = -D__CONSOLE_APP__
-else
-CONSOLE_FLAGS = 
-endif
 
 # Set options for debugging and profiling
 ifeq ($(DEBUG_BUILD), 1)
@@ -95,53 +148,15 @@ DEBUG_FLAGS =
 endif
 
 # Build the complete list of flags for the compilers
-ifeq ($(USE_MATLAB),1)
-CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(MATLAB_FLAGS) \
-           $(WXCPPFLAGS) \
-           $(MATLAB_INCLUDE) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
-else
-CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall \
+CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) $(GMAT_CPP_FLAGS) -Wall \
            $(WXCPPFLAGS) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
-endif
 
-ifeq ($(USE_DEVIL), 0)
-CPPFLAGS = $(CPP_BASE) -DSKIP_DEVIL $(PROFILE_FLAGS) $(DEBUG_FLAGS)
-else
-CPPFLAGS = $(CPP_BASE) $(PROFILE_FLAGS) $(DEBUG_FLAGS) $(IL_HEADERS)
-endif
-
+CPPFLAGS = $(CPP_BASE) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
 
 F77_FLAGS = $(CPPFLAGS)
 
-# Link specific flags
-ifeq ($(USE_DEVIL),1)
-
-ifeq ($(USE_MATLAB),1)
-LINK_FLAGS = $(WXLINKFLAGS)\
-             $(MATLAB_LIB) $(MATLAB_LIBRARIES) \
-             $(FORTRAN_LIB) $(DEBUG_FLAGS) $(IL_LIBRARIES)
-else
-LINK_FLAGS = $(WXLINKFLAGS)\
-             $(FORTRAN_LIB) $(DEBUG_FLAGS) $(IL_LIBRARIES)
-endif
-
-else
-
-ifeq ($(USE_MATLAB),1)
-LINK_FLAGS = $(WXLINKFLAGS)\
-             $(MATLAB_LIB) $(MATLAB_LIBRARIES) \
+LINK_FLAGS = $(GMAT_LINK_FLAGS) $(WXLINKFLAGS) \
              $(FORTRAN_LIB) $(DEBUG_FLAGS)
-else
-LINK_FLAGS = $(WXLINKFLAGS)\
-             $(FORTRAN_LIB) $(DEBUG_FLAGS)
-endif
 
-endif
+CONSOLE_LINK_FLAGS = -L../base/lib $(FORTRAN_LIB) $(DEBUG_FLAGS) $(PROFILE_FLAGS)
 
-
-ifeq ($(USE_MATLAB),1)
-CONSOLE_LINK_FLAGS = $(MATLAB_LIB) $(MATLAB_LIBRARIES) -L../base/lib \
-                    -lgfortran $(DEBUG_FLAGS) $(PROFILE_FLAGS)
-else
-CONSOLE_LINK_FLAGS = -L../base/lib $(FORTRAN_LIB) $(DEBUG_FLAGS) 
-endif
