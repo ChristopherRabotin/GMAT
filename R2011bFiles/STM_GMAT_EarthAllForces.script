@@ -1,0 +1,91 @@
+% This file is for computing the propagated
+% state transition matrix for an SV in 
+% a LEO orbit under 12X12 gravity model with
+% 3rd body effects (All default) and drag and 
+% solar radiation pressure.
+
+%---------------------------------------------
+%----------------Create Variables------------
+%---------------------------------------------
+Create Variable TOFinSeconds;
+
+%--------------------------------------------------
+%-----------------Set the propagation time---------
+%--------------------------------------------------
+TOFinSeconds = 3600.0;
+
+%---------------------------------------------------
+%---------------------Define coordinate frames------
+%--------------------------------------------------
+
+Create CoordinateSystem EarthMJ2000Eq;
+GMAT EarthMJ2000Eq.Origin = Earth;
+GMAT EarthMJ2000Eq.Axes = MJ2000Eq;
+GMAT EarthMJ2000Eq.UpdateInterval = 60;
+GMAT EarthMJ2000Eq.OverrideOriginInterval = false;
+
+%----------------------------------------
+%---------- Spacecrafts
+%----------------------------------------
+
+Create Spacecraft Sat;
+GMAT Sat.DateFormat = TAIModJulian;
+GMAT Sat.Epoch = '21545.000000000';
+GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
+GMAT Sat.DisplayStateType = Cartesian;
+GMAT Sat.X = 9504.2469892823640;
+GMAT Sat.Y = 0.0;
+GMAT Sat.Z = 0.0;
+GMAT Sat.VX = 0.0;
+GMAT Sat.VY = 6.1557661999502;
+GMAT Sat.VZ = 2.8704809208484;
+GMAT Sat.DryMass = 1000;
+GMAT Sat.Cd = 2.2;
+GMAT Sat.Cr = 1.4;
+GMAT Sat.DragArea = 15;
+GMAT Sat.SRPArea = 2;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel propFM;
+GMAT propFM.CentralBody = Earth;
+GMAT propFM.PrimaryBodies = {Earth};
+GMAT propFM.PointMasses = {Sun, Luna, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto};
+GMAT propFM.Drag = JacchiaRoberts;
+GMAT propFM.SRP = On;
+GMAT propFM.ErrorControl = RSSStep;
+GMAT propFM.GravityField.Earth.Degree = 12;
+GMAT propFM.GravityField.Earth.Order = 12;
+GMAT propFM.GravityField.Earth.PotentialFile = 'EGM96.cof';
+GMAT propFM.SRP.Flux = 1367;
+GMAT propFM.SRP.Nominal_Sun = 149597870.691;
+
+%------------------------------ Create Report -----------------------------
+Create ReportFile dataReport;
+GMAT dataReport.Filename = 'STM_GMAT_EarthAllForces.report';
+GMAT dataReport.Precision = 16;
+GMAT dataReport.WriteHeaders = Off;
+GMAT dataReport.LeftJustify = On;
+GMAT dataReport.ZeroFill = Off;
+GMAT dataReport.ColumnWidth = 20;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = propFM;
+GMAT DefaultProp.Type = RungeKutta89;
+GMAT DefaultProp.StopIfAccuracyIsViolated = false;
+GMAT DefaultProp.InitialStepSize = 60;
+GMAT DefaultProp.Accuracy = 9.999999999999999e-12;
+GMAT DefaultProp.MinStep = 60;
+GMAT DefaultProp.MaxStep = 60;
+GMAT DefaultProp.MaxStepAttempts = 50;
+
+BeginMissionSequence
+Propagate DefaultProp(Sat,'STM') {Sat.ElapsedSecs = TOFinSeconds};
+
+Report dataReport Sat.EarthMJ2000Eq.OrbitSTM;

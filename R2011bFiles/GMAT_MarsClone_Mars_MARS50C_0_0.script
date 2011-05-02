@@ -1,0 +1,123 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2011-04-24 11:05:40
+
+%  This script should create same output as GMAT_Mars1_Mars_MARS50C_0_0.script
+
+%----------------------------------------
+%---------- User-Defined Celestial Bodies
+%----------------------------------------
+
+Create Asteroid MarsClone;
+GMAT MarsClone.NAIFId = 4;
+GMAT MarsClone.OrbitSpiceKernelName = {'../data/planetary_ephem/spk/de421.bsp'};
+GMAT MarsClone.EquatorialRadius = 3397;
+GMAT MarsClone.Flattening = 0.0064763;
+GMAT MarsClone.Mu = 42828.314258067;
+GMAT MarsClone.PosVelSource = 'SPICE';
+GMAT MarsClone.CentralBody = 'Sun';
+GMAT MarsClone.RotationDataSource = 'IAUSimplified';
+GMAT MarsClone.OrientationEpoch = 21545;
+GMAT MarsClone.SpinAxisRAConstant = 317.68143;
+GMAT MarsClone.SpinAxisRARate = -0.1061;
+GMAT MarsClone.SpinAxisDECConstant = 52.8865;
+GMAT MarsClone.SpinAxisDECRate = -0.0609;
+GMAT MarsClone.RotationConstant = 176.63;
+GMAT MarsClone.RotationRate = 350.89198266;
+GMAT MarsClone.TextureMapFileName = '../data/graphics/texture/Mars_JPLCaltechUSGS.jpg';
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft DefaultSC;
+GMAT DefaultSC.DateFormat = UTCGregorian;
+GMAT DefaultSC.Epoch = '01 Jun 2004 12:00:00.000';
+GMAT DefaultSC.CoordinateSystem = MarsCloneJ2000Eq;
+GMAT DefaultSC.DisplayStateType = Cartesian;
+GMAT DefaultSC.X = -2737.481646180153;
+GMAT DefaultSC.Y = 0;
+GMAT DefaultSC.Z = 2737.481646180153;
+GMAT DefaultSC.VX = -0.3113216950526478;
+GMAT DefaultSC.VY = -3.55349231393095;
+GMAT DefaultSC.VZ = 0.3113216950526501;
+GMAT DefaultSC.DryMass = 1000;
+GMAT DefaultSC.Cd = 2.2;
+GMAT DefaultSC.Cr = 1.2;
+GMAT DefaultSC.DragArea = 20;
+GMAT DefaultSC.SRPArea = 20;
+GMAT DefaultSC.NAIFId = -123456789;
+GMAT DefaultSC.NAIFIdReferenceFrame = -123456789;
+GMAT DefaultSC.Id = 'SatId';
+GMAT DefaultSC.Attitude = CoordinateSystemFixed;
+GMAT DefaultSC.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT DefaultSC.ModelOffsetX = 0;
+GMAT DefaultSC.ModelOffsetY = 0;
+GMAT DefaultSC.ModelOffsetZ = 0;
+GMAT DefaultSC.ModelRotationX = 0;
+GMAT DefaultSC.ModelRotationY = 0;
+GMAT DefaultSC.ModelRotationZ = 0;
+GMAT DefaultSC.ModelScale = 3;
+GMAT DefaultSC.AttitudeDisplayStateType = 'Quaternion';
+GMAT DefaultSC.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT DefaultSC.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT DefaultSC.Q1 = 0;
+GMAT DefaultSC.Q2 = 0;
+GMAT DefaultSC.Q3 = 0;
+GMAT DefaultSC.Q4 = 1;
+GMAT DefaultSC.EulerAngleSequence = '321';
+GMAT DefaultSC.AngularVelocityX = 0;
+GMAT DefaultSC.AngularVelocityY = 0;
+GMAT DefaultSC.AngularVelocityZ = 0;
+
+
+Create ForceModel MARS50C;
+GMAT MARS50C.CentralBody = MarsClone;
+GMAT MARS50C.PrimaryBodies = {MarsClone};
+GMAT MARS50C.Drag = None;
+GMAT MARS50C.SRP = Off;
+GMAT MARS50C.ErrorControl = RSSStep;
+GMAT MARS50C.Gravity.MarsClone.PotentialFile = ../data/gravity/mars/Mars50c.cof;
+GMAT MARS50C.Gravity.MarsClone.Degree = 20;
+GMAT MARS50C.Gravity.MarsClone.Order = 20;
+
+Create Propagator RKV89;
+GMAT RKV89.FM = MARS50C;
+GMAT RKV89.Type = RungeKutta89;
+GMAT RKV89.StopIfAccuracyIsViolated = false;
+GMAT RKV89.InitialStepSize = 5;
+GMAT RKV89.Accuracy = 1e-013;
+GMAT RKV89.MinStep = 5;
+GMAT RKV89.MaxStep = 5;
+GMAT RKV89.MaxStepAttempts = 50; 
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem MarsCloneJ2000Eq;
+GMAT MarsCloneJ2000Eq.Origin = MarsClone;
+GMAT MarsCloneJ2000Eq.Axes = MJ2000Eq;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile Mars_Report
+GMAT Mars_Report.Filename = GMAT_MarsClone_Mars_MARS50C_0_0.report;
+GMAT Mars_Report.Precision = 16;
+GMAT Mars_Report.WriteHeaders = Off;
+GMAT Mars_Report.ColumnWidth = 20;
+
+Create Variable OutputStepSize;
+
+%-----------Begin Propagation and Report Generation--------
+% Propagate based on preset propagation parameters
+% and current stop conditions.
+BeginMissionSequence
+
+% Output Report file data for each propagation set in the FOR loop
+Report Mars_Report DefaultSC.A1ModJulian DefaultSC.MarsMJ2000Eq.X DefaultSC.MarsMJ2000Eq.Y DefaultSC.MarsMJ2000Eq.Z DefaultSC.MarsMJ2000Eq.VX DefaultSC.MarsMJ2000Eq.VY DefaultSC.MarsMJ2000Eq.VZ;
+For OutputStepSize = 1:864;
+	Propagate   RKV89(DefaultSC, {DefaultSC.ElapsedSecs = 300});
+	Report      Mars_Report DefaultSC.A1ModJulian DefaultSC.MarsMJ2000Eq.X DefaultSC.MarsMJ2000Eq.Y DefaultSC.MarsMJ2000Eq.Z DefaultSC.MarsMJ2000Eq.VX DefaultSC.MarsMJ2000Eq.VY DefaultSC.MarsMJ2000Eq.VZ;
+EndFor ;
