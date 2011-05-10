@@ -2,19 +2,19 @@ function GroundTrack
 
 %%  Define the initial state and some constants
 % Prograde state
-cartState = [7100 0 1300 0 7.35 1]';
+close all
+TOF = 5.5;  %  Time of flight in days;
+progradeLEO   = [7100 0 1300 0 7.35 1]';
+retrogradeLEO = [2124 -4462 6651 -3.6 3.9 4]';
+molniya       = [-52 -3079 -6150 10.043 -0.170 0]';
+geo           = [-743.686572704364 39985.553832 0 -2.855551774845245 -0.053169 1.517940]';
 
-% Retrograde state
-%cartState = [2124 -4462 6651 -3.6 3.9 4]';
+cartState = progradeLEO;
 
-% Molniya
-cartState = [-52 -3079 -6150 10.043 -0.170 0]';
-
-cartState = [-743.686572704364 39985.553832 0 -2.855551774845245 -0.053169 1.517940]';
 
 %% Propagate the orbit for one day
 odeOpt = odeset('AbsTol',1e-9,'RelTol',1e-9);
-[t,xHist] = ode113(@OrbitDot,[0 15*86400],cartState,odeOpt);
+[t,xHist] = ode113(@OrbitDot,[0 TOF*86400],cartState,odeOpt);
 
 %%  Plot the 3D orbit
 figure(1)
@@ -46,32 +46,32 @@ image([-180 180],[-90 90],topoNew,'CDataMapping', 'scaled');axis equal;
 axis([-180 180 -90 90]); hold on; 
 
 %%  Loop over epeheris and draw points
-        figure(2);
+        
 for ephIdx = 1:numEphemPoints
     
-    % Compute longitude and latitude
+    % Compute longitude and latitude and determine direction of motion
     [posFixed,velFixed] = Inertial2Body(t(ephIdx),xHist(ephIdx,1:6)');
     long       = atan2(posFixed(2),posFixed(1));
     lat        = asin(posFixed(3)/sqrt(posFixed(1)^2+posFixed(2)^2 + posFixed(3)^2));
     dir        = sign(velFixed(2,1)*posFixed(1,1) - velFixed(1,1)*posFixed(2,1));
-    
+    figure(2);
     %  Draw new points depending upon special case
     if ephIdx > 2
 
-        % Prograde case stepping of RHS of plot
-        if  dir == 1 & oldLong > 0 && mod(long,2*pi) > pi 
-            modoldLon = mod(oldLong,pi2);
-            modLon    =  mod(long,pi2)
-            m = (lat - oldLat)/ (modLon - modoldLon);
-            boundaryLatitude = m*(pi - modLon) + lat;
+        % Prograde case stepping off RHS of plot
+        mLong    = mod(long,2*pi);
+        moldLong = mod(oldLong,2*pi);
+        mLongM   = mod(long,-2*pi);;
+        moldLongM   = mod(oldLong,-2*pi);
+        if   moldLong < pi && mLong > pi &&  dir == 1 && lastDir == 1 
+            m = (lat - oldLat)/ (mLong -moldLong);
+            boundaryLatitude = m*(pi - mLong) + lat;
             plot([oldLong,pi]/d2r,[oldLat,boundaryLatitude]/d2r,'y-')
             plot([-pi,long]/d2r,[boundaryLatitude,lat]/d2r,'y-')   
-        % Retrograde case stepping of LHS of plot    
-        elseif dir == -1 & oldLong < 0 && mod(long,-2*pi) < -pi
-            modoldLon = mod(oldLong,-pi2);
-            modLon    =  mod(long,-pi2)
-            m = (lat - oldLat)/ (modLon - modoldLon);
-            boundaryLatitude  = m*(-pi - modLon) + lat;
+        % Retrograde case stepping off LHS of plot    
+        elseif dir == -1 && lastDir == -1 && moldLongM > -pi && mLongM  < -pi
+            m = (lat - oldLat)/ (mLongM  - moldLongM);
+            boundaryLatitude  = m*(-pi - mLongM) + lat;
             plot([oldLong,-pi]/d2r,[oldLat,boundaryLatitude]/d2r,'y-')
             plot([pi,long]/d2r,[boundaryLatitude,lat]/d2r,'y-')       
         % Regular case (not stepping off either side of plot)   
@@ -82,6 +82,7 @@ for ephIdx = 1:numEphemPoints
     end;
     
     %% Save data for next loop pass
+    lastDir = dir;
     latVector(ephIdx,1) = lat;
     oldLong  = long;
     oldLat   = lat;
