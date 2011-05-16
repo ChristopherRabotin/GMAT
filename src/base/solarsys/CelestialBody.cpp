@@ -70,6 +70,7 @@
 //#define DEBUG_CB_CLOAKING
 //#define DEBUG_CB_CLOAKING_EPOCH
 //#define DEBUG_CB_EQ_RAD
+//#define DEBUG_CB_CARTOGRAPHIC
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -2301,7 +2302,16 @@ Rvector CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) cons
       delta = orientation[2]  + orientation[3] * T;
       W     = orientation[4]  + orientation[5] * d;
       Wdot  = orientation[5]  * CelestialBody::dDot;
-      
+      #ifdef DEBUG_CB_CARTOGRAPHIC
+      if ((forTime.Get() > 23158.005) && (forTime.Get() < 23158.006))
+      {
+         MessageInterface::ShowMessage("returning cartographic coordinates for body %s at time %12.10f:\n",
+                                       instanceName.c_str(), forTime.Get());
+         MessageInterface::ShowMessage("   alpha = %12.10f    delta = %12.10f    W = %12.10f    Wdot = %12.10f    d = %12.10f    T = %12.10f  dDot = %12.10f\n",
+                                       alpha, delta, W, Wdot, d, T, CelestialBody::dDot);
+         MessageInterface::ShowMessage("   orientation array = %s\n", orientation.ToString().c_str());
+      }
+      #endif
       return Rvector(4, alpha, delta, W, Wdot);
    }
    else
@@ -4034,10 +4044,6 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    {
       x0 = Sqrt(cbMu) * dTime * alpha;
 
-      #ifdef DEBUG_TWO_BODY
-      //   MessageInterface::ShowMessage("alpha = %12.14f    dTime = %12.14f,  cbMu = %12.14f\n", alpha, dTime, cbMu);
-         MessageInterface::ShowMessage("x0 = %12.14f\n", x0);
-      #endif
       if (Abs(alpha - 1.0) <= KEPLER_TOL)
       {
          // match Vallado matlab code 
@@ -4066,6 +4072,9 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
                        (1.0 - rMag0 * alpha);
       x0             = signT * Sqrt(-a) * Ln(num / den);
    }
+   #ifdef DEBUG_TWO_BODY
+      MessageInterface::ShowMessage("x0 = %12.14f\n", x0);
+   #endif
    // Loop until difference falls within tolerance
    Real    rVal    = 0.0;
    Real    xNew    = 0.0;
