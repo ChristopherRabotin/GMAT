@@ -42,10 +42,10 @@
 #-----------------------------------------------------------
 ROOT_PATH              = ../
 #-----------------------------------------------------------
-#PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-#PLUGIN                 = ../plugins/libGmatEstimation
-#PLUGIN                 = ../plugins/libMatlabInterface
-#PLUGIN                 = ../plugins/libFminconOptimizer
+PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+PLUGIN                 = ../plugins/libGmatEstimation
+PLUGIN                 = ../plugins/libMatlabInterface
+PLUGIN                 = ../plugins/libFminconOptimizer
 #-----------------------------------------------------------
 OUTPUT_PATH            = ../output/
 LOG_FILE               = OUTPUT_PATH/GmatLog.txt
