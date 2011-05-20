@@ -4141,13 +4141,14 @@ void GmatMainFrame::RefreshActiveScript(const wxString &filename)
          {
             if (child->GetAssociatedWindow() != NULL)
             {
-               //if (name == filename)
                if (GmatFileUtil::IsSameFileName(name.c_str(), filename.c_str()))
                {
                   #ifdef DEBUG_REFRESH_SCRIPT
                   MessageInterface::ShowMessage("   Setting the script as ACTIVE\n");
                   #endif
-                  ((GmatSavePanel*)child->GetAssociatedWindow())->ReloadFile();
+                  
+                  // We don't wan't to reload the file, so commented out (LOJ: 2011.05.20)
+                  //((GmatSavePanel*)child->GetAssociatedWindow())->ReloadFile();
                   ((GmatSavePanel*)child->GetAssociatedWindow())->UpdateScriptActiveStatus(true);
                }
                else
