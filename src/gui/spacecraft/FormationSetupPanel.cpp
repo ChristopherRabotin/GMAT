@@ -40,9 +40,7 @@ BEGIN_EVENT_TABLE(FormationSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-#ifdef __SHOW_HELP_BUTTON__
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-#endif
 
    EVT_LISTBOX_DCLICK(AVL_LISTBOX, FormationSetupPanel::OnAddSpaceObject)
    EVT_LISTBOX_DCLICK(SEL_LISTBOX, FormationSetupPanel::OnRemoveSpaceObject)

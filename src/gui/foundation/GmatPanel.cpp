@@ -37,8 +37,6 @@
 #include "ShowScriptDialog.hpp"
 #include "ShowSummaryDialog.hpp"
 
-//#define __SHOW_HELP_BUTTON__
-//#define __SMART_APPLY_BUTTON__
 //#define DEBUG_GMATPANEL
 //#define DEBUG_GMATPANEL_SAVE
 
@@ -52,9 +50,7 @@ BEGIN_EVENT_TABLE(GmatPanel, wxPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_SUMMARY, GmatPanel::OnSummary)
-#ifdef __SHOW_HELP_BUTTON__
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-#endif
 END_EVENT_TABLE()
 
 //------------------------------
@@ -79,9 +75,7 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
    theOkButton = NULL;
    theApplyButton = NULL;
    theCancelButton = NULL;
-   #ifdef __SHOW_HELP_BUTTON__
    theHelpButton = NULL;
-   #endif
    theScriptButton = NULL;
    theSummaryButton = NULL;
 
@@ -147,15 +141,11 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
       theCancelButton = new wxButton
                   (this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
 
-      #ifdef __SHOW_HELP_BUTTON__
       theHelpButton = new wxButton
          (this, ID_BUTTON_HELP, GUI_ACCEL_KEY"Help", wxDefaultPosition, wxDefaultSize, 0);
-      #endif
 
       // set the Apply button as the default button, T. Grubb
-      #ifdef __SMART_APPLY_BUTTON__
       theApplyButton->SetDefault();
-      #endif
 
       // use different color for Show Script, and Command Summary for now
       theScriptButton->SetForegroundColour(*wxBLUE);
@@ -182,10 +172,8 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
       theButtonSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
       theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
 
-      #ifdef __SHOW_HELP_BUTTON__
       theButtonSizer->Add(0, 1, wxALIGN_RIGHT);
       theButtonSizer->Add(theHelpButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
-      #endif
 
       theBottomSizer->Add(theButtonSizer, 0, wxGROW | wxALL, borderSize);
    }
@@ -234,9 +222,7 @@ void GmatPanel::EnableUpdate(bool enable)
       mdichild->SetDirty(false);
    }
    // toggle the Apply button based on modifications (T Grubb)
-   #ifdef __SMART_APPLY_BUTTON__
    if (theApplyButton != NULL) theApplyButton->Enable(mDataChanged);
-   #endif
 }
 
 

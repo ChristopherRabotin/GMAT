@@ -94,9 +94,7 @@ protected:
    wxButton *theOkButton;
    wxButton *theApplyButton;
    wxButton *theCancelButton;
-   #ifdef __SHOW_HELP_BUTTON__
    wxButton *theHelpButton;
-   #endif
    wxButton *theScriptButton;
    wxButton *theSummaryButton;
    

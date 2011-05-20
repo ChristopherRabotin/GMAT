@@ -1,3 +1,4 @@
+//$Id$
 //------------------------------------------------------------------------------
 //                            GroundStationPanel
 //------------------------------------------------------------------------------
@@ -47,9 +48,7 @@ BEGIN_EVENT_TABLE(GroundStationPanel, wxPanel)
    EVT_COMBOBOX(ID_COMBOBOX, GroundStationPanel::OnComboBoxChange)
    EVT_COMBOBOX(ID_STATE_TYPE_COMBOBOX, GroundStationPanel::OnStateTypeComboBoxChange)
    EVT_COMBOBOX(ID_HORIZON_REFERENCE_COMBOBOX, GroundStationPanel::OnHorizonReferenceComboBoxChange)
-#ifdef __SHOW_HELP_BUTTON__
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-#endif
 END_EVENT_TABLE()
 
 //------------------------------

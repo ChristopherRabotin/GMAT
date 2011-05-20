@@ -2,9 +2,9 @@
 # Build environment file for Windows
 
 # Flags used to control the build
+CONSOLE_APP = 0
 USE_SPICE = 1
 USE_DEVIL = 0
-CONSOLE_APP = 0
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
@@ -12,8 +12,6 @@ WX_SHARED = 1
 SHARED_BASE = 1
 USE_STC_EDITOR = 1
 USE_WX_EMAIL = 1
-SHOW_HELP_BUTTON = 1
-SMART_APPLY_BUTTON = 1
 
 # GMAT application icon for Windows only
 # location of GmatIcon
@@ -78,20 +76,7 @@ EMAIL_CPP_FLAGS =
 EMAIL_LIBRARIES =
 endif
 
-ifeq ($(SHOW_HELP_BUTTON), 1)
-ifeq ($(SMART_APPLY_BUTTON), 1)
-GUI_CPP_FLAGS = -D__SHOW_HELP_BUTTON__ -D__SMART_APPLY_BUTTON__
-else
-GUI_CPP_FLAGS = -D__SHOW_HELP_BUTTON__
-endif
-else
-ifeq ($(SMART_APPLY_BUTTON), 1)
-GUI_CPP_FLAGS = -D__SMART_APPLY_BUTTON__
-else
-GUI_CPP_FLAGS =
-endif
-endif
-
+#GMAT_CPP_FLAGS = -DDEBUG_MEMORY $(SPICE_CPP_FLAGS) $(IL_CPP_FLAGS) $(STC_CPP_FLAGS) $(EMAIL_CPP_FLAGS) $(GUI_CPP_FLAGS) 
 GMAT_CPP_FLAGS = $(SPICE_CPP_FLAGS) $(IL_CPP_FLAGS) $(STC_CPP_FLAGS) $(EMAIL_CPP_FLAGS) $(GUI_CPP_FLAGS) 
 GMAT_LINK_FLAGS = $(SPICE_LIBRARIES) $(IL_LIBRARIES) $(STC_LIBRARIES) $(EMAIL_LIBRARIES) 
 
@@ -126,7 +111,7 @@ endif
 
 OPTIMIZATIONS =  -DwxUSE_UNIX=0 -D_X86_=1 -DWIN32 -DWINVER=0x0400 -D__WIN95__ \
                  -D__GNUWIN32__ -D__WIN32__ -mthreads -DSTRICT  -D__WXMSW__ \
-                 -D__WINDOWS__ -Wall -fno-pcc-struct-return -O3\
+                 -D__WINDOWS__ -Wall -fno-pcc-struct-return -O2\
                  -finline-functions -funroll-loops -fno-rtti -DNO_GCC_PRAGMA \
                  -malign-double -fexceptions -D__USE_WX280_GL__\
                  -fexpensive-optimizations -march=pentium4

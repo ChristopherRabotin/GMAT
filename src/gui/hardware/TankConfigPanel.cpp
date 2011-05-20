@@ -76,9 +76,7 @@ BEGIN_EVENT_TABLE(TankConfigPanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL, TankConfigPanel::OnTextChange)
    EVT_CHECKBOX(ID_CHECKBOX, TankConfigPanel::OnComboBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, TankConfigPanel::OnComboBoxChange)
-#ifdef __SHOW_HELP_BUTTON__
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-#endif
 END_EVENT_TABLE()
 
 //------------------------------

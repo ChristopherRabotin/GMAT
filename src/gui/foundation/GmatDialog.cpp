@@ -33,9 +33,7 @@
 BEGIN_EVENT_TABLE(GmatDialog, wxDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
-#ifdef __SHOW_HELP_BUTTON__
    EVT_BUTTON(ID_BUTTON_HELP, GmatDialog::OnHelp)
-#endif
    EVT_CLOSE(GmatDialog::OnClose)
 END_EVENT_TABLE()
 
@@ -99,21 +97,15 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    theCancelButton =
       new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
 
-   #ifdef __SHOW_HELP_BUTTON__
    theHelpButton = new wxButton
       (this, ID_BUTTON_HELP, GUI_ACCEL_KEY"Help", wxDefaultPosition, wxDefaultSize, 0);
-   #endif
 
    // adds the buttons to button sizer
-   #ifdef __SHOW_HELP_BUTTON__
    theButtonSizer->Add(0, 1, wxALIGN_LEFT | wxALL);
-   #endif
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-   #ifdef __SHOW_HELP_BUTTON__
    theButtonSizer->Add(0, 1, wxALIGN_RIGHT | wxALL);
    theButtonSizer->Add(theHelpButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
-   #endif
 
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
 }
