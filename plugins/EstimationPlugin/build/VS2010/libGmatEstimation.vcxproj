@@ -17,6 +17,14 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseWithSPICE|Win32">
+      <Configuration>ReleaseWithSPICE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseWithSPICE|x64">
+      <Configuration>ReleaseWithSPICE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FFE4C440-926F-498C-8B75-C29DF159782A}</ProjectGuid>
@@ -46,6 +54,11 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>Windows7.1SDK</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -66,7 +79,7 @@
     <OutDir>$(SolutionDir)lib\debug\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)lib64\debug\</OutDir>
+    <OutDir>..\..\..\application\bin64\debug\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetExt>.dll</TargetExt>
@@ -78,7 +91,7 @@
     <OutDir>$(SolutionDir)lib\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)lib64\</OutDir>
+    <OutDir>..\..\..\application\plugins\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetExt>.dll</TargetExt>
@@ -86,17 +99,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\..\application\plugins\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\ionosphere;..\..\src\base\measurement\troposphere;..\..\src\base\measurementfile;..\..\src\base\ plugin;..\..\src\base\trackingsystem;..\..\..\..\GmatDevelopment\src\base\include;..\..\..\..\GmatDevelopment\src\base\command;..\..\..\..\GmatDevelopment\src\base\burn;..\..\..\..\GmatDevelopment\src\base\configs;..\..\..\..\GmatDevelopment\src\base\parameter;..\..\..\..\GmatDevelopment\src\base\interpreter;..\..\..\..\GmatDevelopment\src\base\stopcond;..\..\..\..\GmatDevelopment\src\base\util;..\..\..\..\GmatDevelopment\src\base\factory;..\..\..\..\GmatDevelopment\src\base\forcemodel;..\..\..\..\GmatDevelopment\src\base\asset;..\..\..\..\GmatDevelopment\src\base\attitude;..\..\..\..\GmatDevelopment\src\base\executive;..\..\..\..\GmatDevelopment\src\base\foundation;..\..\..\..\GmatDevelopment\src\base\propagator;..\..\..\..\GmatDevelopment\src\base\hardware;..\..\..\..\GmatDevelopment\src\base\solarsys;..\..\..\..\GmatDevelopment\src\base\plugin;..\..\..\..\GmatDevelopment\src\base\math;..\..\..\..\GmatDevelopment\src\base\coordsystem;..\..\..\..\GmatDevelopment\src\base\spacecraft;..\..\..\..\GmatDevelopment\src\base\solver;..\..\..\..\GmatDevelopment\src\base\subscriber;..\..\..\..\Gmat3rdParty\f2c\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_WINDLL;_DYNAMICLINK;ESTIMATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\factory;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\solver;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\f2c\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;ESTIMATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\..\build\VS2010\lib;..\..\..\..\GmatDevelopment\application\bin\debug;..\..\..\..\Gmat3rdParty\f2c\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin\debug;..\..\..\..\..\Gmat3rdParty\f2c\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libGmatBase.lib;vcf2c.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -122,15 +139,15 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\ionosphere;..\..\src\base\measurement\troposphere;..\..\src\base\measurementfile;..\..\src\base\ plugin;..\..\src\base\trackingsystem;..\..\..\..\GmatDevelopment\src\base\include;..\..\..\..\GmatDevelopment\src\base\util;..\..\..\..\GmatDevelopment\src\base\foundation;..\..\..\..\GmatDevelopment\src\base\command;..\..\..\..\GmatDevelopment\src\base\burn;..\..\..\..\GmatDevelopment\src\base\configs;..\..\..\..\GmatDevelopment\src\base\parameter;..\..\..\..\GmatDevelopment\src\base\interpreter;..\..\..\..\GmatDevelopment\src\base\stopcond;..\..\..\..\GmatDevelopment\src\base\factory;..\..\..\..\GmatDevelopment\src\base\forcemodel;..\..\..\..\GmatDevelopment\src\base\asset;..\..\..\..\GmatDevelopment\src\base\attitude;..\..\..\..\GmatDevelopment\src\base\executive;..\..\..\..\GmatDevelopment\src\base\propagator;..\..\..\..\GmatDevelopment\src\base\hardware;..\..\..\..\GmatDevelopment\src\base\solarsys;..\..\..\..\GmatDevelopment\src\base\plugin;..\..\..\..\GmatDevelopment\src\base\math;..\..\..\..\GmatDevelopment\src\base\coordsystem;..\..\..\..\GmatDevelopment\src\base\spacecraft;..\..\..\..\GmatDevelopment\src\base\solver;..\..\..\..\GmatDevelopment\src\base\subscriber;..\..\..\..\Gmat3rdParty\f2c\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_WINDLL;_DYNAMICLINK;ESTIMATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\factory;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\solver;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\f2c\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;ESTIMATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\..\..\build\VS2010\lib;..\..\..\..\GmatDevelopment\application\bin;..\..\..\..\Gmat3rdParty\f2c\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\f2c\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libGmatBase.lib;vcf2c.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -157,6 +174,17 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\..\..\build\VS2010\lib64;..\..\..\..\GmatDevelopment\application\bin64;..\..\..\..\Gmat3rdParty\f2c64\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libGmatBase.lib;vcf2c.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\factory;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\solver;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;ESTIMATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -335,6 +363,9 @@
     <ClCompile Include="..\..\src\base\trackingsystem\TDRSSTrackingSystem.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\TrackingSystem.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\USNTrackingSystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

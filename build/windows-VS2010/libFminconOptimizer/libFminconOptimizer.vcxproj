@@ -120,52 +120,52 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\application\plugins\</OutDir>
-    <IncludePath>C:\Program Files (x86)\MATLAB32\R2010b\extern\include;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2010b\extern\lib\win32\microsoft;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files (x86)\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2011a\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\application\bin64\</OutDir>
-    <IncludePath>C:\Program Files (x86)\MATLAB32\R2010b\extern\include;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2010b\extern\lib\win32\microsoft;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\MATLAB\R2011a\extern\lib\win64\microsoft;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\application\plugins\</OutDir>
-    <IncludePath>C:\Program Files (x86)\MATLAB32\R2010b\extern\include;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2010b\extern\lib\win32\microsoft;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files (x86)\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2011a\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|x64'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\application\bin64\</OutDir>
-    <IncludePath>C:\Program Files\MATLAB\R2009b-64bit\extern\include;C:\Program Files\MATLAB\R2010b\extern\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\MATLAB\R2011a\extern\lib\win64\microsoft;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\application\plugins\</OutDir>
-    <IncludePath>C:\Program Files (x86)\MATLAB32\R2010b\extern\include;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2010b\extern\lib\win32\microsoft;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files (x86)\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2011a\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|x64'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\application\bin64\</OutDir>
-    <IncludePath>C:\Program Files (x86)\MATLAB32\R2010b\extern\include;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2010b\extern\lib\win32\microsoft;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\MATLAB\R2011a\extern\lib\win64\microsoft;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Program Files (x86)\MATLAB32\R2010b\extern\include;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files (x86)\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Program Files\MATLAB\R2009b-64bit\extern\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2010b\extern\lib\win32\microsoft;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2011a\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\application\bin\debug\</OutDir>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Program Files\MATLAB\R2011a\extern\lib\win64\microsoft;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\application\bin64\debug64\</OutDir>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
