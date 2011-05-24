@@ -53,7 +53,8 @@ namespace GmatTree
       ICON_PLUTO,
       ICON_REPORT_FILE,
       ICON_NETWORK,
-      ICON_BURN,
+      ICON_IMPULSIVE_BURN,
+      ICON_FINITE_BURN,
 
       ICON_MOON,
       ICON_MOON_GENERIC,

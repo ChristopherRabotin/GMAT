@@ -40,7 +40,6 @@
 #include "bitmaps/pluto.xpm"
 #include "bitmaps/report.xpm"
 #include "bitmaps/network.xpm"
-#include "bitmaps/burn.xpm"
 #include "bitmaps/moon.xpm"
 #include "bitmaps/moon_generic.xpm"
 #include "bitmaps/planet_generic.xpm"
@@ -58,6 +57,8 @@
 #include "bitmaps/tank.xpm"
 #include "bitmaps/thruster.xpm"
 #include "bitmaps/Script.xpm"
+#include "bitmaps/rt_ImpulsiveBurn.xpm"
+#include "bitmaps/rt_FiniteBurn.xpm"
 #include "bitmaps/rt_SolarSystem.xpm"
 #include "bitmaps/rt_Barycenter.xpm"
 #include "bitmaps/rt_LibrationPoint.xpm"
@@ -1292,7 +1293,7 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool restartCounter)
          MessageInterface::ShowMessage
             ("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
          #endif
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_BURN, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_IMPULSIVE_BURN, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::IMPULSIVE_BURN));
       }
@@ -1302,7 +1303,7 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool restartCounter)
          MessageInterface::ShowMessage
             ("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
          #endif
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_BURN, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_FINITE_BURN, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::FINITE_BURN));
       }
@@ -2273,11 +2274,12 @@ void ResourceTree::AddIcons()
    theGuiManager->LoadIcon("saturn", bitmapType, &bitmaps[++index], saturn_xpm);
    theGuiManager->LoadIcon("uranus", bitmapType, &bitmaps[++index], uranus_xpm);
    
-   theGuiManager->LoadIcon("neptune_xpm", bitmapType, &bitmaps[++index], neptune_xpm);
+   theGuiManager->LoadIcon("neptune", bitmapType, &bitmaps[++index], neptune_xpm);
    theGuiManager->LoadIcon("pluto", bitmapType, &bitmaps[++index], pluto_xpm);
    theGuiManager->LoadIcon("report", bitmapType, &bitmaps[++index], report_xpm);
-   theGuiManager->LoadIcon("network_xpm", bitmapType, &bitmaps[++index], network_xpm);
-   theGuiManager->LoadIcon("burn", bitmapType, &bitmaps[++index], burn_xpm);
+   theGuiManager->LoadIcon("network", bitmapType, &bitmaps[++index], network_xpm);
+   theGuiManager->LoadIcon("rt_ImpulsiveBurn", bitmapType, &bitmaps[++index], rt_ImpulsiveBurn_xpm);
+   theGuiManager->LoadIcon("rt_FiniteBurn", bitmapType, &bitmaps[++index], rt_FiniteBurn_xpm);
    
    theGuiManager->LoadIcon("moon", bitmapType, &bitmaps[++index], moon_xpm);
    theGuiManager->LoadIcon("moon_generic", bitmapType, &bitmaps[++index], moon_generic_xpm);
@@ -2632,7 +2634,7 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
    if (obj != NULL)
    {
       wxString name = newName.c_str();
-      AppendItem(item, name, GmatTree::ICON_BURN, -1,
+      AppendItem(item, name, GmatTree::ICON_IMPULSIVE_BURN, -1,
                  new GmatTreeItemData(name, GmatTree::IMPULSIVE_BURN));
       Expand(item);
 
@@ -2659,7 +2661,7 @@ void ResourceTree::OnAddFiniteBurn(wxCommandEvent &event)
    if (obj != NULL)
    {
       wxString name = newName.c_str();
-      AppendItem(item, name, GmatTree::ICON_BURN, -1,
+      AppendItem(item, name, GmatTree::ICON_FINITE_BURN, -1,
                  new GmatTreeItemData(name, GmatTree::FINITE_BURN));
       Expand(item);
 
@@ -4671,8 +4673,9 @@ GmatTree::ResourceIconType ResourceTree::GetTreeItemIcon(GmatTree::ItemType item
    case GmatTree::SPACECRAFT:
       return GmatTree::ICON_SPACECRAFT;
    case GmatTree::IMPULSIVE_BURN:
+      return GmatTree::ICON_IMPULSIVE_BURN;
    case GmatTree::FINITE_BURN:
-      return GmatTree::ICON_BURN;
+      return GmatTree::ICON_FINITE_BURN;
    case GmatTree::PROPAGATOR:
 //   case GmatTree::SPK_PROPAGATOR:
       return GmatTree::ICON_PROPAGATOR;
