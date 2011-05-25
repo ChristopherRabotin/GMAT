@@ -165,7 +165,7 @@ GmatFM::GravityFileType GravityFile::GetFileType(const std::string &filename)
  * @param  mu  Gravity constant from the file
  * @param  radius  Equatorial radius from the file
  *
- * @exception GravityFileException thrown if unreconized file type found
+ * @exception GravityFileException thrown if unrecognized file type found
  */
 //------------------------------------------------------------------------------
 bool GravityFile::GetFileInfo(const std::string &filename, Integer& degree,
@@ -267,7 +267,7 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
                if (tmpA  != 0.0)
                   radius = tmpA / GmatMathConstants::KM_TO_M;  // -> km
 
-               // if not reading coeffiencts, stop after reading the mu and a
+               // if not reading coefficients, stop after reading the mu and a
                if (!readCoeff)
                   break;
             }
