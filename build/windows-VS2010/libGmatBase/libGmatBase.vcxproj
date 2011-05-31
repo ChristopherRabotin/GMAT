@@ -642,6 +642,7 @@
     <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\OpenGlPlot.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\OrbitPlot.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\OrbitView.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\OwnedPlot.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\ReportFile.cpp" />
@@ -1081,6 +1082,7 @@
     <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\OpenGlPlot.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\OrbitView.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\OwnedPlot.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\ReportFile.hpp" />

@@ -1233,6 +1233,9 @@
     <ClCompile Include="..\..\..\src\base\solarsys\msise90_sub.c">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\OrbitPlot.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2428,6 +2431,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.hpp">
       <Filter>Source Files\SpiceUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp">
+      <Filter>Source Files\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
