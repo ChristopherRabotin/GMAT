@@ -1373,10 +1373,20 @@ Integer Subscriber::FindIndexOfElement(StringArray &labelArray,
 }
 
 
+
 //------------------------------------------------------------------------------
-// bool Distribute(const double *dat, int len)
+// bool Distribute(Integer len)
 //------------------------------------------------------------------------------
-bool Subscriber::Distribute(const double *dat, int len)
+bool Subscriber::Distribute(Integer len)
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Distribute(const Real *dat, Integer len)
+//------------------------------------------------------------------------------
+bool Subscriber::Distribute(const Real *dat, Integer len)
 {
    return true;
 }

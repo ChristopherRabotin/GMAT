@@ -29,8 +29,6 @@
 #include "CoordinateConverter.hpp" // for Convert()
 #include <algorithm>               // for find(), distance()
 
-#define __REMOVE_OBJ_BY_SETTING_FLAG__
-
 //#define DBGLVL_INIT 1
 //#define DBGLVL_DATA 1
 //#define DBGLVL_DATA_LABELS 1
@@ -49,12 +47,8 @@
 // static data
 //---------------------------------
 const std::string
-OrbitView::PARAMETER_TEXT[OrbitViewParamCount - SubscriberParamCount] =
+OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
 {
-   "Add",
-   "DrawObject",
-   "OrbitColor",
-   "TargetColor",
    "CoordinateSystem",
    "ViewPointRef",
    "ViewPointReference",
@@ -81,26 +75,18 @@ OrbitView::PARAMETER_TEXT[OrbitViewParamCount - SubscriberParamCount] =
    "UseInitialView",
    "PerspectiveMode",
    "UseFixedFov",
-   "DataCollectFrequency",
-   "UpdatePlotFrequency",
-   "NumPointsToRedraw",
    "StarCount",
    "EnableStars",
    "EnableConstellations",
    "MinFOV",
    "MaxFOV",
    "InitialFOV",
-   "ShowPlot",
 }; 
 
 
 const Gmat::ParameterType
-OrbitView::PARAMETER_TYPE[OrbitViewParamCount - SubscriberParamCount] =
+OrbitView::PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount] =
 {
-   Gmat::OBJECTARRAY_TYPE,       //"Add"
-   Gmat::BOOLEANARRAY_TYPE,      //"DrawObject"
-   Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
-   Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
    Gmat::OBJECT_TYPE,            //"CoordinateSystem"
    Gmat::OBJECT_TYPE,            //"ViewPointRef",
    Gmat::OBJECT_TYPE,            //"ViewPointReference",
@@ -129,29 +115,12 @@ OrbitView::PARAMETER_TYPE[OrbitViewParamCount - SubscriberParamCount] =
    Gmat::ON_OFF_TYPE,            //"PerspectiveMode"
    Gmat::ON_OFF_TYPE,            //"UseFixedFov"
    
-   Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
-   Gmat::INTEGER_TYPE,           //"UpdatePlotFrequency"
-   Gmat::INTEGER_TYPE,           //"NumPointsToRedraw"
-      
    Gmat::INTEGER_TYPE,           //"StarCount"
    Gmat::ON_OFF_TYPE,            //"EnableStars"
    Gmat::ON_OFF_TYPE,            //"EnableConstellations"
    Gmat::INTEGER_TYPE,           //"MinFOV"
    Gmat::INTEGER_TYPE,           //"MaxFOV"
    Gmat::INTEGER_TYPE,           //"InitialFOV"
-   
-   Gmat::BOOLEAN_TYPE,           //"ShowPlot"
-};
-
-
-const UnsignedInt
-OrbitView::DEFAULT_ORBIT_COLOR[MAX_SP_COLOR] =
-{
-   GmatColor::RED32,       GmatColor::LIME32,    GmatColor::YELLOW32,
-   GmatColor::AQUA32,      GmatColor::PINK32,    GmatColor::L_BLUE32,
-   GmatColor::L_GRAY32,    GmatColor::BLUE32,    GmatColor::FUCHSIA32,
-   GmatColor::BEIGE32,     GmatColor::RED32,     GmatColor::LIME32,
-   GmatColor::YELLOW32,    GmatColor::AQUA32,    GmatColor::PINK32
 };
 
 
@@ -163,7 +132,7 @@ OrbitView::DEFAULT_ORBIT_COLOR[MAX_SP_COLOR] =
  */
 //------------------------------------------------------------------------------
 OrbitView::OrbitView(const std::string &name)
-   : Subscriber("OrbitView", name)
+   : OrbitPlot("OrbitView", name)
 {
    // GmatBase data
    parameterCount = OrbitViewParamCount;
@@ -191,7 +160,6 @@ OrbitView::OrbitView(const std::string &name)
    mMaxFOV = 90;
    mInitialFOV = 45;
    
-   mOldName = instanceName;
    mViewCoordSysName = "EarthMJ2000Eq";
    mViewUpCoordSysName = "EarthMJ2000Eq";
    mViewUpAxisName = "Z";
@@ -216,150 +184,64 @@ OrbitView::OrbitView(const std::string &name)
    mViewPointRefObj = NULL;
    mViewPointObj = NULL;
    mViewDirectionObj = NULL;
-   
-   mDataCollectFrequency = 1;
-   mUpdatePlotFrequency = 50;
-   mNumPointsToRedraw = 0;
-   mNumData = 0;
-   mNumCollected = 0;
-   mScNameArray.clear();
-   mObjectNameArray.clear();
-   mAllSpNameArray.clear();
-   mAllRefObjectNames.clear();
-   mObjectArray.clear();
-   mDrawOrbitArray.clear();
-   mDrawObjectArray.clear();
-   mAllSpArray.clear();
-   
-   mScXArray.clear();
-   mScYArray.clear();
-   mScZArray.clear();
-   mScVxArray.clear();
-   mScVyArray.clear();
-   mScVzArray.clear();
-   mScOrbitColorArray.clear();
-   mScTargetColorArray.clear();
-   mOrbitColorArray.clear();
-   mTargetColorArray.clear();
-   
-   mOrbitColorMap.clear();
-   mTargetColorMap.clear();
-   mDrawOrbitMap.clear();
-   mShowObjectMap.clear();
-   
-   mAllSpCount = 0;
-   mScCount = 0;
-   mObjectCount = 0;
-   mNonStdBodyCount = 0;
-   
-   // default planet color
-   mOrbitColorMap["Earth"] = GmatColor::GREEN32;
-   mOrbitColorMap["Luna"] = GmatColor::SILVER32;
-   mOrbitColorMap["Sun"] = GmatColor::ORANGE32;
-   mOrbitColorMap["Mercury"] = GmatColor::GRAY32;
-   mOrbitColorMap["Venus"] = GmatColor::BEIGE32;
-   mOrbitColorMap["Mars"] = GmatColor::L_GRAY32;
-   mOrbitColorMap["Jupiter"] = GmatColor::L_BROWN32;
-   mOrbitColorMap["Saturn"] = GmatColor::D_BROWN32;
-   mOrbitColorMap["Uranus"] = GmatColor::BLUE32;
-   mOrbitColorMap["Neptune"] = GmatColor::NAVY32;
-   mOrbitColorMap["Pluto"] = GmatColor::PURPLE32;
-   
 }
 
 
 //------------------------------------------------------------------------------
-// OrbitView(const OrbitView &ogl)
+// OrbitView(const OrbitView &ov)
 //------------------------------------------------------------------------------
 /**
  * The copy consturctor
  */
 //------------------------------------------------------------------------------
-OrbitView::OrbitView(const OrbitView &ogl)
-   : Subscriber(ogl)
+OrbitView::OrbitView(const OrbitView &ov)
+   : OrbitPlot(ov)
 {
-   mEclipticPlane = ogl.mEclipticPlane;
-   mXYPlane = ogl.mXYPlane;
-   mWireFrame = ogl.mWireFrame;
-   mAxes = ogl.mAxes;
-   mGrid = ogl.mGrid;
-   mSunLine = ogl.mSunLine;
-   mOverlapPlot = ogl.mOverlapPlot;
-   mUseInitialView = ogl.mUseInitialView;
-   mPerspectiveMode = ogl.mPerspectiveMode;
-   mUseFixedFov = ogl.mUseFixedFov;
+   mEclipticPlane = ov.mEclipticPlane;
+   mXYPlane = ov.mXYPlane;
+   mWireFrame = ov.mWireFrame;
+   mAxes = ov.mAxes;
+   mGrid = ov.mGrid;
+   mSunLine = ov.mSunLine;
+   mOverlapPlot = ov.mOverlapPlot;
+   mUseInitialView = ov.mUseInitialView;
+   mPerspectiveMode = ov.mPerspectiveMode;
+   mUseFixedFov = ov.mUseFixedFov;
 
    // stars
-   mEnableStars = ogl.mEnableStars;
-   mEnableConstellations = ogl.mEnableConstellations;
-   mStarCount = ogl.mStarCount;
+   mEnableStars = ov.mEnableStars;
+   mEnableConstellations = ov.mEnableConstellations;
+   mStarCount = ov.mStarCount;
    
    // FOV
-   mMinFOV = ogl.mMinFOV;
-   mMaxFOV = ogl.mMaxFOV;
-   mInitialFOV = ogl.mInitialFOV;
+   mMinFOV = ov.mMinFOV;
+   mMaxFOV = ov.mMaxFOV;
+   mInitialFOV = ov.mInitialFOV;
    
-   mOldName = ogl.mOldName;;
-   mViewCoordSysName = ogl.mViewCoordSysName;
+   mViewCoordSysName = ov.mViewCoordSysName;
    
    // viewpoint
-   mViewPointRefName = ogl.mViewPointRefName;
-   mViewPointRefType = ogl.mViewPointRefType;
-   mViewPointVecName = ogl.mViewPointVecName;
-   mViewPointVecType = ogl.mViewPointVecType;
-   mViewDirectionName = ogl.mViewDirectionName;
-   mViewDirectionType = ogl.mViewDirectionType;
-   mViewScaleFactor = ogl.mViewScaleFactor;
-   mFixedFovAngle = ogl.mFixedFovAngle;
-   mViewPointRefVector = ogl.mViewPointRefVector;
-   mViewPointVecVector = ogl.mViewPointVecVector;
-   mViewDirectionVector = ogl.mViewDirectionVector;
-   mViewUpCoordSysName = ogl.mViewUpCoordSysName;
-   mViewUpAxisName = ogl.mViewUpAxisName;
+   mViewPointRefName = ov.mViewPointRefName;
+   mViewPointRefType = ov.mViewPointRefType;
+   mViewPointVecName = ov.mViewPointVecName;
+   mViewPointVecType = ov.mViewPointVecType;
+   mViewDirectionName = ov.mViewDirectionName;
+   mViewDirectionType = ov.mViewDirectionType;
+   mViewScaleFactor = ov.mViewScaleFactor;
+   mFixedFovAngle = ov.mFixedFovAngle;
+   mViewPointRefVector = ov.mViewPointRefVector;
+   mViewPointVecVector = ov.mViewPointVecVector;
+   mViewDirectionVector = ov.mViewDirectionVector;
+   mViewUpCoordSysName = ov.mViewUpCoordSysName;
+   mViewUpAxisName = ov.mViewUpAxisName;
    
-   mViewCoordSystem = ogl.mViewCoordSystem;
-   mViewUpCoordSystem = ogl.mViewCoordSystem;
-   mViewCoordSysOrigin = ogl.mViewCoordSysOrigin;
-   mViewUpCoordSysOrigin = ogl.mViewUpCoordSysOrigin;
-   mViewPointRefObj = ogl.mViewPointRefObj;
-   mViewPointObj = ogl.mViewPointObj;
-   mViewDirectionObj = ogl.mViewDirectionObj;
-   
-   mDataCollectFrequency = ogl.mDataCollectFrequency;
-   mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
-   mNumPointsToRedraw = ogl.mNumPointsToRedraw;
-   
-   mAllSpCount = ogl.mAllSpCount;
-   mScCount = ogl.mScCount;
-   mObjectCount = ogl.mObjectCount;
-   mNonStdBodyCount = ogl.mNonStdBodyCount;
-   
-   mObjectArray = ogl.mObjectArray;
-   mDrawOrbitArray = ogl.mDrawOrbitArray;
-   mDrawObjectArray = ogl.mDrawObjectArray;
-   mAllSpArray = ogl.mAllSpArray;
-   mScNameArray = ogl.mScNameArray;
-   mObjectNameArray = ogl.mObjectNameArray;
-   mAllSpNameArray = ogl.mAllSpNameArray;
-   mAllRefObjectNames = ogl.mAllRefObjectNames;
-   mScXArray = ogl.mScXArray;
-   mScYArray = ogl.mScYArray;
-   mScZArray = ogl.mScZArray;
-   mScVxArray = ogl.mScVxArray;
-   mScVyArray = ogl.mScVyArray;
-   mScVzArray = ogl.mScVzArray;
-   mScOrbitColorArray = ogl.mScOrbitColorArray;
-   mScTargetColorArray = ogl.mScTargetColorArray;
-   mOrbitColorArray = ogl.mOrbitColorArray;
-   mTargetColorArray = ogl.mTargetColorArray;
-   
-   mOrbitColorMap = ogl.mOrbitColorMap;
-   mTargetColorMap = ogl.mTargetColorMap;
-   mDrawOrbitMap = ogl.mDrawOrbitMap;
-   mShowObjectMap = ogl.mShowObjectMap;
-   
-   mNumData = ogl.mNumData;
-   mNumCollected = ogl.mNumCollected;
+   mViewCoordSystem = ov.mViewCoordSystem;
+   mViewUpCoordSystem = ov.mViewCoordSystem;
+   mViewCoordSysOrigin = ov.mViewCoordSysOrigin;
+   mViewUpCoordSysOrigin = ov.mViewUpCoordSysOrigin;
+   mViewPointRefObj = ov.mViewPointRefObj;
+   mViewPointObj = ov.mViewPointObj;
+   mViewDirectionObj = ov.mViewDirectionObj;
 }
 
 
@@ -370,95 +252,60 @@ OrbitView::OrbitView(const OrbitView &ogl)
  * The assignment operator
  */
 //------------------------------------------------------------------------------
-OrbitView& OrbitView::operator=(const OrbitView& ogl)
+OrbitView& OrbitView::operator=(const OrbitView& ov)
 {
-   if (this == &ogl)
+   if (this == &ov)
       return *this;
    
-   Subscriber::operator=(ogl);
+   OrbitPlot::operator=(ov);
    
-   mEclipticPlane = ogl.mEclipticPlane;
-   mXYPlane = ogl.mXYPlane;
-   mWireFrame = ogl.mWireFrame;
-   mAxes = ogl.mAxes;
-   mGrid = ogl.mGrid;
-   mSunLine = ogl.mSunLine;
-   mOverlapPlot = ogl.mOverlapPlot;
-   mUseInitialView = ogl.mUseInitialView;
-   mPerspectiveMode = ogl.mPerspectiveMode;
-   mUseFixedFov = ogl.mUseFixedFov;
-
+   mEclipticPlane = ov.mEclipticPlane;
+   mXYPlane = ov.mXYPlane;
+   mWireFrame = ov.mWireFrame;
+   mAxes = ov.mAxes;
+   mGrid = ov.mGrid;
+   mSunLine = ov.mSunLine;
+   mOverlapPlot = ov.mOverlapPlot;
+   mUseInitialView = ov.mUseInitialView;
+   mPerspectiveMode = ov.mPerspectiveMode;
+   mUseFixedFov = ov.mUseFixedFov;
+   
    // stars
-   mEnableStars = ogl.mEnableStars;
-   mEnableConstellations = ogl.mEnableConstellations;
-   mStarCount = ogl.mStarCount;
+   mEnableStars = ov.mEnableStars;
+   mEnableConstellations = ov.mEnableConstellations;
+   mStarCount = ov.mStarCount;
    
    // FOV
-   mMinFOV = ogl.mMinFOV;
-   mMaxFOV = ogl.mMaxFOV;
-   mInitialFOV = ogl.mInitialFOV;
-   
-   mOldName = ogl.mOldName;;
-   mViewCoordSysName = ogl.mViewCoordSysName;
+   mMinFOV = ov.mMinFOV;
+   mMaxFOV = ov.mMaxFOV;
+   mInitialFOV = ov.mInitialFOV;
+
+   // View coordinate system name
+   mViewCoordSysName = ov.mViewCoordSysName;
    
    // viewpoint
-   mViewPointRefName = ogl.mViewPointRefName;
-   mViewPointRefType = ogl.mViewPointRefType;
-   mViewPointVecName = ogl.mViewPointVecName;
-   mViewPointVecType = ogl.mViewPointVecType;
-   mViewDirectionName = ogl.mViewDirectionName;
-   mViewDirectionType = ogl.mViewDirectionType;
-   mViewScaleFactor = ogl.mViewScaleFactor;
-   mFixedFovAngle = ogl.mFixedFovAngle;
-   mViewPointRefVector = ogl.mViewPointRefVector;
-   mViewPointVecVector = ogl.mViewPointVecVector;
-   mViewDirectionVector = ogl.mViewDirectionVector;
-   mViewUpCoordSysName = ogl.mViewUpCoordSysName;
-   mViewUpAxisName = ogl.mViewUpAxisName;
+   mViewPointRefName = ov.mViewPointRefName;
+   mViewPointRefType = ov.mViewPointRefType;
+   mViewPointVecName = ov.mViewPointVecName;
+   mViewPointVecType = ov.mViewPointVecType;
+   mViewDirectionName = ov.mViewDirectionName;
+   mViewDirectionType = ov.mViewDirectionType;
+   mViewScaleFactor = ov.mViewScaleFactor;
+   mFixedFovAngle = ov.mFixedFovAngle;
+   mViewPointRefVector = ov.mViewPointRefVector;
+   mViewPointVecVector = ov.mViewPointVecVector;
+   mViewDirectionVector = ov.mViewDirectionVector;
+   mViewUpCoordSysName = ov.mViewUpCoordSysName;
+   mViewUpAxisName = ov.mViewUpAxisName;
    
-   mViewCoordSystem = ogl.mViewCoordSystem;
-   mViewUpCoordSystem = ogl.mViewCoordSystem;
-   mViewCoordSysOrigin = ogl.mViewCoordSysOrigin;
-   mViewUpCoordSysOrigin = ogl.mViewUpCoordSysOrigin;
-   mViewPointRefObj = ogl.mViewPointRefObj;
-   mViewPointObj = ogl.mViewPointObj;
-   mViewDirectionObj = ogl.mViewDirectionObj;
-   
-   mDataCollectFrequency = ogl.mDataCollectFrequency;
-   mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
-   mNumPointsToRedraw = ogl.mNumPointsToRedraw;
-   
-   mAllSpCount = ogl.mAllSpCount;
-   mScCount = ogl.mScCount;
-   mObjectCount = ogl.mObjectCount;
-   mNonStdBodyCount = ogl.mNonStdBodyCount;
-   
-   mObjectArray = ogl.mObjectArray;
-   mDrawOrbitArray = ogl.mDrawOrbitArray;
-   mDrawObjectArray = ogl.mDrawObjectArray;
-   mAllSpArray = ogl.mAllSpArray;
-   mScNameArray = ogl.mScNameArray;
-   mObjectNameArray = ogl.mObjectNameArray;
-   mAllSpNameArray = ogl.mAllSpNameArray;
-   mAllRefObjectNames = ogl.mAllRefObjectNames;
-   mScXArray = ogl.mScXArray;
-   mScYArray = ogl.mScYArray;
-   mScZArray = ogl.mScZArray;
-   mScVxArray = ogl.mScVxArray;
-   mScVyArray = ogl.mScVyArray;
-   mScVzArray = ogl.mScVzArray;
-   mScOrbitColorArray = ogl.mScOrbitColorArray;
-   mScTargetColorArray = ogl.mScTargetColorArray;
-   mOrbitColorArray = ogl.mOrbitColorArray;
-   mTargetColorArray = ogl.mTargetColorArray;
-   
-   mOrbitColorMap = ogl.mOrbitColorMap;
-   mTargetColorMap = ogl.mTargetColorMap;
-   mDrawOrbitMap = ogl.mDrawOrbitMap;
-   mShowObjectMap = ogl.mShowObjectMap;
-   
-   mNumData = ogl.mNumData;
-   mNumCollected = ogl.mNumCollected;
+   // object pointers
+   mViewCoordSystem = ov.mViewCoordSystem;
+   mViewUpCoordSystem = ov.mViewCoordSystem;
+   mViewCoordSysOrigin = ov.mViewCoordSysOrigin;
+   mViewUpCoordSysOrigin = ov.mViewUpCoordSysOrigin;
+   mViewPointRefObj = ov.mViewPointRefObj;
+   mViewPointObj = ov.mViewPointObj;
+   mViewDirectionObj = ov.mViewDirectionObj;
    
    return *this;
 }
@@ -478,142 +325,6 @@ OrbitView& OrbitView::operator=(const OrbitView& ogl)
 OrbitView::~OrbitView()
 {
    PlotInterface::TakeGlAction(instanceName, "ClearObjects");
-}
-
-
-//------------------------------------------------------------------------------
-// const StringArray& GetSpacePointList()
-//------------------------------------------------------------------------------
-const StringArray& OrbitView::GetSpacePointList()
-{
-   return mAllSpNameArray;
-}
-
-
-//------------------------------------------------------------------------------
-// const StringArray& GetSpacecraftList()
-//------------------------------------------------------------------------------
-const StringArray& OrbitView::GetSpacecraftList()
-{
-   return mScNameArray;
-}
-
-
-//------------------------------------------------------------------------------
-// const StringArray& GetNonSpacecraftList()
-//------------------------------------------------------------------------------
-const StringArray& OrbitView::GetNonSpacecraftList()
-{
-   return mObjectNameArray;
-}
-
-
-//------------------------------------------------------------------------------
-// UnsignedInt GetColor(const std::string &item, const std::string &name)
-//------------------------------------------------------------------------------
-UnsignedInt OrbitView::GetColor(const std::string &item,
-                                const std::string &name)
-{
-   #if DBGLVL_PARAM
-   MessageInterface::ShowMessage
-      ("OrbitView::GetColor() item=%s, name=%s\n",
-       item.c_str(), name.c_str());
-   #endif
-   
-   if (item == "Orbit")
-   {
-      if (mOrbitColorMap.find(name) != mOrbitColorMap.end())
-         return mOrbitColorMap[name];
-   }
-   else if (item == "Target")
-   {
-      if (mTargetColorMap.find(name) != mTargetColorMap.end())
-         return mTargetColorMap[name];
-   }
-   
-   return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetColor(const std::string &item, const std::string &name,
-//               UnsignedInt value)
-//------------------------------------------------------------------------------
-bool OrbitView::SetColor(const std::string &item, const std::string &name,
-                         UnsignedInt value)
-{
-   #if DBGLVL_PARAM
-   MessageInterface::ShowMessage
-      ("OrbitView::SetColor() item=%s, name=%s, value=%u\n",
-       item.c_str(), name.c_str(), value);
-   #endif
-   
-   if (item == "Orbit")
-   {
-      if (mOrbitColorMap.find(name) != mOrbitColorMap.end())
-      {
-         mOrbitColorMap[name] = value;
-         
-         for (int i=0; i<mAllSpCount; i++)
-            if (mAllSpNameArray[i] == name)
-               mOrbitColorArray[i] = value;
-         
-         return true;
-      }
-   }
-   else if (item == "Target")
-   {
-      if (mTargetColorMap.find(name) != mTargetColorMap.end())
-      {
-         mTargetColorMap[name] = value;
-         
-         for (int i=0; i<mAllSpCount; i++)
-            if (mAllSpNameArray[i] == name)
-               mTargetColorArray[i] = value;
-         
-         return true;
-      }
-   }
-   
-   return false;
-}
-
-
-//------------------------------------------------------------------------------
-// bool GetShowObject(const std::string &name)
-//------------------------------------------------------------------------------
-bool OrbitView::GetShowObject(const std::string &name)
-{
-   #if DBGLVL_PARAM
-   MessageInterface::ShowMessage
-      ("OrbitView::GetShowObject() name=%s returning %d\n",
-       name.c_str(), mDrawOrbitMap[name]);
-   #endif
-   
-   return mShowObjectMap[name];
-}
-
-
-//------------------------------------------------------------------------------
-// void SetShowObject(const std::string &name, bool value)
-//------------------------------------------------------------------------------
-void OrbitView::SetShowObject(const std::string &name, bool value)
-{
-   #if DBGLVL_PARAM
-   MessageInterface::ShowMessage
-      ("OrbitView::SetShowObject() name=%s setting %d\n", name.c_str(), value);
-   #endif
-   
-   mShowObjectMap[name] = value;
-   if (value)
-      mDrawOrbitMap[name] = value;
-   
-   if (mShowObjectMap.find(name) != mShowObjectMap.end())
-   {
-      for (int i=0; i<mAllSpCount; i++)
-         if (mAllSpNameArray[i] == name)
-            mDrawObjectArray[i] = value;
-   }
 }
 
 
@@ -659,20 +370,6 @@ void OrbitView::SetVector(const std::string &which, const Rvector3 &value)
 // inherited methods from Subscriber
 //----------------------------------
 
-//------------------------------------------------------------------------------
-// void Activate(bool state)
-//------------------------------------------------------------------------------
-void OrbitView::Activate(bool state)
-{
-   #ifdef DEBUG_ACTIVATE
-   MessageInterface::ShowMessage
-      ("OrbitView::Activate() this=<%p>'%s' entered, state=%d, isInitialized=%d\n",
-       this, GetName().c_str(), state, isInitialized);
-   #endif
-   
-   Subscriber::Activate(state);
-}
-
 
 //---------------------------------
 // inherited methods from GmatBase
@@ -689,18 +386,9 @@ void OrbitView::Activate(bool state)
 //------------------------------------------------------------------------------
 bool OrbitView::Validate()
 {
-   // We may use this code for more validation in the future. (LOJ: 2011.01.14)
-   // Check size of objects and those option arrays
-   //Integer objCount = mAllSpNameArray.size();
-   //
-   //if (mDrawObjectArray.size() != objCount)
-   //{
-   //   lastErrorMessage = "There are missing or extra values in \"DrawObject\" field. Expecting " +
-   //      GmatStringUtil::ToString(objCount, 1) + " values";
-   //   return false;
-   //}
+   // Anything to validate here?
    
-   return true;
+   return OrbitPlot::Validate();
 }
 
 
@@ -712,7 +400,7 @@ bool OrbitView::Initialize()
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS)
       return true;
    
-   Subscriber::Initialize();
+   OrbitPlot::Initialize();
    
    // theInternalCoordSys is used only by 3DView so check. (2008.06.16)
    if (theInternalCoordSystem == NULL)
@@ -731,58 +419,7 @@ bool OrbitView::Initialize()
        isInitialized, isEndOfReceive, mAllSpCount);
    #endif
    
-   bool foundSc = false;
    bool retval = false;
-   Integer nullCounter = 0;
-   
-   if (mAllSpCount == 0)
-   {
-      active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The 3DView named \"%s\" will be turned off. "
-          "No SpacePoints were added to plot.\n", GetName().c_str());
-      return false;
-   }
-   
-   // check for spacecaft is included in the plot
-   for (int i=0; i<mAllSpCount; i++)
-   {
-      #if DBGLVL_INIT > 1
-      MessageInterface::ShowMessage
-         ("OrbitView::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
-          i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
-      #endif
-      
-      if (mAllSpArray[i])
-      {                  
-         if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
-         {
-            foundSc = true;
-            break;
-         }
-      }
-      else
-         nullCounter++;
-   }
-   
-   if (nullCounter == mAllSpCount)
-   {
-      active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The 3DView named \"%s\" will be turned off. "
-          "%d SpaceObjects have NULL pointers.\n", GetName().c_str(), nullCounter);
-      return false;
-   }
-   
-   if (!foundSc)
-   {
-      active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The 3DView named \"%s\" will be turned off. "
-          "No Spacecraft was added to plot.\n", GetName().c_str());
-      return false;
-   }
-   
    
    //--------------------------------------------------------
    // start initializing for 3DView
@@ -803,7 +440,7 @@ bool OrbitView::Initialize()
            (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
            (mSunLine == "On"), (mOverlapPlot == "On"), (mUseInitialView == "On"),
            (mPerspectiveMode == "On"), mNumPointsToRedraw, 
-                          (mEnableStars == "On"), (mEnableConstellations == "On"), mStarCount))
+           (mEnableStars == "On"), (mEnableConstellations == "On"), mStarCount))
       {
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
@@ -818,50 +455,12 @@ bool OrbitView::Initialize()
          //--------------------------------------------------------
          
          ClearDynamicArrays();
+         BuildDynamicArrays();
          
-         // add non-spacecraft plot objects to the list
-         for (int i=0; i<mAllSpCount; i++)
-         {
-            #if DBGLVL_INIT > 1
-            MessageInterface::ShowMessage
-               ("OrbitView::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
-                i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
-            #endif
-            
-            if (mAllSpArray[i])
-            {
-               //add all objects to object list
-               mObjectNameArray.push_back(mAllSpNameArray[i]);                  
-               mDrawOrbitArray.push_back(mDrawOrbitMap[mAllSpNameArray[i]]);
-               mDrawObjectArray.push_back(mShowObjectMap[mAllSpNameArray[i]]);
-               mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-               mTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
-               mObjectArray.push_back(mAllSpArray[i]);
-               
-               if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
-               {
-                  mScNameArray.push_back(mAllSpNameArray[i]);
-                  mScOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-                  mScTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
-                  mScXArray.push_back(0.0);
-                  mScYArray.push_back(0.0);
-                  mScZArray.push_back(0.0);
-                  mScVxArray.push_back(0.0);
-                  mScVyArray.push_back(0.0);
-                  mScVzArray.push_back(0.0);
-               }
-            }
-            else
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "The SpacePoint name: %s has NULL pointer.\n"
-                   "It will be removed from the 3DView.\n",
-                   mAllSpNameArray[i].c_str());
-            }
-         }
          
-         mScCount = mScNameArray.size();
-         mObjectCount = mObjectNameArray.size();
+         // Should these moved to OrbitPlot? (Yes, for now)
+         //mScCount = mScNameArray.size();
+         //mObjectCount = mObjectNameArray.size();
          
          // check ViewPoint info to see if any objects need to be
          // included in the non-spacecraft list
@@ -1063,33 +662,6 @@ void OrbitView::Copy(const GmatBase* orig)
 
 
 //------------------------------------------------------------------------------
-// bool SetName(const std::string &who, const std;:string &oldName = "")
-//------------------------------------------------------------------------------
-/**
- * Set the name for this instance.
- *
- * @see GmatBase
- *
- */
-//------------------------------------------------------------------------------
-bool OrbitView::SetName(const std::string &who, const std::string &oldName)
-{
-   #if DBGLVL_RENAME
-   MessageInterface::ShowMessage
-      ("OrbitView::SetName() newName=%s, oldName=%s\n", who.c_str(),
-       oldName.c_str());
-   #endif
-   
-   if (oldName == "")
-      mOldName = instanceName;
-   else
-      mOldName = oldName;
-   
-   return GmatBase::SetName(who);
-}
-
-
-//------------------------------------------------------------------------------
 // virtual bool TakeAction(const std::string &action,  
 //                         const std::string &actionData = "");
 //------------------------------------------------------------------------------
@@ -1146,46 +718,7 @@ bool OrbitView::RenameRefObject(const Gmat::ObjectType type,
    
    if (type == Gmat::SPACECRAFT)
    {
-      // for spacecraft name
-      for (int i=0; i<mAllSpCount; i++)
-         if (mAllSpNameArray[i] == oldName)
-            mAllSpNameArray[i] = newName;
-      
-      //----------------------------------------------------
-      // Since spacecraft name is used as key for spacecraft
-      // color map, I can't change the key name, so it is
-      // removed and inserted with new name
-      //----------------------------------------------------
-      std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
-      std::map<std::string, bool>::iterator drawOrbitPos, showObjectPos;
-      orbColorPos = mOrbitColorMap.find(oldName);
-      targColorPos = mTargetColorMap.find(oldName);
-      drawOrbitPos = mDrawOrbitMap.find(oldName);
-      showObjectPos = mShowObjectMap.find(oldName);
-   
-      if (orbColorPos != mOrbitColorMap.end() &&
-          targColorPos != mTargetColorMap.end())
-      {
-         // add new spacecraft name key and delete old
-         mOrbitColorMap[newName] = mOrbitColorMap[oldName];
-         mTargetColorMap[newName] = mTargetColorMap[oldName];
-         mDrawOrbitMap[newName] = mDrawOrbitMap[oldName];
-         mShowObjectMap[newName] = mShowObjectMap[oldName];
-         mOrbitColorMap.erase(orbColorPos);
-         mTargetColorMap.erase(targColorPos);
-         mDrawOrbitMap.erase(drawOrbitPos);
-         mShowObjectMap.erase(showObjectPos);
-         
-         #if DBGLVL_RENAME
-         MessageInterface::ShowMessage("---After rename\n");
-         for (orbColorPos = mOrbitColorMap.begin();
-              orbColorPos != mOrbitColorMap.end(); ++orbColorPos)
-         {
-            MessageInterface::ShowMessage
-               ("sc=%s, color=%d\n", orbColorPos->first.c_str(), orbColorPos->second);
-         }
-         #endif
-      }
+      return OrbitPlot::RenameRefObject(type, oldName, newName);
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
@@ -1205,10 +738,10 @@ bool OrbitView::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 std::string OrbitView::GetParameterText(const Integer id) const
 {
-   if (id >= SubscriberParamCount && id < OrbitViewParamCount)
-      return PARAMETER_TEXT[id - SubscriberParamCount];
+   if (id >= OrbitPlotParamCount && id < OrbitViewParamCount)
+      return PARAMETER_TEXT[id - OrbitPlotParamCount];
    else
-      return Subscriber::GetParameterText(id);
+      return OrbitPlot::GetParameterText(id);
     
 }
 
@@ -1218,13 +751,13 @@ std::string OrbitView::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer OrbitView::GetParameterID(const std::string &str) const
 {
-   for (int i=SubscriberParamCount; i<OrbitViewParamCount; i++)
+   for (int i=OrbitPlotParamCount; i<OrbitViewParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - SubscriberParamCount])
+      if (str == PARAMETER_TEXT[i - OrbitPlotParamCount])
          return i;
    }
    
-   return Subscriber::GetParameterID(str);
+   return OrbitPlot::GetParameterID(str);
 }
 
 
@@ -1233,10 +766,10 @@ Integer OrbitView::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType OrbitView::GetParameterType(const Integer id) const
 {
-   if (id >= SubscriberParamCount && id < OrbitViewParamCount)
-      return PARAMETER_TYPE[id - SubscriberParamCount];
+   if (id >= OrbitPlotParamCount && id < OrbitViewParamCount)
+      return PARAMETER_TYPE[id - OrbitPlotParamCount];
    else
-      return Subscriber::GetParameterType(id);
+      return OrbitPlot::GetParameterType(id);
 }
 
 
@@ -1245,10 +778,10 @@ Gmat::ParameterType OrbitView::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string OrbitView::GetParameterTypeString(const Integer id) const
 {
-   if (id >= SubscriberParamCount && id < OrbitViewParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - SubscriberParamCount)];
+   if (id >= OrbitPlotParamCount && id < OrbitViewParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - OrbitPlotParamCount)];
    else
-      return Subscriber::GetParameterTypeString(id);
+      return OrbitPlot::GetParameterTypeString(id);
 }
 
 
@@ -1278,7 +811,7 @@ bool OrbitView::IsParameterReadOnly(const Integer id) const
        id == VIEW_DIRECTION_TYPE)
       return true;
    
-   return Subscriber::IsParameterReadOnly(id);
+   return OrbitPlot::IsParameterReadOnly(id);
 }
 
 
@@ -1289,12 +822,6 @@ Integer OrbitView::GetIntegerParameter(const Integer id) const
 {
    switch (id)
    {
-   case DATA_COLLECT_FREQUENCY:
-      return mDataCollectFrequency;
-   case UPDATE_PLOT_FREQUENCY:
-      return mUpdatePlotFrequency;
-   case NUM_POINTS_TO_REDRAW:
-      return mNumPointsToRedraw;
    case STAR_COUNT:
       return mStarCount;
    case MIN_FOV:
@@ -1304,7 +831,7 @@ Integer OrbitView::GetIntegerParameter(const Integer id) const
    case INITIAL_FOV:
       return mInitialFOV;
    default:
-      return Subscriber::GetIntegerParameter(id);
+      return OrbitPlot::GetIntegerParameter(id);
    }
 }
 
@@ -1325,48 +852,6 @@ Integer OrbitView::SetIntegerParameter(const Integer id, const Integer value)
 {
    switch (id)
    {
-   case DATA_COLLECT_FREQUENCY:
-      if (value > 0)
-      {
-         mDataCollectFrequency = value;
-         return value;
-      }
-      else
-      {
-         SubscriberException se;
-         se.SetDetails(errorMessageFormat.c_str(),
-                       GmatStringUtil::ToString(value, 1).c_str(),
-                       "DataCollectFrequency", "Integer Number > 0");
-         throw se;
-      }
-   case UPDATE_PLOT_FREQUENCY:
-      if (value > 0)
-      {
-         mUpdatePlotFrequency = value;
-         return value;
-      }
-      else
-      {
-         SubscriberException se;
-         se.SetDetails(errorMessageFormat.c_str(),
-                       GmatStringUtil::ToString(value, 1).c_str(),
-                       "UpdatePlotFrequency", "Integer Number > 0");
-         throw se;
-      }
-   case NUM_POINTS_TO_REDRAW:
-      if (value >= 0)
-      {
-         mNumPointsToRedraw = value;
-         return value;
-      }
-      else
-      {
-         SubscriberException se;
-         se.SetDetails(errorMessageFormat.c_str(),
-                       GmatStringUtil::ToString(value, 1).c_str(),
-                       "NumPointsToRedraw", "Integer Number >= 0");
-         throw se;
-      }
    case STAR_COUNT:
       if (value >= 0)
       {
@@ -1390,7 +875,7 @@ Integer OrbitView::SetIntegerParameter(const Integer id, const Integer value)
       mInitialFOV = value;
       return value;
    default:
-      return Subscriber::SetIntegerParameter(id, value);
+      return OrbitPlot::SetIntegerParameter(id, value);
    }
 }
 
@@ -1418,7 +903,7 @@ Real OrbitView::GetRealParameter(const Integer id) const
    case FIXED_FOV_ANGLE:
       return mFixedFovAngle;
    default:
-      return Subscriber::GetRealParameter(id);
+      return OrbitPlot::GetRealParameter(id);
    }
 }
 
@@ -1451,7 +936,7 @@ Real OrbitView::SetRealParameter(const Integer id, const Real value)
       mFixedFovAngle = value;
       return value;
    default:
-      return Subscriber::SetRealParameter(id, value);
+      return OrbitPlot::SetRealParameter(id, value);
    }
 }
 
@@ -1491,7 +976,7 @@ Real OrbitView::GetRealParameter(const Integer id, const Integer index) const
       return mViewDirectionVector[index];
       
    default:
-      return Subscriber::GetRealParameter(id, index);
+      return OrbitPlot::GetRealParameter(id, index);
    }
 }
 
@@ -1520,7 +1005,7 @@ Real OrbitView::SetRealParameter(const Integer id, const Real value,
       return value;
       
    default:
-      return Subscriber::SetRealParameter(id, value, index);
+      return OrbitPlot::SetRealParameter(id, value, index);
    }
 }
 
@@ -1550,7 +1035,7 @@ const Rvector& OrbitView::GetRvectorParameter(const Integer id) const
       //WriteDeprecatedMessage(id);
       return mViewDirectionVector;
    default:
-      return Subscriber::GetRvectorParameter(id);
+      return OrbitPlot::GetRvectorParameter(id);
    }
 }
 
@@ -1599,7 +1084,7 @@ const Rvector& OrbitView::SetRvectorParameter(const Integer id,
       return value;
       
    default:
-      return Subscriber::SetRvectorParameter(id, value);
+      return OrbitPlot::SetRvectorParameter(id, value);
    }
 }
 
@@ -1669,7 +1154,7 @@ std::string OrbitView::GetStringParameter(const Integer id) const
    case VIEW_UP_AXIS:
       return mViewUpAxisName;
    default:
-      return Subscriber::GetStringParameter(id);
+      return OrbitPlot::GetStringParameter(id);
    }
 }
 
@@ -1701,13 +1186,6 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value)
    
    switch (id)
    {
-   case ADD:
-      return AddSpacePoint(value, mAllSpCount);
-   case ORBIT_COLOR:
-   case TARGET_COLOR:
-      if (value[0] == '[')
-         PutUnsignedIntValue(id, value);
-      return true;
    case COORD_SYSTEM:
       mViewCoordSysName = value;
       return true;
@@ -1783,7 +1261,7 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value)
       mViewUpAxisName = value;
       return true;
    default:
-      return Subscriber::SetStringParameter(id, value);
+      return OrbitPlot::SetStringParameter(id, value);
    }
 }
 
@@ -1819,8 +1297,6 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value,
    
    switch (id)
    {
-   case ADD:
-      return AddSpacePoint(value, index);
    case VIEWPOINT_REF:
       WriteDeprecatedMessage(id);
       mViewPointRefType = "Vector";
@@ -1839,7 +1315,7 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value,
       PutRvector3Value(mViewDirectionVector, id, value, index);
       return true;
    default:
-      return Subscriber::SetStringParameter(id, value, index);
+      return OrbitPlot::SetStringParameter(id, value, index);
    }
 }
 
@@ -1860,230 +1336,6 @@ bool OrbitView::SetStringParameter(const std::string &label,
    #endif
    
    return SetStringParameter(GetParameterID(label), value, index);
-}
-
-
-//------------------------------------------------------------------------------
-// virtual const UnsignedIntArray&
-// GetUnsignedIntArrayParameter(const Integer id) const
-//------------------------------------------------------------------------------
-const UnsignedIntArray&
-OrbitView::GetUnsignedIntArrayParameter(const Integer id) const
-{   
-   switch (id)
-   {
-   case ORBIT_COLOR:
-      return mOrbitColorArray;
-   case TARGET_COLOR:
-      return mTargetColorArray;
-   default:
-      return Subscriber::GetUnsignedIntArrayParameter(id);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-//                                             const UnsignedInt value,
-//                                             const Integer index)
-//------------------------------------------------------------------------------
-UnsignedInt OrbitView::SetUnsignedIntParameter(const Integer id,
-                                               const UnsignedInt value,
-                                               const Integer index)
-{
-   #if DBGLVL_PARAM
-   MessageInterface::ShowMessage
-      ("OrbitView::SetUnsignedIntParameter() this=%s\n   id=%d, value=%u<%08x>, index=%d, "
-       "mAllSpCount=%d, mOrbitColorArray.size()=%d, mTargetColorArray.size()=%d\n",
-       instanceName.c_str(), id, value, value, index, mAllSpCount, mOrbitColorArray.size(),
-       mTargetColorArray.size());
-   #endif
-   
-   switch (id)
-   {
-   case ORBIT_COLOR:
-      {
-         Integer size = mAllSpNameArray.size();
-         if (index >= size)
-            throw SubscriberException
-               ("index out of bounds for " + GetParameterText(id));
-         
-         for (int i=0; i<size; i++)
-         {
-            if (index == i)
-               mOrbitColorMap[mAllSpNameArray[i]] = value;
-            
-            if (index < size)
-               mOrbitColorArray[index] = value;
-            else
-               mOrbitColorArray.push_back(value);
-         }
-         return value;
-      }
-   case TARGET_COLOR:
-      {
-         Integer size = mAllSpNameArray.size();
-         if (index >= size)
-            throw SubscriberException
-               ("index out of bounds for " + GetParameterText(id));
-         
-         for (int i=0; i<size; i++)
-         {
-            if (index == i)
-               mTargetColorMap[mAllSpNameArray[i]] = value;
-            
-            if (index < size)
-               mTargetColorArray[index] = value;
-            else
-               mTargetColorArray.push_back(value);
-         }
-         return value;
-      }
-   default:
-      return Subscriber::SetUnsignedIntParameter(id, value, index);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// const StringArray& GetStringArrayParameter(const Integer id) const
-//------------------------------------------------------------------------------
-const StringArray& OrbitView::GetStringArrayParameter(const Integer id) const
-{
-   switch (id)
-   {
-   case ADD:
-      return mAllSpNameArray;
-   default:
-      return Subscriber::GetStringArrayParameter(id);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// bool GetBooleanParameter(const Integer id) const
-//------------------------------------------------------------------------------
-bool OrbitView::GetBooleanParameter(const Integer id) const
-{
-   if (id == SHOW_PLOT)
-      return active;
-   return Subscriber::GetBooleanParameter(id);
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetBooleanParameter(const Integer id, const bool value)
-//------------------------------------------------------------------------------
-bool OrbitView::SetBooleanParameter(const Integer id, const bool value)
-{
-   #if DBGLVL_PARAM
-   MessageInterface::ShowMessage
-      ("OrbitView::SetBooleanParameter()<%s> id=%d, value=%d\n",
-       instanceName.c_str(), id, value);
-   #endif
-   
-   if (id == SHOW_PLOT)
-   {
-      active = value;
-      return active;
-   }
-   
-   return Subscriber::SetBooleanParameter(id, value);
-}
-
-
-//---------------------------------------------------------------------------
-//const BooleanArray& GetBooleanArrayParameter(const Integer id) const
-//---------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-const BooleanArray& OrbitView::GetBooleanArrayParameter(const Integer id) const
-{
-   if (id == DRAW_OBJECT)
-   {
-      return mDrawObjectArray;
-   }
-   return Subscriber::GetBooleanArrayParameter(id);
-}
-
-
-//---------------------------------------------------------------------------
-//const BooleanArray& GetBooleanArrayParameter(const std::string &label) const
-//---------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-const BooleanArray& OrbitView::GetBooleanArrayParameter(const std::string &label) const
-{
-   Integer id = GetParameterID(label);
-   return GetBooleanArrayParameter(id);
-}
-
-
-//---------------------------------------------------------------------------
-//  bool SetBooleanArrayParameter(const Integer id, const BooleanArray &valueArray)
-//---------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-bool OrbitView::SetBooleanArrayParameter(const Integer id,
-                                         const BooleanArray &valueArray)
-{
-   #if DBGLVL_PARAM
-   MessageInterface::ShowMessage
-      ("OrbitView::SetBooleanArrayParameter() '%s' entered, id=%d, "
-       "valueArray.size()=%d\n", GetName().c_str(), id, valueArray.size());
-   #endif
-   
-   if (id == DRAW_OBJECT)
-   {
-      #if DBGLVL_PARAM
-      MessageInterface::ShowMessage
-         ("   mAllSpNameArray.size()=%d\n", mAllSpNameArray.size());
-      #endif
-      
-      // Check size of arrays in Initialize() or Interpreter::FinalPass()?
-      //if (mAllSpNameArray.size() != valueArray.size())
-      //   throw SubscriberException
-      //      ("The count doesn't match with added objects" + GetParameterText(id));
-      
-      mDrawObjectArray = valueArray;
-      Integer minCount = mAllSpNameArray.size() < mDrawObjectArray.size() ?
-         mAllSpNameArray.size() : mDrawObjectArray.size();
-      
-      // GUI uses mShowObjectMap so update it
-      for (Integer i = 0; i < minCount; i++)
-      {
-         bool tf = mDrawObjectArray[i];
-         #if DBGLVL_PARAM > 1
-         MessageInterface::ShowMessage
-            ("      mDrawObjectArray[%d]=%s\n", i, tf ? "true" : "false");
-         #endif
-         mShowObjectMap[mAllSpNameArray[i]] = tf;
-      }
-      return true;
-   }
-   return Subscriber::SetBooleanArrayParameter(id, valueArray);
-}
-
-
-//---------------------------------------------------------------------------
-//  bool SetBooleanArrayParameter(const std::string &label,
-//                                const BooleanArray &valueArray)
-//---------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-bool OrbitView::SetBooleanArrayParameter(const std::string &label,
-                                         const BooleanArray &valueArray)
-{
-   Integer id = GetParameterID(label);
-   return SetBooleanArrayParameter(id, valueArray);
 }
 
 
@@ -2121,7 +1373,7 @@ std::string OrbitView::GetOnOffParameter(const Integer id) const
    case ENABLE_CONSTELLATIONS:
       return mEnableConstellations;
    default:
-      return Subscriber::GetOnOffParameter(id);
+      return OrbitPlot::GetOnOffParameter(id);
    }
 }
 
@@ -2183,7 +1435,7 @@ bool OrbitView::SetOnOffParameter(const Integer id, const std::string &value)
       mEnableConstellations = value;
       return true;
    default:
-      return Subscriber::SetOnOffParameter(id, value);
+      return OrbitPlot::SetOnOffParameter(id, value);
    }
 }
 
@@ -2220,7 +1472,7 @@ std::string OrbitView::GetRefObjectName(const Gmat::ObjectType type) const
       ("OrbitView::GetRefObjectName() %s\n", msg.c_str());
    #endif
    
-   return Subscriber::GetRefObjectName(type);
+   return OrbitPlot::GetRefObjectName(type);
 }
 
 
@@ -2249,8 +1501,9 @@ bool OrbitView::HasRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const ObjectTypeArray& OrbitView::GetRefObjectTypeArray()
 {
+   //@note  Olny leaf class clears refObjectTypes
    refObjectTypes.clear();
-   refObjectTypes.push_back(Gmat::SPACE_POINT);
+   refObjectTypes = OrbitPlot::GetRefObjectTypeArray();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    return refObjectTypes;
 }
@@ -2262,6 +1515,7 @@ const ObjectTypeArray& OrbitView::GetRefObjectTypeArray()
 const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllRefObjectNames.clear();
+   mAllRefObjectNames = OrbitPlot::GetRefObjectNameArray(type);
    
    // if Draw Earth-Sun lines is on, add Earth and Sun
    if (mSunLine == "On")
@@ -2372,10 +1626,7 @@ GmatBase* OrbitView::GetRefObject(const Gmat::ObjectType type,
          return mViewDirectionObj;
    }
    
-   return Subscriber::GetRefObject(type, name);
-   
-//    throw SubscriberException("OrbitView::GetRefObject() the object name: " + name +
-//                            "not found\n");
+   return OrbitPlot::GetRefObject(type, name);
 }
 
 
@@ -2413,36 +1664,12 @@ bool OrbitView::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          mViewUpCoordSystem = (CoordinateSystem*)obj;
       return true;
    }
-   else if (obj->IsOfType(Gmat::SPACE_POINT))
+   
+   
+   if (obj->IsOfType(Gmat::SPACE_POINT))
    {
       #if DBGLVL_OBJ
-      MessageInterface::ShowMessage("   mAllSpCount=%d\n", mAllSpCount);
-      #endif
-      
-      for (Integer i=0; i<mAllSpCount; i++)
-      {
-         #if DBGLVL_OBJ
-         MessageInterface::ShowMessage
-            ("   mAllSpNameArray[%d]='%s'\n", i, mAllSpNameArray[i].c_str());
-         #endif
-         
-         if (mAllSpNameArray[i] == realName)
-         {
-            #if DBGLVL_OBJ > 1
-            MessageInterface::ShowMessage
-               ("   Setting object to '%s'\n", mAllSpNameArray[i].c_str());
-            #endif
-            
-            mAllSpArray[i] = (SpacePoint*)(obj);
-         }
-      }
-      
-      #if DBGLVL_OBJ
-      MessageInterface::ShowMessage
-         ("OrbitView::SetRefObject() realName='%s', mViewPointRefName='%s', "
-          "mViewPointVecName='%s', mViewDirectionName='%s'\n", realName.c_str(),
-          mViewPointRefName.c_str(), mViewPointVecName.c_str(),
-          mViewDirectionName.c_str());
+      MessageInterface::ShowMessage("   Setting View information...\n");
       #endif
       
       // ViewPoint info
@@ -2461,425 +1688,15 @@ bool OrbitView::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
           "mViewDirectionObj=<%p>\n", mViewPointRefObj, mViewPointObj,
           mViewDirectionObj);
       #endif
-      return true;
    }
    
-   return Subscriber::SetRefObject(obj, type, realName);
+   return OrbitPlot::SetRefObject(obj, type, realName);
 }
 
 
 //---------------------------------
 // protected methods
 //---------------------------------
-
-//------------------------------------------------------------------------------
-// bool AddSpacePoint(const std::string &name, Integer index, bool show = true)
-//------------------------------------------------------------------------------
-bool OrbitView::AddSpacePoint(const std::string &name, Integer index, bool show)
-{
-   #if DBGLVL_ADD
-   MessageInterface::ShowMessage
-      ("OrbitView::AddSpacePoint()<%s> name=%s, index=%d, show=%d, mAllSpCount=%d\n",
-       instanceName.c_str(), name.c_str(), index, show, mAllSpCount);
-   #endif
-   
-   // if name not in the list, add
-   if (find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name) ==
-       mAllSpNameArray.end())
-   {
-      // Do we want to add any new object here? Like Sun in the following.
-      // OrbitView.Add = {DefaultSC, Earth};
-      // OrbitView.Add = {Sun};
-      // If yes, we should not check for index. Just commenting out for now (LOJ: 2011.01.14)
-      //if (name != "" && index == mAllSpCount)
-      if (name != "")
-      {
-         mAllSpNameArray.push_back(name);
-         mAllSpArray.push_back(NULL);
-         mAllSpCount = mAllSpNameArray.size();
-         
-         mDrawOrbitMap[name] = show;
-         mShowObjectMap[name] = show;
-         
-         // Ignore array value more than actual map size
-         if (mDrawObjectArray.size() < mShowObjectMap.size())
-            mDrawObjectArray.push_back(true); //added (LOJ: 2011.01.13 for bug 2215 fix)
-         
-         if (mAllSpCount < MAX_SP_COLOR)
-         {
-            // If object is non-standard-body, use mNonStdBodyCount.
-            // So that spacecraft color starts from DEFAULT_ORBIT_COLOR
-            if (mOrbitColorMap.find(name) == mOrbitColorMap.end())
-            {
-               mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mNonStdBodyCount];
-               mTargetColorMap[name] = GmatColor::TEAL32;
-               mOrbitColorArray.push_back(DEFAULT_ORBIT_COLOR[mNonStdBodyCount]);
-               mTargetColorArray.push_back(GmatColor::TEAL32);
-               mNonStdBodyCount++;
-            }
-            else
-            {
-               mOrbitColorArray.push_back(mOrbitColorMap[name]);
-               mTargetColorArray.push_back(mTargetColorMap[name]);
-            }
-         }
-         else
-         {
-            mOrbitColorMap[name] = GmatColor::RED32;
-            mTargetColorMap[name] = GmatColor::TEAL32;
-            mOrbitColorArray.push_back(GmatColor::RED32);
-            mTargetColorArray.push_back(GmatColor::TEAL32);
-         }
-      }
-   }
-   
-   #if DBGLVL_ADD   
-   std::string objName;
-   MessageInterface::ShowMessage
-      ("mAllSpNameArray.size()=%d, mAllSpCount=%d\n", mAllSpNameArray.size(), mAllSpCount);
-   for (int i=0; i<mAllSpCount; i++)
-   {
-      objName = mAllSpNameArray[i];
-      MessageInterface::ShowMessage
-         ("   mAllSpNameArray[%d]=%s, draw=%d, show=%d "
-          "orbColor=%u, targColor=%u\n", i, objName.c_str(), mDrawOrbitMap[objName],
-          mShowObjectMap[objName], mOrbitColorMap[objName], mTargetColorMap[objName]);
-      MessageInterface::ShowMessage
-         ("   mOrbitColorArray[%d]=%u, mTargetColorArray[%d]=%u\n", i, mOrbitColorArray[i],
-          i, mTargetColorArray[i]);
-   }
-   #endif
-   
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool ClearSpacePointList()
-//------------------------------------------------------------------------------
-bool OrbitView::ClearSpacePointList()
-{
-   //MessageInterface::ShowMessage("OrbitView::ClearSpacePointList()\n");
-   
-   mAllSpNameArray.clear();
-   mAllSpArray.clear();
-   mObjectArray.clear();
-   mDrawOrbitArray.clear();
-   mDrawObjectArray.clear();
-   mScNameArray.clear();
-   mObjectNameArray.clear();
-   mOrbitColorArray.clear();
-   mTargetColorArray.clear();
-   
-   mScXArray.clear();
-   mScYArray.clear();
-   mScZArray.clear();
-   mScVxArray.clear();
-   mScVyArray.clear();
-   mScVzArray.clear();
-   mOrbitColorMap.clear();
-   mTargetColorMap.clear();
-   mAllSpCount = 0;
-   mScCount = 0;
-   mObjectCount = 0;
-   mNonStdBodyCount = 0;
-   
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool RemoveSpacePoint(const std::string &name)
-//------------------------------------------------------------------------------
-/*
- * Removes spacecraft from the spacecraft list
- *
- * @param <name> spacecraft name to be removed from the list
- *
- * @return true if spacecraft was removed from the list, false otherwise
- *
- */
-//------------------------------------------------------------------------------
-bool OrbitView::RemoveSpacePoint(const std::string &name)
-{
-   //-----------------------------------------------------------------
-   #ifdef __REMOVE_OBJ_BY_SETTING_FLAG__
-   //-----------------------------------------------------------------
-
-   for (UnsignedInt i=0; i<mObjectNameArray.size(); i++)
-   {
-      if (mObjectNameArray[i] == name)
-      {
-         mDrawOrbitArray[i] = false;
-         PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
-         return true;
-      }
-   }
-   
-   return false;
-   
-   //-----------------------------------------------------------------
-   #else
-   //-----------------------------------------------------------------
-   
-   bool removedFromScArray = false;
-   bool removedFromAllSpArray = false;
-   
-   //-------------------------------------------------------
-   // remove from mScNameArray
-   //-------------------------------------------------------
-   #if DBGLVL_REMOVE_SP
-   MessageInterface::ShowMessage
-      ("OrbitView::RemoveSpacePoint() name=%s\n--- Before remove from "
-       "mScNameArray:\n", name.c_str());
-   MessageInterface::ShowMessage("mScCount=%d\n", mScCount);
-   for (int i=0; i<mScCount; i++)
-   {
-      MessageInterface::ShowMessage
-         ("mScNameArray[%d]=%s\n", i, mScNameArray[i].c_str());
-   }
-   #endif
-   
-   StringArray::iterator scPos = 
-      find(mScNameArray.begin(), mScNameArray.end(), name);
-   
-   if (scPos != mScNameArray.end())
-   {
-      MessageInterface::ShowMessage("sc to be erased=%s\n", (*scPos).c_str());
-      
-      // erase given spacecraft from the arrays
-      mScNameArray.erase(scPos);
-      
-      // just reduce the size of array
-      mScOrbitColorArray.erase(mScOrbitColorArray.begin());
-      mScTargetColorArray.erase(mScTargetColorArray.begin());
-      mScXArray.erase(mScXArray.begin());
-      mScYArray.erase(mScYArray.begin());
-      mScZArray.erase(mScZArray.begin());
-      mScVxArray.erase(mScVxArray.begin());
-      mScVyArray.erase(mScVyArray.begin());
-      mScVzArray.erase(mScVzArray.begin());
-      
-      mScCount = mScNameArray.size();
-      
-      // update color array
-      for (int i=0; i<mScCount; i++)
-      {
-         mScOrbitColorArray[i] = mOrbitColorMap[mScNameArray[i]];
-         mScTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
-      }
-      
-      #if DBGLVL_REMOVE_SP
-      MessageInterface::ShowMessage("---After remove from mScNameArray:\n");
-      MessageInterface::ShowMessage("mScCount=%d\n", mScCount);
-      for (int i=0; i<mScCount; i++)
-      {
-         MessageInterface::ShowMessage
-            ("mScNameArray[%d]=%s\n", i, mScNameArray[i].c_str());
-      }
-      #endif
-      
-      removedFromScArray = true;
-      //return true;
-   }
-   
-   
-   //-------------------------------------------------------
-   // remove from mAllSpNameArray and mObjectNameArray
-   //-------------------------------------------------------
-   #if DBGLVL_REMOVE_SP
-   MessageInterface::ShowMessage
-      ("OrbitView::RemoveSpacePoint() name=%s\n--- Before remove from "
-       "mAllSpNameArray:\n", name.c_str());
-   MessageInterface::ShowMessage("mAllSpCount=%d\n", mAllSpCount);
-   for (int i=0; i<mAllSpCount; i++)
-   {
-      MessageInterface::ShowMessage
-         ("mAllSpNameArray[%d]=%s\n", i, mAllSpNameArray[i].c_str());
-   }
-   #endif
-   
-   StringArray::iterator spPos = 
-      find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name);
-   StringArray::iterator objPos = 
-      find(mObjectNameArray.begin(), mObjectNameArray.end(), name);
-   
-   if (spPos != mAllSpNameArray.end() && objPos != mObjectNameArray.end())
-   {
-      std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
-      orbColorPos = mOrbitColorMap.find(name);
-      targColorPos = mTargetColorMap.find(name);
-      
-      if (orbColorPos != mOrbitColorMap.end() &&
-          targColorPos != mTargetColorMap.end())
-      {
-         // erase given spacecraft name
-         mAllSpNameArray.erase(spPos);
-         mObjectNameArray.erase(objPos);
-         mOrbitColorMap.erase(orbColorPos);
-         mTargetColorMap.erase(targColorPos);
-         
-         // reduce the size of array
-         mOrbitColorArray.erase(mOrbitColorArray.begin());
-         mTargetColorArray.erase(mTargetColorArray.begin());
-         
-         mAllSpCount = mAllSpNameArray.size();
-         
-         // update color array
-         for (int i=0; i<mAllSpCount; i++)
-         {
-            mOrbitColorArray[i] = mOrbitColorMap[mAllSpNameArray[i]];
-            mTargetColorArray[i] = mTargetColorMap[mAllSpNameArray[i]];
-         }
-         
-         #if DBGLVL_REMOVE_SP
-         MessageInterface::ShowMessage("---After remove from mAllSpNameArray\n");
-         MessageInterface::ShowMessage("mAllSpCount=%d\n", mAllSpCount);
-         for (int i=0; i<mAllSpCount; i++)
-         {
-            MessageInterface::ShowMessage
-               ("mAllSpNameArray[%d]=%s\n", i, mAllSpNameArray[i].c_str());
-         }
-         #endif
-         
-         removedFromAllSpArray = true;
-      }
-   }
-
-   //-------------------------------------------------------
-   // remove from mObjectArray
-   //-------------------------------------------------------
-   #if DBGLVL_REMOVE_SP
-   MessageInterface::ShowMessage
-      ("OrbitView::RemoveSpacePoint() name=%s\n--- Before remove from "
-       "mObjectArray:\n", name.c_str());
-   MessageInterface::ShowMessage("size=%d\n", mObjectArray.size());
-   #endif
-   
-   for (std::vector<SpacePoint*>::iterator objptPos = mObjectArray.begin();
-        objptPos != mObjectArray.end(); ++objptPos)
-   {
-      MessageInterface::ShowMessage
-         ("mObjectArray=%s\n", (*objptPos)->GetName().c_str());
-      if ((*objptPos)->GetName() == name)
-      {
-         mObjectArray.erase(objptPos);
-         break;
-      }
-   }
-   
-   #if DBGLVL_REMOVE_SP
-   MessageInterface::ShowMessage
-      ("OrbitView::RemoveSpacePoint() name=%s\n--- After remove from "
-       "mObjectArray:\n", name.c_str());
-   MessageInterface::ShowMessage("size=%d\n", mObjectArray.size());
-   #endif
-   
-   if (removedFromScArray && removedFromAllSpArray)
-      // set all object array and pointers
-      PlotInterface::SetGlObject(instanceName, mObjectNameArray,
-                                 mOrbitColorArray, mObjectArray);
-   
-   return (removedFromScArray && removedFromAllSpArray);
-   
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// Integer FindIndexOfElement(StringArray &labelArray, const std::string &label)
-//------------------------------------------------------------------------------
-/*
- * Finds the index of the element label from the element label array.
- *
- * Typical element label array contains:
- *    All.epoch, scName.X, scName.Y, scName.Z, scName.Vx, scName.Vy, scName.Vz.
- */
-//------------------------------------------------------------------------------
-Integer OrbitView::FindIndexOfElement(StringArray &labelArray,
-                                       const std::string &label)
-{
-   std::vector<std::string>::iterator pos;
-   pos = find(labelArray.begin(), labelArray.end(),  label);
-   if (pos == labelArray.end())
-      return -1;
-   else
-      return distance(labelArray.begin(), pos);
-}
-
-
-//------------------------------------------------------------------------------
-// void ClearDynamicArrays()
-//------------------------------------------------------------------------------
-void OrbitView::ClearDynamicArrays()
-{
-   mObjectNameArray.clear();
-   mOrbitColorArray.clear();
-   mTargetColorArray.clear();
-   mObjectArray.clear();
-   mDrawOrbitArray.clear();
-   mDrawObjectArray.clear();
-   mScNameArray.clear();
-   mScOrbitColorArray.clear();
-   mScTargetColorArray.clear();
-   mScXArray.clear();
-   mScYArray.clear();
-   mScZArray.clear();
-   mScVxArray.clear();
-   mScVyArray.clear();
-   mScVzArray.clear();
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateObjectList(SpacePoint *sp, bool show = false)
-//------------------------------------------------------------------------------
-/**
- * Add non-spacecraft object to the list.
- */
-//------------------------------------------------------------------------------
-void OrbitView::UpdateObjectList(SpacePoint *sp, bool show)
-{
-   #if DBGLVL_INIT > 1
-   MessageInterface::ShowMessage
-      ("OrbitView::UpdateObjectList() '%s' entered, sp=<%p>'%s', show=%d\n",
-       sp, sp ? sp->GetName().c_str() : "NULL", show);
-   #endif
-   
-   // Add all spacepoint objects
-   std::string name = sp->GetName();
-   StringArray::iterator pos = 
-      find(mObjectNameArray.begin(), mObjectNameArray.end(), name);
-   
-   // if name not found, add to arrays
-   if (pos == mObjectNameArray.end())
-   {
-      mObjectNameArray.push_back(name);
-      mOrbitColorArray.push_back(mOrbitColorMap[name]);
-      mTargetColorArray.push_back(mTargetColorMap[name]);
-      mObjectArray.push_back(sp);
-      mDrawOrbitMap[name] = show;
-      mShowObjectMap[name] = show;
-      mDrawOrbitArray.push_back(show);
-      mDrawObjectArray.push_back(show);
-      mObjectCount = mObjectNameArray.size();
-   }
-   
-   #if DBGLVL_INIT > 1
-   Integer draw, showObj;
-   MessageInterface::ShowMessage
-      ("OrbitView::UpdateObjectList() instanceName=%s\n", instanceName.c_str());
-   for (int i=0; i<mObjectCount; i++)
-   {
-      draw = mDrawOrbitArray[i] ? 1 : 0;
-      showObj = mDrawObjectArray[i] ? 1 : 0;
-      MessageInterface::ShowMessage
-         ("   mObjectNameArray[%d]=%s, draw=%d, show=%d, color=%d\n", i,
-          mObjectNameArray[i].c_str(), draw, showObj, mOrbitColorArray[i]);
-   }
-   #endif
-}
-
 
 //------------------------------------------------------------------------------
 // void PutRvector3Value(Rvector3 &rvec3, Integer id,
@@ -2990,22 +1807,6 @@ void OrbitView::PutRvector3Value(Rvector3 &rvec3, Integer id,
                     "BarycenterName, or a 3-vector of numerical values");
       throw se;
    }
-}
-
-
-//------------------------------------------------------------------------------
-// void PutUnsignedIntValue(Integer id, const std::string &sval)
-//------------------------------------------------------------------------------
-void OrbitView::PutUnsignedIntValue(Integer id, const std::string &sval)
-{
-   #ifdef DEBUG_PUT
-   MessageInterface::ShowMessage
-      ("PutUnsignedIntValue() id=%d, sval='%s'\n", id, sval.c_str());
-   #endif
-   
-   UnsignedIntArray vals = GmatStringUtil::ToUnsignedIntArray(sval);
-   for (UnsignedInt i=0; i<vals.size(); i++)
-      SetUnsignedIntParameter(id, vals[i], i);
 }
 
 

@@ -21,12 +21,12 @@
 #ifndef OrbitView_hpp
 #define OrbitView_hpp
 
-#include "Subscriber.hpp"
+#include "OrbitPlot.hpp"
 #include "SpacePoint.hpp"
 #include "CoordinateSystem.hpp"
 #include <map>
 
-class GMAT_API OrbitView : public Subscriber
+class GMAT_API OrbitView : public OrbitPlot
 {
 public:
    OrbitView(const std::string &name);
@@ -34,21 +34,8 @@ public:
    OrbitView& operator=(const OrbitView&);
    virtual ~OrbitView(void);
    
-   const StringArray&   GetSpacePointList();
-   const StringArray&   GetSpacecraftList();
-   const StringArray&   GetNonSpacecraftList();
-   
-   UnsignedInt          GetColor(const std::string &item, const std::string &scName);
-   bool                 SetColor(const std::string &item, const std::string &name,
-                                 UnsignedInt value);
-   bool                 GetShowObject(const std::string &name);
-   void                 SetShowObject(const std::string &name, bool value);
-   
    Rvector3             GetVector(const std::string &which);
    void                 SetVector(const std::string &which, const Rvector3 &value);
-   
-   // methods inherited from Subscriber
-   virtual void         Activate(bool state = true);
    
    // methods inherited from GmatBase
    virtual bool         Validate();
@@ -56,9 +43,6 @@ public:
    
    virtual GmatBase*    Clone() const;
    virtual void         Copy(const GmatBase* orig);
-   
-   virtual bool         SetName(const std::string &who,
-                                const std::string &oldName = "");
    
    virtual bool         TakeAction(const std::string &action,  
                                    const std::string &actionData = "");
@@ -111,28 +95,6 @@ public:
                                            const std::string &value,
                                            const Integer index);
    
-   virtual UnsignedInt  SetUnsignedIntParameter(const Integer id,
-                                                const UnsignedInt value,
-                                                const Integer index);
-   
-   virtual const UnsignedIntArray&
-                        GetUnsignedIntArrayParameter(const Integer id) const;   
-   virtual const StringArray&
-                        GetStringArrayParameter(const Integer id) const;
-   
-   virtual bool         GetBooleanParameter(const Integer id) const;
-   virtual bool         SetBooleanParameter(const Integer id,
-                                            const bool value);
-   
-   virtual const BooleanArray&
-                        GetBooleanArrayParameter(const Integer id) const;
-   virtual const BooleanArray&
-                        GetBooleanArrayParameter(const std::string &label) const;
-   virtual bool         SetBooleanArrayParameter(const Integer id,
-                                                 const BooleanArray &valueArray);
-   virtual bool         SetBooleanArrayParameter(const std::string &label,
-                                                 const BooleanArray &valueArray);
-   
    virtual std::string  GetOnOffParameter(const Integer id) const;
    virtual bool         SetOnOffParameter(const Integer id, 
                                           const std::string &value);
@@ -154,18 +116,8 @@ public:
    
 protected:
 
-   bool     AddSpacePoint(const std::string &name, Integer index,
-                          bool show = true);
-   bool     ClearSpacePointList();
-   bool     RemoveSpacePoint(const std::string &name);
-   Integer  FindIndexOfElement(StringArray &labelArray,
-                               const std::string &label);
-   
-   void     ClearDynamicArrays();
-   void     UpdateObjectList(SpacePoint *sp, bool show = false);
    void     PutRvector3Value(Rvector3 &rvec3, Integer id,
                              const std::string &sval, Integer index = -1);
-   void     PutUnsignedIntValue(Integer id, const std::string &sval);
    void     WriteDeprecatedMessage(Integer id) const;
    bool     UpdateSolverData();
    
@@ -176,10 +128,6 @@ protected:
    SpacePoint *mViewPointRefObj;
    SpacePoint *mViewPointObj;
    SpacePoint *mViewDirectionObj;
-   std::vector<SpacePoint*> mObjectArray;
-   std::vector<SpacePoint*> mAllSpArray;
-   BooleanArray mDrawOrbitArray;
-   BooleanArray mDrawObjectArray;
    
    std::string mEclipticPlane;
    std::string mXYPlane;
@@ -192,7 +140,6 @@ protected:
    std::string mGrid;
    std::string mSunLine;
    
-   std::string mOldName;
    std::string mViewCoordSysName;
    std::string mViewPointRefName;
    std::string mViewPointRefType;
@@ -210,17 +157,6 @@ protected:
    Real mViewScaleFactor;
    Real mFixedFovAngle;
    
-   Integer mDataCollectFrequency;
-   Integer mUpdatePlotFrequency;
-   Integer mNumPointsToRedraw;
-   Integer mNumData;
-   Integer mNumCollected;
-   
-   Integer mAllSpCount;
-   Integer mScCount;
-   Integer mObjectCount;
-   Integer mNonStdBodyCount;
-   
    std::string mEnableStars;
    std::string mEnableConstellations;
    Integer mStarCount;
@@ -228,46 +164,10 @@ protected:
    Integer mMinFOV;
    Integer mMaxFOV;
    Integer mInitialFOV;
-   
-   StringArray mScNameArray;
-   StringArray mObjectNameArray;
-   StringArray mAllSpNameArray;
-   StringArray mAllRefObjectNames;
-   
-   // arrays for holding distrubuted data
-   RealArray mScXArray;
-   RealArray mScYArray;
-   RealArray mScZArray;
-   RealArray mScVxArray;
-   RealArray mScVyArray;
-   RealArray mScVzArray;
-   UnsignedIntArray mScOrbitColorArray;
-   UnsignedIntArray mScTargetColorArray;
-   UnsignedIntArray mOrbitColorArray;
-   UnsignedIntArray mTargetColorArray;
-   
-   // arrays for holding solver current data
-   std::vector<StringArray> mCurrScArray;
-   std::vector<Real> mCurrEpochArray;
-   std::vector<RealArray> mCurrXArray;
-   std::vector<RealArray> mCurrYArray;
-   std::vector<RealArray> mCurrZArray;
-   std::vector<RealArray> mCurrVxArray;
-   std::vector<RealArray> mCurrVyArray;
-   std::vector<RealArray> mCurrVzArray;
-   
-   std::map<std::string, UnsignedInt> mOrbitColorMap;
-   std::map<std::string, UnsignedInt> mTargetColorMap;
-   std::map<std::string, bool> mDrawOrbitMap;
-   std::map<std::string, bool> mShowObjectMap;
-   
+      
    enum
    {
-      ADD = SubscriberParamCount,
-      DRAW_OBJECT,
-      ORBIT_COLOR,
-      TARGET_COLOR,
-      COORD_SYSTEM,
+      COORD_SYSTEM = OrbitPlotParamCount,
       VIEWPOINT_REF,
       VIEWPOINT_REFERENCE,
       VIEWPOINT_REF_TYPE,
@@ -293,30 +193,23 @@ protected:
       USE_INITIAL_VIEW,
       PERSPECTIVE_MODE,
       USE_FIXED_FOV,
-      DATA_COLLECT_FREQUENCY,
-      UPDATE_PLOT_FREQUENCY,
-      NUM_POINTS_TO_REDRAW,
       STAR_COUNT,
       ENABLE_STARS,
       ENABLE_CONSTELLATIONS,
       MIN_FOV,
       MAX_FOV,
       INITIAL_FOV,
-      SHOW_PLOT,
       OrbitViewParamCount
    };
    
    static const Gmat::ParameterType
-      PARAMETER_TYPE[OrbitViewParamCount - SubscriberParamCount];
+      PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount];
    static const std::string
-      PARAMETER_TEXT[OrbitViewParamCount - SubscriberParamCount];
+      PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount];
    
    virtual bool Distribute(Integer len);
    virtual bool Distribute(const Real * dat, Integer len);
-   
-   const static int MAX_SP_COLOR = 15;
-   static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SP_COLOR];
-   
+      
 };
 
 #endif

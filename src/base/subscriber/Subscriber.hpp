@@ -178,7 +178,7 @@ protected:
                                            const std::string &label);
    
    // Methods that derived classes can override
-   virtual bool         Distribute(Integer len) = 0;
+   virtual bool         Distribute(Integer len);
    virtual bool         Distribute(const Real *dat, Integer len);
    virtual void         HandleManeuvering(GmatBase *originator,
                                           bool maneuvering, Real epoch,
