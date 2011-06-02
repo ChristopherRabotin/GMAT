@@ -1236,6 +1236,9 @@
     <ClCompile Include="..\..\..\src\base\subscriber\OrbitPlot.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2434,6 +2437,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp">
       <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -640,6 +640,7 @@
     <ClCompile Include="..\..\..\src\base\spacecraft\TimeConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\OpenGlPlot.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\OrbitPlot.cpp" />
@@ -1080,6 +1081,7 @@
     <ClInclude Include="..\..\..\src\base\stopcond\StopCondition.hpp" />
     <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\OpenGlPlot.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp" />
