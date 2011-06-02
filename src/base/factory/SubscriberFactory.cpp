@@ -29,6 +29,7 @@
 #include "XyPlot.hpp"
 #include "EphemerisFile.hpp"
 #include "OrbitView.hpp"
+#include "GroundTrackPlot.hpp"
 
 //---------------------------------
 //  public methods
@@ -85,6 +86,8 @@ Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
       return new OrbitView(withName);
    else if (ofType == "OrbitView")
       return new OrbitView(withName);
+   else if (ofType == "GroundTrackPlot")
+      return new GroundTrackPlot(withName);
    
    return NULL;
 }
@@ -113,6 +116,7 @@ Factory(Gmat::SUBSCRIBER)
       creatables.push_back("OpenGLPlot");
       creatables.push_back("Enhanced3DView");
       creatables.push_back("OrbitView");
+      creatables.push_back("GroundTrackPlot");
    }
    
    // Now fill in unviewable subscribers

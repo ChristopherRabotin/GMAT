@@ -121,7 +121,7 @@ protected:
    void     WriteDeprecatedMessage(Integer id) const;
    bool     UpdateSolverData();
    
-   CoordinateSystem *mViewCoordSystem;
+//    CoordinateSystem *mViewCoordSystem;
    CoordinateSystem *mViewUpCoordSystem;
    SpacePoint *mViewCoordSysOrigin;
    SpacePoint *mViewUpCoordSysOrigin;
@@ -140,7 +140,7 @@ protected:
    std::string mGrid;
    std::string mSunLine;
    
-   std::string mViewCoordSysName;
+//    std::string mViewCoordSysName;
    std::string mViewPointRefName;
    std::string mViewPointRefType;
    std::string mViewPointVecName;
@@ -167,8 +167,8 @@ protected:
       
    enum
    {
-      COORD_SYSTEM = OrbitPlotParamCount,
-      VIEWPOINT_REF,
+//       COORD_SYSTEM = OrbitPlotParamCount,
+      VIEWPOINT_REF = OrbitPlotParamCount,
       VIEWPOINT_REFERENCE,
       VIEWPOINT_REF_TYPE,
       VIEWPOINT_REF_VECTOR,

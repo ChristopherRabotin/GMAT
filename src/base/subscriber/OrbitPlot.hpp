@@ -126,29 +126,10 @@ public:
    
 protected:
    
-   /// Calls PlotInterface for plotting solver data
-   virtual bool         UpdateSolverData();
-   
-   /// Adds Spacecraft and other objects to object arrays and color maps
-   bool                 AddSpacePoint(const std::string &name, Integer index,
-                                      bool show = true);
-   /// Clears all object arrays and color maps, called from TakeAction("Clear")
-   bool                 ClearSpacePointList();
-   /// Removes SpacePoint object from the object and color array, called from TakeAction("Remove")
-   bool                 RemoveSpacePoint(const std::string &name);
-   /// Finds the index of the element label from the element label array.
-   Integer              FindIndexOfElement(StringArray &labelArray,
-                                           const std::string &label);
-   /// Builds dynamic arrays to pass to plotting canvas
-   void                 BuildDynamicArrays();
-   /// Clears dynamic arrays such as object name array, color array, etc.
-   void                 ClearDynamicArrays();
-   /// Updates plotting object information such as plotting object pointer, option flags, etc.
-   void                 UpdateObjectList(SpacePoint *sp, bool show = false);
-   /// Parses string value such as "[0 127 255]" and converts to unsigned int array for color
-   void                 PutUnsignedIntValue(Integer id, const std::string &sval);
+   CoordinateSystem *mViewCoordSystem;
    
    std::string mOldName;
+   std::string mViewCoordSysName;
    
    // object names and arrays
    std::vector<SpacePoint*> mObjectArray;
@@ -205,9 +186,35 @@ protected:
    std::map<std::string, bool> mDrawOrbitMap;
    std::map<std::string, bool> mShowObjectMap;
    
+   /// Calls PlotInterface for plotting solver data
+   virtual bool         UpdateSolverData();
+   
+   /// Buffers published spacecraft orbit data
+   virtual Integer      BufferOrbitData(const Real *dat, Integer len);
+   
+   /// Adds Spacecraft and other objects to object arrays and color maps
+   bool                 AddSpacePoint(const std::string &name, Integer index,
+                                      bool show = true);
+   /// Clears all object arrays and color maps, called from TakeAction("Clear")
+   bool                 ClearSpacePointList();
+   /// Removes SpacePoint object from the object and color array, called from TakeAction("Remove")
+   bool                 RemoveSpacePoint(const std::string &name);
+   /// Finds the index of the element label from the element label array.
+   Integer              FindIndexOfElement(StringArray &labelArray,
+                                           const std::string &label);
+   /// Builds dynamic arrays to pass to plotting canvas
+   void                 BuildDynamicArrays();
+   /// Clears dynamic arrays such as object name array, color array, etc.
+   void                 ClearDynamicArrays();
+   /// Updates plotting object information such as plotting object pointer, option flags, etc.
+   void                 UpdateObjectList(SpacePoint *sp, bool show = false);
+   /// Parses string value such as "[0 127 255]" and converts to unsigned int array for color
+   void                 PutUnsignedIntValue(Integer id, const std::string &sval);
+   
    enum
    {
       ADD = SubscriberParamCount,
+      COORD_SYSTEM,
       DRAW_OBJECT,
       ORBIT_COLOR,
       TARGET_COLOR,

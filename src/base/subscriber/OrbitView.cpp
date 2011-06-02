@@ -49,7 +49,7 @@
 const std::string
 OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
 {
-   "CoordinateSystem",
+//    "CoordinateSystem",
    "ViewPointRef",
    "ViewPointReference",
    "ViewPointRefType",
@@ -87,7 +87,7 @@ OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
 const Gmat::ParameterType
 OrbitView::PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount] =
 {
-   Gmat::OBJECT_TYPE,            //"CoordinateSystem"
+//    Gmat::OBJECT_TYPE,            //"CoordinateSystem"
    Gmat::OBJECT_TYPE,            //"ViewPointRef",
    Gmat::OBJECT_TYPE,            //"ViewPointReference",
    Gmat::STRING_TYPE,            //"ViewPointRefType"
@@ -160,7 +160,7 @@ OrbitView::OrbitView(const std::string &name)
    mMaxFOV = 90;
    mInitialFOV = 45;
    
-   mViewCoordSysName = "EarthMJ2000Eq";
+//    mViewCoordSysName = "EarthMJ2000Eq";
    mViewUpCoordSysName = "EarthMJ2000Eq";
    mViewUpAxisName = "Z";
    
@@ -177,7 +177,7 @@ OrbitView::OrbitView(const std::string &name)
    mViewPointVecVector.Set(0.0, 0.0, 30000.0);
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
    
-   mViewCoordSystem = NULL;
+//    mViewCoordSystem = NULL;
    mViewUpCoordSystem = NULL;
    mViewCoordSysOrigin = NULL;
    mViewUpCoordSysOrigin = NULL;
@@ -218,7 +218,7 @@ OrbitView::OrbitView(const OrbitView &ov)
    mMaxFOV = ov.mMaxFOV;
    mInitialFOV = ov.mInitialFOV;
    
-   mViewCoordSysName = ov.mViewCoordSysName;
+//    mViewCoordSysName = ov.mViewCoordSysName;
    
    // viewpoint
    mViewPointRefName = ov.mViewPointRefName;
@@ -235,7 +235,7 @@ OrbitView::OrbitView(const OrbitView &ov)
    mViewUpCoordSysName = ov.mViewUpCoordSysName;
    mViewUpAxisName = ov.mViewUpAxisName;
    
-   mViewCoordSystem = ov.mViewCoordSystem;
+//    mViewCoordSystem = ov.mViewCoordSystem;
    mViewUpCoordSystem = ov.mViewCoordSystem;
    mViewCoordSysOrigin = ov.mViewCoordSysOrigin;
    mViewUpCoordSysOrigin = ov.mViewUpCoordSysOrigin;
@@ -281,7 +281,7 @@ OrbitView& OrbitView::operator=(const OrbitView& ov)
    mInitialFOV = ov.mInitialFOV;
 
    // View coordinate system name
-   mViewCoordSysName = ov.mViewCoordSysName;
+//    mViewCoordSysName = ov.mViewCoordSysName;
    
    // viewpoint
    mViewPointRefName = ov.mViewPointRefName;
@@ -299,7 +299,7 @@ OrbitView& OrbitView::operator=(const OrbitView& ov)
    mViewUpAxisName = ov.mViewUpAxisName;
    
    // object pointers
-   mViewCoordSystem = ov.mViewCoordSystem;
+//    mViewCoordSystem = ov.mViewCoordSystem;
    mViewUpCoordSystem = ov.mViewCoordSystem;
    mViewCoordSysOrigin = ov.mViewCoordSysOrigin;
    mViewUpCoordSysOrigin = ov.mViewUpCoordSysOrigin;
@@ -722,11 +722,14 @@ bool OrbitView::RenameRefObject(const Gmat::ObjectType type,
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
-      if (mViewCoordSysName == oldName)
-         mViewCoordSysName = newName;
+//       if (mViewCoordSysName == oldName)
+//          mViewCoordSysName = newName;
 
       if (mViewUpCoordSysName == oldName)
-         mViewUpCoordSysName = newName;      
+         mViewUpCoordSysName = newName;
+      
+      return OrbitPlot::RenameRefObject(type, oldName, newName);
+      
    }
    
    return true;
@@ -778,10 +781,7 @@ Gmat::ParameterType OrbitView::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string OrbitView::GetParameterTypeString(const Integer id) const
 {
-   if (id >= OrbitPlotParamCount && id < OrbitViewParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - OrbitPlotParamCount)];
-   else
-      return OrbitPlot::GetParameterTypeString(id);
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -1120,8 +1120,8 @@ std::string OrbitView::GetStringParameter(const Integer id) const
    
    switch (id)
    {
-   case COORD_SYSTEM:
-      return mViewCoordSysName;
+//    case COORD_SYSTEM:
+//       return mViewCoordSysName;
    case VIEWPOINT_REF:      
       WriteDeprecatedMessage(id);
       if (mViewPointRefType == "Vector")
@@ -1186,9 +1186,9 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value)
    
    switch (id)
    {
-   case COORD_SYSTEM:
-      mViewCoordSysName = value;
-      return true;
+//    case COORD_SYSTEM:
+//       mViewCoordSysName = value;
+//       return true;
    case VIEWPOINT_REF:
       WriteDeprecatedMessage(id);
       mViewPointRefName = value;
@@ -1461,10 +1461,10 @@ std::string OrbitView::GetRefObjectName(const Gmat::ObjectType type) const
        GmatBase::GetObjectTypeString(type).c_str());
    #endif
    
-   if (type == Gmat::COORDINATE_SYSTEM)
-   {
-      return mViewCoordSysName; //just return this
-   }
+//    if (type == Gmat::COORDINATE_SYSTEM)
+//    {
+//       return mViewCoordSysName; //just return this
+//    }
    
    #if DBGLVL_OBJ
    std::string msg = "type: " + GmatBase::GetObjectTypeString(type) + " not found";
@@ -1526,7 +1526,7 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-      mAllRefObjectNames.push_back(mViewCoordSysName);
+//       mAllRefObjectNames.push_back(mViewCoordSysName);
       mAllRefObjectNames.push_back(mViewUpCoordSysName);
    }
    else if (type == Gmat::SPACE_POINT)
@@ -1562,10 +1562,11 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
           mViewPointRefType.c_str(), mViewPointVecType.c_str(), mViewDirectionType.c_str());
       #endif
       
-      mAllRefObjectNames = mAllSpNameArray;
+//       mAllRefObjectNames = mAllSpNameArray;
       
-      mAllRefObjectNames.push_back(mViewCoordSysName);
-      
+//       mAllRefObjectNames.push_back(mViewCoordSysName);
+      mAllRefObjectNames.insert(mAllRefObjectNames.end(), mAllSpNameArray.begin(),
+                                mAllSpNameArray.end());
       if (mViewCoordSysName != mViewUpCoordSysName)
          mAllRefObjectNames.push_back(mViewUpCoordSysName);
       
@@ -1611,8 +1612,8 @@ GmatBase* OrbitView::GetRefObject(const Gmat::ObjectType type,
 {
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-      if (name == mViewCoordSysName)
-         return mViewCoordSystem;
+//       if (name == mViewCoordSysName)
+//          return mViewCoordSystem;
       if (name == mViewUpCoordSysName)
          return mViewUpCoordSystem;
    }
@@ -1658,11 +1659,12 @@ bool OrbitView::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-      if (realName == mViewCoordSysName)
-         mViewCoordSystem = (CoordinateSystem*)obj;
+//       if (realName == mViewCoordSysName)
+//          mViewCoordSystem = (CoordinateSystem*)obj;
       if (realName == mViewUpCoordSysName)
          mViewUpCoordSystem = (CoordinateSystem*)obj;
-      return true;
+      
+//       return true;
    }
    
    
@@ -2034,143 +2036,11 @@ bool OrbitView::Distribute(const Real *dat, Integer len)
    
    if ((mNumData % mDataCollectFrequency) == 0)
    {
-      mNumData = 0;
-      mNumCollected++;
-      bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
-      
-      #if DBGLVL_UPDATE > 1
-      MessageInterface::ShowMessage
-         ("   currentProvider=%d, theDataLabels.size()=%d\n",
-          currentProvider, theDataLabels.size());
-      #endif
-      
-      #if DBGLVL_UPDATE > 2
-      MessageInterface::ShowMessage
-         ("OrbitView::Distribute() Using new Publisher code\n");
-      #endif
-      
-      // @note
-      // New Publisher code doesn't assign currentProvider anymore,
-      // it just copies current labels. There was an issue with
-      // provider id keep incrementing if data is regisgered and
-      // published inside a GmatFunction
-      StringArray dataLabels = theDataLabels[0];
-      
-      #if DBGLVL_DATA_LABELS
-      MessageInterface::ShowMessage("   Data labels for %s =\n   ", GetName().c_str());
-      for (int j=0; j<(int)dataLabels.size(); j++)
-         MessageInterface::ShowMessage("%s ", dataLabels[j].c_str());
-      MessageInterface::ShowMessage("\n");
-      #endif
-      
-      Integer idX, idY, idZ;
-      Integer idVx, idVy, idVz;
-      Integer scIndex = -1;
-      
-      for (int i=0; i<mScCount; i++)
-      {
-         idX = FindIndexOfElement(dataLabels, mScNameArray[i]+".X");
-         idY = FindIndexOfElement(dataLabels, mScNameArray[i]+".Y");
-         idZ = FindIndexOfElement(dataLabels, mScNameArray[i]+".Z");
-         
-         idVx = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vx");
-         idVy = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vy");
-         idVz = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vz");
-         
-         #if DBGLVL_DATA_LABELS
-         MessageInterface::ShowMessage
-            ("   mScNameArray[%d]=%s, idX=%d, idY=%d, idZ=%d, idVx=%d, idVy=%d, idVz=%d\n",
-             i, mScNameArray[i].c_str(), idX, idY, idZ, idVx, idVy, idVz);
-         #endif
-         
-         // if any of index not found, continue with next spacecraft name
-         if (idX  == -1 || idY  == -1 || idZ  == -1 ||
-             idVx == -1 || idVy == -1 || idVz == -1)
-            continue;
-         
-         scIndex++;
-         
-         // buffer data
-         for (int sc=0; sc<mScCount; sc++)
-         {
-            // If distributed data coordinate system is different from view
-            // coordinate system, convert data here.
-            // if we convert after current epoch, it will not give correct
-            // results, if origin is spacecraft,
-            // ie, sat->GetMJ2000State(epoch) will not give correct results.
-            
-            #if DBGLVL_DATA
-            MessageInterface::ShowMessage
-               ("   %s, %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(), dat[0],
-                dat[idX], dat[idY], dat[idZ]);
-            #endif
-            
-            if ((theDataCoordSystem != NULL && mViewCoordSystem != NULL) &&
-                (mViewCoordSystem != theDataCoordSystem))
-            {
-               Rvector6 inState, outState;
-               
-               // convert position and velocity
-               inState.Set(dat[idX], dat[idY], dat[idZ],
-                           dat[idVx], dat[idVy], dat[idVz]);
-               
-               coordConverter.Convert(dat[0], inState, theDataCoordSystem,
-                                      outState, mViewCoordSystem);
-               
-               mScXArray[scIndex] = outState[0];
-               mScYArray[scIndex] = outState[1];
-               mScZArray[scIndex] = outState[2];
-               mScVxArray[scIndex] = outState[3];
-               mScVyArray[scIndex] = outState[4];
-               mScVzArray[scIndex] = outState[5];
-            }
-            else
-            {
-               mScXArray[scIndex] = dat[idX];
-               mScYArray[scIndex] = dat[idY];
-               mScZArray[scIndex] = dat[idZ];
-               mScVxArray[scIndex] = dat[idVx];
-               mScVyArray[scIndex] = dat[idVy];
-               mScVzArray[scIndex] = dat[idVz];
-            }
-            
-            #if DBGLVL_DATA
-            MessageInterface::ShowMessage
-               ("   after buffering, scNo=%d, scIndex=%d, X,Y,Z = %f, %f, %f\n",
-                i, scIndex, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
-            #endif
-            
-            #if DBGLVL_DATA > 1
-            MessageInterface::ShowMessage
-               ("   Vx,Vy,Vz = %f, %f, %f\n",
-                mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
-            #endif
-         }
-      }
-      
-      // if only showing current iteration, buffer data and return
-      if (mSolverIterOption == SI_CURRENT)
-      {
-         // save data when targeting or last iteration
-         if (runstate == Gmat::SOLVING || runstate == Gmat::SOLVEDPASS)
-         {
-            mCurrScArray.push_back(mScNameArray);
-            mCurrEpochArray.push_back(dat[0]);
-            mCurrXArray.push_back(mScXArray);
-            mCurrYArray.push_back(mScYArray);
-            mCurrZArray.push_back(mScZArray);
-            mCurrVxArray.push_back(mScVxArray);
-            mCurrVyArray.push_back(mScVyArray);
-            mCurrVzArray.push_back(mScVzArray);
-         }
-         
-         if (runstate == Gmat::SOLVING)
-         {
-            //MessageInterface::ShowMessage
-            //   ("=====> num buffered = %d\n", mCurrEpochArray.size());
-            return true;
-         }
-      }
+      Integer status = BufferOrbitData(dat, len);
+
+      // if solving and plotting current iteration just return
+      if (status == 2)
+         return true;
       
       
       #if DBGLVL_UPDATE > 0
@@ -2184,10 +2054,12 @@ bool OrbitView::Distribute(const Real *dat, Integer len)
          solving = true;
          colorArray = mScTargetColorArray;
       }
-
+      
       bool inFunction = false;
       if (currentProvider && currentProvider->TakeAction("IsInFunction"))
          inFunction = true;
+      
+      bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
       
       PlotInterface::
          UpdateGlPlot(instanceName, mOldName, mScNameArray,

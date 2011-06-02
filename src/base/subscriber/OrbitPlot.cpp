@@ -50,6 +50,7 @@ const std::string
 OrbitPlot::PARAMETER_TEXT[OrbitPlotParamCount - SubscriberParamCount] =
 {
    "Add",
+   "CoordinateSystem",
    "DrawObject",
    "OrbitColor",
    "TargetColor",
@@ -64,6 +65,7 @@ const Gmat::ParameterType
 OrbitPlot::PARAMETER_TYPE[OrbitPlotParamCount - SubscriberParamCount] =
 {
    Gmat::OBJECTARRAY_TYPE,       //"Add"
+   Gmat::OBJECT_TYPE,            //"CoordinateSystem"
    Gmat::BOOLEANARRAY_TYPE,      //"DrawObject"
    Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
    Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
@@ -98,10 +100,13 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    // GmatBase data
    parameterCount = OrbitPlotParamCount;
    
+   mViewCoordSystem = NULL;
+   
    mOldName = instanceName;
+   mViewCoordSysName = "EarthMJ2000Eq";
    
    mDataCollectFrequency = 1;
-   mUpdatePlotFrequency = 1; //50;
+   mUpdatePlotFrequency = 50;
    mNumPointsToRedraw = 0;
    mNumData = 0;
    mNumCollected = 0;
@@ -153,106 +158,116 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// OrbitPlot(const OrbitPlot &op)
+// OrbitPlot(const OrbitPlot &plot)
 //------------------------------------------------------------------------------
 /**
  * The copy consturctor
  */
 //------------------------------------------------------------------------------
-OrbitPlot::OrbitPlot(const OrbitPlot &op)
-   : Subscriber(op)
+OrbitPlot::OrbitPlot(const OrbitPlot &plot)
+   : Subscriber(plot)
 {
-   mOldName = op.mOldName;;
-   mDataCollectFrequency = op.mDataCollectFrequency;
-   mUpdatePlotFrequency = op.mUpdatePlotFrequency;
-   mNumPointsToRedraw = op.mNumPointsToRedraw;
+   // Just copy configured object pointer
+   mViewCoordSystem = plot.mViewCoordSystem;
    
-   mAllSpCount = op.mAllSpCount;
-   mScCount = op.mScCount;
-   mObjectCount = op.mObjectCount;
-   mNonStdBodyCount = op.mNonStdBodyCount;
+   mOldName = plot.mOldName;
+   mViewCoordSysName = plot.mViewCoordSysName;
    
-   mObjectArray = op.mObjectArray;
-   mDrawOrbitArray = op.mDrawOrbitArray;
-   mDrawObjectArray = op.mDrawObjectArray;
-   mAllSpArray = op.mAllSpArray;
-   mScNameArray = op.mScNameArray;
-   mObjectNameArray = op.mObjectNameArray;
-   mAllSpNameArray = op.mAllSpNameArray;
-   mAllRefObjectNames = op.mAllRefObjectNames;
+   mDataCollectFrequency = plot.mDataCollectFrequency;
+   mUpdatePlotFrequency = plot.mUpdatePlotFrequency;
+   mNumPointsToRedraw = plot.mNumPointsToRedraw;
    
-   mScXArray = op.mScXArray;
-   mScYArray = op.mScYArray;
-   mScZArray = op.mScZArray;
-   mScVxArray = op.mScVxArray;
-   mScVyArray = op.mScVyArray;
-   mScVzArray = op.mScVzArray;
+   mAllSpCount = plot.mAllSpCount;
+   mScCount = plot.mScCount;
+   mObjectCount = plot.mObjectCount;
+   mNonStdBodyCount = plot.mNonStdBodyCount;
    
-   mScOrbitColorArray = op.mScOrbitColorArray;
-   mScTargetColorArray = op.mScTargetColorArray;
-   mOrbitColorArray = op.mOrbitColorArray;
-   mTargetColorArray = op.mTargetColorArray;
+   mObjectArray = plot.mObjectArray;
+   mDrawOrbitArray = plot.mDrawOrbitArray;
+   mDrawObjectArray = plot.mDrawObjectArray;
+   mAllSpArray = plot.mAllSpArray;
+   mScNameArray = plot.mScNameArray;
+   mObjectNameArray = plot.mObjectNameArray;
+   mAllSpNameArray = plot.mAllSpNameArray;
+   mAllRefObjectNames = plot.mAllRefObjectNames;
    
-   mOrbitColorMap = op.mOrbitColorMap;
-   mTargetColorMap = op.mTargetColorMap;
-   mDrawOrbitMap = op.mDrawOrbitMap;
-   mShowObjectMap = op.mShowObjectMap;
+   mScXArray = plot.mScXArray;
+   mScYArray = plot.mScYArray;
+   mScZArray = plot.mScZArray;
+   mScVxArray = plot.mScVxArray;
+   mScVyArray = plot.mScVyArray;
+   mScVzArray = plot.mScVzArray;
    
-   mNumData = op.mNumData;
-   mNumCollected = op.mNumCollected;
+   mScOrbitColorArray = plot.mScOrbitColorArray;
+   mScTargetColorArray = plot.mScTargetColorArray;
+   mOrbitColorArray = plot.mOrbitColorArray;
+   mTargetColorArray = plot.mTargetColorArray;
+   
+   mOrbitColorMap = plot.mOrbitColorMap;
+   mTargetColorMap = plot.mTargetColorMap;
+   mDrawOrbitMap = plot.mDrawOrbitMap;
+   mShowObjectMap = plot.mShowObjectMap;
+   
+   mNumData = plot.mNumData;
+   mNumCollected = plot.mNumCollected;
 }
 
 
 //------------------------------------------------------------------------------
-// OrbitPlot& operator=(const OrbitPlot&)
+// OrbitPlot& operator=(const OrbitPlot &plot)
 //------------------------------------------------------------------------------
 /**
  * The assignment operator
  */
 //------------------------------------------------------------------------------
-OrbitPlot& OrbitPlot::operator=(const OrbitPlot& op)
+OrbitPlot& OrbitPlot::operator=(const OrbitPlot& plot)
 {
-   if (this == &op)
+   if (this == &plot)
       return *this;
    
-   Subscriber::operator=(op);
+   Subscriber::operator=(plot);
    
-   mOldName = op.mOldName;
-   mDataCollectFrequency = op.mDataCollectFrequency;
-   mUpdatePlotFrequency = op.mUpdatePlotFrequency;
-   mNumPointsToRedraw = op.mNumPointsToRedraw;
+   // Just copy configured object pointer
+   mViewCoordSystem = plot.mViewCoordSystem;
    
-   mAllSpCount = op.mAllSpCount;
-   mScCount = op.mScCount;
-   mObjectCount = op.mObjectCount;
-   mNonStdBodyCount = op.mNonStdBodyCount;
+   mOldName = plot.mOldName;
+   mViewCoordSysName = plot.mViewCoordSysName;
    
-   mObjectArray = op.mObjectArray;
-   mDrawOrbitArray = op.mDrawOrbitArray;
-   mDrawObjectArray = op.mDrawObjectArray;
-   mAllSpArray = op.mAllSpArray;
-   mScNameArray = op.mScNameArray;
-   mObjectNameArray = op.mObjectNameArray;
-   mAllSpNameArray = op.mAllSpNameArray;
-   mAllRefObjectNames = op.mAllRefObjectNames;
-   mScXArray = op.mScXArray;
-   mScYArray = op.mScYArray;
-   mScZArray = op.mScZArray;
-   mScVxArray = op.mScVxArray;
-   mScVyArray = op.mScVyArray;
-   mScVzArray = op.mScVzArray;
-   mScOrbitColorArray = op.mScOrbitColorArray;
-   mScTargetColorArray = op.mScTargetColorArray;
-   mOrbitColorArray = op.mOrbitColorArray;
-   mTargetColorArray = op.mTargetColorArray;
+   mDataCollectFrequency = plot.mDataCollectFrequency;
+   mUpdatePlotFrequency = plot.mUpdatePlotFrequency;
+   mNumPointsToRedraw = plot.mNumPointsToRedraw;
    
-   mOrbitColorMap = op.mOrbitColorMap;
-   mTargetColorMap = op.mTargetColorMap;
-   mDrawOrbitMap = op.mDrawOrbitMap;
-   mShowObjectMap = op.mShowObjectMap;
+   mAllSpCount = plot.mAllSpCount;
+   mScCount = plot.mScCount;
+   mObjectCount = plot.mObjectCount;
+   mNonStdBodyCount = plot.mNonStdBodyCount;
    
-   mNumData = op.mNumData;
-   mNumCollected = op.mNumCollected;
+   mObjectArray = plot.mObjectArray;
+   mDrawOrbitArray = plot.mDrawOrbitArray;
+   mDrawObjectArray = plot.mDrawObjectArray;
+   mAllSpArray = plot.mAllSpArray;
+   mScNameArray = plot.mScNameArray;
+   mObjectNameArray = plot.mObjectNameArray;
+   mAllSpNameArray = plot.mAllSpNameArray;
+   mAllRefObjectNames = plot.mAllRefObjectNames;
+   mScXArray = plot.mScXArray;
+   mScYArray = plot.mScYArray;
+   mScZArray = plot.mScZArray;
+   mScVxArray = plot.mScVxArray;
+   mScVyArray = plot.mScVyArray;
+   mScVzArray = plot.mScVzArray;
+   mScOrbitColorArray = plot.mScOrbitColorArray;
+   mScTargetColorArray = plot.mScTargetColorArray;
+   mOrbitColorArray = plot.mOrbitColorArray;
+   mTargetColorArray = plot.mTargetColorArray;
+   
+   mOrbitColorMap = plot.mOrbitColorMap;
+   mTargetColorMap = plot.mTargetColorMap;
+   mDrawOrbitMap = plot.mDrawOrbitMap;
+   mShowObjectMap = plot.mShowObjectMap;
+   
+   mNumData = plot.mNumData;
+   mNumCollected = plot.mNumCollected;
    
    return *this;
 }
@@ -460,7 +475,7 @@ bool OrbitPlot::Initialize()
       return true;
    
    Subscriber::Initialize();
-      
+   
    #if DBGLVL_INIT
    MessageInterface::ShowMessage
       ("OrbitPlot::Initialize() this=<%p>'%s', active=%d, isInitialized=%d, "
@@ -475,9 +490,9 @@ bool OrbitPlot::Initialize()
    if (mAllSpCount == 0)
    {
       active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The 3DView named \"%s\" will be turned off. "
-          "No SpacePoints were added to plot.\n", GetName().c_str());
+      MessageInterface::ShowMessage
+         ("*** WARNING *** The %s named \"%s\" will be turned off. "
+          "No SpacePoints were added to plot.\n", GetTypeName().c_str(), GetName().c_str());
       return false;
    }
    
@@ -505,21 +520,22 @@ bool OrbitPlot::Initialize()
    if (nullCounter == mAllSpCount)
    {
       active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The 3DView named \"%s\" will be turned off. "
-          "%d SpaceObjects have NULL pointers.\n", GetName().c_str(), nullCounter);
+      MessageInterface::ShowMessage
+         ("*** WARNING *** The %s named \"%s\" will be turned off.  "
+          "%d SpaceObjects have NULL pointers.\n", GetTypeName().c_str(),
+          GetName().c_str(), nullCounter);
       return false;
    }
    
    if (!foundSc)
    {
       active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The 3DView named \"%s\" will be turned off. "
-          "No Spacecraft was added to plot.\n", GetName().c_str());
+      MessageInterface::ShowMessage
+         ("*** WARNING *** The %s named \"%s\" will be turned off. "
+          "No Spacecraft was added to plot.\n", GetTypeName().c_str(), GetName().c_str());
       return false;
    }
-      
+   
    #if DBGLVL_INIT
    MessageInterface::ShowMessage("OrbitPlot::Initialize() exiting\n");
    #endif
@@ -680,6 +696,11 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
          #endif
       }
    }
+   else if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      if (mViewCoordSysName == oldName)
+         mViewCoordSysName = newName;
+   }
    
    return true;
 }
@@ -730,10 +751,7 @@ Gmat::ParameterType OrbitPlot::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string OrbitPlot::GetParameterTypeString(const Integer id) const
 {
-   if (id >= SubscriberParamCount && id < OrbitPlotParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - SubscriberParamCount)];
-   else
-      return Subscriber::GetParameterTypeString(id);
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -854,7 +872,45 @@ Integer OrbitPlot::SetIntegerParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string OrbitPlot::GetStringParameter(const Integer id) const
 {
-   return Subscriber::GetStringParameter(id);
+   #if DBGLVL_PARAM_STRING
+   MessageInterface::ShowMessage("OrbitPlot::GetStringParameter() id = %d\n", id);
+   #endif
+   
+   switch (id)
+   {
+   case ADD:
+      {
+         Integer objCount = mAllSpNameArray.size();
+         std::string objList = "{ ";
+         for (Integer i = 0; i < objCount; i++)
+         {
+            if (i == objCount - 1)
+               objList += mAllSpNameArray[i];
+            else
+               objList += mAllSpNameArray[i] + ", ";
+         }
+         objList += " }";
+         return objList;
+      }
+   case COORD_SYSTEM:
+      return mViewCoordSysName;
+   default:
+      return Subscriber::GetStringParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string OrbitPlot::GetStringParameter(const std::string &label) const
+{
+   #if DBGLVL_PARAM_STRING
+   MessageInterface::ShowMessage
+      ("OrbitPlot::GetStringParameter() label = %s\n", label.c_str());
+   #endif
+   
+   return GetStringParameter(GetParameterID(label));
 }
 
 
@@ -871,8 +927,37 @@ bool OrbitPlot::SetStringParameter(const Integer id, const std::string &value)
    
    switch (id)
    {
+   case COORD_SYSTEM:
+      mViewCoordSysName = value;
+      return true;
    case ADD:
-      return AddSpacePoint(value, mAllSpCount);
+      {
+         if (value[0] == '{')
+         {
+            #if 1
+            try
+            {
+               TextParser tp;
+               ClearSpacePointList();
+               StringArray spList = tp.SeparateBrackets(value, "{}", ",");
+               for (UnsignedInt i = 0; i < spList.size(); i++)
+                  AddSpacePoint(spList[i], mAllSpCount);
+               return true;
+            }
+            catch (BaseException &e)
+            {
+               SubscriberException se;
+               se.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+                             "Add", "Valid CelestialBody list");
+               throw se;
+            }
+            #endif
+         }
+         else
+         {
+            return AddSpacePoint(value, mAllSpCount);
+         }
+      }
    case ORBIT_COLOR:
    case TARGET_COLOR:
       if (value[0] == '[')
@@ -881,20 +966,6 @@ bool OrbitPlot::SetStringParameter(const Integer id, const std::string &value)
    default:
       return Subscriber::SetStringParameter(id, value);
    }
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetStringParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-std::string OrbitPlot::GetStringParameter(const std::string &label) const
-{
-   #if DBGLVL_PARAM_STRING
-   MessageInterface::ShowMessage
-      ("OrbitPlot::GetStringParameter() label = %s\n", label.c_str());
-   #endif
-   
-   return GetStringParameter(GetParameterID(label));
 }
 
 
@@ -1185,6 +1256,11 @@ bool OrbitPlot::SetBooleanArrayParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string OrbitPlot::GetRefObjectName(const Gmat::ObjectType type) const
 {
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      return mViewCoordSysName; //just return this
+   }
+   
    return Subscriber::GetRefObjectName(type);
 }
 
@@ -1224,6 +1300,18 @@ const ObjectTypeArray& OrbitPlot::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const StringArray& OrbitPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   if (type == Gmat::COORDINATE_SYSTEM || type == Gmat::UNKNOWN_OBJECT)
+   {
+      mAllRefObjectNames.push_back(mViewCoordSysName);
+   }
+   
+   #if DBGLVL_OBJ
+   MessageInterface::ShowMessage
+      ("OrbitPlot::GetRefObjectNameArray() returning for type:%d\n", type);
+   for (unsigned int i=0; i<mAllRefObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", mAllRefObjectNames[i].c_str());
+   #endif
+   
    return mAllRefObjectNames;
 }
 
@@ -1235,7 +1323,12 @@ const StringArray& OrbitPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 GmatBase* OrbitPlot::GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name)
 {
-   // Any ref orbjet declared in this class?
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      if (name == mViewCoordSysName)
+         return mViewCoordSystem;
+   }
+   
    return Subscriber::GetRefObject(type, name);
 }
 
@@ -1289,7 +1382,15 @@ bool OrbitPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             mAllSpArray[i] = (SpacePoint*)(obj);
          }
       }
-            
+      
+      return true;
+   }
+   
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      if (realName == mViewCoordSysName)
+         mViewCoordSystem = (CoordinateSystem*)obj;
+
       return true;
    }
    
@@ -1841,7 +1942,169 @@ bool OrbitPlot::UpdateSolverData()
 }
 
 
-//--------------------------------------
-// methods inherited from Subscriber
-//--------------------------------------
+//------------------------------------------------------------------------------
+// Integer BufferOrbitData(const Real *dat, Integer len)
+//------------------------------------------------------------------------------
+/**
+ * @return 1 if continue
+ *         2 if solving and plotting current iteration
+ */
+//------------------------------------------------------------------------------
+Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
+{
+   //------------------------------------------------------------
+   // buffer orbit data
+   //------------------------------------------------------------
+
+   //@todo check for lenth of data
+   
+   CoordinateConverter coordConverter;
+   
+   #if DBGLVL_UPDATE > 1
+   MessageInterface::ShowMessage
+      ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=<%p>\n",
+       mNumData, mDataCollectFrequency, currentProvider);
+   #endif
+   
+   mNumData = 0;
+   mNumCollected++;
+   
+   #if DBGLVL_UPDATE > 1
+   MessageInterface::ShowMessage
+      ("   currentProvider=%d, theDataLabels.size()=%d\n",
+       currentProvider, theDataLabels.size());
+   #endif
+   
+   #if DBGLVL_UPDATE > 2
+   MessageInterface::ShowMessage
+      ("OrbitView::Distribute() Using new Publisher code\n");
+   #endif
+   
+   // @note
+   // New Publisher code doesn't assign currentProvider anymore,
+   // it just copies current labels. There was an issue with
+   // provider id keep incrementing if data is regisgered and
+   // published inside a GmatFunction
+   StringArray dataLabels = theDataLabels[0];
+   
+   #if DBGLVL_DATA_LABELS
+   MessageInterface::ShowMessage("   Data labels for %s =\n   ", GetName().c_str());
+   for (int j=0; j<(int)dataLabels.size(); j++)
+      MessageInterface::ShowMessage("%s ", dataLabels[j].c_str());
+   MessageInterface::ShowMessage("\n");
+   #endif
+   
+   Integer idX, idY, idZ;
+   Integer idVx, idVy, idVz;
+   Integer scIndex = -1;
+   
+   for (int i=0; i<mScCount; i++)
+   {
+      idX = FindIndexOfElement(dataLabels, mScNameArray[i]+".X");
+      idY = FindIndexOfElement(dataLabels, mScNameArray[i]+".Y");
+      idZ = FindIndexOfElement(dataLabels, mScNameArray[i]+".Z");
+      
+      idVx = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vx");
+      idVy = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vy");
+      idVz = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vz");
+      
+      #if DBGLVL_DATA_LABELS
+      MessageInterface::ShowMessage
+         ("   mScNameArray[%d]=%s, idX=%d, idY=%d, idZ=%d, idVx=%d, idVy=%d, idVz=%d\n",
+          i, mScNameArray[i].c_str(), idX, idY, idZ, idVx, idVy, idVz);
+      #endif
+      
+      // if any of index not found, continue with next spacecraft name
+      if (idX  == -1 || idY  == -1 || idZ  == -1 ||
+          idVx == -1 || idVy == -1 || idVz == -1)
+         continue;
+      
+      scIndex++;
+      
+      // buffer data
+      for (int sc=0; sc<mScCount; sc++)
+      {
+         // If distributed data coordinate system is different from view
+         // coordinate system, convert data here.
+         // if we convert after current epoch, it will not give correct
+         // results, if origin is spacecraft,
+         // ie, sat->GetMJ2000State(epoch) will not give correct results.
+         
+         #if DBGLVL_DATA
+         MessageInterface::ShowMessage
+            ("   %s, %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(), dat[0],
+             dat[idX], dat[idY], dat[idZ]);
+         #endif
+         
+         if ((theDataCoordSystem != NULL && mViewCoordSystem != NULL) &&
+             (mViewCoordSystem != theDataCoordSystem))
+         {
+            Rvector6 inState, outState;
+            
+            // convert position and velocity
+            inState.Set(dat[idX], dat[idY], dat[idZ],
+                        dat[idVx], dat[idVy], dat[idVz]);
+            
+            coordConverter.Convert(dat[0], inState, theDataCoordSystem,
+                                   outState, mViewCoordSystem);
+            
+            mScXArray[scIndex] = outState[0];
+            mScYArray[scIndex] = outState[1];
+            mScZArray[scIndex] = outState[2];
+            mScVxArray[scIndex] = outState[3];
+            mScVyArray[scIndex] = outState[4];
+            mScVzArray[scIndex] = outState[5];
+         }
+         else
+         {
+            mScXArray[scIndex] = dat[idX];
+            mScYArray[scIndex] = dat[idY];
+            mScZArray[scIndex] = dat[idZ];
+            mScVxArray[scIndex] = dat[idVx];
+            mScVyArray[scIndex] = dat[idVy];
+            mScVzArray[scIndex] = dat[idVz];
+         }
+         
+         #if DBGLVL_DATA
+         MessageInterface::ShowMessage
+            ("   after buffering, scNo=%d, scIndex=%d, X,Y,Z = %f, %f, %f\n",
+             i, scIndex, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
+         #endif
+         
+         #if DBGLVL_DATA > 1
+         MessageInterface::ShowMessage
+            ("   Vx,Vy,Vz = %f, %f, %f\n",
+             mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
+         #endif
+      }
+   }
+   
+   // if only showing current iteration, buffer data and return
+   if (mSolverIterOption == SI_CURRENT)
+   {
+      // save data when targeting or last iteration
+      if (runstate == Gmat::SOLVING || runstate == Gmat::SOLVEDPASS)
+      {
+         mCurrScArray.push_back(mScNameArray);
+         mCurrEpochArray.push_back(dat[0]);
+         mCurrXArray.push_back(mScXArray);
+         mCurrYArray.push_back(mScYArray);
+         mCurrZArray.push_back(mScZArray);
+         mCurrVxArray.push_back(mScVxArray);
+         mCurrVyArray.push_back(mScVyArray);
+         mCurrVzArray.push_back(mScVzArray);
+      }
+      
+      if (runstate == Gmat::SOLVING)
+      {
+         #if DBGLVL_DATA
+         MessageInterface::ShowMessage
+            ("=====> num buffered = %d\n", mCurrEpochArray.size());
+         #endif
+         return 2;
+      }
+   }
+   
+   return 1;
+}
 

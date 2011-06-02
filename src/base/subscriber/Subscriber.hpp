@@ -132,9 +132,6 @@ public:
       SolverIterOptionCount
    };
    
-   static Integer GetSolverIterOptionCount() { return SolverIterOptionCount; }
-   static const std::string* GetSolverIterOptionList();
-   
 protected:
    
    std::string          mSolverIterations;
@@ -200,6 +197,16 @@ public:
       PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount];
    static const std::string
       PARAMETER_TEXT[SubscriberParamCount - GmatBaseParamCount];
+   
+   // for GUI population
+   static StringArray solverIterOptions;
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const std::string &label) const;
+   static Integer GetSolverIterOptionCount() { return SolverIterOptionCount; }
+   static const std::string* GetSolverIterOptionList();
+   
    
 private:
    

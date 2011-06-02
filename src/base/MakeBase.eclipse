@@ -480,6 +480,7 @@ OBJECTS = \
     subscriber/MessageWindow.o \
     subscriber/TextEphemFile.o \
     subscriber/OrbitPlot.o \
+    subscriber/GroundTrackPlot.o \
     subscriber/OrbitView.o \
     subscriber/OwnedPlot.o \
     subscriber/ReportFile.o \

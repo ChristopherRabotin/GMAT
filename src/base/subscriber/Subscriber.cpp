@@ -61,6 +61,9 @@
 // static data
 //---------------------------------
 
+/// Available show foot print options
+StringArray Subscriber::solverIterOptions;
+
 const std::string
 Subscriber::SOLVER_ITER_OPTION_TEXT[SolverIterOptionCount] =
 {
@@ -115,6 +118,10 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    mSolverIterOption = SI_CURRENT;
    
    wrappersCopied = false;
+   
+   solverIterOptions.clear();
+   for (UnsignedInt i = 0; i < SolverIterOptionCount; i++)
+      solverIterOptions.push_back(SOLVER_ITER_OPTION_TEXT[i]);
 }
 
 
@@ -946,10 +953,7 @@ Gmat::ParameterType Subscriber::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Subscriber::GetParameterTypeString(const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < SubscriberParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - GmatBaseParamCount)];
-   else
-      return GmatBase::GetParameterTypeString(id);
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -1436,4 +1440,23 @@ void Subscriber::HandleScPropertyChange(GmatBase *originator, Real epoch,
 }
 
 
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+const StringArray& Subscriber::GetPropertyEnumStrings(const Integer id) const
+{
+   if (id == SOLVER_ITERATIONS)
+      return solverIterOptions;
+   
+   return GmatBase::GetPropertyEnumStrings(id);
+}
+
+
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const std::string &label) const
+//---------------------------------------------------------------------------
+const StringArray& Subscriber::GetPropertyEnumStrings(const std::string &label) const
+{
+   return GetPropertyEnumStrings(GetParameterID(label));
+}
 
