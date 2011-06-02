@@ -45,16 +45,23 @@ protected:
    virtual void         Create();
    virtual void         LoadData();
    virtual void         SaveData();
-   wxControl *          BuildControl(wxWindow *parent, GmatBase *theObject, Integer index, const std::string &label, wxFileConfig *config);
-   void          		CreateControls(wxFlexGridSizer *mainSizer, GmatBase *theObject);
-   void          		CreateControls(GmatBase *theObject, Integer index, wxStaticText **aLabel, wxControl **aControl, wxControl **aUnit, wxFileConfig *config);
+   wxControl *          BuildControl(wxWindow *parent, GmatBase *theObject,
+                                     Integer index, const std::string &label,
+                                     wxFileConfig *config);
+   void                 CreateControls(wxFlexGridSizer *mainSizer, GmatBase *theObject);
+   void                 CreateControls(GmatBase *theObject, Integer index,
+                                       wxStaticText **aLabel, wxControl **aControl,
+                                       wxControl **aUnit, wxFileConfig *config);
    void                 LoadControl(GmatBase *theObject, const std::string &label);
-   bool                 SaveControl(GmatBase *theObject, const std::string &label, bool showErrorMsgs = false);
+   bool                 SaveControl(GmatBase *theObject, const std::string &label,
+                                    bool showErrorMsgs = false);
    virtual std::string  GetParameterLabel(GmatBase *theObject, Integer index, wxFileConfig *config) const;
    virtual std::string  GetParameterUnit(GmatBase *theObject, Integer index, wxFileConfig *config) const;
-   std::string  		AssignAcceleratorKey(std::string text);
-   virtual SizerMapType *       CreateGroups(wxFlexGridSizer *mainSizer, wxFileConfig *config);
-   virtual void         CreateProperties(wxFlexGridSizer *mainSizer, GmatBase *theObject, StringArray *propertyNames, SizerMapType *groups, wxFileConfig *config);
+   std::string          AssignAcceleratorKey(std::string text);
+   virtual SizerMapType* CreateGroups(wxFlexGridSizer *mainSizer, wxFileConfig *config);
+   virtual void         CreateProperties(wxFlexGridSizer *mainSizer,
+                                         GmatBase *theObject, StringArray *propertyNames,
+                                         SizerMapType *groups, wxFileConfig *config);
    virtual void         SortGroups(StringArray *groupNames, wxFileConfig *config);
    virtual void         SortProperties(StringArray *propertyNames, wxFileConfig *config);
    virtual void         NormalizeLabels( StringArray propertyNames,
