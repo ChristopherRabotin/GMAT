@@ -2697,7 +2697,9 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new EphemerisFilePanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::SUBSCRIBER:
-      sizer->Add(new SubscriberSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      // Switched to use GmatBaseSetupPanel (LOJ: 2011.06.02)
+      //sizer->Add(new SubscriberSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::MATLAB_FUNCTION:
       sizer->Add(new MatlabFunctionSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
