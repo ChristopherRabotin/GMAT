@@ -4,46 +4,47 @@
 # locations. See /build/install/PACKAGING-MANIFEST.txt for a description of
 # where files are located.
 #
-# Usage: assemblegmat.sh win|linux|mac
+# Usage: $0 [option] ...
+# Options:
+#   -b buildname  Assemble the named build instead of the latest available
+#   -l|-m|[-w]    Assemble for Linux (-l), Mac (-m), or Windows (-w, default)
+#   -t type       Assemble a particular type of distribution:
+#                 full: everything included (default)
 
 # Initializations
-WINDOWS=false
+WINDOWS=true
 MAC=false
 LINUX=false
+TYPE=full
 
 usage() {
-    echo "Usage:"
-    echo "  $0 win <buildname>"
-    echo "  $0 lin"
-    echo "  $0 mac"
+cat <<END
+Usage: $0 [option] ...
+Options:
+  -b buildname  Assemble the named build instead of the latest available
+  -l|-m|[-w]    Assemble for Linux (-l), Mac (-m), or Windows (-w, default)
+  -t type       Assemble a particular type of distribution:
+                full: everything included (default)
+END
 }
 
 # File sources
 sfrepo='https://gmat.svn.sourceforge.net/svnroot/gmat'
-apppath=$sfrepo/trunk/application
+apppath="$sfrepo/trunk/application"
 
-# Platform selection
-if [ "$1" == 'win' ]
-then
-    if [ -z "$2" ]
-    then
-        usage
-        exit 1
-    else
-        WINDOWS=true
-        winbuildname="$2"
-    fi
-elif [ "$1" == 'lin' ]
-then
-    LINUX=true
-elif [ "$1" == 'mac' ]
-then
-    MAC=true
-else
-    usage
-    exit 1
-fi
-    
+# Argument handling
+while getopts b:lmt:w o
+do
+    case "$o" in
+        b) buildname="$OPTARG";;
+        l) LINUX=true; MAC=false; WINDOWS=false;;
+        m) LINUX=false; MAC=true; WINDOWS=false;;
+        t) TYPE="$OPTARG";;
+        w) LINUX=false; MAC=false; WINDOWS=true;;
+        ?) usage; exit 1;;
+    esac
+done
+
 # bin, data, matlab
 svn export --force $apppath gmat
 
@@ -54,29 +55,46 @@ mkdir -p gmat/output
 if $WINDOWS
 then
     # File locations
-    winbuildspath='//mesa-file/595/GMAT/Builds/windows'
+    winbuildspath='//mesa-file/595/GMAT/Builds/windows/VS2010_build'
+    
+    # Find latest build
+    if [ -z "$buildname" ]
+    then
+        buildname=`ls -1 $winbuildspath | tail -n 1`
+    fi
     
     # bin (Windows)
     cp -prv \
-        $winbuildspath/$winbuildname/GMAT.exe \
-        $winbuildspath/$winbuildname/libGmatBase.dll \
+        $winbuildspath/$buildname/GMAT.exe \
+        $winbuildspath/$buildname/libGmatBase.dll \
         gmat/bin
 
     # bin (Windows)
     cp -prv \
-        $winbuildspath/gcc_lib/wx2.8.11/*.dll \
+        $winbuildspath/../vc_lib/wx2.8.12/*.dll \
         gmat/bin
     cp -prv \
-        $winbuildspath/gcc_lib/other/*.dll \
+        $winbuildspath/../vc_lib/*.dll \
         gmat/bin
 
     # plugins (Windows)
     mkdir -p gmat/plugins/proprietary
     cp -prv \
-        $winbuildspath/$winbuildname/libFminconOptimizer.dll \
-        $winbuildspath/$winbuildname/libGmatEstimation.dll \
-        $winbuildspath/$winbuildname/libMatlabInterface.dll \
+        $winbuildspath/$buildname/libFminconOptimizer.dll \
+        $winbuildspath/$buildname/libGmatEstimation.dll \
+        $winbuildspath/$buildname/libMatlabInterface.dll \
         gmat/plugins
+    
+    if [ `echo "$TYPE" | tr [:upper:] [:lower:]` == 'full' ]
+    then
+        cp -prv \
+            $winbuildspath/$buildname/libCcsdsEphemerisFile.dll \
+            $winbuildspath/$buildname/libDataFile.dll \
+            gmat/plugins
+        cp -prv \
+            $winbuildspath/$buildname/libVF13Optimizer.dll \
+            gmat/plugins/proprietary
+    fi
 
     # Remove Windows hidden files
     find gmat -iname thumbs.db -delete
