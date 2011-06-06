@@ -26,11 +26,13 @@ SHARED_LIB_FLAGS = $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace
 MSISE_C_OBJECTS  = 
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared -Wl --out-implib
+SHARED_LIB_FLAGS = -shared -Wl
+# No longer in gcc 4.6: --out-implib
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 endif
 
-#SHARED_LIB_FLAGS = -shared -Wl --out-implib
+#SHARED_LIB_FLAGS = -shared -Wl
+# No longer in gcc 4.6: --out-implib
 
 else
 
@@ -530,6 +532,7 @@ OBJECTS = \
     $(TCPIP_OBJECTS) \
     $(SPICE_OBJECTS)
 
+#    parameter/OrbitAMatrixParameters.o \
 
 #    $(BRIDGEOBJECTS)
 

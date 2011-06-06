@@ -117,6 +117,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
 //      Gmat::STRINGARRAY_TYPE, // SCClockSpiceKernelName
 //      Gmat::STRINGARRAY_TYPE, // FrameSpiceKernelName
       Gmat::RMATRIX_TYPE,     // OrbitSTM
+      Gmat::RMATRIX_TYPE,     // OrbitAMatrix
       Gmat::STRING_TYPE,      // UTCGregorian
       Gmat::REAL_TYPE,        // CartesianX
       Gmat::REAL_TYPE,        // CartesianY
@@ -125,7 +126,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // CartesianVY
       Gmat::REAL_TYPE,        // CartesianVZ
       Gmat::REAL_TYPE,        // Mass Flow
-                Gmat::OBJECTARRAY_TYPE, // AddHardware    // made changes by Tuan Nguyen
+      Gmat::OBJECTARRAY_TYPE, // AddHardware    // made changes by Tuan Nguyen
       Gmat::STRING_TYPE,      // Model File
       Gmat::REAL_TYPE,        // Model Offset X
       Gmat::REAL_TYPE,        // Model Offset Y
@@ -172,6 +173,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
 //      "SCClockSpiceKernelName",
 //      "FrameSpiceKernelName",
       "OrbitSTM",
+      "OrbitAMatrix",
       "UTCGregorian",
       "CartesianX",
       "CartesianY",
@@ -284,6 +286,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    csSet                (false),
    isThrusterSettingMode(false),
    orbitSTM             (6,6),
+   orbitAMatrix         (6,6),
    includeCartesianState(0)
 {
    #ifdef DEBUG_SPACECRAFT
@@ -363,6 +366,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
    orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
 
+   orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
+   orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
    // Initialize the covariance matrix
    covariance.AddCovarianceElement("CartesianState", this);
    covariance.ConstructLHS();
@@ -458,6 +463,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    csSet                (a.csSet),
    isThrusterSettingMode(a.isThrusterSettingMode),
    orbitSTM             (a.orbitSTM),
+   orbitAMatrix         (a.orbitAMatrix),
    includeCartesianState(a.includeCartesianState)
 {
    #ifdef DEBUG_SPACECRAFT
@@ -603,6 +609,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    BuildElementLabelMap();
 
    orbitSTM = a.orbitSTM;
+   orbitAMatrix = a.orbitAMatrix;
 //   orbitSpiceKernelNames = a.orbitSpiceKernelNames;
    includeCartesianState = a.includeCartesianState;
 
@@ -1676,6 +1683,8 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       if (str == "STM")
          return ORBIT_STM;
 
+      if (str == "AMatrix")
+         return ORBIT_A_MATRIX;
 //      if (str == "OrbitSpiceKernelName")
 //         return ORBIT_SPICE_KERNEL_NAME;
 //
@@ -1785,6 +1794,11 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       return true;
    }
 
+   if (id == ORBIT_A_MATRIX)
+   {
+      return true;
+   }
+
    if (id == MASS_FLOW)
    {
       return true;
@@ -1870,6 +1884,44 @@ bool Spacecraft::ParameterAffectsDynamics(const Integer id) const
    return SpaceObject::ParameterAffectsDynamics(id);
 }
 
+//------------------------------------------------------------------------------
+// bool ParameterDvInitializesNonzero(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Describe the method here
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+bool Spacecraft::ParameterDvInitializesNonzero(const Integer id,
+      const Integer r, const Integer c) const
+{
+   if (id == ORBIT_STM)
+   {
+      if (r == c-3)
+         return true;
+      return false;
+   }
+
+   if (id == ORBIT_A_MATRIX)
+   {
+      if (r == c-3)
+         return true;
+      return false;
+   }
+
+   return SpaceObject::ParameterDvInitializesNonzero(id);
+}
+
+Real Spacecraft::ParameterDvInitialValue(const Integer id, const Integer r,
+      const Integer c) const
+{
+   if (r == c-3)
+      return 1.0;
+   return 0.0;
+}
 
 //---------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -2869,6 +2921,9 @@ const Rmatrix& Spacecraft::GetRmatrixParameter(const Integer id) const
    if (id == ORBIT_STM)
       return orbitSTM;
 
+   if (id == ORBIT_A_MATRIX)
+      return orbitAMatrix;
+
 //   if (id == ORBIT_COVARIANCE)
 //      return covariance;
 
@@ -2885,6 +2940,12 @@ const Rmatrix& Spacecraft::SetRmatrixParameter(const Integer id,
    {
       orbitSTM = value;
       return orbitSTM;
+   }
+
+   if (id == ORBIT_A_MATRIX)
+   {
+      orbitAMatrix = value;
+      return orbitAMatrix;
    }
 
 //   if (id == ORBIT_COVARIANCE)
@@ -2924,6 +2985,9 @@ Real Spacecraft::GetRealParameter(const Integer id, const Integer row,
    if (id == ORBIT_STM)
       return orbitSTM(row, col);
 
+   if (id == ORBIT_A_MATRIX)
+      return orbitAMatrix(row, col);
+
    return SpaceObject::GetRealParameter(id, row, col);
 }
 
@@ -2949,6 +3013,12 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
    {
       orbitSTM(row, col) = value;
       return orbitSTM(row, col);
+   }
+
+   if (id == ORBIT_A_MATRIX)
+   {
+      orbitAMatrix(row, col) = value;
+      return orbitAMatrix(row, col);
    }
 
    return SpaceObject::SetRealParameter(id, value, row, col);
@@ -3230,6 +3300,23 @@ bool Spacecraft::TakeAction(const std::string &action,
       orbitSTM(4,0)=orbitSTM(4,1)=orbitSTM(4,2)=orbitSTM(4,3)=orbitSTM(4,5)=
       orbitSTM(5,0)=orbitSTM(5,1)=orbitSTM(5,2)=orbitSTM(5,3)=orbitSTM(5,4)
             = 0.0;
+   }
+
+   if (action == "ResetAMatrix")
+   {
+      orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
+      orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
+
+      orbitAMatrix(0,1) = orbitAMatrix(0,2) = orbitAMatrix(0,3) =
+      orbitAMatrix(0,4) = orbitAMatrix(0,5) = orbitAMatrix(1,0) =
+      orbitAMatrix(1,2) = orbitAMatrix(1,3) = orbitAMatrix(1,4) =
+      orbitAMatrix(1,5) = orbitAMatrix(2,0) = orbitAMatrix(2,1) =
+      orbitAMatrix(2,3) = orbitAMatrix(2,4) = orbitAMatrix(2,5) =
+      orbitAMatrix(3,0) = orbitAMatrix(3,1) = orbitAMatrix(3,2) =
+      orbitAMatrix(3,4) = orbitAMatrix(3,5) = orbitAMatrix(4,0) =
+      orbitAMatrix(4,1) = orbitAMatrix(4,2) = orbitAMatrix(4,3) =
+      orbitAMatrix(4,5) = orbitAMatrix(5,0) = orbitAMatrix(5,1) =
+      orbitAMatrix(5,2) = orbitAMatrix(5,3) = orbitAMatrix(5,4) = 0.0;
    }
 
    return SpaceObject::TakeAction(action, actionData);
@@ -3565,6 +3652,8 @@ Integer Spacecraft::GetPropItemID(const std::string &whichItem)
       return Gmat::CARTESIAN_STATE;
    if (whichItem == "STM")
       return Gmat::ORBIT_STATE_TRANSITION_MATRIX;
+   if (whichItem == "AMatrix")
+      return Gmat::ORBIT_A_MATRIX;
 
    return SpaceObject::GetPropItemID(whichItem);
 }
@@ -3578,6 +3667,8 @@ Integer Spacecraft::SetPropItem(const std::string &propItem)
       return Gmat::CARTESIAN_STATE;
    if (propItem == "STM")
       return Gmat::ORBIT_STATE_TRANSITION_MATRIX;
+   if (propItem == "AMatrix")
+      return Gmat::ORBIT_A_MATRIX;
    if (propItem == "MassFlow")
       if (tanks.size() > 0)
          return Gmat::MASS_FLOW;
@@ -3613,6 +3704,9 @@ Real* Spacecraft::GetPropItem(const Integer item)
 //         retval = stm;
          break;
 
+      case Gmat::ORBIT_A_MATRIX:
+         break;
+
       case Gmat::MASS_FLOW:
          // todo: Access tanks for mass information to handle mass flow
          break;
@@ -3641,6 +3735,9 @@ Integer Spacecraft::GetPropItemSize(const Integer item)
          retval = 36;
          break;
 
+      case Gmat::ORBIT_A_MATRIX:
+         retval = 36;
+         break;
       case Gmat::MASS_FLOW:
          // todo: Access tanks for mass information to handle mass flow
 
@@ -3655,6 +3752,27 @@ Integer Spacecraft::GetPropItemSize(const Integer item)
 
    return retval;
 }
+
+bool Spacecraft::PropItemNeedsFinalUpdate(const Integer item)
+{
+   switch (item)
+   {
+      case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
+      case Gmat::ORBIT_A_MATRIX:
+         return true;
+
+      case Gmat::CARTESIAN_STATE:
+      case Gmat::MASS_FLOW:
+         return false;
+
+      // All other values call up the hierarchy
+      default:
+         ;        // Intentional drop through
+   }
+
+   return SpaceObject::PropItemNeedsFinalUpdate(item);
+}
+
 
 //------------------------------------------------------------------------------
 // bool IsEstimationParameterValid(const Integer item)
@@ -4434,6 +4552,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    parmOrder[parmIndex++] = FUEL_TANK_ID;
    parmOrder[parmIndex++] = THRUSTER_ID;
    parmOrder[parmIndex++] = ORBIT_STM;
+   parmOrder[parmIndex++] = ORBIT_A_MATRIX;
    parmOrder[parmIndex++] = ELEMENT1UNIT_ID;
    parmOrder[parmIndex++] = ELEMENT2UNIT_ID;
    parmOrder[parmIndex++] = ELEMENT3UNIT_ID;

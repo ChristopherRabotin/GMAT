@@ -306,6 +306,14 @@ protected:
    
    ObjectArray               stateObjects;
    
+   bool                      fillSTM;
+   Integer                   stmStart;
+   Integer                   stmCount;
+
+   bool                      fillAMatrix;
+   Integer                   aMatrixStart;
+   Integer                   aMatrixCount;
+
    void                      MoveToOrigin(Real newEpoch = -1.0);
    void                      ReturnFromOrigin(Real newEpoch = -1.0);
    
@@ -320,7 +328,8 @@ protected:
    };
    
 private:
-   // Throws a warning, but can be safely ignored becaise this vector is not used elsewhere
+   // Throws a warning, but can be safely ignored because this vector is not
+   // used elsewhere
    std::vector<StateStructure> sstruct;
 
 protected:
@@ -329,6 +338,8 @@ protected:
    bool                      BuildModelElement(Gmat::StateElementId id, 
                                                Integer start, 
                                                Integer objectCount);
+   bool                      PrepareDerivativeArray();
+   bool                      CompleteDerivativeCalculations(Real *state);
    
 //   /// Data file used when debugging epoch data
 //   std::ofstream             epochFile;

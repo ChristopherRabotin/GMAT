@@ -875,18 +875,16 @@ void Moderator::LoadAPlugin(std::string pluginName)
  * @param libraryName The file name for the plug-in library.  The name should 
  *                    not include the file extension.
  * 
- * @return The DynamicLibrary object that suppies teh library interfaces, or a 
+ * @return The DynamicLibrary object that supplies the library interfaces, or a
  *         NULL pointer if the library did not load.
  */ 
 //------------------------------------------------------------------------------
 DynamicLibrary *Moderator::LoadLibrary(const std::string &libraryName)
 {
-   bool retval = false;
    DynamicLibrary *theLib = new DynamicLibrary(libraryName);
    if (theLib->LoadDynamicLibrary())
    {
       userLibraries[libraryName] = theLib;
-      retval = true;
    }
    else
    {
@@ -7268,12 +7266,17 @@ void Moderator::CreateDefaultMission()
       MessageInterface::ShowMessage("-->default ballistic/mass parameters created\n");
       #endif
       
-      // STM parameters
+      // STM and A-Matrix parameters
       CreateParameter("OrbitSTM", "DefaultSC.OrbitSTM");
       CreateParameter("OrbitSTMA", "DefaultSC.OrbitSTMA");
       CreateParameter("OrbitSTMB", "DefaultSC.OrbitSTMB");
       CreateParameter("OrbitSTMC", "DefaultSC.OrbitSTMC");
       CreateParameter("OrbitSTMD", "DefaultSC.OrbitSTMD");
+      CreateParameter("OrbitAMatrix", "DefaultSC.OrbitSTM");
+      CreateParameter("OrbitAMatrixA", "DefaultSC.OrbitSTMA");
+      CreateParameter("OrbitAMatrixB", "DefaultSC.OrbitSTMB");
+      CreateParameter("OrbitAMatrixC", "DefaultSC.OrbitSTMC");
+      CreateParameter("OrbitAMatrixD", "DefaultSC.OrbitSTMD");
       #if DEBUG_DEFAULT_MISSION > 1
       MessageInterface::ShowMessage("-->default STM parameters created\n");
       #endif

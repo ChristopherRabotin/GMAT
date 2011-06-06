@@ -188,6 +188,11 @@ public:
    virtual bool         IsParameterEqualToDefault(const std::string &label) const;
 
    virtual bool         ParameterAffectsDynamics(const Integer id) const;
+   virtual bool         ParameterDvInitializesNonzero(const Integer id,
+                              const Integer r = 0, const Integer c = 0) const;
+   virtual Real         ParameterDvInitialValue(const Integer id,
+                              const Integer r = 0, const Integer c = 0) const;
+   virtual bool         ParameterUpdatesAfterSuperposition(const Integer id) const;
 
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
@@ -418,6 +423,7 @@ public:
    virtual StringArray     GetDefaultPropItems();
    virtual Real*           GetPropItem(const Integer item);
    virtual Integer         GetPropItemSize(const Integer item);
+   virtual bool            PropItemNeedsFinalUpdate(const Integer item);
 
    virtual Integer         GetEstimationParameterID(const std::string &param);
    virtual Integer         SetEstimationParameter(const std::string &param);

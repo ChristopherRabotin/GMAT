@@ -117,7 +117,10 @@ PointMassForce::PointMassForce(const std::string &name) :
    fillCartesian          (false),
    stmCount               (0),
    stmIndex               (0),
-   fillSTM                (false)
+   fillSTM                (false),
+   aMatrixCount           (0),
+   aMatrixIndex           (0),
+   fillAMatrix            (false)
 {
    parameterCount = PointMassParamCount;
    dimension = 6 * satCount;
@@ -128,16 +131,17 @@ PointMassForce::PointMassForce(const std::string &name) :
    
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    derivativeIds.push_back(Gmat::ORBIT_STATE_TRANSITION_MATRIX);
+   derivativeIds.push_back(Gmat::ORBIT_A_MATRIX);
 }
 
 //------------------------------------------------------------------------------
-// PointMassForce::~PointMassForce(void)
+// PointMassForce::~PointMassForce()
 //------------------------------------------------------------------------------
 /**
  * Destructor for the point mass gravitational model
  */
 //------------------------------------------------------------------------------
-PointMassForce::~PointMassForce(void)
+PointMassForce::~PointMassForce()
 {
    //delete theBody; //loj: 5/20/04
 }
@@ -166,7 +170,10 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
    fillCartesian          (pmf.fillCartesian),
    stmCount               (pmf.stmCount),
    stmIndex               (pmf.stmIndex),
-   fillSTM                (pmf.fillSTM)
+   fillSTM                (pmf.fillSTM),
+   aMatrixCount           (pmf.aMatrixCount),
+   aMatrixIndex           (pmf.aMatrixIndex),
+   fillAMatrix            (pmf.fillAMatrix)
 {
    parameterCount = PointMassParamCount;
    dimension = pmf.dimension;
@@ -207,6 +214,9 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
    stmCount         = pmf.stmCount;
    stmIndex         = pmf.stmIndex;
    fillSTM          = pmf.fillSTM;
+   aMatrixCount     = pmf.aMatrixCount;
+   aMatrixIndex     = pmf.aMatrixIndex;
+   fillAMatrix      = pmf.fillAMatrix;
 
    return *this;
 }
@@ -313,9 +323,9 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
       "satCount = %d\n", state, dt, order, id, satCount);
 #endif
    
-   Integer i6;
+   Integer i6, a6;
 
-   if (fillCartesian || fillSTM)
+   if (fillCartesian || fillSTM || fillAMatrix)
    {
       if (order > 2)
          return false;
@@ -385,18 +395,18 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
                a_indirect[1], a_indirect[2]);
       #endif
 
-        #if DEBUG_PMF_BODY
-           ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
-                         body->GetName(), now, rv);
-        #endif
+      #if DEBUG_PMF_BODY
+          ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
+                        body->GetName(), now, rv);
+      #endif
    
-        #if DEBUG_PMF_DERV
-           ShowDerivative("PointMassForce::GetDerivatives() BEFORE compute", state, 
-              satCount);
-        #endif
+      #if DEBUG_PMF_DERV
+          ShowDerivative("PointMassForce::GetDerivatives() BEFORE compute", state,
+             satCount);
+      #endif
       
-           if (fillCartesian)
-           {
+      if (fillCartesian)
+      {
          for (Integer i = 0; i < satCount; i++) 
          {
             i6 = cartIndex + i * 6;
@@ -453,7 +463,7 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
                deriv[i6+5] = 0.0; 
             }
          }
-           }   
+      }
       #if DEBUG_PMF_DERV
          ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, 
             satCount);
@@ -469,13 +479,18 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
             rv[cartIndex + 2], "]\n   Acceleration:  [", deriv[cartIndex + 3], 
             deriv[cartIndex + 4], deriv[cartIndex + 5]);
       #endif
-      if (fillSTM)
+      if (fillSTM || fillAMatrix)
       {
          Real aTilde[36];
          Integer associate, element;
-         for (Integer i = 0; i < stmCount; ++i)
+         Integer aiCount = (fillSTM ? stmCount : aMatrixCount);
+
+         for (Integer i = 0; i < aiCount; ++i)
          {
             i6 = stmIndex + i * 36;
+            a6 = aMatrixIndex + i * 36;
+            if (!fillSTM)
+               i6 = a6;
             associate = theState->GetAssociateIndex(i6);
             
             relativePosition[0] = rv[0] - state[ associate ];
@@ -503,8 +518,8 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
             // Contributions for the origin term only:
             if (rbb3 == 0.0)
             {
-               // B = I
-               aTilde[ 3] = aTilde[10] = aTilde[17] = 1.0;
+               // B = I is set in the ODE Model
+               aTilde[ 3] = aTilde[10] = aTilde[17] = //1.0;
                aTilde[ 4] = aTilde[ 5] = aTilde[ 9] =
                aTilde[11] = aTilde[15] = aTilde[16] = 0.0;
             }
@@ -542,24 +557,38 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
             
             aTilde[32] = - mu_r + 3.0 * mu_r / (radius*radius) * 
                              relativePosition[2] * relativePosition[2];
-            
-            // Now Phi_dot = A_tilde Phi
+
+// Moved to ODEModel so upper half of STM and A-Matrix are correctly managed
+//            // Now Phi_dot = A_tilde Phi
+//            if (fillSTM)
+//            {
+//               for (Integer j = 0; j < 6; ++j)
+//               {
+//                  for (Integer k = 0; k < 6; ++k)
+//                  {
+//                     element = j * 6 + k;
+//                     deriv[i6+element] = 0.0;
+//                     for (Integer l = 0; l < 6; ++l)
+//                     {
+//                        deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
+//                     }
+//                  }
+//               }
+//            }
             for (Integer j = 0; j < 6; ++j)
             {
                for (Integer k = 0; k < 6; ++k)
                {
                   element = j * 6 + k;
-                  deriv[i6+element] = 0.0;
-                  for (Integer l = 0; l < 6; ++l)
-                  {
-                     deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
-                  }
+                  if (fillSTM)
+                     deriv[i6+element] = aTilde[element];
+                  if (fillAMatrix)
+                     deriv[a6 + element] = aTilde[element];
                }
             }
          }
       }
    }
-   
    
    return true;
 }
@@ -931,6 +960,9 @@ bool PointMassForce::SupportsDerivative(Gmat::StateElementId id)
    if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
       return true;
    
+   if (id == Gmat::ORBIT_A_MATRIX)
+      return true;
+
    return PhysicalModel::SupportsDerivative(id);
 }
 
@@ -976,6 +1008,13 @@ bool PointMassForce::SetStart(Gmat::StateElementId id, Integer index,
          retval = true;
          break;
          
+      case Gmat::ORBIT_A_MATRIX:
+         aMatrixCount = quantity;
+         aMatrixIndex = index;
+         fillAMatrix = true;
+         retval = true;
+         break;
+
       default:
          break;
    }

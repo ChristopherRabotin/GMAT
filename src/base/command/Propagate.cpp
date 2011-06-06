@@ -718,6 +718,16 @@ GmatBase* Propagate::GetRefObject(const Gmat::ObjectType type,
 {
    switch (type)
    {
+   case Gmat::PROP_SETUP:
+      if (index < (Integer)prop.size())
+      {
+         return prop[index];
+      }
+      else
+      {
+         throw CommandException("Propagate::GetRefObject() invalid PropSetup index\n");
+      }
+      break;
    case Gmat::STOP_CONDITION:
       if (index < (Integer)stopWhen.size())
       {
@@ -1703,7 +1713,7 @@ bool Propagate::InterpretAction()
          /** @todo: This point fix needs to be generalized so that a list of
           *         keywords isn't maintained here.
           */
-         if ((*satName[i])[j] != "STM")
+         if (((*satName[i])[j] != "STM") && ((*satName[i])[j] != "AMatrix"))
          {
             #ifdef DEBUG_PROPAGATE_ASSEMBLE
                MessageInterface::ShowMessage("  [%d][%d] = %s\n", i, j,

@@ -43,7 +43,8 @@
  */
 //------------------------------------------------------------------------------
 PropagationStateManager::PropagationStateManager(Integer size) :
-   StateManager         (size)
+   StateManager                  (size),
+   hasPostSuperpositionMember    (false)
 {
 }
 
@@ -73,7 +74,8 @@ PropagationStateManager::~PropagationStateManager()
 //------------------------------------------------------------------------------
 PropagationStateManager::
          PropagationStateManager(const PropagationStateManager& psm) :
-   StateManager         (psm)
+   StateManager                  (psm),
+   hasPostSuperpositionMember    (psm.hasPostSuperpositionMember)
 {
 }
 
@@ -95,6 +97,8 @@ PropagationStateManager&
    if (this != &psm)
    {
       StateManager::operator=(psm);
+
+      hasPostSuperpositionMember = psm.hasPostSuperpositionMember;
    }
    
    return *this;
@@ -583,6 +587,77 @@ bool PropagationStateManager::MapVectorToObjects()
 
 
 //------------------------------------------------------------------------------
+// bool RequiresCompletion()
+//------------------------------------------------------------------------------
+/**
+ * Flags if additional steps are needed for derivatives after superposition
+ *
+ * Returns true if there is a post-superposition step required in the
+ * propagation state vector.  This case occurs, for example, for the orbit STM
+ * and A-Matrix in order to fill in the upper half of the matrices, and (for the
+ * STM) to apply \Phi\dot = A \Phi.
+ *
+ * @return true if a final "completion" step is needed, false if not.
+ */
+//------------------------------------------------------------------------------
+bool PropagationStateManager::RequiresCompletion()
+{
+   return hasPostSuperpositionMember;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetCompletionCount()
+//------------------------------------------------------------------------------
+/**
+ * Describe the method here
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+Integer PropagationStateManager::GetCompletionCount()
+{
+   return completionIndexList.size();
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetCompletionIndex(Integer start)
+//------------------------------------------------------------------------------
+/**
+ * Describe the method here
+ *
+ * @param which Index of the beginning of the element that needs completion
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+Integer PropagationStateManager::GetCompletionIndex(const Integer which)
+{
+   return completionIndexList[which];
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetCompletionSize(Integer start)
+//------------------------------------------------------------------------------
+/**
+ * Describe the method here
+ *
+ * @param which Index of the beginning of the element that needs completion
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+Integer PropagationStateManager::GetCompletionSize(const Integer which)
+{
+   return completionSizeList[which];
+}
+
+
+//------------------------------------------------------------------------------
 // Integer PropagationStateManager::SortVector()
 //------------------------------------------------------------------------------
 /**
@@ -609,6 +684,9 @@ Integer PropagationStateManager::SortVector()
    Gmat::StateElementId id;
    Integer size, loc = 0, val;
    stateSize = 0;
+   // Initially assume there is no post superposition member
+   hasPostSuperpositionMember = false;
+
 
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage("Element list:\n");
@@ -648,6 +726,8 @@ Integer PropagationStateManager::SortVector()
          for (Integer k = 0; k < size; ++k)
          {
             idList.push_back(id);
+            if (current->PropItemNeedsFinalUpdate(id))
+               hasPostSuperpositionMember = true;
             owners.push_back(current);
             property.push_back(*j);
 
@@ -678,6 +758,8 @@ Integer PropagationStateManager::SortVector()
    
    ListItem *newItem;
    val = 0;
+   completionIndexList.clear();
+   completionSizeList.clear();
 
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage(
@@ -743,6 +825,29 @@ Integer PropagationStateManager::SortVector()
          #endif
       }
       
+      newItem->nonzeroInit = owners[order[i]]->
+            ParameterDvInitializesNonzero(newItem->parameterID,
+                  newItem->rowIndex, newItem->colIndex);
+      if (newItem->nonzeroInit)
+      {
+         newItem->initialValue = owners[order[i]]->
+                ParameterDvInitialValue(newItem->parameterID,
+                      newItem->rowIndex, newItem->colIndex);
+      }
+      if (newItem->object->PropItemNeedsFinalUpdate(newItem->elementID))
+      {
+         MessageInterface::ShowMessage("Setting non-zero init for %s.%s\n",
+               owners[order[i]]->GetName().c_str(), property[order[i]].c_str());
+         completionIndexList.push_back(newItem->elementID);
+         completionSizeList.push_back(1);       // Or count sizes?
+//         newItem->nonzeroInit = true;
+//         newItem->initialValue = 1.0;
+      }
+
+      newItem->postDerivativeUpdate = owners[order[i]]->
+            ParameterUpdatesAfterSuperposition(newItem->parameterID);
+
+
       newItem->length      = owners[order[i]]->GetPropItemSize(idList[order[i]]);
       
       if (val == newItem->length)

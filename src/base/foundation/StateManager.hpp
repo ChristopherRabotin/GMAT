@@ -44,6 +44,9 @@ struct GMAT_API ListItem
    Integer     colIndex;      // Used for arrays
    Integer     length;
    bool        dynamicObjectProperty;  // Set if property forces object updates
+   bool        nonzeroInit;			   // Indicates initial value != 0.0
+   Real        initialValue;           // Non-zero initial value
+   bool        postDerivativeUpdate;   // true = Post-superposition step needed
 };
 
 

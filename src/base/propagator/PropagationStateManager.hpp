@@ -46,8 +46,16 @@ public:
    virtual bool BuildState();
    virtual bool MapObjectsToVector();
    virtual bool MapVectorToObjects();
+   virtual bool RequiresCompletion();
+   virtual Integer GetCompletionCount();
+   virtual Integer GetCompletionIndex(const Integer which);
+   virtual Integer GetCompletionSize(const Integer which);
 
 protected:
+
+   bool           hasPostSuperpositionMember;
+   IntegerArray   completionIndexList;
+   IntegerArray   completionSizeList;
 
    Integer        SortVector();
 };

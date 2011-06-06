@@ -79,6 +79,7 @@
 //#define DEBUG_REORIGIN
 //#define DEBUG_ERROR_ESTIMATE
 //#define DUMP_TOTAL_DERIVATIVE
+//#define DEBUG_STM_AMATRIX_DERIVS
 
 
 //#ifndef DEBUG_MEMORY
@@ -176,6 +177,12 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    j2kBody           (NULL),
    earthEq           (NULL),
    earthFixed        (NULL),
+   fillSTM           (false),
+   stmStart          (-1),
+   stmCount          (0),
+   fillAMatrix       (false),
+   aMatrixStart      (-1),
+   aMatrixCount      (0),
    transientCount    (0)
 {
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
@@ -264,6 +271,12 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    j2kBody                    (fdf.j2kBody),
    earthEq                    (fdf.earthEq),
    earthFixed                 (fdf.earthFixed),
+   fillSTM                    (fdf.fillSTM),
+   stmStart                   (fdf.stmStart),
+   stmCount                   (fdf.stmCount),
+   fillAMatrix                (fdf.fillAMatrix),
+   aMatrixStart               (fdf.aMatrixStart),
+   aMatrixCount               (fdf.aMatrixCount),
    transientCount             (fdf.transientCount)
 {
    #ifdef DEBUG_ODEMODEL
@@ -365,6 +378,14 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    earthFixed          = fdf.earthFixed; 
    forceMembersNotInitialized = fdf.forceMembersNotInitialized;
    transientCount      = fdf.transientCount;
+
+   fillSTM             = fdf.fillSTM;
+   stmStart            = fdf.stmStart;
+   stmCount            = fdf.stmCount;
+   fillAMatrix         = fdf.fillAMatrix;
+   aMatrixStart        = fdf.aMatrixStart;
+   aMatrixCount        = fdf.aMatrixCount;
+
 
    // Clear owned objects before clone
    ClearForceList();
@@ -1111,6 +1132,22 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       cartObjCount   = objectCount;
       cartStateStart = start;
       cartStateSize  = objectCount * 6;
+   }
+
+   if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+   {
+      fillSTM = true;
+      if (stmStart == -1)
+         stmStart = start;
+      ++stmCount;
+   }
+
+   if (id == Gmat::ORBIT_A_MATRIX)
+   {
+      fillAMatrix = true;
+      if (aMatrixStart == -1)
+         aMatrixStart = start;
+      ++aMatrixCount;
    }
 
    #ifdef DEBUG_BUILDING_MODELS
@@ -1976,18 +2013,16 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       MessageInterface::ShowMessage("%le]\n", state[dimension-1]);
    #endif
   
-   // Initialize the derivative array
-   for (Integer i = 0; i < dimension; ++i)
-   {
-      deriv[i] = 0.0;
-   }
-   
+   PrepareDerivativeArray();
+
    const Real* ddt;
 
    #ifdef DEBUG_ODEMODEL_EXE
       MessageInterface::ShowMessage("Looping through %d PhysicalModels\n",
             forceList.size());
    #endif
+
+   // Apply superposition of forces/derivatives
    for (std::vector<PhysicalModel *>::iterator i = forceList.begin();
          i != forceList.end(); ++i)
    {
@@ -2042,6 +2077,9 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       #endif
    }
 
+   if (psm->RequiresCompletion())
+      CompleteDerivativeCalculations(state);
+
    #ifdef DEBUG_ODEMODEL_EXE
       MessageInterface::ShowMessage("  ===============================\n");
    #endif
@@ -2079,8 +2117,113 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       MessageInterface::ShowMessage("%.12le]\n", deriv[dimension-1]); //(*state)[state->GetSize()-1]);
    #endif
 
+   #ifdef DEBUG_STM_AMATRIX_DERIVS
+      MessageInterface::ShowMessage("Final dv array:\n");
+
+      for (Integer i = 0; i < 6; ++i)
+      {
+         MessageInterface::ShowMessage("  %lf  ", deriv[i]);
+      }
+      MessageInterface::ShowMessage("\n");
+      for (Integer i = 6; i < dimension; i += 6)
+      {
+         for (Integer j = 0; j < 6; ++j)
+            MessageInterface::ShowMessage("  %le  ", deriv[i+j]);
+         MessageInterface::ShowMessage("\n");
+      }
+   #endif
+
    return true;
 }
+
+
+bool ODEModel::PrepareDerivativeArray()
+{
+   bool retval = true;
+
+   #ifdef DEBUG_STM_AMATRIX_DERIVS
+      static bool eins = false;
+   #endif
+
+   const std::vector<ListItem*> *smap = psm->GetStateMap();
+
+   // Initialize the derivative array
+   for (Integer i = 0; i < dimension; ++i)
+   {
+      #ifdef DEBUG_STM_AMATRIX_DERIVS
+         if (eins == false)
+            MessageInterface::ShowMessage("Mapping [%d] %s\n", i,
+                  ((*smap)[i]->nonzeroInit == true ? "true" : "false"));
+      #endif
+
+      if ((*smap)[i]->nonzeroInit)
+      {
+         deriv[i] = (*smap)[i]->initialValue;
+      }
+      else
+         deriv[i] = 0.0;
+   }
+
+   #ifdef DEBUG_STM_AMATRIX_DERIVS
+      if (eins == false)
+      {
+         MessageInterface::ShowMessage("Initial dv array:\n");
+
+         for (Integer i = 0; i < 6; ++i)
+         {
+            MessageInterface::ShowMessage("  %lf  ", deriv[i]);
+         }
+         MessageInterface::ShowMessage("\n");
+         for (Integer i = 6; i < dimension; i += 6)
+         {
+            for (Integer j = 0; j < 6; ++j)
+               MessageInterface::ShowMessage("  %lf  ", deriv[i+j]);
+            MessageInterface::ShowMessage("\n");
+         }
+      }
+
+      eins = true;
+   #endif
+
+   return retval;
+}
+
+
+bool ODEModel::CompleteDerivativeCalculations(Real *state)
+{
+   bool retval = true;
+
+   // Convert A to Phi dot for STM pieces
+   // \Phi\dot = A\tilde \Phi
+
+   for (Integer i = 0; i < stmCount; ++i)
+   {
+      Integer i6 = stmStart + i * 36;
+
+      // Build aTilde
+      Real aTilde[36];
+      for (Integer m = 0; m < 36; ++m)
+         aTilde[m] = deriv[i6+m];
+
+      if (fillSTM)
+      {
+         for (Integer j = 0; j < 6; ++j)
+         {
+            for (Integer k = 0; k < 6; ++k)
+            {
+               Integer element = j * 6 + k;
+               deriv[i6+element] = 0.0;
+               for (Integer l = 0; l < 6; ++l)
+               {
+                  deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
+               }
+            }
+         }
+      }
+   }
+   return retval;
+}
+
 
 //------------------------------------------------------------------------------
 // Real ODEModel::EstimateError(Real *diffs, Real *answer) const

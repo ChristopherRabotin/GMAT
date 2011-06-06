@@ -1389,6 +1389,26 @@ bool GmatBase::ParameterAffectsDynamics(const Integer id) const
 }
 
 
+bool GmatBase::ParameterDvInitializesNonzero(const Integer id, const Integer r,
+      const Integer c) const
+{
+   return false;
+}
+
+
+Real GmatBase::ParameterDvInitialValue(const Integer id, const Integer r,
+      const Integer c) const
+{
+   return 0.0;
+}
+
+
+bool GmatBase::ParameterUpdatesAfterSuperposition(const Integer id) const
+{
+   return false;
+}
+
+
 //---------------------------------------------------------------------------
 // Gmat::ObjectType GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
@@ -3503,6 +3523,11 @@ Real* GmatBase::GetPropItem(const Integer item)
 Integer GmatBase::GetPropItemSize(const Integer item)
 {
    return -1;
+}
+
+bool GmatBase::PropItemNeedsFinalUpdate(const Integer item)
+{
+   return false;
 }
 
 Integer GmatBase::SetEstimationParameter(const std::string &param)
