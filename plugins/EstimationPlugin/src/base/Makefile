@@ -18,7 +18,8 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace -undefined dynamic_loo
 
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared -Wl --out-implib
+SHARED_LIB_FLAGS = -shared -Wl
+# No longer in gcc 4.6:  --out-implib
 endif
 
 else
@@ -197,12 +198,12 @@ $(TARGET) : $(C_OBJECTS) $(CPP_OBJECTS)
 	mkdir -p ../../lib
 	$(CPP) $(C_OBJECTS) $(CPP_OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) $(PLATFORM_FLAGS)
 	install_name_tool -change lib/lib$(BASE_LIBRARY).dylib $(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
-	cp $(TARGET) $(GMAT_Plugin_Location)
+	cp $(TARGET) $(GMAT_Plugin_Location)/../plugins
 else
 $(TARGET) : $(C_OBJECTS) $(CPP_OBJECTS)
 	mkdir -p ../../lib
 	$(CPP) $(C_OBJECTS)  $(CPP_OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) $(PLATFORM_FLAGS)
-	cp $(TARGET) $(GMAT_Bin_Location)
+	cp $(TARGET) $(GMAT_Bin_Location)/../plugins
 endif
 
 
