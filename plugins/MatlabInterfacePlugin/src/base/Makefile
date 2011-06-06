@@ -86,13 +86,13 @@ else
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../../lib
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) $(MATLAB_LIB_DIR) $(MATLAB_LIBRARIES)
-	cp $(TARGET) $(GMAT_BIN_LOCATION)
+	cp $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
 endif	
 else
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../../lib
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS)
-	cp $(TARGET) $(GMAT_BIN_LOCATION)
+	cp $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
 endif
 
 
