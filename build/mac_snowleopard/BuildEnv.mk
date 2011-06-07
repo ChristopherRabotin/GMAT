@@ -24,15 +24,15 @@ SHARED_BASE = 1
 # *** EDIT THIS *** - put the top of the GMAT project directory structure here .... make sure not to have trailing blanks
 TOP_DIR = <your-top-level-directory-goes-here>
 # *** EDIT THIS *** - this is where you installed the version of wxMac that you're using ...
-WX_HOME = /Applications/wxmac-2.8.11/shared
+WX_HOME = /Applications/wxmac-2.8.12/shared
 
 # *** EDIT THIS *** - 'sudo make install' of wxMac will put things here ......
 WX_INSTALLED = /usr/local/bin
 # *** EDIT THIS *** - this should match the version of wxMac you are using
-INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle_2_8_11
+INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle_2_8_12
 
 # *** EDIT THIS *** - where is PCRE installed
-PCRE_LIB_LOC = /Applications/pcre-8.00/.libs
+PCRE_LIB_LOC = /Applications/pcre-8.12/.libs
 
 ifeq ($(USE_F2C_VERSION), 1)
 # *** EDIT THIS *** - If you are using F2C, say where it is located
@@ -137,7 +137,7 @@ MAC_CPP_FLAGS=-current_version 0.5 -compatibility_version 0.5 -fvisibility=defau
 EXECUTABLE 	= $(TOP_DIR)/application/bin/GMAT
 
 # *** EDIT THIS *** - put the version number of the wxMac that you're using here ...
-WX_VERSION   = 2.8.11
+WX_VERSION   = 2.8.12
 GMAT_INFO    = $(TOP_DIR)/src/gui/Info_GMAT.plist
 CONTENTS_DIR = $(EXECUTABLE).app/Contents
 MACOS_DIR    = $(CONTENTS_DIR)/MacOS
@@ -174,7 +174,7 @@ endif
 DEBUG_FLAGS = 
 
 # Build the complete list of flags for the compilers
-CPPFLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(SHARED_BASE_FLAGS) -D__SHOW_HELP_BUTTON__ -D__SMART_APPLY_BUTTON__\
+CPPFLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(SHARED_BASE_FLAGS) \
            $(WXCPPFLAGS) $(SPICE_INCLUDE) $(SPICE_DIRECTIVE) $(IL_HEADERS) -D__WXMAC__ $(WX_28_DEFINES) $(WX_CARBON_BUILD)
 F77_FLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall -m32 \
             $(WXCPPFLAGS) $(IL_HEADERS) -D__WXMAC__ $(WX_28_DEFINES)
