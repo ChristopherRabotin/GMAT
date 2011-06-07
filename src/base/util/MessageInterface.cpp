@@ -115,6 +115,7 @@ void MessageInterface::ShowMessage(const char *format, ...)
       short    size;
       va_list  marker;
       char     *msgBuffer = NULL;
+      std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
       
       // format is vsprintf format
       // actual max message length is MAX_MESSAGE_LENGTH
@@ -128,14 +129,15 @@ void MessageInterface::ShowMessage(const char *format, ...)
          va_start(marker, format);
          ret = vsprintf(msgBuffer, format, marker);
          va_end(marker);
+         theMessageReceiver->ShowMessage(std::string(msgBuffer));
       }
       else
       {
-         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show "
-            "the message.\n";
+         theMessageReceiver->ShowMessage(msgStr);
+//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
       }
 
-      theMessageReceiver->ShowMessage(std::string(msgBuffer));
+//      theMessageReceiver->ShowMessage(std::string(msgBuffer));
       free(msgBuffer);
    }
 } // end ShowMessage()
@@ -181,6 +183,7 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *forma
       short    size;
       va_list  marker;
       char     *msgBuffer = NULL;
+      std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
 
       // format is vsprintf format
       // actual max message length is MAX_MESSAGE_LENGTH
@@ -197,14 +200,15 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *forma
          // if no EOL then append it
          if (msgBuffer[strlen(msgBuffer)-1] != '\n')
             msgBuffer[strlen(msgBuffer)] = '\n';
-         
+         theMessageReceiver->PopupMessage(msgType, std::string(msgBuffer));
       }
       else
       {
-         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
+         theMessageReceiver->PopupMessage(msgType, msgStr);
+//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
       }
       
-      theMessageReceiver->PopupMessage(msgType, std::string(msgBuffer));
+//      theMessageReceiver->PopupMessage(msgType, std::string(msgBuffer));
       
       free(msgBuffer);
    }
@@ -308,6 +312,7 @@ void MessageInterface::LogMessage(const char *msg, ...)
       short    size;
       va_list  marker;
       char     *msgBuffer = NULL;
+      std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
       
       // msg is vsprintf format
       // actual max message length is MAX_MESSAGE_LENGTH
@@ -321,14 +326,16 @@ void MessageInterface::LogMessage(const char *msg, ...)
          va_start(marker, msg);
          ret = vsprintf(msgBuffer, msg, marker);
          va_end(marker);
+         theMessageReceiver->LogMessage(std::string(msgBuffer));
       }
       else
       {
-         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show "
-            "the message.\n";
+         theMessageReceiver->LogMessage(msgStr);
+//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show "
+//            "the message.\n";
       }
       
-      theMessageReceiver->LogMessage(std::string(msgBuffer));
+//      theMessageReceiver->LogMessage(std::string(msgBuffer));
       free(msgBuffer);
    }
 }
