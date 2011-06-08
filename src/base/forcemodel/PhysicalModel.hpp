@@ -262,9 +262,28 @@ protected:
    Real relativeErrorThreshold;
    /// Pointer to the solar system model used as a data provider for the forces
    SolarSystem *solarSystem;
-   /// Pointer to the origin associated with the force model
-   //CelestialBody *theBody; //loj: 5/11/04
    
+   /// Flag indicating that the Cartesian state derivatives should be filled
+   bool                      fillCartesian;
+   /// Starting index for Cartesian state data (defaults to 0)
+   Integer                   cartesianStart;
+   /// Number of C. state derivatives that are filled (Usually matches satCount)
+   Integer                   cartesianCount;
+
+   /// Flag indicating that the orbital State Transition Matrix derivatives should be filled
+   bool                      fillSTM;
+   /// Starting index for STM data
+   Integer                   stmStart;
+   /// Number of STM matrices that need to be filled
+   Integer                   stmCount;
+
+   /// Flag indicating that the orbital A-matrix should be filled
+   bool                      fillAMatrix;
+   /// Starting index for A-matrix data
+   Integer                   aMatrixStart;
+   /// Number of A-matrices that need to be filled
+   Integer                   aMatrixCount;
+
    /// Parameter IDs
    enum
    {

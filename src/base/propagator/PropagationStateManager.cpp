@@ -836,8 +836,6 @@ Integer PropagationStateManager::SortVector()
       }
       if (newItem->object->PropItemNeedsFinalUpdate(newItem->elementID))
       {
-         MessageInterface::ShowMessage("Setting non-zero init for %s.%s\n",
-               owners[order[i]]->GetName().c_str(), property[order[i]].c_str());
          completionIndexList.push_back(newItem->elementID);
          completionSizeList.push_back(1);       // Or count sizes?
 //         newItem->nonzeroInit = true;

@@ -112,15 +112,7 @@ PointMassForce::PointMassForce(const std::string &name) :
    mu                     (GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH]),
    estimationMethod       (1.0),
    isPrimaryBody          (true),
-   satCount               (0),
-   cartIndex              (0),
-   fillCartesian          (false),
-   stmCount               (0),
-   stmIndex               (0),
-   fillSTM                (false),
-   aMatrixCount           (0),
-   aMatrixIndex           (0),
-   fillAMatrix            (false)
+   satCount               (0)
 {
    parameterCount = PointMassParamCount;
    dimension = 6 * satCount;
@@ -165,15 +157,7 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
    orig                   (pmf.orig),
    rv                     (pmf.rv),
    now                    (pmf.now),
-   satCount               (pmf.satCount),
-   cartIndex              (pmf.cartIndex),
-   fillCartesian          (pmf.fillCartesian),
-   stmCount               (pmf.stmCount),
-   stmIndex               (pmf.stmIndex),
-   fillSTM                (pmf.fillSTM),
-   aMatrixCount           (pmf.aMatrixCount),
-   aMatrixIndex           (pmf.aMatrixIndex),
-   fillAMatrix            (pmf.fillAMatrix)
+   satCount               (pmf.satCount)
 {
    parameterCount = PointMassParamCount;
    dimension = pmf.dimension;
@@ -209,14 +193,6 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
    rv               = pmf.rv;
    now              = pmf.now;
    satCount         = pmf.satCount;
-   cartIndex        = pmf.cartIndex;
-   fillCartesian    = pmf.fillCartesian;
-   stmCount         = pmf.stmCount;
-   stmIndex         = pmf.stmIndex;
-   fillSTM          = pmf.fillSTM;
-   aMatrixCount     = pmf.aMatrixCount;
-   aMatrixIndex     = pmf.aMatrixIndex;
-   fillAMatrix      = pmf.fillAMatrix;
 
    return *this;
 }
@@ -281,7 +257,7 @@ bool PointMassForce::Initialize()
    Integer i6;
    for (Integer i = 0; i < satCount; i++) 
    {
-      i6 = cartIndex + i*6;
+      i6 = cartesianStart + i*6;
       modelState[i6]   = 7000.0 + 200.0 * i;
       modelState[i6+1] = 300.0 * i;
       modelState[i6+2] = 1000.0 - 100.0 * i;
@@ -317,11 +293,11 @@ bool PointMassForce::Initialize()
 bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order, 
       const Integer id)
 {
-#ifdef DEBUG_PMF_DERV
-   MessageInterface::ShowMessage("Evaluating PointMassForce; "
-      "state pointer = %d, time offset = %le, order = %d, id = %d "
-      "satCount = %d\n", state, dt, order, id, satCount);
-#endif
+   #ifdef DEBUG_PMF_DERV
+      MessageInterface::ShowMessage("Evaluating PointMassForce; "
+         "state pointer = %d, time offset = %le, order = %d, id = %d "
+         "satCount = %d\n", state, dt, order, id, satCount);
+   #endif
    
    Integer i6, a6;
 
@@ -409,7 +385,7 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
       {
          for (Integer i = 0; i < satCount; i++) 
          {
-            i6 = cartIndex + i * 6;
+            i6 = cartesianStart + i * 6;
             
             relativePosition[0] = rv[0] - state[ i6 ];
             relativePosition[1] = rv[1] - state[i6+1];
@@ -487,8 +463,8 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
 
          for (Integer i = 0; i < aiCount; ++i)
          {
-            i6 = stmIndex + i * 36;
-            a6 = aMatrixIndex + i * 36;
+            i6 = stmStart + i * 36;
+            a6 = aMatrixStart + i * 36;
             if (!fillSTM)
                i6 = a6;
             associate = theState->GetAssociateIndex(i6);
@@ -624,7 +600,7 @@ bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
 
    for (Integer i = 0; i < satCount; i++) 
    {
-      i6 = cartIndex + i * 6;
+      i6 = cartesianStart + i * 6;
 
       map[ i6 ] = i6 + 3;
       map[i6+1] = i6 + 4;
@@ -996,21 +972,22 @@ bool PointMassForce::SetStart(Gmat::StateElementId id, Integer index,
    {
       case Gmat::CARTESIAN_STATE:
          satCount = quantity;
-         cartIndex = index;
+         cartesianStart = index;
+         cartesianCount = quantity;
          fillCartesian = true;
          retval = true;
          break;
          
       case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
          stmCount = quantity;
-         stmIndex = index;
+         stmStart = index;
          fillSTM = true;
          retval = true;
          break;
          
       case Gmat::ORBIT_A_MATRIX:
          aMatrixCount = quantity;
-         aMatrixIndex = index;
+         aMatrixStart = index;
          fillAMatrix = true;
          retval = true;
          break;

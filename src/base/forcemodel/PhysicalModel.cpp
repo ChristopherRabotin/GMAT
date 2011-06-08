@@ -161,7 +161,16 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    prevElapsedTime             (0.0),
    deriv                       (NULL),
    relativeErrorThreshold      (0.10),
-   solarSystem                 (NULL)
+   solarSystem                 (NULL),
+   fillCartesian               (true),
+   cartesianStart              (0),
+   cartesianCount              (0),
+   fillSTM                     (false),
+   stmStart                    (-1),
+   stmCount                    (0),
+   fillAMatrix                 (false),
+   aMatrixStart                (-1),
+   aMatrixCount                (0)
 {
    objectTypes.push_back(Gmat::PHYSICAL_MODEL);
    objectTypeNames.push_back("PhysicalModel");
@@ -236,7 +245,16 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    derivativeIds               (pm.derivativeIds),
    derivativeNames             (pm.derivativeNames),
    relativeErrorThreshold      (pm.relativeErrorThreshold),
-   solarSystem                 (pm.solarSystem)
+   solarSystem                 (pm.solarSystem),
+   fillCartesian               (pm.fillCartesian),
+   cartesianStart              (pm.cartesianStart),
+   cartesianCount              (pm.cartesianCount),
+   fillSTM                     (pm.fillSTM),
+   stmStart                    (pm.stmStart),
+   stmCount                    (pm.stmCount),
+   fillAMatrix                 (pm.fillAMatrix),
+   aMatrixStart                (pm.aMatrixStart),
+   aMatrixCount                (pm.aMatrixCount)
 {
    if (pm.modelState != NULL) 
    {
@@ -301,6 +319,16 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    relativeErrorThreshold = pm.relativeErrorThreshold;
    solarSystem = pm.solarSystem;
    
+   fillCartesian  = pm.fillCartesian;
+   cartesianStart = pm.cartesianStart;
+   cartesianCount = pm.cartesianCount;
+   fillSTM        = pm.fillSTM;
+   stmStart       = pm.stmStart;
+   stmCount       = pm.stmCount;
+   fillAMatrix    = pm.fillAMatrix;
+   aMatrixStart   = pm.aMatrixStart;
+   aMatrixCount   = pm.aMatrixCount;
+
    theState = pm.theState;
 
    if (pm.modelState) 

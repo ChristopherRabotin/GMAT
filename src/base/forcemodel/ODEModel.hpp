@@ -258,10 +258,6 @@ protected:
    /// ID for CartesianState end for processing dynamic state data
    Integer stateEnd;
 
-   /// Number of objects providing Cartesian state data
-   Integer cartObjCount;
-   /// Starting index for Cartesian state data
-   Integer cartStateStart;
    /// Number of elements in the Cartesian state data
    Integer cartStateSize;
    /// If spacecraft properties are dynamic, update at every call
@@ -306,14 +302,6 @@ protected:
    
    ObjectArray               stateObjects;
    
-   bool                      fillSTM;
-   Integer                   stmStart;
-   Integer                   stmCount;
-
-   bool                      fillAMatrix;
-   Integer                   aMatrixStart;
-   Integer                   aMatrixCount;
-
    void                      MoveToOrigin(Real newEpoch = -1.0);
    void                      ReturnFromOrigin(Real newEpoch = -1.0);
    

@@ -186,17 +186,17 @@ protected:
 
    /// Number of spacecraft in the state vector that use CartesianState
    Integer              satCount;
-   /// Start index for the Cartesian state
-   Integer              cartIndex;
-   /// Flag indicating if the Cartesian state should be populated
-   bool                 fillCartesian;
-   
-   /// Number of spacecraft in the state vector that use OrbitSTM
-   Integer              stmCount;
-   /// Start index for the OrbitSTM
-   Integer              stmIndex;
-   /// Flag indicating if the OrbitSTM should be populated
-   bool                 fillSTM;
+//   /// Start index for the Cartesian state
+//   Integer              cartIndex;
+//   /// Flag indicating if the Cartesian state should be populated
+//   bool                 fillCartesian;
+//
+//   /// Number of spacecraft in the state vector that use OrbitSTM
+//   Integer              stmCount;
+//   /// Start index for the OrbitSTM
+//   Integer              stmIndex;
+//   /// Flag indicating if the OrbitSTM should be populated
+//   bool                 fillSTM;
 
    Integer massID;
    Integer crID;

@@ -33,8 +33,8 @@
 // ***  Administrator of the National Aeronautics and Space               ***
 // ***  Administration                                                    ***
 // ***                                                                    ***
-// ***  This software is subject to the Sofware Usage Agreement described ***
-// ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
+// ***  This software is subject to the Software Usage Agreement described***
+// ***  by NASA Case Number GSC-14735-1.  The Software Usage Agreement    ***
 // ***  must be included in any distribution.  Removal of this header is  ***
 // ***  strictly prohibited.                                              ***
 // ***                                                                    ***
@@ -54,6 +54,7 @@
 //#define DEBUG_SRP_ORIGIN
 //#define DEBUG_SOLAR_RADIATION_PRESSURE
 //#define DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW
+//#define DEBUG_A_MATRIX
 
 //---------------------------------
 // static data
@@ -127,11 +128,6 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    nominalSun          (149597870.691),
    bodyIsTheSun        (false),
    satCount            (0),
-   cartIndex           (0),
-   fillCartesian       (false),
-   stmCount            (0),
-   stmIndex            (0),
-   fillSTM             (false),
    massID              (-1),
    crID                (-1),
    areaID              (-1)
@@ -171,11 +167,6 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    percentSun          (srp.percentSun),
    bodyID              (srp.bodyID),
    satCount            (srp.satCount),
-   cartIndex           (srp.cartIndex),
-   fillCartesian       (srp.fillCartesian),
-   stmCount            (srp.stmCount),
-   stmIndex            (srp.stmIndex),
-   fillSTM             (srp.fillSTM),
    massID              (srp.massID),
    crID                (srp.crID),
    areaID              (srp.areaID)
@@ -218,11 +209,6 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       bodyID       = srp.bodyID;
    
       satCount      = srp.satCount;
-      cartIndex     = srp.cartIndex;
-      fillCartesian = srp.fillCartesian;
-      stmCount      = srp.stmCount;
-      stmIndex      = srp.stmIndex;
-      fillSTM       = srp.fillSTM;
       massID        = srp.massID;
       crID          = srp.crID;
       areaID        = srp.areaID;
@@ -689,7 +675,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       throw ODEModelException(msg.str());
    }
 
-   Real distancefactor = 1.0, mag = 0.0;
+   Real distancefactor = 1.0, mag, sSquared;
    bool inSunlight = true, inShadow = false;
 
    Real ep = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
@@ -732,10 +718,14 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
    {
       for (Integer i = 0; i < satCount; ++i) 
       {
-         i6 = cartIndex + i*6;
+         #ifdef DEBUG_A_MATRIX
+            MessageInterface::ShowMessage(
+                  "Filling Cartesian state for spacecraft %d\n", i);
+         #endif
+         i6 = cartesianStart + i*6;
 
          // Build vector from the Sun to the current spacecraft
-         sunSat[0] = state[i6] - cbSunVector[0];
+         sunSat[0] = state[ i6 ] - cbSunVector[0];
          sunSat[1] = state[i6+1] - cbSunVector[1];
          sunSat[2] = state[i6+2] - cbSunVector[2];
          sunDistance = sqrt(sunSat[0]*sunSat[0] + sunSat[1]*sunSat[1] + 
@@ -798,96 +788,210 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       }
    }
 
-//// Uncomment the following to work on the SRP STM piece
-//   if (fillSTM)
-//   {
 //      Real aTilde[36];
 //      Integer associate, element;
-//      for (Integer i = 0; i < stmCount; ++i)
+//      Integer aiCount = (fillSTM ? stmCount : aMatrixCount);
+//
+//      for (Integer i = 0; i < aiCount; ++i)
 //      {
-//         i6 = stmIndex + i * 36;
+//         i6 = stmStart + i * 36;
+//         a6 = aMatrixStart + i * 36;
+//         if (!fillSTM)
+//            i6 = a6;
 //         associate = theState->GetAssociateIndex(i6);
-//         
-////         relativePosition[0] = rv[0] - state[ associate ];
-////         relativePosition[1] = rv[1] - state[associate+1];
-////         relativePosition[2] = rv[2] - state[associate+2];
-////   
-////         r3 = relativePosition[0]*relativePosition[0] + 
-////              relativePosition[1]*relativePosition[1] + 
-////              relativePosition[2]*relativePosition[2];
-////         
-////         radius = sqrt(r3);
-////         r3 *= radius;
-////         mu_r = mu / r3;
-//         
-//         // Calculate A-tilde
-//         
-//         // A = D = 0
-//         aTilde[ 0] = aTilde[ 1] = aTilde[ 2] = 
-//         aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
-//         aTilde[12] = aTilde[13] = aTilde[14] =
-//         aTilde[21] = aTilde[22] = aTilde[23] = 
-//         aTilde[27] = aTilde[28] = aTilde[29] =
-//         aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
-//         
-//         // Contributions for the origin term only:
-////         if (rbb3 == 0.0)
-////         {
-////            // B = I
-////            aTilde[ 3] = aTilde[10] = aTilde[17] = 1.0;
-////            aTilde[ 4] = aTilde[ 5] = aTilde[ 9] =
-////            aTilde[11] = aTilde[15] = aTilde[16] = 0.0;
-////         }
-////         else
-////         {
-//            aTilde[ 3] = aTilde[10] = aTilde[17] = 
-//            aTilde[ 4] = aTilde[ 5] = aTilde[ 9] =
-//            aTilde[11] = aTilde[15] = aTilde[16] = 0.0;
-////         }
-//            
-//         // Math spec, equ 6.69, broken into separate pieces
-////         aTilde[18] = - mu_r + 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[0] * relativePosition[0];
-////         
-////         aTilde[19] = 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[0] * relativePosition[1];
-////         
-////         aTilde[20] = 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[0] * relativePosition[2];
-////         
-////         aTilde[24] = 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[1] * relativePosition[0];
-////         
-////         aTilde[25] = - mu_r + 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[1] * relativePosition[1];
-////         
-////         aTilde[26] = 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[1] * relativePosition[2];
-////         
-////         aTilde[30] = 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[2] * relativePosition[0];
-////         
-////         aTilde[31] = 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[2] * relativePosition[1];
-////         
-////         aTilde[32] = - mu_r + 3.0 * mu_r / (radius*radius) * 
-////                          relativePosition[2] * relativePosition[2];
-//         
-//         // Now Phi_dot = A_tilde Phi
-//         for (Integer j = 0; j < 6; ++j)
-//         {
-//            for (Integer k = 0; k < 6; ++k)
-//            {
-//               element = j * 6 + k;
-//               deriv[i6+element] = 0.0;
-////               for (Integer l = 0; l < 6; ++l)
-////               {
-////                  deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
-////               }
-//            }
-//         }
-//      }
-//   }
+//
+//         relativePosition[0] = rv[0] - state[ associate ];
+//         relativePosition[1] = rv[1] - state[associate+1];
+//         relativePosition[2] = rv[2] - state[associate+2];
+
+   if (fillSTM || fillAMatrix)
+   {
+      Real aTilde[36];
+      Integer associate, element;
+      for (Integer i = 0; i < stmCount; ++i)
+      {
+         #ifdef DEBUG_A_MATRIX
+            MessageInterface::ShowMessage("Filling STM for spacecraft %d\n", i);
+         #endif
+         i6 = stmStart + i * 36;
+         associate = theState->GetAssociateIndex(i6);
+
+         // Calculate A-tilde
+         aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
+         aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
+         aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
+         aTilde[ 9] = aTilde[10] = aTilde[11] =
+         aTilde[12] = aTilde[13] = aTilde[14] =
+         aTilde[15] = aTilde[16] = aTilde[17] =
+         aTilde[21] = aTilde[22] = aTilde[23] =
+         aTilde[27] = aTilde[28] = aTilde[29] =
+         aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
+
+         // Build vector from Sun to the current spacecraft; (-s in math spec)
+         sunSat[0] = state[ associate ] - cbSunVector[0];
+         sunSat[1] = state[associate+1] - cbSunVector[1];
+         sunSat[2] = state[associate+2] - cbSunVector[2];
+         sunDistance = sqrt(sunSat[0]*sunSat[0] + sunSat[1]*sunSat[1] +
+                           sunSat[2]*sunSat[2]);
+         if (sunDistance == 0.0)
+            sunDistance = 1.0;
+
+         distancefactor = nominalSun / sunDistance;
+         // Convert m/s^2 to km/s^2
+         distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
+
+         #ifdef DEBUG_SRP_ORIGIN
+            if (shadowModel == 0)
+               shadowModel = CONICAL_MODEL;
+         #endif
+
+         // Test shadow condition for current spacecraft (only if body isn't Sol)
+         if (!bodyIsTheSun)
+         {
+            psunrad = asin(sunRadius / sunDistance);
+            FindShadowState(inSunlight, inShadow, &state[i6]);
+         }
+         else
+         {
+            inSunlight= true;
+            inShadow = false;
+            percentSun = 1.0;
+         }
+
+         if (!inShadow)
+         {
+            // All of the common terms for C_s
+            mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
+                                (mass[i] * sunDistance);
+            sSquared = sunDistance * sunDistance;
+
+            // Math spec terms for SRP C submatrix of the A-matrix
+            aTilde[18] = mag * (1.0 - sunSat[0]*sunSat[0] / sSquared);
+            aTilde[19] = mag * (    - sunSat[0]*sunSat[1] / sSquared);
+            aTilde[20] = mag * (    - sunSat[0]*sunSat[2] / sSquared);
+            aTilde[24] = mag * (    - sunSat[1]*sunSat[0] / sSquared);
+            aTilde[25] = mag * (1.0 - sunSat[1]*sunSat[1] / sSquared);
+            aTilde[26] = mag * (    - sunSat[1]*sunSat[2] / sSquared);
+            aTilde[30] = mag * (    - sunSat[2]*sunSat[0] / sSquared);
+            aTilde[31] = mag * (    - sunSat[2]*sunSat[1] / sSquared);
+            aTilde[32] = mag * (1.0 - sunSat[2]*sunSat[2] / sSquared);
+         }
+         else
+         {
+            aTilde[18] = aTilde[19] = aTilde[20] =
+            aTilde[24] = aTilde[25] = aTilde[26] =
+            aTilde[30] = aTilde[31] = aTilde[32] = 0.0;
+         }
+
+         for (Integer j = 0; j < 6; ++j)
+         {
+            for (Integer k = 0; k < 6; ++k)
+            {
+               element = j * 6 + k;
+               deriv[i6+element] = aTilde[element];
+            }
+         }
+      }
+
+      for (Integer i = 0; i < aMatrixCount; ++i)
+      {
+         #ifdef DEBUG_A_MATRIX
+            MessageInterface::ShowMessage(
+                  "Filling A-matrix for spacecraft %d\n", i);
+         #endif
+         i6 = aMatrixStart + i * 36;
+         associate = theState->GetAssociateIndex(i6);
+
+         // Calculate A-tilde
+         aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
+         aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
+         aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
+         aTilde[ 9] = aTilde[10] = aTilde[11] =
+         aTilde[12] = aTilde[13] = aTilde[14] =
+         aTilde[15] = aTilde[16] = aTilde[17] =
+         aTilde[21] = aTilde[22] = aTilde[23] =
+         aTilde[27] = aTilde[28] = aTilde[29] =
+         aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
+
+//         // Gather spacecraft data
+//         i6 = cartIndex + i*6;
+
+         // Build vector from Sun to the current spacecraft; (-s in math spec)
+         sunSat[0] = state[ associate ] - cbSunVector[0];
+         sunSat[1] = state[associate+1] - cbSunVector[1];
+         sunSat[2] = state[associate+2] - cbSunVector[2];
+         sunDistance = sqrt(sunSat[0]*sunSat[0] + sunSat[1]*sunSat[1] +
+                           sunSat[2]*sunSat[2]);
+         if (sunDistance == 0.0)
+            sunDistance = 1.0;
+
+         distancefactor = nominalSun / sunDistance;
+         // Convert m/s^2 to km/s^2
+         distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
+
+         #ifdef DEBUG_SRP_ORIGIN
+            if (shadowModel == 0)
+               shadowModel = CONICAL_MODEL;
+         #endif
+
+         // Test shadow condition for current spacecraft (only if body isn't Sol)
+         if (!bodyIsTheSun)
+         {
+            psunrad = asin(sunRadius / sunDistance);
+            FindShadowState(inSunlight, inShadow, &state[i6]);
+         }
+         else
+         {
+            inSunlight= true;
+            inShadow = false;
+            percentSun = 1.0;
+         }
+
+         if (!inShadow)
+         {
+            // All of the common terms for C_s
+            mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
+                                (mass[i] * sunDistance);
+            sSquared = sunDistance * sunDistance;
+
+            // Math spec terms for SRP C submatrix of the A-matrix
+            aTilde[18] = mag * (1.0 - sunSat[0]*sunSat[0] / sSquared);
+            aTilde[19] = mag * (    - sunSat[0]*sunSat[1] / sSquared);
+            aTilde[20] = mag * (    - sunSat[0]*sunSat[2] / sSquared);
+            aTilde[24] = mag * (    - sunSat[1]*sunSat[0] / sSquared);
+            aTilde[25] = mag * (1.0 - sunSat[1]*sunSat[1] / sSquared);
+            aTilde[26] = mag * (    - sunSat[1]*sunSat[2] / sSquared);
+            aTilde[30] = mag * (    - sunSat[2]*sunSat[0] / sSquared);
+            aTilde[31] = mag * (    - sunSat[2]*sunSat[1] / sSquared);
+            aTilde[32] = mag * (1.0 - sunSat[2]*sunSat[2] / sSquared);
+         }
+         else
+         {
+            aTilde[18] = aTilde[19] = aTilde[20] =
+            aTilde[24] = aTilde[25] = aTilde[26] =
+            aTilde[30] = aTilde[31] = aTilde[32] = 0.0;
+         }
+
+         #ifdef DEBUG_A_MATRIX
+            MessageInterface::ShowMessage(
+                  "A-Matrix contribution[%d] from SRP:\n", i);
+         #endif
+         for (Integer j = 0; j < 6; ++j)
+         {
+            for (Integer k = 0; k < 6; ++k)
+            {
+               element = j * 6 + k;
+               deriv[i6+element] = aTilde[element];
+               #ifdef DEBUG_A_MATRIX
+                  MessageInterface::ShowMessage("  %le  ", deriv[i6+element]);
+               #endif
+            }
+            #ifdef DEBUG_A_MATRIX
+               MessageInterface::ShowMessage("\n");
+            #endif
+         }
+      }
+   }
     
    #ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
       MessageInterface::ShowMessage(
@@ -1245,6 +1349,9 @@ bool SolarRadiationPressure::SupportsDerivative(Gmat::StateElementId id)
    if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
       return true;
    
+   if (id == Gmat::ORBIT_A_MATRIX)
+      return true;
+
    return PhysicalModel::SupportsDerivative(id);
 }
 
@@ -1279,18 +1386,25 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
    {
       case Gmat::CARTESIAN_STATE:
          satCount = quantity;
-         cartIndex = index;
+         cartesianStart = index;
          fillCartesian = true;
          retval = true;
          break;
          
       case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
          stmCount = quantity;
-         stmIndex = index;
+         stmStart = index;
          fillSTM = true;
          retval = true;
          break;
          
+      case Gmat::ORBIT_A_MATRIX:
+         aMatrixCount = quantity;
+         aMatrixStart = index;
+         fillAMatrix = true;
+         retval = true;
+         break;
+
       default:
          break;
    }

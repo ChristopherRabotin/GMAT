@@ -169,20 +169,12 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    satCount          (0),
    stateStart        (-1),
    stateEnd          (-1),
-   cartObjCount      (0),
-   cartStateStart    (-1),
    cartStateSize     (0),
    dynamicProperties (false),
    j2kBodyName       ("Earth"),
    j2kBody           (NULL),
    earthEq           (NULL),
    earthFixed        (NULL),
-   fillSTM           (false),
-   stmStart          (-1),
-   stmCount          (0),
-   fillAMatrix       (false),
-   aMatrixStart      (-1),
-   aMatrixCount      (0),
    transientCount    (0)
 {
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
@@ -261,8 +253,6 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    satCount                   (0),
    stateStart                 (fdf.stateStart),
    stateEnd                   (fdf.stateEnd),
-   cartObjCount               (0),
-   cartStateStart             (-1),
    cartStateSize              (0),
    dynamicProperties          (false),
    j2kBodyName                (fdf.j2kBodyName),
@@ -271,12 +261,6 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    j2kBody                    (fdf.j2kBody),
    earthEq                    (fdf.earthEq),
    earthFixed                 (fdf.earthFixed),
-   fillSTM                    (fdf.fillSTM),
-   stmStart                   (fdf.stmStart),
-   stmCount                   (fdf.stmCount),
-   fillAMatrix                (fdf.fillAMatrix),
-   aMatrixStart               (fdf.aMatrixStart),
-   aMatrixCount               (fdf.aMatrixCount),
    transientCount             (fdf.transientCount)
 {
    #ifdef DEBUG_ODEMODEL
@@ -339,6 +323,8 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    if (&fdf == this)
         return *this;
 
+   PhysicalModel::operator=(fdf);
+
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
    satIds[5] = satIds[6] = -1;
    
@@ -348,10 +334,8 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    stateStart = fdf.stateStart;
    stateEnd   = fdf.stateEnd;
 
-   cartObjCount      = 0;
-   cartStateStart    = -1;
-   cartStateSize     =  0;
-   dynamicProperties = false;
+   cartStateSize       = 0;
+   dynamicProperties   = false;
 
    numForces           = fdf.numForces;
    stateSize           = fdf.stateSize;
@@ -378,14 +362,6 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    earthFixed          = fdf.earthFixed; 
    forceMembersNotInitialized = fdf.forceMembersNotInitialized;
    transientCount      = fdf.transientCount;
-
-   fillSTM             = fdf.fillSTM;
-   stmStart            = fdf.stmStart;
-   stmCount            = fdf.stmCount;
-   fillAMatrix         = fdf.fillAMatrix;
-   aMatrixStart        = fdf.aMatrixStart;
-   aMatrixCount        = fdf.aMatrixCount;
-
 
    // Clear owned objects before clone
    ClearForceList();
@@ -1129,8 +1105,8 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    /// @todo Check this piece again for 6DoF
    if (id == Gmat::CARTESIAN_STATE)
    {
-      cartObjCount   = objectCount;
-      cartStateStart = start;
+      cartesianCount   = objectCount;
+      cartesianStart = start;
       cartStateSize  = objectCount * 6;
    }
 
@@ -2267,7 +2243,7 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
    #endif
 
    // Handle non-Cartesian state elements as an L1 norm
-   for (int i = 0; i < cartStateStart; ++i)
+   for (int i = 0; i < cartesianStart; ++i)
    {
       // L1 norm
       mag = fabs(answer[ i ] - modelState[ i ]);
@@ -2286,7 +2262,7 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
    }
 
    // Handle the Cartesian piece
-   for (int i = cartStateStart; i < cartStateStart + cartStateSize; i += 3)
+   for (int i = cartesianStart; i < cartesianStart + cartStateSize; i += 3)
    {
       switch (normType)
       {
@@ -2357,7 +2333,7 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
    }
 
 //   // Handle non-Cartesian state elements as an L1 norm
-//   for (int i = cartStateStart + cartStateSize; i < dimension; ++i)
+//   for (int i = cartesianStart + cartStateSize; i < dimension; ++i)
 //   {
 //      // L1 norm
 //      mag = fabs(answer[ i ] - modelState[ i ]);
@@ -3442,7 +3418,7 @@ void ODEModel::MoveToOrigin(Real newEpoch)
    
 #ifdef DEBUG_REORIGIN
    MessageInterface::ShowMessage(
-         "SatCount = %d, dimension = %d, stateSize = %d\n",cartObjCount,
+         "SatCount = %d, dimension = %d, stateSize = %d\n",cartesianCount,
          dimension, stateSize);
    MessageInterface::ShowMessage(
          "StatePointers: rawState = %p, modelState = %p\n", rawState, 
@@ -3468,9 +3444,9 @@ void ODEModel::MoveToOrigin(Real newEpoch)
 
       delta = cbState - j2kState;
 
-      for (Integer i = 0; i < cartObjCount; ++i)
+      for (Integer i = 0; i < cartesianCount; ++i)
       {
-         Integer i6 = cartStateStart + i * 6;
+         Integer i6 = cartesianStart + i * 6;
          for (int j = 0; j < 6; ++j)
             modelState[i6+j] = rawState[i6+j] - delta[j];
 
@@ -3535,9 +3511,9 @@ void ODEModel::ReturnFromOrigin(Real newEpoch)
       delta = j2kState - cbState;
 
 
-      for (Integer i = 0; i < cartObjCount; ++i)
+      for (Integer i = 0; i < cartesianCount; ++i)
       {
-         Integer i6 = cartStateStart + i * 6;
+         Integer i6 = cartesianStart + i * 6;
          for (int j = 0; j < 6; ++j)
             rawState[i6+j] = modelState[i6+j] - delta[j];
             #ifdef DEBUG_REORIGIN

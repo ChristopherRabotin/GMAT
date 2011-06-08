@@ -149,14 +149,7 @@ protected:
    Rvector3 rv;
    A1Mjd now;
    Integer satCount;
-   Integer cartIndex;
-   bool fillCartesian;
-   Integer stmCount;
-   Integer stmIndex;
-   bool fillSTM;
-   Integer aMatrixCount;
-   Integer aMatrixIndex;
-   bool fillAMatrix;
+//   Integer cartIndex;
    
    // for Debug
    void ShowBodyState(const std::string &header, Real time, Rvector6 &rv);
