@@ -128,8 +128,13 @@ void MessageInterface::ShowMessage(const char *format, ...)
             msgBuffer[i] = '\0';
          va_start(marker, format);
          ret = vsprintf(msgBuffer, format, marker);
-         va_end(marker);
-         theMessageReceiver->ShowMessage(std::string(msgBuffer));
+         if (ret < 0)
+            theMessageReceiver->ShowMessage("Unable to complete messaging");
+         else
+         {
+            va_end(marker);
+            theMessageReceiver->ShowMessage(std::string(msgBuffer));
+         }
       }
       else
       {
@@ -195,12 +200,18 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *forma
             msgBuffer[i] = '\0';
          va_start(marker, format);
          ret = vsprintf(msgBuffer, format, marker);
-         va_end(marker);
-         
-         // if no EOL then append it
-         if (msgBuffer[strlen(msgBuffer)-1] != '\n')
-            msgBuffer[strlen(msgBuffer)] = '\n';
-         theMessageReceiver->PopupMessage(msgType, std::string(msgBuffer));
+         if (ret < 0)
+            theMessageReceiver->PopupMessage(msgType,
+                  "Unable to complete messaging");
+         else
+         {
+            va_end(marker);
+
+            // if no EOL then append it
+            if (msgBuffer[strlen(msgBuffer)-1] != '\n')
+               msgBuffer[strlen(msgBuffer)] = '\n';
+            theMessageReceiver->PopupMessage(msgType, std::string(msgBuffer));
+         }
       }
       else
       {
@@ -325,8 +336,13 @@ void MessageInterface::LogMessage(const char *msg, ...)
             msgBuffer[i] = '\0';
          va_start(marker, msg);
          ret = vsprintf(msgBuffer, msg, marker);
-         va_end(marker);
-         theMessageReceiver->LogMessage(std::string(msgBuffer));
+         if (ret < 0) // vsprintf failed
+            theMessageReceiver->LogMessage("Unable to complete messaging\n");
+         else
+         {
+            va_end(marker);
+            theMessageReceiver->LogMessage(std::string(msgBuffer));
+         }
       }
       else
       {
