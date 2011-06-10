@@ -620,7 +620,7 @@ bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
  * Interface used to estimate the error in the current step
  *
  * The method calculates the largest local estimate of the error from the 
- * integration given the components of the differences calculated bt the 
+ * integration given the components of the differences calculated by the
  * integrator.  It returns the largest error estimate found.  
  *  
  * The default implementation returns the largest single relative error 
