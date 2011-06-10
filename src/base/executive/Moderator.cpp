@@ -76,6 +76,7 @@
 //#define DEBUG_CREATE_RESOURCE 2
 //#define DEBUG_CREATE_CALC_POINT
 //#define DEBUG_CREATE_PARAMETER 1
+//#define DEBUG_CREATE_EPHEMFILE 1
 //#define DEBUG_PARAMETER_REF_OBJ 1
 //#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_COMMAND_APPEND 1
@@ -4519,7 +4520,7 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 Subscriber* Moderator::CreateEphemerisFile(const std::string &type,
                                            const std::string &name)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_EPHEMFILE
    MessageInterface::ShowMessage
       ("Moderator::CreateEphemerisFile() type='%s', name='%s'\n",
        type.c_str(), name.c_str());
@@ -4534,14 +4535,26 @@ Subscriber* Moderator::CreateEphemerisFile(const std::string &type,
       
       if (obj == NULL)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "**** ERROR **** Cannot create a EphemerisFile type: %s.\n"
-             "Make sure to specify PLUGIN = libDataFile and PLUGIN = libCcsdsEphemerisFile\n"
-             "in the gmat_start_file and make sure such dlls exist.  "
-             "Make sure that libpcre-0 and libpcrecpp-0 also exist in the path\n",
-             type.c_str(), type.c_str());
-         
-         return NULL;
+         #ifdef __USE_DATAFILE__
+            if (type == "CcsdsEphemerisFile")
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, "**** ERROR **** Cannot create an EphemerisFile type: %s.\n"
+                   "Make sure to specify PLUGIN = libDataFile and PLUGIN = libCcsdsEphemerisFile\n"
+                   "in the gmat_start_file and make sure such dlls exist.  "
+                   "Make sure that libpcre-0 and libpcrecpp-0 also exist in the path\n",
+                   type.c_str(), type.c_str());
+
+               return NULL;
+            }
+         #else
+            #ifdef DEBUG_CREATE_EPHEMFILE
+            MessageInterface::ShowMessage
+               ("CreateEphemerisFile() Creating a subscriber of type EphemerisFile\n");
+            #endif
+            // Try again with "EphemerisFile" type
+            obj = (Subscriber*)(theFactoryManager->CreateSubscriber("EphemerisFile", name));
+         #endif
       }
       
       #ifdef DEBUG_MEMORY
@@ -4566,11 +4579,16 @@ Subscriber* Moderator::CreateEphemerisFile(const std::string &type,
                                        e.GetFullMessage());
       }
       
+      #if DEBUG_CREATE_EPHEMFILE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateEphemerisFile() returning <%p>\n", obj);
+      #endif
+      
       return obj;
    }
    else
    {
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_EPHEMFILE
       MessageInterface::ShowMessage
          ("Moderator::CreateEphemerisFile() Unable to create EphemerisFile "
           "name: %s already exist\n", name.c_str());
@@ -7417,6 +7435,10 @@ void Moderator::CreateDefaultMission()
           "*** Error occurred during default mission creation.\n    The default "
           "mission will not run.\n    Message: " + e.GetFullMessage());
    }
+   
+   #if DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Moderator successfully created default mission\n");
+   #endif
 } // CreateDefaultMission()
 
 
