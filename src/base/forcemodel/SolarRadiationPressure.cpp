@@ -788,22 +788,6 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       }
    }
 
-//      Real aTilde[36];
-//      Integer associate, element;
-//      Integer aiCount = (fillSTM ? stmCount : aMatrixCount);
-//
-//      for (Integer i = 0; i < aiCount; ++i)
-//      {
-//         i6 = stmStart + i * 36;
-//         a6 = aMatrixStart + i * 36;
-//         if (!fillSTM)
-//            i6 = a6;
-//         associate = theState->GetAssociateIndex(i6);
-//
-//         relativePosition[0] = rv[0] - state[ associate ];
-//         relativePosition[1] = rv[1] - state[associate+1];
-//         relativePosition[2] = rv[2] - state[associate+2];
-
    if (fillSTM || fillAMatrix)
    {
       Real aTilde[36];
@@ -912,9 +896,6 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          aTilde[21] = aTilde[22] = aTilde[23] =
          aTilde[27] = aTilde[28] = aTilde[29] =
          aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
-
-//         // Gather spacecraft data
-//         i6 = cartIndex + i*6;
 
          // Build vector from Sun to the current spacecraft; (-s in math spec)
          sunSat[0] = state[ associate ] - cbSunVector[0];
@@ -1386,6 +1367,7 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
    {
       case Gmat::CARTESIAN_STATE:
          satCount = quantity;
+         cartesianCount = quantity;
          cartesianStart = index;
          fillCartesian = true;
          retval = true;
