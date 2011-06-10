@@ -496,7 +496,9 @@
     <ClCompile Include="..\..\..\src\gui\spacecraft\VisualModelCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\VisualModelPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTrajFrame.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -760,7 +762,9 @@
     <ClInclude Include="..\..\..\src\gui\spacecraft\VisualModelCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\VisualModelPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTrajFrame.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

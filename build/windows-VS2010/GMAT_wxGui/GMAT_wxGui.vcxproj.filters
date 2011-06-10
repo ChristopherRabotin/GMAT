@@ -510,6 +510,12 @@
     <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp">
       <Filter>Source Files\output</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -958,6 +964,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp">
       <Filter>Source Files\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.hpp">
+      <Filter>Source Files\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

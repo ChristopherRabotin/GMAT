@@ -1191,9 +1191,6 @@
     <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\subscriber\OpenGlPlot.cpp">
-      <Filter>Source Files\subscriber</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\subscriber\OrbitView.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
@@ -2391,9 +2388,6 @@
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp">
-      <Filter>Source Files\subscriber</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\subscriber\OpenGlPlot.hpp">
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\OrbitView.hpp">
