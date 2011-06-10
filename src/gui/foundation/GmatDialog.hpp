@@ -30,7 +30,6 @@
 #include "wx/radiobut.h"
 
 #include "UserInputValidator.hpp"
-#include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
 

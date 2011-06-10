@@ -28,6 +28,14 @@
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
 
+#if !defined __CONSOLE_APP__
+#include "ViewTextFrame.hpp"
+#include "ResourceTree.hpp"
+#include "MissionTree.hpp"
+#include "OutputTree.hpp"
+#include "GmatMainFrame.hpp"
+#endif
+
 GmatAppData* GmatAppData::theGmatAppData = NULL;
 
 //------------------------------------------------------------------------------

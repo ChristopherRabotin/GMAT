@@ -1,3 +1,4 @@
+//$Id$
 //------------------------------------------------------------------------------
 //                              Stars.hpp
 //------------------------------------------------------------------------------
@@ -39,7 +40,7 @@ enum StarOrder {
     CosRAcosDec = 0,                // cos(RA)*cosDec
     SinRAcosDec,                    // sin(RA)*cosDec
     SinDec,                         // sin(Dec)
-	 Range									// Set to zero, draw at infinity
+    Range                           // Set to zero, draw at infinity
 };
 
 
@@ -71,8 +72,8 @@ private:
    Real  StarsVA[MAXSTARS][4];              // cos(RA)*cosDec
                                             // sin(RA)*cosDec
                                             // sin(Dec)
-														  // 0 (to draw at infinity)
-   GLfloat     CLines[MAXLINES][4];			  // Constellation points
+                                                                                                                  // 0 (to draw at infinity)
+   GLfloat     CLines[MAXLINES][4];                       // Constellation points
    wxString    ConstellationNames[MAXCON];   // The names of the constellations
    int         ConstellationIndex[MAXCON][2]; // The starting and ending indices for each constellation
    int         GroupIndex[GROUPCOUNT];      // Indexes into the m_StarsVA array

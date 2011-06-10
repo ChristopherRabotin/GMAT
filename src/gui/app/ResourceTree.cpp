@@ -74,15 +74,17 @@
 #include "bitmaps/rt_Matlab.xpm"
 #include "bitmaps/rt_MatlabServer.xpm"
 #include "bitmaps/rt_Default.xpm"
+#include "bitmaps/rt_GroundTrackPlot.xpm"
 
 #include "GuiInterpreter.hpp"
 #include "ResourceTree.hpp"
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
+#include "MissionTree.hpp"
 #include "MessageInterface.hpp"
 #include "GmatTreeItemData.hpp"
 #include "ParameterCreateDialog.hpp"
 #include "CoordSysCreateDialog.hpp"
-#include "GmatMainFrame.hpp"
 #include "RunScriptFolderDialog.hpp"
 #include "ViewTextDialog.hpp"
 #include "GmatFunction.hpp"           // for SetNewFunction()
@@ -2253,13 +2255,16 @@ void ResourceTree::AddIcons()
    wxBitmap* bitmaps[GmatTree::ICON_COUNT];
    int index = 0;
    long bitmapType = wxBITMAP_TYPE_PNG;
+
+   // Note:
+   // Add icons by the order of enum ResourceIconType in GmatTreeItemData.hpp
    
-   // add icons by the order of enum ResourceIconType in GmatTreeItemData.hpp
    theGuiManager->LoadIcon("ClosedFolder", bitmapType, &bitmaps[index], ClosedFolder_xpm); 
    theGuiManager->LoadIcon("file", bitmapType, &bitmaps[++index], file_xpm);   
    theGuiManager->LoadIcon("OpenFolder", bitmapType, &bitmaps[++index], OpenFolder_xpm);   
    theGuiManager->LoadIcon("Groundstation", bitmapType, &bitmaps[++index], Groundstation_xpm);   
    theGuiManager->LoadIcon("spacecraft", bitmapType, &bitmaps[++index], spacecraft_xpm);
+   theGuiManager->LoadIcon("propagator", bitmapType, &bitmaps[++index], propagator_xpm);
    
    theGuiManager->LoadIcon("tank", bitmapType, &bitmaps[++index], tank_xpm);
    theGuiManager->LoadIcon("thruster", bitmapType, &bitmaps[++index], thruster_xpm);
@@ -2286,19 +2291,20 @@ void ResourceTree::AddIcons()
    theGuiManager->LoadIcon("planet_generic", bitmapType, &bitmaps[++index], planet_generic_xpm);
    theGuiManager->LoadIcon("comet", bitmapType, &bitmaps[++index], comet_xpm);
    theGuiManager->LoadIcon("asteroid", bitmapType, &bitmaps[++index], asteroid_xpm);
+   theGuiManager->LoadIcon("rt_Barycenter", bitmapType, &bitmaps[++index], rt_Barycenter_xpm);
+   theGuiManager->LoadIcon("rt_LibrationPoint", bitmapType, &bitmaps[++index], rt_LibrationPoint_xpm);
+   
    theGuiManager->LoadIcon("matlabfunction", bitmapType, &bitmaps[++index], matlabfunction_xpm);
    theGuiManager->LoadIcon("function", bitmapType, &bitmaps[++index], function_xpm);
    theGuiManager->LoadIcon("coordinatesystem", bitmapType, &bitmaps[++index], coordinatesystem_xpm);
-   theGuiManager->LoadIcon("openglplot", bitmapType, &bitmaps[++index], openglplot_xpm);
    
-   theGuiManager->LoadIcon("propagator", bitmapType, &bitmaps[++index], propagator_xpm);
+   theGuiManager->LoadIcon("openglplot", bitmapType, &bitmaps[++index], openglplot_xpm);
+   theGuiManager->LoadIcon("xyplot", bitmapType, &bitmaps[++index], xyplot_xpm);
+   theGuiManager->LoadIcon("rt_GroundTrackPlot", bitmapType, &bitmaps[++index], rt_GroundTrackPlot_xpm);
+   
    theGuiManager->LoadIcon("variable", bitmapType, &bitmaps[++index], variable_xpm);
    theGuiManager->LoadIcon("array", bitmapType, &bitmaps[++index], array_xpm);
    theGuiManager->LoadIcon("string", bitmapType, &bitmaps[++index], string_xpm);
-   theGuiManager->LoadIcon("xyplot", bitmapType, &bitmaps[++index], xyplot_xpm);
-   
-   theGuiManager->LoadIcon("rt_Barycenter", bitmapType, &bitmaps[++index], rt_Barycenter_xpm);
-   theGuiManager->LoadIcon("rt_LibrationPoint", bitmapType, &bitmaps[++index], rt_LibrationPoint_xpm);
    
    theGuiManager->LoadIcon("rt_BoundaryValueSolver", bitmapType, &bitmaps[++index], rt_BoundaryValueSolver_xpm);
    theGuiManager->LoadIcon("rt_Optimizer", bitmapType, &bitmaps[++index], rt_Optimizer_xpm);
@@ -2940,11 +2946,15 @@ void ResourceTree::OnAddSubscriber(wxCommandEvent &event)
 
    if (obj != NULL)
    {
+      GmatTree::ResourceIconType iconToUse = GmatTree::RESOURCE_ICON_DEFAULT;
+      if (selected == "GroundTrackPlot")
+         iconToUse = GmatTree::RESOURCE_ICON_GROUND_TRACK_PLOT;
+      
       wxString name = newName.c_str();
-      AppendItem(item, name, GmatTree::RESOURCE_ICON_DEFAULT, -1,
+      AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, GmatTree::SUBSCRIBER));
       Expand(item);
-
+      
       theGuiManager->UpdateSubscriber();
    }
 }

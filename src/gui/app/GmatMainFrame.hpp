@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2003/08/05
 //
@@ -37,8 +35,9 @@
 #include "GuiInterpreter.hpp"
 #include "GmatTreeItemData.hpp"
 #include "GmatServer.hpp"
-#include "MdiChildTrajFrame.hpp"
-#include "MdiChildTsFrame.hpp"
+//#include "MdiChildViewFrame.hpp"
+//#include "MdiChildTsFrame.hpp"
+#include "GmatMdiChildFrame.hpp"
 #include "WelcomePanel.hpp"
 
 #include <wx/notebook.h>
@@ -48,6 +47,9 @@
 #include <wx/textctrl.h>
 #include <wx/hyperlink.h>
 #include <wx/help.h>        // (wxWidgets chooses the appropriate help controller class)
+
+class MdiChildViewFrame;
+class MdiChildTsFrame;
 
 namespace GmatGui
 {
@@ -195,8 +197,8 @@ public:
    void UpdateGuiScriptSyncStatus(int guiStatus, int scriptStatus);
    
    virtual bool Show(bool show = true);
-
-   MdiChildTrajFrame *trajSubframe;
+   
+   MdiChildViewFrame *viewSubframe;
    MdiChildTsFrame *tsSubframe;
    wxList *theMdiChildren;
 

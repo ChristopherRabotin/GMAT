@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------------
 #include "FormationSetupPanel.hpp"
 #include "GmatAppData.hpp"
+#include "ResourceTree.hpp"
 #include "Formation.hpp"
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"

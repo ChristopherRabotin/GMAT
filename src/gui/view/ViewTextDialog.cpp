@@ -20,6 +20,7 @@
 #include "ViewTextDialog.hpp"
 #include "FileManager.hpp"
 #include "GmatAppData.hpp"
+#include "GmatBaseException.hpp"
 #include "MessageInterface.hpp"
 
 BEGIN_EVENT_TABLE(ViewTextDialog, wxDialog)

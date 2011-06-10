@@ -23,15 +23,16 @@
 #include "TsPlotCurve.hpp"
 #include "TsPlotXYCanvas.hpp"
 #include "GmatAppData.hpp"
-#include "RealUtilities.hpp" // for Abs(), Min(), Max()
-#include <fstream>           // for ifstream (plot input file)
+#include "GmatMainFrame.hpp"       // for theMdiChildren->Append
+#include "RealUtilities.hpp"       // for Abs(), Min(), Max()
+#include <fstream>                 // for ifstream (plot input file)
 
 #include "wx/image.h"
 #include "wx/listctrl.h"
 #include "wx/sizer.h"
 #include "wx/log.h"
 #include "wx/intl.h"
-#include "wx/gdicmn.h"       // for color
+#include "wx/gdicmn.h"             // for color
 
 #include "RgbColor.hpp"
 #include "MessageInterface.hpp"

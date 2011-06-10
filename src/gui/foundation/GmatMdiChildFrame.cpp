@@ -19,6 +19,7 @@
 
 #include "GmatMdiChildFrame.hpp"
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include "GuiInterpreter.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"

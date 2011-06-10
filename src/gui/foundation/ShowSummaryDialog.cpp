@@ -22,6 +22,7 @@
 
 
 #include "ShowSummaryDialog.hpp"
+#include "GmatAppData.hpp"
 
 //------------------------------------------------------------------------------
 //  ShowSummaryDialog(wxWindow *parent, wxWindowID id, const wxString& title, 

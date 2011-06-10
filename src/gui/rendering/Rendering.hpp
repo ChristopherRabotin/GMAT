@@ -23,6 +23,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"         // for GetGuiInterpreter()
 #include "GmatOpenGLSupport.hpp"   // for OpenGL support
+#include "Rvector3.hpp"
 
 struct GlColorType
 {

@@ -18,10 +18,10 @@
  * Shows text.
  */
 //------------------------------------------------------------------------------
-#include "gmatwxdefs.hpp"
 #include "ViewTextFrame.hpp"
 #include "GmatAppData.hpp"
 #include "FileManager.hpp"
+#include "GmatBaseException.hpp"
 #include "MessageInterface.hpp"
 
 BEGIN_EVENT_TABLE(ViewTextFrame, wxFrame)

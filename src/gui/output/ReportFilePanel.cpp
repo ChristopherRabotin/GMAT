@@ -18,6 +18,7 @@
 
 #include "ReportFilePanel.hpp"
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include "MessageInterface.hpp"
 
 #include <wx/file.h> // for wxFile
@@ -166,17 +167,19 @@ void ReportFilePanel::LoadData()
       mFileContentsTextCtrl->LoadFile(filename.c_str());
    else
       mFileContentsTextCtrl->SetValue("");
+   
+   delete file;
 }
 
 
 //------------------------------------------------------------------------------
-// void OnClose()
+// void OnClose(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
  * Close page.
  */
 //------------------------------------------------------------------------------
-void ReportFilePanel::OnClose(wxCommandEvent &event)
+void ReportFilePanel::OnClose(wxCommandEvent &WXUNUSED(event))
 {
    GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
 }

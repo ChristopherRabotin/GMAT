@@ -40,6 +40,7 @@
 #include "GmatToolBar.hpp"
 #include "GmatTreeItemData.hpp"
 #include "GmatMdiChildFrame.hpp"
+#include "MdiChildViewFrame.hpp"
 // panels
 #include "GmatBaseSetupPanel.hpp"
 #include "SpacecraftPanel.hpp"
@@ -291,11 +292,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mInterpretFailed = false;
    mExitWithoutConfirm = false;
    mRunStatus = 0;
-
-   // child frames
-   trajSubframe = (MdiChildTrajFrame *)NULL;
+   
+   viewSubframe = (MdiChildViewFrame *)NULL;
    tsSubframe = (MdiChildTsFrame *)NULL;
-
+   
    GmatAppData *gmatAppData = GmatAppData::Instance();
    theGuiInterpreter = gmatAppData->GetGuiInterpreter();
    gmatAppData->SetTempScriptName(mTempScriptName.c_str());
@@ -977,7 +977,7 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
              name.c_str());
          #endif
 
-         // MdiChildTrajFrame::OnPlotClose() and MdiChildTsrame::OnPlotClose()
+         // MdiChildViewFrame::OnPlotClose() and MdiChildTsrame::OnPlotClose()
          // set deleteChild to false
          if (deleteChild)
             delete child;
@@ -1636,10 +1636,11 @@ void GmatMainFrame::StopRunningMission()
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_STOP, FALSE);
    wxYield();
-
+   
    theGuiInterpreter->ChangeRunState("Stop");
    mRunPaused = false;
-
+   mRunCompleted = true;
+   
    theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
    UpdateMenus(TRUE);
    toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, TRUE);
@@ -1669,6 +1670,7 @@ void GmatMainFrame::NotifyRunCompleted()
 //------------------------------------------------------------------------------
 void GmatMainFrame::ProcessPendingEvent()
 {
+   MessageInterface::ShowMessage("---> GmatMainFrame::ProcessPendingEvent() entered\n");
    wxYield();
 }
 
@@ -4531,7 +4533,7 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
    }
    
    wxString title = child->GetTitle();
-   MdiChildTrajFrame *frame = NULL;
+   MdiChildViewFrame *frame = NULL;
    bool frameFound = false;
 
    #if DEBUG_ANIMATION
@@ -4541,7 +4543,7 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
 
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
-      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       if (frame && (frame->GetPlotName().IsSameAs(title)))
       {
          frameFound = true;
@@ -4597,7 +4599,8 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
       frame->SetAnimationFrameIncrement(mAnimationFrameInc);
       break;
    case TOOL_ANIMATION_OPTIONS:
-      frame->OnShowOptionDialog(event);
+      // This is deprecated code
+      //frame->OnShowOptionDialog(event);
       break;
    default:
       break;

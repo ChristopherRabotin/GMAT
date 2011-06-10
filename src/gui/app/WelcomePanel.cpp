@@ -23,6 +23,7 @@
 #include "FileManager.hpp"
 #include "FileUtil.hpp"
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
 #include <wx/config.h>

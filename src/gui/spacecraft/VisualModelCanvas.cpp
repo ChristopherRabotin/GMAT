@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------
 
 #include "gmatwxdefs.hpp"
+#include "ColorTypes.hpp"          // for GmatColor::
 #include "Camera.hpp"
 #include "Light.hpp"
 #include "GmatOpenGLSupport.hpp"   // for OpenGL support
@@ -86,7 +87,7 @@ VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    glInitialized = false;
    recentered = false;
 
-	glClearColor(0.0, 0.0, 0.0, 1);
+        glClearColor(0.0, 0.0, 0.0, 1);
    // Clear the color and depth bits
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -104,9 +105,9 @@ VisualModelCanvas::~VisualModelCanvas()
 //------------------------------------------------------------------------------
 void VisualModelCanvas::OnPaint(wxPaintEvent &event)
 {
-	float offset[3] = {0.0f, 0.0f, 0.0f}, rotation[3] = {0.0f, 0.0f, 0.0f}, scale;
+        float offset[3] = {0.0f, 0.0f, 0.0f}, rotation[3] = {0.0f, 0.0f, 0.0f}, scale;
 
-	#ifndef __WXMAC__
+        #ifndef __WXMAC__
       // Set the context
       theContext->SetCurrent(*this);
       SetCurrent(*theContext);
@@ -169,18 +170,18 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
    }
    else
    {
-		offset[0] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"));
-		offset[1] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"));
-		offset[2] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"));
-		rotation[0] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"));
-		rotation[1] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"));
-		rotation[2] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"));
-		scale = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelScale"));
-		loadedModel->SetBaseOffset(offset[0], offset[1], offset[2]);
+                offset[0] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"));
+                offset[1] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"));
+                offset[2] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"));
+                rotation[0] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"));
+                rotation[1] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"));
+                rotation[2] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"));
+                scale = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelScale"));
+                loadedModel->SetBaseOffset(offset[0], offset[1], offset[2]);
       // Dunn changed the subscript below from [3] to [2]
-		loadedModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-		loadedModel->SetBaseScale(scale, scale, scale);
-		loadedModel->Draw(true);
+                loadedModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
+                loadedModel->SetBaseScale(scale, scale, scale);
+                loadedModel->Draw(true);
    }
    glDisable(GL_LIGHTING);
    // Draw the axes
@@ -223,25 +224,25 @@ void VisualModelCanvas::OnMouse(wxMouseEvent &event)
       // Zooms the camera when the right mouse button is used
       if (event.RightIsDown())
       {
-			Real x2 = (lastMouseX - mouseX) * (lastMouseX - mouseX);
+                        Real x2 = (lastMouseX - mouseX) * (lastMouseX - mouseX);
          Real y2 = (mouseY - lastMouseY) * (mouseY - lastMouseY);
          Real length = sqrt(x2 + y2);
 
-			Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
+                        Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
 
          Real zoom = length * distance / 500;
          if (mouseY < lastMouseY)
-				mCamera.Translate(0, 0, zoom, false);
+                                mCamera.Translate(0, 0, zoom, false);
          else
             mCamera.Translate(0, 0, -zoom, false);
          Refresh(false);
       }
-		if (event.MiddleIsDown())
-		{
-			float roll = (mouseY - lastMouseY) / 400.0;
-			mCamera.Rotate(0.0, 0.0, roll, false, true);
-			Refresh(false);
-		}
+                if (event.MiddleIsDown())
+                {
+                        float roll = (mouseY - lastMouseY) / 400.0;
+                        mCamera.Rotate(0.0, 0.0, roll, false, true);
+                        Refresh(false);
+                }
    }
    // Record the mouse position
    lastMouseX = mouseX;
@@ -285,8 +286,8 @@ void VisualModelCanvas::DrawAxes()
      viewDist = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]; // stays the same
 
    Rvector3 axis;
-	Rvector3 origin;
-	origin.Set(0, 0, 0);
+        Rvector3 origin;
+        origin.Set(0, 0, 0);
 
    // PS - See Rendering.cpp
    // Note from Dunn.  The signs for these axes were changed after the big fix
@@ -297,34 +298,34 @@ void VisualModelCanvas::DrawAxes()
    //
    // Set X-Axis
    axis.Set(viewDist, 0, 0);
-	DrawLine(1, 0, 0, origin, axis);
+        DrawLine(1, 0, 0, origin, axis);
 
    // Set Y-Axis
    axis.Set(0, viewDist, 0);
-	DrawLine(0, 1, 0, origin, axis);
+        DrawLine(0, 1, 0, origin, axis);
 
    // Set Z-Axis
    axis.Set(0, 0, viewDist);
-	DrawLine(0, 0, 1, origin, axis);
+        DrawLine(0, 0, 1, origin, axis);
 
    //-----------------------------------
    // throw some text out...
    //-----------------------------------
 
    // Label X-Axis
-	glColor3f(1, 0, 0);	// red
+        glColor3f(1, 0, 0);     // red
    axisLabel = "+X ";
-	DrawStringAt(axisLabel, +viewDist, 0.0, 0.0, 1.0);
+        DrawStringAt(axisLabel, +viewDist, 0.0, 0.0, 1.0);
 
    // Label Y-Axis
-	glColor3f(0, 1, 0);	// green
+        glColor3f(0, 1, 0);     // green
    axisLabel = "+Y ";
-	DrawStringAt(axisLabel, 0.0, +viewDist, 0.0, 1.0);
+        DrawStringAt(axisLabel, 0.0, +viewDist, 0.0, 1.0);
 
    // Label Z-Axis
-	glColor3f(0, 0, 1);	// blue
+        glColor3f(0, 0, 1);     // blue
    axisLabel = "+Z ";
-	DrawStringAt(axisLabel, 0.0, 0.0, +viewDist, 1.0);
+        DrawStringAt(axisLabel, 0.0, 0.0, +viewDist, 1.0);
 
    glLineWidth(1.0);
 }
@@ -446,13 +447,13 @@ float VisualModelCanvas::AutoscaleModel()
 {
 //   float earthRadius = 6378.0f,
    float earthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH],
-		modelRadius = loadedModel->bsphere_radius;
-	return earthRadius / (5.0f * modelRadius);
+                modelRadius = loadedModel->bsphere_radius;
+        return earthRadius / (5.0f * modelRadius);
 }
 
 void VisualModelCanvas::LoadModel()
 {
-	ModelManager *mm = ModelManager::Instance();
+        ModelManager *mm = ModelManager::Instance();
    currentSpacecraft->modelID = mm->LoadModel(modelPath);
    loadedModel = mm->GetModel(currentSpacecraft->modelID);
    needToLoadModel = false;

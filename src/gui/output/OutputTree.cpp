@@ -29,6 +29,7 @@
 #include <wx/string.h>        // for wxArrayString
 
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include "OutputTree.hpp"
 #include "GmatTreeItemData.hpp"
 #include "ViewTextFrame.hpp"

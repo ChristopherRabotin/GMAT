@@ -18,6 +18,7 @@
 
 #include "CompareReportPanel.hpp"
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
 

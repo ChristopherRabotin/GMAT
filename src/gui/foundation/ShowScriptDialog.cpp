@@ -21,6 +21,7 @@
 
 
 #include "ShowScriptDialog.hpp"
+#include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------

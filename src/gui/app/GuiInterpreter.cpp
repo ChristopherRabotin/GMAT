@@ -20,13 +20,16 @@
 //------------------------------------------------------------------------------
 #if !defined __CONSOLE_APP__
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
+#include "ResourceTree.hpp"
+#include "MissionTree.hpp"
+#include "OutputTree.hpp"
 #endif
 
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "Moderator.hpp"
 
-#define DEBUG_INTERPRET 1
 
 GuiInterpreter* GuiInterpreter::instance = NULL;
 

@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 
 #include "Editor.hpp"
+#include "GmatMainFrame.hpp"
 #include "GmatSavePanel.hpp"
 #include "FunctionSetupPanel.hpp"
 #include "EditorPreferences.hpp"

@@ -21,6 +21,8 @@
 #include "ParameterCreateDialog.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "GmatStaticBoxSizer.hpp"
+#include "GmatAppData.hpp"              // for GetResourceTree()
+#include "ResourceTree.hpp"
 #include "RgbColor.hpp"
 #include "ParameterInfo.hpp"            // for GetDepObjectType()
 #include "StringUtil.hpp"               // for GmatStringUtil::

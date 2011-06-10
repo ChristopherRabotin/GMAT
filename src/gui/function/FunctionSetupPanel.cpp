@@ -23,6 +23,7 @@
 
 #include "FunctionSetupPanel.hpp"
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include "FileUtil.hpp"           // for DoesFileExist()
 #include "MessageInterface.hpp"
 #include <wx/filename.h>          // for wxFileName::

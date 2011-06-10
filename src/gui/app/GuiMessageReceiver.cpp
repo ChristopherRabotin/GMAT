@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
-
+#include "ViewTextFrame.hpp"
 #include <stdarg.h>                // for va_start(), va_end()
 #include <stdio.h>                 // for vsprintf()
 #include <string.h>                // for strlen()

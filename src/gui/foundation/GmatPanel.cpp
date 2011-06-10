@@ -30,6 +30,8 @@
 #include <wx/config.h>
 #include "GmatPanel.hpp"
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
+#include "GmatMdiChildFrame.hpp"
 #include "MessageInterface.hpp"
 #include "bitmaps/NewScript.xpm"
 #include "bitmaps/report.xpm"

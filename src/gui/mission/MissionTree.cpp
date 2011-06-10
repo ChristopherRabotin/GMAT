@@ -1860,8 +1860,30 @@ void MissionTree::AddIcons()
    theGuiManager->LoadIcon("mt_RunEstimator", bitmapType, &bitmaps[++index], mt_RunEstimator_xpm);
    theGuiManager->LoadIcon("mt_Default", bitmapType, &bitmaps[++index], mt_Default_xpm);
    
+   // Rescale if bitmap size is not 16x16 and use high quality scale (LOJ: 2011.04.22)
+   int w, h;
    for ( size_t i = 0; i < WXSIZEOF(bitmaps); i++ )
-      images->Add(bitmaps[i]->ConvertToImage().Rescale(sizeW, sizeH));
+   {
+      w = bitmaps[i]->GetWidth();
+      h = bitmaps[i]->GetHeight();
+      
+      #ifdef DEBUG_ADD_ICONS
+      MessageInterface::ShowMessage("   bitmaps[%2d], w=%d, h=%d\n", i, w, h);
+      #endif
+      
+      wxImage image = bitmaps[i]->ConvertToImage();
+      if (w != sizeW || h != sizeH)
+      {
+         #ifdef DEBUG_ADD_ICONS
+         MessageInterface::ShowMessage("   rescaling image to %d x %d\n", sizeW, sizeH);
+         #endif
+         
+         image.Rescale(sizeW, sizeH, wxIMAGE_QUALITY_HIGH);
+      }
+      
+      images->Add(image);
+      //images->Add(bitmaps[i]->ConvertToImage().Rescale(sizeW, sizeH));
+   }
    
    AssignImageList(images);
    

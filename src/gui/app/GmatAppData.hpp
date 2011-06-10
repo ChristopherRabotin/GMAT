@@ -22,11 +22,20 @@
 #define GmatAppData_hpp
 
 #if !defined __CONSOLE_APP__
-#include "ViewTextFrame.hpp"
-#include "ResourceTree.hpp"
-#include "MissionTree.hpp"
-#include "OutputTree.hpp"
-#include "GmatMainFrame.hpp"
+
+//#include "ViewTextFrame.hpp"
+//#include "ResourceTree.hpp"
+//#include "MissionTree.hpp"
+//#include "OutputTree.hpp"
+//#include "GmatMainFrame.hpp"
+
+class ViewTextFrame;
+class ResourceTree;
+class MissionTree;
+class OutputTree;
+class GmatMainFrame;
+
+#include "gmatwxdefs.hpp"
 #include <wx/print.h>         // for wxPrintData
 #include <wx/printdlg.h>      // for wxPageSetupDialogData
 #include <wx/confbase.h>

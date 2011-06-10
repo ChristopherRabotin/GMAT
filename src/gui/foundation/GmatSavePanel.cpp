@@ -21,6 +21,7 @@
 
 #include "GmatSavePanel.hpp"
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include "ShowScriptDialog.hpp"
 #include "MessageInterface.hpp"
 

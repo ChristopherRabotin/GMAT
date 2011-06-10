@@ -25,10 +25,6 @@
 #include <wx/button.h>
 #include <wx/hyperlink.h>
 
-#include "GmatAppData.hpp"
-#include "GuiInterpreter.hpp"
-#include "GuiItemManager.hpp"
-
 class AboutDialog : public wxDialog
 {
 public:

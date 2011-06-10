@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 
 #include "AboutDialog.hpp"
+#include "GmatBaseException.hpp"
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
 #include "ViewTextDialog.hpp"

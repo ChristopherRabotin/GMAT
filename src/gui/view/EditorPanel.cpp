@@ -20,8 +20,10 @@
 //------------------------------------------------------------------------------
 
 #include "EditorPanel.hpp"
-#include "MessageInterface.hpp"   // for Instance()
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
+#include "ResourceTree.hpp"
+#include "MessageInterface.hpp"
 #include <wx/file.h>              // for wxFile
 #include <wx/gdicmn.h>            // for wxColourDatabase
 
