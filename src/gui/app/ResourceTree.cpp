@@ -1436,6 +1436,12 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool restartCounte
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::ORBIT_VIEW));
       }
+      else if (objTypeName == "GroundTrackPlot")
+      {
+         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_GROUND_TRACK_PLOT, -1,
+                    new GmatTreeItemData(wxT(objName),
+                                         GmatTree::ORBIT_VIEW));
+      }
       else if (objTypeName == "EphemerisFile")
       {
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT_FILE, -1,

@@ -4439,6 +4439,12 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                obj->SetStringParameter("Add", "Earth");
                obj->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
             }
+            else if (type == "GroundTrackPlot")
+            {
+               // add default spacecraft and earth
+               obj->SetStringParameter("Add", GetDefaultSpacecraft()->GetName());
+               obj->SetStringParameter("Add", "Earth");
+            }
             else if (type == "XYPlot")
             {
                // add default x,y parameter to XYPlot
@@ -7929,6 +7935,14 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
       sub->SetStringParameter("Add", "Earth");
       sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
       sub->SetStringParameter("ViewPointVector", "[30000 0 0]");
+      sub->Activate(true);
+   }
+   else if (type == "GroundTrackPlot")
+   {
+      // create default GroundTrackPlot
+      sub = CreateSubscriber("GroundTrackPlot", "DefaultGroundTrackPlot");
+      sub->SetStringParameter("Add", "DefaultSC");
+      sub->SetStringParameter("Add", "Earth");
       sub->Activate(true);
    }
    else if (type == "XYPlot")
