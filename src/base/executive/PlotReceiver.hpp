@@ -36,6 +36,7 @@ namespace GmatPlot
    {
       TRAJECTORY_PLOT,
       ENHANCED_3D_VIEW,
+      GROUND_TRACK_PLOT,
    };
 };
 
@@ -48,40 +49,46 @@ public:
    GmatPlot::ViewType GetViewType();
    
    virtual bool CreateGlPlotWindow(const std::string &plotName,
-                           const std::string &oldName,
-                           bool drawEcPlane, bool drawEqPlane,
-                           bool drawWireFrame, bool drawAxes, bool drawGrid,
-                           bool drawESLines, bool overlapPlot,
-                           bool usevpInfo, bool usepm,
-                           Integer numPtsToRedraw,
-                           bool drawStars, bool drawConstellations, Integer starCount) = 0;
+                        const std::string &oldName,
+                        Integer numPtsToRedraw) = 0;
    
    virtual void SetGlSolarSystem(const std::string &plotName,
-                                 SolarSystem *ss) = 0;
+                        SolarSystem *ss) = 0;
    
    virtual void SetGlObject(const std::string &plotName,
-                    const StringArray &objNames,
-                    const UnsignedIntArray &objOrbitColors,
-                    const std::vector<SpacePoint*> &objArray) = 0;
+                        const StringArray &objNames,
+                        const UnsignedIntArray &objOrbitColors,
+                        const std::vector<SpacePoint*> &objArray) = 0;
    
    virtual void SetGlCoordSystem(const std::string &plotName,
-                         CoordinateSystem *internalCs,
-                         CoordinateSystem *viewCs,
-                         CoordinateSystem *viewUpCs) = 0;
+                        CoordinateSystem *internalCs,
+                        CoordinateSystem *viewCs,
+                        CoordinateSystem *viewUpCs) = 0;
    
-   virtual void SetGlViewOption(const std::string &plotName,
+   virtual void SetGl2dDrawingOption(const std::string &plotName,
+                        const std::string &textureMap,
+                        Integer footPrintOption) = 0;
+   
+   virtual void SetGl3dDrawingOption(const std::string &plotName,
+                        bool drawEcPlane, bool drawEqPlane,
+                        bool drawWireFrame, bool drawAxes,
+                        bool drawGrid, bool drawSunLine,
+                        bool overlapPlot, bool usevpInfo,
+                        bool drawStars, bool drawConstellations,
+                        Integer starCount) = 0;
+   
+   virtual void SetGl3dViewOption(const std::string &plotName,
                         SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                         SpacePoint *vdObj, Real vsFactor,
                         const Rvector3 &vpRefVec, const Rvector3 &vpVec,
                         const Rvector3 &vdVec, const std::string &upAxis,
-                        bool usevpRefVec, bool usevpVec, bool usevdVec,
-                        bool useFixedFov, Real fov) = 0;
+                        bool usevpRefVec, bool usevpVec, bool usevdVec) = 0;
    
    virtual void SetGlDrawOrbitFlag(const std::string &plotName,
-                           const std::vector<bool> &drawArray) = 0;
+                        const std::vector<bool> &drawArray) = 0;
    
    virtual void SetGlShowObjectFlag(const std::string &plotName,
-                            const std::vector<bool> &showArray) = 0;
+                        const std::vector<bool> &showArray) = 0;
    
    virtual void SetGlUpdateFrequency(const std::string &plotName, 
                         Integer updFreq) = 0;
@@ -93,88 +100,88 @@ public:
    virtual bool SetGlEndOfRun(const std::string &plotName) = 0;
    
    virtual bool UpdateGlPlot(const std::string &plotName,
-                     const std::string &oldName,
-                     const StringArray &scNames, const Real &time,
-                     const RealArray &posX, const RealArray &posY,
-                     const RealArray &posZ, const RealArray &velX,
-                     const RealArray &velY, const RealArray &velZ,
-                     const UnsignedIntArray &scColors, bool solving,
-                     Integer solverOption, bool updateCanvas,
-                     bool inFunction) = 0;
+                        const std::string &oldName,
+                        const StringArray &scNames, const Real &time,
+                        const RealArray &posX, const RealArray &posY,
+                        const RealArray &posZ, const RealArray &velX,
+                        const RealArray &velY, const RealArray &velZ,
+                        const UnsignedIntArray &scColors, bool solving,
+                        Integer solverOption, bool updateCanvas,
+                        bool inFunction) = 0;
    
    virtual bool TakeGlAction(const std::string &plotName,
-                     const std::string &action) = 0;
+                        const std::string &action) = 0;
    
    // for XY plot
    virtual bool CreateXyPlotWindow(const std::string &plotName,
-                           const std::string &oldName,
-                           const std::string &plotTitle,
-                           const std::string &xAxisTitle,
-                           const std::string &yAxisTitle,
-                           bool drawGrid = false) = 0;
+                        const std::string &oldName,
+                        const std::string &plotTitle,
+                        const std::string &xAxisTitle,
+                        const std::string &yAxisTitle,
+                        bool drawGrid = false) = 0;
    virtual bool DeleteXyPlot(const std::string &plotName) = 0;
    virtual bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
-                       int yOffset, Real yMin, Real yMax,
-                       const std::string &curveTitle,
-                       UnsignedInt penColor) = 0;
+                        int yOffset, Real yMin, Real yMax,
+                        const std::string &curveTitle,
+                        UnsignedInt penColor) = 0;
    virtual bool DeleteAllXyPlotCurves(const std::string &plotName,
-                              const std::string &oldName) = 0;
-   virtual bool DeleteXyPlotCurve(const std::string &plotName, 
-                       int curveIndex) = 0;
+                        const std::string &oldName) = 0;
+   virtual bool DeleteXyPlotCurve(const std::string &plotName,
+                        int curveIndex) = 0;
    virtual void ClearXyPlotData(const std::string &plotName) = 0;
    virtual void XyPlotPenUp(const std::string &plotName) = 0;
    virtual void XyPlotPenDown(const std::string &plotName) = 0;
    virtual void XyPlotDarken(const std::string &plotName, Integer factor,
-         Integer index = -1, Integer forCurve = -1) = 0;
+                        Integer index = -1, Integer forCurve = -1) = 0;
    virtual void XyPlotLighten(const std::string &plotName, Integer factor,
-            Integer index = -1, Integer forCurve = -1) = 0;
+                        Integer index = -1, Integer forCurve = -1) = 0;
 
    virtual void XyPlotMarkPoint(const std::string &plotName, Integer index = -1,
-         Integer forCurve = -1) = 0;
+                        Integer forCurve = -1) = 0;
    virtual void XyPlotMarkBreak(const std::string &plotName, Integer index = -1,
-         Integer curveNumber = -1) = 0;
+                        Integer curveNumber = -1) = 0;
    virtual void XyPlotClearFromBreak(const std::string &plotName,
-         Integer breakNumber, Integer index = -1, Integer curveNumber = -1) = 0;
+                        Integer breakNumber, Integer index = -1, Integer curveNumber = -1) = 0;
 
    virtual void XyPlotChangeColor(const std::string &plotName,
-         Integer index = -1, UnsignedInt newColor = 0xffffff,
-         Integer forCurve = -1) = 0;
+                        Integer index = -1, UnsignedInt newColor = 0xffffff,
+                        Integer forCurve = -1) = 0;
    virtual void XyPlotChangeMarker(const std::string &plotName,
-         Integer index = -1, Integer newMarker = -1, int forCurve = -1) = 0;
+                        Integer index = -1, Integer newMarker = -1, int forCurve = -1) = 0;
    virtual void XyPlotChangeWidth(const std::string &plotName,
-         Integer index = -1, Integer newWidth = 1, int forCurve = -1) = 0;
+                        Integer index = -1, Integer newWidth = 1, int forCurve = -1) = 0;
    virtual void XyPlotChangeStyle(const std::string &plotName,
-         Integer index = -1, Integer newStyle = 100, int forCurve = -1) = 0;
+                        Integer index = -1, Integer newStyle = 100, int forCurve = -1) = 0;
 
    virtual void XyPlotRescale(const std::string &plotName) = 0;
    virtual void XyPlotCurveSettings(const std::string &plotName,
-         bool useLines = true,
-         Integer lineWidth = 1,
-         Integer lineStyle = 100,
-         bool useMarkers = false,
-         Integer markerSize = 3,
-         Integer marker = 1,
-         bool useHiLow = false,
-         Integer forCurve = -1) = 0;
+                        bool useLines = true,
+                        Integer lineWidth = 1,
+                        Integer lineStyle = 100,
+                        bool useMarkers = false,
+                        Integer markerSize = 3,
+                        Integer marker = 1,
+                        bool useHiLow = false,
+                        Integer forCurve = -1) = 0;
 
    virtual void SetXyPlotTitle(const std::string &plotName,
-                       const std::string &plotTitle) = 0;
+                        const std::string &plotTitle) = 0;
    virtual void ShowXyPlotLegend(const std::string &plotName) = 0;
    virtual bool RefreshXyPlot(const std::string &plotName) = 0;
    virtual bool UpdateXyPlot(const std::string &plotName,
-                     const std::string &oldName,
-                     const Real &xval, const Rvector &yvals,
-                     const std::string &plotTitle,
-                     const std::string &xAxisTitle,
-                     const std::string &yAxisTitle,
-                     bool updateCanvas, bool drawGrid) = 0;
+                        const std::string &oldName,
+                        const Real &xval, const Rvector &yvals,
+                        const std::string &plotTitle,
+                        const std::string &xAxisTitle,
+                        const std::string &yAxisTitle,
+                        bool updateCanvas, bool drawGrid) = 0;
    virtual bool UpdateXyPlotData(const std::string &plotName, const Real &xval,
-                     const Rvector &yvals, const Rvector *yhis = NULL,
-                     const Rvector *ylows = NULL) = 0;
+                        const Rvector &yvals, const Rvector *yhis = NULL,
+                        const Rvector *ylows = NULL) = 0;
    virtual bool UpdateXyPlotCurve(const std::string &plotName,
-                     const Integer whichCurve, const Real xval,
-                     const Real yval, const Real yhi = 0.0,
-                     const Real ylow = 0.0) = 0;
+                        const Integer whichCurve, const Real xval,
+                        const Real yval, const Real yhi = 0.0,
+                        const Real ylow = 0.0) = 0;
 
    virtual bool DeactivateXyPlot(const std::string &plotName) = 0;
    virtual bool ActivateXyPlot(const std::string &plotName) = 0;

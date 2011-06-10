@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2003/11/25
 /**
@@ -42,6 +40,18 @@ public:
                        const wxSize& size, const long style);
    virtual ~MdiChild3DViewFrame();
       
+   virtual void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
+                        bool drawWireFrame, bool drawAxes,
+                        bool drawGrid, bool drawSunLine,
+                        bool overlapPlot, bool usevpInfo,
+                        bool drawStars, bool drawConstellations,
+                        Integer starCount);
+   
+   virtual void SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                        SpacePoint *vdObj, Real vsFactor,
+                        const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                        const Rvector3 &vdVec, const std::string &upAxis,
+                        bool usevpRefVec, bool usevpVec, bool usevdVec);
 protected:
    
    DECLARE_EVENT_TABLE();

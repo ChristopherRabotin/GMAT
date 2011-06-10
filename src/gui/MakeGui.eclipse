@@ -290,8 +290,9 @@ OBJECTS = \
     spacecraft/VisualModelCanvas.o \
     spacecraft/VisualModelPanel.o \
     subscriber/EphemerisFilePanel.o \
-    subscriber/MdiChild3DViewFrame.o \
     subscriber/MdiChildViewFrame.o \
+    subscriber/MdiChild3DViewFrame.o \
+    subscriber/MdiChildGroundTrackFrame.o \
     subscriber/MdiChildTsFrame.o \
     subscriber/MdiGlPlotData.o \
     subscriber/MdiTsPlotData.o \
@@ -300,6 +301,7 @@ OBJECTS = \
     subscriber/SubscriberSetupPanel.o \
     subscriber/ViewCanvas.o \
     subscriber/OrbitViewCanvas.o \
+    subscriber/GroundTrackCanvas.o \
     subscriber/TsPlotCanvas.o \
     subscriber/TsPlotXYCanvas.o \
     subscriber/TsPlotCurve.o \

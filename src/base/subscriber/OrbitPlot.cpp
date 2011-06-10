@@ -31,7 +31,7 @@
 
 #define __REMOVE_OBJ_BY_SETTING_FLAG__
 
-//#define DBGLVL_INIT 1
+//#define DBGLVL_INIT 2
 //#define DBGLVL_DATA 1
 //#define DBGLVL_DATA_LABELS 1
 //#define DBGLVL_ADD 1
@@ -501,8 +501,8 @@ bool OrbitPlot::Initialize()
    {
       #if DBGLVL_INIT > 1
       MessageInterface::ShowMessage
-         ("OrbitPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
-          i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
+         ("OrbitPlot::Initialize() mAllSpNameArray[%d]=<%p>'%s'\n",
+          i, mAllSpArray[i], mAllSpNameArray[i].c_str());
       #endif
       
       if (mAllSpArray[i])
@@ -1300,19 +1300,33 @@ const ObjectTypeArray& OrbitPlot::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const StringArray& OrbitPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   #ifdef DBGLVL_OBJ
+   MessageInterface::ShowMessage
+      ("OrbitPlot::GetRefObjectNameArray() '%s' entered, refObjectNames.size()=%d, "
+       "mAllSpNameArray.size()=%d\n", GetName().c_str(), refObjectNames.size(),
+       mAllSpNameArray.size());
+   #endif
+   
    if (type == Gmat::COORDINATE_SYSTEM || type == Gmat::UNKNOWN_OBJECT)
    {
-      mAllRefObjectNames.push_back(mViewCoordSysName);
+      refObjectNames.push_back(mViewCoordSysName);
+   }
+   
+   if (type == Gmat::SPACE_POINT || type == Gmat::UNKNOWN_OBJECT)
+   {
+      refObjectNames.insert(refObjectNames.end(), mAllSpNameArray.begin(),
+                            mAllSpNameArray.end());
    }
    
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
-      ("OrbitPlot::GetRefObjectNameArray() returning for type:%d\n", type);
-   for (unsigned int i=0; i<mAllRefObjectNames.size(); i++)
-      MessageInterface::ShowMessage("   %s\n", mAllRefObjectNames[i].c_str());
+      ("OrbitPlot::GetRefObjectNameArray() returning %d names for type:%d\n",
+       refObjectNames.size(), type);
+   for (unsigned int i=0; i<refObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
    #endif
    
-   return mAllRefObjectNames;
+   return refObjectNames;
 }
 
 
@@ -1743,12 +1757,18 @@ Integer OrbitPlot::FindIndexOfElement(StringArray &labelArray,
 //------------------------------------------------------------------------------
 void OrbitPlot::BuildDynamicArrays()
 {
+   #if DBGLVL_INIT
+   MessageInterface::ShowMessage
+      ("OrbitPlot::BuildDynamicArrays() entered, mAllSpNameArray.size()=%d, "
+       "mAllSpArray.size()=%d\n", mAllSpNameArray.size(), mAllSpArray.size());
+   #endif
+   
    // add non-spacecraft plot objects to the list
    for (int i=0; i<mAllSpCount; i++)
    {
       #if DBGLVL_INIT > 1
       MessageInterface::ShowMessage
-         ("OrbitPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
+         ("OrbitPlot::BuildDynamicArrays() mAllSpNameArray[%d]=%s, addr=%d\n",
           i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
       #endif
       
@@ -1822,8 +1842,8 @@ void OrbitPlot::UpdateObjectList(SpacePoint *sp, bool show)
 {
    #if DBGLVL_INIT > 1
    MessageInterface::ShowMessage
-      ("OrbitPlot::UpdateObjectList() '%s' entered, sp=<%p>'%s', show=%d\n",
-       sp, sp ? sp->GetName().c_str() : "NULL", show);
+      ("OrbitPlot::UpdateObjectList() <%p>'%s' entered, sp=<%p>'%s', show=%d\n",
+       this, GetName().c_str(), sp, sp ? sp->GetName().c_str() : "NULL", show);
    #endif
    
    // Add all spacepoint objects

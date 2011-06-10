@@ -4531,7 +4531,7 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
          {
             InterpreterException ex
                ("The field name \"" + toProp + "\" on object " + "\"" +
-                toOwner->GetName() + "\" will no longer be permitted in the future");
+                toOwner->GetName() + "\" is no longer in use");
             HandleError(ex, true, true);
             ignoreError = true;
             return false;

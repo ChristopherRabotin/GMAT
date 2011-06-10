@@ -49,7 +49,7 @@ GmatPlot::ViewType PlotReceiver::GetViewType()
 //------------------------------------------------------------------------------
 PlotReceiver::PlotReceiver()
 {
-   currentView = GmatPlot::TRAJECTORY_PLOT;
+   currentView = GmatPlot::ENHANCED_3D_VIEW;
 }
 
 

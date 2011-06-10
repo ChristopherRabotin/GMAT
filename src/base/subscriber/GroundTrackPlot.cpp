@@ -26,7 +26,8 @@
 
 
 //#define DBGLVL_PARAM_STRING 2
-
+//#define DBGLVL_OBJ 1
+//#define DBGLVL_UPDATE 1
 
 //---------------------------------
 // static data
@@ -94,6 +95,7 @@ GroundTrackPlot::GroundTrackPlot(const std::string &name)
 GroundTrackPlot::GroundTrackPlot(const GroundTrackPlot &plot)
    : OrbitPlot(plot)
 {
+   centralBody        = plot.centralBody;
    centralBodyName    = plot.centralBodyName;
    footPrints         = plot.footPrints;
    textureMapFileName = plot.textureMapFileName;
@@ -114,6 +116,7 @@ GroundTrackPlot& GroundTrackPlot::operator=(const GroundTrackPlot& plot)
    
    OrbitPlot::operator=(plot);
    
+   centralBody        = plot.centralBody;
    centralBodyName    = plot.centralBodyName;
    footPrints         = plot.footPrints;
    textureMapFileName = plot.textureMapFileName;
@@ -168,10 +171,6 @@ bool GroundTrackPlot::Initialize()
 {
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS)
       return true;
-
-   // show future work message
-   MessageInterface::ShowMessage("***** Ground Track Plot is in progress.\n");
-   return false;
    
    bool retval = OrbitPlot::Initialize();
    
@@ -182,6 +181,153 @@ bool GroundTrackPlot::Initialize()
        isInitialized, isEndOfReceive, mAllSpCount);
    #endif
    
+   //--------------------------------------------------------
+   // start initializing for ground track plot
+   //--------------------------------------------------------
+   if (active && !isInitialized)
+   {
+      #if DBGLVL_INIT
+      MessageInterface::ShowMessage
+         ("GroundTrackPlot::Initialize() CreateGlPlotWindow() theSolarSystem=%p\n",
+          theSolarSystem);
+      #endif
+      
+      // set ViewType
+      PlotInterface::SetViewType(GmatPlot::GROUND_TRACK_PLOT);
+      
+      if (PlotInterface::CreateGlPlotWindow
+          (instanceName, mOldName, mNumPointsToRedraw))
+      {
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   mViewPointRefObj=%p, mViewScaleFactor=%f\n",
+             mViewPointRefObj, mViewScaleFactor);
+         #endif
+         
+         //--------------------------------------------------------
+         // Set Spacecraft and non-Spacecraft objects.
+         // If non-Spacecraft, position has to be computed in the
+         // TrajPlotCanvas, so need to pass those object pointers.
+         //--------------------------------------------------------
+         
+         ClearDynamicArrays();
+         BuildDynamicArrays();
+         
+         // Add central body to object list and always show
+         if (centralBody != NULL)
+            UpdateObjectList(centralBody, true);
+         
+         //===========================================================
+         // Save this in incase we need to use light
+         //===========================================================
+         #if 1
+         // Add Sun to list if it was not added already to enable light source 
+         if (find(mObjectNameArray.begin(), mObjectNameArray.end(), "Sun") ==
+             mObjectNameArray.end())
+            UpdateObjectList(theSolarSystem->GetBody("Sun"), false);
+         #endif
+         //===========================================================
+         
+         
+         #if DBGLVL_INIT > 1
+         MessageInterface::ShowMessage
+            ("   mScNameArray.size=%d, mScOrbitColorArray.size=%d\n",
+             mScNameArray.size(), mScOrbitColorArray.size());
+         MessageInterface::ShowMessage
+            ("   mObjectNameArray.size=%d, mOrbitColorArray.size=%d\n",
+             mObjectNameArray.size(), mOrbitColorArray.size());
+         
+         bool draw, show;
+         for (int i=0; i<mObjectCount; i++)
+         {
+            draw = mDrawOrbitArray[i] ? true : false;
+            show = mDrawObjectArray[i] ? true : false;
+            MessageInterface::ShowMessage
+               ("   mObjectNameArray[%d]=%s, draw=%d, show=%d, color=%d\n",
+                i, mObjectNameArray[i].c_str(), draw, show, mOrbitColorArray[i]);
+         }
+         #endif
+         
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   calling PlotInterface::SetGlSolarSystem(%p)\n", theSolarSystem);
+         #endif
+         
+         // set SolarSystem
+         PlotInterface::SetGlSolarSystem(instanceName, theSolarSystem);
+         
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   calling PlotInterface::SetGlObject()\n");
+         for (UnsignedInt i=0; i<mObjectArray.size(); i++)
+            MessageInterface::ShowMessage
+               ("      mObjectArray[%d]=<%p>'%s'\n", i, mObjectArray[i],
+                mObjectArray[i]->GetName().c_str());
+         #endif
+         
+         // set all object array and pointers
+         PlotInterface::SetGlObject(instanceName, mObjectNameArray,
+                                    mOrbitColorArray, mObjectArray);
+         
+         //--------------------------------------------------------
+         // set CoordinateSystem
+         //--------------------------------------------------------
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   calling PlotInterface::SetGlCoordSystem()\n");
+         #endif
+         
+         PlotInterface::SetGlCoordSystem(instanceName, theInternalCoordSystem,
+                                         mViewCoordSystem, mViewCoordSystem);
+         
+         
+         //--------------------------------------------------------
+         // set drawing options
+         //--------------------------------------------------------
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   calling PlotInterface::SetGlDrawingOption()\n");
+         #endif
+         
+         PlotInterface::SetGl2dDrawingOption(instanceName, textureMapFileName,
+                                             footPrintOption);
+         
+         //--------------------------------------------------------
+         // set viewpoint info
+         //--------------------------------------------------------
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   calling PlotInterface::SetGlViewOption()\n");
+         #endif
+         
+         PlotInterface::SetGlUpdateFrequency(instanceName, mUpdatePlotFrequency);
+         
+         //--------------------------------------------------------
+         // set drawing object flag
+         //--------------------------------------------------------
+         PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
+         PlotInterface::SetGlShowObjectFlag(instanceName, mDrawObjectArray);
+         
+         isInitialized = true;
+         retval = true;
+      }
+      else
+      {
+         retval = false;
+      }
+   }
+   else
+   {
+      #if DBGLVL_INIT
+      MessageInterface::ShowMessage
+         ("GroundTrackPlot::Initialize() Plot is active and initialized, "
+          "so calling DeleteGlPlot()\n");
+      #endif
+      
+      // Why do we want to delete plot if active and initialized?
+      // This causes Global 3DView not to show, so commented out (loj: 2008.10.08)
+      //retval =  PlotInterface::DeleteGlPlot(instanceName);
+   }
    
    #if DBGLVL_INIT
    MessageInterface::ShowMessage("GroundTrackPlot::Initialize() returning %d\n", retval);
@@ -236,7 +382,7 @@ void GroundTrackPlot::Copy(const GmatBase* orig)
  */
 //------------------------------------------------------------------------------
 bool GroundTrackPlot::TakeAction(const std::string &action,
-                           const std::string &actionData)
+                                 const std::string &actionData)
 {
    return OrbitPlot::TakeAction(action, actionData);
 }
@@ -493,12 +639,29 @@ const ObjectTypeArray& GroundTrackPlot::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const StringArray& GroundTrackPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   #if DBGLVL_OBJ
+   MessageInterface::ShowMessage
+      ("GroundTrackPlot::GetRefObjectNameArray() entered, type=%d\n", type);
+   #endif
+   
    refObjectNames.clear();
    refObjectNames = OrbitPlot::GetRefObjectNameArray(type);
    
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT ||
        type == Gmat::CELESTIAL_BODY)
+   {      
+      #if DBGLVL_OBJ
+      MessageInterface::ShowMessage("   Adding '%s' to array\n", centralBodyName.c_str());
+      #endif
       refObjectNames.push_back(centralBodyName);
+   }
+   
+   #if DBGLVL_OBJ
+   MessageInterface::ShowMessage
+      ("GroundTrackPlot::GetRefObjectNameArray() returning for type:%d\n", type);
+   for (unsigned int i=0; i<refObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
+   #endif
    
    return refObjectNames;
 }
@@ -593,7 +756,7 @@ bool GroundTrackPlot::UpdateSolverData()
       #endif
 
       // future work
-      #if 0
+      #if 1
       // Just buffer data up to last point - 1
       PlotInterface::
          UpdateGlPlot(instanceName, mOldName, mCurrScArray[i],
@@ -605,7 +768,7 @@ bool GroundTrackPlot::UpdateSolverData()
    
    // Buffer last point and Update the plot
    // future work
-   #if 0
+   #if 1
    PlotInterface::
       UpdateGlPlot(instanceName, mOldName, mCurrScArray[last],
                    mCurrEpochArray[last], mCurrXArray[last], mCurrYArray[last],
@@ -625,7 +788,7 @@ bool GroundTrackPlot::UpdateSolverData()
    
    if (runstate == Gmat::SOLVING)
    {
-      #if 0
+      #if 1
       // future work
       PlotInterface::TakeGlAction(instanceName, "ClearSolverData");
       #endif
@@ -642,7 +805,7 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
    #if DBGLVL_UPDATE
    MessageInterface::ShowMessage
       ("===========================================================================\n"
-       "OrbitView::Distribute() instanceName=%s, active=%d, isEndOfRun=%d, "
+       "GroundTrackPlot::Distribute() instanceName=%s, active=%d, isEndOfRun=%d, "
        "isEndOfReceive=%d\n   mAllSpCount=%d, mScCount=%d, len=%d, runstate=%d\n",
        instanceName.c_str(), active, isEndOfRun, isEndOfReceive, mAllSpCount,
        mScCount, len, runstate);
@@ -658,7 +821,7 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
    if (isEndOfRun)
    {
       // future work
-      #if 0
+      #if 1
       return PlotInterface::SetGlEndOfRun(instanceName);
       #else
       return true;
@@ -675,7 +838,7 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
       else
       {
          // future work
-         #if 0
+         #if 1
          return PlotInterface::RefreshGlPlot(instanceName);
          #else
          return true;
@@ -732,7 +895,7 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
       
       
       #if DBGLVL_UPDATE > 0
-      MessageInterface::ShowMessage("==========> now update 3D View\n");
+      MessageInterface::ShowMessage("==========> now update GroundTrackPlot\n");
       #endif
       
       bool solving = false;
@@ -750,7 +913,7 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
       bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
       
       // future work
-      #if 0
+      #if 1
       PlotInterface::
          UpdateGlPlot(instanceName, mOldName, mScNameArray,
                       dat[0], mScXArray, mScYArray, mScZArray,

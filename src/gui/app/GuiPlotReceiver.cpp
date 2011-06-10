@@ -24,18 +24,20 @@
 #include "gmatwxdefs.hpp"
 #include "gmatwxrcs.hpp"
 #include "GmatAppData.hpp"
-#include "MdiGlPlotData.hpp"         // for 3D Visualization
-#include "MdiChildViewFrame.hpp"     // for 3D Visualization
-#include "MdiChild3DViewFrame.hpp"   // for 3D Visualization
-#include "MdiTsPlotData.hpp"         // for XY plot
-#include "MdiChildTsFrame.hpp"       // for XY plot
+#include "GmatMainFrame.hpp"
+#include "MdiGlPlotData.hpp"            // for 3D Visualization
+#include "MdiChildViewFrame.hpp"        // for 3D Visualization
+#include "MdiChild3DViewFrame.hpp"      // for 3D Visualization
+#include "MdiTsPlotData.hpp"            // for XY plot
+#include "MdiChildTsFrame.hpp"          // for XY plot
+#include "MdiChildGroundTrackFrame.hpp" // for GroundTrackPlot
 
 #endif
 
 #include "GuiPlotReceiver.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_PLOTIF_GL 1
+//#define DEBUG_PLOTIF_GL_SET 1
 //#define DEBUG_PLOTIF_GL_CREATE 1
 //#define DEBUG_PLOTIF_GL_DELETE 1
 //#define DEBUG_PLOTIF_GL_UPDATE 1
@@ -109,7 +111,6 @@ GuiPlotReceiver::~GuiPlotReceiver()
  * @param <drawSunLine>  true if draw earth sun lines
  * @param <overlapPlot>  true if overlap plot without clearing the plot
  * @param <usevpInfo>  true if use viewpoint info to draw plot
- * @param <usepm>  true if use perspective projection mode
  * @param <numPtsToRedraw>  number of points to redraw during the run
  * @param <drawStars> true if we want to draw the stars
  * @param <drawConstellations> true if we want to the draw the constellation lines
@@ -117,13 +118,8 @@ GuiPlotReceiver::~GuiPlotReceiver()
  */
 //------------------------------------------------------------------------------
 bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
-                                       const std::string &oldName,
-                                       bool drawEcPlane, bool drawXyPlane,
-                                       bool drawWireFrame, bool drawAxes,
-                                       bool drawGrid, bool drawSunLine,
-                                       bool overlapPlot, bool usevpInfo, bool usepm,
-                                       Integer numPtsToRedraw,
-                                                                                                        bool drawStars, bool drawConstellations, Integer starCount)
+                                         const std::string &oldName,
+                                         Integer numPtsToRedraw)
 {
    //-------------------------------------------------------
    // check if new MDI child frame is needed
@@ -131,29 +127,29 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
    bool createNewFrame = true;
    wxString currPlotName;
    MdiChildViewFrame *frame = NULL;
-
+   
    #if DEBUG_PLOTIF_GL_CREATE
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::CreateGlPlotWindow() MdiGlPlot::numChildren=%d, "
-       "plotName=%s\n   oldName=%s\n", MdiGlPlot::numChildren,
-       plotName.c_str(), oldName.c_str());
-  #endif
-
+       "plotName='%s', numPtsToRedraw=%d\n   oldName=%s\n", MdiGlPlot::numChildren,
+       plotName.c_str(), oldName.c_str(), numPtsToRedraw);
+   #endif
+   
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
-
+      
       if (frame)
          currPlotName = frame->GetPlotName();
       else
          break;
-
+      
       #if DEBUG_PLOTIF_GL_CREATE
       MessageInterface::ShowMessage
-         ("GuiPlotReceiver::CreateGlPlotWindow() currPlotName[%d]=%s, addr=%p\n",
-          i, currPlotName.c_str(), frame);
+         ("GuiPlotReceiver::CreateGlPlotWindow() currPlotName[%d]=<%p>'%s'\n",
+          i, frame, currPlotName.c_str());
       #endif
-
+      
       if (currPlotName.IsSameAs(plotName.c_str()))
       {
          createNewFrame = false;
@@ -167,7 +163,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
          break;
       }
    }
-
+   
    //-------------------------------------------------------
    // create MDI child frame if not exist
    //-------------------------------------------------------
@@ -178,7 +174,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
          ("GuiPlotReceiver::CreateGlPlotWindow() Creating MdiChildViewFrame "
           "%s\n", plotName.c_str());
       #endif
-
+      
       Integer x,y, w, h;
       #ifdef __WXMAC__
          wxSize size = wxGetDisplaySize();
@@ -195,7 +191,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
          w = -1;
          h = -1;
       #endif
-
+         
       if (currentView == GmatPlot::ENHANCED_3D_VIEW)
       {
          #if DEBUG_PLOTIF_GL_CREATE
@@ -203,10 +199,18 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
          #endif
          frame = new MdiChild3DViewFrame
             (GmatAppData::Instance()->GetMainFrame(),
-             wxString(plotName.c_str()),
-             wxString(plotName.c_str()),
-             wxPoint(x, y), wxSize(w, h),
-             wxDEFAULT_FRAME_STYLE);
+             wxString(plotName.c_str()), wxString(plotName.c_str()),
+             wxPoint(x, y), wxSize(w, h), wxDEFAULT_FRAME_STYLE);
+      }
+      else if (currentView == GmatPlot::GROUND_TRACK_PLOT)
+      {
+         #if DEBUG_PLOTIF_GL_CREATE
+         MessageInterface::ShowMessage("   Creating MdiChildGroundTrackFrame...\n");
+         #endif
+         frame = new MdiChildGroundTrackFrame
+            (GmatAppData::Instance()->GetMainFrame(),
+             wxString(plotName.c_str()), wxString(plotName.c_str()),
+             wxPoint(x, y), wxSize(w, h), wxDEFAULT_FRAME_STYLE);
       }
       else
       {
@@ -219,17 +223,17 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
          frame->Show();
       else
          return false;
-
+      
       #if __WXMAC__
          frame->SetSize(w-1, h-1);
       #endif
 
       #if DEBUG_PLOTIF_GL_CREATE
       MessageInterface::ShowMessage
-         ("GuiPlotReceiver::CreateGlPlotWindow() frame->GetPlotName()=%s\n",
+         ("GuiPlotReceiver::CreateGlPlotWindow() frame created, frame->GetPlotName()=%s\n",
           frame->GetPlotName().c_str());
       #endif
-
+      
       GmatAppData::Instance()->GetMainFrame()->Tile();
 
       ++MdiGlPlot::numChildren;
@@ -242,35 +246,21 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
           plotName.c_str());
       #endif
    }
-
+   
    #if DEBUG_PLOTIF_GL_CREATE
    MessageInterface::ShowMessage
-      ("GuiPlotReceiver::CreateGlPlotWindow() setting view options for %s\n",
+      ("GuiPlotReceiver::CreateGlPlotWindow() setting num points to redraw for %s\n",
        frame->GetPlotName().c_str());
    #endif
-
-   frame->SetDrawXyPlane(drawXyPlane);
-   frame->SetDrawEcPlane(drawEcPlane);
-   frame->SetDrawWireFrame(drawWireFrame);
-   frame->SetDrawAxes(drawAxes);
-   frame->SetDrawGrid(drawGrid);
-   frame->SetDrawSunLine(drawSunLine);
-
-        frame->SetDrawStars(drawStars);
-        frame->SetDrawConstellations(drawConstellations);
-        frame->SetStarCount(starCount);
-
-   frame->SetOverlapPlot(overlapPlot);
-   frame->SetUseInitialViewDef(usevpInfo);
-   frame->SetUsePerspectiveMode(usepm);
+   
    frame->SetNumPointsToRedraw(numPtsToRedraw);
-
+   
    #if DEBUG_PLOTIF_GL_CREATE
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::CreateGlPlotWindow() returning true, there are %d plots.\n",
        MdiGlPlot::numChildren);
    #endif
-
+   
    return true;
 } //CreateGlPlotWindow()
 
@@ -280,7 +270,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
 //------------------------------------------------------------------------------
 void GuiPlotReceiver::SetGlSolarSystem(const std::string &plotName, SolarSystem *ss)
 {
-   #if DEBUG_PLOTIF_GL
+   #if DEBUG_PLOTIF_GL_SET
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::SetGlSolarSystem() SolarSystem=%p\n", ss);
    #endif
@@ -304,11 +294,11 @@ void GuiPlotReceiver::SetGlSolarSystem(const std::string &plotName, SolarSystem 
 // void SetGlObject(const std::string &plotName,  ...
 //------------------------------------------------------------------------------
 void GuiPlotReceiver::SetGlObject(const std::string &plotName,
-                                const StringArray &objNames,
-                                const UnsignedIntArray &objOrbitColors,
-                                const std::vector<SpacePoint*> &objArray)
+                                  const StringArray &objNames,
+                                  const UnsignedIntArray &objOrbitColors,
+                                  const std::vector<SpacePoint*> &objArray)
 {
-   #if DEBUG_PLOTIF_GL
+   #if DEBUG_PLOTIF_GL_SET
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::SetGlObject() plotName:%s\n", plotName.c_str());
    #endif
@@ -336,7 +326,7 @@ void GuiPlotReceiver::SetGlCoordSystem(const std::string &plotName,
                                        CoordinateSystem *viewCs,
                                        CoordinateSystem *viewUpCs)
 {
-   #if DEBUG_PLOTIF_GL
+   #if DEBUG_PLOTIF_GL_SET
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::SetGlCoordSystem() plotName:%s\n", plotName.c_str());
    #endif
@@ -357,19 +347,71 @@ void GuiPlotReceiver::SetGlCoordSystem(const std::string &plotName,
 
 
 //------------------------------------------------------------------------------
-// void SetGlViewOption(const std::string &plotName, SpacePoint *vpRefObj, ...
+// void SetGl2dDrawingOption(const std::string &plotName, ...)
 //------------------------------------------------------------------------------
-void GuiPlotReceiver::SetGlViewOption(const std::string &plotName,
-                                    SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-                                    SpacePoint *vdObj, Real vsFactor,
-                                    const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                                    const Rvector3 &vdVec, const std::string &upAxis,
-                                    bool usevpRefVec, bool usevpVec, bool usevdVec,
-                                     bool useFixedFov, Real fov)
+void GuiPlotReceiver::SetGl2dDrawingOption(const std::string &plotName,
+                                           const std::string &textureMap,
+                                           Integer footPrintOption)
 {
-   #if DEBUG_PLOTIF_GL
+   wxString owner = wxString(plotName.c_str());
+   MdiChildViewFrame *frame = NULL;
+   
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
+      {         
+         frame->SetGl2dDrawingOption(textureMap, footPrintOption);         
+         break;
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGl3dDrawingOption(const std::string &plotName, ...)
+//------------------------------------------------------------------------------
+void GuiPlotReceiver::SetGl3dDrawingOption(const std::string &plotName,
+                                         bool drawEcPlane, bool drawXyPlane,
+                                         bool drawWireFrame, bool drawAxes,
+                                         bool drawGrid, bool drawSunLine,
+                                         bool overlapPlot, bool usevpInfo,
+                                         bool drawStars, bool drawConstellations,
+                                         Integer starCount)
+{
+   wxString owner = wxString(plotName.c_str());
+   MdiChildViewFrame *frame = NULL;
+
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
+      {
+         frame->SetGl3dDrawingOption(drawEcPlane, drawXyPlane, drawWireFrame,
+                                     drawAxes, drawGrid, drawSunLine, overlapPlot,
+                                     usevpInfo, drawStars, drawConstellations,
+                                     starCount);
+         break;
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGl3dViewOption(const std::string &plotName, SpacePoint *vpRefObj, ...
+//------------------------------------------------------------------------------
+void GuiPlotReceiver::SetGl3dViewOption(const std::string &plotName,
+                                      SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                                      SpacePoint *vdObj, Real vsFactor,
+                                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                                      const Rvector3 &vdVec, const std::string &upAxis,
+                                      bool usevpRefVec, bool usevpVec, bool usevdVec)
+{
+   #if DEBUG_PLOTIF_GL_SET
    MessageInterface::ShowMessage
-      ("GuiPlotReceiver::SetGlViewOption() plotName:%s\n", plotName.c_str());
+      ("GuiPlotReceiver::SetGl3dViewOption() plotName:%s\n", plotName.c_str());
    #endif
 
    wxString owner = wxString(plotName.c_str());
@@ -379,17 +421,17 @@ void GuiPlotReceiver::SetGlViewOption(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         #if DEBUG_PLOTIF_GL
+         #if DEBUG_PLOTIF_GL_SET
          MessageInterface::ShowMessage
-            ("GuiPlotReceiver::SetGlViewOption() vpRefObj=%d, vsFactor=%f\n",
+            ("GuiPlotReceiver::SetGl3dViewOption() vpRefObj=%d, vsFactor=%f\n",
              vpRefObj, vsFactor);
          #endif
-
-         frame->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
-                                vpVec, vdVec, upAxis, usevpRefVec,usevpVec,
-                                usevdVec, useFixedFov, fov);
+         
+         frame->SetGl3dViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
+                                  vpVec, vdVec, upAxis, usevpRefVec,usevpVec,
+                                  usevdVec);
       }
    }
 }
@@ -399,9 +441,9 @@ void GuiPlotReceiver::SetGlViewOption(const std::string &plotName,
 // void SetGlDrawOrbitFlag(const std::string &plotName, ...
 //------------------------------------------------------------------------------
 void GuiPlotReceiver::SetGlDrawOrbitFlag(const std::string &plotName,
-                                       const std::vector<bool> &drawArray)
+                                         const std::vector<bool> &drawArray)
 {
-   #if DEBUG_PLOTIF_GL
+   #if DEBUG_PLOTIF_GL_SET
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::SetGlDrawOrbitFlag() plotName:%s\n", plotName.c_str());
    #endif
@@ -413,7 +455,7 @@ void GuiPlotReceiver::SetGlDrawOrbitFlag(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
       {
          frame->SetGlDrawOrbitFlag(drawArray);
       }
@@ -427,7 +469,7 @@ void GuiPlotReceiver::SetGlDrawOrbitFlag(const std::string &plotName,
 void GuiPlotReceiver::SetGlShowObjectFlag(const std::string &plotName,
                                         const std::vector<bool> &showArray)
 {
-   #if DEBUG_PLOTIF_GL
+   #if DEBUG_PLOTIF_GL_SET
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::SetGlShowObjectFlag() plotName:%s\n", plotName.c_str());
    #endif
@@ -439,7 +481,7 @@ void GuiPlotReceiver::SetGlShowObjectFlag(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
       {
          frame->SetGlShowObjectFlag(showArray);
       }
@@ -460,7 +502,7 @@ void GuiPlotReceiver::SetGlUpdateFrequency(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
       {
          frame->SetGlUpdateFrequency(updFreq);
       }
@@ -486,7 +528,7 @@ bool GuiPlotReceiver::IsThere(const std::string &plotName)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             return true;
          }
@@ -524,7 +566,7 @@ bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_ORBIT_VIEW);
             gmatAppData->GetMainFrame()->Tile();
@@ -560,7 +602,7 @@ bool GuiPlotReceiver::RefreshGlPlot(const std::string &plotName)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             frame->RefreshPlot();
          }
@@ -582,7 +624,7 @@ bool GuiPlotReceiver::SetGlEndOfRun(const std::string &plotName)
 {
    if (GmatAppData::Instance()->GetMainFrame() != NULL)
    {
-      #if DEBUG_PLOTIF_GL
+      #if DEBUG_PLOTIF_GL_SET
          MessageInterface::ShowMessage
             ("GuiPlotReceiver::SetGlEndOfRun() plotName=%s\n",plotName.c_str());
       #endif
@@ -593,7 +635,7 @@ bool GuiPlotReceiver::SetGlEndOfRun(const std::string &plotName)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             frame->SetEndOfRun();
          }
@@ -626,12 +668,12 @@ bool GuiPlotReceiver::UpdateGlPlot(const std::string &plotName,
       ("GuiPlotReceiver::UpdateGlPlot() entered. time = %f, number of plots = %d\n",
        time, MdiGlPlot::numChildren);
    #endif
-
+   
    bool updated = false;
    wxString owner = wxString(plotName.c_str());
-
+   
    MdiChildViewFrame *frame = NULL;
-
+   
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
@@ -642,23 +684,21 @@ bool GuiPlotReceiver::UpdateGlPlot(const std::string &plotName,
           "owner=%s\n", i, frame->GetPlotName().c_str(), owner.c_str());
       #endif
       
-      if (frame)
+      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         if (frame->GetPlotName().IsSameAs(owner.c_str()))
-         {
-            #if DEBUG_PLOTIF_GL_UPDATE
-            MessageInterface::ShowMessage
-               ("GuiPlotReceiver::UpdateGlPlot() now updating '%s'...\n",
-                frame->GetPlotName().c_str());
-            #endif
-            frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                              scColors, solving, solverOption, updateCanvas, inFunction);
-            
-            updated = true;
-         }
+         #if DEBUG_PLOTIF_GL_UPDATE
+         MessageInterface::ShowMessage
+            ("GuiPlotReceiver::UpdateGlPlot() now updating '%s'...\n",
+             frame->GetPlotName().c_str());
+         #endif
+         frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
+                           scColors, solving, solverOption, updateCanvas, inFunction);
+         
+         updated = true;
+         break;
       }
    }
-
+   
    return updated;
 } // end UpdateGlPlot()
 

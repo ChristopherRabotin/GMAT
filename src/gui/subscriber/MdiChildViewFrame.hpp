@@ -21,7 +21,7 @@
 
 #include "GmatMdiChildFrame.hpp"
 #include "MdiGlPlotData.hpp"      // for wxStringColorMap
-#include "ViewCanvas.hpp"
+//#include "ViewCanvas.hpp"
 #include "gmatdefs.hpp"
 #include "SolarSystem.hpp"
 
@@ -36,6 +36,8 @@
 #include "wx/wx.h"
 #include "wx/mdi.h"
 #endif
+
+class ViewCanvas;
 
 class MdiChildViewFrame: public GmatMdiChildFrame
 {
@@ -71,7 +73,6 @@ public:
    virtual void ResetShowViewOption();
    virtual void SetOverlapPlot(bool overlap);
    virtual void SetUseInitialViewDef(bool flag);
-   virtual void SetUsePerspectiveMode(bool flag);
    virtual void SetAnimationUpdateInterval(Integer value);
    virtual void SetAnimationFrameIncrement(Integer value);
    virtual void SetDrawWireFrame(bool flag);
@@ -112,31 +113,40 @@ public:
    
    // drawing
    virtual void SetGlObject(const StringArray &objNames,
-                            const UnsignedIntArray &objOrbitColors,
-                            const std::vector<SpacePoint*> &objArray);
+                        const UnsignedIntArray &objOrbitColors,
+                        const std::vector<SpacePoint*> &objArray);
    
    virtual void SetGlCoordSystem(CoordinateSystem *internalCs,
-                                 CoordinateSystem *viewCs,
-                                 CoordinateSystem *viewUpCs);
+                        CoordinateSystem *viewCs,
+                        CoordinateSystem *viewUpCs);
    
-   virtual void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-                                SpacePoint *vdObj, Real vsFactor,
-                                const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                                const Rvector3 &vdVec, const std::string &upAxis,
-                                bool usevpRefVec, bool usevpVec, bool usevdVec,
-                                bool useFixedFov, Real fov);
+   virtual void SetGl2dDrawingOption(const std::string &textureMap,
+                        Integer footPrintOption);
+   
+   virtual void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
+                        bool drawWireFrame, bool drawAxes,
+                        bool drawGrid, bool drawSunLine,
+                        bool overlapPlot, bool usevpInfo,
+                        bool drawStars, bool drawConstellations,
+                        Integer starCount);
+   
+   virtual void SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                        SpacePoint *vdObj, Real vsFactor,
+                        const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                        const Rvector3 &vdVec, const std::string &upAxis,
+                        bool usevpRefVec, bool usevpVec, bool usevdVec);
    
    virtual void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray);
    virtual void SetGlShowObjectFlag(const std::vector<bool> &showArray);
    virtual void SetGlUpdateFrequency(Integer updFreq);
    
    virtual void UpdatePlot(const StringArray &scNames, const Real &time,
-                           const RealArray &posX, const RealArray &posY,
-                           const RealArray &posZ, const RealArray &velX,
-                           const RealArray &velY, const RealArray &velZ,
-                           const UnsignedIntArray &scColors, bool solving,
-                           Integer solverOption, bool updateCanvas,
-                           bool inFunction = false);
+                        const RealArray &posX, const RealArray &posY,
+                        const RealArray &posZ, const RealArray &velX,
+                        const RealArray &velY, const RealArray &velZ,
+                        const UnsignedIntArray &scColors, bool solving,
+                        Integer solverOption, bool updateCanvas,
+                        bool inFunction = false);
    virtual void TakeAction(const std::string &action);
    virtual void RefreshPlot();
    virtual void SetEndOfRun();

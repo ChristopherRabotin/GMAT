@@ -61,7 +61,6 @@ OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
    "ViewDirectionType",
    "ViewDirectionVector",
    "ViewScaleFactor",
-   "FixedFovAngle",
    "ViewUpCoordinateSystem",
    "ViewUpAxis",
    "CelestialPlane",
@@ -73,14 +72,9 @@ OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
    "SunLine",
    "Overlap",
    "UseInitialView",
-   "PerspectiveMode",
-   "UseFixedFov",
    "StarCount",
    "EnableStars",
    "EnableConstellations",
-   "MinFOV",
-   "MaxFOV",
-   "InitialFOV",
 }; 
 
 
@@ -99,7 +93,6 @@ OrbitView::PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount] =
    Gmat::STRING_TYPE,            //"ViewDirectionType",
    Gmat::RVECTOR_TYPE,           //"ViewDirectionVector",
    Gmat::REAL_TYPE,              //"ViewScaleFactor",
-   Gmat::REAL_TYPE,              //"FixedFovAngle",
    Gmat::OBJECT_TYPE,            //"ViewUpCoordinaetSystem"
    Gmat::ENUMERATION_TYPE,       //"ViewUpAxis"
    
@@ -112,15 +105,10 @@ OrbitView::PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount] =
    Gmat::ON_OFF_TYPE,            //"SunLine"   
    Gmat::ON_OFF_TYPE,            //"Overlap"
    Gmat::ON_OFF_TYPE,            //"LockView"
-   Gmat::ON_OFF_TYPE,            //"PerspectiveMode"
-   Gmat::ON_OFF_TYPE,            //"UseFixedFov"
    
    Gmat::INTEGER_TYPE,           //"StarCount"
    Gmat::ON_OFF_TYPE,            //"EnableStars"
    Gmat::ON_OFF_TYPE,            //"EnableConstellations"
-   Gmat::INTEGER_TYPE,           //"MinFOV"
-   Gmat::INTEGER_TYPE,           //"MaxFOV"
-   Gmat::INTEGER_TYPE,           //"InitialFOV"
 };
 
 
@@ -147,19 +135,12 @@ OrbitView::OrbitView(const std::string &name)
    mSunLine = "Off";
    mOverlapPlot = "Off";
    mUseInitialView = "On";
-   mPerspectiveMode = "Off";
-   mUseFixedFov = "Off";
    
    // stars
    mEnableStars = "On";
    mEnableConstellations = "On";
    mStarCount = 7000;
-   
-   // FOV
-   mMinFOV = 0;
-   mMaxFOV = 90;
-   mInitialFOV = 45;
-   
+      
 //    mViewCoordSysName = "EarthMJ2000Eq";
    mViewUpCoordSysName = "EarthMJ2000Eq";
    mViewUpAxisName = "Z";
@@ -172,7 +153,6 @@ OrbitView::OrbitView(const std::string &name)
    mViewDirectionName = "Earth";
    mViewDirectionType= "Object";
    mViewScaleFactor = 1.0;
-   mFixedFovAngle = 45.0;
    mViewPointRefVector.Set(0.0, 0.0, 0.0);
    mViewPointVecVector.Set(0.0, 0.0, 30000.0);
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
@@ -205,19 +185,12 @@ OrbitView::OrbitView(const OrbitView &ov)
    mSunLine = ov.mSunLine;
    mOverlapPlot = ov.mOverlapPlot;
    mUseInitialView = ov.mUseInitialView;
-   mPerspectiveMode = ov.mPerspectiveMode;
-   mUseFixedFov = ov.mUseFixedFov;
 
    // stars
    mEnableStars = ov.mEnableStars;
    mEnableConstellations = ov.mEnableConstellations;
    mStarCount = ov.mStarCount;
-   
-   // FOV
-   mMinFOV = ov.mMinFOV;
-   mMaxFOV = ov.mMaxFOV;
-   mInitialFOV = ov.mInitialFOV;
-   
+      
 //    mViewCoordSysName = ov.mViewCoordSysName;
    
    // viewpoint
@@ -228,7 +201,6 @@ OrbitView::OrbitView(const OrbitView &ov)
    mViewDirectionName = ov.mViewDirectionName;
    mViewDirectionType = ov.mViewDirectionType;
    mViewScaleFactor = ov.mViewScaleFactor;
-   mFixedFovAngle = ov.mFixedFovAngle;
    mViewPointRefVector = ov.mViewPointRefVector;
    mViewPointVecVector = ov.mViewPointVecVector;
    mViewDirectionVector = ov.mViewDirectionVector;
@@ -267,19 +239,12 @@ OrbitView& OrbitView::operator=(const OrbitView& ov)
    mSunLine = ov.mSunLine;
    mOverlapPlot = ov.mOverlapPlot;
    mUseInitialView = ov.mUseInitialView;
-   mPerspectiveMode = ov.mPerspectiveMode;
-   mUseFixedFov = ov.mUseFixedFov;
    
    // stars
    mEnableStars = ov.mEnableStars;
    mEnableConstellations = ov.mEnableConstellations;
    mStarCount = ov.mStarCount;
    
-   // FOV
-   mMinFOV = ov.mMinFOV;
-   mMaxFOV = ov.mMaxFOV;
-   mInitialFOV = ov.mInitialFOV;
-
    // View coordinate system name
 //    mViewCoordSysName = ov.mViewCoordSysName;
    
@@ -291,7 +256,6 @@ OrbitView& OrbitView::operator=(const OrbitView& ov)
    mViewDirectionName = ov.mViewDirectionName;
    mViewDirectionType = ov.mViewDirectionType;
    mViewScaleFactor = ov.mViewScaleFactor;
-   mFixedFovAngle = ov.mFixedFovAngle;
    mViewPointRefVector = ov.mViewPointRefVector;
    mViewPointVecVector = ov.mViewPointVecVector;
    mViewDirectionVector = ov.mViewDirectionVector;
@@ -436,11 +400,7 @@ bool OrbitView::Initialize()
       PlotInterface::SetViewType(GmatPlot::ENHANCED_3D_VIEW);
       
       if (PlotInterface::CreateGlPlotWindow
-          (instanceName, mOldName, (mEclipticPlane == "On"), (mXYPlane == "On"),
-           (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
-           (mSunLine == "On"), (mOverlapPlot == "On"), (mUseInitialView == "On"),
-           (mPerspectiveMode == "On"), mNumPointsToRedraw, 
-           (mEnableStars == "On"), (mEnableConstellations == "On"), mStarCount))
+          (instanceName, mOldName, mNumPointsToRedraw))
       {
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
@@ -578,6 +538,20 @@ bool OrbitView::Initialize()
                                          mViewCoordSystem, mViewUpCoordSystem);
          
          //--------------------------------------------------------
+         // set drawing options
+         //--------------------------------------------------------
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   calling PlotInterface::SetGlDrawingOption()\n");
+         #endif
+         
+         PlotInterface::SetGl3dDrawingOption
+            (instanceName, (mEclipticPlane == "On"), (mXYPlane == "On"),
+             (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
+             (mSunLine == "On"), (mOverlapPlot == "On"), (mUseInitialView == "On"),
+             (mEnableStars == "On"), (mEnableConstellations == "On"), mStarCount);
+         
+         //--------------------------------------------------------
          // set viewpoint info
          //--------------------------------------------------------
          #if DBGLVL_INIT
@@ -585,13 +559,12 @@ bool OrbitView::Initialize()
             ("   calling PlotInterface::SetGlViewOption()\n");
          #endif
          
-         PlotInterface::SetGlViewOption
+         PlotInterface::SetGl3dViewOption
             (instanceName, mViewPointRefObj, mViewPointObj,
              mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
              mViewPointVecVector, mViewDirectionVector, mViewUpAxisName,
              (mViewPointRefType == "Vector"), (mViewPointVecType == "Vector"),
-             (mViewDirectionType == "Vector"), (mUseFixedFov == "On"),
-             mFixedFovAngle);
+             (mViewDirectionType == "Vector"));
          
          PlotInterface::SetGlUpdateFrequency(instanceName, mUpdatePlotFrequency);
          
@@ -754,6 +727,10 @@ std::string OrbitView::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer OrbitView::GetParameterID(const std::string &str) const
 {
+   if (str == "PerspectiveMode" || str == "UseFixedFov" || str == "FixedFovAngle" ||
+       str == "MinFOV" || str == "MaxFOV" || str == "InitialFOV")
+      return Gmat::PARAMETER_REMOVED;
+   
    for (int i=OrbitPlotParamCount; i<OrbitViewParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - OrbitPlotParamCount])
@@ -799,12 +776,7 @@ std::string OrbitView::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool OrbitView::IsParameterReadOnly(const Integer id) const
 {
-   //Note: We can remove PERSPECTIVE_MODE, USE_FIXED_FOV, FIXED_FOV_ANGLE
-   //      when perspective mode is working.
-   
    if (id == OVERLAP_PLOT ||
-       id == PERSPECTIVE_MODE || id == USE_FIXED_FOV || id == FIXED_FOV_ANGLE ||
-       id == MIN_FOV || id == MAX_FOV || id == INITIAL_FOV ||
        id == EARTH_SUN_LINES || id == VIEWPOINT_REF || id == VIEWPOINT_REF_VECTOR ||
        id == VIEWPOINT_VECTOR_VECTOR || id == VIEW_DIRECTION_VECTOR ||
        id == VIEWPOINT_REF_TYPE || id == VIEWPOINT_VECTOR_TYPE ||
@@ -824,12 +796,6 @@ Integer OrbitView::GetIntegerParameter(const Integer id) const
    {
    case STAR_COUNT:
       return mStarCount;
-   case MIN_FOV:
-      return mMinFOV;
-   case MAX_FOV:
-      return mMaxFOV;
-   case INITIAL_FOV:
-      return mInitialFOV;
    default:
       return OrbitPlot::GetIntegerParameter(id);
    }
@@ -865,15 +831,6 @@ Integer OrbitView::SetIntegerParameter(const Integer id, const Integer value)
                        GmatStringUtil::ToString(value, 1).c_str(),
                        "StarCount", "Integer Value >= 0");
       }
-   case MIN_FOV:
-      mMinFOV = value;
-      return value;
-   case MAX_FOV:
-      mMaxFOV = value;
-      return value;
-   case INITIAL_FOV:
-      mInitialFOV = value;
-      return value;
    default:
       return OrbitPlot::SetIntegerParameter(id, value);
    }
@@ -900,8 +857,6 @@ Real OrbitView::GetRealParameter(const Integer id) const
    {
    case VIEW_SCALE_FACTOR:
       return mViewScaleFactor;
-   case FIXED_FOV_ANGLE:
-      return mFixedFovAngle;
    default:
       return OrbitPlot::GetRealParameter(id);
    }
@@ -931,9 +886,6 @@ Real OrbitView::SetRealParameter(const Integer id, const Real value)
    {
    case VIEW_SCALE_FACTOR:
       mViewScaleFactor = value;
-      return value;
-   case FIXED_FOV_ANGLE:
-      mFixedFovAngle = value;
       return value;
    default:
       return OrbitPlot::SetRealParameter(id, value);
@@ -1364,10 +1316,6 @@ std::string OrbitView::GetOnOffParameter(const Integer id) const
       return mOverlapPlot;
    case USE_INITIAL_VIEW:
       return mUseInitialView;
-   case PERSPECTIVE_MODE:
-      return mPerspectiveMode;
-   case USE_FIXED_FOV:
-      return mUseFixedFov;
    case ENABLE_STARS:
       return mEnableStars;
    case ENABLE_CONSTELLATIONS:
@@ -1421,12 +1369,6 @@ bool OrbitView::SetOnOffParameter(const Integer id, const std::string &value)
       return true;
    case USE_INITIAL_VIEW:
       mUseInitialView = value;
-      return true;
-   case PERSPECTIVE_MODE:
-      mPerspectiveMode = value;
-      return true;
-   case USE_FIXED_FOV:
-      mUseFixedFov = value;
       return true;
    case ENABLE_STARS:
       mEnableStars = value;
@@ -1514,8 +1456,8 @@ const ObjectTypeArray& OrbitView::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   mAllRefObjectNames.clear();
-   mAllRefObjectNames = OrbitPlot::GetRefObjectNameArray(type);
+   refObjectNames.clear();
+   refObjectNames = OrbitPlot::GetRefObjectNameArray(type);
    
    // if Draw Earth-Sun lines is on, add Earth and Sun
    if (mSunLine == "On")
@@ -1526,32 +1468,32 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-//       mAllRefObjectNames.push_back(mViewCoordSysName);
-      mAllRefObjectNames.push_back(mViewUpCoordSysName);
+//       refObjectNames.push_back(mViewCoordSysName);
+      refObjectNames.push_back(mViewUpCoordSysName);
    }
    else if (type == Gmat::SPACE_POINT)
    {
-      mAllRefObjectNames = mAllSpNameArray;
+      //refObjectNames = mAllSpNameArray;
       
       if (mViewPointRefType != "Vector")
       {
-         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
-                  mViewPointRefName) == mAllRefObjectNames.end())
-            mAllRefObjectNames.push_back(mViewPointRefName);
+         if (find(refObjectNames.begin(), refObjectNames.end(),
+                  mViewPointRefName) == refObjectNames.end())
+            refObjectNames.push_back(mViewPointRefName);
       }
       
       if (mViewPointVecType != "Vector")
       {
-         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
-                  mViewPointVecName) == mAllRefObjectNames.end())
-            mAllRefObjectNames.push_back(mViewPointVecName);
+         if (find(refObjectNames.begin(), refObjectNames.end(),
+                  mViewPointVecName) == refObjectNames.end())
+            refObjectNames.push_back(mViewPointVecName);
       }
       
       if (mViewDirectionType != "Vector")
       {
-         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
-                  mViewDirectionName) == mAllRefObjectNames.end())
-            mAllRefObjectNames.push_back(mViewDirectionName);
+         if (find(refObjectNames.begin(), refObjectNames.end(),
+                  mViewDirectionName) == refObjectNames.end())
+            refObjectNames.push_back(mViewDirectionName);
       }
    }
    else if (type == Gmat::UNKNOWN_OBJECT)
@@ -1562,44 +1504,45 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
           mViewPointRefType.c_str(), mViewPointVecType.c_str(), mViewDirectionType.c_str());
       #endif
       
-//       mAllRefObjectNames = mAllSpNameArray;
+//       refObjectNames = mAllSpNameArray;      
+//       refObjectNames.push_back(mViewCoordSysName);
       
-//       mAllRefObjectNames.push_back(mViewCoordSysName);
-      mAllRefObjectNames.insert(mAllRefObjectNames.end(), mAllSpNameArray.begin(),
-                                mAllSpNameArray.end());
+      refObjectNames.insert(refObjectNames.end(), mAllSpNameArray.begin(),
+                            mAllSpNameArray.end());
+      
       if (mViewCoordSysName != mViewUpCoordSysName)
-         mAllRefObjectNames.push_back(mViewUpCoordSysName);
+         refObjectNames.push_back(mViewUpCoordSysName);
       
       if (mViewPointRefType != "Vector")
       {
-         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
-                  mViewPointRefName) == mAllRefObjectNames.end())
-            mAllRefObjectNames.push_back(mViewPointRefName);
+         if (find(refObjectNames.begin(), refObjectNames.end(),
+                  mViewPointRefName) == refObjectNames.end())
+            refObjectNames.push_back(mViewPointRefName);
       }
       
       if (mViewPointVecType != "Vector")
       {
-         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
-                  mViewPointVecName) == mAllRefObjectNames.end())
-            mAllRefObjectNames.push_back(mViewPointVecName);
+         if (find(refObjectNames.begin(), refObjectNames.end(),
+                  mViewPointVecName) == refObjectNames.end())
+            refObjectNames.push_back(mViewPointVecName);
       }
       
       if (mViewDirectionType != "Vector")
       {
-         if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
-                  mViewDirectionName) == mAllRefObjectNames.end())
-            mAllRefObjectNames.push_back(mViewDirectionName);
+         if (find(refObjectNames.begin(), refObjectNames.end(),
+                  mViewDirectionName) == refObjectNames.end())
+            refObjectNames.push_back(mViewDirectionName);
       }
    }
    
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
       ("OrbitView::GetRefObjectNameArray() returning for type:%d\n", type);
-   for (unsigned int i=0; i<mAllRefObjectNames.size(); i++)
-      MessageInterface::ShowMessage("   %s\n", mAllRefObjectNames[i].c_str());
+   for (unsigned int i=0; i<refObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
    #endif
    
-   return mAllRefObjectNames;
+   return refObjectNames;
 }
 
 

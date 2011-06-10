@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2010/04/19
 /**
@@ -26,7 +24,7 @@
 #include "ColorTypes.hpp"         // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
-//#define DEBUG_TRAJ_FRAME
+//#define DEBUG_VIEW_FRAME
 //#define DEBUG_MDI_CHILD_FRAME_CLOSE
 
 //------------------------------------------------------------------------------
@@ -284,7 +282,7 @@ void MdiChildViewFrame::SetUserInterrupt()
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetPlotName(const wxString &name)
 {
-   #ifdef DEBUG_TRAJ_FRAME
+   #ifdef DEBUG_VIEW_FRAME
       MessageInterface::ShowMessage
          ("MdiChildViewFrame::SetPlotName() name=%s\n", name.c_str());
    #endif
@@ -300,7 +298,7 @@ void MdiChildViewFrame::SetPlotName(const wxString &name)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::ResetShowViewOption()
 {
-   #ifdef DEBUG_TRAJ_FRAME
+   #ifdef DEBUG_VIEW_FRAME
    MessageInterface::ShowMessage
       ("MdiChildViewFrame::ResetShowViewOption()\n");
    #endif
@@ -331,16 +329,6 @@ void MdiChildViewFrame::SetUseInitialViewDef(bool flag)
 {
    if (mCanvas)
       mCanvas->SetUseInitialViewDef(flag);
-}
-
-
-//------------------------------------------------------------------------------
-// void SetUsePerspectiveMode(bool flag)
-//------------------------------------------------------------------------------
-void MdiChildViewFrame::SetUsePerspectiveMode(bool flag)
-{
-   if (mCanvas)
-      mCanvas->SetUsePerspectiveMode(flag);
 }
 
 
@@ -381,10 +369,10 @@ void MdiChildViewFrame::SetDrawWireFrame(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawStars(bool flag)
 {
-        if (mCanvas)
-        {
-                mCanvas->SetDrawStars(flag);
-        }
+   if (mCanvas)
+   {
+      mCanvas->SetDrawStars(flag);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -392,10 +380,10 @@ void MdiChildViewFrame::SetDrawStars(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawConstellations(bool flag)
 {
-        if (mCanvas)
-        {
-                mCanvas->SetDrawConstellations(flag);
-        }
+   if (mCanvas)
+   {
+      mCanvas->SetDrawConstellations(flag);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -403,10 +391,10 @@ void MdiChildViewFrame::SetDrawConstellations(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetStarCount(int count)
 {
-        if (mCanvas)
-        {
-                mCanvas->SetStarCount(count);
-        }
+   if (mCanvas)
+   {
+      mCanvas->SetStarCount(count);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -527,7 +515,7 @@ void MdiChildViewFrame::DrawInOtherCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::RedrawPlot(bool viewAnimation)
 {
-   #ifdef DEBUG_TRAJ_FRAME
+   #ifdef DEBUG_VIEW_FRAME
    MessageInterface::ShowMessage("MdiChildViewFrame::RedrawPlot() entered.\n");
    #endif
    
@@ -738,26 +726,42 @@ void MdiChildViewFrame::SetGlCoordSystem(CoordinateSystem *internalCs,
 
 
 //------------------------------------------------------------------------------
-// void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj, ...
+// void SetGl2dDrawingOption(Integer footPrintOption)
 //------------------------------------------------------------------------------
-void MdiChildViewFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-                                        SpacePoint *vdObj, Real vsFactor,
-                                        const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                                        const Rvector3 &vdVec, const std::string &upAxis,
-                                        bool usevpRefVec, bool usevpVec, bool usevdVec,
-                                        bool useFixedFov, Real fov)
+void MdiChildViewFrame::SetGl2dDrawingOption(const std::string &textureMap,
+                                             Integer footPrintOption)
 {
-   if (mCanvas)
-   {
-      #ifdef DEBUG_TRAJ_FRAME
-         MessageInterface::ShowMessage
-            ("MdiChildViewFrame::SetGlViewOption() vsFactor=%f\n", vsFactor);
-      #endif
-         
-      mCanvas->SetGlViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
-                               vpVec, vdVec, upAxis, usevpRefVec, usevpVec,
-                               usevdVec, useFixedFov, fov);
-   }
+   // do nothing here
+   // derived class should orvrride this
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGl3dDrawingOption(const std::string &plotName, ...)
+//------------------------------------------------------------------------------
+void MdiChildViewFrame::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
+                                             bool drawWireFrame, bool drawAxes,
+                                             bool drawGrid, bool drawSunLine,
+                                             bool overlapPlot, bool usevpInfo,
+                                             bool drawStars, bool drawConstellations,
+                                             Integer starCount)
+{
+   // do nothing here
+   // derived class should orvrride this
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj, ...
+//------------------------------------------------------------------------------
+void MdiChildViewFrame::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                                          SpacePoint *vdObj, Real vsFactor,
+                                          const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                                          const Rvector3 &vdVec, const std::string &upAxis,
+                                          bool usevpRefVec, bool usevpVec, bool usevdVec)
+{
+   // do nothing here
+   // derived class should orvrride this
 }
 
 
@@ -802,18 +806,21 @@ void MdiChildViewFrame::UpdatePlot(const StringArray &scNames, const Real &time,
                                    Integer solverOption, bool updateCanvas,
                                    bool inFunction)
 {
+   #ifdef DEBUG_UPDATE_PLOT
+   MessageInterface::ShowMessage
+      ("MdiChildViewFrame::UpdatePlot() entered, time=%f, updateCanvas=%d\n",
+       time, updateCanvas);
+   #endif
+   
    if (mCanvas)
    {
       mCanvas->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
                           scColors, solving, solverOption, inFunction);
-
+      
       mInFunction = inFunction;
       
       if (updateCanvas)
       {
-         //MessageInterface::ShowMessage
-         //   ("===> MdiChildViewFrame::UpdatePlot() time=%f\n", time);
-         
          //-----------------------------------------------------------
          // Notes:
          // Added mCanvas->Refresh(false) here since Refresh() is
@@ -849,6 +856,11 @@ void MdiChildViewFrame::TakeAction(const std::string &action)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::RefreshPlot()
 {
+   #ifdef DEBUG_REFRESH_PLOT
+   MessageInterface::ShowMessage
+      ("MdiChildViewFrame::RefreshPlot() entered\n");
+   #endif
+   
    if (mCanvas)
    {
       mCanvas->SetEndOfData(true);

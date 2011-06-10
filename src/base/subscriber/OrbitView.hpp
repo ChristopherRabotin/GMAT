@@ -134,8 +134,6 @@ protected:
    std::string mWireFrame;
    std::string mOverlapPlot;
    std::string mUseInitialView;
-   std::string mPerspectiveMode;
-   std::string mUseFixedFov;
    std::string mAxes;
    std::string mGrid;
    std::string mSunLine;
@@ -155,16 +153,11 @@ protected:
    Rvector3 mViewDirectionVector;
    
    Real mViewScaleFactor;
-   Real mFixedFovAngle;
    
    std::string mEnableStars;
    std::string mEnableConstellations;
    Integer mStarCount;
-   
-   Integer mMinFOV;
-   Integer mMaxFOV;
-   Integer mInitialFOV;
-      
+         
    enum
    {
 //       COORD_SYSTEM = OrbitPlotParamCount,
@@ -179,7 +172,6 @@ protected:
       VIEW_DIRECTION_TYPE,
       VIEW_DIRECTION_VECTOR,
       VIEW_SCALE_FACTOR,
-      FIXED_FOV_ANGLE,
       VIEW_UP_COORD_SYSTEM,
       VIEW_UP_AXIS,
       CELESTIAL_PLANE,
@@ -191,14 +183,9 @@ protected:
       SUN_LINE,
       OVERLAP_PLOT,
       USE_INITIAL_VIEW,
-      PERSPECTIVE_MODE,
-      USE_FIXED_FOV,
       STAR_COUNT,
       ENABLE_STARS,
       ENABLE_CONSTELLATIONS,
-      MIN_FOV,
-      MAX_FOV,
-      INITIAL_FOV,
       OrbitViewParamCount
    };
    

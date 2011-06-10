@@ -82,18 +82,12 @@ PlotInterface::~PlotInterface()
  * @param <drawSunLine>  true if draw earth sun lines
  * @param <overlapPlot>  true if overlap plot without clearing the plot
  * @param <usevpInfo>  true if use viewpoint info to draw plot
- * @param <usepm>  true if use perspective projection mode
  * @param <numPtsToRedraw>  number of points to redraw during the run
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        const std::string &oldName,
-                                       bool drawEcPlane, bool drawXyPlane,
-                                       bool drawWireFrame, bool drawAxes,
-                                       bool drawGrid, bool drawSunLine,
-                                       bool overlapPlot, bool usevpInfo, bool usepm,
-                                       Integer numPtsToRedraw,
-                                                                                                        bool drawStars, bool drawConstellations, Integer starCount)
+                                       Integer numPtsToRedraw)
 {
    #if DEBUG_PLOTIF_GL_CREATE
    MessageInterface::ShowMessage
@@ -102,10 +96,8 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    #endif
    
    if (thePlotReceiver != NULL)
-      return thePlotReceiver->CreateGlPlotWindow(plotName, oldName, drawEcPlane, 
-                   drawXyPlane, drawWireFrame, drawAxes, drawGrid, drawSunLine,
-                   overlapPlot, usevpInfo, usepm, numPtsToRedraw,
-                                                 drawStars, drawConstellations, starCount);
+      return thePlotReceiver->CreateGlPlotWindow(plotName, oldName, numPtsToRedraw);
+   
    return false;
 }
 
@@ -158,20 +150,51 @@ void PlotInterface::SetGlCoordSystem(const std::string &plotName,
 
 
 //------------------------------------------------------------------------------
-// void SetGlViewOption(const std::string &plotName, SpacePoint *vpRefObj, ...
+// void SetGl2dDrawingOption(const std::string &plotName, Integer footPrintOption)
 //------------------------------------------------------------------------------
-void PlotInterface::SetGlViewOption(const std::string &plotName,
-                                    SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-                                    SpacePoint *vdObj, Real vsFactor,
-                                    const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                                    const Rvector3 &vdVec, const std::string &upAxis,
-                                    bool usevpRefVec, bool usevpVec, bool usevdVec,
-                                     bool useFixedFov, Real fov)
+void PlotInterface::SetGl2dDrawingOption(const std::string &plotName,
+                                         const std::string &textureMap,
+                                         Integer footPrintOption)
 {
    if (thePlotReceiver != NULL)
-      thePlotReceiver->SetGlViewOption(plotName, vpRefObj, vpVecObj, vdObj, 
+      thePlotReceiver->
+         SetGl2dDrawingOption(plotName, textureMap, footPrintOption);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGl3dDrawingOption(const std::string &plotName, bool drawEcPlane, ...)
+//------------------------------------------------------------------------------
+void PlotInterface::SetGl3dDrawingOption(const std::string &plotName,
+                                         bool drawEcPlane, bool drawXyPlane,
+                                         bool drawWireFrame, bool drawAxes,
+                                         bool drawGrid, bool drawSunLine,
+                                         bool overlapPlot, bool usevpInfo,
+                                         bool drawStars, bool drawConstellations,
+                                         Integer starCount)
+{
+   if (thePlotReceiver != NULL)
+      thePlotReceiver->
+         SetGl3dDrawingOption(plotName, drawEcPlane, drawXyPlane, drawWireFrame,
+                              drawAxes, drawGrid, drawSunLine, overlapPlot, usevpInfo,
+                              drawStars, drawConstellations, starCount);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGl3dViewOption(const std::string &plotName, SpacePoint *vpRefObj, ...
+//------------------------------------------------------------------------------
+void PlotInterface::SetGl3dViewOption(const std::string &plotName,
+                                      SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+                                      SpacePoint *vdObj, Real vsFactor,
+                                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
+                                      const Rvector3 &vdVec, const std::string &upAxis,
+                                      bool usevpRefVec, bool usevpVec, bool usevdVec)
+{
+   if (thePlotReceiver != NULL)
+      thePlotReceiver->SetGl3dViewOption(plotName, vpRefObj, vpVecObj, vdObj, 
             vsFactor, vpRefVec, vpVec, vdVec, upAxis, usevpRefVec, usevpVec, 
-            usevdVec, useFixedFov, fov);
+            usevdVec);
 }
 
 

@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2010/04/19
 /**
@@ -22,8 +20,8 @@
 #include "gmatwxdefs.hpp"
 #include "MdiGlPlotData.hpp"
 #include "GuiInterpreter.hpp"
-#include "TextTrajectoryFile.hpp"
 #include "SolarSystem.hpp"
+#include "Spacecraft.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "Rvector3.hpp"
@@ -41,34 +39,37 @@ public:
               long style = 0);
    virtual ~ViewCanvas();
    
+   // GL context
+   virtual wxGLContext* GetGLContext();
+   virtual void SetGLContext(wxGLContext *glContext = NULL);
+   
    // initialization
-   //virtual bool InitGL() = 0;
+   virtual bool InitOpenGL();
    
    // getters
-   virtual bool  GetUseViewPointInfo() = 0;
-   virtual bool  GetUsePerspectiveMode() = 0;
-   virtual bool  GetDrawWireFrame() = 0;
-   virtual bool  GetDrawXyPlane() = 0;
-   virtual bool  GetDrawEcPlane() = 0;
-   virtual bool  GetDrawSunLine() = 0;
-   virtual bool  GetDrawAxes() = 0;
-   virtual bool  GetDrawGrid() = 0;
-   virtual bool  GetRotateAboutXY() = 0;
-   virtual bool  IsAnimationRunning() = 0;
+   virtual int GetAnimationUpdateInterval() = 0;
+   virtual int GetAnimationFrameIncrement() = 0;
+   virtual const wxStringBoolMap& GetShowObjectMap() = 0;
+   virtual const wxStringColorMap& GetObjectColorMap() = 0;
+   
+   virtual bool GetUseViewPointInfo() = 0;
+   virtual bool GetDrawWireFrame() = 0;
+   virtual bool GetDrawXyPlane() = 0;
+   virtual bool GetDrawEcPlane() = 0;
+   virtual bool GetDrawSunLine() = 0;
+   virtual bool GetDrawAxes() = 0;
+   virtual bool GetDrawGrid() = 0;
+   virtual bool IsAnimationRunning() = 0;
    virtual unsigned int GetXyPlaneColor() = 0;
    virtual unsigned int GetEcPlaneColor() = 0;
    virtual unsigned int GetSunLineColor() = 0;
+   
    virtual float GetDistance() = 0;
-   virtual int GetAnimationUpdateInterval() = 0;
-   virtual int GetAnimationFrameIncrement() = 0;
    virtual wxString GetViewCoordSysName() = 0;
    virtual CoordinateSystem* GetViewCoordSystem() = 0;
    virtual const wxArrayString& GetObjectNames() = 0;
    virtual const wxArrayString& GetValidCSNames() = 0;
-   virtual const wxStringBoolMap& GetShowObjectMap() = 0;
-   virtual const wxStringColorMap& GetObjectColorMap() = 0;
-   virtual wxString GetGotoObjectName() = 0;
-   virtual wxGLContext* GetGLContext() = 0;
+   virtual wxString GetGotoObjectName();
    
    // setters
    virtual void SetEndOfRun(bool flag = true) = 0;
@@ -77,6 +78,7 @@ public:
    virtual void SetUseInitialViewDef(bool flag) = 0;
    virtual void SetAnimationUpdateInterval(int value) = 0;
    virtual void SetAnimationFrameIncrement(int value) = 0;
+   
    virtual void SetDrawWireFrame(bool flag) = 0;
    virtual void SetDrawStars(bool flag) = 0;
    virtual void SetDrawConstellations(bool flag) = 0;
@@ -86,53 +88,57 @@ public:
    virtual void SetDrawSunLine(bool flag) = 0;
    virtual void SetDrawAxes(bool flag) = 0;
    virtual void SetDrawGrid(bool flag) = 0;
-   virtual void SetRotateAboutXY(bool flag) = 0;
    virtual void SetXyPlaneColor(unsigned int color) = 0;
    virtual void SetEcPlaneColor(unsigned int color) = 0;
    virtual void SetSunLineColor(unsigned int color) = 0;
-   virtual void SetUsePerspectiveMode(bool perspMode) = 0;
+   
    virtual void SetObjectColors(const wxStringColorMap &objectColorMap) = 0;
    virtual void SetShowObjects(const wxStringBoolMap &showObjMap) = 0;   
-   virtual void SetGLContext(wxGLContext *glContext = NULL) = 0;
    virtual void SetUserInterrupt()  = 0;
    
    // actions
    virtual void ClearPlot() = 0;
-   virtual void ResetPlotInfo() = 0;
    virtual void RedrawPlot(bool viewAnimation) = 0;
    virtual void ShowDefaultView() = 0;
-   //virtual void RotatePlot(int width, int height, int mouseX, int mouseY) = 0;
-   //virtual void ZoomIn() = 0;
-   //virtual void ZoomOut() = 0;
    virtual void DrawWireFrame(bool flag) = 0;
+   
    virtual void DrawXyPlane(bool flag) = 0;
    virtual void DrawEcPlane(bool flag) = 0;
    virtual void OnDrawAxes(bool flag) = 0;
    virtual void OnDrawGrid(bool flag) = 0;
+   
    virtual void DrawInOtherCoordSystem(const wxString &csName) = 0;
-   virtual void GotoObject(const wxString &objName) = 0;
-   virtual void GotoOtherBody(const wxString &bodyName) = 0;
+   virtual void GotoObject(const wxString &objName);
    virtual void ViewAnimation(int interval, int frameInc = 30) = 0;
    
    virtual void SetGlObject(const StringArray &objNames,
-                    const UnsignedIntArray &objOrbitColors,
-                    const std::vector<SpacePoint*> &objectArray) = 0;
+                        const UnsignedIntArray &objOrbitColors,
+                        const std::vector<SpacePoint*> &objectArray) = 0;
    
    // SolarSystem
    virtual void SetSolarSystem(SolarSystem *ss) = 0;
    
    // CoordinateSystem
    virtual void SetGlCoordSystem(CoordinateSystem *internalCs,
-                         CoordinateSystem *viewCs,
-                         CoordinateSystem *viewUpCs) = 0;
+                        CoordinateSystem *viewCs,
+                        CoordinateSystem *viewUpCs) = 0;
+   
+   // drawing options
+   virtual void SetGl2dDrawingOption(const std::string &textureMap,
+                        Integer footPrintOption);
+   virtual void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
+                        bool drawWireFrame, bool drawAxes,
+                        bool drawGrid, bool drawSunLine,
+                        bool usevpInfo, bool drawStars,
+                        bool drawConstellations,
+                        Integer starCount);
    
    // viewpoint
-   virtual void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
+   virtual void SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                         SpacePoint *vdObj, Real vscaleFactor,
                         const Rvector3 &vpRefVec, const Rvector3 &vpVec,
                         const Rvector3 &vdVec, const std::string &upAxis,
-                        bool usevpRefVec, bool usevpVec, bool usevdVec,
-                        bool useFixedFov, Real fov) = 0;
+                        bool usevpRefVec, bool usevpVec, bool usevdVec);
    
    // drawing toggle switch
    virtual void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray) = 0;
@@ -144,27 +150,161 @@ public:
    
    // update
    virtual void UpdatePlot(const StringArray &scNames, const Real &time,
-                   const RealArray &posX, const RealArray &posY,
-                   const RealArray &posZ, const RealArray &velX,
-                   const RealArray &velY, const RealArray &velZ,
-                   const UnsignedIntArray &scColors, bool solving,
-                   Integer solverOption, bool inFunction = false) = 0;
+                        const RealArray &posX, const RealArray &posY,
+                        const RealArray &posZ, const RealArray &velX,
+                        const RealArray &velY, const RealArray &velZ,
+                        const UnsignedIntArray &scColors, bool solving,
+                        Integer solverOption, bool inFunction = false);
    
    virtual void TakeAction(const std::string &action) = 0;
    
    // object
    virtual void AddObjectList(const wxArrayString &objNames,
-                      const UnsignedIntArray &objColors,
-                      bool clearList = true) = 0;
+                        const UnsignedIntArray &objColors,
+                        bool clearList = true);
    
-   // file
-   virtual int  ReadTextTrajectory(const wxString &filename) = 0;
-
 protected:
+
+   enum
+   {
+      MAX_DATA = 20000,
+      UNKNOWN_OBJ_ID = -999,
+   };
+   
+   static const Real RADIUS_ZOOM_RATIO;// = 2.2;
+   
+   // parent frame
+   wxWindow *mParent;
+   
+   // OpenGL Context
+   wxGLContext *theContext;
+   wxSize  mCanvasSize;
+   
+   // GuiInterpreter
+   GuiInterpreter *theGuiInterpreter;
+   wxStatusBar *theStatusBar;
+   
+   // initialization
+   wxString mPlotName;
+   bool mGlInitialized;
+   bool mViewPointInitialized;
+   bool mOpenGLInitialized;
+   bool modelsAreLoaded;
+   
+   // performance
+   bool mRedrawLastPointsOnly;
+   int  mNumPointsToRedraw;
+   int  mUpdateFrequency;
+   
+   // ring buffer index
+   int  mBeginIndex1;
+   int  mBeginIndex2;
+   int  mEndIndex1;
+   int  mEndIndex2;
+   int  mRealBeginIndex1;
+   int  mRealBeginIndex2;
+   int  mRealEndIndex1;
+   int  mRealEndIndex2;
+   int  mLastIndex;
+   int  mCurrIndex;
+   
+   // data points
+   int  mNumData;
+   int  mTotalPoints;
+   
+   // data control flags
+   bool mIsEndOfData;
+   bool mIsEndOfRun;
+   bool mIsFirstRun;
+   bool mWriteWarning;
+   
+   // texture
+   std::map<wxString, GLuint> mObjectTextureIdMap;
+   
+   // view control
+   bool mUseInitialViewPoint;
+   
+   // animation
+   bool mIsAnimationRunning;
+   bool mHasUserInterrupted;
+   int  mUpdateInterval;
+   int  mFrameInc;
+   
+   // message
+   bool mShowMaxWarning;
+   int  mOverCounter;
+   
+   // error handling and function mode
+   bool mFatalErrorFound;
+   bool mWriteRepaintDisalbedInfo;
+   bool mInFunction;
+   
+   // solar system
+   SolarSystem *pSolarSystem;
+   
+   // coordinate system
+   wxString mInternalCoordSysName;
+   wxString mViewCoordSysName;
+   wxString mViewUpCoordSysName;
+   wxString mOriginName;
+   CoordinateSystem *pInternalCoordSystem;
+   CoordinateSystem *pViewCoordSystem;
+   CoordinateSystem *pViewUpCoordSystem;
+   int mOriginId;
+   
+   // coordinate sytem conversion
+   bool mViewCsIsInternalCs;
+   CoordinateConverter mCoordConverter;
+   
+   // spacecraft data
+   int   mScCount;
+   float mScRadius;
+   StringArray mScNameArray;
+   
+   // objects
+   wxArrayString mObjectNames;
+   wxArrayString mShowObjectNames;
+   wxArrayString mValidCSNames;
+   wxStringColorMap mObjectColorMap;
+   wxStringBoolMap  mShowObjectMap;
+   std::vector<SpacePoint*> mObjectArray;
+   std::vector<bool> mDrawOrbitArray;
+   std::vector<bool> mShowObjectArray;
+   int mObjectCount;
+   Real mObjectDefaultRadius;
+   
+   // data buffers
+   Real *mTime;                    // [MAX_DATA]
+   Real *mObjectRadius;            // [mObjectCount]
+   Real *mObjMaxZoomIn;            // [mObjectCount]
+   int  *mObjLastFrame;            // [mObjectCount]
+   bool *mDrawOrbitFlag;           // [mObjectCount][MAX_DATA]
+   UnsignedInt *mObjectOrbitColor; // [mObjectCount][MAX_DATA]
+   
+   // object positions
+   Real *mObjectGciPos;            // [mObjectCount][MAX_DATA][3]
+   Real *mObjectViewPos;           // [mObjectCount][MAX_DATA][3]
+   
+   // object attitude
+   Real *mObjectQuat;              // [mObjectCount][MAX_DATA][4]
+   
+   // Coordinate Transformation Matrices
+   Real *mCoordData;               // [MAX_DATA][16]
+   
+   // solver data
+   bool mDrawSolverData;
+   std::vector<RealArray> mSolverAllPosX; // [numPoints][numSC]
+   std::vector<RealArray> mSolverAllPosY; // [numPoints][numSC]
+   std::vector<RealArray> mSolverAllPosZ; // [numPoints][numSC]
+   UnsignedIntArray mSolverIterColorArray;
+   
+   // viewing
+   // Coordinate Transformation Matrices
+   Rmatrix mCoordMatrix;
    
    // events
    virtual void OnPaint(wxPaintEvent &event) = 0;
-   virtual void OnTrajSize(wxSizeEvent &event) = 0;
+   virtual void OnSize(wxSizeEvent &event) = 0;
    virtual void OnMouse(wxMouseEvent &event) = 0;
    virtual void OnKeyDown(wxKeyEvent &event) = 0;
    
@@ -172,11 +312,13 @@ protected:
    virtual bool SetPixelFormatDescriptor() = 0;
    virtual void SetDefaultGLFont() = 0;
    
-   // initialize
+   // initialization
+   virtual void ResetPlotInfo();   
    virtual void InitializeViewPoint() = 0;
    
    // for data buffer indexing
-   virtual void ComputeActualIndex() = 0;
+   virtual void ComputeBufferIndex(Real time);
+   virtual void ComputeActualIndex();
    
    // texture
    virtual bool LoadGLTextures() = 0;
@@ -186,69 +328,55 @@ protected:
    // view objects
    virtual void SetProjection() = 0;
    virtual void SetupWorld() = 0;
-   virtual void ComputeView(GLfloat fEndX, GLfloat fEndY) = 0;
    virtual void ChangeView(float viewX, float viewY, float viewZ) = 0;
    virtual void ChangeProjection(int width, int height, float axisLength) = 0;
-   virtual void ComputeViewVectors() = 0;
-   virtual void ComputeUpAngleAxis() = 0;
    virtual void TransformView() = 0;
    
    // drawing objects
    virtual void DrawFrame() = 0;
    virtual void DrawPlot() = 0;
-   //virtual void DrawSphere(GLdouble radius, GLint slices, GLint stacks, GLenum style,
-   //                GLenum orientation = GLU_OUTSIDE, GLenum normals = GL_SMOOTH,
-   //                GLenum textureCoords = GL_TRUE) = 0;
    virtual void DrawObject(const wxString &objName, int obj) = 0;
-   //virtual void DrawObjectOrbit() = 0;
    virtual void DrawOrbit(const wxString &objName, int obj, int objId) = 0;
    virtual void DrawOrbitLines(int i, const wxString &objName, int obj, int objId) = 0;
    
-   //virtual void DrawObjectTexture(const wxString &objName, int obj, int objId) = 0;
    virtual void DrawSolverData() = 0;
-   //virtual void DrawSpacecraft(UnsignedInt scColor) = 0;
+   
+   virtual void DrawStatus(const wxString &label1, unsigned int textColor,
+                        const wxString &label2, double time, int xpos = 0,
+                        int ypos = 0, const wxString &label3 = "");
+   
+   #if 0
    virtual void DrawEquatorialPlane(UnsignedInt color) = 0;
    virtual void DrawEclipticPlane(UnsignedInt color) = 0;
    virtual void DrawSunLine() = 0;
    virtual void DrawAxes() = 0;
-   virtual void DrawStatus(const wxString &label1, int frame, const wxString &label2,
-                   double time, int xpos = 0, int ypos = 0,
-                   const wxString &label3 = "") = 0;
-   
-   // for rotation
-   virtual void ApplyEulerAngles() = 0;
-   
-   // drawing primative objects
-   //virtual void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z) = 0;
-   //virtual void DrawCircle(GLUquadricObj *qobj, Real radius) = 0;
+   #endif
    
    // for object
-   virtual int  GetObjectId(const wxString &name) = 0;
-   virtual void ClearObjectArrays(bool deleteArrays = true) = 0;
-   virtual bool CreateObjectArrays() = 0;
+   virtual int  GetObjectId(const wxString &name);
+   virtual void ClearObjectArrays(bool deleteArrays = true);
+   virtual bool CreateObjectArrays();
    
    // for data update
    virtual void UpdateSolverData(const RealArray &posX, const RealArray &posY,
-                         const RealArray &posZ, const UnsignedIntArray &scColors,
-                         bool solving) = 0;
+                        const RealArray &posZ, const UnsignedIntArray &scColors,
+                        bool solving);
    virtual void UpdateSpacecraftData(const Real &time,
-                             const RealArray &posX, const RealArray &posY,
-                             const RealArray &posZ, const RealArray &velX,
-                             const RealArray &velY, const RealArray &velZ,
-                             const UnsignedIntArray &scColors, Integer solverOption) = 0;
-   virtual void UpdateOtherData(const Real &time) = 0;
+                        const RealArray &posX, const RealArray &posY,
+                        const RealArray &posZ, const RealArray &velX,
+                        const RealArray &velY, const RealArray &velZ,
+                        const UnsignedIntArray &scColors, Integer solverOption);
+   virtual void UpdateOtherData(const Real &time);
+   virtual void UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId);   
+   virtual void UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId);
    
    // for coordinate system
    virtual bool ConvertObjectData() = 0;
    virtual void ConvertObject(int objId, int index) = 0;
    
-   // for utility
-   virtual Rvector3 ComputeEulerAngles();
-   virtual void ComputeLongitudeLst(Real time, Real x, Real y, Real *meanHourAngle,
-                                    Real *longitude, Real *localSiderealTime) = 0;
-   
    // for copy
    virtual void CopyVector3(Real to[3], Real from[3]);
+   
    // for loading image
    virtual bool LoadImage(const std::string &fileName);
    
