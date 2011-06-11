@@ -1087,11 +1087,48 @@ void PhysicalModel::SetPropList(ObjectArray *soList)
 {
 }
 
+//------------------------------------------------------------------------------
+// bool SupportsDerivative(Gmat::StateElementId id)
+//------------------------------------------------------------------------------
+/**
+ * Identifies which derivatives are supported.
+ *
+ * Function used to determine if the physical model supports derivative
+ * information for a specified type.  By default, physical models support
+ * derivatives of the Cartesian state but no other components.  Override this
+ * method to add support for other elements (e.g. mass depletion, the A-matrix,
+ * the state transition matrix, and so forth).
+ *
+ * @param id State Element ID for the derivative type
+ *
+ * @return true if the type is supported, false otherwise.
+ */
+//------------------------------------------------------------------------------
 bool PhysicalModel::SupportsDerivative(Gmat::StateElementId id)
 {
+   if (id == Gmat::CARTESIAN_STATE)
+      return true;
+
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool SetStart(Gmat::StateElementId id, Integer index, Integer quantity)
+//------------------------------------------------------------------------------
+/**
+ * Sets indices for supported derivatives in the propagation state vector.
+ *
+ * Function used to set the start point and size information for the state
+ * vector, so that the derivative information can be placed in the correct place
+ * in the derivative vector.
+ *
+ * @param id State Element ID for the derivative type
+ * @param index Starting index in the state vector for this type of derivative
+ * @param quantity Number of objects that supply this type of data
+ *
+ * @return true if the type is supported, false otherwise.
+ */
+//------------------------------------------------------------------------------
 bool PhysicalModel::SetStart(Gmat::StateElementId id, Integer index,
       Integer quantity)
 {

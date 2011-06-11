@@ -3,8 +3,8 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = "GMAT Development Fork"
-PROJECT_NUMBER         = 0.0.0.1
+PROJECT_NAME           = "GMAT Trunk"
+PROJECT_NUMBER         = R2011b (In Progress)
 OUTPUT_DIRECTORY       = ../doc
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
