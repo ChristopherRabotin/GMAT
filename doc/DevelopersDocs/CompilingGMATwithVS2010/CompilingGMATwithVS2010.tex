@@ -346,7 +346,43 @@ This completes the pcre setup.  If you'd prefer to compile pcre yourself, the in
 
 \section{GMAT Data Files and Support Files }
 
-\textit{Here I'll describe the files folder, etc}
+GMAT requires access to data files organized in a file structure described in the GMAT startup file, gmat\_startup\_file.txt.  That file should be in the working folder from which the interface is accessed.  In a typical setup, the GMAT startup file identifies a root folder, a data file folder, and then uses these tow locations to identify the locations of additional data files needed by GMAT.  A typical startup file contains these lines for the top level folders:
+
+\begin{quote}
+\begin{verbatim}
+ROOT_PATH              = ../
+DATA_PATH              = ROOT_PATH/data/
+\end{verbatim}
+\end{quote}
+
+\noindent The remaining lines in the file describe the locations of planetary ephemerides, coefficient files for planetary gravity fields, time system data, and other data elements needed when GMAT runs.  A typical file structure for the data files is shown in Figure~\ref{fig:DataFileStrucure}.
+
+\begin{figure}[htb]
+  \begin{center}
+	\includegraphics{DataFileLayout.eps}
+	\caption{The Default Data File Strucure for GMAT}
+	\label{fig:DataFileStrucure}
+  \end{center}
+\end{figure}
+
+\noindent This file structure matches the structure delivered with GMAT R2011a.  It also matches the data file structure found in the source code repository for GMAT at SourceForge at the time of this writing.  The entries in the GMAT startup file point to specific files in this structure.  For example, the lines
+
+\begin{quote}
+\begin{verbatim}
+SPK_PATH               = DATA_PATH/planetary_ephem/spk/
+PLANETARY_SPK_FILE     = SPK_PATH/de421.bsp
+\end{verbatim}
+\end{quote}
+
+\noindent identify the location of the SPICE planetary ephemeris file, de421.bsp, in the file system.  Using the entries provided thus far, GMAT looks for the file
+
+\begin{quote}
+\begin{verbatim}
+../data/planetary_ephem/spk/de421.bsp
+\end{verbatim}
+\end{quote}
+
+\noindent relative to the starting folder for the system.  The startup file provides similar path data for all of GMAT's data files; interested users should look in this file when trying to understand the data used when running a mission.
 
 \section{\label{app:64bit}Building GMAT in 64-bit mode}
 
