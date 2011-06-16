@@ -75,11 +75,19 @@ This document describes the steps needed to build GMAT using Visual Studio 2010,
 
 \section{Introduction}
 
+The General Mission Analysis Tool, GMAT, is a space trajectory optimization and mission analysis system developed by NASA and private industry in the spirit of the NASA Vision. GMAT contains new technology and is a testbed for future technology development. To satisfy NASA's mandate and maximize technology transfer, GMAT is an open source software system licensed under the NASA Open Source Agreement.  Interested parties are encouraged to use GMAT to plan spacecraft missions, to build the system when they have requirements for features not yet included in GMAT, and to contribute new capabiliities to the system either through direct contributions to the code base or through plugin libraries.
+
+This document describes the steps a new developer takes to set up a build environment for GMAT using Microsoft's Visual Studio development system.  The instructions were written using Visual Studio 2010 Express Edition, and validated using bot the Express Edition and the Professional Edition.  The following instructions assume that the developer is running a Windows XP, Vista, or Windows~7 based computer.  Separate instructions are available for users building GMAT with the Gnu Compiler Collection (gcc) on Windows, Mac, or Linux based computers.
+
+The following sections describe installation of the compiler, folder arrangements and code used in the GMAT build files, preliminary steps necessary to collect and build the libraries GMAT needs, and the build steps for GMAT itself.  The document concludes with instructions for plugin libraries that GMAT uses to interface with MATLAB and the MATLAB Optimization toolbox, to perform estimation (the estimation plugin is a preview of capabilities still in development), and the VF13ad optimizer (core code available separately).
+
 \section{Installing Visual C++ 2010 / Visual Studio 2010 Express Edition}
+
+The Visual C++ environment can be installed either fron a web-based installer or from disk.  Users of the paid versions of Visual C++ should skip this section and install the product following the instruction provided by Microsoft.  Users of the Express edition can install from the onlins instructions provided by Microsoft, or by following the instructions provided here.
 
 \subsection{Option 1: Web installation}
 
-Visual C++ can be installed using a web based installer
+Visual C++ can be installed using a web based installer by following these steps:
 
 \begin{enumerate}
 	\item Open a web browser and browse to the Visual Studio 2010 Express download page: \\http://www.microsoft.com/express/Downloads/\#2010-Visual-CPP
@@ -115,17 +123,20 @@ If you have a disk containing Visual Studio Express, follow these steps:
 
 \subsection{64-bit Compilers (Optional)}
 
-If you plan to build the 64-bit version of GMAT, you'll need to install the Windows 7 SDK version 7.1.  You'll also want to be running on a 64-bit version of Windows so you can test the resulting build.
+If you plan to build the 64-bit version of GMAT, you'll need to install the Windows 7 SDK version 7.1.  You'll also need to be running on a 64-bit version of Windows so you can test the resulting build.
 
 The SDK can be downloaded from (all on one line)
 \begin{quote}
-http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-9702-529fa782d63b\&displaylang=en
+\begin{verbatim}
+http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-
+9702-529fa782d63b\&displaylang=en
+\end{verbatim}
 \end{quote}
 \noindent Download the web based installer by clicking on the ``Download'' button, and then run it.  This installs the software development kit, including a 64-bit compiler.
 
 \section{Folder Configuration}
 
-Create a folder for building GMAT.  I'll use C:\textbackslash GmatVS as the root folder.  This folder will contain the subfolders for third party components of the build -- wxWidgets, cspice, pcrecpp, and similar files.  Add the following folders to your root folder:
+Create a folder for building GMAT.  I'll use C:\textbackslash GmatVS as the root folder in this document.  This folder will contain the subfolders for third party components of the build -- wxWidgets, cspice, pcrecpp, and similar files.  Add the following folders to your root folder:
 \begin{itemize}
 \item Gmat3rdParty
 \item GmatDevelopment
@@ -148,7 +159,7 @@ Create a folder for building GMAT.  I'll use C:\textbackslash GmatVS as the root
 \end{figure}
 
 
-\noindent At this point, your folder structure should match the structure shown in Figure~\ref{fig:FolderStructure}.  If you want to also build the 64-bit release and have either a paid version of Visual Studio 2010 (that is, Professional, Premium, or Ultimate), or if you plan to install the 64-bit tools in the Windows SDK and then build a 64-bit version of GMAT, add these folders for the 64-bit versions of the 3rd party tools:
+\noindent At this point, your folder structure should match the structure shown in Figure~\ref{fig:FolderStructure}.  If you want to also build the 64-bit release and have either a paid version of Visual Studio 2010 (that is, Professional, Premium, or Ultimate), or, if you installed the 64-bit tools in the Windows SDK so you can build a 64-bit version of GMAT, add these folders for the 64-bit versions of the 3rd party tools:
 \begin{itemize}
 \item cspice64
 \item f2c64
@@ -156,30 +167,29 @@ Create a folder for building GMAT.  I'll use C:\textbackslash GmatVS as the root
 \item wxWidgets64
 \end{itemize}
 
-
 \section{Downloading GMAT}
 
 GMAT's source code is located in a Subversion repository at SourceForge.  In addition to the source code, the repository at SourceForge contains the build files we'll need to proceed, including wxWidgets project files configured for Visual Studio 2010.  Because of this, you need to begin by downloading the GMAT development code using a Subversion client.  I am using SmartSVN on Windows, but any client should work.  Set up your client to access code at the following URL:
 
 \begin{quote}
-https://gmat.svn.sourceforge.net/svnroot/gmat/branches/development
+https://gmat.svn.sourceforge.net/svnroot/gmat/trunk
 \end{quote}
-\noindent Check out the entire source tree from that location.
+\noindent Check out the entire source tree from that location.  When you check out the tree from this location, you'll retrieve GMAT's source code, development files, documentation, source for several plugin libraries, and the support files needed to run GMAT. 
 
 \section{Building wxWidgets}
 
-From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-bit build of GMAT.  Appendix~\ref{app:64bit} described the settings and changes necessary to build GMAT as a 64-bit application.
+From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-bit build of GMAT.  Appendix~\ref{app:64bit} describes the settings and changes necessary to build GMAT as a 64-bit application.  We begin by building wxWidgets, the GUI toolkit used for GMAT's user interface.
 
 \subsection{Install the wx Code}
 
 \begin{enumerate}
-\item Download wxWidgets 2.8 from http://wxwidgets.org/downloads/.  Use the latest stable version of the 2.8 tree (2.8.11 at this writing), and download the wxMSW package.
+\item Download wxWidgets 2.8 from http://wxwidgets.org/downloads/.  Use the latest stable version of the 2.8 tree (2.8.12 at this writing), and download the wxMSW package.
 \item Unpack the wx code into the folder named wxWidgets in your Gmat3rdParty folder.  You should see folders named art, build, contrib, demos, docs, include, lib, locale, samples, src, and utils in the wxWidgets folder when finished.
 \item Visual Studio 2010 has trouble processing the Visual C++ project files that ship with wx.  Instead, we'll use files already configured (using Visual Studio 2010 Professional) for wx at Thinking Systems. 
 \begin{enumerate}
-\item The Visual Studio 2010 solution and project files for wxWidgets are located in an archive file in the GMAT folders you checked out earlier.  Find the file wxmsw.zip in the build\textbackslash GmatVS2010 folder of that check out.
+\item The Visual Studio 2010 solution and project files for wxWidgets are located in an archive file in the GMAT folders you checked out earlier.  Find the file wxmsw.zip in the build\textbackslash GmatVS2010 folder of that working copy of the code.
 \item Unpack the wxmsw.zip archive into your wxWidgets\textbackslash build\textbackslash msw folder.
-\item Check to see that the file wx\textbackslash dll.sln is in your Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder.
+\item Check to see that the file wx\textbackslash dll.sln is in your Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder.  If, instead, you see that there is a folder named wxmsw in that folder, move its contents into the Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder. 
 \end{enumerate}
  
 \end{enumerate}
@@ -197,13 +207,21 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 	\item If this file has the line ``\textbackslash\textbackslash  Name:        wx/univ/setup.h'' at the top, open the other setup file. (You want to edit the file in msw rather than in univ; the file you want identifies itself as ``wx/msw/setup.h''.)
 	\item Search for wxUSE\_GLCANVAS in the open file
 	\item Set wxUSE\_GLCANVAS to 1 rather than the default value of 0
+	\item Save and close the file.
 \end{enumerate}
-\item On the Visual C++ toolbar select ``DLL Release'' (specifying the build configuration) and set your solution platform to Win32.
-\item Build the solution (right click on the Solution node at the top of the tree and press ``Build''.)
+\item On the Visual C++ toolbar select ``DLL Release'' (specifying the build configuration) and set your solution platform to Win32.  Figure~\ref{fig:wxSettings} shows these settings.
+\item Build the solution (right click on the ``Solution 'wx\_dll'{}'' node at the top of the tree and select ``Build Solution''.)
 \item Most, but not all, of the solution will build.  You may need to repeat the build process to get all of the libraries GMAT requires built.  Build the solution again until all but the dbgrid projects build.  (You are done when 19 of the 20 projects build.)
 \end{enumerate}
 
-\noindent Check to see that you have 13 dll files in the wxWidgets\textbackslash lib\textbackslash vc\_dll folder.  Copy these into your GmatDevelopment/bin folder.
+\begin{figure}
+\centering
+\includegraphics[scale=0.6]{DLLRelease.eps}
+\caption{Configuration and Platform Settings for the 32-bit wxWidgets Build}
+\label{fig:wxSettings}
+\end{figure}
+
+\noindent Check to see that you have 13 dll files in the wxWidgets\textbackslash lib\textbackslash vc\_dll folder.  Copy these into your GmatDevelopment/application/bin folder.
 
 \section{Preparing SPICE (Optional)}
 
@@ -218,9 +236,11 @@ http://naif.jpl.nasa.gov/naif/toolkit\_C\_PC\_Windows\_VisualC\_32bit.html
 \begin{quote}
 http://naif.jpl.nasa.gov/naif/toolkit\_C\_PC\_Windows\_VisualC\_64bit.html
 \end{quote}
-\noindent You want the file names cspice.zip.
-\item Unpack the archive into your Gmat3rdParty\textbackslash cspice (or cspice64 for 64-bit) folder.  You should unpack the files so that you have, for example, a Gmat3rdParty\textbackslash cspice\textbackslash include folder that contains the cspice header (.h) files.  Note that cspice includes the Fortran to C library code; if you build with SPICE, you do not need to manage f2c separately when working with the GMAT base library code.
+\noindent You want the file named cspice.zip.
+\item Unpack the archive into your Gmat3rdParty\textbackslash cspice (or cspice64 for 64-bit) folder.  You should unpack the files so that you have, for example, a Gmat3rdParty\textbackslash cspice\textbackslash include folder that contains the cspice header (.h) files.  
 \end{enumerate}
+
+\noindent Note that cspice includes the Fortran to C library code; if you build with SPICE, you do not need to manage f2c separately when working with the GMAT base library code.
 
 \section{Preparing f2c (Optional)}
 
