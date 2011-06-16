@@ -1049,9 +1049,11 @@ void OrbitViewPanel::SaveData()
    
    canClose = true;
    std::string str1, str2;
-   Integer collectFreq = 0, updateFreq = 0, pointsToRedraw = 0, starCount = 0,
-                initialFOV = 0, minFOV = 0, maxFOV = 0;
-   Real scaleFactor;
+   Integer collectFreq = 0, updateFreq = 0, pointsToRedraw = 0, starCount = 0;
+   #ifdef __ENABLE_FOV__
+   Integer initialFOV = 0, minFOV = 0, maxFOV = 0;
+   #endif
+   Real scaleFactor = 0.0;
    Real viewRef[3], viewVec[3], viewDir[3];
    Rvector3 vec;
    bool setVector = false;
@@ -1156,9 +1158,11 @@ void OrbitViewPanel::SaveData()
          mOrbitView->SetIntegerParameter("UpdatePlotFrequency", updateFreq);
          mOrbitView->SetIntegerParameter("NumPointsToRedraw", pointsToRedraw);
          mOrbitView->SetIntegerParameter("StarCount", starCount);
+         #ifdef __ENABLE_FOV__
          mOrbitView->SetIntegerParameter("MinFOV", minFOV);
          mOrbitView->SetIntegerParameter("MaxFOV", maxFOV);
          mOrbitView->SetIntegerParameter("InitialFOV", initialFOV);
+         #endif
       }
       
       //--------------------------------------------------------------

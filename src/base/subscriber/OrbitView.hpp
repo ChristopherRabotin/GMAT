@@ -110,7 +110,7 @@ public:
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
-                                  const std::string &name);
+                                     const std::string &name);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    
@@ -121,7 +121,6 @@ protected:
    void     WriteDeprecatedMessage(Integer id) const;
    bool     UpdateSolverData();
    
-//    CoordinateSystem *mViewCoordSystem;
    CoordinateSystem *mViewUpCoordSystem;
    SpacePoint *mViewCoordSysOrigin;
    SpacePoint *mViewUpCoordSysOrigin;
@@ -138,7 +137,6 @@ protected:
    std::string mGrid;
    std::string mSunLine;
    
-//    std::string mViewCoordSysName;
    std::string mViewPointRefName;
    std::string mViewPointRefType;
    std::string mViewPointVecName;
@@ -153,14 +151,19 @@ protected:
    Rvector3 mViewDirectionVector;
    
    Real mViewScaleFactor;
-   
+
+   // stars
    std::string mEnableStars;
    std::string mEnableConstellations;
    Integer mStarCount;
-         
+   
+   // FOV - currentrly not used and will be removed later
+   Integer mMinFOV;
+   Integer mMaxFOV;
+   Integer mInitialFOV;
+   
    enum
    {
-//       COORD_SYSTEM = OrbitPlotParamCount,
       VIEWPOINT_REF = OrbitPlotParamCount,
       VIEWPOINT_REFERENCE,
       VIEWPOINT_REF_TYPE,
@@ -186,6 +189,9 @@ protected:
       STAR_COUNT,
       ENABLE_STARS,
       ENABLE_CONSTELLATIONS,
+      MIN_FOV,
+      MAX_FOV,
+      INITIAL_FOV,
       OrbitViewParamCount
    };
    

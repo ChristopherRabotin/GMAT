@@ -75,6 +75,9 @@ OrbitView::PARAMETER_TEXT[OrbitViewParamCount - OrbitPlotParamCount] =
    "StarCount",
    "EnableStars",
    "EnableConstellations",
+   "MinFOV",
+   "MaxFOV",
+   "InitialFOV",
 }; 
 
 
@@ -109,6 +112,10 @@ OrbitView::PARAMETER_TYPE[OrbitViewParamCount - OrbitPlotParamCount] =
    Gmat::INTEGER_TYPE,           //"StarCount"
    Gmat::ON_OFF_TYPE,            //"EnableStars"
    Gmat::ON_OFF_TYPE,            //"EnableConstellations"
+   
+   Gmat::INTEGER_TYPE,           //"MinFOV"
+   Gmat::INTEGER_TYPE,           //"MaxFOV"
+   Gmat::INTEGER_TYPE,           //"InitialFOV"
 };
 
 
@@ -140,8 +147,12 @@ OrbitView::OrbitView(const std::string &name)
    mEnableStars = "On";
    mEnableConstellations = "On";
    mStarCount = 7000;
-      
-//    mViewCoordSysName = "EarthMJ2000Eq";
+   
+   // FOV - currentrly not used and will be removed later
+   mMinFOV = 0;
+   mMaxFOV = 90;
+   mInitialFOV = 45;
+   
    mViewUpCoordSysName = "EarthMJ2000Eq";
    mViewUpAxisName = "Z";
    
@@ -157,7 +168,6 @@ OrbitView::OrbitView(const std::string &name)
    mViewPointVecVector.Set(0.0, 0.0, 30000.0);
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
    
-//    mViewCoordSystem = NULL;
    mViewUpCoordSystem = NULL;
    mViewCoordSysOrigin = NULL;
    mViewUpCoordSysOrigin = NULL;
@@ -780,6 +790,7 @@ bool OrbitView::IsParameterReadOnly(const Integer id) const
        id == EARTH_SUN_LINES || id == VIEWPOINT_REF || id == VIEWPOINT_REF_VECTOR ||
        id == VIEWPOINT_VECTOR_VECTOR || id == VIEW_DIRECTION_VECTOR ||
        id == VIEWPOINT_REF_TYPE || id == VIEWPOINT_VECTOR_TYPE ||
+       id == MIN_FOV || id == MAX_FOV || id == INITIAL_FOV ||
        id == VIEW_DIRECTION_TYPE)
       return true;
    
@@ -796,6 +807,12 @@ Integer OrbitView::GetIntegerParameter(const Integer id) const
    {
    case STAR_COUNT:
       return mStarCount;
+   case MIN_FOV:
+      return mMinFOV;
+   case MAX_FOV:
+      return mMaxFOV;
+   case INITIAL_FOV:
+      return mInitialFOV;
    default:
       return OrbitPlot::GetIntegerParameter(id);
    }
@@ -831,6 +848,15 @@ Integer OrbitView::SetIntegerParameter(const Integer id, const Integer value)
                        GmatStringUtil::ToString(value, 1).c_str(),
                        "StarCount", "Integer Value >= 0");
       }
+   case MIN_FOV:
+      mMinFOV = value;
+      return value;
+   case MAX_FOV:
+      mMaxFOV = value;
+      return value;
+   case INITIAL_FOV:
+      mInitialFOV = value;
+      return value;
    default:
       return OrbitPlot::SetIntegerParameter(id, value);
    }
