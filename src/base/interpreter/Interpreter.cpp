@@ -3644,7 +3644,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       if (!isAllowed)
       {
          InterpreterException ex
-            ("Setting \"" + lhs + "\" to \"" + rhs + "\" is not allowed in before BeginMissionSequence");
+            ("Setting \"" + lhs + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
          HandleError(ex);
          return false;
       }
@@ -7488,7 +7488,7 @@ bool Interpreter::ValidateMcsCommands(GmatCommand *first, GmatCommand *parent,
 
    do
    {
-      if (current->IsOfType("BeginMissionSequence"))
+      if (theModerator->IsSequenceStarter(current->GetTypeName()))
          ++beginMCSCount;
 
       StringArray refs;
@@ -7609,12 +7609,13 @@ bool Interpreter::ValidateMcsCommands(GmatCommand *first, GmatCommand *parent,
          delete accumulatedErrors;
 
       if (beginMCSCount > 1)
-         exceptionError += "Too many \"BeginMissionSequence\" "
-               "commands were found";
+         exceptionError += "Too many Mission Sequence start "
+               "commands (from the list [" + 
+               theModerator->GetStarterStringList() + "]) were found";
 
       if (beginMCSCount == 0)
-         exceptionError += "No \"BeginMissionSequence\" "
-               "commands were found";
+         exceptionError += "No Mission Sequence starter commands (from the "
+         "list [" + theModerator->GetStarterStringList() + "]) were found";
 
       throw InterpreterException("\n" + exceptionError);
    }

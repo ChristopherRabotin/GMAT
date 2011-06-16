@@ -138,7 +138,8 @@ public:
                                             const std::string &withName = "");
    
    // method to return list of types of objects that this factory can create
-   StringArray              GetListOfCreatableObjects() const;
+   virtual StringArray      GetListOfCreatableObjects(
+                                  const std::string &qualifier = "") const;
    // method to check if a createable object type matches a subtype
    virtual bool             DoesObjectTypeMatchSubtype(
                                   const std::string &theType,
@@ -176,6 +177,8 @@ protected:
    // a list of all of the specific types of objects (of type itsType) that
    // can be created by this factory.
    StringArray              creatables;
+   // a list of qualified creatable objects thatcan be created by this factory.
+   StringArray              qualifiedCreatables;
    // a list of all of the types of objects that can be viewed from the GUI
    // (This is automacally generated)
    StringArray              viewables;

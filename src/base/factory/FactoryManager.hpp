@@ -147,7 +147,8 @@ public:
 
    // method to return a list of strings representing the objects of the input
    // type that may be created in the system
-   const StringArray&     GetListOfItems(Gmat::ObjectType byType);
+   const StringArray&     GetListOfItems(Gmat::ObjectType byType, 
+                                const std::string &withQualifier = "");
    const StringArray&     GetListOfAllItems();
    const StringArray&     GetListOfAllItemsExcept(const ObjectTypeArray &types);
    const StringArray&     GetListOfViewableItems(Gmat::ObjectType byType);
@@ -177,7 +178,7 @@ private:
    
    // private methods 
    Factory*               FindFactory(Gmat::ObjectType ofType, const std::string &forType);
-   const StringArray&     GetList(Gmat::ObjectType ofType);
+   const StringArray&     GetList(Gmat::ObjectType ofType, const std::string &withQualifier);
    const StringArray&     GetListOfViewables(Gmat::ObjectType ofType);
    const StringArray&     GetListOfUnviewables(Gmat::ObjectType ofType);
    

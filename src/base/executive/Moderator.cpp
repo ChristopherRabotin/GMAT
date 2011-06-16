@@ -6065,23 +6065,33 @@ Integer Moderator::RunMission(Integer sandboxNum)
          // initialize Sandbox
          InitializeSandbox(sandboxNum-1);
          
-         #if DEBUG_RUN
-         MessageInterface::ShowMessage
-            ("Moderator::RunMission() after InitializeSandbox()\n");
-         #endif
-         
-         // reset user interrupt flag
-         GmatGlobal::Instance()->SetRunInterrupted(false);
-         
-         // execute sandbox
-         runState = Gmat::RUNNING;
-         ExecuteSandbox(sandboxNum-1);
-         
-         #if DEBUG_RUN
-         MessageInterface::ShowMessage
-            ("Moderator::RunMission() after ExecuteSandbox()\n");
-         #endif
-         
+
+         if (!loadSandboxAndPause)
+         {
+            #if DEBUG_RUN
+            MessageInterface::ShowMessage
+               ("Moderator::RunMission() after InitializeSandbox()\n");
+            #endif
+
+            // reset user interrupt flag
+            GmatGlobal::Instance()->SetRunInterrupted(false);
+
+            // execute sandbox
+            runState = Gmat::RUNNING;
+            ExecuteSandbox(sandboxNum-1);
+
+            #if DEBUG_RUN
+            MessageInterface::ShowMessage
+               ("Moderator::RunMission() after ExecuteSandbox()\n");
+            #endif
+         }
+         else
+         {
+            // Execute only the PrepareMissionSequence command
+            GmatCommand *cmd = commands[sandboxNum-1]->GetNext();
+            if (cmd->GetTypeName() == "PrepareMissionSequence")
+               cmd->Execute();
+         }
       }
       catch (BaseException &e)
       {
@@ -6380,16 +6390,22 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    #if DEBUG_INTERPRET
    ShowCommand("first cmd = ", first, " second cmd = ", second);
    #endif
-   
-   if (second != NULL && second->GetTypeName() != "BeginMissionSequence")
+
+   std::string firstCommandType = 
+      (second != NULL ? second->GetTypeName() : "");
+
+   if (!IsSequenceStarter(firstCommandType))
    {
       // Show warning message for now (LOJ: 2010.07.15)
       std::string firstCmdStr = "The first command detected is \n'";
-      firstCmdStr = firstCmdStr + second->GetGeneratingString(Gmat::NO_COMMENTS) + "'";
+      firstCmdStr = firstCmdStr + 
+            second->GetGeneratingString(Gmat::NO_COMMENTS) + "'";
+      std::string knownStartCommands = "   [" + GetStarterStringList() + "]\n";
       //firstCmdStr = firstCmdStr + second->GetGeneratingString() + "'";
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** BeginMissionSequence is missing. "
-          "It will be required in future builds.\n" + firstCmdStr);
+         (Gmat::WARNING_, "*** WARNING *** Mission Sequence start command "
+          "is missing.  One will be required in future builds.  Recognized "
+          "start commands are\n" + knownStartCommands + firstCmdStr);
       
       #if DEBUG_INTERPRET
       MessageInterface::ShowMessage
@@ -6400,6 +6416,11 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       GmatCommand *bms = CreateCommand("BeginMissionSequence", "", retval);
       InsertCommand(bms, first);
    }
+
+   if (second != NULL && second->GetTypeName() == "PrepareMissionSequence")
+      loadSandboxAndPause = true;
+   else
+      loadSandboxAndPause = false;
    
    #if DEBUG_INTERPRET > 1
    MessageInterface::ShowMessage(GetScript());
@@ -7296,11 +7317,11 @@ void Moderator::CreateDefaultMission()
       CreateParameter("OrbitSTMB", "DefaultSC.OrbitSTMB");
       CreateParameter("OrbitSTMC", "DefaultSC.OrbitSTMC");
       CreateParameter("OrbitSTMD", "DefaultSC.OrbitSTMD");
-      CreateParameter("OrbitAMatrix", "DefaultSC.OrbitSTM");
-      CreateParameter("OrbitAMatrixA", "DefaultSC.OrbitSTMA");
-      CreateParameter("OrbitAMatrixB", "DefaultSC.OrbitSTMB");
-      CreateParameter("OrbitAMatrixC", "DefaultSC.OrbitSTMC");
-      CreateParameter("OrbitAMatrixD", "DefaultSC.OrbitSTMD");
+//      CreateParameter("OrbitAMatrix", "DefaultSC.OrbitSTM");
+//      CreateParameter("OrbitAMatrixA", "DefaultSC.OrbitSTMA");
+//      CreateParameter("OrbitAMatrixB", "DefaultSC.OrbitSTMB");
+//      CreateParameter("OrbitAMatrixC", "DefaultSC.OrbitSTMC");
+//      CreateParameter("OrbitAMatrixD", "DefaultSC.OrbitSTMD");
       #if DEBUG_DEFAULT_MISSION > 1
       MessageInterface::ShowMessage("-->default STM parameters created\n");
       #endif
@@ -7432,6 +7453,7 @@ void Moderator::CreateDefaultMission()
       SetSolarSystemAndObjectMap(theSolarSystemInUse, objectMapInUse, false,
                                  "CreateDefaultMission()");
       
+      loadSandboxAndPause = false;
       isRunReady = true;
    }
    catch (BaseException &e)
@@ -7812,6 +7834,77 @@ void Moderator::SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
       if (!forFunction)
          theUiInterpreter->SetFunction(NULL);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsSequenceStarter(const std::string &commandType)
+//------------------------------------------------------------------------------
+/*
+ * Determines if a command identifies a mission control sequence start command
+ *
+ * @param commandType Type name for the command
+ *
+ * @return true if the command is a MCS start command
+ */
+//------------------------------------------------------------------------------
+bool Moderator::IsSequenceStarter(const std::string &commandType)
+{
+   bool retval = false;
+
+   if (sequenceStarters.empty())
+      GetSequenceStarters();
+   if (find(sequenceStarters.begin(), sequenceStarters.end(), commandType) != 
+         sequenceStarters.end())
+      retval = true;
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetSequenceStarters()
+//------------------------------------------------------------------------------
+/*
+ * Retrieves a StringArray listing the mission control sequence start commands
+ *
+ * @return The array naming the MCS start commands
+ */
+//------------------------------------------------------------------------------
+const StringArray& Moderator::GetSequenceStarters()
+{
+   sequenceStarters.clear();
+   sequenceStarters = theFactoryManager->GetListOfItems(Gmat::COMMAND, "SequenceStarters");
+
+   return sequenceStarters;
+}
+
+//------------------------------------------------------------------------------
+// const std::string& GetStarterStringList()
+//------------------------------------------------------------------------------
+/*
+ * Retrieves a string listing the mission control sequence start commands
+ *
+ * This method is used to set teh list in exception related to the start commands
+ *
+ * @return The array naming the MCS start commands
+ */
+//------------------------------------------------------------------------------
+const std::string& Moderator::GetStarterStringList()
+{
+   if (starterList == "")
+   {
+      if (sequenceStarters.empty())
+         GetSequenceStarters();
+      for (UnsignedInt i = 0; i < sequenceStarters.size(); ++i)
+      {
+         starterList += sequenceStarters[i];
+         if (i+1 < sequenceStarters.size())
+            starterList += ", ";
+      }
+   }
+
+   return starterList;
 }
 
 
@@ -8446,6 +8539,7 @@ Moderator::Moderator()
 {
    isRunReady = false;
    showFinalState = false;
+   loadSandboxAndPause = false;
    theDefaultSolarSystem = NULL;
    theSolarSystemInUse = NULL;
    theInternalCoordSystem = NULL;

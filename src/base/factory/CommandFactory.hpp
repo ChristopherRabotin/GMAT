@@ -43,8 +43,14 @@ public:
    // destructor
    ~CommandFactory();
 
+   // method to return list of types of objects that this factory can create
+   virtual StringArray      GetListOfCreatableObjects(
+                                  const std::string &qualifier = "") const;
+
 protected:
    // protected data
+   /// List of commands that toggle from object mode to command mode
+   StringArray              sequenceStarters;
 
 private:
 

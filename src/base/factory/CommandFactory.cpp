@@ -201,6 +201,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Assignment");
       creatables.push_back("BeginFiniteBurn");
       creatables.push_back("BeginMissionSequence");
+      sequenceStarters.push_back("BeginMissionSequence");
       creatables.push_back("BeginScript");
       creatables.push_back("CallFunction");
       creatables.push_back("CallGmatFunction");
@@ -343,3 +344,29 @@ CommandFactory::~CommandFactory()
    // deletes handled by Factory destructor
 }
 
+
+//------------------------------------------------------------------------------
+// StringArray GetListOfCreatableObjects(const std::string &qualifier) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of creatable objects
+ *
+ * Override for the base class method so that sequence starter commands can be
+ * identified
+ *
+ * @param qualifier The subtype for the command, if any
+ *
+ * @return The list of commands, qualified if requested
+ */
+//------------------------------------------------------------------------------
+StringArray CommandFactory::GetListOfCreatableObjects(
+                                  const std::string &qualifier) const
+{
+   if (qualifier != "")
+   {
+      if (qualifier == "SequenceStarters")
+         return sequenceStarters;
+   }
+
+   return Factory::GetListOfCreatableObjects(qualifier);
+}

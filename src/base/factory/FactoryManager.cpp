@@ -786,20 +786,23 @@ FactoryManager::CreateCoordinateSystem(const std::string &withName)
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfItems(Gmat::ObjectType byType)
+// const StringArray& GetListOfItems(Gmat::ObjectType byType,
+//             const std::string &withQualifier = "")
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type byType that can be created.
  *
- * @param <byType> type of items of which to return a list.
+ * @param byType type of items of which to return a list.
+ * @param withQualifier Optional qualifier to retrieve only subtypes
  *
  * @return list of creatable items of type byType.
  */
 //------------------------------------------------------------------------------
-const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType)
+const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType,
+            const std::string &withQualifier)
 {
    entireList.clear();
-   return GetList(byType);
+   return GetList(byType, withQualifier);
 }
 
 //------------------------------------------------------------------------------
@@ -821,7 +824,7 @@ const StringArray& FactoryManager::GetListOfAllItems()
    std::list<Gmat::ObjectType>::iterator ftype = factoryTypeList.begin();
    while (ftype != factoryTypeList.end())
    {
-      GetList(*ftype);
+      GetList(*ftype, "");
       ftype++;
    }
    
@@ -867,7 +870,7 @@ const StringArray& FactoryManager::GetListOfAllItemsExcept(const ObjectTypeArray
    while (ftype != factoryTypeList.end())
    {
       if (find(types.begin(), types.end(), *ftype) == types.end())
-         GetList((*ftype));
+         GetList((*ftype), "");
       
       ftype++;
    }
@@ -1071,17 +1074,20 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetList(Gmat::ObjectType ofType) const
+// const StringArray& GetList(Gmat::ObjectType ofType,
+//             const std::string &withQualifier) const
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type ofType that can be created.
  *
- * @param <ofType> type of creatable objects of which to return a list.
+ * @param ofType type of creatable objects of which to return a list.
+ * @param withQualifier Optional qualifier to retrieve only subtypes
  *
  * @return list of creatable items of type ofType.
  */
 //------------------------------------------------------------------------------
-const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType)
+const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType,
+            const std::string &withQualifier)
 {
    //entireList.clear();
    std::list<Factory*>::iterator f = factoryList.begin();
@@ -1090,7 +1096,7 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType)
       if ((*f)->GetFactoryType() == ofType)
       {
          // Add the name(s) to the list 
-         StringArray objs = (*f)->GetListOfCreatableObjects();
+         StringArray objs = (*f)->GetListOfCreatableObjects(withQualifier);
          if (!objs.empty())
             entireList.insert(entireList.end(), objs.begin(), objs.end());
             

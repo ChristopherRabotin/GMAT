@@ -398,6 +398,9 @@ public:
    // Plugin GUI data
    std::vector<Gmat::PluginResource*> *GetPluginResourceList();
 
+   bool IsSequenceStarter(const std::string &commandType);
+   const std::string& GetStarterStringList();
+
 private:
    
    // initialization
@@ -423,6 +426,11 @@ private:
    void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
                                    bool forFunction,
                                    const std::string &callFrom = "");
+
+   // Handlers for the commands that can start a mission sequence
+   StringArray sequenceStarters;
+   std::string starterList;
+   const StringArray& GetSequenceStarters();
    
    // default objects
    Spacecraft* GetDefaultSpacecraft();
@@ -461,6 +469,7 @@ private:
    bool isFromGui;
    bool endOfInterpreter;
    bool showFinalState;
+   bool loadSandboxAndPause;
    Integer objectManageOption;
    std::vector<Sandbox*> sandboxes;
    std::vector<TriggerManager*> triggerManagers;

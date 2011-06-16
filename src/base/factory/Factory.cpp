@@ -939,15 +939,20 @@ TrackingData* Factory::CreateTrackingData(const std::string &ofType,
 //  StringArray GetListOfCreatableObjects() const
 //------------------------------------------------------------------------------
 /**
-* This method returns the list of creatable objects for the factory.
+ * This method returns the list of creatable objects for the factory.
+ *
+ * @param qualifier Qualifier for a list of subtypes.  Derived classes override
+ *                  this method to allow for subsets of the creatables list
  *
  * @return list of creatable objects of this factory.
  *
  */
 //------------------------------------------------------------------------------
-StringArray Factory::GetListOfCreatableObjects() const
+StringArray Factory::GetListOfCreatableObjects(const std::string &qualifier) const
 {
-   return creatables;
+   if (qualifier == "")
+      return creatables;
+   return qualifiedCreatables;
 }
 
 

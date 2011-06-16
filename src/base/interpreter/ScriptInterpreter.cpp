@@ -1892,6 +1892,9 @@ bool ScriptInterpreter::IsOneWordCommand(const std::string &str)
    {
       retval = true;
    }
+
+   if (theModerator->IsSequenceStarter(str))
+      retval = true;
    
    #ifdef DEBUG_ONE_WORD_COMMAND
    MessageInterface::ShowMessage
