@@ -277,7 +277,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_LEO_Propagate1PropagateCommand.png"
+                         fileref="files/images/Tut_LEO_Propagate1PropagateCommand.jpeg"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
 
@@ -480,7 +480,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_LEO_Achieve1AchieveCommand.png"
+                         fileref="files/images/Tut_LEO_Achieve1AchieveCommand.jpeg"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
 
@@ -590,7 +590,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Tut_LEO_OutputPart2.jpeg" scalefit="1"
-                     width="100%"></imagedata>
+                     width="90%"></imagedata>
         </imageobject>
 
         <caption>
