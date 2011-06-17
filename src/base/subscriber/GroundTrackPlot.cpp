@@ -590,8 +590,9 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
          }
       }
    default:
-      return OrbitPlot::SetStringParameter(id, value);
+      ;           // Intentional drop through so all paths return a value
    }
+   return OrbitPlot::SetStringParameter(id, value);
 }
 
 
