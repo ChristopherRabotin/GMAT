@@ -63,7 +63,7 @@
 
 \begin{document}
 
-\title{Compiling GMAT using Visual Studio 2010\\\textit{Express Edition Instructions}}
+\title{Compiling GMAT using Visual Studio 2010}
 \author{Darrel J. Conway\thanks{Support provided by NASA GSFC FDSS Contract, Task 28.}
 \\Thinking Systems, Inc.\\Tucson, AZ}
 \date{March 2011}
@@ -81,7 +81,7 @@ This document describes the steps a new developer takes to set up a build enviro
 
 The following sections describe installation of the compiler, folder arrangements and code used in the GMAT build files, preliminary steps necessary to collect and build the libraries GMAT needs, and the build steps for GMAT itself.  The document concludes with instructions for plugin libraries that GMAT uses to interface with MATLAB and the MATLAB Optimization toolbox, to perform estimation (the estimation plugin is a preview of capabilities still in development), and the VF13ad optimizer (core code available separately).
 
-\section{Installing Visual C++ 2010 / Visual Studio 2010 Express Edition}
+\section{Installing Visual C++ / Visual Studio 2010 Express Edition}
 
 The Visual C++ environment can be installed either fron a web-based installer or from disk.  Users of the paid versions of Visual C++ should skip this section and install the product following the instruction provided by Microsoft.  Users of the Express edition can install from the onlins instructions provided by Microsoft, or by following the instructions provided here.
 
@@ -109,7 +109,7 @@ If you have a disk containing Visual Studio Express, follow these steps:
 
 \begin{figure}
 	\centering
-		\includegraphics[height=4in,width=6in,keepaspectratio]{VisualCpp.eps}
+		\includegraphics[scale=0.5]{VisualCpp.eps}
 	\caption{To add: Select Visual C++ Here}
 	\label{fig:VisualCpp}
 \end{figure}
@@ -153,7 +153,7 @@ Create a folder for building GMAT.  I'll use C:\textbackslash GmatVS as the root
 
 \begin{figure}
 \centering
-\includegraphics{FolderStructure.eps}
+\includegraphics[scale=0.75]{FolderStructure.eps}
 \caption{The File Structure used in GMAT's Conguration Managed Build Files}
 \label{fig:FolderStructure}
 \end{figure}
@@ -247,7 +247,7 @@ http://naif.jpl.nasa.gov/naif/toolkit\_C\_PC\_Windows\_VisualC\_64bit.html
 GMAT uses the Fortran to C compiler, f2c, for certain dynamics models and solvers.  The SPICE libraries from JPL include the f2c library code as part of their library.  If you plan to work exclusively with GMAT's source code using a build that includes the SPICE extensions and do not have Fortran code that you need to convert to C, you can skip this step.  Otherwise, you need to follow these steps to configure the f2c system:
 
 \begin{enumerate}
-\item A minimal f2c build is contained in the archive f2c.zip, located in the GmatDevelopment\textbackslash build\textbackslash windows-VS2010 folder.  Locate this file.
+\item The GmatDevelopment\textbackslash build\textbackslash windows-VS2010 folder contains a minimal f2c build in the archive f2c.zip.  Locate this file.
 \item Unpack the file into your Gmat3rdParty\textbackslash f2c folder.  You should have three directories as a result: Gmat3rdParty\textbackslash f2c\textbackslash bin, Gmat3rdParty\textbackslash f2c\textbackslash lib, and Gmat3rdParty\textbackslash f2c\textbackslash include, along with a file containing the copyright notice of the owners of the f2c system.
 \end{enumerate}
 
