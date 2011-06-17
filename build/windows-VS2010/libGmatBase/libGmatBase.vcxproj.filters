@@ -1234,7 +1234,7 @@
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\subscriber</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
