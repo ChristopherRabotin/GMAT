@@ -43,7 +43,8 @@ public:
    virtual Real GetMagnitude() const; 
    Rvector3 GetUnitVector() const;
    const Rvector3& Normalize();
-
+   void ComputeLongitudeLatitude(Real &lon, Real &lat);
+   
    Rvector3& operator=(const Rvector3 &v);
    bool operator==(const Rvector3 &v)const;
    bool operator!=(const Rvector3 &v)const;

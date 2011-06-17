@@ -130,6 +130,21 @@ const Rvector3& Rvector3::Normalize()
    return *this;
 }
 
+
+//------------------------------------------------------------------------------
+// void ComputeLongitudeLatitude(Real &lon, Real &lat)
+//------------------------------------------------------------------------------
+/**
+ * Computes longitude and latitude in radians
+ */
+//------------------------------------------------------------------------------
+void Rvector3::ComputeLongitudeLatitude(Real &lon, Real &lat)
+{
+   lon = GmatMathUtil::ATan2(elementD[1], elementD[0]);
+   lat = GmatMathUtil::ASin(elementD[2] / GetMagnitude());
+}
+
+
 //------------------------------------------------------------------------------
 //  Rvector3& operator=(const Rvector3 &v)
 //------------------------------------------------------------------------------
