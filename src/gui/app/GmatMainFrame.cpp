@@ -603,7 +603,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
       ("GmatMainFrame::CreateChild() title='%s', name='%s', restore=%d\n",
        item->GetTitle().c_str(), item->GetName().c_str(), restore);
    #endif
-
+   
    GmatMdiChildFrame *newChild = NULL;
 
    // if child already open, just return
@@ -1560,7 +1560,7 @@ Integer GmatMainFrame::RunCurrentMission()
    MessageInterface::ShowMessage
       ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
    #endif
-
+      
    Integer retval = 1;
    mAnimationEnabled = true;
    
@@ -2698,6 +2698,7 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    case GmatTree::EPHEMERIS_FILE:
       sizer->Add(new EphemerisFilePanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::GROUND_TRACK_PLOT:
    case GmatTree::SUBSCRIBER:
       // Switched to use GmatBaseSetupPanel (LOJ: 2011.06.02)
       //sizer->Add(new SubscriberSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);

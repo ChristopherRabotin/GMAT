@@ -18,6 +18,7 @@
 #include "MdiChildViewFrame.hpp"
 #include "MdiGlPlotData.hpp"
 #include "ViewCanvas.hpp"
+#include "OrbitViewCanvas.hpp"
 #include "CelesBodySelectDialog.hpp"
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"      // for namespace GmatMenu
@@ -33,14 +34,14 @@
 MdiChildViewFrame::MdiChildViewFrame(wxMDIParentFrame *parent,
                                      const wxString& plotName, const wxString& title,
                                      const wxPoint& pos, const wxSize& size,
-                                     const long style)
+                                     const long style, const wxString &viewType)
    : GmatMdiChildFrame(parent, plotName, title, GmatTree::OUTPUT_ORBIT_VIEW, -1,
                        pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mCanvas = (ViewCanvas *) NULL;
    mPlotName = plotName;
    mPlotTitle = plotName;
-   
+   mViewType = viewType;
    mOverlapPlot = false;
    mInFunction = false;
    
@@ -146,9 +147,9 @@ bool MdiChildViewFrame::GetDrawWireFrame()
 //------------------------------------------------------------------------------
 bool MdiChildViewFrame::GetDrawXyPlane()
 {
-   if (mCanvas)
-      return mCanvas->GetDrawXyPlane();
-
+   if (mCanvas && mViewType == "3D")
+      return ((OrbitViewCanvas*)mCanvas)->GetDrawXyPlane();
+   
    return false;
 }
 
@@ -158,8 +159,8 @@ bool MdiChildViewFrame::GetDrawXyPlane()
 //------------------------------------------------------------------------------
 bool MdiChildViewFrame::GetDrawEcPlane()
 {
-   if (mCanvas)
-      return mCanvas->GetDrawEcPlane();
+   if (mCanvas && mViewType == "3D")
+      return ((OrbitViewCanvas*)mCanvas)->GetDrawEcPlane();
 
    return false;
 }
@@ -170,8 +171,8 @@ bool MdiChildViewFrame::GetDrawEcPlane()
 //------------------------------------------------------------------------------
 bool MdiChildViewFrame::GetDrawSunLine()
 {
-   if (mCanvas)
-      return mCanvas->GetDrawSunLine();
+   if (mCanvas && mViewType == "3D")
+      return ((OrbitViewCanvas*)mCanvas)->GetDrawSunLine();
 
    return false;
 }
@@ -182,8 +183,8 @@ bool MdiChildViewFrame::GetDrawSunLine()
 //------------------------------------------------------------------------------
 bool MdiChildViewFrame::GetDrawAxes()
 {
-   if (mCanvas)
-      return mCanvas->GetDrawAxes();
+   if (mCanvas && mViewType == "3D")
+      return ((OrbitViewCanvas*)mCanvas)->GetDrawAxes();
 
    return false;
 }
@@ -193,8 +194,8 @@ bool MdiChildViewFrame::GetDrawAxes()
 //------------------------------------------------------------------------------
 bool MdiChildViewFrame::GetDrawGrid()
 {
-   if (mCanvas)
-      return mCanvas->GetDrawGrid();
+   if (mCanvas && mViewType == "3D")
+      return ((OrbitViewCanvas*)mCanvas)->GetDrawGrid();
 
    return false;
 }
@@ -205,8 +206,8 @@ bool MdiChildViewFrame::GetDrawGrid()
 //------------------------------------------------------------------------------
 UnsignedInt MdiChildViewFrame::GetXyPlaneColor()
 {
-   if (mCanvas)
-      return mCanvas->GetXyPlaneColor();
+   if (mCanvas && mViewType == "3D")
+      return ((OrbitViewCanvas*)mCanvas)->GetXyPlaneColor();
 
    return 0;
 }
@@ -217,8 +218,8 @@ UnsignedInt MdiChildViewFrame::GetXyPlaneColor()
 //------------------------------------------------------------------------------
 UnsignedInt MdiChildViewFrame::GetSunLineColor()
 {
-   if (mCanvas)
-      return mCanvas->GetSunLineColor();
+   if (mCanvas && mViewType == "3D")
+      return ((OrbitViewCanvas*)mCanvas)->GetSunLineColor();
 
    return 0;
 }
@@ -369,9 +370,9 @@ void MdiChildViewFrame::SetDrawWireFrame(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawStars(bool flag)
 {
-   if (mCanvas)
+   if (mCanvas && mViewType == "3D")
    {
-      mCanvas->SetDrawStars(flag);
+      ((OrbitViewCanvas*)mCanvas)->SetDrawStars(flag);
    }
 }
 
@@ -380,9 +381,9 @@ void MdiChildViewFrame::SetDrawStars(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawConstellations(bool flag)
 {
-   if (mCanvas)
+   if (mCanvas && mViewType == "3D")
    {
-      mCanvas->SetDrawConstellations(flag);
+      ((OrbitViewCanvas*)mCanvas)->SetDrawConstellations(flag);
    }
 }
 
@@ -391,9 +392,9 @@ void MdiChildViewFrame::SetDrawConstellations(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetStarCount(int count)
 {
-   if (mCanvas)
+   if (mCanvas && mViewType == "3D")
    {
-      mCanvas->SetStarCount(count);
+      ((OrbitViewCanvas*)mCanvas)->SetStarCount(count);
    }
 }
 
@@ -402,10 +403,10 @@ void MdiChildViewFrame::SetStarCount(int count)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawXyPlane(bool flag)
 {
-   if (mCanvas)
+   if (mCanvas && mViewType == "3D")
    {
       theMenuBar->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);   
-      mCanvas->SetDrawXyPlane(flag);
+      ((OrbitViewCanvas*)mCanvas)->SetDrawXyPlane(flag);
    }
 }
 
@@ -415,8 +416,8 @@ void MdiChildViewFrame::SetDrawXyPlane(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawEcPlane(bool flag)
 {
-   if (mCanvas)
-      mCanvas->SetDrawEcPlane(flag);
+   if (mCanvas && mViewType == "3D")
+      ((OrbitViewCanvas*)mCanvas)->SetDrawEcPlane(flag);
 }
 
 
@@ -425,8 +426,8 @@ void MdiChildViewFrame::SetDrawEcPlane(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawSunLine(bool flag)
 {
-   if (mCanvas)
-      mCanvas->SetDrawSunLine(flag);
+   if (mCanvas && mViewType == "3D")
+      ((OrbitViewCanvas*)mCanvas)->SetDrawSunLine(flag);
 }
 
 
@@ -435,8 +436,8 @@ void MdiChildViewFrame::SetDrawSunLine(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawAxes(bool flag)
 {
-   if (mCanvas)
-      mCanvas->SetDrawAxes(flag);
+   if (mCanvas && mViewType == "3D")
+      ((OrbitViewCanvas*)mCanvas)->SetDrawAxes(flag);
 }
 
 
@@ -445,8 +446,8 @@ void MdiChildViewFrame::SetDrawAxes(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetDrawGrid(bool flag)
 {
-   if (mCanvas)
-      mCanvas->SetDrawGrid(flag);
+   if (mCanvas && mViewType == "3D")
+      ((OrbitViewCanvas*)mCanvas)->SetDrawGrid(flag);
 }
 
 
@@ -455,8 +456,8 @@ void MdiChildViewFrame::SetDrawGrid(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetXyPlaneColor(UnsignedInt color)
 {
-   if (mCanvas)
-      mCanvas->SetXyPlaneColor(color);
+   if (mCanvas && mViewType == "3D")
+      ((OrbitViewCanvas*)mCanvas)->SetXyPlaneColor(color);
 }
 
 
@@ -465,8 +466,8 @@ void MdiChildViewFrame::SetXyPlaneColor(UnsignedInt color)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetSunLineColor(UnsignedInt color)
 {
-   if (mCanvas)
-      mCanvas->SetSunLineColor(color);
+   if (mCanvas && mViewType == "3D")
+      ((OrbitViewCanvas*)mCanvas)->SetSunLineColor(color);
 }
 
 
@@ -577,8 +578,8 @@ void MdiChildViewFrame::OnDrawWireFrame(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::OnDrawXyPlane(wxCommandEvent& event)
 {
-   if (mCanvas)
-      mCanvas->DrawXyPlane(event.IsChecked());
+   if (mCanvas && mViewType == "3D")
+      ((OrbitViewCanvas*)mCanvas)->DrawXyPlane(event.IsChecked());
 }
 
 
@@ -728,7 +729,8 @@ void MdiChildViewFrame::SetGlCoordSystem(CoordinateSystem *internalCs,
 //------------------------------------------------------------------------------
 // void SetGl2dDrawingOption(Integer footPrintOption)
 //------------------------------------------------------------------------------
-void MdiChildViewFrame::SetGl2dDrawingOption(const std::string &textureMap,
+void MdiChildViewFrame::SetGl2dDrawingOption(const std::string &centralBodyName,
+                                             const std::string &textureMap,
                                              Integer footPrintOption)
 {
    // do nothing here
@@ -848,6 +850,28 @@ void MdiChildViewFrame::TakeAction(const std::string &action)
 
 
 //------------------------------------------------------------------------------
+// void InitializePlot()
+//------------------------------------------------------------------------------
+/*
+ * Activates OnPaint() event
+ */
+//------------------------------------------------------------------------------
+void MdiChildViewFrame::InitializePlot()
+{
+   #ifdef DEBUG_REFRESH_PLOT
+   MessageInterface::ShowMessage
+      ("MdiChildViewFrame::InitializePlot() entered\n");
+   #endif
+   
+   if (mCanvas)
+   {
+      mCanvas->InitializePlot();
+      Update();
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void RefreshPlot()
 //------------------------------------------------------------------------------
 /*
@@ -871,6 +895,16 @@ void MdiChildViewFrame::RefreshPlot()
 
 
 //------------------------------------------------------------------------------
+// void DeletePlot()
+//------------------------------------------------------------------------------
+void MdiChildViewFrame::DeletePlot()
+{
+   // This will call OnClose()
+   Close(TRUE);
+}
+
+
+//------------------------------------------------------------------------------
 // void SetEndOfRun()
 //------------------------------------------------------------------------------
 /*
@@ -885,16 +919,6 @@ void MdiChildViewFrame::SetEndOfRun()
       mCanvas->Refresh(false);
       Update();
    }
-}
-
-
-//------------------------------------------------------------------------------
-// void DeletePlot()
-//------------------------------------------------------------------------------
-void MdiChildViewFrame::DeletePlot()
-{
-   // This will call OnClose()
-   Close(TRUE);
 }
 
 

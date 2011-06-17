@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Phillip Silvia, Jr.
 // Created: 2009/06/17
 /**
@@ -39,6 +37,7 @@ void DrawSphere(GLdouble radius, GLint slices, GLint stacks, GLenum style,
                 GLenum textureCoords = GL_TRUE);
 void DrawLine(GlColorType *color, Rvector3 start, Rvector3 end);
 void DrawLine(float red, float green, float blue, Rvector3 start, Rvector3 end);
+void DrawLine(double x1, double y1, double x2, double y2);
 void DrawCube(float x, float y, float z);
 void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2);
 void DrawEquatorialPlanes();

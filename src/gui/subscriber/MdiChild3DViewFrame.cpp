@@ -43,7 +43,7 @@ MdiChild3DViewFrame::MdiChild3DViewFrame(wxMDIParentFrame *parent,
                                      const wxString& plotName, const wxString& title,
                                      const wxPoint& pos, const wxSize& size,
                                      const long style)
-   : MdiChildViewFrame(parent, plotName, title, pos, size, style)
+   : MdiChildViewFrame(parent, plotName, title, pos, size, style, "3D")
 {
    // Create GLCanvas
    int width, height;

@@ -242,6 +242,7 @@ namespace GmatTree
       REPORT_FILE,
       XY_PLOT,
       ORBIT_VIEW,
+      GROUND_TRACK_PLOT,
       EPHEMERIS_FILE,
       
       VARIABLE = 41600,

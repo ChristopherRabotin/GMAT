@@ -23,7 +23,6 @@
 #include "Light.hpp"
 #include "MdiGlPlotData.hpp"
 #include "GuiInterpreter.hpp"
-//#include "TextTrajectoryFile.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
@@ -37,26 +36,24 @@ class OrbitViewCanvas: public ViewCanvas
 {
 public:
    OrbitViewCanvas(wxWindow *parent, const wxWindowID id = -1,
-                  const wxPoint& pos = wxDefaultPosition,
-                  const wxSize& size = wxDefaultSize, 
-                  const wxString& name = wxT("OrbitViewCanvas"),
-                  long style = 0);
+                   const wxPoint& pos = wxDefaultPosition,
+                   const wxSize& size = wxDefaultSize, 
+                   const wxString& name = wxT("OrbitViewCanvas"),
+                   long style = 0);
    virtual ~OrbitViewCanvas();
    
    // getters
    int GetAnimationUpdateInterval() { return mUpdateInterval; }
    int GetAnimationFrameIncrement() { return mFrameInc; }
-   bool  IsAnimationRunning() { return mIsAnimationRunning; }
+   bool IsAnimationRunning() { return mIsAnimationRunning; }
    const wxStringBoolMap& GetShowObjectMap() { return mShowObjectMap; }
    const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap; }
    
-   bool  GetUseViewPointInfo() { return mUseInitialViewPoint; }
-   bool  GetDrawWireFrame() { return mDrawWireFrame; }
-   bool  GetDrawXyPlane() { return mDrawXyPlane; }
-   bool  GetDrawEcPlane() { return mDrawEcPlane; }
-   bool  GetDrawSunLine() { return mDrawSunLine; }
-   bool  GetDrawAxes() { return mDrawAxes; }
-   bool  GetDrawGrid() { return mDrawGrid; }
+   bool GetUseViewPointInfo() { return mUseInitialViewPoint; }
+   bool GetDrawXyPlane() { return mDrawXyPlane; }
+   bool GetDrawEcPlane() { return mDrawEcPlane; }
+   bool GetDrawSunLine() { return mDrawSunLine; }
+   bool GetDrawAxes() { return mDrawAxes; }
    unsigned int GetXyPlaneColor() { return mXyPlaneColor; }
    unsigned int GetEcPlaneColor() { return mEcPlaneColor; }
    unsigned int GetSunLineColor() { return mSunLineColor; }
@@ -78,7 +75,6 @@ public:
    
    void SetDistance(float dist) { mAxisLength = dist; }
    void SetUseInitialViewDef(bool flag) { mUseInitialViewPoint = flag; }
-   void SetDrawWireFrame(bool flag) { mDrawWireFrame = flag; }
    void SetDrawStars(bool flag) { mDrawStars = flag; }
    void SetDrawConstellations(bool flag) { mDrawConstellations = flag; }
    void SetStarCount(int count) { mStarCount = count; }
@@ -86,7 +82,6 @@ public:
    void SetDrawEcPlane(bool flag) { mDrawEcPlane = flag; }
    void SetDrawSunLine(bool flag) { mDrawSunLine = flag; }
    void SetDrawAxes(bool flag) { mDrawAxes = flag; }
-   void SetDrawGrid(bool flag) { mDrawGrid = flag; }
    void SetXyPlaneColor(unsigned int color) { mXyPlaneColor = color; }
    void SetEcPlaneColor(unsigned int color) { mEcPlaneColor = color; }
    void SetSunLineColor(unsigned int color) { mSunLineColor = color; }
@@ -104,13 +99,10 @@ public:
    void GotoObject(const wxString &objName);
    void GotoOtherBody(const wxString &bodyName);
    void ViewAnimation(int interval, int frameInc = 30);
-   
+
    void SetGlObject(const StringArray &objNames,
                     const UnsignedIntArray &objOrbitColors,
                     const std::vector<SpacePoint*> &objectArray);
-   
-   // SolarSystem
-   void SetSolarSystem(SolarSystem *ss);
    
    // CoordinateSystem
    void SetGlCoordSystem(CoordinateSystem *internalCs,
@@ -197,14 +189,12 @@ private:
    int  mNumPointsToRedraw;
    int  mUpdateFrequency;
    
-   // draw option
+   // drawing options
    float mAxisLength;
-   bool mDrawWireFrame;
    bool mDrawXyPlane;
    bool mDrawEcPlane;
    bool mDrawSunLine;
    bool mDrawAxes;
-   bool mDrawGrid;
    
    // color
    unsigned int mXyPlaneColor;
@@ -253,8 +243,6 @@ private:
    int mVpVecObjId;
    int mVdirObjId;
    Real mViewObjRadius;
-   wxString mViewObjName;
-   int mViewObjId;
       
    // object rotation
    Real mInitialLongitude;
@@ -286,17 +274,11 @@ private:
    float mCurrRotZAngle;
    float mCurrViewDist;
    
-   // windows specific functions
-   bool SetPixelFormatDescriptor();
-   void SetDefaultGLFont();
-   
    // view point
    void SetDefaultViewPoint();
    void InitializeViewPoint();
    
    // texture
-   bool LoadGLTextures();
-   GLuint BindTexture(SpacePoint *obj, const wxString &objName);
    void SetDefaultView();
    
    // view objects
@@ -309,11 +291,11 @@ private:
    // drawing objects
    void DrawFrame();
    void DrawPlot();
-   void DrawObject(const wxString &objName, int obj);
    void DrawObjectOrbit(int frame);
+   void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame);
+   void DrawObject(const wxString &objName, int obj);
    void DrawOrbit(const wxString &objName, int obj, int objId);
    void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);   
-   void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame);
    void DrawSolverData();
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane(UnsignedInt color);
@@ -327,20 +309,6 @@ private:
    void RotateBodyUsingAttitude(const wxString &objName, int objId);
    void RotateBody(const wxString &objName, int frame, int objId);
       
-   // for data update
-   void UpdateSolverData(const RealArray &posX, const RealArray &posY,
-                         const RealArray &posZ, const UnsignedIntArray &scColors,
-                         bool solving);
-   void UpdateSpacecraftData(const Real &time,
-                             const RealArray &posX, const RealArray &posY,
-                             const RealArray &posZ, const RealArray &velX,
-                             const RealArray &velY, const RealArray &velZ,
-                             const UnsignedIntArray &scColors, Integer solverOption);
-   void UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId);
-   
-   void UpdateOtherData(const Real &time);
-   void UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId);
-   
    // for coordinate system
    void UpdateRotateFlags();
    bool ConvertObjectData();

@@ -41,7 +41,7 @@ MdiChildGroundTrackFrame::MdiChildGroundTrackFrame(wxMDIParentFrame *parent,
                              const wxString& plotName, const wxString& title,
                              const wxPoint& pos, const wxSize& size,
                              const long style)
-   : MdiChildViewFrame(parent, plotName, title, pos, size, style)
+   : MdiChildViewFrame(parent, plotName, title, pos, size, style, "2D")
 {
    // Create GLCanvas
    int width, height;
@@ -68,12 +68,13 @@ MdiChildGroundTrackFrame::~MdiChildGroundTrackFrame()
 //------------------------------------------------------------------------------
 // void SetGl2dDrawingOption(const std::string &textureMap, Integer footPrintOption)
 //------------------------------------------------------------------------------
-void MdiChildGroundTrackFrame::SetGl2dDrawingOption(const std::string &textureMap,
+void MdiChildGroundTrackFrame::SetGl2dDrawingOption(const std::string &centralBodyName,
+                                                    const std::string &textureMap,
                                                     Integer footPrintOption)
 {
    if (mCanvas)
    {
-      mCanvas->SetGl2dDrawingOption(textureMap, footPrintOption);
+      mCanvas->SetGl2dDrawingOption(centralBodyName, textureMap, footPrintOption);
    }
 }
 

@@ -584,6 +584,11 @@ bool OrbitView::Initialize()
          PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
          PlotInterface::SetGlShowObjectFlag(instanceName, mDrawObjectArray);
          
+         //--------------------------------------------------------
+         // initialize GL
+         //--------------------------------------------------------
+         PlotInterface::InitializeGlPlot(instanceName);
+         
          isInitialized = true;
          retval = true;
       }

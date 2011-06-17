@@ -55,8 +55,9 @@ public:
                         CoordinateSystem *viewUpCs);
    
    virtual void SetGl2dDrawingOption(const std::string &plotName,
-                           const std::string &textureMap,
-                           Integer footPrintOption);
+                        const std::string &centralBodyName,
+                        const std::string &textureMap,
+                        Integer footPrintOption);
    
    virtual void SetGl3dDrawingOption(const std::string &plotName,
                         bool drawEcPlane, bool drawXyPlane,
@@ -83,8 +84,9 @@ public:
    
    virtual bool IsThere(const std::string &plotName);
    
-   virtual bool DeleteGlPlot(const std::string &plotName);
+   virtual bool InitializeGlPlot(const std::string &plotName);
    virtual bool RefreshGlPlot(const std::string &plotName);
+   virtual bool DeleteGlPlot(const std::string &plotName);
    virtual bool SetGlEndOfRun(const std::string &plotName);
    
    virtual bool UpdateGlPlot(const std::string &plotName,

@@ -32,7 +32,7 @@
 #define __REMOVE_OBJ_BY_SETTING_FLAG__
 
 //#define DBGLVL_INIT 2
-//#define DBGLVL_DATA 1
+//#define DBGLVL_DATA 2
 //#define DBGLVL_DATA_LABELS 1
 //#define DBGLVL_ADD 1
 //#define DBGLVL_OBJ 2
@@ -1980,22 +1980,30 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
    
    CoordinateConverter coordConverter;
    
-   #if DBGLVL_UPDATE > 1
+   #if DBGLVL_DATA > 1
    MessageInterface::ShowMessage
       ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=<%p>\n",
        mNumData, mDataCollectFrequency, currentProvider);
+   MessageInterface::ShowMessage
+      ("theDataCoordSystem=<%p><%s>'%s', mViewCoordSystem=<%p><%s>'%s'\n",
+       theDataCoordSystem,
+       theDataCoordSystem ? theDataCoordSystem->GetTypeName().c_str() : "NULL",
+       theDataCoordSystem ? theDataCoordSystem->GetName().c_str() : "NULL",
+       mViewCoordSystem,
+       mViewCoordSystem ? mViewCoordSystem->GetTypeName().c_str() : "NULL",
+       mViewCoordSystem ? mViewCoordSystem->GetName().c_str() : "NULL");
    #endif
    
    mNumData = 0;
    mNumCollected++;
    
-   #if DBGLVL_UPDATE > 1
+   #if DBGLVL_DATA > 1
    MessageInterface::ShowMessage
       ("   currentProvider=%d, theDataLabels.size()=%d\n",
        currentProvider, theDataLabels.size());
    #endif
    
-   #if DBGLVL_UPDATE > 2
+   #if DBGLVL_DATA > 2
    MessageInterface::ShowMessage
       ("OrbitView::Distribute() Using new Publisher code\n");
    #endif

@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2010/04/19
 /**
@@ -21,7 +19,6 @@
 
 #include "GmatMdiChildFrame.hpp"
 #include "MdiGlPlotData.hpp"      // for wxStringColorMap
-//#include "ViewCanvas.hpp"
 #include "gmatdefs.hpp"
 #include "SolarSystem.hpp"
 
@@ -44,7 +41,8 @@ class MdiChildViewFrame: public GmatMdiChildFrame
 public:
    MdiChildViewFrame(wxMDIParentFrame *parent, const wxString& plotName,
                      const wxString& title, const wxPoint& pos,
-                     const wxSize& size, const long style);
+                     const wxSize& size, const long style,
+                     const wxString &viewType);
    virtual ~MdiChildViewFrame();
    
    // getters
@@ -120,7 +118,8 @@ public:
                         CoordinateSystem *viewCs,
                         CoordinateSystem *viewUpCs);
    
-   virtual void SetGl2dDrawingOption(const std::string &textureMap,
+   virtual void SetGl2dDrawingOption(const std::string &centralBodyName,
+                        const std::string &textureMap,
                         Integer footPrintOption);
    
    virtual void SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
@@ -148,9 +147,10 @@ public:
                         Integer solverOption, bool updateCanvas,
                         bool inFunction = false);
    virtual void TakeAction(const std::string &action);
+   virtual void InitializePlot();
    virtual void RefreshPlot();
-   virtual void SetEndOfRun();
    virtual void DeletePlot();
+   virtual void SetEndOfRun();
       
 protected:
    
@@ -160,6 +160,7 @@ protected:
    
    wxString mPlotName;
    wxString mPlotTitle;
+   wxString mViewType;
    bool mOverlapPlot;
    bool mInFunction;
    

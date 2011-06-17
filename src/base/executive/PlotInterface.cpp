@@ -153,12 +153,13 @@ void PlotInterface::SetGlCoordSystem(const std::string &plotName,
 // void SetGl2dDrawingOption(const std::string &plotName, Integer footPrintOption)
 //------------------------------------------------------------------------------
 void PlotInterface::SetGl2dDrawingOption(const std::string &plotName,
+                                         const std::string &centralBodyName,
                                          const std::string &textureMap,
                                          Integer footPrintOption)
 {
    if (thePlotReceiver != NULL)
       thePlotReceiver->
-         SetGl2dDrawingOption(plotName, textureMap, footPrintOption);
+         SetGl2dDrawingOption(plotName, centralBodyName, textureMap, footPrintOption);
 }
 
 
@@ -248,7 +249,7 @@ bool PlotInterface::IsThere(const std::string &plotName)
 
 
 //------------------------------------------------------------------------------
-//  bool DeleteGlPlot(const std::string &plotName)
+//  bool InitializeGlPlot(const std::string &plotName)
 //------------------------------------------------------------------------------
 /*
  * Deletes OpenGlPlot by plot name.
@@ -256,10 +257,10 @@ bool PlotInterface::IsThere(const std::string &plotName)
  * @param <plotName> name of plot to be deleted
  */
 //------------------------------------------------------------------------------
-bool PlotInterface::DeleteGlPlot(const std::string &plotName)
+bool PlotInterface::InitializeGlPlot(const std::string &plotName)
 {    
    if (thePlotReceiver != NULL)
-      return thePlotReceiver->DeleteGlPlot(plotName);
+      return thePlotReceiver->InitializeGlPlot(plotName);
    
    return false;
 }
@@ -276,6 +277,24 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 {    
    if (thePlotReceiver != NULL)
       return thePlotReceiver->RefreshGlPlot(plotName);
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool DeleteGlPlot(const std::string &plotName)
+//------------------------------------------------------------------------------
+/*
+ * Deletes OpenGlPlot by plot name.
+ *
+ * @param <plotName> name of plot to be deleted
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::DeleteGlPlot(const std::string &plotName)
+{    
+   if (thePlotReceiver != NULL)
+      return thePlotReceiver->DeleteGlPlot(plotName);
    
    return false;
 }

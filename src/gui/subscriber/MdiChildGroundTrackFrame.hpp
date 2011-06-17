@@ -39,8 +39,9 @@ public:
                             const wxString& title, const wxPoint& pos,
                             const wxSize& size, const long style);
    virtual ~MdiChildGroundTrackFrame();
-
-   virtual void SetGl2dDrawingOption(const std::string &textureMap,
+   
+   virtual void SetGl2dDrawingOption(const std::string &centralBodyName,
+                        const std::string &textureMap,
                         Integer footPrintOption);
    
 protected:

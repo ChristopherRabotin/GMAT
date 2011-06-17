@@ -26,28 +26,11 @@
 #include "SubscriberException.hpp"
 #include "MessageInterface.hpp"
 
-#if 0
-#ifdef __WXMAC__
-#  ifdef __DARWIN__
-#    include <OpenGL/gl.h>
-#    include <OpenGL/glu.h>
-#  else
-#    include <gl.h>
-#    include <glu.h>
-#  endif
-#else
-#  include <GL/gl.h>
-#  include <GL/glu.h>
-#endif
-#endif
-
+//#define DEBUG_INIT 1
 //#define DEBUG_LOAD_IMAGE 1
-
-#if 0
-// color
-static int *sIntColor = new int;
-static GlColorType *sGlColor = (GlColorType*)sIntColor;
-#endif
+//#define DEBUG_TEXTURE 1
+//#define DEBUG_LOAD_MODEL 1
+//#define DEBUG_OBJECT 1
 
 //---------------------------------
 // static data
@@ -118,6 +101,12 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mIsEndOfData = false;
    mIsEndOfRun = false;
    mWriteWarning = true;
+   mNeedVelocity = false;
+   mNeedAttitude = false;
+   
+   // drawing options
+   mDrawWireFrame = false;
+   mDrawGrid = false;
    
    // view control
    mUseInitialViewPoint = true;
@@ -174,6 +163,7 @@ ViewCanvas::~ViewCanvas()
 {
 }
 
+
 //------------------------------------------------------------------------------
 // wxGLContext* GetGLContext()
 //------------------------------------------------------------------------------
@@ -200,6 +190,51 @@ void ViewCanvas::SetGLContext(wxGLContext *glContext)
    #else
    SetCurrent();
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool InitializePlot()
+//------------------------------------------------------------------------------
+/**
+ * Initializes GL and IL.
+ */
+//------------------------------------------------------------------------------
+bool ViewCanvas::InitializePlot()
+{
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("\nViewCanvas::InitializePlot() entered\n");
+   #endif
+   
+   // Add things to do here
+   wxPaintDC dc(this);
+   
+   #ifndef __WXMOTIF__
+      #ifndef __USE_WX280_GL__
+         if (!GetContext()) return false;
+      #endif
+   #endif
+   
+   #ifdef __USE_WX280_GL__
+      theContext->SetCurrent(*this);
+      SetCurrent(*theContext);
+   #else
+      SetCurrent();
+   #endif
+      
+   InitOpenGL();
+   
+   // load body textures   
+   LoadBodyTextures();
+   
+   // load spacecraft models
+   LoadSpacecraftModels();
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("ViewCanvas::InitializePlot() leaving\n\n");
+   #endif
+   
+   return true;
 }
 
 
@@ -234,50 +269,21 @@ bool ViewCanvas::InitOpenGL()
    
    InitGL();
    
-   // remove back faces
-   /*glDisable(GL_CULL_FACE);
-   
-   // enable depth testing, so that objects further away from the
-   // viewer aren't drawn over closer objects
-   glEnable(GL_DEPTH_TEST);
-   
-   glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
-   glDepthFunc(GL_LESS);
-   //glDepthRange(0.0, 100.0); //loj: just tried - made no difference
-   
-   // speedups
-   glEnable(GL_DITHER);
-   
-   // set polygons to be smoothly shaded (i.e. interpolate lighting equations
-   // between points on polygons).
-   glShadeModel(GL_SMOOTH);
-   
-   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-   glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);*/
-   
    #ifdef __USE_WX280_GL__
    SetCurrent(*theContext);
    #else
    SetCurrent();
    #endif
    
-   #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage
-      ("ViewCanvas::InitOpenGL() calling LoadGLTextures()\n");
-   #endif
-   
-   if (!LoadGLTextures())
-      return false;
-   
-   // pixel format
+   // set pixel format
    if (!SetPixelFormatDescriptor())
    {
       //throw SubscriberException("SetPixelFormatDescriptor failed\n");
    }
    
-   // font
+   // set font
    SetDefaultGLFont();
-   
+      
    mShowMaxWarning = true;
    mIsAnimationRunning = false;
    mOpenGLInitialized = true;
@@ -291,10 +297,138 @@ bool ViewCanvas::InitOpenGL()
 }
 
 
+//------------------------------------------------------------------------------
+// void SetGlObject(const StringArray &objNames,
+//                  const UnsignedIntArray &objOrbitColors,
+//                  const std::vector<SpacePoint*> &objArray)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetGlObject(const StringArray &objNames,
+                             const UnsignedIntArray &objOrbitColors,
+                             const std::vector<SpacePoint*> &objArray)
+{
+   #if DEBUG_OBJECT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetGlObject() '%s' entered, objCount=%d, colorCount=%d.\n",
+       mPlotName.c_str(), objNames.size(), objOrbitColors.size());
+   #endif
+   
+   #if 0
+   // Initialize objects used in view
+   SetDefaultViewPoint();
+   #endif
+   
+   mObjectArray = objArray;
+   wxArrayString tempList;
+   int scCount = 0;
+   
+   if (objNames.size() == objOrbitColors.size() &&
+       objNames.size() == objArray.size())
+   {      
+      for (UnsignedInt i=0; i<objNames.size(); i++)
+      {
+         tempList.Add(objNames[i].c_str());
+         
+         // Set spacecraft names and count
+         if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
+         {
+            mScNameArray.push_back(objNames[i]);
+            scCount++;
+         }
+         
+         #if DEBUG_OBJECT > 1
+         MessageInterface::ShowMessage
+            ("   objNames[%d]=%s, objPtr=<%p>%s\n", i, objNames[i].c_str(),
+             mObjectArray[i], mObjectArray[i]->GetName().c_str());
+         #endif
+      }
+      
+      AddObjectList(tempList, objOrbitColors);
+   }
+   else
+   {
+      MessageInterface::ShowMessage("ViewCanvas::SetGlObject() object sizes "
+                                    "are not the same. No objects added.\n");
+   }
+   
+   mScCount = scCount;
+   
+   #if DEBUG_OBJECT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetGlObject() '%s' leaving\n", mPlotName.c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetSolarSystem(SolarSystem *ss)
+{
+   pSolarSystem = ss;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlCoordSystem(CoordinateSystem *internalCs,CoordinateSystem *viewCs,
+//                       CoordinateSystem *viewUpCs)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
+                                  CoordinateSystem *viewCs,
+                                  CoordinateSystem *viewUpCs)
+{
+   #if DEBUG_CS
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetGlCoordSystem() '%s' entered, internalCs=<%p>, viewCs=<%p>, "
+       " viweUpCs=%p\n",  mPlotName.c_str(), internalCs, viewCs, viewUpCs);
+   #endif
+   
+   if (internalCs == NULL || viewCs == NULL || viewUpCs == NULL)
+   {
+      throw SubscriberException
+         ("Internal or View or View Up CoordinateSystem is NULL\n"); 
+   }
+   
+   pInternalCoordSystem = internalCs;
+   mInternalCoordSysName = internalCs->GetName().c_str();
+   
+   pViewCoordSystem = viewCs;
+   mViewCoordSysName = viewCs->GetName().c_str();
+   
+   pViewUpCoordSystem = viewUpCs;
+   mViewUpCoordSysName = viewUpCs->GetName().c_str();
+   
+   // see if we need data conversion
+   if (mViewCoordSysName.IsSameAs(mInternalCoordSysName))
+      mViewCsIsInternalCs = true;
+   else
+      mViewCsIsInternalCs = false;
+   
+   // set view center object
+   mOriginName = viewCs->GetOriginName().c_str();
+   mOriginId = GetObjectId(mOriginName);
+   
+   mViewObjName = mOriginName;
+   mViewObjId = mOriginId;
+   
+   #if DEBUG_CS
+   MessageInterface::ShowMessage
+      ("   mViewCoordSysName=%s, pViewCoordSystem=%p, mOriginName=%s, "
+       "mOriginId=%d\n", mViewCoordSysName.c_str(), pViewCoordSystem,
+       mOriginName.c_str(),  mOriginId);
+   MessageInterface::ShowMessage
+      ("   mViewUpCoordSysName=%s, mViewObjName=%s, mViewObjId=%d\n",
+       mViewUpCoordSysName.c_str(), mViewObjName.c_str(), mViewObjId);
+   #endif
+   
+} // end SetGlCoordSystem()
+
+
 //---------------------------------------------------------------------------
-// void SetGl2dDrawingOption(const std::string &textureMap, bool drawFootPrints)
+// void SetGl2dDrawingOption(const std::string &centralBodyName,
+//         const std::string &textureMap, bool drawFootPrints)
 //---------------------------------------------------------------------------
-void ViewCanvas::SetGl2dDrawingOption(const std::string &textureMap,
+void ViewCanvas::SetGl2dDrawingOption(const std::string &centralBodyName,
+                                      const std::string &textureMap,
                                       Integer footPrintOption)
 {
    // do nothing here
@@ -380,13 +514,6 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
 {
    if (IsFrozen())
       Thaw();
-   
-   // Commented out since spacecraft solar panel is not showing. (LOJ: 2011.04.25)
-   // This code attempt to show spacecraft moel when total data points are
-   // less than update frequency points (Bug 2380)
-   // To load spacecraft model, OpenGL needs to be initialized first
-   //if (!mOpenGLInitialized)
-   //   Update();
    
    mTotalPoints++;
    mInFunction = inFunction;   
@@ -490,7 +617,7 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
       // add object names
       mObjectNames.Add(objNames[i]);
       
-      if (mObjectTextureIdMap.find(objNames[i]) == mObjectTextureIdMap.end())
+      if (mTextureIdMap.find(objNames[i]) == mTextureIdMap.end())
       {
          #if DEBUG_OBJECT
          MessageInterface::ShowMessage
@@ -498,7 +625,7 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
              objNames[i].c_str());
          #endif
          
-         mObjectTextureIdMap[objNames[i]] = GmatPlot::UNINIT_TEXTURE;
+         mTextureIdMap[objNames[i]] = GmatPlot::UNINIT_TEXTURE;
       }
       
       // initialize show object
@@ -546,6 +673,153 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
 //-----------------------
 // protected methods
 //-----------------------
+
+//------------------------------------------------------------------------------
+// bool SetPixelFormatDescriptor()
+//------------------------------------------------------------------------------
+/**
+ * Sets pixel format on Windows.
+ */
+//------------------------------------------------------------------------------
+bool ViewCanvas::SetPixelFormatDescriptor()
+{
+#ifdef __WXMSW__
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetPixelFormatDescriptor() entered\n");
+   #endif
+   
+   // On Windows, for OpenGL, you have to set the pixel format
+   // once before doing your drawing stuff. This function
+   // properly sets it up.
+   
+   HDC hdc = wglGetCurrentDC();
+   
+   PIXELFORMATDESCRIPTOR pfd =
+   {
+      sizeof(PIXELFORMATDESCRIPTOR),   // size of this pfd
+      1,                     // version number
+      PFD_DRAW_TO_WINDOW |   // support window
+      PFD_SUPPORT_OPENGL |   // support OpenGL
+      PFD_DOUBLEBUFFER,      // double buffered
+      PFD_TYPE_RGBA,         // RGBA type
+      24,                    // 24-bit color depth
+      0, 0, 0, 0, 0, 0,      // color bits ignored
+      0,                     // no alpha buffer
+      0,                     // shift bit ignored
+      0,                     // no accumulation buffer
+      0, 0, 0, 0,            // accum bits ignored
+      //32,                    // 32-bit z-buffer
+      16,                    // 32-bit z-buffer
+      0,                     // no stencil buffer
+      0,                     // no auxiliary buffer
+      PFD_MAIN_PLANE,        // main layer
+      0,                     // reserved
+      0, 0, 0                // layer masks ignored
+   };
+   
+   // get the device context's best-available-match pixel format
+   int pixelFormatId = ChoosePixelFormat(hdc, &pfd);
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetPixelFormatDescriptor() pixelFormatId = %d \n",
+       pixelFormatId);
+   #endif
+   
+   if(pixelFormatId == 0)
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** Failed to find a matching pixel format\n");
+      return false;
+   }
+   
+   // set the pixel format of the device context
+   if (!SetPixelFormat(hdc, pixelFormatId, &pfd))
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** Failed to set pixel format id %d\n", pixelFormatId);
+      return false;
+   }
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetPixelFormatDescriptor() returning true\n");
+   #endif
+   
+   return true;
+
+#else
+   // Should we return true for non-Window system?
+   //return false;
+   return true;
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetDefaultGLFont()
+//------------------------------------------------------------------------------
+/**
+ * Sets default GL font.
+ */
+//------------------------------------------------------------------------------
+void ViewCanvas::SetDefaultGLFont()
+{
+#ifdef __WXMSW__
+   // Set up font stuff for windows -
+   // Make the Current font the device context's selected font
+   //SelectObject(dc, Font->Handle);
+   HDC hdc = wglGetCurrentDC();
+   
+   wglUseFontBitmaps(hdc, 0, 255, 1000);
+   glListBase(1000); // base for displaying
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetDrawingMode()
+//------------------------------------------------------------------------------
+void ViewCanvas::SetDrawingMode()
+{
+   // set OpenGL to recognize the counter clockwise defined side of a polygon
+   // as its 'front' for lighting and culling purposes
+   glFrontFace(GL_CCW);
+   
+   // enable face culling, so that polygons facing away (defines by front face)
+   // from the viewer aren't drawn (for efficiency).
+   glEnable(GL_CULL_FACE);
+   
+   // tell OpenGL to use glColor() to get material properties for..
+   glEnable(GL_COLOR_MATERIAL);
+   
+   // the front face's ambient and diffuse components
+   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+   
+   // Set the ambient lighting
+   GLfloat ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
+   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+   
+   // Set viewport size
+   int nWidth, nHeight;
+   GetClientSize(&nWidth, &nHeight);
+   glViewport(0, 0, nWidth, nHeight);
+   
+   // Set plygon drawng mode
+   if (mDrawWireFrame)
+   {
+      glPolygonMode(GL_FRONT, GL_LINE);
+      glPolygonMode(GL_BACK, GL_LINE);
+   }
+   else
+   {
+      glPolygonMode(GL_FRONT, GL_FILL);
+      glPolygonMode(GL_BACK, GL_FILL);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void ResetPlotInfo()
@@ -638,13 +912,16 @@ void ViewCanvas::ClearObjectArrays(bool deleteArrays)
       if (mObjectViewPos)
          delete [] mObjectViewPos;
       
+      if (mObjectViewVel)
+         delete [] mObjectViewVel;
+      
       if (mObjectQuat)
          delete [] mObjectQuat;
       
       if (mCoordData)
          delete [] mCoordData;
    }
-
+   
    mTime = NULL;
    mObjectRadius = NULL;
    mObjMaxZoomIn = NULL;
@@ -653,6 +930,7 @@ void ViewCanvas::ClearObjectArrays(bool deleteArrays)
    mObjectOrbitColor = NULL;
    mObjectGciPos = NULL;
    mObjectViewPos = NULL;
+   mObjectViewVel = NULL;
    mObjectQuat = NULL;
    mCoordData = NULL;
    
@@ -673,7 +951,8 @@ bool ViewCanvas::CreateObjectArrays()
 {
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("CreateObjectArrays() allocating object arrays with %d\n", mObjectCount);
+      ("ViewCanvas::CreateObjectArrays() allocating object arrays with %d\n",
+       mObjectCount);
    #endif
    
    if ((mTime = new Real[MAX_DATA]) == NULL)
@@ -705,10 +984,15 @@ bool ViewCanvas::CreateObjectArrays()
    
    if ((mObjectViewPos = new Real[mObjectCount*MAX_DATA*3]) == NULL)
       return false;
-   
-   if ((mObjectQuat = new Real[mObjectCount*MAX_DATA*4]) == NULL)
-      return false;
 
+   if (mNeedVelocity)
+      if ((mObjectViewVel = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+         return false;
+   
+   if (mNeedAttitude)
+      if ((mObjectQuat = new Real[mObjectCount*MAX_DATA*4]) == NULL)
+         return false;
+   
    if ((mCoordData = new Real[MAX_DATA*16]) == NULL)
       return false;
    
@@ -834,6 +1118,179 @@ void ViewCanvas::ComputeActualIndex()
 
 
 //------------------------------------------------------------------------------
+// virtual bool LoadBodyTextures()
+//------------------------------------------------------------------------------
+bool ViewCanvas::LoadBodyTextures()
+{
+   #if DEBUG_TEXTURE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadBodyTextures() entered, mObjectCount=%d\n", mObjectCount);
+   #endif
+   
+   //--------------------------------------------------
+   // load object texture if used
+   //--------------------------------------------------
+   for (int i=0; i<mObjectCount; i++)
+   {
+      if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
+         continue;
+      
+      if (mTextureIdMap[mObjectNames[i]] == GmatPlot::UNINIT_TEXTURE)
+      {
+         #if DEBUG_TEXTURE > 1
+         MessageInterface::ShowMessage
+            ("ViewCanvas::LoadBodyTextures() object=<%p>'%s'\n",
+             mObjectArray[i], mObjectNames[i].c_str());
+         #endif
+         
+         mTextureIdMap[mObjectNames[i]] =
+            BindTexture(mObjectArray[i], mObjectNames[i]);
+      }
+   }
+   
+   #if DEBUG_TEXTURE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadBodyTextures() leaving, mObjectCount=%d\n", mObjectCount);
+   #endif
+   
+   return true;   
+}
+
+
+//------------------------------------------------------------------------------
+// virtual GLuint BindTexture(SpacePoint *obj, const wxString &objName)
+//------------------------------------------------------------------------------
+/**
+ * Binds texture map for the body. It uses texture file set for this plot.
+ * If it was not set then it uses texture file from the body.
+ */
+//------------------------------------------------------------------------------
+GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
+{
+   GLuint ret = GmatPlot::UNINIT_TEXTURE;
+   std::string textureFile;
+   
+   // if texture file specified then use it
+   if (mTextureFileMap.find(objName) != mTextureFileMap.end())
+      textureFile = mTextureFileMap[objName];
+   
+   #if DEBUG_TEXTURE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::BindTexture() entered, textureFile = '%s'\n", textureFile.c_str());
+   #endif
+   
+   try
+   {
+      // use texture map set by user for this plot, if not set use from the celestial body
+      if (textureFile == "" || !GmatFileUtil::DoesFileExist(textureFile))
+      {
+         CelestialBody *body = (CelestialBody*) obj;
+         textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
+      }
+      
+      #ifdef __USE_WX280_GL__
+         SetCurrent(*theContext);
+      #else
+         SetCurrent();
+      #endif
+      
+      glGenTextures(1, &ret);
+      glBindTexture(GL_TEXTURE_2D, ret);
+      
+      if (!LoadImage(textureFile))
+      {
+         if (obj->IsOfType(Gmat::CELESTIAL_BODY))
+         {
+            MessageInterface::ShowMessage
+               ("*** WARNING *** ViewCanvas::BindTexture() Cannot load texture "
+                "image for '%s' from '%s'\n", objName.c_str(), textureFile.c_str());
+         }
+         ret = GmatPlot::UNINIT_TEXTURE;
+      }
+   }
+   catch (BaseException &e)
+   {
+      // Give warning for missing texture file for only CelestialBody object
+      if (obj->IsOfType(Gmat::CELESTIAL_BODY))
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** ViewCanvas::BindTexture() Cannot bind texture "
+             "image for %s.\n%s\n", objName.c_str(), e.GetFullMessage().c_str());
+      }
+   }
+   
+   #if DEBUG_TEXTURE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::BindTexture() objName='%s', ret=%d\n", objName.c_str(),
+       ret);
+   #endif
+   
+   return ret;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool LoadSpacecraftModels()
+//------------------------------------------------------------------------------
+bool ViewCanvas::LoadSpacecraftModels()
+{
+   #if DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadSpacecraftModels() entered, mOpenGLInitialized = %d, "
+       "modelsAreLoaded = %d, mScCount = %d\n", mOpenGLInitialized, modelsAreLoaded,
+       mScCount);
+   #endif
+   
+   if (mOpenGLInitialized)
+   {
+      if (!modelsAreLoaded)
+      {
+         ModelManager *mm = ModelManager::Instance();
+         for (int sc = 0; sc < mScCount; sc++)
+         {
+            int satId = GetObjectId(mScNameArray[sc].c_str());
+            if (satId != UNKNOWN_OBJ_ID)
+            {
+               Spacecraft *sat = (Spacecraft*)mObjectArray[satId];
+               if (sat->modelFile != "" && sat->modelID == -1)
+               {
+                  wxString modelPath(sat->modelFile.c_str());
+                  if (GmatFileUtil::DoesFileExist(modelPath.c_str()))
+                  {
+                     sat->modelID = mm->LoadModel(modelPath);
+                     #ifdef DEBUG_LOAD_MODEL
+                     MessageInterface::ShowMessage
+                        ("UpdateSpacecraftData() loaded model '%s'\n", modelPath.c_str());
+                     #endif
+                  }
+                  else
+                  {
+                     MessageInterface::ShowMessage
+                        ("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
+                         "The file '%s' does not exist.\n", sat->GetName().c_str(),
+                         modelPath.c_str());
+                  }
+               }
+               
+               // Set modelsAreLoaded to true if it went through all models
+               if (sc == mScCount-1)
+                  modelsAreLoaded = true;
+            }
+         }
+      }
+   }
+   
+   #if DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadSpacecraftModels() leaving, mOpenGLInitialized = %d, "
+       "modelsAreLoaded = %d\n", mOpenGLInitialized, modelsAreLoaded);
+   #endif
+   
+   return modelsAreLoaded;
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdateSolverData(RealArray posX, RealArray posY, RealArray posZ, ...)
 //------------------------------------------------------------------------------
 void ViewCanvas::UpdateSolverData(const RealArray &posX, const RealArray &posY,
@@ -909,10 +1366,14 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
        mOpenGLInitialized, modelsAreLoaded);
    #endif
    
+   // Load spacecraft models
+   if (!modelsAreLoaded)
+      LoadSpacecraftModels();
+   
    //-------------------------------------------------------
    // update spacecraft position
    //-------------------------------------------------------
-   for (int sc=0; sc<mScCount; sc++)
+   for (int sc = 0; sc < mScCount; sc++)
    {
       int satId = GetObjectId(mScNameArray[sc].c_str());
       
@@ -926,37 +1387,6 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
       {
          Spacecraft *spac = (Spacecraft*)mObjectArray[satId];
          int colorIndex = satId * MAX_DATA + mLastIndex;
-         
-         if (mOpenGLInitialized)
-         {
-            ModelManager *mm = ModelManager::Instance();
-            if (!modelsAreLoaded)
-            {
-               if (spac->modelFile != "" && spac->modelID == -1)
-               {
-                  wxString modelPath(spac->modelFile.c_str());
-                  if (GmatFileUtil::DoesFileExist(modelPath.c_str()))
-                  {
-                     spac->modelID = mm->LoadModel(modelPath);
-                     #ifdef DEBUG_MODEL
-                     MessageInterface::ShowMessage
-                        ("UpdateSpacecraftData() loaded model '%s'\n", modelPath.c_str());
-                     #endif
-                  }
-                  else
-                  {
-                     MessageInterface::ShowMessage
-                        ("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
-                         "The file '%s' does not exist.\n", spac->GetName().c_str(),
-                         modelPath.c_str());
-                  }
-               }
-               
-               // Set modelsAreLoaded to true if it went through all models
-               if (sc == mScCount-1)
-                  modelsAreLoaded = true;
-            }
-         }
          
          if (!mDrawOrbitArray[satId])
          {
@@ -980,6 +1410,14 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          mObjectViewPos[posIndex+0] = posX[sc];
          mObjectViewPos[posIndex+1] = posY[sc];
          mObjectViewPos[posIndex+2] = posZ[sc];            
+         
+         // Buffer velocity if needed
+         if (mNeedVelocity)
+         {
+            mObjectViewVel[posIndex+0] = velX[sc];
+            mObjectViewVel[posIndex+1] = velY[sc];
+            mObjectViewVel[posIndex+2] = velZ[sc];            
+         }
          
          #if DEBUG_UPDATE
          if (mNumData < sNumDebugOutput)
@@ -1028,7 +1466,8 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
             ("   Now updating spacecraft attitude of %d\n", satId);
          #endif
          
-         UpdateSpacecraftAttitude(time, spac, satId);
+         if (mNeedAttitude)
+            UpdateSpacecraftAttitude(time, spac, satId);
       }
    }
    
@@ -1115,7 +1554,8 @@ void ViewCanvas::UpdateOtherData(const Real &time)
             #endif
             
             // Update object's attitude
-            UpdateOtherObjectAttitude(time, otherObj, objId);
+            if (mNeedAttitude)
+               UpdateOtherObjectAttitude(time, otherObj, objId);
          }
          else
          {
@@ -1275,8 +1715,8 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
  */
 //---------------------------------------------------------------------------
 void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
-                            const wxString &label2, double time,
-                            int xpos, int ypos, const wxString &label3)
+                            const wxString &label2, double time, int xpos,
+                            int ypos, bool showCS, const wxString &label3)
 {
    int frame = mTotalPoints;
    
@@ -1306,6 +1746,9 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
    str1.Printf("%f - ", time);
    #endif
    
+   if (label1 != "")
+      text = label1;      
+   
    if (time > 0)
    {
       Real toMjd = -999;
@@ -1332,10 +1775,13 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
       glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.c_str());
    }
    
-   // Prepend space before coordinate system name (Bug 2318 fix)
-   wxString viewCsName = "  " + mViewCoordSysName;
-   glRasterPos2i(xpos, ypos+20);
-   glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.c_str());
+   if (showCS)
+   {
+      // Prepend space before coordinate system name (Bug 2318 fix)
+      wxString viewCsName = "  " + mViewCoordSysName;
+      glRasterPos2i(xpos, ypos+20);
+      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.c_str());
+   }
    
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);

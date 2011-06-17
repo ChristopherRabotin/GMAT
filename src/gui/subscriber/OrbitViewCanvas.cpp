@@ -172,6 +172,9 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
                                  const wxString& name, long style)
    : ViewCanvas(parent, id, pos, size, name, style)
 {
+   // extra data need
+   mNeedAttitude = true;
+   
    modelsAreLoaded = false;
    mGlInitialized = false;
    mViewPointInitialized = false;
@@ -198,18 +201,25 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    // Use wxGLCanvas::m_glContext, otherwise resize will not work
    //m_glContext = new wxGLContext(this);
    #endif
+   
    ModelManager *mm = ModelManager::Instance();
-
+   
    #ifndef __WXMAC__
       if (!mm->modelContext)
+      {
+         #if DEBUG_INIT
+         MessageInterface::ShowMessage
+            ("   Setting new wxGLContext(this) to ModelManager::modelContext\n");
+         #endif
          mm->modelContext = new wxGLContext(this);
-        #else
+      }
+   #else
       if (!mm->modelContext)
           mm->modelContext = this->GetGLContext();
    #endif
-
+   
    theContext = mm->modelContext;//new wxGLContext(this);
-
+   
    mStars = GLStars::Instance();
    mStars->InitStars();
    mStars->SetDesiredStarCount(mStarCount);
@@ -275,11 +285,10 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mEnableLightSource = true;
    
    // drawing options
-   mDrawWireFrame = false;
    mDrawXyPlane = false;
    mDrawEcPlane = false;
    mDrawAxes = false;
-   mDrawGrid = false;
+   mNeedAttitude = true;
    
    mXyPlaneColor = GmatColor::NAVY32;
    mEcPlaneColor = 0x00002266; //dark red
@@ -357,6 +366,16 @@ OrbitViewCanvas::~OrbitViewCanvas()
    
    // Note:
    // deleting m_glContext is handled in wxGLCanvas
+   
+   #ifndef __WXMAC__
+      ModelManager *mm = ModelManager::Instance();
+      if (!mm->modelContext)
+      {
+         // delete modelContext since it was created in the constructor
+         delete mm->modelContext;
+         mm->modelContext = NULL;
+      }
+   #endif
    
    ClearObjectArrays();
    
@@ -711,50 +730,18 @@ void OrbitViewCanvas::SetGlObject(const StringArray &objNames,
 {
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::SetGlObject() entered for %s, objCount=%d, colorCount=%d.\n",
-       mPlotName.c_str(), objNames.size(), objOrbitColors.size());
+      ("OrbitViewCanvas::SetGlObject() '%s' entered\n", mPlotName.c_str());
    #endif
+
+   ViewCanvas::SetGlObject(objNames, objOrbitColors, objArray);
    
    // Initialize objects used in view
    SetDefaultViewPoint();
-   
-   mObjectArray = objArray;
-   wxArrayString tempList;
-   
-   if (objNames.size() == objOrbitColors.size() &&
-       objNames.size() == objArray.size())
-   {      
-      for (UnsignedInt i=0; i<objNames.size(); i++)
-      {
-         tempList.Add(objNames[i].c_str());
-         
-         #if DEBUG_OBJECT > 1
-         MessageInterface::ShowMessage
-            ("   objNames[%d]=%s, objPtr=<%p>%s\n", i, objNames[i].c_str(),
-             mObjectArray[i], mObjectArray[i]->GetName().c_str());
-         #endif
-      }
       
-      AddObjectList(tempList, objOrbitColors);
-   }
-   else
-   {
-      MessageInterface::ShowMessage("OrbitViewCanvas::SetGlObject() object sizes "
-                                    "are not the same. No objects added.\n");
-   }
-   
    #if DEBUG_OBJECT
-   MessageInterface::ShowMessage("OrbitViewCanvas::SetGlObject() leaving\n");
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::SetGlObject() '%s' leaving\n", mPlotName.c_str());
    #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void SetSolarSystem(SolarSystem *ss)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetSolarSystem(SolarSystem *ss)
-{
-   pSolarSystem = ss;
 }
 
 
@@ -768,37 +755,10 @@ void OrbitViewCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
 {
    #if DEBUG_CS
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::SetGlCoordSystem() for '%s', internalCs=<%p>, viewCs=<%p>, "
-       " viweUpCs=%p\n",  mPlotName.c_str(), internalCs, viewCs, viewUpCs);
+      ("OrbitViewCanvas::SetGlCoordSystem() '%s' entered\n", mPlotName.c_str());
    #endif
    
-   if (internalCs == NULL || viewCs == NULL || viewUpCs == NULL)
-   {
-      throw SubscriberException
-         ("Internal or View or View Up CoordinateSystem is NULL\n"); 
-   }
-   
-   pInternalCoordSystem = internalCs;
-   mInternalCoordSysName = internalCs->GetName().c_str();
-   
-   pViewCoordSystem = viewCs;
-   mViewCoordSysName = viewCs->GetName().c_str();
-   
-   pViewUpCoordSystem = viewUpCs;
-   mViewUpCoordSysName = viewUpCs->GetName().c_str();
-   
-   // see if we need data conversion
-   if (mViewCoordSysName.IsSameAs(mInternalCoordSysName))
-      mViewCsIsInternalCs = true;
-   else
-      mViewCsIsInternalCs = false;
-   
-   // set view center object
-   mOriginName = viewCs->GetOriginName().c_str();
-   mOriginId = GetObjectId(mOriginName);
-   
-   mViewObjName = mOriginName;
-   mViewObjId = mOriginId;
+   ViewCanvas::SetGlCoordSystem(internalCs, viewCs, viewUpCs);
    
    // if view coordinate system origin is spacecraft, make spacecraft radius smaller.
    // So that spacecraft won't overlap each other.
@@ -811,20 +771,13 @@ void OrbitViewCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
    mMaxZoomIn = mObjMaxZoomIn[mOriginId];
    
    if (mUseInitialViewPoint)
-   {
       mAxisLength = mMaxZoomIn;
-   }
    
    UpdateRotateFlags();
    
    #if DEBUG_CS
    MessageInterface::ShowMessage
-      ("   mViewCoordSysName=%s, pViewCoordSystem=%p, mOriginName=%s, "
-       "mOriginId=%d\n", mViewCoordSysName.c_str(), pViewCoordSystem,
-       mOriginName.c_str(),  mOriginId);
-   MessageInterface::ShowMessage
-      ("   mViewUpCoordSysName=%s, mViewObjName=%s, mViewObjId=%d\n",
-       mViewUpCoordSysName.c_str(), mViewObjName.c_str(), mViewObjId);
+      ("OrbitViewCanvas::SetGlCoordSystem() '%s' leaving\n", mPlotName.c_str());
    #endif
    
 } // end SetGlCoordSystem()
@@ -1574,101 +1527,6 @@ void OrbitViewCanvas::OnKeyDown(wxKeyEvent &event)
 
 
 //------------------------------------------------------------------------------
-// bool SetPixelFormatDescriptor()
-//------------------------------------------------------------------------------
-/**
- * Sets pixel format on Windows.
- */
-//------------------------------------------------------------------------------
-bool OrbitViewCanvas::SetPixelFormatDescriptor()
-{
-#ifdef __WXMSW__
-   
-   // On Windows, for OpenGL, you have to set the pixel format
-   // once before doing your drawing stuff. This function
-   // properly sets it up.
-   
-   HDC hdc = wglGetCurrentDC();
-   
-   PIXELFORMATDESCRIPTOR pfd =
-   {
-      sizeof(PIXELFORMATDESCRIPTOR),   // size of this pfd
-      1,                     // version number
-      PFD_DRAW_TO_WINDOW |   // support window
-      PFD_SUPPORT_OPENGL |   // support OpenGL
-      PFD_DOUBLEBUFFER,      // double buffered
-      PFD_TYPE_RGBA,         // RGBA type
-      24,                    // 24-bit color depth
-      0, 0, 0, 0, 0, 0,      // color bits ignored
-      0,                     // no alpha buffer
-      0,                     // shift bit ignored
-      0,                     // no accumulation buffer
-      0, 0, 0, 0,            // accum bits ignored
-      //32,                    // 32-bit z-buffer
-      16,                    // 32-bit z-buffer
-      0,                     // no stencil buffer
-      0,                     // no auxiliary buffer
-      PFD_MAIN_PLANE,        // main layer
-      0,                     // reserved
-      0, 0, 0                // layer masks ignored
-   };
-   
-   // get the device context's best-available-match pixel format
-   int pixelFormatId = ChoosePixelFormat(hdc, &pfd);
-   
-   #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::SetPixelFormatDescriptor() pixelFormatId = %d \n",
-       pixelFormatId);
-   #endif
-   
-   if(pixelFormatId == 0)
-   {
-      MessageInterface::ShowMessage
-         ("**** ERROR **** Failed to find a matching pixel format\n");
-      return false;
-   }
-   
-   // set the pixel format of the device context
-   if (!SetPixelFormat(hdc, pixelFormatId, &pfd))
-   {
-      MessageInterface::ShowMessage
-         ("**** ERROR **** Failed to set pixel format id %d\n", pixelFormatId);
-      return false;
-   }
-   
-   return true;
-
-#else
-   // Should we return true for non-Window system?
-   //return false;
-   return true;
-#endif
-}
-
-
-//------------------------------------------------------------------------------
-//  void SetDefaultGLFont()
-//------------------------------------------------------------------------------
-/**
- * Sets default GL font.
- */
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetDefaultGLFont()
-{
-#ifdef __WXMSW__
-   // Set up font stuff for windows -
-   // Make the Current font the device context's selected font
-   //SelectObject(dc, Font->Handle);
-   HDC hdc = wglGetCurrentDC();
-   
-   wglUseFontBitmaps(hdc, 0, 255, 1000);
-   glListBase(1000); // base for displaying
-#endif
-}
-
-
-//------------------------------------------------------------------------------
 // void SetDefaultViewPoint()
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::SetDefaultViewPoint()
@@ -1791,111 +1649,6 @@ void OrbitViewCanvas::InitializeViewPoint()
       ("OrbitViewCanvas::InitializeViewPoint() leaving\n");
    #endif
 }
-
-
-//------------------------------------------------------------------------------
-//  bool LoadGLTextures()
-//------------------------------------------------------------------------------
-/**
- * Loads textures.
- */
-//------------------------------------------------------------------------------
-bool OrbitViewCanvas::LoadGLTextures()
-{
-   #if DEBUG_TEXTURE
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::LoadGLTextures() mObjectCount=%d\n", mObjectCount);
-   #endif
-   
-   //--------------------------------------------------
-   // load object texture if used
-   //--------------------------------------------------
-   for (int i=0; i<mObjectCount; i++)
-   {
-      if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
-         continue;
-      
-      if (mObjectTextureIdMap[mObjectNames[i]] == GmatPlot::UNINIT_TEXTURE)
-      {
-         #if DEBUG_TEXTURE > 1
-         MessageInterface::ShowMessage
-            ("OrbitViewCanvas::LoadGLTextures() object=<%p>'%s'\n",
-             mObjectArray[i], mObjectNames[i].c_str());
-         #endif
-         
-         mObjectTextureIdMap[mObjectNames[i]] =
-            BindTexture(mObjectArray[i], mObjectNames[i]);
-      }
-   }
-   
-   return true;
-   
-} //end LoadGLTextures()
-
-
-//------------------------------------------------------------------------------
-// GLuint BindTexture(SpacePoint *obj, const wxString &objName)
-//------------------------------------------------------------------------------
-/**
- * Loads textures and returns binding index.
- */
-//------------------------------------------------------------------------------
-GLuint OrbitViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
-{
-   GLuint ret = GmatPlot::UNINIT_TEXTURE;
-
-   //MessageInterface::ShowMessage("===> OrbitViewCanvas::BindTexture() ret = %d\n", ret);
-   // texture map file names now stored with the CelestialBody  wcs 2009.01.06
-   //FileManager *fm = FileManager::Instance();
-   std::string textureFile;  
-   //std::string name = std::string(objName.Upper().c_str());
-   //std::string filename = name + "_TEXTURE_FILE";
-   
-   try
-   {
-      //textureFile = fm->GetFullPathname(filename);
-      CelestialBody *body = (CelestialBody*) obj;
-      textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
-      
-      #ifdef __USE_WX280_GL__
-         SetCurrent(*theContext);
-      #else
-         SetCurrent();
-      #endif
-      
-      glGenTextures(1, &ret);
-      glBindTexture(GL_TEXTURE_2D, ret);
-      
-      if (!LoadImage(textureFile))
-      {
-         if (obj->IsOfType(Gmat::CELESTIAL_BODY))
-         {
-            MessageInterface::ShowMessage
-               ("*** WARNING *** OrbitViewCanvas::BindTexture() Cannot load texture "
-                "image for '%s' from '%s'\n", objName.c_str(), textureFile.c_str());
-         }
-         ret = GmatPlot::UNINIT_TEXTURE;
-      }
-   }
-   catch (BaseException &e)
-   {
-      // Give warning for missing texture file for only CelestialBody object
-      if (obj->IsOfType(Gmat::CELESTIAL_BODY))
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** OrbitViewCanvas::BindTexture() Cannot bind texture "
-             "image for %s.\n%s\n", objName.c_str(), e.GetFullMessage().c_str());
-      }
-   }
-   
-   #if DEBUG_TEXTURE
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::BindTexture() objName=%s ret=%d\n", objName.c_str(),
-       ret);
-   #endif
-   
-   return ret;
-} //end BindTexture()
 
 
 //------------------------------------------------------------------------------
@@ -2232,9 +1985,9 @@ void OrbitViewCanvas::DrawPlot()
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    else
       glClear(GL_DEPTH_BUFFER_BIT);
-
    
-   DrawStatus("Frame#: ", GmatColor::YELLOW32, "  Epoch: ", mTime[mLastIndex], 0, 5);
+   
+   DrawStatus("", GmatColor::YELLOW32, "  Epoch: ", mTime[mLastIndex], 0, 5);
    
    // Plot is not refreshed when another panel is opened, so add glFlush()
    // and SwapBuffers() (loj: 4/5/06)
@@ -2284,234 +2037,6 @@ void OrbitViewCanvas::DrawPlot()
    SwapBuffers();
 
 } // end DrawPlot()
-
-
-//------------------------------------------------------------------------------
-//  void DrawObject(const wxString &objName, int obj)
-//------------------------------------------------------------------------------
-/**
- * Draws object sphere and maps texture image.
- *
- * @param  objName  Name of the object
- * @param  obj      Index of the object for mObjectArray
- */
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
-{
-   int frame = mLastIndex;
-   int objId = GetObjectId(objName);
-   
-   #if DEBUG_DRAW > 1
-   MessageInterface::ShowMessage
-         ("OrbitViewCanvas::DrawObject() drawing:%s, obj=%d, objId:%d, frame:%d\n",
-          objName.c_str(), obj, objId, frame);
-   #endif
-   
-   //-------------------------------------------------------
-   // enable light source on option
-   //-------------------------------------------------------
-   if (mEnableLightSource && mSunPresent)
-   {
-      int sunId = GetObjectId("Sun");
-      int index = sunId * MAX_DATA * 3 + frame * 3;
-      
-      if (sunId == UNKNOWN_OBJ_ID)
-      {
-         mLight.SetPosition(0.01f, 1.0f, 0.3f);
-      }
-      else
-      {
-         index = sunId * MAX_DATA * 3 + frame * 3;
-         mLight.SetPosition(mObjectViewPos[index+0],mObjectViewPos[index+1],mObjectViewPos[index+2]);
-      }
-      mLight.SetDirectional(true);
-
-      // Dunn is setting sun level a little dimmer to avoid washing out the models.
-      mLight.SetColor(0.8f,0.8f,0.8f,1.0f);  
-      // If 4th value is zero, the light source is directional one, and
-      // (x,y,z) values describes its direction.
-      // If 4th value is nonzero, the light is positional, and the (x,y,z) values
-      // specify the location of the light in homogeneous object coordinates.
-      // By default, a positional light radiates in all directions.
-      
-      float lpos[4];
-      mLight.GetPositionf(lpos);
-      glLightfv(GL_LIGHT0, GL_POSITION, lpos);
-      glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
-      
-      // enable the lighting
-      glEnable(GL_LIGHTING);
-   }
-   
-   #if DEBUG_DRAW > 1
-   MessageInterface::ShowMessage
-      ("   mObjectTextureIdMap[%s]=%d\n", objName.c_str(),
-       mObjectTextureIdMap[objName]);
-   #endif
-   
-   // Rotate body before drawing texture
-   if (mObjectArray[obj]->IsOfType(Gmat::CELESTIAL_BODY))
-      RotateBody(objName, frame, objId);
-   
-   #if DEBUG_DRAW > 1
-   MessageInterface::ShowMessage
-      ("   After rotate body, mDrawAxes=%d, objId=%d, mOriginId=%d, mCanRotateAxes=%d\n",
-       mDrawAxes, objId, mOriginId, mCanRotateAxes);
-   #endif
-   
-   //-------------------------------------------------------
-   // draw axes if it rotates with the body
-   //-------------------------------------------------------
-   // Note from Dunn.  This is for earth fixed axes that rotate with the earth.
-   // If this is true, you do get axes that rotate with the earth, but you also
-   // get +X and +Y ECI axis labels.  The DrawAxes function needs to be told
-   // which labels to use, so it can show Earth Fixed labels.
-   if (mDrawAxes && objId == mOriginId && mCanRotateAxes)
-   //if(true)
-   {
-      // Before debugging the Earth Rotation Angle, and getting the texture map
-      // to be correctly oriented in ECI space, Dunn has noticed that the ECF
-      // axes seem to be rotated 90 degrees to the east.  To fix this we will
-      // call an OpenGL rotate command here before and after drawing the axes in
-      // order to get them correctly oriented wrt the prime meridian.
-      glRotatef(-90.0, 0.0, 0.0, 1.0);
-      
-      // This next line is the NASA call that draws the ECF axes with ECI labels.
-      // Dunn has commented it out and added the code to draw with correct labels.
-      // This is a kludge that needs to be fixed.
-      DrawAxes();
-      
-      //// Here is Dunn's temporary kludge.
-      //glDisable(GL_LIGHTING);
-      //glDisable(GL_LIGHT0);
-      //wxString axisLabel;
-      //GLfloat viewDist;
-      
-      //glLineWidth(2.5); // Thicker for ECF
-      
-      ////-----------------------------------
-      //// draw axes
-      ////-----------------------------------
-      
-      ////viewDist = mCurrViewDist/2; //zooms in and out
-      //viewDist = mAxisLength;///1.8; // stays the same
-      //Rvector3 axis;
-      //Rvector3 origin;
-      //origin.Set(0, 0, 0);
-      
-      //// PS - See Rendering.cpp
-      //axis.Set(viewDist, 0, 0);
-      //DrawLine(1, 0, 0, origin, axis);
-      
-      //axis.Set(0, viewDist, 0);
-      //DrawLine(0, 1, 0, origin, axis);
-      
-      //axis.Set(0, 0, viewDist);
-      //DrawLine(0, 0, 1, origin, axis);
-      
-      ////-----------------------------------
-      //// throw some text out...
-      ////-----------------------------------
-      //// Dunn took out old minus signs to get axis labels at the correct end of
-      //// each axis and thus make attitude correct.
-      //glColor3f(1, 0, 0);     // red
-      //axisLabel = "+X Earth Fixed";
-      //DrawStringAt(axisLabel, +viewDist, 0.0, 0.0, 1.0);
-
-      //glColor3f(0, 1, 0);     // green
-      //axisLabel = "+Y Earth Fixed";
-      //DrawStringAt(axisLabel, 0.0, +viewDist, 0.0, 1.0);
-
-      //glColor3f(0, 0, 1);     // blue
-      //axisLabel = "+Z Earth Fixed";
-      //// 0.82 multiplier below so this label doesn't sit on top of ECI
-      //DrawStringAt(axisLabel, 0.0, 0.0, +viewDist*0.82, 1.0); 
-
-      //glLineWidth(1.0);
-
-      //glEnable(GL_LIGHTING);
-      //glEnable(GL_LIGHT0);
-
-      // After rotating -90 to get the axes lined up wrt the texture map, it is
-      // time to rotate back +90.  This is from Dunn.
-      glRotatef(90.0, 0.0, 0.0, 1.0);
-   }
-   
-   // Trying this, but why 90 degree offset ? (LOJ: 2010.11.19)
-   glRotatef(90.0, 0.0, 0.0, 1.0);
-   
-   //-------------------------------------------------------
-   // draw object with texture on option
-   //-------------------------------------------------------
-   if (mObjectTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
-   {
-      //glColor4f(1.0, 1.0, 1.0, 1.0);
-      glColor3f(1.0, 1.0, 1.0);
-      
-      glMultMatrixd(mCoordMatrix.GetDataVector());
-      
-      /*Rmatrix coordMatrix = mCoordConverter.GetLastRotationMatrix();
-        Rmatrix dataMatrix = Rmatrix(4,4);
-        for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-        dataMatrix.SetElement(i, j, coordMatrix.GetElement(i,j));
-        dataMatrix.SetElement(3, 3, 1);
-        dataMatrix = dataMatrix.Transpose();
-        glMultMatrixd(dataMatrix.GetDataVector());*/
-      // Commented out to make body fixed to work (2010.11.19)
-      ////loj:glMultMatrixd(mCoordMatrix.GetDataVector());
-      
-      glBindTexture(GL_TEXTURE_2D, mObjectTextureIdMap[objName]);
-      glEnable(GL_TEXTURE_2D);
-
-      if (objName == "Sun")
-      {
-         glDisable(GL_LIGHTING);
-         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL, GLU_INSIDE);
-         glEnable(GL_LIGHTING);
-      }
-      else
-         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL);     
-      
-      glDisable(GL_TEXTURE_2D);
-      
-      //----------------------------------------------------
-      // draw grid on option
-      //----------------------------------------------------
-      if (mDrawGrid && objName == "Earth")
-      {
-         // This makes lines thicker
-         //glEnable(GL_LINE_SMOOTH);
-         //glLineWidth(1.5);
-         
-         // Just draw a wireframe sphere little bigger to show grid
-         //glColor3f(0.20, 0.20, 0.50); // dark blue
-         glColor3f(0.0, 0.0, 0.0);      // black
-         //glColor3f(0.50, 0.10, 0.20); // maroon
-         GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.03;
-         DrawSphere(radius, 36, 18, GLU_LINE, GLU_OUTSIDE, GL_NONE, GL_FALSE);
-      }
-   }
-   else
-   {
-      #if DEBUG_DRAW
-      MessageInterface::ShowMessage
-         ("*** WARNING *** OrbitViewCanvas::DrawObject() %s texture not found.\n",
-          objName.c_str());
-      #endif
-      
-      // Just draw a wireframe sphere if we get here
-      glColor3f(0.20f, 0.20f, 0.50f);
-      DrawSphere(mObjectRadius[objId], 50, 50, GLU_LINE);      
-      glDisable(GL_TEXTURE_2D);
-   }
-   
-   if (mEnableLightSource && mSunPresent)
-   {
-      glDisable(GL_LIGHTING);
-   }
-   
-} // end DrawObject(const wxString &objName)
 
 
 //------------------------------------------------------------------------------
@@ -2589,122 +2114,6 @@ void OrbitViewCanvas::DrawObjectOrbit(int frame)
    MessageInterface::ShowMessage("==========> DrawObjectOrbit() leaving, frame=%d\n", frame);
    #endif
 } // end DrawObjectOrbit()
-
-
-//------------------------------------------------------------------------------
-// void DrawOrbit(const wxString &objName, int obj, int objId)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
-{   
-   glPushMatrix();
-   glBegin(GL_LINES);
-   
-   #ifdef DEBUG_DRAW
-   MessageInterface::ShowMessage
-      ("==========> DrawOrbit() objName='%s', drawing first part\n",
-       objName.c_str());
-   #endif
-   
-   // Draw first part from the ring buffer
-   for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
-   {
-      DrawOrbitLines(i, objName, obj, objId);
-   }
-   
-   // Draw second part from the ring buffer
-   if (mEndIndex2 != -1 && mBeginIndex1 != mBeginIndex2)
-   {
-      #ifdef DEBUG_DRAW
-      MessageInterface::ShowMessage
-         ("==========> DrawOrbit() objName='%s', drawing second part\n",
-          objName.c_str());
-      #endif
-      
-      for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
-      {
-         DrawOrbitLines(i, objName, obj, objId);
-      }
-   }
-   
-   glEnd();
-   glPopMatrix();
-}
-
-
-//------------------------------------------------------------------------------
-// void DrawOrbitLines(int i, const wxString &objName, int obj, int objId)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
-                                     int objId)
-{
-   int index1 = 0, index2 = 0;
-   
-   #ifdef DEBUG_ORBIT_LINES
-   MessageInterface::ShowMessage
-      ("DrawOrbitLines() entered, i=%d, objName='%s', obj=%d, objId=%d, "
-       "mTime[%3d]=%f, mTime[%3d]=%f\n", i, objName.c_str(), obj, objId, i,
-       mTime[i], i-1, mTime[i-1]);
-   #endif
-   
-   // Draw object orbit line based on points
-   if ((mTime[i] > mTime[i-1]) ||
-       (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop
-   {
-      index1 = objId * MAX_DATA * 3 + (i-1) * 3;
-      index2 = objId * MAX_DATA * 3 + i * 3;
-      
-      Rvector3 r1(mObjectViewPos[index1+0], mObjectViewPos[index1+1],
-                  mObjectViewPos[index1+2]);
-      
-      Rvector3 r2(mObjectViewPos[index2+0], mObjectViewPos[index2+1],
-                  mObjectViewPos[index2+2]);
-      
-      // if object position magnitude is 0, skip
-      if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
-         return;
-      
-      // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
-      #ifdef SKIP_OVER_LIMIT_DATA
-      static Real sMaxDiffDist = 100000.0;
-      // if difference is more than sMaxDiffDist skip
-      if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||
-          (Abs(r2[1]- r1[1]) > sMaxDiffDist && (SignOf(r2[1]) != SignOf(r1[1]))) ||
-          (Abs(r2[2]- r1[2]) > sMaxDiffDist && (SignOf(r2[2]) != SignOf(r1[2]))))
-      {
-         #if DEBUG_SHOW_SKIP
-         MessageInterface::ShowMessage
-            ("   plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
-             GetName().c_str(), i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
-             r2.ToString().c_str());
-         #endif
-         return;
-      }
-      #endif
-      
-      // If drawing orbit lines
-      int colorIndex = objId * MAX_DATA + i;
-      if (mDrawOrbitFlag[colorIndex])
-      {
-         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT)){
-            // We are drawing a spacecraft orbit.  This includes solver passes.
-            *sIntColor = mObjectOrbitColor[colorIndex];}
-         else {
-            // We are drawing some other trajectory, say for a planet.
-            *sIntColor = mObjectColorMap[objName].GetIntColor();}
-         
-         // PS - Rendering.cpp
-         DrawLine(sGlColor, r1, r2);
-      }
-      
-      // save last valid frame to show object at final frame
-      mObjLastFrame[objId] = i;
-      
-      #ifdef DEBUG_ORBIT_LINES
-      MessageInterface::ShowMessage
-         ("DrawOrbitLines() leaving, mObjLastFrame[%d] = %d\n", objId, i);
-      #endif
-   }
-}
 
 
 //------------------------------------------------------------------------------
@@ -2925,6 +2334,350 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    }
    
    glPopMatrix();
+}
+
+
+//------------------------------------------------------------------------------
+//  void DrawObject(const wxString &objName, int obj)
+//------------------------------------------------------------------------------
+/**
+ * Draws object sphere and maps texture image.
+ *
+ * @param  objName  Name of the object
+ * @param  obj      Index of the object for mObjectArray
+ */
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
+{
+   int frame = mLastIndex;
+   int objId = GetObjectId(objName);
+   
+   #if DEBUG_DRAW > 1
+   MessageInterface::ShowMessage
+         ("OrbitViewCanvas::DrawObject() drawing:%s, obj=%d, objId:%d, frame:%d\n",
+          objName.c_str(), obj, objId, frame);
+   #endif
+   
+   //-------------------------------------------------------
+   // enable light source on option
+   //-------------------------------------------------------
+   if (mEnableLightSource && mSunPresent)
+   {
+      int sunId = GetObjectId("Sun");
+      int index = sunId * MAX_DATA * 3 + frame * 3;
+      
+      if (sunId == UNKNOWN_OBJ_ID)
+      {
+         mLight.SetPosition(0.01f, 1.0f, 0.3f);
+      }
+      else
+      {
+         index = sunId * MAX_DATA * 3 + frame * 3;
+         mLight.SetPosition(mObjectViewPos[index+0],mObjectViewPos[index+1],mObjectViewPos[index+2]);
+      }
+      mLight.SetDirectional(true);
+
+      // Dunn is setting sun level a little dimmer to avoid washing out the models.
+      mLight.SetColor(0.8f,0.8f,0.8f,1.0f);  
+      // If 4th value is zero, the light source is directional one, and
+      // (x,y,z) values describes its direction.
+      // If 4th value is nonzero, the light is positional, and the (x,y,z) values
+      // specify the location of the light in homogeneous object coordinates.
+      // By default, a positional light radiates in all directions.
+      
+      float lpos[4];
+      mLight.GetPositionf(lpos);
+      glLightfv(GL_LIGHT0, GL_POSITION, lpos);
+      glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
+      
+      // enable the lighting
+      glEnable(GL_LIGHTING);
+   }
+   
+   #if DEBUG_DRAW > 1
+   MessageInterface::ShowMessage
+      ("   mTextureIdMap[%s]=%d\n", objName.c_str(),
+       mTextureIdMap[objName]);
+   #endif
+   
+   // Rotate body before drawing texture
+   if (mObjectArray[obj]->IsOfType(Gmat::CELESTIAL_BODY))
+      RotateBody(objName, frame, objId);
+   
+   #if DEBUG_DRAW > 1
+   MessageInterface::ShowMessage
+      ("   After rotate body, mDrawAxes=%d, objId=%d, mOriginId=%d, mCanRotateAxes=%d\n",
+       mDrawAxes, objId, mOriginId, mCanRotateAxes);
+   #endif
+   
+   //-------------------------------------------------------
+   // draw axes if it rotates with the body
+   //-------------------------------------------------------
+   // Note from Dunn.  This is for earth fixed axes that rotate with the earth.
+   // If this is true, you do get axes that rotate with the earth, but you also
+   // get +X and +Y ECI axis labels.  The DrawAxes function needs to be told
+   // which labels to use, so it can show Earth Fixed labels.
+   if (mDrawAxes && objId == mOriginId && mCanRotateAxes)
+   //if(true)
+   {
+      // Before debugging the Earth Rotation Angle, and getting the texture map
+      // to be correctly oriented in ECI space, Dunn has noticed that the ECF
+      // axes seem to be rotated 90 degrees to the east.  To fix this we will
+      // call an OpenGL rotate command here before and after drawing the axes in
+      // order to get them correctly oriented wrt the prime meridian.
+      glRotatef(-90.0, 0.0, 0.0, 1.0);
+      
+      // This next line is the NASA call that draws the ECF axes with ECI labels.
+      // Dunn has commented it out and added the code to draw with correct labels.
+      // This is a kludge that needs to be fixed.
+      DrawAxes();
+      
+      //// Here is Dunn's temporary kludge.
+      //glDisable(GL_LIGHTING);
+      //glDisable(GL_LIGHT0);
+      //wxString axisLabel;
+      //GLfloat viewDist;
+      
+      //glLineWidth(2.5); // Thicker for ECF
+      
+      ////-----------------------------------
+      //// draw axes
+      ////-----------------------------------
+      
+      ////viewDist = mCurrViewDist/2; //zooms in and out
+      //viewDist = mAxisLength;///1.8; // stays the same
+      //Rvector3 axis;
+      //Rvector3 origin;
+      //origin.Set(0, 0, 0);
+      
+      //// PS - See Rendering.cpp
+      //axis.Set(viewDist, 0, 0);
+      //DrawLine(1, 0, 0, origin, axis);
+      
+      //axis.Set(0, viewDist, 0);
+      //DrawLine(0, 1, 0, origin, axis);
+      
+      //axis.Set(0, 0, viewDist);
+      //DrawLine(0, 0, 1, origin, axis);
+      
+      ////-----------------------------------
+      //// throw some text out...
+      ////-----------------------------------
+      //// Dunn took out old minus signs to get axis labels at the correct end of
+      //// each axis and thus make attitude correct.
+      //glColor3f(1, 0, 0);     // red
+      //axisLabel = "+X Earth Fixed";
+      //DrawStringAt(axisLabel, +viewDist, 0.0, 0.0, 1.0);
+
+      //glColor3f(0, 1, 0);     // green
+      //axisLabel = "+Y Earth Fixed";
+      //DrawStringAt(axisLabel, 0.0, +viewDist, 0.0, 1.0);
+
+      //glColor3f(0, 0, 1);     // blue
+      //axisLabel = "+Z Earth Fixed";
+      //// 0.82 multiplier below so this label doesn't sit on top of ECI
+      //DrawStringAt(axisLabel, 0.0, 0.0, +viewDist*0.82, 1.0); 
+
+      //glLineWidth(1.0);
+
+      //glEnable(GL_LIGHTING);
+      //glEnable(GL_LIGHT0);
+
+      // After rotating -90 to get the axes lined up wrt the texture map, it is
+      // time to rotate back +90.  This is from Dunn.
+      glRotatef(90.0, 0.0, 0.0, 1.0);
+   }
+   
+   // Trying this, but why 90 degree offset ? (LOJ: 2010.11.19)
+   glRotatef(90.0, 0.0, 0.0, 1.0);
+   
+   //-------------------------------------------------------
+   // draw object with texture on option
+   //-------------------------------------------------------
+   if (mTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
+   {
+      //glColor4f(1.0, 1.0, 1.0, 1.0);
+      glColor3f(1.0, 1.0, 1.0);
+      
+      glMultMatrixd(mCoordMatrix.GetDataVector());
+      
+      /*Rmatrix coordMatrix = mCoordConverter.GetLastRotationMatrix();
+        Rmatrix dataMatrix = Rmatrix(4,4);
+        for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+        dataMatrix.SetElement(i, j, coordMatrix.GetElement(i,j));
+        dataMatrix.SetElement(3, 3, 1);
+        dataMatrix = dataMatrix.Transpose();
+        glMultMatrixd(dataMatrix.GetDataVector());*/
+      // Commented out to make body fixed to work (2010.11.19)
+      ////loj:glMultMatrixd(mCoordMatrix.GetDataVector());
+      
+      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName]);
+      glEnable(GL_TEXTURE_2D);
+
+      if (objName == "Sun")
+      {
+         glDisable(GL_LIGHTING);
+         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL, GLU_INSIDE);
+         glEnable(GL_LIGHTING);
+      }
+      else
+         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL);     
+      
+      glDisable(GL_TEXTURE_2D);
+      
+      //----------------------------------------------------
+      // draw grid on option
+      //----------------------------------------------------
+      if (mDrawGrid && objName == "Earth")
+      {
+         // This makes lines thicker
+         //glEnable(GL_LINE_SMOOTH);
+         //glLineWidth(1.5);
+         
+         // Just draw a wireframe sphere little bigger to show grid
+         //glColor3f(0.20, 0.20, 0.50); // dark blue
+         glColor3f(0.0, 0.0, 0.0);      // black
+         //glColor3f(0.50, 0.10, 0.20); // maroon
+         GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.03;
+         DrawSphere(radius, 36, 18, GLU_LINE, GLU_OUTSIDE, GL_NONE, GL_FALSE);
+      }
+   }
+   else
+   {
+      #if DEBUG_DRAW
+      MessageInterface::ShowMessage
+         ("*** WARNING *** OrbitViewCanvas::DrawObject() %s texture not found.\n",
+          objName.c_str());
+      #endif
+      
+      // Just draw a wireframe sphere if we get here
+      glColor3f(0.20f, 0.20f, 0.50f);
+      DrawSphere(mObjectRadius[objId], 50, 50, GLU_LINE);      
+      glDisable(GL_TEXTURE_2D);
+   }
+   
+   if (mEnableLightSource && mSunPresent)
+   {
+      glDisable(GL_LIGHTING);
+   }
+   
+} // end DrawObject(const wxString &objName)
+
+
+//------------------------------------------------------------------------------
+// void DrawOrbit(const wxString &objName, int obj, int objId)
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
+{   
+   glPushMatrix();
+   glBegin(GL_LINES);
+   
+   #ifdef DEBUG_DRAW
+   MessageInterface::ShowMessage
+      ("==========> DrawOrbit() objName='%s', drawing first part\n",
+       objName.c_str());
+   #endif
+   
+   // Draw first part from the ring buffer
+   for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
+   {
+      DrawOrbitLines(i, objName, obj, objId);
+   }
+   
+   // Draw second part from the ring buffer
+   if (mEndIndex2 != -1 && mBeginIndex1 != mBeginIndex2)
+   {
+      #ifdef DEBUG_DRAW
+      MessageInterface::ShowMessage
+         ("==========> DrawOrbit() objName='%s', drawing second part\n",
+          objName.c_str());
+      #endif
+      
+      for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
+      {
+         DrawOrbitLines(i, objName, obj, objId);
+      }
+   }
+   
+   glEnd();
+   glPopMatrix();
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawOrbitLines(int i, const wxString &objName, int obj, int objId)
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
+                                     int objId)
+{
+   int index1 = 0, index2 = 0;
+   
+   #ifdef DEBUG_ORBIT_LINES
+   MessageInterface::ShowMessage
+      ("DrawOrbitLines() entered, i=%d, objName='%s', obj=%d, objId=%d, "
+       "mTime[%3d]=%f, mTime[%3d]=%f\n", i, objName.c_str(), obj, objId, i,
+       mTime[i], i-1, mTime[i-1]);
+   #endif
+   
+   // Draw object orbit line based on points
+   if ((mTime[i] > mTime[i-1]) ||
+       (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop
+   {
+      index1 = objId * MAX_DATA * 3 + (i-1) * 3;
+      index2 = objId * MAX_DATA * 3 + i * 3;
+      
+      Rvector3 r1(mObjectViewPos[index1+0], mObjectViewPos[index1+1],
+                  mObjectViewPos[index1+2]);
+      
+      Rvector3 r2(mObjectViewPos[index2+0], mObjectViewPos[index2+1],
+                  mObjectViewPos[index2+2]);
+      
+      // if object position magnitude is 0, skip
+      if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
+         return;
+      
+      // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
+      #ifdef SKIP_OVER_LIMIT_DATA
+      static Real sMaxDiffDist = 100000.0;
+      // if difference is more than sMaxDiffDist skip
+      if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||
+          (Abs(r2[1]- r1[1]) > sMaxDiffDist && (SignOf(r2[1]) != SignOf(r1[1]))) ||
+          (Abs(r2[2]- r1[2]) > sMaxDiffDist && (SignOf(r2[2]) != SignOf(r1[2]))))
+      {
+         #if DEBUG_SHOW_SKIP
+         MessageInterface::ShowMessage
+            ("   plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
+             GetName().c_str(), i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
+             r2.ToString().c_str());
+         #endif
+         return;
+      }
+      #endif
+      
+      // If drawing orbit lines
+      int colorIndex = objId * MAX_DATA + i;
+      if (mDrawOrbitFlag[colorIndex])
+      {
+         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT)){
+            // We are drawing a spacecraft orbit.  This includes solver passes.
+            *sIntColor = mObjectOrbitColor[colorIndex];}
+         else {
+            // We are drawing some other trajectory, say for a planet.
+            *sIntColor = mObjectColorMap[objName].GetIntColor();}
+         
+         // PS - Rendering.cpp
+         DrawLine(sGlColor, r1, r2);
+      }
+      
+      // save last valid frame to show object at final frame
+      mObjLastFrame[objId] = i;
+      
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage
+         ("DrawOrbitLines() leaving, mObjLastFrame[%d] = %d\n", objId, i);
+      #endif
+   }
 }
 
 
@@ -3385,382 +3138,6 @@ void OrbitViewCanvas::RotateBody(const wxString &objName, int frame, int objId)
    
    // Rotate other body
    RotateBodyUsingAttitude(objName, objId);
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateSolverData(RealArray posX, RealArray posY, RealArray posZ, ...)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas
-::UpdateSolverData(const RealArray &posX, const RealArray &posY, const RealArray &posZ,
-                   const UnsignedIntArray &scColors, bool solving)
-{
-   #if DEBUG_SOLVER_DATA
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::UpdateSolverData() entered, solving=%d\n", solving);
-   #endif
-   
-   //-----------------------------------------------------------------
-   // If showing current iteration only, handle solver iteration data
-   // separately here since it will be shown temporarily during the run
-   //-----------------------------------------------------------------
-   if (solving)
-   {
-      mDrawSolverData = true;
-      RealArray tempSolverX, tempSolverY, tempSolverZ;
-      
-      for (int sc=0; sc<mScCount; sc++)
-      {
-         int satId = GetObjectId(mScNameArray[sc].c_str());
-         if (satId != UNKNOWN_OBJ_ID)
-         {
-            // if we are not drawing this spacecraft, skip
-            if (!mDrawOrbitArray[satId])
-               continue;
-            
-            tempSolverX.push_back(posX[sc]);
-            tempSolverY.push_back(posY[sc]);
-            tempSolverZ.push_back(posZ[sc]);
-         }
-      }
-      
-      mSolverAllPosX.push_back(tempSolverX);
-      mSolverAllPosY.push_back(tempSolverY);
-      mSolverAllPosZ.push_back(tempSolverZ);
-      mSolverIterColorArray = scColors;
-   }
-   else
-   {
-      mSolverAllPosX.clear();
-      mSolverAllPosY.clear();
-      mSolverAllPosZ.clear();
-   }
-   
-   #if DEBUG_SOLVER_DATA
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::UpdateSolverData() leaving\n");
-   #endif
-}
-
-
-//---------------------------------------------------------------------------
-// void UpdateSpacecraftData(const RealArray &posX, const RealArray &posY, ...)
-//---------------------------------------------------------------------------
-void OrbitViewCanvas
-::UpdateSpacecraftData(const Real &time,
-                       const RealArray &posX, const RealArray &posY,
-                       const RealArray &posZ, const RealArray &velX,
-                       const RealArray &velY, const RealArray &velZ,
-                       const UnsignedIntArray &scColors,
-                       Integer solverOption)
-{
-   #if DEBUG_UPDATE
-   static int sNumDebugOutput = 1000;
-   #endif
-
-   #if DEBUG_UPDATE
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::UpdateSpacecraftData() entered, time=%f, mScCount=%d, "
-       "mOpenGLInitialized=%d, modelsAreLoaded=%d\n", time, mScCount,
-       mOpenGLInitialized, modelsAreLoaded);
-   #endif
-   
-   //-------------------------------------------------------
-   // update spacecraft position
-   //-------------------------------------------------------
-   for (int sc=0; sc<mScCount; sc++)
-   {
-      int satId = GetObjectId(mScNameArray[sc].c_str());
-      
-      #if DEBUG_UPDATE
-      MessageInterface::ShowMessage
-         ("OrbitViewCanvas::UpdateSpacecraftData() satId=%d, scName=%s\n", satId,
-          mObjectNames[satId].c_str());
-      #endif
-      
-      if (satId != UNKNOWN_OBJ_ID)
-      {
-         Spacecraft *spac = (Spacecraft*)mObjectArray[satId];
-         int colorIndex = satId * MAX_DATA + mLastIndex;
-         
-         if (mOpenGLInitialized)
-         {
-            ModelManager *mm = ModelManager::Instance();
-            if (!modelsAreLoaded)
-            {
-               if (spac->modelFile != "" && spac->modelID == -1)
-               {
-                  wxString modelPath(spac->modelFile.c_str());
-                  if (GmatFileUtil::DoesFileExist(modelPath.c_str()))
-                  {
-                     spac->modelID = mm->LoadModel(modelPath);
-                     #ifdef DEBUG_MODEL
-                     MessageInterface::ShowMessage
-                        ("UpdateSpacecraftData() loaded model '%s'\n", modelPath.c_str());
-                     #endif
-                  }
-                  else
-                  {
-                     MessageInterface::ShowMessage
-                        ("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
-                         "The file '%s' does not exist.\n", spac->GetName().c_str(),
-                         modelPath.c_str());
-                  }
-               }
-               
-               // Set modelsAreLoaded to true if it went through all models
-               if (sc == mScCount-1)
-                  modelsAreLoaded = true;
-            }
-         }
-         
-         if (!mDrawOrbitArray[satId])
-         {
-            mDrawOrbitFlag[colorIndex] = false;
-            #ifdef DEBUG_UPDATE
-            MessageInterface::ShowMessage("===> mDrawOrbitArray[satId] is NULL\n");
-            #endif
-            continue;
-         }
-         
-         mDrawOrbitFlag[colorIndex] = true;
-         
-         // If drawing solver's current iteration only, we don't want to draw
-         // first 3 points since these points have solver data.
-         if (mDrawSolverData || (solverOption == 1 && mNumData == 2))
-            mDrawOrbitFlag[colorIndex] = false;
-         
-         mObjectOrbitColor[colorIndex] = scColors[sc];
-         
-         int posIndex = satId * MAX_DATA * 3 + (mLastIndex*3);
-         mObjectViewPos[posIndex+0] = posX[sc];
-         mObjectViewPos[posIndex+1] = posY[sc];
-         mObjectViewPos[posIndex+2] = posZ[sc];            
-         
-         #if DEBUG_UPDATE
-         if (mNumData < sNumDebugOutput)
-         {
-            MessageInterface::ShowMessage
-               ("   satId=%d, object=%s, colorIndex=%u, color=%u\n", satId,
-                mObjectNames[satId].c_str(), colorIndex, mObjectOrbitColor[colorIndex]);
-            MessageInterface::ShowMessage
-               ("   satId:%d posIndex=%d, gcipos = %f, %f, %f\n", satId,
-                posIndex, mObjectViewPos[posIndex+0], mObjectViewPos[posIndex+1],
-                mObjectViewPos[posIndex+2]);
-         }
-         #endif
-         
-         // if need to convert to internal coordinate system (EarthMJ2000Eq)
-         if (mViewCsIsInternalCs)
-         {
-            CopyVector3(&mObjectGciPos[posIndex], &mObjectViewPos[posIndex]);
-         }
-         else
-         {
-            Rvector6 satState(posX[sc], posY[sc], posZ[sc], velX[sc], velY[sc], velZ[sc]);
-            Rvector6 outState;
-            
-            mCoordConverter.Convert(time, satState, pViewCoordSystem,
-                                    outState, pInternalCoordSystem);
-            
-            mObjectGciPos[posIndex+0] = outState[0];
-            mObjectGciPos[posIndex+1] = outState[1];
-            mObjectGciPos[posIndex+2] = outState[2];                  
-         }
-         
-         #if DEBUG_UPDATE
-         if (mNumData < sNumDebugOutput)
-         {
-            MessageInterface::ShowMessage
-               ("   satId:%d posIndex=%d, tmppos = %f, %f, %f\n", satId, posIndex,
-                mObjectViewPos[posIndex+0], mObjectViewPos[posIndex+1],
-                mObjectViewPos[posIndex+2]);
-         }
-         #endif
-         
-         // Update spacecraft attitude
-         #if DEBUG_UPDATE
-         MessageInterface::ShowMessage
-            ("   Now updating spacecraft attitude of %d\n", satId);
-         #endif
-         
-         UpdateSpacecraftAttitude(time, spac, satId);
-      }
-   }
-   
-   #if DEBUG_UPDATE
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::UpdateSpacecraftData() leaving\n");
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::UpdateSpacecraftAttitude(Real time, Spacecraft *sat,
-                                               int satId)
-{
-   if (sat == NULL)
-      return;
-   
-   int attIndex = satId * MAX_DATA * 4 + (mLastIndex*4);
-   
-   Rmatrix33 cosMat = sat->GetAttitude(time);
-   Rvector quat = Attitude::ToQuaternion(cosMat);
-   mObjectQuat[attIndex+0] = quat[0];
-   mObjectQuat[attIndex+1] = quat[1];
-   mObjectQuat[attIndex+2] = quat[2];
-   mObjectQuat[attIndex+3] = quat[3];
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateOtherData(const Real &time)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::UpdateOtherData(const Real &time)
-{
-   for (int obj = 0; obj < mObjectCount; obj++)
-   {
-      SpacePoint *otherObj = mObjectArray[obj];
-      
-      // if object pointer is not NULL and not a spacecraft
-      if (otherObj != NULL && otherObj->GetType() != Gmat::SPACECRAFT)
-      {
-         int objId = GetObjectId(mObjectNames[obj]);
-         
-         #if DEBUG_UPDATE_OBJECT
-         MessageInterface::ShowMessage
-            ("OrbitViewCanvas::UpdateOtherData() objId=%d, obj=%s\n", objId,
-             mObjectNames[objId].c_str());
-         #endif
-         
-         // if object id found
-         if (objId != UNKNOWN_OBJ_ID)
-         {
-            int colorIndex = objId * MAX_DATA + mLastIndex;
-            if (!mDrawOrbitArray[objId])
-               mDrawOrbitFlag[colorIndex] = false;
-            else
-               mDrawOrbitFlag[colorIndex] = true;
-            
-            Rvector6 objState;
-            try
-            {
-               objState = otherObj->GetMJ2000State(time);
-            }
-            catch (BaseException &)
-            {
-               mFatalErrorFound = true;
-               throw;
-            }
-            
-            int posIndex = objId * MAX_DATA * 3 + (mLastIndex*3);
-            mObjectGciPos[posIndex+0] = objState[0];
-            mObjectGciPos[posIndex+1] = objState[1];
-            mObjectGciPos[posIndex+2] = objState[2];
-            
-            #if DEBUG_UPDATE_OBJECT > 1
-            MessageInterface::ShowMessage
-               ("OrbitViewCanvas::UpdateOtherData() %s, posIndex=%d, objState=%s\n",
-                mObjectNames[obj].c_str(), posIndex, objState.ToString().c_str());
-            #endif
-            
-            // convert objects to view CoordinateSystem
-            if (mViewCsIsInternalCs)
-            {
-               CopyVector3(&mObjectViewPos[posIndex], &mObjectGciPos[posIndex]);
-            }
-            else
-            {
-               Rvector6 outState;
-               
-               mCoordConverter.Convert(time, objState, pInternalCoordSystem,
-                                       outState, pViewCoordSystem);
-               
-               mObjectViewPos[posIndex+0] = outState[0];
-               mObjectViewPos[posIndex+1] = outState[1];
-               mObjectViewPos[posIndex+2] = outState[2];                  
-            }
-            
-            #if DEBUG_UPDATE_OBJECT > 1
-            MessageInterface::ShowMessage
-               ("    %s posIndex=%d, tmppos = %f, %f, %f\n", mObjectNames[obj].c_str(),
-                posIndex, mObjectViewPos[posIndex+0], mObjectViewPos[posIndex+1],
-                mObjectViewPos[posIndex+2]);
-            #endif
-            
-            // Update object's attitude
-            UpdateOtherObjectAttitude(time, otherObj, objId);
-         }
-         else
-         {
-            #if DEBUG_UPDATE_OBJECT > 1
-            MessageInterface::ShowMessage
-               ("OrbitViewCanvas::UpdateOtherData() Cannot Add data. Invalid objId=%d\n",
-                objId);
-            #endif
-         }
-      }
-      else
-      {
-         #if DEBUG_UPDATE_OBJECT > 1
-         if (mObjectArray[obj] == NULL)
-         {
-            MessageInterface::ShowMessage
-               ("OrbitViewCanvas::UpdateOtherData() Cannot add data. %s is NULL\n",
-                mObjectNames[obj].c_str());
-         }
-         #endif
-      }
-   }
-   
-   int cIndex = mLastIndex*16;
-   Rmatrix converterMatrix = mCoordConverter.GetLastRotationMatrix();
-   for (int i = 0; i < 4; i++)
-   {
-      for (int j = 0; j < 4; j++)
-      {
-         if (j < 3 && i < 3)
-            mCoordData[cIndex+(i*4)+j] = converterMatrix.GetElement(i,j);
-         else
-            mCoordData[cIndex+(i*4)+j] = 0;
-      }
-   }
-   mCoordData[cIndex+15] = 1;
-   
-   mCoordMatrix = Rmatrix(4,4);
-   for (int i = 0; i < 3; i++)
-      for (int j = 0; j < 3; j++)
-         mCoordMatrix.SetElement(i, j, converterMatrix.GetElement(i,j));
-   mCoordMatrix.SetElement(3, 3, 1);
-   mCoordMatrix = mCoordMatrix.Transpose();
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::UpdateOtherObjectAttitude(Real time, SpacePoint *sp,
-                                                int objId)
-{
-   if (sp == NULL)
-      return;
-   
-   int attIndex = objId * MAX_DATA * 4 + (mLastIndex*4);
-   
-   // Get attitude matrix   
-   Rmatrix33 cosMat = sp->GetAttitude(time);
-   Rvector quat = Attitude::ToQuaternion(cosMat);
-   #ifdef DEBUG_ATTITUDE
-   MessageInterface::ShowMessage
-      ("UpdateOtherObjectAttitude() '%s', attIndex=%d, quat=%s", sp->GetName().c_str(),
-       attIndex, quat.ToString().c_str());
-   #endif
-   mObjectQuat[attIndex+0] = quat[0];
-   mObjectQuat[attIndex+1] = quat[1];
-   mObjectQuat[attIndex+2] = quat[2];
-   mObjectQuat[attIndex+3] = quat[3];
 }
 
 

@@ -77,6 +77,7 @@ GroundTrackPlot::GroundTrackPlot(const std::string &name)
    
    centralBody = NULL;
    centralBodyName = "Earth";
+   mViewCoordSysName = "EarthFixed";
    footPrints = "None";
    
    footPrintOptions.clear();
@@ -276,6 +277,13 @@ bool GroundTrackPlot::Initialize()
          MessageInterface::ShowMessage
             ("   calling PlotInterface::SetGlCoordSystem()\n");
          #endif
+
+         if (mViewCoordSystem == NULL)
+         {
+            mViewCoordSystem = CoordinateSystem::CreateLocalCoordinateSystem
+               (mViewCoordSysName, "BodyFixed", centralBody, NULL,
+                NULL, theInternalCoordSystem->GetJ2000Body(), theSolarSystem);
+         }
          
          PlotInterface::SetGlCoordSystem(instanceName, theInternalCoordSystem,
                                          mViewCoordSystem, mViewCoordSystem);
@@ -289,8 +297,8 @@ bool GroundTrackPlot::Initialize()
             ("   calling PlotInterface::SetGlDrawingOption()\n");
          #endif
          
-         PlotInterface::SetGl2dDrawingOption(instanceName, textureMapFileName,
-                                             footPrintOption);
+         PlotInterface::SetGl2dDrawingOption(instanceName, centralBodyName,
+                                             textureMapFileName, footPrintOption);
          
          //--------------------------------------------------------
          // set viewpoint info
@@ -307,6 +315,11 @@ bool GroundTrackPlot::Initialize()
          //--------------------------------------------------------
          PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
          PlotInterface::SetGlShowObjectFlag(instanceName, mDrawObjectArray);
+         
+         //--------------------------------------------------------
+         // initialize GL
+         //--------------------------------------------------------
+         PlotInterface::InitializeGlPlot(instanceName);
          
          isInitialized = true;
          retval = true;
@@ -535,8 +548,14 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
    
    switch (id)
    {
+   case COORD_SYSTEM:
+      // script do not specify view coordinate system, so do nothing here
+      // we want to create local body fixed coord system instead in Initialize()
+      break;
    case CENTRAL_BODY:
       centralBodyName = value;
+      // Since ground track data uses body fixed coordinates, name it here
+      mViewCoordSysName = value + "Fixed";
       return true;
    case TEXTURE_MAP:
       textureMapFileName = value;
@@ -912,14 +931,12 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
       
       bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
       
-      // future work
-      #if 1
+      // update plot data
       PlotInterface::
          UpdateGlPlot(instanceName, mOldName, mScNameArray,
                       dat[0], mScXArray, mScYArray, mScZArray,
                       mScVxArray, mScVyArray, mScVzArray,
                       colorArray, solving, mSolverIterOption, update, inFunction);
-      #endif
       
       if (update)
          mNumCollected = 0;

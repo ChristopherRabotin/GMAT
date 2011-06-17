@@ -70,14 +70,6 @@ using namespace FloatAttUtil;
 #endif
 
 
-// if test Euler angle on mouse event
-//#define COMPUTE_EULER_ANGLE
-#ifdef COMPUTE_EULER_ANGLE
-#include "AttitudeUtil.hpp"
-//#define USE_MODELVIEW_MAT
-//#define DEBUG_TRAJCANVAS_EULER 1
-#endif
-
 // For the newer (wx 2.7.x+) method, create a wxGLCanvas window using the
 // constructor that does not create an implicit rendering context, create
 // an explicit instance of a wxGLContext that is initialized with the
@@ -103,6 +95,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_ACTION 1
 //#define DEBUG_CONVERT 1
 //#define DEBUG_DRAW 2
+//#define DEBUG_DRAW_LINE 2
 //#define DEBUG_OBJECT 2
 //#define DEBUG_TEXTURE 2
 //#define DEBUG_PERSPECTIVE 1
@@ -162,6 +155,8 @@ GroundTrackCanvas::GroundTrackCanvas(wxWindow *parent, wxWindowID id,
                                      const wxString& name, long style)
    : ViewCanvas(parent, id, pos, size, name, style)
 {
+   // velocity is needed for computing direction of the ground track
+   mNeedVelocity = true;
    
    // Linux specific
    #ifdef __WXGTK__
@@ -179,21 +174,26 @@ GroundTrackCanvas::GroundTrackCanvas(wxWindow *parent, wxWindowID id,
    // Use wxGLCanvas::m_glContext, otherwise resize will not work
    //m_glContext = new wxGLContext(this);
    #endif
+   
    ModelManager *mm = ModelManager::Instance();
-
+   
    #ifndef __WXMAC__
       if (!mm->modelContext)
+      {
+         #if DEBUG_INIT
+         MessageInterface::ShowMessage
+            ("   Setting new wxGLContext(this) to ModelManager::modelContext\n");
+         #endif
          mm->modelContext = new wxGLContext(this);
-        #else
+      }
+   #else
       if (!mm->modelContext)
           mm->modelContext = this->GetGLContext();
    #endif
    
    theContext = mm->modelContext;//new wxGLContext(this);
    
-   mStars = GLStars::Instance();
-   mStars->InitStars();
-   mStars->SetDesiredStarCount(mStarCount);
+   //@todo remove 3d related stuff
    
    mCamera.Reset();
    mCamera.Relocate(DEFAULT_DIST, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -234,45 +234,20 @@ GroundTrackCanvas::GroundTrackCanvas(wxWindow *parent, wxWindowID id,
    MessageInterface::ShowMessage("   mAxisLength=%f\n", mAxisLength);
    #endif 
    ChangeProjection(size.x, size.y, mAxisLength);
-   
-   // Note from Dunn.  Size of earth vs. spacecraft models will take lots of
-   // work in the future.  Models need to be drawn in meters.  Cameras need to
-   // be placed near models to "make big enough to see", and if camera is beyond
-   // about 2000 meters, model should be drawn as dot.  More discussion to follow!
-//   mEarthRadius = 6378.14f; //km
-   // @todo - does this need a pointer to the actual Earth object, to get radius? (mEarthRadius does not
-   // appear to be used, though)
+
+   // Do we need this in GroundTrackPlot? Remove them later
    mEarthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]; //km
    mScRadius = 200;        //km: make big enough to see
    
    // light source
    mSunPresent = false;
-   //mEnableLightSource = true;
-   mEnableLightSource = false;
-   
-   // drawing options
-   mDrawWireFrame = false;
-   mDrawXyPlane = false;
-   mDrawEcPlane = false;
-   mDrawSunLine = false;
-   mDrawAxes = false;
-   mDrawGrid = false;
-   
-   mXyPlaneColor = GmatColor::NAVY32;
-   mEcPlaneColor = 0x00002266; //dark red
-   mSunLineColor = GmatColor::YELLOW32;
+   mEnableLightSource = true;
    
    // foot print option
    mFootPrintOption = 0; // Draw ALL
    
    // Zoom
    mMaxZoomIn = MAX_ZOOM_IN;
-   
-   // stars and options
-   mStars = NULL;
-   mStarCount = 0;
-   mDrawStars = false;
-   mDrawConstellations = false;
    
    #if DEBUG_INIT
    MessageInterface::ShowMessage
@@ -305,6 +280,16 @@ GroundTrackCanvas::~GroundTrackCanvas()
    
    // Note:
    // deleting m_glContext is handled in wxGLCanvas
+   
+   #ifndef __WXMAC__
+      ModelManager *mm = ModelManager::Instance();
+      if (!mm->modelContext)
+      {
+         // delete modelContext since it was created in the constructor
+         delete mm->modelContext;
+         mm->modelContext = NULL;
+      }
+   #endif
    
    ClearObjectArrays();
    
@@ -376,34 +361,23 @@ void GroundTrackCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
 }
 
 
-// //------------------------------------------------------------------------------
-// // void SetGLContext(wxGLContext *glContext)
-// //------------------------------------------------------------------------------
-// void GroundTrackCanvas::SetGLContext(wxGLContext *glContext)
-// {
-//    #ifdef __USE_WX280_GL__
-//    if (glContext == NULL)
-//       SetCurrent(*theContext);
-//    else
-//       SetCurrent(*glContext);
-//    #else
-//    SetCurrent();
-//    #endif
-// }
-
-
 //------------------------------------------------------------------------------
-// void SetGl2dDrawingOption(const std::string &textureMap, Integer footPrintOption)
+// void SetGl2dDrawingOption(const std::string &centralBodyName,
+//         const std::string &textureMap, Integer footPrintOption)
 //------------------------------------------------------------------------------
-void GroundTrackCanvas::SetGl2dDrawingOption(const std::string &textureMap,
+void GroundTrackCanvas::SetGl2dDrawingOption(const std::string &centralBodyName,
+                                             const std::string &textureMap,
                                              Integer footPrintOption)
 {
    #ifdef DEBUG_DRAWING_OPTION
    MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetGl2dDrawingOption() entered, textureMap='%s', "
-       "footPrintOption=%d\n", textureMap.c_str(), footPrintOption);
+      ("GroundTrackCanvas::SetGl2dDrawingOption() entered, centralBodyName='%s', "
+       "textureMap='%s', footPrintOption=%d\n", centralBody.c_str(),
+       textureMap.c_str(), footPrintOption);
    #endif
+   mCentralBodyName = centralBodyName;
    mCentralBodyTextureFile = textureMap;
+   mTextureFileMap[mCentralBodyName] = textureMap;
    mFootPrintOption = footPrintOption;
 }
 
@@ -490,48 +464,6 @@ void GroundTrackCanvas::ShowDefaultView()
 void GroundTrackCanvas::DrawWireFrame(bool flag)
 {
    mDrawWireFrame = flag;
-   Refresh(false);
-}
-
-
-//------------------------------------------------------------------------------
-// void DrawXyPlane(bool flag)
-//------------------------------------------------------------------------------
-/**
- * Draws equatorial plane
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawXyPlane(bool flag)
-{
-   mDrawXyPlane = flag;
-   Refresh(false);
-}
-
-
-//------------------------------------------------------------------------------
-// void DrawEcPlane(bool flag)
-//------------------------------------------------------------------------------
-/**
- * Draws ecliptic plane
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawEcPlane(bool flag)
-{
-   mDrawEcPlane = flag;
-   Refresh(false);
-}
-
-
-//------------------------------------------------------------------------------
-// void OnDrawAxes(bool flag)
-//------------------------------------------------------------------------------
-/**
- * Draws axes.
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::OnDrawAxes(bool flag)
-{
-   mDrawAxes = flag;
    Refresh(false);
 }
 
@@ -629,273 +561,6 @@ void GroundTrackCanvas::ViewAnimation(int interval, int frameInc)
 
 
 //------------------------------------------------------------------------------
-// void SetGlObject(const StringArray &objNames,
-//                  const UnsignedIntArray &objOrbitColors,
-//                  const std::vector<SpacePoint*> &objArray)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetGlObject(const StringArray &objNames,
-                                  const UnsignedIntArray &objOrbitColors,
-                                  const std::vector<SpacePoint*> &objArray)
-{
-   #if DEBUG_OBJECT
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetGlObject() entered for %s, objCount=%d, colorCount=%d.\n",
-       mPlotName.c_str(), objNames.size(), objOrbitColors.size());
-   #endif
-   
-   // Initialize objects used in view
-   SetDefaultViewPoint();
-   
-   mObjectArray = objArray;
-   wxArrayString tempList;
-   
-   if (objNames.size() == objOrbitColors.size() &&
-       objNames.size() == objArray.size())
-   {      
-      for (UnsignedInt i=0; i<objNames.size(); i++)
-      {
-         tempList.Add(objNames[i].c_str());
-         
-         #if DEBUG_OBJECT > 1
-         MessageInterface::ShowMessage
-            ("   objNames[%d]=%s, objPtr=<%p>%s\n", i, objNames[i].c_str(),
-             mObjectArray[i], mObjectArray[i]->GetName().c_str());
-         #endif
-      }
-      
-      AddObjectList(tempList, objOrbitColors);
-   }
-   else
-   {
-      MessageInterface::ShowMessage("GroundTrackCanvas::SetGlObject() object sizes "
-                                    "are not the same. No objects added.\n");
-   }
-   
-   #if DEBUG_OBJECT
-   MessageInterface::ShowMessage("GroundTrackCanvas::SetGlObject() leaving\n");
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void SetSolarSystem(SolarSystem *ss)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetSolarSystem(SolarSystem *ss)
-{
-   pSolarSystem = ss;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetGlCoordSystem(CoordinateSystem *internalCs,CoordinateSystem *viewCs,
-//                       CoordinateSystem *viewUpCs)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
-                                       CoordinateSystem *viewCs,
-                                       CoordinateSystem *viewUpCs)
-{
-   #if DEBUG_CS
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetGlCoordSystem() for '%s', internalCs=<%p>, viewCs=<%p>, "
-       " viweUpCs=%p\n",  mPlotName.c_str(), internalCs, viewCs, viewUpCs);
-   #endif
-   
-   if (internalCs == NULL || viewCs == NULL || viewUpCs == NULL)
-   {
-      throw SubscriberException
-         ("Internal or View or View Up CoordinateSystem is NULL\n"); 
-   }
-   
-   pInternalCoordSystem = internalCs;
-   mInternalCoordSysName = internalCs->GetName().c_str();
-   
-   pViewCoordSystem = viewCs;
-   mViewCoordSysName = viewCs->GetName().c_str();
-   
-   pViewUpCoordSystem = viewUpCs;
-   mViewUpCoordSysName = viewUpCs->GetName().c_str();
-   
-   // see if we need data conversion
-   if (mViewCoordSysName.IsSameAs(mInternalCoordSysName))
-      mViewCsIsInternalCs = true;
-   else
-      mViewCsIsInternalCs = false;
-   
-   // set view center object
-   mOriginName = viewCs->GetOriginName().c_str();
-   mOriginId = GetObjectId(mOriginName);
-   
-   mViewObjName = mOriginName;
-   mViewObjId = mOriginId;
-   
-   // if view coordinate system origin is spacecraft, make spacecraft radius smaller.
-   // So that spacecraft won't overlap each other.
-   //@todo: need better way to scale spacecraft size.  See Dunn's comments above.
-   if (viewCs->GetOrigin()->IsOfType(Gmat::SPACECRAFT))
-      mScRadius = 30;
-   else if (viewCs->GetOrigin()->IsOfType(Gmat::CELESTIAL_BODY))
-      mScRadius = mObjectRadius[mOriginId] * 0.03;
-   
-   mMaxZoomIn = mObjMaxZoomIn[mOriginId];
-   
-   #if 0
-   if (mUseInitialViewPoint)
-   {
-      mAxisLength = mMaxZoomIn;
-   }
-   #endif
-   
-   #if DEBUG_CS
-   MessageInterface::ShowMessage
-      ("   mViewCoordSysName=%s, pViewCoordSystem=%p, mOriginName=%s, "
-       "mOriginId=%d\n", mViewCoordSysName.c_str(), pViewCoordSystem,
-       mOriginName.c_str(),  mOriginId);
-   MessageInterface::ShowMessage
-      ("   mViewUpCoordSysName=%s, mViewObjName=%s, mViewObjId=%d\n",
-       mViewUpCoordSysName.c_str(), mViewObjName.c_str(), mViewObjId);
-   #endif
-   
-} // end SetGlCoordSystem()
-
-
-//------------------------------------------------------------------------------
-// void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-//                      SpacePoint *vdObj, Real vsFactor,
-//                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-//                      const Rvector3 &vdVec, bool usevpRefVec,
-//                      bool usevpVec, bool usevdVec)
-//------------------------------------------------------------------------------
-/*
- * Sets OpenGL view options
- *
- * @param <vpRefObj> Viewpoint reference object pointer
- * @param <vpVecObj> Viewpoint vector object pointer
- * @param <vdObj>  View direction object pointer
- * @param <vsFactor> Viewpoint scale factor
- * @param <vpRefVec> 3 element vector for viewpoint ref. vector (use if usevpVec is true)
- * @param <vpVec> 3 element vector for viewpoint vector (use if usevpVec is true)
- * @param <vdVec> 3 element vector for view direction (use if usevdVec is true)
- * @param <usevpRefVec> true if use vector for viewpoint reference vector
- * @param <usevpVec> true if use vector for viewpoint vector
- * @param <usevdVec> true if use vector for view direction
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-                                      SpacePoint *vdObj, Real vsFactor,
-                                      const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                                      const Rvector3 &vdVec, const std::string &upAxis,
-                                      bool usevpRefVec, bool usevpVec, bool usevdVec)
-{
-   pViewPointRefObj = vpRefObj;
-   pViewPointVectorObj = vpVecObj;
-   pViewDirectionObj = vdObj;
-      
-   mViewScaleFactor = vsFactor;
-   mViewPointRefVector = vpRefVec;
-   mViewPointVector = vpVec;
-   mViewDirectionVector = vdVec;
-   mViewUpAxisName = upAxis;
-   mUseViewPointRefVector = usevpRefVec;
-   mUseViewPointVector = usevpVec;
-   mUseViewDirectionVector = usevdVec;
-   
-   Rvector3 lvpRefVec(vpRefVec);
-   Rvector3 lvpVec(vpVec);
-   Rvector3 lvdVec(vdVec);
-      
-   #if DEBUG_PROJECTION
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetGlViewOption() pViewPointRefObj=%p, "
-       "pViewPointVectorObj=%p\n   pViewDirectionObj=%p, mViewScaleFactor=%f   "
-       "mViewPointRefVector=%s\n   mViewPointVector=%s, mViewDirectionVector=%s, "
-       "mViewUpAxisName=%s\n   mUseViewPointRefVector=%d, mUseViewDirectionVector=%d\n",
-       pViewPointRefObj, pViewPointVectorObj, pViewDirectionObj, mViewScaleFactor,
-       lvpRefVec.ToString(10).c_str(), lvpVec.ToString(10).c_str(),
-       lvdVec.ToString(10).c_str(), mViewUpAxisName.c_str(), mUseViewPointRefVector,
-       mUseViewDirectionVector);
-   #endif
-   
-   // Set viewpoint ref. object id
-   if (!mUseViewPointRefVector && pViewPointRefObj)
-   {
-      mViewObjName = pViewDirectionObj->GetName().c_str();
-      mViewPointRefObjName = pViewPointRefObj->GetName();
-      
-      mVpRefObjId = GetObjectId(pViewPointRefObj->GetName().c_str());
-      
-      if (mVpRefObjId == GmatPlot::UNKNOWN_BODY)
-      {
-         mUseViewPointRefVector = true;
-         MessageInterface::ShowMessage
-            ("*** Warning *** GroundTrackCanvas::SetGlViewOption() Cannot find "
-             "pViewPointRefObj name=%s, so using vector=%s\n",
-             pViewPointRefObj->GetName().c_str(),
-             mViewPointRefVector.ToString().c_str());
-      }
-   }
-   else
-   {
-      mViewPointRefObjName = "Earth";
-      
-      if (!mUseViewPointRefVector)
-         MessageInterface::ShowMessage
-            ("*** Warning *** GroundTrackCanvas::SetGlViewOption() "
-             "ViewPointRefObject is NULL,"
-             "so will use default Vector instead.\n");
-   }
-   
-   // Set viewpoint vector object id
-   if (!mUseViewPointVector && pViewPointVectorObj)
-   {
-      mVpVecObjId = GetObjectId(pViewPointVectorObj->GetName().c_str());
-      
-      if (mVpVecObjId == GmatPlot::UNKNOWN_BODY)
-      {
-         mUseViewPointVector = true;
-         MessageInterface::ShowMessage
-            ("*** Warning *** GroundTrackCanvas::SetGlViewOption() Cannot find "
-             "pViewPointVectorObj name=%s, so using vector=%s\n",
-             pViewPointVectorObj->GetName().c_str(),
-             mViewPointVector.ToString().c_str());
-      }
-   }
-   else
-   {
-      if (!mUseViewPointVector)
-         MessageInterface::ShowMessage
-            ("*** Warning *** GroundTrackCanvas::SetGlViewOption() "
-             "ViewPointVectorObject is NULL, "
-             "so will use default Vector instead.\n");
-   }
-   
-   // Set view direction object id
-   if (!mUseViewDirectionVector && pViewDirectionObj)
-   {
-      mVdirObjId = GetObjectId(pViewDirectionObj->GetName().c_str());
-      
-      if (mVdirObjId == GmatPlot::UNKNOWN_BODY)
-      {
-         mUseViewDirectionVector = true;
-         MessageInterface::ShowMessage
-            ("*** Warning *** GroundTrackCanvas::SetGlViewOption() Cannot find "
-             "pViewDirectionObj name=%s, so using vector=%s\n",
-             pViewDirectionObj->GetName().c_str(),
-             mViewDirectionVector.ToString().c_str());
-      }
-   }
-   else
-   {
-      if (!mUseViewDirectionVector)
-         MessageInterface::ShowMessage
-            ("*** Warning *** GroundTrackCanvas::SetGlViewOption() "
-             "ViewDirectionObject is NULL,"
-             "so will use default Vector instead.\n");
-   }
-   
-} //end SetGlViewOption()
-
-
-//------------------------------------------------------------------------------
 // void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
@@ -956,6 +621,7 @@ void GroundTrackCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
        mEnableLightSource, mSunPresent);
    #endif
    
+   #if 1
    // Handle light source
    if (mEnableLightSource && mSunPresent)
    {
@@ -967,12 +633,6 @@ void GroundTrackCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
       // enable face culling, so that polygons facing away (defines by front face)
       // from the viewer aren't drawn (for efficiency).
       glEnable(GL_CULL_FACE);
-      
-      // create a light:
-      //float lightColor[4]={1.0f, 1.0f, 1.0f, 1.0f};
-      
-      //glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, lightColor);
-      //glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
       
       // enable the light
       glEnable(GL_LIGHTING);
@@ -989,6 +649,7 @@ void GroundTrackCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
       glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
       //----------------------------------------------------------------------
    }
+   #endif
 }
 
 
@@ -1063,10 +724,10 @@ void GroundTrackCanvas::OnPaint(wxPaintEvent& event)
    #endif
    
    #ifdef __USE_WX280_GL__
-   theContext->SetCurrent(*this);
-   SetCurrent(*theContext);
+      theContext->SetCurrent(*this);
+      SetCurrent(*theContext);
    #else
-   SetCurrent();
+      SetCurrent();
    #endif
    
    if (!mGlInitialized && mObjectCount > 0)
@@ -1078,42 +739,7 @@ void GroundTrackCanvas::OnPaint(wxPaintEvent& event)
       mGlInitialized = true;
    }
    
-   // set OpenGL to recognize the counter clockwise defined side of a polygon
-   // as its 'front' for lighting and culling purposes
-   glFrontFace(GL_CCW);
-   
-   // enable face culling, so that polygons facing away (defines by front face)
-   // from the viewer aren't drawn (for efficiency).
-   glEnable(GL_CULL_FACE);
-   
-   // tell OpenGL to use glColor() to get material properties for..
-   glEnable(GL_COLOR_MATERIAL);
-   
-   // ..the front face's ambient and diffuse components
-   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-   
-   // Set the ambient lighting
-   GLfloat ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
-   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-   
-   // Set viewport size
-   int nWidth, nHeight;
-   GetClientSize(&nWidth, &nHeight);
-   glViewport(0, 0, nWidth, nHeight);
-   
-   
-   #if 0
-   if (mDrawWireFrame)
-   {
-      glPolygonMode(GL_FRONT, GL_LINE);
-      glPolygonMode(GL_BACK, GL_LINE);
-   }
-   else
-   {
-      glPolygonMode(GL_FRONT, GL_FILL);
-      glPolygonMode(GL_BACK, GL_FILL);
-   }
-   #endif
+   SetDrawingMode();
    
    // Linux specific
    #ifdef __WXGTK__
@@ -1201,8 +827,7 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::OnMouse(wxMouseEvent& event)
 {
-   // Just return for now while thinking what users will need
-   // zoom in and zoom out like map?
+   // Just return for now while thinking what users will need for mouse
    bool justReturn = true;
    
    if (justReturn)
@@ -1337,23 +962,19 @@ void GroundTrackCanvas::OnMouse(wxMouseEvent& event)
          {
             // dragging from upper right corner to lower left corner
             mCamera.Translate(0, 0, mZoomAmount, false);
-            //mCamera.ZoomIn(mZoomAmount);
          }
          else if (mouseX > mLastMouseX && mouseY < mLastMouseY)
          {
             // dragging from lower left corner to upper right corner
             mCamera.Translate(0, 0, -mZoomAmount, false);
-            //mCamera.ZoomOut(mZoomAmount);
          }
          else
          {
             // if mouse moves toward left then zoom in
             if (mouseX < mLastMouseX || mouseY < mLastMouseY)
                mCamera.Translate(0, 0, mZoomAmount, false);
-               //mCamera.ZoomIn(mZoomAmount);
             else
                mCamera.Translate(0, 0, -mZoomAmount, false);
-               //mCamera.ZoomOut(mZoomAmount);
          }
          
          Refresh(false);
@@ -1494,101 +1115,6 @@ void GroundTrackCanvas::OnKeyDown(wxKeyEvent &event)
 
 
 //------------------------------------------------------------------------------
-// bool SetPixelFormatDescriptor()
-//------------------------------------------------------------------------------
-/**
- * Sets pixel format on Windows.
- */
-//------------------------------------------------------------------------------
-bool GroundTrackCanvas::SetPixelFormatDescriptor()
-{
-#ifdef __WXMSW__
-   
-   // On Windows, for OpenGL, you have to set the pixel format
-   // once before doing your drawing stuff. This function
-   // properly sets it up.
-   
-   HDC hdc = wglGetCurrentDC();
-   
-   PIXELFORMATDESCRIPTOR pfd =
-   {
-      sizeof(PIXELFORMATDESCRIPTOR),   // size of this pfd
-      1,                     // version number
-      PFD_DRAW_TO_WINDOW |   // support window
-      PFD_SUPPORT_OPENGL |   // support OpenGL
-      PFD_DOUBLEBUFFER,      // double buffered
-      PFD_TYPE_RGBA,         // RGBA type
-      24,                    // 24-bit color depth
-      0, 0, 0, 0, 0, 0,      // color bits ignored
-      0,                     // no alpha buffer
-      0,                     // shift bit ignored
-      0,                     // no accumulation buffer
-      0, 0, 0, 0,            // accum bits ignored
-      //32,                    // 32-bit z-buffer
-      16,                    // 32-bit z-buffer
-      0,                     // no stencil buffer
-      0,                     // no auxiliary buffer
-      PFD_MAIN_PLANE,        // main layer
-      0,                     // reserved
-      0, 0, 0                // layer masks ignored
-   };
-   
-   // get the device context's best-available-match pixel format
-   int pixelFormatId = ChoosePixelFormat(hdc, &pfd);
-   
-   #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetPixelFormatDescriptor() pixelFormatId = %d \n",
-       pixelFormatId);
-   #endif
-   
-   if(pixelFormatId == 0)
-   {
-      MessageInterface::ShowMessage
-         ("**** ERROR **** Failed to find a matching pixel format\n");
-      return false;
-   }
-   
-   // set the pixel format of the device context
-   if (!SetPixelFormat(hdc, pixelFormatId, &pfd))
-   {
-      MessageInterface::ShowMessage
-         ("**** ERROR **** Failed to set pixel format id %d\n", pixelFormatId);
-      return false;
-   }
-   
-   return true;
-
-#else
-   // Should we return true for non-Window system?
-   //return false;
-   return true;
-#endif
-}
-
-
-//------------------------------------------------------------------------------
-//  void SetDefaultGLFont()
-//------------------------------------------------------------------------------
-/**
- * Sets default GL font.
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetDefaultGLFont()
-{
-#ifdef __WXMSW__
-   // Set up font stuff for windows -
-   // Make the Current font the device context's selected font
-   //SelectObject(dc, Font->Handle);
-   HDC hdc = wglGetCurrentDC();
-   
-   wglUseFontBitmaps(hdc, 0, 255, 1000);
-   glListBase(1000); // base for displaying
-#endif
-}
-
-
-//------------------------------------------------------------------------------
 // void SetDefaultViewPoint()
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::SetDefaultViewPoint()
@@ -1714,116 +1240,6 @@ void GroundTrackCanvas::InitializeViewPoint()
 
 
 //------------------------------------------------------------------------------
-//  bool LoadGLTextures()
-//------------------------------------------------------------------------------
-/**
- * Loads textures.
- */
-//------------------------------------------------------------------------------
-bool GroundTrackCanvas::LoadGLTextures()
-{
-   #if DEBUG_TEXTURE
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::LoadGLTextures() mObjectCount=%d\n", mObjectCount);
-   #endif
-   
-   //--------------------------------------------------
-   // load object texture if used
-   //--------------------------------------------------
-   for (int i=0; i<mObjectCount; i++)
-   {
-      if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
-         continue;
-      
-      if (mObjectTextureIdMap[mObjectNames[i]] == GmatPlot::UNINIT_TEXTURE)
-      {
-         #if DEBUG_TEXTURE > 1
-         MessageInterface::ShowMessage
-            ("GroundTrackCanvas::LoadGLTextures() object=<%p>'%s'\n",
-             mObjectArray[i], mObjectNames[i].c_str());
-         #endif
-         
-         mObjectTextureIdMap[mObjectNames[i]] =
-            BindTexture(mObjectArray[i], mObjectNames[i]);
-      }
-   }
-   
-   return true;
-   
-} //end LoadGLTextures()
-
-
-//------------------------------------------------------------------------------
-// GLuint BindTexture(SpacePoint *obj, const wxString &objName)
-//------------------------------------------------------------------------------
-/**
- * Loads textures and returns binding index.
- */
-//------------------------------------------------------------------------------
-GLuint GroundTrackCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
-{
-   GLuint ret = GmatPlot::UNINIT_TEXTURE;
-   
-   //MessageInterface::ShowMessage("===> GroundTrackCanvas::BindTexture() ret = %d\n", ret);
-   // texture map file names now stored with the CelestialBody  wcs 2009.01.06
-   //FileManager *fm = FileManager::Instance();
-   std::string textureFile;  
-   //std::string name = std::string(objName.Upper().c_str());
-   //std::string filename = name + "_TEXTURE_FILE";
-   
-   try
-   {
-      // use texture map set by user, if not set use from the celestial body
-      textureFile = mCentralBodyTextureFile;
-      if (textureFile == "" || !GmatFileUtil::DoesFileExist(textureFile))
-      {
-         //textureFile = fm->GetFullPathname(filename);
-         CelestialBody *body = (CelestialBody*) obj;
-         textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
-      }
-      
-      #ifdef __USE_WX280_GL__
-         SetCurrent(*theContext);
-      #else
-         SetCurrent();
-      #endif
-      
-      glGenTextures(1, &ret);
-      glBindTexture(GL_TEXTURE_2D, ret);
-      
-      if (!LoadImage(textureFile))
-      {
-         if (obj->IsOfType(Gmat::CELESTIAL_BODY))
-         {
-            MessageInterface::ShowMessage
-               ("*** WARNING *** GroundTrackCanvas::BindTexture() Cannot load texture "
-                "image for '%s' from '%s'\n", objName.c_str(), textureFile.c_str());
-         }
-         ret = GmatPlot::UNINIT_TEXTURE;
-      }
-   }
-   catch (BaseException &e)
-   {
-      // Give warning for missing texture file for only CelestialBody object
-      if (obj->IsOfType(Gmat::CELESTIAL_BODY))
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** GroundTrackCanvas::BindTexture() Cannot bind texture "
-             "image for %s.\n%s\n", objName.c_str(), e.GetFullMessage().c_str());
-      }
-   }
-   
-   #if DEBUG_TEXTURE
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::BindTexture() objName='%s', ret=%d\n", objName.c_str(),
-       ret);
-   #endif
-   
-   return ret;
-} //end BindTexture()
-
-
-//------------------------------------------------------------------------------
 // void SetDefaultView()
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::SetDefaultView()
@@ -1861,10 +1277,10 @@ void GroundTrackCanvas::SetProjection()
    
    // Setup the world view
    glMatrixMode(GL_PROJECTION); // first go to projection mode
-   glPushMatrix();              // start projection modification
    glLoadIdentity();            // clear all previous information
    SetupWorld();                // set it up
    glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();            // clear all previous information
    
    #if DEBUG_PROJECTION > 2
    MessageInterface::ShowMessage("GroundTrackCanvas::SetProjection() leaving\n");
@@ -1876,10 +1292,7 @@ void GroundTrackCanvas::SetProjection()
 //  void SetupWorld()
 //------------------------------------------------------------------------------
 /**
- * Sets world view as orthographic projection. With an orthographic projection,
- * the viewing volume is a rectangular parallelepiped. Unlike perspective
- * projection, the size of the viewing volume doesn't change from one end to the
- * other, so distance from the camera doesn't affect how large a object appears.
+ * Sets view projection.
  */
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::SetupWorld()
@@ -1887,10 +1300,10 @@ void GroundTrackCanvas::SetupWorld()
    #if DEBUG_PROJECTION > 2
    MessageInterface::ShowMessage("GroundTrackCanvas::SetupWorld() entered\n");
    #endif
-
+   
    // Set left, right, bottom, top
    gluOrtho2D(-180.0, 180.0, -90.0, 90.0);
-      
+   
    #if DEBUG_PROJECTION > 2
    MessageInterface::ShowMessage("GroundTrackCanvas::SetupWorld() leaving\n");
    #endif
@@ -1910,9 +1323,9 @@ void GroundTrackCanvas::SetupWorld()
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::ChangeView(float viewX, float viewY, float viewZ)
 {
-   //#if DEBUG_PROJECTION > 2
+   #if DEBUG_PROJECTION > 2
    MessageInterface::ShowMessage("GroundTrackCanvas::ChangeView() entered\n");
-   //#endif
+   #endif
    
    mfCamRotXAngle = (int)(viewX) % 360 + 270;
    mfCamRotYAngle = (int)(viewY) % 360;
@@ -2187,7 +1600,6 @@ void GroundTrackCanvas::DrawPlot()
    else
       glClear(GL_DEPTH_BUFFER_BIT);
    
-   
    // Plot is not refreshed when another panel is opened, so add glFlush()
    // and SwapBuffers() (loj: 4/5/06)
    if (mNumData < 1 && !mDrawSolverData) // to avoid 0.0 time
@@ -2196,26 +1608,23 @@ void GroundTrackCanvas::DrawPlot()
       SwapBuffers();
       return;
    }
-
    
-   #if DEBUG_DRAW
-   MessageInterface::ShowMessage("   mAxisLength=%f\n", mAxisLength);
-   #endif
-   
-   ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
-   
+   // Do not use light source
    glDisable(GL_LIGHTING);
-   
+
+   // Set viewing projection
    SetProjection();
-   TransformView();
    
-   // draw object orbit
+   // Draw central body texture map
+   DrawCentralBodyTexture();
+   
+   // Draw object orbit
    DrawObjectOrbit(mNumData-1);
    
    if (mDrawSolverData)
       DrawSolverData();
    
-   DrawStatus("Frame#: ", GmatColor::RED32, "  Epoch: ", mTime[mLastIndex], 0, 5);
+   DrawStatus("", GmatColor::RED32, "  Epoch: ", mTime[mLastIndex], 0, 5, false);   
    
    glFlush();
    SwapBuffers();
@@ -2224,133 +1633,6 @@ void GroundTrackCanvas::DrawPlot()
    MessageInterface::ShowMessage("GroundTrackCanvas::DrawPlot() leaving\n");
    #endif
 } // end DrawPlot()
-
-
-//------------------------------------------------------------------------------
-//  void DrawObject(const wxString &objName, int obj)
-//------------------------------------------------------------------------------
-/**
- * Draws object sphere and maps texture image.
- *
- * @param  objName  Name of the object
- * @param  obj      Index of the object for mObjectArray
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
-{
-   int frame = mLastIndex;
-   int objId = GetObjectId(objName);
-   
-   #if DEBUG_DRAW > 1
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::DrawObject() drawing:%s, obj=%d, objId:%d, frame:%d\n",
-       objName.c_str(), obj, objId, frame);
-   #endif
-   
-   //-------------------------------------------------------
-   // enable light source on option
-   //-------------------------------------------------------
-   if (mEnableLightSource && mSunPresent)
-   {
-      int sunId = GetObjectId("Sun");
-      int index = sunId * MAX_DATA * 3 + frame * 3;
-      
-      if (sunId == UNKNOWN_OBJ_ID)
-      {
-         mLight.SetPosition(0.01f, 1.0f, 0.3f);
-      }
-      else
-      {
-         index = sunId * MAX_DATA * 3 + frame * 3;
-         mLight.SetPosition(mObjectViewPos[index+0],mObjectViewPos[index+1],mObjectViewPos[index+2]);
-      }
-      mLight.SetDirectional(true);
-
-      // Dunn is setting sun level a little dimmer to avoid washing out the models.
-      mLight.SetColor(0.8f,0.8f,0.8f,1.0f);  
-      // If 4th value is zero, the light source is directional one, and
-      // (x,y,z) values describes its direction.
-      // If 4th value is nonzero, the light is positional, and the (x,y,z) values
-      // specify the location of the light in homogeneous object coordinates.
-      // By default, a positional light radiates in all directions.
-      
-      float lpos[4];
-      mLight.GetPositionf(lpos);
-      glLightfv(GL_LIGHT0, GL_POSITION, lpos);
-      glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
-      
-      // enable the lighting
-      glEnable(GL_LIGHTING);
-   }
-     
-   
-   //-------------------------------------------------------
-   // draw object with texture on option
-   //-------------------------------------------------------
-   if (mObjectTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
-   {
-      #if 0
-      //glColor4f(1.0, 1.0, 1.0, 1.0);
-      glColor3f(1.0, 1.0, 1.0);
-      glMultMatrixd(mCoordMatrix.GetDataVector());
-      glBindTexture(GL_TEXTURE_2D, mObjectTextureIdMap[objName]);
-      glEnable(GL_TEXTURE_2D);
-      #endif
-      
-      // Draw central body texture map
-      DrawCentralBodyTexture();
-      
-      #if 0
-      if (objName == "Sun")
-      {
-         glDisable(GL_LIGHTING);
-         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL, GLU_INSIDE);
-         glEnable(GL_LIGHTING);
-      }
-      else
-         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL);     
-      
-      glDisable(GL_TEXTURE_2D);
-      
-      //----------------------------------------------------
-      // draw grid on option
-      //----------------------------------------------------
-      if (mDrawGrid && objName == "Earth")
-      {
-         // This makes lines thicker
-         //glEnable(GL_LINE_SMOOTH);
-         //glLineWidth(1.5);
-         
-         // Just draw a wireframe sphere little bigger to show grid
-         //glColor3f(0.20, 0.20, 0.50); // dark blue
-         glColor3f(0.0, 0.0, 0.0);      // black
-         //glColor3f(0.50, 0.10, 0.20); // maroon
-         GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.03;
-         DrawSphere(radius, 36, 18, GLU_LINE, GLU_OUTSIDE, GL_NONE, GL_FALSE);
-      }
-      #endif
-   }
-   else
-   {
-      #if DEBUG_DRAW
-      MessageInterface::ShowMessage
-         ("*** WARNING *** GroundTrackCanvas::DrawObject() %s texture not found.\n",
-          objName.c_str());
-      #endif
-      
-      // Just draw a wireframe sphere if we get here
-      glColor3f(0.20f, 0.20f, 0.50f);
-      DrawSphere(mObjectRadius[objId], 50, 50, GLU_LINE);      
-      glDisable(GL_TEXTURE_2D);
-   }
-   
-   
-   if (mEnableLightSource && mSunPresent)
-   {
-      glDisable(GL_LIGHTING);
-   }
-   
-} // end DrawObject(const wxString &objName)
 
 
 //------------------------------------------------------------------------------
@@ -2367,18 +1649,20 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
 {
    #if DEBUG_DRAW
    MessageInterface::ShowMessage
-      ("==========> DrawObjectOrbit() entered, frame=%d, mLastIndex=%d\n", frame,
-       mLastIndex);
+      ("==========> DrawObjectOrbit() entered, frame=%d, mLastIndex=%d, mObjectCount=%d\n",
+       frame, mLastIndex, mObjectCount);
    #endif
    
    int objId;
    wxString objName;
    
+   #if 0
    if (mEnableLightSource && mSunPresent)
    {
       // we don't want the orbit paths lit
       glDisable(GL_LIGHTING);
    }
+   #endif
    
    ComputeActualIndex();
    
@@ -2396,6 +1680,7 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
           obj, objId, objName.c_str(), index);
       #endif
       
+      #if 0
       // If not showing orbit just draw object, continue to next one
       if (!mDrawOrbitFlag[index])
       {
@@ -2410,19 +1695,52 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
          
          continue;
       }
+      #endif
       
       #if 0
-      // always draw orbit trajectory
+      //---------------------------------------------------------
+      //draw central body texture map
+      //---------------------------------------------------------      
+      if (mShowObjectMap[objName])
+      {
+         if (objName == mCentralBodyName)
+            DrawCentralBodyTexture();         
+      }
+      #endif
+      
+      #if 0
+      if (mObjectArray[obj]->IsOfType(Gmat::CELESTIAL_BODY))
+         continue;
+      #endif
+      
+      #if DEBUG_DRAW_DEBUG
+      DrawDebugMessage(" Before DrawOrbit --- ", GmatColor::RED32, 0, 100);
+      #endif
+      
+      #if 1
+      #if DEBUG_DRAW
+      MessageInterface::ShowMessage("---> Calling DrawOrbit(%s, %d, %d)\n", objName.c_str(), obj, objId);
+      #endif
+      
+      // always draw spacecraft orbit trajectory
       DrawOrbit(objName, obj, objId);
       #endif
       
+      #if DEBUG_DRAW_DEBUG
+      DrawDebugMessage(" After DrawOrbit  --- ", GmatColor::RED32, 0, 120);
+      #endif
+      
+      #if 0
       //---------------------------------------------------------
       //draw object with texture
       //---------------------------------------------------------      
       if (mShowObjectMap[objName])
-      {            
-         DrawObjectTexture(objName, obj, objId, frame);
+      {
+         if (objName != mCentralBodyName)
+            DrawObjectTexture(objName, obj, objId, frame);
       }
+      #endif
+      
    }
    
    #if DEBUG_DRAW
@@ -2432,126 +1750,10 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
 
 
 //------------------------------------------------------------------------------
-// void DrawOrbit(const wxString &objName, int obj, int objId)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
-{   
-   glPushMatrix();
-   glBegin(GL_LINES);
-   
-   #ifdef DEBUG_DRAW
-   MessageInterface::ShowMessage
-      ("==========> DrawOrbit() objName='%s', drawing first part\n",
-       objName.c_str());
-   #endif
-   
-   // Draw first part from the ring buffer
-   for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
-   {
-      DrawOrbitLines(i, objName, obj, objId);
-   }
-   
-   // Draw second part from the ring buffer
-   if (mEndIndex2 != -1 && mBeginIndex1 != mBeginIndex2)
-   {
-      #ifdef DEBUG_DRAW
-      MessageInterface::ShowMessage
-         ("==========> DrawOrbit() objName='%s', drawing second part\n",
-          objName.c_str());
-      #endif
-      
-      for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
-      {
-         DrawOrbitLines(i, objName, obj, objId);
-      }
-   }
-   
-   glEnd();
-   glPopMatrix();
-}
-
-
-//------------------------------------------------------------------------------
-// void DrawOrbitLines(int i, const wxString &objName, int obj, int objId)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
-                                     int objId)
-{
-   int index1 = 0, index2 = 0;
-   
-   #ifdef DEBUG_ORBIT_LINES
-   MessageInterface::ShowMessage
-      ("DrawOrbitLines() entered, i=%d, objName='%s', obj=%d, objId=%d, "
-       "mTime[%3d]=%f, mTime[%3d]=%f\n", i, objName.c_str(), obj, objId, i,
-       mTime[i], i-1, mTime[i-1]);
-   #endif
-   
-   // Draw object orbit line based on points
-   if ((mTime[i] > mTime[i-1]) ||
-       (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop
-   {
-      index1 = objId * MAX_DATA * 3 + (i-1) * 3;
-      index2 = objId * MAX_DATA * 3 + i * 3;
-      
-      Rvector3 r1(mObjectViewPos[index1+0], mObjectViewPos[index1+1],
-                  mObjectViewPos[index1+2]);
-      
-      Rvector3 r2(mObjectViewPos[index2+0], mObjectViewPos[index2+1],
-                  mObjectViewPos[index2+2]);
-      
-      // if object position magnitude is 0, skip
-      if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
-         return;
-      
-      // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
-      #ifdef SKIP_OVER_LIMIT_DATA
-      static Real sMaxDiffDist = 100000.0;
-      // if difference is more than sMaxDiffDist skip
-      if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||
-          (Abs(r2[1]- r1[1]) > sMaxDiffDist && (SignOf(r2[1]) != SignOf(r1[1]))) ||
-          (Abs(r2[2]- r1[2]) > sMaxDiffDist && (SignOf(r2[2]) != SignOf(r1[2]))))
-      {
-         #if DEBUG_SHOW_SKIP
-         MessageInterface::ShowMessage
-            ("   plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
-             GetName().c_str(), i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
-             r2.ToString().c_str());
-         #endif
-         return;
-      }
-      #endif
-      
-      // If drawing orbit lines
-      int colorIndex = objId * MAX_DATA + i;
-      if (mDrawOrbitFlag[colorIndex])
-      {
-         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT)){
-            // We are drawing a spacecraft orbit.  This includes solver passes.
-            *sIntColor = mObjectOrbitColor[colorIndex];}
-         else {
-            // We are drawing some other trajectory, say for a planet.
-            *sIntColor = mObjectColorMap[objName].GetIntColor();}
-         
-         // PS - Rendering.cpp
-         DrawLine(sGlColor, r1, r2);
-      }
-      
-      // save last valid frame to show object at final frame
-      mObjLastFrame[objId] = i;
-      
-      #ifdef DEBUG_ORBIT_LINES
-      MessageInterface::ShowMessage
-         ("DrawOrbitLines() leaving, mObjLastFrame[%d] = %d\n", objId, i);
-      #endif
-   }
-}
-
-
-//------------------------------------------------------------------------------
 // void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame)
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
-                                        int objId, int frame)
+                                          int objId, int frame)
 {
    if (mNumData < 1)
       return;
@@ -2582,6 +1784,7 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
    // without this, lines are drawn dim (loj: 2007.06.11)
    glDisable(GL_TEXTURE_2D);
    
+   #if 0
    //-------------------------------------------------------
    // enable light source on option
    //-------------------------------------------------------
@@ -2604,32 +1807,24 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       // Dunn is setting sunlight to be a little dimmer.
       mLight.SetColor(0.8f,0.8f,0.8f,1.0f);
       
-      // opposite direction with  sun earth line
-      //lightPos[0] = mObjectViewPos[index+0];
-      //lightPos[1] = mObjectViewPos[index+1];
-      //lightPos[2] = mObjectViewPos[index+2];
-      // If 4th value is zero, the light source is directional one, and
-      // (x,y,z) values describes its direction.
-      // If 4th value is nonzero, the light is positional, and the (x,y,z) values
-      // specify the location of the light in homogeneous object coordinates.
-      // By default, a positional light radiates in all directions.
-      
       // reset the light position to reflect the transformations
       float lpos[4], *color = mLight.GetColor();
       mLight.GetPositionf(lpos);
       glLightfv(GL_LIGHT0, GL_POSITION, lpos);
       glLightfv(GL_LIGHT0, GL_SPECULAR, color);
-      //glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
       
       // enable the lighting
       glEnable(GL_LIGHTING);
       glEnable(GL_LIGHT0);
    }
+   #endif
    
-   // Draw spacecraft
+   
+   // Draw spacecraft model
    if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
    {
       #if 0
+      
       #if DEBUG_DRAW
       MessageInterface::ShowMessage("==> Drawing spacecraft '%s'\n", objName.c_str());
       #endif
@@ -2700,6 +1895,7 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
          //DrawSpacecraft(mScRadius, yellow, red);
          DrawSpacecraft(mScRadius, yellow, sGlColor);
       }
+      
       #endif
    }
    else
@@ -2713,7 +1909,9 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       glTranslatef(mObjectViewPos[index1+0],mObjectViewPos[index1+1],mObjectViewPos[index1+2]);
       #endif
       
+      #if 0
       DrawObject(objName, obj);
+      #endif
    }
    
    if (mEnableLightSource && mSunPresent)
@@ -2722,6 +1920,400 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
    }
    
    glPopMatrix();
+} // DrawObjectTexture
+
+
+//------------------------------------------------------------------------------
+//  void DrawObject(const wxString &objName, int obj)
+//------------------------------------------------------------------------------
+/**
+ * Draws object sphere and maps texture image.
+ *
+ * @param  objName  Name of the object
+ * @param  obj      Index of the object for mObjectArray
+ */
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
+{
+   int frame = mLastIndex;
+   int objId = GetObjectId(objName);
+   
+   #if DEBUG_DRAW > 1
+   MessageInterface::ShowMessage
+      ("GroundTrackCanvas::DrawObject() drawing:%s, obj=%d, objId:%d, frame:%d\n",
+       objName.c_str(), obj, objId, frame);
+   #endif
+   
+   #if 0
+   //-------------------------------------------------------
+   // enable light source on option
+   //-------------------------------------------------------
+   if (mEnableLightSource && mSunPresent)
+   {
+      int sunId = GetObjectId("Sun");
+      int index = sunId * MAX_DATA * 3 + frame * 3;
+      
+      if (sunId == UNKNOWN_OBJ_ID)
+      {
+         mLight.SetPosition(0.01f, 1.0f, 0.3f);
+      }
+      else
+      {
+         index = sunId * MAX_DATA * 3 + frame * 3;
+         mLight.SetPosition(mObjectViewPos[index+0],mObjectViewPos[index+1],mObjectViewPos[index+2]);
+      }
+      mLight.SetDirectional(true);
+      
+      // Dunn is setting sun level a little dimmer to avoid washing out the models.
+      mLight.SetColor(0.8f,0.8f,0.8f,1.0f);  
+      // If 4th value is zero, the light source is directional one, and
+      // (x,y,z) values describes its direction.
+      // If 4th value is nonzero, the light is positional, and the (x,y,z) values
+      // specify the location of the light in homogeneous object coordinates.
+      // By default, a positional light radiates in all directions.
+      
+      float lpos[4];
+      mLight.GetPositionf(lpos);
+      glLightfv(GL_LIGHT0, GL_POSITION, lpos);
+      glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
+      
+      // enable the lighting
+      glEnable(GL_LIGHTING);
+   }
+   #endif
+   
+   
+   //-------------------------------------------------------
+   // draw object with texture on option
+   //-------------------------------------------------------
+   if (mTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
+   {
+      #if 0
+      //glColor4f(1.0, 1.0, 1.0, 1.0);
+      glColor3f(1.0, 1.0, 1.0);
+      glMultMatrixd(mCoordMatrix.GetDataVector());
+      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName]);
+      glEnable(GL_TEXTURE_2D);
+      #endif
+      
+      #if 0
+      if (objName == "Sun")
+      {
+         glDisable(GL_LIGHTING);
+         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL, GLU_INSIDE);
+         glEnable(GL_LIGHTING);
+      }
+      else
+         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL);     
+      
+      glDisable(GL_TEXTURE_2D);
+      
+      //----------------------------------------------------
+      // draw grid on option
+      //----------------------------------------------------
+      if (mDrawGrid && objName == "Earth")
+      {
+         // This makes lines thicker
+         //glEnable(GL_LINE_SMOOTH);
+         //glLineWidth(1.5);
+         
+         // Just draw a wireframe sphere little bigger to show grid
+         //glColor3f(0.20, 0.20, 0.50); // dark blue
+         glColor3f(0.0, 0.0, 0.0);      // black
+         //glColor3f(0.50, 0.10, 0.20); // maroon
+         GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.03;
+         DrawSphere(radius, 36, 18, GLU_LINE, GLU_OUTSIDE, GL_NONE, GL_FALSE);
+      }
+      #endif
+   }
+   else
+   {
+      #if DEBUG_DRAW
+      MessageInterface::ShowMessage
+         ("*** WARNING *** GroundTrackCanvas::DrawObject() %s texture not found.\n",
+          objName.c_str());
+      #endif
+      
+      // Just draw a wireframe sphere if we get here
+      glColor3f(0.20f, 0.20f, 0.50f);
+      DrawSphere(mObjectRadius[objId], 50, 50, GLU_LINE);      
+      glDisable(GL_TEXTURE_2D);
+   }
+   
+   #if 0
+   if (mEnableLightSource && mSunPresent)
+   {
+      glDisable(GL_LIGHTING);
+   }
+   #endif
+   
+} // end DrawObject(const wxString &objName)
+
+
+//------------------------------------------------------------------------------
+// void DrawOrbit(const wxString &objName, int obj, int objId)
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
+{
+   #if 0
+   // We don't want to draw celestial body
+   if (objName == "Earth" || objName == "Sun")
+      return;
+   #endif
+   
+   #if DEBUG_DRAW_DEBUG
+   DrawDebugMessage(" Entered DrawOrbit  --- ", GmatColor::RED32, 0, 200);
+   #endif
+   
+   #ifdef DEBUG_DRAW
+   MessageInterface::ShowMessage
+      ("==========> DrawOrbit() objName='%s', drawing first part\n",
+       objName.c_str());
+   #endif
+
+   #if 0
+   // draw X here for testing
+   glColor3f(1.0, 1.0, 1.0);
+   glBegin(GL_LINES);
+   glVertex2f(-180.0, -90.0);
+   glVertex2f(180.0, 90.0);
+   glEnd();
+   
+   glBegin(GL_LINES);
+   glVertex2f(-180.0, 90.0);
+   glVertex2f(180.0, -90.0);
+   glEnd();
+   #endif
+   
+   // Draw first part from the ring buffer
+   for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
+   {
+      DrawOrbitLines(i, objName, obj, objId);
+   }
+   
+   // Draw second part from the ring buffer
+   if (mEndIndex2 != -1 && mBeginIndex1 != mBeginIndex2)
+   {
+      #ifdef DEBUG_DRAW
+      MessageInterface::ShowMessage
+         ("==========> DrawOrbit() objName='%s', drawing second part\n",
+          objName.c_str());
+      #endif
+      
+      for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
+      {
+         DrawOrbitLines(i, objName, obj, objId);
+      }
+   }
+   
+   #if DEBUG_DRAW_DEBUG
+   DrawDebugMessage(" Leaving DrawOrbit  --- ", GmatColor::RED32, 0, 240);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawOrbitLines(int i, const wxString &objName, int obj, int objId)
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
+                                       int objId)
+{
+   #if DEBUG_DRAW_DEBUG
+   DrawDebugMessage(" Entered DrawOrbitLines  --- ", GmatColor::RED32, 0, 300);
+   #endif
+   
+   int index1 = 0, index2 = 0;
+   
+   #ifdef DEBUG_ORBIT_LINES
+   MessageInterface::ShowMessage
+      ("DrawOrbitLines() entered, i=%d, objName='%s', obj=%d, objId=%d, "
+       "mTime[%3d]=%f, mTime[%3d]=%f\n", i, objName.c_str(), obj, objId, i,
+       mTime[i], i-1, mTime[i-1]);
+   #endif
+   
+   // Draw object orbit line based on points
+   if ((mTime[i] > mTime[i-1]) ||
+       (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop
+   {
+      index1 = objId * MAX_DATA * 3 + (i-1) * 3;
+      index2 = objId * MAX_DATA * 3 + i * 3;
+      
+      Rvector3 r1(mObjectViewPos[index1+0], mObjectViewPos[index1+1],
+                  mObjectViewPos[index1+2]);
+      
+      Rvector3 r2(mObjectViewPos[index2+0], mObjectViewPos[index2+1],
+                  mObjectViewPos[index2+2]);
+      
+      // if object position magnitude is 0, skip
+      if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
+         return;
+      
+      // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
+      #ifdef SKIP_OVER_LIMIT_DATA
+      static Real sMaxDiffDist = 100000.0;
+      // if difference is more than sMaxDiffDist skip
+      if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||
+          (Abs(r2[1]- r1[1]) > sMaxDiffDist && (SignOf(r2[1]) != SignOf(r1[1]))) ||
+          (Abs(r2[2]- r1[2]) > sMaxDiffDist && (SignOf(r2[2]) != SignOf(r1[2]))))
+      {
+         #if DEBUG_SHOW_SKIP
+         MessageInterface::ShowMessage
+            ("   plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
+             GetName().c_str(), i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
+             r2.ToString().c_str());
+         #endif
+         return;
+      }
+      #endif
+            
+      // If drawing orbit lines
+      int colorIndex = objId * MAX_DATA + i;
+      if (mDrawOrbitFlag[colorIndex])
+      {
+         
+         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
+         {
+            // We are drawing a spacecraft orbit.  This includes solver passes.
+            *sIntColor = mObjectOrbitColor[colorIndex];
+         }
+         else
+         {
+            // We are drawing some other trajectory, say for a groundstation.
+            *sIntColor = mObjectColorMap[objName].GetIntColor();
+         }
+         
+         Rvector3 v1(mObjectViewVel[index1+0], mObjectViewVel[index1+1],
+                     mObjectViewVel[index1+2]);
+         
+         Rvector3 v2(mObjectViewVel[index2+0], mObjectViewVel[index2+1],
+                     mObjectViewVel[index2+2]);
+         
+         // We don't want to draw celestial body
+         if (objName != "Earth" && objName != "Sun")
+         {
+            DrawGroundTrackLines(r1, v1, r2, v2);
+         }
+      }
+      
+      
+      // save last valid frame to show object at final frame
+      mObjLastFrame[objId] = i;
+      
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage
+         ("DrawOrbitLines() leaving, mObjLastFrame[%d] = %d\n", objId, i);
+      #endif
+   }
+   
+   #if DEBUG_DRAW_DEBUG
+   DrawDebugMessage(" Leaving DrawOrbitLines  --- ", GmatColor::RED32, 0, 420);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1, Rvector3 &r2, Rvector3 &v2)
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
+                                             Rvector3 &r2, Rvector3 &v2)
+{
+   #if DEBUG_DRAW_LINE
+   MessageInterface::ShowMessage("DrawGroundTrackLines() entered\n");
+   #endif
+   
+   #if DEBUG_DRAW_DEBUG
+   DrawDebugMessage(" Entered DrawGroundTrackLines --- ", GmatColor::RED32, 0, 500);
+   #endif
+      
+   // Compute latitude and longitude
+   Real lon1, lat1, lon2, lat2;
+   r1.ComputeLongitudeLatitude(lon1, lat1);
+   r2.ComputeLongitudeLatitude(lon2, lat2);
+   
+   // Comvert to degree
+   lon1 *= GmatMathConstants::DEG_PER_RAD;
+   lat1 *= GmatMathConstants::DEG_PER_RAD;
+   lon2 *= GmatMathConstants::DEG_PER_RAD;
+   lat2 *= GmatMathConstants::DEG_PER_RAD;
+   
+   #if DEBUG_DRAW_LINE
+   MessageInterface::ShowMessage("---> lon1=%f, lat1=%f, lon2=%f, lat2=%f\n", lon1, lat1, lon2, lat2);
+   #endif
+   
+   // Turn on TEXTURE_2D to dim the color, alpha doen't seem to work!!
+   glEnable(GL_TEXTURE_2D);
+   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+   // Why  it doesn't use alpha?
+   //glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, 255);
+   glLineWidth(0.5);
+   
+   Integer dir1 = GmatMathUtil::SignOf(v1[1] * r1[0] - v1[0] * r1[1]);
+   Integer dir2 = GmatMathUtil::SignOf(v2[1] * r2[0] - v2[0] * r2[1]);
+   Real m = (lat2 - lat1) / (lon2 - lon1);
+   Real plusLon2 = GmatMathUtil::Mod(lon2, GmatMathConstants::TWO_PI_DEG);
+   Real plusLon1 = GmatMathUtil::Mod(lon1, GmatMathConstants::TWO_PI_DEG);
+   Real minusLon2 = GmatMathUtil::Mod(lon2, -GmatMathConstants::TWO_PI_DEG);
+   Real minusLon1 = GmatMathUtil::Mod(lon1, -GmatMathConstants::TWO_PI_DEG);
+   Real m1, lat3;
+   
+   #if DEBUG_DRAW_LINE
+   MessageInterface::ShowMessage
+      ("   plusLon2=%f, plusLon1=%f, minusLon2=%f, minusLon1=%f\n",
+       plusLon2, plusLon1, minusLon2, minusLon1);
+   #endif
+   
+   #if DEBUG_DRAW_LINE
+   MessageInterface::ShowMessage
+      ("---> dir1=%d, dir2=%d, m=%f\n", dir1, dir2, m);
+   #endif
+   
+   // New point wrapps off RHS border
+   if (dir2 == 1 && dir1 == 1 &&
+       plusLon1 < GmatMathConstants::PI_DEG &&
+       plusLon2 > GmatMathConstants::PI_DEG)
+   {
+      m1 = (lat2 - lat1) / (plusLon2 - plusLon1);
+      lat3 = m1 * (GmatMathConstants::PI_DEG - plusLon2) + lat2;
+      #if DEBUG_DRAW_LINE
+      MessageInterface::ShowMessage("------> at RHS border, lat3=%f\n", lat3);
+      #endif
+      
+      DrawLine(lon1, lat1, GmatMathConstants::PI_DEG, lat3);
+      DrawLine(-GmatMathConstants::PI_DEG, lat3, lon2, lat2);
+   }
+   // New point wrapps off LHS border
+   else if (dir2 == -1 && dir1 == -1 &&
+            minusLon2 < -GmatMathConstants::PI_DEG &&
+            minusLon1 > -GmatMathConstants::PI_DEG)
+   {
+      m1 = (lat2 - lat1) / (minusLon2 - minusLon1);
+      lat3 = m1 * (-GmatMathConstants::PI_DEG - minusLon2) + lat2;
+      #if DEBUG_DRAW_LINE
+      MessageInterface::ShowMessage("------> at LHS border, lat3=%f\n", lat3);
+      #endif
+      
+      DrawLine(lon1, lat1, -GmatMathConstants::PI_DEG, lat3);
+      DrawLine(GmatMathConstants::PI_DEG, lat3, lon2, lat2);
+   }
+   else
+   {
+      #if DEBUG_DRAW_LINE
+      MessageInterface::ShowMessage("------> at normal drawing\n");
+      #endif
+      
+      DrawLine(lon1, lat1, lon2, lat2);
+   }
+   
+   // Turn off TEXTURE_2D to go back to normal light
+   glDisable(GL_TEXTURE_2D);
+   
+   #if DEBUG_DRAW_DEBUG
+   DrawDebugMessage(" Leaving DrawGroundTrackLines --- ", GmatColor::RED32, 0, 500);
+   #endif
+   
+   #if DEBUG_DRAW_LINE
+   MessageInterface::ShowMessage("DrawGroundTrackLines() leaving\n");
+   #endif
 }
 
 
@@ -2789,30 +2381,24 @@ void GroundTrackCanvas::DrawCentralBodyTexture()
    #ifdef DEBUG_DRAW
    MessageInterface::ShowMessage("DrawCentralBodyTexture() entered\n");
    #endif
-   
-   wxString objName = "Earth";
-   int objId = GetObjectId(objName);
-   
-   glPushMatrix();
-   
-   if (mObjectTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
+      
+   if (mTextureIdMap[mCentralBodyName] != GmatPlot::UNINIT_TEXTURE)
    {
       glLoadIdentity();
       glColor3f(1.0, 1.0, 1.0);
       glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, mObjectTextureIdMap[objName]);
-      
+      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[mCentralBodyName]);
       glBegin(GL_QUADS);
       glTexCoord2f(0.0, 0.0);  glVertex2f(-180.0, -90.0);
       glTexCoord2f(1.0, 0.0);  glVertex2f(+180.0, -90.0);
       glTexCoord2f(1.0, 1.0);  glVertex2f(+180.0, +90.0);
       glTexCoord2f(0.0, 1.0);  glVertex2f(-180.0, +90.0);
       glEnd();
-      
       glDisable(GL_TEXTURE_2D);
+      
+      // reset to drawing mode
+      SetProjection();
    }
-   
-   glPopMatrix();
    
    #ifdef DEBUG_DRAW
    MessageInterface::ShowMessage("DrawCentralBodyTexture() leaving\n");
@@ -3044,5 +2630,33 @@ void GroundTrackCanvas::ConvertObject(int objId, int index)
           inState[1], inState[2], outState[0], outState[1], outState[2]);
    }
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos)
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
+                                         int xpos, int ypos)
+{
+   glDisable(GL_LIGHTING);
+   glDisable(GL_LIGHT0);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(0.0, (GLfloat)mCanvasSize.x, 0.0, (GLfloat)mCanvasSize.y);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+   
+   GlColorType *color = (GlColorType*)&textColor;
+   glColor3ub(color->red, color->green, color->blue);
+   glRasterPos2i(xpos, ypos);
+   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.c_str());
+   
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(-180.0, 180.0, -90.0, 90.0);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+   
 }
 

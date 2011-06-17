@@ -57,6 +57,7 @@ public:
                         CoordinateSystem *viewUpCs);
    
    static void SetGl2dDrawingOption(const std::string &plotName,
+                        const std::string &centralBodyName,
                         const std::string &textureMap,
                         Integer footPrintOption);
    
@@ -85,8 +86,9 @@ public:
    
    static bool IsThere(const std::string &plotName);
    
-   static bool DeleteGlPlot(const std::string &plotName);
+   static bool InitializeGlPlot(const std::string &plotName);
    static bool RefreshGlPlot(const std::string &plotName);
+   static bool DeleteGlPlot(const std::string &plotName);
    static bool SetGlEndOfRun(const std::string &plotName);
    
    static bool UpdateGlPlot(const std::string &plotName,

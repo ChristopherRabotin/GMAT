@@ -350,6 +350,7 @@ void GuiPlotReceiver::SetGlCoordSystem(const std::string &plotName,
 // void SetGl2dDrawingOption(const std::string &plotName, ...)
 //------------------------------------------------------------------------------
 void GuiPlotReceiver::SetGl2dDrawingOption(const std::string &plotName,
+                                           const std::string &centralBodyName,
                                            const std::string &textureMap,
                                            Integer footPrintOption)
 {
@@ -362,7 +363,7 @@ void GuiPlotReceiver::SetGl2dDrawingOption(const std::string &plotName,
       
       if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
       {         
-         frame->SetGl2dDrawingOption(textureMap, footPrintOption);         
+         frame->SetGl2dDrawingOption(centralBodyName, textureMap, footPrintOption);         
          break;
       }
    }
@@ -540,23 +541,19 @@ bool GuiPlotReceiver::IsThere(const std::string &plotName)
 
 
 //------------------------------------------------------------------------------
-//  bool DeleteGlPlot(const std::string &plotName)
+//  bool InitializeGlPlot(const std::string &plotName)
 //------------------------------------------------------------------------------
 /*
- * Deletes OpenGlPlot by plot name.
- *
- * @param <plotName> name of plot to be deleted
+ * Refreshes OpenGlPlot.
  */
 //------------------------------------------------------------------------------
-bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
+bool GuiPlotReceiver::InitializeGlPlot(const std::string &plotName)
 {
-   GmatAppData *gmatAppData = GmatAppData::Instance();
-
-   if (gmatAppData->GetMainFrame() != NULL)
+   if (GmatAppData::Instance()->GetMainFrame() != NULL)
    {
-      #if DEBUG_PLOTIF_GL_DELETE
+      #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
-         ("GuiPlotReceiver::DeleteGlPlot() plotName=%s\n", plotName.c_str());
+         ("GuiPlotReceiver::InitializeGlPlot() plotName=%s\n",plotName.c_str());
       #endif
 
       wxString owner = wxString(plotName.c_str());
@@ -568,9 +565,7 @@ bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
 
          if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
          {
-            gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_ORBIT_VIEW);
-            gmatAppData->GetMainFrame()->Tile();
-            break;
+            frame->InitializePlot();
          }
       }
    }
@@ -605,6 +600,46 @@ bool GuiPlotReceiver::RefreshGlPlot(const std::string &plotName)
          if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             frame->RefreshPlot();
+         }
+      }
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool DeleteGlPlot(const std::string &plotName)
+//------------------------------------------------------------------------------
+/*
+ * Deletes OpenGlPlot by plot name.
+ *
+ * @param <plotName> name of plot to be deleted
+ */
+//------------------------------------------------------------------------------
+bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
+{
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+
+   if (gmatAppData->GetMainFrame() != NULL)
+   {
+      #if DEBUG_PLOTIF_GL_DELETE
+      MessageInterface::ShowMessage
+         ("GuiPlotReceiver::DeleteGlPlot() plotName=%s\n", plotName.c_str());
+      #endif
+
+      wxString owner = wxString(plotName.c_str());
+      MdiChildViewFrame *frame = NULL;
+
+      for (int i=0; i<MdiGlPlot::numChildren; i++)
+      {
+         frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+
+         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_ORBIT_VIEW);
+            gmatAppData->GetMainFrame()->Tile();
+            break;
          }
       }
    }

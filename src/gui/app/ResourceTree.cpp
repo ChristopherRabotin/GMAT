@@ -1440,7 +1440,7 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool restartCounte
       {
          AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_GROUND_TRACK_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
-                                         GmatTree::ORBIT_VIEW));
+                                         GmatTree::GROUND_TRACK_PLOT));
       }
       else if (objTypeName == "EphemerisFile")
       {
@@ -2953,12 +2953,16 @@ void ResourceTree::OnAddSubscriber(wxCommandEvent &event)
    if (obj != NULL)
    {
       GmatTree::ResourceIconType iconToUse = GmatTree::RESOURCE_ICON_DEFAULT;
+      GmatTree::ItemType itemType = GmatTree::SUBSCRIBER;
       if (selected == "GroundTrackPlot")
+      {
          iconToUse = GmatTree::RESOURCE_ICON_GROUND_TRACK_PLOT;
+         itemType = GmatTree::GROUND_TRACK_PLOT;
+      }
       
       wxString name = newName.c_str();
       AppendItem(item, name, iconToUse, -1,
-                 new GmatTreeItemData(name, GmatTree::SUBSCRIBER));
+                 new GmatTreeItemData(name, itemType));
       Expand(item);
       
       theGuiManager->UpdateSubscriber();

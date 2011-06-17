@@ -66,6 +66,7 @@ public:
                         CoordinateSystem *viewUpCs) = 0;
    
    virtual void SetGl2dDrawingOption(const std::string &plotName,
+                        const std::string &centralBodyName,
                         const std::string &textureMap,
                         Integer footPrintOption) = 0;
    
@@ -95,8 +96,9 @@ public:
    
    virtual bool IsThere(const std::string &plotName) = 0;
    
-   virtual bool DeleteGlPlot(const std::string &plotName) = 0;
+   virtual bool InitializeGlPlot(const std::string &plotName) = 0;
    virtual bool RefreshGlPlot(const std::string &plotName) = 0;
+   virtual bool DeleteGlPlot(const std::string &plotName) = 0;
    virtual bool SetGlEndOfRun(const std::string &plotName) = 0;
    
    virtual bool UpdateGlPlot(const std::string &plotName,

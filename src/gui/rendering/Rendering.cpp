@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Phillip Silvia, Jr.
 // Created: 2009/06/17
 /**
@@ -109,6 +107,23 @@ void DrawLine(float red, float green, float blue, Rvector3 start, Rvector3 end)
    glEnd();
    glPopMatrix();
 }
+
+
+//------------------------------------------------------------------------------
+// void DrawLine(double x1, double y1, double x2, double y2)
+//------------------------------------------------------------------------------
+/**
+ * Draw a line from one point to another point in 2D
+ */
+//------------------------------------------------------------------------------
+void DrawLine(double x1, double y1, double x2, double y2)
+{
+   glBegin(GL_LINES);
+   glVertex2d(x1, y1);
+   glVertex2d(x2, y2);
+   glEnd();
+}
+
 
 //------------------------------------------------------------------------------
 // void DrawCube(float x, float y, float z)

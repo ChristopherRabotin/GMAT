@@ -45,17 +45,8 @@ public:
    
    // getters
    bool  GetUseViewPointInfo() { return mUseInitialViewPoint; }
-   bool  GetDrawWireFrame() { return mDrawWireFrame; }
-   bool  GetDrawXyPlane() { return mDrawXyPlane; }
-   bool  GetDrawEcPlane() { return mDrawEcPlane; }
-   bool  GetDrawSunLine() { return mDrawSunLine; }
-   bool  GetDrawAxes() { return mDrawAxes; }
-   bool  GetDrawGrid() { return mDrawGrid; }
-   bool  GetRotateAboutXY() { return mRotateXy; }
    bool  IsAnimationRunning() { return mIsAnimationRunning; }
-   unsigned int GetXyPlaneColor() { return mXyPlaneColor; }
-   unsigned int GetEcPlaneColor() { return mEcPlaneColor; }
-   unsigned int GetSunLineColor() { return mSunLineColor; }
+   
    float GetDistance() { return mAxisLength; }
    int GetAnimationUpdateInterval() { return mUpdateInterval; }
    int GetAnimationFrameIncrement() { return mFrameInc; }
@@ -65,7 +56,6 @@ public:
    const wxArrayString& GetValidCSNames() { return mValidCSNames; }
    const wxStringBoolMap& GetShowObjectMap() { return mShowObjectMap; }
    const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap; }
-   //wxString GetGotoObjectName();
    
    // setters
    void SetEndOfRun(bool flag = true);
@@ -74,24 +64,13 @@ public:
    void SetUseInitialViewDef(bool flag) { mUseInitialViewPoint = flag; }
    void SetAnimationUpdateInterval(int value) { mUpdateInterval = value; }
    void SetAnimationFrameIncrement(int value) { mFrameInc = value; }
-   void SetDrawWireFrame(bool flag) { mDrawWireFrame = flag; }
-   void SetDrawStars(bool flag) { mDrawStars = flag; }
-   void SetDrawConstellations(bool flag) { mDrawConstellations = flag; }
-   void SetStarCount(int count) { mStarCount = count; }
-   void SetDrawXyPlane(bool flag) { mDrawXyPlane = flag; }
-   void SetDrawEcPlane(bool flag) { mDrawEcPlane = flag; }
-   void SetDrawSunLine(bool flag) { mDrawSunLine = flag; }
-   void SetDrawAxes(bool flag) { mDrawAxes = flag; }
-   void SetDrawGrid(bool flag) { mDrawGrid = flag; }
-   void SetRotateAboutXY(bool flag) { mRotateXy = flag; }
-   void SetXyPlaneColor(unsigned int color) { mXyPlaneColor = color; }
-   void SetEcPlaneColor(unsigned int color) { mEcPlaneColor = color; }
-   void SetSunLineColor(unsigned int color) { mSunLineColor = color; }
+   
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
    void SetUserInterrupt() { mHasUserInterrupted = true; }
    
-   void SetGl2dDrawingOption(const std::string &textureMap,
+   void SetGl2dDrawingOption(const std::string &centralBodyName,
+                        const std::string &textureMap,
                         Integer footPrintOption);
    
    
@@ -102,33 +81,10 @@ public:
    void ZoomIn();
    void ZoomOut();
    void DrawWireFrame(bool flag);
-   void DrawXyPlane(bool flag);
-   void DrawEcPlane(bool flag);
-   void OnDrawAxes(bool flag);
+      
    void OnDrawGrid(bool flag);
    void DrawInOtherCoordSystem(const wxString &csName);
-   //void GotoObject(const wxString &objName);
-   //void GotoOtherBody(const wxString &bodyName);
    void ViewAnimation(int interval, int frameInc = 30);
-   
-   void SetGlObject(const StringArray &objNames,
-                    const UnsignedIntArray &objOrbitColors,
-                    const std::vector<SpacePoint*> &objectArray);
-   
-   // SolarSystem
-   void SetSolarSystem(SolarSystem *ss);
-   
-   // CoordinateSystem
-   void SetGlCoordSystem(CoordinateSystem *internalCs,
-                         CoordinateSystem *viewCs,
-                         CoordinateSystem *viewUpCs);
-   
-   // viewpoint
-   void SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
-                        SpacePoint *vdObj, Real vscaleFactor,
-                        const Rvector3 &vpRefVec, const Rvector3 &vpVec,
-                        const Rvector3 &vdVec, const std::string &upAxis,
-                        bool usevpRefVec, bool usevpVec, bool usevdVec);
    
    // drawing toggle switch
    void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray);
@@ -137,7 +93,7 @@ public:
    // performance
    void SetUpdateFrequency(Integer updFreq);
    void SetNumPointsToRedraw(Integer numPoints);
-   
+      
    // user actions
    void TakeAction(const std::string &action);
    
@@ -159,13 +115,7 @@ private:
    static const Real MAX_ZOOM_IN;// = 3700.0;
    static const Real RADIUS_ZOOM_RATIO;// = 2.2;
    static const Real DEFAULT_DIST;// = 30000.0;
-   
-   // stars and options
-   GLStars *mStars;
-   int mStarCount;
-   bool mDrawStars;
-   bool mDrawConstellations;
-   
+      
    // camera
    Camera mCamera;
    
@@ -191,21 +141,11 @@ private:
    // view model
    bool mUseGluLookAt;
    
-   // draw option
+   // drawing option
    float mAxisLength;
-   bool mDrawWireFrame;
-   bool mDrawXyPlane;
-   bool mDrawEcPlane;
-   bool mDrawSunLine;
-   bool mDrawAxes;
-   bool mDrawGrid;
    
-   // color
-   unsigned int mXyPlaneColor;
-   unsigned int mEcPlaneColor;
-   unsigned int mSunLineColor;
-   
-   // texture
+   // central body
+   std::string mCentralBodyName;
    std::string mCentralBodyTextureFile;
    
    // foot print option
@@ -297,21 +237,11 @@ private:
    float mCurrRotZAngle;
    float mCurrViewDist;
    
-   #if 1
-   // windows specific functions
-   bool SetPixelFormatDescriptor();
-   void SetDefaultGLFont();
-   #endif
-   
    // view point
    void SetDefaultViewPoint();
    void InitializeViewPoint();
-   
-   // texture
-   bool LoadGLTextures();
-   GLuint BindTexture(SpacePoint *obj, const wxString &objName);
    void SetDefaultView();
-   
+      
    // view objects
    void SetProjection();
    void SetupWorld();
@@ -322,11 +252,13 @@ private:
    // drawing objects
    void DrawFrame();
    void DrawPlot();
-   void DrawObject(const wxString &objName, int obj);
    void DrawObjectOrbit(int frame);
-   void DrawOrbit(const wxString &objName, int obj, int objId);
-   void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);   
    void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame);
+   void DrawObject(const wxString &objName, int obj);
+   void DrawOrbit(const wxString &objName, int obj, int objId);
+   void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);
+   void DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
+                             Rvector3 &r2, Rvector3 &v2);
    void DrawSolverData();
    
    void DrawCentralBodyTexture();
@@ -339,9 +271,8 @@ private:
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
    
-   // for utility
-   void ComputeLongitudeLst(Real time, Real x, Real y, Real *meanHourAngle,
-                            Real *longitude, Real *localSiderealTime);
+   // for debug
+   void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos);
    
    // Linux specific fix
    #ifdef __WXGTK__
