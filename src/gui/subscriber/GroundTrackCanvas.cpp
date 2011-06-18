@@ -377,7 +377,7 @@ void GroundTrackCanvas::SetGl2dDrawingOption(const std::string &centralBodyName,
    #endif
    mCentralBodyName = centralBodyName;
    mCentralBodyTextureFile = textureMap;
-   mTextureFileMap[mCentralBodyName] = textureMap;
+   mTextureFileMap[mCentralBodyName.c_str()] = textureMap;
    mFootPrintOption = footPrintOption;
 }
 
@@ -2382,12 +2382,12 @@ void GroundTrackCanvas::DrawCentralBodyTexture()
    MessageInterface::ShowMessage("DrawCentralBodyTexture() entered\n");
    #endif
       
-   if (mTextureIdMap[mCentralBodyName] != GmatPlot::UNINIT_TEXTURE)
+   if (mTextureIdMap[mCentralBodyName.c_str()] != GmatPlot::UNINIT_TEXTURE)
    {
       glLoadIdentity();
       glColor3f(1.0, 1.0, 1.0);
       glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[mCentralBodyName]);
+      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[mCentralBodyName.c_str()]);
       glBegin(GL_QUADS);
       glTexCoord2f(0.0, 0.0);  glVertex2f(-180.0, -90.0);
       glTexCoord2f(1.0, 0.0);  glVertex2f(+180.0, -90.0);
