@@ -68,7 +68,7 @@ namespace BodyFixedStateConverterUtil
 
    Rvector3 GMAT_API SphericalEllipsoidToSpherical(const Rvector3 &sphEll, const Real flattening, const Real meanRadius);
 
-   bool GMAT_API IsValidateStateRepresentation(const std::string &rep);
+   bool GMAT_API IsValidStateRepresentation(const std::string &rep);
    StringArray GMAT_API GetValidRepresentations();
 
 }

@@ -447,9 +447,9 @@ Rvector3 BodyFixedStateConverterUtil::SphericalEllipsoidToSpherical(const Rvecto
 
 
 //---------------------------------------------------------------------------
-// bool BodyFixedStateConverterUtil::IsValidateStateRepresentation(const std::string &rep)
+// bool BodyFixedStateConverterUtil::IsValidStateRepresentation(const std::string &rep)
 //---------------------------------------------------------------------------
-bool BodyFixedStateConverterUtil::IsValidateStateRepresentation(const std::string &rep)
+bool BodyFixedStateConverterUtil::IsValidStateRepresentation(const std::string &rep)
 {
    for (Integer ii = 0; ii < NUM_STATE_REPRESENTATIONS; ii++)
       if (rep == BODY_FIXED_STATE_REPRESENTATION_TEXT[ii]) return true;
