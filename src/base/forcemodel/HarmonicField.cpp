@@ -125,9 +125,6 @@ maxDegree               (maxDeg),
 maxOrder                (maxOrd),
 degree                  (4),
 order                   (4),
-Abar                    (NULL),
-re                      (NULL),
-im                      (NULL),
 filename                (""),
 fileRead                (false),
 inputCSName             ("EarthMJ2000Eq"),
@@ -137,10 +134,7 @@ potPath                 (""),
 inputCS                 (NULL),
 fixedCS                 (NULL),
 targetCS                (NULL),
-offDiags                (NULL),
-abarCoeff1              (NULL),
-abarCoeff2              (NULL)
-//epoch                   (GmatTimeConstants::MJD_OF_J2000)
+eop                     (NULL)
 {
    objectTypeNames.push_back("HarmonicField");
    parameterCount = HarmonicFieldParamCount;
@@ -163,38 +157,6 @@ abarCoeff2              (NULL)
 //------------------------------------------------------------------------------
 HarmonicField::~HarmonicField(void)
 {
-   if (Abar)
-   {
-      for (int i = 0; i <= maxDegree+1; ++i)
-         delete [] Abar[i];
-
-      delete [] Abar;
-   }
-
-   if (re)
-      delete [] re;
-
-   if (im)
-      delete [] im;
-
-   if (offDiags)
-      delete [] offDiags;
-
-   if (abarCoeff1)
-   {
-      for (Integer i = 0; i <= degree+1; ++i)
-         delete [] abarCoeff1[i];
-      
-      delete [] abarCoeff1;
-   }
-
-   if (abarCoeff2)
-   {
-      for (Integer i = 0; i <= degree+1; ++i)
-         delete [] abarCoeff2[i];
-      
-      delete [] abarCoeff2;
-   }
 }
 
 
@@ -215,28 +177,20 @@ maxDegree               (hf.maxDegree),
 maxOrder                (hf.maxOrder),
 degree                  (hf.degree),
 order                   (hf.order),
-Abar                    (NULL),
 r                       (0.0),
 s                       (0.0),
 t                       (0.0),
 u                       (0.0),
-re                      (NULL),
-im                      (NULL),
 filename                (hf.filename),
 fileRead                (false),
 inputCSName             (hf.inputCSName),
 fixedCSName             (hf.fixedCSName),
 targetCSName            (hf.targetCSName),
 potPath                 (hf.potPath),
-//inputCS                 (hf.inputCS),
-//fixedCS                 (hf.fixedCS),
-//targetCS                (hf.targetCS),
 inputCS                 (NULL),
 fixedCS                 (NULL),
 targetCS                (NULL),
-offDiags                (NULL),
-abarCoeff1              (NULL),
-abarCoeff2              (NULL)
+eop                     (hf.eop)
 {
 }
 
@@ -261,13 +215,10 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    maxOrder       = hf.maxOrder;
    degree         = hf.degree;
    order          = hf.order;
-   Abar           = NULL;    // or hf.Abar?
    r              = 0.0;     // or hf.r?
    s              = 0.0;     // or hf.s?
    t              = 0.0;     // or hf.t?
    u              = 0.0;     // or hf.u?
-   re             = NULL;    // or hf.re?
-   im             = NULL;    // or hf.im?
    filename       = hf.filename;
    fileRead       = false;
    inputCSName    = hf.inputCSName;
@@ -277,10 +228,7 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    inputCS        = hf.inputCS;
    fixedCS        = hf.fixedCS;
    targetCS       = hf.targetCS;
-   offDiags       = NULL;
-   abarCoeff1     = NULL;
-   abarCoeff2     = NULL;
-
+   eop            = hf.eop;
    return *this;
 }
 
@@ -311,14 +259,13 @@ bool HarmonicField::Initialize()
    if (!fixedCS) throw ODEModelException(
                  "Body fixed coordinate system undefined for Harmonic Field "
                   + instanceName);
-   //if (!targetCS) throw ODEModelException(
-   //               "Target coordinate system undefined for Harmonic Field "
-   //               + instanceName);
    if (!targetCS) targetCS = inputCS;
 
-   // initialize the body
-   //body = solarSystem->GetBody(bodyName);
-   return legendreP_init();
+   if (!eop) throw ODEModelException(
+             "EOP file is undefined for Harmonic Field " + instanceName);
+
+   hMinitialized = true;
+   return true;
 }
 
 
@@ -418,149 +365,6 @@ bool HarmonicField::SetFilename(const std::string &fn)
    #endif
    
    fileRead = false;
-   return true;
-}
-
-/** \brief Calculate normalized Legendre Polynomials
-
-  The normalized "Derived" associated Legendre Polynomials of the 1st kind are
-  calculated using the algorithm in Lundberg and Schutz:
-
-    Lundberg, J.B., and Schutz, B.E., "Recursion Formulas of Legendre
-    Functions for Use with Nonsingular Geopotential Models", Journal
-    of Guidance, Dynamics, and Control, Vol. 11, No.1, Jan.-Feb. 1988.
-
-  Code was derived from the implementation coded by Steve Queen.  This version
-  takes his C version, and encapsulates it in C++ classes.  Steve can be
-  contacted at
-
-    Steven Queen
-    Goddard Space Flight Center
-    Flight Dynamics Analysis Branch
-    Steven.Z.Queen@nasa.gov
- */
-//------------------------------------------------------------------------------
-//  bool legendreP_init()
-//------------------------------------------------------------------------------
-/**
- * This method initializes the Legendre polynomials for this HarmonicField
- * object.
- *
- * @return flag indicating success of the operation.
- */
-//------------------------------------------------------------------------------
-bool HarmonicField::legendreP_init()
-{
-   Integer  m, n;
-   Integer  cc;
-   Integer  i;
-
-   // if re-initializing, delete the old arrays first
-   if (Abar)
-   {
-      for (i = 0; i <= maxDegree+1; ++i)
-         delete [] Abar[i];
-      
-      delete [] Abar;
-   }
-   
-   if (re)
-      delete [] re;
-   
-   if (im)
-      delete [] im;
-
-   if (offDiags)
-      delete [] offDiags;
-   if (abarCoeff1)
-   {
-      for (i = 0; i <= degree+1; ++i)
-         delete [] abarCoeff1[i];
-      
-      delete [] abarCoeff1;
-   }
-   if (abarCoeff2)
-   {
-      for (i = 0; i <= degree+1; ++i)
-         delete [] abarCoeff2[i];
-      
-      delete [] abarCoeff2;
-   }
-   
-   Abar = new Real*[maxDegree+3];
-   if ( !Abar ) {
-      throw ODEModelException("legendreP_init: memory allocation failed for Abar!");
-   }
-
-   Integer allocsize = 0;
-   
-   for (cc = 0; cc <= maxDegree+1; ++cc)
-   {
-      if ( maxOrder >= cc )
-         allocsize = cc + 3;
-      else
-         allocsize = maxOrder + 3;
-
-      Abar[cc] = new Real[allocsize];
-      
-      if ( !Abar[cc] )
-      {
-         throw ODEModelException("legendreP_init:  calloc failed!\a\n!");
-      }
-      else
-      {
-         for (int jj=0; jj<allocsize; jj++)
-            Abar[cc][jj] = 0.0;
-      }
-   }
-
-   /* initialize the diagonal elements (not a function of the input) */
-   Abar[0][0] = (Real)1.0;
-   for (n = 1;n <= maxDegree+1; ++n)
-   {
-      Abar[n][n] = Sqrt((Real)(2*n+1)/(Real)(2*n)) * Abar[n-1][n-1];
-   }
-   
-   /* additional shared quantities (real & imaginary coordinates) */
-   re = new Real[maxOrder+3];
-   im = new Real[maxOrder+3];
-   if ( !re || !im ) {
-      throw ODEModelException("legendreP_init:  calloc failed!\a\n!");
-   }
-
-   /* initalize recursion, Ref.[1] */
-   re[0] = (Real)1.0;  /* real part of (s + i*t)^m       */
-   im[0] = (Real)0.0;  /* imaginary part of (s + i*t)^m  */
-   
-   offDiags = new Real[degree+2];
-   abarCoeff1 = new Real*[degree+2];
-   abarCoeff2 = new Real*[degree+2];
-   
-   for (n = 1; n <= degree+1; ++n) 
-   {
-      offDiags[n] = sqrt((Real)(2*n+3));
-      abarCoeff1[n] = new Real[degree+2];
-      abarCoeff2[n] = new Real[degree+2];
-   }
-   offDiags[0] = 0.0; 
-   abarCoeff1[0] = new Real[degree+2];
-   abarCoeff2[0] = new Real[degree+2];
-   
-   Real nmnm, n2;
-   /* apply column-fill recursion formula (Table 2, Row I, Ref.[1]) */
-   for (m = 0 ; m <= order+1; m++) 
-   {
-      for (n = m+2; n <= degree+1; n++) 
-      {
-         nmnm = (n-m)*(n+m);
-         n2 = 2*n;
-         abarCoeff1[n][m] = Sqrt((Real)((n2+1)*(n2-1))/(Real)(nmnm));
-         abarCoeff2[n][m] = Sqrt((Real)((n2+1)*(n-m-1)*(n+m-1))/
-                                 (Real)((n2-3)*nmnm));
-      }
-   }
-
-   hMinitialized = true;
    return true;
 }
 
@@ -1072,96 +876,19 @@ void HarmonicField::SetForceOrigin(CelestialBody* toBody)
 // protected methods
 //---------------------------------
 
-
-/**
- * Normalized Derived Associated Lengendre Polynomials (of the 1st kind)
- * per the method of Ref.[1]. "Fully" normalized for compatibility with the
- * EGM96 coefficients per Ref[2]
- *
- * REFERENCES:
- * [1]   Lundberg, J.B., and Schutz, B.E., "Recursion Formulas of Lengendre
- *       Functions for Use with Nonsingular Geopotential Models", Journal
- *       of Guidance, Dynamics, and Control, Vol. 11, No.1, Jan.-Feb. 1988.
- *
- * [2]   Heiskanen, W.A., and Moritz, H., "Physical Geodesy", W.H. Freeman
- *       and Company, San Francisco, 1967.
- *
- * [3]   Pines, S., "Uniform Representation of the Gravitational Potential
- *       and its Derivatives", AIAA Journal, Vol. 11, No. 11, 1973.
- *
- * Steven Queen
- * Goddard Space Flight Center
- * Flight Dynamics Analysis Branch
- * Steven.Z.Queen@nasa.gov
- * February 28, 2003
- */
 //------------------------------------------------------------------------------
-//  bool legendreP_rtq(Rvector& R )
+//  void SetEopFile(EopFile *eopF)
 //------------------------------------------------------------------------------
 /**
- * This method calculates the Legendre polynomials for this HarmonicField
- * object.
+ * Method to set EopFile for this system.
  *
- * @param <R> ????
+ * @param eopF  the eopFile.
  *
- * @return flag indicating success of the operation.
  */
 //------------------------------------------------------------------------------
-bool HarmonicField::legendreP_rtq(Real *R )
+void HarmonicField::SetEopFile(EopFile *eopF)
 {
-   if (!hMinitialized)
-      if (!Initialize())
-      {
-         return false;
-     }
- 
-   Integer  n, m;
-   static const Real sqrt3 = Sqrt(3.0);
-
-   /* coordinate transformation, Ref.[3], Eqs.(7),(40) */
-   r = sqrt( R[0]*R[0] + R[1]*R[1] + R[2]*R[2] );
-   if (r == 0.0) {
-      throw ODEModelException (
-                   "In HarmonicField::legendreP_rtq,  Radial distance is zero");
-     // return false;
-   }
-
-   s = R[0]/r;
-   t = R[1]/r;
-   u = R[2]/r; /* sin(phi), phi = geocentric latitude */
-
-   /* generate the off-diagonal elements */
-   Abar[1][0] = u * sqrt3;
-   for (n = 1; n <= degree; ++n) 
-   {
-//      if (offDiags[n] != sqrt( (Real)(2*n+3) ))
-//         MessageInterface::ShowMessage("%d %le ", n,
-//                                       offDiags[n] - sqrt( (Real)(2*n+3) ));
-      Abar[n+1][n] = u * offDiags[n] * Abar[n][n];
-//      Abar[n+1][n] = u*sqrt( (Real)(2*n+3) ) * Abar[n][n];
-   }
-   
-//   Real nmnm, n2;
-   /* apply column-fill recursion formula (Table 2, Row I, Ref.[1]) */
-   for (m = 0 ; m <= order+1; m++) 
-   {
-      for (n = m+2; n <= degree+1; n++) 
-      {
-         Abar[n][m] = u * abarCoeff1[n][m] * Abar[n-1][m] -
-                      abarCoeff2[n][m] * Abar[n-2][m];
-//         n2 = 2*n;
-//         nmnm = (n-m)*(n+m);
-//         Abar[n][m] = u * sqrt((Real)((n2+1)*(n2-1))/(Real)(nmnm)) * Abar[n-1][m] -
-//            sqrt((Real)((n2+1)*(n-m-1)*(n+m-1))/(Real)((n2-3)*nmnm)) * Abar[n-2][m];
-      }
-      if ( m > 0 ) {
-         /* Ref.[2], Eq.(24) */
-         re[m] = s*re[m-1] - t*im[m-1]; /* real part of (s + i*t)^m */
-         im[m] = s*im[m-1] + t*re[m-1]; /* imaginary part of (s + i*t)^m */
-      }
-   }
-
-   return true;
+   eop = eopF;
 }
 
 

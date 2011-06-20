@@ -16,6 +16,7 @@
 // Modified: 2004/04/15 W. Shoan GSFC Code 583
 //           Updated for GMAT style, standards; changed quad-t to Real, int
 //           to Integer, etc.
+//           2011.05.20 W. Shoan - updates based on code from John P. Downing to add Earth tides
 //
 /**
  * This is the base class for celestial bodies.
@@ -75,6 +76,12 @@
 
 #include "HarmonicField.hpp"
 #include "CelestialBody.hpp"
+#include "HarmonicGravity.hpp"
+#include "HarmonicGravityFactory.hpp"
+#include "ODEModelException.hpp"
+#include "Rvector.hpp"          // ???  JPD
+#include "Rmatrix.hpp"          // ???
+#include "CoordinateSystem.hpp" // ???
 
 
 class GMAT_API GravityField : public HarmonicField
@@ -83,21 +90,20 @@ public:
    GravityField(const std::string &name, const std::string &forBodyName,
                 Integer maxDeg = HarmonicField::HF_MAX_DEGREE,
                 Integer maxOrd = HarmonicField::HF_MAX_ORDER);
-   virtual ~GravityField(void);
+   virtual ~GravityField();
    GravityField(const GravityField & gf);
    GravityField&   operator=(const GravityField & gf);
 
-   virtual bool    Initialize(void);
-   bool            gravity_rtq(Real jday, Real F[]);
+   virtual bool    Initialize();
    
-   virtual bool    GetDerivatives(Real * state, Real dt = 0.0, 
-                                                Integer order = 1, 
-                                                const Integer id = -1);
+   virtual bool    GetDerivatives(Real *state, Real dt = 0.0, 
+                                  Integer order = 1, 
+                                  const Integer id = -1);
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
 
-   // override acces methods derived from GmatBase
+   // override access methods derived from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
@@ -110,7 +116,13 @@ public:
    virtual Real        GetRealParameter(const std::string &label) const;
    virtual Real        SetRealParameter(const std::string &label,
                                         const Real value);
-
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual bool        SetStringParameter(const Integer id,
+                                          const std::string &value);
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool        SetStringParameter(const std::string &label,
+                                          const std::string &value);
+   
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
@@ -119,12 +131,15 @@ public:
 
 protected:
 
-   enum   // do we need the Abar, etc. to be in this list?
+   enum
    {
       MU = HarmonicFieldParamCount,
       A,
+      EARTH_TIDE_MODEL,
       GravityFieldParamCount
    };
+
+   static HarmonicGravityFactory hgFactory;
 
    static const std::string PARAMETER_TEXT[
       GravityFieldParamCount - HarmonicFieldParamCount];
@@ -136,63 +151,39 @@ protected:
    Real               mu;
    /// radius of central body ( mean equatorial )
    Real               a;
+   /// string for tide model
+   std::string        earthTideModel;
    /// default mu
    Real               defaultMu;
    /// default equatorial radius
    Real               defaultA;
-   /// normalized harmonic coefficients
-   Real               Cbar[361][361];
-   /// normalized harmonic coefficients
-   Real               Sbar[361][361];
-   /// coefficient drifts per year
-   Real               dCbar[17][17];
-   /// coefficient drifts per year
-   Real               dSbar[17][17];
    ///
    bool               gfInitialized;
    /// Flag used to keep from scrolling the "truncating to order" message
-   bool               orderTruncateReported;
+   bool               orderTruncateReported;   // no longer needed - only truncated in Initialize
    /// Flag used to keep from scrolling the "truncating to degree" message
-   bool               degreeTruncateReported;
+   bool               degreeTruncateReported;  // no longer needed - only truncated in Initialize
    
-   bool          gravity_init(void);
-
-   bool          ReadFile();
+   HarmonicGravity    *gravityModel;    // JPD
    
-   void          PrepareArrays();
 
-   bool          IsBlank(char* aLine);
+   bool          IsBlank(char* aLine);  // leaving this one in for now
+   bool          IsBlank(const std::string &aLine);  // leaving this one in for now
 
-   static const Integer GRAV_MAX_DRIFT_DEGREE = 2;
-   static const Integer BUFSIZE               = 256;
    static const Integer stateSize             = 6;
    
    // stuff moved in here for performance
    Rvector6 frv;
    Rvector6 trv;
    A1Mjd    now;
-//   Integer satcount;
-   
-   
-   
-   Real     *sum2Diag;
-   Real     *sum3Diag;
-   Real     **sum2OffDiag;
-   Real     **sum3OffDiag;
    
    CoordinateConverter cc;
-   Rmatrix33           rotMatrix;
-   Rvector6            outState;
-   Rvector6            theState;
 
-   /// Number of spacecraft in the state vector that use CartesianState
-   Integer              satCount;
-/// Start index for the Cartesian state
-   Integer              cartIndex;
-   /// Flag indicating if the Cartesian state should be populated
-   bool                 fillCartesian;
-
-
+   //  JPD added these ...............
+   void Calculate (Real dt, Real state[6],
+                   Real force[3], Rmatrix33& grad);
+   void InverseRotate(Rmatrix33& rot, const Real in[3], Real out[3]);
+   
 };
 
 

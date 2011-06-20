@@ -58,6 +58,7 @@
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
 #include "CoordinateSystem.hpp"
+#include "EopFile.hpp"
 
 
 /* Common header file definitions for execution of gravity, legendreP, and redux routines
@@ -83,7 +84,7 @@ public:
     virtual bool            Initialize(void);
     virtual bool            SetDegreeOrder(Integer degree, Integer order);
     virtual bool            SetFilename(const std::string &fn);
-    bool                    legendreP_rtq(Real *R );
+    virtual void            SetEopFile(EopFile *eopF);
 
    // inherited from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
@@ -148,16 +149,8 @@ protected:
    Integer                 degree;
    /// Current order for the field
    Integer                 order;
-   /// normalized 'derived' Associated Legendre Polynomial
-   Real                    **Abar;
    /// transformed spherical coordinates
    Real                    r,s,t,u;
-   /// powers of projection of position onto x_ecf (real)
-   Real                    *re;
-   /// powers of projection of position onto y_ecf (imaginary)
-   Real                    *im;
-   /// Epoch of the PhysicalModel
-   //Real                    epoch; // inherit from PhysicalModel
    /// The name of the potential file
    std::string             filename;
 
@@ -172,14 +165,8 @@ protected:
    CoordinateSystem        *inputCS;
    CoordinateSystem        *fixedCS;
    CoordinateSystem        *targetCS;
+   EopFile                 *eop;
    
-   // Buffers for performance
-   Real                    *offDiags;
-   Real                    **abarCoeff1;
-   Real                    **abarCoeff2;
-
-   bool                    legendreP_init();
-
 };
 
 #endif // HarmonicField_hpp
