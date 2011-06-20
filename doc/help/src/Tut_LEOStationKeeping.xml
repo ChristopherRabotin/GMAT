@@ -12,16 +12,14 @@
   <section>
     <title>Objective and Overview</title>
 
-    <para><emphasis role="bold">Final result:</emphasis> <link
-    xlink:href="scripts/HohmannTransferDesign.script">HohmannTransferDesign.script</link></para>
-
-    <para>In this tutorial, you will learn how to use the GMAT's control flow
-    and targeting mechanisms to maintain a Low-Earth orbit in the presense of
-    atmosphere drag. For the sake of simulation time, we will make the
-    area-to-mass ratio of the spacecraft large, to make the drag cause a rapid
-    lowering of the orbit semimajor axis. The process used in this script is
-    also useful for generating delta-V estimates for LEO stationkeeping of
-    real-world missions. The basic steps of this tutorial are:</para>
+    <para><emphasis role="bold"></emphasis>In this tutorial, you will learn
+    how to use the GMAT's control flow and targeting mechanisms to maintain a
+    Low-Earth orbit in the presense of atmosphere drag. For the sake of
+    simulation time, we will make the area-to-mass ratio of the spacecraft
+    large, to make the drag cause a rapid lowering of the orbit semimajor
+    axis. The process used in this script is also useful for generating
+    delta-V estimates for LEO stationkeeping of real-world missions. The basic
+    steps of this tutorial are:</para>
 
     <procedure>
       <step>
@@ -589,8 +587,8 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Tut_LEO_OutputPart2.jpeg" scalefit="1"
-                     width="90%"></imagedata>
+                     fileref="files/images/Tut_LEO_OutputPart2.jpeg"
+                     scalefit="1" width="90%"></imagedata>
         </imageobject>
 
         <caption>
