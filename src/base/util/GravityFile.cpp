@@ -567,7 +567,7 @@ bool GravityFile::ReadGrvFile(const std::string &filename, Integer& degree,
    Real          Cnm = 0.0, Snm = 0.0;
    Real          tmpMu = 0.0;
    Real          tmpA  = 0.0;
-   std::string   isNormalized;
+   std::string   isNormalized = "";
 
    #ifdef DEBUG_GRAVITY_GRV_FILE
    MessageInterface::ShowMessage("Entered GravityFile::ReadGrvFile\n");
