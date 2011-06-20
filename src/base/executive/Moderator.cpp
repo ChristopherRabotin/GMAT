@@ -100,6 +100,7 @@
 //#define DEBUG_PLUGIN_REGISTRATION
 //#define DEBUG_MATLAB
 //#define DEBUG_CCSDS_EPHEMERIS
+//#define DEBUG_CREATE_PHYSICAL_MODEL
 
 // Currently we can't use DataFile for 2011a release so commented out
 // Actually we want to put this flag in BuildEnv.mk but it is very close to
@@ -2676,6 +2677,10 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
                ("The Moderator cannot create a PhysicalModel type \"" + type +
                 "\"\n");
       
+      // set the EOP file, since it's a GravityField object
+      HarmonicField *hf = (HarmonicField*) obj;
+      hf->SetEopFile(theEopFile);
+
       #ifdef DEBUG_MEMORY
       std::string funcName;
       funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
@@ -2733,10 +2738,14 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
 PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
                                               const std::string &name)
 {
-   if (GetPhysicalModel(name) == NULL)
+   #ifdef DEBUG_CREATE_PHYSICAL_MODEL
+      MessageInterface::ShowMessage("Now attempting to create a PhysicalModel of type %s with name %s\n",
+            type.c_str(), name.c_str());
+   #endif
+   PhysicalModel *obj = GetPhysicalModel(name);
+   if (obj == NULL)
    {
-      PhysicalModel *obj =
-         theFactoryManager->CreatePhysicalModel(type, name);
+      obj = theFactoryManager->CreatePhysicalModel(type, name);
       
       if (obj ==  NULL)
          throw GmatBaseException
@@ -2764,7 +2773,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
                                        e.GetFullMessage());
       }
       
-      return obj;
+//      return obj;
    }
    else
    {
@@ -2773,8 +2782,14 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
          ("Moderator::CreatePhysicalModel() Unable to create PhysicalModel "
           "name: %s already exist\n", name.c_str());
       #endif
-      return GetPhysicalModel(name);
+//      return GetPhysicalModel(name);
    }
+   if ((obj != NULL) && obj->IsOfType("HarmonicField"))
+   {
+      HarmonicField *hf = (HarmonicField*) obj;
+      hf->SetEopFile(theEopFile);
+   }
+   return obj;
 }
 
 //------------------------------------------------------------------------------
