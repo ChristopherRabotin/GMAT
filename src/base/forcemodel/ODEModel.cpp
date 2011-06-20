@@ -141,7 +141,7 @@ std::map<std::string, std::string> ODEModel::scriptAliases;
 
 
 //---------------------------------
-// public
+// public methods
 //---------------------------------
 
 
@@ -695,7 +695,7 @@ PhysicalModel* ODEModel::GetForce(Integer index) const
  */
 //------------------------------------------------------------------------------
 const PhysicalModel* ODEModel::GetForce(std::string forcetype, 
-                                          Integer whichOne) const
+										Integer whichOne) const
 {
    Integer i = 0;
 
@@ -703,7 +703,8 @@ const PhysicalModel* ODEModel::GetForce(std::string forcetype,
         force != forceList.end(); ++force) 
    {
       std::string pmName = (*force)->GetTypeName();
-      if (pmName == forcetype) {
+      if (pmName == forcetype) 
+	  {
          if (whichOne <= i)
             return *force;
          else
@@ -1229,9 +1230,9 @@ bool ODEModel::Initialize()
          (*current)->SetSolarSystem(solarSystem);
          
          // Handle missing coordinate system issues for GravityFields
-         if ((*current)->IsOfType("HarmonicField"))
+		  if ((*current)->IsOfType("HarmonicField"))
          {
-            SetInternalCoordinateSystem("InputCoordinateSystem", (*current));
+			SetInternalCoordinateSystem("InputCoordinateSystem", (*current));
             SetInternalCoordinateSystem("FixedCoordinateSystem", (*current));
             SetInternalCoordinateSystem("TargetCoordinateSystem", (*current));
 
