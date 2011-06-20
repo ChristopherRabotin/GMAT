@@ -121,6 +121,7 @@ HEADERS = -I../base/include \
           -I../base/executive \
           -I../base/factory \
           -I../base/forcemodel \
+          -I../base/forcemodel/harmonic \
           -I../base/foundation \
           -I../base/function \
           -I../base/hardware \

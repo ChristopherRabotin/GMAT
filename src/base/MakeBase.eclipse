@@ -101,6 +101,7 @@ HEADERS = -Iinclude \
           -Ispacecraft \
           -Iasset \
           -Iforcemodel \
+          -Iforcemodel/harmonic \
           -Ipropagator \
           -Isubscriber \
           -Icommand \
@@ -289,13 +290,20 @@ OBJECTS = \
     factory/SubscriberFactory.o \
     forcemodel/DragForce.o \
     forcemodel/FiniteThrust.o \
-    forcemodel/ODEModelException.o \
-    forcemodel/ODEModel.o \
     forcemodel/GravityField.o \
     forcemodel/HarmonicField.o \
+    forcemodel/ODEModelException.o \
+    forcemodel/ODEModel.o \
     forcemodel/PhysicalModel.o \
     forcemodel/PointMassForce.o \
     forcemodel/SolarRadiationPressure.o \
+    forcemodel/harmonic/EarthTide.o \
+    forcemodel/harmonic/Harmonic.o \
+    forcemodel/harmonic/HarmonicGravity.o \
+    forcemodel/harmonic/HarmonicGravityBody.o \
+    forcemodel/harmonic/HarmonicGravityCof.o \
+    forcemodel/harmonic/HarmonicGravityFactory.o \
+    forcemodel/harmonic/HarmonicGravityGrv.o \
     foundation/Covariance.o \
     foundation/ElementWrapper.o \
     foundation/GmatBaseException.o \
@@ -531,7 +539,10 @@ OBJECTS = \
     solarsys/SimpleExponentialAtmosphere.o \
     $(TCPIP_OBJECTS) \
     $(SPICE_OBJECTS)
+#    solarsys/BodyDataReader.o \
 
+#    forcemodel/harmonic/HarmonicGravityEgm96dat.o \
+#    forcemodel/harmonic/HarmonicGravityVarying.o \
 #    parameter/OrbitAMatrixParameters.o \
 
 #    $(BRIDGEOBJECTS)
