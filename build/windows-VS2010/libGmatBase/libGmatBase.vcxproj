@@ -205,7 +205,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
     </ClCompile>
@@ -433,6 +433,13 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\HarmonicField.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityBody.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\ODEModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\ODEModelException.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\PhysicalModel.cpp" />
@@ -871,6 +878,13 @@
     <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\HarmonicField.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityBody.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\ODEModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\ODEModelException.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\PhysicalModel.hpp" />

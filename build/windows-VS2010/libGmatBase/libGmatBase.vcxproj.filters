@@ -94,6 +94,9 @@
     <Filter Include="Source Files\SpiceUtil">
       <UniqueIdentifier>{e2d8d328-ae90-4741-940b-c8b2d4e4a597}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\forcemodel\harmonic">
+      <UniqueIdentifier>{fd9133da-290d-4694-a5a6-6684bd03cf1f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp">
@@ -1235,6 +1238,27 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp">
       <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.cpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.cpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityBody.cpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.cpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityFactory.cpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.cpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2434,6 +2458,27 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.hpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.hpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityBody.hpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.hpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityFactory.hpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.hpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
