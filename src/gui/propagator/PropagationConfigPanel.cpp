@@ -1267,7 +1267,9 @@ void PropagationConfigPanel::SaveData()
                   MessageInterface::ShowMessage("SaveData() Creating "
                         "GravityField for %s\n", bodyName.c_str());
                #endif
-               theGravForce = new GravityField("", bodyName);
+               theGravForce = (GravityField*)theGuiInterpreter->CreateObject("GravityField","");
+
+//               theGravForce = new GravityField("", bodyName);
                theGravForce->SetSolarSystem(theSolarSystem);
                theGravForce->SetStringParameter("BodyName", bodyName);
                theGravForce->SetStringParameter("PotentialFile",
