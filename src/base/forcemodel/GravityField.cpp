@@ -93,7 +93,7 @@ using namespace GmatMathUtil;
 static bool firstCallFired = false;
 #endif
 
-static HarmonicGravityFactory hgFactory;
+HarmonicGravityFactory GravityField::hgFactory;
 
 const std::string
 GravityField::PARAMETER_TEXT[GravityFieldParamCount - HarmonicFieldParamCount] =
