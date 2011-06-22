@@ -56,6 +56,9 @@
 //#define DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW
 //#define DEBUG_A_MATRIX
 
+//#define IGNORE_SHADOWS
+
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -718,7 +721,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
    {
       for (Integer i = 0; i < satCount; ++i) 
       {
-         #ifdef DEBUG_A_MATRIX
+         #ifdef DEBUG_DERIVATIVE
             MessageInterface::ShowMessage(
                   "Filling Cartesian state for spacecraft %d\n", i);
          #endif
@@ -758,7 +761,11 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
         	 inShadow = false;
         	 percentSun = 1.0;
          }
-        
+
+         #ifdef IGNORE_SHADOWS
+            percentSun = 1.0;
+         #endif
+
          if (!inShadow) 
          {
             // Montenbruck and Gill, eq. 3.75
@@ -794,7 +801,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       Integer associate, element;
       for (Integer i = 0; i < stmCount; ++i)
       {
-         #ifdef DEBUG_A_MATRIX
+         #ifdef DEBUG_STM_MATRIX
             MessageInterface::ShowMessage("Filling STM for spacecraft %d\n", i);
          #endif
          i6 = stmStart + i * 36;
@@ -822,7 +829,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
          distancefactor = nominalSun / sunDistance;
          // Convert m/s^2 to km/s^2
-         distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
+         distancefactor *= distancefactor * GmatMathConstants::M_TO_KM * GmatMathConstants::M_TO_KM;
 
          #ifdef DEBUG_SRP_ORIGIN
             if (shadowModel == 0)
@@ -842,6 +849,10 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             percentSun = 1.0;
          }
 
+         #ifdef IGNORE_SHADOWS
+            percentSun = 1.0;
+         #endif
+            
          if (!inShadow)
          {
             // All of the common terms for C_s
@@ -850,15 +861,15 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             sSquared = sunDistance * sunDistance;
 
             // Math spec terms for SRP C submatrix of the A-matrix
-            aTilde[18] = mag * (1.0 - sunSat[0]*sunSat[0] / sSquared);
-            aTilde[19] = mag * (    - sunSat[0]*sunSat[1] / sSquared);
-            aTilde[20] = mag * (    - sunSat[0]*sunSat[2] / sSquared);
-            aTilde[24] = mag * (    - sunSat[1]*sunSat[0] / sSquared);
-            aTilde[25] = mag * (1.0 - sunSat[1]*sunSat[1] / sSquared);
-            aTilde[26] = mag * (    - sunSat[1]*sunSat[2] / sSquared);
-            aTilde[30] = mag * (    - sunSat[2]*sunSat[0] / sSquared);
-            aTilde[31] = mag * (    - sunSat[2]*sunSat[1] / sSquared);
-            aTilde[32] = mag * (1.0 - sunSat[2]*sunSat[2] / sSquared);
+            aTilde[18] = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
+            aTilde[19] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
+            aTilde[20] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
+            aTilde[24] = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
+            aTilde[25] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
+            aTilde[26] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
+            aTilde[30] = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
+            aTilde[31] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
+            aTilde[32] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
          }
          else
          {
@@ -928,6 +939,11 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             percentSun = 1.0;
          }
 
+         #ifdef IGNORE_SHADOWS
+            percentSun = 1.0;
+         #endif
+
+
          if (!inShadow)
          {
             // All of the common terms for C_s
@@ -936,15 +952,15 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             sSquared = sunDistance * sunDistance;
 
             // Math spec terms for SRP C submatrix of the A-matrix
-            aTilde[18] = mag * (1.0 - sunSat[0]*sunSat[0] / sSquared);
-            aTilde[19] = mag * (    - sunSat[0]*sunSat[1] / sSquared);
-            aTilde[20] = mag * (    - sunSat[0]*sunSat[2] / sSquared);
-            aTilde[24] = mag * (    - sunSat[1]*sunSat[0] / sSquared);
-            aTilde[25] = mag * (1.0 - sunSat[1]*sunSat[1] / sSquared);
-            aTilde[26] = mag * (    - sunSat[1]*sunSat[2] / sSquared);
-            aTilde[30] = mag * (    - sunSat[2]*sunSat[0] / sSquared);
-            aTilde[31] = mag * (    - sunSat[2]*sunSat[1] / sSquared);
-            aTilde[32] = mag * (1.0 - sunSat[2]*sunSat[2] / sSquared);
+            aTilde[18] = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
+            aTilde[19] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
+            aTilde[20] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
+            aTilde[24] = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
+            aTilde[25] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
+            aTilde[26] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
+            aTilde[30] = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
+            aTilde[31] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
+            aTilde[32] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
          }
          else
          {
