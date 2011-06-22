@@ -268,11 +268,200 @@ Unloaded
 
 The \texttt{startgmat} and \texttt{closegmat} functions wrap several calls to GMAT's C interface inside of simpler MATLAB functions.  In this section, we'll examine the raw calls into the interface from MATLAB to illustrate how the interface works.  Appendix~\ref{sec:FunctionList} lists all of the functions in the current implementation of the interface.
 
-\textit{To be completed}
+There are 3 core MATLAB functions that are used to access the GMAT C interface: loadlibrary, calllib, and unloadlibrary.  The functions supported in the interface are defined in a header file in the GMAT plugin source code named CInterfaceFunctions.hpp.  A MATLAB compatible version of that header is included in the interfacewrapper.m script file in ODTBX's GMAT\_Adapters folder.  That script is included when MATLAB loads the interface library.  The full call to load the interface is this:
+
+\begin{quote}
+\begin{verbatim}
+loadlibrary('libCInterface.dll',@interfacewrapper)
+\end{verbatim}
+\end{quote}
+
+\noindent After running this line in MATLAB, the library is loaded into memory but the GMAT engine is not yet started.  You can check to see that the library is loaded by calling MATLAB's libisloaded function.  If the library is loaded, the return value will be 1:
+
+\begin{quote}
+\begin{verbatim}
+>> libisloaded('libCInterface')
+
+ans =
+
+     1
+\end{verbatim}
+\end{quote}
+
+\noindent The GMAT engine is started by calling the StartGmat function in the interface.  Interface functions are all called using the calllib function in MATLAB.  The function that initializes the GMAT engine is a good example of this function call:
+
+\begin{quote}
+\begin{verbatim}
+>> retval = calllib('libCInterface','StartGmat')
+
+retval =
+
+     0
+\end{verbatim}
+\end{quote}
+
+\noindent The StartGmat command returns 0 when the engine starts correctly, and a negative number if the startup failed.  
+
+You can also retrieve data from the C interface about the last function called using the getLastMessage function.  If you call that function immediately after calling StartGmat, you'll see that the engine did start:
+
+\begin{quote}
+\begin{verbatim}
+>> calllib('libCInterface','getLastMessage')
+
+ans =
+
+The Moderator has been initialized
+\end{verbatim}
+\end{quote}
+
+C interface functions that take extra parameters pass in those parameters as extra arguments on the calllib function.  Fir example, the configuration script is loaded in a call to LoadScript that looks like this:
+
+\begin{quote}
+\begin{verbatim}
+>> calllib('libCInterface', 'LoadScript', 'GmatConfig.script');
+>> calllib('libCInterface','getLastMessage')
+
+ans =
+
+Interpreted the script GmatConfig.script successfully.
+\end{verbatim}
+\end{quote}
+
+\noindent (Note that the text here checked the loading by retrieving the last message generated inside of the interface.)
+
+Once a script has been loaded, the interconnections between objects in the script is made by passing the objects defined in the script into an object in GMAT called the Sandbox, which manages the objects used in a running script.  You populate a Sandbox with by calling the RunScript function:
+
+\begin{quote}
+\begin{verbatim}
+>> calllib('libCInterface', 'RunScript');
+\end{verbatim}
+\end{quote}
+
+\noindent When a script is run, GMAT will either load a Sandbox with the script contents and then wait for further calls, or load a Sandbox, execute the timeline defined in the script (the timeline is called a ``Mission Control Sequence'' in other GMAT documentation), and then wait for further instructions.  If the loaded script starts the Mission Control Sequence with the command BeginMissionSequence, the latter action is performed.  If the script starts the sequence with the command PrepareMissionSequence, as in the example in Appendix~\ref{sec:SampleConfigurationScript}, a Sandbox is loaded but the timeline is not actually executed.
+
+You can examine the results of a run using the GetRunSummary command:
+
+\begin{quote}
+\begin{verbatim}
+>> calllib('libCInterface', 'GetRunSummary')
+
+ans =
+
+        Spacecraft       : DefaultSC
+        Coordinate System: EarthMJ2000Eq 
+
+        Time System   Gregorian                     Modified Julian  
+        ----------------------------------------------------------------------    
+        UTC Epoch:    01 Jan 2000 11:59:28.000      21544.9996296296
+        TAI Epoch:    01 Jan 2000 12:00:00.000      21545.0000000000
+        TT  Epoch:    01 Jan 2000 12:00:32.184      21545.0003725000
+        TDB Epoch:    01 Jan 2000 12:00:32.184      21545.0003724992
+
+        Cartesian State                       Keplerian State
+        ---------------------------           -------------------------------- 
+        X  =   7100.0000000000 km             SMA  =   7191.9388176290 km
+        Y  =   0.0000000000000 km             ECC  =   0.0245497490060
+        Z  =   1300.0000000000 km             INC  =   12.850080056581 deg
+        VX =   0.0000000000000 km/sec         RAAN =   306.61480219480 deg
+        VY =   7.3500000000000 km/sec         AOP  =   314.19055153599 deg
+        VZ =   1.0000000000000 km/sec         TA   =   99.887749332049 deg
+
+        Spherical State:
+        ---------------------------       
+        RMAG =   7218.0329730474 km
+        RA   =   0.0000000000000 deg
+        DEC  =   10.375844920051 deg
+        VMAG =   7.4177152816753 km/s
+        AZI  =   82.377421681550 deg
+        VFPA =   88.608703653704 deg
+        RAV  =   90.000000000000 deg
+        DECV =   7.7477720361081 deg
+
+
+        Spacecraft properties:
+        ------------------------------
+        Cd =                      2.200000
+        Drag area =               15.00000 m^2
+        Cr =                      1.800000
+        Reflective (SRP) area =   1.000000 m^2
+        Dry mass =                850.00000000000 kg
+        Total mass =              850.00000000000 kg
+
+-----------------------------------
+Command Summary: Propagate Command
+Execute the script to generate command summary data
+
+-----------------------------------
+\end{verbatim}
+\end{quote}
+
+A typical use for the C interface is to access objects internal to GMAT in order to perform some outside processing.  The current interface supplies access to a GMAT ODEModel for this purpose through the interface functions FindOdeModel, GetStateSize, GetStateDescription, SetState, GetState, GetDerivativesForState, and GetDerivatives.  Examples of the calls to these functions can be found in the startgmat.m, gmatforces\_km.m, and validate\_gmatforces.m functions in the ODTBX GMAT\_Adapters folder.  The next section illustrates this usage in order to propagate an orbit using GMAT's ODEModel with an ODTBX propagator.
 
 \section{An ODTBX Example: Integrating an Orbit}
 
-\textit{To be completed}
+The process of integrating an orbit using a numerical integrator is straightforward:
+
+\begin{enumerate}
+\item Define an state vector.  I'll use a Cartesian state for this example.
+\item Choose an initial state (for this example, a position and velocity).
+\item Set up a set of differential equations for the time rate of change of the state vector.
+\item Select a numerical integrator that uses the differential equations selected above.
+\item Tell the integrator about the differential equations and use then to evolve the state vector.
+\end{enumerate}
+
+ODTBX has a numerical integrator named integ, located in the ODTBX\_Source folder, that we can use for this process.  In order to use integ with the GMAT C interface, we need to format GMAT's differential equations in the ODEModel class into a form compatible with integ.
+
+The MATLAB function gmatforces\_km provides the interface needed to connect GMAT's ODEModel to integ.  The core calls into the interface are those that set the state vector and then retrieve the time derivative.  The state vector is set by passing in an a.1 modified Julian date and a state vector.  This happens on lines 61-63 of the function:
+
+\begin{quote}
+\lstset{language=Matlab, numbers=left, numberstyle=\tiny}
+\begin{lstlisting}[firstnumber=61]
+epoch = 21545.0 + t(i) / 86400.0;
+statep = libpointer('doublePtr', x(:,i));
+retval = calllib('libCInterface','SetState',epoch,statep,nx);
+\end{lstlisting}
+\end{quote}
+
+\noindent GMAT computes the positions of celestial bodies, their orientations, and related data needed for the force model based on an a.1 modified Julian date referenced to January 5, 1941 12:00:00.000.  In that time system, the J2000 epoch, Jan 1 2000 12:00:00.000 has a modified Julian value of 21545.0; that is the reference number for the time offset in this sample code (line~61), and should be adjusted for the reference epoch needed for other applications.  The time offset from this reference epoch is given by t(i) for the i\,\textsuperscript{th} spacecraft in the call.  The state pointer is set to point to the start of the matching Cartesian state on line~62.  These data are then passed into GMAT using the call to SetState on line~63.
+
+The derivative data is retrieved from GMAT using a call to the GetDerivatives function on line~68:
+    
+\begin{quote}
+\lstset{language=Matlab, numbers=left, numberstyle=\tiny}
+\begin{lstlisting}[firstnumber=68]
+derivsptr = calllib('libCInterface','GetDerivatives',0.0,1,dimptr);
+\end{lstlisting}
+\end{quote}
+
+\noindent This call returns the derivative data in a single vector that needs to be broken apart for use by integ (and the rest of ODTBX).  This data rearrangement is performed in the subsequent lines of gmatforces\_km:
+
+\begin{quote}
+\lstset{language=Matlab, numbers=left, numberstyle=\tiny}
+\begin{lstlisting}[firstnumber=77]
+setdatatype(derivsptr, 'doublePtr', dimval, 1);
+derivatives = get(derivsptr,'Value');
+xDot(:,i) = derivatives(1:6);
+
+if nargout > 1
+    for m=1:6
+        for n=1:6
+            A(m,n,i) = derivatives(m*6+n);
+        end
+    end
+end
+\end{lstlisting}
+\end{quote}
+
+The ODTBX repository includes a sample script, validate\_gmatforces, that uses this function with integ to test the C interface.  validate\_gmatforces, initializes GMAT by calling startgmat with a configuration script name.  It then defines some state data and performs integration through a call on line~45:
+
+\begin{quote}
+\lstset{language=Matlab, numbers=left, numberstyle=\tiny}
+\begin{lstlisting}[firstnumber=45]
+[tPlot,xPlot] = integ(@gmatforces_km,[0 T],state,[],w);
+\end{lstlisting}
+\end{quote}
+
+\noindent The results of this integration are then displayed on screen, and additional integration is performed and plotted.
 
 \appendix
 
@@ -331,7 +520,7 @@ The GMAT engine is configured for use through a GMAT script.  The C-interface sp
 A minimal script designed to prepare a point mass gravity model for use by a single spacecraft looks like this:
 
 \begin{quote}
-\lstset{numbers=left}
+\lstset{numbers=left, numberstyle=\tiny}
 \lstinputlisting{Scripts/defaultConfig.script}
 \end{quote}
 
