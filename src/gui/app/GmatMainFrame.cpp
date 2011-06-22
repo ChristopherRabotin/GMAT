@@ -2592,7 +2592,7 @@ void GmatMainFrame::OnHelpFeedback(wxCommandEvent& WXUNUSED(event))
    #else
    
    MessageInterface::PopupMessage
-      (Gmat::INFO_, "Use of email is disbled.");
+      (Gmat::INFO_, "Use of email is disabled.");
    
    #endif
 }
