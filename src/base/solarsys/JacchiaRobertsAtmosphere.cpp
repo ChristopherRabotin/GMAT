@@ -437,19 +437,24 @@ Real JacchiaRobertsAtmosphere::exotherm(Real space_craft[2], Real sun[3],
           geo->tkp, geo->xtemp, height, sun_dec, geo_lat);
    #endif
    
-   Real exotemp, expkp, hour_angle;
-   Real theta, eta, tau, th22, t1, sun_denom;
+   Real exotemp, expkp, hour_angle, cross_denom;
+   Real theta, eta, tau, th22, t1, sun_denom, cos_denom;
    Real c_star[5], aux[4][2];
    Integer i;
    const Integer na=5;
 
    // Compute hour angle of the sun
    sun_denom = sqrt(sun[0]*sun[0] + sun[1]*sun[1]);
-   hour_angle = ( (sun[0]*space_craft[1]-sun[1]*space_craft[0])/
-                  fabs(sun[0]*space_craft[1]-sun[1]*space_craft[0]))
+   cross_denom = fabs(sun[0]*space_craft[1]-sun[1]*space_craft[0]);
+   cos_denom = sqrt(space_craft[0]*space_craft[0] + 
+         space_craft[1]*space_craft[1]);
+   if ((cross_denom < GmatRealConstants::REAL_TOL) || (cos_denom < GmatRealConstants::REAL_TOL))
+      throw AtmosphereException("Numerical precision error in "
+            "JacchiaRobertsAtmosphere::exotherm; denominator is too close to 0.0");
+
+   hour_angle = ( (sun[0]*space_craft[1]-sun[1]*space_craft[0])/cross_denom)
       *acos((sun[0]*space_craft[0]+sun[1]*space_craft[1])/
-            (sun_denom * sqrt(space_craft[0]*space_craft[0] +
-                              space_craft[1]*space_craft[1])));
+            (sun_denom * cos_denom));
 
    // Compute sun and spacecraft position dependent part of temperature
    theta = 0.5 * fabs(geo_lat + sun_dec);
