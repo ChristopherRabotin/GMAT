@@ -188,8 +188,8 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 \item Visual Studio 2010 has trouble processing the Visual C++ project files that ship with wx.  Instead, we'll use files already configured (using Visual Studio 2010 Professional) for wx at Thinking Systems. 
 \begin{enumerate}
 \item The Visual Studio 2010 solution and project files for wxWidgets are located in an archive file in the GMAT folders you checked out earlier.  Find the file wxmsw.zip in the build\textbackslash GmatVS2010 folder of that working copy of the code.
-\item Unpack the wxmsw.zip archive into your wxWidgets\textbackslash build\textbackslash msw folder.
-\item Check to see that the file wx\textbackslash dll.sln is in your Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder.  If, instead, you see that there is a folder named wxmsw in that folder, move its contents into the Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder. 
+\item Unpack the wxWidgets.zip archive into your wxWidgets folder.
+\item Check to see that the file wx\_dll.sln is in your Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder.  (This step ensures that all of the build files are properly positioned in the wxWidgets folder structure.  The key files are wx\_dll.sln in the Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder and wxcontrib\_dll.sln in the Gmat3rdParty\textbackslash wxWidgets\textbackslash contrib\textbackslash build folder.) 
 \end{enumerate}
  
 \end{enumerate}
@@ -198,7 +198,7 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 \begin{enumerate}
 \item Open Visual Studio
 \item Select ``File | Open | Project/Solution...'' from the menu bar
-\item Open the wx\textbackslash dll.sln solution file from the build\textbackslash msw folder of your wxWidgets installation.  (For me, the file is found in  C\:\textbackslash GmatVS\textbackslash Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw)
+\item Open the wx\_dll.sln solution file from the build\textbackslash msw folder of your wxWidgets installation.  (For me, the file is found in  C\:\textbackslash GmatVS\textbackslash Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw)
 \item GMAT needs the wxWidgets OpenGL components as part of the build.  This is configures in the wx\textbackslash setup.h configuration file for the build.  We need to change a setting in this file from its default setting.
 \begin{enumerate}
 	\item Open one of the projects in the Visual Studio solution tree
@@ -212,6 +212,10 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 \item On the Visual C++ toolbar select ``DLL Release'' (specifying the build configuration) and set your solution platform to Win32.  Figure~\ref{fig:wxSettings} shows these settings.
 \item Build the solution (right click on the ``Solution 'wx\_dll'{}'' node at the top of the tree and select ``Build Solution''.)
 \item Most, but not all, of the solution will build.  You may need to repeat the build process to get all of the libraries GMAT requires built.  Build the solution again until all but the dbgrid projects build.  (You are done when 19 of the 20 projects build.)
+\item Select ``File | Open | Project/Solution...'' from the menu bar
+\item Open the wxcontrib\_dll.sln solution file from the contrib\textbackslash build folder of your wxWidgets installation.  (For me, the file is found in  C\:\textbackslash GmatVS\textbackslash Gmat3rdParty\textbackslash wxWidgets\textbackslash contrib\textbackslash build)
+\item On the Visual C++ toolbar select ``DLL Release'' (specifying the build configuration) and set your solution platform to Win32.  
+\item Build the solution (right click on the ``Solution 'wxcontrib\_dll'{}'' node at the top of the tree and select ``Build Solution''.)
 \end{enumerate}
 
 \begin{figure}
@@ -221,7 +225,26 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 \label{fig:wxSettings}
 \end{figure}
 
-\noindent Check to see that you have 13 dll files in the wxWidgets\textbackslash lib\textbackslash vc\_dll folder.  Copy these into your GmatDevelopment/application/bin folder.
+\noindent Check to see that you have 15 dll files in the wxWidgets\textbackslash lib\textbackslash vc\_dll folder:
+{\begin{itemize}\setlength{\itemsep}{0pt}
+\item wxbase28\_net\_vc\_custom.dll
+\item wxbase28\_odbc\_vc\_custom.dll
+\item wxbase28\_vc\_custom.dll
+\item wxbase28\_xml\_vc\_custom.dll
+\item wxmsw28\_adv\_vc\_custom.dll
+\item wxmsw28\_aui\_vc\_custom.dll
+\item wxmsw28\_core\_vc\_custom.dll
+\item wxmsw28\_gl\_vc\_custom.dll
+\item wxmsw28\_html\_vc\_custom.dll
+\item wxmsw28\_media\_vc\_custom.dll
+\item wxmsw28\_netutils\_vc\_custom.dll
+\item wxmsw28\_qa\_vc\_custom.dll
+\item wxmsw28\_richtext\_vc\_custom.dll
+\item wxmsw28\_stc\_vc\_custom.dll
+\item wxmsw28\_xrc\_vc\_custom.dll
+\end{itemize}}
+  
+\noindent Copy these into your GmatDevelopment/application/bin folder.
 
 \section{Preparing SPICE (Optional)}
 
