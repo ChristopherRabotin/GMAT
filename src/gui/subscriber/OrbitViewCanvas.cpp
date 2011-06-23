@@ -2205,101 +2205,10 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       Spacecraft *spac = (Spacecraft*)mObjectArray[obj];
       ModelManager *mm = ModelManager::Instance();
       ModelObject *model = mm->GetModel(spac->modelID);
-      // This was to darken the model when it is behind the Earth,
-      // but was not pleasing visually and caused more problems
-      // than it solved
-      /*
-        Rvector3 toCenter, cardinal;
-        
-        // Calculate whether or not the craft is in darkness
-        toCenter = mLight.GetPosition();
-        
-        //toCenter.Set(lightPos[0], lightPos[1], lightPos[2]);
-        if (toCenter.GetMagnitude() < (model->position[frame] - toCenter).GetMagnitude())
-        isLit = true;
-        else {
-        cardinal = Cross(toCenter, Cross(model->position[frame], toCenter) / toCenter.GetMagnitude())
-        / toCenter.GetMagnitude();
-        isLit = cardinal.GetMagnitude() > mObjectRadius[GetObjectId("Earth")];
-        }
-      */
       
       if (spac->modelID != -1)
       {
-         float     RTD         = (float)GmatMathConstants::DEG_PER_RAD;
-         
-         int attIndex = objId * MAX_DATA * 4 + mObjLastFrame[objId] * 4;
-         Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
-                                mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
-         Rvector3 EARad = Attitude::ToEulerAngles(quat, 1,2,3);
-         
-         // old code commented out (LOJ: 2010.11.22)
-         // Extract spacecraft attitude from saved data files using subscriber
-         //   Attitude  *scAttitude  = (Attitude*) spac->GetRefObject(Gmat::ATTITUDE, "");
-         //   Rmatrix33 AMat         = scAttitude->GetCosineMatrix(mTime[frame]);
-         //   Rvector3  EARad        = Attitude::ToEulerAngles(AMat,1,2,3);
-         
-         #ifdef DEBUG_SC_ATTITUDE
-         MessageInterface::ShowMessage
-            ("===> '%s', EARad=%s\n", objName.c_str(),EARad.ToString().c_str());
-         #endif
-         
-         float     EAng1Deg     = float(EARad(0))*RTD;
-         float     EAng2Deg     = float(EARad(1))*RTD;
-         float     EAng3Deg     = float(EARad(2))*RTD;
-         
-         // Get offset rotation and scale from Spacecraft Visualization Tab in GUI.
-         float     offset[3];
-         float     rotation[3];
-         float     scale;
-         offset[0] = spac->GetRealParameter(spac->GetParameterID("ModelOffsetX"));
-         offset[1] = spac->GetRealParameter(spac->GetParameterID("ModelOffsetY"));
-         offset[2] = spac->GetRealParameter(spac->GetParameterID("ModelOffsetZ"));
-         rotation[0] = spac->GetRealParameter(spac->GetParameterID("ModelRotationX"));
-         rotation[1] = spac->GetRealParameter(spac->GetParameterID("ModelRotationY"));
-         rotation[2] = spac->GetRealParameter(spac->GetParameterID("ModelRotationZ"));
-         scale = spac->GetRealParameter(spac->GetParameterID("ModelScale"));
-         model->SetBaseOffset(offset[0], offset[1], offset[2]);
-         model->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-         model->SetBaseScale(scale, scale, scale);
-         
-         // Dunn's new attitude call.  Need to change to quaternions.  Also need
-         // to concatenate with BaseRotation.  Also need this to work for replay
-         // animation buttons.
-         model->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
-         
-         // The line above is where the object model gets its orientation.  This
-         // also seems to be a good place to give the model its ECI position.
-         // That call is actually in ModelObject.cpp on line 682.
-         
-         // Draw model
-         glTranslatef(mObjectViewPos[index1+0],
-                      mObjectViewPos[index1+1],
-                      mObjectViewPos[index1+2]);
-         model->Draw(frame, true); //isLit
-         
-         // Old code that may be worth saving
-         //SetCurrent(*theContext);
-         // ModelManager *mm = ModelManager::Instance();
-         // SetCurrent(*mm->modelContext);
-         // mm->modelContext->SetCurrent(*this);
-         
-         // Maybe delete this
-         // Rvector3  eulersRad   = scAttitude->GetEulerAngles(mTime[frame],1,2,3);  // Uses the 123 Euler Sequence
-         
-         
-         // Save line below for when Phil modifies model->Rotate to accept quats
-         // Rvector   quaternion  = scAttitude->GetQuaternion(mTime[frame]);
-
-         // Save line below for when I need to transpose a matrix.
-         // Rmatrix33 TMat        = AMat.Transpose();
-         
-         // Neither of the calls below works.  The model is being positioned somewhere else!
-         // PosX = 0.0;
-         // PosY = 0.0;
-         // PosZ = 15000.0;
-         // model->Reposition(PosX,PosY,PosZ);
-         // model->TranslateW(PosX,PosY,PosZ);
+         DrawSpacecraft3dModel(spac, objId, frame);
       }
       else
       {
@@ -2979,6 +2888,87 @@ void OrbitViewCanvas::DrawAxes()
    
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame)
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame)
+{
+   ModelManager *mm = ModelManager::Instance();
+   ModelObject *model = mm->GetModel(sc->modelID);
+   
+   float RTD = (float)GmatMathConstants::DEG_PER_RAD;
+   
+   int index1 = objId * MAX_DATA * 3 + frame * 3;
+   int attIndex = objId * MAX_DATA * 4 + mObjLastFrame[objId] * 4;
+   
+   Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
+                          mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
+   Rvector3 EARad = Attitude::ToEulerAngles(quat, 1,2,3);
+   
+   #ifdef DEBUG_SC_ATTITUDE
+   MessageInterface::ShowMessage
+      ("===> '%s', EARad=%s\n", objName.c_str(),EARad.ToString().c_str());
+   #endif
+   
+   float EAng1Deg = float(EARad(0)) * RTD;
+   float EAng2Deg = float(EARad(1)) * RTD;
+   float EAng3Deg = float(EARad(2)) * RTD;
+   
+   // Get offset rotation and scale from Spacecraft Visualization Tab in GUI.
+   float     offset[3];
+   float     rotation[3];
+   float     scale;
+   offset[0]   = sc->GetRealParameter(sc->GetParameterID("ModelOffsetX"));
+   offset[1]   = sc->GetRealParameter(sc->GetParameterID("ModelOffsetY"));
+   offset[2]   = sc->GetRealParameter(sc->GetParameterID("ModelOffsetZ"));
+   rotation[0] = sc->GetRealParameter(sc->GetParameterID("ModelRotationX"));
+   rotation[1] = sc->GetRealParameter(sc->GetParameterID("ModelRotationY"));
+   rotation[2] = sc->GetRealParameter(sc->GetParameterID("ModelRotationZ"));
+   scale = sc->GetRealParameter(sc->GetParameterID("ModelScale"));
+   model->SetBaseOffset(offset[0], offset[1], offset[2]);
+   model->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
+   model->SetBaseScale(scale, scale, scale);
+   
+   // Dunn's new attitude call.  Need to change to quaternions.  Also need
+   // to concatenate with BaseRotation.  Also need this to work for replay
+   // animation buttons.
+   model->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   
+   // The line above is where the object model gets its orientation.  This
+   // also seems to be a good place to give the model its ECI position.
+   // That call is actually in ModelObject.cpp on line 682.
+   
+   // Draw model
+   glTranslatef(mObjectViewPos[index1+0],
+                mObjectViewPos[index1+1],
+                mObjectViewPos[index1+2]);
+   
+   model->Draw(true); //isLit
+   
+   // Old code that may be worth saving
+   //SetCurrent(*theContext);
+   // ModelManager *mm = ModelManager::Instance();
+   // SetCurrent(*mm->modelContext);
+   // mm->modelContext->SetCurrent(*this);
+   
+   // Maybe delete this
+   // Rvector3  eulersRad   = scAttitude->GetEulerAngles(mTime[frame],1,2,3);  // Uses the 123 Euler Sequence
+   
+   // Save line below for when Phil modifies model->Rotate to accept quats
+   // Rvector   quaternion  = scAttitude->GetQuaternion(mTime[frame]);
+   
+   // Save line below for when I need to transpose a matrix.
+   // Rmatrix33 TMat        = AMat.Transpose();
+   
+   // Neither of the calls below works.  The model is being positioned somewhere else!
+   // PosX = 0.0;
+   // PosY = 0.0;
+   // PosZ = 15000.0;
+   // model->Reposition(PosX,PosY,PosZ);
+   // model->TranslateW(PosX,PosY,PosZ);
 }
 
 

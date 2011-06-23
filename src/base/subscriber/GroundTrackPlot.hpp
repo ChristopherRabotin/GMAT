@@ -73,8 +73,8 @@ public:
    
    enum FootPrintOption
    {
-      FP_ALL,
       FP_NONE,
+      FP_ALL,
       FootPrintOptionCount
    };
    

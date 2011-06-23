@@ -42,6 +42,8 @@ void DrawCube(float x, float y, float z);
 void DrawSpacecraft(float radius, GlColorType *color1, GlColorType *color2);
 void DrawEquatorialPlanes();
 void DrawCircle(GLUquadricObj *qobj, Real radius);
+void DrawCircle(double x1, double y1, double radius, bool fill = true);
+void DrawSquare(double x1, double y1, double radius, bool fill = true);
 void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z,
                   GLfloat k);
 

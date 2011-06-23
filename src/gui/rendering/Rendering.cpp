@@ -201,6 +201,61 @@ void DrawCircle(GLUquadricObj *qobj, Real radius)
 }
 
 //------------------------------------------------------------------------------
+// void DrawCircle(double x, double y, double radius, bool fill = true)
+//------------------------------------------------------------------------------
+/**
+ * Draws a circle around the point x and y.
+ */
+//------------------------------------------------------------------------------
+void DrawCircle(double x, double y, double radius, bool fill)
+{
+   double angle = 0.0;
+   double x1 = 0.0;
+   double y1 = 0.0;
+   double sinAngle = 0.0;
+   double cosAngle  = 0.0;
+   
+   if (fill)
+      glPolygonMode(GL_FRONT, GL_FILL);
+   else
+      glPolygonMode(GL_FRONT, GL_LINE);
+   
+   glBegin(GL_POLYGON);
+   for (int i = 0; i < 360; i += 10)
+   {
+      angle = i * GmatMathConstants::RAD_PER_DEG;
+      sinAngle = GmatMathUtil::Sin(angle);
+      cosAngle = GmatMathUtil::Cos(angle);
+      x1 = x - sinAngle * radius;
+      y1 = y + cosAngle * radius;
+      glVertex2d(x1, y1);
+   }
+   glEnd();
+}
+
+//------------------------------------------------------------------------------
+// void DrawSquare(double x, double y, double radius, bool fill = true)
+//------------------------------------------------------------------------------
+/**
+ * Draws a circle around the point x and y.
+ */
+//------------------------------------------------------------------------------
+void DrawSquare(double x, double y, double radius, bool fill)
+{
+   if (fill)
+      glPolygonMode(GL_FRONT, GL_FILL);
+   else
+      glPolygonMode(GL_FRONT, GL_LINE);
+   
+   glBegin(GL_QUADS);
+   glVertex2d(x - radius, y - radius);
+   glVertex2d(x + radius, y - radius);
+   glVertex2d(x + radius, y + radius);
+   glVertex2d(x - radius, y + radius);
+   glEnd();
+}
+
+//------------------------------------------------------------------------------
 // void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z, GLfloat k)
 //------------------------------------------------------------------------------
 void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z, GLfloat k)

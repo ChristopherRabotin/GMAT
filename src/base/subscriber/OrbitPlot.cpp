@@ -1449,6 +1449,11 @@ bool OrbitPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
          if (mDrawObjectArray.size() < mShowObjectMap.size())
             mDrawObjectArray.push_back(true); //added (LOJ: 2011.01.13 for bug 2215 fix)
          
+         UnsignedInt targetColor = GmatColor::TEAL32;
+         // Make lighter target color for ground track plot since it draws on the texture map
+         if (GetTypeName() == "GroundTrackPlot")
+            targetColor = GmatColor::WHITE32;
+         
          if (mAllSpCount < MAX_SP_COLOR)
          {
             // If object is non-standard-body, use mNonStdBodyCount.
@@ -1456,9 +1461,9 @@ bool OrbitPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
             if (mOrbitColorMap.find(name) == mOrbitColorMap.end())
             {
                mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mNonStdBodyCount];
-               mTargetColorMap[name] = GmatColor::TEAL32;
+               mTargetColorMap[name] = targetColor;
                mOrbitColorArray.push_back(DEFAULT_ORBIT_COLOR[mNonStdBodyCount]);
-               mTargetColorArray.push_back(GmatColor::TEAL32);
+               mTargetColorArray.push_back(targetColor);
                mNonStdBodyCount++;
             }
             else
@@ -1470,9 +1475,9 @@ bool OrbitPlot::AddSpacePoint(const std::string &name, Integer index, bool show)
          else
          {
             mOrbitColorMap[name] = GmatColor::RED32;
-            mTargetColorMap[name] = GmatColor::TEAL32;
+            mTargetColorMap[name] = targetColor;
             mOrbitColorArray.push_back(GmatColor::RED32);
-            mTargetColorArray.push_back(GmatColor::TEAL32);
+            mTargetColorArray.push_back(targetColor);
          }
       }
    }

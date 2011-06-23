@@ -150,6 +150,7 @@ private:
    
    // foot print option
    Integer mFootPrintOption;
+   Integer mFootPrintDrawFrequency;
    
    // light source
    bool mSunPresent;
@@ -262,6 +263,9 @@ private:
    void DrawSolverData();
    
    void DrawCentralBodyTexture();
+   void DrawCircleAtCurrentPosition(int objId, int index, double radius,
+                                    bool enableTransparency = true);
+   void DrawGroundStation(int objId, int index);
    
    // for rotation
    void RotateBodyUsingAttitude(const wxString &objName, int objId);

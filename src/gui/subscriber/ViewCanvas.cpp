@@ -203,7 +203,8 @@ void ViewCanvas::SetGLContext(wxGLContext *glContext)
 bool ViewCanvas::InitializePlot()
 {
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("\nViewCanvas::InitializePlot() entered\n");
+   MessageInterface::ShowMessage
+      ("\nViewCanvas::InitializePlot() '%s' entered\n", mPlotName.c_str());
    #endif
    
    // Add things to do here
@@ -224,14 +225,15 @@ bool ViewCanvas::InitializePlot()
       
    InitOpenGL();
    
-   // load body textures   
+   // load body textures
    LoadBodyTextures();
    
    // load spacecraft models
    LoadSpacecraftModels();
    
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("ViewCanvas::InitializePlot() leaving\n\n");
+   MessageInterface::ShowMessage
+      ("\nViewCanvas::InitializePlot() '%s' leaving\n", mPlotName.c_str());
    #endif
    
    return true;
@@ -1409,7 +1411,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          int posIndex = satId * MAX_DATA * 3 + (mLastIndex*3);
          mObjectViewPos[posIndex+0] = posX[sc];
          mObjectViewPos[posIndex+1] = posY[sc];
-         mObjectViewPos[posIndex+2] = posZ[sc];            
+         mObjectViewPos[posIndex+2] = posZ[sc];
          
          // Buffer velocity if needed
          if (mNeedVelocity)

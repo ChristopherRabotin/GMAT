@@ -244,7 +244,8 @@ GroundTrackCanvas::GroundTrackCanvas(wxWindow *parent, wxWindowID id,
    mEnableLightSource = true;
    
    // foot print option
-   mFootPrintOption = 0; // Draw ALL
+   mFootPrintOption = 0; // 0 = Draw NONE, 1 = Draw ALL
+   mFootPrintDrawFrequency = 10; // every 100th plot data
    
    // Zoom
    mMaxZoomIn = MAX_ZOOM_IN;
@@ -372,7 +373,7 @@ void GroundTrackCanvas::SetGl2dDrawingOption(const std::string &centralBodyName,
    #ifdef DEBUG_DRAWING_OPTION
    MessageInterface::ShowMessage
       ("GroundTrackCanvas::SetGl2dDrawingOption() entered, centralBodyName='%s', "
-       "textureMap='%s', footPrintOption=%d\n", centralBody.c_str(),
+       "textureMap='%s', footPrintOption=%d\n", centralBodyName.c_str(),
        textureMap.c_str(), footPrintOption);
    #endif
    mCentralBodyName = centralBodyName;
@@ -1147,88 +1148,10 @@ void GroundTrackCanvas::SetDefaultViewPoint()
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::InitializeViewPoint()
 {
-   // Dunn took out minus signs below to position vectors correctly in the 
-   // ECI reference frame.
-
    #if DEBUG_INIT
    MessageInterface::ShowMessage
       ("GroundTrackCanvas::InitializeViewPoint() entered\n");
    #endif
-   
-   wxString name;
-   int objId;
-   int index;
-   Rvector3 refVec, viewpoint, direction;
-   
-   if (mUseViewPointRefVector)
-   {
-      refVec = mViewPointRefVector;
-   }
-   else
-   {
-      name = pViewPointRefObj->GetName().c_str();
-      objId = GetObjectId(name);
-      index = objId * MAX_DATA * 3 + (mLastIndex*3);
-      refVec = Rvector3(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
-   }
-   
-   if (mUseViewPointVector)
-   {
-      viewpoint = mViewPointVector;
-   }
-   else
-   {
-      name = pViewPointVectorObj->GetName().c_str();
-      objId = GetObjectId(name);
-      index = objId * MAX_DATA * 3 + (mLastIndex*3);
-      viewpoint = Rvector3(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
-   }
-   viewpoint *= mViewScaleFactor;
-      
-   if (mUseViewDirectionVector)
-   {
-      direction = mViewDirectionVector;
-   }
-   else
-   {
-      name = pViewDirectionObj->GetName().c_str();
-      objId = GetObjectId(name);
-      index = objId * MAX_DATA * 3 + (mLastIndex*3);
-      direction = Rvector3(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
-   }
-   
-   mCamera.Reset();
-   if (mViewUpAxisName == "X")
-      mCamera.up = Rvector3(1.0, 0.0, 0.0);
-   else if (mViewUpAxisName == "-X")
-      mCamera.up = Rvector3(-1.0, 0.0, 0.0);
-   else if (mViewUpAxisName == "Y")
-      mCamera.up = Rvector3(0.0, 1.0, 0.0);
-   else if (mViewUpAxisName == "-Y")
-      mCamera.up = Rvector3(0.0, -1.0, 0.0);
-   else if (mViewUpAxisName == "Z")
-      mCamera.up = Rvector3(0.0, 0.0, 1.0);
-   else if (mViewUpAxisName == "-Z")
-      mCamera.up = Rvector3(0.0, 0.0, -1.0);
-   
-   Rvector3 viewPos = refVec + viewpoint;
-   Rvector3 viewDiff = viewPos - direction;
-   
-   #if DEBUG_INIT
-   MessageInterface::ShowMessage("   refVec    = %s", refVec.ToString().c_str());
-   MessageInterface::ShowMessage("   viewpoint = %s", viewpoint.ToString().c_str());
-   MessageInterface::ShowMessage("   viewPos   = %s", viewPos.ToString().c_str());
-   MessageInterface::ShowMessage("   direction = %s", viewPos.ToString().c_str());
-   MessageInterface::ShowMessage("   viewDiff  = %s", viewDiff.ToString().c_str());
-   #endif
-   
-   // If view difference is not zero then relocate camera
-   if (!viewDiff.IsZeroVector())
-   {
-      mCamera.Relocate(viewPos, direction);
-      // ReorthogonalizeVectors() is called from Camera::Relocate(), so commented out
-      //mCamera.ReorthogonalizeVectors();
-   }
    
    mViewPointInitialized = true;
    
@@ -1717,20 +1640,18 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
       DrawDebugMessage(" Before DrawOrbit --- ", GmatColor::RED32, 0, 100);
       #endif
       
-      #if 1
       #if DEBUG_DRAW
       MessageInterface::ShowMessage("---> Calling DrawOrbit(%s, %d, %d)\n", objName.c_str(), obj, objId);
       #endif
       
       // always draw spacecraft orbit trajectory
       DrawOrbit(objName, obj, objId);
-      #endif
       
       #if DEBUG_DRAW_DEBUG
       DrawDebugMessage(" After DrawOrbit  --- ", GmatColor::RED32, 0, 120);
       #endif
       
-      #if 0
+      #if 1
       //---------------------------------------------------------
       //draw object with texture
       //---------------------------------------------------------      
@@ -1758,28 +1679,20 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
    if (mNumData < 1)
       return;
    
-   int index1 = objId * MAX_DATA * 3 + frame * 3;
+   int index2 = objId * MAX_DATA * 3 + frame * 3;
    
    #if DEBUG_DRAW
    MessageInterface::ShowMessage
       ("DrawObjectTexture() entered, objName='%s', obj=%d, objId=%d, frame=%d, "
-       "index1=%d, mObjLastFrame[%d]=%d\n", objName.c_str(), obj, objId, frame,
-       index1, objId, mObjLastFrame[objId]);
+       "index2=%d, mObjLastFrame[%d]=%d\n", objName.c_str(), obj, objId, frame,
+       index2, objId, mObjLastFrame[objId]);
    MessageInterface::ShowMessage
-      ("   mObjectViewPos=%f, %f, %f\n", mObjectViewPos[index1+0],
-       mObjectViewPos[index1+1], mObjectViewPos[index1+2]);
+      ("   mObjectViewPos=%f, %f, %f\n", mObjectViewPos[index2+0],
+       mObjectViewPos[index2+1], mObjectViewPos[index2+2]);
    #endif
    
    glPushMatrix();
-   
-   // put object at final position
-   // Dunn took out old minus signs to make attitude correct.  Even though this
-   // section was already commented out.  Just in case someone comments it back
-   // in!
-   //glTranslatef(mObjectViewPos[index1+0],
-   //             mObjectViewPos[index1+1],
-   //              mObjectViewPos[index1+2]);
-   
+      
    // first disable GL_TEXTURE_2D to show lines clearly
    // without this, lines are drawn dim (loj: 2007.06.11)
    glDisable(GL_TEXTURE_2D);
@@ -1822,81 +1735,34 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
    
    // Draw spacecraft model
    if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
-   {
-      #if 0
-      
+   {     
       #if DEBUG_DRAW
       MessageInterface::ShowMessage("==> Drawing spacecraft '%s'\n", objName.c_str());
       #endif
       
       Spacecraft *spac = (Spacecraft*)mObjectArray[obj];
-      ModelManager *mm = ModelManager::Instance();
-      ModelObject *model = mm->GetModel(spac->modelID);
+      //ModelManager *mm = ModelManager::Instance();
+      //ModelObject *model = mm->GetModel(spac->modelID);
       
       // Draw model if model id found
       if (spac->modelID != -1)
       {
-         float RTD = (float)GmatMathConstants::DEG_PER_RAD;
-         
-         int attIndex = objId * MAX_DATA * 4 + mObjLastFrame[objId] * 4;
-         Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
-                                mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
-         Rvector3 EARad = Attitude::ToEulerAngles(quat, 1,2,3);
-                  
-         #ifdef DEBUG_SC_ATTITUDE
-         MessageInterface::ShowMessage
-            ("===> '%s', EARad=%s\n", objName.c_str(),EARad.ToString().c_str());
-         #endif
-         
-         float     EAng1Deg     = float(EARad(0))*RTD;
-         float     EAng2Deg     = float(EARad(1))*RTD;
-         float     EAng3Deg     = float(EARad(2))*RTD;
-         
-         // Get offset rotation and scale from Spacecraft Visualization Tab in GUI.
-         float     offset[3];
-         float     rotation[3];
-         float     scale;
-         offset[0] = spac->GetRealParameter(spac->GetParameterID("ModelOffsetX"));
-         offset[1] = spac->GetRealParameter(spac->GetParameterID("ModelOffsetY"));
-         offset[2] = spac->GetRealParameter(spac->GetParameterID("ModelOffsetZ"));
-         rotation[0] = spac->GetRealParameter(spac->GetParameterID("ModelRotationX"));
-         rotation[1] = spac->GetRealParameter(spac->GetParameterID("ModelRotationY"));
-         rotation[2] = spac->GetRealParameter(spac->GetParameterID("ModelRotationZ"));
-         scale = spac->GetRealParameter(spac->GetParameterID("ModelScale"));
-         model->SetBaseOffset(offset[0], offset[1], offset[2]);
-         model->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-         model->SetBaseScale(scale, scale, scale);
-         
-         // Dunn's new attitude call.  Need to change to quaternions.  Also need
-         // to concatenate with BaseRotation.  Also need this to work for replay
-         // animation buttons.
-         model->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
-         
-         // The line above is where the object model gets its orientation.  This
-         // also seems to be a good place to give the model its ECI position.
-         // That call is actually in ModelObject.cpp on line 682.
-         
-         // Draw model
-         glTranslatef(mObjectViewPos[index1+0],
-                      mObjectViewPos[index1+1],
-                      mObjectViewPos[index1+2]);
-         model->Draw(frame, true); //isLit
+         // Need to draw 2d spacecraft here
+         // Draw spacecraft as circle for now
+         DrawCircleAtCurrentPosition(objId, index2, 2.0, false);
       }
       else
       {
-         // Dunn took out old minus signs to make attitude correct.
-         glTranslatef(mObjectViewPos[index1+0],
-                      mObjectViewPos[index1+1],
-                      mObjectViewPos[index1+2]);
-         GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW32;
-         GlColorType *red = (GlColorType*)&GmatColor::RED32;
-         *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
-         // We want to differenciate spacecraft by orbit color (LOJ: 2011.02.16)
-         //DrawSpacecraft(mScRadius, yellow, red);
-         DrawSpacecraft(mScRadius, yellow, sGlColor);
+         DrawCircleAtCurrentPosition(objId, index2, 2.0, false);
       }
-      
+   }
+   else if (mObjectArray[obj]->IsOfType(Gmat::GROUND_STATION))
+   {
+      #if DEBUG_DRAW
+      MessageInterface::ShowMessage("==> Drawing ground station '%s'\n", objName.c_str());
       #endif
+      
+      DrawGroundStation(objId, index2);
    }
    else
    {
@@ -1906,7 +1772,7 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       
       //put object at final position
       #if 0
-      glTranslatef(mObjectViewPos[index1+0],mObjectViewPos[index1+1],mObjectViewPos[index1+2]);
+      glTranslatef(mObjectViewPos[index2+0],mObjectViewPos[index2+1],mObjectViewPos[index2+2]);
       #endif
       
       #if 0
@@ -2070,20 +1936,6 @@ void GroundTrackCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
       ("==========> DrawOrbit() objName='%s', drawing first part\n",
        objName.c_str());
    #endif
-
-   #if 0
-   // draw X here for testing
-   glColor3f(1.0, 1.0, 1.0);
-   glBegin(GL_LINES);
-   glVertex2f(-180.0, -90.0);
-   glVertex2f(180.0, 90.0);
-   glEnd();
-   
-   glBegin(GL_LINES);
-   glVertex2f(-180.0, 90.0);
-   glVertex2f(180.0, -90.0);
-   glEnd();
-   #endif
    
    // Draw first part from the ring buffer
    for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
@@ -2165,7 +2017,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
          return;
       }
       #endif
-            
+      
       // If drawing orbit lines
       int colorIndex = objId * MAX_DATA + i;
       if (mDrawOrbitFlag[colorIndex])
@@ -2192,6 +2044,14 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
          if (objName != "Earth" && objName != "Sun")
          {
             DrawGroundTrackLines(r1, v1, r2, v2);
+            
+            // draw foot print on option
+            if (mFootPrintOption == 1)
+            {
+               // Plot shows incosistent gap between foot prints, so commented out
+               //if (i % mFootPrintDrawFrequency == 0)
+                  DrawCircleAtCurrentPosition(objId, index2, 5.0);
+            }
          }
       }
       
@@ -2303,7 +2163,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
       
       DrawLine(lon1, lat1, lon2, lat2);
    }
-   
+      
    // Turn off TEXTURE_2D to go back to normal light
    glDisable(GL_TEXTURE_2D);
    
@@ -2403,6 +2263,86 @@ void GroundTrackCanvas::DrawCentralBodyTexture()
    #ifdef DEBUG_DRAW
    MessageInterface::ShowMessage("DrawCentralBodyTexture() leaving\n");
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawCircleAtCurrentPosition(int objId, int index, double radius, ...)
+//------------------------------------------------------------------------------
+/**
+ * Draws a circle at current position with given radius.
+ */
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawCircleAtCurrentPosition(int objId, int index,
+                                                    double radius,
+                                                    bool enableTransparency)
+{
+   // Compute current position
+   Real lon2, lat2;
+   Rvector3 r2(mObjectViewPos[index+0], mObjectViewPos[index+1],
+               mObjectViewPos[index+2]);
+   r2.ComputeLongitudeLatitude(lon2, lat2);
+   lon2 *= GmatMathConstants::DEG_PER_RAD;
+   lat2 *= GmatMathConstants::DEG_PER_RAD;
+   
+   #if DEBUG_DRAW_SPACECRAFT
+   MessageInterface::ShowMessage("   lon2 = %f, lat2 = %f\n", lon2, lat2);
+   #endif
+   
+   // Set color
+   *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
+
+   if (enableTransparency)
+   {
+      // Make the color transparent before drawing, set alpha value to 128
+      glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, 128);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   }
+   else
+      glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+   
+   glEnable(GL_TEXTURE_2D);
+   DrawCircle(lon2, lat2, radius, true);
+   glDisable(GL_TEXTURE_2D);
+   if (enableTransparency)
+      glDisable(GL_BLEND);
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawGroundStation(int objId, int index)
+//------------------------------------------------------------------------------
+/**
+ * Draws a circle at current position
+ */
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawGroundStation(int objId, int index)
+{
+   // Compute current position
+   Real lon2, lat2;
+   Rvector3 r2(mObjectViewPos[index+0], mObjectViewPos[index+1],
+               mObjectViewPos[index+2]);
+   r2.ComputeLongitudeLatitude(lon2, lat2);
+   lon2 *= GmatMathConstants::DEG_PER_RAD;
+   lat2 *= GmatMathConstants::DEG_PER_RAD;
+   
+   #if DEBUG_DRAW_GROUNDSTATION
+   MessageInterface::ShowMessage("   lon2 = %f, lat2 = %f\n", lon2, lat2);
+   #endif
+   
+   // Set color to yellow
+   GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW32;
+   //GlColorType *red = (GlColorType*)&GmatColor::RED32;
+   
+   // Make the color transparent before drawing, set alpha value to 128
+   glColor4ub(yellow->red, yellow->green, yellow->blue, 128);
+   glEnable(GL_TEXTURE_2D);
+   glEnable (GL_BLEND);
+   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   DrawSquare(lon2, lat2, 2.0, true);
+   glDisable(GL_TEXTURE_2D);
+   glDisable (GL_BLEND);
 }
 
 

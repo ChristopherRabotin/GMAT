@@ -39,7 +39,7 @@ StringArray GroundTrackPlot::footPrintOptions;
 const std::string
 GroundTrackPlot::FOOT_PRINT_OPTION_TEXT[FootPrintOptionCount] =
 {
-   "All", "None",
+   "None", "All", 
 };
 
 
@@ -79,6 +79,7 @@ GroundTrackPlot::GroundTrackPlot(const std::string &name)
    centralBodyName = "Earth";
    mViewCoordSysName = "EarthFixed";
    footPrints = "None";
+   footPrintOption = FP_NONE;
    
    footPrintOptions.clear();
    for (UnsignedInt i = 0; i < FootPrintOptionCount; i++)
@@ -100,6 +101,7 @@ GroundTrackPlot::GroundTrackPlot(const GroundTrackPlot &plot)
    centralBodyName    = plot.centralBodyName;
    footPrints         = plot.footPrints;
    textureMapFileName = plot.textureMapFileName;
+   footPrintOption    = plot.footPrintOption;
 }
 
 
@@ -121,6 +123,7 @@ GroundTrackPlot& GroundTrackPlot::operator=(const GroundTrackPlot& plot)
    centralBodyName    = plot.centralBodyName;
    footPrints         = plot.footPrints;
    textureMapFileName = plot.textureMapFileName;
+   footPrintOption    = plot.footPrintOption;
    
    return *this;
 }
@@ -298,7 +301,7 @@ bool GroundTrackPlot::Initialize()
          #endif
          
          PlotInterface::SetGl2dDrawingOption(instanceName, centralBodyName,
-                                             textureMapFileName, footPrintOption);
+                                             textureMapFileName, (Integer)footPrintOption);
          
          //--------------------------------------------------------
          // set viewpoint info
@@ -578,14 +581,21 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
          {
             footPrints = value;
             footPrintOption = (FootPrintOption)index;
+            #if DBGLVL_PARAM_STRING
+            MessageInterface::ShowMessage("   footPrintOption = %d\n", footPrintOption);
+            #endif
             return true;
          }
          else
          {
             SubscriberException se;
+            std::string options;
+            for (int i = 0; i < FootPrintOptionCount - 1; i++)               
+               options = options + FOOT_PRINT_OPTION_TEXT[i] + " ,";
+            options = options + FOOT_PRINT_OPTION_TEXT[FootPrintOptionCount - 1];
+            
             se.SetDetails(errorMessageFormat.c_str(), value.c_str(),
-                          PARAMETER_TEXT[id - GmatBaseParamCount].c_str(),
-                          "All, None");
+                          GetParameterText(id).c_str(), options.c_str());
             throw se;
          }
       }
