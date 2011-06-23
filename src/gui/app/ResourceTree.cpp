@@ -643,6 +643,7 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    case GmatTree::REPORT_FILE:
    case GmatTree::XY_PLOT:
    case GmatTree::ORBIT_VIEW:
+   case GmatTree::GROUND_TRACK_PLOT:
    case GmatTree::EPHEMERIS_FILE:
       theGuiManager->UpdateSubscriber();
       break;
@@ -2040,6 +2041,7 @@ void ResourceTree::OnClone(wxCommandEvent &event)
         (itemType == GmatTree::REPORT_FILE) ||
         (itemType == GmatTree::XY_PLOT) ||
         (itemType == GmatTree::ORBIT_VIEW) ||
+        (itemType == GmatTree::GROUND_TRACK_PLOT) ||
         (itemType == GmatTree::EPHEMERIS_FILE) ||
         (itemType == GmatTree::DIFF_CORR) ||
         (itemType == GmatTree::SQP) ||
@@ -2111,6 +2113,7 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
                          (itemType == GmatTree::REPORT_FILE)      ||
                          (itemType == GmatTree::XY_PLOT)          ||
                          (itemType == GmatTree::ORBIT_VIEW)       ||
+                         (itemType == GmatTree::GROUND_TRACK_PLOT)||
                          (itemType == GmatTree::EPHEMERIS_FILE)   ||
                          (itemType == GmatTree::INTERFACE));
 
@@ -4586,6 +4589,7 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::REPORT_FILE:
    case GmatTree::XY_PLOT:
    case GmatTree::ORBIT_VIEW:
+   case GmatTree::GROUND_TRACK_PLOT:      
    case GmatTree::EPHEMERIS_FILE:
       objType = Gmat::SUBSCRIBER;
       break;
@@ -4650,6 +4654,7 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    case GmatTree::REPORT_FILE:
    case GmatTree::XY_PLOT:
    case GmatTree::ORBIT_VIEW:
+   case GmatTree::GROUND_TRACK_PLOT:      
    case GmatTree::EPHEMERIS_FILE:
       return mSubscriberItem;
    case GmatTree::VARIABLE:
@@ -4705,6 +4710,8 @@ GmatTree::ResourceIconType ResourceTree::GetTreeItemIcon(GmatTree::ItemType item
       return GmatTree::ICON_XY_PLOT;
    case GmatTree::ORBIT_VIEW:
       return GmatTree::ICON_ORBIT_VIEW;
+   case GmatTree::GROUND_TRACK_PLOT:
+      return GmatTree::RESOURCE_ICON_GROUND_TRACK_PLOT;
    case GmatTree::EPHEMERIS_FILE:
       return GmatTree::ICON_REPORT_FILE;
    case GmatTree::VARIABLE:
