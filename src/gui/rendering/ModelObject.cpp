@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Developed jointly by NASA/GSFC, Thinking Systems, Inc., and Schafer Corp.,
 // under AFRL NOVA Contract #FA945104D03990003
 //
@@ -95,21 +93,21 @@ char ModelObject::Load(const wxString &full_path, float posX, float posY, float 
       path.append('/');
    extension = full_path.AfterLast('.');
    if (extension == wxT("3ds") || extension == wxT("3DS")){
-	   if (Load3DS(this, full_path) == 0)
-		   return 0;
-	   // Calculate the normals for the object
-	   // We only do this for 3ds files, since pov files
-	   // come with their norms
-	   CalcNormals();
+           if (Load3DS(this, full_path) == 0)
+                   return 0;
+           // Calculate the normals for the object
+           // We only do this for 3ds files, since pov files
+           // come with their norms
+           CalcNormals();
    }
    else if (extension == wxT("pov") || extension == wxT("POV")){
-	   LoadPOV(this, full_path);
-	   //CalcNormals();
-	   //for (int i = 0; i < num_vertices; i++){
-		   //VectorNormalize(&normal[i]);
-	   //}
-	   //if (LoadPOV(this, full_path) == 0)
-		   //return 0;
+           LoadPOV(this, full_path);
+           //CalcNormals();
+           //for (int i = 0; i < num_vertices; i++){
+                   //VectorNormalize(&normal[i]);
+           //}
+           //if (LoadPOV(this, full_path) == 0)
+                   //return 0;
    }
    filePath = path;
    // Then we go through each texture from the materials and load those. Any that failed
@@ -153,9 +151,9 @@ void ModelObject::LoadTextures(){
 // Loads a texture, binds it, and returns the generated texture id
 int ModelObject::LoadTexture(const wxString &filename){
    GLuint id;
-	GLenum error;
+        GLenum error;
    wxImage img; 
-	bool result = false;
+        bool result = false;
    wxString ext;
    if (!wxFileExists(filename))
       return -1;
@@ -172,12 +170,12 @@ int ModelObject::LoadTexture(const wxString &filename){
    else
       return -1;
 
-	if (!result)
-		return -1;
+        if (!result)
+                return -1;
 
    // Generate the texture id
    glGenTextures(1, &id);
-	error = glGetError();
+        error = glGetError();
    // Bind the texture id
    glBindTexture(GL_TEXTURE_2D, id);
    error = glGetError();
@@ -194,10 +192,10 @@ int ModelObject::LoadTexture(const wxString &filename){
    // Define the 2D texture
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.GetWidth(), img.GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, img.GetData());
    // Create the 2D mipmaps for minification
-	#ifndef __WXGTK__
+        #ifndef __WXGTK__
       // This call crashes GMAT on Linux, so it is excluded here. 
-		gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, img.GetWidth(), img.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, img.GetData());
-	#endif
+                gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, img.GetWidth(), img.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, img.GetData());
+        #endif
    
    return id;
 }
@@ -412,7 +410,7 @@ void ModelObject::Reposition(float x, float y, float z){
    /*MatrixSetElement(&matrix, 3, 0, x);//0, 3, x);
    MatrixSetElement(&matrix, 3, 1, y);//1, 3, y);
    MatrixSetElement(&matrix, 3, 2, z);//2, 3, z);*/
-	translation.Set(x, y, z);
+        translation.Set(x, y, z);
    Translate(baseOffset[0], baseOffset[1], baseOffset[2]);
 }
 
@@ -428,7 +426,7 @@ void ModelObject::Translate(float x, float y, float z){
    MatrixSetElement(&mat, 3, 1, y);//1, 3, y);
    MatrixSetElement(&mat, 3, 2, z);//2, 3, z);*/
 
-	translation.Set(translation[0] + x, translation[1] + y, translation[2] + z);
+        translation.Set(translation[0] + x, translation[1] + y, translation[2] + z);
 
    // The object's matrix is multiplied by the translation matrix
    //MatrixMult(&mat, &matrix, &matrix);
@@ -445,7 +443,7 @@ void ModelObject::TranslateW(float x, float y, float z){
    MatrixSetElement(&matrix, 3, 1, MatrixGetElement(&matrix, 3, 1) + y);
    MatrixSetElement(&matrix, 3, 2, MatrixGetElement(&matrix, 3, 2) + z);*/
 
-	translation.Set(translation[0] + x, translation[1] + y, translation[2] + z);
+        translation.Set(translation[0] + x, translation[1] + y, translation[2] + z);
 }
 
 // Rotates the object around its local axi by the given angles
@@ -462,11 +460,11 @@ void ModelObject::Rotate(bool useDegrees, float x, float y, float z)
    // If we're using degrees, we'll need to add the conversion factor
    if (useDegrees)
       factor = (float)(GmatMathConstants::RAD_PER_DEG);
-	x *= factor;
-	y *= factor;
-	z *= factor;
+        x *= factor;
+        y *= factor;
+        z *= factor;
 
-	rotation.Set(rotation[0] + x, rotation[1] + y, rotation[2] + z);
+        rotation.Set(rotation[0] + x, rotation[1] + y, rotation[2] + z);
 
    // X rotation
    /*if (x != 0.0){
@@ -508,7 +506,7 @@ void ModelObject::Rotate(bool useDegrees, float x, float y, float z)
       //matrix = res;
       MatrixMult(&mat, &matrix, &matrix);
    }*/
-	//MatrixMult(&mat, &matrix, &matrix);
+        //MatrixMult(&mat, &matrix, &matrix);
 }
 
 // Scales the object
@@ -522,7 +520,7 @@ void ModelObject::Scale(float x, float y, float z){
    MatrixSetElement(&mat, 1, 1, y);
    MatrixSetElement(&mat, 2, 2, z);*/
 
-	scale.Set(scale[0] + x, scale[1] + y, scale[2] + z);
+        scale.Set(scale[0] + x, scale[1] + y, scale[2] + z);
 
    //MatrixMult(&mat, &matrix, &matrix);
 }
@@ -530,11 +528,11 @@ void ModelObject::Scale(float x, float y, float z){
 // Resets the model's matrix to the identity matrix
 void ModelObject::Reset(){
    //MatrixIdentity(&matrix);
-	for (int i = 0; i < 3; i++){
-		rotation[i] = 0;
-		translation[i] = 0;
-		scale[i] = 0;
-	}
+        for (int i = 0; i < 3; i++){
+                rotation[i] = 0;
+                translation[i] = 0;
+                scale[i] = 0;
+        }
    Scale(baseScale[0], baseScale[1], baseScale[2]);
    Translate(baseOffset[0], baseOffset[1], baseOffset[2]);
    Rotate(false, baseRotation[0], baseRotation[1], baseRotation[2]);
@@ -697,51 +695,52 @@ void ModelObject::Dynamics(float time_factor){
       rot_speed.z * time_factor);
 }
 
+// This function is not used so commented out (LOJ: 2011.06.21)
 // Draws the object at the position of the given frame
 //
 // frame: The frame at which the object should be drawn
-void ModelObject::Draw(int frame, bool isLit){
-   //matrix_type cMatrix;
-   //MatrixCopy(&matrix, &cMatrix);
-   // Dunn took out the minus signs here.
-   // Hey Phil!  Should this be here?  Should all the rotation commands be in
-   // here too and the base offset stuff?
-   //Reposition(position[frame][0], position[frame][1], position[frame][2]);
-   Draw(isLit);
-   //MatrixCopy(&cMatrix, &matrix);
-}
+// void ModelObject::Draw(int frame, bool isLit){
+//    //matrix_type cMatrix;
+//    //MatrixCopy(&matrix, &cMatrix);
+//    // Dunn took out the minus signs here.
+//    // Hey Phil!  Should this be here?  Should all the rotation commands be in
+//    // here too and the base offset stuff?
+//    //Reposition(position[frame][0], position[frame][1], position[frame][2]);
+//    Draw(isLit);
+//    //MatrixCopy(&cMatrix, &matrix);
+// }
 
 // Draw the object on the screen
 void ModelObject::Draw(bool isLit){
    int i,j,k;
-	float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+   float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
    float black[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
    glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
    glMatrixMode(GL_MODELVIEW);
-
-	SetMatrix();
-
+   
+   SetMatrix();
+   
    // Save the current matrix
    glPushMatrix();
    // Multiply the object matrix by the object's matrix
    glMultMatrixf(matrix.element);
-
+   
 #ifndef WIREFRAME_MODE
 //   if (WIREFRAME_MODE == 0){
    // Go through all of the materials in the object
-	for (i = 0; i < num_materials; i++){
+        for (i = 0; i < num_materials; i++){
       GLenum error;
       // As long as have a texture id, we bind it and enable textures
       if (material[i].id_texture != -1){
-			GLint params = -13;
-			error = glGetError();
+                        GLint params = -13;
+                        error = glGetError();
          glBindTexture(GL_TEXTURE_2D, material[i].id_texture);
-			error = glGetError();
-			glGetIntegerv(GL_TEXTURE_BINDING_2D, &params);
-			error = glGetError();
+                        error = glGetError();
+                        glGetIntegerv(GL_TEXTURE_BINDING_2D, &params);
+                        error = glGetError();
          glEnable(GL_TEXTURE_2D);
-			error = glGetError();
+                        error = glGetError();
       }
       // If we have no texture id, we disable textures
       else
@@ -750,7 +749,7 @@ void ModelObject::Draw(bool isLit){
       // Apply the diffuse color of the material
       //glMaterialfv(GL_FRONT, GL_AMBIENT, &material[i].mat_ambient.r);
       //glMaterialfv(GL_FRONT, GL_DIFFUSE, &material[i].mat_diffuse.r);
-	  //glColor3f(1.0, 1.0, 1.0);
+          //glColor3f(1.0, 1.0, 1.0);
       glColor3fv(&material[i].mat_diffuse.r);//&material[i].mat_ambient.r);
       if (isLit)
          glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, &material[i].mat_specular.r);
@@ -761,7 +760,7 @@ void ModelObject::Draw(bool isLit){
       // Begin to draw the triangles
       glBegin(GL_TRIANGLES);
       // Go through all of the faces stored in the material
-	  for (j = 0; j < material[i].num_faces; j++){
+          for (j = 0; j < material[i].num_faces; j++){
          // Store the face number, for easy reference
          k = material[i].faces[j];
 
@@ -867,32 +866,32 @@ void ModelObject::Draw(bool isLit){
 
 // Sets the matrix to use the base and currents for translation, rotation, etc.
 void ModelObject::SetMatrix(){
-	matrix_type mat;
-	MatrixIdentity(&matrix);
-	float rotcos, rotsin;
+        matrix_type mat;
+        MatrixIdentity(&matrix);
+        float rotcos, rotsin;
 
    MatrixIdentity(&mat);
    MatrixSetElement(&mat, 0, 0, scale[0]);
    MatrixSetElement(&mat, 1, 1, scale[1]);
    MatrixSetElement(&mat, 2, 2, scale[2]);
-	MatrixMult(&mat, &matrix, &matrix);
+        MatrixMult(&mat, &matrix, &matrix);
 
-	MatrixIdentity(&mat);
+        MatrixIdentity(&mat);
    MatrixSetElement(&mat, 3, 0, translation[0]);
    MatrixSetElement(&mat, 3, 1, translation[1]);
    MatrixSetElement(&mat, 3, 2, translation[2]);
    MatrixMult(&mat, &matrix, &matrix);
 
-	MatrixIdentity(&mat);
-	rotcos = (float)cos(rotation[0]);
+        MatrixIdentity(&mat);
+        rotcos = (float)cos(rotation[0]);
    rotsin = (float)sin(rotation[0]);
    MatrixSetElement(&mat, 1, 1, rotcos);
    MatrixSetElement(&mat, 1, 2, rotsin);
    MatrixSetElement(&mat, 2, 1, -rotsin);
    MatrixSetElement(&mat, 2, 2, rotcos);
-	MatrixMult(&mat, &matrix, &matrix);
+        MatrixMult(&mat, &matrix, &matrix);
 
-	MatrixIdentity(&mat);
+        MatrixIdentity(&mat);
    rotcos = (float)cos(rotation[1]);
    rotsin = (float)sin(rotation[1]);
    MatrixSetElement(&mat, 0, 0, rotcos);
@@ -901,7 +900,7 @@ void ModelObject::SetMatrix(){
    MatrixSetElement(&mat, 2, 2, rotcos);
    MatrixMult(&mat, &matrix, &matrix);
 
-	MatrixIdentity(&mat);
+        MatrixIdentity(&mat);
    rotcos = (float)cos(rotation[2]);
    rotsin = (float)sin(rotation[2]);
    MatrixSetElement(&mat, 0, 0, rotcos);

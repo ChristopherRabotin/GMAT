@@ -1,3 +1,4 @@
+//$Id$
 //------------------------------------------------------------------------------
 //                              ModelObject
 //------------------------------------------------------------------------------
@@ -124,11 +125,11 @@ public:
       float pos_x = 0.0f, float pos_y = 0.0f, float pos_z = 0.0f, 
       int rot_x = 0, int rot_y = 0, int rot_z = 0);
    void LoadTextures();
-
+   
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// These modify the model's object matrix
    ///////////////////////////////////////////////////////////////////////////////////////////
-
+   
    // Set the model's matrix position
    void Reposition(float x, float y, float z);
    // Move the model's matrix position
@@ -141,17 +142,17 @@ public:
    void Scale(float x, float y, float z);
    // Sets the model's matrix to an identity matrix
    void Reset();
-
+   
    // This is the base rotation and offset of the model. This will not be cleared when the 
    // model's matrix is reset
    void SetBaseRotation(bool useDegrees, float x, float y, float z);
    void SetBaseOffset(float x, float y, float z);
    void SetBaseScale(float x, float y, float z);
-
+   
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// These apply different forces to the object. They are NOT used at this time
    ///////////////////////////////////////////////////////////////////////////////////////////
-
+   
    // Increase the linear speed of the model
    void Accelerate(char axis_system, float ax, float ay, float az);
    // Increase the rotational speed of the model
@@ -168,31 +169,31 @@ public:
    void CollisionCheck(ModelObject object1, ModelObject object2);
    // Simulate a collision response between two objects
    void CollisionResponse(ModelObject object1, ModelObject object2);
-
+   
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// These perform the openGL drawing
    ///////////////////////////////////////////////////////////////////////////////////////////
-
+   
    // Draw the model at the given frame position
-   void Draw(int frame, bool isLit);
+   //void Draw(int frame, bool isLit);
    // Draw the model
    void Draw(bool isLit);
    void RenderShadowVolume(float *light_pos, int frame);
-
+   
 private:
    float baseRotation[3];
    float baseOffset[3];
    float baseScale[3];
-	Rvector3 rotation;
-	Rvector3 translation;
-	Rvector3 scale;
-
+   Rvector3 rotation;
+   Rvector3 translation;
+   Rvector3 scale;
+   
    void CreateAABB(); // Creates the axis-aligned bounding box for the object
    void CreateBSphere(); // Creates the bounding sphere for the object
    void CalcNormals(); // Calculates the vertex normals of the object
    void FindNeighbors(); // Finds all neighboring faces for all polygons
    int LoadTexture(const wxString &file_name);
-
+   
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// Helper functions for the vector structure used within the class
    /// The structures are used instead of Rvector because they allow easier model drawing
@@ -217,15 +218,15 @@ private:
    /// Helper functions for the matrix structure used within the class
    /// The structures are used instead of Rmatrix because Rmatrix is finicky and this was faster
    ///////////////////////////////////////////////////////////////////////////////////////////
-
-	void SetMatrix();
-
+   
+   void SetMatrix();
+   
    void MatrixSetElement(matrix_type_ptr matrix, int r, int c, float value);
    float MatrixGetElement(matrix_type_ptr matrix, int r, int c);
    void MatrixIdentity(matrix_type_ptr matrix);
    void MatrixZero(matrix_type_ptr matrix);
    void MatrixCopy(matrix_type_ptr source, matrix_type_ptr destination);
    void MatrixMult(matrix_type_ptr matrix1, matrix_type_ptr matrix2, matrix_type_ptr result);
-
+   
 };
 #endif
