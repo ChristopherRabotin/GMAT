@@ -2051,9 +2051,18 @@ void GmatMainFrame::OpenRecentScript(size_t index, wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OpenRecentScript(wxString filename, wxCommandEvent &event)
 {
+   // Check if file exist first
+   if (!wxFileName::FileExists(filename))
+   {
+      wxMessageBox(wxT("The script file \"" + filename + "\" no longer exist.  "
+                       "It may have been removed or renamed.\n"),
+                   wxT("GMAT Error"));
+      return;
+   }
+   
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetResourceTree()->AddScript(filename);
-
+   
    if (gmatAppData->GetResourceTree()->WasScriptAdded())
    {
       #ifdef DEBUG_OPEN_SCRIPT
