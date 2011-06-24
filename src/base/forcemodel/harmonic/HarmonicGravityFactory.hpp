@@ -15,7 +15,7 @@
 /**
  * This is the class that creates and returns a pointer to the
  * appropriate HarmonicGravity sub-class.
- * NOTE: this class currently can only be used in the GraivtyField class.
+ * NOTE: this class currently can only be used in the GravityField class.
  */
 //------------------------------------------------------------------------------
 #ifndef HarmonicGravityFactory_hpp
