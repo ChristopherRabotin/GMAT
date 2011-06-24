@@ -20,6 +20,9 @@
 //           2004/11/02 D. Conway Thinking Systems, Inc.
 //           Changed internal arrays to static arrays to fix memory error.
 //
+// @note For now, we assume
+//       1) we are computing state derivatives along with any
+//          STM or A-Matrix derivatives.
 /**
  * This is the GravityField class.
  *
@@ -82,6 +85,7 @@
 //#define DEBUG_CALCULATE
 //#define DEBUG_BODY_DATA
 //#define DEBUG_DEGREE_ORDER
+//#define DEBUG_DERIVATIVES
 
 using namespace GmatMathUtil;
 
@@ -158,7 +162,7 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
 //------------------------------------------------------------------------------
 GravityField::~GravityField()
 {
-   if ((gravityModel) && (gravityModel->GetFilename() == "")) delete gravityModel;
+//   if ((gravityModel) && (gravityModel->GetFilename() == "")) delete gravityModel; // deleted in HGFactory
    gravityModel = NULL;
 }
 
@@ -224,8 +228,9 @@ GravityField& GravityField::operator=(const GravityField &gf)
    gfInitialized          = false;  // is that what I want to do?
    orderTruncateReported  = gf.orderTruncateReported;
    degreeTruncateReported = gf.degreeTruncateReported;
-   if ((gravityModel) && (gravityModel->GetFilename() == "")) delete gravityModel;  // delete only Body ones
-   gravityModel           = NULL;
+//   if ((gravityModel) && (gravityModel->GetFilename() == "")) delete gravityModel;  // delete only Body ones
+   gravityModel           = gf.gravityModel;
+//   gravityModel           = NULL;
    frv                    = gf.frv;
    trv                    = gf.trv;
    now                    = gf.now;
@@ -269,7 +274,7 @@ bool GravityField::Initialize()
    if (body->GetName() != fixedCS->GetOriginName()) // ********** is this the right CS to use???
       throw ODEModelException("Full field gravity is only supported for "
                               "the force model origin in current GMAT builds.");
-   if (!fileRead) 
+   if ((!fileRead) || (!gravityModel))
    {
       Integer fileDegree = 0;
       Integer fileOrder  = 0;
@@ -293,6 +298,9 @@ bool GravityField::Initialize()
             }
             else
             {
+               #ifdef DEBUG_GRAVITY_FILE_READ
+                  MessageInterface::ShowMessage("--- HarmonicGravity object retrieved is <%p>\n", gravityModel);
+               #endif
                fileDegree =   gravityModel->GetNN();
                fileOrder  =   gravityModel->GetMM();
                mu         = - gravityModel->GetFactor();
@@ -396,19 +404,22 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
       return false;
 
    #ifdef DEBUG_GRAVITY_FIELD
-   if (body->GetName() == "Mars")
-   {
       MessageInterface::ShowMessage("%s %d %s %le %s  %le %le %le %le %le %le\n",
           "Entered GravityField::GetDerivatives with order", dvorder, "dt = ",
           dt, "and state\n",
           state[0], state[1], state[2], state[3], state[4], state[5]);
-   }
+      MessageInterface::ShowMessage("cartesianCount = %d, stmCount = %d, aMatrixCount = %d\n",
+            cartesianCount, stmCount, aMatrixCount);
+      MessageInterface::ShowMessage("fillCartesian = %s, fillSTM = %s, fillAMatrix = %s\n",
+            (fillCartesian? "true" : "false"), (fillSTM? "true" : "false"), (fillAMatrix? "true" : "false"));
+      MessageInterface::ShowMessage("cartesianStart = %d, stmStart = %d, aMatrixStart = %d\n",
+            cartesianStart, stmStart, aMatrixStart);
    #endif
 
-/// @todo Optimize this code -- May be possible to make GravityField calcs more efficient
+/// @todo Optimize this code -- May be possible to make GravityField calculations more efficient
 
-   // Currently hardcoded for one spacecraft.  - remove this!!!!!!!!!!!!!!
-   if (cartesianCount < 1)    // need to check stmCount and aMatrixCount here too??????
+
+   if ((cartesianCount < 1)  && (stmCount < 1) && (aMatrixCount < 1))
       throw ODEModelException(
          "GravityField requires at least one spacecraft.");
 
@@ -449,15 +460,26 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
    #endif
 
 
-   if (fillCartesian)
+   if (fillCartesian || fillAMatrix || fillSTM)
    {
+      // See assumption 1, above
+      if ((cartesianCount < stmCount) || (cartesianCount < aMatrixCount))
+      {
+         throw ODEModelException("GetDerivatives: cartesianCount < stmCount or aMatrixCount\n");
+      }
       Real originacc[3] = { 0.0,0.0,0.0 };  // JPD code
       Rmatrix33 origingrad (0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+      Rmatrix33 emptyGradient(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+      Rmatrix33 gradnew (0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
       if (body != forceOrigin)
       {
          Real originstate[6] = { 0.0,0.0,0.0,0.0,0.0,0.0 };
          Calculate(dt,originstate,originacc,origingrad);
+#ifdef DEBUG_DERIVATIVES
+      MessageInterface::ShowMessage("---------> origingrad = %s\n", origingrad.ToString().c_str());
+#endif
       }
+
       for (Integer n = 0; n < cartesianCount; ++n)
       {
          nOffset = cartesianStart + n * stateSize;
@@ -465,17 +487,23 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
             satState[i] = state[i+nOffset];
 
          Real accnew[3];  // JPD code
-         Rmatrix33 gradnew (0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+         gradnew = emptyGradient;
          Calculate(dt,satState,accnew,gradnew);
          if (body != forceOrigin)
          {
             for (Integer i=0;  i<=2;  ++i)
                accnew[i] -= originacc[i];
             gradnew -= origingrad;
+#ifdef DEBUG_DERIVATIVES
+      MessageInterface::ShowMessage("---------> body not equal to forceOrigin\n");
+#endif
          }
+#ifdef DEBUG_DERIVATIVES
+      MessageInterface::ShowMessage("---------> gradnew (%d) = %s\n", n, gradnew.ToString().c_str());
+#endif
          
          // Fill Derivatives
-         switch (dvorder) 
+         switch (dvorder)
          {
             case 1:
                deriv[0+nOffset] = satState[3];
@@ -485,7 +513,7 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                deriv[4+nOffset] = accnew[1];
                deriv[5+nOffset] = accnew[2];
                break;
-               
+
             case 2:
                deriv[0+nOffset] = accnew[0];
                deriv[1+nOffset] = accnew[1];
@@ -494,7 +522,104 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                deriv[4+nOffset] = 0.0;
                deriv[5+nOffset] = 0.0;
                break;
-         } 
+         }
+
+#ifdef DEBUG_DERIVATIVES
+         for (Integer ii = 0 + nOffset; ii < 6+nOffset; ii++)
+                     MessageInterface::ShowMessage("------ deriv[%d] = %12.10f\n", ii, deriv[ii]);
+#endif
+         if (fillSTM)
+         {
+            Real aTilde[36];
+            Integer element;
+            // @todo Add the use of the GetAssociateIndex() method here to get index into state array
+            //       (See assumption 1, above)
+            if (n <= stmCount)
+            {
+               Integer i6 = stmStart + n * 36;
+
+               // Calculate A-tilde
+               aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
+               aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
+               aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
+               aTilde[ 9] = aTilde[10] = aTilde[11] =
+               aTilde[12] = aTilde[13] = aTilde[14] =
+               aTilde[15] = aTilde[16] = aTilde[17] =
+               aTilde[21] = aTilde[22] = aTilde[23] =
+               aTilde[27] = aTilde[28] = aTilde[29] =
+               aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
+
+               // fill in the lower left quadrant with the calculated gradient values
+               aTilde[18] = gradnew(0,0);
+               aTilde[19] = gradnew(0,1);
+               aTilde[20] = gradnew(0,2);
+               aTilde[24] = gradnew(1,0);
+               aTilde[25] = gradnew(1,1);
+               aTilde[26] = gradnew(1,2);
+               aTilde[30] = gradnew(2,0);
+               aTilde[31] = gradnew(2,1);
+               aTilde[32] = gradnew(2,2);
+
+               for (Integer j = 0; j < 6; j++)
+               {
+                  for (Integer k = 0; k < 6; k++)
+                  {
+                     element = j * 6 + k;
+#ifdef DEBUG_DERIVATIVES
+                     MessageInterface::ShowMessage("------ deriv[%d] = %12.10f\n", (i6+element), aTilde[element]);
+#endif
+                     deriv[i6+element] = aTilde[element];
+                  }
+               }
+            }
+         }
+
+         if (fillAMatrix)
+         {
+            Real aTilde[36];
+            Integer element;
+            // @todo Add the use of the GetAssociateIndex() method here to get index into state array
+            //       (See assumption 1, above)
+            if (n <= aMatrixCount)
+            {
+               Integer i6 = aMatrixStart + n * 36;
+
+               // Calculate A-tilde
+               aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
+               aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
+               aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
+               aTilde[ 9] = aTilde[10] = aTilde[11] =
+               aTilde[12] = aTilde[13] = aTilde[14] =
+               aTilde[15] = aTilde[16] = aTilde[17] =
+               aTilde[21] = aTilde[22] = aTilde[23] =
+               aTilde[27] = aTilde[28] = aTilde[29] =
+               aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
+
+               // fill in the lower left quadrant with the calculated gradient values
+               aTilde[18] = gradnew(0,0);
+               aTilde[19] = gradnew(0,1);
+               aTilde[20] = gradnew(0,2);
+               aTilde[24] = gradnew(1,0);
+               aTilde[25] = gradnew(1,1);
+               aTilde[26] = gradnew(1,2);
+               aTilde[30] = gradnew(2,0);
+               aTilde[31] = gradnew(2,1);
+               aTilde[32] = gradnew(2,2);
+
+               for (Integer j = 0; j < 6; j++)
+               {
+                  for (Integer k = 0; k < 6; k++)
+                  {
+                     element = j * 6 + k;
+#ifdef DEBUG_DERIVATIVES
+                     MessageInterface::ShowMessage("------ deriv[%d] = %12.10f\n", (i6+element), aTilde[element]);
+#endif
+                     deriv[i6+element] = aTilde[element];
+                  }
+               }
+            }
+         }
+
       }  // end for
    }
 
@@ -773,11 +898,11 @@ bool GravityField::SupportsDerivative(Gmat::StateElementId id)
    if (id == Gmat::CARTESIAN_STATE)
       return true;
 
-//   if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
-//      return true;
-//
-//   if (id == Gmat::ORBIT_A_MATRIX)
-//      return true;
+   if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+      return true;
+
+   if (id == Gmat::ORBIT_A_MATRIX)
+      return true;
 
    return PhysicalModel::SupportsDerivative(id);
 }
@@ -811,25 +936,26 @@ bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
    switch (id)
    {
       case Gmat::CARTESIAN_STATE:
+//         satCount       = quantity;
          cartesianCount = quantity;
          cartesianStart = index;
          fillCartesian  = true;
          retval         = true;
          break;
 
-//      case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
-//         stmCount       = quantity;
-//         stmIndex       = index;
-//         fillSTM        = true;
-//         retval         = true;
-//         break;
-//
-//      case Gmat::ORBIT_A_MATRIX:
-//         aMatrixCount   = quantity;
-//         aMatrixStart   = index;
-//         fillAMatrix    = true;
-//         retval         = true;
-//         break;
+      case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
+         stmCount       = quantity;
+         stmStart       = index;
+         fillSTM        = true;
+         retval         = true;
+         break;
+
+      case Gmat::ORBIT_A_MATRIX:
+         aMatrixCount   = quantity;
+         aMatrixStart   = index;
+         fillAMatrix    = true;
+         retval         = true;
+         break;
 
       default:
          break;
@@ -916,6 +1042,9 @@ void GravityField::Calculate (Real dt, Real state[6],
             jday, now, tmpState[0], tmpState[1], tmpState[2], tmpState[3], tmpState[4], tmpState[5]);
    #endif
    Rmatrix33 rotMatrix = cc.GetLastRotationMatrix();
+#ifdef DEBUG_DERIVATIVES
+   MessageInterface::ShowMessage("---->>>> rotMatrix = %s\n", rotMatrix.ToString().c_str());
+#endif
    // calculate sun and moon pos
    Real sunpos[3]   = {0.0,0.0,0.0};
    Real moonpos[3]  = {0.0,0.0,0.0};
@@ -958,10 +1087,13 @@ void GravityField::Calculate (Real dt, Real state[6],
    Real utcmjd  = TimeConverterUtil::Convert(now, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
                  GmatTimeConstants::JD_JAN_5_1941);
    eop->GetPolarMotionAndLod(utcmjd, xp, yp, lod);
+   bool computeMatrix = fillAMatrix || fillSTM;
 
-   gravityModel->CalculateFullField(jday,tmpState,degree,order,
-                                    useTides,sunpos,moonpos,sunMass, moonMass,
-                                    xp, yp, fillAMatrix,rotacc,rotgrad);
+   gravityModel->CalculateFullField(jday, tmpState, degree, order, useTides, sunpos, moonpos, sunMass, moonMass,
+                                    xp, yp, computeMatrix, rotacc, rotgrad);
+#ifdef DEBUG_DERIVATIVES
+   MessageInterface::ShowMessage("after CalculateFullField, rotgrad = %s\n", rotgrad.ToString().c_str());
+#endif
    /*
     MessageInterface::ShowMessage
     ("HarmonicField::Calculate pos= %20.14f %20.14f %20.14f\n",
@@ -980,4 +1112,7 @@ void GravityField::Calculate (Real dt, Real state[6],
    // Convert back to target CS
    InverseRotate (rotMatrix,rotacc,acc);
    grad = rotMatrix.Transpose() * rotgrad * rotMatrix;
+#ifdef DEBUG_DERIVATIVES
+   MessageInterface::ShowMessage("at end of Calculate, after rotation, grad = %s\n", grad.ToString().c_str());
+#endif
 }
