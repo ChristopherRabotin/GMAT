@@ -41,11 +41,12 @@ GravityFile*                  HarmonicGravityFactory::gravFile = NULL;
 
 HarmonicGravityFactory::HarmonicGravityFactory()
 {
+   gravFile = new GravityFile();
 }
 
 HarmonicGravityFactory::~HarmonicGravityFactory()
 {
-   EmptyCache();
+//   EmptyCache();
 }
 
 
@@ -60,7 +61,7 @@ HarmonicGravity* HarmonicGravityFactory::Create(const std::string& filename,
    {
       if ((*objptPos)->GetFilename() == filename)
       {
-         return (*objptPos); // When are the pointers in cache deleted?
+         return (*objptPos);
       }
    }
    HarmonicGravity         *newOne  = NULL;
@@ -70,12 +71,12 @@ HarmonicGravity* HarmonicGravityFactory::Create(const std::string& filename,
       case GmatFM::GFT_COF:
          newOne = new HarmonicGravityCof(filename,radius,mukm);
          break;
-//      case GmatFM::GFT_DAT:
-//         newOne = new HarmonicGravityEgm96dat(filename,radius,mukm);
-//         break;
       case GmatFM::GFT_GRV:
          newOne = new HarmonicGravityGrv(filename,radius,mukm);
          break;
+//      case GmatFM::GFT_DAT:
+//         newOne = new HarmonicGravityEgm96dat(filename,radius,mukm);
+//         break;
       case GmatFM::GFT_UNKNOWN:
          throw ODEModelException
             ("HarmonicGravityFactory::Create file not found or incorrect type\n");
@@ -92,8 +93,13 @@ HarmonicGravity* HarmonicGravityFactory::Create(const std::string& filename,
    }
    cache.push_back(newOne);
    #ifdef DEBUG_CREATE_DELETE
-      MessageInterface::ShowMessage("Just created a HarmonicGravity file object for filename %s\n",
-            filename.c_str());
+      MessageInterface::ShowMessage(">>>> Just created a HarmonicGravity file object <%p> for filename %s\n",
+            newOne, filename.c_str());
+      MessageInterface::ShowMessage("cache pointers and filenames are: \n");
+      for (unsigned int ii = 0; ii < cache.size(); ii++)
+      {
+         MessageInterface::ShowMessage("    <%p>     %s\n", cache.at(ii), ((cache.at(ii))->GetFilename()).c_str());
+      }
    #endif
    return newOne;  // When are the pointers in cache deleted?
 }
@@ -113,25 +119,27 @@ HarmonicGravity* HarmonicGravityFactory::Create(CelestialBody* body)
 }
 
 
+//------------------------------------------------------------------------------
 void HarmonicGravityFactory::EmptyCache()
 {
    if (cache.empty()) return;
+   HarmonicGravity *hg = NULL;
 
-   Integer cacheSize = cache.size();
    #ifdef DEBUG_CACHE
-      MessageInterface::ShowMessage("Emptying HarmonicGravityFactory::cache (size = %d) ...................\n", cacheSize);
+      MessageInterface::ShowMessage("Emptying HarmonicGravityFactory::cache (size = %d) ...................\n", cache.size());
    #endif
-   for (Integer ii = cacheSize - 1; ii >= 0; ii--)
+   while (!cache.empty())
    {
-      if (cache.at(ii) != NULL)
+      hg = cache.back();
+      if (hg)
       {
          #ifdef DEBUG_CACHE
-            MessageInterface::ShowMessage("Deleting HarmonicGravityFactory::cache[%d] for filename %s ...................\n",
-                  ii, (cache[ii]->GetFilename()).c_str());
+         MessageInterface::ShowMessage(">>>> Deleting HarmonicGravityFactory::cache <%p>", hg);
+         MessageInterface::ShowMessage(" for filename %s ...................\n", (hg->GetFilename()).c_str());
          #endif
-         delete cache[ii];
-         cache[ii] = NULL;
+         delete hg;
       }
+      cache.pop_back();
    }
    cache.clear();
 }
