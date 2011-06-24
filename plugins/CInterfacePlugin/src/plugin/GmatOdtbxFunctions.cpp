@@ -138,6 +138,9 @@ extern "C"
          return -2;
 
       lastMsg = "The Moderator has been initialized";
+      ode     = NULL;
+      pSetup  = NULL;
+
       return 0;
    }
 
@@ -274,6 +277,8 @@ extern "C"
    int FindOdeModel(const char* modelName)
    {
       int retval = -1;
+      ode = NULL;
+      pSetup = NULL;
 
       Moderator *theModerator = Moderator::Instance();
       if (theModerator == NULL)
@@ -598,9 +603,11 @@ extern "C"
    * @note The current implementation returns the first ODEModel found.
    */
 //------------------------------------------------------------------------------
-void GetODEModel(GmatCommand *cmd, std::string modelName)
+void GetODEModel(GmatCommand *cmd, const char *modelName)
 {
    ODEModel* model = NULL;
+   ode = NULL;
+   pSetup = NULL;
 
    PropSetup *prop = GetFirstPropagator(cmd);
    if (prop != NULL)
@@ -648,19 +655,23 @@ PropSetup *GetFirstPropagator(GmatCommand *cmd)
       extraMsg += "   " + current->GetTypeName() + "\n";
       if (current->GetTypeName() == "Propagate")
       {
-         retval = (PropSetup*)(current->GetRefObject(Gmat::PROP_SETUP, "", 0));
-         if (retval != NULL)
+         GmatBase *obj = current->GetRefObject(Gmat::PROP_SETUP, "", 0);
+         if (obj->IsOfType("PropSetup"))
          {
-            try
+            retval = (PropSetup*)(obj);
+            if (retval != NULL)
             {
-               // Fire once to set all of the internal connections
-               current->Execute();
+               try
+               {
+                  // Fire once to set all of the internal connections
+                  current->Execute();
+               }
+               catch (BaseException &ex)
+               {
+                  lastMsg = ex.GetFullMessage();
+               }
+               break;
             }
-            catch (BaseException &ex)
-            {
-               lastMsg = ex.GetFullMessage();
-            }
-            break;
          }
       }
       current = current->GetNext();
