@@ -24,6 +24,8 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 
+//#define DEBUG_GRADIENT
+
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -116,6 +118,10 @@ void HarmonicGravity::CalculatePointField(const Real& jday,         const Real p
                gradient(i,j) += -mu_r_3;
          }
    }
+#ifdef DEBUG_GRADIENT
+   MessageInterface::ShowMessage("In CalPtF, fillgradient = %s\n", (fillgradient? "true" : "false"));
+   MessageInterface::ShowMessage("gradientPoint = %s\n", gradient.ToString().c_str());
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -146,4 +152,8 @@ void HarmonicGravity::CalculateFullField(const Real& jday,         const Real po
       acc[i] = accpoint[i] + accharmonic[i];
    if (fillgradient)
       gradient = gradientpoint + gradientharmonic;
+#ifdef DEBUG_GRADIENT
+   MessageInterface::ShowMessage("In CalFullField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+   MessageInterface::ShowMessage("gradient = %s\n", gradient.ToString().c_str());
+#endif
 }
