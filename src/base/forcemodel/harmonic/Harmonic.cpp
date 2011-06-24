@@ -21,6 +21,10 @@
 #include "Harmonic.hpp"
 #include "ODEModelException.hpp"
 #include "MessageInterface.hpp"
+#include "RealUtilities.hpp"
+
+//#define DEBUG_GRADIENT
+//#define DEBUG_ALLOCATION
 
 //------------------------------------------------------------------------------
 // static data
@@ -40,7 +44,7 @@ Harmonic::Harmonic () :
    S (NULL),
    A (NULL),
    V (NULL),
-   Sch (NULL),
+//   Sch (NULL),
    Re (NULL),
    Im (NULL),
    N1 (NULL),
@@ -167,6 +171,7 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
       Real sum33 = 0;
       Real sum34 = 0;
       Real sum44 = 0;
+
       for (Integer m=0;  m<=n && m<=MM && m<=mm;  ++m)
       {
          Real C,S;  // Overrides class variables C,S
@@ -201,8 +206,17 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
             // Correct for normalization
             Real Vnm = V[n][m];
             Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
+            if (GmatMathUtil::IsNaN(Avv02) || GmatMathUtil::IsInf(Avv02))    Avv02 = 0.0;  // **************
             Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
             Real Avv22 = Vnm / V[n+2][m+2] * A[n+2][m+2];
+#ifdef DEBUG_GRADIENT
+   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+   MessageInterface::ShowMessage("************** n = %d   m = %d\n", n, m);
+   MessageInterface::ShowMessage("Vnm       = %12.10f\n", Vnm);
+   MessageInterface::ShowMessage("Avv02     = %12.10f\n", Avv02);
+   MessageInterface::ShowMessage("V[n][m+2] = %12.10f\n", V[n][m+2]);
+   MessageInterface::ShowMessage("A[n][m+2] = %12.10f\n", A[n][m+2]);
+#endif
             // Pines Equation 36 (Part of)
             sum11 += m*(m-1) * Avv00 * G;
             sum12 += m*(m-1) * Avv00 * H;
@@ -233,6 +247,14 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
          a33 += rho_np2/Radius/Radius*sum33;
          a34 -= rho_np2/Radius/Radius*sum34;
          a44 += rho_np2/Radius/Radius*sum44;
+#ifdef DEBUG_GRADIENT
+//   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+//   MessageInterface::ShowMessage("a33   = %12.10f\n", a33);
+//   MessageInterface::ShowMessage("sum33 = %12.10f\n", sum33);
+//   MessageInterface::ShowMessage("u     = %12.10f\n", u);
+//   MessageInterface::ShowMessage("a44   = %12.10f\n", a44);
+//   MessageInterface::ShowMessage("a34   = %12.10f\n", a34);
+#endif
       }
    }
 
@@ -253,6 +275,10 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
       gradient(1,2) =
       gradient(2,1) =  a23 + t*u*a44 + u*a24 + t*a34;
    }
+#ifdef DEBUG_GRADIENT
+   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+   MessageInterface::ShowMessage("gradientHarmonic = %s\n", gradient.ToString().c_str());
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -264,7 +290,7 @@ void Harmonic::Allocate()
    AllocateArray(S,NN,0);
    AllocateArray(A,NN,3);
    AllocateArray(V,NN,3);
-   AllocateArray(Sch,NN,0);
+//   AllocateArray(Sch,NN,0);
    AllocateArray(Re,NN,3);
    AllocateArray(Im,NN,3);
    AllocateArray(N1,NN,3);
@@ -285,7 +311,7 @@ void Harmonic::Allocate()
    for (Integer n=0;  n<=NN+2;  ++n)
    {
       V[n][0] = sqrt(Real(2*(2*n+1)));   // Temporary, to make following loop work
-      for (Integer m=1;  m<=n+2 && m<=MM+2;  ++m)
+    for (Integer m=1;  m<=n+2 && m<=MM+2;  ++m)
       {
 //         Integer denom = (n+m)*(n-m+1);
 //         V[n][m] = denom <= 0 ? 0 : V[n][m-1] / sqrt(Real(denom));
@@ -293,6 +319,14 @@ void Harmonic::Allocate()
       }
       V[n][0] = sqrt(Real(2*n+1));       // Now set true value
    }
+#ifdef DEBUG_ALLOCATION
+   MessageInterface::ShowMessage("After Allocation, V = \n");
+   for (Integer ii = 0; ii < NN + 3; ii++)
+   {
+      for (Integer jj = 0; jj < NN + 3; jj++)
+         MessageInterface::ShowMessage("   V[%d][%d] = %12.10f\n", ii, jj, V[ii][jj]);
+   }
+#endif
    for (Integer n=0;  n<=NN;  ++n)
       for (Integer m=0;  m<=n && m<=MM;  ++m)
       {
@@ -300,9 +334,9 @@ void Harmonic::Allocate()
          VR11[n][m] = V[n][m] / V[n+1][m+1];
       }
 
-   // Compute Schmidt normalization coefficients
-   for (Integer n=0;  n<=NN;  ++n)
-      Sch[n] = /*1e-9 * */sqrt (1/Real(2*n+1));
+//   // Compute Schmidt normalization coefficients
+//   for (Integer n=0;  n<=NN;  ++n)
+//      Sch[n] = /*1e-9 * */sqrt (1/Real(2*n+1));
 
 
    for (Integer m=0;  m<=MM+2;  ++m)
@@ -323,7 +357,7 @@ void Harmonic::Deallocate()
    DeallocateArray(S,NN,0);
    DeallocateArray(A,NN,3);
    DeallocateArray(V,NN,3);
-   DeallocateArray(Sch,NN,0);
+//   DeallocateArray(Sch,NN,0);
    DeallocateArray(Re,NN,3);
    DeallocateArray(Im,NN,3);
    DeallocateArray(N1,NN,3);
@@ -339,7 +373,7 @@ void Harmonic::Copy(Harmonic& x)
    CopyArray(S,x.S,NN,0);
    CopyArray(A,x.A,NN,3);
    CopyArray(V,x.V,NN,3);
-   CopyArray(Sch,x.Sch,NN,0);
+//   CopyArray(Sch,x.Sch,NN,0);
    CopyArray(Re,x.Re,NN,3);
    CopyArray(Im,x.Im,NN,3);
    CopyArray(N1,x.N1,NN,3);

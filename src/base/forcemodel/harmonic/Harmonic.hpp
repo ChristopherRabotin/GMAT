@@ -76,7 +76,7 @@ protected:
    Real**      S;       // normalized harmonic coefficients
    Real**      A;       // Normalized 'derived' Assoc. Legendre Poly
    Real**      V;       // Normalization factor
-   Real*       Sch;     // Schmidt Normalization Factor
+//   Real*       Sch;     // Schmidt Normalization Factor
    Real*       Re;      // powers of projection of pos onto x_ecf (re)
    Real*       Im;      // powers of projection of pos onto y_ecf (im)
    Real**      N1;      // Temporary
