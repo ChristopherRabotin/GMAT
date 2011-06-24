@@ -525,7 +525,6 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
       finalState[3],finalState[4], finalState[5]);
    #endif
    return finalState; // implicit copy constructor
-   //return internalState; // implicit copy constructor
 }
 
 //------------------------------------------------------------------------------
@@ -624,9 +623,6 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
 
    if (axes)
    {
-      //if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
-      //   throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
-      //                                   + instanceName);
       if (!axes->RotateFromMJ2000Eq(epoch,internalState,finalState,
           forceComputation))//,j2000Body))
          throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
@@ -647,7 +643,6 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
       finalState[3], finalState[4], finalState[5]);
    #endif
    return finalState; // implicit copy constructor
-   //return internalState; // implicit copy constructor
 }
 
 
@@ -676,9 +671,6 @@ void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
          MessageInterface::ShowMessage("About to call RotateFromMJ2000Eq for object %s\n",
                (GetName()).c_str());
       #endif
-      //if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState))//,j2000Body))
-      //   throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
-      //                                   + instanceName);
       if (!axes->RotateFromMJ2000Eq(epoch,internalState,outState, 
           forceComputation))//,j2000Body))
          throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
