@@ -1657,7 +1657,7 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
       //---------------------------------------------------------      
       if (mShowObjectMap[objName])
       {
-         if (objName != mCentralBodyName)
+         if (objName != mCentralBodyName.c_str())
             DrawObjectTexture(objName, obj, objId, frame);
       }
       #endif
