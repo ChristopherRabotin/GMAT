@@ -22,6 +22,7 @@
 #include "StringUtil.hpp"       
 #include <fstream>
 #include <sstream>
+#include <stdlib.h>           // For atoi
 
 //------------------------------------------------------------------------------
 // static data
