@@ -66,7 +66,7 @@
 \title{Compiling GMAT using Visual Studio 2010}
 \author{Darrel J. Conway\thanks{Support provided by NASA GSFC FDSS Contract, Task 28.}
 \\Thinking Systems, Inc.\\Tucson, AZ}
-\date{March 2011}
+\date{\today}
 \maketitle
 
 \begin{abstract}
@@ -298,15 +298,48 @@ At this point, GMAT should build without further configuration.  Follow these st
 \item Double click on the GMAT.exe file to run GMAT.  Press the Run button to run the default mission.  Rejoice.
 \end{enumerate}
 
-\section{Building the MATLAB Plugin Libraries for MATLAB and fmincon (Optional)}
+\section{Building the Plugin Libraries for MATLAB, fmincon, Estimation, and the C-Interface (Optional)}
+
+At this writing there are four plugin libraries included in GMAT's trunk code on SourceForge.  Two of these, libMatlabInterface and libFminconOptimizer, require a recent version of MATLAB to build.  The other two, libGmatEstimation and libCInterface, build in a straightforward manner.  We'll look at the latter two first, and then at the MATLAB dependent plugins.
+
+\subsection{Building libGmatEstimation and libCInterface}
+
+GMAT's source tree includes a project file and code for a GMAT compatible estimation plugin.  This plugin includes both a Kalman filter and a batch estimator, along with a measurement simulator and several measurement models.  At this writing, these components are in an early alpha form.  As the component evolves, the build process should remain the same.  GMAT's estimation plugin includes tropospheric and ionospheric models.  The ionosphere model was originally coded in Fortran, and then imported into the GMAT plugin using the f2c utility program.  For that reason, you must have either f2c or SPICE installed to build the estimation plugin.
+
+The source tree also includes code for a C interface into GMAT's object-oriented engine in the shared library libGmatBase.  The C-interface is being used on other projects to provide access to select components of GMAT's engine for external use.  This access is contained in the libCInterface plugin.
+
+Follow these instructions to build libGmatEstimation and libCInterface:
+ 
+\begin{enumerate}
+\item Building libGmatEstimation
+\begin{enumerate}
+\item Open Visual C++
+\item Select ``File | Open | Project/Solution...'' from the menu bar
+\item Browse to the GmatDevelopment\textbackslash build\textbackslash GmatVS2010 folder
+\item Select the GmatVS2010.sln solution file and click the Open button.  The GMAT solution will open and show projects to build GMAT and several plugin libraries.
+\item Right-click on the libGmatEstimation node, and select ``Build''
+\end{enumerate}
+\item Building libCInterface
+\begin{enumerate}
+\item Open Visual C++
+\item Select ``File | Open | Project/Solution...'' from the menu bar
+\item Browse to the GmatDevelopment\textbackslash build\textbackslash GmatVS2010 folder
+\item Select the GmatVS2010.sln solution file and click the Open button.  The GMAT solution will open and show projects to build GMAT and several plugin libraries.
+\item Right-click on the libCInterface node, and select ``Build''
+\end{enumerate}
+\end{enumerate}
+
+Once each build finishes, the plugin libraries will be copied to the appropriate target folders.  The release build of libGmatEstimation is copied into the application/plugins folder, and the release build of libCInterface, into the application/bin folder.
+
+\subsection{The MATLAB and fmincon Plugins}
 
 Next we will build the GMAT MATLAB interface.  You'll need to have MATLAB installed to build the MATLAB interface, and you'll also need the Optimization Toolbox to build the fmincon optimization plugin.
 
 \begin{figure}
-	\centering
-		\includegraphics{SettingIncludeFolder.eps}
-	\caption{MATLAB Include Settings}
-	\label{fig:SettingIncludeFolder}
+\centering
+\includegraphics[scale = 0.6]{SettingIncludeFolder.eps}
+\caption{MATLAB Include Settings}
+\label{fig:SettingIncludeFolder}
 \end{figure}
 
 
@@ -334,7 +367,7 @@ Next we will build the GMAT MATLAB interface.  You'll need to have MATLAB instal
 
 \section{\label{sec:Plugins}Standard GMAT Plugins}
 
-There are four standard plugin libraries that are built for GMAT at this writing.  If you have access to the plugin repositories, you can configure and build these optional libraries: libDataFile, libCcsdsEphemerisFile, libGmatEstimation, and libVF13Optimizer.  The VF13ad optimizer library and the Estimation library both use the Fortran to C library, so if you plan to build those components, follow the steps above to build f2c.  The DataFile plugin and the CcsdsEphemerisFile plugin use the C++ extensions to the Perl Compatible Regular Expression library, pcrecpp.  Configuration of that component is described next.
+There are three additional plugin libraries that are built for GMAT at this writing.  If you have access to the plugin repositories, you can configure and build these optional libraries: libDataFile, libCcsdsEphemerisFile, and libVF13Optimizer.  The VF13ad optimizer library, like the Estimation library described above, uses the Fortran to C library, so if you plan to build it, follow the steps above to setup either f2c or SPICE.  The DataFile plugin and the CcsdsEphemerisFile plugin use the C++ extensions to the Perl Compatible Regular Expression library, pcrecpp.  Configuration of that component is described next.
 
 \subsection{Configuring and Building PCRECPP (Optional)}
 
@@ -352,6 +385,10 @@ GMAT uses the C++ version of the Perl Compatible, pcrecpp, for string manipulati
 
 This completes the pcre setup.  If you'd prefer to compile pcre yourself, the instructions for doing this using CMake can be found in the pcre\textbackslash NON-UNIX-USE file.  Just be sure that you place the resulting libraries in place in pcre\textbackslash lib and pcre\textbackslash dll.
 
+\subsection{Building the DataFile, CCSDS Ephemeris File, and VF13ad Plugins}
+
+\textit{Instructions to be written as needed}
+
 \begin{thebibliography}{9}                                                                                               
 \bibitem {VisualStudio} Visual Studio Express can be downloaded from http://www.microsoft.com/express/Downloads/\#2010-Visual-CPP
 
@@ -364,7 +401,7 @@ This completes the pcre setup.  If you'd prefer to compile pcre yourself, the in
 
 \appendix
 
-\section{GMAT Data Files and Support Files }
+\section{\label{sec:DataFileLayout}GMAT Data Files and Support Files }
 
 GMAT requires access to data files organized in a file structure described in the GMAT startup file, gmat\_startup\_file.txt.  That file should be in the folder from which GMAT is launched.  In a typical setup, the GMAT startup file identifies a root folder, a data file folder, and then uses these two locations to identify the locations of additional data files needed by GMAT.  A typical startup file contains these lines for the top level folders:
 
@@ -404,8 +441,22 @@ PLANETARY_SPK_FILE     = SPK_PATH/de421.bsp
 
 \noindent relative to the starting folder for the system.  The startup file provides similar path data for all of GMAT's data files; interested users should look in this file when trying to understand the data used when running a mission.
 
+\section{\label{sec:ThirdPartyVersions}Library Versions}
+
+At this writing, the software used to populate the Gmat3rdParty folder is as follows:
+
+\begin{itemize}
+\item wxWidgets,	2.8.12
+\item The SPICE Toolkit, N0064
+\item MATLAB, R2011a
+\item pcre, 8.12
+\item f2c, built from source last updated Sep 3, 2010
+\end{itemize}
+ 
+\noindent These versions are the target versions for GMAT R2011b.
+
 \section{\label{app:64bit}Building GMAT in 64-bit mode}
 
-\textit{To be written}
+\textit{To be written as needed}
 
 \end{document}
