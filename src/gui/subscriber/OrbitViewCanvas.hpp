@@ -42,14 +42,6 @@ public:
                    long style = 0);
    virtual ~OrbitViewCanvas();
    
-   // getters
-   int GetAnimationUpdateInterval() { return mUpdateInterval; }
-   int GetAnimationFrameIncrement() { return mFrameInc; }
-   bool IsAnimationRunning() { return mIsAnimationRunning; }
-   const wxStringBoolMap& GetShowObjectMap() { return mShowObjectMap; }
-   const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap; }
-   
-   bool GetUseViewPointInfo() { return mUseInitialViewPoint; }
    bool GetDrawXyPlane() { return mDrawXyPlane; }
    bool GetDrawEcPlane() { return mDrawEcPlane; }
    bool GetDrawSunLine() { return mDrawSunLine; }
@@ -57,24 +49,6 @@ public:
    unsigned int GetXyPlaneColor() { return mXyPlaneColor; }
    unsigned int GetEcPlaneColor() { return mEcPlaneColor; }
    unsigned int GetSunLineColor() { return mSunLineColor; }
-   float GetDistance() { return mAxisLength; }
-   wxString GetViewCoordSysName() { return mViewCoordSysName; }
-   CoordinateSystem* GetViewCoordSystem() { return pViewCoordSystem; }
-   const wxArrayString& GetObjectNames() { return mObjectNames; }
-   const wxArrayString& GetValidCSNames() { return mValidCSNames; }
-   wxString GetGotoObjectName();
-   
-   // setters
-   void SetUserInterrupt() { mHasUserInterrupted = true; }
-   void SetEndOfRun(bool flag = true);
-   void SetEndOfData(bool flag = true) { mIsEndOfData = flag; }
-   void SetAnimationUpdateInterval(int value) { mUpdateInterval = value; }
-   void SetAnimationFrameIncrement(int value) { mFrameInc = value; }
-   void SetObjectColors(const wxStringColorMap &objectColorMap);
-   void SetShowObjects(const wxStringBoolMap &showObjMap);
-   
-   void SetDistance(float dist) { mAxisLength = dist; }
-   void SetUseInitialViewDef(bool flag) { mUseInitialViewPoint = flag; }
    void SetDrawStars(bool flag) { mDrawStars = flag; }
    void SetDrawConstellations(bool flag) { mDrawConstellations = flag; }
    void SetStarCount(int count) { mStarCount = count; }
@@ -122,14 +96,6 @@ public:
                           const Rvector3 &vpRefVec, const Rvector3 &vpVec,
                           const Rvector3 &vdVec, const std::string &upAxis,
                           bool usevpRefVec, bool usevpVec, bool usevdVec);
-   
-   // drawing toggle switch
-   void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray);
-   void SetGlShowObjectFlag(const std::vector<bool> &showArray);
-   
-   // performance
-   void SetUpdateFrequency(Integer updFreq);
-   void SetNumPointsToRedraw(Integer numPoints);
    
    // user actions   
    void TakeAction(const std::string &action);
@@ -184,11 +150,6 @@ private:
    // view model
    bool mUseGluLookAt;
    
-   // performance
-   bool mRedrawLastPointsOnly;
-   int  mNumPointsToRedraw;
-   int  mUpdateFrequency;
-   
    // drawing options
    float mAxisLength;
    bool mDrawXyPlane;
@@ -200,10 +161,6 @@ private:
    unsigned int mXyPlaneColor;
    unsigned int mEcPlaneColor;
    unsigned int mSunLineColor;
-   
-   // light source
-   bool mSunPresent;
-   bool mEnableLightSource;
    
    // mouse rotating
    float mQuat[4];     // orientation of object
@@ -282,11 +239,14 @@ private:
    void SetDefaultView();
    
    // view objects
-   void SetProjection();
+   void SetupProjection();
    void SetupWorld();
    void ChangeView(float viewX, float viewY, float viewZ);
    void ChangeProjection(int width, int height, float axisLength);
    void TransformView();
+   
+   // light source
+   void HandleLightSource();
    
    // drawing objects
    void DrawFrame();
@@ -294,9 +254,7 @@ private:
    void DrawObjectOrbit(int frame);
    void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame);
    void DrawObject(const wxString &objName, int obj);
-   void DrawOrbit(const wxString &objName, int obj, int objId);
-   void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);   
-   void DrawSolverData();
+   void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane(UnsignedInt color);
    void DrawSunLine();

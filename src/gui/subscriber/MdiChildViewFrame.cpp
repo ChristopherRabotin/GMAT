@@ -124,8 +124,8 @@ wxGLContext* MdiChildViewFrame::GetGLContext()
 bool MdiChildViewFrame::GetUseViewPointInfo()
 {
    if (mCanvas)
-      return mCanvas->GetUseViewPointInfo();
-
+      return mCanvas->GetUseInitialViewDef();
+   
    return false;
 }
 

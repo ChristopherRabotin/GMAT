@@ -43,36 +43,10 @@ public:
                      long style = 0);
    virtual ~GroundTrackCanvas();
    
-   // getters
-   bool  GetUseViewPointInfo() { return mUseInitialViewPoint; }
-   bool  IsAnimationRunning() { return mIsAnimationRunning; }
-   
-   float GetDistance() { return mAxisLength; }
-   int GetAnimationUpdateInterval() { return mUpdateInterval; }
-   int GetAnimationFrameIncrement() { return mFrameInc; }
-   wxString GetViewCoordSysName() { return mViewCoordSysName; }
-   CoordinateSystem* GetViewCoordSystem() { return pViewCoordSystem; }
-   const wxArrayString& GetObjectNames() { return mObjectNames; }
-   const wxArrayString& GetValidCSNames() { return mValidCSNames; }
-   const wxStringBoolMap& GetShowObjectMap() { return mShowObjectMap; }
-   const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap; }
-   
-   // setters
-   void SetEndOfRun(bool flag = true);
-   void SetEndOfData(bool flag = true) { mIsEndOfData = flag; }
-   void SetDistance(float dist) { mAxisLength = dist; }
-   void SetUseInitialViewDef(bool flag) { mUseInitialViewPoint = flag; }
-   void SetAnimationUpdateInterval(int value) { mUpdateInterval = value; }
-   void SetAnimationFrameIncrement(int value) { mFrameInc = value; }
-   
-   void SetObjectColors(const wxStringColorMap &objectColorMap);
-   void SetShowObjects(const wxStringBoolMap &showObjMap);
-   void SetUserInterrupt() { mHasUserInterrupted = true; }
    
    void SetGl2dDrawingOption(const std::string &centralBodyName,
                         const std::string &textureMap,
                         Integer footPrintOption);
-   
    
    // actions
    void ClearPlot();
@@ -81,19 +55,11 @@ public:
    void ZoomIn();
    void ZoomOut();
    void DrawWireFrame(bool flag);
-      
+   
    void OnDrawGrid(bool flag);
    void DrawInOtherCoordSystem(const wxString &csName);
    void ViewAnimation(int interval, int frameInc = 30);
    
-   // drawing toggle switch
-   void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray);
-   void SetGlShowObjectFlag(const std::vector<bool> &showArray);
-   
-   // performance
-   void SetUpdateFrequency(Integer updFreq);
-   void SetNumPointsToRedraw(Integer numPoints);
-      
    // user actions
    void TakeAction(const std::string &action);
    
@@ -128,22 +94,6 @@ private:
    // Actual params of the window
    GLfloat mfLeftPos, mfRightPos, mfBottomPos, mfTopPos;
    
-   // Camera rotations
-   GLfloat mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle;
-   GLfloat mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis;
-   
-   // Camera translations
-   GLfloat mfCamTransX, mfCamTransY, mfCamTransZ;
-   
-   // DJC added for "Up"   
-   GLfloat mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis;
-   
-   // view model
-   bool mUseGluLookAt;
-   
-   // drawing option
-   float mAxisLength;
-   
    // central body
    std::string mCentralBodyName;
    std::string mCentralBodyTextureFile;
@@ -151,10 +101,6 @@ private:
    // foot print option
    Integer mFootPrintOption;
    Integer mFootPrintDrawFrequency;
-   
-   // light source
-   bool mSunPresent;
-   bool mEnableLightSource;
    
    // mouse rotating
    bool mRotateXy;
@@ -176,79 +122,19 @@ private:
    std::string mViewPointRefObjName;
    std::string mViewUpAxisName;
    
-   // passed view definition object pointers
-   SpacePoint *pViewPointRefObj;
-   SpacePoint *pViewPointVectorObj;
-   SpacePoint *pViewDirectionObj;
-   
-   Rvector3 mViewPointRefVector;
-   Rvector3 mViewPointVector;
-   Rvector3 mViewDirectionVector;
-   Rvector6 mUpState;
-   Real mViewScaleFactor;
-   
-   bool mUseViewPointRefVector;
-   bool mUseViewPointVector;
-   bool mUseViewDirectionVector;
-   bool mCanRotateAxes;
-   
-   int mVpRefObjId;
-   int mVpVecObjId;
-   int mVdirObjId;
-   Real mViewObjRadius;
-   wxString mViewObjName;
-   int mViewObjId;
-   
-   // computed viewpoint
-   Rvector3 mVpLocVec;
-   Rvector3 mVpRefVec;
-   Rvector3 mVpVec;
-   Rvector3 mVdVec;
-   Rvector3 mVcVec;
-   Rvector3 mUpVec;
-      
-   // object rotation
-   Real mInitialLongitude;
-   Real mInitialMha;
-   Real mFinalLongitude;
-   Real mFinalMha;
-   Real mFinalLst;
-   
    // spacecraft
    GLuint mGlList;
-      
-   // earth
-   float mEarthRadius;
    
    // view
    wxSize  mCanvasSize;
-   GLfloat mfViewLeft;
-   GLfloat mfViewRight;
-   GLfloat mfViewTop;
-   GLfloat mfViewBottom;
-   GLfloat mfViewNear;
-   GLfloat mfViewFar;
-   
-   float mDefaultRotXAngle;
-   float mDefaultRotYAngle;
-   float mDefaultRotZAngle;
-   float mDefaultViewDist;
-   float mCurrRotXAngle;
-   float mCurrRotYAngle;
-   float mCurrRotZAngle;
-   float mCurrViewDist;
    
    // view point
    void SetDefaultViewPoint();
    void InitializeViewPoint();
    void SetDefaultView();
-      
+   
    // view objects
-   void SetProjection();
    void SetupWorld();
-   void ChangeView(float viewX, float viewY, float viewZ);
-   void ChangeProjection(int width, int height, float axisLength);
-   void TransformView();
    
    // drawing objects
    void DrawFrame();
@@ -256,12 +142,9 @@ private:
    void DrawObjectOrbit(int frame);
    void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame);
    void DrawObject(const wxString &objName, int obj);
-   void DrawOrbit(const wxString &objName, int obj, int objId);
    void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);
    void DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
                              Rvector3 &r2, Rvector3 &v2);
-   void DrawSolverData();
-   
    void DrawCentralBodyTexture();
    void DrawCircleAtCurrentPosition(int objId, int index, double radius,
                                     bool enableTransparency = true);
@@ -274,9 +157,6 @@ private:
    // for coordinate system
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
-   
-   // for debug
-   void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos);
    
    // Linux specific fix
    #ifdef __WXGTK__

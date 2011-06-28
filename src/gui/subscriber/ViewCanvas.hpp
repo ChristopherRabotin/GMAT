@@ -47,39 +47,46 @@ public:
    virtual bool InitializePlot();
    virtual bool InitOpenGL();
    
+   // user interrupt
+   virtual void SetUserInterrupt() { mHasUserInterrupted = true; }
+   
    // drawing options
+   virtual bool GetUseInitialViewDef() { return mUseInitialViewPoint; }   
+   virtual void SetUseInitialViewDef(bool flag) { mUseInitialViewPoint = flag; }
    virtual bool GetDrawWireFrame() { return mDrawWireFrame; }
    virtual void SetDrawWireFrame(bool flag) { mDrawWireFrame = flag; }
    virtual bool GetDrawGrid() { return mDrawGrid; }
    virtual void SetDrawGrid(bool flag) { mDrawGrid = flag; }
    
-   // getters
-   virtual int GetAnimationUpdateInterval() = 0;
-   virtual int GetAnimationFrameIncrement() = 0;
-   virtual const wxStringBoolMap& GetShowObjectMap() = 0;
-   virtual const wxStringColorMap& GetObjectColorMap() = 0;
+   // animation
+   virtual int  GetAnimationUpdateInterval() { return mUpdateInterval; }
+   virtual void SetAnimationUpdateInterval(int value) { mUpdateInterval = value; }
+   virtual int  GetAnimationFrameIncrement() { return mFrameInc; }
+   virtual void SetAnimationFrameIncrement(int value) { mFrameInc = value; }
+   virtual bool IsAnimationRunning() { return mIsAnimationRunning; }
    
-   virtual bool GetUseViewPointInfo() = 0;
-   virtual bool IsAnimationRunning() = 0;
-   
-   virtual float GetDistance() = 0;
-   virtual wxString GetViewCoordSysName() = 0;
-   virtual CoordinateSystem* GetViewCoordSystem() = 0;
-   virtual const wxArrayString& GetObjectNames() = 0;
-   virtual const wxArrayString& GetValidCSNames() = 0;
+   // objects
+   virtual const wxStringBoolMap& GetShowObjectMap() { return mShowObjectMap; }
+   virtual const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap; }
+   virtual const wxArrayString& GetObjectNames() { return mObjectNames; }
+   virtual const wxArrayString& GetValidCSNames() { return mValidCSNames; }
+   virtual void SetObjectColors(const wxStringColorMap &objectColorMap);
+   virtual void SetShowObjects(const wxStringBoolMap &showObjMap);  
    virtual wxString GetGotoObjectName();
    
-   // setters
-   virtual void SetEndOfRun(bool flag = true) = 0;
-   virtual void SetEndOfData(bool flag = true) = 0;
-   virtual void SetDistance(float dist) = 0;
-   virtual void SetUseInitialViewDef(bool flag) = 0;
-   virtual void SetAnimationUpdateInterval(int value) = 0;
-   virtual void SetAnimationFrameIncrement(int value) = 0;
+   // coordinate system
+   virtual wxString GetViewCoordSysName() { return mViewCoordSysName; }
+   virtual CoordinateSystem* GetViewCoordSystem() { return pViewCoordSystem; }
    
-   virtual void SetObjectColors(const wxStringColorMap &objectColorMap) = 0;
-   virtual void SetShowObjects(const wxStringBoolMap &showObjMap) = 0;   
-   virtual void SetUserInterrupt()  = 0;
+   // view distance
+   virtual float GetDistance() { return mAxisLength; }
+   virtual void SetDistance(float dist) { mAxisLength = dist; }
+   
+   // mission run
+   virtual void SetEndOfData(bool flag = true) { mIsEndOfData = flag; }
+   virtual void SetEndOfRun(bool flag = true);
+   
+   
    
    // actions
    virtual void ClearPlot() = 0;
@@ -124,12 +131,12 @@ public:
                         bool usevpRefVec, bool usevpVec, bool usevdVec);
    
    // drawing toggle switch
-   virtual void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray) = 0;
-   virtual void SetGlShowObjectFlag(const std::vector<bool> &showArray) = 0;
+   virtual void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray);
+   virtual void SetGlShowObjectFlag(const std::vector<bool> &showArray);
    
    // performance
-   virtual void SetUpdateFrequency(Integer updFreq) = 0;
-   virtual void SetNumPointsToRedraw(Integer numPoints) = 0;
+   virtual void SetUpdateFrequency(Integer updFreq);
+   virtual void SetNumPointsToRedraw(Integer numPoints);
    
    // update
    virtual void UpdatePlot(const StringArray &scNames, const Real &time,
@@ -207,12 +214,17 @@ protected:
    bool mDrawWireFrame;
    bool mDrawGrid;   
    
+   // light source
+   bool mSunPresent;
+   bool mEnableLightSource;
+   
    // texture
    std::map<wxString, GLuint> mTextureIdMap;
    std::map<wxString, std::string> mTextureFileMap;
    
    // view control
    bool mUseInitialViewPoint;
+   float mAxisLength;
    
    // animation
    bool mIsAnimationRunning;
@@ -307,9 +319,6 @@ protected:
    virtual bool SetPixelFormatDescriptor();
    virtual void SetDefaultGLFont();
    
-   // drawing mode
-   virtual void SetDrawingMode();
-   
    // initialization
    virtual void ResetPlotInfo();   
    virtual void InitializeViewPoint() = 0;
@@ -327,11 +336,14 @@ protected:
    virtual bool LoadSpacecraftModels();
    
    // view objects
-   virtual void SetProjection() = 0;
+   virtual void SetupProjection();
    virtual void SetupWorld() = 0;
-   virtual void ChangeView(float viewX, float viewY, float viewZ) = 0;
-   virtual void ChangeProjection(int width, int height, float axisLength) = 0;
-   virtual void TransformView() = 0;
+      
+   // drawing mode
+   virtual void SetDrawingMode();
+   
+   // light source
+   virtual void HandleLightSource();
    
    // drawing objects
    virtual void DrawFrame() = 0;
@@ -339,10 +351,10 @@ protected:
    virtual void DrawObjectOrbit(int frame) = 0;
    virtual void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame) = 0;
    virtual void DrawObject(const wxString &objName, int obj) = 0;
-   virtual void DrawOrbit(const wxString &objName, int obj, int objId) = 0;
+   virtual void DrawOrbit(const wxString &objName, int obj, int objId);
    virtual void DrawOrbitLines(int i, const wxString &objName, int obj, int objId) = 0;
    
-   virtual void DrawSolverData() = 0;
+   virtual void DrawSolverData();
    
    virtual void DrawStatus(const wxString &label1, unsigned int textColor,
                         const wxString &label2, double time,  int xpos = 0,
@@ -375,6 +387,9 @@ protected:
    
    // for loading image
    virtual bool LoadImage(const std::string &fileName);
+   
+   // for debug
+   void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos);
    
 };
 

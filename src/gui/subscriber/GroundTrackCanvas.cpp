@@ -22,24 +22,10 @@
 #include "Camera.hpp"
 #include "ModelObject.hpp"
 #include "ModelManager.hpp"
-#include "GmatAppData.hpp"         // for GetGuiInterpreter()
 #include "GmatMainFrame.hpp"       // for EnableAnimation()
-#include "FileManager.hpp"         // for texture files
 #include "ColorTypes.hpp"          // for namespace GmatColor::
-#include "Rvector3.hpp"            // for Rvector3::GetMagnitude()
-#include "RealUtilities.hpp"
-#include "AngleUtil.hpp"           // for ComputeAngleInDeg()
-#include "CelestialBody.hpp"
-#include "MdiGlPlotData.hpp"
-#include "FileUtil.hpp"            // for GmatFileUtil::DoesFileExist()
 #include "MessageInterface.hpp"
-#include "SubscriberException.hpp"
-#include "TimeSystemConverter.hpp" // for ConvertMjdToGregorian()
-#include "GmatDefaults.hpp"
-#include "BodyFixedAxes.hpp"
 #include "Rendering.hpp"
-#include "GmatOpenGLSupport.hpp"   // for OpenGL support
-#include <string.h>                // for strlen( )
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -90,15 +76,11 @@ using namespace FloatAttUtil;
 // debug
 //#define DEBUG_INIT 1
 //#define DEBUG_UPDATE 1
-//#define DEBUG_SOLVER_DATA 1
-//#define DEBUG_UPDATE_OBJECT 2
 //#define DEBUG_ACTION 1
-//#define DEBUG_CONVERT 1
-//#define DEBUG_DRAW 2
+//#define DEBUG_DRAW 1
 //#define DEBUG_DRAW_LINE 2
 //#define DEBUG_OBJECT 2
 //#define DEBUG_TEXTURE 2
-//#define DEBUG_PERSPECTIVE 1
 //#define DEBUG_PROJECTION 3
 //#define DEBUG_CS 1
 //#define DEBUG_ANIMATION 1
@@ -107,6 +89,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_ROTATE_BODY 2
 //#define DEBUG_DATA_BUFFERRING
 //#define DEBUG_ORBIT_LINES
+//#define DEBUG_DRAW_DEBUG 1
 
 #define MODE_CENTERED_VIEW 0
 #define MODE_FREE_FLYING 1
@@ -211,39 +194,12 @@ GroundTrackCanvas::GroundTrackCanvas(wxWindow *parent, wxWindowID id,
    // viewpoint
    SetDefaultViewPoint();
    
-   // default view
-   mDefaultRotXAngle = 90.0;
-   mDefaultRotYAngle = 0.0;
-   mDefaultRotZAngle = 0.0;
-   mDefaultViewDist = DEFAULT_DIST;
-   
-   // view model
-   //mUseGluLookAt = true;
-   mUseGluLookAt = false;
-   
-   mAxisLength = DEFAULT_DIST;
-   
    mOriginName = "";
    mOriginId = 0;
    
    mRotateXy = true;
    mZoomAmount = 300.0;
    
-   // projection
-   #if DEBUG_INIT
-   MessageInterface::ShowMessage("   mAxisLength=%f\n", mAxisLength);
-   #endif 
-   ChangeProjection(size.x, size.y, mAxisLength);
-
-   // Do we need this in GroundTrackPlot? Remove them later
-   mEarthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]; //km
-   mScRadius = 200;        //km: make big enough to see
-   
-   // light source
-   mSunPresent = false;
-   mEnableLightSource = true;
-   
-   // foot print option
    mFootPrintOption = 0; // 0 = Draw NONE, 1 = Draw ALL
    mFootPrintDrawFrequency = 10; // every 100th plot data
    
@@ -298,67 +254,6 @@ GroundTrackCanvas::~GroundTrackCanvas()
    MessageInterface::ShowMessage
       ("GroundTrackCanvas::~GroundTrackCanvas() '%s' exiting\n", mPlotName.c_str());
    #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void SetEndOfRun(bool flag = true)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetEndOfRun(bool flag)
-{
-   #if DEBUG_UPDATE
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetEndOfRun() GroundTrackCanvas::SetEndOfRun() flag=%d, "
-       "mNumData=%d\n",  flag, mNumData);
-   #endif
-   
-   mIsEndOfRun = flag;
-   mIsEndOfData = flag;
-   
-   if (mNumData < 1)
-   {
-      Refresh(false);
-      return;
-   }
-   
-   if (mIsEndOfRun)
-   {
-      #if DEBUG_LONGITUDE
-      MessageInterface::ShowMessage
-         ("GroundTrackCanvas::SetEndOfRun() mIsEndOfRun=%d, mNumData=%d\n",
-          mIsEndOfRun, mNumData);
-      #endif
-      
-      //-------------------------------------------------------
-      // get first spacecraft id
-      //-------------------------------------------------------
-      int objId = UNKNOWN_OBJ_ID;
-      for (int sc=0; sc<mScCount; sc++)
-      {
-         objId = GetObjectId(mScNameArray[sc].c_str());
-         
-         if (objId != UNKNOWN_OBJ_ID)
-            break;
-      }
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void SetObjectColors(const wxStringColorMap &objectColorMap)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetObjectColors(const wxStringColorMap &objectColorMap)
-{
-   mObjectColorMap = objectColorMap;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetShowObjects(const wxStringColorMap &showObjMap)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
-{
-   mShowObjectMap = showObjMap;
 }
 
 
@@ -419,15 +314,7 @@ void GroundTrackCanvas::RedrawPlot(bool viewAnimation)
    MessageInterface::ShowMessage
       ("GroundTrackCanvas::RedrawPlot() entered, viewAnimation=%d\n", viewAnimation);
    #endif
-   
-   if (mAxisLength < mMaxZoomIn)
-   {
-      mAxisLength = mMaxZoomIn;
-      MessageInterface::ShowMessage
-         ("GroundTrackCanvas::RedrawPlot() distance < max zoom in. distance set to %f\n",
-          mAxisLength);
-   }
-   
+      
    if (viewAnimation)
       ViewAnimation(mUpdateInterval, mFrameInc);
    else
@@ -445,12 +332,7 @@ void GroundTrackCanvas::RedrawPlot(bool viewAnimation)
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::ShowDefaultView()
 {
-   int clientWidth, clientHeight;
-   GetClientSize(&clientWidth, &clientHeight);
-   
    SetDefaultView();
-   ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
-   ChangeProjection(clientWidth, clientHeight, mAxisLength);
    Refresh(false);
 }
 
@@ -558,123 +440,6 @@ void GroundTrackCanvas::ViewAnimation(int interval, int frameInc)
    
    mIsAnimationRunning = false;
    
-}
-
-
-//------------------------------------------------------------------------------
-// void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
-{
-   mDrawOrbitArray = drawArray;
-   
-   #if DEBUG_OBJECT
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
-       "mObjectCount=%d\n", mDrawOrbitArray.size(), mObjectCount);
-   
-   bool draw;
-   for (int i=0; i<mObjectCount; i++)
-   {
-      draw = mDrawOrbitArray[i] ? true : false;      
-      MessageInterface::ShowMessage
-         ("GroundTrackCanvas::SetGlDrawObjectFlag() i=%d, mDrawOrbitArray[%s]=%d\n",
-          i, mObjectNames[i].c_str(), draw);
-   }
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void SetGlShowObjectFlag(const std::vector<bool> &showArray)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
-{
-   mShowObjectArray = showArray;
-
-   #if DEBUG_OBJECT
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
-       "mObjectCount=%d\n", mShowObjectArray.size(), mObjectCount);
-   #endif
-   
-   bool show;
-   mSunPresent = true;//false;
-   
-   for (int i=0; i<mObjectCount; i++)
-   {
-      show = mShowObjectArray[i] ? true : false;
-      mShowObjectMap[mObjectNames[i]] = show;
-      
-      if (mObjectNames[i] == "Sun" && mShowObjectMap["Sun"])
-         mSunPresent = true;
-      
-      #if DEBUG_OBJECT
-      MessageInterface::ShowMessage
-         ("GroundTrackCanvas::SetGlShowObjectFlag() i=%d, mShowObjectMap[%s]=%d\n",
-          i, mObjectNames[i].c_str(), show);
-      #endif
-   }
-   
-   #if DEBUG_OBJECT
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::SetGlDrawObjectFlag() mEnableLightSource=%d, mSunPresent=%d\n",
-       mEnableLightSource, mSunPresent);
-   #endif
-   
-   #if 1
-   // Handle light source
-   if (mEnableLightSource && mSunPresent)
-   {
-      //----------------------------------------------------------------------
-      // set OpenGL to recognize the counter clockwise defined side of a polygon
-      // as its 'front' for lighting and culling purposes
-      glFrontFace(GL_CCW);
-      
-      // enable face culling, so that polygons facing away (defines by front face)
-      // from the viewer aren't drawn (for efficiency).
-      glEnable(GL_CULL_FACE);
-      
-      // enable the light
-      glEnable(GL_LIGHTING);
-      glEnable(GL_LIGHT0);
-      
-      // tell OpenGL to use glColor() to get material properties for..
-      glEnable(GL_COLOR_MATERIAL);
-      
-      // ..the front face's ambient and diffuse components
-      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-      
-      // Set the ambient lighting
-      GLfloat ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
-      glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-      //----------------------------------------------------------------------
-   }
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void SetNumPointsToRedraw(Integer numPoints)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetNumPointsToRedraw(Integer numPoints)
-{
-   mNumPointsToRedraw = numPoints;
-   mRedrawLastPointsOnly = false;
-
-   // if mNumPointsToRedraw =  0 It redraws whole plot
-   // if mNumPointsToRedraw = -1 It does not clear GL_COLOR_BUFFER
-   if (mNumPointsToRedraw > 0)
-      mRedrawLastPointsOnly = true;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetUpdateFrequency(Integer updFreq)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetUpdateFrequency(Integer updFreq)
-{
-   mUpdateFrequency = updFreq;
 }
 
 
@@ -797,12 +562,6 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
    if (GetContext())
 #endif
    {
-      //loj: need this to make picture not to stretch to canvas
-      #ifdef DEBUG_ONSIZE
-      MessageInterface::ShowMessage("   mAxisLength=%f\n", mAxisLength);
-      #endif
-      ChangeProjection(nWidth, nHeight, mAxisLength);
-      
       #ifdef __USE_WX280_GL__
       theContext->SetCurrent(*this);
       SetCurrent(*theContext);
@@ -828,219 +587,22 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::OnMouse(wxMouseEvent& event)
 {
-   // Just return for now while thinking what users will need for mouse
-   bool justReturn = true;
-   
-   if (justReturn)
-      return;
-   
-   //MessageInterface::ShowMessage
-   //   ("===> OnMouse() mUseInitialViewPoint=%d, mIsEndOfData=%d\n",
-   //    mUseInitialViewPoint, mIsEndOfData);
-   
    if (mIsEndOfData && mInFunction)
       return;
    
-   int flippedY;
+   //#ifdef __WRITE_MOUSE_POS__
    int width, height;
-   int mouseX, mouseY;
-   
-   mIsAnimationRunning = false;
-   
+   int mouseX = event.GetX();
+   int mouseY = event.GetY();
    GetClientSize(&width, &height);
-   #if 0
-   ChangeProjection(width, height, mAxisLength);
-   #endif
-   
-   mouseX = event.GetX();
-   mouseY = event.GetY();
-   
-   // First, flip the mouseY value so it is oriented right (bottom left is 0,0)
-   flippedY = height - mouseY;
-   
-   GLfloat fEndX = mfLeftPos + ((GLfloat)mouseX /(GLfloat)width) *
-      (mfRightPos - mfLeftPos);
-   GLfloat fEndY = mfBottomPos + ((GLfloat)flippedY /(GLfloat)height)*
-      (mfTopPos - mfBottomPos);
-   
-   //if mouse dragging
-   if (event.Dragging())
-   {
-      //------------------------------
-      // translating
-      //------------------------------
-      if ((mControlMode != MODE_ASTRONAUT_6DOF && event.ShiftDown() && event.LeftIsDown()) ||
-         (mControlMode == MODE_ASTRONAUT_6DOF && event.LeftIsDown()))
-      {
-         // Do a X/Y Translate of the camera
-         mfCamTransX = (fEndX - mfStartX) * mInversion;
-         mfCamTransY = (fEndY - mfStartY) * mInversion;
-
-         mCamera.Translate(mfCamTransX, mfCamTransY, 0.0, true);
-         
-         // repaint
-         Refresh(false);
-      }
-      //------------------------------
-      // rotating
-      //------------------------------
-      else if ((mControlMode != MODE_ASTRONAUT_6DOF && event.LeftIsDown()) ||
-         (mControlMode == MODE_ASTRONAUT_6DOF && event.RightIsDown()))
-      {
-         // PS - Attempting a new form of view rotation
-         //   Rather than apply a rotation based on quaternions and all of that
-         //   complication, we move the camera position based
-         //   on the mouse movement. 
-         // The angles used are based on how far the mouse moved
-         float angleX = (mLastMouseX - mouseX) / 400.0 * mInversion,
-            angleY = (mLastMouseY - mouseY) / 400.0 * mInversion;
-         if (mControlMode == MODE_CENTERED_VIEW)
-         {
-            mCamera.Rotate(angleX, angleY, 0.0, false, true);
-         }
-         else
-         {
-            mCamera.Rotate(angleX, angleY, 0.0, false, false);
-         }
-         
-         // repaint
-         Refresh(false); 
-         
-      }
-      //------------------------------
-      // translating forward and backward
-      //------------------------------
-      /*else if (mControlMode != MODE_ASTRONAUT_6DOF && event.ShiftDown() && event.RightIsDown())
-      {
-         // find the length
-         Real length = mLastMouseY - mouseY;
-         length *= 100;
-         mCamera.Translate(0.0, 0.0, length, true);
-
-         Refresh(false);
-      }*/
-      //------------------------------
-      // FOV Zoom
-      //------------------------------
-      else if (event.ShiftDown() && event.RightIsDown()){
-         Real x2 = Pow(mLastMouseX - mouseX, 2);
-         Real y2 = Pow(mouseY - mLastMouseY, 2);
-         Real length = sqrt(x2 + y2);
-         
-         Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
-         
-         mZoomAmount = length * distance / 1000000;
-         if (mouseY > mLastMouseY)
-            mCamera.ZoomOut(mZoomAmount);
-         else
-            mCamera.ZoomIn(mZoomAmount);
-         
-         Refresh(false);
-      }
-      //------------------------------
-      // "zooming"
-      //------------------------------
-      else if (mControlMode != MODE_ASTRONAUT_6DOF && event.RightIsDown())
-      {            
-         // if end-of-run compute new mfCamRotXYZAngle by calling ChangeView()
-         if (mIsEndOfRun)
-            ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
-         
-         //VC++ error C2668: 'pow' : ambiguous call to overloaded function
-         //'long double pow(long double,int)' 'float pow(float,int)' 'double pow(double,int);
-         // Changed pow to GmatMathUtil::Pow();
-         
-         // find the length
-         Real x2 = Pow(mLastMouseX - mouseX, 2);
-         Real y2 = Pow(mouseY - mLastMouseY, 2);
-         Real length = sqrt(x2 + y2);
-         
-         Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
-         
-         mZoomAmount = length * distance / 500;
-         
-         if (mouseX < mLastMouseX && mouseY > mLastMouseY)
-         {
-            // dragging from upper right corner to lower left corner
-            mCamera.Translate(0, 0, mZoomAmount, false);
-         }
-         else if (mouseX > mLastMouseX && mouseY < mLastMouseY)
-         {
-            // dragging from lower left corner to upper right corner
-            mCamera.Translate(0, 0, -mZoomAmount, false);
-         }
-         else
-         {
-            // if mouse moves toward left then zoom in
-            if (mouseX < mLastMouseX || mouseY < mLastMouseY)
-               mCamera.Translate(0, 0, mZoomAmount, false);
-            else
-               mCamera.Translate(0, 0, -mZoomAmount, false);
-         }
-         
-         Refresh(false);
-      }
-      //------------------------------
-      // roll
-      //------------------------------
-      else if (event.MiddleIsDown())
-      {
-         float roll = (mouseY - mLastMouseY) / 400.0 * mInversion;
-         if (mControlMode == MODE_CENTERED_VIEW)
-         {
-            mCamera.Rotate(0.0, 0.0, roll, false, true);
-         }
-         else
-            mCamera.Rotate(0.0, 0.0, roll, false, false);
-         Refresh(false);
-      }
-   }
-   // Mousewheel movements
-   else if (event.GetWheelRotation() != 0 && mControlMode == MODE_ASTRONAUT_6DOF)
-   {
-      float rot = event.GetWheelRotation();
-      Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
-      Real movement = rot * distance / 3000;
-
-      if (event.ShiftDown() && rot > 0)
-      {
-         mCamera.ZoomIn(1);
-      }
-      else if (event.ShiftDown() && rot < 0)
-      {
-         mCamera.ZoomOut(1);
-      }
-      else if (rot > 0)
-      {
-         mCamera.Translate(0.0, 0.0, movement, true);
-      }
-      else if (rot < 0)
-      {
-         mCamera.Translate(0.0, 0.0, movement, true);
-      }
-      Refresh(false);
-   } // end if (event.Dragging())
-   
-   // ensures the directional vectors for the viewpoint are still orthogonal
-   mCamera.ReorthogonalizeVectors();
-   
-   // save last position
-   mLastMouseX = mouseX;
-   mLastMouseY = mouseY;
-   
-   mfStartX = fEndX;
-   mfStartY = fEndY;
-   
-   #ifdef __WRITE_GL_MOUSE_POS__
+   // Flip mouseY so it is oriented bottom left is 0,0
+   mouseY = height - mouseY;
+   double lon = (mouseX * 360 / width) - 180.0;
+   double lat = (mouseY * 180 / height) - 90.0;
    wxString mousePosStr;
-   //mousePosStr.Printf("X = %g Y = %g", fEndX, fEndY);
-   mousePosStr.Printf("X = %g Y = %g mouseX = %d, mouseY = %d",
-                      fEndX, fEndY, mouseX, mouseY);   
+   mousePosStr.Printf("Latitude:%g  Longitude:%g", lat, lon);   
    theStatusBar->SetStatusText(mousePosStr, 2);
-   //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
-   //            wxT("X = %d Y = %d lastX = %f lastY = %f Zoom amount = %f Distance = %f"),
-   //            event.GetX(), event.GetY(), mfStartX, mfStartY, mZoomAmount, mAxisLength);
-   #endif
+   //#endif
    
    event.Skip();
 }
@@ -1120,26 +682,6 @@ void GroundTrackCanvas::OnKeyDown(wxKeyEvent &event)
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::SetDefaultViewPoint()
 {
-   mViewPointInitialized = false;
-   mViewPointRefObjName = "UNKNOWN";
-   
-   pViewPointRefObj = NULL;
-   pViewPointVectorObj = NULL;
-   pViewDirectionObj = NULL;
-   
-   mViewPointRefVector.Set(0.0, 0.0, 0.0);
-   mViewPointVector.Set(DEFAULT_DIST, 0.0, 0.0);
-   mViewDirectionVector.Set(0.0, 0.0, -1.0);
-   //mCamera.Reset();
-   //mCamera.Relocate(DEFAULT_DIST, 0.0, 0.0, 0.0, 0.0, 0.0);
-   
-   mViewScaleFactor = 1.0;
-   mUseViewPointRefVector = true;
-   mUseViewPointVector = true;
-   mUseViewDirectionVector = true;
-   mVpRefObjId = UNKNOWN_OBJ_ID;
-   mVpVecObjId = UNKNOWN_OBJ_ID;
-   mVdirObjId = UNKNOWN_OBJ_ID;
 }
 
 
@@ -1167,47 +709,6 @@ void GroundTrackCanvas::InitializeViewPoint()
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::SetDefaultView()
 {
-   mCurrRotXAngle = mDefaultRotXAngle;
-   mCurrRotYAngle = mDefaultRotYAngle;
-   mCurrRotZAngle = mDefaultRotZAngle;
-   mCurrViewDist = mDefaultViewDist;
-   mAxisLength = mCurrViewDist;
-   mfCamTransX = 0;
-   mfCamTransY = 0;
-   mfCamTransZ = 0;
-   mfCamRotXAngle = 0;
-   mfCamRotYAngle = 0;
-   mfCamRotZAngle = 0;
-   
-   #ifdef USE_TRACKBALL
-   ToQuat(mQuat, 0.0f, 0.0f, 0.0f, 0.0);
-   #endif   
-}
-
-
-//------------------------------------------------------------------------------
-//  void SetProjection()
-//------------------------------------------------------------------------------
-/**
- * Sets view projection.
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::SetProjection()
-{
-   #if DEBUG_PROJECTION > 2
-   MessageInterface::ShowMessage("GroundTrackCanvas::SetProjection() entered\n");
-   #endif
-   
-   // Setup the world view
-   glMatrixMode(GL_PROJECTION); // first go to projection mode
-   glLoadIdentity();            // clear all previous information
-   SetupWorld();                // set it up
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();            // clear all previous information
-   
-   #if DEBUG_PROJECTION > 2
-   MessageInterface::ShowMessage("GroundTrackCanvas::SetProjection() leaving\n");
-   #endif
 }
 
 
@@ -1231,162 +732,6 @@ void GroundTrackCanvas::SetupWorld()
    MessageInterface::ShowMessage("GroundTrackCanvas::SetupWorld() leaving\n");
    #endif
 } // end SetupWorld()
-
-
-//------------------------------------------------------------------------------
-//  void ChangeView(float viewX, float viewY, float viewZ)
-//------------------------------------------------------------------------------
-/**
- * Changes view by rotating the camera.
- *
- * @param <viewX> rotation angle of X component.
- * @param <viewY> rotation angle of Y component.
- * @param <viewZ> rotation angle of Z component.
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::ChangeView(float viewX, float viewY, float viewZ)
-{
-   #if DEBUG_PROJECTION > 2
-   MessageInterface::ShowMessage("GroundTrackCanvas::ChangeView() entered\n");
-   #endif
-   
-   mfCamRotXAngle = (int)(viewX) % 360 + 270;
-   mfCamRotYAngle = (int)(viewY) % 360;
-   mfCamRotZAngle = (int)(viewZ) % 360;
-   
-   //MessageInterface::ShowMessage
-   //   ("===> GroundTrackCanvas::ChangeView() mfCamRotXYZAngle = %f %f %f\n",
-   //    mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle);
-   
-   // don't let the rotation angles build up to some insane size
-   if (mfCamRotYAngle > 360)
-      mfCamRotYAngle -= 360;
-   else if (mfCamRotYAngle < 0)
-      mfCamRotYAngle += 360;
-
-   // don't let the rotation angles build up to some insane size
-   if (mfCamRotXAngle > 450)
-      mfCamRotXAngle -= 360;
-   else if (mfCamRotXAngle < 90)
-      mfCamRotXAngle += 360;
-   
-   // don't let the rotation angles build up to some insane size
-   if (mfCamRotZAngle > 360)
-      mfCamRotZAngle -= 360;
-   else if (mfCamRotZAngle < 0)
-      mfCamRotZAngle += 360;
-  
-   #if DEBUG_PROJECTION > 2
-   MessageInterface::ShowMessage("GroundTrackCanvas::ChangeView() leaving\n");
-   #endif
-   
-} // end ChangeView()
-
-
-//------------------------------------------------------------------------------
-//  void ChangeProjection(int width, int height, float axisLength)
-//------------------------------------------------------------------------------
-/**
- * Changes view projection by viewing area in pixel and axis length in
- * orthographic projection.
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::ChangeProjection(int width, int height, float axisLength)
-{
-   #if DEBUG_PROJECTION > 2
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::ChangeProjection() entered, canvas w=%d, h=%d, axisLength=%f\n",
-       width, height, axisLength);
-   #endif
-   
-   GLfloat fAspect = (GLfloat) height / (GLfloat) width;
-   
-   mfViewLeft   = -axisLength/2;
-   mfViewRight  =  axisLength/2;
-   
-   mfViewTop    =  axisLength/2;
-   mfViewBottom = -axisLength/2;
-   
-   //texture maps upside down
-   //mfViewTop    = -axisLength/2;
-   //mfViewBottom =  axisLength/2;
-   
-   if (mUseGluLookAt)
-   {
-      //loj: 1/10/06 changed *2 to * 10000 to fix near/far clipping
-      //mfViewNear = -axisLength * 10000.0;
-      //mfViewFar  =  axisLength * 10000.0;
-      mfViewNear = -axisLength * 100000.0;
-      mfViewFar  =  axisLength * 100000.0;
-   }
-   else
-   {
-//       mfViewNear = -axisLength/2;
-//       mfViewFar  =  axisLength/2;
-      mfViewNear = 0.0;
-      mfViewFar  = 0.0;
-   }
-   
-   // save the size we are setting the projection for later use
-   if (width <= height)
-   {
-      mfLeftPos = mfViewLeft;
-      mfRightPos = mfViewRight;
-      mfBottomPos = mfViewBottom*fAspect;
-      mfTopPos = mfViewTop*fAspect;
-   }
-   else
-   {
-      mfLeftPos = mfViewLeft / fAspect;
-      mfRightPos = mfViewRight / fAspect;
-      mfBottomPos = mfViewBottom;
-      mfTopPos = mfViewTop;
-   }
-   
-   #if DEBUG_PROJECTION > 2
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::ChangeProjection() leaving, mfLeftPos=%f, mfRightPos=%f, "
-       "mfBottomPos=%f, mfTopPos=%f\n", mfLeftPos, mfRightPos, mfBottomPos, mfTopPos);
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void TransformView()
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::TransformView()
-{
-   #if DEBUG_DRAW
-   MessageInterface::ShowMessage
-      ("GroundTrackCanvas::TransformView() mIsEndOfData=%d, mIsEndOfRun=%d\n",
-       mIsEndOfData, mIsEndOfRun);
-   #endif
-   
-   glLoadIdentity();
-   
-   if (mUseGluLookAt)
-   {
-      gluLookAt(mCamera.position[0], mCamera.position[1], mCamera.position[2],
-                mCamera.view_center[0], mCamera.view_center[1], mCamera.view_center[2],
-                mCamera.up[0], mCamera.up[1], mCamera.up[2]);
-   }
-   else
-   {
-      glTranslatef(0.0, 0.0, 30000000.0);
-      
-      //glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
-      //glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
-      
-      // DJC added for Up
-      //glRotatef(-mfUpAngle, mfUpXAxis, mfUpYAxis, -mfUpZAxis);
-      
-   } //if (mUseGluLookAt)
-   
-   #if DEBUG_DRAW
-   MessageInterface::ShowMessage("GroundTrackCanvas::TransformView() leaving\n");
-   #endif
-   
-} // end TransformView()
 
 
 //------------------------------------------------------------------------------
@@ -1466,13 +811,7 @@ void GroundTrackCanvas::DrawFrame()
       mLastIndex = mEndIndex1;
       if (mEndIndex2 != -1)
          mLastIndex = mEndIndex2;
-      
-      #if DEBUG_ANIMATION
-      MessageInterface::ShowMessage("   mAxisLength=%f\n", mAxisLength);
-      #endif
-      
-      ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
-      
+            
       Refresh(false);
    }
    
@@ -1511,8 +850,8 @@ void GroundTrackCanvas::DrawPlot()
    #if DEBUG_DRAW > 1
    MessageInterface::ShowMessage
       ("   mRedrawLastPointsOnly=%d, mNumPointsToRedraw=%d, mViewCsIsInternalCs=%d, "
-       "mUseInitialViewPoint=%d, mAxisLength=%f\n", mRedrawLastPointsOnly, mNumPointsToRedraw,
-       mViewCsIsInternalCs, mUseInitialViewPoint, mAxisLength);
+       "mUseInitialViewPoint=%d\n", mRedrawLastPointsOnly, mNumPointsToRedraw,
+       mViewCsIsInternalCs, mUseInitialViewPoint);
    MessageInterface::ShowMessage
       ("   mUseInitialViewPoint=%d, mIsEndOfData=%d, mIsEndOfRun=%d, mDrawSolverData=%d\n",
        mUseInitialViewPoint, mIsEndOfData, mIsEndOfRun, mDrawSolverData);
@@ -1536,7 +875,7 @@ void GroundTrackCanvas::DrawPlot()
    glDisable(GL_LIGHTING);
 
    // Set viewing projection
-   SetProjection();
+   SetupProjection();
    
    // Draw central body texture map
    DrawCentralBodyTexture();
@@ -1595,7 +934,9 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
       objId = GetObjectId(objName);
       mObjLastFrame[objId] = 0;
       
+      #if 0
       int index = objId * MAX_DATA + mLastIndex;
+      #endif
       
       #if DEBUG_DRAW
       MessageInterface::ShowMessage
@@ -1801,7 +1142,10 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
 {
+   #if 0
    int frame = mLastIndex;
+   #endif
+   
    int objId = GetObjectId(objName);
    
    #if DEBUG_DRAW > 1
@@ -1914,54 +1258,6 @@ void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
    #endif
    
 } // end DrawObject(const wxString &objName)
-
-
-//------------------------------------------------------------------------------
-// void DrawOrbit(const wxString &objName, int obj, int objId)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
-{
-   #if 0
-   // We don't want to draw celestial body
-   if (objName == "Earth" || objName == "Sun")
-      return;
-   #endif
-   
-   #if DEBUG_DRAW_DEBUG
-   DrawDebugMessage(" Entered DrawOrbit  --- ", GmatColor::RED32, 0, 200);
-   #endif
-   
-   #ifdef DEBUG_DRAW
-   MessageInterface::ShowMessage
-      ("==========> DrawOrbit() objName='%s', drawing first part\n",
-       objName.c_str());
-   #endif
-   
-   // Draw first part from the ring buffer
-   for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
-   {
-      DrawOrbitLines(i, objName, obj, objId);
-   }
-   
-   // Draw second part from the ring buffer
-   if (mEndIndex2 != -1 && mBeginIndex1 != mBeginIndex2)
-   {
-      #ifdef DEBUG_DRAW
-      MessageInterface::ShowMessage
-         ("==========> DrawOrbit() objName='%s', drawing second part\n",
-          objName.c_str());
-      #endif
-      
-      for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
-      {
-         DrawOrbitLines(i, objName, obj, objId);
-      }
-   }
-   
-   #if DEBUG_DRAW_DEBUG
-   DrawDebugMessage(" Leaving DrawOrbit  --- ", GmatColor::RED32, 0, 240);
-   #endif
-}
 
 
 //------------------------------------------------------------------------------
@@ -2109,7 +1405,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    
    Integer dir1 = GmatMathUtil::SignOf(v1[1] * r1[0] - v1[0] * r1[1]);
    Integer dir2 = GmatMathUtil::SignOf(v2[1] * r2[0] - v2[0] * r2[1]);
-   Real m = (lat2 - lat1) / (lon2 - lon1);
+   //Real m = (lat2 - lat1) / (lon2 - lon1);
    Real plusLon2 = GmatMathUtil::Mod(lon2, GmatMathConstants::TWO_PI_DEG);
    Real plusLon1 = GmatMathUtil::Mod(lon1, GmatMathConstants::TWO_PI_DEG);
    Real minusLon2 = GmatMathUtil::Mod(lon2, -GmatMathConstants::TWO_PI_DEG);
@@ -2177,62 +1473,6 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
 }
 
 
-//------------------------------------------------------------------------------
-//  void DrawSolverData()
-//------------------------------------------------------------------------------
-/**
- * Draws solver iteration data
- * This is only called when drawing "current" solver data.  For drawing all
- * solver passes at the same time, see TrajPlotCanvas::UpdatePlot()
- */
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawSolverData()
-{
-   Rvector3 start, end;
-   int numPoints = mSolverAllPosX.size();
-   
-   #if DEBUG_SOLVER_DATA
-   MessageInterface::ShowMessage
-      ("==========> DrawSolverData() entered, solver points = %d\n", numPoints);
-   #endif
-   
-   if (numPoints == 0)
-      return;
-   
-   // Note that we're starting at 2 here rather than at 1.  There is a bug that
-   // looks like a bad pointer when starting from 1 when the plot running in
-   // "Current" mode.  We need to investigate this issue after the 2011a release
-   // is out the door.  This TEMPORARY fix is in place so that the Mac, Linux
-   // and Visual Studio builds won't crash for the "Current" setting.
-   for (int i=2; i<numPoints; i++)
-   {
-      int numSc = mSolverAllPosX[i].size();      
-      //MessageInterface::ShowMessage("==========> sc count = %d\n", numSc);
-      
-      //---------------------------------------------------------
-      // draw lines
-      //---------------------------------------------------------
-      for (int sc=0; sc<numSc; sc++)
-      {
-         *sIntColor = mSolverIterColorArray[sc];         
-         // Dunn took out old minus signs to make attitude correct.
-         // Examining GMAT functionality in the debugger, this is only to show
-         // the current solver iteration.  Somewhere else the multiple iterations 
-         // are drawn.
-         start.Set(mSolverAllPosX[i-1][sc],mSolverAllPosY[i-1][sc],mSolverAllPosZ[i-1][sc]);
-         end.Set  (mSolverAllPosX[i]  [sc],mSolverAllPosY[i]  [sc],mSolverAllPosZ[i]  [sc]);
-         
-         // PS - See Rendering.cpp
-         DrawLine(sGlColor, start, end);
-      }
-   }
-   
-   #if DEBUG_SOLVER_DATA
-   MessageInterface::ShowMessage("==========> DrawSolverData() leaving\n");
-   #endif
-}
-
-
 //---------------------------------------------------------------------------
 // void DrawCentralBodyTexture()
 //---------------------------------------------------------------------------
@@ -2257,7 +1497,7 @@ void GroundTrackCanvas::DrawCentralBodyTexture()
       glDisable(GL_TEXTURE_2D);
       
       // reset to drawing mode
-      SetProjection();
+      SetupProjection();
    }
    
    #ifdef DEBUG_DRAW
@@ -2281,6 +1521,22 @@ void GroundTrackCanvas::DrawCircleAtCurrentPosition(int objId, int index,
    Real lon2, lat2;
    Rvector3 r2(mObjectViewPos[index+0], mObjectViewPos[index+1],
                mObjectViewPos[index+2]);
+
+   //======================================================================
+   // Actualy I can't use CartesianToSpherical() from BodyFixedStateConverter as is
+   // since longitude has to be between -180 and 180. Also it constructs Rvector3 when
+   // it returns the value which will slow down the performance. I need a new function
+   // CartesianToLatLong(const Rvector3 &cart, Real &lat, Real &lon);
+   // I don't need height, so pass 0.0 for mean radius, flattening is not used so pass 0.0
+   #if 0
+   Rvector3 latLonHgt =
+      BodyFixedStateConverterUtil::CartesianToSpherical(r2, 0.0, 0.0);
+   Real lon3 = latLonHgt[1] * GmatMathConstants::DEG_PER_RAD;
+   Real lat3 = latLonHgt[0] * GmatMathConstants::DEG_PER_RAD;
+   MessageInterface::ShowMessage("   lon3 = %f, lat3 = %f\n", lon3, lat3);
+   #endif
+   //======================================================================
+   
    r2.ComputeLongitudeLatitude(lon2, lat2);
    lon2 *= GmatMathConstants::DEG_PER_RAD;
    lat2 *= GmatMathConstants::DEG_PER_RAD;
@@ -2570,33 +1826,5 @@ void GroundTrackCanvas::ConvertObject(int objId, int index)
           inState[1], inState[2], outState[0], outState[1], outState[2]);
    }
    #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos)
-//------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
-                                         int xpos, int ypos)
-{
-   glDisable(GL_LIGHTING);
-   glDisable(GL_LIGHT0);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluOrtho2D(0.0, (GLfloat)mCanvasSize.x, 0.0, (GLfloat)mCanvasSize.y);
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-   
-   GlColorType *color = (GlColorType*)&textColor;
-   glColor3ub(color->red, color->green, color->blue);
-   glRasterPos2i(xpos, ypos);
-   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.c_str());
-   
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluOrtho2D(-180.0, 180.0, -90.0, 90.0);
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-   
 }
 

@@ -22,6 +22,7 @@
 #include "FileUtil.hpp"            // for GmatFileUtil::DoesFileExist()
 #include "GmatOpenGLSupport.hpp"   // for InitGL()
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"       // for GetMainFrameStatusBar()
 #include "GuiInterpreter.hpp"
 #include "SubscriberException.hpp"
 #include "MessageInterface.hpp"
@@ -31,11 +32,16 @@
 //#define DEBUG_TEXTURE 1
 //#define DEBUG_LOAD_MODEL 1
 //#define DEBUG_OBJECT 1
+//#define DEBUG_DATA_BUFFERRING 1
 
 //---------------------------------
 // static data
 //---------------------------------
 const Real ViewCanvas::RADIUS_ZOOM_RATIO = 2.2;
+
+// color
+static int *sIntColor = new int;
+static GlColorType *sGlColor = (GlColorType*)sIntColor;
 
 //------------------------------------------------------------------------------
 // ViewCanvas(wxWindow *parent, wxWindowID id, ...)
@@ -63,7 +69,9 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
 {
    // initialize pointers
    mParent = parent;
-   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   theGuiInterpreter = gmatAppData->GetGuiInterpreter();
+   theStatusBar = gmatAppData->GetMainFrame()->GetMainFrameStatusBar();
    mCanvasSize = size;
    
    // initialization
@@ -108,8 +116,13 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mDrawWireFrame = false;
    mDrawGrid = false;
    
+   // light source
+   mSunPresent = false;
+   mEnableLightSource = true;
+   
    // view control
    mUseInitialViewPoint = true;
+   mAxisLength = 30000.0;
    
    // animation
    mIsAnimationRunning = false;
@@ -300,6 +313,24 @@ bool ViewCanvas::InitOpenGL()
 
 
 //------------------------------------------------------------------------------
+// virtual void SetObjectColors(const wxStringColorMap &objectColorMap)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetObjectColors(const wxStringColorMap &objectColorMap)
+{
+   mObjectColorMap = objectColorMap;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetObjectColors(const wxStringColorMap &objectColorMap)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
+{
+   mShowObjectMap = showObjMap;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetGlObject(const StringArray &objNames,
 //                  const UnsignedIntArray &objOrbitColors,
 //                  const std::vector<SpacePoint*> &objArray)
@@ -464,6 +495,107 @@ void ViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
 }
 
 
+//------------------------------------------------------------------------------
+// void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
+{
+   mDrawOrbitArray = drawArray;
+   
+   #if DEBUG_OBJECT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
+       "mObjectCount=%d\n", mDrawOrbitArray.size(), mObjectCount);
+   
+   bool draw;
+   for (int i=0; i<mObjectCount; i++)
+   {
+      draw = mDrawOrbitArray[i] ? true : false;      
+      MessageInterface::ShowMessage
+         ("ViewCanvas::SetGlDrawObjectFlag() i=%d, mDrawOrbitArray[%s]=%d\n",
+          i, mObjectNames[i].c_str(), draw);
+   }
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlShowObjectFlag(const std::vector<bool> &showArray)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
+{
+   mShowObjectArray = showArray;
+
+   #if DEBUG_OBJECT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
+       "mObjectCount=%d\n", mShowObjectArray.size(), mObjectCount);
+   #endif
+   
+   bool show;
+   mSunPresent = true;//false;
+   
+   for (int i=0; i<mObjectCount; i++)
+   {
+      show = mShowObjectArray[i] ? true : false;
+      mShowObjectMap[mObjectNames[i]] = show;
+      
+      if (mObjectNames[i] == "Sun" && mShowObjectMap["Sun"])
+         mSunPresent = true;
+      
+      #if DEBUG_OBJECT
+      MessageInterface::ShowMessage
+         ("ViewCanvas::SetGlShowObjectFlag() i=%d, mShowObjectMap[%s]=%d\n",
+          i, mObjectNames[i].c_str(), show);
+      #endif
+   }
+   
+   // Handle light source
+   HandleLightSource();
+   
+   #if DEBUG_OBJECT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetGlDrawObjectFlag() mEnableLightSource=%d, mSunPresent=%d\n",
+       mEnableLightSource, mSunPresent);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetNumPointsToRedraw(Integer numPoints)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetNumPointsToRedraw(Integer numPoints)
+{
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetNumPointsToRedraw() entered, numPoints=%d\n", numPoints);
+   #endif
+   
+   mNumPointsToRedraw = numPoints;
+   mRedrawLastPointsOnly = false;
+   
+   // if mNumPointsToRedraw =  0 It redraws whole plot
+   // if mNumPointsToRedraw = -1 It does not clear GL_COLOR_BUFFER
+   if (mNumPointsToRedraw > 0)
+      mRedrawLastPointsOnly = true;
+   
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetNumPointsToRedraw() leaving, mRedrawLastPointsOnly=%d\n",
+       mRedrawLastPointsOnly);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetUpdateFrequency(Integer updFreq)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetUpdateFrequency(Integer updFreq)
+{
+   mUpdateFrequency = updFreq;
+}
+
+
 //---------------------------------------------------------------------------
 // wxString GetGotoObjectName()
 //---------------------------------------------------------------------------
@@ -480,6 +612,49 @@ wxString ViewCanvas::GetGotoObjectName()
 void ViewCanvas::GotoObject(const wxString &objName)
 {
    // do nothing here
+}
+
+
+//------------------------------------------------------------------------------
+// void SetEndOfRun(bool flag = true)
+//------------------------------------------------------------------------------
+void ViewCanvas::SetEndOfRun(bool flag)
+{
+   #if DEBUG_UPDATE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetEndOfRun() ViewCanvas::SetEndOfRun() flag=%d, "
+       "mNumData=%d\n",  flag, mNumData);
+   #endif
+   
+   mIsEndOfRun = flag;
+   mIsEndOfData = flag;
+   
+   if (mNumData < 1)
+   {
+      Refresh(false);
+      return;
+   }
+   
+   if (mIsEndOfRun)
+   {
+      #if DEBUG_LONGITUDE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::SetEndOfRun() mIsEndOfRun=%d, mNumData=%d\n",
+          mIsEndOfRun, mNumData);
+      #endif
+      
+      //-------------------------------------------------------
+      // get first spacecraft id
+      //-------------------------------------------------------
+      int objId = UNKNOWN_OBJ_ID;
+      for (int sc=0; sc<mScCount; sc++)
+      {
+         objId = GetObjectId(mScNameArray[sc].c_str());
+         
+         if (objId != UNKNOWN_OBJ_ID)
+            break;
+      }
+   }
 }
 
 
@@ -824,6 +999,15 @@ void ViewCanvas::SetDrawingMode()
 
 
 //------------------------------------------------------------------------------
+// virtual void HandleLightSource()
+//------------------------------------------------------------------------------
+void ViewCanvas::HandleLightSource()
+{
+   // do nothing here
+}
+
+
+//------------------------------------------------------------------------------
 // void ResetPlotInfo()
 //------------------------------------------------------------------------------
 /**
@@ -1072,6 +1256,14 @@ void ViewCanvas::ComputeBufferIndex(Real time)
 //------------------------------------------------------------------------------
 void ViewCanvas::ComputeActualIndex()
 {
+   #ifdef DEBUG_COMPUTE_ACTUAL_INDEX
+   MessageInterface::ShowMessage
+      ("ViewCanvas::ComputeActualIndex() mRedrawLastPointsOnly=%d, mIsEndOfRun=%d\n"
+       "   mBeginIndex1=%d, mEndIndex1=%d, mBeginIndex2=%d, mEndIndex2=%d\n",
+       mRedrawLastPointsOnly, mIsEndOfRun, mBeginIndex1, mEndIndex1, mBeginIndex2,
+       mEndIndex2);
+   #endif
+   
    mRealBeginIndex1 = mBeginIndex1;
    mRealEndIndex1   = mEndIndex1;
    mRealBeginIndex2 = mBeginIndex2;
@@ -1106,7 +1298,7 @@ void ViewCanvas::ComputeActualIndex()
       }
    }
    
-   #ifdef DEBUG_DATA_BUFFERRING
+   #ifdef DEBUG_COMPUTE_ACTUAL_INDEX
    MessageInterface::ShowMessage
       ("ViewCanvas::ComputeActualIndex()     mBeginIndex1=%3d,     mEndIndex1=%3d, "
        "    mBeginIndex2=%3d,     mEndIndex2=%3d\n", mBeginIndex1, mEndIndex1,
@@ -1289,6 +1481,32 @@ bool ViewCanvas::LoadSpacecraftModels()
    #endif
    
    return modelsAreLoaded;
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetupProjection()
+//------------------------------------------------------------------------------
+/**
+ * Sets up how object is viewed
+ */
+//------------------------------------------------------------------------------
+void ViewCanvas::SetupProjection()
+{
+   #if DEBUG_PROJECTION > 2
+   MessageInterface::ShowMessage("ViewCanvas::SetupProjection() entered\n");
+   #endif
+   
+   // Setup the world view
+   glMatrixMode(GL_PROJECTION); // first go to projection mode
+   glLoadIdentity();            // clear all previous information
+   SetupWorld();                // set it up
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();            // clear all previous information
+   
+   #if DEBUG_PROJECTION > 2
+   MessageInterface::ShowMessage("ViewCanvas::SetupProjection() leaving\n");
+   #endif
 }
 
 
@@ -1709,6 +1927,100 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
 }
 
 
+//------------------------------------------------------------------------------
+// void DrawOrbit(const wxString &objName, int obj, int objId)
+//------------------------------------------------------------------------------
+void ViewCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
+{
+   #ifdef DEBUG_DRAW
+   MessageInterface::ShowMessage
+      ("==========> DrawOrbit() objName='%s', drawing first part, mRealBeginIndex1=%d, "
+       "mRealEndIndex1=%d\n", objName.c_str(), mRealBeginIndex1, mRealEndIndex1);
+   #endif
+   
+   // Draw first part from the ring buffer
+   for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
+   {
+      DrawOrbitLines(i, objName, obj, objId);
+   }
+   
+   // Draw second part from the ring buffer
+   if (mEndIndex2 != -1 && mBeginIndex1 != mBeginIndex2)
+   {
+      #ifdef DEBUG_DRAW
+      MessageInterface::ShowMessage
+         ("==========> DrawOrbit() objName='%s', drawing second part\n",
+          objName.c_str());
+      #endif
+      
+      for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
+      {
+         DrawOrbitLines(i, objName, obj, objId);
+      }
+   }
+   
+   #if DEBUG_DRAW_DEBUG
+   DrawDebugMessage(" Leaving DrawOrbit  --- ", GmatColor::RED32, 0, 240);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+//  void DrawSolverData()
+//------------------------------------------------------------------------------
+/**
+ * Draws solver iteration data
+ * This is only called when drawing "current" solver data.  For drawing all
+ * solver passes at the same time, see UpdatePlot()
+ */
+//------------------------------------------------------------------------------
+void ViewCanvas::DrawSolverData()
+{
+   Rvector3 start, end;
+   int numPoints = mSolverAllPosX.size();
+   
+   #if DEBUG_SOLVER_DATA
+   MessageInterface::ShowMessage
+      ("==========> DrawSolverData() entered, solver points = %d\n", numPoints);
+   #endif
+   
+   if (numPoints == 0)
+      return;
+   
+   // Note that we're starting at 2 here rather than at 1.  There is a bug that
+   // looks like a bad pointer when starting from 1 when the plot running in
+   // "Current" mode.  We need to investigate this issue after the 2011a release
+   // is out the door.  This TEMPORARY fix is in place so that the Mac, Linux
+   // and Visual Studio builds won't crash for the "Current" setting.
+   for (int i=2; i<numPoints; i++)
+   {
+      int numSc = mSolverAllPosX[i].size();      
+      //MessageInterface::ShowMessage("==========> sc count = %d\n", numSc);
+      
+      //---------------------------------------------------------
+      // draw lines
+      //---------------------------------------------------------
+      for (int sc=0; sc<numSc; sc++)
+      {
+         *sIntColor = mSolverIterColorArray[sc];         
+         // Dunn took out old minus signs to make attitude correct.
+         // Examining GMAT functionality in the debugger, this is only to show
+         // the current solver iteration.  Somewhere else the multiple iterations 
+         // are drawn.
+         start.Set(mSolverAllPosX[i-1][sc],mSolverAllPosY[i-1][sc],mSolverAllPosZ[i-1][sc]);
+         end.Set  (mSolverAllPosX[i]  [sc],mSolverAllPosY[i]  [sc],mSolverAllPosZ[i]  [sc]);
+         
+         // PS - See Rendering.cpp
+         DrawLine(sGlColor, start, end);
+      }
+   }
+   
+   #if DEBUG_SOLVER_DATA
+   MessageInterface::ShowMessage("==========> DrawSolverData() leaving\n");
+   #endif
+}
+
+
 //---------------------------------------------------------------------------
 // void DrawStatus(const wxString &label1, unsigned int textColor, ...)
 //---------------------------------------------------------------------------
@@ -1719,10 +2031,9 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
 void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
                             const wxString &label2, double time, int xpos,
                             int ypos, bool showCS, const wxString &label3)
-{
-   int frame = mTotalPoints;
-   
+{   
    #ifdef DEBUG_DRAW_STATUS
+   int frame = mTotalPoints;
    MessageInterface::ShowMessage
       ("DrawStatus() entered, frame=%d, time=%.9f\n", frame, time);
    #endif
@@ -1792,3 +2103,35 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
    MessageInterface::ShowMessage("DrawStatus() leaving\n");
    #endif
 }
+
+
+//------------------------------------------------------------------------------
+// void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos)
+//------------------------------------------------------------------------------
+void ViewCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
+                                  int xpos, int ypos)
+{
+   glDisable(GL_LIGHTING);
+   glDisable(GL_LIGHT0);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(0.0, (GLfloat)mCanvasSize.x, 0.0, (GLfloat)mCanvasSize.y);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+   
+   GlColorType *color = (GlColorType*)&textColor;
+   glColor3ub(color->red, color->green, color->blue);
+   glRasterPos2i(xpos, ypos);
+   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.c_str());
+   
+   SetupProjection();
+
+   #if 0
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(-180.0, 180.0, -90.0, 90.0);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+   #endif
+}
+

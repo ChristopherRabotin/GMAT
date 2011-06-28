@@ -249,14 +249,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    
    // view model
    mUseGluLookAt = true;
-   
-   // performance
-   // if mNumPointsToRedraw =  0 It redraws whole plot
-   // if mNumPointsToRedraw = -1 It does not clear GL_COLOR_BUFFER
-   mNumPointsToRedraw = 0;
-   mRedrawLastPointsOnly = false;
-   mUpdateFrequency = 50;
-   
+      
    //mAxisLength = mCurrViewDist;
    mAxisLength = DEFAULT_DIST;
    
@@ -279,10 +272,6 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    // appear to be used, though)
    mEarthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]; //km
    mScRadius = 200;        //km: make big enough to see
-   
-   // light source
-   mSunPresent = false;
-   mEnableLightSource = true;
    
    // drawing options
    mDrawXyPlane = false;
@@ -385,75 +374,6 @@ OrbitViewCanvas::~OrbitViewCanvas()
    #endif
 }
 
-
-//------------------------------------------------------------------------------
-// wxString GetGotoObjectName()
-//------------------------------------------------------------------------------
-wxString OrbitViewCanvas::GetGotoObjectName()
-{
-   return mObjectNames[mViewObjId];
-}
-
-
-//------------------------------------------------------------------------------
-// void SetEndOfRun(bool flag = true)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetEndOfRun(bool flag)
-{
-   #if DEBUG_UPDATE
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::SetEndOfRun() OrbitViewCanvas::SetEndOfRun() flag=%d, "
-       "mNumData=%d\n",  flag, mNumData);
-   #endif
-   
-   mIsEndOfRun = flag;
-   mIsEndOfData = flag;
-   
-   if (mNumData < 1)
-   {
-      Refresh(false);
-      return;
-   }
-   
-   if (mIsEndOfRun)
-   {
-      #if DEBUG_LONGITUDE
-      MessageInterface::ShowMessage
-         ("OrbitViewCanvas::SetEndOfRun() mIsEndOfRun=%d, mNumData=%d\n",
-          mIsEndOfRun, mNumData);
-      #endif
-      
-      //-------------------------------------------------------
-      // get first spacecraft id
-      //-------------------------------------------------------
-      int objId = UNKNOWN_OBJ_ID;
-      for (int sc=0; sc<mScCount; sc++)
-      {
-         objId = GetObjectId(mScNameArray[sc].c_str());
-         
-         if (objId != UNKNOWN_OBJ_ID)
-            break;
-      }
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void SetObjectColors(const wxStringColorMap &objectColorMap)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetObjectColors(const wxStringColorMap &objectColorMap)
-{
-   mObjectColorMap = objectColorMap;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetShowObjects(const wxStringColorMap &showObjMap)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
-{
-   mShowObjectMap = showObjMap;
-}
 
 //------------------------------------------------------------------------------
 // void ClearPlot()
@@ -941,129 +861,7 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
              "so will use default Vector instead.\n");
    }
    
-} //end SetGlViewOption()
-
-
-//------------------------------------------------------------------------------
-// void SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
-{
-   mDrawOrbitArray = drawArray;
-   
-   #if DEBUG_OBJECT
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
-       "mObjectCount=%d\n", mDrawOrbitArray.size(), mObjectCount);
-   
-   bool draw;
-   for (int i=0; i<mObjectCount; i++)
-   {
-      draw = mDrawOrbitArray[i] ? true : false;      
-      MessageInterface::ShowMessage
-         ("OrbitViewCanvas::SetGlDrawObjectFlag() i=%d, mDrawOrbitArray[%s]=%d\n",
-          i, mObjectNames[i].c_str(), draw);
-   }
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void SetGlShowObjectFlag(const std::vector<bool> &showArray)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
-{
-   mShowObjectArray = showArray;
-
-   #if DEBUG_OBJECT
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
-       "mObjectCount=%d\n", mShowObjectArray.size(), mObjectCount);
-   #endif
-   
-   bool show;
-   mSunPresent = true;//false;
-   
-   for (int i=0; i<mObjectCount; i++)
-   {
-      show = mShowObjectArray[i] ? true : false;
-      mShowObjectMap[mObjectNames[i]] = show;
-      
-      if (mObjectNames[i] == "Sun" && mShowObjectMap["Sun"])
-         mSunPresent = true;
-      
-      #if DEBUG_OBJECT
-      MessageInterface::ShowMessage
-         ("OrbitViewCanvas::SetGlShowObjectFlag() i=%d, mShowObjectMap[%s]=%d\n",
-          i, mObjectNames[i].c_str(), show);
-      #endif
-   }
-   
-   #if DEBUG_OBJECT
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::SetGlDrawObjectFlag() mEnableLightSource=%d, mSunPresent=%d\n",
-       mEnableLightSource, mSunPresent);
-   #endif
-   
-   // Handle light source
-   if (mEnableLightSource && mSunPresent)
-   {
-      //----------------------------------------------------------------------
-      // set OpenGL to recognize the counter clockwise defined side of a polygon
-      // as its 'front' for lighting and culling purposes
-      glFrontFace(GL_CCW);
-      
-      // enable face culling, so that polygons facing away (defines by front face)
-      // from the viewer aren't drawn (for efficiency).
-      glEnable(GL_CULL_FACE);
-      
-      // create a light:
-      //float lightColor[4]={1.0f, 1.0f, 1.0f, 1.0f};
-      
-      //glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, lightColor);
-      //glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
-      
-      // enable the light
-      glEnable(GL_LIGHTING);
-      glEnable(GL_LIGHT0);
-      
-      // tell OpenGL to use glColor() to get material properties for..
-      glEnable(GL_COLOR_MATERIAL);
-      
-      // ..the front face's ambient and diffuse components
-      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-      
-      // Set the ambient lighting
-      GLfloat ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
-      glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-      //----------------------------------------------------------------------
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void SetNumPointsToRedraw(Integer numPoints)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetNumPointsToRedraw(Integer numPoints)
-{
-   mNumPointsToRedraw = numPoints;
-   mRedrawLastPointsOnly = false;
-
-   // if mNumPointsToRedraw =  0 It redraws whole plot
-   // if mNumPointsToRedraw = -1 It does not clear GL_COLOR_BUFFER
-   if (mNumPointsToRedraw > 0)
-      mRedrawLastPointsOnly = true;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetUpdateFrequency(Integer updFreq)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::SetUpdateFrequency(Integer updFreq)
-{
-   mUpdateFrequency = updFreq;
-}
-
+} //end SetGl3dViewOption()
 
 
 //---------------------------------------------------------------------------
@@ -1084,10 +882,6 @@ void OrbitViewCanvas::TakeAction(const std::string &action)
       mObjectArray.clear();
    }
 }
-
-
-
-
 
 
 //------------------------------------------------------------------------------
@@ -1675,13 +1469,13 @@ void OrbitViewCanvas::SetDefaultView()
 
 
 //------------------------------------------------------------------------------
-//  void SetProjection()
+//  void SetupProjection()
 //------------------------------------------------------------------------------
 /**
- * Sets view projection.
+ * Sets up how object is viewed
  */
 //------------------------------------------------------------------------------
-void OrbitViewCanvas::SetProjection()
+void OrbitViewCanvas::SetupProjection()
 {
    // Setup the world view
    glMatrixMode(GL_PROJECTION); // first go to projection mode
@@ -1859,6 +1653,46 @@ void OrbitViewCanvas::TransformView()
 
 
 //------------------------------------------------------------------------------
+// virtual void HandleLightSource()
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::HandleLightSource()
+{
+   if (mEnableLightSource && mSunPresent)
+   {
+      //----------------------------------------------------------------------
+      // set OpenGL to recognize the counter clockwise defined side of a polygon
+      // as its 'front' for lighting and culling purposes
+      glFrontFace(GL_CCW);
+      
+      // enable face culling, so that polygons facing away (defines by front face)
+      // from the viewer aren't drawn (for efficiency).
+      glEnable(GL_CULL_FACE);
+      
+      // create a light:
+      //float lightColor[4]={1.0f, 1.0f, 1.0f, 1.0f};
+      
+      //glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, lightColor);
+      //glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+      
+      // enable the light
+      glEnable(GL_LIGHTING);
+      glEnable(GL_LIGHT0);
+      
+      // tell OpenGL to use glColor() to get material properties for..
+      glEnable(GL_COLOR_MATERIAL);
+      
+      // ..the front face's ambient and diffuse components
+      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+      
+      // Set the ambient lighting
+      GLfloat ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
+      glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+      //----------------------------------------------------------------------
+   }
+}
+
+
+//------------------------------------------------------------------------------
 //  void DrawFrame()
 //------------------------------------------------------------------------------
 /**
@@ -2007,7 +1841,7 @@ void OrbitViewCanvas::DrawPlot()
    if (mDrawStars)
       DrawStars();
    
-   SetProjection();
+   SetupProjection();
    TransformView();
    
    // draw axes
@@ -2083,7 +1917,6 @@ void OrbitViewCanvas::DrawObjectOrbit(int frame)
       #endif
       
       // If not showing orbit just draw object, continue to next one
-      //if (!mDrawOrbitFlag[objId*MAX_DATA+mLastIndex])
       if (!mDrawOrbitFlag[index])
       {
          #if DEBUG_DRAW
@@ -2203,8 +2036,8 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       #endif
       
       Spacecraft *spac = (Spacecraft*)mObjectArray[obj];
-      ModelManager *mm = ModelManager::Instance();
-      ModelObject *model = mm->GetModel(spac->modelID);
+      //ModelManager *mm = ModelManager::Instance();
+      //ModelObject *model = mm->GetModel(spac->modelID);
       
       if (spac->modelID != -1)
       {
@@ -2217,7 +2050,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
                       mObjectViewPos[index1+1],
                       mObjectViewPos[index1+2]);
          GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW32;
-         GlColorType *red = (GlColorType*)&GmatColor::RED32;
+         //GlColorType *red = (GlColorType*)&GmatColor::RED32;
          *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
          // We want to differenciate spacecraft by orbit color (LOJ: 2011.02.16)
          //DrawSpacecraft(mScRadius, yellow, red);
@@ -2475,46 +2308,6 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
 
 
 //------------------------------------------------------------------------------
-// void DrawOrbit(const wxString &objName, int obj, int objId)
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
-{   
-   glPushMatrix();
-   glBegin(GL_LINES);
-   
-   #ifdef DEBUG_DRAW
-   MessageInterface::ShowMessage
-      ("==========> DrawOrbit() objName='%s', drawing first part\n",
-       objName.c_str());
-   #endif
-   
-   // Draw first part from the ring buffer
-   for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
-   {
-      DrawOrbitLines(i, objName, obj, objId);
-   }
-   
-   // Draw second part from the ring buffer
-   if (mEndIndex2 != -1 && mBeginIndex1 != mBeginIndex2)
-   {
-      #ifdef DEBUG_DRAW
-      MessageInterface::ShowMessage
-         ("==========> DrawOrbit() objName='%s', drawing second part\n",
-          objName.c_str());
-      #endif
-      
-      for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
-      {
-         DrawOrbitLines(i, objName, obj, objId);
-      }
-   }
-   
-   glEnd();
-   glPopMatrix();
-}
-
-
-//------------------------------------------------------------------------------
 // void DrawOrbitLines(int i, const wxString &objName, int obj, int objId)
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
@@ -2587,62 +2380,6 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
          ("DrawOrbitLines() leaving, mObjLastFrame[%d] = %d\n", objId, i);
       #endif
    }
-}
-
-
-//------------------------------------------------------------------------------
-//  void DrawSolverData()
-//------------------------------------------------------------------------------
-/**
- * Draws solver iteration data
- * This is only called when drawing "current" solver data.  For drawing all
- * solver passes at the same time, see TrajPlotCanvas::UpdatePlot()
- */
-//------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawSolverData()
-{
-   Rvector3 start, end;
-   int numPoints = mSolverAllPosX.size();
-   
-   #if DEBUG_SOLVER_DATA
-   MessageInterface::ShowMessage
-      ("==========> DrawSolverData() entered, solver points = %d\n", numPoints);
-   #endif
-   
-   if (numPoints == 0)
-      return;
-   
-   // Note that we're starting at 2 here rather than at 1.  There is a bug that
-   // looks like a bad pointer when starting from 1 when the plot running in
-   // "Current" mode.  We need to investigate this issue after the 2011a release
-   // is out the door.  This TEMPORARY fix is in place so that the Mac, Linux
-   // and Visual Studio builds won't crash for the "Current" setting.
-   for (int i=2; i<numPoints; i++)
-   {
-      int numSc = mSolverAllPosX[i].size();      
-      //MessageInterface::ShowMessage("==========> sc count = %d\n", numSc);
-      
-      //---------------------------------------------------------
-      // draw lines
-      //---------------------------------------------------------
-      for (int sc=0; sc<numSc; sc++)
-      {
-         *sIntColor = mSolverIterColorArray[sc];         
-         // Dunn took out old minus signs to make attitude correct.
-         // Examining GMAT functionality in the debugger, this is only to show
-         // the current solver iteration.  Somewhere else the multiple iterations 
-         // are drawn.
-         start.Set(mSolverAllPosX[i-1][sc],mSolverAllPosY[i-1][sc],mSolverAllPosZ[i-1][sc]);
-         end.Set  (mSolverAllPosX[i]  [sc],mSolverAllPosY[i]  [sc],mSolverAllPosZ[i]  [sc]);
-         
-         // PS - See Rendering.cpp
-         DrawLine(sGlColor, start, end);
-      }
-   }
-   
-   #if DEBUG_SOLVER_DATA
-   MessageInterface::ShowMessage("==========> DrawSolverData() leaving\n");
-   #endif
 }
 
 
