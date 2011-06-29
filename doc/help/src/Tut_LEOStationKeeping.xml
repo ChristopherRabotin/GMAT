@@ -213,7 +213,7 @@
     <literal>While</literal> loop with a propagate sequence, and will
     configure it to propagate for about 10 days. This will still lack any
     orbit control strategy - upon running the mission you will see the SMA
-    drop below the allowed value of 342 km. Later in PArt 2 a control sequence
+    drop below the allowed value of 342 km. Later in Part 2 a control sequence
     will be added, to ensure that SMA remains above approximately 342 km.
     Below is an illustration of the Mission Tree after you have completed Part
     1. Follow the steps below.</para>

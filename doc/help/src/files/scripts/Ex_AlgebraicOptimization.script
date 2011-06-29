@@ -1,78 +1,33 @@
 %  Script Mission - Optimization Example
 %
 %  This script demonstrates how to use an Optimize sequence
-%
-%  REVSION HISTORY
-%  $Id: Ex_AlgebraicOptimization.script,v 1.4 2007/07/26 19:12:57 edove Exp $
+
+
+%-----------------------------------------------------------------
+%---------------------- Create Spacecraft ------------------------
+%-----------------------------------------------------------------
+Create Spacecraft Sat;
+GMAT Sat.DisplayStateType = Cartesian;
+
+%-----------------------------------------------------------------
+%-----------------Create and Setup the Optimizer------------------
+%-----------------------------------------------------------------
+Create VF13ad SQPfmincon
 
 
 %-----------------------------------------------------------------
 %-----------------Create Variable and Arrays ---------------------
 %-----------------------------------------------------------------
-Create Variable X1 X2 F G;
-
-%----------------------------------------
-%---------- Coordinate Systems
-%----------------------------------------
-
-Create CoordinateSystem EarthMJ2000Eq;
-GMAT EarthMJ2000Eq.Origin = Earth;
-GMAT EarthMJ2000Eq.Axes = MJ2000Eq;
-GMAT EarthMJ2000Eq.UpdateInterval = 60;
-GMAT EarthMJ2000Eq.OverrideOriginInterval = false;
-
-Create CoordinateSystem EarthMJ2000Ec;
-GMAT EarthMJ2000Ec.Origin = Earth;
-GMAT EarthMJ2000Ec.Axes = MJ2000Ec;
-GMAT EarthMJ2000Ec.UpdateInterval = 60;
-GMAT EarthMJ2000Ec.OverrideOriginInterval = false;
-
-Create CoordinateSystem EarthFixed;
-GMAT EarthFixed.Origin = Earth;
-GMAT EarthFixed.Axes = BodyFixed;
-GMAT EarthFixed.UpdateInterval = 60;
-GMAT EarthFixed.OverrideOriginInterval = false;
-%-----------------------------------------------------------------
-%---------------------- Create Spacecraft ------------------------
-%-----------------------------------------------------------------
-%Create Spacecraft Sat;
-%GMAT Sat.DisplayStateType = Cartesian;
-
-%-----------------------------------------------------------------
-%-----------------Create and Setup the Optimizer------------------
-%-----------------------------------------------------------------
-Create FminconOptimizer SQPfmincon;
-GMAT SQPfmincon.ShowProgress = true;
-GMAT SQPfmincon.ReportStyle = 'Normal';
-GMAT SQPfmincon.TargeterTextFile = 'FminconOptimizerSQPfmincon.data';
-GMAT SQPfmincon.MaximumIterations = 25;
-GMAT SQPfmincon.Tolerance = 0;
-GMAT SQPfmincon.FunctionPath = '';
-GMAT SQPfmincon.SourceType = 'MATLAB';
-GMAT SQPfmincon.DiffMaxChange = '0.01';
-GMAT SQPfmincon.DiffMinChange = '0.000001';
-GMAT SQPfmincon.MaxFunEvals = '1000';
-GMAT SQPfmincon.MaxIter = '250';
-GMAT SQPfmincon.TolX = '0.01';
-GMAT SQPfmincon.TolFun = '0.0001';
-GMAT SQPfmincon.TolCon = '0.0001';
-GMAT SQPfmincon.DerivativeCheck = 'Off';
-GMAT SQPfmincon.Diagnostics = 'On';
-GMAT SQPfmincon.Display = 'Iter';
-GMAT SQPfmincon.GradObj = 'Off';
-GMAT SQPfmincon.GradConstr = 'Off';
+Create Variable X1 X2 F G
 
 %-----------------------------------------------------------------
 %------------------------------OutPut-----------------------------
 %-----------------------------------------------------------------
 
 Create ReportFile Data;
-GMAT Data.SolverIterations = Current;
-GMAT Data.Filename = './output/SampleMissions/Ex_AlgebraicOptimization.report';
+GMAT Data.Filename = Ex_AlgebraicOptimization.report;
 GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = On;
-GMAT Data.LeftJustify = On;
-GMAT Data.ZeroFill = Off;
+GMAT Data.WriteHeaders = Off;
 GMAT Data.ColumnWidth = 20;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,29 +35,26 @@ GMAT Data.ColumnWidth = 20;
 %----------------- Run the Optimization Loop ---------------------
 %-----------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+BeginMissionSequence
 Optimize SQPfmincon;
-   
-   %  Vary the independent variables
-   Vary SQPfmincon(X1 = 0, {Lower = -10, Upper = 10, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
-   Vary SQPfmincon(X2 = 0, {Lower = -10, Upper = 10, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
-   %GMAT X1 = Sat.X;
-   %GMAT X2 = Sat.Y;
-   
-   %  The cost function and Minimize command
-   GMAT F = ( X1 - 2 )^2 + ( X2 - 2 )^2;
-   Minimize SQPfmincon(F);
-   
-   %  Calculate constraint and use NonLinearConstraint command
-   %   ( yes, the equation below is actually a linear constraint, were 
-   %     testing functionality with this test)
-   %  The constraint is to require the solution to lie above the line defined by X2 = -X1 + 8
-   %  or X2 >= -X1 + 8;
-   GMAT G = X2 + X1;
-   NonlinearConstraint SQPfmincon(G=8);
 
-EndOptimize;  % For optimizer SQPfmincon
+    %  Vary the independent variables
+    Vary SQPfmincon( X1 = 0  , { Upper = 10, Lower = -10 } );
+    Vary SQPfmincon( X2 = 0  , { Upper = 10, Lower = -10 } );
+   
+    %  The cost function and Minimize command
+    GMAT F =  ( X1 - 2 )^2 + ( X2 - 2 )^2 
+    Minimize SQPfmincon(F);
 
-Report Data F G X1 X2;
-%Report Data Sat.X Sat.Y Sat.Z
+    %  Calculate constraint and use NonLinearConstraint command
+    %   ( yes, the equation below is actually a linear constraint, were 
+    %     testing functionality with this test)
+    %  The constraint is to require the solution to lie above the line defined by X2 = -X1 + 6
+    %  or X2 >= -X1 + 6;
+    GMAT G =  X2 + X1;
+    NonlinearConstraint SQPfmincon( G = 8 );
 
+EndOptimize;
+
+Report Data F G
+Report Data X1 X2
