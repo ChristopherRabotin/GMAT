@@ -300,9 +300,7 @@ OBJECTS = \
     forcemodel/harmonic/EarthTide.o \
     forcemodel/harmonic/Harmonic.o \
     forcemodel/harmonic/HarmonicGravity.o \
-    forcemodel/harmonic/HarmonicGravityBody.o \
     forcemodel/harmonic/HarmonicGravityCof.o \
-    forcemodel/harmonic/HarmonicGravityFactory.o \
     forcemodel/harmonic/HarmonicGravityGrv.o \
     foundation/Covariance.o \
     foundation/ElementWrapper.o \
@@ -541,8 +539,6 @@ OBJECTS = \
     $(SPICE_OBJECTS)
 #    solarsys/BodyDataReader.o \
 
-#    forcemodel/harmonic/HarmonicGravityEgm96dat.o \
-#    forcemodel/harmonic/HarmonicGravityVarying.o \
 #    parameter/OrbitAMatrixParameters.o \
 
 #    $(BRIDGEOBJECTS)
