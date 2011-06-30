@@ -1,6 +1,6 @@
 //$Id: GmatOdtbxFunctions.cpp 9544 2011-05-18 21:45:36Z djcinsb $
 //------------------------------------------------------------------------------
-//                            GmatOdtbxFunctions
+//                          CInterfacePluginFunctions
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 // ODTBX: Orbit Determination Toolbox
@@ -18,7 +18,7 @@
  */
 //------------------------------------------------------------------------------
 
-#include "GmatOdtbxFunctions.hpp"
+#include "CInterfacePluginFunctions.hpp"
 #include "MessageInterface.hpp"
 #include "Moderator.hpp"
 #include "ODEModel.hpp"
@@ -27,7 +27,6 @@
 
 #include "CCommandFactory.hpp"
 
-//#include "xxxFactory.hpp"
 
 // Library globals - lastMsg or internal statics are needed for messaging, the 
 // others (ode, pSetup) are here for convenience but could be made internal to
@@ -39,11 +38,6 @@ std::string extraMsg = "";
 
 extern "C"
 {
-   //---------------------------------------------------------------------
-   // Plugin functions -- Not needed at the moment
-   //---------------------------------------------------------------------
-   
-
    //------------------------------------------------------------------------------
    // Integer GetFactoryCount()
    //------------------------------------------------------------------------------
@@ -102,7 +96,7 @@ extern "C"
 
 
    //---------------------------------------------------------------------
-   // ODTBX Interface functions
+   // Client Interface functions
    //---------------------------------------------------------------------
    
    //------------------------------------------------------------------------------

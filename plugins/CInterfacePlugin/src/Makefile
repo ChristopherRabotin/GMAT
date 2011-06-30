@@ -1,13 +1,13 @@
 # $Id: Makefile 9154 2011-03-04 23:07:17Z djcinsb $
-# makefile for GMAT's MatlabInterface Plugin
-# This is the base level makefile 
+# makefile for GMAT's CInterface Plugin
+# This is the src level makefile 
 #
 # This file builds the plug-in base code
 
-include ./GmatOdtbxInterfaceEnv.mk
+include ./CInterfaceEnv.mk
 
 
-TARGET = ../lib/libGmatOdtbxInterface$(SHARED_EXTENSION)
+TARGET = ../lib/libCInterface$(SHARED_EXTENSION)
 
 
 all: prep $(TARGET)
@@ -22,22 +22,29 @@ HEADERS = -Iinclude \
           -Icommand \
           -I$(GMAT_CODE_LOCATION)/base/include \
           -I$(GMAT_CODE_LOCATION)/base/attitude \
-          -I$(GMAT_CODE_LOCATION)/base/coordsystem \
-          -I$(GMAT_CODE_LOCATION)/base/util \
-          -I$(GMAT_CODE_LOCATION)/base/solarsys \
-          -I$(GMAT_CODE_LOCATION)/base/hardware \
-          -I$(GMAT_CODE_LOCATION)/base/spacecraft \
-          -I$(GMAT_CODE_LOCATION)/base/foundation \
-          -I$(GMAT_CODE_LOCATION)/base/factory \
-          -I$(GMAT_CODE_LOCATION)/base/function \
-          -I$(GMAT_CODE_LOCATION)/base/parameter \
-          -I$(GMAT_CODE_LOCATION)/base/solver \
-          -I$(GMAT_CODE_LOCATION)/base/subscriber \
-          -I$(GMAT_CODE_LOCATION)/base/interface \
+          -I$(GMAT_CODE_LOCATION)/base/burn \
           -I$(GMAT_CODE_LOCATION)/base/command \
+          -I$(GMAT_CODE_LOCATION)/base/configs \
+          -I$(GMAT_CODE_LOCATION)/base/coordsystem \
           -I$(GMAT_CODE_LOCATION)/base/executive \
+          -I$(GMAT_CODE_LOCATION)/base/factory \
+          -I$(GMAT_CODE_LOCATION)/base/forcemodel \
+          -I$(GMAT_CODE_LOCATION)/base/foundation \
+          -I$(GMAT_CODE_LOCATION)/base/function \
+          -I$(GMAT_CODE_LOCATION)/base/hardware \
+          -I$(GMAT_CODE_LOCATION)/base/interface \
+          -I$(GMAT_CODE_LOCATION)/base/interpolator \
           -I$(GMAT_CODE_LOCATION)/base/interpreter \
-          -I$(GMAT_CODE_LOCATION)/base/forcemodel 
+          -I$(GMAT_CODE_LOCATION)/base/math \
+          -I$(GMAT_CODE_LOCATION)/base/parameter \
+          -I$(GMAT_CODE_LOCATION)/base/plugin \
+          -I$(GMAT_CODE_LOCATION)/base/propagator \
+          -I$(GMAT_CODE_LOCATION)/base/solarsys \
+          -I$(GMAT_CODE_LOCATION)/base/solver \
+          -I$(GMAT_CODE_LOCATION)/base/stopcond \
+          -I$(GMAT_CODE_LOCATION)/base/subscriber \
+          -I$(GMAT_CODE_LOCATION)/base/spacecraft \
+          -I$(GMAT_CODE_LOCATION)/base/util 
 
 
 clean : archclean
@@ -51,7 +58,9 @@ archclean :
 	rm -rf */core
 
 OBJECTS = \
-    plugin/GmatOdtbxFunctions.o 
+    command/PrepareMissionSequence.o \
+    factory/CCommandFactory.o \
+    plugin/CInterfacePluginFunctions.o
     
     
 ifeq ($(LINUX_MAC), 1)
@@ -64,7 +73,7 @@ $(TARGET) : $(OBJECTS)
 else
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../lib
-	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) $(MATLAB_LIB_DIR) $(MATLAB_LIBRARIES)
+	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) -L$(GMAT_BIN_LOCATION) -l$(BASE_LIBRARY)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)
 endif	
 else

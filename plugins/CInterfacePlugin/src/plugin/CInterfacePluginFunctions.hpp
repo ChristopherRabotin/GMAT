@@ -1,6 +1,6 @@
 //$Id: GmatOdtbxFunctions.hpp 9540 2011-05-18 00:02:57Z djcinsb $
 //------------------------------------------------------------------------------
-//                            GmatOdtbxFunctions
+//                          CInterfacePluginFunctions
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 // ODTBX: Orbit Determination Toolbox
@@ -18,8 +18,8 @@
  */
 //------------------------------------------------------------------------------
 
-#ifndef GmatPluginFunctions_hpp
-#define GmatPluginFunctions_hpp
+#ifndef CInterfacePluginFunctions_hpp
+#define CInterfacePluginFunctions_hpp
 
 #include "gmatdefs.hpp"
 #include "GmatCFunc_defs.hpp"
@@ -28,6 +28,7 @@ class Factory;
 class ODEModel;
 class PropSetup;
 class MessageReceiver;
+class GmatCommand;
 
 extern "C"
 {
@@ -37,11 +38,11 @@ extern "C"
    Factory CINTERFACE_API *GetFactoryPointer(Integer index);
    void CINTERFACE_API SetMessageReceiver(MessageReceiver* mr);
 
-   // Load the function defs that are visible to ODTBX.  These are split into a 
-   // separate file to simplify function include statements and the generation 
-   // of a MATLAB m-file defining the interface.  All of the interface 
-   // functions providing external callers access to GMAT are defined in this 
-   // header:
+   // Load the function defs that are visible to the client.  These are split
+   // into a  separate file to simplify function include statements and the
+   // generation of a MATLAB m-file defining the interface.  All of the
+   // interface functions providing external callers access to GMAT are defined
+   // in this header:
    #include "CInterfaceFunctions.hpp"
 
    // Internal helper functions
@@ -49,4 +50,4 @@ extern "C"
    PropSetup *GetFirstPropagator(GmatCommand *cmd);
 };
 
-#endif /*GmatPluginFunctions_hpp*/
+#endif /*CInterfacePluginFunctions_hpp*/

@@ -1,14 +1,8 @@
 # $Id$
-# Environment settings for the GMAT-ODTBX Interface plugin
+# Environment settings for the GMAT C Interface plugin
 # location of GMAT base headers and libraries
 GMAT_CODE_LOCATION = ../../../src
 GMAT_BIN_LOCATION = ../../../application/bin
-
-# location of MATLAB headers and libraries
-MATLAB_DIR = /opt/matlab/R2009b
-MATLAB_CPP_FLAGS = -D__USE_MATLAB__=1 -I$(MATLAB_DIR)/extern/include
-MATLAB_LIB_DIR = -L$(MATLAB_DIR)/bin/glnxa64
-MATLAB_LIBRARIES = $(MATLAB_LIB_DIR) -leng -lmx -lmat
 
 # Set to 0 for Windows, 1 for Linux or Mac
 LINUX_MAC = 1
@@ -18,11 +12,27 @@ MAC_SPECIFIC = 0
 
 DEBUG_BUILD = 0
 
+USE_SPICE = 1
+
+ifeq ($(USE_SPICE), 1)
+# location of CSPICE headers and libraries
+# *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
+SPICE_DIR = /home/djc/TS_Code/Gmat3rdParty
+SPICE_INCLUDE = -I$(SPICE_DIR)/cspice/include
+SPICE_LIB_DIR = $(SPICE_DIR)/cspice/lib
+SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
+SPICE_DIRECTIVE = -D__USE_SPICE__
+SPICE_STACKSIZE = ulimit -s 61440
+else
+SPICE_INCLUDE =
+SPICE_LIB_DIR =
+SPICE_LIBRARIES =
+SPICE_DIRECTIVE = 
+SPICE_STACKSIZE = echo 'SPICE not included in this build ...'
+endif
+
 # Select the base library
 BASE_LIBRARY = GmatBase
-
-# DataFile library
-#MATLAB_LIBRARY = DataFile
 
 # Compiler options
 CPP = g++
@@ -35,7 +45,9 @@ PROFILE_FLAGS =
 endif
 
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared -Wl --out-implib
+SHARED_LIB_FLAGS = -shared -Wl
+
+# --out-implib
 
 DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \
                  -finline-functions -funroll-loops -fno-rtti -DNO_GCC_PRAGMA \
@@ -49,7 +61,6 @@ OPTIMIZATIONS = -O3 -fno-strict-aliasing $(WX_28_DEFINES) -fPIC
 endif
 
 # Do not edit below this line -- here we build up longer compile/link strings
-CPP_BASE = $(OPTIMIZATIONS) -Wall \
-           $(MATLAB_CPP_FLAGS) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
+CPP_BASE = $(OPTIMIZATIONS) -Wall $(PROFILE_FLAGS) $(DEBUG_FLAGS)
 
 CPPFLAGS = $(CPP_BASE)

@@ -1,6 +1,6 @@
 //$Id: MatlabFunctions.hpp 9540 2011-05-18 00:02:57Z djcinsb $
 //------------------------------------------------------------------------------
-//                            GmatOdtbxFunctions
+//                         GmatCInterfaceFunctions
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 // ODTBX: Orbit Determination Toolbox
@@ -14,20 +14,21 @@
 // Created: 2011/05/17
 //
 /**
- * Functions called on the ODTBX side of the interface
+ * Functions called on the client (e.g. ODTBX) side of the interface
  *
  * This file is parsed by MATLAB to define the functions that are accessed using 
  * MATLAB's loadlibrary/calllib functions. These are all pure C functions; the 
- * file is loaded by GmatOdtbxFunctions.hpp when building the interface library.
+ * file is loaded by CInterfacePluginFunctions.hpp when building the interface
+ * library.
  */
 //------------------------------------------------------------------------------
 
-#ifndef MatlabFunctions_hpp
-#define MatlabFunctions_hpp
+#ifndef GmatCInterfaceFunctions_hpp
+#define GmatCInterfaceFunctions_hpp
 
 #include "GmatCFunc_defs.hpp"
 
-// Interfaces used by ODTBX
+// Interfaces used by the client
 const char CINTERFACE_API *getLastMessage();
 int CINTERFACE_API StartGmat();
 
@@ -49,4 +50,4 @@ int CINTERFACE_API CountObjects();
 const char CINTERFACE_API *GetObjectName(int which);
 const char CINTERFACE_API *GetRunSummary();
 
-#endif /*GMATPLUGINFUNCTIONS_H_*/
+#endif /*GmatCInterfaceFunctions_hpp*/

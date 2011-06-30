@@ -1,6 +1,6 @@
 //$Id: GmatOdtbx_defs.hpp 9540 2011-05-18 00:02:57Z djcinsb $
 //------------------------------------------------------------------------------
-//                     GMAT_ODTBX Import/Export Definitions
+//                 Gmat C Function Import/Export Definitions
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 // ODTBX: Orbit Determination Toolbox
@@ -18,8 +18,8 @@
  */
 //------------------------------------------------------------------------------
 
-#ifndef GmatOdtbx_defs_hpp
-#define GmatOdtbx_defs_hpp
+#ifndef GmatCFunc_defs_hpp
+#define GmatCFunc_defs_hpp
 
 
 #ifdef _WIN32  // Windows
@@ -57,6 +57,8 @@
 
       #define EXPORT_TEMPLATES
    #endif
+#else
+   #define CINTERFACE_API
 #endif //  End of OS nits
 
 #ifdef IMPEXP_STDSTRING
@@ -64,8 +66,8 @@
     EXPIMP_TEMPLATE template class DECLSPECIFIER std::basic_string<char, std::char_traits<char>, std::allocator<char>>;
 #endif
 
-#ifndef GMATODTBX_API
-   #define GMATODTBX_API
+#ifndef CINTERFACE_API
+   #define CINTERFACE_API
 #endif
 
 #endif
