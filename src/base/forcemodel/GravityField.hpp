@@ -77,11 +77,8 @@
 #include "HarmonicField.hpp"
 #include "CelestialBody.hpp"
 #include "HarmonicGravity.hpp"
-#include "HarmonicGravityFactory.hpp"
 #include "ODEModelException.hpp"
-#include "Rvector.hpp"          // ???  JPD
-#include "Rmatrix.hpp"          // ???
-#include "CoordinateSystem.hpp" // ???
+#include "GravityFile.hpp"
 
 
 class GMAT_API GravityField : public HarmonicField
@@ -139,7 +136,8 @@ protected:
       GravityFieldParamCount
    };
 
-   static HarmonicGravityFactory hgFactory;
+   static std::vector<HarmonicGravity*> cache;
+   static GravityFile                   *gravFile;
 
    static const std::string PARAMETER_TEXT[
       GravityFieldParamCount - HarmonicFieldParamCount];
@@ -184,6 +182,7 @@ protected:
                    Real force[3], Rmatrix33& grad);
    void InverseRotate(Rmatrix33& rot, const Real in[3], Real out[3]);
    
+   HarmonicGravity* GetGravityFile(const std::string &filename, const Real &radius, const Real &mukm);
 };
 
 

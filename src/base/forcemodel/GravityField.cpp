@@ -73,6 +73,8 @@
 #include "GmatDefaults.hpp"
 #include "GravityFile.hpp"
 #include "FileManager.hpp"
+#include "HarmonicGravityCof.hpp"
+#include "HarmonicGravityGrv.hpp"
 
 
 //#define DEBUG_GRAVITY_FIELD
@@ -86,6 +88,7 @@
 //#define DEBUG_BODY_DATA
 //#define DEBUG_DEGREE_ORDER
 //#define DEBUG_DERIVATIVES
+//#define DEBUG_CREATE_DELETE
 
 using namespace GmatMathUtil;
 
@@ -97,7 +100,8 @@ using namespace GmatMathUtil;
 static bool firstCallFired = false;
 #endif
 
-HarmonicGravityFactory GravityField::hgFactory;
+std::vector<HarmonicGravity*> GravityField::cache;
+GravityFile*                  GravityField::gravFile = NULL;
 
 const std::string
 GravityField::PARAMETER_TEXT[GravityFieldParamCount - HarmonicFieldParamCount] =
@@ -162,7 +166,6 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
 //------------------------------------------------------------------------------
 GravityField::~GravityField()
 {
-//   if ((gravityModel) && (gravityModel->GetFilename() == "")) delete gravityModel; // deleted in HGFactory
    gravityModel = NULL;
 }
 
@@ -278,58 +281,37 @@ bool GravityField::Initialize()
    {
       Integer fileDegree = 0;
       Integer fileOrder  = 0;
-      bool    isOk       = true;
-      try
+      mu = body->GetGravitationalConstant();
+      a  = body->GetEquatorialRadius();
+      if (IsBlank(filename.c_str()))
       {
-         mu = body->GetGravitationalConstant();
-         a  = body->GetEquatorialRadius();
-         if (IsBlank(filename.c_str())) isOk = false;
+         std::string errmsg = "There is no gravity file specified for GravityField ";
+         errmsg += instanceName + "\n";
+         throw ODEModelException(errmsg);
+      }
+      else
+      {
+         #ifdef DEBUG_GRAVITY_FILE_READ
+            MessageInterface::ShowMessage("Now getting HarmonicGravity with filename = %s, a = %12.10f, mu = %12.10f\n",
+                  filename.c_str(), a, mu);
+         #endif
+         gravityModel = GetGravityFile(filename,a,mu);
+         if (!gravityModel)
+         {
+            std::string errmsg = "Gravity file ";
+            errmsg += filename + " cannot be opened or read.\n";
+            throw ODEModelException(errmsg);
+         }
          else
          {
             #ifdef DEBUG_GRAVITY_FILE_READ
-               MessageInterface::ShowMessage("Now calling Factory::Create with filename = %s, a = %12.10f, mu = %12.10f\n",
-                     filename.c_str(), a, mu);
+               MessageInterface::ShowMessage("--- HarmonicGravity object retrieved is <%p>\n", gravityModel);
             #endif
-            gravityModel = HarmonicGravityFactory::Create(filename,a,mu);
-            if (!gravityModel)
-            {
-               MessageInterface::ShowMessage("Error creating Harmonic Gravity object \n");
-               isOk = false;
-            }
-            else
-            {
-               #ifdef DEBUG_GRAVITY_FILE_READ
-                  MessageInterface::ShowMessage("--- HarmonicGravity object retrieved is <%p>\n", gravityModel);
-               #endif
-               fileDegree =   gravityModel->GetNN();
-               fileOrder  =   gravityModel->GetMM();
-               mu         = - gravityModel->GetFactor();
-               a          =   gravityModel->GetRadius();
-            }
+            fileDegree =   gravityModel->GetNN();
+            fileOrder  =   gravityModel->GetMM();
+            mu         = - gravityModel->GetFactor();
+            a          =   gravityModel->GetRadius();
          }
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage(e.GetFullMessage());
-         isOk = false;
-      }
-      
-      #ifdef DEBUG_GRAVITY_FILE_READ
-         MessageInterface::ShowMessage("    isOk = %s\n", (isOk? "true" : "false"));
-      #endif
-      if (!isOk)
-      {
-         // try to get default coefficients from the body
-         #ifdef DEBUG_GRAVITY_FILE_READ
-            MessageInterface::ShowMessage("Now calling Factory::Create with body = %p (%s)\n",body,
-                  (body? (body->GetName()).c_str() : "NULL") );
-         #endif
-         gravityModel = HarmonicGravityFactory::Create(body);
-         MessageInterface::ShowMessage("Using default coefficients from the body.\n");
-         fileDegree = body->GetDegree();
-         fileOrder  = body->GetOrder();
-         mu         = - gravityModel->GetFactor();
-         a          =   gravityModel->GetRadius();
       }
       // truncate the degree and/or order, if necessary
       #ifdef DEBUG_DEGREE_ORDER
@@ -338,28 +320,32 @@ bool GravityField::Initialize()
          MessageInterface::ShowMessage("for body %s, fileOrder  = %d, order  = %d\n",
                (body->GetName()).c_str(), fileDegree, degree);
       #endif
-//      if (fileDegree < degree)   // for now, do not truncate ...
-//      {
-//         degree = fileDegree;
-//         MessageInterface::ShowMessage ("In GravityField(%s), truncating to degree = %d\n",
-//               (body->GetName()).c_str(), degree);
-//      }
-//      if (fileOrder < order)
-//      {
-//         order = fileOrder;
-//         MessageInterface::ShowMessage ("In GravityField(%s), truncating to order = %d\n",
-//               (body->GetName()).c_str(), order);
-//      }
+      if (fileDegree < degree)   // for now, do not truncate ...
+      {
+         std::stringstream ss("");
+         ss << "In GravityField " << instanceName << ", requested degree (";
+         ss << degree << ") is greater than degree (" << fileDegree;
+         ss << ") on file " << filename << std::endl;
+         throw ODEModelException(ss.str());
+      }
+      if (fileOrder < order)
+      {
+         std::stringstream ss("");
+         ss << "In GravityField " << instanceName << ", requested order (";
+         ss << order << ") is greater than order (" << fileOrder;
+         ss << ") on file " << filename << std::endl;
+         throw ODEModelException(ss.str());
+      }
       if (order > degree)
       {
          order = degree;
-         MessageInterface::ShowMessage("In GravityField(%s), truncating to order = %d\n",
+         MessageInterface::ShowMessage("In GravityField(%s), order is greater than degree - truncating to order = %d\n",
                (body->GetName()).c_str(), order);
       }
       if (degree < 0)
          throw ODEModelException("Invalid degree in GravityField: Degree < 0\n");
       if (order < 0)
-         throw ODEModelException("Invalid degree in GravityField: Degree < 0\n");
+         throw ODEModelException("Invalid order in GravityField: Degree < 0\n");
       fileRead = true;
    }
    #ifdef DEBUG_BODY_DATA
@@ -369,8 +355,6 @@ bool GravityField::Initialize()
 
    gfInitialized = true;
    return true;
-   
-   MessageInterface::ShowMessage("EXITing GravityField Initialize ...\n"); // *********************
 }
 
 
@@ -1019,7 +1003,7 @@ void GravityField::InverseRotate (Rmatrix33& rot, const Real in[3], Real out[3])
    }
    
 }
-//--------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void GravityField::Calculate (Real dt, Real state[6], 
                               Real acc[3], Rmatrix33& grad)
 {
@@ -1116,3 +1100,52 @@ void GravityField::Calculate (Real dt, Real state[6],
    MessageInterface::ShowMessage("at end of Calculate, after rotation, grad = %s\n", grad.ToString().c_str());
 #endif
 }
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+HarmonicGravity* GravityField::GetGravityFile(const std::string &filename,
+                                              const Real &radius, const Real &mukm)
+{
+   if (!gravFile) gravFile = new GravityFile();
+
+   for (std::vector<HarmonicGravity*>::iterator objptPos = cache.begin();
+        objptPos != cache.end(); ++objptPos)
+   {
+      if ((*objptPos)->GetFilename() == filename)
+      {
+         return (*objptPos);
+      }
+   }
+   HarmonicGravity         *newOne  = NULL;
+   GmatFM::GravityFileType fileType = gravFile->GetFileType(filename);
+   switch (fileType)
+   {
+      case GmatFM::GFT_COF:
+         newOne = new HarmonicGravityCof(filename,radius,mukm);
+         break;
+      case GmatFM::GFT_GRV:
+         newOne = new HarmonicGravityGrv(filename,radius,mukm);
+         break;
+      case GmatFM::GFT_UNKNOWN:
+         throw ODEModelException
+            ("GravityField::Create file not found or incorrect type\n");
+      default:
+         return NULL;
+   }
+
+   if (newOne)
+   {
+      cache.push_back(newOne);
+   }
+   #ifdef DEBUG_CREATE_DELETE
+      MessageInterface::ShowMessage(">>>> Just created a HarmonicGravity file object <%p> for filename %s\n",
+            newOne, filename.c_str());
+      MessageInterface::ShowMessage("cache pointers and filenames are: \n");
+      for (unsigned int ii = 0; ii < cache.size(); ii++)
+      {
+         MessageInterface::ShowMessage("    <%p>     %s\n", cache.at(ii), ((cache.at(ii))->GetFilename()).c_str());
+      }
+   #endif
+   return newOne;
+}
+
