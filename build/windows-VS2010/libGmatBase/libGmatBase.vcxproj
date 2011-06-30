@@ -436,9 +436,7 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.cpp" />
-    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityBody.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.cpp" />
-    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\ODEModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\ODEModelException.cpp" />
@@ -881,9 +879,7 @@
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.hpp" />
-    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityBody.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.hpp" />
-    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\ODEModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\ODEModelException.hpp" />

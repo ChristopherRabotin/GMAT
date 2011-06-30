@@ -1248,13 +1248,7 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.cpp">
       <Filter>Source Files\forcemodel\harmonic</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityBody.cpp">
-      <Filter>Source Files\forcemodel\harmonic</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.cpp">
-      <Filter>Source Files\forcemodel\harmonic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityFactory.cpp">
       <Filter>Source Files\forcemodel\harmonic</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.cpp">
@@ -2468,13 +2462,7 @@
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.hpp">
       <Filter>Source Files\forcemodel\harmonic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityBody.hpp">
-      <Filter>Source Files\forcemodel\harmonic</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.hpp">
-      <Filter>Source Files\forcemodel\harmonic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityFactory.hpp">
       <Filter>Source Files\forcemodel\harmonic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.hpp">
