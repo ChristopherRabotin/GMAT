@@ -33,9 +33,6 @@
     <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\include\GmatCFunc_defs.hpp">
       <Filter>Header Files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\GmatOdtbxFunctions.hpp">
-      <Filter>Source Files\plugin</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\propagator\DynFunInterface.hpp">
       <Filter>Source Files\propagator</Filter>
     </ClInclude>
@@ -48,16 +45,19 @@
     <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\factory\CCommandFactory.hpp">
       <Filter>Source Files\factory</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfacePluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\plugin\GmatOdtbxFunctions.cpp">
-      <Filter>Source Files\plugin</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\command\PrepareMissionSequence.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\factory\CCommandFactory.cpp">
       <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfacePluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

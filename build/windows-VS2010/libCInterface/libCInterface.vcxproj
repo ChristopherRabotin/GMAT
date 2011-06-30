@@ -14,14 +14,14 @@
     <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\command\PrepareMissionSequence.hpp" />
     <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\factory\CCommandFactory.hpp" />
     <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\include\GmatCFunc_defs.hpp" />
-    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\GmatOdtbxFunctions.hpp" />
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfacePluginFunctions.hpp" />
     <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfaceFunctions.hpp" />
     <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\propagator\DynFunInterface.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\command\PrepareMissionSequence.cpp" />
     <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\factory\CCommandFactory.cpp" />
-    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\plugin\GmatOdtbxFunctions.cpp" />
+    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfacePluginFunctions.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C3252E26-1167-4F4D-AD89-3926B1AF0C5C}</ProjectGuid>
