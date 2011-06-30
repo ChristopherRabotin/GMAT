@@ -156,7 +156,11 @@ protected:
 
    /// has the file been read?
    bool                    fileRead;
+   bool                    usingDefaultFile;
    
+   bool                    isFirstTimeDefault;
+
+
    std::string             inputCSName;
    std::string             fixedCSName;
    std::string             targetCSName;

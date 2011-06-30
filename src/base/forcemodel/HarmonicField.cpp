@@ -127,6 +127,8 @@ degree                  (4),
 order                   (4),
 filename                (""),
 fileRead                (false),
+usingDefaultFile        (false),
+isFirstTimeDefault      (true),
 inputCSName             ("EarthMJ2000Eq"),
 fixedCSName             ("EarthFixed"),
 targetCSName            ("EarthMJ2000Eq"),
@@ -183,6 +185,8 @@ t                       (0.0),
 u                       (0.0),
 filename                (hf.filename),
 fileRead                (false),
+usingDefaultFile        (hf.usingDefaultFile),
+isFirstTimeDefault      (hf.isFirstTimeDefault),
 inputCSName             (hf.inputCSName),
 fixedCSName             (hf.fixedCSName),
 targetCSName            (hf.targetCSName),
@@ -221,6 +225,8 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    u              = 0.0;     // or hf.u?
    filename       = hf.filename;
    fileRead       = false;
+   usingDefaultFile   = hf.usingDefaultFile;
+   isFirstTimeDefault = hf.isFirstTimeDefault;
    inputCSName    = hf.inputCSName;
    fixedCSName    = hf.fixedCSName;
    targetCSName   = hf.targetCSName;
@@ -265,6 +271,12 @@ bool HarmonicField::Initialize()
              "EOP file is undefined for Harmonic Field " + instanceName);
 
    hMinitialized = true;
+   if (usingDefaultFile && isFirstTimeDefault)
+   {
+      MessageInterface::ShowMessage("Using default potential file \"%s\" for GravityField object \"%s\"\n",
+            filename.c_str(), instanceName.c_str());
+      isFirstTimeDefault = false;
+   }
    return true;
 }
 
@@ -329,24 +341,42 @@ bool HarmonicField::SetFilename(const std::string &fn)
    MessageInterface::ShowMessage("   potPath  = %s\n", potPath.c_str());
    #endif
    
-   if (filename != fn)
+   bool hasDefaultIndicator = false;
+   std::string newfn;
+   if (fn.substr(0, 6) == "DFLT__")  // Must match Interpreter static const std::string defaultIndicator
    {
+      newfn               = fn.substr(6,fn.npos-6);
+      hasDefaultIndicator = true;
+   }
+   else
+   {
+      newfn               = fn;
+      hasDefaultIndicator = false;
+   }
+   if (filename != newfn)
+   {
+      #ifdef DEBUG_HARMONIC_FIELD_FILENAME
+      MessageInterface::ShowMessage
+         ("HarmonicField::SetFilename(): hasDefaultIndicator = %s, newfn = %s\n",
+          (hasDefaultIndicator? "true" : "false"), newfn.c_str());
+      MessageInterface::ShowMessage("   potPath  = %s\n", potPath.c_str());
+      #endif
       // Add default pathname if none specified
-      if (fn.find("/") == fn.npos && fn.find("\\") == fn.npos)
+      if (newfn.find("/") == newfn.npos && newfn.find("\\") == newfn.npos)
       {
          try
          {
-            filename = potPath + fn;
+            filename = potPath + newfn;
          }
          catch (GmatBaseException &e)
          {
-            filename = fn;
+            filename = newfn;
             MessageInterface::ShowMessage(e.GetFullMessage());
          }
       }
       else
       {
-         filename = fn;
+         filename = newfn;
       }
       
       std::ifstream potfile(filename.c_str());
@@ -365,6 +395,7 @@ bool HarmonicField::SetFilename(const std::string &fn)
    #endif
    
    fileRead = false;
+   usingDefaultFile = hasDefaultIndicator;
    return true;
 }
 
