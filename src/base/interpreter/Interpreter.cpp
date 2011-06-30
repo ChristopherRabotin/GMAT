@@ -103,6 +103,9 @@ StringArray Interpreter::allObjectTypeList = StringArray(1, "");
 StringArray Interpreter::viewableCommandList = StringArray(1, "");
 std::map<std::string, Gmat::ObjectType> Interpreter::objectTypeMap;
 
+const std::string Interpreter::defaultIndicator = "DFLT__";
+
+
 //------------------------------------------------------------------------------
 // Interpreter(SolarSystem *ss = NULL, ObjectMap *objMap = NULL)
 //------------------------------------------------------------------------------
@@ -3461,7 +3464,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       {
          if (lhs == "")
          {
-            InterpreterException ex("Object field assignment is imcomplelte");
+            InterpreterException ex("Object field assignment is incomplete");
             HandleError(ex);
          }
          else
@@ -5837,6 +5840,24 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
                type = pm->GetParameterType(id);
                retval = SetPropertyValue(pm, id, type, "JGM2");
             }
+            if (pmType == "PrimaryBodies" && bodies[i] == "Luna")
+            {
+               id = pm->GetParameterID("Model");
+               type = pm->GetParameterType(id);
+               retval = SetPropertyValue(pm, id, type, "LP165P");
+            }
+            if (pmType == "PrimaryBodies" && bodies[i] == "Venus")
+            {
+               id = pm->GetParameterID("Model");
+               type = pm->GetParameterType(id);
+               retval = SetPropertyValue(pm, id, type, "MGNP180U");
+            }
+            if (pmType == "PrimaryBodies" && bodies[i] == "Mars")
+            {
+               id = pm->GetParameterID("Model");
+               type = pm->GetParameterType(id);
+               retval = SetPropertyValue(pm, id, type, "MARS50C");
+            }
          }
       }
       
@@ -7812,7 +7833,9 @@ bool Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
       val = theModerator->GetPotentialFileName(value);
       if (val.find("Unknown Potential File Type") == std::string::npos)
       {
-         value = val;
+         // Adding a default indicator to the string here, so that the HarmonicField object
+         // can tell when it is reading a default file vs. one the user specified
+         value = defaultIndicator + val;
          retval = true;
       }
    }

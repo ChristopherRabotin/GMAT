@@ -363,6 +363,8 @@ private:
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);
    bool HandleMathTree(GmatCommand *cmd);
+
+   static const std::string defaultIndicator;
 };
 
 #endif // INTERPRETER_HPP
