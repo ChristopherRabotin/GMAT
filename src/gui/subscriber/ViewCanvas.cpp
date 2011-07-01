@@ -27,6 +27,19 @@
 #include "SubscriberException.hpp"
 #include "MessageInterface.hpp"
 
+
+//http://www.opengl.org/resources/features/KilgardTechniques/oglpitfall/
+// When you desire high-quality texture mapping, you will typically specify a
+// mipmapped texture filter. Mipmapping lets you specify multiple levels of
+// detail for a texture image. Each level of detail is half the size of the
+// previous level of detail in each dimension. So if your initial texture
+// image is an image of size 32x32, the lower levels of detail will be of
+// size 16x16, 8x8, 4x4, 2x2, and 1x1. Typically, you use the gluBuild2DMipmaps
+// routine to automatically construct the lower levels of details from you
+// original image. This routine re-samples the original image at each level
+// of detail so that the image is available at each of the various smaller sizes.
+#define __ENABLE_MIPMAPS__
+
 //#define DEBUG_INIT 1
 //#define DEBUG_LOAD_IMAGE 1
 //#define DEBUG_TEXTURE 1
@@ -61,6 +74,12 @@ static GlColorType *sGlColor = (GlColorType*)sIntColor;
 ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
                        const wxPoint& pos, const wxSize& size,
                        const wxString& name, long style)
+   // @note
+   // I want to use wxFULL_REPAINT_ON_RESIZE for style so when window is resized
+   // it automatically repaints, but it flickers too much. I tried to use
+   // wxBufferedPaintDC() to reduce the flickering, but I see no difference.
+   // Currently it repaints when I make window size larger, but not when I
+   // reduce the size. (LOJ: 2011.07.01)
    #ifdef __USE_WX280_GL__
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #else
@@ -1890,7 +1909,13 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
    #endif
    
    if (fileName == "")
+   {
+      #if DEBUG_LOAD_IMAGE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadImage() blank filename, so returning false\n");
+      #endif
       return false;
+   }
    
    wxImage image = wxImage(fileName.c_str());
    int width = image.GetWidth();
@@ -1899,7 +1924,13 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
    GLubyte *data = image.GetData();
    
    if (data == NULL)
+   {
+      #if DEBUG_LOAD_IMAGE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadImage() empty data, so returning false\n");
+      #endif
       return false;
+   }
    
    #if DEBUG_LOAD_IMAGE
    int size = width * height * 3;
@@ -1912,18 +1943,87 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
    wxImage mirror = image.Mirror(false);
    GLubyte *data1 = mirror.GetData();
    
+   glEnable(GL_TEXTURE_2D);
+   
+   //=======================================================
+   // Do we want to use mipmaps?
+   // When you desire high-quality texture mapping, you will typically specify a
+   // mipmapped texture filter. Mipmapping lets you specify multiple levels of
+   // detail for a texture image. Each level of detail is half the size of the
+   // previous level of detail in each dimension. So if your initial texture
+   // image is an image of size 32x32, the lower levels of detail will be of
+   // size 16x16, 8x8, 4x4, 2x2, and 1x1. Typically, you use the gluBuild2DMipmaps
+   // routine to automatically construct the lower levels of details from you
+   // original image. This routine re-samples the original image at each level
+   // of detail so that the image is available at each of the various smaller sizes.
+   //=======================================================
+   #ifdef __ENABLE_MIPMAPS__
+   //=======================================================
+   
+   //used for min and magnifying texture
+   int mipmapsStatus = 0;
+   
+   //pass image to opengl
+   #ifndef __WXGTK__
+   
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+   
+   // This call crashes GMAT on Linux, so it is excluded here. 
+   mipmapsStatus =
+      gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
+                        GL_UNSIGNED_BYTE, data1);
+   
+   #else
+   
+   // Try this on Linux
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                GL_UNSIGNED_BYTE, data1);
+   
+   #endif
+   
+   if (mipmapsStatus == 0)
+   {
+      #if DEBUG_LOAD_IMAGE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadImage() returning true, mipmapsStatus=%d\n", mipmapsStatus);
+      #endif
+            
+      return true;
+   }
+   else
+   {
+      #if DEBUG_LOAD_IMAGE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadImage() returning false, mipmapsStatus=%d\n", mipmapsStatus);
+      #endif
+      return false;
+   }
+   
+   //=======================================================
+   #else
+   //=======================================================
+   
    //used for min and magnifying texture
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                GL_UNSIGNED_BYTE, data1);
       
-   //pass image to opengl
-   #ifndef __WXGTK__
-      // This call crashes GMAT on Linux, so it is excluded here. 
-      gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
-                        GL_UNSIGNED_BYTE, data1);
+   #if DEBUG_LOAD_IMAGE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadImage() returning true, using glTexImage2D\d\n");
    #endif
    
    return true;
+   
+   //=======================================================
+   #endif
+   //=======================================================
 }
 
 

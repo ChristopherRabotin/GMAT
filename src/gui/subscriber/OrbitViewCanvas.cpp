@@ -1815,11 +1815,13 @@ void OrbitViewCanvas::DrawPlot()
        mUseInitialViewPoint, mIsEndOfData, mIsEndOfRun, mDrawSolverData);
    #endif
    
+   // Set background color to black
+   glClearColor(0.0, 0.0, 0.0, 1.0);
+   
    if (mRedrawLastPointsOnly || mNumPointsToRedraw == 0)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    else
       glClear(GL_DEPTH_BUFFER_BIT);
-   
    
    DrawStatus("", GmatColor::YELLOW32, "  Epoch: ", mTime[mLastIndex], 0, 5);
    
@@ -1869,7 +1871,7 @@ void OrbitViewCanvas::DrawPlot()
    
    glFlush();
    SwapBuffers();
-
+   
 } // end DrawPlot()
 
 

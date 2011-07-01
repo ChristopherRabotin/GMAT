@@ -725,8 +725,32 @@ void GroundTrackCanvas::SetupWorld()
    MessageInterface::ShowMessage("GroundTrackCanvas::SetupWorld() entered\n");
    #endif
    
+   double left    = -180.0;
+   double right   =  180.0;
+   double bottom  = -90.0;
+   double top     =  90.0;
+   
+   double canvasAspect = (double)mCanvasSize.x / (double)mCanvasSize.y;
+   
+   // The aspect ratio of texture map for the ground track is always 2.0
+   if (canvasAspect >= 2.0)
+   {
+      left  = canvasAspect * bottom;
+      right = canvasAspect * top;
+   }
+   else
+   {
+      bottom = left  / canvasAspect;
+      top    = right / canvasAspect;
+   }
+   
+   #if DEBUG_PROJECTION > 2
+   MessageInterface::ShowMessage
+      ("   left = %f, right = %f, bottom = %f, top = %f\n", left, right, bottom, top);
+   #endif
+   
    // Set left, right, bottom, top
-   gluOrtho2D(-180.0, 180.0, -90.0, 90.0);
+   gluOrtho2D(left, right, bottom, top);
    
    #if DEBUG_PROJECTION > 2
    MessageInterface::ShowMessage("GroundTrackCanvas::SetupWorld() leaving\n");
@@ -857,6 +881,9 @@ void GroundTrackCanvas::DrawPlot()
        mUseInitialViewPoint, mIsEndOfData, mIsEndOfRun, mDrawSolverData);
    #endif
    
+   // Set background color to grey
+   glClearColor(0.3, 0.3, 0.3, 1.0);
+   
    if (mRedrawLastPointsOnly || mNumPointsToRedraw == 0)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    else
@@ -934,55 +961,14 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
       objId = GetObjectId(objName);
       mObjLastFrame[objId] = 0;
       
-      #if 0
-      int index = objId * MAX_DATA + mLastIndex;
-      #endif
-      
       #if DEBUG_DRAW
       MessageInterface::ShowMessage
-         ("DrawObjectOrbit() obj=%d, objId=%d, objName='%s', index=%d\n",
-          obj, objId, objName.c_str(), index);
+         ("DrawObjectOrbit() obj=%d, objId=%d, objName='%s'\n",
+          obj, objId, objName.c_str());
       #endif
-      
-      #if 0
-      // If not showing orbit just draw object, continue to next one
-      if (!mDrawOrbitFlag[index])
-      {
-         #if DEBUG_DRAW
-         MessageInterface::ShowMessage
-            ("==> Not drawing orbit of '%s', so skip\n", objName.c_str());
-         #endif
-         
-         // just draw object texture and continue
-         if (mShowObjectMap[objName])
-            DrawObjectTexture(objName, obj, objId, frame);
-         
-         continue;
-      }
-      #endif
-      
-      #if 0
-      //---------------------------------------------------------
-      //draw central body texture map
-      //---------------------------------------------------------      
-      if (mShowObjectMap[objName])
-      {
-         if (objName == mCentralBodyName)
-            DrawCentralBodyTexture();         
-      }
-      #endif
-      
-      #if 0
-      if (mObjectArray[obj]->IsOfType(Gmat::CELESTIAL_BODY))
-         continue;
-      #endif
-      
+     
       #if DEBUG_DRAW_DEBUG
       DrawDebugMessage(" Before DrawOrbit --- ", GmatColor::RED32, 0, 100);
-      #endif
-      
-      #if DEBUG_DRAW
-      MessageInterface::ShowMessage("---> Calling DrawOrbit(%s, %d, %d)\n", objName.c_str(), obj, objId);
       #endif
       
       // always draw spacecraft orbit trajectory
@@ -992,7 +978,6 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
       DrawDebugMessage(" After DrawOrbit  --- ", GmatColor::RED32, 0, 120);
       #endif
       
-      #if 1
       //---------------------------------------------------------
       //draw object with texture
       //---------------------------------------------------------      
@@ -1000,9 +985,7 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
       {
          if (objName != mCentralBodyName.c_str())
             DrawObjectTexture(objName, obj, objId, frame);
-      }
-      #endif
-      
+      }      
    }
    
    #if DEBUG_DRAW
@@ -1481,7 +1464,7 @@ void GroundTrackCanvas::DrawCentralBodyTexture()
    #ifdef DEBUG_DRAW
    MessageInterface::ShowMessage("DrawCentralBodyTexture() entered\n");
    #endif
-      
+   
    if (mTextureIdMap[mCentralBodyName.c_str()] != GmatPlot::UNINIT_TEXTURE)
    {
       glLoadIdentity();
@@ -1489,6 +1472,7 @@ void GroundTrackCanvas::DrawCentralBodyTexture()
       glEnable(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, mTextureIdMap[mCentralBodyName.c_str()]);
       glBegin(GL_QUADS);
+      // Texture coordinate points go counter clockwise from the bottom left corner
       glTexCoord2f(0.0, 0.0);  glVertex2f(-180.0, -90.0);
       glTexCoord2f(1.0, 0.0);  glVertex2f(+180.0, -90.0);
       glTexCoord2f(1.0, 1.0);  glVertex2f(+180.0, +90.0);
