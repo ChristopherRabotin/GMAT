@@ -26,7 +26,7 @@ SHARED_LIB_FLAGS = $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace
 MSISE_C_OBJECTS  = 
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared -Wl
+SHARED_LIB_FLAGS = -shared -Wl -L$(SPICE_LIB_DIR) -lcspice
 # No longer in gcc 4.6: --out-implib
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 endif
