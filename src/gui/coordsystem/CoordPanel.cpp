@@ -386,58 +386,64 @@ AxisSystem* CoordPanel::CreateAxis()
       {
          try
          {
-            if (priName != "")
+            if (axis->UsesPrimary()) //  && priName != "")
             {
                SpacePoint *primary = (SpacePoint *)theGuiInterpreter->
                   GetConfiguredObject(std::string(priName.c_str()));
                axis->SetPrimaryObject(primary);
             }
             
-            if (secName != "")
+            if (axis->UsesSecondary()) //  && secName != "")
             {
                SpacePoint *secondary = (SpacePoint *)theGuiInterpreter->
                   GetConfiguredObject(std::string(secName.c_str()));
                axis->SetSecondaryObject(secondary);
             }
             
-            // set the x, y, and z
-            axis->SetXAxis(std::string(xStr.c_str()));
-            axis->SetYAxis(std::string(yStr.c_str()));
-            axis->SetZAxis(std::string(zStr.c_str()));
+            if (axis->UsesXAxis() || axis->UsesYAxis() || axis->UsesZAxis())
+            {
+               // set the x, y, and z
+               axis->SetXAxis(std::string(xStr.c_str()));
+               axis->SetYAxis(std::string(yStr.c_str()));
+               axis->SetZAxis(std::string(zStr.c_str()));
+            }
             
 //            axis->SetEpochFormat(std::string(epochFormat.c_str()));
 //            axis->SetRealParameter("UpdateInterval", atof(updateStr.c_str()));
             
             // convert epoch to a1mjd
             // if Epoch is not in A1ModJulian, convert to A1ModJulian(loj: 1/23/07)
-            Real a1mjd;
-            GmatStringUtil::ToReal(epochStr.c_str(), a1mjd);
-            
-//            if (epochFormat != "" && epochFormat != "A1ModJulian")
-//            {
-//               // Use TimsSystemConverter instead of TimeConverter
-//               Real inputMjd = -999.999;
-//               Real a1mjd;
-//               std::string a1mjdStr;
-//               TimeConverterUtil::Convert(epochFormat.c_str(), inputMjd,
-//                                          epochStr.c_str(), "A1ModJulian",
-//                                          a1mjd, a1mjdStr);
-//
-//               //std::string taiEpochStr = mTimeConverter.Convert
-//               //   (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
-//               //    "TAIModJulian");
-//
-//               //Real epoch = TimeConverterUtil::ConvertFromTaiMjd
-//               //   (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()),
-//               //    GmatTimeConstants::JD_JAN_5_1941);
-//            }
-            
-            #if DEBUG_COORD_PANEL
-               MessageInterface::ShowMessage
-                  ("CoordPanel::CreateAxis() about to set the value of epoch on axis to %12.10f\n",
-                        a1mjd);
-            #endif
-            axis->SetEpoch(a1mjd);
+            if (axis->UsesEpoch())
+            {
+               Real a1mjd;
+               GmatStringUtil::ToReal(epochStr.c_str(), a1mjd);
+
+   //            if (epochFormat != "" && epochFormat != "A1ModJulian")
+   //            {
+   //               // Use TimsSystemConverter instead of TimeConverter
+   //               Real inputMjd = -999.999;
+   //               Real a1mjd;
+   //               std::string a1mjdStr;
+   //               TimeConverterUtil::Convert(epochFormat.c_str(), inputMjd,
+   //                                          epochStr.c_str(), "A1ModJulian",
+   //                                          a1mjd, a1mjdStr);
+   //
+   //               //std::string taiEpochStr = mTimeConverter.Convert
+   //               //   (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
+   //               //    "TAIModJulian");
+   //
+   //               //Real epoch = TimeConverterUtil::ConvertFromTaiMjd
+   //               //   (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()),
+   //               //    GmatTimeConstants::JD_JAN_5_1941);
+   //            }
+
+               #if DEBUG_COORD_PANEL
+                  MessageInterface::ShowMessage
+                     ("CoordPanel::CreateAxis() about to set the value of epoch on axis to %12.10f\n",
+                           a1mjd);
+               #endif
+               axis->SetEpoch(a1mjd);
+            }
             
          }
          catch (BaseException &e)
