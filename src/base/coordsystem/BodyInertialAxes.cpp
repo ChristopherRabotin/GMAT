@@ -158,8 +158,9 @@ bool BodyInertialAxes::Initialize()
    #ifdef DEBUG_BODY_INERTIAL
       MessageInterface::ShowMessage("Initializing BodyInertialAxes with name \"%s\"\n",
       instanceName.c_str());
+      MessageInterface::ShowMessage("   originName = %s\n", originName.c_str());
    #endif
-   // if origin is not a CelestialNody, there is an error
+   // if origin is not a CelestialBody, there is an error
    if (!(origin->IsOfType("CelestialBody")))
       throw CoordinateSystemException(
             "Improper origin set for BodyInertialAxes object.");
@@ -180,6 +181,10 @@ bool BodyInertialAxes::Initialize()
       // get alpha, delta, W, Wdot at the A1Mjd time of epoch
       Rvector   coords(4);
       coords              = ((CelestialBody*)origin)->GetBodyCartographicCoordinates(epoch);
+      #ifdef DEBUG_BODY_INERTIAL
+         MessageInterface::ShowMessage("   Body cartographic coords for body %s are %12.10f   %12.10f   %12.10f   %12.10f\n",
+               (origin->GetName()).c_str(), coords[0], coords[1], coords[2], coords[3]);
+      #endif
       Real      a         = GmatMathConstants::PI_OVER_TWO +    // 90 + alpha
                             GmatMathUtil::Rad(coords[0]);
       Real      b         = GmatMathConstants::PI_OVER_TWO -    // 90 - delta
@@ -192,6 +197,10 @@ bool BodyInertialAxes::Initialize()
                      0.0,  GmatMathUtil::Sin(b),  GmatMathUtil::Cos(b));
       rotMatrix = R3T * R1T;
    }
+   #ifdef DEBUG_BODY_INERTIAL
+      MessageInterface::ShowMessage("At end of BodyInertialAxes::Initialize, rotMatrix    = %s\n", (rotMatrix.ToString()).c_str());
+      MessageInterface::ShowMessage("                                        rotDotMatrix = %s\n", (rotDotMatrix.ToString()).c_str());
+   #endif
    // rotDotMatrix remains the zero matrix
    return true;
 }
