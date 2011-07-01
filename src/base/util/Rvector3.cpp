@@ -135,7 +135,11 @@ const Rvector3& Rvector3::Normalize()
 // void ComputeLongitudeLatitude(Real &lon, Real &lat)
 //------------------------------------------------------------------------------
 /**
- * Computes longitude and latitude in radians
+ * Computes longitude and latitude in radians.
+ * Longitude returns value between -PI and +PI.
+ * Latitude returns value between -PI/2 and +PI/2
+ *
+ * @note - Consider using BodyFixedStateConverter::CartesianToSpherical()
  */
 //------------------------------------------------------------------------------
 void Rvector3::ComputeLongitudeLatitude(Real &lon, Real &lat)
