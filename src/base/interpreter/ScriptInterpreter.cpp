@@ -207,12 +207,18 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    if (retval0)
    {
       retval1 = ReadScript(inCmd, skipHeader);
-      
-      // call FinalPass if not in function mode
-      if (inFunctionMode)
+
+      // Call FinalPass() if not in function mode or creating command inside a ScriptEvent
+      // Added to check for inCmd != NULL for Bug 2436 fix (LOJ: 2011.07.05)
+      if (inFunctionMode || inCmd != NULL)
          retval2 = true;
-      else
+      else if (inCmd == NULL)
+      {
+         #if DBGLVL_SCRIPT_READING
+         MessageInterface::ShowMessage("   Callilng FinalPass()\n");
+         #endif
          retval2 = FinalPass();
+      }
    }
    
    // Write any error messages collected

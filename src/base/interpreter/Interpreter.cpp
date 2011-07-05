@@ -7172,6 +7172,11 @@ bool Interpreter::FinalPass()
    
    // Update the owned ODE models based on the fully scripted original
    objList = theModerator->GetListOfObjects(Gmat::PROP_SETUP);
+   #if DBGLVL_FINAL_PASS > 1
+   MessageInterface::ShowMessage("FinalPass:: PropSetup list =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+      MessageInterface::ShowMessage("   %s\n", (objList.at(ii)).c_str());
+   #endif
    for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
    {
       obj = FindObject(*i);
@@ -7182,6 +7187,12 @@ bool Interpreter::FinalPass()
             std::string refName = obj->GetStringParameter("FM");
             GmatBase *configuredOde = FindObject(refName);
 //            ODEModel *ode = ((PropSetup*)obj)->GetODEModel();
+            
+            #if DBGLVL_FINAL_PASS > 1
+            MessageInterface::ShowMessage
+               ("   OdeModel='%s', configuredOde=<%p>\n", refName.c_str(), configuredOde);
+            #endif
+            
             if (configuredOde != NULL)
             {
                if (configuredOde->IsOfType(Gmat::ODE_MODEL))
