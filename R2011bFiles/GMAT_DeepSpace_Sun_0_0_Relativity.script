@@ -1,0 +1,59 @@
+
+Create Spacecraft ISS;
+GMAT ISS.Epoch.UTCGregorian = 31 Jul 2011 12:00:00.000;
+GMAT ISS.DisplayStateType = Cartesian;
+GMAT ISS.CoordinateSystem = SunMJ2000Eq;
+GMAT ISS.X = -1.272e+007;
+GMAT ISS.Y = -1.288e+008;
+GMAT ISS.Z = 6.509e+006;
+GMAT ISS.VX = 33.4;
+GMAT ISS.VY = 5.149
+GMAT ISS.VZ = 4.147
+GMAT ISS.Cd = 2.2;
+GMAT ISS.Cr = 1.2;
+GMAT ISS.DragArea = 20;
+GMAT ISS.SRPArea = 20;
+GMAT ISS.DryMass = 1000; 
+
+Create ForceModel Sun2Body;
+GMAT Sun2Body.CentralBody = Sun
+GMAT Sun2Body.PointMasses   = {Sun};
+GMAT Sun2Body.RelativisticCorrection = 'On';
+
+Create Propagator RKV89;
+GMAT RKV89.FM = Sun2Body;
+GMAT RKV89.Type = RungeKutta89;
+GMAT RKV89.InitialStepSize = 5;
+GMAT RKV89.Accuracy = 1e-013;
+GMAT RKV89.MinStep = 0;
+GMAT RKV89.MaxStep = 86400;
+GMAT RKV89.MaxStepAttempts = 50; 
+ 
+GMAT SolarSystem.EphemerisUpdateInterval = 0.0;
+GMAT SolarSystem.Earth.NutationUpdateInterval = 00.0; 
+
+Create CoordinateSystem SunMJ2000Eq
+SunMJ2000Eq.Origin = Sun
+SunMJ2000Eq.Axes   = MJ2000Eq;
+
+Create ReportFile ISS_Report
+GMAT ISS_Report.Filename = GMAT_ISS_Earth_0_0_0.report;
+GMAT ISS_Report.Precision = 16;
+GMAT ISS_Report.WriteHeaders = Off;
+GMAT ISS_Report.ColumnWidth = 20;
+
+Create Variable OutputStepSize;
+
+%-----------Begin Propagation and Report Generation--------
+% Propagate based on preset propagation parameters
+% and current stop conditions.
+BeginMissionSequence
+
+% Output Report file data for each propagation set in the FOR loop
+Report ISS_Report ISS.A1ModJulian ISS.SunMJ2000Eq.X ISS.SunMJ2000Eq.Y ISS.SunMJ2000Eq.Z ...
+                  ISS.SunMJ2000Eq.VX ISS.SunMJ2000Eq.VY ISS.SunMJ2000Eq.VZ;
+For OutputStepSize = 1:365;
+	Propagate   RKV89(ISS, {ISS.ElapsedSecs = 86400});
+   Report ISS_Report ISS.A1ModJulian ISS.SunMJ2000Eq.X ISS.SunMJ2000Eq.Y ISS.SunMJ2000Eq.Z ...
+                  ISS.SunMJ2000Eq.VX ISS.SunMJ2000Eq.VY ISS.SunMJ2000Eq.VZ;
+EndFor ;
