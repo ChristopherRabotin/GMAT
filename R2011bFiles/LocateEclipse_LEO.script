@@ -95,6 +95,7 @@ GMAT DefaultIB.GravitationalAccel = 9.810000000000001;
 
 Create EclipseLocator LEOSatShadows
 StationContacts.Spacecraft = {MySat};
+StationContacts.EclipseTypes = All;
 StationContacts.OccultingBodies = {Luna,Earth};
 StationContacts.Tolerance = 1e-5;
 StationContacts.WriteReport = true;
