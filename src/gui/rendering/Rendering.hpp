@@ -28,7 +28,7 @@ struct GlColorType
    Byte red;
    Byte green;
    Byte blue;
-   Byte not_used;
+   Byte alpha;
 };
 
 void SetColor(GlColorType color, Byte red, Byte green, Byte blue);
