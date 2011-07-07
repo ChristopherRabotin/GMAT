@@ -70,8 +70,6 @@
     <section>
       <title>Creating the Differential Corrector</title>
 
-      <para>To create a differential corrector:</para>
-
       <procedure>
         <step>
           <para>Locate the Solvers folder in the Resource Tree and expand it
@@ -88,18 +86,18 @@
     <section>
       <title>Modifying the default Orbit View</title>
 
-      <para>You need to make minor modifications to default Orbit View so that
+      <para>We need to make minor modifications to default Orbit View so that
       the entire final orbit will fit in the graphics window.</para>
 
       <procedure>
         <step>
-          <para>Locate DefaultOrbitView in the Resource Tree, right-click on
-          it, and select Open.</para>
+          <para>Double-click the DefaultOrbitView in the Resource Tree to open its dialog box. 
+         (Or, you can right-click on it and select Open.)</para>
         </step>
 
         <step>
-          <para>Change the SolverIterations input field, located in the
-          Drawing Option group box, to the value Current.</para>
+          <para>In the Drawing Option group box, change the Solver Iterations input field
+           to the value Current.</para>
         </step>
 
         <step>
@@ -112,7 +110,7 @@
 
         <step>
           <para>Verify the configuration against the screen capture below,
-          make any changes necessary, and click Ok on the DefaultOrbitView
+          make changes if needed, and click OK to save and close the
           dialog box.</para>
         </step>
       </procedure>
@@ -139,42 +137,39 @@
     <section>
       <title>Creating the Maneuvers.</title>
 
-      <para>You need two default maneuvers for this tutorial and we will
+      <para>We need two default maneuvers for this tutorial. We will also
       rename the default maneuver and create a new maneuver:</para>
 
       <procedure>
         <step>
-          <para>Locate DefaultIB in the Resource Tree, right-click on it,
+          <para>In the Burns folder in the Resource Tree, right-click on DefaultIB,
           select Rename, and change the name to dv1.</para>
         </step>
 
         <step>
           <para>Right-click on the Burns folder, select
-          Add--&gt;ImpulsiveBurn.</para>
+          Add, and add ImpulsiveBurn.</para>
         </step>
 
         <step>
-          <para>Right-click on the impulsive burn created in the previous
-          step, select Rename, and change the name to dv2.</para>
+          <para>Right-click on the new ImpulsiveBurn, 
+          select Rename, and change its name to dv2.</para>
         </step>
       </procedure>
     </section>
   </section>
 
   <section>
-    <title>Creating and Configuring the Mission Tree</title>
+    <title>Configuring the Mission Tree</title>
 
-    <para>Below you will create a targeting sequence to raise orbit apogee to
-    GEOsynchronous altitude (~42165km) and then circularize the orbit. You'll
-    begin by modifying the intial propagate command to propagate to periapsis.
-    Next you will create the command structure and finally you will configure
-    each command.</para>
+    <para>The objective of the targeting sequence that we will create here is 
+    to raise the orbit apogee to
+    GEOsynchronous altitude (~42165km) and then circularize the orbit. We
+    begin by modifying the intial propagate command to propagate to periapsis,
+    then create the command structure, and finally configure each command.</para>
 
     <section>
       <title>Initial Propagate Sequence</title>
-
-      <para>To configure the initial propagate sequence to propagate to
-      periapsis, perform the following steps:</para>
 
       <procedure>
         <step>
@@ -183,25 +178,24 @@
         </step>
 
         <step>
-          <para>Right-click on Propagate1 and select Open from the
-          menu.</para>
+          <para>Open the Propagate1 dialog box (by double-clicking it or by 
+          right-clicking and then selecting Open from the menu).</para>
         </step>
 
         <step>
-          <para>Locate the Stopping Conditions group box and then right click
-          on the set of ellipses next to the text "DefaultSC.ElapsedSecs".
-          This will open the Parameter Select Dialog box.</para>
+          <para>Locate the Stopping Conditions group box, and right-click
+          on the line with text "DefaultSC.ElapsedSecs".
+          This opens the Parameter Select Dialog box.</para>
         </step>
 
         <step>
-          <para>Under the Object Properties list on the Parameter Select
-          Dialog box, locate periapsis and double-click on it. Click the Ok
-          button to close the Parameter Select Dialog box.</para>
+          <para>Under the Object Properties list, locate periapsis and 
+          double-click on it. Click OK to close the Parameter Select Dialog box.</para>
         </step>
 
         <step>
-          <para>Click the Ok button on the Propagate 1 dialog box to save
-          changes and close.</para>
+          <para>Your Propagate1 dialog box should now look as shown below. 
+          Click OK to save and close it.</para>
         </step>
       </procedure>
 
@@ -230,7 +224,7 @@
         GEO altitude and then circularize the orbit, you will employ a
         Targeting loop. Let's begin by creating the commands necessary to
         perform the targeting sequence. The figure below illustrates the
-        configuration of the mission tree after you have completed the steps
+        configuration of the Mission Tree after you have complete the steps
         in this section.</para>
 
         <screenshot>
@@ -258,53 +252,53 @@
           </step>
 
           <step>
-            <para>Right-click on Target1 in the Mission Tree, select Insert
+            <para>Right-click on Target1, select Insert
             After, and select Vary.</para>
           </step>
 
           <step>
-            <para>Right-click on Vary1 in the Mission Tree, select Insert
+            <para>Right-click on Vary1, select Insert
             After, and select Manuever.</para>
           </step>
 
           <step>
-            <para>Right-click on Maneuver1 in the Mission Tree, select Insert
+            <para>Right-click on Maneuver1, select Insert
             After, and select Propagate.</para>
           </step>
 
           <step>
-            <para>Right-click on Propagate2 in the Mission Tree, select Insert
+            <para>Right-click on Propagate2, select Insert
             After, and select Achieve.</para>
           </step>
 
           <step>
-            <para>Right-click on Achieve1 in the Mission Tree, select Insert
+            <para>Right-click on Achieve1, select Insert
             After, and select Vary.</para>
           </step>
 
           <step>
-            <para>Right-click on Vary2 in the Mission Tree, select Insert
+            <para>Right-click on Vary2, select Insert
             After, and select Manuever.</para>
           </step>
 
           <step>
-            <para>Right-click on Maneuver2 in the Mission Tree, select Insert
+            <para>Right-click on Maneuver2, select Insert
             After, and select Propagate.</para>
           </step>
 
           <step>
-            <para>Right-click on Propagate3 in the Mission Tree, select Insert
+            <para>Right-click on Propagate3, select Insert
             After, and select Achieve.</para>
           </step>
         </procedure>
 
-        <para>Let's talk about the function of the command sequence you
-        created above. The Vary commands define the variables the differential
+        <para>Let us discuss the function of the command sequence
+        created above. The Vary commands define variables that the differential
         corrector can modify to achieve the goals defined in the Achieve
         commands. Because there are two variables (Vary commands) and two
         Achieve commands (constraints), this is a "square" targeting problem.
         Below you will configure the Vary commands to modify the maneuver
-        values to achieve a final orbit radius of 42165 and an eccentricity of
+        values to achieve a final orbit radius of 42165 km and an eccentricity of
         0.005</para>
       </section>
 
@@ -316,15 +310,14 @@
 
         <procedure>
           <step>
-            <para>Right-click on Target1 in the Mission Tree and select Open.
+            <para>Open the Target1 dialog box.
             Locate the ExitMode drop-down menu and set it to SaveAndContinue.
             This will save the converged solution of the targeting
             problem.</para>
           </step>
 
           <step>
-            <para>When you are finished, click OK to close the Target1 dialog
-            box.</para>
+            <para>Click OK to save and close the Target1 dialog box. (See the figure below.)</para>
 
             <screenshot>
               <mediaobject>
@@ -342,20 +335,19 @@
           </step>
 
           <step>
-            <para>Right-click on Vary1 in the Mission Tree and select Open.
-            Notice that in the Variable SetUp group box, the variable is
+            <para>Open the Vary1 dialog box in the Mission Tree.
+            Notice that the variable in the Variable SetUp group is
             defined as dv1.Element1. This is the velocity component of dv1 in
-            the local VNB system. So we do not need to change the targeter
-            variable.</para>
+            the local VNB system. That's what we need, so we'll keep it.</para>
           </step>
 
           <step>
-            <para>Locate the InitialValue text box and set it to 1.0.</para>
+            <para>Set the InitialValue to 1.0.</para>
           </step>
 
           <step>
-            <para>Set the MaxStep to 0.5 and then click Ok to close the Vary1
-            dialog box.</para>
+            <para>Set the MaxStep to 0.5. Your Vary1 box should look as in figure below. 
+            Click OK to save and close it.</para>
 
             <screenshot>
               <mediaobject>
@@ -373,10 +365,9 @@
           </step>
 
           <step>
-            <para>Double-click on the Maneuver1 command in the Mission Tree.
-            Notice that the command is set to apply dv1 to DefaultSC so we do
-            not need to change any settings for this command. Click Ok to
-            close the Maneuver1 dialog box.</para>
+            <para>Open the Maneuver1 command in the Mission Tree.
+            Notice that the command is already set to apply dv1 to DefaultSC, so we don't
+            need to change anything here. Click OK to save and close.</para>
 
             <screenshot>
               <mediaobject>
@@ -394,9 +385,9 @@
           </step>
 
           <step>
-            <para>Double-click on the Propagate2 dialog box. Use the same
-            procedure shown in the sections above to set the stopping condtion
-            to Apoapsis and then click Ok to close the dialog box.</para>
+            <para>Open the Propagate2 dialog box. Use the
+            procedure that we used in sections above to set the stopping condition
+            to Apoapsis. Click OK to save and close.</para>
 
             <screenshot>
               <mediaobject>
@@ -414,10 +405,9 @@
           </step>
 
           <step>
-            <para>Double-click on the <literal>Achieve1</literal> command in
-            the Mission Tree. Notice that the goal is set to
-            DefaultSC.Earth.RMAG. So we do not need to change any settings for
-            this command. Click Ok to close the dialog box.</para>
+            <para>Open the <literal>Achieve1</literal> dialog box. Notice that the goal is set to
+            DefaultSC.Earth.RMAG - which is what we need, so we make no changes here. 
+            Click OK to save and close.</para>
 
             <screenshot>
               <mediaobject>
@@ -435,7 +425,7 @@
           </step>
 
           <step>
-            <para>Double-click on Vary2 in the Mission Tree.</para>
+            <para>Open Vary2 command.</para>
           </step>
 
           <step>
@@ -447,11 +437,11 @@
           </step>
 
           <step>
-            <para>Double-click on Element1 under the ObjectProperties.</para>
+            <para>Double-click on Element1 under the ObjectProperties. (See the figure below.)</para>
           </step>
 
           <step>
-            <para>Click Ok to close the ParameterSelect dialog box.</para>
+            <para>Click OK to save and close the ParameterSelect dialog box.</para>
 
             <screenshot>
               <mediaobject>
@@ -492,14 +482,13 @@
           </step>
 
           <step>
-            <para>Double-click on the <literal>Maneuver2</literal> command in
+            <para>Open the <literal>Maneuver2</literal> command in
             the Mission Tree.</para>
           </step>
 
           <step>
-            <para>Locate the <literal>Burn</literal> combo box and change it
-            to <literal>dv2</literal>. Click OK to close the Maneuver2 dialog
-            box.</para>
+            <para>Locate the <literal>Burn</literal> field, change it
+            to <literal>dv2</literal>. Click OK to save and close.</para>
 
             <screenshot>
               <mediaobject>
@@ -517,9 +506,10 @@
           </step>
 
           <step>
-            <para>Double-click on the Propagate3 dialog box. Use the same
-            procedure shown above to set the stopping condtion to
-            <literal>ElapsedDays</literal> of 1.0. box.</para>
+            <para>Open the <literal>Propagate3</literal> command. Use the procedure 
+             that we used above to set the stopping condition in the Parameter group to
+            <literal>DefaultSC.ElapsedDays</literal>, with the Condition set to 1.0. box.
+             (See the figure below.) Click OK to save and close.</para>
 
             <screenshot>
               <mediaobject>
@@ -537,18 +527,17 @@
           </step>
 
           <step>
-            <para>Finally, double-click on the Achieve2 command in the Mission
+            <para>Finally, open the <literal>Achieve2</literal> command in the Mission
             Tree.</para>
           </step>
 
           <step>
-            <para>Click on the Edit button next to the Goal text box.</para>
+            <para>Click on the Edit for the Goal text box.</para>
           </step>
 
           <step>
-            <para>Locate <literal> ECC </literal> in the Object Properties
-            list and double-click on it. Click Ok to close the Parameter
-            Select Dialog Box.</para>
+            <para>Double-click <literal> ECC </literal> in the Object Properties
+            list. Click OK to close the Parameter Select Dialog Box.</para>
           </step>
 
           <step>
@@ -556,7 +545,8 @@
           </step>
 
           <step>
-            <para>Change the <literal> Tolerance </literal> to 0.0001</para>
+            <para>Change the <literal> Tolerance </literal> to 0.0001. 
+            (See the figure below.) Hit OK to save.</para>
 
             <screenshot>
               <mediaobject>
@@ -582,11 +572,11 @@
 
     <para>Before running the mission, click on the Save button in the toolbar
     and save your file to the desired location. Now click on the Run button in
-    the Toolbar. As the mission is running, you will see the Differetial
-    Corrector try different maneuvers values resulting in trajectory
-    iterations in light blue. These are Differential Corrector iterations, and
-    perturbation passes to determine the Jacobian of the two-point boundary
-    value problem. After the mission is run, the OrbitView should appear
+    the Toolbar. As the mission is running, you will see the Differential
+    Corrector try different maneuvers (shown in light blue). These are 
+    Differential Corrector iterations and
+    perturbation passes that attempt to determine the Jacobian of the two-point boundary
+    value problem. After the mission is complete, the OrbitView should appear
     similar to the image shown below.</para>
 
     <screenshot>
