@@ -20,6 +20,7 @@
 #include "ModelManager.hpp"
 #include "Rendering.hpp"           // for GlColorType
 #include "FileUtil.hpp"            // for GmatFileUtil::DoesFileExist()
+#include "FileManager.hpp"         // for GetFullPathname()
 #include "GmatOpenGLSupport.hpp"   // for InitGL()
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"       // for GetMainFrameStatusBar()
@@ -40,6 +41,7 @@
 // of detail so that the image is available at each of the various smaller sizes.
 #define __ENABLE_MIPMAPS__
 
+//#define DEBUG_GL_INFO
 //#define DEBUG_INIT 1
 //#define DEBUG_LOAD_IMAGE 1
 //#define DEBUG_TEXTURE 1
@@ -193,6 +195,27 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 ViewCanvas::~ViewCanvas()
 {
+   #ifdef DEBUG_VIEWCANVAS
+   MessageInterface::ShowMessage("ViewCanvas::~ViewCanvas() '%s' entered\n", mPlotName.c_str());
+   #endif
+   
+   // Cleanup textures
+   for (std::map<wxString, GLuint>::iterator i = mTextureIdMap.begin();
+        i != mTextureIdMap.end(); ++i)
+   {
+      GLuint texId = i->second;
+      #ifdef DEBUG_VIEWCANVAS
+      MessageInterface::ShowMessage("   texId = %3d, obj = '%s'\n", texId, i->first.c_str());
+      #endif
+      if (i->first != "" && texId != GmatPlot::UNINIT_TEXTURE)
+      {
+         glDeleteTextures(1, &texId);
+      }
+   }
+   
+   #ifdef DEBUG_VIEWCANVAS
+   MessageInterface::ShowMessage("ViewCanvas::~ViewCanvas() '%s' leaviing\n", mPlotName.c_str());
+   #endif
 }
 
 
@@ -254,7 +277,7 @@ bool ViewCanvas::InitializePlot()
    #else
       SetCurrent();
    #endif
-      
+   
    InitOpenGL();
    
    // load body textures
@@ -265,7 +288,7 @@ bool ViewCanvas::InitializePlot()
    
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
-      ("\nViewCanvas::InitializePlot() '%s' leaving\n", mPlotName.c_str());
+      ("ViewCanvas::InitializePlot() '%s' leaving\n\n", mPlotName.c_str());
    #endif
    
    return true;
@@ -280,25 +303,29 @@ bool ViewCanvas::InitializePlot()
  */
 //------------------------------------------------------------------------------
 bool ViewCanvas::InitOpenGL()
-{
-   // get GL version
-   #ifdef __GET_GL_INFO__
-   const GLubyte *str = glGetString(GL_VENDOR);
-   MessageInterface::ShowMessage("GL vendor = '%s'\n", (char*)str);
-   str = glGetString(GL_VERSION);
-   MessageInterface::ShowMessage("GL version = '%s'\n", (char*)str);
-   str = glGetString(GL_EXTENSIONS);
-   MessageInterface::ShowMessage("GL extensions = '%s'\n", (char*)str);
-   str = gluGetString(GLU_VERSION);
-   MessageInterface::ShowMessage("GLU version = '%s'\n", (char*)str);
-   str = gluGetString(GLU_EXTENSIONS);
-   MessageInterface::ShowMessage("GLU extensions = '%s'\n", (char*)str);
-   #endif
-   
+{   
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
       ("ViewCanvas::InitOpenGL() '%s' entered, calling InitGL()\n",
        mPlotName.c_str());
+   #endif
+   
+   #ifdef DEBUG_GL_INFO
+   char *GL_version = (char*)glGetString(GL_VERSION);
+   MessageInterface::ShowMessage("   GL version  = '%s'\n", GL_version);
+   char *GL_vendor = (char*)glGetString(GL_VENDOR);
+   MessageInterface::ShowMessage("   GL vendor   = '%s'\n", GL_vendor);
+   char *GL_renderer = (char*)glGetString(GL_RENDERER);
+   MessageInterface::ShowMessage("   GL renderer = '%s'\n", GL_renderer);
+   char *GLU_version = (char*)gluGetString(GLU_VERSION);
+   MessageInterface::ShowMessage("   GLU version = '%s'\n", GLU_version);
+   #endif
+   
+   #ifdef DEBUG_GL_MORE_INFO
+   char *GL_ext = (char*)glGetString(GL_EXTENSIONS);
+   char *GLU_ext = (char*)gluGetString(GLU_EXTENSIONS);
+   MessageInterface::ShowMessage("   GL extensions = '%s'\n", GL_ext);
+   MessageInterface::ShowMessage("   GLU extensions = '%s'\n", GLU_ext);
    #endif
    
    InitGL();
@@ -1254,7 +1281,7 @@ void ViewCanvas::ComputeBufferIndex(Real time)
       mCurrIndex = 0;
    }
    
-   // find buffer index
+   // Compute last buffer index
    mLastIndex = mEndIndex1;
    if (mEndIndex2 != -1)
       mLastIndex = mEndIndex2;
@@ -1345,8 +1372,8 @@ bool ViewCanvas::LoadBodyTextures()
    //--------------------------------------------------
    for (int i=0; i<mObjectCount; i++)
    {
-      if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
-         continue;
+      //if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
+      //   continue;
       
       if (mTextureIdMap[mObjectNames[i]] == GmatPlot::UNINIT_TEXTURE)
       {
@@ -1380,7 +1407,7 @@ bool ViewCanvas::LoadBodyTextures()
 //------------------------------------------------------------------------------
 GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
 {
-   GLuint ret = GmatPlot::UNINIT_TEXTURE;
+   GLuint texId = GmatPlot::UNINIT_TEXTURE;
    std::string textureFile;
    
    // if texture file specified then use it
@@ -1389,26 +1416,57 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::BindTexture() entered, textureFile = '%s'\n", textureFile.c_str());
+      ("ViewCanvas::BindTexture() entered, objName='%s', textureFile = '%s'\n",
+       objName.c_str(), textureFile.c_str());
    #endif
    
    try
    {
-      // use texture map set by user for this plot, if not set use from the celestial body
-      if (textureFile == "" || !GmatFileUtil::DoesFileExist(textureFile))
+      if (obj->IsOfType(Gmat::CELESTIAL_BODY))
       {
-         CelestialBody *body = (CelestialBody*) obj;
-         textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
+         // use texture map set by user for this plot, if not set use from the celestial body
+         if (textureFile == "" || !GmatFileUtil::DoesFileExist(textureFile))
+         {
+            CelestialBody *body = (CelestialBody*) obj;
+            textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
+         }
       }
+      else if (obj->IsOfType(Gmat::SPACECRAFT))
+      {
+         FileManager *fm = FileManager::Instance();
+         std::string iconLoc = fm->GetFullPathname("ICON_PATH");
+         
+         #ifdef DEBUG_TEXTURE
+         MessageInterface::ShowMessage("   iconLoc = '%s'\n", loc.c_str());
+         #endif
+         
+         // Check if icon file directory exist
+         if (GmatFileUtil::DoesDirectoryExist(iconLoc.c_str(), false))
+         {
+            textureFile = iconLoc + "/Spacecraft.png";
+         }
+      }
+      
+      #if DEBUG_TEXTURE
+      MessageInterface::ShowMessage
+         ("   theContext=<%p>, textureFile='%s'\n", theContext, textureFile.c_str());
+      #endif
       
       #ifdef __USE_WX280_GL__
          SetCurrent(*theContext);
       #else
          SetCurrent();
       #endif
+         
+      glGenTextures(1, &texId);
+      glBindTexture(GL_TEXTURE_2D, texId);
       
-      glGenTextures(1, &ret);
-      glBindTexture(GL_TEXTURE_2D, ret);
+      #if DEBUG_TEXTURE
+      GLenum error = glGetError();
+      MessageInterface::ShowMessage
+         ("   texId = %3d, error = %d, GL_INVALID_VALUE = %d, UNINIT_TEXTURE = %d\n",
+          texId, error, GL_INVALID_VALUE, GmatPlot::UNINIT_TEXTURE);
+      #endif
       
       if (!LoadImage(textureFile))
       {
@@ -1418,7 +1476,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
                ("*** WARNING *** ViewCanvas::BindTexture() Cannot load texture "
                 "image for '%s' from '%s'\n", objName.c_str(), textureFile.c_str());
          }
-         ret = GmatPlot::UNINIT_TEXTURE;
+         texId = GmatPlot::UNINIT_TEXTURE;
       }
    }
    catch (BaseException &e)
@@ -1434,11 +1492,184 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::BindTexture() objName='%s', ret=%d\n", objName.c_str(),
-       ret);
+      ("ViewCanvas::BindTexture() objName='%s', texId=%d\n", objName.c_str(),
+       texId);
    #endif
    
-   return ret;
+   return texId;
+}
+
+
+//---------------------------------------------------------------------------
+// bool LoadImage(const std::string &fileName)
+//---------------------------------------------------------------------------
+bool ViewCanvas::LoadImage(const std::string &fileName)
+{
+   #if DEBUG_LOAD_IMAGE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadImage() file='%s'\n", fileName.c_str());
+   #endif
+   
+   if (fileName == "")
+   {
+      #if DEBUG_LOAD_IMAGE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadImage() blank filename, so returning false\n");
+      #endif
+      return false;
+   }
+   
+   wxImage image = wxImage(fileName.c_str());
+   int width = image.GetWidth();
+   int height = image.GetHeight();
+   
+   GLubyte *data = image.GetData();
+   
+   if (data == NULL)
+   {
+      #if DEBUG_LOAD_IMAGE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadImage() empty data, so returning false\n");
+      #endif
+      return false;
+   }
+   
+   #if DEBUG_LOAD_IMAGE
+   int size = width * height * 3;
+   MessageInterface::ShowMessage
+      ("   width=%d, height=%d, size=%d, hasAlpha=%d\n", width, height, size,
+       image.HasAlpha());
+   #endif
+   
+   // Why is image upside down?
+   // Get vertial mirror
+   wxImage mirror = image.Mirror(false);
+   GLubyte *data1 = mirror.GetData();
+   
+   glEnable(GL_TEXTURE_2D);
+   
+   //=======================================================
+   // Do we want to use mipmaps?
+   // When you desire high-quality texture mapping, you will typically specify a
+   // mipmapped texture filter. Mipmapping lets you specify multiple levels of
+   // detail for a texture image. Each level of detail is half the size of the
+   // previous level of detail in each dimension. So if your initial texture
+   // image is an image of size 32x32, the lower levels of detail will be of
+   // size 16x16, 8x8, 4x4, 2x2, and 1x1. Typically, you use the gluBuild2DMipmaps
+   // routine to automatically construct the lower levels of details from you
+   // original image. This routine re-samples the original image at each level
+   // of detail so that the image is available at each of the various smaller sizes.
+   //=======================================================
+   #ifdef __ENABLE_MIPMAPS__
+   //=======================================================
+   
+   //used for min and magnifying texture
+   int mipmapsStatus = 0;
+   
+   //pass image to opengl
+   #ifndef __WXGTK__
+   
+   // If small icon, set background color alpha value to 0 transparent
+   // so that it will not be shown when drawing.
+   // Why it's not working? Set to false (LOJ: 2011.07.06)
+   bool removeBackground = false;
+   if (removeBackground && width == 16 && height == 16)
+   {
+      unsigned char red, green, blue;
+      
+      for (int x = 0; x < width; x++)
+      {
+         for (int y = 0; y < height; y++)
+         {
+            red = mirror.GetRed(x, y);
+            green = mirror.GetGreen(x, y);
+            blue = mirror.GetBlue(x, y);
+            
+            #if 0
+            MessageInterface::ShowMessage
+               ("   mirror(%2d,%2d), red=%3d, green=%3d, blue=%3d\n", x, y, red, green, blue);
+            #endif
+            
+            // Assuming background color is white
+            if (red == 255 && green == 255 && blue == 255)
+               mirror.SetAlpha(x, y, 0);
+            else
+               mirror.SetAlpha(x, y, 255);
+            
+            GLubyte *data2 = mirror.GetData();
+            
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            
+            // Set internal format and data type to GL_RGBA
+            mipmapsStatus =
+               gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, width, height, GL_RGBA,
+                                 GL_UNSIGNED_BYTE, data2);
+            
+         }
+      }
+   }
+   else
+   {
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      
+      // This call crashes GMAT on Linux, so it is excluded here. 
+      mipmapsStatus =
+         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
+                           GL_UNSIGNED_BYTE, data1);
+   }
+   
+   #else
+   
+   // Try this on Linux
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                GL_UNSIGNED_BYTE, data1);
+   
+   #endif
+   
+   if (mipmapsStatus == 0)
+   {
+      #if DEBUG_LOAD_IMAGE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadImage() returning true, mipmapsStatus=%d\n", mipmapsStatus);
+      #endif
+      
+      return true;
+   }
+   else
+   {
+      #if DEBUG_LOAD_IMAGE
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadImage() returning false, mipmapsStatus=%d\n", mipmapsStatus);
+      #endif
+      return false;
+   }
+   
+   //=======================================================
+   #else
+   //=======================================================
+   
+   //used for min and magnifying texture
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                GL_UNSIGNED_BYTE, data1);
+   
+   #if DEBUG_LOAD_IMAGE
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadImage() returning true, using glTexImage2D\d\n");
+   #endif
+   
+   return true;
+   
+   //=======================================================
+   #endif
+   //=======================================================
 }
 
 
@@ -1898,135 +2129,6 @@ void ViewCanvas::CopyVector3(Real to[3], Real from[3])
 }
 
 
-//---------------------------------------------------------------------------
-// bool LoadImage(const std::string &fileName)
-//---------------------------------------------------------------------------
-bool ViewCanvas::LoadImage(const std::string &fileName)
-{
-   #if DEBUG_LOAD_IMAGE
-   MessageInterface::ShowMessage
-      ("ViewCanvas::LoadImage() file='%s'\n", fileName.c_str());
-   #endif
-   
-   if (fileName == "")
-   {
-      #if DEBUG_LOAD_IMAGE
-      MessageInterface::ShowMessage
-         ("ViewCanvas::LoadImage() blank filename, so returning false\n");
-      #endif
-      return false;
-   }
-   
-   wxImage image = wxImage(fileName.c_str());
-   int width = image.GetWidth();
-   int height = image.GetHeight();
-   
-   GLubyte *data = image.GetData();
-   
-   if (data == NULL)
-   {
-      #if DEBUG_LOAD_IMAGE
-      MessageInterface::ShowMessage
-         ("ViewCanvas::LoadImage() empty data, so returning false\n");
-      #endif
-      return false;
-   }
-   
-   #if DEBUG_LOAD_IMAGE
-   int size = width * height * 3;
-   MessageInterface::ShowMessage
-      ("   width=%d, height=%d, size=%d\n", width, height, size);
-   #endif
-   
-   // Why is image upside down?
-   // Get vertial mirror
-   wxImage mirror = image.Mirror(false);
-   GLubyte *data1 = mirror.GetData();
-   
-   glEnable(GL_TEXTURE_2D);
-   
-   //=======================================================
-   // Do we want to use mipmaps?
-   // When you desire high-quality texture mapping, you will typically specify a
-   // mipmapped texture filter. Mipmapping lets you specify multiple levels of
-   // detail for a texture image. Each level of detail is half the size of the
-   // previous level of detail in each dimension. So if your initial texture
-   // image is an image of size 32x32, the lower levels of detail will be of
-   // size 16x16, 8x8, 4x4, 2x2, and 1x1. Typically, you use the gluBuild2DMipmaps
-   // routine to automatically construct the lower levels of details from you
-   // original image. This routine re-samples the original image at each level
-   // of detail so that the image is available at each of the various smaller sizes.
-   //=======================================================
-   #ifdef __ENABLE_MIPMAPS__
-   //=======================================================
-   
-   //used for min and magnifying texture
-   int mipmapsStatus = 0;
-   
-   //pass image to opengl
-   #ifndef __WXGTK__
-   
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-   
-   // This call crashes GMAT on Linux, so it is excluded here. 
-   mipmapsStatus =
-      gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
-                        GL_UNSIGNED_BYTE, data1);
-   
-   #else
-   
-   // Try this on Linux
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                GL_UNSIGNED_BYTE, data1);
-   
-   #endif
-   
-   if (mipmapsStatus == 0)
-   {
-      #if DEBUG_LOAD_IMAGE
-      MessageInterface::ShowMessage
-         ("ViewCanvas::LoadImage() returning true, mipmapsStatus=%d\n", mipmapsStatus);
-      #endif
-            
-      return true;
-   }
-   else
-   {
-      #if DEBUG_LOAD_IMAGE
-      MessageInterface::ShowMessage
-         ("ViewCanvas::LoadImage() returning false, mipmapsStatus=%d\n", mipmapsStatus);
-      #endif
-      return false;
-   }
-   
-   //=======================================================
-   #else
-   //=======================================================
-   
-   //used for min and magnifying texture
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                GL_UNSIGNED_BYTE, data1);
-      
-   #if DEBUG_LOAD_IMAGE
-   MessageInterface::ShowMessage
-      ("ViewCanvas::LoadImage() returning true, using glTexImage2D\d\n");
-   #endif
-   
-   return true;
-   
-   //=======================================================
-   #endif
-   //=======================================================
-}
-
-
 //------------------------------------------------------------------------------
 // void DrawOrbit(const wxString &objName, int obj, int objId)
 //------------------------------------------------------------------------------
@@ -2225,13 +2327,5 @@ void ViewCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
    glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.c_str());
    
    SetupProjection();
-
-   #if 0
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluOrtho2D(-180.0, 180.0, -90.0, 90.0);
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-   #endif
 }
 
