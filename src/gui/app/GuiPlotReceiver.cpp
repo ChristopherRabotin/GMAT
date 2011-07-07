@@ -234,9 +234,9 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
           frame->GetPlotName().c_str());
       #endif
       
-      GmatAppData::Instance()->GetMainFrame()->Tile();
-
       ++MdiGlPlot::numChildren;
+      // Tile vertically
+      GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
    }
    else
    {
@@ -638,8 +638,9 @@ bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
          if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_ORBIT_VIEW);
-            gmatAppData->GetMainFrame()->Tile();
-            break;
+            
+            // Tile vertically
+            GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
          }
       }
    }
@@ -877,11 +878,12 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
                              wxDEFAULT_FRAME_STYLE);
 
       frame->Show();
-
-      GmatAppData::Instance()->GetMainFrame()->Tile();
-
+      
       ++MdiTsPlot::numChildren;
-
+      
+      // Tile vertically
+      GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      
       frame->RedrawCurve();
    }
 
@@ -926,7 +928,9 @@ bool GuiPlotReceiver::DeleteXyPlot(const std::string &plotName)
          {
             gmatAppData->GetMainFrame()->CloseChild(owner,
                   GmatTree::OUTPUT_XY_PLOT);
-            gmatAppData->GetMainFrame()->Tile();
+            
+            // Tile vertically
+            GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
             break;
          }
       }

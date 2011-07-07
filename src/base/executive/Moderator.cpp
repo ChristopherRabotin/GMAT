@@ -7335,11 +7335,6 @@ void Moderator::CreateDefaultMission()
       CreateParameter("OrbitSTMB", "DefaultSC.OrbitSTMB");
       CreateParameter("OrbitSTMC", "DefaultSC.OrbitSTMC");
       CreateParameter("OrbitSTMD", "DefaultSC.OrbitSTMD");
-//      CreateParameter("OrbitAMatrix", "DefaultSC.OrbitSTM");
-//      CreateParameter("OrbitAMatrixA", "DefaultSC.OrbitSTMA");
-//      CreateParameter("OrbitAMatrixB", "DefaultSC.OrbitSTMB");
-//      CreateParameter("OrbitAMatrixC", "DefaultSC.OrbitSTMC");
-//      CreateParameter("OrbitAMatrixD", "DefaultSC.OrbitSTMD");
       #if DEBUG_DEFAULT_MISSION > 1
       MessageInterface::ShowMessage("-->default STM parameters created\n");
       #endif
@@ -7411,6 +7406,7 @@ void Moderator::CreateDefaultMission()
       // Subscribers
       // OrbitView
       GetDefaultSubscriber("OrbitView");
+      GetDefaultSubscriber("GroundTrackPlot");
       
       #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default Subscribers created\n");
