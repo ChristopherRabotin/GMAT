@@ -179,6 +179,9 @@ bool GmatApp::OnInit()
          
          if (GmatGlobal::Instance()->GetGuiMode() != GmatGlobal::MINIMIZED_GUI)
          {
+            // Initializes all available image handlers.
+            ::wxInitAllImageHandlers();
+            
             //show the splash screen
             wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
             if (GmatFileUtil::DoesFileExist(splashFile.c_str()))
