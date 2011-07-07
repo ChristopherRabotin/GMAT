@@ -26,11 +26,10 @@
 #include "TextTrajectoryFile.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
-// #include "CoordinateConverter.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 #include "GLStars.hpp"
-
+#include "Rendering.hpp"           // for GlColorType
 #include <map>
 
 class GroundTrackCanvas: public ViewCanvas
@@ -145,10 +144,14 @@ private:
    void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);
    void DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
                              Rvector3 &r2, Rvector3 &v2);
+   void DrawGridLines();
    void DrawCentralBodyTexture();
+   void DrawCircleAt(GlColorType *color, double lon, double lat, double radius,
+                     bool enableTransparency = true);
    void DrawCircleAtCurrentPosition(int objId, int index, double radius,
                                     bool enableTransparency = true);
-   void DrawGroundStation(int objId, int index);
+   void DrawSpacecraft(const wxString &objName, int objId, int index);
+   void DrawGroundStation(const wxString &objName, int objId, int index);
    
    // for rotation
    void RotateBodyUsingAttitude(const wxString &objName, int objId);

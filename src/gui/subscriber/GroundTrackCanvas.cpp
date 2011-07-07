@@ -25,7 +25,7 @@
 #include "GmatMainFrame.hpp"       // for EnableAnimation()
 #include "ColorTypes.hpp"          // for namespace GmatColor::
 #include "MessageInterface.hpp"
-#include "Rendering.hpp"
+#include "Rendering.hpp"           // for DrawStringAt(), DrawSquare()
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -796,7 +796,7 @@ void GroundTrackCanvas::DrawFrame()
    mCurrIndex = 0;
    
    // refresh every 50 points (Allow user to set frame this increment?)
-   for (int frame=1; frame<numberOfData; frame+=mFrameInc)
+   for (int frame = 1; frame < numberOfData; frame+=mFrameInc)
    {
       mIsAnimationRunning = true;
       
@@ -815,27 +815,9 @@ void GroundTrackCanvas::DrawFrame()
       Sleep(mUpdateInterval);
       
       mNumData = frame;
-      mCurrIndex++;
       
-      if (mCurrIndex < MAX_DATA)
-      {
-         mEndIndex1 = mNumData - 1;
-         if (mEndIndex2 != -1)
-         {
-            mBeginIndex1++;
-            if (mBeginIndex1 + 1 > MAX_DATA)
-               mBeginIndex1 = 0;
-            
-            mEndIndex2++;
-            if (mEndIndex2 + 1 > MAX_DATA)
-               mEndIndex2 = 0;
-         }
-      }
+      ComputeBufferIndex(mTime[frame]);
       
-      mLastIndex = mEndIndex1;
-      if (mEndIndex2 != -1)
-         mLastIndex = mEndIndex2;
-            
       Refresh(false);
    }
    
@@ -883,6 +865,7 @@ void GroundTrackCanvas::DrawPlot()
    
    // Set background color to grey
    glClearColor(0.3, 0.3, 0.3, 1.0);
+   //glClearColor(0.20, 0.50, 0.50, 1.0); // green blue
    
    if (mRedrawLastPointsOnly || mNumPointsToRedraw == 0)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -906,6 +889,9 @@ void GroundTrackCanvas::DrawPlot()
    
    // Draw central body texture map
    DrawCentralBodyTexture();
+   
+   // Always draw grid lines for now, will draw on user option later
+   DrawGridLines();
    
    // Draw object orbit
    DrawObjectOrbit(mNumData-1);
@@ -1016,7 +1002,7 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
    #endif
    
    glPushMatrix();
-      
+   
    // first disable GL_TEXTURE_2D to show lines clearly
    // without this, lines are drawn dim (loj: 2007.06.11)
    glDisable(GL_TEXTURE_2D);
@@ -1065,15 +1051,11 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       #endif
       
       Spacecraft *spac = (Spacecraft*)mObjectArray[obj];
-      //ModelManager *mm = ModelManager::Instance();
-      //ModelObject *model = mm->GetModel(spac->modelID);
       
       // Draw model if model id found
       if (spac->modelID != -1)
       {
-         // Need to draw 2d spacecraft here
-         // Draw spacecraft as circle for now
-         DrawCircleAtCurrentPosition(objId, index2, 2.0, false);
+         DrawSpacecraft(objName, objId, index2);
       }
       else
       {
@@ -1086,7 +1068,7 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       MessageInterface::ShowMessage("==> Drawing ground station '%s'\n", objName.c_str());
       #endif
       
-      DrawGroundStation(objId, index2);
+      DrawGroundStation(objName, objId, index2);
    }
    else
    {
@@ -1124,11 +1106,7 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
  */
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
-{
-   #if 0
-   int frame = mLastIndex;
-   #endif
-   
+{   
    int objId = GetObjectId(objName);
    
    #if DEBUG_DRAW > 1
@@ -1175,63 +1153,6 @@ void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
    }
    #endif
    
-   
-   //-------------------------------------------------------
-   // draw object with texture on option
-   //-------------------------------------------------------
-   if (mTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
-   {
-      #if 0
-      //glColor4f(1.0, 1.0, 1.0, 1.0);
-      glColor3f(1.0, 1.0, 1.0);
-      glMultMatrixd(mCoordMatrix.GetDataVector());
-      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName]);
-      glEnable(GL_TEXTURE_2D);
-      #endif
-      
-      #if 0
-      if (objName == "Sun")
-      {
-         glDisable(GL_LIGHTING);
-         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL, GLU_INSIDE);
-         glEnable(GL_LIGHTING);
-      }
-      else
-         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL);     
-      
-      glDisable(GL_TEXTURE_2D);
-      
-      //----------------------------------------------------
-      // draw grid on option
-      //----------------------------------------------------
-      if (mDrawGrid && objName == "Earth")
-      {
-         // This makes lines thicker
-         //glEnable(GL_LINE_SMOOTH);
-         //glLineWidth(1.5);
-         
-         // Just draw a wireframe sphere little bigger to show grid
-         //glColor3f(0.20, 0.20, 0.50); // dark blue
-         glColor3f(0.0, 0.0, 0.0);      // black
-         //glColor3f(0.50, 0.10, 0.20); // maroon
-         GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.03;
-         DrawSphere(radius, 36, 18, GLU_LINE, GLU_OUTSIDE, GL_NONE, GL_FALSE);
-      }
-      #endif
-   }
-   else
-   {
-      #if DEBUG_DRAW
-      MessageInterface::ShowMessage
-         ("*** WARNING *** GroundTrackCanvas::DrawObject() %s texture not found.\n",
-          objName.c_str());
-      #endif
-      
-      // Just draw a wireframe sphere if we get here
-      glColor3f(0.20f, 0.20f, 0.50f);
-      DrawSphere(mObjectRadius[objId], 50, 50, GLU_LINE);      
-      glDisable(GL_TEXTURE_2D);
-   }
    
    #if 0
    if (mEnableLightSource && mSunPresent)
@@ -1442,7 +1363,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
       
       DrawLine(lon1, lat1, lon2, lat2);
    }
-      
+   
    // Turn off TEXTURE_2D to go back to normal light
    glDisable(GL_TEXTURE_2D);
    
@@ -1453,6 +1374,59 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    #if DEBUG_DRAW_LINE
    MessageInterface::ShowMessage("DrawGroundTrackLines() leaving\n");
    #endif
+}
+
+
+//---------------------------------------------------------------------------
+// void DrawGridLines()
+//---------------------------------------------------------------------------
+void GroundTrackCanvas::DrawGridLines()
+{
+   glEnable(GL_TEXTURE_2D);
+   glColor4f(1.0, 1.0, 1.0, 1.0);
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   
+   Real lat1 = +90.0;
+   Real lat2 = -90.0;
+   Real lon1 = 0.0;
+   Real lon2 = 0.0;
+   wxString str;
+   
+   // Draw longitudes
+   for (int i = -180; i <= +180; i+=30)
+   {
+      lon1 = (Real)i;
+      lon2 = lon1;
+      DrawLine(lon1, lat1, lon2, lat2);
+
+      // Draw labels
+      if (i != -180 && i != 180)
+      {
+         str.Printf("%d", i);
+         DrawStringAt(str, lon1+1, lat2+1, 0, 1);
+      }
+   }
+   
+   // Draw latitudes
+   lon1 = -180.0;
+   lon2 = +180.0;
+   for (int i = -90; i <= +90; i+=30)
+   {
+      lat1 = (Real)i;
+      lat2 = lat1;
+      DrawLine(lon1, lat1, lon2, lat2);
+      
+      // Draw labels
+      if (i != -90 && i != 90)
+      {
+         str.Printf("%d", i);
+         DrawStringAt(str, lon1+1, lat2+1, 0, 1);
+      }
+   }
+   
+   glDisable(GL_TEXTURE_2D);
+   glDisable(GL_BLEND);
 }
 
 
@@ -1531,19 +1505,32 @@ void GroundTrackCanvas::DrawCircleAtCurrentPosition(int objId, int index,
    
    // Set color
    *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
+   
+   // Draw circle
+   DrawCircleAt(sGlColor, lon2, lat2, radius, enableTransparency);
+   
+}
 
+
+//------------------------------------------------------------------------------
+// void DrawCircleAt(GlColorType *color, double lon, double lat, double radius,
+//                   bool enableTransparency = true)
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawCircleAt(GlColorType *color, double lon, double lat,
+                                     double radius, bool enableTransparency)
+{
    if (enableTransparency)
    {
       // Make the color transparent before drawing, set alpha value to 128
-      glColor4ub(sGlColor->red, sGlColor->green, sGlColor->blue, 128);
+      glColor4ub(color->red, color->green, color->blue, 128);
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    }
    else
-      glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+      glColor3ub(color->red, color->green, color->blue);
    
    glEnable(GL_TEXTURE_2D);
-   DrawCircle(lon2, lat2, radius, true);
+   DrawCircle(lon, lat, radius, true);
    glDisable(GL_TEXTURE_2D);
    if (enableTransparency)
       glDisable(GL_BLEND);
@@ -1551,13 +1538,79 @@ void GroundTrackCanvas::DrawCircleAtCurrentPosition(int objId, int index,
 
 
 //------------------------------------------------------------------------------
-// void DrawGroundStation(int objId, int index)
+// void DrawSpacecraft(const wxString &objName, int objId, int index)
+//------------------------------------------------------------------------------
+/**
+ * Draws a spacecraft at current position
+ */
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int index)
+{
+   // Compute current position
+   Real lon2, lat2;
+   Rvector3 r2(mObjectViewPos[index+0], mObjectViewPos[index+1],
+               mObjectViewPos[index+2]);
+   r2.ComputeLongitudeLatitude(lon2, lat2);
+   lon2 *= GmatMathConstants::DEG_PER_RAD;
+   lat2 *= GmatMathConstants::DEG_PER_RAD;
+   
+   #if DEBUG_DRAW_SPACECRAFT
+   MessageInterface::ShowMessage("   lon = %f, lat = %f\n", lon, lat);
+   #endif
+   
+   
+   if (mTextureIdMap[objName.c_str()] != GmatPlot::UNINIT_TEXTURE)
+   {
+      glPushMatrix();
+      glLoadIdentity();
+      glColor4f(1.0, 1.0, 1.0, 0.0);
+      glEnable(GL_TEXTURE_2D);
+      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName.c_str()]);
+      // How can I remove white background of spacecraft icon (png file)
+      //glEnable (GL_BLEND);
+      //glEnable(GL_ALPHA_TEST);
+      //glAlphaFunc(GL_GREATER, 0.0f); // shows nothing
+      //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      //glBlendFunc (GL_DST_COLOR, GL_ZERO); // blends whole background to black
+      //glBlendFunc (GL_SRC_ALPHA, GL_ONE); // blends with white
+      
+      glBegin(GL_QUADS);
+      // Texture coordinate points go counter clockwise from the bottom left corner
+      glTexCoord2f(0.0, 0.0);  glVertex2f(lon2-1.5, lat2-1.5);
+      glTexCoord2f(1.0, 0.0);  glVertex2f(lon2+1.5, lat2-1.5);
+      glTexCoord2f(1.0, 1.0);  glVertex2f(lon2+1.5, lat2+1.5);
+      glTexCoord2f(0.0, 1.0);  glVertex2f(lon2-1.5, lat2+1.5);
+      glEnd();
+      //glDisable(GL_TEXTURE_2D);
+      //glDisable (GL_BLEND);
+      
+      // Restore old projection matrix
+      glPopMatrix();
+   }
+   else
+   {
+      // Set color
+      *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
+      // Draw circle for now
+      DrawCircleAt(sGlColor, lon2, lat2, 3.0);
+   }
+   
+   // Draw spacecraft label
+   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+   DrawStringAt(objName, lon2+1.5, lat2+1.5, 0, 1);
+   glDisable(GL_TEXTURE_2D);
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawGroundStation(const wxString &objName, int objId, int index)
 //------------------------------------------------------------------------------
 /**
  * Draws a circle at current position
  */
 //------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawGroundStation(int objId, int index)
+void GroundTrackCanvas::DrawGroundStation(const wxString &objName, int objId,
+                                          int index)
 {
    // Compute current position
    Real lon2, lat2;
@@ -1572,17 +1625,21 @@ void GroundTrackCanvas::DrawGroundStation(int objId, int index)
    #endif
    
    // Set color to yellow
-   GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW32;
-   //GlColorType *red = (GlColorType*)&GmatColor::RED32;
+   GlColorType *objColor = (GlColorType*)&GmatColor::YELLOW32;
+   //GlColorType *objColor = (GlColorType*)&GmatColor::RED32;
    
    // Make the color transparent before drawing, set alpha value to 128
-   glColor4ub(yellow->red, yellow->green, yellow->blue, 128);
+   glColor4ub(objColor->red, objColor->green, objColor->blue, 128);
    glEnable(GL_TEXTURE_2D);
    glEnable (GL_BLEND);
    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    DrawSquare(lon2, lat2, 2.0, true);
    glDisable(GL_TEXTURE_2D);
    glDisable (GL_BLEND);
+   
+   // Draw ground station label
+   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+   DrawStringAt(objName, lon2+1.5, lat2+1.5, 0, 1);
 }
 
 
