@@ -2274,18 +2274,7 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
       // draw grid on option
       //----------------------------------------------------
       if (mDrawGrid && objName == "Earth")
-      {
-         // This makes lines thicker
-         //glEnable(GL_LINE_SMOOTH);
-         //glLineWidth(1.5);
-         
-         // Just draw a wireframe sphere little bigger to show grid
-         //glColor3f(0.20, 0.20, 0.50); // dark blue
-         glColor3f(0.0, 0.0, 0.0);      // black
-         //glColor3f(0.50, 0.10, 0.20); // maroon
-         GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.03;
-         DrawSphere(radius, 36, 18, GLU_LINE, GLU_OUTSIDE, GL_NONE, GL_FALSE);
-      }
+         DrawGridLines(objId);
    }
    else
    {
@@ -2477,7 +2466,7 @@ void OrbitViewCanvas::DrawEquatorialPlane(UnsignedInt color)
          DrawCircle(qobj, i*size);
    
    gluDeleteQuadric(qobj);
-   sGlColor->not_used = 255;
+   sGlColor->alpha = 255;
    
    glPopMatrix();
    glLineWidth(1.0f);
@@ -2627,6 +2616,24 @@ void OrbitViewCanvas::DrawAxes()
    
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawGridLines(int objId)
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawGridLines(int objId)
+{
+   // This makes lines thicker
+   //glEnable(GL_LINE_SMOOTH);
+   //glLineWidth(1.5);
+   
+   // Just draw a wireframe sphere little bigger to show grid
+   //glColor3f(0.20, 0.20, 0.50); // dark blue
+   glColor3f(0.0, 0.0, 0.0);      // black
+   //glColor3f(0.50, 0.10, 0.20); // maroon
+   GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.03;
+   DrawSphere(radius, 36, 18, GLU_LINE, GLU_OUTSIDE, GL_NONE, GL_FALSE);
 }
 
 

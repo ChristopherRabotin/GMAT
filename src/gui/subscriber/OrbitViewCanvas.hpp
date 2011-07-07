@@ -259,6 +259,7 @@ private:
    void DrawEclipticPlane(UnsignedInt color);
    void DrawSunLine();
    void DrawAxes();
+   void DrawGridLines(int objId);
    
    // spacecraft model
    void DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame);
