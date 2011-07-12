@@ -217,26 +217,30 @@ bool PenUp::Initialize()
       
    GmatCommand::Initialize();
    
-   GmatBase *xy;
+   GmatBase *sub;
    thePlotList.clear();
    
    for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
    {
-      if ((xy = FindObject(plotNameList.at(ii))) != NULL) 
+      if ((sub = FindObject(plotNameList.at(ii))) != NULL) 
       {
-         if (xy->GetTypeName() == "XYPlot") 
-            thePlotList.push_back((XyPlot*) xy);
-            //thePlot = (XyPlot*)xy;
+         if (sub->GetTypeName() == "XYPlot" ||
+             sub->GetTypeName() == "OrbitView" ||
+             sub->GetTypeName() == "GroundTrackPlot")
+            //thePlotList.push_back((XyPlot*) sub);
+            thePlotList.push_back((Subscriber*) sub);
+            //thePlot = (XyPlot*)sub;
          else
             throw CommandException(
-               "Object named \"" + plotNameList.at(ii) + "\" should be an XYPlot to use the "
+               "Object named \"" + plotNameList.at(ii) +
+               "\" should be an XYPlot, OrbitView or GroundTrackPlot to use the "
                "PenUp command for this object, but it is a " + 
-               xy->GetTypeName());      
+               sub->GetTypeName());      
       }
       else 
       {
          MessageInterface::ShowMessage
-            ("PenUp command cannot find XY Plot \"%s\"; command has no effect."
+            ("PenUp command cannot find Plot \"%s\"; command has no effect."
             "\n", (plotNameList.at(ii)).c_str());
          return false;
       }

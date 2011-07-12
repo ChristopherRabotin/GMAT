@@ -99,7 +99,6 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mPlotName = name;
    mGlInitialized = false;
    mViewPointInitialized = false;
-   mOpenGLInitialized = false;
    modelsAreLoaded = false;
    
    // performance
@@ -347,7 +346,7 @@ bool ViewCanvas::InitOpenGL()
       
    mShowMaxWarning = true;
    mIsAnimationRunning = false;
-   mOpenGLInitialized = true;
+   mGlInitialized = true;
    
    #ifdef DEBUG_INIT_OPENGL
    MessageInterface::ShowMessage
@@ -704,6 +703,50 @@ void ViewCanvas::SetEndOfRun(bool flag)
 }
 
 
+//---------------------------------------------------------------------------
+// void TakeAction(const std::string &action)
+//---------------------------------------------------------------------------
+/**
+ * Perform any actions for GL plot
+ */
+//---------------------------------------------------------------------------
+void ViewCanvas::TakeAction(const std::string &action)
+{
+   #ifdef DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("ViewCanvas::TakeAction() '%s' entered, action = '%s'\n", mPlotName.c_str(),
+       action.c_str());
+   #endif
+   
+   if (action == "ClearSolverData")
+   {
+      mSolverAllPosX.clear();
+      mSolverAllPosY.clear();
+      mSolverAllPosZ.clear();
+   }
+   else if (action == "ClearObjects")
+   {
+      mObjectCount = 0;
+      mObjectArray.clear();
+   }
+   else if (action == "PenUp")
+   {
+      mIsDrawing[mLastIndex] = true;
+   }
+   else if (action == "PenDown")
+   {
+      // We don't want to connect to new point so set it to false
+      mIsDrawing[mLastIndex] = false;
+   }
+   
+   #ifdef DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("ViewCanvas::TakeAction() '%s' leaving, action = '%s'\n", mPlotName.c_str(),
+       action.c_str());
+   #endif
+}
+
+
 //------------------------------------------------------------------------------
 // void UpdatePlot(const StringArray &scNames, const Real &time, ...
 //------------------------------------------------------------------------------
@@ -725,6 +768,7 @@ void ViewCanvas::SetEndOfRun(bool flag)
  *           0 (Subscriber::SI_ALL)     = Draw all iteration
  *           1 (Subscriber::SI_CURRENT) = Draw current iteration only
  *           2 (Subscriber::SI_NONE)    = Draw no iteration
+ * @param <drawing> true if drawing is enabled
  * @param <inFunction> true if data is published inside a function
  */
 //------------------------------------------------------------------------------
@@ -733,7 +777,7 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                             const RealArray &posZ, const RealArray &velX,
                             const RealArray &velY, const RealArray &velZ,
                             const UnsignedIntArray &scColors, bool solving,
-                            Integer solverOption, bool inFunction)
+                            Integer solverOption, bool drawing, bool inFunction)
 {
    if (IsFrozen())
       Thaw();
@@ -769,9 +813,9 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       ("===========================================================================\n");
    MessageInterface::ShowMessage
       ("ViewCanvas::UpdatePlot() plot=%s, time=%f, posX=%f, mNumData=%d, "
-       "mScCount=%d, scColor=%u, solving=%d, solverOption=%d, inFunction=%d\n",
+       "mScCount=%d, scColor=%u, solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n",
        GetName().c_str(), time, posX[0], mNumData, mScCount, scColors[0], solving,
-       solverOption, inFunction);
+       solverOption, drawing, inFunction);
    #endif
    
    
@@ -780,6 +824,7 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    //-----------------------------------------------------------------
    ComputeBufferIndex(time);
    mTime[mLastIndex] = time;
+   mIsDrawing[mLastIndex] = drawing;
    
    // update spacecraft position
    UpdateSpacecraftData(time, posX, posY, posZ, velX, velY, velZ, scColors,
@@ -1123,6 +1168,9 @@ void ViewCanvas::ClearObjectArrays(bool deleteArrays)
       if (mTime)
          delete [] mTime;
       
+      if (mIsDrawing)
+         delete [] mIsDrawing;
+      
       if (mObjectRadius)
          delete [] mObjectRadius;
       
@@ -1155,6 +1203,7 @@ void ViewCanvas::ClearObjectArrays(bool deleteArrays)
    }
    
    mTime = NULL;
+   mIsDrawing = NULL;
    mObjectRadius = NULL;
    mObjMaxZoomIn = NULL;
    mObjLastFrame = NULL;
@@ -1188,6 +1237,9 @@ bool ViewCanvas::CreateObjectArrays()
    #endif
    
    if ((mTime = new Real[MAX_DATA]) == NULL)
+      return false;
+   
+   if ((mIsDrawing = new bool[MAX_DATA]) == NULL)
       return false;
    
    if ((mObjectRadius = new Real[mObjectCount]) == NULL)
@@ -1457,7 +1509,8 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
       #else
          SetCurrent();
       #endif
-         
+
+      // Generate text id and bind it before loading image
       glGenTextures(1, &texId);
       glBindTexture(GL_TEXTURE_2D, texId);
       
@@ -1680,12 +1733,12 @@ bool ViewCanvas::LoadSpacecraftModels()
 {
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadSpacecraftModels() entered, mOpenGLInitialized = %d, "
-       "modelsAreLoaded = %d, mScCount = %d\n", mOpenGLInitialized, modelsAreLoaded,
+      ("ViewCanvas::LoadSpacecraftModels() entered, mGlInitialized = %d, "
+       "modelsAreLoaded = %d, mScCount = %d\n", mGlInitialized, modelsAreLoaded,
        mScCount);
    #endif
    
-   if (mOpenGLInitialized)
+   if (mGlInitialized)
    {
       if (!modelsAreLoaded)
       {
@@ -1726,8 +1779,8 @@ bool ViewCanvas::LoadSpacecraftModels()
    
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadSpacecraftModels() leaving, mOpenGLInitialized = %d, "
-       "modelsAreLoaded = %d\n", mOpenGLInitialized, modelsAreLoaded);
+      ("ViewCanvas::LoadSpacecraftModels() leaving, mGlInitialized = %d, "
+       "modelsAreLoaded = %d\n", mGlInitialized, modelsAreLoaded);
    #endif
    
    return modelsAreLoaded;
@@ -1832,8 +1885,8 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
    #if DEBUG_UPDATE
    MessageInterface::ShowMessage
       ("ViewCanvas::UpdateSpacecraftData() entered, time=%f, mScCount=%d, "
-       "mOpenGLInitialized=%d, modelsAreLoaded=%d\n", time, mScCount,
-       mOpenGLInitialized, modelsAreLoaded);
+       "mGlInitialized=%d, modelsAreLoaded=%d\n", time, mScCount,
+       mGlInitialized, modelsAreLoaded);
    #endif
    
    // Load spacecraft models

@@ -174,17 +174,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
 {
    // extra data need
    mNeedAttitude = true;
-   
-   modelsAreLoaded = false;
-   mGlInitialized = false;
-   mViewPointInitialized = false;
-   mOpenGLInitialized = false;
-   mPlotName = name;
-   mParent = parent;
-   mFatalErrorFound = false;
-   mInFunction = false;
-   mWriteRepaintDisalbedInfo = true;
-   
+      
    // Linux specific
    #ifdef __WXGTK__
       hasBeenPainted = false;
@@ -869,18 +859,15 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
 //---------------------------------------------------------------------------
 void OrbitViewCanvas::TakeAction(const std::string &action)
 {
-   if (action == "ClearSolverData")
-   {
-      //MessageInterface::ShowMessage("===> clearing solver data");
-      mSolverAllPosX.clear();
-      mSolverAllPosY.clear();
-      mSolverAllPosZ.clear();
-   }
-   else if (action == "ClearObjects")
-   {
-      mObjectCount = 0;
-      mObjectArray.clear();
-   }
+   #ifdef DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::TakeAction() entered, action = '%s'\n", action.c_str());
+   #endif
+   
+   // Any actions to handle in this plot?
+   
+   ViewCanvas::TakeAction(action);
+   
 }
 
 
@@ -2033,30 +2020,32 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    // Draw spacecraft
    if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
    {
-      #if DEBUG_DRAW
-      MessageInterface::ShowMessage("==> Drawing spacecraft '%s'\n", objName.c_str());
-      #endif
-      
-      Spacecraft *spac = (Spacecraft*)mObjectArray[obj];
-      //ModelManager *mm = ModelManager::Instance();
-      //ModelObject *model = mm->GetModel(spac->modelID);
-      
-      if (spac->modelID != -1)
+      // If drawing at current position is on
+      if (mIsDrawing[frame])
       {
-         DrawSpacecraft3dModel(spac, objId, frame);
-      }
-      else
-      {
-         // Dunn took out old minus signs to make attitude correct.
-         glTranslatef(mObjectViewPos[index1+0],
-                      mObjectViewPos[index1+1],
-                      mObjectViewPos[index1+2]);
-         GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW32;
-         //GlColorType *red = (GlColorType*)&GmatColor::RED32;
-         *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
-         // We want to differenciate spacecraft by orbit color (LOJ: 2011.02.16)
-         //DrawSpacecraft(mScRadius, yellow, red);
-         DrawSpacecraft(mScRadius, yellow, sGlColor);
+         #if DEBUG_DRAW
+         MessageInterface::ShowMessage("==> Drawing spacecraft '%s'\n", objName.c_str());
+         #endif
+         
+         Spacecraft *spac = (Spacecraft*)mObjectArray[obj];
+         
+         if (spac->modelID != -1)
+         {
+            DrawSpacecraft3dModel(spac, objId, frame);
+         }
+         else
+         {
+            // Dunn took out old minus signs to make attitude correct.
+            glTranslatef(mObjectViewPos[index1+0],
+                         mObjectViewPos[index1+1],
+                         mObjectViewPos[index1+2]);
+            GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW32;
+            //GlColorType *red = (GlColorType*)&GmatColor::RED32;
+            *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
+            // We want to differenciate spacecraft by orbit color (LOJ: 2011.02.16)
+            //DrawSpacecraft(mScRadius, yellow, red);
+            DrawSpacecraft(mScRadius, yellow, sGlColor);
+         }
       }
    }
    else
@@ -2304,15 +2293,20 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
 void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
                                      int objId)
 {
-   int index1 = 0, index2 = 0;
-   
    #ifdef DEBUG_ORBIT_LINES
    MessageInterface::ShowMessage
-      ("DrawOrbitLines() entered, i=%d, objName='%s', obj=%d, objId=%d, "
-       "mTime[%3d]=%f, mTime[%3d]=%f\n", i, objName.c_str(), obj, objId, i,
-       mTime[i], i-1, mTime[i-1]);
+      ("OrbitViewCanvas::DrawOrbitLines() entered, i=%d, objName='%s', "
+       "obj=%d, objId=%d, mTime[%3d]=%f, mTime[%3d]=%f, mIsDrawing[%3d]=%d, "
+       "mIsDrawing[%3d]=%d\n", i, objName.c_str(), obj, objId, i, mTime[i],
+       i-1, mTime[i-1], i, mIsDrawing[i], i-1, mIsDrawing[i-1);
    #endif
    
+   // If current or previous points are not drawing, just return
+   if (!mIsDrawing[i] || !mIsDrawing[i-1])
+      return;
+   
+   int index1 = 0, index2 = 0;
+      
    // Draw object orbit line based on points
    if ((mTime[i] > mTime[i-1]) ||
        (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop

@@ -24,7 +24,8 @@
 #define PenDown_hpp
 
 #include "GmatCommand.hpp"
-#include "XyPlot.hpp"
+//#include "XyPlot.hpp"
+#include "Subscriber.hpp"
 
 
 /**
@@ -52,7 +53,8 @@ public:
 
 protected:
    StringArray          plotNameList;   
-   std::vector<XyPlot*> thePlotList;
+   //std::vector<XyPlot*> thePlotList;
+   std::vector<Subscriber*> thePlotList;
 };
 
 #endif /* PenDown_hpp */

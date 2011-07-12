@@ -697,7 +697,7 @@ bool GuiPlotReceiver::UpdateGlPlot(const std::string &plotName,
                                    const RealArray &velY, const RealArray &velZ,
                                    const UnsignedIntArray &scColors, bool solving,
                                    Integer solverOption, bool updateCanvas,
-                                   bool inFunction)
+                                   bool drawing, bool inFunction)
 {
    #if DEBUG_PLOTIF_GL_UPDATE
    MessageInterface::ShowMessage
@@ -728,7 +728,8 @@ bool GuiPlotReceiver::UpdateGlPlot(const std::string &plotName,
              frame->GetPlotName().c_str());
          #endif
          frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                           scColors, solving, solverOption, updateCanvas, inFunction);
+                           scColors, solving, solverOption, updateCanvas, drawing,
+                           inFunction);
          
          updated = true;
          break;

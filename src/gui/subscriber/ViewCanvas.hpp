@@ -138,15 +138,17 @@ public:
    virtual void SetUpdateFrequency(Integer updFreq);
    virtual void SetNumPointsToRedraw(Integer numPoints);
    
+   // actions
+   virtual void TakeAction(const std::string &action);
+   
    // update
    virtual void UpdatePlot(const StringArray &scNames, const Real &time,
                         const RealArray &posX, const RealArray &posY,
                         const RealArray &posZ, const RealArray &velX,
                         const RealArray &velY, const RealArray &velZ,
                         const UnsignedIntArray &scColors, bool solving,
-                        Integer solverOption, bool inFunction = false);
-   
-   virtual void TakeAction(const std::string &action) = 0;
+                        Integer solverOption, bool drawing,
+                        bool inFunction = false);
    
    // object
    virtual void AddObjectList(const wxArrayString &objNames,
@@ -178,7 +180,6 @@ protected:
    wxString mPlotName;
    bool mGlInitialized;
    bool mViewPointInitialized;
-   bool mOpenGLInitialized;
    bool modelsAreLoaded;
    
    // performance
@@ -209,7 +210,7 @@ protected:
    bool mWriteWarning;
    bool mNeedVelocity;
    bool mNeedAttitude;
-
+   
    // drawing option
    bool mDrawWireFrame;
    bool mDrawGrid;   
@@ -279,6 +280,7 @@ protected:
    
    // data buffers
    Real *mTime;                    // [MAX_DATA]
+   bool *mIsDrawing;               // [MAX_DATA]
    Real *mObjectRadius;            // [mObjectCount]
    Real *mObjMaxZoomIn;            // [mObjectCount]
    int  *mObjLastFrame;            // [mObjectCount]

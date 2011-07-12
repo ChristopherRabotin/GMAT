@@ -448,18 +448,9 @@ void GroundTrackCanvas::ViewAnimation(int interval, int frameInc)
 //---------------------------------------------------------------------------
 void GroundTrackCanvas::TakeAction(const std::string &action)
 {
-   if (action == "ClearSolverData")
-   {
-      //MessageInterface::ShowMessage("===> clearing solver data");
-      mSolverAllPosX.clear();
-      mSolverAllPosY.clear();
-      mSolverAllPosZ.clear();
-   }
-   else if (action == "ClearObjects")
-   {
-      mObjectCount = 0;
-      mObjectArray.clear();
-   }
+   // Any actions to handle in this plot?
+   
+   ViewCanvas::TakeAction(action);
 }
 
 
@@ -1050,17 +1041,9 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       MessageInterface::ShowMessage("==> Drawing spacecraft '%s'\n", objName.c_str());
       #endif
       
-      Spacecraft *spac = (Spacecraft*)mObjectArray[obj];
-      
-      // Draw model if model id found
-      if (spac->modelID != -1)
-      {
+      // If drawing at current position is on
+      if (mIsDrawing[frame])
          DrawSpacecraft(objName, objId, index2);
-      }
-      else
-      {
-         DrawCircleAtCurrentPosition(objId, index2, 2.0, false);
-      }
    }
    else if (mObjectArray[obj]->IsOfType(Gmat::GROUND_STATION))
    {
@@ -1174,14 +1157,19 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    DrawDebugMessage(" Entered DrawOrbitLines  --- ", GmatColor::RED32, 0, 300);
    #endif
    
-   int index1 = 0, index2 = 0;
-   
    #ifdef DEBUG_ORBIT_LINES
    MessageInterface::ShowMessage
-      ("DrawOrbitLines() entered, i=%d, objName='%s', obj=%d, objId=%d, "
-       "mTime[%3d]=%f, mTime[%3d]=%f\n", i, objName.c_str(), obj, objId, i,
-       mTime[i], i-1, mTime[i-1]);
+      ("GroundTrackCanvas::DrawOrbitLines() entered, i=%d, objName='%s', "
+       "obj=%d, objId=%d, mTime[%3d]=%f, mTime[%3d]=%f, mIsDrawing[%3d]=%d, "
+       "mIsDrawing[%3d]=%d\n", i, objName.c_str(), obj, objId, i, mTime[i],
+       i-1, mTime[i-1], i, mIsDrawing[i], i-1, mIsDrawing[i-1]);
    #endif
+   
+   // If current or previous points are not drawing, just return
+   if (!mIsDrawing[i] || !mIsDrawing[i-1])
+      return;
+   
+   int index1 = 0, index2 = 0;
    
    // Draw object orbit line based on points
    if ((mTime[i] > mTime[i-1]) ||
@@ -1557,7 +1545,6 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    #if DEBUG_DRAW_SPACECRAFT
    MessageInterface::ShowMessage("   lon = %f, lat = %f\n", lon, lat);
    #endif
-   
    
    if (mTextureIdMap[objName.c_str()] != GmatPlot::UNINIT_TEXTURE)
    {

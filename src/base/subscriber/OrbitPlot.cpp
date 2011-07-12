@@ -424,6 +424,11 @@ void OrbitPlot::SetShowObject(const std::string &name, bool value)
 //------------------------------------------------------------------------------
 // void Activate(bool state)
 //------------------------------------------------------------------------------
+/**
+ * Turns on or off the plot.
+ * This methods is called from the Toggle command.
+ */
+//------------------------------------------------------------------------------
 void OrbitPlot::Activate(bool state)
 {
    #ifdef DEBUG_ACTIVATE
@@ -622,6 +627,7 @@ bool OrbitPlot::TakeAction(const std::string &action,
       ("OrbitPlot::TakeAction() '%s' entered, action='%s', actionData='%s'\n",
        GetName().c_str(), action.c_str(), actionData.c_str());
    #endif
+   
    if (action == "Clear")
    {
       return ClearSpacePointList();
@@ -633,6 +639,16 @@ bool OrbitPlot::TakeAction(const std::string &action,
    else if (action == "Finalize")
    {
       PlotInterface::DeleteGlPlot(instanceName);
+   }
+   else if (action == "PenUp")
+   {
+      isDataOn = false;
+      return true;
+   }
+   else if (action == "PenDown")
+   {
+      isDataOn = true;
+      return true;
    }
    
    return false;
@@ -1903,6 +1919,60 @@ void OrbitPlot::PutUnsignedIntValue(Integer id, const std::string &sval)
 
 
 //------------------------------------------------------------------------------
+// bool UpdateData(const Real *dat, Integer len)
+//------------------------------------------------------------------------------
+bool OrbitPlot::UpdateData(const Real *dat, Integer len)
+{
+   if (len == 0)
+      return true;
+   
+   mNumData++;
+   
+   #if DBGLVL_UPDATE > 1
+   MessageInterface::ShowMessage
+      ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=<%p>\n",
+       mNumData, mDataCollectFrequency, currentProvider);
+   #endif
+   
+   if ((mNumData % mDataCollectFrequency) == 0)
+   {
+      Integer status = BufferOrbitData(dat, len);
+      
+      // if solving and plotting current iteration just return
+      if (status == 2)
+         return true;
+      
+      #if DBGLVL_UPDATE > 0
+      MessageInterface::ShowMessage("==========> Updating plot data\n");
+      #endif
+      
+      bool solving = false;
+      UnsignedIntArray colorArray = mScOrbitColorArray;
+      if (runstate == Gmat::SOLVING)
+      {
+         solving = true;
+         colorArray = mScTargetColorArray;
+      }
+      
+      bool inFunction = false;
+      if (currentProvider && currentProvider->TakeAction("IsInFunction"))
+         inFunction = true;
+      
+      bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
+      
+      PlotInterface::
+         UpdateGlPlot(instanceName, mOldName, mScNameArray, dat[0], mScXArray,
+                      mScYArray, mScZArray, mScVxArray, mScVyArray, mScVzArray,
+                      colorArray, solving, mSolverIterOption, update,
+                      isDataOn, inFunction);
+      
+      if (update)
+         mNumCollected = 0;
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // bool UpdateSolverData()
 //------------------------------------------------------------------------------
 bool OrbitPlot::UpdateSolverData()
@@ -1940,7 +2010,8 @@ bool OrbitPlot::UpdateSolverData()
          UpdateGlPlot(instanceName, mOldName, mCurrScArray[i],
                       mCurrEpochArray[i], mCurrXArray[i], mCurrYArray[i],
                       mCurrZArray[i], mCurrVxArray[i], mCurrVyArray[i],
-                      mCurrVzArray[i], colorArray, true, mSolverIterOption, false);
+                      mCurrVzArray[i], colorArray, true, mSolverIterOption,
+                      false, isDataOn);
    }
    
    // Buffer last point and Update the plot
@@ -1948,7 +2019,8 @@ bool OrbitPlot::UpdateSolverData()
       UpdateGlPlot(instanceName, mOldName, mCurrScArray[last],
                    mCurrEpochArray[last], mCurrXArray[last], mCurrYArray[last],
                    mCurrZArray[last], mCurrVxArray[last], mCurrVyArray[last],
-                   mCurrVzArray[last], colorArray, true, mSolverIterOption, true);
+                   mCurrVzArray[last], colorArray, true, mSolverIterOption,
+                   true, isDataOn);
    
    // clear arrays
    mCurrScArray.clear();
@@ -1977,6 +2049,11 @@ bool OrbitPlot::UpdateSolverData()
 //------------------------------------------------------------------------------
 Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
 {
+   #if DBGLVL_DATA
+   MessageInterface::ShowMessage
+      ("OrbitPlot::BufferOrbitData() '%s' entered\n"), GetName().c_str());
+   #endif
+   
    //------------------------------------------------------------
    // buffer orbit data
    //------------------------------------------------------------
@@ -2006,11 +2083,6 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
    MessageInterface::ShowMessage
       ("   currentProvider=%d, theDataLabels.size()=%d\n",
        currentProvider, theDataLabels.size());
-   #endif
-   
-   #if DBGLVL_DATA > 2
-   MessageInterface::ShowMessage
-      ("OrbitView::Distribute() Using new Publisher code\n");
    #endif
    
    // @note

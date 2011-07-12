@@ -224,15 +224,12 @@ bool GroundTrackPlot::Initialize()
          //===========================================================
          // Save this in incase we need to use light
          //===========================================================
-         #if 1
          // Add Sun to list if it was not added already to enable light source 
          if (find(mObjectNameArray.begin(), mObjectNameArray.end(), "Sun") ==
              mObjectNameArray.end())
             UpdateObjectList(theSolarSystem->GetBody("Sun"), false);
-         #endif
          //===========================================================
-         
-         
+                  
          #if DBGLVL_INIT > 1
          MessageInterface::ShowMessage
             ("   mScNameArray.size=%d, mScOrbitColorArray.size=%d\n",
@@ -784,27 +781,23 @@ bool GroundTrackPlot::UpdateSolverData()
              mCurrEpochArray[i], mCurrXArray[i][sc], mCurrYArray[i][sc],
              mCurrZArray[i][sc]);
       #endif
-
-      // future work
-      #if 1
+      
       // Just buffer data up to last point - 1
       PlotInterface::
          UpdateGlPlot(instanceName, mOldName, mCurrScArray[i],
                       mCurrEpochArray[i], mCurrXArray[i], mCurrYArray[i],
                       mCurrZArray[i], mCurrVxArray[i], mCurrVyArray[i],
-                      mCurrVzArray[i], colorArray, true, mSolverIterOption, false);
-      #endif
+                      mCurrVzArray[i], colorArray, true, mSolverIterOption,
+                      false, isDataOn);
    }
    
    // Buffer last point and Update the plot
-   // future work
-   #if 1
    PlotInterface::
       UpdateGlPlot(instanceName, mOldName, mCurrScArray[last],
                    mCurrEpochArray[last], mCurrXArray[last], mCurrYArray[last],
                    mCurrZArray[last], mCurrVxArray[last], mCurrVyArray[last],
-                   mCurrVzArray[last], colorArray, true, mSolverIterOption, true);
-   #endif
+                   mCurrVzArray[last], colorArray, true, mSolverIterOption, true,
+                   isDataOn);
    
    // clear arrays
    mCurrScArray.clear();
@@ -818,10 +811,7 @@ bool GroundTrackPlot::UpdateSolverData()
    
    if (runstate == Gmat::SOLVING)
    {
-      #if 1
-      // future work
       PlotInterface::TakeGlAction(instanceName, "ClearSolverData");
-      #endif
    }
    return true;
 }
@@ -836,13 +826,25 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
    MessageInterface::ShowMessage
       ("===========================================================================\n"
        "GroundTrackPlot::Distribute() instanceName=%s, active=%d, isEndOfRun=%d, "
-       "isEndOfReceive=%d\n   mAllSpCount=%d, mScCount=%d, len=%d, runstate=%d\n",
-       instanceName.c_str(), active, isEndOfRun, isEndOfReceive, mAllSpCount,
-       mScCount, len, runstate);
+       "isEndOfReceive=%d\n   mAllSpCount=%d, mScCount=%d, len=%d, runstate=%d, "
+       "isDataStateChanged=%d\n", instanceName.c_str(), active, isEndOfRun, isEndOfReceive,
+       mAllSpCount, mScCount, len, runstate, isDataStateChanged);
    #endif
    
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS)
       return true;
+   
+   // if data state changed from on to off or vice versa, update plot data so
+   // data points can be flagged.
+   if (isDataStateChanged)
+   {
+      if (isDataOn)
+         PlotInterface::TakeGlAction(instanceName, "PenDown");
+      else
+         PlotInterface::TakeGlAction(instanceName, "PenUp");
+      
+      isDataStateChanged = false;
+   }
    
    if (!active || mScCount <= 0)
       return true;
@@ -850,12 +852,7 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
    // test isEndOfRun first
    if (isEndOfRun)
    {
-      // future work
-      #if 1
       return PlotInterface::SetGlEndOfRun(instanceName);
-      #else
-      return true;
-      #endif
    }
    
    if (isEndOfReceive)
@@ -867,12 +864,7 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
       }
       else
       {
-         // future work
-         #if 1
          return PlotInterface::RefreshGlPlot(instanceName);
-         #else
-         return true;
-         #endif
       }
    }
    
@@ -906,52 +898,8 @@ bool GroundTrackPlot::Distribute(const Real *dat, Integer len)
    // update plot data
    //------------------------------------------------------------
    
-   mNumData++;
+   UpdateData(dat, len);
    
-   #if DBGLVL_UPDATE > 1
-   MessageInterface::ShowMessage
-      ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=<%p>\n",
-       mNumData, mDataCollectFrequency, currentProvider);
-   #endif
-   
-   if ((mNumData % mDataCollectFrequency) == 0)
-   {
-      
-      Integer status = BufferOrbitData(dat, len);
-      
-      // if solving and plotting current iteration just return
-      if (status == 2)
-         return true;
-      
-      
-      #if DBGLVL_UPDATE > 0
-      MessageInterface::ShowMessage("==========> now update GroundTrackPlot\n");
-      #endif
-      
-      bool solving = false;
-      UnsignedIntArray colorArray = mScOrbitColorArray;
-      if (runstate == Gmat::SOLVING)
-      {
-         solving = true;
-         colorArray = mScTargetColorArray;
-      }
-      
-      bool inFunction = false;
-      if (currentProvider && currentProvider->TakeAction("IsInFunction"))
-         inFunction = true;
-      
-      bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
-      
-      // update plot data
-      PlotInterface::
-         UpdateGlPlot(instanceName, mOldName, mScNameArray,
-                      dat[0], mScXArray, mScYArray, mScZArray,
-                      mScVxArray, mScVyArray, mScVzArray,
-                      colorArray, solving, mSolverIterOption, update, inFunction);
-      
-      if (update)
-         mNumCollected = 0;
-   }
    
    //loj: always return true otherwise next subscriber will not call ReceiveData()
    //     in Publisher::Publish()

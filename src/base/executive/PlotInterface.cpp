@@ -331,7 +331,7 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
                                  const RealArray &velY, const RealArray &velZ,
                                  const UnsignedIntArray &scColors, bool solving,
                                  Integer solverOption, bool updateCanvas,
-                                 bool inFunction)
+                                 bool drawing, bool inFunction)
 {
    #if DEBUG_PLOTIF_GL_UPDATE
    MessageInterface::ShowMessage
@@ -342,8 +342,8 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
    if (thePlotReceiver != NULL)
       return thePlotReceiver->UpdateGlPlot(plotName, oldName, scNames, time,
             posX, posY, posZ, velX, velY, velZ, scColors, solving, solverOption, 
-            updateCanvas, inFunction);
-
+            updateCanvas, drawing, inFunction);
+   
    return false;
 } // end UpdateGlPlot()
 

@@ -806,7 +806,7 @@ void MdiChildViewFrame::UpdatePlot(const StringArray &scNames, const Real &time,
                                    const RealArray &velY, const RealArray &velZ,
                                    const UnsignedIntArray &scColors, bool solving,
                                    Integer solverOption, bool updateCanvas,
-                                   bool inFunction)
+                                   bool drawing, bool inFunction)
 {
    #ifdef DEBUG_UPDATE_PLOT
    MessageInterface::ShowMessage
@@ -817,7 +817,7 @@ void MdiChildViewFrame::UpdatePlot(const StringArray &scNames, const Real &time,
    if (mCanvas)
    {
       mCanvas->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                          scColors, solving, solverOption, inFunction);
+                          scColors, solving, solverOption, drawing, inFunction);
       
       mInFunction = inFunction;
       

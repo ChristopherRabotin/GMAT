@@ -155,6 +155,7 @@ protected:
    Integer mNumPointsToRedraw;
    Integer mNumData;
    Integer mNumCollected;
+   bool    mDrawingStatusChanged;
    
    // arrays for holding distributed data
    RealArray mScXArray;
@@ -185,6 +186,9 @@ protected:
    std::map<std::string, UnsignedInt> mTargetColorMap;
    std::map<std::string, bool> mDrawOrbitMap;
    std::map<std::string, bool> mShowObjectMap;
+   
+   /// Calls PlotInterface for plotting non-solver data  
+   virtual bool         UpdateData(const Real *dat, Integer len);
    
    /// Calls PlotInterface for plotting solver data
    virtual bool         UpdateSolverData();

@@ -155,6 +155,8 @@ protected:
    bool                 isEndOfRun;
    bool                 isInitialized;
    bool                 isFinalized;
+   bool                 isDataOn;
+   bool                 isDataStateChanged;
    
    /// The current run state, so actions based on state can be taken
    Gmat::RunState       runstate;

@@ -97,7 +97,7 @@ public:
                         const RealArray &velY, const RealArray &velZ,
                         const UnsignedIntArray &scColors, bool solving,
                         Integer solverOption, bool updateCanvas,
-                        bool inFunction = false);
+                        bool drawing, bool inFunction = false);
    
    virtual bool TakeGlAction(const std::string &plotName,
                         const std::string &action);

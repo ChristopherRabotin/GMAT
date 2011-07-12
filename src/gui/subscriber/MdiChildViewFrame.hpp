@@ -145,7 +145,7 @@ public:
                         const RealArray &velY, const RealArray &velZ,
                         const UnsignedIntArray &scColors, bool solving,
                         Integer solverOption, bool updateCanvas,
-                        bool inFunction = false);
+                        bool drawing, bool inFunction = false);
    virtual void TakeAction(const std::string &action);
    virtual void InitializePlot();
    virtual void RefreshPlot();

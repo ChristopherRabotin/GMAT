@@ -108,6 +108,8 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    isEndOfRun(false),
    isInitialized(false),
    isFinalized(false),
+   isDataOn(true),
+   isDataStateChanged(false),
    runstate(Gmat::IDLE),
    currProviderId(0)
 {
@@ -143,6 +145,8 @@ Subscriber::Subscriber(const Subscriber &copy) :
    isEndOfRun(copy.isEndOfRun),
    isInitialized(copy.isInitialized),
    isFinalized(copy.isFinalized),
+   isDataOn(copy.isDataOn),
+   isDataStateChanged(copy.isDataStateChanged),
    runstate(copy.runstate),
    currProviderId(copy.currProviderId),
    wrapperObjectNames(copy.wrapperObjectNames)
@@ -196,6 +200,8 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    isEndOfRun = rhs.isEndOfRun;
    isInitialized = rhs.isInitialized;
    isFinalized = rhs.isFinalized;
+   isDataOn = rhs.isDataOn;
+   isDataStateChanged = rhs.isDataStateChanged;
    runstate = rhs.runstate;
    currProviderId = rhs.currProviderId;
    
@@ -264,6 +270,8 @@ bool Subscriber::Initialize()
    isEndOfRun = false;
    isInitialized = false;
    isFinalized = false;
+   isDataOn = true;
+   isDataStateChanged = false;
    return true;
 }
 
@@ -534,11 +542,26 @@ void Subscriber::Activate(bool state)
 {
    #ifdef DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage
-      ("Subscriber::Activate() entered, state=%d, isInitialized=%d\n",
-       state, isInitialized);
+      ("Subscriber::Activate() entered, state=%d, active=%d, isDataOn=%d, "
+       "isDataStateChanged=%d, isInitialized=%d\n", state, active, isDataOn,
+       isDataStateChanged, isInitialized);
    #endif
    
-   active = state;
+   isDataStateChanged = false;
+   if (active != state)
+   {
+      isDataStateChanged = true;
+      active = state;
+      isDataOn = state;
+   }
+   
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage
+      ("Subscriber::Activate() leaving, state=%d, active=%d, isDataOn=%d, "
+       "isDataStateChanged=%d, isInitialized=%d\n", state, active, isDataOn,
+       isDataStateChanged, isInitialized);
+   #endif
+   
 }
 
 

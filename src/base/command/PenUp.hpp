@@ -24,7 +24,8 @@
 #define PenUp_hpp
 
 #include "GmatCommand.hpp"
-#include "XyPlot.hpp"
+//#include "XyPlot.hpp"
+#include "Subscriber.hpp"
 
 
 /**
@@ -53,7 +54,8 @@ protected:
    //std::string plotName;
    //XyPlot      *thePlot;
    StringArray          plotNameList;   
-   std::vector<XyPlot*> thePlotList;
+   //std::vector<XyPlot*> thePlotList;
+   std::vector<Subscriber*> thePlotList;
 };
 
 #endif /* PenUp_hpp */

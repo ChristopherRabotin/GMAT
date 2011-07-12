@@ -665,25 +665,7 @@ void OrbitView::Copy(const GmatBase* orig)
 bool OrbitView::TakeAction(const std::string &action,
                            const std::string &actionData)
 {
-   #if DBGLVL_TAKE_ACTION
-   MessageInterface::ShowMessage
-      ("OrbitView::TakeAction() '%s' entered, action='%s', actionData='%s'\n",
-       GetName().c_str(), action.c_str(), actionData.c_str());
-   #endif
-   if (action == "Clear")
-   {
-      return ClearSpacePointList();
-   }
-   else if (action == "Remove")
-   {
-      return RemoveSpacePoint(actionData);
-   }
-   else if (action == "Finalize")
-   {
-      PlotInterface::DeleteGlPlot(instanceName);
-   }
-   
-   return false;
+   return OrbitPlot::TakeAction(action, actionData);
 }
 
 
@@ -1891,7 +1873,8 @@ bool OrbitView::UpdateSolverData()
          UpdateGlPlot(instanceName, mOldName, mCurrScArray[i],
                       mCurrEpochArray[i], mCurrXArray[i], mCurrYArray[i],
                       mCurrZArray[i], mCurrVxArray[i], mCurrVyArray[i],
-                      mCurrVzArray[i], colorArray, true, mSolverIterOption, false);
+                      mCurrVzArray[i], colorArray, true, mSolverIterOption,
+                      false, isDataOn);
    }
    
    // Buffer last point and Update the plot
@@ -1899,7 +1882,8 @@ bool OrbitView::UpdateSolverData()
       UpdateGlPlot(instanceName, mOldName, mCurrScArray[last],
                    mCurrEpochArray[last], mCurrXArray[last], mCurrYArray[last],
                    mCurrZArray[last], mCurrVxArray[last], mCurrVyArray[last],
-                   mCurrVzArray[last], colorArray, true, mSolverIterOption, true);
+                   mCurrVzArray[last], colorArray, true, mSolverIterOption,
+                   true, isDataOn);
    
    // clear arrays
    mCurrScArray.clear();
@@ -1941,13 +1925,25 @@ bool OrbitView::Distribute(const Real *dat, Integer len)
    MessageInterface::ShowMessage
       ("===========================================================================\n"
        "OrbitView::Distribute() instanceName=%s, active=%d, isEndOfRun=%d, "
-       "isEndOfReceive=%d\n   mAllSpCount=%d, mScCount=%d, len=%d, runstate=%d\n",
-       instanceName.c_str(), active, isEndOfRun, isEndOfReceive, mAllSpCount,
-       mScCount, len, runstate);
+       "isEndOfReceive=%d\n   mAllSpCount=%d, mScCount=%d, len=%d, runstate=%d, "
+       "isDataStateChanged=%d\n", instanceName.c_str(), active, isEndOfRun, isEndOfReceive,
+       mAllSpCount, mScCount, len, runstate, isDataStateChanged);
    #endif
    
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS)
       return true;
+   
+   // if data state changed from on to off or vice versa, update plot data so
+   // data points can be flagged.
+   if (isDataStateChanged)
+   {
+      if (isDataOn)
+         PlotInterface::TakeGlAction(instanceName, "PenDown");
+      else
+         PlotInterface::TakeGlAction(instanceName, "PenUp");
+      
+      isDataStateChanged = false;
+   }
    
    if (!active || mScCount <= 0)
       return true;
@@ -1998,52 +1994,9 @@ bool OrbitView::Distribute(const Real *dat, Integer len)
    //------------------------------------------------------------
    // update plot data
    //------------------------------------------------------------
-   
-   CoordinateConverter coordConverter;
-   mNumData++;
-   
-   #if DBGLVL_UPDATE > 1
-   MessageInterface::ShowMessage
-      ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=<%p>\n",
-       mNumData, mDataCollectFrequency, currentProvider);
-   #endif
-   
-   if ((mNumData % mDataCollectFrequency) == 0)
-   {
-      Integer status = BufferOrbitData(dat, len);
 
-      // if solving and plotting current iteration just return
-      if (status == 2)
-         return true;
-      
-      
-      #if DBGLVL_UPDATE > 0
-      MessageInterface::ShowMessage("==========> now update 3D View\n");
-      #endif
-      
-      bool solving = false;
-      UnsignedIntArray colorArray = mScOrbitColorArray;
-      if (runstate == Gmat::SOLVING)
-      {
-         solving = true;
-         colorArray = mScTargetColorArray;
-      }
-      
-      bool inFunction = false;
-      if (currentProvider && currentProvider->TakeAction("IsInFunction"))
-         inFunction = true;
-      
-      bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
-      
-      PlotInterface::
-         UpdateGlPlot(instanceName, mOldName, mScNameArray,
-                      dat[0], mScXArray, mScYArray, mScZArray,
-                      mScVxArray, mScVyArray, mScVzArray,
-                      colorArray, solving, mSolverIterOption, update, inFunction);
-      
-      if (update)
-         mNumCollected = 0;
-   }
+   UpdateData(dat, len);
+
    
    //loj: always return true otherwise next subscriber will not call ReceiveData()
    //     in Publisher::Publish()
