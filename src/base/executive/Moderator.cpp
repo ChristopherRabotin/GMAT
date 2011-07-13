@@ -6416,8 +6416,9 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    {
       // Show warning message for now (LOJ: 2010.07.15)
       std::string firstCmdStr = "The first command detected is \n'";
-      firstCmdStr = firstCmdStr + 
-            second->GetGeneratingString(Gmat::NO_COMMENTS) + "'";
+      if (second != NULL)
+         firstCmdStr = firstCmdStr +
+               second->GetGeneratingString(Gmat::NO_COMMENTS) + "'";
       std::string knownStartCommands = "   [" + GetStarterStringList() + "]\n";
       //firstCmdStr = firstCmdStr + second->GetGeneratingString() + "'";
       MessageInterface::PopupMessage
