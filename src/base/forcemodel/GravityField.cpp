@@ -710,6 +710,8 @@ bool GravityField::IsParameterReadOnly(const Integer id) const
    if (id < HarmonicFieldParamCount)
       return HarmonicField::IsParameterReadOnly(id);
 
+   if (id == EARTH_TIDE_MODEL)  return false;
+
    return true;
 }
 
