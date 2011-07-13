@@ -1489,7 +1489,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          std::string iconLoc = fm->GetFullPathname("ICON_PATH");
          
          #ifdef DEBUG_TEXTURE
-         MessageInterface::ShowMessage("   iconLoc = '%s'\n", loc.c_str());
+         MessageInterface::ShowMessage("   iconLoc = '%s'\n", iconLoc.c_str());
          #endif
          
          // Check if icon file directory exist
@@ -1624,43 +1624,9 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
    
    // If small icon, set background color alpha value to 0 transparent
    // so that it will not be shown when drawing.
-   // Why it's not working? Set to false (LOJ: 2011.07.06)
-   bool removeBackground = false;
-   if (removeBackground && width == 16 && height == 16)
+   if (width <= 16 && height <= 16)
    {
-      unsigned char red, green, blue;
-      
-      for (int x = 0; x < width; x++)
-      {
-         for (int y = 0; y < height; y++)
-         {
-            red = mirror.GetRed(x, y);
-            green = mirror.GetGreen(x, y);
-            blue = mirror.GetBlue(x, y);
-            
-            #if 0
-            MessageInterface::ShowMessage
-               ("   mirror(%2d,%2d), red=%3d, green=%3d, blue=%3d\n", x, y, red, green, blue);
-            #endif
-            
-            // Assuming background color is white
-            if (red == 255 && green == 255 && blue == 255)
-               mirror.SetAlpha(x, y, 0);
-            else
-               mirror.SetAlpha(x, y, 255);
-            
-            GLubyte *data2 = mirror.GetData();
-            
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            
-            // Set internal format and data type to GL_RGBA
-            mipmapsStatus =
-               gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, width, height, GL_RGBA,
-                                 GL_UNSIGNED_BYTE, data2);
-            
-         }
-      }
+      mipmapsStatus = AddAlphaToTexture(mirror, true);
    }
    else
    {
@@ -1675,12 +1641,19 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
    
    #else
    
-   // Try this on Linux
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                GL_UNSIGNED_BYTE, data1);
+   if (width <= 16 && height <= 16)
+   {
+      mipmapsStatus = AddAlphaToTexture(mirror, false);
+   }
+   else
+   {
+      // Try this on Linux
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                   GL_UNSIGNED_BYTE, data1);
+   }
    
    #endif
    
@@ -1723,6 +1696,74 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
    //=======================================================
    #endif
    //=======================================================
+}
+
+
+//------------------------------------------------------------------------------
+// int AddAlphaToTexture(const wxImage &image, bool useMipmaps)
+//------------------------------------------------------------------------------
+/**
+ * Adds alpha value to texture image
+ */
+//------------------------------------------------------------------------------
+int ViewCanvas::AddAlphaToTexture(const wxImage &image, bool useMipmaps)
+{
+   int width = image.GetWidth();
+   int height = image.GetHeight();
+   unsigned char red, green, blue;
+   int status = 0;
+   
+   GlColorType *tex32 = new GlColorType[width * height];
+   
+   for (int x = 0; x < width; x++)
+   {
+      for (int y = 0; y < height; y++)
+      {
+         red = image.GetRed(x, y);
+         green = image.GetGreen(x, y);
+         blue = image.GetBlue(x, y);
+         
+         #ifdef DEBUG_ADD_ALPHA
+         MessageInterface::ShowMessage
+            ("   image(%2d,%2d), red=%3d, green=%3d, blue=%3d\n",
+             x, y, red, green, blue);
+         #endif
+         
+         int index = y * width + x;
+         tex32[index].red = red;
+         tex32[index].green = green;
+         tex32[index].blue = blue;
+         
+         // Assumes white background for now
+         if (red == 255 && green == 255 && blue == 255)            
+            tex32[index].alpha = 0;
+         else
+            tex32[index].alpha = 255;
+      }
+   }
+   
+   if (useMipmaps)
+   {
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      
+      // Set internal format and data type to GL_RGBA
+      status =
+         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, width, height, GL_RGBA,
+                           GL_UNSIGNED_BYTE, tex32);
+   }
+   else
+   {
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                   GL_UNSIGNED_BYTE, tex32);
+   }
+   
+   delete[] tex32;
+   
+   return status;
 }
 
 

@@ -1550,26 +1550,29 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    {
       glPushMatrix();
       glLoadIdentity();
-      glColor4f(1.0, 1.0, 1.0, 0.0);
+      glColor4f(1.0, 1.0, 1.0, 1.0);
       glEnable(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName.c_str()]);
-      // How can I remove white background of spacecraft icon (png file)
-      //glEnable (GL_BLEND);
+      
+      // Need to enable blending in order to remove background color of png file.
+      // Actually it works without enabling GL_ALPHA_TEST
+      glEnable (GL_BLEND);
       //glEnable(GL_ALPHA_TEST);
-      //glAlphaFunc(GL_GREATER, 0.0f); // shows nothing
-      //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      //glBlendFunc (GL_DST_COLOR, GL_ZERO); // blends whole background to black
+      //glAlphaFunc(GL_GREATER, 0.0f); // works
+      glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // works
+      //glBlendFunc (GL_DST_COLOR, GL_ZERO); // blends with black
       //glBlendFunc (GL_SRC_ALPHA, GL_ONE); // blends with white
       
       glBegin(GL_QUADS);
       // Texture coordinate points go counter clockwise from the bottom left corner
-      glTexCoord2f(0.0, 0.0);  glVertex2f(lon2-1.5, lat2-1.5);
-      glTexCoord2f(1.0, 0.0);  glVertex2f(lon2+1.5, lat2-1.5);
-      glTexCoord2f(1.0, 1.0);  glVertex2f(lon2+1.5, lat2+1.5);
-      glTexCoord2f(0.0, 1.0);  glVertex2f(lon2-1.5, lat2+1.5);
+      float size = 1.7;
+      glTexCoord2f(0.0, 0.0);  glVertex2f(lon2-size, lat2-size);
+      glTexCoord2f(1.0, 0.0);  glVertex2f(lon2+size, lat2-size);
+      glTexCoord2f(1.0, 1.0);  glVertex2f(lon2+size, lat2+size);
+      glTexCoord2f(0.0, 1.0);  glVertex2f(lon2-size, lat2+size);
       glEnd();
-      //glDisable(GL_TEXTURE_2D);
-      //glDisable (GL_BLEND);
+      glDisable(GL_TEXTURE_2D);
+      glDisable (GL_BLEND);
       
       // Restore old projection matrix
       glPopMatrix();
@@ -1583,6 +1586,7 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    }
    
    // Draw spacecraft label
+   glEnable(GL_TEXTURE_2D);
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
    DrawStringAt(objName, lon2+1.5, lat2+1.5, 0, 1);
    glDisable(GL_TEXTURE_2D);

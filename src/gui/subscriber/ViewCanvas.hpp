@@ -84,9 +84,8 @@ public:
    
    // mission run
    virtual void SetEndOfData(bool flag = true) { mIsEndOfData = flag; }
-   virtual void SetEndOfRun(bool flag = true);
-   
-   
+   virtual void SetEndOfRun(bool flag = true);   
+
    
    // actions
    virtual void ClearPlot() = 0;
@@ -333,6 +332,7 @@ protected:
    // texture
    virtual bool LoadBodyTextures();
    virtual GLuint BindTexture(SpacePoint *obj, const wxString &objName);
+   virtual int  AddAlphaToTexture(const wxImage &image, bool useMipmaps);
    
    // model
    virtual bool LoadSpacecraftModels();
