@@ -72,6 +72,7 @@ Optimize::PARAMETER_TYPE[OptimizeParamCount - SolverBranchCommandParamCount] =
 Optimize::Optimize() :
    SolverBranchCommand              ("Optimize"),
    optimizerConverged               (false),
+   optimizerRunOnce                 (false),
    optimizerInFunctionInitialized   (false),
    optimizerInDebugMode             (false),
    minimizeCount                    (0)
@@ -89,6 +90,7 @@ Optimize::Optimize() :
 Optimize::Optimize(const Optimize& o) :
    SolverBranchCommand              (o),
    optimizerConverged               (false),
+   optimizerRunOnce                 (false),
    optimizerInFunctionInitialized   (false),
    optimizerInDebugMode             (o.optimizerInDebugMode),
    minimizeCount                    (0)
@@ -110,7 +112,8 @@ Optimize& Optimize::operator=(const Optimize& o)
     
    GmatCommand::operator=(o);
 
-   optimizerConverged   = false;
+   optimizerConverged             = false;
+   optimizerRunOnce               = false;
    optimizerInFunctionInitialized = false;
    optimizerInDebugMode = o.optimizerInDebugMode;
    localStore.clear();
@@ -921,7 +924,11 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
                std::string type = currentCmd->GetTypeName();
                if ((type == "Optimize") || (type == "Vary") ||
                    (type == "Minimize") || (type == "NonlinearConstraint"))
+               {
                   currentCmd->Execute();
+                  if ((type == "Vary") && (optimizerRunOnce))
+                     currentCmd->TakeAction("SolverReset");
+               }
                currentCmd = currentCmd->GetNext();
             }
             StoreLoopData();
@@ -980,6 +987,7 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
             // Commented out to run once more below (LOJ: 2010.01.08)
             //commandComplete = true;
             optimizerConverged = true;
+            optimizerRunOnce = true;
             
             // Run once more to publish the data from the converged state
             if (!commandComplete)

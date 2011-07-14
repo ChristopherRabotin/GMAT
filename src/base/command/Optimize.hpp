@@ -93,6 +93,8 @@ protected:
    
    /// Flag indicating is the optimizer has converged
    bool                optimizerConverged;
+   /// FLag indicating that this SolverControlSequence ran once already
+   bool                optimizerRunOnce;
    /// Flag indicating optimizer in function initialized
    bool                optimizerInFunctionInitialized;
    

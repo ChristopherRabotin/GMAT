@@ -654,7 +654,6 @@ bool Target::Execute()
 
       theSolver->TakeAction("Reset");
       state = theSolver->GetState();
-      
    }
    
    if (branchExecuting)
