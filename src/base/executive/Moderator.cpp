@@ -6318,7 +6318,7 @@ Gmat::RunState Moderator::GetRunState()
 bool Moderator::InterpretScript(const std::string &filename, bool readBack,
                                 const std::string &newPath)
 {
-   bool status = false;
+   bool isGoodScript = false;
    isRunReady = false;
    endOfInterpreter = false;
    runState = Gmat::IDLE;
@@ -6330,7 +6330,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    try
    {
       PrepareNextScriptReading();
-      status = theScriptInterpreter->Interpret(filename);
+      isGoodScript = theScriptInterpreter->Interpret(filename);
       
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->SetScript(filename);
@@ -6375,12 +6375,9 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
          InterpretScript(newfile);
       }
       
-      if (status)
+      if (isGoodScript)
       {
          #if DEBUG_INTERPRET
-         MessageInterface::ShowMessage
-             ("Moderator::InterpretScript() creating Default Coordinate "
-              "System...\n");
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          #endif
@@ -6401,57 +6398,69 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    ResetConfigurationChanged();
    endOfInterpreter = true;
    
-   // Append BeginMissionSequence command if not there (New since 2010.07.09)
-   GmatCommand *first = GetFirstCommand();
-   GmatCommand *second = first->GetNext();
-   
-   #if DEBUG_INTERPRET
-   ShowCommand("first cmd = ", first, " second cmd = ", second);
-   #endif
-
-   std::string firstCommandType = 
-      (second != NULL ? second->GetTypeName() : "");
-
-   if (!IsSequenceStarter(firstCommandType))
+   if (isGoodScript)
    {
-      // Show warning message for now (LOJ: 2010.07.15)
-      std::string firstCmdStr = "The first command detected is \n'";
-      if (second != NULL)
-         firstCmdStr = firstCmdStr +
-               second->GetGeneratingString(Gmat::NO_COMMENTS) + "'";
-      std::string knownStartCommands = "   [" + GetStarterStringList() + "]\n";
-      //firstCmdStr = firstCmdStr + second->GetGeneratingString() + "'";
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** Mission Sequence start command "
-          "is missing.  One will be required in future builds.  Recognized "
-          "start commands are\n" + knownStartCommands + firstCmdStr);
+      // Append BeginMissionSequence command if not there (New since 2010.07.09)
+      GmatCommand *first = GetFirstCommand();
+      GmatCommand *second = first->GetNext();
       
       #if DEBUG_INTERPRET
-      MessageInterface::ShowMessage
-         ("==> Inserting 'BeginMissionSequence' after '%s'\n",
-          first->GetTypeName().c_str());
+      ShowCommand("first cmd = ", first, " second cmd = ", second);
       #endif
-      bool retval;
-      GmatCommand *bms = CreateCommand("BeginMissionSequence", "", retval);
-      InsertCommand(bms, first);
+      
+      std::string firstCommandType = 
+         (second != NULL ? second->GetTypeName() : "");
+      
+      if (!IsSequenceStarter(firstCommandType))
+      {
+         // Show warning message for now (LOJ: 2010.07.15)
+         std::string firstCmdStr;
+         if (second == NULL)
+         {
+            firstCmdStr = "There is no command detected.";
+         }
+         else
+         {
+            //if (second != NULL)            
+            firstCmdStr = "The first command detected is \n'";
+            firstCmdStr = firstCmdStr +
+               second->GetGeneratingString(Gmat::NO_COMMENTS) + "'";
+         }
+         
+         std::string knownStartCommands = "   [" + GetStarterStringList() + "]\n";
+         //firstCmdStr = firstCmdStr + second->GetGeneratingString() + "'";
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "*** WARNING *** Mission Sequence start command "
+             "is missing.  One will be required in future builds.  Recognized "
+             "start commands are\n" + knownStartCommands + firstCmdStr);
+         
+         #if DEBUG_INTERPRET
+         MessageInterface::ShowMessage
+            ("==> Inserting 'BeginMissionSequence' after '%s'\n",
+             first->GetTypeName().c_str());
+         #endif
+         bool retval;
+         GmatCommand *bms = CreateCommand("BeginMissionSequence", "", retval);
+         InsertCommand(bms, first);
+      }
+      
+      if (second != NULL && second->GetTypeName() == "PrepareMissionSequence")
+         loadSandboxAndPause = true;
+      else
+         loadSandboxAndPause = false;
+      
+      #if DEBUG_INTERPRET > 1
+      MessageInterface::ShowMessage(GetScript());
+      #endif
+      
+      #if DEBUG_INTERPRET > 0
+      GmatCommand *cmd = GetFirstCommand();
+      MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
+      MessageInterface::ShowMessage("Moderator::InterpretScript() returning %d\n", isGoodScript);
+      #endif
    }
-
-   if (second != NULL && second->GetTypeName() == "PrepareMissionSequence")
-      loadSandboxAndPause = true;
-   else
-      loadSandboxAndPause = false;
    
-   #if DEBUG_INTERPRET > 1
-   MessageInterface::ShowMessage(GetScript());
-   #endif
-   
-   #if DEBUG_INTERPRET > 0
-   GmatCommand *cmd = GetFirstCommand();
-   MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
-   MessageInterface::ShowMessage("Moderator::InterpretScript() returning %d\n", status);
-   #endif
-   
-   return status;
+   return isGoodScript;
 }
 
 
@@ -6468,7 +6477,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
 //------------------------------------------------------------------------------
 bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
 {
-   bool status = false;
+   bool isGoodScript = false;
    isRunReady = false;
    endOfInterpreter = false;
    runState = Gmat::IDLE;
@@ -6483,9 +6492,9 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       
       // Set istream and Interpret
       theScriptInterpreter->SetInStream(ss);
-      status = theScriptInterpreter->Interpret();
+      isGoodScript = theScriptInterpreter->Interpret();
       
-      if (status)
+      if (isGoodScript)
       {
          #if DEBUG_INTERPRET
          MessageInterface::ShowMessage
@@ -6514,7 +6523,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    MessageInterface::ShowMessage(GetScript());
    #endif
    
-   return status;
+   return isGoodScript;
 }
 
 
