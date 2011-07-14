@@ -2682,13 +2682,18 @@ void EphemerisFile::WriteCcsdsOrbitDataSegment()
 void EphemerisFile::WriteCcsdsOemMetaData()
 {
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
-   std::string objId  = spacecraft->GetStringParameter("Id");
-   std::string origin = spacecraft->GetOriginName();
+
+   std::string origin = "UNKNOWN";
    std::string csType = "UNKNOWN";
-   GmatBase *cs = (GmatBase*)(spacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""));
+   std::string objId  = spacecraft->GetStringParameter("Id");
    
-   if (cs)
-      csType = (cs->GetRefObject(Gmat::AXIS_SYSTEM, ""))->GetTypeName();
+   if (outCoordSystem)
+   {
+      csType = outCoordSystem->GetStringParameter("Axes");
+      origin = outCoordSystem->GetStringParameter("Origin");
+      if (origin == "Luna")
+         origin = "Moon";
+   }
    
    std::stringstream ss("");
    ss << std::endl;
@@ -2795,11 +2800,9 @@ void EphemerisFile::WriteCcsdsComments(const std::string &comments)
 {
    std::string ccsdsComments = "COMMENT  " + comments;
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
-   //WriteString("\nCOMMENT  " + comments + "\n");
    WriteString("\n" + ccsdsComments + "\n");
    #endif
    
-   //WriteRealCcsdsComments(comments);
    WriteRealCcsdsComments(ccsdsComments);
 }
 
