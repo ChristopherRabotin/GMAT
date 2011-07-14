@@ -137,6 +137,7 @@ ifeq ($(CONSOLE_APP),1)
 
 archclean :
 	rm -rf */*.o
+	rm -rf */*/*.o
 	rm -rf $(TARGETS)
 	rm -rf */*~
 	rm -rf core
@@ -150,6 +151,7 @@ else
 
 archclean :
 	rm -rf */*.o
+	rm -rf */*/*.o
 	rm -rf $(TARGETS)
 	rm -rf */*~
 	rm -rf core

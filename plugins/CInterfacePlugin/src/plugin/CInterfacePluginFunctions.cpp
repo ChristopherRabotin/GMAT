@@ -217,8 +217,8 @@ extern "C"
          lastMsg = "Exception thrown during the run";
          break;
 
+      case -4:
       default:
-      case -4: 
          lastMsg = "unknown error occurred";
       }
 
@@ -603,6 +603,8 @@ void GetODEModel(GmatCommand *cmd, const char *modelName)
    ode = NULL;
    pSetup = NULL;
 
+   char extraMsg[256] = "";
+
    PropSetup *prop = GetFirstPropagator(cmd);
    if (prop != NULL)
    {
@@ -612,17 +614,18 @@ void GetODEModel(GmatCommand *cmd, const char *modelName)
          pSetup = prop;
          ode = model;
          if (ode != NULL)
-            extraMsg = ode->GetName();
+            sprintf(extraMsg, "%s", ode->GetName().c_str());
       }
    }
 
    if (ode != NULL)
    {
-      lastMsg = "ODE model is set to " + extraMsg;
+      lastMsg = "ODE model is set to ";
+      lastMsg += extraMsg;
    }
    else
    {
-      lastMsg = "No ODE model found\n" + extraMsg;
+      lastMsg = "No ODE model found\n";
    }
 }
 
