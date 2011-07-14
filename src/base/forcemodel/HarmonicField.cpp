@@ -903,9 +903,6 @@ void HarmonicField::SetForceOrigin(CelestialBody* toBody)
 }
 
 
-//---------------------------------
-// protected methods
-//---------------------------------
 
 //------------------------------------------------------------------------------
 //  void SetEopFile(EopFile *eopF)
@@ -950,3 +947,8 @@ bool HarmonicField::IsParameterReadOnly(const Integer id) const
    
    return true;
 }
+
+//---------------------------------
+// protected methods
+//---------------------------------
+// N/A
