@@ -87,6 +87,16 @@ class PropagationStateManager;
 class GMAT_API ODEModel : public PhysicalModel
 {
 public:
+   //--------------------------------------------------------------------------------
+   // static methods
+   //--------------------------------------------------------------------------------
+   static void          SetScriptAlias(const std::string& alias,
+                                       const std::string& typeName);
+   static std::string&  GetScriptAlias(const std::string& alias);
+
+   //--------------------------------------------------------------------------------
+   // class methods
+   //--------------------------------------------------------------------------------
    ODEModel(const std::string &nomme = "", 
             const std::string typeNomme = "ODEModel");
    virtual ~ODEModel();
@@ -182,10 +192,6 @@ public:
                                             const Integer value);
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
-   static void          SetScriptAlias(const std::string& alias, 
-                                       const std::string& typeName);
-   static std::string&  GetScriptAlias(const std::string& alias);
-   
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name);
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
@@ -332,6 +338,9 @@ protected:
 //   /// Data file used when debugging epoch data
 //   std::ofstream             epochFile;
    
+   /// map of mu values for SpacePoints
+   std::map<std::string, Real>    muMap;
+
    enum
    {
       CENTRAL_BODY = PhysicalModelParamCount,
@@ -339,6 +348,7 @@ protected:
       POINT_MASSES,
       DRAG,
       SRP,
+      RELATIVISTIC_CORRECTION,
       ERROR_CONTROL,
       COORDINATE_SYSTEM_LIST,
       

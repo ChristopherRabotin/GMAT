@@ -97,6 +97,8 @@ public:
                                   Integer order = 1, 
                                   const Integer id = -1);
 
+   virtual bool    GetBodyAndMu(std::string &itsName, Real &itsMu);
+
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
 

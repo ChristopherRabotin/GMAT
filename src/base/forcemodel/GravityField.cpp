@@ -152,6 +152,9 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
    bodyName = forBodyName;
    parameterCount = GravityFieldParamCount;
 
+   derivativeIds.push_back(Gmat::CARTESIAN_STATE);
+   derivativeIds.push_back(Gmat::ORBIT_STATE_TRANSITION_MATRIX);
+   derivativeIds.push_back(Gmat::ORBIT_A_MATRIX);
 }
 
 
@@ -203,6 +206,8 @@ GravityField::GravityField(const GravityField &gf) :
    parameterCount = GravityFieldParamCount;
 
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
+   derivativeIds.push_back(Gmat::ORBIT_STATE_TRANSITION_MATRIX);
+   derivativeIds.push_back(Gmat::ORBIT_A_MATRIX);
 }
 
 
@@ -623,6 +628,23 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
       }
    #endif
 
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool GetBodyAndMu(std::string &itsName, Real &itsMu)
+//------------------------------------------------------------------------------
+/**
+* This method returns the body name and mu value (from the gravity file).
+ *
+ * @return success flag.
+ */
+//------------------------------------------------------------------------------
+bool GravityField::GetBodyAndMu(std::string &itsName, Real &itsMu)
+{
+   itsName = bodyName;
+   itsMu   = mu;
    return true;
 }
 

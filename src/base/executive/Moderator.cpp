@@ -54,6 +54,7 @@
 
 #include "NoOp.hpp"
 #include "GravityField.hpp"
+#include "RelativisticCorrection.hpp"
 #include "CalculatedPoint.hpp"
 #include "TimeSystemConverter.hpp"  // for SetLeapSecsFileReader(), SetEopFile()
 #include "BodyFixedAxes.hpp"        // for SetEopFile(), SetCoefficientsFile()
@@ -70,7 +71,7 @@
 
 //#define DEBUG_INITIALIZE 1
 //#define DEBUG_FINALIZE 1
-//#define DEBUG_INTERPRET 1
+//#define DEBUG_INTERPRET 2
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
@@ -1308,8 +1309,20 @@ const StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type,
          // add CalculatedPoint to the list
          StringArray calptList =
             theConfigManager->GetListOfItems(Gmat::CALCULATED_POINT);
-         for (UnsignedInt i=0; i<calptList.size(); i++)
-            tempObjectNames.push_back(calptList[i]);
+         // Do not add default (built-in) barycenter(s) on option
+         if (excludeDefaultObjects)
+         {
+            for (UnsignedInt i=0; i<calptList.size(); i++)
+            {
+               if (calptList[i] != "SolarSystemBarycenter")
+                  tempObjectNames.push_back(calptList[i]);
+            }
+         }
+         else
+         {
+            for (UnsignedInt i=0; i<calptList.size(); i++)
+               tempObjectNames.push_back(calptList[i]);
+         }
          
          StringArray osptList =
             theConfigManager->GetListOfItems(Gmat::SPACE_POINT);
@@ -2059,14 +2072,14 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
             obj->SetStringParameter("Secondary", "Earth");
             
             #ifdef __CREATE_DEFAULT_BC__
-            // first create default Earth-Moon Barycenter
-            CalculatedPoint *defBc = GetCalculatedPoint("DefaultBC");
-            
-            if (defBc == NULL)
-               defBc = CreateCalculatedPoint("Barycenter", "DefaultBC");
-            
-            obj->SetStringParameter("Secondary", "DefaultBC");
-            obj->SetRefObject(defBc, Gmat::SPACE_POINT, "DefaultBC");
+               // first create default Earth-Moon Barycenter
+               CalculatedPoint *defBc = GetCalculatedPoint("DefaultBC");
+
+               if (defBc == NULL)
+                  defBc = CreateCalculatedPoint("Barycenter", "DefaultBC");
+
+               obj->SetStringParameter("Secondary", "DefaultBC");
+               obj->SetRefObject(defBc, Gmat::SPACE_POINT, "DefaultBC");
             #endif
             
             // Set body and J2000Body pointer, so that GUI can create LibrationPoint
@@ -2788,6 +2801,11 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
    {
       HarmonicField *hf = (HarmonicField*) obj;
       hf->SetEopFile(theEopFile);
+   }
+   if ((obj != NULL) && obj->IsOfType("RelativisticCorrection"))
+   {
+      RelativisticCorrection *rc = (RelativisticCorrection*) obj;
+      rc->SetEopFile(theEopFile);
    }
    return obj;
 }
@@ -6403,6 +6421,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       // Append BeginMissionSequence command if not there (New since 2010.07.09)
       GmatCommand *first = GetFirstCommand();
       GmatCommand *second = first->GetNext();
+
       
       #if DEBUG_INTERPRET
       ShowCommand("first cmd = ", first, " second cmd = ", second);
@@ -6458,6 +6477,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
       MessageInterface::ShowMessage("Moderator::InterpretScript() returning %d\n", isGoodScript);
       #endif
+
    }
    
    return isGoodScript;

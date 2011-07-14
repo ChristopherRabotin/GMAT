@@ -5867,7 +5867,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       #endif
       return retval;
    }
-   else if (pmType == "SRP" || pmType == "Drag")
+   else if (pmType == "SRP" || pmType == "Drag" || pmType == "RelativisticCorrection")
    {
       if (pmType == "SRP")
       {
@@ -5881,6 +5881,18 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
             return false;
       }
       
+      if (pmType == "RelativisticCorrection")
+      {
+         id = obj->GetParameterID("RelativisticCorrection");
+         type = obj->GetParameterType(id);
+         retval = SetPropertyValue(obj, id, type, value);
+
+         if (retval && value != "On")
+            return true;
+         else if (!retval)
+            return false;
+      }
+
       if (pmType == "Drag" && value == "None")
          return true;
       
@@ -5919,7 +5931,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
             }
          }
       }
-      else if (pmType == "SRP")
+      else if (pmType == "SRP" || pmType == "RelativisticCorrection")
       {
          // Should we set SRP on ForceModel central body?
          pm->SetStringParameter("BodyName", centralBodyName);

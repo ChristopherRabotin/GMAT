@@ -816,7 +816,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
        theObj->GetType() == Gmat::ODE_MODEL && parts.size() >= 2)
    {
       if (parts[1] == "PrimaryBodies" || parts[1] == "PointMasses" ||
-          parts[1] == "SRP" || parts[1] == "Drag")
+          parts[1] == "SRP" || parts[1] == "Drag" || parts[1] == "RelativisticCorrection")
       {
          if (!CreateForceModelProperty(theObj, lhs, rhs))
          {

@@ -26,6 +26,7 @@
 #include "SolarRadiationPressure.hpp"
 #include "DragForce.hpp" 
 #include "GravityField.hpp" 
+#include "RelativisticCorrection.hpp"
 
 
 //---------------------------------
@@ -79,6 +80,8 @@ PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(
        return new DragForce(withName);
    else if (ofType == "GravityField")
        return new GravityField(withName, "Earth");
+   else if (ofType == "RelativisticCorrection")
+       return new RelativisticCorrection(withName, "Earth");
    return NULL;
 }
 
@@ -103,6 +106,7 @@ PhysicalModelFactory::PhysicalModelFactory()
       creatables.push_back("GravityField");
       creatables.push_back("SolarRadiationPressure");
       creatables.push_back("DragForce");
+      creatables.push_back("RelativisticCorrection");
    }
 }
 

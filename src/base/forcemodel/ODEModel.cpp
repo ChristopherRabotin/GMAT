@@ -56,6 +56,7 @@
 #include "PropagationStateManager.hpp"
 #include "TimeTypes.hpp"
 
+#include "GravityField.hpp"
 //#include "PointMassForce.hpp"
 //#include "Formation.hpp"      // for BuildState()
 
@@ -80,6 +81,7 @@
 //#define DEBUG_ERROR_ESTIMATE
 //#define DUMP_TOTAL_DERIVATIVE
 //#define DEBUG_STM_AMATRIX_DERIVS
+//#define DEBUG_MU_MAP
 
 
 //#ifndef DEBUG_MEMORY
@@ -106,6 +108,7 @@ ODEModel::PARAMETER_TEXT[ODEModelParamCount - PhysicalModelParamCount] =
    "PointMasses",
    "Drag",
    "SRP",
+   "RelativisticCorrection",
    "ErrorControl",
    "CoordinateSystemList",
    
@@ -125,6 +128,7 @@ ODEModel::PARAMETER_TYPE[ODEModelParamCount - PhysicalModelParamCount] =
    Gmat::OBJECTARRAY_TYPE,  // "PointMasses",
    Gmat::OBJECT_TYPE,       // "Drag",
    Gmat::ON_OFF_TYPE,       // "SRP",
+   Gmat::ON_OFF_TYPE,       // "RelativisticCorrection",
    Gmat::ENUMERATION_TYPE,  // "ErrorControl",
    Gmat::OBJECTARRAY_TYPE,  // "CoordinateSystemList"
    
@@ -139,6 +143,62 @@ ODEModel::PARAMETER_TYPE[ODEModelParamCount - PhysicalModelParamCount] =
 // Table of alternative words used in force model scripting
 std::map<std::string, std::string> ODEModel::scriptAliases;
 
+//--------------------------------------------------------------------------------
+// static methods
+//--------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void SetScriptAlias(const std::string& alias, const std::string& typeName)
+//------------------------------------------------------------------------------
+/**
+ * Sets mapping between script descriptions of forces and their class names.
+ *
+ * The GMAT script document specifies descriptors for some forces that is
+ * different from the actual class names, and in some cases actually uses more
+ * than one name for the same force.  This method is used to build the map
+ * between the script strings and the actual class names.  The constructor for
+ * the Interpreter base class fills in this data (at least for now -- we might
+ * move it to the Moderator's initialization once it is working and tested).
+ *
+ * @param alias script string used for the force.
+ * @param typeName actual class name as used by the factory that creates it.
+ *
+ * @todo Put the initialization for force aliases in a convenient location.
+ */
+//------------------------------------------------------------------------------
+void ODEModel::SetScriptAlias(const std::string& alias,
+                                const std::string& typeName)
+{
+   if (scriptAliases.find(alias) == scriptAliases.end())
+   {
+      scriptAliases[alias] = typeName;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string& GetScriptAlias(const std::string& alias)
+//------------------------------------------------------------------------------
+/**
+ * Accesses mapping between script descriptions of forces and their class names.
+ *
+ * This method provides access to class names given an alias in the script.
+ *
+ * @param alias script string used for the force.
+ *
+ * @return The class name.
+ */
+//------------------------------------------------------------------------------
+std::string& ODEModel::GetScriptAlias(const std::string& alias)
+{
+   static std::string type;
+   type = alias;
+   if (scriptAliases.find(alias) != scriptAliases.end())
+   {
+      type = scriptAliases[alias];
+   }
+   return type;
+}
 
 //---------------------------------
 // public methods
@@ -189,6 +249,8 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    dimension = 6;
    currentForce = 0;
    parameterCount = ODEModelParamCount;
+
+   muMap.clear();
 }
 
 
@@ -215,6 +277,8 @@ ODEModel::~ODEModel()
    // Delete the owned objects
    ClearForceList();
    ClearInternalCoordinateSystems();
+
+   muMap.clear();
 
    #ifdef DEBUG_FORCE_EPOCHS
       if (epochFile.is_open())
@@ -284,6 +348,7 @@ ODEModel::ODEModel(const ODEModel& fdf) :
 //   spacecraft.clear();
    forceList.clear();
    internalCoordinateSystems.clear();
+   muMap.clear();
    
    // Copy the forces.  May not work -- the copy constructors need to be checked
    for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
@@ -382,6 +447,7 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
           "*newPm = (*pm)->Clone()", this);
       #endif
    }
+   muMap = fdf.muMap;
    
    return *this;
 }
@@ -486,6 +552,24 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
             "support additional forces.");
    }
    
+   if (pmType == "RelativisticCorrection")
+   {
+      std::map<std::string, Real>::iterator pos;
+      std::string rcBodyName = pPhysicalModel->GetBodyName();
+      for (pos = muMap.begin(); pos != muMap.end(); ++pos)
+      {
+         if (pos->first == rcBodyName)
+         {
+            #ifdef DEBUG_MU_MAP
+               MessageInterface::ShowMessage("ODEModel::AddForce ---  setting mu value of %12.10f on newly-added RC for body %s\n",
+                                             pos->second, rcBodyName.c_str());
+            #endif
+            pPhysicalModel->SetRealParameter(pPhysicalModel->GetParameterID("Mu"), pos->second);
+         }
+      }
+   }
+
+
    // Add if new PhysicalModel pointer if not found in the forceList
    if (find(forceList.begin(), forceList.end(), pPhysicalModel) == forceList.end())
    {
@@ -1232,7 +1316,7 @@ bool ODEModel::Initialize()
          // Handle missing coordinate system issues for GravityFields
 		  if ((*current)->IsOfType("HarmonicField"))
          {
-			SetInternalCoordinateSystem("InputCoordinateSystem", (*current));
+			   SetInternalCoordinateSystem("InputCoordinateSystem", (*current));
             SetInternalCoordinateSystem("FixedCoordinateSystem", (*current));
             SetInternalCoordinateSystem("TargetCoordinateSystem", (*current));
 
@@ -1255,9 +1339,41 @@ bool ODEModel::Initialize()
          msg += " failed to initialize";
          throw ODEModelException(msg);
       }
+      if ((*current)->IsOfType("GravityField"))
+      {
+         // get the name and mu value for the muMap
+         std::string itsName;
+         Real        itsMu;
+         ((GravityField*) (*current))->GetBodyAndMu(itsName, itsMu);
+         #ifdef DEBUG_MU_MAP
+            MessageInterface::ShowMessage("ODEModel::Initialize - saving mu value of %12.10f for body %s\n",
+                                          itsMu, itsName.c_str());
+         #endif
+         muMap[itsName] = itsMu;
+      }
       (*current)->SetState(modelState);
    }
-   
+   for (std::vector<PhysicalModel *>::iterator current = forceList.begin();
+        current != forceList.end(); ++current)
+   {
+      if ((*current)->IsOfType("RelativisticCorrection"))
+      {
+         std::map<std::string, Real>::iterator pos;
+         std::string rcBodyName = (*current)->GetBodyName();
+         for (pos = muMap.begin(); pos != muMap.end(); ++pos)
+         {
+            if (pos->first == rcBodyName)
+            {
+               #ifdef DEBUG_MU_MAP
+                  MessageInterface::ShowMessage("ODEModel::Initialize ---  setting mu value of %12.10f on RC for body %s\n",
+                                                 pos->second, rcBodyName.c_str());
+               #endif
+               (*current)->SetRealParameter((*current)->GetParameterID("Mu"), pos->second);
+            }
+         }
+      }
+   }
+
    #ifdef DEBUG_FORCE_EPOCHS
       std::string epfile = "ForceEpochs.txt";
       if (instanceName != "")
@@ -1288,6 +1404,15 @@ bool ODEModel::Initialize()
             " is empty, so it cannot be used for propagation.");
 
    initialized = true;
+
+   #ifdef DEBUG_MU_MAP
+      std::map<std::string, Real>::iterator pos;
+      MessageInterface::ShowMessage("----> At end of Initialize(), the muMap is:");
+      for (pos = muMap.begin(); pos != muMap.end(); ++pos)
+      {
+         MessageInterface::ShowMessage("      %s      %12.10f\n", (pos->first).c_str(), pos->second);
+      }
+   #endif
 
    return true;
 }
@@ -2986,6 +3111,13 @@ std::string ODEModel::GetOnOffParameter(const Integer id) const
             return "Off";
          return "On";
       }
+   case RELATIVISTIC_CORRECTION:
+      {
+         const PhysicalModel *pm = GetForce("RelativisticCorrection");
+         if (pm == NULL)
+            return "Off";
+         return "On";
+      }
    default:
       return PhysicalModel::GetOnOffParameter(id);
    }
@@ -3000,6 +3132,8 @@ bool ODEModel::SetOnOffParameter(const Integer id, const std::string &value)
    switch (id)
    {
    case SRP:
+      return true;
+   case RELATIVISTIC_CORRECTION:
       return true;
    default:
       return PhysicalModel::SetOnOffParameter(id, value);
@@ -3201,58 +3335,6 @@ const StringArray& ODEModel::BuildUserForceList() const
 
 
 //------------------------------------------------------------------------------
-// void SetScriptAlias(const std::string& alias, const std::string& typeName)
-//------------------------------------------------------------------------------
-/**
- * Sets mapping between script descriptions of forces and their class names.
- * 
- * The GMAT script document specifies descriptors for some forces that is 
- * different from the actual class names, and in some cases actually uses more
- * than one name for the same force.  This method is used to build the map
- * between the script strings and the actual class names.  The constructor for
- * the Interpreter base class fills in this data (at least for now -- we might
- * move it to the Moderator's initialization once it is working and tested).
- * 
- * @param alias script string used for the force.
- * @param typeName actual class name as used by the factory that creates it.
- * 
- * @todo Put the initialization for force aliases in a convenient location.
- */
-//------------------------------------------------------------------------------
-void ODEModel::SetScriptAlias(const std::string& alias, 
-                                const std::string& typeName)
-{
-   if (scriptAliases.find(alias) == scriptAliases.end()) {
-      scriptAliases[alias] = typeName;
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// std::string& GetScriptAlias(const std::string& alias)
-//------------------------------------------------------------------------------
-/**
- * Accesses mapping between script descriptions of forces and their class names.
- * 
- * This method provides access to class names given an alias in the script.
- * 
- * @param alias script string used for the force.
- * 
- * @return The class name.
- */
-//------------------------------------------------------------------------------
-std::string& ODEModel::GetScriptAlias(const std::string& alias)
-{
-   static std::string type;
-   type = alias;
-   if (scriptAliases.find(alias) != scriptAliases.end()) {
-      type = scriptAliases[alias];
-   }
-   return type;
-}
-
-
-//------------------------------------------------------------------------------
 // GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -3386,6 +3468,8 @@ std::string ODEModel::BuildForceNameString(PhysicalModel *force)
       retval = force->GetStringParameter("BodyName");
    if (forceType == "SolarRadiationPressure")
       retval = "SRP";
+   if (forceType == "RelativisticCorrection")
+      retval = "RelativisticCorrection";
    
    // Add others here
    
