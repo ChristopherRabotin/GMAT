@@ -18,7 +18,7 @@ GMAT ISS.DryMass = 1000;
 Create ForceModel Sun2Body;
 GMAT Sun2Body.CentralBody = Sun
 GMAT Sun2Body.PointMasses   = {Sun};
-GMAT Sun2Body.RelativisticCorrection = 'On';
+GMAT Sun2Body.RelativisticCorrection = On;
 
 Create Propagator RKV89;
 GMAT RKV89.FM = Sun2Body;
