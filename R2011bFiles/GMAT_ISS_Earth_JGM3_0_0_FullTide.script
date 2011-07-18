@@ -62,7 +62,7 @@ GMAT EarthJGM3.ErrorControl = RSSStep;
 GMAT EarthJGM3.GravityField.Earth.Degree = 20;
 GMAT EarthJGM3.GravityField.Earth.Order = 20;
 GMAT EarthJGM3.GravityField.Earth.PotentialFile = 'JGM3.cof';
-GMAT EarthJGM3.GravityField.Earth.EarthTideModel = 'Full';
+GMAT EarthJGM3.GravityField.Earth.EarthTideModel = 'SolidAndPole';
 
 %----------------------------------------
 %---------- Propagators
