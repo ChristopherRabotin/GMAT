@@ -55,12 +55,6 @@ do
     esac
 done
 
-# bin, data, matlab
-svn export --force "$apppath" "$dest"
-
-# output (empty)
-mkdir -p "$dest/output"
-
 # Platform-dependent stuff
 if $WINDOWS
 then
@@ -74,7 +68,14 @@ then
             grep -E '[0-9]{4}-[0-9]{2}-[0-9]{2}' | \
             tail -n 1`
     fi
-    
+
+    # Validate build
+    if [ ! -e "$winbuildspath"/"$buildname"/bin/GMAT.exe ]
+    then
+        echo 'Invalid build: cannot find GMAT.exe'
+        exit 2;
+    fi
+
     # Copy build files
     cp -pRv "$winbuildspath"/"$buildname"/* "$dest"
 
@@ -97,3 +98,6 @@ elif $MAC
 then
     echo 'Mac-specific files not implemented'
 fi
+
+# bin, data, matlab
+svn export --force "$apppath" "$dest"
