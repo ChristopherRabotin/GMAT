@@ -442,6 +442,7 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\ODEModelException.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\PhysicalModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\PointMassForce.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\RelativisticCorrection.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\SolarRadiationPressure.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\Covariance.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\ElementWrapper.cpp" />
@@ -885,6 +886,7 @@
     <ClInclude Include="..\..\..\src\base\forcemodel\ODEModelException.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\PhysicalModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\PointMassForce.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\RelativisticCorrection.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\SolarRadiationPressure.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\Covariance.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\ElementWrapper.hpp" />
