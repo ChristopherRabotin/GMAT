@@ -1969,6 +1969,8 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
       if (update)
          mNumCollected = 0;
    }
+   
+   return true;
 }
 
 
