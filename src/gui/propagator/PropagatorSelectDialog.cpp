@@ -70,7 +70,7 @@ void PropagatorSelectDialog::Create()
    int bsize = 2; // border size
    //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
-     
+   
    //wxStaticText
    wxStaticText *mPropagatorStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Available Propagator"),
@@ -85,7 +85,7 @@ void PropagatorSelectDialog::Create()
    StringArray propList =
       theGuiInterpreter->GetListOfObjects(Gmat::PROP_SETUP);
    int propCount = propList.size();
-
+   
    if (propCount > 0)
    {
       wxString *propNameList = new wxString[propCount];
@@ -96,12 +96,12 @@ void PropagatorSelectDialog::Create()
       mPropagatorListBox =
          new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
                        wxSize(150, 100), propCount, propNameList, wxLB_SINGLE);
-      delete propNameList;
+      delete [] propNameList;
    }
    else
    {
       mPropagatorListBox =
-         new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150, 100), //0,
+         new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150, 100),
                        emptyList, wxLB_SINGLE);
    }
    
