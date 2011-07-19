@@ -264,6 +264,7 @@ protected:
    int   mScCount;
    float mScRadius;
    StringArray mScNameArray;
+   GLubyte *mScImage;
    
    // objects
    wxArrayString mObjectNames;
@@ -332,7 +333,8 @@ protected:
    // texture
    virtual bool LoadBodyTextures();
    virtual GLuint BindTexture(SpacePoint *obj, const wxString &objName);
-   virtual int  AddAlphaToTexture(const wxImage &image, bool useMipmaps);
+   virtual int  AddAlphaToTexture(const wxImage &image, bool isSpacecraft,
+                                  bool useMipmaps);
    
    // model
    virtual bool LoadSpacecraftModels();
@@ -388,7 +390,7 @@ protected:
    virtual void CopyVector3(Real to[3], Real from[3]);
    
    // for loading image
-   virtual bool LoadImage(const std::string &fileName);
+   virtual bool LoadImage(const std::string &fileName, bool isSpacecraft);
    
    // for debug
    void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos);

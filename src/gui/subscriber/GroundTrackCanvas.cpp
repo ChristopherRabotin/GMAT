@@ -563,8 +563,12 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
       glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
    }
    
+   mAxisLength = (float)(sqrt((Real)(nWidth*nWidth + nHeight*nHeight)));
+   
    #ifdef DEBUG_ONSIZE
-   MessageInterface::ShowMessage("GroundTrackCanvas::OnSize() leaving\n");
+   MessageInterface::ShowMessage
+      ("GroundTrackCanvas::OnSize() leaving, w = %d, h = %d, mAxisLength = %f\n",
+       nWidth, nHeight, mAxisLength);
    #endif
 }
 
@@ -1542,12 +1546,43 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    lon2 *= GmatMathConstants::DEG_PER_RAD;
    lat2 *= GmatMathConstants::DEG_PER_RAD;
    
+   // Use defaultCanvasAxis to draw spacecraft image and label in proper position
+   float defaultCanvasAxis = 1800.0;
+   float imagePos = 2.0 * (defaultCanvasAxis / mAxisLength);
+   
    #if DEBUG_DRAW_SPACECRAFT
    MessageInterface::ShowMessage("   lon = %f, lat = %f\n", lon, lat);
    #endif
    
    if (mTextureIdMap[objName.c_str()] != GmatPlot::UNINIT_TEXTURE)
    {
+      #if 1
+      
+      // This code block draws spacecraft image without blending
+      GLint texW, texH;
+      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName.c_str()]);
+      glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &texW);
+      glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texH);
+      
+      glRasterPos3f(lon2-imagePos, lat2-imagePos, 0.0);
+      glEnable(GL_ALPHA_TEST);
+      glAlphaFunc(GL_GREATER, 0.0f);
+      
+      if (mScImage == NULL)
+      {
+         GLubyte *image = new GLubyte[texW * texH * 4];
+         glGetTexImage(GL_TEXTURE_2D,  0,  GL_RGBA, GL_UNSIGNED_BYTE,  image);
+         glDrawPixels(texW, texH, GL_RGBA, GL_UNSIGNED_BYTE,  image);
+         delete[] image;
+      }
+      else
+      {
+         glDrawPixels(texW, texH, GL_RGBA, GL_UNSIGNED_BYTE,  mScImage);
+      }
+      
+      #else
+      
+      // This code block draws spacecraft image with blending
       glPushMatrix();
       glLoadIdentity();
       glColor4f(1.0, 1.0, 1.0, 1.0);
@@ -1565,17 +1600,18 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
       
       glBegin(GL_QUADS);
       // Texture coordinate points go counter clockwise from the bottom left corner
-      float size = 1.7;
-      glTexCoord2f(0.0, 0.0);  glVertex2f(lon2-size, lat2-size);
-      glTexCoord2f(1.0, 0.0);  glVertex2f(lon2+size, lat2-size);
-      glTexCoord2f(1.0, 1.0);  glVertex2f(lon2+size, lat2+size);
-      glTexCoord2f(0.0, 1.0);  glVertex2f(lon2-size, lat2+size);
+      glTexCoord2f(0.0, 0.0);  glVertex2f(lon2-imagePos, lat2-imagePos);
+      glTexCoord2f(1.0, 0.0);  glVertex2f(lon2+imagePos, lat2-imagePos);
+      glTexCoord2f(1.0, 1.0);  glVertex2f(lon2+imagePos, lat2+imagePos);
+      glTexCoord2f(0.0, 1.0);  glVertex2f(lon2-imagePos, lat2+imagePos);
       glEnd();
       glDisable(GL_TEXTURE_2D);
-      glDisable (GL_BLEND);
+      glDisable(GL_BLEND);
       
       // Restore old projection matrix
       glPopMatrix();
+      
+      #endif
    }
    else
    {
@@ -1588,7 +1624,7 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    // Draw spacecraft label
    glEnable(GL_TEXTURE_2D);
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-   DrawStringAt(objName, lon2+1.5, lat2+1.5, 0, 1);
+   DrawStringAt(objName, lon2+imagePos, lat2+imagePos, 0, 1);
    glDisable(GL_TEXTURE_2D);
 }
 

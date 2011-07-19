@@ -167,6 +167,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    
    // Spacecraft
    mScCount = 0;
+   mScImage = NULL;
    
    // objects
    mObjectCount = 0;
@@ -211,6 +212,10 @@ ViewCanvas::~ViewCanvas()
          glDeleteTextures(1, &texId);
       }
    }
+   
+   // delete SC image data
+   if (mScImage)
+      delete [] mScImage;
    
    #ifdef DEBUG_VIEWCANVAS
    MessageInterface::ShowMessage("ViewCanvas::~ViewCanvas() '%s' leaviing\n", mPlotName.c_str());
@@ -1521,7 +1526,12 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
           texId, error, GL_INVALID_VALUE, GmatPlot::UNINIT_TEXTURE);
       #endif
       
-      if (!LoadImage(textureFile))
+      // Save image data if object is spacecraft or ground station
+      bool isSpacecraft = false;
+      if (obj->IsOfType(Gmat::SPACECRAFT))
+         isSpacecraft = true;
+      
+      if (!LoadImage(textureFile, isSpacecraft))
       {
          if (obj->IsOfType(Gmat::CELESTIAL_BODY))
          {
@@ -1554,9 +1564,9 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
 
 
 //---------------------------------------------------------------------------
-// bool LoadImage(const std::string &fileName)
+// bool LoadImage(const std::string &fileName, bool isSpacecraft)
 //---------------------------------------------------------------------------
-bool ViewCanvas::LoadImage(const std::string &fileName)
+bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
 {
    #if DEBUG_LOAD_IMAGE
    MessageInterface::ShowMessage
@@ -1626,7 +1636,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
    // so that it will not be shown when drawing.
    if (width <= 16 && height <= 16)
    {
-      mipmapsStatus = AddAlphaToTexture(mirror, true);
+      mipmapsStatus = AddAlphaToTexture(mirror, isSpacecraft, true);
    }
    else
    {
@@ -1643,7 +1653,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
    
    if (width <= 16 && height <= 16)
    {
-      mipmapsStatus = AddAlphaToTexture(mirror, false);
+      mipmapsStatus = AddAlphaToTexture(mirror, isSpacecraft, false);
    }
    else
    {
@@ -1700,13 +1710,14 @@ bool ViewCanvas::LoadImage(const std::string &fileName)
 
 
 //------------------------------------------------------------------------------
-// int AddAlphaToTexture(const wxImage &image, bool useMipmaps)
+// int AddAlphaToTexture(const wxImage &image, bool isSpacecraft, bool useMipmaps)
 //------------------------------------------------------------------------------
 /**
  * Adds alpha value to texture image
  */
 //------------------------------------------------------------------------------
-int ViewCanvas::AddAlphaToTexture(const wxImage &image, bool useMipmaps)
+int ViewCanvas::AddAlphaToTexture(const wxImage &image, bool isSpacecraft,
+                                  bool useMipmaps)
 {
    int width = image.GetWidth();
    int height = image.GetHeight();
@@ -1761,7 +1772,10 @@ int ViewCanvas::AddAlphaToTexture(const wxImage &image, bool useMipmaps)
                    GL_UNSIGNED_BYTE, tex32);
    }
    
-   delete[] tex32;
+   if (isSpacecraft)
+      mScImage = (GLubyte*)tex32;
+   else
+      delete[] tex32;
    
    return status;
 }
