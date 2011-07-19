@@ -1597,8 +1597,32 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
    }
    catch (BaseException &)
    {
+      // Owned objects are not configurable and they are local objects
       if (FindOwnedObject(obj, prop, owner, id, type))
+      {
          retval = true;
+      }
+      else
+      {
+         // Bug 2445 fix
+         // Check if it is property of associated objects, such as Hardware of Spacecraft.
+         // Hardware objcts are configurable, but those are cloned before association. 
+         // So that same Hardware can be associated with multiple Spacecraft.
+         StringArray refObjNames = obj->GetRefObjectNameArray(Gmat::HARDWARE);
+         #ifdef DEBUG_FIND_PROP_ID
+         WriteStringArray("Hardware objects ", obj->GetName(), refObjNames);
+         #endif
+         GmatBase *refObj = NULL;
+         for (UnsignedInt i = 0; i < refObjNames.size(); i++)
+         {
+            refObj = FindObject(refObjNames[i]);
+            if (FindPropertyID(refObj, chunk, owner, id, type))
+            {
+               retval = true;
+               break;
+            }
+         }
+      }
    }
    
    #ifdef DEBUG_FIND_PROP_ID
