@@ -441,6 +441,9 @@ bool ObjectPropertyWrapper::SetString(const std::string &toValue)
    MessageInterface::ShowMessage("Entering OBWrapper::SetString with toValue = %s\n",
          toValue.c_str());
    MessageInterface::ShowMessage("   and data type = %d\n", (Integer) GetDataType());
+   MessageInterface::ShowMessage
+      ("   object = <%p><%s>'%s'\n", object, object->GetTypeName().c_str(),
+       object->GetName().c_str());
 #endif
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::STRING_TYPE ||
