@@ -289,6 +289,10 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
        forBody, atTime.GetReal(), overrideTimeSystem, itsName.c_str());
    #endif
    
+   if (atTime.Get() < mA1FileBeg)
+      throw PlanetaryEphemException("Attempting to read data for an epoch "
+            "earlier than the beginning of the current DE File; exiting.\n");
+
    static Real      result[6];
    // if we're asking for the Earth state, return 0.0 (since we're
    // currently assuming Earth-Centered Equatorial
@@ -544,6 +548,7 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
    
    // store file begin time (loj: 9/15/05 Added)
    mFileBeg = T_beg - baseEpoch;
+   mA1FileBeg = T_beg;
 
    #ifdef DEBUG_DEFILE_INIT
    MessageInterface::ShowMessage("   T_beg=%.9f, addr=%p\n", T_beg, &T_beg);

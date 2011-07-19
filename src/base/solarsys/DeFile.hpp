@@ -284,6 +284,9 @@ private:
    /// The base epoch for internal time calculations
    double       baseEpoch;
    double       mFileBeg;
+   /// File beginning in ModJulian format
+   double       mA1FileBeg;
+
       #if (USE_64_BIT_LONGS == 1)
          int numConst;
       #else
