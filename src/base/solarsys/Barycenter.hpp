@@ -59,7 +59,10 @@ public:
    
    virtual Real            GetMass();
    virtual bool            Initialize();
-   
+
+   virtual bool         IsBuiltIn();
+   virtual void         SetIsBuiltIn(bool builtIn, const std::string &ofType = "SSB");
+   virtual StringArray  GetBuiltInNames();
 
    // Parameter access methods - overridden from GmatBase
    /*
@@ -77,10 +80,16 @@ protected:
    };
    //static const std::string PARAMETER_TEXT[BarycenterParamCount - CalculatedPointParamCount];
    //static const Gmat::ParameterType PARAMETER_TYPE[BarycenterParamCount - CalculatedPointParamCount];
+
+   /// flag indicating whether or not this is a built-in Barycenter
+   bool                        isBuiltIn;
+   std::string                 builtInType;
+   SpacePoint                  *builtInSP;
     
 private:
       // check that all bodies in the list are CelestialBody objects
       virtual void CheckBodies();
+
 };
 #endif // Barycenter_hpp
 

@@ -24,8 +24,11 @@
 #include "SolarSystemException.hpp"
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
+#include "GmatDefaults.hpp"
+#include "SolarSystem.hpp"
 
 //#define DEBUG_BARYCENTER
+//#define DEBUG_BARYCENTER_STATE
 //#define DEBUG_BARYCENTER_BODIES
 
 //---------------------------------
@@ -57,11 +60,15 @@
  */
 //------------------------------------------------------------------------------
 Barycenter::Barycenter(const std::string &itsName) :
-CalculatedPoint("Barycenter", itsName)
+   CalculatedPoint("Barycenter", itsName),
+   isBuiltIn      (false),
+   builtInType    (""),
+   builtInSP      (NULL)
 {
    objectTypes.push_back(Gmat::BARYCENTER);
    objectTypeNames.push_back("Barycenter");
    parameterCount = BarycenterParamCount;
+
 }
 
 //------------------------------------------------------------------------------
@@ -75,9 +82,12 @@ CalculatedPoint("Barycenter", itsName)
  */
 //------------------------------------------------------------------------------
 Barycenter::Barycenter(const Barycenter &bary) :
-CalculatedPoint          (bary)
+   CalculatedPoint          (bary),
+   isBuiltIn                (bary.isBuiltIn),
+   builtInType              (bary.builtInType),
+   builtInSP                (NULL)
 {
-   parameterCount = bary.parameterCount;
+   parameterCount  = bary.parameterCount;
 }
 
 //------------------------------------------------------------------------------
@@ -98,8 +108,11 @@ Barycenter& Barycenter::operator=(const Barycenter &bary)
       return *this;
 
    CalculatedPoint::operator=(bary);
-   parameterCount = bary.parameterCount;
-   
+   parameterCount  = bary.parameterCount;
+   isBuiltIn       = bary.isBuiltIn;
+   builtInType     = builtInType;
+   builtInSP       = bary.builtInSP;
+
    return *this;
 }
 
@@ -128,6 +141,16 @@ Barycenter::~Barycenter()
 //---------------------------------------------------------------------------
 const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
 {
+   // if it's built-in, get the state from the SpacePoint
+   if (isBuiltIn)
+   {
+      #ifdef DEBUG_BARYCENTER_STATE
+         MessageInterface::ShowMessage("Computing state for Barycenter %s, whose builtInSP is %s\n",
+               instanceName.c_str(), (builtInSP->GetName()).c_str());
+      #endif
+      return builtInSP->GetMJ2000State(atTime);
+   }
+   // otherwise, sum the masses and states
    CheckBodies();
    #ifdef DEBUG_BARYCENTER
       MessageInterface::ShowMessage("Entering BaryCenter;:GetMJ2000EqState at time %12.10f\n",
@@ -136,20 +159,22 @@ const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
    Real     bodyMass = 0.0;
    Rvector3 bodyPos(0.0,0.0,0.0);
    Rvector3 bodyVel(0.0,0.0,0.0);
-   
-   Real     sumMass  = 0.0;
+
+//   Real     sumMass  = 0.0;
    Real     weight   = 0.0;
    Rvector3 sumMassPos(0.0,0.0,0.0);
    Rvector3 sumMassVel(0.0,0.0,0.0);
-
-   for (unsigned int ii = 0; ii < bodyList.size(); ii++)
-      sumMass +=  ((CelestialBody*) (bodyList.at(ii)))->GetMass();
+   Rvector6 bodyState;
+   Real      sumMass = GetMass();
+//   for (unsigned int ii = 0; ii < bodyList.size(); ii++)
+//      sumMass +=  ((CelestialBody*) (bodyList.at(ii)))->GetMass();
 
    for (unsigned int i = 0; i < bodyList.size() ; i++)
    {
       bodyMass    = ((CelestialBody*) (bodyList.at(i)))->GetMass();
-      bodyPos     = (bodyList.at(i))->GetMJ2000Position(atTime);
-      bodyVel     = (bodyList.at(i))->GetMJ2000Velocity(atTime);
+      bodyState   = (bodyList.at(i))->GetMJ2000State(atTime);
+      bodyPos     = bodyState.GetR();
+      bodyVel     = bodyState.GetV();
       weight      = bodyMass/sumMass;
       #ifdef DEBUG_BARYCENTER
          MessageInterface::ShowMessage("Mass (and weight) of body %s = %12.10f (%12.10f)\n",
@@ -157,8 +182,6 @@ const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
          MessageInterface::ShowMessage("    pos = %s\n", (bodyPos.ToString()).c_str());
          MessageInterface::ShowMessage("    vel = %s\n", (bodyVel.ToString()).c_str());
       #endif
-//      sumMassPos += (bodyMass * bodyPos);
-//      sumMassVel += (bodyMass * bodyVel);
       sumMassPos += (weight * bodyPos);
       sumMassVel += (weight * bodyVel);
    }
@@ -217,6 +240,10 @@ const Rvector3 Barycenter::GetMJ2000Velocity(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 Real Barycenter::GetMass() 
 {
+   // if it's built-in, get the mass from the SpacePoint
+   if (isBuiltIn)
+      return ((CelestialBody*)builtInSP)->GetMass();
+   // otherwise, sum the masses of the bodies
    Real     sumMass  = 0.0;
    for (unsigned int i = 0; i < bodyList.size() ; i++)
    {
@@ -358,27 +385,65 @@ bool Barycenter::Initialize()
       for (unsigned int ii = 0; ii < defaultBodies.size(); ii++)
          MessageInterface::ShowMessage("   %d    %s\n", ii, (defaultBodies.at(ii)).c_str());
    #endif
-   if ((bodyNames.empty()) && !(defaultBodies.empty()))
+   if (isBuiltIn)
    {
-      for (unsigned int ii = 0; ii < defaultBodies.size(); ii++)
-         bodyNames.push_back(defaultBodies.at(ii));
-//      bodyNames = defaultBodies;
+      // create the builtInSP here
+      if ((builtInType == "SSB") || (builtInType == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME))
+      {
+         builtInSP = theSolarSystem->GetSpecialPoint(GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME);
+         if (!builtInSP)
+         {
+            std::string errmsg = "No special point \"";
+            errmsg += GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME + "\" found in Solar System.\n";
+            throw SolarSystemException(errmsg);
+         }
+      }
+      else // no others currently available
+      {
+         throw SolarSystemException("Unknown built-in barycenter\n");
+      }
    }
-   if (bodyNames.empty())
+   else
    {
-      std::string errmsg = "No celestial body specified for Barycenter ";
-      errmsg += instanceName + "\n";
-      throw SolarSystemException(errmsg);
+      if ((bodyNames.empty()) && !(defaultBodies.empty()))
+      {
+         for (unsigned int ii = 0; ii < defaultBodies.size(); ii++)
+            bodyNames.push_back(defaultBodies.at(ii));
+      }
+      if (bodyNames.empty())
+      {
+         std::string errmsg = "No celestial body specified for Barycenter ";
+         errmsg += instanceName + "\n";
+         throw SolarSystemException(errmsg);
+      }
+      #ifdef DEBUG_BARYCENTER_BODIES
+         MessageInterface::ShowMessage("at end of Barycenter::Initialize\n   bodyNames:\n");
+         for (unsigned int ii = 0; ii < bodyNames.size(); ii++)
+            MessageInterface::ShowMessage("   %d    %s\n", ii, (bodyNames.at(ii)).c_str());
+      #endif
    }
-   #ifdef DEBUG_BARYCENTER_BODIES
-      MessageInterface::ShowMessage("at end of Barycenter::Initialize\n   bodyNames:\n");
-      for (unsigned int ii = 0; ii < bodyNames.size(); ii++)
-         MessageInterface::ShowMessage("   %d    %s\n", ii, (bodyNames.at(ii)).c_str());
-   #endif
    return CalculatedPoint::Initialize();
 }
 
 
+bool Barycenter::IsBuiltIn()
+{
+   return isBuiltIn;
+}
+
+void Barycenter::SetIsBuiltIn(bool builtIn, const std::string &ofType)
+{
+   isBuiltIn   = builtIn;
+   builtInType = ofType;
+}
+
+StringArray Barycenter::GetBuiltInNames()
+{
+   StringArray spNames;
+   if (builtInType ==  "SSB")
+      spNames.push_back("SolarSystemBarycenter");
+   return spNames;
+}
 
 //------------------------------------------------------------------------------
 // private methods
