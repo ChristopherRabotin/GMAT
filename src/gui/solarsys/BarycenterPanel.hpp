@@ -40,6 +40,7 @@ private:
    wxArrayString mBodyNames;
 
    bool mIsBodySelected;
+   bool mIsBuiltIn;
 
    wxString mSelBodyName;
    wxArrayString mExcludedCelesBodyList;

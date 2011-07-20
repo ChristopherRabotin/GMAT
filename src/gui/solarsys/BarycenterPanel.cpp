@@ -56,6 +56,7 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
 {
    theBarycenter =
       (Barycenter*)theGuiInterpreter->GetConfiguredObject(name.c_str());
+   mIsBuiltIn    = theBarycenter->IsBuiltIn();
 
    mBodyNames.Clear();
    mIsBodySelected = false;
@@ -103,12 +104,12 @@ void BarycenterPanel::Create()
    // 2. Create Available Bodies box:
    GmatStaticBoxSizer* listStaticBoxSizer = new GmatStaticBoxSizer(wxHORIZONTAL, this, "Available Bodies");
    wxArrayString tmpArrayString;
-   bodyListBox = theGuiManager->GetCelestialBodyListBox(this, -1, wxSize(150, 200), &mExcludedCelesBodyList);
+   bodyListBox = theGuiManager->GetCelestialBodyListBox(this, -1, wxSize(180, 200), &mExcludedCelesBodyList);
    listStaticBoxSizer->Add(bodyListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    // 3. Create Selected Bodies box:
    GmatStaticBoxSizer* selectedStaticBoxSizer = new GmatStaticBoxSizer(wxHORIZONTAL, this, "Selected Bodies");
-   bodySelectedListBox = new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition, wxSize(150, 200), //0,
+   bodySelectedListBox = new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition, wxSize(180, 200), //0,
                                        emptyList, wxLB_SINGLE);
    selectedStaticBoxSizer->Add(bodySelectedListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
@@ -132,21 +133,29 @@ void BarycenterPanel::LoadData()
 {
    try
    {
-      StringArray selectedBodies = theBarycenter->
-         GetStringArrayParameter("BodyNames");
-      if (selectedBodies.empty())
-         selectedBodies = theBarycenter->GetDefaultBodies();
-      
+      StringArray selectedBodies;
+      if (mIsBuiltIn)
+      {
+         selectedBodies = theBarycenter->GetBuiltInNames();
+      }
+      else
+      {
+         selectedBodies= theBarycenter->
+            GetStringArrayParameter("BodyNames");
+         if (selectedBodies.empty())
+            selectedBodies = theBarycenter->GetDefaultBodies();
+      }
       for (unsigned int i=0; i<selectedBodies.size(); i++)
       {
          bodySelectedListBox->Append(selectedBodies[i].c_str());
-         
+
          // find string in body list and delete it, so there are no dups
          int position = bodyListBox->FindString(selectedBodies[i].c_str());
          bodyListBox->Delete(position);
-         
+
          // Added to excluded list
-         mExcludedCelesBodyList.Add(selectedBodies[i].c_str());
+         if (!mIsBuiltIn)
+            mExcludedCelesBodyList.Add(selectedBodies[i].c_str());
       }
    }
    catch (BaseException &e)
@@ -158,6 +167,16 @@ void BarycenterPanel::LoadData()
    
    // Activate "ShowScript"
    mObject = theBarycenter;
+
+   /// don't allow the user to modify the built-in Barycenter(s)
+   if (mIsBuiltIn)
+   {
+      addBodyButton->Enable(false);
+      removeBodyButton->Enable(false);
+      clearBodyButton->Enable(false);
+      bodyListBox->Enable(false);
+      bodySelectedListBox->Enable(false);
+   }
 }
 
 
@@ -167,6 +186,7 @@ void BarycenterPanel::LoadData()
 void BarycenterPanel::SaveData()
 {
    canClose = true;
+   if (mIsBuiltIn) return;
    
    try
    {
