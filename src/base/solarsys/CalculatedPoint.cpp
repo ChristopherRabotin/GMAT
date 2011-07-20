@@ -23,6 +23,7 @@
 #include "gmatdefs.hpp"
 #include "SpacePoint.hpp"
 #include "CalculatedPoint.hpp"
+#include "SolarSystem.hpp"
 #include "SolarSystemException.hpp"
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"
@@ -67,7 +68,7 @@ CalculatedPoint::PARAMETER_TYPE[CalculatedPointParamCount - SpacePointParamCount
 CalculatedPoint::CalculatedPoint(const std::string &ptType, 
                                  const std::string &itsName) :
 SpacePoint(Gmat::CALCULATED_POINT, ptType, itsName),
-numberOfBodies (0)
+numberOfBodies  (0)
 {
    objectTypes.push_back(Gmat::CALCULATED_POINT);
    objectTypeNames.push_back("CalculatedPoint");
@@ -871,6 +872,7 @@ const StringArray& CalculatedPoint::GetDefaultBodies() const
 {
    return defaultBodies;
 }
+
 
 
 
