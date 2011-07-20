@@ -76,6 +76,12 @@ then
         exit 2;
     fi
 
+    # Create destination directory
+    if [ ! -e "$dest" ]
+    then
+        mkdir -p "$dest"
+    fi
+    
     # Copy build files
     cp -pRv "$winbuildspath"/"$buildname"/* "$dest"
 
