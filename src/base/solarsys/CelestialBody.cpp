@@ -404,8 +404,8 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    default_textureMapFileName    (cBody.default_textureMapFileName),
    order               (cBody.order),
    degree              (cBody.degree),
-   sij                 (cBody.sij),
-   cij                 (cBody.cij),
+//   sij                 (cBody.sij),
+//   cij                 (cBody.cij),
    twoBodyFormat       (cBody.twoBodyFormat),
    twoBodyStateType    (cBody.twoBodyStateType),
    twoBodyEpoch        (cBody.twoBodyEpoch),
@@ -1249,40 +1249,40 @@ Real  CelestialBody::GetHourAngle(A1Mjd atTime)
    return hourAngle;
 }
 
-//------------------------------------------------------------------------------
-//  const Rmatrix& GetHarmonicCoefficientsSij() 
-//------------------------------------------------------------------------------
-/**
- * This method returns the spherical harmonic coefficients sij for the body.  It
- * will read the potential file if that is requested.
- *
- * @return sij spherical harmonic coefficients for the body.
- *
- *
- * @exception <SolarSystemException> thown if there is an error getting the data.
- */
-//------------------------------------------------------------------------------
-const Rmatrix& CelestialBody::GetHarmonicCoefficientsSij() 
-{
-   return sij;
-}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix& GetHarmonicCoefficientsCij() 
-//------------------------------------------------------------------------------
-/**
- * This method returns the spherical harmonic coefficients cij for the body.  It
- * will read the potential file if that is requested.
- *
- * @return cij spherical harmonic coefficients for the body.
- *
- * @exception <SolarSystemException> thown if there is an error getting the data.
- */
-//------------------------------------------------------------------------------
-const Rmatrix& CelestialBody::GetHarmonicCoefficientsCij() 
-{
-   return cij;
-}
+////------------------------------------------------------------------------------
+////  const Rmatrix& GetHarmonicCoefficientsSij()
+////------------------------------------------------------------------------------
+///**
+// * This method returns the spherical harmonic coefficients sij for the body.  It
+// * will read the potential file if that is requested.
+// *
+// * @return sij spherical harmonic coefficients for the body.
+// *
+// *
+// * @exception <SolarSystemException> thown if there is an error getting the data.
+// */
+////------------------------------------------------------------------------------
+//const Rmatrix& CelestialBody::GetHarmonicCoefficientsSij()
+//{
+//   return sij;
+//}
+//
+////------------------------------------------------------------------------------
+////  const Rmatrix& GetHarmonicCoefficientsCij()
+////------------------------------------------------------------------------------
+///**
+// * This method returns the spherical harmonic coefficients cij for the body.  It
+// * will read the potential file if that is requested.
+// *
+// * @return cij spherical harmonic coefficients for the body.
+// *
+// * @exception <SolarSystemException> thown if there is an error getting the data.
+// */
+////------------------------------------------------------------------------------
+//const Rmatrix& CelestialBody::GetHarmonicCoefficientsCij()
+//{
+//   return cij;
+//}
 
 //------------------------------------------------------------------------------
 //  const Rmatrix& GetCoefDriftS()
@@ -1731,16 +1731,17 @@ bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetSourceFile(PlanetaryEphem *src)
 {
-   #ifdef DEBUG_EPHEM_SOURCE
-   MessageInterface::ShowMessage
-      ("CelestialBody::SetSourceFile() <%p> %s, Setting source file to %p\n",
-       this, GetName().c_str(), src);
-   #endif
    
    // should I delete the old one here???
    theSourceFile = src;
    sourceFilename = theSourceFile->GetName();
    bodyNumber = theSourceFile->GetBodyID(instanceName);
+   #ifdef DEBUG_EPHEM_SOURCE
+      MessageInterface::ShowMessage
+         ("CelestialBody::SetSourceFile() <%p> %s, Setting source file to %p\n",
+          this, GetName().c_str(), src);
+      MessageInterface::ShowMessage("    and bodyId from source is %d\n", bodyNumber);
+   #endif
    return true;
 }
 
@@ -1923,17 +1924,17 @@ bool CelestialBody::SetDegree(Integer toDegree)
    return true;
 }
 
-bool CelestialBody::SetHarmonicCoefficientsSij(const Rmatrix &coeffSij)
-{
-   sij                 = coeffSij;
-   return true;
-}
-
-bool CelestialBody::SetHarmonicCoefficientsCij(const Rmatrix &coeffCij)
-{
-   cij                 = coeffCij;
-   return true;
-}
+//bool CelestialBody::SetHarmonicCoefficientsSij(const Rmatrix &coeffSij)
+//{
+//   sij                 = coeffSij;
+//   return true;
+//}
+//
+//bool CelestialBody::SetHarmonicCoefficientsCij(const Rmatrix &coeffCij)
+//{
+//   cij                 = coeffCij;
+//   return true;
+//}
 
 
 
@@ -2303,14 +2304,14 @@ Rvector CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) cons
       W     = orientation[4]  + orientation[5] * d;
       Wdot  = orientation[5]  * CelestialBody::dDot;
       #ifdef DEBUG_CB_CARTOGRAPHIC
-      if ((forTime.Get() > 23158.005) && (forTime.Get() < 23158.006))
-      {
+//      if ((forTime.Get() > 23158.005) && (forTime.Get() < 23158.006))
+//      {
          MessageInterface::ShowMessage("returning cartographic coordinates for body %s at time %12.10f:\n",
                                        instanceName.c_str(), forTime.Get());
          MessageInterface::ShowMessage("   alpha = %12.10f    delta = %12.10f    W = %12.10f    Wdot = %12.10f    d = %12.10f    T = %12.10f  dDot = %12.10f\n",
                                        alpha, delta, W, Wdot, d, T, CelestialBody::dDot);
          MessageInterface::ShowMessage("   orientation array = %s\n", orientation.ToString().c_str());
-      }
+//      }
       #endif
       return Rvector(4, alpha, delta, W, Wdot);
    }
@@ -4000,8 +4001,8 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    if ((!newTwoBody) && 
        (Abs(forTime.Subtract(prevTwoBodyEpoch) * GmatTimeConstants::SECS_PER_DAY) <= KEPLER_TOL))
       return prevTwoBodyState;
-      cart  = CoordUtil::KeplerianToCartesian(twoBodyKepler, cbMu, CoordUtil::TA);  // or MA???
-      dTime = forTime.Subtract(twoBodyEpoch) * GmatTimeConstants::SECS_PER_DAY;
+   cart  = CoordUtil::KeplerianToCartesian(twoBodyKepler, cbMu, CoordUtil::TA);  // or MA???
+   dTime = forTime.Subtract(twoBodyEpoch) * GmatTimeConstants::SECS_PER_DAY;
    #ifdef DEBUG_TWO_BODY
       MessageInterface::ShowMessage("cbMu = %12.14f    dTime = %12.14f\n", cbMu, dTime);
    #endif
@@ -4042,6 +4043,9 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    // for a circle or ellipse
    if (alpha > KEPLER_TOL)  
    {
+      #ifdef DEBUG_TWO_BODY
+         MessageInterface::ShowMessage(" -------- circle or ellipse\n");
+      #endif
       x0 = Sqrt(cbMu) * dTime * alpha;
 
       if (Abs(alpha - 1.0) <= KEPLER_TOL)
@@ -4053,6 +4057,9 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    // for a parabola
    else if (Abs(alpha) < KEPLER_TOL)
    {
+      #ifdef DEBUG_TWO_BODY
+         MessageInterface::ShowMessage(" -------- parabola\n");
+      #endif
       Rvector3 h     = Cross(r0, v0);
       Real     hMag0 = h.GetMagnitude();
       Real     p     = (hMag0 * hMag0) / cbMu;
@@ -4065,6 +4072,9 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    // for a hyperbola
    else if (alpha < -KEPLER_TOL)
    {
+      #ifdef DEBUG_TWO_BODY
+         MessageInterface::ShowMessage(" -------- hyperbola\n");
+      #endif
       Real     a     = 1.0 / alpha;
       Integer  signT = SignOf(dTime);
       Real     num   = -2.0 * cbMu * alpha * dTime;
@@ -4130,7 +4140,7 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
 
    if (counter >= KEPLER_MAX_ITERATIONS)
    {
-      std::stringstream ss;
+      std::stringstream ss("");
       ss << "Kepler's Problem (TwoBodyPropagation) for Body \"" << instanceName <<
             "\" is not converging after " << KEPLER_MAX_ITERATIONS << "iterations.";
       throw SolarSystemException(ss.str());
@@ -4207,9 +4217,10 @@ bool CelestialBody::SetUpSPICE()
       }
       else  // outer planets/moons, comets, and asteroids must have their own SPK file specified
       {
-         if (!msgWritten && ((instanceName != SolarSystem::SUN_NAME) && (instanceName != SolarSystem::MERCURY_NAME) &&
-             (instanceName != SolarSystem::VENUS_NAME) && (instanceName != SolarSystem::EARTH_NAME) &&
-             (instanceName != SolarSystem::MOON_NAME)))
+         if (!msgWritten && !NeedsOnlyMainSPK())
+//         if (!msgWritten && ((instanceName != SolarSystem::SUN_NAME) && (instanceName != SolarSystem::MERCURY_NAME) &&
+//             (instanceName != SolarSystem::VENUS_NAME) && (instanceName != SolarSystem::EARTH_NAME) &&
+//             (instanceName != SolarSystem::MOON_NAME)))
          {
             MessageInterface::ShowMessage(
                "An additional body-specific SPK may be required for body %s or its satellites.\n",
@@ -4267,11 +4278,13 @@ bool CelestialBody::SetUpSPICE()
       Integer spiceNaifId; 
       if (instanceName == SolarSystem::MOON_NAME)
          spiceNaifId = kernelReader->GetNaifID("MOON"); 
+      else if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+         spiceNaifId = kernelReader->GetNaifID("SSB");
       else
       {
             spiceNaifId = kernelReader->GetNaifID(instanceName, false);
             // if not found with the instanceName, try using the NAIF ID
-            if (spiceNaifId == 0)
+            if (spiceNaifId == 0)   // SSB is 0, but that's handled above
             {
                std::stringstream ss("");
                ss << naifId;
@@ -4290,7 +4303,7 @@ bool CelestialBody::SetUpSPICE()
       
       if ((naifId != UNDEFINED_NAIF_ID) && (spiceNaifId != naifId))
       {
-         std::stringstream ss;
+         std::stringstream ss("");
          ss << "Overriding input NAIF ID for body \"" << instanceName <<
                "\" with SPICE NAIF ID (" << spiceNaifId << ").\n";
          MessageInterface::PopupMessage(Gmat::WARNING_, ss.str());
@@ -4304,6 +4317,11 @@ bool CelestialBody::SetUpSPICE()
    #endif
 #endif
    return true;
+}
+
+bool CelestialBody::NeedsOnlyMainSPK()
+{
+   return false;
 }
 
 //------------------------------------------------------------------------------

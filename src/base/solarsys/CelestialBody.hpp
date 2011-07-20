@@ -67,8 +67,9 @@ namespace Gmat
       STAR = 0,
       PLANET,
       MOON,
-      ASTEROID,             // asteroids not yet implemented
+      ASTEROID,
       COMET,
+      SPECIAL_CELESTIAL_POINT,
       KUIPER_BELT_OBJECT,   // KBOs not yet implemented
       BodyTypeCount
    };
@@ -80,6 +81,7 @@ namespace Gmat
       "Moon",
       "Asteroid",
       "Comet",
+      "SpecialCelestialPoint",
       "KuiperBeltObject",   // KBOs not yet implemented
    };
    
@@ -177,8 +179,8 @@ public:
 
    virtual Real                 GetHourAngle(A1Mjd atTime); 
    
-   virtual const Rmatrix&       GetHarmonicCoefficientsSij(); 
-   virtual const Rmatrix&       GetHarmonicCoefficientsCij(); 
+//   virtual const Rmatrix&       GetHarmonicCoefficientsSij();
+//   virtual const Rmatrix&       GetHarmonicCoefficientsCij();
    virtual Integer              GetDegree();
    virtual Integer              GetOrder();
    virtual std::string          GetAtmosphereModelType();
@@ -217,8 +219,8 @@ public:
    virtual bool           SetValidModelList(Gmat::ModelType m, const StringArray &toList);
    virtual bool           SetOrder(Integer toOrder);
    virtual bool           SetDegree(Integer toDegree);
-   virtual bool           SetHarmonicCoefficientsSij(const Rmatrix &coeffSij);
-   virtual bool           SetHarmonicCoefficientsCij(const Rmatrix &coeffCij);
+//   virtual bool           SetHarmonicCoefficientsSij(const Rmatrix &coeffSij);
+//   virtual bool           SetHarmonicCoefficientsCij(const Rmatrix &coeffCij);
 
    
    virtual bool           SetAtmosphereModelType(std::string toAtmModelType);
@@ -480,10 +482,10 @@ protected:
    Integer                order;    
    /// degree of the gravity model
    Integer                degree;  
-   /// spherical harmonic coefficients (Sij) for the body
-   Rmatrix                sij;
-   /// spherical harmonic coefficients (Cij) for the body
-   Rmatrix                cij;
+//   /// spherical harmonic coefficients (Sij) for the body
+//   Rmatrix                sij;
+//   /// spherical harmonic coefficients (Cij) for the body
+//   Rmatrix                cij;
    /// date format for the twoBody method epoch
    std::string            twoBodyFormat;
    /// state type for twoBody inputs
@@ -561,6 +563,7 @@ protected:
    virtual Rvector6 ComputeTwoBody(const A1Mjd &forTime);
    virtual Rvector6 KeplersProblem(const A1Mjd &forTime);
    virtual bool     SetUpSPICE();
+   virtual bool     NeedsOnlyMainSPK();
    
 private:
 
