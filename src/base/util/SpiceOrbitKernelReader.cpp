@@ -310,8 +310,9 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
    }
    if (firstInt)
    {
-      std::string errmsg = "Error - no data available for body on specified SPK kernels";
-      throw UtilityException(errmsg);
+      std::stringstream errmsg("");
+      errmsg << "Error - no data available for body with NAIF ID " << forNaifId << " on specified SPK kernels\n";
+      throw UtilityException(errmsg.str());
    }
 }
 
@@ -353,10 +354,11 @@ Rvector6 SpiceOrbitKernelReader::GetTargetState(const std::string &targetName,
       MessageInterface::ShowMessage("   coverage for object %s : %12.10f --> %12.10f\n",
             targetName.c_str(), start, end);
    #endif
-   std::string targetNameToUse = targetName;
-   if ((targetName == "Luna") || (targetName == "LUNA"))  // Luna, instead of Moon, for GMAT
-      targetNameToUse        = "Moon";
-   targetNameToUse           = GmatStringUtil::ToUpper(targetNameToUse);
+   std::string targetNameToUse = GmatStringUtil::ToUpper(targetName);
+   if (targetNameToUse == "LUNA")  // We use Luna, instead of Moon, for GMAT
+      targetNameToUse        = "MOON";
+   if (targetNameToUse == "SOLARSYSTEMBARYCENTER")
+      targetNameToUse = "SSB";
    objectNameSPICE           = targetNameToUse.c_str();
    observingBodyNameSPICE    = observingBodyName.c_str();
    referenceFrameSPICE       = referenceFrame.c_str();
