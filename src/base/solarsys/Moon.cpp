@@ -83,21 +83,21 @@ CelestialBody     ("Moon",name)
    if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_405_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
    
-   // defaults for now ...
-   Rmatrix s(5,5,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0);
-   Rmatrix c(5,5,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0);
-   sij = s;
-   cij = c;
+//   // defaults for now ...
+//   Rmatrix s(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   Rmatrix c(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   sij = s;
+//   cij = c;
 
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
@@ -339,6 +339,12 @@ GmatBase* Moon::Clone(void) const
 void Moon::Copy(const GmatBase* orig)
 {
    operator=(*((Moon *)(orig)));
+}
+
+bool Moon::NeedsOnlyMainSPK()
+{
+   if (instanceName == GmatSolarSystemDefaults::MOON_NAME)  return true;
+   return false;
 }
 
 

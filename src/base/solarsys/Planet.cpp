@@ -86,21 +86,21 @@ Planet::Planet(std::string name) :
    else if (name == SolarSystem::NEPTUNE_NAME)
       rotationSrc      = Gmat::IAU_2002;
 
-   // defaults for now ...
-   Rmatrix s(5,5,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0);
-   Rmatrix c(5,5,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0);
-   sij = s;
-   cij = c;
+//   // defaults for now ...
+//   Rmatrix s(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   Rmatrix c(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   sij = s;
+//   cij = c;
 
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
@@ -433,6 +433,14 @@ void Planet::Copy(const GmatBase* orig)
    operator=(*((Planet *)(orig)));
 }
 
+bool Planet::NeedsOnlyMainSPK()
+{
+   if ((instanceName == GmatSolarSystemDefaults::MERCURY_NAME) ||
+       (instanceName == GmatSolarSystemDefaults::VENUS_NAME) ||
+       (instanceName == GmatSolarSystemDefaults::EARTH_NAME))
+              return true;
+   return false;
+}
 
 
 //------------------------------------------------------------------------------

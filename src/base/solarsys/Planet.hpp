@@ -80,6 +80,7 @@ public:
    virtual GmatBase* Clone(void) const;
    // required method for all subclasses that can be copied in a script
    virtual void      Copy(const GmatBase* orig);
+   virtual bool      NeedsOnlyMainSPK();
 
    // Parameter access methods - overridden from GmatBase - may need these later??
    virtual std::string     GetParameterText(const Integer id) const;     

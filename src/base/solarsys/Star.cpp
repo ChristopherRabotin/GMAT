@@ -72,21 +72,21 @@ CelestialBody       ("Star",name)
    referenceBodyNumber = 3;
    rotationSrc         = Gmat::IAU_SIMPLIFIED;  // ??
    
-   // defaults for now ...
-   Rmatrix s(5,5,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0);
-   Rmatrix c(5,5,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0,
-         0.0, 0.0,             0.0,             0.0,             0.0);
-   sij = s;
-   cij = c;
+//   // defaults for now ...
+//   Rmatrix s(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   Rmatrix c(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   sij = s;
+//   cij = c;
 
    SaveAllAsDefault();
 //   InitializeStar();  // should this be the default?
@@ -269,6 +269,11 @@ void Star::Copy(const GmatBase* orig)
    operator=(*((Star *)(orig)));
 }
 
+bool Star::NeedsOnlyMainSPK()
+{
+   if (instanceName == GmatSolarSystemDefaults::SUN_NAME)  return true;
+   return false;
+}
 
 
 //------------------------------------------------------------------------------
