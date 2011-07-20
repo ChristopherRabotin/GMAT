@@ -632,7 +632,7 @@ bool GravityFile::ReadGrvFile(const std::string &filename, Integer& degree,
          }
          else
          {
-            // We can stop here if we dont read coefficients
+            // We can stop here if we don't read coefficients
             if (!readCoeff)
                break;
 
