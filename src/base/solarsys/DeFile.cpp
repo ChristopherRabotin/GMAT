@@ -248,6 +248,8 @@ void DeFile::Initialize()
 //------------------------------------------------------------------------------
 Integer  DeFile::GetBodyID(std::string bodyName)
 {
+   if (bodyName == SolarSystem::SOLAR_SYSTEM_BARYCENTER_NAME)     return DeFile::SS_BARY_ID;
+
    if (bodyName == SolarSystem::SUN_NAME)     return DeFile::SUN_ID;
    if (bodyName == SolarSystem::MERCURY_NAME) return DeFile::MERCURY_ID;
    if (bodyName == SolarSystem::VENUS_NAME)   return DeFile::VENUS_ID;
@@ -346,6 +348,11 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    
    // interpolate the data to get the state
    Interpolate_State(absJD, forBody, &rv);
+   #ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel()  state from DE file = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+               rv.Position[0], rv.Position[1], rv.Position[2], rv.Velocity[0], rv.Velocity[1], rv.Velocity[2]);
+   #endif
 
    if (forBody == DeFile::MOON_ID)
    {
@@ -367,24 +374,38 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    Interpolate_State(absJD,(int)DeFile::EARTH_ID, &emrv);
    // moon state (geocentric)
    Interpolate_State(absJD,(int)DeFile::MOON_ID, &mrv);
-   
-   stateType bwe;
-   
-   for (int i=0; i<3; i++)
-   {
-      bwe.Position[i] = rv.Position[i] -
-         (emrv.Position[i] - (mrv.Position[i] / (R1.EMRAT + 1.0)));
-      bwe.Velocity[i] = rv.Velocity[i] -
-         (emrv.Velocity[i] - (mrv.Velocity[i] / (R1.EMRAT + 1.0)));
-   }
-   
-   result[0] = bwe.Position[0];
-   result[1] = bwe.Position[1];
-   result[2] = bwe.Position[2];
-   result[3] = bwe.Velocity[0];
-   result[4] = bwe.Velocity[1];
-   result[5] = bwe.Velocity[2];
-   
+   #ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() Earth-Moon barycenter state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+               emrv.Position[0], emrv.Position[1], emrv.Position[2], emrv.Velocity[0], emrv.Velocity[1], emrv.Velocity[2]);
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() Moon (geocentric) state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+               mrv.Position[0], mrv.Position[1], mrv.Position[2], mrv.Velocity[0], mrv.Velocity[1], mrv.Velocity[2]);
+   #endif
+
+//   stateType bwe;
+//
+//   for (int i=0; i<3; i++)
+//   {
+//      bwe.Position[i] = rv.Position[i] -
+//         (emrv.Position[i] - (mrv.Position[i] / (R1.EMRAT + 1.0)));
+//      bwe.Velocity[i] = rv.Velocity[i] -
+//         (emrv.Velocity[i] - (mrv.Velocity[i] / (R1.EMRAT + 1.0)));
+//   }
+//
+//   result[0] = bwe.Position[0];
+//   result[1] = bwe.Position[1];
+//   result[2] = bwe.Position[2];
+//   result[3] = bwe.Position[0];
+//   result[4] = bwe.Velocity[1];
+//   result[5] = bwe.Velocity[2];
+   result[0] = rv.Position[0] -(emrv.Position[0] - (mrv.Position[0] / (R1.EMRAT + 1.0)));
+   result[1] = rv.Position[1] -(emrv.Position[1] - (mrv.Position[1] / (R1.EMRAT + 1.0)));
+   result[2] = rv.Position[2] -(emrv.Position[2] - (mrv.Position[2] / (R1.EMRAT + 1.0)));
+   result[3] = rv.Velocity[0] -(emrv.Velocity[0] - (mrv.Velocity[0] / (R1.EMRAT + 1.0)));
+   result[4] = rv.Velocity[1] -(emrv.Velocity[1] - (mrv.Velocity[1] / (R1.EMRAT + 1.0)));
+   result[5] = rv.Velocity[2] -(emrv.Velocity[2] - (mrv.Velocity[2] / (R1.EMRAT + 1.0)));
+
    #ifdef DEBUG_DEFILE_GET
    MessageInterface::ShowMessage
       ("DeFile::GetPosVel() returning %f, %f, %f, %f, %f, %f\n",
@@ -1332,7 +1353,8 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
   /* This function doesn't "do" nutations or librations.                      */
   /*--------------------------------------------------------------------------*/
 
-  if ( Target >= 11 )             /* Also protects against weird input errors */
+//  if ( Target >= 11 )             /* Also protects against weird input errors */
+  if ( Target > 11 )             /* Also protects against weird input errors */
      {
        //printf("\n This function does not compute nutations or librations.\n");
        return;
