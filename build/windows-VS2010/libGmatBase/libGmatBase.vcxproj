@@ -157,7 +157,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__SKIP_MSISE90__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
     </ClCompile>
@@ -624,6 +624,7 @@
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystemException.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Star.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\DerivativeModel.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\DifferentialCorrector.cpp" />
@@ -1066,6 +1067,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystemException.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Star.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\DerivativeModel.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\DifferentialCorrector.hpp" />

@@ -1239,9 +1239,6 @@
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.cpp">
-      <Filter>Source Files\forcemodel\harmonic</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp">
       <Filter>Source Files\forcemodel\harmonic</Filter>
     </ClCompile>
@@ -1256,6 +1253,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\forcemodel\RelativisticCorrection.cpp">
       <Filter>Source Files\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.cpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp">
+      <Filter>Source Files\solarsys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2453,12 +2456,6 @@
     <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp">
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.hpp">
-      <Filter>Source Files\forcemodel\harmonic</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp">
       <Filter>Source Files\forcemodel\harmonic</Filter>
     </ClInclude>
@@ -2473,6 +2470,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\forcemodel\RelativisticCorrection.hpp">
       <Filter>Source Files\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.hpp">
+      <Filter>Source Files\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp">
+      <Filter>Source Files\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
