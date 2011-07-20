@@ -414,6 +414,7 @@ private:
    void CreateSolarSystemInUse();
    void CreateInternalCoordSystem();
    void CreateDefaultCoordSystems();
+   void CreateDefaultBarycenter();
    void CreateDefaultMission();
    
    // Parameter reference object setting

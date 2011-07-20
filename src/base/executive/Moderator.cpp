@@ -51,11 +51,13 @@
 #include "MathFactory.hpp"
 #include "Interface.hpp"
 #include "XyPlot.hpp"
+#include "GmatDefaults.hpp"
 
 #include "NoOp.hpp"
 #include "GravityField.hpp"
 #include "RelativisticCorrection.hpp"
 #include "CalculatedPoint.hpp"
+#include "Barycenter.hpp"
 #include "TimeSystemConverter.hpp"  // for SetLeapSecsFileReader(), SetEopFile()
 #include "BodyFixedAxes.hpp"        // for SetEopFile(), SetCoefficientsFile()
 #include "ObjectReferencedAxes.hpp"
@@ -102,6 +104,7 @@
 //#define DEBUG_MATLAB
 //#define DEBUG_CCSDS_EPHEMERIS
 //#define DEBUG_CREATE_PHYSICAL_MODEL
+//#define DEBUG_LIST_CALCULATED_POINT
 
 // Currently we can't use DataFile for 2011a release so commented out
 // Actually we want to put this flag in BuildEnv.mk but it is very close to
@@ -1310,16 +1313,25 @@ const StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type,
          StringArray calptList =
             theConfigManager->GetListOfItems(Gmat::CALCULATED_POINT);
          // Do not add default (built-in) barycenter(s) on option
+         #ifdef DEBUG_LIST_CALCULATED_POINT
+            MessageInterface::ShowMessage("There are %d configured calculated points.\n", (Integer) calptList.size());
+         #endif
          if (excludeDefaultObjects)
          {
+            #ifdef DEBUG_LIST_CALCULATED_POINT
+               MessageInterface::ShowMessage("--- Excluding default Calculated Point objects .....\n");
+            #endif
             for (UnsignedInt i=0; i<calptList.size(); i++)
             {
-               if (calptList[i] != "SolarSystemBarycenter")
+               if (calptList[i] != GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
                   tempObjectNames.push_back(calptList[i]);
             }
          }
          else
          {
+            #ifdef DEBUG_LIST_CALCULATED_POINT
+               MessageInterface::ShowMessage("--- NOT Excluding default Calculated Point objects .....\n");
+            #endif
             for (UnsignedInt i=0; i<calptList.size(); i++)
                tempObjectNames.push_back(calptList[i]);
          }
@@ -1350,6 +1362,17 @@ const StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type,
       return tempObjectNames;
    }
    
+   // Do not add default barycenter on option
+   if (type == Gmat::CALCULATED_POINT && excludeDefaultObjects)
+   {
+      tempObjectNames.clear();
+      StringArray cpNames = theConfigManager->GetListOfItems(type);
+      for (UnsignedInt i=0; i<cpNames.size(); i++)
+         if (cpNames[i] != GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+            tempObjectNames.push_back(cpNames[i]);
+      return tempObjectNames;
+   }
+
    return theConfigManager->GetListOfItems(type);
 }
 
@@ -1400,6 +1423,25 @@ const StringArray& Moderator::GetListOfObjects(const std::string &typeName,
          // add CalculatedPoint to the list
          StringArray calptList =
             theConfigManager->GetListOfItems(Gmat::CALCULATED_POINT);
+         if (excludeDefaultObjects)
+         {
+            #ifdef DEBUG_LIST_CALCULATED_POINT
+               MessageInterface::ShowMessage("--- Excluding default Calculated Point objects .....\n");
+            #endif
+            for (UnsignedInt i=0; i<calptList.size(); i++)
+            {
+               if (calptList[i] != GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+                  tempObjectNames.push_back(calptList[i]);
+            }
+         }
+         else
+         {
+            #ifdef DEBUG_LIST_CALCULATED_POINT
+               MessageInterface::ShowMessage("--- NOT Excluding default Calculated Point objects .....\n");
+            #endif
+            for (UnsignedInt i=0; i<calptList.size(); i++)
+               tempObjectNames.push_back(calptList[i]);
+         }
          for (UnsignedInt i=0; i<calptList.size(); i++)
             tempObjectNames.push_back(calptList[i]);
          
@@ -1421,6 +1463,16 @@ const StringArray& Moderator::GetListOfObjects(const std::string &typeName,
          if (csObjNames[i] != "EarthMJ2000Eq" && csObjNames[i] != "EarthMJ2000Ec" &&
              csObjNames[i] != "EarthFixed")
             tempObjectNames.push_back(csObjNames[i]);
+      return tempObjectNames;
+   }
+   // Do not add default barycenter on option
+   if (typeName == "CalculatedPoint" && excludeDefaultObjects)
+   {
+      tempObjectNames.clear();
+      StringArray cpNames = theConfigManager->GetListOfItems(typeName);
+      for (UnsignedInt i=0; i<cpNames.size(); i++)
+         if (cpNames[i] != GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+            tempObjectNames.push_back(cpNames[i]);
       return tempObjectNames;
    }
    
@@ -2305,6 +2357,8 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
       if (theInternalCoordSystem == NULL)
          CreateInternalCoordSystem();
       CreateDefaultCoordSystems();
+      // Create the default Solar System barycenter
+      CreateDefaultBarycenter();
       
       if (type == "Spacecraft")
       {
@@ -6783,6 +6837,8 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
    MessageInterface::ShowMessage(".....Creating Default CoordinateSystem...\n");
    #endif
    CreateDefaultCoordSystems();
+   // Create the default Solar System barycenter
+   CreateDefaultBarycenter();
    
    #if DEBUG_OBJECT_MAP > 1
    ShowObjectMap("   Moderator::PrepareNextScriptReading() Here is the configured object map");
@@ -7107,6 +7163,51 @@ void Moderator::CreateDefaultCoordSystems()
    }
 }
 
+//------------------------------------------------------------------------------
+// void CreateDefaultBarycenter()
+//------------------------------------------------------------------------------
+void Moderator::CreateDefaultBarycenter()
+{
+   #if DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage
+      ("Moderator checking if default barycenter should be created...\n");
+   #endif
+
+   try
+   {
+      SolarSystem *ss = GetSolarSystemInUse();
+
+      // Solar System Barycenter
+      Barycenter *bary = (Barycenter*) GetCalculatedPoint(GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME);
+      if (bary == NULL)
+      {
+         bary = (Barycenter*) CreateCalculatedPoint("Barycenter", GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME, false);
+
+         #if DEBUG_INITIALIZE
+         MessageInterface::ShowMessage
+            (".....created <%p>'%s'\n", bary, bary->GetName().c_str());
+         #endif
+      }
+      else
+      {
+         #if DEBUG_INITIALIZE
+         MessageInterface::ShowMessage
+            (".....found <%p>'%s'\n", bary, bary->GetName().c_str());
+         #endif
+      }
+      bary->SetSolarSystem(ss);
+      bary->SetIsBuiltIn(true);
+      bary->Initialize();  // ????
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_,
+          "Moderator::CreateDefaultBarycenter() Error occurred during default "
+          "barycenter creation. " +  e.GetFullMessage());
+   }
+}
 
 //------------------------------------------------------------------------------
 // void CreateDefaultMission()
@@ -7129,6 +7230,8 @@ void Moderator::CreateDefaultMission()
       
       // Create default coordinate systems
       CreateDefaultCoordSystems();
+      // Create the default Solar System barycenter
+      CreateDefaultBarycenter();
       
       // Spacecraft
       Spacecraft *sc = (Spacecraft*)CreateSpacecraft("Spacecraft", "DefaultSC");
