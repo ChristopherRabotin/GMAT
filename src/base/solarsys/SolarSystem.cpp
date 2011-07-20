@@ -40,7 +40,7 @@
 //#define DEBUG_SS_PLANETARY_FILE
 //#define DEBUG_SS_FIND_BODY
 //#define DEBUG_SS_ADD_BODY
-//#define SS_CONSTRUCT_DESTRUCT
+//#define DEBUG_SS_CONSTRUCT_DESTRUCT
 //#define DEBUG_SS_SPICE
 //#define DEBUG_SS_CLOAKING
 //#define DEBUG_SS_PARAM_EQUAL
@@ -86,6 +86,7 @@ SolarSystem::PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount] =
    Gmat::REAL_TYPE,
 };
 
+const std::string SolarSystem::SOLAR_SYSTEM_BARYCENTER_NAME = GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME;
 
 
 const std::string SolarSystem::SUN_NAME        = GmatSolarSystemDefaults::SUN_NAME;
@@ -374,8 +375,8 @@ SolarSystem::SolarSystem(std::string withName)
    theSun->SetGravitationalConstant(STAR_MU);
    theSun->SetOrder(STAR_ORDER);
    theSun->SetDegree(STAR_DEGREE);
-   theSun->SetHarmonicCoefficientsSij(STAR_SIJ);
-   theSun->SetHarmonicCoefficientsCij(STAR_CIJ);
+//   theSun->SetHarmonicCoefficientsSij(STAR_SIJ);
+//   theSun->SetHarmonicCoefficientsCij(STAR_CIJ);
    theSun->SetRadiantPower(STAR_RADIANT_POWER, STAR_REFERENCE_DISTANCE);
    theSun->SetPhotosphereRadius(STAR_PHOTOSPHERE_RADIUS);
    theSun->SetIntegerParameter(theSun->GetParameterID("NAIFId"),STAR_NAIF_IDS);
@@ -429,8 +430,8 @@ SolarSystem::SolarSystem(std::string withName)
       newPlanet->SetGravitationalConstant(PLANET_MU[ii]);
       newPlanet->SetOrder(PLANET_ORDER[ii]);
       newPlanet->SetDegree(PLANET_DEGREE[ii]);
-      newPlanet->SetHarmonicCoefficientsSij(PLANET_SIJ[ii]);
-      newPlanet->SetHarmonicCoefficientsCij(PLANET_CIJ[ii]);
+//      newPlanet->SetHarmonicCoefficientsSij(PLANET_SIJ[ii]);
+//      newPlanet->SetHarmonicCoefficientsCij(PLANET_CIJ[ii]);
       // reference object must be set before setting TwoBodyEpoch or TwoBodyElements
       newPlanet->SetRefObject(theSun, Gmat::CELESTIAL_BODY, SUN_NAME);
 
@@ -492,8 +493,8 @@ SolarSystem::SolarSystem(std::string withName)
       newMoon->SetGravitationalConstant(MOON_MU[ii]);
       newMoon->SetOrder(MOON_ORDER[ii]);
       newMoon->SetDegree(MOON_DEGREE[ii]);
-      newMoon->SetHarmonicCoefficientsSij(MOON_SIJ[ii]);
-      newMoon->SetHarmonicCoefficientsCij(MOON_CIJ[ii]);
+//      newMoon->SetHarmonicCoefficientsSij(MOON_SIJ[ii]);
+//      newMoon->SetHarmonicCoefficientsCij(MOON_CIJ[ii]);
       // reference object must be set before setting TwoBodyEpoch or TwoBodyElements
       CelestialBody *central = FindBody(MOON_CENTRAL_BODIES[ii]);
       if (!central)
@@ -542,6 +543,24 @@ SolarSystem::SolarSystem(std::string withName)
       AddBody(newMoon);
    }
 
+   // Create special points
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
+      MessageInterface::ShowMessage("Now about to create the Barycenter special point ...\n");
+   #endif
+   // 1. Create the SolarSystemBarycenter
+   SpecialCelestialPoint *ssb = new SpecialCelestialPoint(SOLAR_SYSTEM_BARYCENTER_NAME);
+   ssb->SetIntegerParameter(ssb->GetParameterID("NAIFId"), GmatSolarSystemDefaults::SSB_NAIF_ID);
+//   ssb->SetGravitationalConstant(GmatSolarSystemDefaults::SSB_MU);
+   ssb->SetSolarSystem(this);
+#ifdef __USE_SPICE__
+  // Set the kernel reader on the solar system barycenter
+   ssb->SetSpiceOrbitKernelReader(planetarySPK);
+#endif
+   specialPoints[SOLAR_SYSTEM_BARYCENTER_NAME] = ssb;
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
+      MessageInterface::ShowMessage("Now DONE creating the Solar System Barycenter special point ...\n");
+   #endif
+
 
    if (!theEarth)
       throw SolarSystemException("The Earth not defined.\n");
@@ -572,7 +591,7 @@ SolarSystem::SolarSystem(std::string withName)
       ++cbi;
    }
 
-   #ifdef SS_CONSTRUCT_DESTRUCT
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Just constructed a new SolarSystem with name %s at <%p>\n",
             withName.c_str(), this);
    #endif
@@ -612,6 +631,9 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
    default_ephemUpdateInterval       (ss.default_ephemUpdateInterval)
 
 {
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
+      MessageInterface::ShowMessage("Now starting the Solar System copy constructor ...\n");
+   #endif
    theDefaultDeFile  = NULL;
    parameterCount    = SolarSystemParamCount;
 
@@ -643,8 +665,14 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
    // set current planetary source
    SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
 
-   CloneBodiesInUse(ss);
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
+      MessageInterface::ShowMessage("Trying to clone the bodies and special points ...\n");
+   #endif
+   CloneBodiesInUse(ss, true);
    SetJ2000Body();
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
+      MessageInterface::ShowMessage("Now DONE with the Solar System copy constructor ...\n");
+   #endif
 }
 
 
@@ -703,8 +731,8 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
 
    // delete old bodies and clone bodies
-   DeleteBodiesInUse();
-   CloneBodiesInUse(ss);
+   DeleteBodiesInUse(true);
+   CloneBodiesInUse(ss, true);
    SetJ2000Body();
 
    return *this;
@@ -720,12 +748,12 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
 //------------------------------------------------------------------------------
 SolarSystem::~SolarSystem()
 {
-   #ifdef SS_CONSTRUCT_DESTRUCT
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now destructing the SolarSystem with name %s at <%p>\n",
             instanceName.c_str(), this);
    #endif
       
-   DeleteBodiesInUse();
+   DeleteBodiesInUse(true);
    
    #ifdef DEBUG_SS_CLONING
    MessageInterface::ShowMessage
@@ -800,6 +828,13 @@ bool SolarSystem::Initialize()
    {
       (*cbi)->Initialize();
       ++cbi;
+   }
+   // Initialize the Special Points
+   std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
+   while (spi != specialPoints.end())
+   {
+      (spi->second)->Initialize();
+      ++spi;
    }
    return true;
 }
@@ -1204,6 +1239,14 @@ void SolarSystem::SetIsSpiceAllowedForDefaultBodies(const bool allowSpice)
       if (!((*cbi)->IsUserDefined())) (*cbi)->SetAllowSpice(allowSpiceForDefaultBodies);
       ++cbi;
    }
+   // Set the flag on special points as well
+   std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
+   while (spi != specialPoints.end())
+   {
+      (spi->second)->SetAllowSpice(allowSpiceForDefaultBodies);
+      ++spi;
+   }
+
 
 }
 
@@ -1213,6 +1256,11 @@ void SolarSystem::SetIsSpiceAllowedForDefaultBodies(const bool allowSpice)
 bool SolarSystem::IsSpiceAllowedForDefaultBodies() const
 {
    return allowSpiceForDefaultBodies;
+}
+
+PlanetaryEphem* SolarSystem::GetPlanetaryEphem()
+{
+   return thePlanetaryEphem;
 }
 
 #ifdef __USE_SPICE__
@@ -1313,6 +1361,11 @@ void SolarSystem::LoadSpiceKernels()
       }
    }
 }
+
+SpiceOrbitKernelReader* SolarSystem::GetSpiceOrbitKernelReader()
+{
+   return planetarySPK;
+}
 #endif
 
 
@@ -1341,6 +1394,17 @@ void SolarSystem::ResetToDefaults()
       (*cbi)->SetUsePotentialFile(false);
       ++cbi;
    }
+
+   // Reset the Special Points as well
+   std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
+   while (spi != specialPoints.end())
+   {
+      (spi->second)->SetSource(pvSrcForAll);
+      (spi->second)->SetOverrideTimeSystem(overrideTimeForAll);
+      (spi->second)->SetEphemUpdateInterval(ephemUpdateInterval);
+      ++cbi;
+   }
+
 }
 
 
@@ -1449,6 +1513,16 @@ bool SolarSystem::DeleteBody(const std::string &withName)
       ++cbi;
    }
    return false;
+}
+
+SpecialCelestialPoint* SolarSystem::GetSpecialPoint(const std::string &withName)
+{
+   std::map<std::string, SpecialCelestialPoint*>::iterator spi;
+   for (spi = specialPoints.begin(); spi != specialPoints.end(); ++spi)
+   {
+      if (spi->first == withName)   return spi->second;
+   }
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -1589,6 +1663,14 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
       }
       ++cbi;
    }
+   // Set the source flag on all of the special points as well
+   std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
+   while (spi != specialPoints.end())
+   {
+      if ((spi->second)->SetSource(pvSrc) == false)  return false;
+      ++spi;
+   }
+
    pvSrcForAll = pvSrc;
    std::string srcStr = "";
    for (Integer ii = 0; ii < Gmat::PosVelSourceCount; ii++)
@@ -1659,7 +1741,7 @@ bool SolarSystem::SetSourceFile(PlanetaryEphem *src)
        src->GetName().c_str(), src);
    #endif
 
-   // Search through bodiesInUse for the body with the name withName
+   // Set the file on each of the default bodies
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
@@ -1667,6 +1749,14 @@ bool SolarSystem::SetSourceFile(PlanetaryEphem *src)
       if (!userDef)
          if ((*cbi)->SetSourceFile(thePlanetaryEphem) == false) return false;
       ++cbi;
+   }
+
+   // Set the file on each of the special points
+   std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
+   while (spi != specialPoints.end())
+   {
+      if ((spi->second)->SetSourceFile(thePlanetaryEphem) == false) return false;
+      ++spi;
    }
 
    return true;
@@ -1754,6 +1844,13 @@ bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
       if ((*cbi)->SetOverrideTimeSystem(overrideIt) == false)  return false;
       ++cbi;
    }
+   // Set it for each of the special points
+   std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
+   while (spi != specialPoints.end())
+   {
+      if ((spi->second)->SetOverrideTimeSystem(overrideIt) == false)  return false;
+      ++spi;
+   }
    overrideTimeForAll = overrideIt;
    return true;
 }
@@ -1779,6 +1876,13 @@ bool SolarSystem::SetEphemUpdateInterval(Real intvl)
    {
       if ((*cbi)->SetEphemUpdateInterval(intvl) == false)  return false;
       ++cbi;
+   }
+   // Set it for each of the special points
+   std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
+   while (spi != specialPoints.end())
+   {
+      if ((spi->second)->SetEphemUpdateInterval(intvl) == false)  return false;
+      ++spi;
    }
    ephemUpdateInterval = intvl;
    return true;
@@ -1874,7 +1978,7 @@ SolarSystem* SolarSystem::Clone() const
    // clone all objects in the Solar System as well
    SolarSystem * clonedSS = new SolarSystem(*this);
    
-   #ifdef SS_CONSTRUCT_DESTRUCT
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now cloning a new SolarSystem from <%p> to <%p>\n",
             this, clonedSS);
    #endif
@@ -1896,7 +2000,7 @@ SolarSystem* SolarSystem::Clone() const
 //---------------------------------------------------------------------------
 void SolarSystem::Copy(const GmatBase* orig)
 {
-   // We dont want to clone the bodies so, just copy
+   // We don't want to clone the bodies so, just copy
 
    SolarSystem *ss = (SolarSystem*)orig;
 
@@ -1907,7 +2011,7 @@ void SolarSystem::Copy(const GmatBase* orig)
    defaultBodyStrings     = ss->defaultBodyStrings;
    userDefinedBodyStrings = ss->userDefinedBodyStrings;
 
-   // The SolarSystem has its own PlnetaryEphem files, so do not copy pointers
+   // The SolarSystem has its own PlanetaryEphem files, so do not copy pointers
    //thePlanetaryEphem   = ss->thePlanetaryEphem;
    //theDefaultSlpFile   = ss->theDefaultSlpFile;
    //theDefaultDeFile    = ss->theDefaultDeFile;
@@ -1932,6 +2036,24 @@ void SolarSystem::Copy(const GmatBase* orig)
          SolarSystemException ss;
          ss.SetDetails("%s not found in the solar system named "
                        "\"%s\"\n", cb->GetName().c_str(), GetName().c_str());
+         throw ss;
+      }
+   }
+   // copy the Special Points
+   for (std::map<std::string, SpecialCelestialPoint*>::const_iterator spi = ss->specialPoints.begin();
+        spi != ss->specialPoints.end(); ++spi)
+   {
+      SpecialCelestialPoint *sp = spi->second;
+      SpecialCelestialPoint *pt = GetSpecialPoint(sp->GetName());
+      if (pt != NULL)
+      {
+         pt->Copy(sp);
+      }
+      else
+      {
+         SolarSystemException ss;
+         ss.SetDetails("Special Point %s not found in the solar system named "
+                       "\"%s\"\n", ((spi->first).c_str()), GetName().c_str());
          throw ss;
       }
    }
@@ -2574,15 +2696,21 @@ void SolarSystem::SetJ2000Body()
             (*cbi)->SetJ2000Body(j2000Body);
             ++cbi;
          }
+         std::map<std::string, SpecialCelestialPoint*>::const_iterator spi = specialPoints.begin();
+         while (spi != specialPoints.end())
+         {
+            (spi->second)->SetJ2000Body(j2000Body);
+            ++spi;
+         }
       }
    }
 }
 
 
 //------------------------------------------------------------------------------
-// void CloneBodiesInUse(const SolarSystem &ss)
+// void CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoints)
 //------------------------------------------------------------------------------
-void SolarSystem::CloneBodiesInUse(const SolarSystem &ss)
+void SolarSystem::CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoints)
 {
    #ifdef DEBUG_SS_CLONING
    MessageInterface::ShowMessage("   ===> Cloning %d bodies\n", ss.bodiesInUse.size());
@@ -2636,13 +2764,33 @@ void SolarSystem::CloneBodiesInUse(const SolarSystem &ss)
       #endif
       cb->SetRefObject(central, Gmat::CELESTIAL_BODY, cbName);
    }
+   #ifdef DEBUG_SS_CLONING
+      MessageInterface::ShowMessage("   about to clone %d special celestial points\n",
+                                    ((Integer) ss.specialPoints.size()));
+   #endif
+   if (cloneSpecialPoints)
+   {
+      specialPoints.clear();
+      // clone the Special Points
+      std::map<std::string, SpecialCelestialPoint*>::const_iterator spi = (ss.specialPoints).begin();
+      while (spi != (ss.specialPoints).end())
+      {
+         SpecialCelestialPoint *sp = (SpecialCelestialPoint*)(spi->second)->Clone();
+         #ifdef DEBUG_SS_CLONING
+            MessageInterface::ShowMessage("   Object %s cloned for use ...\n",sp->GetName().c_str());
+         #endif
+//         specialPoints[spi->first] = sp;
+         specialPoints.insert(std::make_pair(spi->first, sp));
+         spi++;
+      }
+   }
 }
 
 
 //------------------------------------------------------------------------------
-// void DeleteBodiesInUse()
+// void DeleteBodiesInUse(bool deleteSpecialPoints)
 //------------------------------------------------------------------------------
-void SolarSystem::DeleteBodiesInUse()
+void SolarSystem::DeleteBodiesInUse(bool deleteSpecialPoints)
 {
    #ifdef DEBUG_SS_CLONING
    MessageInterface::ShowMessage("   ===> Deleting %d bodies\n", bodiesInUse.size());
@@ -2669,6 +2817,19 @@ void SolarSystem::DeleteBodiesInUse()
    bodyStrings.clear();
    defaultBodyStrings.clear();
    userDefinedBodyStrings.clear();
+
+   if (deleteSpecialPoints)
+   {
+      std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
+      while (spi != specialPoints.end())
+      {
+         delete spi->second;       // delete each special point first
+         spi->second = NULL;
+         ++spi;
+      }
+
+      specialPoints.clear();
+   }
 }
 
 

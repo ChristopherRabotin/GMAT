@@ -35,6 +35,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "CelestialBody.hpp"
+#include "SpecialCelestialPoint.hpp"
 #include "PlanetaryEphem.hpp"
 #include "DeFile.hpp"
 #include "GmatDefaults.hpp"
@@ -73,7 +74,7 @@ public:
    const StringArray& GetPlanetarySourceTypes();
    const StringArray& GetPlanetarySourceNames();
    const StringArray& GetPlanetarySourceTypesInUse();
-   bool SetPlanetarySourceName(const std::string &sourceType,
+   bool  SetPlanetarySourceName(const std::string &sourceType,
                                const std::string &fileName);
    Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes); 
    Integer GetPlanetarySourceId(const std::string &sourceType);
@@ -81,8 +82,11 @@ public:
    std::string GetCurrentPlanetarySource();
    void        SetIsSpiceAllowedForDefaultBodies(const bool allowSpice);
    bool        IsSpiceAllowedForDefaultBodies() const;
+
+   PlanetaryEphem* GetPlanetaryEphem();
 #ifdef __USE_SPICE__
    void        LoadSpiceKernels();
+   SpiceOrbitKernelReader* GetSpiceOrbitKernelReader();
 #endif
 
    
@@ -94,6 +98,9 @@ public:
    CelestialBody*       GetBody(std::string withName);
    // method to remove a body from the solar system
    bool                 DeleteBody(const std::string &withName);
+   /// methods to return a pointer to a specific SpecialCelestialPoint
+   SpecialCelestialPoint*
+                        GetSpecialPoint(const std::string &withName);
    
    // method to return an array of the names of the bodies included in
    // this solar system
@@ -180,8 +187,11 @@ public:
    virtual void         Copy(const GmatBase* orig);
    
    /// default names for each of the possible celestial bodies in the solar system
+   static const std::string SOLAR_SYSTEM_BARYCENTER_NAME;
+
+
    static const std::string SUN_NAME;
-   
+
    static const std::string MERCURY_NAME;
    
    static const std::string VENUS_NAME;
@@ -304,6 +314,10 @@ private:
    StringArray bodyStrings;  // is this needed, or just a convenience?
    StringArray defaultBodyStrings;
    StringArray userDefinedBodyStrings;
+
+   /// map of SpecialCelestialPoints that the SolarSystem knows about
+   std::map<std::string, SpecialCelestialPoint*>  specialPoints;
+
 #ifdef __USE_SPICE__
    SpiceOrbitKernelReader *planetarySPK;
 #endif
@@ -328,8 +342,8 @@ private:
    // method to find a body in the solar system, given its name
    CelestialBody* FindBody(std::string withName);
    void SetJ2000Body();
-   void CloneBodiesInUse(const SolarSystem &ss);
-   void DeleteBodiesInUse();
+   void CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoints = true);
+   void DeleteBodiesInUse(bool deleteSpecialPoints = true);
    
    // methods to create planetary source file
    void SetDefaultPlanetarySource();
