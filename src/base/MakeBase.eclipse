@@ -468,6 +468,7 @@ OBJECTS = \
     solarsys/SolarFluxFileReader.o \
     solarsys/SolarSystemException.o \
     solarsys/SolarSystem.o \
+    solarsys/SpecialCelestialPoint.o \
     solarsys/Star.o \
     solver/Solver.o \
     solver/DifferentialCorrector.o \
