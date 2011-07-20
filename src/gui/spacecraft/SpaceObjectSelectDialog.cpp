@@ -185,7 +185,7 @@ void SpaceObjectSelectDialog::Create()
    //------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   delete tempList;
+   delete [] tempList;
 }
 
 
