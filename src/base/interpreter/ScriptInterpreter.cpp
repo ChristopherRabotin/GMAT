@@ -1137,9 +1137,12 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    //-----------------------------------
    // Libration Points and Barycenters
    //-----------------------------------
-   objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
    #ifdef DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage("   Found %d Calculated Points\n", objs.size());
+      MessageInterface::ShowMessage("   About to ask Moderator for list of Calculated Points\n");
+   #endif
+   objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT, true);
+   #ifdef DEBUG_SCRIPT_WRITING
+      MessageInterface::ShowMessage("   Found %d Calculated Points\n", objs.size());
    #endif
    if (objs.size() > 0)
       WriteObjects(objs, "Calculated Points", mode);
