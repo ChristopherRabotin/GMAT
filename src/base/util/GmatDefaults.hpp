@@ -45,6 +45,8 @@ namespace GmatSolarSystemDefaults
    };
 
    /// default names for each of the possible celestial bodies in the solar system
+   const std::string SOLAR_SYSTEM_BARYCENTER_NAME = "SolarSystemBarycenter";
+
    const std::string SUN_NAME        = "Sun";
 
    const std::string MERCURY_NAME    = "Mercury";
@@ -116,6 +118,14 @@ namespace GmatSolarSystemDefaults
    const std::string PLUTO_NAME      = "Pluto";
    const std::string CHARON_NAME     = "Charon";
 
+   /// Default barycenter data
+
+   // default values for CelestialBody data
+
+   const Integer               SSB_NAIF_ID          = 0;
+   const Real                  SSB_MU               = 0.0; // Not Necessary
+
+   /// Default planet data
 
    // default values for CelestialBody data
    const std::string           PLANET_NAMES[NumberOfDefaultPlanets] =
@@ -596,6 +606,8 @@ namespace GmatSolarSystemDefaults
    const Real                  STAR_REFERENCE_DISTANCE       = GmatPhysicalConstants::ASTRONOMICAL_UNIT;;  // km
    // Units for radius are meters
    const Real                  STAR_PHOTOSPHERE_RADIUS       = 695990000.0;;  // m
+
+
 
 } // GmatSolarSystemDefaults
 
