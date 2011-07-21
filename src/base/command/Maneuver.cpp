@@ -41,6 +41,7 @@ Maneuver::Maneuver() :
    burn        (NULL),
    satName     (""),
    sat         (NULL),
+   firedOnce   (false),
    // Parameter IDs
    burnNameID  (parameterCount),
    satNameID   (parameterCount+1)
@@ -76,6 +77,7 @@ Maneuver::Maneuver(const Maneuver& m) :
    burn        (NULL),
    satName     (m.satName),
    sat         (NULL),
+   firedOnce   (false),
    // Parameter IDs
    burnNameID  (m.burnNameID),
    satNameID   (m.satNameID)
@@ -101,10 +103,12 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
       return *this;
 
    GmatCommand::operator=(m);
-   burnName = m.burnName;
-   burn     = NULL;
-   satName  = m.satName;
-   sat      = NULL;
+   burnName  = m.burnName;
+   burn      = NULL;
+   satName   = m.satName;
+   sat       = NULL;
+   firedOnce = false;
+
    burnNameID = m.burnNameID;
    satNameID = m.satNameID;
 
@@ -561,6 +565,7 @@ bool Maneuver::Initialize()
    #endif
    #endif
    
+   firedOnce = false;
    return true;
 }
 
@@ -607,6 +612,7 @@ bool Maneuver::Execute()
       ("   state after  maneuver at epoch %f \n   %s", epoch, state.ToString().c_str());
    #endif
    
+   firedOnce = true;
    BuildCommandSummary(true);
    
    #ifdef DEBUG_MANEUVER_EXEC
@@ -635,9 +641,10 @@ bool Maneuver::Execute()
 //------------------------------------------------------------------------------
 void Maneuver::BuildCommandSummaryString(bool commandCompleted)
 {
-   GmatCommand::BuildCommandSummaryString(commandCompleted);
+   bool canSummarize = commandCompleted && firedOnce;
+   GmatCommand::BuildCommandSummaryString(canSummarize);
 
-   if (commandCompleted)
+   if (canSummarize)
    {
       std::stringstream data;
 

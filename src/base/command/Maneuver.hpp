@@ -101,7 +101,9 @@ protected:
    std::string             satName;
    /// The spacecraft
    Spacecraft              *sat;
-   
+   /// Flag used to tell if the summary can be built yet
+   bool                    firedOnce;
+
    // Parameter IDs 
    /// ID for the burn object
    Integer                 burnNameID;
