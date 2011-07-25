@@ -109,7 +109,7 @@ DragForce::DragForce(const std::string &name) :
    orbitDimension          (0),
    dragState               (NULL),
    wUpdateInterval         (0.02),      // 0.02 = 28.8 minutes
-   wUpdateEpoch            (-1.0),		// Force update if not set to fixed w
+   wUpdateEpoch            (-1.0),              // Force update if not set to fixed w
    massID                  (-1),
    cdID                    (-1),
    areaID                  (-1),
@@ -604,42 +604,6 @@ void DragForce::ClearSatelliteParameters(const std::string parmName)
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
-//                         const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * This method returns a reference object from the HarmonicField class.
- *
- * @param type  type of the reference object requested
- * @param name  name of the reference object requested
- *
- * @return pointer to the reference object requested.
- *
- */
-//------------------------------------------------------------------------------
-GmatBase* DragForce::GetRefObject(const Gmat::ObjectType type,
-                                      const std::string &name)
-{
-   switch (type)
-   {
-      case Gmat::COORDINATE_SYSTEM:
-         { // Set scope for local variable
-            std::string fixedCSName = bodyName + "Fixed";
-            if ((cbFixed) && (name == fixedCSName))
-               return cbFixed;
-         }
-         break;
-
-      default:
-         break;
-   }
-
-   // Not handled here -- invoke the next higher GetRefObject call
-   return PhysicalModel::GetRefObject(type, name);
-}
-
-
-//------------------------------------------------------------------------------
 // void Initialize()
 //------------------------------------------------------------------------------
 /**
@@ -725,9 +689,9 @@ bool DragForce::Initialize()
          for (StringArray::iterator i = dragBody.begin(); i != dragBody.end(); 
               ++i)
          {
-            if ((*i) != "Earth")
+            if ((*i) != "Earth" && (*i) != "Mars")
                throw ODEModelException(
-                  "Drag modeling only works at the Earth in current GMAT "
+                  "Drag modeling only works at the Earth or Mars in current GMAT "
                   "builds.");
          }
          
@@ -1453,7 +1417,8 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_DRAGFORCE_PARAM
    MessageInterface::ShowMessage
-      ("DragForce::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
+      ("DragForce::SetStringParameter() '%s' entered, id=%d, value=%s\n",
+       GetName().c_str(), id, value.c_str());
    #endif
    
    if (id == ATMOSPHERE_MODEL)
@@ -1484,17 +1449,18 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    {
       if (value == "")
          return false;
-      
+
+      // Added Mars for drag body. We added MarsGRAM atmosphere model.
       // Drag currently requires that the drag body be the Earth.  When other
       // drag models are implemented, remove this block and test.
-      if (value != "Earth")
+      if (value != "Earth" && value != "Mars")
          throw ODEModelException(
             "Drag models only function at the Earth in this build of GMAT.");
       bodyName = value;
       return true;
    }
-      
-    
+   
+   
    if (id == SOURCE_TYPE)      // "File" or "Constant" for now
    {
       if ((value != "File") && (value != "Constant"))
@@ -1592,6 +1558,42 @@ Integer DragForce::SetIntegerParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                         const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * This method returns a reference object from the HarmonicField class.
+ *
+ * @param type  type of the reference object requested
+ * @param name  name of the reference object requested
+ *
+ * @return pointer to the reference object requested.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* DragForce::GetRefObject(const Gmat::ObjectType type,
+                                      const std::string &name)
+{
+   switch (type)
+   {
+      case Gmat::COORDINATE_SYSTEM:
+         { // Set scope for local variable
+            std::string fixedCSName = bodyName + "Fixed";
+            if ((cbFixed) && (name == fixedCSName))
+               return cbFixed;
+         }
+         break;
+
+      default:
+         break;
+   }
+
+   // Not handled here -- invoke the next higher GetRefObject call
+   return PhysicalModel::GetRefObject(type, name);
+}
+
+
+//------------------------------------------------------------------------------
 // void SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //                              const std::string &name)
 //------------------------------------------------------------------------------
@@ -1648,6 +1650,26 @@ bool DragForce::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
 
    return PhysicalModel::SetRefObject(obj, type, name);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer GetOwnedObjectCount()
+//------------------------------------------------------------------------------
+Integer DragForce::GetOwnedObjectCount()
+{
+   if (internalAtmos != NULL)
+      return 1;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* GetOwnedObject(Integer whichOne)
+//------------------------------------------------------------------------------
+GmatBase* DragForce::GetOwnedObject(Integer whichOne)
+{
+   // for now only 1 internal object
+   return internalAtmos;
 }
 
 

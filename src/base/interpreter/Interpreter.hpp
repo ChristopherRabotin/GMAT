@@ -130,7 +130,8 @@ public:
    
    bool SetForceModelProperty(GmatBase *obj, const std::string &prop,
                               const std::string &value, GmatBase *fromObj);
-   
+   bool SetDragForceProperty(GmatBase *obj, const std::string &pmType,
+                             const std::string &pmField, const std::string &value);
    bool SetMeasurementModelProperty(GmatBase *obj, const std::string &prop,
                               const std::string &value);
    bool SetTrackingDataProperty(GmatBase *obj, const std::string &prop,
@@ -318,6 +319,7 @@ protected:
    // for debug
    void WriteStringArray(const std::string &title1, const std::string &title2,
                          const StringArray &parts);
+   void WriteForceModel(GmatBase *obj);
    
    // for GamtFunction handling
    bool CheckFunctionDefinition(const std::string &funcPathAndName,

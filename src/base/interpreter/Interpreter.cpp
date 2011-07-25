@@ -1608,18 +1608,22 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
          // Check if it is property of associated objects, such as Hardware of Spacecraft.
          // Hardware objcts are configurable, but those are cloned before association. 
          // So that same Hardware can be associated with multiple Spacecraft.
-         StringArray refObjNames = obj->GetRefObjectNameArray(Gmat::HARDWARE);
-         #ifdef DEBUG_FIND_PROP_ID
-         WriteStringArray("Hardware objects ", obj->GetName(), refObjNames);
-         #endif
-         GmatBase *refObj = NULL;
-         for (UnsignedInt i = 0; i < refObjNames.size(); i++)
+         if (obj->IsOfType(Gmat::SPACECRAFT))
          {
-            refObj = FindObject(refObjNames[i]);
-            if (FindPropertyID(refObj, chunk, owner, id, type))
+            StringArray refObjNames = obj->GetRefObjectNameArray(Gmat::HARDWARE);
+            #ifdef DEBUG_FIND_PROP_ID
+            WriteStringArray("Hardware objects ", obj->GetName(), refObjNames);
+            #endif
+            
+            GmatBase *refObj = NULL;
+            for (UnsignedInt i = 0; i < refObjNames.size(); i++)
             {
-               retval = true;
-               break;
+               refObj = FindObject(refObjNames[i]);
+               if (FindPropertyID(refObj, chunk, owner, id, type))
+               {
+                  retval = true;
+                  break;
+               }
             }
          }
       }
@@ -3834,9 +3838,6 @@ bool Interpreter::SetObjectToProperty(GmatBase *toObj, GmatBase *fromOwner,
    
    if (toObj->GetTypeName() != "Variable" && toObj->GetTypeName() != "String")
    {
-      //InterpreterException ex
-      //   ("Setting \"" + fromProp + "\" to an object \"" + toObj->GetName() +
-      //    "\" is not allowed");
       InterpreterException ex
          ("Setting an object \"" + toObj->GetName() + "\" to " + fromProp +
           "\" is not allowed");
@@ -5765,11 +5766,18 @@ bool Interpreter::SetComplexProperty(GmatBase *obj, const std::string &prop,
 bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
                                   const std::string &value, GmatBase *fromObj)
 {
+   #ifdef DEBUG_SET_FORCE_MODEL
+   MessageInterface::ShowMessage
+      ("Interpreter::SetForceModelProperty() entered, obj=<%p><%s>'%s', prop=%s, "
+       "value=%s, fromObj=<%p>\n", obj, obj->GetTypeName().c_str(), obj->GetName().c_str(),
+       prop.c_str(), value.c_str(), fromObj);
+   #endif
+   
    debugMsg = "In SetForceModelProperty()";
    bool retval = false;
    StringArray parts = theTextParser.SeparateDots(prop);
-   Integer count = parts.size();
-   std::string pmType = parts[count-1];
+   Integer dotCount = parts.size();
+   std::string pmType = parts[dotCount-1];
    Integer id;
    Gmat::ParameterType type;
    
@@ -5777,7 +5785,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    //GMAT FM.CentralBody = Earth;
    //GMAT FM.PrimaryBodies = {Earth, Luna};
    //GMAT FM.PointMasses = {Sun, Jupiter}; 
-   //GMAT FM.Drag = None;
+   //GMAT FM.Drag = None; // deprecated (2011.07.22)
    //GMAT FM.SRP = On;
    //GMAT FM.GravityField.Earth.Degree = 20;
    //GMAT FM.GravityField.Earth.Order = 20;
@@ -5785,6 +5793,13 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    //GMAT FM.GravityField.Luna.Degree = 4;
    //GMAT FM.GravityField.Luna.Order = 4;
    //GMAT FM.GravityField.Luna.PotentialFile = LP165P.cof;
+   
+   // New Drag force script (2011.07.20)
+   // GMAT FM.Drag = None; // deprecated
+   // FM.Drag.AtmosphereModel = 'MarsGRAM2005'
+   // FM.Drag.DensityModel = Mean
+   // FM.Drag.InputFile = 'INPUT.nml' 
+   // FM.Drag.F107 = 150 
    
    // For future scripting we want to specify body for Drag and SRP
    // e.g. FM.Drag.Earth = JacchiaRoberts;
@@ -5797,9 +5812,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    
    #ifdef DEBUG_SET_FORCE_MODEL
    MessageInterface::ShowMessage
-      ("Interpreter::SetForceModelProperty() fm=%s, prop=%s, value=%s\n"
-       "   pmType=%s, forceType=%s\n", obj->GetName().c_str(), prop.c_str(), value.c_str(),
-       pmType.c_str(), forceType.c_str());
+      ("   pmType=%s, forceType=%s\n", pmType.c_str(), forceType.c_str());
    #endif
    
    //------------------------------------------------------------
@@ -5891,7 +5904,28 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       #endif
       return retval;
    }
-   else if (pmType == "SRP" || pmType == "Drag" || pmType == "RelativisticCorrection")
+   else if (pmType == "Drag" || pmType == "AtmosphereModel")
+   {
+      // Write deprecated message, now we olny use Drag.AtmosphereModel to specify model name
+      if (pmType == "Drag")
+      {
+         InterpreterException ex
+            ("The field \"Drag\" of ForceModel \"" + obj->GetName() +
+             "\" will not be permitted in a future build; "
+             "please use \"Drag.AtmosphereModel\" instead");
+         HandleError(ex, true, true);
+         
+         if (value == "None")
+            return true;
+      }
+      
+      // Special handling for Drag
+      // If field is AtmosphereModel, create DragForce and then AtmosphereModel
+      // Also handle old script such as FM.Drag = JacchiaRoberts
+      if (pmType == "AtmosphereModel" || (pmType == "Drag" && value != "None"))
+         return SetDragForceProperty(obj, "Drag", pmType, value);
+   }
+   else if (pmType == "SRP" || pmType == "RelativisticCorrection")
    {
       if (pmType == "SRP")
       {
@@ -5916,50 +5950,16 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          else if (!retval)
             return false;
       }
-
-      if (pmType == "Drag" && value == "None")
-         return true;
       
       // Create PhysicalModel
       std::string forceName = pmType + "." + centralBodyName;
       //@note 0.ForceName indicates unmanaged internal forcename.
+      // Added name for debugging purpose only
       PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "0."+forceName, 0);
       pm->SetName(forceName);
       
-      // Special handling for Drag
-      if (pmType == "Drag")
-      {
-         if (!pm->SetStringParameter("AtmosphereModel", value))
-         {
-            InterpreterException ex
-               ("Unable to set AtmosphereModel for drag force");
-            HandleError(ex);
-            ignoreError = true;
-            return false;
-         }
-         
-         /// @todo Add the body name for drag at other bodies
-         if (value != "BodyDefault")
-         {
-            pm->SetStringParameter("BodyName", centralBodyName);
-            GmatBase *am = CreateObject(value, value, 0);
-            if (am)
-               pm->SetRefObject(am, Gmat::ATMOSPHERE, am->GetName());
-            else
-            {
-               InterpreterException ex
-                  ("Unable to create AtmosphereModel \"" + value + "\" for drag force");
-               HandleError(ex);
-               ignoreError = true;
-               return false;
-            }
-         }
-      }
-      else if (pmType == "SRP" || pmType == "RelativisticCorrection")
-      {
-         // Should we set SRP on ForceModel central body?
-         pm->SetStringParameter("BodyName", centralBodyName);
-      }
+      // Should we set SRP on ForceModel central body?
+      pm->SetStringParameter("BodyName", centralBodyName);
       
       #ifdef DEBUG_SET_FORCE_MODEL
       MessageInterface::ShowMessage
@@ -6009,7 +6009,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    
    pmType = parts[0];
    forceType = ODEModel::GetScriptAlias(pmType);
-   std::string propName = parts[count-1];
+   std::string propName = parts[dotCount-1];
    
    #ifdef DEBUG_SET_FORCE_MODEL
    MessageInterface::ShowMessage
@@ -6028,12 +6028,119 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       if (fromObj != NULL)
          owner->SetRefObject(fromObj, fromObj->GetType(), value);
    }
+   else
+   {
+      // Try owned object from ODEModel
+      for (int i = 0; i < forceModel->GetOwnedObjectCount(); i++)
+      {
+         GmatBase *ownedObj = forceModel->GetOwnedObject(i);
+         if (ownedObj && FindPropertyID(ownedObj, propName, &owner, propId, propType))
+         {
+            id = owner->GetParameterID(propName);
+            type = owner->GetParameterType(id);
+            retval = SetPropertyValue(owner, id, type, value);
+            break;
+         }
+      }
+   }
    
    #ifdef DEBUG_SET_FORCE_MODEL
    MessageInterface::ShowMessage
       ("Interpreter::SetForceModelProperty() returning %d\n", retval);
    #endif
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetDragForceProperty(GmatBase *obj, const std::string &pmType, ...)
+//------------------------------------------------------------------------------
+/**
+ * Creates DragForce and AtmosphereModel objects and adds to ODEModel.
+ *
+ * @param  obj  ODEModel object
+ * @param  pmType  First field string (This is not the actual PhysicalModel type name)
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::SetDragForceProperty(GmatBase *obj,
+                                       const std::string &pmType,
+                                       const std::string &propName,
+                                       const std::string &value)
+{
+   ODEModel *forceModel = (ODEModel*)obj;
+   std::string forceType = ODEModel::GetScriptAlias(pmType);
+   std::string centralBodyName = forceModel->GetStringParameter("CentralBody");
+   
+   #ifdef DEBUG_SET_FORCE_MODEL
+   MessageInterface::ShowMessage
+      ("Interpreter::SetDragForceProperty() entered, forceType=%s, pmType=%s, "
+       "propName=%s, value=%s, centralBodyName=%s\n", forceType.c_str(), pmType.c_str(),
+       propName.c_str(), value.c_str(), centralBodyName.c_str());
+   #endif
+   
+   // Create DragForce
+   //@note 0.ForceName indicates unmanaged internal forcename.
+   // Added name for debugging purpose only
+   std::string forceName = pmType + "." + centralBodyName;
+   PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "0."+forceName, 0);
+   pm->SetName(forceName);
+   
+   #ifdef DEBUG_SET_FORCE_MODEL
+   MessageInterface::ShowMessage
+      ("   PhysicalModel <%p><%s>'%s' created\n", pm, pm->GetTypeName().c_str(),
+       pm->GetName().c_str());
+   #endif
+   
+   if (!pm->SetStringParameter("AtmosphereModel", value))
+   {
+      InterpreterException ex
+         ("Unable to set AtmosphereModel for drag force");
+      HandleError(ex);
+      ignoreError = true;
+      return false;
+   }
+   
+   // Create AtmosphereModel for the primary body
+   if (value != "BodyDefault")
+   {
+      std::string valueToUse = GmatStringUtil::RemoveEnclosingString(value, "'");
+      
+      #ifdef DEBUG_SET_FORCE_MODEL
+      MessageInterface::ShowMessage
+         ("   Creating AtmosphereModel of type '%s'\n", valueToUse.c_str());
+      #endif
+      
+      pm->SetStringParameter("BodyName", centralBodyName);
+      pm->SetStringParameter("AtmosphereBody", centralBodyName);
+      GmatBase *am = CreateObject(valueToUse, valueToUse, 0);
+      if (am)
+      {
+         pm->SetRefObject(am, Gmat::ATMOSPHERE, am->GetName());
+      }
+      else
+      {
+         InterpreterException ex
+            ("Unable to create AtmosphereModel \"" + valueToUse + "\" for drag force");
+         HandleError(ex);
+         ignoreError = true;
+         return false;
+      }
+   }
+   
+   #ifdef DEBUG_SET_FORCE_MODEL
+   MessageInterface::ShowMessage
+      ("   Adding PhysicalModel <%p><%s>'%s' to ForceModel:<%s>\n", pm,
+       pm->GetTypeName().c_str(), pm->GetName().c_str(),
+       forceModel->GetName().c_str());
+   #endif
+   
+   // Add force to ForceModel
+   forceModel->AddForce(pm);
+   
+   #ifdef DEBUG_SET_FORCE_MODEL
+   MessageInterface::ShowMessage("Interpreter::SetDragForceProperty() returning true\n");
+   #endif
+   return true;
 }
 
 
@@ -6512,6 +6619,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
    Integer ownedObjCount = owner->GetOwnedObjectCount();
    Integer errorCount = 0;
    GmatBase *tempObj = NULL;
+   *ownedObj = NULL;
    
    // Initialize output parameters
    id = -1;
@@ -6573,7 +6681,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
    
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("   FindOwnedObject() returning retval=%d, ownedObj=%p\n", retval, *ownedObj);
+      ("   FindOwnedObject() returning retval=%d, ownedObj=<%p>\n", retval, *ownedObj);
    #endif
    
    return retval;
@@ -7910,6 +8018,25 @@ void Interpreter::WriteStringArray(const std::string &title1,
    for (UnsignedInt i=0; i<parts.size(); i++)
       MessageInterface::ShowMessage("   %d: '%s'\n", i, parts[i].c_str());
    MessageInterface::ShowMessage("\n");
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteForceModel(GmatBase *obj)
+//------------------------------------------------------------------------------
+void Interpreter::WriteForceModel(GmatBase *obj)
+{
+   ODEModel *fm = (ODEModel*)obj;
+   Integer numForces = fm->GetNumForces();
+   MessageInterface::ShowMessage
+      ("   ODEModel '%s' has %d forces\n", fm->GetName().c_str(), numForces);
+   for (int i = 0; i < numForces; i++)
+   {
+      const PhysicalModel* force = fm->GetForce(i);
+      MessageInterface::ShowMessage
+         ("      force[%d] = <%p><%s>'%s'\n", i, force, force->GetTypeName().c_str(),
+          force->GetName().c_str());
+   }
 }
 
 

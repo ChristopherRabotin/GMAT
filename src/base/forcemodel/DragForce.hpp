@@ -107,7 +107,10 @@ public:
                                      const std::string &name);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
-
+   
+   virtual Integer      GetOwnedObjectCount();
+   virtual GmatBase*    GetOwnedObject(Integer whichOne);
+   
    // Special access methods used by drag forces
    bool                 SetInternalAtmosphereModel(AtmosphereModel* atm);
    AtmosphereModel*     GetInternalAtmosphereModel();
