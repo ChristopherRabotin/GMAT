@@ -42,10 +42,10 @@
 // Forward reference for the transient force vector
 class PhysicalModel;
 
-// forward refernce for the calling FunctionManager
+// forward reference for the calling FunctionManager
 class FunctionManager;
 
-// forward refernce for the function containg this command
+// forward reference for the function containing this command
 class Function;
 
 
@@ -220,7 +220,6 @@ protected:
    /// Command parameter types
    static const Gmat::ParameterType 
                      PARAMETER_TYPE[GmatCommandParamCount - GmatBaseParamCount];
-   
    
    /// Flag used to determine if associations have been made
    bool                 initialized;
