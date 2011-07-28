@@ -430,6 +430,10 @@ void PlanetData::InitializeRefObjects()
       throw ParameterException
          ("PlanetData::InitializeRefObjects() Cannot find internal "
           "CoordinateSystem object\n");
+   #ifdef DEBUG_PLANETDATA_INIT
+      MessageInterface::ShowMessage
+         ("PlanetData::InitializeRefObjects() getting output CS pointer.\n");
+   #endif
    
    mOutCoordSystem =
       (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
@@ -456,9 +460,11 @@ void PlanetData::InitializeRefObjects()
          (CelestialBody*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
       
       if (!mOrigin)
+      {
          throw ParameterException
             ("PlanetData::InitializeRefObjects() Cannot find Origin object: " +
              originName + "\n");
+      }
 
    }
 }
@@ -475,9 +481,20 @@ void PlanetData::InitializeRefObjects()
 //------------------------------------------------------------------------------
 bool PlanetData::IsValidObjectType(Gmat::ObjectType type)
 {
+#ifdef DEBUG_PLANETDATA_INIT
+   MessageInterface::ShowMessage
+      ("PlanetData::IsValidObjectType() CHECKING type %s.\n",(GmatBase::GetObjectTypeString(type).c_str()));
+#endif
    for (int i=0; i<PlanetDataObjectCount; i++)
    {
+#ifdef DEBUG_PLANETDATA_INIT
+   MessageInterface::ShowMessage
+      ("PlanetData::IsValidObjectType() has type %s.\n",(VALID_OBJECT_TYPE_LIST[i]).c_str());
+#endif
       if (GmatBase::GetObjectTypeString(type) == VALID_OBJECT_TYPE_LIST[i])
+         return true;
+      // Special case for CelestialBody origin
+      if ((VALID_OBJECT_TYPE_LIST[i] == "SpacePoint") && (GmatBase::GetObjectTypeString(type) == "CelestialBody"))
          return true;
    }
    
