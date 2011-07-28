@@ -649,28 +649,18 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
       std::stringstream data;
 
       data << "\n"
-           << "\n        Maneuver Summary:"
+           << "\n        Maneuver Summary"
            << "\n        -----------------"
-           << "\n           Impulsive Burn:     " << burnName
-           << "\n           Spacecraft:         "
-           << burn->GetStringParameter(burn->GetParameterID("SpacecraftName"))
-           << "\n           Coordinate System:  "
-           << burn->GetStringParameter(burn->GetParameterID("CoordinateSystem"))
-           << "\n           Origin:             "
-           << burn->GetStringParameter(burn->GetParameterID("Origin"))
-           << "\n           Axes:               "
-           << burn->GetStringParameter(burn->GetParameterID("Axes"))
+           << "\n        Impulsive Burn:     " << burnName
+           << "\n        Spacecraft:         " << burn->GetStringParameter(burn->GetParameterID("SpacecraftName"))
+           << "\n        Coordinate System:  " << burn->GetStringParameter(burn->GetParameterID("CoordinateSystem"))
+           << "\n        Origin:             " << burn->GetStringParameter(burn->GetParameterID("Origin"))
+           << "\n        Axes:               " << burn->GetStringParameter(burn->GetParameterID("Axes"))
 
-           << "\n           Burn Vector:"
-           << "\n              Element 1:  "
-           << BuildNumber(burn->GetRealParameter(
-                 burn->GetParameterID("Element1")))
-           << "\n              Element 2:  "
-           << BuildNumber(burn->GetRealParameter(
-                 burn->GetParameterID("Element2")))
-           << "\n              Element 3:  "
-           << BuildNumber(burn->GetRealParameter(
-                 burn->GetParameterID("Element3")))
+           << "\n        Burn Vector:"
+           << "\n           Element 1:  " << BuildNumber(burn->GetRealParameter(burn->GetParameterID("Element1")))
+           << "\n           Element 2:  " << BuildNumber(burn->GetRealParameter(burn->GetParameterID("Element2")))
+           << "\n           Element 3:  " << BuildNumber(burn->GetRealParameter(burn->GetParameterID("Element3")))
            << "\n";
 
       if (burn->GetBooleanParameter(burn->GetParameterID("DecrementMass")))
@@ -699,14 +689,9 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
          }
 
          data << "\n        Mass depletion from " << tanklist <<":  "
-              << "\n           Thrust:       "
-              << BuildNumber(thrust) << " N"
-              << "\n           Isp:          "
-              << BuildNumber(burn->GetRealParameter(
-                    burn->GetParameterID("Isp"))) << " s"
-              << "\n           Mass change:  "
-              << BuildNumber(burn->GetRealParameter(
-                    burn->GetParameterID("DeltaTankMass"))) << " kg"
+              << "\n           Thrust:       "    << BuildNumber(thrust) << " N"
+              << "\n           Isp:          "    << BuildNumber(burn->GetRealParameter(burn->GetParameterID("Isp"))) << " s"
+              << "\n           Mass change:  "    << BuildNumber(burn->GetRealParameter(burn->GetParameterID("DeltaTankMass"))) << " kg"
               << "\n";
 
       }

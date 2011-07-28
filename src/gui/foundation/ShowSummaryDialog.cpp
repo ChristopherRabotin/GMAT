@@ -66,14 +66,15 @@ void ShowSummaryDialog::Create()
    GetTextExtent(text, &w, &h);
 
    wxSize scriptPanelSize(500, 32);
-   if (theObject != NULL) {
+   if (theObject != NULL)
+   {
       text = theObject->GetStringParameter("Summary").c_str();
 
       // This code is flaky -- text width is height dependent??? -- on Linux:
 //      GetTextExtent(text, &w, &h);
 //      w = (w + 200 > 1000 ? 1000 : w + 200);
 //      h = (h > 700 ? 700 : h);
-      scriptPanelSize.Set(690, 720);
+      scriptPanelSize.Set(690, 735);
 
       SetSize(wxDefaultCoord, wxDefaultCoord, w, h);
    }

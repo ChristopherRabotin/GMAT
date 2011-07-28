@@ -26,6 +26,15 @@
 #include "MessageInterface.hpp"  // MessageInterface
 #include "TimeSystemConverter.hpp"
 #include "GmatDefaults.hpp"
+#include "GmatConstants.hpp"
+#include "Parameter.hpp"
+#include "KeplerianParameters.hpp"
+#include "AngularParameters.hpp"
+#include "OrbitalParameters.hpp"
+#include "PlanetParameters.hpp"
+#include "BplaneParameters.hpp"
+#include "Keplerian.hpp"
+#include "RealUtilities.hpp"
 
 #include <algorithm>             // for find()
 #include <sstream>               // for command summary generation
@@ -34,7 +43,7 @@
                                  // used.
 #include <iostream>
 #include <iomanip>
-#include "OrbitalParameters.hpp"
+
 //#define DEBUG_COMMAND_DEALLOCATION
 //#define DEBUG_COMMAND_SUMMARY_LIST
 //#define DEBUG_COMMAND_INIT 1
@@ -50,6 +59,8 @@
 //#define DEBUG_IS_FUNCTION
 //#define DEBUG_INTERPRET_PREFACE
 //#define DEBUG_CMD_CALLING_FUNCTION
+//#define DEBUG_COMMAND_SUMMARY_STATE
+//#define DEBUG_COMMAND_SUMMARY_REF_DATA
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -1901,7 +1912,7 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
       epochData[i] = satVector[i]->GetRealParameter(satEpochID);
       memcpy(&stateData[i6], satVector[i]->GetState().GetState(),
             6*sizeof(Real));
-      parmData[i6] = satVector[i]->GetRealParameter(satCdID);
+      parmData[i6]   = satVector[i]->GetRealParameter(satCdID);
       parmData[i6+1] = satVector[i]->GetRealParameter(satDragAreaID);
       parmData[i6+2] = satVector[i]->GetRealParameter(satCrID);
       parmData[i6+3] = satVector[i]->GetRealParameter(satSRPAreaID);
@@ -1943,43 +1954,305 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
         // data << "-------------------------------------------"
         //      << "-------------------------------------------\n";
    
-         GmatBase *obj;
+         GmatBase   *obj;
+         Rvector6   rawState;
+         Rvector6   cartState;
+         Rvector6   kepState;
+         Rvector6   sphStateAZFPA;
+         Rvector6   sphStateRADEC;
+         Real       ma, ea, ha, meanMotion, orbitEnergy, c3, semilatusRectum, angularMomentum;
+         Real       betaAngle, periAltitude, velPeriapsis, velApoapsis, orbitPeriod, lst, mha;
+         Real       latitude, longitude, altitude, bDotT = 0.0, bDotR = 0.0, bVectorAngle = 0.0, bVectorMag = 0.0;
+         Real       dla = 0.0, rla = 0.0;
+         bool       isEccentric, isHyperbolic, originIsCelestialBody;
+         SpacePoint *origin = NULL;
+         Parameter  *kepMM = NULL, *SR = NULL, *angMom = NULL, *betaA = NULL;
+         Parameter  *energy = NULL, *c3energy = NULL, *velPeri = NULL, *velApo = NULL, *T = NULL;
+         Parameter  *localST = NULL, *meanHA = NULL, *lat = NULL, *longi = NULL, *ht = NULL;
+         Parameter  *bdt = NULL, *bdr = NULL, *bva = NULL, *bvm = NULL;
+//         Parameter  *dla1 = NULL, *rla1 = NULL;
+
          // Build summary data for each spacecraft in the object list
          for (Integer i = 0; i < satsInMaps; ++i)
          {
-            obj = satVector[i];
+            obj              = satVector[i];
 
-            Rvector6 rawState  = &stateData[i*6];
-            Rvector6 cartState = rawState;
-            Rvector6 kepState      = stateConverter.FromCartesian(rawState,
-                  "Keplerian");
-            Rvector6 sphStateAZFPA = stateConverter.FromCartesian(rawState,
-                  "SphericalAZFPA");
-            Rvector6 sphStateRADEC = stateConverter.FromCartesian(rawState,
-                  "SphericalRADEC");
+            rawState         = &stateData[i*6];
+            cartState        = rawState;
+            #ifdef DEBUG_COMMAND_SUMMARY_STATE
+               MessageInterface::ShowMessage("state from array = %s\n", rawState.ToString().c_str());
+               Rvector6 stateFromSC = ((SpaceObject*) obj)->GetState().GetState();
+               MessageInterface::ShowMessage("state from SC    = %s\n", stateFromSC.ToString().c_str());
+            #endif
+            kepState         = stateConverter.FromCartesian(rawState, "Keplerian");
+            sphStateAZFPA    = stateConverter.FromCartesian(rawState, "SphericalAZFPA");
+            sphStateRADEC    = stateConverter.FromCartesian(rawState, "SphericalRADEC");
+
+            isEccentric      = false;
+            isHyperbolic     = false;
+            ea               = 0.0;
+            ha               = 0.0;
+            ma               = Keplerian::TrueToMeanAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+                               kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
+            if (kepState[1] < (1.0 - GmatOrbitConstants::KEP_ECC_TOL))
+            {
+               ea                   = Keplerian::TrueToEccentricAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+                                      kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
+               isEccentric          = true;
+            }
+            else if (kepState[1] > (1.0 + GmatOrbitConstants::KEP_TOL)) // *** or KEP_ECC_TOL or need new tolerance for this?  1.0e-10
+            {
+               ha                   = Keplerian::TrueToHyperbolicAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+                                      kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
+               isHyperbolic         = true;
+            }
+
+            origin           = ((SpaceObject*)obj)->GetOrigin();
+            if (origin->IsOfType("CelestialBody"))
+               originIsCelestialBody    = true;
+            else
+               originIsCelestialBody    = false;
+            #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> Origin is %s of type %s\n",
+                     origin->GetName().c_str(), origin->GetTypeName().c_str());
+            #endif
+
+            // Create the Parameters to compute the data
+            kepMM = new KepMM("");
+            kepMM->AddRefObject(obj);
+            kepMM->AddRefObject(origin,true);
+            kepMM->SetInternalCoordSystem(internalCoordSys);
+            kepMM->AddRefObject(solarSys);
+            kepMM->Initialize();
+
+            SR = new SemilatusRectum("");
+            SR->AddRefObject(obj);
+            SR->AddRefObject(origin,true);
+            SR->SetInternalCoordSystem(internalCoordSys);
+            SR->AddRefObject(solarSys);
+            SR->Initialize();
+
+            angMom = new AngularMomentumMag("");
+            angMom->AddRefObject(obj);
+            angMom->AddRefObject(origin,true);
+            angMom->SetInternalCoordSystem(internalCoordSys);
+            angMom->AddRefObject(solarSys);
+            angMom->Initialize();
+
+            betaA = new BetaAngle("");
+            betaA->AddRefObject(obj);
+            betaA->AddRefObject(origin,true);
+            betaA->SetInternalCoordSystem(internalCoordSys);
+            betaA->AddRefObject(solarSys);
+            betaA->Initialize();
+
+            energy = new Energy("");
+            energy->AddRefObject(obj);
+            energy->AddRefObject(origin,true);
+            energy->SetInternalCoordSystem(internalCoordSys);
+            energy->AddRefObject(solarSys);
+            energy->Initialize();
+
+            c3energy = new C3Energy("");
+            c3energy->AddRefObject(obj);
+            c3energy->AddRefObject(origin,true);
+            c3energy->SetInternalCoordSystem(internalCoordSys);
+            c3energy->AddRefObject(solarSys);
+            c3energy->Initialize();
+
+            velPeri = new VelPeriapsis("");
+            velPeri->AddRefObject(obj);
+            velPeri->AddRefObject(origin,true);
+            velPeri->SetInternalCoordSystem(internalCoordSys);
+            velPeri->AddRefObject(solarSys);
+            velPeri->Initialize();
+
+            meanMotion       = kepMM->EvaluateReal();
+            semilatusRectum  = SR->EvaluateReal();
+            angularMomentum  = angMom->EvaluateReal();
+            betaAngle        = betaA->EvaluateReal();
+            orbitEnergy      = energy->EvaluateReal();
+            c3               = c3energy->EvaluateReal();
+            velPeriapsis     = velPeri->EvaluateReal();
+            periAltitude     = 999.999999; // ** TBD ** What is this????  *** TBD ***
+
+            if (isEccentric)
+            {
+               T      = new OrbitPeriod("");
+               T->AddRefObject(obj);
+               T->AddRefObject(origin,true);
+               T->SetInternalCoordSystem(internalCoordSys);
+               T->AddRefObject(solarSys);
+               T->Initialize();
+
+               velApo = new VelApoapsis("");
+               velApo->AddRefObject(obj);
+               velApo->AddRefObject(origin,true);
+               velApo->SetInternalCoordSystem(internalCoordSys);
+               velApo->AddRefObject(solarSys);
+               velApo->Initialize();
+
+               orbitPeriod       = T->EvaluateReal();
+               velApoapsis       = velApo->EvaluateReal();
+            }
+            else  // these shouldn't be written anyway
+            {
+               orbitPeriod       = 0.0;
+               velApoapsis       = 0.0;
+            }
+
+            if (originIsCelestialBody)
+            {
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+                  MessageInterface::ShowMessage("----> Now creating BodyFixed cs and passing into PlanetData objects.\n");
+               #endif
+               // Need a origin-centered BodyFixed coordinate system here
+               CoordinateSystem *originBF = CoordinateSystem::CreateLocalCoordinateSystem("OriginBodyFixed", "BodyFixed",
+                                            origin, NULL, NULL, ((SpacePoint*)obj)->GetJ2000Body(), solarSys);
+               if (!originBF)
+               {
+                  std::string errmsg = "Error creating BodyFixed Coordinate System for origin ";
+                  errmsg += origin->GetName() + "\n";
+                  throw CommandException(errmsg);
+               }
+               localST = new LST();
+               localST->SetRefObjectName(Gmat::SPACE_POINT, origin->GetName());
+               localST->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+               localST->AddRefObject(obj);
+               localST->AddRefObject(origin,true);
+               localST->SetInternalCoordSystem(internalCoordSys);
+               localST->AddRefObject(solarSys);
+               localST->AddRefObject(originBF);
+               localST->Initialize();
+
+               meanHA = new MHA("");
+               meanHA->SetRefObjectName(Gmat::SPACE_POINT, origin->GetName());
+               meanHA->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+               meanHA->AddRefObject(obj);
+               meanHA->AddRefObject(origin,true);;
+               meanHA->SetInternalCoordSystem(internalCoordSys);
+               meanHA->AddRefObject(solarSys);
+               meanHA->AddRefObject(originBF);
+               meanHA->Initialize();
+
+               lat = new Latitude("");
+               lat->SetRefObjectName(Gmat::SPACE_POINT, origin->GetName());
+               lat->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+               lat->AddRefObject(obj);
+               lat->AddRefObject(origin,true);
+               lat->SetInternalCoordSystem(internalCoordSys);
+               lat->AddRefObject(solarSys);
+               lat->AddRefObject(originBF);
+               lat->Initialize();
+
+               longi = new Longitude("");
+               longi->SetRefObjectName(Gmat::SPACE_POINT, origin->GetName());
+               longi->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+               longi->AddRefObject(obj);
+               longi->AddRefObject(origin,true);
+               longi->SetInternalCoordSystem(internalCoordSys);
+               longi->AddRefObject(solarSys);
+               longi->AddRefObject(originBF);
+               longi->Initialize();
+
+               ht = new Altitude("");
+               ht->SetRefObjectName(Gmat::SPACE_POINT, origin->GetName());
+               ht->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+               ht->AddRefObject(obj);
+               ht->AddRefObject(origin,true);
+               ht->SetInternalCoordSystem(internalCoordSys);
+               ht->AddRefObject(solarSys);
+               ht->AddRefObject(originBF);
+               ht->Initialize();
+
+               lst                = localST->EvaluateReal();
+               mha                = meanHA->EvaluateReal();
+               latitude           = lat->EvaluateReal();
+               longitude          = longi->EvaluateReal();
+               altitude           = ht->EvaluateReal();
+               if (isHyperbolic)
+               {
+                  bdt = new BdotT();
+                  bdt->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+                  bdt->AddRefObject(obj);
+                  bdt->AddRefObject(origin,true);
+                  bdt->SetInternalCoordSystem(internalCoordSys);
+                  bdt->AddRefObject(solarSys);
+                  bdt->AddRefObject(originBF);
+                  bdt->Initialize();
+
+                  bdr = new BdotR();
+                  bdr->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+                  bdr->AddRefObject(obj);
+                  bdr->AddRefObject(origin,true);
+                  bdr->SetInternalCoordSystem(internalCoordSys);
+                  bdr->AddRefObject(solarSys);
+                  bdr->AddRefObject(originBF);
+                  bdr->Initialize();
+
+                  bva = new BVectorAngle();
+                  bva->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+                  bva->AddRefObject(obj);
+                  bva->AddRefObject(origin,true);
+                  bva->SetInternalCoordSystem(internalCoordSys);
+                  bva->AddRefObject(solarSys);
+                  bva->AddRefObject(originBF);
+                  bva->Initialize();
+
+                  bvm = new BVectorMag();
+                  bvm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "OriginBodyFixed");
+                  bvm->AddRefObject(obj);
+                  bvm->AddRefObject(origin,true);
+                  bvm->SetInternalCoordSystem(internalCoordSys);
+                  bvm->AddRefObject(solarSys);
+                  bvm->AddRefObject(originBF);
+                  bvm->Initialize();
+
+                  bDotT            = bdt->EvaluateReal();
+                  bDotR            = bdr->EvaluateReal();
+                  bVectorAngle     = bva->EvaluateReal();
+                  bVectorMag       = bvm->EvaluateReal();
+
+                  dla              = 999.999999; // ** TBD ** Need specs and parameter  *** TBD ***
+                  rla              = 999.999999; // ** TBD ** Need specs and parameter  *** TBD ***
+               }
+               else  // these shouldn't be written anyway
+               {
+                  bDotT            = 0.0;
+                  bDotR            = 0.0;
+                  bVectorAngle     = 0.0;
+                  bVectorMag       = 0.0;
+
+                  dla              = 999.999999; // ** TBD ** Need specs and parameter  *** TBD ***
+                  rla              = 999.999999; // ** TBD ** Need specs and parameter  *** TBD ***
+               }
+            }
+            else  // these shouldn't be written anyway
+            {
+               lst                = 0.0;
+               mha                = 0.0;
+               latitude           = 0.0;
+               longitude          = 0.0;
+               altitude           = 0.0;
+            }
 
             //TimeConverterUtil::Convert
-            Real utcModJulEpoch = TimeConverterUtil::Convert(epochData[i],
-                  TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
-                  GmatTimeConstants::JD_JAN_5_1941);
-            Real taiModJulEpoch = TimeConverterUtil::Convert(epochData[i],
-                  TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
-                  GmatTimeConstants::JD_JAN_5_1941);
-            Real ttModJulEpoch = TimeConverterUtil::Convert(epochData[i],
-                  TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
-                  GmatTimeConstants::JD_JAN_5_1941);
-            Real tdbModJulEpoch = TimeConverterUtil::Convert(epochData[i],
-                  TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
-                  GmatTimeConstants::JD_JAN_5_1941);
-            std::string utcString =
-                  TimeConverterUtil::ConvertMjdToGregorian(utcModJulEpoch);
-            std::string taiString =
-                  TimeConverterUtil::ConvertMjdToGregorian(taiModJulEpoch);
-            std::string ttString =
-                  TimeConverterUtil::ConvertMjdToGregorian(ttModJulEpoch);
-            std::string tdbString =
-                  TimeConverterUtil::ConvertMjdToGregorian(tdbModJulEpoch);
-
+            Real utcModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
+                                      TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941);
+            Real taiModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
+                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941);
+            Real ttModJulEpoch      = TimeConverterUtil::Convert(epochData[i],
+                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941);
+            Real tdbModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
+                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941);
+            std::string utcString   = TimeConverterUtil::ConvertMjdToGregorian(utcModJulEpoch);
+            std::string taiString   = TimeConverterUtil::ConvertMjdToGregorian(taiModJulEpoch);
+            std::string ttString    = TimeConverterUtil::ConvertMjdToGregorian(ttModJulEpoch);
+            std::string tdbString   = TimeConverterUtil::ConvertMjdToGregorian(tdbModJulEpoch);
             data.flags(std::ios::left);
             data.precision(10);
             data.setf(std::ios::fixed,std::ios::floatfield);
@@ -1999,14 +2272,10 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                  << "Modified Julian  \n"
                  << "        --------------------------------------------"
                  << "--------------------------    \n"
-                 << "        UTC Epoch:    " << utcString << "      "
-                 << utcModJulEpoch <<"\n"
-                 << "        TAI Epoch:    " << taiString << "      "
-                 << taiModJulEpoch <<"\n"
-                 << "        TT  Epoch:    " << ttString  << "      "
-                 << ttModJulEpoch  <<"\n"
-                 << "        TDB Epoch:    " << tdbString << "      "
-                 << tdbModJulEpoch <<"\n\n";
+                 << "        UTC Epoch:    " << utcString << "      " << utcModJulEpoch <<"\n"
+                 << "        TAI Epoch:    " << taiString << "      " << taiModJulEpoch <<"\n"
+                 << "        TT  Epoch:    " << ttString  << "      " << ttModJulEpoch  <<"\n"
+                 << "        TDB Epoch:    " << tdbString << "      " << tdbModJulEpoch <<"\n\n";
 
             data.unsetf(std::ios::fixed);
             data.unsetf(std::ios::floatfield);
@@ -2015,53 +2284,98 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 
             data << "        Cartesian State                       "
                  << "Keplerian State\n"
-                                     << "        ---------------------------           "
-                                     << "-------------------------------- \n"
-                 << "        X  = " << BuildNumber(cartState[0]) << " km     "
-                 << "        SMA  = " << BuildNumber(kepState[0]) << " km\n"
-                 << "        Y  = " << BuildNumber(cartState[1]) << " km     "
-                 << "        ECC  = " << BuildNumber(kepState[1]) << "\n"
-                 << "        Z  = " << BuildNumber(cartState[2]) << " km     "
-                 << "        INC  = " << BuildNumber(kepState[2]) << " deg\n"
-                 << "        VX = " << BuildNumber(cartState[3]) << " km/sec "
-                 << "        RAAN = " << BuildNumber(kepState[3]) << " deg\n"
-                 << "        VY = " << BuildNumber(cartState[4]) << " km/sec "
-                 << "        AOP  = " << BuildNumber(kepState[4]) << " deg\n"
-                 << "        VZ = " << BuildNumber(cartState[5]) << " km/sec "
-                 << "        TA   = " << BuildNumber(kepState[5]) << " deg\n"
-                 << "\n        Spherical State:\n"
-                 << "        ---------------------------       \n"
-                 << "        RMAG = " << BuildNumber(sphStateAZFPA[0])
-                 << " km\n"
-                 << "        RA   = " << BuildNumber(sphStateAZFPA[1])
-                 << " deg\n"
-                 << "        DEC  = " << BuildNumber(sphStateAZFPA[2])
-                 << " deg\n"
-                 << "        VMAG = " << BuildNumber(sphStateAZFPA[3])
-                 << " km/s\n"
-                 << "        AZI  = " << BuildNumber(sphStateAZFPA[4])
-                 << " deg\n"
-                 << "        VFPA = " << BuildNumber(sphStateAZFPA[5])
-                 << " deg\n"
-                 << "        RAV  = " << BuildNumber(sphStateRADEC[4])
-                 << " deg\n"
-                 << "        DECV = " << BuildNumber(sphStateRADEC[5])
-                 << " deg\n"
-                 << "\n\n        Spacecraft properties:\n"
-                 << "        ------------------------------\n"
-                 << "        Cd =                    "
-                 << BuildNumber(parmData[i*6], 10) << "\n"
-                 << "        Drag area =             "
-                 << BuildNumber(parmData[i*6+1], 10) << " m^2\n"
-                 << "        Cr =                    "
-                 << BuildNumber(parmData[i*6+2], 10) << "\n"
-                 << "        Reflective (SRP) area = " 
-                 << BuildNumber(parmData[i*6+3], 10) << " m^2\n";
+                                      << "        ---------------------------           "
+                                      << "-------------------------------- \n"
+                 << "        X  = "   << BuildNumber(cartState[0])  << " km     "
+                 << "        SMA  = " << BuildNumber(kepState[0])   << " km\n"
+                 << "        Y  = "   << BuildNumber(cartState[1])  << " km     "
+                 << "        ECC  = " << BuildNumber(kepState[1])   << "\n"
+                 << "        Z  = "   << BuildNumber(cartState[2])  << " km     "
+                 << "        INC  = " << BuildNumber(kepState[2])   << " deg\n"
+                 << "        VX = "   << BuildNumber(cartState[3])  << " km/sec "
+                 << "        RAAN = " << BuildNumber(kepState[3])   << " deg\n"
+                 << "        VY = "   << BuildNumber(cartState[4])  << " km/sec "
+                 << "        AOP  = " << BuildNumber(kepState[4])   << " deg\n"
+                 << "        VZ = "   << BuildNumber(cartState[5])  << " km/sec "
+                 << "        TA   = " << BuildNumber(kepState[5])   << " deg\n"
+                 << "                                      "        << "        MA   = " << BuildNumber(ma) << " deg\n";
+            if (isEccentric)
+               data << "                                      "     << "        EA   = " << BuildNumber(ea) << " deg\n";
+            else if (isHyperbolic)
+               data << "                                      "     << "        HA   = " << BuildNumber(ha) << " deg\n";
+            data << "\n        Spherical State                       "
+                 << "Other Orbit Data\n"
+                 << "        ---------------------------           "
+                 << "--------------------------------\n"
+                 << "        RMAG = "               << BuildNumber(sphStateAZFPA[0])    << " km   "
+                 << "        Mean Motion        = " << BuildNumber(meanMotion, 12)      << " deg/sec\n"
+                 << "        RA   = "               << BuildNumber(sphStateAZFPA[1])    << " deg  "
+                 << "        Orbit Energy       = " << BuildNumber(orbitEnergy, 12)     << " Km^2/s^2\n"
+                 << "        DEC  = "               << BuildNumber(sphStateAZFPA[2])    << " deg  "
+                 << "        C3                 = " << BuildNumber(c3, 12)              << " Km^2/s^2\n"
+                 << "        VMAG = "               << BuildNumber(sphStateAZFPA[3])    << " km/s "
+                 << "        Semilatus Rectum   = " << BuildNumber(semilatusRectum, 12) << " km   \n"
+                 << "        AZI  = "               << BuildNumber(sphStateAZFPA[4])    << " deg  "
+                 << "        Angular Momentum   = " << BuildNumber(angularMomentum, 12) << " km^2/s\n"
+                 << "        VFPA = "               << BuildNumber(sphStateAZFPA[5])    << " deg  "
+                 << "        Beta Angle         = " << BuildNumber(betaAngle, 12)       << " deg  \n"
+                 << "        RAV  = "               << BuildNumber(sphStateRADEC[4])    << " deg  "
+                 << "        Periapsis Altitude = " << "  TBD       "                   << " km   \n"
+//                 << "        Periapsis Altitude = " << BuildNumber(periAltitude, 12)    << " km   \n"
+                 << "        DECV = "               << BuildNumber(sphStateRADEC[5])    << " deg  "
+                 << "        VelPeriapsis       = " << BuildNumber(velPeriapsis, 12)    << " km/s\n";
+            if (isEccentric)
+            {
+               data << "                                       " << "       VelApoapsis        = " << BuildNumber(velApoapsis, 12) << " km/s \n"
+                    << "                                       " << "       Orbit Period       = " << BuildNumber(orbitPeriod, 12) << " s    \n";
+            }
+            // add planetodetic parameters, if the origin is a Celestial Body
+            if (originIsCelestialBody)
+            {
+               // and include hyperbolic parameters, if appropriate
+               if (isHyperbolic)
+               {
+                  data << "\n        Planetodetic Properties               "
+                       << "Hyperbolic Parameters\n"
+                       << "        ---------------------------           "
+                       << "--------------------------------\n"
+                       << "        LST       = "      << BuildNumber(lst, 12)          << " deg  "
+                       << "        BdotT          = " << BuildNumber(bDotT, 12)        << " km   \n"
+                       << "        MHA       = "      << BuildNumber(mha, 12)          << " deg  "
+                       << "        BdotR          = " << BuildNumber(bDotR, 12)        << " km   \n"
+                       << "        Latitude  = "      << BuildNumber(latitude, 12)     << " deg  "
+                       << "        B Vector Angle = " << BuildNumber(bVectorAngle, 12) << " deg  \n"
+                       << "        Longitude = "      << BuildNumber(longitude, 12)    << " deg  "
+                       << "        B Vector Mag   = " << BuildNumber(bVectorMag, 12)   << " km   \n"
+                       << "        Altitude  = "      << BuildNumber(altitude, 12)     << " km   "
+                       << "        DLA            = " << "  TBD       "                << " TBD  \n"
+                       << "                                      "
+                       << "        RLA            = " << "  TBD       "                << " TBD  \n";
+//                       << "        DLA            = " << BuildNumber(dla, 12)          << " TBD  \n"
+//                       << "                                      "
+//                       << "        RLA            = " << BuildNumber(rla, 12)   << " TBD  \n";
+               }
+               else
+               {
+                  data << "\n        Planetodetic Properties \n"
+                       << "        ---------------------------\n"
+                       << "        LST       = " << BuildNumber(lst, 12)       << " deg\n"
+                       << "        MHA       = " << BuildNumber(mha, 12)       << " deg\n"
+                       << "        Latitude  = " << BuildNumber(latitude, 12)  << " deg\n"
+                       << "        Longitude = " << BuildNumber(longitude, 12) << " deg\n"
+                       << "        Altitude  = " << BuildNumber(altitude, 12)  << " km\n";
+               }
+            }
 
-            data << "        Dry mass =              "
-                 << BuildNumber(parmData[i*6+4]) << " kg\n";
-            data << "        Total mass =            "
-                 << BuildNumber(parmData[i*6+5]) << " kg\n";
+            data << "\n\n        Spacecraft properties \n"
+                 << "        ------------------------------\n"
+                 << "        Cd                    = " << BuildNumber(parmData[i*6], 10)   << "\n"
+                 << "        Drag area             = " << BuildNumber(parmData[i*6+1], 10) << " m^2\n"
+                 << "        Cr                    = " << BuildNumber(parmData[i*6+2], 10) << "\n"
+                 << "        Reflective (SRP) area = " << BuildNumber(parmData[i*6+3], 10) << " m^2\n";
+
+            data << "        Dry mass              = " << BuildNumber(parmData[i*6+4])     << " kg\n";
+            data << "        Total mass            = " << BuildNumber(parmData[i*6+5])     << " kg\n";
 
             StringArray tanks = obj->GetStringArrayParameter(satTankID);
             if (tanks.size() > 0)
@@ -2073,7 +2387,36 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                        << BuildNumber(obj->GetRefObject(Gmat::HARDWARE, (*i))->
                              GetRealParameter("FuelMass")) << " kg\n";
             }
-                 
+            // delete the Parameters
+            delete kepMM;    kepMM     = NULL;
+            delete SR;       SR        = NULL;
+            delete angMom;   angMom    = NULL;
+            delete betaA;    betaA     = NULL;
+            delete energy;   energy    = NULL;
+            delete c3energy; c3energy  = NULL;
+            delete velPeri;  velPeri   = NULL;
+            if (isEccentric)
+            {
+               delete velApo; velApo   = NULL;
+               delete T;      T        = NULL;
+            }
+            if (originIsCelestialBody)
+            {
+               delete localST; localST = NULL;
+               delete meanHA;  meanHA  = NULL;
+               delete lat;     lat     = NULL;
+               delete longi;   longi   = NULL;
+               delete ht;      ht      = NULL;
+               if (isEccentric)
+               {
+                  delete bdt;  bdt     = NULL;
+                  delete bdr;  bdr     = NULL;
+                  delete bva;  bva     = NULL;
+                  delete bvm;  bvm     = NULL;
+//                  delete dla1; dla1    = NULL;
+//                  delete rla1; rla1    = NULL;
+               }
+            }
          }
       }
    }
