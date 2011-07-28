@@ -24,7 +24,7 @@
 #include "StringUtil.hpp"          // for ParseParameter()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_REFDATA_OBJECT 1
+//#define DEBUG_REFDATA_OBJECT 2
 //#define DEBUG_REFDATA_OBJECT_GET 2
 //#define DEBUG_REFDATA_OBJECT_SET 2
 //#define DEBUG_REFDATA_FIND 1
@@ -465,11 +465,15 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
        name.c_str(), obj, replaceName);
    #endif
    
-   if (IsValidObjectType(type))
+   Gmat::ObjectType actualType = type;
+   if (type == Gmat::CELESTIAL_BODY)
+      actualType = Gmat::SPACE_POINT;
+
+   if (IsValidObjectType(actualType))
    {
-      if (FindFirstObjectName(type) == "")
+      if (FindFirstObjectName(actualType) == "")
       {
-         RefObjType newObj(type, name, obj);
+         RefObjType newObj(actualType, name, obj);
          mRefObjList.push_back(newObj);
          mNumRefObjects = mRefObjList.size();
          return true;        
@@ -477,9 +481,9 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
       else
       {
          if (replaceName)
-            SetRefObjectWithNewName(obj, type, name);
+            SetRefObjectWithNewName(obj, actualType, name);
          else
-            SetRefObject(obj, type, name);
+            SetRefObject(obj, actualType, name);
          
          return true;
       }
@@ -487,7 +491,7 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
    
    #if DEBUG_REFDATA_ADD
    MessageInterface::ShowMessage
-      ("RefData::AddRefObject() '%s' is not a valid object type so returnning "
+      ("RefData::AddRefObject() '%s' does NOT have a valid object type so returning "
        "false\n", name.c_str());
    #endif
    
@@ -532,7 +536,7 @@ bool RefData::SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type
          
          #if DEBUG_REFDATA_OBJECT > 1
          MessageInterface::ShowMessage
-            ("RefData::SetRefObjectWithName() set %s to %d\n",
+            ("RefData::SetRefObjectWithName() set %s to %p\n",
              mRefObjList[i].objName.c_str(), obj);
          #endif
          return true;
