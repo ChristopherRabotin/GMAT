@@ -737,7 +737,7 @@ bool BranchCommand::InsertRightAfter(GmatCommand *cmd)
 // void BranchCommand::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 /**
- * Sets teh solar system pointer for the child commands.
+ * Sets the solar system pointer for the child commands.
  *
  * @param <ss>  The SolarSystem instance.
  */
@@ -755,6 +755,33 @@ void BranchCommand::SetSolarSystem(SolarSystem *ss)
       while ((current != NULL) && (current != this))
       {
          current->SetSolarSystem(ss);;
+         current = current->GetNext();
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+// void BranchCommand::SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ * Sets the internal coordinate system pointer for the child commands.
+ *
+ * @param <ss>  The CoordinateSystem instance.
+ */
+//------------------------------------------------------------------------------
+void BranchCommand::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   GmatCommand::SetInternalCoordSystem(cs);
+   GmatCommand *current = NULL;
+
+   // Set it for all of the branch nodes
+   // If we have branches, try to insert there first
+   for (Integer which = 0; which < (Integer)branch.size(); ++which)
+   {
+      current = branch[which];
+      while ((current != NULL) && (current != this))
+      {
+         current->SetInternalCoordSystem(cs);;
          current = current->GetNext();
       }
    }

@@ -49,6 +49,7 @@ public:
    virtual bool            InsertRightAfter(GmatCommand *cmd);
    
    virtual void            SetSolarSystem(SolarSystem *ss);
+   virtual void            SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
    virtual void            SetGlobalObjectMap(std::map<std::string, GmatBase*> *map);
    
