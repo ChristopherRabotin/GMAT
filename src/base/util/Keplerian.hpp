@@ -106,9 +106,9 @@ public :
                              const Rvector3 &vel, bool inRadian = false);
    static Real CartesianToMA(Real mu, const Rvector3 &pos,
                              const Rvector3 &vel, bool inRadian = false);
-   static Radians TrueToMeanAnomaly(Radians ta, Real ecc);
-   static Radians TrueToEccentricAnomaly(Radians ta, Real ecc);
-   static Radians TrueToHyperbolicAnomaly(Radians ta, Real ecc);
+   static Radians TrueToMeanAnomaly(Radians ta, Real ecc, bool modBy2Pi = false);
+   static Radians TrueToEccentricAnomaly(Radians ta, Real ecc, bool modBy2Pi = false);
+   static Radians TrueToHyperbolicAnomaly(Radians ta, Real ecc, bool modBy2Pi = false);
    
    static Real MeanToTrueAnomaly(Real maInDeg, Real ecc, Real tol = 1.0e-08);
    static Integer ComputeMeanToTrueAnomaly(Real maInDeg, Real ecc, Real tol,

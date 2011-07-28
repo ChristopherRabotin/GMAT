@@ -978,13 +978,13 @@ Rvector6 Keplerian::CartesianToKeplerian(Real mu, const Rvector6 &state,
 
 
 //------------------------------------------------------------------------------
-// static Radians TrueToMeanAnomaly(Radians ta, Real ecc)
+// static Radians TrueToMeanAnomaly(Radians ta, Real ecc, bool modBy2Pi = false)
 //------------------------------------------------------------------------------
 /*
  * Computes mean anomaly from true anomaly
  */
 //------------------------------------------------------------------------------
-Radians Keplerian::TrueToMeanAnomaly(Radians ta, Real ecc)
+Radians Keplerian::TrueToMeanAnomaly(Radians ta, Real ecc, bool modBy2Pi)
 {
    #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage
@@ -1018,15 +1018,20 @@ Radians Keplerian::TrueToMeanAnomaly(Radians ta, Real ecc)
    
    if (ma < 0.0)
       ma = ma + TWO_PI;
+   if (modBy2Pi)
+   {
+      while (ma > TWO_PI)
+         ma -= TWO_PI;
+   }
    
    return ma;
 }
 
 
 //------------------------------------------------------------------------------
-// static Radians TrueToEccentricAnomaly(Radians ta, Real ecc)
+// static Radians TrueToEccentricAnomaly(Radians ta, Real ecc, bool modBy2Pi = false)
 //------------------------------------------------------------------------------
-Radians Keplerian::TrueToEccentricAnomaly(Radians ta, Real ecc)
+Radians Keplerian::TrueToEccentricAnomaly(Radians ta, Real ecc, bool modBy2Pi)
 {
    #if DEBUG_ANOMALY
    MessageInterface::ShowMessage
@@ -1046,6 +1051,11 @@ Radians Keplerian::TrueToEccentricAnomaly(Radians ta, Real ecc)
    
    if (ea < 0.0)
       ea = ea + TWO_PI;
+   if (modBy2Pi)
+   {
+      while (ea > TWO_PI)
+         ea -= TWO_PI;
+   }
    
    #if DEBUG_ANOMALY
    MessageInterface::ShowMessage("TrueToEccentricAnomaly() returning %f\n", ea);
@@ -1056,9 +1066,9 @@ Radians Keplerian::TrueToEccentricAnomaly(Radians ta, Real ecc)
 
 
 //------------------------------------------------------------------------------
-// static Radians TrueToHyperbolicAnomaly(Radians ta, Real ecc)
+// static Radians TrueToHyperbolicAnomaly(Radians ta, Real ecc, bool modBy2Pi = false)
 //------------------------------------------------------------------------------
-Radians Keplerian::TrueToHyperbolicAnomaly(Radians ta, Real ecc)
+Radians Keplerian::TrueToHyperbolicAnomaly(Radians ta, Real ecc, bool modBy2Pi)
 {
    #if DEBUG_ANOMALY
    MessageInterface::ShowMessage
@@ -1084,7 +1094,12 @@ Radians Keplerian::TrueToHyperbolicAnomaly(Radians ta, Real ecc)
    #if DEBUG_ANOMALY
    MessageInterface::ShowMessage("TrueToHyperbolicAnomaly() returning %f\n", ha);
    #endif
-   
+   if (modBy2Pi)
+   {
+      while (ha > TWO_PI)
+         ha -= TWO_PI;
+   }
+
    return ha;
 }
 
