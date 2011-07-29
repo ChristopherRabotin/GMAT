@@ -1658,8 +1658,11 @@ bool DragForce::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 Integer DragForce::GetOwnedObjectCount()
 {
+   // for now only 1 internal object
    if (internalAtmos != NULL)
       return 1;
+   else
+      return 0;
 }
 
 
