@@ -209,6 +209,28 @@ void OrbitData::SetReal(Integer item, Real rval)
           GmatOrbitConstants::ORBIT_REAL_UNDEFINED);
    }
    
+   CoordinateSystem *satCS =
+      (CoordinateSystem*)mSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "");
+   
+   #if DEBUG_ORBITDATA_SET
+   MessageInterface::ShowMessage
+      ("   Parameter CS Origin = '%s'\n", mOutCoordSystem->GetOriginName().c_str());
+   MessageInterface::ShowMessage
+      ("   Sat       CS Origin = '%s'\n", satCS->GetOriginName().c_str());
+   #endif
+   
+   if (mOutCoordSystem != satCS)
+   {
+      ParameterException pe;
+      pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
+                    "requires values to be in the '%s' coordinate system (setting "
+                    "values in different coordinate systems will be implemented in "
+                    "future builds)",  mName.c_str(), mSpacecraft->GetName().c_str(),
+                    satCS->GetName().c_str());
+      throw pe;
+   }
+   
+   
    switch (item)
    {
    case PX:
@@ -639,10 +661,10 @@ Real OrbitData::GetOtherKepReal(Integer item)
       else
          return GmatMathConstants::TWO_PI * Sqrt((sma * sma * sma)/ grav);
    case RAD_APOAPSIS:
-	   if ( (ecc < 1.0 - GmatOrbitConstants::KEP_ECC_TOL) || (ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL)) //Ellipse and Hyperbola
+           if ( (ecc < 1.0 - GmatOrbitConstants::KEP_ECC_TOL) || (ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL)) //Ellipse and Hyperbola
          return sma * (1.0 + ecc);
-	  else
-		 return 0.0;   // Parabola
+          else
+                 return 0.0;   // Parabola
    case RAD_PERIAPSIS:
       return sma * (1.0 - ecc);
    case C3_ENERGY:
