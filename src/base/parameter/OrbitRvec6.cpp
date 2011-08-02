@@ -179,7 +179,7 @@ void OrbitRvec6::SetInternalCoordSystem(CoordinateSystem *cs)
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool OrbitRvec6::AddRefObject(GmatBase *obj)
+bool OrbitRvec6::AddRefObject(GmatBase *obj, bool replaceName)
 {
    if (obj != NULL)
       return OrbitData::AddRefObject(obj->GetType(), obj->GetName(), obj);

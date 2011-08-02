@@ -44,7 +44,7 @@ public:
    virtual Integer GetNumRefObjects() const;
    virtual void SetSolarSystem(SolarSystem *ss);
    virtual void SetInternalCoordSystem(CoordinateSystem *ss);
-   virtual bool AddRefObject(GmatBase *obj);
+   virtual bool AddRefObject(GmatBase *obj, bool replaceName = false);
    virtual bool Validate();
    virtual bool Initialize();
    
