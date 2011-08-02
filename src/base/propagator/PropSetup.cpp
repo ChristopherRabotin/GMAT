@@ -427,8 +427,11 @@ void PropSetup::SetODEModel(ODEModel *odeModel)
    #endif
    
    DeleteOwnedObject(ODE_MODEL, true);
-   CloneODEModel(odeModel);      // Makes clone or sets pointer to NULL
-   mODEModelName = odeModel->GetName();
+   if (mPropagator->UsesODEModel())
+   {
+      CloneODEModel(odeModel);      // Makes clone or sets pointer to NULL
+      mODEModelName = odeModel->GetName();
+   }
    
    #ifdef DEBUG_PROPSETUP_SET
    MessageInterface::ShowMessage
