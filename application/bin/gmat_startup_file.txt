@@ -99,16 +99,18 @@ SPLASH_PATH            = DATA_PATH/graphics/splash/
 SPLASH_FILE            = SPLASH_PATH/GMATSplashScreen.tif
 #-----------------------------------------------------------
 TEXTURE_PATH           = DATA_PATH/graphics/texture/
+SUN_TEXTURE_FILE       = TEXTURE_PATH/Sun.jpg
+MERCURY_TEXTURE_FILE   = TEXTURE_PATH/Mercury_JPLCaltech.jpg
+VENUS_TEXTURE_FILE     = TEXTURE_PATH/Venus_BjornJonsson.jpg
 EARTH_TEXTURE_FILE     = TEXTURE_PATH/ModifiedBlueMarble.jpg
-JUPITER_TEXTURE_FILE   = TEXTURE_PATH/Jupiter_HermesCelestiaMotherlode.jpg
 LUNA_TEXTURE_FILE      = TEXTURE_PATH/Moon_HermesCelestiaMotherlode.jpg
 MARS_TEXTURE_FILE      = TEXTURE_PATH/Mars_JPLCaltechUSGS.jpg
-MERCURY_TEXTURE_FILE   = TEXTURE_PATH/Mercury_JPLCaltech.jpg
+JUPITER_TEXTURE_FILE   = TEXTURE_PATH/Jupiter_HermesCelestiaMotherlode.jpg
+SATURN_TEXTURE_FILE    = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
+URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
 NEPTUNE_TEXTURE_FILE   = TEXTURE_PATH/Neptune_BjornJonsson.jpg
 PLUTO_TEXTURE_FILE     = TEXTURE_PATH/Pluto_JPLCaltech.jpg
-SATRUN_TEXTURE_FILE    = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
-SUN_TEXTURE_FILE       = TEXTURE_PATH/Sun.jpg
-URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
+
 #-----------------------------------------------------------
 STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
