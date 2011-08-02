@@ -859,7 +859,7 @@ bool Parameter::Evaluate()
 bool Parameter::AddRefObject(GmatBase *object, bool replaceName)
 {
    if (mKey == GmatParam::SYSTEM_PARAM)
-      throw ParameterException("Parameter: AddObject() should be implemented "
+      throw ParameterException("Parameter: AddRefObject() should be implemented "
                                "for Parameter Type:" + GetTypeName() + "\n");
 
    return false;
