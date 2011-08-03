@@ -189,7 +189,8 @@ void EarthTide::SetTide (const Real& jday,      const bool& removepermtide,
    Real mass_sun_earth  = sunMass / earthMass;     // match the math here?
 
    // zero the coefficient delta matrices
-   for (Integer n=0;  n<=NNTide;  ++n)
+//   for (Integer n=0;  n<=NNTide;  ++n)
+   for (Integer n=0;  n<NNTide;  ++n)   // wcs < instead of <=
       for (Integer m=0;  m<=n;  ++m)
       {
          CTide[n][m] = 0;
@@ -199,11 +200,25 @@ void EarthTide::SetTide (const Real& jday,      const bool& removepermtide,
    //------------------------------------------------------------------------------
    Real SunPolar[3];    // R,Latitude,Longitude (Radians)  
    Real MoonPolar[3];   // R,Latitude,Longitude (Radians)    
+   for (Integer ii = 0; ii < 3; ii++)
+   {
+      SunPolar[ii]  = 0.0;
+      MoonPolar[ii] = 0.0;
+   }
    CartesianToPolar (sunpos,SunPolar);
    CartesianToPolar (moonpos,MoonPolar);
   
    Real PMoon[NNTide][NNTide];
    Real PSun[NNTide][NNTide];
+   // Initialize these arrays
+   for (Integer ii = 0; ii < 5; ii++)
+   {
+      for (Integer jj = 0; jj < 5; jj++)
+      {
+         PMoon[ii][jj] = 0.0;
+         PSun[ii][jj]  = 0.0;
+      }
+   }
    PolarToLegendre (MoonPolar,PMoon);
    PolarToLegendre (SunPolar,PSun);
 

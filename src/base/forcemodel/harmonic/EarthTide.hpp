@@ -58,7 +58,8 @@ private:  // No creating or copying allowed
    static const Real    Table63b[Table63bDim1][7];
 
    // Table 6.3c, IERS p.66 (for C22 coefficient)
-   static const Integer Table63cDim1 = 21;
+//   static const Integer Table63cDim1 = 21;    // 21?/ He's only setting 2!!!
+   static const Integer Table63cDim1 = 2;
    static const Real    Table63c[Table63cDim1][6];
 };
 
