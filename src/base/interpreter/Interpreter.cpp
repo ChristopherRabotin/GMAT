@@ -5907,23 +5907,23 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    else if (pmType == "Drag" || pmType == "AtmosphereModel")
    {
       // Write deprecated message, now we olny use Drag.AtmosphereModel to specify model name
-      if (pmType == "Drag")
+      if (pmType == "Drag" && value != "None")
       {
          InterpreterException ex
             ("The field \"Drag\" of ForceModel \"" + obj->GetName() +
              "\" will not be permitted in a future build; "
              "please use \"Drag.AtmosphereModel\" instead");
          HandleError(ex, true, true);
-         
-         if (value == "None")
-            return true;
       }
       
+      // If value is None, do not create DragForce
+      if (value == "None")
+         return true;
+      
       // Special handling for Drag
-      // If field is AtmosphereModel, create DragForce and then AtmosphereModel
-      // Also handle old script such as FM.Drag = JacchiaRoberts
-      if (pmType == "AtmosphereModel" || (pmType == "Drag" && value != "None"))
-         return SetDragForceProperty(obj, "Drag", pmType, value);
+      // If field is AtmosphereModel, create DragForce and then AtmosphereModel.
+      // It will also handle old script such as FM.Drag = JacchiaRoberts
+      return SetDragForceProperty(obj, "Drag", pmType, value);
    }
    else if (pmType == "SRP" || pmType == "RelativisticCorrection")
    {
