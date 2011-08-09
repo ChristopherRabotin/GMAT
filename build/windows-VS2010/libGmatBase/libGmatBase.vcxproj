@@ -609,13 +609,15 @@
     <ClCompile Include="..\..\..\src\base\solarsys\Msise90Atmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\msise90_sub.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">true</ExcludedFromBuild>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">4244;4996;4251</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">4244;4996;4251;4244</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4244;4996;4251</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">4244;4996;4251</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4244;4996;4251</DisableSpecificWarnings>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\NRLMsise00Atmosphere.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\nrlmsise00_sub.c" />
     <ClCompile Include="..\..\..\src\base\solarsys\Planet.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphemException.cpp" />
@@ -1059,6 +1061,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\LibrationPoint.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Moon.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Msise90Atmosphere.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\NRLMsise00Atmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphemException.hpp" />
