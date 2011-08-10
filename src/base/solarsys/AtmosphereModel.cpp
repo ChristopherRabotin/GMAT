@@ -85,6 +85,7 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    nominalKp            (3.0),
    kpApConversion       (0),
    mInternalCoordSystem (NULL),
+   cbJ2000              (NULL),
    cbFixed              (NULL),
    wUpdateInterval      (0.0),     // Default to always update
    wUpdateEpoch         (0.0),
@@ -152,6 +153,7 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    nominalKp            (am.nominalKp),
    kpApConversion       (am.kpApConversion),
    mInternalCoordSystem (am.mInternalCoordSystem),
+   cbJ2000              (am.cbJ2000),
    cbFixed              (am.cbFixed),
    wUpdateInterval      (am.wUpdateInterval),
    wUpdateEpoch         (am.wUpdateEpoch),
@@ -201,6 +203,7 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    nominalAp            = ConvertKpToAp(nominalKp);
    kpApConversion       = am.kpApConversion;
    mInternalCoordSystem = am.mInternalCoordSystem;
+   cbJ2000              = am.cbJ2000;
    cbFixed              = am.cbFixed;
    wUpdateInterval      = am.wUpdateInterval;
    wUpdateEpoch         = am.wUpdateEpoch;
@@ -272,6 +275,21 @@ void AtmosphereModel::SetUpdateParameters(Real interval, GmatEpoch epoch)
 void AtmosphereModel::SetInternalCoordSystem(CoordinateSystem *cs)
 {
    mInternalCoordSystem = cs;
+}
+
+//------------------------------------------------------------------------------
+// void SetCbJ2000CoordinateSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ * Sets the body centered J2000 coordinate system used to calculate geodetics 
+ * when the CB is not the Earth.
+ *
+ * @param cs The coordinate system
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetCbJ2000CoordinateSystem(CoordinateSystem *cs)
+{
+   cbJ2000 = cs;
 }
 
 //------------------------------------------------------------------------------
@@ -586,6 +604,110 @@ Real AtmosphereModel::ConvertKpToAp(const Real kp)
 }
 
 
+//-----------------------------------------------------------------------------
+// bool AtmosphereModel::HasWindModel()
+//-----------------------------------------------------------------------------
+/**
+ * Checks to see if a local wind model exists for the atmosphere.
+ *
+ * @return true if the model supports wind calculation, false if not
+ */
+//-----------------------------------------------------------------------------
+bool AtmosphereModel::HasWindModel()
+{
+   return false;
+}
+
+//-----------------------------------------------------------------------------
+// bool Wind(Real *position, Real* wind, Real ep, Integer count = 1)
+//-----------------------------------------------------------------------------
+/**
+ * Retrieves the local wind in MJ2000Eq coordinates.
+ *
+ * @param position The location of the spacecraft
+ * @param wind The local wind, as set by the method
+ * @param ep The epoch of the calculations
+ * @param count The number of spacecraft contained in pos
+ *
+ * @return true on success, false on failure
+ */
+//-----------------------------------------------------------------------------
+bool AtmosphereModel::Wind(Real *position, Real* wind, Real ep,
+						   Integer count)
+{
+   return false;
+}
+
+//-----------------------------------------------------------------------------
+// bool HasTemperatureModel()
+//-----------------------------------------------------------------------------
+/**
+ * Checks to see if a local temperature exists for the atmosphere.
+ *
+ * @return true if the model supports temperature calculation, false if not
+ */
+//-----------------------------------------------------------------------------
+bool AtmosphereModel::HasTemperatureModel()
+{
+   return false;
+}
+
+//-----------------------------------------------------------------------------
+// bool Temperature(Real *position, Real *temperature, Real epoch, 
+//       Integer count)
+//-----------------------------------------------------------------------------
+/**
+ * Retrieves the temperature.
+ *
+ * @param position The location of the spacecraft
+ * @param temperature The temperature, as set by the method
+ * @param ep The epoch of the calculations
+ * @param count The number of spacecraft contained in position
+ *
+ * @return true on success, false on failure
+ */
+//-----------------------------------------------------------------------------
+bool AtmosphereModel::Temperature(Real *position, Real *temperature, 
+         Real epoch, Integer count)
+{
+   return false;
+}
+
+//-----------------------------------------------------------------------------
+// bool HasPressureModel()
+//-----------------------------------------------------------------------------
+/**
+ * Checks to see if a local pressure exists for the atmosphere.
+ *
+ * @return true if the model supports pressure calculation, false if not
+ */
+//-----------------------------------------------------------------------------
+bool AtmosphereModel::HasPressureModel()
+{
+   return false;
+}
+
+//-----------------------------------------------------------------------------
+// bool Pressure(Real *position, Real *pressure, Real epoch, Integer count)
+//-----------------------------------------------------------------------------
+/**
+ * Retrieves the pressure.
+ *
+ * @param position The location of the spacecraft
+ * @param pressure The pressure, as set by the method
+ * @param ep The epoch of the calculations
+ * @param count The number of spacecraft contained in position
+ *
+ * @return true on success, false on failure
+ */
+//-----------------------------------------------------------------------------
+bool AtmosphereModel::Pressure(Real *position, Real *pressure, 
+         Real epoch, Integer count)
+{
+   return false;
+}
+
+
 //------------------------------------------------------------------------------
 // void SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
@@ -855,6 +977,8 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
 {
    Rvector6 instate(position), state;
 
+   CoordinateSystem *j2000ToUse = (cbJ2000 == NULL ? mInternalCoordSystem : cbJ2000);
+
    if (when == -1.0)
       when = wUpdateEpoch;
 
@@ -865,10 +989,14 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
             mInternalCoordSystem->GetGeneratingString(
                   Gmat::NO_COMMENTS).c_str(),
             cbFixed->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      if (cbJ2000 != NULL)
+         MessageInterface::ShowMessage("cbJ2000 CS:\n%s\n",
+            cbJ2000->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      MessageInterface::ShowMessage("Position: %lf, %lf, %lf\n", position[0], position[1], position[2]);
    #endif
 
    CoordinateConverter mCoordConverter;
-   mCoordConverter.Convert(A1Mjd(when), instate, mInternalCoordSystem,
+   mCoordConverter.Convert(A1Mjd(when), instate, j2000ToUse,
                            state, cbFixed);
 
    // Build angular momentum

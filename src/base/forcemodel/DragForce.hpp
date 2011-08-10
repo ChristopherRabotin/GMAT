@@ -146,6 +146,8 @@ protected:
    Real                 *prefactor;
    /// Flag used to determine if data has changed for the prefactors
    bool                 firedOnce;
+   /// Flag used to indicate that local wind calcs are used
+   bool                 hasWindModel;
    /// Number of spacecraft in the state vector that use CartesianState
    Integer              satCount;
    /// Central bodies used for atmosphere source

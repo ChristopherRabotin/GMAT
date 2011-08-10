@@ -105,6 +105,7 @@ DragForce::DragForce(const std::string &name) :
    density                 (NULL),
    prefactor               (NULL),
    firedOnce               (false),
+   hasWindModel            (false),
    satCount                (1),
    orbitDimension          (0),
    dragState               (NULL),
@@ -237,6 +238,7 @@ DragForce::DragForce(const DragForce& df) :
    density                 (NULL),
    prefactor               (NULL),
    firedOnce               (false),
+   hasWindModel            (df.hasWindModel),
    satCount                (df.satCount),
    dragBody                (df.dragBody),
    dragState               (NULL),
@@ -354,6 +356,7 @@ DragForce& DragForce::operator=(const DragForce& df)
    density               = NULL;
    prefactor             = NULL;
    firedOnce             = false;
+   hasWindModel          = df.hasWindModel;
    //bodyName              = df.bodyName;
    satCount              = df.satCount;
    dragBody              = df.dragBody;
@@ -759,6 +762,7 @@ bool DragForce::Initialize()
             atmos->SetKpApConversionMethod(kpApConversion);
 
             angVel = atmos->GetAngularVelocity();
+            hasWindModel = atmos->HasWindModel();
 
             F107ID = atmos->GetParameterID("F107");
             F107AID = atmos->GetParameterID("F107A");
@@ -974,6 +978,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
       dragdata << "Looking up density\n";
    #endif
    GetDensity(dragState, now);
+   Real wind[6];
 
    if (fillCartesian)
    {
@@ -986,15 +991,43 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
             dragdata << "Spacecraft " << (i+1) << ": ";
          #endif
    
-         // v_rel = v - w x R
-         vRelative[0] = dragState[i6+3] -
-                        (angVel[1]*dragState[i6+2] - angVel[2]*dragState[i6+1]);
-         vRelative[1] = dragState[i6+4] -
-                        (angVel[2]*dragState[ i6 ] - angVel[0]*dragState[i6+2]);
-         vRelative[2] = dragState[i6+5] -
-                        (angVel[0]*dragState[i6+1] - angVel[1]*dragState[ i6 ]);
-         vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
-                        vRelative[2]*vRelative[2]);
+         
+         if (hasWindModel)
+         {
+            // v_rel = v - w x R
+            atmos->Wind(&(dragState[i6]), wind, now, 1);
+            vRelative[0] = dragState[i6+3] - wind[3];
+            vRelative[1] = dragState[i6+4] - wind[4];
+            vRelative[2] = dragState[i6+5] - wind[5];
+            vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
+                           vRelative[2]*vRelative[2]);
+
+            #ifdef COMPAREAPPROACHES
+               Real vRel[3];
+               vRel[0] = dragState[i6+3] -
+                              (angVel[1]*dragState[i6+2] - angVel[2]*dragState[i6+1]);
+               vRel[1] = dragState[i6+4] -
+                              (angVel[2]*dragState[ i6 ] - angVel[0]*dragState[i6+2]);
+               vRel[2] = dragState[i6+5] -
+                              (angVel[0]*dragState[i6+1] - angVel[1]*dragState[ i6 ]);
+               MessageInterface::ShowMessage("v-Local wind: %lf %lf %lf\n",
+                     dragState[i6+3] - wind[3], dragState[i6+4] - wind[4], dragState[i6+5] - wind[5]);
+               MessageInterface::ShowMessage("VRel: %lf %lf %lf\n",
+                     vRelative[0], vRelative[1], vRelative[2]);
+            #endif
+         }
+         else
+         {
+            // v_rel = v - w x R
+            vRelative[0] = dragState[i6+3] -
+                           (angVel[1]*dragState[i6+2] - angVel[2]*dragState[i6+1]);
+            vRelative[1] = dragState[i6+4] -
+                           (angVel[2]*dragState[ i6 ] - angVel[0]*dragState[i6+2]);
+            vRelative[2] = dragState[i6+5] -
+                           (angVel[0]*dragState[i6+1] - angVel[1]*dragState[ i6 ]);
+            vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
+                           vRelative[2]*vRelative[2]);
+         }
 
          factor = prefactor[i] * density[i];
    

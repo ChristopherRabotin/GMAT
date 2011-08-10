@@ -74,12 +74,25 @@ public:
    virtual void SetCentralBody(CelestialBody *cb);
    void SetUpdateParameters(Real interval, GmatEpoch epoch = -1.0);
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
+   virtual void SetCbJ2000CoordinateSystem(CoordinateSystem *cs);
    void SetFixedCoordinateSystem(CoordinateSystem *cs);
    Real* GetAngularVelocity(const Real GmatEpoch = -1.0);
    void BuildAngularVelocity(const Real GmatEpoch);
    void UpdateAngularVelocity(const Real GmatEpoch);
    void SetKpApConversionMethod(Integer method);
    Real ConvertKpToAp(const Real kp);
+
+   // Extra methods some models may support
+   virtual bool HasWindModel();
+   virtual bool Wind(Real *position, Real* wind, Real ep,
+						   Integer count = 1);
+   virtual bool HasTemperatureModel();
+   virtual bool Temperature(Real *position, Real *temperature, 
+         Real epoch = GmatTimeConstants::MJD_OF_J2000, Integer count = 1);
+   virtual bool HasPressureModel();
+   virtual bool Pressure(Real *position, Real *pressure, 
+         Real epoch = GmatTimeConstants::MJD_OF_J2000, Integer count = 1);
+
 
    // Methods overridden from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
@@ -137,6 +150,8 @@ protected:
    Integer                 kpApConversion;
    /// Internal coordinate system used for conversions
    CoordinateSystem        *mInternalCoordSystem;
+   /// MJ2000 CS for the central body
+   CoordinateSystem        *cbJ2000;
    /// Body fixed CS for the central body
    CoordinateSystem        *cbFixed;
    /// Angular velocity of the central body
