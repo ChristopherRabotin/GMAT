@@ -68,6 +68,10 @@ void ShowSummaryDialog::Create()
    wxSize scriptPanelSize(500, 32);
    if (theObject != NULL)
    {
+      /// @todo - add the combo box for the user to select the coordinate system -
+      /// the coordinate system must have a celestial body as the origin and must
+      /// not contain a reference to a spacecraft (e.g. primary, etc.)
+      theObject->SetSummaryCoordSystem("EarthMJ2000Eq");  // ********* temporary *********
       text = theObject->GetStringParameter("Summary").c_str();
 
       // This code is flaky -- text width is height dependent??? -- on Linux:

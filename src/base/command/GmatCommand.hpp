@@ -107,6 +107,7 @@ public:
                                   const std::string objName = "");
    
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
+   virtual void         SetSummaryCoordSystem(const std::string &csName);
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetTriggerManagers(std::vector<TriggerManager*> *trigs);
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
@@ -262,6 +263,8 @@ protected:
    bool                 commandChangedState;
    /// String used for the command summary data
    std::string          commandSummary;
+   /// Coordinate System used for the Command Summary display
+   std::string          summaryCoordSysName;
 //   /// Optional comment string associated with the command
 //   std::string          comment;
    /// Flag indicating that a command has been changed by a user
@@ -286,7 +289,7 @@ protected:
    virtual const std::string 
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
    virtual const std::string
-                        BuildNumber(Real value, Integer length = 17);
+                        BuildNumber(Real value, bool useExp = false, Integer length = 17);
 
    // for Debug
    virtual void         ShowCommand(const std::string &prefix,
