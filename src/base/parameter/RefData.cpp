@@ -235,8 +235,8 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 {
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
-      ("RefData::SetRefObjectName() '%s' entered, type=%d, name=%s\n",
-       mName.c_str(), type, name.c_str());
+      ("RefData::SetRefObjectName() '%s' entered, type=%d(%s), name=%s\n",
+       mName.c_str(), type,  GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(), name.c_str());
    #endif
    
    if (FindFirstObjectName(type) != "")
