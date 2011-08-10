@@ -119,6 +119,9 @@ namespace GmatMathConstants
    static const Real M_TO_KM = 0.001;
    static const Real KM_TO_M = 1000.0;
 
+   // NaN
+   static const Real QUIET_NAN = std::numeric_limits<Real>::quiet_NaN();
+
    enum SIGN {PLUS = 1, MINUS = -1 };
 
 } // GmatMathConstants
