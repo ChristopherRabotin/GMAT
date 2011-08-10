@@ -31,7 +31,7 @@
 
 //#define DBGLVL_BPLANEDATA_INIT 1
 //#define DBGLVL_BPLANEDATA_CONVERT 1
-//#define DBGLVL_BPLANEDATA_RUN 1
+//#define DBGLVL_BPLANEDATA_RUN 2
 
 using namespace GmatMathUtil;
 
@@ -192,6 +192,11 @@ Real BplaneData::GetBplaneReal(Integer item)
    
    Real eMag = eVec.GetMagnitude();
    
+   #if DBGLVL_BPLANEDATA_RUN > 1
+   MessageInterface::ShowMessage("BplaneData::GetBplaneReal() rMag = %12.10f\n", rMag);
+   MessageInterface::ShowMessage("BplaneData::GetBplaneReal() vMag = %12.10f\n", vMag);
+   MessageInterface::ShowMessage("BplaneData::GetBplaneReal() eMag = %12.10f\n", eMag);
+   #endif
    // if eMag <= 1, then the method fails, orbit should be hyperbolic
    if (eMag <= 1.0)
       throw ParameterException
@@ -442,8 +447,8 @@ Rvector6 BplaneData::GetCartState()
    
    #if DBGLVL_BPLANEDATA_RUN
    MessageInterface::ShowMessage
-      ("BplaneData::GetCartState() stateType=%s, internalCoordName=%s\n"
-       "     outCoordName=%s\n", elemType.c_str(),
+      ("BplaneData::GetCartState() internalCoordName=%s\n"
+       "     outCoordName=%s\n",
        mInternalCoordSystem->GetName().c_str(),
        mOutCoordSystem->GetName().c_str());
    #endif
