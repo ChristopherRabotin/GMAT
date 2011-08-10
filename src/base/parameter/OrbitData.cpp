@@ -783,7 +783,7 @@ Real OrbitData::GetAngularReal(Integer item)
    vel = Rvector3(state[3], state[4], state[5]);
    
    Rvector3 hVec3 = Cross(pos, vel);
-   Real h = Sqrt(hVec3 * hVec3);
+   Real     h     = Sqrt(hVec3 * hVec3);
    
    Real grav = mGravConst;
 
@@ -845,18 +845,19 @@ Real OrbitData::GetOtherAngleReal(Integer item)
    MessageInterface::ShowMessage("OrbitData::GetOtherAngleReal() item=%d\n", item);
    #endif
    
-   Rvector6 state = GetCartState();
+   Rvector6 state;
+   if (mOrigin->GetName() != "Earth")
+      state = GetRelativeCartState(mOrigin);
+   else
+      state = GetCartState();
+   Rvector3 pos = Rvector3(state[0], state[1], state[2]);
+   Rvector3 vel = Rvector3(state[3], state[4], state[5]);
 
    switch (item)
    {
    case BETA_ANGLE:
       {
-         if (mOrigin->GetName() != "Earth")
-            state = GetRelativeCartState(mOrigin);
-         
          // compute orbit normal unit vector
-         Rvector3 pos = Rvector3(state[0], state[1], state[2]);
-         Rvector3 vel = Rvector3(state[3], state[4], state[5]);
          Rvector3 hVec3 = Cross(pos, vel);
          hVec3.Normalize();
          
@@ -872,6 +873,30 @@ Real OrbitData::GetOtherAngleReal(Integer item)
          Real betaAngle = ASin(hVec3*originToSun) * GmatMathConstants::DEG_PER_RAD;
          return betaAngle;
       }
+   case HYPERBOLIC_RLA:
+   case HYPERBOLIC_DLA:
+      {
+         // Compute the eccentricity vector
+         Real     r     = pos.GetMagnitude();
+         Real     v     = vel.GetMagnitude();
+         Rvector3 e     = ((((v * v) - mGravConst / r) * pos) - (pos * vel) *vel) / mGravConst;
+         Real     ecc   = e.GetMagnitude();
+         if (Abs(ecc) < 1.0 + GmatOrbitConstants::KEP_ECC_TOL)
+            return GmatMathConstants::QUIET_NAN;
+
+         // Compute orbit normal unit vector
+         Rvector3 hVec3 = Cross(pos, vel);
+         Real     h     = hVec3.GetMagnitude();
+
+         // Compute C3
+         Real     C3    = v * v - (2.0 * mGravConst) / r;
+         Real     s_1   = 1.0 / (1.0 + C3 * (h / mGravConst) * (h / mGravConst));
+         Rvector3 s     = s_1 * ((Sqrt(C3) / mGravConst) * Cross(hVec3, e) - e);
+         if (item == HYPERBOLIC_RLA)
+            return ATan2(s[0], s[1]) * GmatMathConstants::DEG_PER_RAD;
+         else // DLA
+            return ASin(s[2]) * GmatMathConstants::DEG_PER_RAD;
+      }
    default:
       throw ParameterException
          ("OrbitData::GetOtherAngleReal() Unknown parameter ID: " +
@@ -884,7 +909,7 @@ Real OrbitData::GetOtherAngleReal(Integer item)
 // Real GetEquiReal(Integer item)
 //------------------------------------------------------------------------------
 /**
- * Retrives Equinoctial element
+ * Retrieves Equinoctial element
  */
 //------------------------------------------------------------------------------
 Real OrbitData::GetEquinReal(Integer item)
@@ -1087,6 +1112,7 @@ void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
 }
 
 
+
 //------------------------------------------------------------------------------
 // Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 //------------------------------------------------------------------------------
@@ -1154,7 +1180,7 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 
 // The inherited methods from RefData
 //------------------------------------------------------------------------------
-// virtual void InitializeRefObjects(
+// virtual void InitializeRefObjects()
 //------------------------------------------------------------------------------
 void OrbitData::InitializeRefObjects()
 {
@@ -1206,7 +1232,7 @@ void OrbitData::InitializeRefObjects()
    {
       #ifdef DEBUG_ORBITDATA_INIT
       MessageInterface::ShowMessage
-         ("OrbitData::InitializeRefObjects() getting originName:%s pointer.\n",
+         ("OrbitData::InitializeRefObjects() getting originName: %s pointer.\n",
           originName.c_str());
       #endif
       

@@ -218,6 +218,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new AngularMomentumY(withName);
    if (ofType == "HZ")
       return new AngularMomentumZ(withName);
+   if (ofType == "DLA")
+      return new DLA(withName);
+   if (ofType == "RLA")
+      return new RLA(withName);
 
    // Environmental parameters
    if (ofType == "AtmosDensity")
@@ -481,6 +485,8 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("HX");
       creatables.push_back("HY");
       creatables.push_back("HZ");
+      creatables.push_back("DLA");
+      creatables.push_back("RLA");
       
       // Environmental parameters
       #ifdef __ENABLE_ATMOS_DENSITY__

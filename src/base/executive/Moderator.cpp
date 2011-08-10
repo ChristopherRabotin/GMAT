@@ -7389,6 +7389,8 @@ void Moderator::CreateDefaultMission()
       CreateParameter("HX", "DefaultSC.EarthMJ2000Eq.HX");
       CreateParameter("HY", "DefaultSC.EarthMJ2000Eq.HY");
       CreateParameter("HZ", "DefaultSC.EarthMJ2000Eq.HZ");
+      CreateParameter("DLA", "DefaultSC.EarthMJ2000Eq.DLA");
+      CreateParameter("RLA", "DefaultSC.EarthMJ2000Eq.RLA");
       #if DEBUG_DEFAULT_MISSION > 1
       MessageInterface::ShowMessage("-->default angular parameters created\n");
       #endif

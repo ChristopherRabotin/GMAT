@@ -700,3 +700,225 @@ GmatBase* BetaAngle::Clone(void) const
 {
    return new BetaAngle(*this);
 }
+
+//==============================================================================
+//                              RLA
+//==============================================================================
+/**
+ * Implements RLA parameter class. RLA is the right ascension of the outgoing
+ * asymptote of a hyperbolic trajectory.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// RLA(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+RLA::RLA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RLA", obj, "Right Ascension Outgoing Asymptote", "deg", GmatParam::COORD_SYS)
+{
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+}
+
+
+//------------------------------------------------------------------------------
+// RLA(const RLA &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+RLA::RLA(const RLA &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const RLA& operator=(const RLA &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const RLA& RLA::operator=(const RLA &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~RLA()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+RLA::~RLA()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool RLA::Evaluate()
+{
+   mRealValue = OrbitData::GetOtherAngleReal(HYPERBOLIC_RLA);
+
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* RLA::Clone(void) const
+{
+   return new RLA(*this);
+}
+
+//==============================================================================
+//                              DLA
+//==============================================================================
+/**
+ * Implements DLA parameter class. DLA is the declination of the outgoing
+ * asymptote of a hyperbolic trajectory.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// DLA(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+DLA::DLA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "DLA", obj, "Declination Outgoing Asymptote", "deg", GmatParam::COORD_SYS)
+{
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+}
+
+
+//------------------------------------------------------------------------------
+// DLA(const DLA &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+DLA::DLA(const DLA &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const DLA& operator=(const DLA &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const DLA& DLA::operator=(const DLA &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~DLA()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+DLA::~DLA()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool DLA::Evaluate()
+{
+   mRealValue = OrbitData::GetOtherAngleReal(HYPERBOLIC_DLA);
+
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* DLA::Clone(void) const
+{
+   return new DLA(*this);
+}

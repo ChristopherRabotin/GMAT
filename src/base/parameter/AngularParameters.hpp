@@ -192,4 +192,60 @@ protected:
 
 };
 
+//==============================================================================
+//                                     RLA
+//==============================================================================
+/**
+ * Declares DLA parameter class. RLA is the right ascension of the outgoing
+ * asymptote of a hyperbolic trajectory.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API RLA : public OrbitReal
+{
+public:
+
+   RLA(const std::string &name = "", GmatBase *obj = NULL);
+   RLA(const RLA &copy);
+   const RLA& operator=(const RLA &right);
+   virtual ~RLA();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+
+};
+
+//==============================================================================
+//                                     DLA
+//==============================================================================
+/**
+ * Declares DLA parameter class. DLA is the declination of the outgoing asymptote
+ * of a hyperbolic trajectory.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API DLA : public OrbitReal
+{
+public:
+
+   DLA(const std::string &name = "", GmatBase *obj = NULL);
+   DLA(const DLA &copy);
+   const DLA& operator=(const DLA &right);
+   virtual ~DLA();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+
+};
+
 #endif //AngularParameters_hpp
