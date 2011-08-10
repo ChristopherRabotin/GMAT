@@ -155,6 +155,7 @@
 //#define DEBUG_RUN
 //#define DEBUG_SIZE
 //#define DBGLVL_MENUBAR 1
+//#define DEBUG_PENDING_EVENTS
 
 using namespace GmatMenu;
 
@@ -1670,7 +1671,9 @@ void GmatMainFrame::NotifyRunCompleted()
 //------------------------------------------------------------------------------
 void GmatMainFrame::ProcessPendingEvent()
 {
-   MessageInterface::ShowMessage("---> GmatMainFrame::ProcessPendingEvent() entered\n");
+   #ifdef DEBUG_PENDING_EVENTS
+      MessageInterface::ShowMessage("---> GmatMainFrame::ProcessPendingEvent() entered\n");
+   #endif
    wxYield();
 }
 
