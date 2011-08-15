@@ -20,7 +20,7 @@
  */
 //------------------------------------------------------------------------------
 
-
+#include "GuiItemManager.hpp"
 #include "GmatDialog.hpp"
 
 #ifndef ShowSummaryDialog_hpp
@@ -38,6 +38,7 @@ public:
    // constructors
    ShowSummaryDialog(wxWindow *parent, wxWindowID id, const wxString& title, 
                     GmatCommand *obj);
+   ~ShowSummaryDialog();
 
 protected:
    /// The object that provides the generating string for display.
@@ -49,6 +50,27 @@ protected:
    virtual void LoadData();
    virtual void SaveData();
    virtual void ResetData();
+
+   // event handling
+   void OnComboBoxChange(wxCommandEvent& event);
+
+   DECLARE_EVENT_TABLE();
+
+   // IDs for the controls and the menu commands
+   enum
+   {
+      ID_CS_TEXT = 46000,
+      ID_COMBOBOX
+   };
+
+
+   bool           isCoordSysModified;
+   std::string    currentCoordSysName;
+   GuiItemManager *theGuiManager;
+
+   wxComboBox     *coordSysComboBox;
+
+   void BuildValidCoordinateSystemList();
 };
 
 #endif //ShowScriptDialog_hpp
