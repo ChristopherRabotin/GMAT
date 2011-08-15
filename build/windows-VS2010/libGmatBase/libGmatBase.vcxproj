@@ -433,7 +433,6 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\HarmonicField.cpp" />
-    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.cpp" />
@@ -667,6 +666,7 @@
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Cartesian.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CoordUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
@@ -880,7 +880,6 @@
     <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\HarmonicField.hpp" />
-    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.hpp" />
@@ -1117,6 +1116,7 @@
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Cartesian.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CoordUtil.hpp" />

@@ -1254,9 +1254,6 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\RelativisticCorrection.cpp">
       <Filter>Source Files\forcemodel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.cpp">
-      <Filter>Source Files\forcemodel\harmonic</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
@@ -1265,6 +1262,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\NRLMsise00Atmosphere.cpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2480,14 +2480,14 @@
     <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp">
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\EarthTide.hpp">
-      <Filter>Source Files\forcemodel\harmonic</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp">
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\NRLMsise00Atmosphere.hpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
