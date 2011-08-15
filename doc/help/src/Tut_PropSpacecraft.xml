@@ -121,10 +121,13 @@
           </listitem>
 
           <listitem>
-            <para>Set the values of Elements as follows: <para>SMA =
-            83474.31800000001; <para>ECC = 0.8965199999999999; <para>INC =
-            12.4606; <para>RAAN = 112.8362; <para>AOP = 218.9805; <para>TA =
-            180</para></para></para></para></para></para></para>
+            <para>Set the values of Elements as follows:</para>
+            <para>SMA = 83474.31800000001;</para>
+            <para>ECC = 0.8965199999999999;</para>
+            <para>INC = 12.4606;</para>
+            <para>RAAN = 112.8362;</para>
+            <para>AOP = 218.9805;</para>
+            <para>TA = 180</para>
           </listitem>
 
           <listitem>
