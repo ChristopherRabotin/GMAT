@@ -508,6 +508,7 @@ OBJECTS = \
     util/BaseException.o \
     util/BodyFixedStateConverter.o \
     util/Cartesian.o \
+    util/CalculationUtilities.o \
     util/CoordUtil.o \
     util/Date.o \
     util/DateUtil.o \
