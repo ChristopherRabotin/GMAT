@@ -54,35 +54,35 @@ class Harmonic
 {
 public:
    Harmonic();
+   Harmonic(const Harmonic& x);
+   Harmonic& operator=(const Harmonic& x);
    virtual ~Harmonic();
 
-   virtual bool HasVariableCS() const;
    virtual Real Cnm(const Real& jday, const Integer& n, const Integer& m) const;
    virtual Real Snm(const Real& jday, const Integer& n, const Integer& m) const;
-   Integer GetNN() const;
-   Integer GetMM() const;
-   Real GetRadius() const;
-   Real GetFactor() const;
-   void CalculateField(const Real& jday,  const Real pos[3],        const Integer& nn,
-                       const Integer& mm, const bool& fillgradient, Real  acc[3],
-                       Rmatrix33& gradient) const;
+   Integer      GetNN() const;
+   Integer      GetMM() const;
+   Real         GetRadius() const;
+   Real         GetFactor() const;
+   void         CalculateField(const Real& jday,  const Real pos[3],        const Integer& nn,
+                               const Integer& mm, const bool& fillgradient, Real  acc[3],
+                               Rmatrix33& gradient) const;
 
 protected:
    Integer     NN;      // Maximum value of n (Jn=J2,J3...)
    Integer     MM;      // Maximum value of m (Jnm=Jn2,Jn3...
-   Real        Radius;  // Radius of body
-   Real        Factor;  // Factor = 1 (magnetic) or -mu (gravity)
-   Real**      C;       // normalized harmonic coefficients
-   Real**      S;       // normalized harmonic coefficients
+   Real        bodyRadius;  // Radius of body
+   Real        factor;  // factor = 1 (magnetic) or -mu (gravity)
+   Real        C[361][361];
+   Real        S[361][361];
    Real**      A;       // Normalized 'derived' Assoc. Legendre Poly
    Real**      V;       // Normalization factor
-//   Real*       Sch;     // Schmidt Normalization Factor
    Real*       Re;      // powers of projection of pos onto x_ecf (re)
    Real*       Im;      // powers of projection of pos onto y_ecf (im)
    Real**      N1;      // Temporary
    Real**      N2;      // Temporary
-   Real**      VR01;    // Temporary
-   Real**      VR11;    // Temporary
+   Real        VR01[361][361];    // Temporary
+   Real        VR11[361][361];    // Temporary
 
    void Allocate();
    void Deallocate();
@@ -96,10 +96,6 @@ protected:
    static void CopyArray(Real*& a,  Real*& b,  const Integer& nn, const Integer& excess);
 //--------------------------------------------------------------------
 
-private:
-   // No copying allowed, so these are declared as private, but not implemented
-   Harmonic(const Harmonic& x);
-   Harmonic& operator=(const Harmonic& x);
 
 };
 

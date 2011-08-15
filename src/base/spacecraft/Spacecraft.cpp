@@ -960,6 +960,15 @@ GmatBase* Spacecraft::Clone() const
          ("Spacecraft::Clone() cloned <%p>'%s' to <%p>'%s'\n", this,
          instanceName.c_str(), clone, clone->GetName().c_str());
    #endif
+   #ifdef DEBUG_OBJ_CLONE
+      Spacecraft *tmp = (const_cast<Spacecraft*>(this));
+      GmatState vec6Orig = tmp->GetState();
+      GmatState vec6     = clone->GetState();
+      MessageInterface::ShowMessage("ORIGINAL spacecraft has state of %12.10f %12.10f %12.10f %12.10f %12.10f %12.10f\n",
+            vec6Orig[0], vec6Orig[1], vec6Orig[2], vec6Orig[3], vec6Orig[4], vec6Orig[5]);
+      MessageInterface::ShowMessage("Cloned spacecraft has state of %12.10f %12.10f %12.10f %12.10f %12.10f %12.10f\n",
+            vec6[0], vec6[1], vec6[2], vec6[3], vec6[4], vec6[5]);
+   #endif
 
    return (clone);
 }
@@ -2134,8 +2143,8 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
 Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 {
    #ifdef DEBUG_SPACECRAFT_SET
-   MessageInterface::ShowMessage("In SC::SetRealParameter (%s), id = %d and value = %.12f\n",
-   instanceName.c_str(), id, value);
+   MessageInterface::ShowMessage("In SC::SetRealParameter (%s), id = %d (%s) and value = %.12f\n",
+   instanceName.c_str(), id, GetParameterText(id).c_str(), value);
    #endif
    if (id >= CART_X && id < EndMultipleReps)
    {

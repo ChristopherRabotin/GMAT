@@ -301,7 +301,6 @@ OBJECTS = \
     forcemodel/PointMassForce.o \
     forcemodel/RelativisticCorrection.o \
     forcemodel/SolarRadiationPressure.o \
-    forcemodel/harmonic/EarthTide.o \
     forcemodel/harmonic/Harmonic.o \
     forcemodel/harmonic/HarmonicGravity.o \
     forcemodel/harmonic/HarmonicGravityCof.o \
@@ -547,7 +546,7 @@ OBJECTS = \
 #    solarsys/BodyDataReader.o \
 
 #    parameter/OrbitAMatrixParameters.o \
-
+#    forcemodel/harmonic/EarthTide.o \
 #    $(BRIDGEOBJECTS)
 
 # Future classes:

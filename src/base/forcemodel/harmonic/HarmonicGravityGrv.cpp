@@ -34,8 +34,8 @@ HarmonicGravityGrv::HarmonicGravityGrv(const std::string& filename,
                                        const Real& radius, const Real& mukm) :
    HarmonicGravity (filename)
 {
-   Radius = radius;
-   Factor = -mukm;
+   bodyRadius = radius;
+   factor     = -mukm;
    Load();
 }
 
@@ -47,9 +47,9 @@ HarmonicGravityGrv::~HarmonicGravityGrv()
 //------------------------------------------------------------------------------
 void HarmonicGravityGrv::Load()
 {
-   std::ifstream inStream(Filename.c_str());
+   std::ifstream inStream(gravityFilename.c_str());
    if (!inStream)
-      throw GravityFileException("Cannot open GRV gravity file \"" + Filename + "\"");
+      throw GravityFileException("Cannot open GRV gravity file \"" + gravityFilename + "\"");
 
    #ifdef DEBUG_GRAVITY_GRV_FILE
    MessageInterface::ShowMessage("Entered GravityFile::ReadGrvFile\n");
@@ -66,7 +66,6 @@ void HarmonicGravityGrv::Load()
    {
       getline(inStream, line);
 
-      //MessageInterface::ShowMessage("=> line=<%s>\n", line.c_str());
       if (line == "")
          continue;
 
@@ -100,14 +99,14 @@ void HarmonicGravityGrv::Load()
             Real tmpMu = 0.0;
             lineStream >> tmpMu;
             if (tmpMu != 0.0)
-               Factor = -tmpMu / 1.0e09;     // -> Km^3/sec^2
+               factor = -tmpMu / 1.0e09;     // -> Km^3/sec^2
          }
          else if (upperString == "REFDISTANCE")
          {
             Real tmpA  = 0.0;
             lineStream >> tmpA;
             if (tmpA != 0.0)
-               Radius = tmpA / 1000.0;  // -> Km
+               bodyRadius = tmpA / 1000.0;  // -> Km
          }
          else if (upperString == "NORMALIZED")
          {

@@ -36,8 +36,8 @@ HarmonicGravityCof::HarmonicGravityCof(const std::string& filename,
                                        const Real& radius, const Real& mukm) :
    HarmonicGravity (filename)
 {
-   Radius = radius;
-   Factor = -mukm;
+   bodyRadius = radius;
+   factor     = -mukm;
    Load ();
 }
 
@@ -52,15 +52,15 @@ HarmonicGravityCof::~HarmonicGravityCof()
 //------------------------------------------------------------------------------
 void HarmonicGravityCof::Load()
 {
-   std::ifstream inStream (Filename.c_str());
+   std::ifstream inStream (gravityFilename.c_str());
    if (!inStream)
-      throw GravityFileException("Cannot open COF gravity file \"" + Filename + "\"");
+      throw GravityFileException("Cannot open COF gravity file \"" + gravityFilename + "\"");
 
    Integer       cbflag = -1;  // 0 = earth
    Real          normalizedflag = -1;
 
    #ifdef DEBUG_GRAVITY_COF_FILE
-   MessageInterface::ShowMessage("Entered GravityFile::ReadCofFile for file %s\n", Filename.c_str());
+   MessageInterface::ShowMessage("Entered GravityFile::ReadCofFile for file %s\n", gravityFilename.c_str());
    #endif
 
    std::string line;
@@ -94,9 +94,9 @@ void HarmonicGravityCof::Load()
                Real tmpA = 0;
                lineStream >> cbflag >> tmpMu >> tmpA >> normalizedflag;
                if (tmpMu != 0.0)
-                  Factor = -tmpMu / 1.0e09;     // -> km^3/sec^2
+                  factor = -tmpMu / 1.0e09;     // -> km^3/sec^2
                if (tmpA  != 0.0)
-                  Radius = tmpA / 1000.0;  // -> km
+                  bodyRadius = tmpA / 1000.0;  // -> km
                
                // if not reading coefficients, stop after reading the mu and a
                Allocate ();
@@ -104,7 +104,7 @@ void HarmonicGravityCof::Load()
             else
             {
                throw GravityFileException
-                  ("File \"" + Filename + "\" has error in \n   \"" + line + "\"");
+                  ("File \"" + gravityFilename + "\" has error in \n   \"" + line + "\"");
             }
          }
          else if (firstStr == "RECOEF")
@@ -119,9 +119,6 @@ void HarmonicGravityCof::Load()
             lineStream.str(line.substr(38, 21));
             lineStream >> snmStr;
             snmStr = GmatStringUtil::Trim(snmStr);
-            //MessageInterface::ShowMessage
-            //   ("===> nStr=%s, mStr=%s, snmStr=<%s>\n",
-            //    nStr.c_str(), mStr.c_str(), snmStr.c_str());
             if ((GmatStringUtil::ToInteger(nStr, n)) &&
                 (GmatStringUtil::ToInteger(mStr, m)) &&
                 (GmatStringUtil::ToReal(cnmStr, cnm)) &&
@@ -149,7 +146,7 @@ void HarmonicGravityCof::Load()
             else
             {
                throw GravityFileException
-                  ("File \"" + Filename + "\" has error in \n   \"" + line + "\"");
+                  ("File \"" + gravityFilename + "\" has error in \n   \"" + line + "\"");
             }
             snmStr = "";
             snm = 0.0;
@@ -158,12 +155,10 @@ void HarmonicGravityCof::Load()
    }
 
    #ifdef DEBUG_GRAVITY_COF_FILE
-   MessageInterface::ShowMessage("   \"%s\" successfully read\n", Filename.c_str());
+   MessageInterface::ShowMessage("   \"%s\" successfully read\n", gravityFilename.c_str());
    MessageInterface::ShowMessage
-      ("   NN=%d, MM=%d, Factor=%f, Radius=%f\n", NN, MM,
-            Factor, Radius);
-//   MessageInterface::ShowMessage
-//   ("   last n=%d, m=%d, Cnm=%le, Snm=%le\n", n, m, Cnm, Snm);
+      ("   NN=%d, MM=%d, factor=%f, bodyRadius=%f\n", NN, MM,
+            factor, bodyRadius);
    MessageInterface::ShowMessage
       ("   last nStr=%s, mStr=%s, cnmStr=%s, snmStr=%s\n",
        nStr.c_str(), mStr.c_str(), cnmStr.c_str(), snmStr.c_str());
