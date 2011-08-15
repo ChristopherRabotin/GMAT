@@ -60,10 +60,15 @@
           <para>Find: Values X1 and X2</para>
         </listitem>
       </itemizedlist>
+
+      <para>Note that the constraint G makes our problem one of conditional
+      optimization. With no constraint G, the function F minimum would
+      obviously correspond to X1=2, X2=2, thus F=0. But this solution is not
+      possible due to G = X1 + X2 = 8. At the end of this tutorial, after we
+      solve our original problem, for exersize we will request GMAT to produce
+      the unconditional F value as well.</para>
     </section>
   </section>
-
-Note that the constraint G makes our problem one of conditional optimization. With no constraint G, the function F minimum would obviously correspond to X1=2, X2=2, thus F=0. But this solution is not possible due to G = X1 + X2 = 8. At the end of this tutorial, after we solve our original problem, for exersize we will request GMAT to produce the unconditional F value as well. 
 
   <section>
     <title>Configuring the Resource Tree</title>
@@ -87,17 +92,20 @@ Note that the constraint G makes our problem one of conditional optimization. Wi
     </section>
 
     <section>
+       
+
       <title>Creating and Modifying Resource Tree Objects</title>
 
-We will create/modify the following objects: the optimizer (in section Solvers of the Resource Tree); the report (in Output); and variables (in Variables/Arrays/Strings). GMAT defaults will be used for other mission resources. 
+      <para> We will create/modify the following objects: the optimizer (in
+      section Solvers of the Resource Tree); the report (in Output); and
+      variables (in Variables/Arrays/Strings). GMAT defaults will be used for
+      other mission resources. </para>
 
       <itemizedlist>
-        
         <listitem>
-          <para>Solvers: Add to the sequence the VF13ad1 optimizer. We will use the optimizer's default characteristics. The figure below shows how this dialog box looks like</para>
-
-          <itemizedlist>
-
+          <para>Solvers: Add to the sequence the VF13ad1 optimizer. We will
+          use the optimizer's default characteristics. The figure below shows
+          how this dialog box looks like</para>
 
             <screenshot>
               <mediaobject>
@@ -112,14 +120,12 @@ We will create/modify the following objects: the optimizer (in section Solvers o
                 </caption>
               </mediaobject>
             </screenshot>
-          </itemizedlist>
         </listitem>
 
         <listitem>
-          <para>Plots/Reports: Set up the Data ReportFile. Your ReportFile dialog
-          box should look as in the figure below</para>
+          <para>Plots/Reports: Set up the Data ReportFile. Your ReportFile
+          dialog box should look as in the figure below</para>
 
-          <itemizedlist>
             <itemizedlist>
               <listitem>
                 <para>Clear Parameter List</para>
@@ -144,13 +150,12 @@ We will create/modify the following objects: the optimizer (in section Solvers o
                 </caption>
               </mediaobject>
             </screenshot>
-          </itemizedlist>
+
         </listitem>
 
-
-
-<listitem>
-          <para>Variables/Strings/Arrays: Set the initial values, as follows:</para>
+        <listitem>
+          <para>Variables/Strings/Arrays: Set the initial values, as
+          follows:</para>
 
           <itemizedlist>
             <listitem>
@@ -166,10 +171,11 @@ We will create/modify the following objects: the optimizer (in section Solvers o
             </listitem>
 
             <listitem>
-              <para>Variable G = 0. Your last Variables/Strings/Arrays dialog box should look as shown in this figure:</para>
+              <para>Variable G = 0. Your last Variables/Strings/Arrays dialog
+              box should look as shown in this figure:</para>
             </listitem>
-
-		<screenshot>
+            </itemizedlist>
+            <screenshot>
               <mediaobject>
                 <imageobject>
                   <imagedata align="center" contentdepth="100%"
@@ -183,30 +189,29 @@ We will create/modify the following objects: the optimizer (in section Solvers o
               </mediaobject>
             </screenshot>
 
-          </itemizedlist>
         </listitem>
-
-
       </itemizedlist>
 
+       
 
-Now your Resource Tree should look as shown in this figure:
+      <para>Now your Resource Tree should look as shown in this figure:
+      </para>
 
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_AlgebraicOpt_AlgebraicOptimizationResourceTree.jpeg"
+                       scalefit="1" width="100%" />
+          </imageobject>
 
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Tut_AlgebraicOpt_AlgebraicOptimizationResourceTree.jpeg"
-                     scalefit="1" width="100%" />
-        </imageobject>
+          <caption>
+            <para>Figure: Algebraic Optimization Resource Tree</para>
+          </caption>
+        </mediaobject>
+      </screenshot>
 
-        <caption>
-          <para>Figure: Algebraic Optimization Resource Tree</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-
+       
     </section>
   </section>
 
@@ -221,11 +226,10 @@ Now your Resource Tree should look as shown in this figure:
         <tgroup cols="2">
           <tbody>
             <row>
-              <entry><screenshot>
-                  <caption>
-                    <title>Figure: Mission Tree</title>
-                  </caption>
-
+              <entry><figure>
+                  
+                  <title>Figure: Mission Tree</title>
+                  <screenshot>
                   <mediaobject>
                     <imageobject>
                       <imagedata align="center" contentdepth="100%"
@@ -233,12 +237,10 @@ Now your Resource Tree should look as shown in this figure:
                                  scalefit="1" width="100%" />
                     </imageobject>
                   </mediaobject>
-                </screenshot></entry>
+                </screenshot></figure></entry>
 
-              <entry><screenshot>
-                  <caption>
-                    <title>Figure: Output Tree</title>
-                  </caption>
+              <entry><figure><title>Figure: Output Tree</title><screenshot>
+                  
 
                   <mediaobject>
                     <imageobject>
@@ -247,7 +249,7 @@ Now your Resource Tree should look as shown in this figure:
                                  scalefit="1" width="100%" />
                     </imageobject>
                   </mediaobject>
-                </screenshot></entry>
+                </screenshot></figure></entry>
             </row>
           </tbody>
         </tgroup>
@@ -427,8 +429,8 @@ Now your Resource Tree should look as shown in this figure:
 
     <para>There is no plot for this mission sequence. Its results - values X1,
     X2, the minimum value of the optimized function F, and, for completeness,
-    the constraint value G - can be found by calling ReportFile1 in the Output Tree. The
-    report should look like the figure below.</para>
+    the constraint value G - can be found by calling ReportFile1 in the Output
+    Tree. The report should look like the figure below.</para>
 
     <screenshot>
       <mediaobject>
@@ -443,9 +445,12 @@ Now your Resource Tree should look as shown in this figure:
         </caption>
       </mediaobject>
     </screenshot>
-  </section>
 
-As an exersize, let us see what values X1, X2, and F would the optimizer deliver if we eleminate the constraint G. In the Mission Tree, remove the NonlinearConstraint1 command and run the mission again. Not surprisingly, the optimizer delivers values X1=2, X2=2, and F=0. See the ReportFile box below (value G has no meaning here).
+    <para>As an exersize, let us see what values X1, X2, and F would the
+    optimizer deliver if we eleminate the constraint G. In the Mission Tree,
+    remove the NonlinearConstraint1 command and run the mission again. Not
+    surprisingly, the optimizer delivers values X1=2, X2=2, and F=0. See the
+    ReportFile box below (value G has no meaning here).</para>
 
     <screenshot>
       <mediaobject>
@@ -460,4 +465,5 @@ As an exersize, let us see what values X1, X2, and F would the optimizer deliver
         </caption>
       </mediaobject>
     </screenshot>
+  </section>
 </section>
