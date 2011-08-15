@@ -13,9 +13,9 @@ extern "C" {
 struct {
     real tlb, s, db04, db16, db28, db32, db40, db48, db01, za, t0, z0, g0, rl,
 	     dd, db14, tr12;
-} gts3c_;
+} gts3c00_;
 
-#define gts3c_1 gts3c_
+#define gts3c00_1 gts3c00_
 
 struct {
     real tn1[5], tn2[4], tn3[5], tgn1[2], tgn2[2], tgn3[2];
@@ -1213,7 +1213,7 @@ L240:
 L10:
     goto L90;
 L50:
-    gts3c_1.dd = densm00_(alt, &c_b14, &c_b15, &tz, &mn3, zn3, meso7_1.tn3, 
+    gts3c00_1.dd = densm00_(alt, &c_b14, &c_b15, &tz, &mn3, zn3, meso7_1.tn3, 
 	    meso7_1.tgn3, &mn2, zn2, meso7_1.tn2, meso7_1.tgn2);
     t[2] = tz;
 L90:
@@ -1740,8 +1740,8 @@ L20:
     v2 = vtst7_(iyd, sec, glat, glong, stl, f107a, f107, &ap[1], &c__2);
 
     yrd = (real) (*iyd);
-    gts3c_1.za = parm7_1.pdl[40];
-    zn1[0] = gts3c_1.za;
+    gts3c00_1.za = parm7_1.pdl[40];
+    zn1[0] = gts3c00_1.za;
     for (j = 1; j <= 9; ++j) {
 	d__[j] = (float)0.;
 /* L2: */
@@ -1760,20 +1760,20 @@ L20:
 /*          GRADIENT VARIATIONS NOT IMPORTANT BELOW ZN1(5) */
     if (*alt > zn1[4]) {
 	if (v2 == (float)1. || alast <= zn1[4]) {
-	    gts3c_1.g0 = lower7_1.ptm[3] * parm7_1.ps[0] * (csw_1.sw[18] * 
+	    gts3c00_1.g0 = lower7_1.ptm[3] * parm7_1.ps[0] * (csw_1.sw[18] * 
 		    globe7_(&yrd, sec, glat, glong, stl, f107a, f107, &ap[1], 
 		    parm7_1.ps) + (float)1.);
 	}
     } else {
-	gts3c_1.g0 = lower7_1.ptm[3] * parm7_1.ps[0];
+	gts3c00_1.g0 = lower7_1.ptm[3] * parm7_1.ps[0];
     }
 /*      Calculate these temperatures only if input changed */
     if (v2 == (float)1. || *alt < (float)300.) {
-	gts3c_1.tlb = lower7_1.ptm[1] * (csw_1.sw[16] * globe7_(&yrd, sec, 
+	gts3c00_1.tlb = lower7_1.ptm[1] * (csw_1.sw[16] * globe7_(&yrd, sec, 
 		glat, glong, stl, f107a, f107, &ap[1], &parm7_1.pd[450]) + (
 		float)1.) * parm7_1.pd[450];
     }
-    gts3c_1.s = gts3c_1.g0 / (tinf - gts3c_1.tlb);
+    gts3c00_1.s = gts3c00_1.g0 / (tinf - gts3c00_1.tlb);
 /*       Lower thermosphere temp variations not significant for */
 /*        density above 300 km */
     if (*alt < (float)300.) {
@@ -1804,9 +1804,9 @@ L20:
 		* meso7_1.tn1[4] / (r__1 * r__1);
     }
 
-    gts3c_1.z0 = zn1[3];
-    gts3c_1.t0 = meso7_1.tn1[3];
-    gts3c_1.tr12 = (float)1.;
+    gts3c00_1.z0 = zn1[3];
+    gts3c00_1.t0 = meso7_1.tn1[3];
+    gts3c00_1.tr12 = (float)1.;
 
     if (*mass == 0) {
 	goto L50;
@@ -1841,27 +1841,27 @@ L15:
 /*       **** N2 DENSITY **** */
 
 /*      Diffusive density at Zlb */
-    gts3c_1.db28 = lower7_1.pdm[20] * exp(g28) * parm7_1.pd[300];
+    gts3c00_1.db28 = lower7_1.pdm[20] * exp(g28) * parm7_1.pd[300];
 /*      Diffusive density at Alt */
-    d__[3] = densu00_(&z__, &gts3c_1.db28, &tinf, &gts3c_1.tlb, &c_b45, &
-	    alpha[2], &t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, 
+    d__[3] = densu00_(&z__, &gts3c00_1.db28, &tinf, &gts3c00_1.tlb, &c_b45, &
+	    alpha[2], &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
 	    meso7_1.tn1, meso7_1.tgn1);
-    gts3c_1.dd = d__[3];
+    gts3c00_1.dd = d__[3];
 /*      Turbopause */
     zh28 = lower7_1.pdm[22] * zhf;
     zhm28 = lower7_1.pdm[23] * parm7_1.pdl[30];
     xmd = (float)28. - xmm;
 /*      Mixed density at Zlb */
     r__1 = alpha[2] - (float)1.;
-    b28 = densu00_(&zh28, &gts3c_1.db28, &tinf, &gts3c_1.tlb, &xmd, &r__1, &
-	    tz, &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    b28 = densu00_(&zh28, &gts3c00_1.db28, &tinf, &gts3c00_1.tlb, &xmd, &r__1,
+	     &tz, &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
     if (z__ > altl[2] || csw_1.sw[14] == (float)0.) {
 	goto L17;
     }
 /*      Mixed density at Alt */
-    dmix_1.dm28 = densu00_(&z__, &b28, &tinf, &gts3c_1.tlb, &xmm, &alpha[2], &
-	    tz, &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    dmix_1.dm28 = densu00_(&z__, &b28, &tinf, &gts3c00_1.tlb, &xmm, &alpha[2],
+	     &tz, &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
 /*      Net density at Alt */
     d__[3] = dnet00_(&d__[3], &dmix_1.dm28, &zhm28, &xmm, &c_b45);
@@ -1887,12 +1887,12 @@ L20:
     g4 = csw_1.sw[20] * globe7_(&yrd, sec, glat, glong, stl, f107a, f107, &ap[
 	    1], parm7_1.pd);
 /*      Diffusive density at Zlb */
-    gts3c_1.db04 = lower7_1.pdm[0] * exp(g4) * parm7_1.pd[0];
+    gts3c00_1.db04 = lower7_1.pdm[0] * exp(g4) * parm7_1.pd[0];
 /*      Diffusive density at Alt */
-    d__[1] = densu00_(&z__, &gts3c_1.db04, &tinf, &gts3c_1.tlb, &c_b54, alpha,
-	     &t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
-	    meso7_1.tgn1);
-    gts3c_1.dd = d__[1];
+    d__[1] = densu00_(&z__, &gts3c00_1.db04, &tinf, &gts3c00_1.tlb, &c_b54, 
+	    alpha, &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
+	    meso7_1.tn1, meso7_1.tgn1);
+    gts3c00_1.dd = d__[1];
     if (z__ > altl[0] || csw_1.sw[14] == (float)0.) {
 	goto L24;
     }
@@ -1901,22 +1901,22 @@ L20:
 /*      Mixed density at Zlb */
     r__1 = (float)4. - xmm;
     r__2 = alpha[0] - (float)1.;
-    b04 = densu00_(&zh04, &gts3c_1.db04, &tinf, &gts3c_1.tlb, &r__1, &r__2, &
-	    t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
-	    meso7_1.tgn1);
+    b04 = densu00_(&zh04, &gts3c00_1.db04, &tinf, &gts3c00_1.tlb, &r__1, &
+	    r__2, &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
+	    meso7_1.tn1, meso7_1.tgn1);
 /*      Mixed density at Alt */
-    dmix_1.dm04 = densu00_(&z__, &b04, &tinf, &gts3c_1.tlb, &xmm, &c_b15, &t[
-	    2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    dmix_1.dm04 = densu00_(&z__, &b04, &tinf, &gts3c00_1.tlb, &xmm, &c_b15, &
+	    t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
     zhm04 = zhm28;
 /*      Net density at Alt */
     d__[1] = dnet00_(&d__[1], &dmix_1.dm04, &zhm04, &xmm, &c_b54);
 /*      Correction to specified mixing ratio at ground */
-    gts3c_1.rl = log(b28 * lower7_1.pdm[1] / b04);
+    gts3c00_1.rl = log(b28 * lower7_1.pdm[1] / b04);
     zc04 = lower7_1.pdm[4] * parm7_1.pdl[25];
     hc04 = lower7_1.pdm[5] * parm7_1.pdl[26];
 /*      Net density corrected at Alt */
-    d__[1] *= ccor00_(&z__, &gts3c_1.rl, &hc04, &zc04);
+    d__[1] *= ccor00_(&z__, &gts3c00_1.rl, &hc04, &zc04);
 L24:
     if (*mass != 48) {
 	goto L90;
@@ -1929,12 +1929,12 @@ L25:
     g16 = csw_1.sw[20] * globe7_(&yrd, sec, glat, glong, stl, f107a, f107, &
 	    ap[1], &parm7_1.pd[150]);
 /*      Diffusive density at Zlb */
-    gts3c_1.db16 = lower7_1.pdm[10] * exp(g16) * parm7_1.pd[150];
+    gts3c00_1.db16 = lower7_1.pdm[10] * exp(g16) * parm7_1.pd[150];
 /*       Diffusive density at Alt */
-    d__[2] = densu00_(&z__, &gts3c_1.db16, &tinf, &gts3c_1.tlb, &c_b58, &
-	    alpha[1], &t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, 
+    d__[2] = densu00_(&z__, &gts3c00_1.db16, &tinf, &gts3c00_1.tlb, &c_b58, &
+	    alpha[1], &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
 	    meso7_1.tn1, meso7_1.tgn1);
-    gts3c_1.dd = d__[2];
+    gts3c00_1.dd = d__[2];
     if (z__ > altl[1] || csw_1.sw[14] == (float)0.) {
 	goto L34;
     }
@@ -1944,12 +1944,12 @@ L25:
 /*      Mixed density at Zlb */
     r__1 = 16 - xmm;
     r__2 = alpha[1] - (float)1.;
-    b16 = densu00_(&zh16, &gts3c_1.db16, &tinf, &gts3c_1.tlb, &r__1, &r__2, &
-	    t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
-	    meso7_1.tgn1);
+    b16 = densu00_(&zh16, &gts3c00_1.db16, &tinf, &gts3c00_1.tlb, &r__1, &
+	    r__2, &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
+	    meso7_1.tn1, meso7_1.tgn1);
 /*      Mixed density at Alt */
-    dmix_1.dm16 = densu00_(&z__, &b16, &tinf, &gts3c_1.tlb, &xmm, &c_b15, &t[
-	    2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    dmix_1.dm16 = densu00_(&z__, &b16, &tinf, &gts3c00_1.tlb, &xmm, &c_b15, &
+	    t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
     zhm16 = zhm28;
 /*      Net density at Alt */
@@ -1957,12 +1957,12 @@ L25:
 /*   3/16/99 Change form to match O2 departure from diff equil near 150 */
 /*   km and add dependence on F10.7 */
 /*      RL=ALOG(B28*PDM(2,2)*ABS(PDL(17,2))/B16) */
-    gts3c_1.rl = lower7_1.pdm[11] * parm7_1.pdl[41] * (csw_1.sw[0] * 
+    gts3c00_1.rl = lower7_1.pdm[11] * parm7_1.pdl[41] * (csw_1.sw[0] * 
 	    parm7_1.pdl[23] * (*f107a - (float)150.) + (float)1.);
     hc16 = lower7_1.pdm[15] * parm7_1.pdl[28];
     zc16 = lower7_1.pdm[14] * parm7_1.pdl[27];
     hc216 = lower7_1.pdm[15] * parm7_1.pdl[29];
-    d__[2] *= ccor2_(&z__, &gts3c_1.rl, &hc16, &zc16, &hc216);
+    d__[2] *= ccor2_(&z__, &gts3c00_1.rl, &hc16, &zc16, &hc216);
 /*       Chemistry correction */
     hcc16 = lower7_1.pdm[17] * parm7_1.pdl[38];
     zcc16 = lower7_1.pdm[16] * parm7_1.pdl[37];
@@ -1981,15 +1981,15 @@ L35:
     g32 = csw_1.sw[20] * globe7_(&yrd, sec, glat, glong, stl, f107a, f107, &
 	    ap[1], &parm7_1.pd[600]);
 /*      Diffusive density at Zlb */
-    gts3c_1.db32 = lower7_1.pdm[30] * exp(g32) * parm7_1.pd[600];
+    gts3c00_1.db32 = lower7_1.pdm[30] * exp(g32) * parm7_1.pd[600];
 /*       Diffusive density at Alt */
-    d__[4] = densu00_(&z__, &gts3c_1.db32, &tinf, &gts3c_1.tlb, &c_b62, &
-	    alpha[3], &t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, 
+    d__[4] = densu00_(&z__, &gts3c00_1.db32, &tinf, &gts3c00_1.tlb, &c_b62, &
+	    alpha[3], &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
 	    meso7_1.tn1, meso7_1.tgn1);
     if (*mass == 49) {
-	gts3c_1.dd += d__[4] * (float)2.;
+	gts3c00_1.dd += d__[4] * (float)2.;
     } else {
-	gts3c_1.dd = d__[4];
+	gts3c00_1.dd = d__[4];
     }
     if (csw_1.sw[14] == (float)0.) {
 	goto L39;
@@ -2002,21 +2002,21 @@ L35:
 /*      Mixed density at Zlb */
     r__1 = (float)32. - xmm;
     r__2 = alpha[3] - (float)1.;
-    b32 = densu00_(&zh32, &gts3c_1.db32, &tinf, &gts3c_1.tlb, &r__1, &r__2, &
-	    t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
-	    meso7_1.tgn1);
+    b32 = densu00_(&zh32, &gts3c00_1.db32, &tinf, &gts3c00_1.tlb, &r__1, &
+	    r__2, &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
+	    meso7_1.tn1, meso7_1.tgn1);
 /*      Mixed density at Alt */
-    dmix_1.dm32 = densu00_(&z__, &b32, &tinf, &gts3c_1.tlb, &xmm, &c_b15, &t[
-	    2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    dmix_1.dm32 = densu00_(&z__, &b32, &tinf, &gts3c00_1.tlb, &xmm, &c_b15, &
+	    t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
     zhm32 = zhm28;
 /*      Net density at Alt */
     d__[4] = dnet00_(&d__[4], &dmix_1.dm32, &zhm32, &xmm, &c_b62);
 /*       Correction to specified mixing ratio at ground */
-    gts3c_1.rl = log(b28 * lower7_1.pdm[31] / b32);
+    gts3c00_1.rl = log(b28 * lower7_1.pdm[31] / b32);
     hc32 = lower7_1.pdm[35] * parm7_1.pdl[32];
     zc32 = lower7_1.pdm[34] * parm7_1.pdl[31];
-    d__[4] *= ccor00_(&z__, &gts3c_1.rl, &hc32, &zc32);
+    d__[4] *= ccor00_(&z__, &gts3c00_1.rl, &hc32, &zc32);
 L38:
 /*      Correction for general departure from diffusive equilibrium above Zlb */
     hcc32 = lower7_1.pdm[37] * parm7_1.pdl[47];
@@ -2038,12 +2038,12 @@ L40:
     g40 = csw_1.sw[20] * globe7_(&yrd, sec, glat, glong, stl, f107a, f107, &
 	    ap[1], &parm7_1.pd[750]);
 /*      Diffusive density at Zlb */
-    gts3c_1.db40 = lower7_1.pdm[40] * exp(g40) * parm7_1.pd[750];
+    gts3c00_1.db40 = lower7_1.pdm[40] * exp(g40) * parm7_1.pd[750];
 /*       Diffusive density at Alt */
-    d__[5] = densu00_(&z__, &gts3c_1.db40, &tinf, &gts3c_1.tlb, &c_b67, &
-	    alpha[4], &t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, 
+    d__[5] = densu00_(&z__, &gts3c00_1.db40, &tinf, &gts3c00_1.tlb, &c_b67, &
+	    alpha[4], &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
 	    meso7_1.tn1, meso7_1.tgn1);
-    gts3c_1.dd = d__[5];
+    gts3c00_1.dd = d__[5];
     if (z__ > altl[4] || csw_1.sw[14] == (float)0.) {
 	goto L44;
     }
@@ -2052,22 +2052,22 @@ L40:
 /*      Mixed density at Zlb */
     r__1 = (float)40. - xmm;
     r__2 = alpha[4] - (float)1.;
-    b40 = densu00_(&zh40, &gts3c_1.db40, &tinf, &gts3c_1.tlb, &r__1, &r__2, &
-	    t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
-	    meso7_1.tgn1);
+    b40 = densu00_(&zh40, &gts3c00_1.db40, &tinf, &gts3c00_1.tlb, &r__1, &
+	    r__2, &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
+	    meso7_1.tn1, meso7_1.tgn1);
 /*      Mixed density at Alt */
-    dmix_1.dm40 = densu00_(&z__, &b40, &tinf, &gts3c_1.tlb, &xmm, &c_b15, &t[
-	    2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    dmix_1.dm40 = densu00_(&z__, &b40, &tinf, &gts3c00_1.tlb, &xmm, &c_b15, &
+	    t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
     zhm40 = zhm28;
 /*      Net density at Alt */
     d__[5] = dnet00_(&d__[5], &dmix_1.dm40, &zhm40, &xmm, &c_b67);
 /*       Correction to specified mixing ratio at ground */
-    gts3c_1.rl = log(b28 * lower7_1.pdm[41] / b40);
+    gts3c00_1.rl = log(b28 * lower7_1.pdm[41] / b40);
     hc40 = lower7_1.pdm[45] * parm7_1.pdl[34];
     zc40 = lower7_1.pdm[44] * parm7_1.pdl[33];
 /*      Net density corrected at Alt */
-    d__[5] *= ccor00_(&z__, &gts3c_1.rl, &hc40, &zc40);
+    d__[5] *= ccor00_(&z__, &gts3c00_1.rl, &hc40, &zc40);
 L44:
     if (*mass != 48) {
 	goto L90;
@@ -2080,12 +2080,12 @@ L45:
     g1 = csw_1.sw[20] * globe7_(&yrd, sec, glat, glong, stl, f107a, f107, &ap[
 	    1], &parm7_1.pd[900]);
 /*      Diffusive density at Zlb */
-    gts3c_1.db01 = lower7_1.pdm[50] * exp(g1) * parm7_1.pd[900];
+    gts3c00_1.db01 = lower7_1.pdm[50] * exp(g1) * parm7_1.pd[900];
 /*       Diffusive density at Alt */
-    d__[7] = densu00_(&z__, &gts3c_1.db01, &tinf, &gts3c_1.tlb, &c_b14, &
-	    alpha[6], &t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, 
+    d__[7] = densu00_(&z__, &gts3c00_1.db01, &tinf, &gts3c00_1.tlb, &c_b14, &
+	    alpha[6], &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
 	    meso7_1.tn1, meso7_1.tgn1);
-    gts3c_1.dd = d__[7];
+    gts3c00_1.dd = d__[7];
     if (z__ > altl[6] || csw_1.sw[14] == (float)0.) {
 	goto L47;
     }
@@ -2094,21 +2094,21 @@ L45:
 /*      Mixed density at Zlb */
     r__1 = (float)1. - xmm;
     r__2 = alpha[6] - (float)1.;
-    b01 = densu00_(&zh01, &gts3c_1.db01, &tinf, &gts3c_1.tlb, &r__1, &r__2, &
-	    t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
-	    meso7_1.tgn1);
+    b01 = densu00_(&zh01, &gts3c00_1.db01, &tinf, &gts3c00_1.tlb, &r__1, &
+	    r__2, &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
+	    meso7_1.tn1, meso7_1.tgn1);
 /*      Mixed density at Alt */
-    dmix_1.dm01 = densu00_(&z__, &b01, &tinf, &gts3c_1.tlb, &xmm, &c_b15, &t[
-	    2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    dmix_1.dm01 = densu00_(&z__, &b01, &tinf, &gts3c00_1.tlb, &xmm, &c_b15, &
+	    t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
     zhm01 = zhm28;
 /*      Net density at Alt */
     d__[7] = dnet00_(&d__[7], &dmix_1.dm01, &zhm01, &xmm, &c_b14);
 /*       Correction to specified mixing ratio at ground */
-    gts3c_1.rl = log(b28 * lower7_1.pdm[51] * dabs(parm7_1.pdl[42]) / b01);
+    gts3c00_1.rl = log(b28 * lower7_1.pdm[51] * dabs(parm7_1.pdl[42]) / b01);
     hc01 = lower7_1.pdm[55] * parm7_1.pdl[36];
     zc01 = lower7_1.pdm[54] * parm7_1.pdl[35];
-    d__[7] *= ccor00_(&z__, &gts3c_1.rl, &hc01, &zc01);
+    d__[7] *= ccor00_(&z__, &gts3c00_1.rl, &hc01, &zc01);
 /*       Chemistry correction */
     hcc01 = lower7_1.pdm[57] * parm7_1.pdl[44];
     zcc01 = lower7_1.pdm[56] * parm7_1.pdl[43];
@@ -2127,12 +2127,12 @@ L48:
     g14 = csw_1.sw[20] * globe7_(&yrd, sec, glat, glong, stl, f107a, f107, &
 	    ap[1], &parm7_1.pd[1050]);
 /*      Diffusive density at Zlb */
-    gts3c_1.db14 = lower7_1.pdm[60] * exp(g14) * parm7_1.pd[1050];
+    gts3c00_1.db14 = lower7_1.pdm[60] * exp(g14) * parm7_1.pd[1050];
 /*       Diffusive density at Alt */
-    d__[8] = densu00_(&z__, &gts3c_1.db14, &tinf, &gts3c_1.tlb, &c_b75, &
-	    alpha[7], &t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, 
+    d__[8] = densu00_(&z__, &gts3c00_1.db14, &tinf, &gts3c00_1.tlb, &c_b75, &
+	    alpha[7], &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
 	    meso7_1.tn1, meso7_1.tgn1);
-    gts3c_1.dd = d__[8];
+    gts3c00_1.dd = d__[8];
     if (z__ > altl[7] || csw_1.sw[14] == (float)0.) {
 	goto L49;
     }
@@ -2141,21 +2141,21 @@ L48:
 /*      Mixed density at Zlb */
     r__1 = (float)14. - xmm;
     r__2 = alpha[7] - (float)1.;
-    b14 = densu00_(&zh14, &gts3c_1.db14, &tinf, &gts3c_1.tlb, &r__1, &r__2, &
-	    t[2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
-	    meso7_1.tgn1);
+    b14 = densu00_(&zh14, &gts3c00_1.db14, &tinf, &gts3c00_1.tlb, &r__1, &
+	    r__2, &t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, 
+	    meso7_1.tn1, meso7_1.tgn1);
 /*      Mixed density at Alt */
-    dmix_1.dm14 = densu00_(&z__, &b14, &tinf, &gts3c_1.tlb, &xmm, &c_b15, &t[
-	    2], &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    dmix_1.dm14 = densu00_(&z__, &b14, &tinf, &gts3c00_1.tlb, &xmm, &c_b15, &
+	    t[2], &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
     zhm14 = zhm28;
 /*      Net density at Alt */
     d__[8] = dnet00_(&d__[8], &dmix_1.dm14, &zhm14, &xmm, &c_b75);
 /*       Correction to specified mixing ratio at ground */
-    gts3c_1.rl = log(b28 * lower7_1.pdm[61] * dabs(parm7_1.pdl[2]) / b14);
+    gts3c00_1.rl = log(b28 * lower7_1.pdm[61] * dabs(parm7_1.pdl[2]) / b14);
     hc14 = lower7_1.pdm[65] * parm7_1.pdl[1];
     zc14 = lower7_1.pdm[64] * parm7_1.pdl[0];
-    d__[8] *= ccor00_(&z__, &gts3c_1.rl, &hc14, &zc14);
+    d__[8] *= ccor00_(&z__, &gts3c00_1.rl, &hc14, &zc14);
 /*       Chemistry correction */
     hcc14 = lower7_1.pdm[67] * parm7_1.pdl[4];
     zcc14 = lower7_1.pdm[66] * parm7_1.pdl[3];
@@ -2174,13 +2174,13 @@ L46:
 	    ap[1], &parm7_1.pd[1200]);
     db16h = lower7_1.pdm[70] * exp(g16h) * parm7_1.pd[1200];
     tho = lower7_1.pdm[79] * parm7_1.pdl[6];
-    gts3c_1.dd = densu00_(&z__, &db16h, &tho, &tho, &c_b58, &alpha[8], &t2, &
-	    lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, meso7_1.tgn1)
-	    ;
+    gts3c00_1.dd = densu00_(&z__, &db16h, &tho, &tho, &c_b58, &alpha[8], &t2, 
+	    &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
+	    meso7_1.tgn1);
     zsht = lower7_1.pdm[75];
     zmho = lower7_1.pdm[74];
     zsho = scalh_(&zmho, &c_b58, &tho);
-    d__[9] = gts3c_1.dd * exp(-zsht / zsho * (exp(-(z__ - zmho) / zsht) - (
+    d__[9] = gts3c00_1.dd * exp(-zsht / zsho * (exp(-(z__ - zmho) / zsht) - (
 	    float)1.));
     if (*mass != 48) {
 	goto L90;
@@ -2191,16 +2191,16 @@ L46:
     d__[6] = (d__[1] * (float)4. + d__[2] * (float)16. + d__[3] * (float)28. 
 	    + d__[4] * (float)32. + d__[5] * (float)40. + d__[7] + d__[8] * (
 	    float)14.) * (float)1.66e-24;
-    gts3c_1.db48 = (gts3c_1.db04 * (float)4. + gts3c_1.db16 * (float)16. + 
-	    gts3c_1.db28 * (float)28. + gts3c_1.db32 * (float)32. + 
-	    gts3c_1.db40 * (float)40. + gts3c_1.db01 + gts3c_1.db14 * (float)
-	    14.) * (float)1.66e-24;
+    gts3c00_1.db48 = (gts3c00_1.db04 * (float)4. + gts3c00_1.db16 * (float)
+	    16. + gts3c00_1.db28 * (float)28. + gts3c00_1.db32 * (float)32. + 
+	    gts3c00_1.db40 * (float)40. + gts3c00_1.db01 + gts3c00_1.db14 * (
+	    float)14.) * (float)1.66e-24;
     goto L90;
 /*       TEMPERATURE AT ALTITUDE */
 L50:
     z__ = dabs(*alt);
-    ddum = densu00_(&z__, &c_b14, &tinf, &gts3c_1.tlb, &c_b15, &c_b15, &t[2], 
-	    &lower7_1.ptm[5], &gts3c_1.s, &mn1, zn1, meso7_1.tn1, 
+    ddum = densu00_(&z__, &c_b14, &tinf, &gts3c00_1.tlb, &c_b15, &c_b15, &t[2]
+	    , &lower7_1.ptm[5], &gts3c00_1.s, &mn1, zn1, meso7_1.tn1, 
 	    meso7_1.tgn1);
 L90:
 /*       ADJUST DENSITIES FROM CGS TO KGM */
