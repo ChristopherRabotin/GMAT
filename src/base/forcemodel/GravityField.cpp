@@ -842,7 +842,7 @@ bool GravityField::SetStringParameter(const Integer id,
       {
          ODEModelException ome;
          ome.SetDetails(errorMessageFormat.c_str(),
-                        value.c_str(), "EarthTideModel", "\"None\" or \"SolidAndPole\"");
+                        value.c_str(), "EarthTideModel", "\'None\' or \'SolidAndPole\'");
          throw ome;
       }
       earthTideModel = value;
