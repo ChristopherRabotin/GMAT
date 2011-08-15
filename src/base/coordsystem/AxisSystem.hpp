@@ -55,7 +55,8 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesYAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
-   
+   virtual bool                           UsesSpacecraft() const;
+
    // methods to set parameters for the AxisSystems
    virtual void                  SetPrimaryObject(SpacePoint *prim);
    virtual void                  SetSecondaryObject(SpacePoint *second);

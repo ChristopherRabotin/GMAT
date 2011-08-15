@@ -344,6 +344,22 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesNutationUpdateInterval() const
    return GmatCoordinate::NOT_USED;
 }
 
+bool AxisSystem::UsesSpacecraft() const
+{
+   if (origin && origin->IsOfType("Spacecraft"))  return true;
+   if (UsesPrimary())
+   {
+      SpacePoint *p = GetPrimaryObject();
+      if (p && p->IsOfType("Spacecraft")) return true;
+   }
+   if (UsesSecondary())
+   {
+      SpacePoint *s = GetSecondaryObject();
+      if (s && s->IsOfType("Spacecraft")) return true;
+   }
+   return false;
+}
+
 // methods to set parameters for the AxisSystems - AxisSystems that need these
 // will need to override these implementations
 void AxisSystem::SetPrimaryObject(SpacePoint *prim)

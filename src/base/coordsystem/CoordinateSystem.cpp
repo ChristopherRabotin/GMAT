@@ -293,6 +293,12 @@ GmatCoordinate::ParameterUsage CoordinateSystem::UsesNutationUpdateInterval() co
    return GmatCoordinate::NOT_USED;
 }
 
+bool CoordinateSystem::UsesSpacecraft() const
+{
+   if (axes) return axes->UsesSpacecraft();
+   return false;
+}
+
 
 
 // methods to set parameters for the AxisSystems
