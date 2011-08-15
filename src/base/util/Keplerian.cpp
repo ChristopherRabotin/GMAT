@@ -53,7 +53,7 @@ const std::string Keplerian::DATA_DESCRIPTIONS[NUM_DATA] =
    "Inclination",
    "RA of Ascending Node",
    "Argument of Periapsis",
-   "True Anomally"
+   "True Anomaly"
 };
 
 //---------------------------------
@@ -882,6 +882,7 @@ Rvector6 Keplerian::CartesianToKeplerian(Real mu, const Rvector3 &pos,
 {
    #if DEBUG_KEPLERIAN
    MessageInterface::ShowMessage("CartesianToKeplerian() ");
+   MessageInterface::ShowMessage("                   pos = %s and  vel = %s\n", pos.ToString().c_str(), vel.ToString().c_str());
    #endif
    
 //   Real sma = CartesianToSMA(mu, pos, vel);
