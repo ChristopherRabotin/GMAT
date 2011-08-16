@@ -77,6 +77,7 @@ protected:
    };
    
    static const std::string VALID_OBJECT_TYPE_LIST[PlanetDataObjectCount];
+   static const std::string VALID_PLANET_DATA_NAMES[LST_ID - LATITUDE + 1];
 };
 #endif // PlanetData_hpp
 

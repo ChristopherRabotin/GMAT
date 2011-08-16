@@ -28,6 +28,7 @@
 #include "CelestialBody.hpp"
 #include "AngleUtil.hpp"          // for PutAngleInDegRange()
 #include "Linear.hpp"             // for GmatRealUtil::ToString()
+#include "CalculationUtilities.hpp"
 #include "MessageInterface.hpp"
 
 //#define __COMPUTE_LONGITUDE_OLDWAY__
@@ -52,6 +53,16 @@ PlanetData::VALID_OBJECT_TYPE_LIST[PlanetDataObjectCount] =
    "CoordinateSystem",
    "SpacePoint"
 }; 
+
+const std::string PlanetData::VALID_PLANET_DATA_NAMES[LST_ID - LATITUDE + 1] =
+{
+   "Latitude",
+   "Longitude",
+   "Altitude",
+   "MHA",
+   "LST"
+};
+
 
 //---------------------------------
 // public methods
@@ -162,168 +173,30 @@ Real PlanetData::GetPlanetReal(Integer item)
    
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
-   
-   switch (item)
-   {
-   case MHA_ID:
-      {
-         // Get current time
-         Real a1mjd = mSpacecraft->GetEpoch();
-         
-         // Call GetHourAngle() on origin
-         Real mha = mOrigin->GetHourAngle(a1mjd);
-         
-         #ifdef DEBUG_PLANETDATA_RUN
-         MessageInterface::ShowMessage
-            ("PlanetData::GetPlanetReal() a1mdj=%f, origin=%s, mha=%f\n", a1mjd,
-             mOrigin->GetName().c_str(), mha);
-         #endif
-      
-         return mha;
-      }
-   case LONGITUDE:
-      {
-         #ifdef __COMPUTE_LONGITUDE_OLDWAY__
-         //==============================================================
-         
-         // Get spacecraft RightAscension
-         Rvector6 state = mSpacecraft->GetState().GetState();
-         Real a1mjd = mSpacecraft->GetEpoch();
-         
-         if (mOrigin->GetName() != "Earth")
-         {
-            // Get current state
-            state = state - mOrigin->GetMJ2000State(a1mjd);
-         }
-         
-         Real raDeg = GmatMathUtil::ATan(state[1], state[0]) * DEG_PER_RAD;
-         Real mha = mOrigin->GetHourAngle(a1mjd);
-         
-         // Compute east longitude
-         // Longitude is measured positive to east from prime meridian.
-         // (Greenwich for Earth)
-         // Reference: Valado 3.2.1 Location Parameters
-         Real longitude = raDeg - mha;
-         longitude = AngleUtil::PutAngleInDegRange(longitude, -180.0, 180.0);
-         
-         #ifdef DEBUG_PLANETDATA_RUN
-         MessageInterface::ShowMessage
-            ("PlanetData::GetPlanetReal(%d) raDeg=%f, mha=%f, longitude=%f\n",
-             item, raDeg, mha, longitude);
-         #endif
-         
-         #else
-         //==============================================================
-         // 1)  Get state in the body fixed system of the central body
-         //     defined by sc.centralbody.Longitude. so, if the central
-         //     body is Mars, we convert the state to MarsFixed,
-         //     if the central body is Venus, we convert to Venus fixed.
-         //     This gives us X_f, Y_f, and Z_f,  the Cartesian coordinates
-         //     in the fixed system.
-         // 2)  Longitude = atan2( Y_f, X_f )
-         
-         Real epoch = mSpacecraft->GetEpoch();
-         Rvector6 state = mSpacecraft->GetState().GetState();
-         Rvector6 outState;
-         mCoordConverter.Convert(A1Mjd(epoch), state, mInternalCoordSystem,
-                                 outState, mOutCoordSystem);
-         
-         Real longitude = ATan(outState[1], outState[0]) * GmatMathConstants::DEG_PER_RAD;
-         longitude = AngleUtil::PutAngleInDegRange(longitude, -180.0, 180.0);
 
-         #ifdef DEBUG_LONGITUDE
-         MessageInterface::ShowMessage
-            ("PlanetData::GetPlanetReal(%d) longitude=%f\n\n", item, longitude);
-         #endif
-         
-         #endif
-         //==============================================================
-      
-         return longitude;
-      }
-   case LATITUDE:
-   case ALTITUDE:
-      {
-         Rvector6 intState = mSpacecraft->GetState().GetState();
-         
-         #ifdef DEBUG_ALTITUDE
-         MessageInterface::ShowMessage
-            ("PlanetData::GetPlanetReal(%d) state=%s\n", item,
-                  intState.ToString().c_str());
-         #endif
-         
-         Real epoch = mSpacecraft->GetRealParameter("A1Epoch");
-         Rvector6 instate = mSpacecraft->GetState().GetState();
-         Rvector6 state;
-         mCoordConverter.Convert(A1Mjd(epoch), instate, mInternalCoordSystem,
-                                 state, mOutCoordSystem);
-         
-         // get flattening for the body
-         Real flatteningFactor =
-            mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
-         
-         // Reworked to match Vallado algorithm 12 (Vallado, 2nd ed, p. 177)
-         
-         // Note -- using cmath here because I know it better -- may want to change
-         // to GmatMath
-         Real equatorialRadius =
-            mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
-         
-         Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
-         Real geolat = atan2(state[2], rxy);
-         Real delta = 1.0;
-         Real geodeticTolerance = 1.0e-7;    // Better than 0.0001 degrees
-         Real ecc2 = 2.0 * flatteningFactor - flatteningFactor*flatteningFactor;
-         
-         Real cFactor, oldlat, sinlat;
-         while (delta > geodeticTolerance)
-         {
-            oldlat = geolat;
-            sinlat = sin(oldlat);
-            cFactor = equatorialRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
-            geolat = atan2(state[2] + cFactor*ecc2*sinlat, rxy);
-            delta = fabs(geolat - oldlat);
-         }
-         
-         #ifdef DEBUG_PLANETDATA_RUN
-         MessageInterface::ShowMessage
-            ("PlanetData::GetPlanetReal() geolat=%lf rad = %lf deg\n", geolat,
-             geolat * 180.0 / PI);
-         #endif
-         
-         if (item == LATITUDE)
-         {
-            //return geolat * 180.0 / PI;
-            // put latitude between -90 and 90
-            geolat = geolat * 180.0 / GmatMathConstants::PI;
-            geolat = AngleUtil::PutAngleInDegRange(geolat, -90.0, 90.0);
-            return geolat;
-         }
-         else  // item == ALTITUDE
-         {
-            sinlat = sin(geolat);
-            cFactor = equatorialRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
-            return rxy / cos(geolat) - cFactor;
-         }
-      }
-   case LST_ID:
-      {
-         // compute Local Sidereal Time (LST = GMST + Longitude)
-         // according to Vallado Eq. 3-41
-         Real gmst = GetPlanetReal(MHA_ID);
-         Real lst = gmst + GetPlanetReal(LONGITUDE);
-         lst = AngleUtil::PutAngleInDegRange(lst, 0.0, 360.0);
-         
-         #ifdef DEBUG_PLANETDATA_RUN
-         MessageInterface::ShowMessage("PlanetData::GetPlanetReal() lst=%f\n", lst);
-         #endif
-         
-         return lst;
-      }
-   default:
-      throw ParameterException("PlanetData::GetPlanetReal() Unknown parameter id: " +
-                               GmatRealUtil::ToString(item));
-   }
+   // Get current time
+   Real a1mjd = mSpacecraft->GetEpoch();
+   
+   // Call GetHourAngle() on origin
+   Real mha = mOrigin->GetHourAngle(a1mjd);
+
+   Real epoch = mSpacecraft->GetRealParameter("A1Epoch");
+   Rvector6 instate = mSpacecraft->GetState().GetState();
+   Rvector6 state;
+   mCoordConverter.Convert(A1Mjd(epoch), instate, mInternalCoordSystem,
+                           state, mOutCoordSystem);
+   // get flattening for the body
+   Real flatteningFactor =
+      mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
+
+   // Reworked to match Vallado algorithm 12 (Vallado, 2nd ed, p. 177)
+
+   // Note -- using cmath here because I know it better -- may want to change
+   // to GmatMath
+   Real equatorialRadius =
+      mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
+
+   return GmatCalcUtil::CalculatePlanetData(VALID_PLANET_DATA_NAMES[item - LATITUDE], state, equatorialRadius, flatteningFactor, mha);
 }
 
 
@@ -331,7 +204,7 @@ Real PlanetData::GetPlanetReal(Integer item)
 // Real GetPlanetReal(const std::string &str)
 //------------------------------------------------------------------------------
 /**
- * Retrives planet related parameters.
+ * Retrieves planet related parameters.
  */
 //------------------------------------------------------------------------------
 Real PlanetData::GetPlanetReal(const std::string &str)
