@@ -90,11 +90,11 @@ Real GmatCalcUtil::CalculateBPlaneData(const std::string &item, const Rvector6 &
 
    if (item == "BDotR")
    {
-      return bDotT;
+      return bDotR;
    }
    else if (item == "BDotT")
    {
-      return bDotR;
+      return bDotT;
    }
    else if (item == "BVectorMag")
    {
