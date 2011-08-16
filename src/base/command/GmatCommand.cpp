@@ -2085,9 +2085,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             #endif
 
             meanMotion       = GmatCalcUtil::CalculateKeplerianData("MeanMotion", cartState, originMu);
-            semilatusRectum  = GmatCalcUtil::CalculateAngularData("SemilatusRectum", a1.Get(), cartState, originMu, originToSun);
-            angularMomentum  = GmatCalcUtil::CalculateAngularData("HMag", a1.Get(), cartState, originMu, originToSun);
-            betaAngle        = GmatCalcUtil::CalculateAngularData("BetaAngle", a1.Get(), cartState, originMu, originToSun);
+            semilatusRectum  = GmatCalcUtil::CalculateAngularData("SemilatusRectum", cartState, originMu, originToSun);
+            angularMomentum  = GmatCalcUtil::CalculateAngularData("HMag", cartState, originMu, originToSun);
+            betaAngle        = GmatCalcUtil::CalculateAngularData("BetaAngle", cartState, originMu, originToSun);
             orbitEnergy      = GmatCalcUtil::CalculateKeplerianData("Energy", cartState, originMu);
             c3               = GmatCalcUtil::CalculateKeplerianData("C3Energy", cartState, originMu);
             velPeriapsis     = GmatCalcUtil::CalculateKeplerianData("VelPeriapsis", cartState, originMu);
@@ -2136,8 +2136,8 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                      bDotR            = GmatCalcUtil::CalculateBPlaneData("BDotT", cartState, originMu);
                      bVectorAngle     = GmatCalcUtil::CalculateBPlaneData("BVectorAngle", cartState, originMu);
                      bVectorMag       = GmatCalcUtil::CalculateBPlaneData("BVectorMag", cartState, originMu);
-                     dla              = GmatCalcUtil::CalculateAngularData("DLA", a1.Get(), cartState, originMu, originToSun);
-                     rla              = GmatCalcUtil::CalculateAngularData("RLA", a1.Get(), cartState, originMu, originToSun);
+                     dla              = GmatCalcUtil::CalculateAngularData("DLA", cartState, originMu, originToSun);
+                     rla              = GmatCalcUtil::CalculateAngularData("RLA", cartState, originMu, originToSun);
                   }
                   catch (BaseException& be)
                   {

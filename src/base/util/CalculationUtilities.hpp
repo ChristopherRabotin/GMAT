@@ -16,6 +16,9 @@
 /**
  * This namespace provides Calculation Utilities that can be used to compute the
  * GMAT Calculation Objects.
+ *
+ * NOTE: the input state must be in the coordinate system desired - no
+ *       conversions are done here
  */
 //------------------------------------------------------------------------------
 #ifndef CalculationUtilities_hpp
@@ -29,7 +32,7 @@
 namespace GmatCalcUtil
 {
    Real GMAT_API  CalculateBPlaneData(const std::string &item, const Rvector6 &state, const Real originMu);
-   Real GMAT_API  CalculateAngularData(const std::string &item, const Real &epoch, const Rvector6 &state,
+   Real GMAT_API  CalculateAngularData(const std::string &item, const Rvector6 &state,
                                        const Real &originMu, const Rvector3 &originToSunUnit);
    Real GMAT_API  CalculateKeplerianData(const std::string &item, const Rvector6 &state, const Real originMu);
    Real GMAT_API  CalculatePlanetData(const std::string &item, const Rvector6 &state, const Real originMu,

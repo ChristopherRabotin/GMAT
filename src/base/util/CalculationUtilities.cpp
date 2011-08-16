@@ -42,7 +42,24 @@ using namespace GmatMathUtil;
 using namespace GmatMathConstants;
 
 
-Real GmatCalcUtil::CalculateBPlaneData(const std::string &item, const Rvector6 &state, const Real originMu)
+//------------------------------------------------------------------------------
+//  Real  CalculateBPlaneData(const std::string &item, const Rvector6 &state,
+//                            const Real originMu)
+//------------------------------------------------------------------------------
+/**
+ * This method calculates the BPlane Calculation Objects.
+ *
+ * @param item       string indicating which item to compute.
+ * @param state      input state in the desired coordinate system
+ * @param originMu   gravitational constant for the origin of the
+ *                   coordinate system (assumes origin is a Celestial Body)
+ *
+ * @return           Real value requested
+ *
+ */
+//------------------------------------------------------------------------------
+Real GmatCalcUtil::CalculateBPlaneData(const std::string &item, const Rvector6 &state,
+                                       const Real originMu)
 {
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);
@@ -113,7 +130,24 @@ Real GmatCalcUtil::CalculateBPlaneData(const std::string &item, const Rvector6 &
 }
 
 
-Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Real &epoch, const Rvector6 &state,
+//------------------------------------------------------------------------------
+//  Real  CalculateAngularData(const std::string &item, const Rvector6 &state,
+//                             const Real originMu, const Rvector3 &originToSunUnit)
+//------------------------------------------------------------------------------
+/**
+ * This method calculates the Angular (Orbit) Calculation Objects.
+ *
+ * @param item       string indicating which item to compute.
+ * @param state      input state in the desired coordinate system
+ * @param originMu   gravitational constant for the origin of the
+ *                   coordinate system (assumes origin is a Celestial Body)
+ * @param originToSunUnit origin-to-sun unit vector
+ *
+ * @return           Real value requested
+ *
+ */
+//------------------------------------------------------------------------------
+Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Rvector6 &state,
                                         const Real &originMu, const Rvector3 &originToSunUnit)
 {
    Rvector3 pos(state[0], state[1], state[2]);
@@ -147,11 +181,6 @@ Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Real &epo
    }
    else if (item == "BetaAngle")
    {
-      // compute sun unit vector from the origin
-//      Rvector3 sunPos      = (ss->GetBody(SolarSystem::SUN_NAME))->GetMJ2000Position(epoch);
-//      Rvector3 originPos   = origin->GetMJ2000Position(epoch);
-//      Rvector3 originToSun = sunPos - originPos;
-//      originToSun.Normalize();
       hVec3.Normalize();
       Real betaAngle = ASin(hVec3*originToSunUnit) * GmatMathConstants::DEG_PER_RAD;
       return betaAngle;
@@ -187,7 +216,24 @@ Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Real &epo
 
 }
 
-Real GmatCalcUtil::CalculateKeplerianData(const std::string &item, const Rvector6 &state, const Real originMu)
+//------------------------------------------------------------------------------
+//  Real  CalculateKeplerianData(const std::string &item, const Rvector6 &state,
+//                               const Real originMu)
+//------------------------------------------------------------------------------
+/**
+ * This method calculates the Keplerian Calculation Objects.
+ *
+ * @param item       string indicating which item to compute.
+ * @param state      input state in the desired coordinate system
+ * @param originMu   gravitational constant for the origin of the
+ *                   coordinate system (assumes origin is a Celestial Body)
+ *
+ * @return           Real value requested
+ *
+ */
+//------------------------------------------------------------------------------
+Real GmatCalcUtil::CalculateKeplerianData(const std::string &item, const Rvector6 &state,
+                                          const Real originMu)
 {
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);
