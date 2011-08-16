@@ -68,15 +68,28 @@ const Real OrbitData::ORBIT_DATA_TOLERANCE     = 2.0e-10;
 
 const std::string OrbitData::VALID_ANGLE_PARAM_NAMES[HYPERBOLIC_DLA - SEMILATUS_RECTUM + 1] =
 {
-      "SemilatusRectum",
-      "HMag",
-      "HX",
-      "HY",
-      "HZ",
-      "BetaAngle",
-      "RLA",
-      "DLA"
+   "SemilatusRectum",
+   "HMag",
+   "HX",
+   "HY",
+   "HZ",
+   "BetaAngle",
+   "RLA",
+   "DLA"
 };
+
+const std::string OrbitData::VALID_OTHER_KEPLERIAN_PARAM_NAMES[ENERGY - MM + 1] =
+{
+   "MeanMotion",
+   "VelApoapsis",
+   "VelPeriapsis",
+   "OrbitPeriod",
+   "RadApoapsis",
+   "RadPeriapsis",
+   "C3Energy",
+   "Energy"
+};
+
 
 //---------------------------------
 // public methods
@@ -630,65 +643,8 @@ Real OrbitData::GetOtherKepReal(Integer item)
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
    
-   Rvector3 pos(state[0], state[1], state[2]);
-   Rvector3 vel(state[3], state[4], state[5]);
+   return GmatCalcUtil::CalculateKeplerianData(VALID_OTHER_KEPLERIAN_PARAM_NAMES[item-MM], state, mGravConst);
    
-   Real sma = Keplerian::CartesianToSMA(mGravConst, pos, vel);   
-   Real ecc = Keplerian::CartesianToECC(mGravConst, pos, vel);
-   
-   if (GmatMathUtil::Abs(1.0 - ecc) <= GmatOrbitConstants::KEP_ECC_TOL)
-   {
-      throw ParameterException
-         ("In OrbitData, Error in conversion to Keplerian state: "
-          "The state results in an orbit that is nearly parabolic.\n");
-   } 
-
-  if (sma*(1 - ecc) < .001)
-   {
-      throw ParameterException
-         ("In OrbitData, Error in conversion to Keplerian state: "
-          "The state results in a singular conic section with radius of periapsis less than 1 m.\n");
-   } 
-   
-   Real grav = mGravConst;
-   
-   switch (item)
-   {
-   case MM:
-      if (ecc < (1.0 - GmatOrbitConstants::KEP_ECC_TOL))      // Ellipse
-         return Sqrt(grav / (sma*sma*sma));
-      else if (ecc > (1.0 + GmatOrbitConstants::KEP_ECC_TOL)) // Hyperbola 
-         return Sqrt(-(grav / (sma*sma*sma)));
-      else                         
-         return 2.0 * Sqrt(grav); // Parabola
-   case VEL_APOAPSIS:
-      if ( (ecc < 1.0 - GmatOrbitConstants::KEP_ECC_TOL) || (ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL))  //Ellipse and Hyperbola
-         return Sqrt( (grav/sma)*((1-ecc)/(1+ecc)) );  
-      else
-         return 0.0; // Parabola  
-   case VEL_PERIAPSIS:
-      return Sqrt( (grav/sma)*((1+ecc)/(1-ecc)) );
-   case ORBIT_PERIOD:
-      if (sma < 0.0)
-         return 0.0;
-      else
-         return GmatMathConstants::TWO_PI * Sqrt((sma * sma * sma)/ grav);
-   case RAD_APOAPSIS:
-           if ( (ecc < 1.0 - GmatOrbitConstants::KEP_ECC_TOL) || (ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL)) //Ellipse and Hyperbola
-         return sma * (1.0 + ecc);
-          else
-                 return 0.0;   // Parabola
-   case RAD_PERIAPSIS:
-      return sma * (1.0 - ecc);
-   case C3_ENERGY:
-      return -grav / sma;
-   case ENERGY:
-      return -grav / (2.0 * sma);
-   default:
-      throw ParameterException
-         ("OrbitData::GetOtherKepReal() Unknown parameter ID: " +
-          GmatRealUtil::ToString(item));
-   }
 }
 
 

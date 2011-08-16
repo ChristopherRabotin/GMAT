@@ -146,6 +146,7 @@ protected:
    static const std::string VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount];
    static const Real        ORBIT_DATA_TOLERANCE;
    static const std::string VALID_ANGLE_PARAM_NAMES[HYPERBOLIC_DLA - SEMILATUS_RECTUM + 1];
+   static const std::string VALID_OTHER_KEPLERIAN_PARAM_NAMES[ENERGY - MM + 1];
 };
 #endif // OrbitData_hpp
 
