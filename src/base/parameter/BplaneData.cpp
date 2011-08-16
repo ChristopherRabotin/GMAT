@@ -22,7 +22,8 @@
 #include "BplaneData.hpp"
 #include "ParameterException.hpp"
 #include "Rvector3.hpp"
-#include "RealUtilities.hpp"   // for Sqrt()
+#include "RealUtilities.hpp"
+#include "CalculationUtilities.hpp"
 #include "GmatConstants.hpp"
 #include "UtilityException.hpp"
 #include "CelestialBody.hpp"
@@ -39,14 +40,21 @@ using namespace GmatMathUtil;
 // static data
 //---------------------------------
 
-const std::string
-BplaneData::VALID_OBJECT_TYPE_LIST[BplaneDataObjectCount] =
+const std::string BplaneData::VALID_OBJECT_TYPE_LIST[BplaneDataObjectCount] =
 {
    "Spacecraft",
    "SolarSystem",
    "CoordinateSystem",
    "SpacePoint"
 }; 
+
+const std::string BplaneData::VALID_PARAM_NAMES[BplaneParamEnd - BplaneParamBegin - 1] =
+{
+   "BDotT",
+   "BDotR",
+   "BVectorMag",
+   "BVectorAngle"
+};
 
 
 //---------------------------------
@@ -179,98 +187,9 @@ Real BplaneData::GetBplaneReal(Integer item)
       ("BplaneData::GetBplaneReal() item = %d, mGravConst = %f\n     state = %s\n",
        item, mGravConst, state.ToString().c_str());
    #endif
-   
-   Rvector3 pos(state[0], state[1], state[2]);
-   Rvector3 vel(state[3], state[4], state[5]);
-   
-   Real rMag = pos.GetMagnitude();
-   Real vMag = vel.GetMagnitude();
-   
-   // Compute eccentricity related information   
-   Rvector3 eVec =
-      ((vMag*vMag - mGravConst/rMag) * pos - (pos*vel)*vel) / mGravConst;
-   
-   Real eMag = eVec.GetMagnitude();
-   
-   #if DBGLVL_BPLANEDATA_RUN > 1
-   MessageInterface::ShowMessage("BplaneData::GetBplaneReal() rMag = %12.10f\n", rMag);
-   MessageInterface::ShowMessage("BplaneData::GetBplaneReal() vMag = %12.10f\n", vMag);
-   MessageInterface::ShowMessage("BplaneData::GetBplaneReal() eMag = %12.10f\n", eMag);
-   #endif
-   // if eMag <= 1, then the method fails, orbit should be hyperbolic
-   if (eMag <= 1.0)
-      throw ParameterException
-         ("BplaneData::GetBplaneReal() ParamID: " + GmatRealUtil::ToString(item, false, 2) +
-          "\n     eccentricity magnitude is <= 1.0. eMag: " +
-          GmatRealUtil::ToString(eMag));
-   
-   eVec.Normalize();
-   
-   // Compute the angular momentum and orbit normal vectors
-   Rvector3 hVec = Cross(pos, vel);
-   Real hMag = hVec.GetMagnitude();
-   hVec.Normalize();
-   Rvector3 nVec = Cross(hVec, eVec);
-   
-   #if DBGLVL_BPLANEDATA_RUN > 1
-   MessageInterface::ShowMessage
-      ("BplaneData::GetBplaneReal()\n     eVec = %s\n     hVec = %s\n     nVec = %s\n",
-       eVec.ToString().c_str(), hVec.ToString().c_str(), nVec.ToString().c_str());
-   #endif
-      
-   // Compute semiminor axis, b
-   Real b = (hMag*hMag) / (mGravConst * Sqrt(eMag*eMag - 1.0));
-   
-   // Compute incoming asymptote
-   Real oneOverEmag = 1.0/eMag;
-   Real temp = Sqrt(1.0 - oneOverEmag*oneOverEmag);
-   Rvector3 sVec = (eVec/eMag) + (temp*nVec);
-   
-   // Compute the B-vector
-   Rvector3 bVec = b * (temp * eVec - oneOverEmag*nVec);
-   
-   #if DBGLVL_BPLANEDATA_RUN > 1
-   MessageInterface::ShowMessage
-      ("BplaneData::GetBplaneReal() b = %f\n     sVec = %s\n     bVec = %s\n",
-       b, sVec.ToString().c_str(), bVec.ToString().c_str());
-   #endif
-   
-   // Compute T and R vector
-   Rvector3 sVec1(sVec[1], -sVec[0], 0.0);
-   Rvector3 tVec = sVec1 / Sqrt(sVec[0]*sVec[0] + sVec[1]*sVec[1]);
-   Rvector3 rVec = Cross(sVec, tVec);
-   
-   #if DBGLVL_BPLANEDATA_RUN > 1
-   MessageInterface::ShowMessage
-      ("BplaneData::GetBplaneReal()\n     sVec1 = %s\n     tVec = %s\n     rVec = %s\n",
-       sVec1.ToString().c_str(), tVec.ToString().c_str(), rVec.ToString().c_str());
-   #endif
 
-   Real bDotT = bVec * tVec;
-   Real bDotR = bVec * rVec;
-   
-   #if DBGLVL_BPLANEDATA_RUN
-   MessageInterface::ShowMessage
-      ("==>BplaneData::GetBplaneReal() B_DOT_T=%f, B_DOT_R=%f\n   B_VECTOR_MAG=%f, "
-       "B_VECTOR_ANGLE=%f\n", bDotT, bDotR, Sqrt(bDotT*bDotT + bDotR*bDotR),
-       ATan(bDotR, bDotT));
-   #endif
-   
-   switch (item)
-   {
-   case B_DOT_T:
-      return bDotT;
-   case B_DOT_R:
-      return bDotR;
-   case B_VECTOR_MAG:
-      return Sqrt(bDotT*bDotT + bDotR*bDotR);
-   case B_VECTOR_ANGLE:
-      return ATan(bDotR, bDotT) * GmatMathConstants::DEG_PER_RAD;
-   default:
-      throw ParameterException
-         ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
-          GmatRealUtil::ToString(item, false, 2));
-   }
+   return GmatCalcUtil::CalculateBPlaneData(VALID_PARAM_NAMES[item-1], state, mGravConst);
+
 }
 
 

@@ -89,6 +89,7 @@ protected:
    };
    
    static const std::string VALID_OBJECT_TYPE_LIST[BplaneDataObjectCount];
+   static const std::string VALID_PARAM_NAMES[BplaneParamEnd - BplaneParamBegin - 1];
 };
 #endif // BplaneData_hpp
 
