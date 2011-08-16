@@ -2123,11 +2123,11 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                cc.Convert(a1, cartStateInternal, internalCoordSys, cartBodyFixed, originBF);
 
 
-               lst                = GmatCalcUtil::CalculatePlanetData("LST", cartBodyFixed, originMu, originEqRad, originFlattening, originHourAngle);
-               mha                = GmatCalcUtil::CalculatePlanetData("MHA", cartBodyFixed, originMu, originEqRad, originFlattening, originHourAngle);
-               latitude           = GmatCalcUtil::CalculatePlanetData("Latitude", cartBodyFixed, originMu, originEqRad, originFlattening, originHourAngle);
-               longitude          = GmatCalcUtil::CalculatePlanetData("Longitude", cartBodyFixed, originMu, originEqRad, originFlattening, originHourAngle);
-               altitude           = GmatCalcUtil::CalculatePlanetData("Altitude", cartBodyFixed, originMu, originEqRad, originFlattening, originHourAngle);
+               lst                = GmatCalcUtil::CalculatePlanetData("LST", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
+               mha                = GmatCalcUtil::CalculatePlanetData("MHA", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
+               latitude           = GmatCalcUtil::CalculatePlanetData("Latitude", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
+               longitude          = GmatCalcUtil::CalculatePlanetData("Longitude", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
+               altitude           = GmatCalcUtil::CalculatePlanetData("Altitude", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
                if (isHyperbolic)
                {
                   try

@@ -308,7 +308,7 @@ Real GmatCalcUtil::CalculateKeplerianData(const std::string &item, const Rvector
   }
 }
 
-Real GmatCalcUtil::CalculatePlanetData(const std::string &item, const Rvector6 &state, const Real originMu,
+Real GmatCalcUtil::CalculatePlanetData(const std::string &item, const Rvector6 &state,
                                        const Real originRadius, const Real originFlattening, const Real originHourAngle)
 {
    if (item == "MHA")

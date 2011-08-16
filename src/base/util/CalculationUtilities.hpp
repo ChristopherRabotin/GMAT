@@ -35,7 +35,7 @@ namespace GmatCalcUtil
    Real GMAT_API  CalculateAngularData(const std::string &item, const Rvector6 &state,
                                        const Real &originMu, const Rvector3 &originToSunUnit);
    Real GMAT_API  CalculateKeplerianData(const std::string &item, const Rvector6 &state, const Real originMu);
-   Real GMAT_API  CalculatePlanetData(const std::string &item, const Rvector6 &state, const Real originMu,
+   Real GMAT_API  CalculatePlanetData(const std::string &item, const Rvector6 &state,
                                       const Real originRadius, const Real originFlattening, const Real originHourAngle);
 }
 
