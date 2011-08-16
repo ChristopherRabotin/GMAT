@@ -25,6 +25,7 @@
 #include "ParameterException.hpp"
 #include "Rvector3.hpp"
 #include "RealUtilities.hpp"
+#include "CalculationUtilities.hpp"
 #include "GmatConstants.hpp"
 #include "Linear.hpp"
 #include "Keplerian.hpp"         // for Cartesian to Keplerian elements
@@ -64,6 +65,18 @@ OrbitData::VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount] =
 
 
 const Real OrbitData::ORBIT_DATA_TOLERANCE     = 2.0e-10;
+
+const std::string OrbitData::VALID_ANGLE_PARAM_NAMES[HYPERBOLIC_DLA - SEMILATUS_RECTUM + 1] =
+{
+      "SemilatusRectum",
+      "HMag",
+      "HX",
+      "HY",
+      "HZ",
+      "BetaAngle",
+      "RLA",
+      "DLA"
+};
 
 //---------------------------------
 // public methods
@@ -769,6 +782,7 @@ Real OrbitData::GetAngularReal(Integer item)
    #endif
    
    Rvector6 state = GetCartState();
+   Rvector3 dummy;
 
    #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
@@ -776,59 +790,8 @@ Real OrbitData::GetAngularReal(Integer item)
        item, state.ToString().c_str());
    #endif
    
-   Rvector3 pos;
-   Rvector3 vel;
-   
-   pos = Rvector3(state[0], state[1], state[2]);
-   vel = Rvector3(state[3], state[4], state[5]);
-   
-   Rvector3 hVec3 = Cross(pos, vel);
-   Real     h     = Sqrt(hVec3 * hVec3);
-   
-   Real grav = mGravConst;
+   return GmatCalcUtil::CalculateAngularData(VALID_ANGLE_PARAM_NAMES[item-SEMILATUS_RECTUM], state, mGravConst, dummy);
 
-   switch (item)
-   {
-   case SEMILATUS_RECTUM:
-      {
-         if (mOrigin->GetName() != "Earth")
-         {
-            state = GetRelativeCartState(mOrigin);
-            pos = Rvector3(state[0], state[1], state[2]);
-            vel = Rvector3(state[3], state[4], state[5]);
-            hVec3 = Cross(pos, vel);
-            h = Sqrt(hVec3 * hVec3);
-         }
-         
-         if (h < GmatOrbitConstants::KEP_TOL)
-            return 0.0;
-         else
-            return (h / grav) * h;      // B M W; eq. 1.6-1
-      }
-   case HMAG:
-      {
-         if (mOrigin->GetName() != "Earth")
-         {
-            state = GetRelativeCartState(mOrigin);
-            pos = Rvector3(state[0], state[1], state[2]);
-            vel = Rvector3(state[3], state[4], state[5]);
-            hVec3 = Cross(pos, vel);
-            h = Sqrt(hVec3 * hVec3);
-         }
-         
-         return h; 
-      }
-   case HX:
-      return hVec3[0];
-   case HY:
-      return hVec3[1];
-   case HZ:
-      return hVec3[2];
-   default:
-      throw ParameterException
-         ("OrbitData::GetAngularReal() Unknown parameter ID: " +
-          GmatRealUtil::ToString(item));
-   }
 }
 
 
@@ -850,58 +813,15 @@ Real OrbitData::GetOtherAngleReal(Integer item)
       state = GetRelativeCartState(mOrigin);
    else
       state = GetCartState();
-   Rvector3 pos = Rvector3(state[0], state[1], state[2]);
-   Rvector3 vel = Rvector3(state[3], state[4], state[5]);
 
-   switch (item)
-   {
-   case BETA_ANGLE:
-      {
-         // compute orbit normal unit vector
-         Rvector3 hVec3 = Cross(pos, vel);
-         hVec3.Normalize();
-         
-         // compute sun unit vector from the origin
-         Rvector3 sunPos = (mSolarSystem->GetBody(SolarSystem::SUN_NAME))->
-            GetMJ2000Position(mCartEpoch);
-         Rvector3 originPos = mOrigin->GetMJ2000Position(mCartEpoch);
-         Rvector3 originToSun = sunPos - originPos;
-         originToSun.Normalize();
-         
-         // Math Spec change: eq. 4.99 on 2006/12/11
-         //Real betaAngle = ACos(hVec3*originToSun) * DEG_PER_RAD;
-         Real betaAngle = ASin(hVec3*originToSun) * GmatMathConstants::DEG_PER_RAD;
-         return betaAngle;
-      }
-   case HYPERBOLIC_RLA:
-   case HYPERBOLIC_DLA:
-      {
-         // Compute the eccentricity vector
-         Real     r     = pos.GetMagnitude();
-         Real     v     = vel.GetMagnitude();
-         Rvector3 e     = ((((v * v) - mGravConst / r) * pos) - (pos * vel) *vel) / mGravConst;
-         Real     ecc   = e.GetMagnitude();
-         if (Abs(ecc) < 1.0 + GmatOrbitConstants::KEP_ECC_TOL)
-            return GmatMathConstants::QUIET_NAN;
+   // compute sun unit vector from the origin
+   Rvector3 sunPos = (mSolarSystem->GetBody(SolarSystem::SUN_NAME))->
+      GetMJ2000Position(mCartEpoch);
+   Rvector3 originPos = mOrigin->GetMJ2000Position(mCartEpoch);
+   Rvector3 originToSun = sunPos - originPos;
+   originToSun.Normalize();
 
-         // Compute orbit normal unit vector
-         Rvector3 hVec3 = Cross(pos, vel);
-         Real     h     = hVec3.GetMagnitude();
-
-         // Compute C3
-         Real     C3    = v * v - (2.0 * mGravConst) / r;
-         Real     s_1   = 1.0 / (1.0 + C3 * (h / mGravConst) * (h / mGravConst));
-         Rvector3 s     = s_1 * ((Sqrt(C3) / mGravConst) * Cross(hVec3, e) - e);
-         if (item == HYPERBOLIC_RLA)
-            return ATan2(s[0], s[1]) * GmatMathConstants::DEG_PER_RAD;
-         else // DLA
-            return ASin(s[2]) * GmatMathConstants::DEG_PER_RAD;
-      }
-   default:
-      throw ParameterException
-         ("OrbitData::GetOtherAngleReal() Unknown parameter ID: " +
-          GmatRealUtil::ToString(item));
-   }
+   return GmatCalcUtil::CalculateAngularData(VALID_ANGLE_PARAM_NAMES[item-SEMILATUS_RECTUM], state, mGravConst, originToSun);
 }
 
 
