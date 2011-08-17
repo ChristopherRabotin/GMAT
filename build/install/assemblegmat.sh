@@ -10,8 +10,10 @@
 #   -d dest       Place files in specified directory dest (default: current
 #                 directory)
 #   -l|-m|[-w]    Assemble for Linux (-l), Mac (-m), or Windows (-w, default)
+#   -p pw         Use repository password pw (default: prompt) 
 #   -t type       Assemble a particular type of distribution:
 #                 full: everything included (default)
+#   -u user       Use repository username user (default: prompt)
 #
 # Prerequisites:
 #   svn
@@ -32,24 +34,29 @@ Options:
   -d dest       Place files in specified directory dest (default: current
                 directory)
   -l|-m|[-w]    Assemble for Linux (-l), Mac (-m), or Windows (-w, default)
+  -p pw         Use repository password pw (default: prompt) 
   -t type       Assemble a particular type of distribution:
                 full: everything included (default)
+  -u user       Use repository username user (default: prompt)
 END
 }
 
 # File sources
 sfrepo='https://gmat.svn.sourceforge.net/svnroot/gmat'
+jazzrepo='https://gs580s-jazz.ndc.nasa.gov/svn/GMAT' 
 apppath="$sfrepo/trunk/application"
 
 # Argument handling
-while getopts b:d:lmt:w o
+while getopts b:d:lmp:t:u:w o
 do
     case "$o" in
         b) buildname="$OPTARG";;
         d) dest="$OPTARG";;
         l) LINUX=true; MAC=false; WINDOWS=false;;
         m) LINUX=false; MAC=true; WINDOWS=false;;
+        p) pw="$OPTARG";;
         t) TYPE="$OPTARG";;
+        u) user="$OPTARG";;
         w) LINUX=false; MAC=false; WINDOWS=true;;
         ?) usage; exit 1;;
     esac
@@ -107,3 +114,15 @@ fi
 
 # bin, data, matlab
 svn export --force "$apppath" "$dest"
+
+# Mars-GRAM 2005 data
+mgpath="$jazzrepo/trunk/code/MarsGRAMPlugin/data"
+if [ $user ]
+then
+    ustring="--username $user"
+fi
+if [ $pw ]
+then
+    pwstring="--password $pw"
+fi
+svn export $ustring $pwstring --force "$mgpath" "$dest/data"
