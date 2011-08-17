@@ -2073,10 +2073,14 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                originIsCelestialBody    = false;
             }
             // Compute the origin-to-sun unit vector
-            Rvector3 sunPos      = (solarSys->GetBody(SolarSystem::SUN_NAME))->GetMJ2000Position(a1);
-            Rvector3 originPos   = cmdOrigin->GetMJ2000Position(a1);
-            Rvector3 originToSun = sunPos - originPos;
-            originToSun.Normalize();
+            Rvector3 originToSun(0.0,0.0,0.0);
+            if (cmdOrigin->GetName() != SolarSystem::SUN_NAME)
+            {
+               Rvector3 sunPos      = (solarSys->GetBody(SolarSystem::SUN_NAME))->GetMJ2000Position(a1);
+               Rvector3 originPos   = cmdOrigin->GetMJ2000Position(a1);
+               originToSun = sunPos - originPos;
+               originToSun.Normalize();
+            }
             #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
                MessageInterface::ShowMessage("----> Spacecraft Origin is %s of type %s\n",
                      objOrigin->GetName().c_str(), objOrigin->GetTypeName().c_str());
