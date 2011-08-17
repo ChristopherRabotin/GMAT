@@ -189,10 +189,6 @@ Real PlanetData::GetPlanetReal(Integer item)
    Real flatteningFactor =
       mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
 
-   // Reworked to match Vallado algorithm 12 (Vallado, 2nd ed, p. 177)
-
-   // Note -- using cmath here because I know it better -- may want to change
-   // to GmatMath
    Real equatorialRadius =
       mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
 
