@@ -78,8 +78,6 @@ Toggle::Toggle(const Toggle& t) :
 //------------------------------------------------------------------------------
 Toggle& Toggle::operator=(const Toggle& t)
 {
-   return *this;
-   
    if (this == &t)
       return *this;
     
@@ -87,6 +85,8 @@ Toggle& Toggle::operator=(const Toggle& t)
    toggleState = t.toggleState;
    subNames.clear();
    subs.clear();
+   
+   return *this;   
 }
 
 
@@ -212,7 +212,9 @@ bool Toggle::Execute()
    #ifdef DEBUG_TOGGLE_EXE
    MessageInterface::ShowMessage
       ("Toggle::Execute() entered, There are %d subscriber(s)\n", subNames.size());
+   #ifdef DEBUG_TOGGLE_EXE_MAP
    ShowObjectMaps("In Toggle::Execute()");
+   #endif
    #endif
    
    if (currentFunction != NULL)
