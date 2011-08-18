@@ -151,6 +151,7 @@ protected:
    StringArray          mParamNames;
    StringArray          mAllRefObjectNames;
    Integer              lastUsedProvider;
+   Real                 mLastReportTime;
    bool                 usedByReport;
    bool                 calledByReport;
    bool                 initial;

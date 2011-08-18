@@ -88,6 +88,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    leftJustify     (true),
    zeroFill        (false),
    lastUsedProvider(-1),
+   mLastReportTime (0.0),
    usedByReport    (false),
    calledByReport  (false)
 {
@@ -129,6 +130,7 @@ ReportFile::ReportFile(const ReportFile &rf) :
    leftJustify     (rf.leftJustify),
    zeroFill        (rf.zeroFill),
    lastUsedProvider(-1),
+   mLastReportTime (rf.mLastReportTime),
    usedByReport    (rf.usedByReport),
    calledByReport  (rf.calledByReport)
 {
@@ -178,9 +180,10 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    mParamNames = rf.mParamNames;
    mAllRefObjectNames = rf.mAllRefObjectNames;
    lastUsedProvider = rf.lastUsedProvider;
+   mLastReportTime = rf.mLastReportTime;
    usedByReport = rf.usedByReport;
    calledByReport = rf.calledByReport;
-
+   
    initial = true;
    
    #ifdef DEBUG_REPORTFILE
@@ -381,6 +384,11 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
       {
          defWidth = (Integer)desc.length() > columnWidth ?
             desc.length() : columnWidth;
+         
+         // parameter name has Gregorian, minimum width is 24
+         if (desc.find("Gregorian") != desc.npos)
+            if (defWidth < 24)
+               defWidth = 24;
       }
       
       // if writing headers or called by Report add 3 more spaces
@@ -1347,13 +1355,19 @@ void ReportFile::ClearParameters()
 //------------------------------------------------------------------------------
 void ReportFile::WriteHeaders()
 {
+   #ifdef DEBUG_WRITE_HEADERS
+   MessageInterface::ShowMessage
+      ("ReportFile::WriteHeaders() entered, mNumParams=%d, columnWidth=%d\n",
+       mNumParams, columnWidth);
+   #endif
+   
    if (writeHeaders)
    {
       if (!dstream.is_open())
          return;
       
       // write heading for each item
-      for (int i=0; i < mNumParams; i++)
+      for (int i = 0; i < mNumParams; i++)
       {
           if (!dstream.good())
              dstream.clear();
@@ -1366,6 +1380,10 @@ void ReportFile::WriteHeaders()
           if (mParamNames[i].find("Gregorian") != mParamNames[i].npos)
              if (width < 24)
                 width = 24;
+          
+          #ifdef DEBUG_WRITE_HEADERS
+          MessageInterface::ShowMessage("   column %d: width = %d\n", i, width);
+          #endif
           
           dstream.width(width + 3); // sets miminum field width
           dstream.fill(' ');
@@ -1381,6 +1399,10 @@ void ReportFile::WriteHeaders()
    }
    
    initial = false;
+   
+   #ifdef DEBUG_WRITE_HEADERS
+   MessageInterface::ShowMessage("ReportFile::WriteHeaders() leaving\n");
+   #endif
 } // WriteHeaders()
 
 
@@ -1556,6 +1578,16 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       return true;
    }
    
+   // If data time is the same as previous time, just return
+   if (mLastReportTime == dat[0])
+   {
+      #if DBGLVL_REPORTFILE_DATA > 0
+      MessageInterface::ShowMessage
+         ("   ===> Just returning; current time is the same as last report time\n");
+      #endif
+      return true;
+   }
+   
    #if DBGLVL_REPORTFILE_DATA > 0
    MessageInterface::ShowMessage("   Start writing data\n");
    #endif
@@ -1580,6 +1612,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       // Write to report file using ReportFile::WriateData().
       // This method takes ElementWrapper array to write data to stream
       WriteData(paramWrappers);
+      mLastReportTime = dat[0];
       
       if (isEndOfRun)  // close file
       {
