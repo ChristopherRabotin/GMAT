@@ -516,6 +516,9 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\TreeViewOptionDialog.cpp">
+      <Filter>Source Files\mission</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -970,6 +973,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.hpp">
       <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\TreeViewOptionDialog.hpp">
+      <Filter>Source Files\mission</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

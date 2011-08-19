@@ -455,6 +455,7 @@
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\MissionTree.cpp" />
+    <ClCompile Include="..\..\..\src\gui\mission\TreeViewOptionDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\CompareReportPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp" />
@@ -716,6 +717,7 @@
     <ClInclude Include="..\..\..\src\gui\include\gmatwxrcs.hpp" />
     <ClInclude Include="..\..\..\src\gui\mission\DecoratedTree.hpp" />
     <ClInclude Include="..\..\..\src\gui\mission\MissionTree.hpp" />
+    <ClInclude Include="..\..\..\src\gui\mission\TreeViewOptionDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\CompareReportPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp" />
