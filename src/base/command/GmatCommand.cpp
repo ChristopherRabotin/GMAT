@@ -397,20 +397,20 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    std::string inlineComment = GetInlineComment();
    
    #if DEBUG_GEN_STRING
-   ShowCommand("", "GmatCommand::GetGeneratingString() this = ", this);
    MessageInterface::ShowMessage
-      ("===> commentLine=<%s>, inlineComment=<%s>\n",
+      ("GmatCommand::GetGeneratingString() entered, generatingString =\n<%s>\n",
+       generatingString.c_str());
+   MessageInterface::ShowMessage
+      ("   commentLine = <%s>\n   inlineComment = <%s>\n",
        commentLine.c_str(), inlineComment.c_str());   
-   MessageInterface::ShowMessage
-      ("===> generatingString=\n%s\n", generatingString.c_str());
    #endif
    
    // write preface comment
    if (showPrefaceComment)
    {
+      std::stringstream gen;
       if (commentLine != "")
       {
-         std::stringstream gen;
          TextParser tp;
          StringArray textArray = tp.DecomposeBlock(commentLine);
          
@@ -425,9 +425,10 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
                   gen << "\n";
             }
          }
-         
-         generatingString = gen.str() + generatingString;
       }
+      
+      InsertCommandName(generatingString);      
+      generatingString = gen.str() + generatingString;
    }
    
    
@@ -437,7 +438,7 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    
    #if DEBUG_GEN_STRING
    MessageInterface::ShowMessage
-      ("===> return\n<%s>\n", generatingString.c_str());
+      ("===> return\n<%s>\n\n", generatingString.c_str());
    #endif
    
    return generatingString;
@@ -2516,6 +2517,40 @@ Integer GmatCommand::GetCloneCount()
 GmatBase* GmatCommand::GetClone(Integer cloneIndex)
 {
    return NULL;
+}
+
+//------------------------------------------------------------------------------
+// virtual void InsertCommandName(std::string &genString)
+//------------------------------------------------------------------------------
+/**
+ * Inserts command name in quotes to generatin string. It puts single quotes
+ * aroud the instanceName and inserts right after command type. If instanceName
+ * is blank or command type is not found, it does nothing.
+ *
+ * @param  genString  Input/Output generating string to insert command name
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::InsertCommandName(std::string &genString)
+{
+   if (instanceName != "")
+   {
+      std::string::size_type insertPoint = genString.find_first_of(typeName);
+      std::string nameInQuotes = "'" + instanceName + "'";
+      #if DEBUG_GEN_STRING
+      MessageInterface::ShowMessage
+         ("   typeName = <%s>, command name = <%s>, insertPoint = %d\n",
+          typeName.c_str(), instanceName.c_str(), insertPoint);
+      #endif
+      if (insertPoint != genString.npos)
+      {
+         insertPoint = insertPoint + typeName.size();
+         #if DEBUG_GEN_STRING
+         MessageInterface::ShowMessage("   insertPoint = %d\n", insertPoint);
+         #endif
+         genString =
+            genString.insert(insertPoint, " " + nameInQuotes);
+      }
+   }
 }
 
 

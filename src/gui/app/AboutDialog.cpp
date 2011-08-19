@@ -223,7 +223,8 @@ void AboutDialog::OnHyperLinkClick(wxHyperlinkEvent &event)
    if (event.GetEventObject() == theLicenseLink)
    {
       ViewTextDialog *dlg =
-         new ViewTextDialog(this, _T("NASA Open Source Agreement"), 450, 300);
+         new ViewTextDialog(this, _T("NASA Open Source Agreement"), false,
+                            wxDefaultPosition, wxSize(450, 300));
       
       wxString rootPath = FileManager::Instance()->GetRootPath().c_str();
       wxString fileName = rootPath + "License.txt";

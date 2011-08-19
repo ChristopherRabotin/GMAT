@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Allison Greene
 // Created: 2003/09/02
 /**
@@ -27,6 +25,7 @@
 #include "DecoratedTree.hpp"
 #include "GuiItemManager.hpp"
 #include "GuiInterpreter.hpp"
+#include "ViewTextDialog.hpp"
 
 #include <map>
 
@@ -35,6 +34,7 @@
 #endif
 
 class GmatMainFrame;
+class GmatNotebook;
 
 class MissionTree : public DecoratedTree
 {
@@ -43,10 +43,16 @@ public:
                const wxSize& size, long style);
    
    void SetMainFrame(GmatMainFrame *gmf);
+   void SetNotebook(GmatNotebook *notebook);
    void ClearMission();
-   void UpdateMission(bool resetCounter);
+   void AddDefaultMission();
+   void UpdateMission(bool resetCounter, bool viewAll = true, bool collapse = false);
    void UpdateMissionForRename();
    void ChangeNodeLabel(const wxString &oldLabel);
+   void SetViewAll(bool viewAll = true);
+   void SetViewLevel(int level);
+   void SetViewCommands(const wxArrayString &viewCmds);
+   const wxArrayString& GetCommandList(bool forViewControl = false);
    
 protected:
    
@@ -58,17 +64,25 @@ private:
    };
    
    GmatMainFrame  *theMainFrame;
+   GmatNotebook   *theNotebook;
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
+   wxArrayString   mViewCommands;
+   bool            mViewAll;
+   bool            mUsingViewLevel;
+   int             mViewLevel;
    
    wxArrayString mCommandList;
-   wxWindow *parent;
+   wxArrayString mCommandListForViewControl;
+   wxWindow *mParent;
    
    wxTreeItemId mMissionSeqTopId;
    wxTreeItemId mMissionSeqSubId;
    wxTreeItemId mFiniteBurnTreeId;
    wxTreeItemId mNewTreeId;
-
+   
+   wxPoint      mLastClickPoint;
+   
    int mTempCounter;
    int mNumMissionSeq;
    int mNumPropagate;
@@ -99,10 +113,16 @@ private:
    int  mScriptEventCount;
    
    void InitializeCounter();
-   void UpdateCommand();
    GmatCommand* CreateCommand(const wxString &cmdName);
+   void UpdateCommand();
    
-   wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
+   bool IsAnyViewCommandInBranch(GmatCommand *branch);
+   void ShowEllipsisInPreviousNode(wxTreeItemId parent, wxTreeItemId node);
+   wxTreeItemId BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
+                              Integer level, bool &isPrevItemHidden);
+   
+   wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd,
+                                   Integer level);
    void ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
                            GmatCommand *cmd);
    void ExpandChildCommand(wxTreeItemId parent, GmatCommand *cmd, Integer level);
@@ -121,7 +141,6 @@ private:
    void InsertAfter(const wxString &cmdName);
    void UpdateGuiManager(const wxString &cmdName);
    
-   void AddDefaultMission();
    void AddDefaultMissionSeq(wxTreeItemId universe);
    void AddIcons();
    
@@ -144,7 +163,11 @@ private:
    void OnAutoInsertBefore(wxCommandEvent &event);
    void OnAutoInsertAfter(wxCommandEvent &event);
    
+   void OnBeginEditLabel(wxTreeEvent& event);
+   void OnEndEditLabel(wxTreeEvent& event);
+   void OnRename(wxCommandEvent &event);
    void OnDelete(wxCommandEvent &event);
+   
    void OnRun(wxCommandEvent &event);
    void OnShowDetail(wxCommandEvent &event);
    void OnShowScript(wxCommandEvent &event);

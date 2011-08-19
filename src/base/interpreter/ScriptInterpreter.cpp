@@ -1541,10 +1541,14 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
       // check for extra text at the end of one-word commands
       if (IsOneWordCommand(chunks[0]))
       {
-         InterpreterException ex
-            ("Unexpected text after \"" + chunks[0] + "\" command");
-         HandleError(ex);
-         return false;
+         // If second item is not a command name then throw a exception
+         if (!GmatStringUtil::IsEnclosedWith(chunks[1], "'"))
+         {
+            InterpreterException ex
+               ("Unexpected text after \"" + chunks[0] + "\" command");
+            HandleError(ex);
+            return false;
+         }
       }
       
       // check for .. in the command block

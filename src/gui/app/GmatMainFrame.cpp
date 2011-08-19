@@ -444,10 +444,13 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    //theMainWinSetDefaultSize(wxSize(275, h));
    theMainWin->SetDefaultSize(wxSize(w, h));
 #else
-   theMainWin->SetDefaultSize(wxSize(200, h));
+   //theMainWin->SetDefaultSize(wxSize(200, h));
+   // Try 220 since Mission page has one more panel to show (LOJ: 2011.08.02)
+   theMainWin->SetDefaultSize(wxSize(220, h));
    // 200 is too narrow for most linux themes
    #ifdef __LINUX__
-      theMainWin->SetDefaultSize(wxSize(220, h));
+      //theMainWin->SetDefaultSize(wxSize(220, h));
+      theMainWin->SetDefaultSize(wxSize(240, h));
    #endif
 #endif
    theMainWin->SetMinimumSizeX(20);

@@ -4013,52 +4013,52 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    wxString msg2;
    wxString msg3;
    std::string msg1Str;
-
+   
    if (mBuildErrorCount > 0)
    {
       wxString scriptNames1;
-      msg1Str = "Script errors were found in the following ";
-      msg1Str += GmatStringUtil::ToString(mBuildErrorCount, 1) +  " script(s):\n";
-      msg1 = msg1Str.c_str();
-//      msg1 = "Script errors were found in the following " +
-//         GmatStringUtil::ToString(mBuildErrorCount, 1) + " script(s):\n";
-      
-      for (int i=0; i<mBuildErrorCount; i++)
+      msg1.Printf("Script errors found in the following %d script(s):\n",
+                  mBuildErrorCount);
+      for (int i = 0; i < mBuildErrorCount; i++)
          scriptNames1 = scriptNames1 + mFailedScriptsList[i] + "\n";
-
+      
       msg1 = msg1 + scriptNames1;
    }
-
+   
    if (failedToRunScripts.GetCount() > 0)
    {
+      int numFailed = failedToRunScripts.GetCount();
       wxString scriptNames2;
-      msg2 = "\nThe following script(s) failed to run to completion:\n";
-
-      for (unsigned int i=0; i<failedToRunScripts.GetCount(); i++)
+      msg2.Printf("\nThe following %d script(s) failed to run to completion:\n",
+                  numFailed);
+      
+      for (int i = 0; i < numFailed; i++)
          scriptNames2 = scriptNames2 + failedToRunScripts[i] + "\n";
-
+      
       msg2 = msg2 + scriptNames2;
    }
-
+   
    if (runInterruptedScripts.GetCount() > 0)
    {
+      int numInterrupted = failedToRunScripts.GetCount();
       wxString scriptNames3;
-      msg3 = "\nThe following script(s) were interrupted by user:\n";
-
-      for (unsigned int i=0; i<runInterruptedScripts.GetCount(); i++)
+      msg3.Printf("\nThe following %d script(s) were interrupted by user:\n",
+                  numInterrupted);
+      
+      for (int i = 0; i < numInterrupted; i++)
          scriptNames3 = scriptNames3 + runInterruptedScripts[i] + "\n";
-
+      
       msg3 = msg3 + scriptNames3;
    }
-
+   
    if (msg1 != "" || msg2 != "" || msg3 != "")
    {
       // Show errors to message window
       MessageInterface::ShowMessage(msg1 + msg2 + msg3);
-
+      
       // Show errors to view text dialog
       ViewTextDialog *dlg =
-         new ViewTextDialog(this, _T("Information"), 550, 300);
+         new ViewTextDialog(this, _T("Information"), false, wxDefaultPosition, wxSize(550, 300));
       wxTextCtrl *text = dlg->GetTextCtrl();
       wxString msg = msg1 + msg2 + msg3;
       text->AppendText(msg);

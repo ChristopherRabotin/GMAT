@@ -290,7 +290,9 @@ protected:
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
    virtual const std::string
                         BuildNumber(Real value, bool useExp = false, Integer length = 17);
-
+   // for command name
+   virtual void         InsertCommandName(std::string &genString);
+   
    // for Debug
    virtual void         ShowCommand(const std::string &prefix,
                                     const std::string &title1, GmatCommand *cmd1,

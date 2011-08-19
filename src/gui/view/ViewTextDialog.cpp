@@ -24,57 +24,82 @@
 #include "MessageInterface.hpp"
 
 BEGIN_EVENT_TABLE(ViewTextDialog, wxDialog)
-   EVT_BUTTON(ID_BUTTON, ViewTextDialog::OnOK)
+   EVT_BUTTON(ID_BUTTON, ViewTextDialog::OnButtonClick)
+   EVT_TEXT_ENTER(-1, ViewTextDialog::OnEnterPressed)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-//  ViewTextDialog(wxWindow *parent, const wxString& title, int w, int h)
+//  ViewTextDialog(wxWindow *parent, const wxString& title, ...)
 //------------------------------------------------------------------------------
 /**
  * @param parent  Parent wxWindow for the dialog.
  * @param title  Title for the dialog.
- * @param w  Width for the dialog.
- * @param h  Height for the dialog.
  */
 //------------------------------------------------------------------------------
-ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title, int w, int h)
-   : wxDialog(parent, -1, title, wxDefaultPosition, wxSize(w, h),
-              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER, title)
+ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
+                               bool isEditable, const wxPoint &pos,
+                               const wxSize &size, long style)
+   : wxDialog(parent, -1, title, pos, size, style, title)
 {
-   theDialogSizer = new wxBoxSizer(wxVERTICAL);
-   theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
-   theMiddleSizer = new wxBoxSizer(wxVERTICAL);
-   theBottomSizer = new wxBoxSizer(wxVERTICAL);
-
+   isTextEditable = isEditable;
+   
    // create bottom buttons
    theOkButton =
       new wxButton(this, ID_BUTTON, "OK", wxDefaultPosition, wxDefaultSize, 0);
-
+   
+   if (isTextEditable)
+      theCancelButton =
+         new wxButton(this, ID_BUTTON, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
+   
    // adds the buttons to button sizer
+   theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, 2);
+   if (isTextEditable)
+      theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, 2);
+   
+   theBottomSizer = new wxBoxSizer(wxVERTICAL);
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, 2);
-
+   
    // Set additional style wxTE_RICH to Ctrl + mouse scroll wheel to decrease or
    // increase text size(loj: 2009.02.05)
-   theText = new wxTextCtrl(this, -1, _T(""), wxDefaultPosition, wxSize(w,h),
-                            wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH);
-
-   theText->SetMaxLength(320000);
+   if (isTextEditable)
+      theText = new wxTextCtrl(this, -1, _T(""), wxDefaultPosition, size,
+                               wxTE_PROCESS_ENTER);
+   else
+      theText = new wxTextCtrl(this, -1, _T(""), wxDefaultPosition, size,
+                               wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH);
+   
+   if (!isTextEditable)
+      theText->SetMaxLength(320000);
    //theText->SetFont( GmatAppData::GetFont());
-
+   
    // add items to middle sizer
-   theMiddleSizer->Add(theText, 1, wxGROW|wxALL, 2);
-
+   theMiddleSizer = new wxBoxSizer(wxVERTICAL);
+   if (isTextEditable)
+      theMiddleSizer->Add(theText, 0, wxGROW|wxALL, 2);
+   else
+      theMiddleSizer->Add(theText, 1, wxGROW|wxALL, 2);
+   
    // add items to dialog sizer
-   theDialogSizer->Add(theMiddleSizer, 1, wxGROW | wxALL, 1);
-   theDialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
-
+   wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
+   if (isTextEditable)
+   {
+      dialogSizer->Add(theMiddleSizer, 0, wxGROW | wxALL, 1);
+      dialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
+   }
+   else
+   {
+      dialogSizer->Add(theMiddleSizer, 1, wxGROW | wxALL, 1);
+      dialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
+   }
+   
+   
    // tells the enclosing window to adjust to the size of the sizer
    SetAutoLayout(TRUE);
-   SetSizer(theDialogSizer);
-   theDialogSizer->Fit(this);
-   theDialogSizer->SetSizeHints(this);
-
+   SetSizer(dialogSizer);
+   dialogSizer->Fit(this);
+   dialogSizer->SetSizeHints(this);
+   
    // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
    try
@@ -92,8 +117,9 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title, int w, i
    {
       //MessageInterface::ShowMessage(e.GetMessage());
    }
-
-   CenterOnScreen(wxBOTH);
+   
+   if (!isTextEditable)
+      CenterOnScreen(wxBOTH);
 }
 
 
@@ -102,18 +128,52 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title, int w, i
 //------------------------------------------------------------------------------
 void ViewTextDialog::AppendText(const wxString& text)
 {
-   theText->AppendText(text);
+   if (isTextEditable)
+   {
+      oldText = text;
+      theText->SetValue(text);
+      theText->SetInsertionPointEnd();
+      // Why this doesn't set selection to all text?
+      theText->SetSelection(-1, -1);
+   }
+   else
+      theText->AppendText(text);
+   
 }
 
 
 //------------------------------------------------------------------------------
-// void OnOK(wxCommandEvent &event)
+// void OnButtonClick(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Closes the dialog
  */
 //------------------------------------------------------------------------------
-void ViewTextDialog::OnOK(wxCommandEvent &event)
+void ViewTextDialog::OnButtonClick(wxCommandEvent &event)
 {
+   hasTextChanged = false;
+   if (event.GetEventObject() == theOkButton)
+   {
+      if (theText->GetValue() != oldText)
+         hasTextChanged = true;
+   }
+   
+   Close(true);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnEnterPressed(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Closes the dialog
+ */
+//------------------------------------------------------------------------------
+void ViewTextDialog::OnEnterPressed(wxCommandEvent &event)
+{
+   hasTextChanged = false;
+   if (theText->GetValue() != oldText)
+      hasTextChanged = true;
+   
    Close(true);
 }

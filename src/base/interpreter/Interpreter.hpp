@@ -216,6 +216,8 @@ protected:
    
    // for commands
    bool         IsCommandType(const std::string &type);
+   void         ParseAndSetCommandName(GmatCommand *cmd, const std::string &cmdType,
+                                       const std::string &desc, std::string &newDesc);
    GmatCommand* CreateCommand(const std::string &type, const std::string &desc,
                               bool &retFlag, GmatCommand *inCmd = NULL);
    GmatCommand* AppendCommand(const std::string &type, bool &retFlag,

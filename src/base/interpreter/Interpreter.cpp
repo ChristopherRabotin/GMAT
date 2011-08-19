@@ -1677,6 +1677,70 @@ bool Interpreter::IsCommandType(const std::string &type)
 
 
 //------------------------------------------------------------------------------
+// void ParseAndSetCommandName(GmatCommand *cmd, const std::string &cmdType, ...)
+//------------------------------------------------------------------------------
+/**
+ * Parses command name from the command descriptoin, such as Propagate 'name' ...
+ *
+ * @param  cmd  Command pointer
+ * @param  cmdType  Command type name
+ * @param  desc  Original command input parameter
+ * @param  newDesc  New command input parameter after command name removed
+ * @return true if command name not found or command name found and enclosed
+ *              with single quote; false otherwise
+ */
+//------------------------------------------------------------------------------
+void Interpreter::ParseAndSetCommandName(GmatCommand *cmd, const std::string &cmdType,
+                                         const std::string &desc, std::string &newDesc)
+{
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("ParseAndSetCommandName() entered, cmdType='%s', desc=<%s>\n", cmdType.c_str(),
+       desc.c_str());
+   #endif
+   if (desc.find("'") != desc.npos)
+   {
+      if (desc[0] == '\'')
+      {
+         // if matching quote found, continue
+         if (desc.find('\'', 1) != desc.npos)
+         {
+            StringArray parts = GmatStringUtil::SeparateBy(newDesc, "'");
+            #ifdef DEBUG_CREATE_COMMAND
+            WriteStringArray("   --->command parts", "", parts);
+            #endif
+            
+            //std::string cmdName = "'" + parts[0] + "'";
+            std::string cmdName = parts[0];
+            // Set command name
+            if (parts.size() == 1)
+            {
+               cmd->SetName(cmdName);
+               newDesc = "";
+            }
+            else if (parts.size() >= 2)
+            {
+               newDesc = parts[1];
+               cmd->SetName(cmdName);
+            }
+         }
+         else
+         {
+            InterpreterException ex
+               ("Found invalid syntax for \"" + cmdType +
+                "\" command, possible missing single quote for the command name");
+            HandleError(ex);
+         }
+      }
+   }
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("ParseAndSetCommandName() leaving, newDesc=<%s>\n", newDesc.c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(const std::string &type, const std::string &desc)
 //------------------------------------------------------------------------------
 GmatCommand* Interpreter::CreateCommand(const std::string &type,
@@ -1695,6 +1759,9 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    GmatCommand *cmd = NULL;
    std::string type1 = type;
    std::string desc1 = desc;
+   std::string cmdStr = type + " " + desc;
+   
+   std::string realDesc; // Command description after name removed
    bool commandFound = false;
    
    // handle blank type
@@ -1739,6 +1806,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
           type1.c_str(), std::string(type1 + " " + desc).c_str());
       #endif
       
+      // Create CallFunction command and append to command sequence
       cmd = AppendCommand(type1, retFlag, inCmd);
       desc1 = type1 +  "=" + desc;
       if (cmd != NULL)
@@ -1786,6 +1854,8 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             ("   2 Now creating <%s> command and setting GenString to <%s>\n",
              type1.c_str(), std::string(type1 + " " + desc).c_str());
          #endif
+         
+         // Create command and append to command sequence
          cmd = AppendCommand(type1, retFlag, inCmd);
          desc1 = "[] =" + type1 + desc;
          if (cmd != NULL)
@@ -1832,13 +1902,6 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          }
       }
       
-      #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALLFUNCTION)
-      
-      MessageInterface::ShowMessage
-         ("   3 Now creating <%s> command and setting GenString to <%s>\n",
-          type1.c_str(), std::string(type1 + " " + desc).c_str());
-      #endif
-      
       // How do we detect MatlabFunction inside a GmatFunction?
       if (desc.find("MatlabFunction") != desc.npos)
       {
@@ -1853,9 +1916,28 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          }
       }
       
+//       #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALLFUNCTION)      
+//       MessageInterface::ShowMessage
+//          ("   3 Now creating <%s> command and setting GenString to <%s>\n",
+//           type1.c_str(), std::string(type1 + " " + desc).c_str());
+//       #endif
+      #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALLFUNCTION)      
+      MessageInterface::ShowMessage("   3 Now creating <%s> command\n", type1.c_str());
+      #endif
+      
+      // Create a command and append to command sequence
       cmd = AppendCommand(type1, retFlag, inCmd);
-      if (cmd != NULL)
-         cmd->SetGeneratingString(type1 + " " + desc);
+      realDesc = desc;
+      
+      // If command is not call function, parse command name
+      if (cmd != NULL && !cmd->IsOfType("CallFunction"))
+         ParseAndSetCommandName(cmd, type1, desc, realDesc);
+      
+      #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALLFUNCTION)      
+      MessageInterface::ShowMessage
+         ("   Setting GenString to <%s>\n", std::string(type1 + " " + realDesc).c_str());
+      #endif
+      cmd->SetGeneratingString(type1 + " " + realDesc);
    }
    
    if (cmd == NULL)
@@ -1877,8 +1959,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       MessageInterface::ShowMessage
          ("   => '%s' created and appended to '%s'.\n",
           cmd->GetTypeName().c_str(), inCmd->GetTypeName().c_str());
+   MessageInterface::ShowMessage
+      ("   desc     = <%s>\n     desc1    = <%s>\n     realDesc = <%s>\n",
+       desc.c_str(), desc1.c_str(), realDesc.c_str());
    #endif
-   
    
    // Now assemble command
    try
@@ -1904,11 +1988,19 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          retFlag  = ValidateCommand(cmd);
          
          #ifdef DEBUG_CREATE_COMMAND
+         MessageInterface::ShowMessage("   ===> %s has own InterpretAction()\n", type1.c_str());
          MessageInterface::ShowMessage
-            ("   ===> %s has own InterpretAction() returning %p\n", type1.c_str(), cmd);
+            ("CreateCommand() leaving creating '%s', cmd=<%p>, retFlag=%d\n", type1.c_str(),
+             cmd, retFlag);
          #endif
-         
          return cmd;
+      }
+      else
+      {
+         #ifdef DEBUG_CREATE_COMMAND
+         MessageInterface::ShowMessage
+            ("   ===> %s does not have own InterpretAction()\n", type1.c_str());
+         #endif
       }
    }
    catch (BaseException &e)
@@ -1918,7 +2010,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       
       #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage
-         ("CreateCommand() leaving creating %s, cmd=<%p>, retFlag=%d\n", type1.c_str(),
+         ("CreateCommand() leaving creating '%s', cmd=<%p>, retFlag=%d\n", type1.c_str(),
           cmd, retFlag);
       #endif
       
@@ -1926,21 +2018,34 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       return cmd;
    }
    
-   if (desc1 != "")
+   
+   // Assemble commands those don't have InterpretAction()
+   if (realDesc != "")
    {
       bool retval3 = true;
-      bool retval1  = AssembleCommand(cmd, desc1);
+      bool retval1  = AssembleCommand(cmd, realDesc);
       
       if (retval1)
          retval3 = ValidateCommand(cmd);
+      else
+      {
+         InterpreterException ex("Failed to parse " + cmdStr);
+         HandleError(ex);
+      }
       
       retFlag = retval1 && retval3;
       
    }
+   else
+   {
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage("   There is no command descriptions to assemble\n");
+      #endif
+   }
    
    #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("CreateCommand() leaving creating %s, cmd=<%p>, retFlag=%d\n", type1.c_str(),
+      ("CreateCommand() leaving creating '%s', cmd=<%p>, retFlag=%d\n", type1.c_str(),
        cmd, retFlag);
    #endif
    

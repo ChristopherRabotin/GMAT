@@ -919,6 +919,7 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &useName)
 {
    fullString = prefix + generatingString;
+   InsertCommandName(fullString);
    
    // We don't want BranchCommand to indent
    UnsignedInt prefixSize = prefix.size();   
