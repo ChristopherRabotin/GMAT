@@ -45,6 +45,7 @@ double CINTERFACE_API *GetState();
 double CINTERFACE_API *GetDerivativesForState(double epoch, double state[], 
       int stateDim, double dt, int order, int *pdim);
 double CINTERFACE_API *GetDerivatives(double dt, int order, int *pdim);
+//double CINTERFACE_API *GetDerivatives(double dt, int order);
 
 int CINTERFACE_API CountObjects();
 const char CINTERFACE_API *GetObjectName(int which);

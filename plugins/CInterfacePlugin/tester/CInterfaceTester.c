@@ -89,6 +89,71 @@ int FindOdeModel(char *odeName, int sandboxNumber, void *libHandle)
    return retval;
 }
 
+int GetState(char *odeName, int sandboxNumber, void *libHandle)
+{
+   int retval = -1;
+
+//   if (FindOdeModel(odeName, sandboxNumber, libHandle) == 0)
+   {
+      int (*GetStateSize)() = NULL;
+      GetStateSize = (int (*)())GetFunction("GetStateSize", libHandle);
+      if (GetStateSize == NULL)
+         return -2;
+      int size = GetStateSize();
+      double* (*GetState)() = NULL;
+      GetState = (double* (*)())GetFunction("GetState", libHandle);
+      if (GetState != NULL)
+      {
+         double *state = GetState();
+         printf("State data:\n   ");
+         int i;
+         for (i = 0; i < size; ++i)
+            printf(" %lf ", state[i]);
+         printf("\n");
+         retval = 0;
+      }
+   }
+   return retval;
+}
+
+int SetState(double *state, int size, char *odeName, int sandboxNumber, void *libHandle)
+{
+   int retval = -1;
+   return retval;
+}
+
+int GetDerivatives(char *odeName, int sandboxNumber, void *libHandle)
+{
+   int retval = -1;
+
+//   if (FindOdeModel(odeName, sandboxNumber, libHandle) == 0)
+   {
+      int (*GetStateSize)() = NULL;
+      GetStateSize = (int (*)())GetFunction("GetStateSize", libHandle);
+      if (GetStateSize == NULL)
+         return -2;
+      int size = GetStateSize();
+      double* (*GetDerivatives)(double, int, int*) = NULL;
+      GetDerivatives = (double* (*)(double, int, int*))GetFunction("GetDerivatives", libHandle);
+      if (GetDerivatives != NULL)
+      {
+         int dim;
+         double *dv = GetDerivatives(0.0, 1, &dim);
+//         double *dv = GetDerivatives(0.0, 1);
+//         dim = size;
+         printf("State size = %d, derivative size = %d\n", size, dim);
+         printf("Derivative data:\n   ");
+         int i;
+         for (i = 0; i < dim; ++i)
+            printf(" %lf ", dv[i]);
+         printf("\n");
+         retval = 0;
+      }
+   }
+   return retval;
+}
+
+
 int main(int argc, char *argv[])
 {
    char *msg;
@@ -153,16 +218,20 @@ int main(int argc, char *argv[])
       msg = GetLastMessage(libHandle);
       printf("%s\n", msg);
 
+      FindOdeModel(odeName, 0, libHandle);
+
       if (FindOdeModel(odeName, 0, libHandle) < 0)
-         if (FindOdeModel(odeName, 0, libHandle) < 0)
-         {
-            msg = GetLastMessage(libHandle);
-            printf("%s\n", msg);
-            printf("GMAT failed find the ODE Model %s; exiting...\n", odeName);
-            return -1;
-         }
+      {
+         msg = GetLastMessage(libHandle);
+         printf("%s\n", msg);
+         printf("GMAT failed find the ODE Model %s; exiting...\n", odeName);
+         return -1;
+      }
       msg = GetLastMessage(libHandle);
       printf("%s\n", msg);
+
+      GetState(odeName, 0, libHandle);
+      GetDerivatives(odeName, 0, libHandle);
    }
 
    printf("Closing the library\n");

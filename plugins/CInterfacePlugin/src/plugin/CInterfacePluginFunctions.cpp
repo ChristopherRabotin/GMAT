@@ -38,23 +38,23 @@ std::string extraMsg = "";
 
 extern "C"
 {
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // Integer GetFactoryCount()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Returns the number of plug-in factories in this module
     *
     * @return The number of factories
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    Integer GetFactoryCount()
    {
       return 1;
    }
    
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // Factory* GetFactoryPointer(Integer index)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Retrieves a pointer to a specific factory
     *
@@ -62,7 +62,7 @@ extern "C"
     *
     * @return The Factory pointer
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    Factory* GetFactoryPointer(Integer index)
    {
       Factory* factory = NULL;
@@ -80,32 +80,32 @@ extern "C"
       return factory;
    }
    
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // void SetMessageReceiver(MessageReceiver* mr)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Sets the messaging interface used for GMAT messages
     *
     * @param mr The message receiver
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    void SetMessageReceiver(MessageReceiver* mr)
    {
       MessageInterface::SetMessageReceiver(mr);
    }
 
 
-   //---------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // Client Interface functions
-   //---------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // const char* getLastMessage()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Returns a status message
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    const char* getLastMessage()
    {
       if (lastMsg == "")
@@ -113,15 +113,15 @@ extern "C"
       return lastMsg.c_str();
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // unsigned int StartGmat()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Starts GMAT running!
     *
     * @return A status flag indicating the status upon return; 0 means success
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    int StartGmat()
    {
       Moderator *theModerator = Moderator::Instance();
@@ -138,9 +138,9 @@ extern "C"
       return 0;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // int LoadScript(const char* scriptName)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Loads a scripted configuration into GMAT
     *
@@ -148,7 +148,7 @@ extern "C"
     *
     * @return A status flag indicating the status upon return; 0 means success
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    int LoadScript(const char* scriptName)
    {
       int retval = -1;
@@ -176,16 +176,16 @@ extern "C"
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // int RunScript()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Runs a GMAT script.  This is needed to fully establish the connections 
     * between objects in the GMAT Sandbox
     *
     * @return A status flag indicating the status upon return; 0 means success
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    int RunScript()
    {
       int retval = -1;
@@ -220,14 +220,15 @@ extern "C"
       case -4:
       default:
          lastMsg = "unknown error occurred";
+         break;
       }
 
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // int LoadAndRunScript(const char* scriptName)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Loads a script and runs it.
     *
@@ -237,7 +238,7 @@ extern "C"
     *
     * @return A status flag indicating the status upon return; 0 means success
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    int LoadAndRunScript(const char* scriptName)
    {
       lastMsg = "LoadAndRunScript is not yet ready for use.";
@@ -253,9 +254,9 @@ extern "C"
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // int FindOdeModel(const char* modelName)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Finds an ODE model in the GMAT Sandbox
     *
@@ -267,7 +268,7 @@ extern "C"
     *       libary pointer to it.  A later implementation will find the instance 
     *       by name.
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    int FindOdeModel(const char* modelName)
    {
       int retval = -1;
@@ -292,15 +293,15 @@ extern "C"
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // int GetStateSize()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Retrieves the size of GMAT's propagation state vector for the ODEModel
     *
     * @return The state vector size, or 0 if the state vector is not available.
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    int GetStateSize()
    {
       int retval = 0;
@@ -311,16 +312,16 @@ extern "C"
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // const char *GetStateDescription()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Retrieves a test description of GMAT's propagation state vector, element 
     * by element.
     *
     * @return The state vector description
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    const char *GetStateDescription()
    {
       lastMsg = "";
@@ -336,9 +337,9 @@ extern "C"
       return lastMsg.c_str();
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // int SetState(double epoch, double state[], int stateDim)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Sets the data in GMAT's propagation state vector
     *
@@ -349,7 +350,7 @@ extern "C"
     *
     * @return A status flag indicating the status upon return; 0 means success
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    int SetState(double epoch, double state[], int stateDim)
    {
       int retval = -1;
@@ -367,8 +368,13 @@ extern "C"
          }
          else
          {
-            lastMsg = "ERROR: Incoming state size is larger than the "
-               "propagation state vector size!";
+            char msg[128];
+            sprintf(msg, "ERROR: Incoming state size (%d) is larger than the "
+                  "propagation state vector size (%d)!\n   Epoch: %lf\n   "
+                  "State = [%lf %lf %lf %lf %lf %lf]\n", stateDim,
+                  theState->GetSize(), epoch, state[0], state[1], state[2],
+                  state[3], state[4], state[5]);
+            lastMsg = msg;
             retval = -2;
          }
       }
@@ -379,15 +385,15 @@ extern "C"
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // double *GetState()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Retrieves the propagation state vector
     *
     * @return A pointer to the state vector, or NULL if it is not set
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    double *GetState()
    {
       double *retval = NULL;
@@ -402,14 +408,14 @@ extern "C"
       return retval; 
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // double *GetDerivativesForState(double epoch, double state[], int stateDim, 
    //      double dt, int order, int *pdim)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Calculates and returns the derivative of the input state vector
     *
-    * One side efffect of this call is that the internal state vector is set to 
+    * One side effect of this call is that the internal state vector is set to
     * the input data.  This is necessary to ensure that full dimensionality is
     * preserved.
     *
@@ -420,13 +426,13 @@ extern "C"
     * @param dt Time offset (in sec) off of the input epoch
     * @param order Order of the derivative data returned -- 1 or 2 for first or
     *              second derivative data
-    * @param pdim Output variable that contains the size of the derivative vector 
-    *             being returned
+    * @param pdim Output variable that contains the size of the derivative
+    *             vector being returned
     *
     * @return The derivative data in a real array, or NULL if the derivatives 
     *         cannot be calculated
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    double *GetDerivativesForState(double epoch, double state[], 
          int stateDim, double dt, int order, int *pdim)
    {
@@ -449,22 +455,22 @@ extern "C"
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // double *GetDerivatives(double dt, int order, int *pdim)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Calculates and returns the derivative of GMAT's internal state vector
     *
     * @param dt Time offset (in sec) off of the input epoch
     * @param order Order of the derivative data returned -- 1 or 2 for first or
     *              second derivative data
-    * @param pdim Output variable that contains the size of the derivative vector 
-    *             being returned
+    * @param pdim Output variable that contains the size of the derivative
+    *             vector being returned
     *
     * @return The derivative data in a real array, or NULL if the derivatives 
     *         cannot be calculated
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    double *GetDerivatives(double dt, int order, int *pdim)
    {
       double *retval = NULL;
@@ -472,26 +478,27 @@ extern "C"
       if (ode != NULL)
       {
          double *state = GetState();
-         *pdim = GetStateSize();
+         int dim = GetStateSize();
+         *pdim = dim;
          if (deriv == NULL)
-            deriv = new double[*pdim];
+            deriv = new double[dim];
          ode->GetDerivatives(state, dt, order);
          const double *ddt = ode->GetDerivativeArray();
-         memcpy(deriv, ddt, *pdim * sizeof(double));
+         memcpy(deriv, ddt, dim * sizeof(double));
          retval = deriv;
       }
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // int CountObjects()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Determins how many objects exist in GMAT's configuration manager
     *
     * @return The count of the objects
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    int CountObjects()
    {
       int retval = -1;
@@ -503,15 +510,16 @@ extern "C"
          return retval;
       }
 
-      StringArray objects = theModerator->GetListOfObjects(Gmat::UNKNOWN_OBJECT);
+      StringArray objects = theModerator->GetListOfObjects(
+            Gmat::UNKNOWN_OBJECT);
       retval = objects.size();
 
       return retval;
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // const char *GetObjectName(int which)
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Retrieves the name of the object at the input index 
     *
@@ -519,7 +527,7 @@ extern "C"
     *
     * @return The name of the object at index = which
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    const char *GetObjectName(int which)
    {
       Moderator *theModerator = Moderator::Instance();
@@ -529,7 +537,8 @@ extern "C"
          return "Error accessing the Moderator";
       }
 
-      StringArray objects = theModerator->GetListOfObjects(Gmat::UNKNOWN_OBJECT);
+      StringArray objects = theModerator->GetListOfObjects(
+            Gmat::UNKNOWN_OBJECT);
       if ((int)objects.size() > which)
       {
          lastMsg = objects[which];
@@ -538,15 +547,15 @@ extern "C"
       return lastMsg.c_str();
    }
 
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    // const char *GetRunSummary()
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    /**
     * Retrieves command summary data for a GMAT run
     *
     * @return The summary data for each command in the mission control sequence
     */
-   //------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------
    const char *GetRunSummary()
    {
       Moderator *theModerator = Moderator::Instance();
@@ -571,14 +580,12 @@ extern "C"
       return lastMsg.c_str();
    }
 
+};  // End of extern "C"
 
 
-};
-
-
-//---------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Internal functions
-//---------------------------------------------------------------------
+//------------------------------------------------------------------------------
    
 //------------------------------------------------------------------------------
 // ODEModel *GetODEModel(GmatCommand *cmd, std::string modelName)
@@ -609,13 +616,30 @@ void GetODEModel(GmatCommand *cmd, const char *modelName)
    if (prop != NULL)
    {
       model = prop->GetODEModel();
+      lastMsg = "In GetODEModel; found prop";
       if (model != NULL)
       {
+         #ifdef DEBUG_ODE_SEARCH
+            lastMsg += ", model != NULL\n";
+            lastMsg += ::extraMsg;
+         #else
+            lastMsg += " ";
+         #endif
+         lastMsg += model->GetName();
+         lastMsg += "\n";
          pSetup = prop;
          ode = model;
+         return;
          if (ode != NULL)
             sprintf(extraMsg, "%s", ode->GetName().c_str());
       }
+      else
+         lastMsg += ", model == NULL\n";
+   }
+   else
+   {
+      lastMsg = "In GetODEModel; did not find prop\n";
+      lastMsg += ::extraMsg;
    }
 
    if (ode != NULL)
@@ -625,7 +649,7 @@ void GetODEModel(GmatCommand *cmd, const char *modelName)
    }
    else
    {
-      lastMsg = "No ODE model found\n";
+      lastMsg += "No ODE model found\n";
    }
 }
 
@@ -642,33 +666,45 @@ void GetODEModel(GmatCommand *cmd, const char *modelName)
 //------------------------------------------------------------------------------
 PropSetup *GetFirstPropagator(GmatCommand *cmd)
 {
-   PropSetup *retval = NULL;
+   static PropSetup *retval = NULL;
    GmatCommand *current = cmd;
 
-   extraMsg = "Commands checked:\n";
-
+   #ifdef DEBUG_ODE_SEARCH
+      extraMsg = "Commands checked:\n";
+   #endif
    while (current != NULL)
    {
-      extraMsg += "   " + current->GetTypeName() + "\n";
+      #ifdef DEBUG_ODE_SEARCH
+            extraMsg += "   '" + current->GetTypeName() + "'\n";
+      #endif
       if (current->GetTypeName() == "Propagate")
       {
+         try
+         {
+            // Set all of the internal connections
+//               current->TakeAction("PrepareToPropagate");
+            current->Execute();
+         }
+         catch (BaseException &ex)
+         {
+            lastMsg = ex.GetFullMessage();
+         }
+         #ifdef DEBUG_ODE_SEARCH
+            extraMsg += "      Checking in this command\n";
+         #endif
          GmatBase *obj = current->GetRefObject(Gmat::PROP_SETUP, "", 0);
+
+         #ifdef DEBUG_ODE_SEARCH
+            if (obj != NULL)
+               extraMsg += "      Found an object of type PROPSETUP\n";
+            else
+               extraMsg += "      Propagate command returns NULL PROPSETUP\n";
+         #endif
+
          if (obj->IsOfType("PropSetup"))
          {
             retval = (PropSetup*)(obj);
-            if (retval != NULL)
-            {
-               try
-               {
-                  // Fire once to set all of the internal connections
-                  current->Execute();
-               }
-               catch (BaseException &ex)
-               {
-                  lastMsg = ex.GetFullMessage();
-               }
-               break;
-            }
+            break;
          }
       }
       current = current->GetNext();

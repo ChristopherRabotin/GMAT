@@ -43,7 +43,7 @@ extern "C"
    // generation of a MATLAB m-file defining the interface.  All of the
    // interface functions providing external callers access to GMAT are defined
    // in this header:
-   #include "CInterfaceFunctions.hpp"
+   #include "CInterfaceFunctions.h"
 
    // Internal helper functions
    void GetODEModel(GmatCommand *cmd, const char *modelName = "");

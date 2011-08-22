@@ -68,7 +68,7 @@ ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../lib
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) -L$(GMAT_BIN_LOCATION) -l$(BASE_LIBRARY)
-	install_name_tool -change lib/lib$(BASE_LIBRARY).dylib $(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
+	install_name_tool -change lib64/lib$(BASE_LIBRARY).dylib $(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)
 else
 $(TARGET) : $(OBJECTS)
