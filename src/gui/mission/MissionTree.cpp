@@ -3514,7 +3514,9 @@ wxString MissionTree::GetCommandString(GmatCommand *cmd, const wxString &currStr
    wxString cmdString;
    cmdString = cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str();
    
-   MessageInterface::ShowMessage("---> GetCommandString() cmdString='%s'\n", cmdString.c_str());
+   #ifdef DEBUG_CMD_STRING
+   MessageInterface::ShowMessage("GetCommandString() cmdString='%s'\n", cmdString.c_str());
+   #endif
    
    if (cmdString == ";")
       return currStr;
