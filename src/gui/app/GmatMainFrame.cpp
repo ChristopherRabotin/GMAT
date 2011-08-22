@@ -966,11 +966,11 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          //------------------------------------------------------
          // Notes:
          // OrbitView and XYPlot is added to theMdiChildren list
-         // in this main frame and to it's own list of
+         // in this main frame and to its own list of
          // MdiGlPlot::mdiChildren and MdiTsPlot::mdiChildren.
          // These lists are used in the PlotInterface.
          // The count is decremented and object is deleted in the
-         // destructors
+         // destructors.
          //------------------------------------------------------
 
          //childName = child->GetName();
