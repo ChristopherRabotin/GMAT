@@ -153,7 +153,7 @@ void GmatNotebook::CreateMissionTreeToolBar()
    
    // Use wxTB_FLAT to show separator divider
    mMissionToolBar = new wxToolBar(mMissionTreePanel, -1, wxDefaultPosition, wxDefaultSize,
-                                   wxTB_VERTICAL|wxTB_FLAT);
+                                   wxTB_VERTICAL|wxTB_FLAT);    // |wxTB_RIGHT);
    
    index = -1;
    mMissionToolBar->AddCheckTool(TOOL_LEVEL_ALL, wxT("LevelA"), *bitmaps[++index],
@@ -434,13 +434,16 @@ wxPanel *GmatNotebook::CreateMissionPage()
    mLastLevelClicked = TOOL_LEVEL_ALL;
    
    bsize = 5;
-   
-   GmatStaticBoxSizer *treeCtrlSizer = new GmatStaticBoxSizer( wxVERTICAL, mMissionTreePanel, "" );
-   treeCtrlSizer->Add(mMissionToolBar, 0, wxGROW|wxBOTTOM, bsize);
+   #ifndef __WXMAC__
+      GmatStaticBoxSizer *treeCtrlSizer = new GmatStaticBoxSizer( wxVERTICAL, mMissionTreePanel, "" );
+      treeCtrlSizer->Add(mMissionToolBar, 0, wxGROW|wxBOTTOM, bsize);
+   #endif
    
    wxBoxSizer *treeSizer = new wxBoxSizer(wxHORIZONTAL);
    treeSizer->Add( missionTree, 1, wxGROW|wxALIGN_CENTER|wxALL, 0 );
-   treeSizer->Add( treeCtrlSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, 0 );
+   #ifndef __WXMAC__
+      treeSizer->Add( treeCtrlSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, 0 );
+   #endif
    
    mMissionTreePanel->SetAutoLayout( TRUE );
    mMissionTreePanel->SetSizer( treeSizer );
