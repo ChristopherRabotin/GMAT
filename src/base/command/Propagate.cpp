@@ -1417,6 +1417,11 @@ bool Propagate::TakeAction(const std::string &action,
       else
          return true;
    }
+   else if (action == "PrepareToPropagate")
+   {
+      PrepareToPropagate();
+      return true;
+   }
 
    return GmatCommand::TakeAction(action, actionData);
 }

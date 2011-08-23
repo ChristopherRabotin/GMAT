@@ -98,6 +98,7 @@ HEADERS = -Iinclude \
           -Ifoundation \
           -Ihardware \
           -Iexecutive \
+          -Ievent \
           -Iattitude \
           -Ispacecraft \
           -Iasset \
@@ -258,6 +259,10 @@ OBJECTS = \
     coordsystem/TOEEqAxes.o \
     coordsystem/TopocentricAxes.o \
     coordsystem/TrueOfDateAxes.o \
+    event/EventFunction.o \
+    event/EventLocator.o \
+    event/LocatedEventTable.o \
+    event/LocatedEvent.o \
     executive/Moderator.o \
     executive/PlotInterface.o \
     executive/PlotReceiver.o \

@@ -176,6 +176,8 @@ namespace Gmat
       MATH_TREE,
       BODY_FIXED_POINT,
       EVENT,
+      EVENT_LOCATOR,
+
       // Estimation types
       MEASUREMENT_MODEL,   // May be replaced by TrackingSystem
       CORE_MEASUREMENT,    // For the measurement primitives

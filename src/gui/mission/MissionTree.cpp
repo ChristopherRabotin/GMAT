@@ -582,7 +582,7 @@ bool MissionTree::IsAnyViewCommandInBranch(GmatCommand *branch)
    GmatCommand* nextInBranch;
    GmatCommand* child;
    wxString typeName;
-   wxString branchTypeName = branch->GetTypeName();
+   wxString branchTypeName = branch->GetTypeName().c_str();
    
    while((child = branch->GetChildCommand(childNo)) != NULL)
    {
