@@ -11,7 +11,7 @@
 // Author: Linda Jun
 // Created: 2010/04/19
 /**
- * Declares MdiChildViewFrame for 3D visulaization.
+ * Declares MdiChildViewFrame for 3D visualization.
  */
 //------------------------------------------------------------------------------
 #ifndef MdiChildViewFrame_hpp
