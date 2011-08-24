@@ -44,6 +44,7 @@ EndFiniteBurn::EndFiniteBurn() :
 {
    if (instanceName == "")
       instanceName = "EndFiniteBurn";
+   physicsBasedCommand = true;
 }
 
 

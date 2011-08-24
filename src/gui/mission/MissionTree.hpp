@@ -171,6 +171,8 @@ private:
    void OnRun(wxCommandEvent &event);
    void OnShowDetail(wxCommandEvent &event);
    void OnShowScript(wxCommandEvent &event);
+   void OnShowMissionSummaryAll(wxCommandEvent &event);
+   void OnShowMissionSummaryPhysics(wxCommandEvent &event);
    
    void OnCollapse(wxCommandEvent &event);
    void OnExpand(wxCommandEvent &event);
@@ -354,6 +356,8 @@ private:
       POPUP_RUN,
       POPUP_SHOW_DETAIL,
       POPUP_SHOW_SCRIPT,
+      POPUP_MISSION_SUMMARY_ALL,
+      POPUP_MISSION_SUMMARY_PHYSICS,
       
       //----- for auto testing actions
       POPUP_START_SAVE_ACTIONS,

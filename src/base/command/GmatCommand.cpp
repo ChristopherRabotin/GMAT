@@ -58,6 +58,8 @@
 //#define DEBUG_CMD_CALLING_FUNCTION
 //#define DEBUG_COMMAND_SUMMARY_STATE
 //#define DEBUG_COMMAND_SUMMARY_REF_DATA
+//#define DEBUG_COMMAND_SUMMARY_TYPE
+//#define DEBUG_MISSION_SUMMARY
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -129,6 +131,11 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    commandChangedState  (false),
    commandSummary       (""),
    summaryCoordSysName  ("EarthMJ2000Eq"),
+   summaryForEntireMission (false),
+   missionPhysicsBasedOnly (false),
+   physicsBasedCommand  (false),
+   includeInSummary     (true),
+   summaryName          ("Unnamed"),
 //   comment              (""),
    commandChanged       (false),
    cloneCount           (0),
@@ -139,6 +146,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    generatingString = "";
    parameterCount = GmatCommandParamCount;
    objectTypes.push_back(Gmat::COMMAND);
+   objectTypeNames.push_back(typeStr);
    
    commandNameList.push_back(typeStr);
    parser.Initialize(commandNameList);
@@ -262,6 +270,11 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    commandChangedState  (c.commandChangedState),
    commandSummary       (c.commandSummary),
    summaryCoordSysName  (c.summaryCoordSysName),
+   summaryForEntireMission (c.summaryForEntireMission),
+   missionPhysicsBasedOnly (c.missionPhysicsBasedOnly),
+   physicsBasedCommand  (c.physicsBasedCommand),
+   includeInSummary     (c.includeInSummary),
+   summaryName          (c.summaryName),
 //   comment              (c.comment),
    commandChanged       (c.commandChanged),
    settables            (c.settables),
@@ -321,6 +334,11 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    commandChangedState = c.commandChangedState;
    commandSummary      = c.commandSummary;
    summaryCoordSysName = c.summaryCoordSysName;
+   summaryForEntireMission = c.summaryForEntireMission;
+   missionPhysicsBasedOnly = c.missionPhysicsBasedOnly;
+   physicsBasedCommand = c.physicsBasedCommand;
+   includeInSummary    = c.includeInSummary;
+   summaryName         = c.summaryName;
    commandChanged      = c.commandChanged;
    cloneCount          = 0;
    settables           = c.settables;
@@ -719,21 +737,36 @@ void GmatCommand::SetInternalCoordSystem(CoordinateSystem *cs)
 
 
 //------------------------------------------------------------------------------
-// virtual void SetSummaryCoordSystem(const std::string &csName)
+// virtual void SetSummary(const std::string &csName, bool entireMission = false,
+//                         bool physicsOnly = false)
 //------------------------------------------------------------------------------
 /*
- * Sets the name of the coordinate system to use for the Command Summary display.
+ * Sets the name of the coordinate system and flags to use for the Command
+ * Summary display.
  *
  */
 //------------------------------------------------------------------------------
-void GmatCommand::SetSummaryCoordSystem(const std::string &csName)
+void GmatCommand::SetupSummary(const std::string &csName, bool entireMission, bool physicsOnly)
+
 {
    #ifdef DEBUG_COMMAND_SET
    MessageInterface::ShowMessage
-      ("GmatCommand::SetSummaryCoordSystem() entered, cs=<%s>\n", csName.c_str());
+      ("GmatCommand::SetupSummary() entered, cs=<%s>\n", csName.c_str());
    #endif
 
-   summaryCoordSysName = csName;
+   summaryCoordSysName     = csName;
+   summaryForEntireMission = entireMission;
+   missionPhysicsBasedOnly = physicsOnly;
+}
+
+void GmatCommand::SetSummaryName(const std::string &sumName)
+{
+   summaryName = sumName;
+}
+
+std::string GmatCommand::GetSummaryName()
+{
+   return summaryName;
 }
 
 
@@ -1982,18 +2015,41 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 {
+   #ifdef DEBUG_COMMAND_SUMMARY_TYPE
+      MessageInterface::ShowMessage(
+            "   Now entering BuildCommandSummaryString with commandCompleted = %s, summaryForEntireMission = %s, missionPhysicsBasedOnly = %s, for command %s of type %s which is %s a physics-based command.\n",
+            (commandCompleted? "true" : "false"),(summaryForEntireMission? "true" : "false"), (missionPhysicsBasedOnly? "true" : "false"), summaryName.c_str(), typeName.c_str(),
+            (physicsBasedCommand? "DEFINITELY" :"NOT"));
+   #endif
    std::stringstream data;
    StateConverter    stateConverter;
+
+   /// if we're writing the entire mission summary for only physics-based commands, return if not a physics-based command
+   if (summaryForEntireMission && ((missionPhysicsBasedOnly && (!physicsBasedCommand)) || !includeInSummary))
+   {
+      data << "";
+      commandSummary = data.str();
+      return;
+   }
+   if (!summaryForEntireMission && (!includeInSummary))
+   {
+      data << "No summary data for " << typeName << " command " << summaryName << "\n";
+      commandSummary = data.str();
+      return;
+   }
+
+   // Write the separator and the name and type of the command first
+   if (summaryForEntireMission)
+      data << "========================================================\n";
+   data << typeName << " Command: " << summaryName << "\n";
 
    if (((objectMap == NULL) && (globalObjectMap == NULL)) ||
        (satVector.size() == 0))
    {
-      data << "Command Summary: " << typeName << " Command\n"
-           << "Execute the script to generate command summary data\n";
+         data << "No command summary data available\n";
    }
    else
    {
-      //data << "Command Summary: " << typeName << " Command\n";
       if (!commandCompleted)
          data << "Execute the script to generate command summary data\n";
       else
@@ -2031,13 +2087,15 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 
             objOrigin                = ((SpaceObject*)obj)->GetOrigin(); // is this the same as the origin of the internalCoordSystem?
             summaryCoordSys          = (CoordinateSystem*) FindObject(summaryCoordSysName);
-            if (!summaryCoordSys)
+            if (summaryCoordSys == NULL)
             {
                std::string errmsg = "Cannot find coordinate system ";
                errmsg += summaryCoordSysName + " to build command summary.\n";
                throw CommandException(errmsg);
             }
             cmdOrigin                = summaryCoordSys->GetOrigin();
+            if (!cmdOrigin)
+               throw CommandException("Origin for summary coordinate system is NULL!!!!!\n");
 
             if (!stateConverter.SetMu(summaryCoordSys))
             {
@@ -2362,11 +2420,21 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 //------------------------------------------------------------------------------
 const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head)
 {
+   #ifdef DEBUG_MISSION_SUMMARY
+      MessageInterface::ShowMessage("Entering BuildMissionSummaryString for command %s of type %s\n",
+            ((GmatCommand*)head)->GetSummaryName().c_str(), ((GmatCommand*)head)->GetTypeName().c_str());
+   #endif
    BuildCommandSummaryString();
    std::string missionSummary = commandSummary;
 
+
    if (next && (next != head))
    {
+      next->SetupSummary(summaryCoordSysName, true, missionPhysicsBasedOnly);
+      #ifdef DEBUG_MISSION_SUMMARY
+         MessageInterface::ShowMessage("... about to ask for summary for command %s of type %s\n",
+               next->GetSummaryName().c_str(), next->GetTypeName().c_str());
+      #endif
       missionSummary += next->GetStringParameter("MissionSummary");
    }
    
@@ -2395,23 +2463,15 @@ const std::string GmatCommand::BuildNumber(Real value, bool useExp, Integer leng
    {
       char temp[100], defstr[40];
       Integer fraction = 1;
-      Real shift       = GmatMathUtil::Abs(value);
 
       if (useExp)
       {
-         fraction = 0;
-         while (shift < 1.0)
-         {
-            ++fraction;
-            shift *= 10.0;
-         }
-         fraction = length - 3 - fraction;
+         fraction = length - 8;
          sprintf(defstr, "%%%d.%de", length, fraction);
-         std::string df = defstr;// ******************************************************
-//         MessageInterface::ShowMessage("value = %12.10lf,  defstr = %s\n", value, df.c_str()); // ******************
       }
       else
       {
+         Real shift = GmatMathUtil::Abs(value);
          while (shift > 10.0)
          {
             ++fraction;

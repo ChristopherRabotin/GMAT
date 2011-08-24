@@ -54,6 +54,7 @@
 #include "MissionTree.hpp"
 #include "MissionTreeItemData.hpp"
 #include "ViewTextFrame.hpp"
+#include "ShowSummaryDialog.hpp"
 
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"
@@ -157,7 +158,9 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    
    EVT_MENU(POPUP_SHOW_DETAIL, MissionTree::OnShowDetail)
    EVT_MENU(POPUP_SHOW_SCRIPT, MissionTree::OnShowScript)
-   
+   EVT_MENU(POPUP_MISSION_SUMMARY_ALL, MissionTree::OnShowMissionSummaryAll)
+   EVT_MENU(POPUP_MISSION_SUMMARY_PHYSICS, MissionTree::OnShowMissionSummaryPhysics)
+
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    EVT_MENU(POPUP_START_SAVE_ACTIONS, MissionTree::OnStartSaveActions)
    EVT_MENU(POPUP_STOP_SAVE_ACTIONS, MissionTree::OnStopSaveActions)
@@ -949,6 +952,8 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    
    // Show command string as node label(loj: 2007.11.13)
    nodeName = GetCommandString(cmd, nodeName);
+   /// Tell the command its name
+   cmd->SetSummaryName(nodeName.c_str());
    
    #if DEBUG_MISSION_TREE_APPEND
    MessageInterface::ShowMessage
@@ -2307,6 +2312,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       
       menu.AppendSeparator();
       menu.Append(POPUP_SHOW_SCRIPT, wxT("Show Script"));
+      menu.AppendSeparator();
+      menu.Append(POPUP_MISSION_SUMMARY_ALL, wxT("Mission Summary - All"));
+      menu.Append(POPUP_MISSION_SUMMARY_PHYSICS, wxT("Mission Summary - Physics"));
       
       //----- for auto testing actions
       #ifdef __TEST_MISSION_TREE_ACTIONS__
@@ -3046,6 +3054,7 @@ void MissionTree::OnEndEditLabel(wxTreeEvent& event)
    item->SetName(newLabel);
    item->SetTitle(newLabel);
    cmd->SetName(newLabel.c_str());
+   cmd->SetSummaryName(newLabel.c_str());
    
    #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
@@ -3111,6 +3120,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
       item->SetName(newName);
       item->SetTitle(newName);
       cmd->SetName(newName.c_str());
+      cmd->SetSummaryName(newName.c_str());
    }
    
    //=================================================================
@@ -3193,6 +3203,46 @@ void MissionTree::OnShowScript(wxCommandEvent &event)
    vtf->AppendText(str.c_str());
    vtf->Show(true);
    
+}
+
+//---------------------------------------------------------------------------
+// void MissionTree::OnShowMissionSummaryAll()
+//--------------------------------------------------------------------------
+void MissionTree::OnShowMissionSummaryAll(wxCommandEvent &event)
+{
+   wxString title = "Mission Summary - All Commands";
+
+   GmatCommand *firstCmd = theGuiInterpreter->GetFirstCommand();;
+   if (firstCmd)
+   {
+      ShowSummaryDialog ssd(this, -1, title, firstCmd, true, false);
+      ssd.ShowModal();
+   }
+   else
+   {
+      std::string errmsg = "\'Mission Summary\' - unable to obtain pointer to first command.\n";
+      MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+   }
+}
+
+//---------------------------------------------------------------------------
+// void MissionTree::OnShowMissionSummaryPhysics()
+//--------------------------------------------------------------------------
+void MissionTree::OnShowMissionSummaryPhysics(wxCommandEvent &event)
+{
+   wxString title = "Mission Summary - Physics-Based Commands";
+
+   GmatCommand *firstCmd = theGuiInterpreter->GetFirstCommand();;
+   if (firstCmd)
+   {
+      ShowSummaryDialog ssd(this, -1, title, firstCmd, true, true);
+      ssd.ShowModal();
+   }
+   else
+   {
+      std::string errmsg = "\'Mission Summary\' - unable to obtain pointer to first command.\n";
+      MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+   }
 }
 
 

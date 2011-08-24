@@ -45,6 +45,7 @@ public:
    virtual bool            Append(GmatCommand *cmd);
    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
    virtual GmatCommand*    Remove(GmatCommand *cmd);
+   virtual void            BuildCommandSummaryString(bool commandCompleted = true);
    // Insert into the main sequence, not into a branch
    virtual bool            InsertRightAfter(GmatCommand *cmd);
    

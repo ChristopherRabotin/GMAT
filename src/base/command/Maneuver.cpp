@@ -46,7 +46,8 @@ Maneuver::Maneuver() :
    burnNameID  (parameterCount),
    satNameID   (parameterCount+1)
 {
-   parameterCount += 2;
+   parameterCount     += 2;
+   physicsBasedCommand = true;
 }
 
 

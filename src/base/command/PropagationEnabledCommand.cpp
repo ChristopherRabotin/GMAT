@@ -63,6 +63,8 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    j2kState             (NULL),
    pubdata              (NULL)
 {
+   objectTypeNames.push_back("PropagationEnabledCommand");
+   physicsBasedCommand = true;
 }
 
 

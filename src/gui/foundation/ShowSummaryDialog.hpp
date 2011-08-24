@@ -37,7 +37,7 @@ class ShowSummaryDialog : public GmatDialog
 public:
    // constructors
    ShowSummaryDialog(wxWindow *parent, wxWindowID id, const wxString& title, 
-                    GmatCommand *obj);
+                    GmatCommand *obj, bool summaryForMission = false, bool physicsOnly = false);
    ~ShowSummaryDialog();
 
 protected:
@@ -67,6 +67,8 @@ protected:
    bool           isCoordSysModified;
    std::string    currentCoordSysName;
    GuiItemManager *theGuiManager;
+   bool           summaryForEntireMission;
+   bool           physicsBasedOnly;
 
    wxComboBox     *coordSysComboBox;
 

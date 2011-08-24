@@ -109,7 +109,9 @@ public:
                                   const std::string objName = "");
    
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
-   virtual void         SetSummaryCoordSystem(const std::string &csName);
+   virtual void         SetupSummary(const std::string &csName, bool entireMission = false, bool physicsOnly = false);
+   virtual void         SetSummaryName(const std::string &sumName);
+   virtual std::string  GetSummaryName();
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetTriggerManagers(std::vector<TriggerManager*> *trigs);
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
@@ -271,6 +273,19 @@ protected:
    std::string          commandSummary;
    /// Coordinate System used for the Command Summary display
    std::string          summaryCoordSysName;
+   /// flag indicating whether or not the summary for the command is part of
+   /// a requested summary for the entire misison (or branch)
+   bool                 summaryForEntireMission;
+   /// flag indicating whether or not the entire-mission summary should only include
+   /// physics-based commands
+   bool                 missionPhysicsBasedOnly;
+   /// flag indicating whether or not this command is a physics-based command
+   bool                 physicsBasedCommand;
+   /// flag indicating whether or not to include this type of command in a command summary
+   bool                 includeInSummary;
+   /// node name (on the GUI) for the command
+   std::string          summaryName;
+
 //   /// Optional comment string associated with the command
 //   std::string          comment;
    /// Flag indicating that a command has been changed by a user
@@ -324,6 +339,7 @@ protected:
    static Integer       satDryMassID;
    static Integer       satTotalMassID;
    
+
    // Command summary data buffers
    Real                 *epochData;
    Real                 *stateData;
@@ -348,6 +364,7 @@ protected:
    // Publish methods that are overridden as needed
    virtual void        PrepareToPublish(bool publishAll = true);
    virtual void        PublishData();
+
 };
 
 #endif // Command_hpp

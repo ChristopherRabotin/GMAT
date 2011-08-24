@@ -33,6 +33,7 @@
 NoOp::NoOp() :
     GmatCommand("NoOp")
 {
+   includeInSummary = false;
 }
 
 

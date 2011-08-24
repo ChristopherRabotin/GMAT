@@ -38,6 +38,7 @@
 //#define DEBUG_BRANCHCOMMAND_GEN_STRING
 //#define DEBUG_RUN_COMPLETE
 //#define DEBUG_BRANCHCOMMAND_GMATFUNCTIONS
+//#define DEBUG_BRANCHCOMMAND_SUMMARY
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -709,6 +710,50 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
    return GmatCommand::Remove(cmd);
 } // Remove()
 
+//------------------------------------------------------------------------------
+//  void BuildCommandSummaryString(bool commandCompleted)
+//------------------------------------------------------------------------------
+/**
+ * Generates the summary string for a command by building the summary string for
+ * this command, and then tacking on the summary for the branch commans\ds.
+ *
+ *
+ * @param <commandCompleted> has the command completed execution
+ */
+//------------------------------------------------------------------------------
+void BranchCommand::BuildCommandSummaryString(bool commandCompleted)
+{
+   #ifdef DEBUG_BRANCHCOMMAND_SUMMARY
+      MessageInterface::ShowMessage("Entering BranchCommand::BuildMissionSummaryString for command %s of type %s\n",
+            summaryName.c_str(), typeName.c_str());
+   #endif
+
+   GmatCommand::BuildCommandSummaryString(commandCompleted);
+   if (summaryForEntireMission)
+   {
+      std::string branchSummary = commandSummary;
+      GmatCommand *current = NULL;
+
+      // Build Command Summary string for all of the branch nodes
+      for (Integer which = 0; which < (Integer)branch.size(); ++which)
+      {
+         current = branch[which];
+         while ((current != NULL) && (current != this))
+         {
+            current->SetupSummary(summaryCoordSysName, summaryForEntireMission, missionPhysicsBasedOnly);
+            #ifdef DEBUG_BRANCHCOMMAND_SUMMARY
+               MessageInterface::ShowMessage("About to call for MissionSummary for command %s of type %s\n",
+                     (current->GetSummaryName()).c_str(), (current->GetTypeName()).c_str());
+            #endif
+            branchSummary += current->GetStringParameter("Summary");
+   //         missionSummary += current->GetStringParameter("MissionSummary");
+            current = current->GetNext();
+         }
+      }
+
+      commandSummary = branchSummary;
+   }
+}
 
 //------------------------------------------------------------------------------
 // bool InsertRightAfter(GmatCommand *cmd)

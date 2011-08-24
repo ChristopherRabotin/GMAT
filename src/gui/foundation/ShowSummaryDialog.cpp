@@ -39,7 +39,7 @@ END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
 //  ShowSummaryDialog(wxWindow *parent, wxWindowID id, const wxString& title, 
-//                   GmatBase *obj)
+//                   GmatBase *obj, bool summaryForMission, bool physicsOnly)
 //------------------------------------------------------------------------------
 /**
  * FiniteBurn constructor (default constructor).
@@ -51,10 +51,13 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 ShowSummaryDialog::ShowSummaryDialog(wxWindow *parent, wxWindowID id, 
-                                     const wxString& title, GmatCommand *obj) :
+                                     const wxString& title, GmatCommand *obj,
+                                     bool summaryForMission, bool physicsOnly) :
    GmatDialog(parent, id, title, NULL, wxDefaultPosition, wxDefaultSize, 
               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
-   theObject(obj)
+   theObject              (obj),
+   summaryForEntireMission(summaryForMission),
+   physicsBasedOnly       (physicsOnly)
 {
    isCoordSysModified = false;
    theGuiManager      = GuiItemManager::GetInstance();
@@ -88,8 +91,14 @@ void ShowSummaryDialog::Create()
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
-   pConfig->SetPath(wxT("/Command Summary"));
-
+   if (summaryForEntireMission)
+   {
+      pConfig->SetPath(wxT("/Mission Summary"));
+   }
+   else
+   {
+      pConfig->SetPath(wxT("/Command Summary"));
+   }
    wxString text = "Summary not yet available for this panel";
    // Find the height of a line of test, to use when sizing the text control
    GetTextExtent(text, &w, &h);
@@ -100,21 +109,24 @@ void ShowSummaryDialog::Create()
    coordSysComboBox =theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    coordSysComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
 
+   /// the coordinate system must have a celestial body as the origin and must
+   /// not contain a reference to a spacecraft (e.g. primary, etc.)
    BuildValidCoordinateSystemList();
 
    wxSize scriptPanelSize(500, 32);
    if (theObject != NULL)
    {
-      /// the coordinate system must have a celestial body as the origin and must
-      /// not contain a reference to a spacecraft (e.g. primary, etc.)
-      theObject->SetSummaryCoordSystem("EarthMJ2000Eq");
-      text = theObject->GetStringParameter("Summary").c_str();
+      theObject->SetupSummary("EarthMJ2000Eq", summaryForEntireMission, physicsBasedOnly);
+      if (summaryForEntireMission)
+         text = theObject->GetStringParameter("MissionSummary").c_str();
+      else
+         text = theObject->GetStringParameter("Summary").c_str();
 
       // This code is flaky -- text width is height dependent??? -- on Linux:
 //      GetTextExtent(text, &w, &h);
 //      w = (w + 200 > 1000 ? 1000 : w + 200);
 //      h = (h > 700 ? 700 : h);
-      scriptPanelSize.Set(690, 695); // 735);
+      scriptPanelSize.Set(720, 735);
 
       SetSize(wxDefaultCoord, wxDefaultCoord, w, h);
    }
@@ -191,11 +203,28 @@ void ShowSummaryDialog::OnComboBoxChange(wxCommandEvent& event)
    //-----------------------------------------------------------------
    if (event.GetEventObject() == coordSysComboBox)
    {
-      isCoordSysModified = true;
-      currentCoordSysName = coordSysComboBox->GetValue().c_str();
-      theObject->SetSummaryCoordSystem(currentCoordSysName);
-      text = theObject->GetStringParameter("Summary").c_str();
-      theSummary->ChangeValue(text);
+      isCoordSysModified     = true;
+      std::string lastCSName = currentCoordSysName;
+      currentCoordSysName    = coordSysComboBox->GetValue().c_str();
+      theObject->SetupSummary(currentCoordSysName, summaryForEntireMission, physicsBasedOnly);
+      try
+      {
+         if (summaryForEntireMission)
+            text = theObject->GetStringParameter("MissionSummary").c_str();
+         else
+            text = theObject->GetStringParameter("Summary").c_str();
+         theSummary->ChangeValue(text);
+      }
+      catch (BaseException &e)
+      {
+         isCoordSysModified  = false;
+         currentCoordSysName = lastCSName;
+         std::string errmsg = e.GetFullMessage();
+         errmsg += "Resetting to last valid value: " + currentCoordSysName + "\n";
+         MessageInterface::PopupMessage(Gmat::ERROR_, errmsg.c_str());
+         coordSysComboBox->SetValue(currentCoordSysName.c_str());
+//         canClose = false;
+      }
    }
 
 //   dataChanged = true;
@@ -244,6 +273,6 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
          coordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
    }
    coordSysComboBox->SetValue(newCS.c_str());
-
+   currentCoordSysName = coordSysComboBox->GetValue().c_str();
 }
 
