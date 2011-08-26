@@ -24,6 +24,7 @@
 #include "math.h"
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
+#include "RealUtilities.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -1298,7 +1299,7 @@ void SunSync::SolveRoAAE(Real RoA, Real i, Real &a, Real &e)
 		 sqrt(GmatSolarSystemDefaults::PLANET_MU[2])*cos(i)/
 		 (2*omegaSunSync*pow(1-pow(e,2),2)),2.0/7);
       eNew = (RoA/aNew)-1;
-      diff = abs(a - aNew);
+      diff = GmatMathUtil::Abs(a - aNew);
       count++;
       a = aNew;
       e = eNew;
@@ -1374,7 +1375,7 @@ void SunSync::SolveRoPAE(Real RoP, Real i, Real &a, Real &e)
 		 sqrt(GmatSolarSystemDefaults::PLANET_MU[2])*cos(i)/
 		 (2*omegaSunSync*pow(1-pow(e,2),2))),ex);
       eNew = 1-(RoP/aNew);
-      diff = abs(a - aNew);
+      diff = GmatMathUtil::Abs(a - aNew);
       count++;
       a = aNew;
       e = eNew;

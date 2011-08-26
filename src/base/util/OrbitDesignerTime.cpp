@@ -22,6 +22,7 @@
 #include "OrbitDesignerTime.hpp"
 #include "math.h"
 #include "MessageInterface.hpp"
+#include "RealUtilities.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -292,12 +293,12 @@ std::string OrbitDesignerTime::FindStartTime(bool flag, Real lon)
       c1 + c2*(JD0-epochJD) + 24*c3*(JD-JD0) + c4*pow((JD-epochJD)/36525,2)
 	  - GMST;
 
-   while ((abs(diff)>tol) && (count<10000))
+   while ((GmatMathUtil::Abs(diff)>tol) && (count<10000))
    {
       if (diff>tol)
          JD = JD - diff*.01;
       else if (diff<tol)
-         JD = JD + abs(diff*.01);
+         JD = JD + GmatMathUtil::Abs(diff*.01);
 	  diff = 
 	     c1 + c2*(JD0-epochJD) + 24*c3*(JD-JD0) + 
 		 c4*pow((JD-epochJD)/36525,2.0) - GMST;

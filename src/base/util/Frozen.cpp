@@ -23,6 +23,7 @@
 #include "GmatDefaults.hpp" 
 #include "math.h"
 #include "GmatConstants.hpp"
+#include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
 
 
@@ -108,9 +109,9 @@ void Frozen::CalculateFrozen(Real ALT, bool altVal, Real INC, bool incVal)
    e = 0;
    error = a1*pow(e,3) + a2*pow(e,2) + a3*e + a4;
 
-   while ((abs(error)>tol) && (e<=eLimit))
+   while ((GmatMathUtil::Abs(error)>tol) && (e<=eLimit))
    {
-	  e+=abs(error)*.25;
+	  e+=GmatMathUtil::Abs(error)*.25;
 	  error = a1*pow(e,3) + a2*pow(e,2) + a3*e + a4;
    }
    if ((e >= 0) && (e < eLimit))

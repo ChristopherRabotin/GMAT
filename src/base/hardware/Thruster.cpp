@@ -1627,6 +1627,13 @@ bool Thruster::Initialize()
          #endif
          return false;
       }
+
+      #ifdef DEBUG_THRUSTER_CONVERT
+         MessageInterface::ShowMessage
+            ("Local thruster coord system is\n%s\n",localCoordSystem->
+                  GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      #endif
+
    }
    
    // Convert direction to inertial coord system

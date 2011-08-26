@@ -23,7 +23,7 @@
 #include "GmatDefaults.hpp" 
 #include "math.h"
 #include "GmatConstants.hpp"
-
+#include "RealUtilities.hpp"
 
 //------------------------------------------------------------------------------
 // RepeatSunSync()
@@ -196,7 +196,7 @@ void RepeatSunSync::CalculateRepeatSunSync(bool eccVal, Real ECC, bool dtrVal,
    a = 7000;
    errormsg = "";
 
-   while ((abs(sun) > sunTol) && (diff> smaTol) && (count <= 100))
+   while ((GmatMathUtil::Abs(sun) > sunTol) && (diff> smaTol) && (count <= 100))
    {
       p = a*(1 - pow(ECC,2));
       raanDot = 
@@ -218,14 +218,14 @@ void RepeatSunSync::CalculateRepeatSunSync(bool eccVal, Real ECC, bool dtrVal,
 		 sqrt(GmatSolarSystemDefaults::PLANET_MU[2])));
       n = revsPerDay*(omegaEarth - raanDot) - (MDot + omegaDot);
       newA = pow((GmatSolarSystemDefaults::PLANET_MU[2]/pow(n,2)),(1/3.0));
-      diff = abs(newA - a);
+      diff = GmatMathUtil::Abs(newA - a);
       rp = newA*(1-ECC);
       newE = (newA - rp)/newA;
       incCheck = 
 	     (2*omegaSunSync*pow((1-pow(ECC,2)),2)*pow(a,(7.0/2)))/
 		 (-3*sqrt(GmatSolarSystemDefaults::PLANET_MU[2])*
 		 pow(GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2],2)*J2);
-      if (abs(incCheck) > 1)
+      if (GmatMathUtil::Abs(incCheck) > 1)
          newInc = inc;
       else
          newInc = acos(incCheck);

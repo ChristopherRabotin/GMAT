@@ -23,7 +23,7 @@
 #include "GmatDefaults.hpp" 
 #include "math.h"
 #include "GmatConstants.hpp"
-
+#include "RealUtilities.hpp"
 
 //------------------------------------------------------------------------------
 // RepeatGroundTrack()
@@ -196,7 +196,7 @@ void RepeatGroundTrack::CalculateRepeatGroundTrack(bool eccVal, Real ECC,
 		 sqrt(1 - pow(ECC,2))*(2 - 3*pow(sin(INC),2)); 
       n = revsPerDay*(omegaEarth - raanDot) - (maDot + aopDot);
       newSMA = pow((muEarth*pow((1/n),2)),(1/3.0));
-      diff = abs(SMA - newSMA);
+      diff = GmatMathUtil::Abs(SMA - newSMA);
    }
 
    if (SMA < radiusEarth)
