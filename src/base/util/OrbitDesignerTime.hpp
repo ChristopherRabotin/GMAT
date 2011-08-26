@@ -1,4 +1,4 @@
-//
+//$Id$
 //------------------------------------------------------------------------------
 //                           OrbitDesignerTime      
 //------------------------------------------------------------------------------
@@ -28,12 +28,12 @@ class OrbitDesignerTime
 {
 public:
    OrbitDesignerTime(std::string epochFormat = "UTCGregorian", 
-	                 std::string epoch = "01 Jan 2000 11:59:28.000", 
-					 Real RAAN = 306.6148021947984100,
-					 std::string startTime = "12:00:00.0");
+                         std::string epoch = "01 Jan 2000 11:59:28.000", 
+                                         Real RAAN = 306.6148021947984100,
+                                         std::string startTime = "12:00:00.0");
    OrbitDesignerTime(std::string epoch, std::string epochFormatStr, 
-	                 bool raanVal, Real RAAN, bool startTimeVal, 
-					 std::string startTime);
+                         bool raanVal, Real RAAN, bool startTimeVal, 
+                                         std::string startTime);
    ~OrbitDesignerTime();
 
    Real FindRAAN();
@@ -62,3 +62,4 @@ private:
 };
 
 #endif
+

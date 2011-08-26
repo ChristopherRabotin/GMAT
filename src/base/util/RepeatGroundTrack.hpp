@@ -1,4 +1,4 @@
-//
+//$Id$
 //------------------------------------------------------------------------------
 //                           RepeatGroundTrack     
 //------------------------------------------------------------------------------
@@ -31,9 +31,9 @@ public:
    ~RepeatGroundTrack();
 
    void CalculateRepeatGroundTrack(bool eccVal, Real ECC, bool incVal, Real INC, 
-	                               bool rtrVal, Real revsToRepeat, bool dtrVal, 
-								   Real daysToRepeat, bool rpdVal, 
-								   Real revsPerDay);
+                                       bool rtrVal, Real revsToRepeat, bool dtrVal, 
+                                                                   Real daysToRepeat, bool rpdVal, 
+                                                                   Real revsPerDay);
 
    //accessor functions
    Real GetSMA();
@@ -60,3 +60,4 @@ private:
 };
 
 #endif
+

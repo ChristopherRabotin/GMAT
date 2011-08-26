@@ -1,4 +1,4 @@
-//
+//$Id$
 //------------------------------------------------------------------------------
 //                           SunSync      
 //------------------------------------------------------------------------------
@@ -32,8 +32,8 @@ public:
    ~SunSync();
 
    void CalculateSunSync(bool aVal, Real a, bool altVal, Real alt, bool eVal, 
-	                     Real e, bool iVal, Real i, bool ropVal, Real RoP, 
-						 bool roaVal, Real RoA, bool pVal, Real P);
+                             Real e, bool iVal, Real i, bool ropVal, Real RoP, 
+                                                 bool roaVal, Real RoA, bool pVal, Real P);
 
    //accessor functions
    Real GetSMA();
@@ -49,8 +49,8 @@ public:
    Real SolveA(Real e, Real i, bool flag);
    Real SolveE(Real a, Real i, bool flag, bool altFlag = false);
    Real SolveI(Real a, Real e, bool flag, bool roaFlag = false, bool ropFlag = false,
-	           bool eFlag = true, bool aFlag = true, bool pFlag = false, 
-			   bool altFlag = false);
+                   bool eFlag = true, bool aFlag = true, bool pFlag = false, 
+                           bool altFlag = false);
    void SolvePAE(Real P, Real i, Real &a, Real &e);
    void SolveRoAAE(Real RoA, Real i, Real &a, Real &e);
    void SolveRoPAE(Real RoP, Real i, Real &a, Real &e);
@@ -73,3 +73,4 @@ private:
 };
 
 #endif
+

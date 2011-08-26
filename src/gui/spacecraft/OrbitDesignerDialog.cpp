@@ -1,4 +1,4 @@
-//
+//$Id$
 //------------------------------------------------------------------------------
 //                              OrbitDesignerDialog
 //------------------------------------------------------------------------------
@@ -87,9 +87,9 @@ void OrbitDesignerDialog::Create()
 {
    int bsize = 3; // border size
    wxString orbitTypesArr[] = {"Sun Sync", "Repeat Sun Sync", "Repeat Ground Track", "Geostationary", 
-	                           "Molniya", "Frozen"};
+                                   "Molniya", "Frozen"};
    wxString epochTypesArr[] = {"A1ModJulian", "TAIModJulian", "UTCModJulian", "TTModJulian", 
-	                           "A1Gregorian", "TAIGregorian", "UTCGregorian", "TTGregorian"};
+                                   "A1Gregorian", "TAIGregorian", "UTCGregorian", "TTGregorian"};
 
    //orbit selection combo box and label
    wxStaticText *orbitTypeStaticText = new wxStaticText( this, ID_TEXT, wxT("Orbit Type"),
@@ -117,24 +117,24 @@ void OrbitDesignerDialog::Create()
    paramOneCheckBox = 
       new wxCheckBox(this, ID_CB_P1, wxT("SMA"), wxDefaultPosition, wxSize(150,-1),0);
    paramTwoCheckBox = 
-	  new wxCheckBox(this, ID_CB_P2, wxT("Altitude"), wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_P2, wxT("Altitude"), wxDefaultPosition, wxSize(150,-1),0);
    paramThreeCheckBox = 
-	  new wxCheckBox(this, ID_CB_P3, wxT("ECC"), wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_P3, wxT("ECC"), wxDefaultPosition, wxSize(150,-1),0);
    paramFourCheckBox = 
-	  new wxCheckBox(this, ID_CB_P4, wxT("INC"), wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_P4, wxT("INC"), wxDefaultPosition, wxSize(150,-1),0);
    paramFiveCheckBox = 
-	  new wxCheckBox(this, ID_CB_P5, wxT("ROP"), wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_P5, wxT("ROP"), wxDefaultPosition, wxSize(150,-1),0);
    paramSixCheckBox = 
-	  new wxCheckBox(this, ID_CB_P6, wxT("ROA"), wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_P6, wxT("ROA"), wxDefaultPosition, wxSize(150,-1),0);
    paramSevenCheckBox = 
-	  new wxCheckBox(this, ID_CB_P7, wxT("P"), wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_P7, wxT("P"), wxDefaultPosition, wxSize(150,-1),0);
    timeParamOneCheckBox = 
-	  new wxCheckBox(this, ID_CB_TP1, wxT("Epoch"), wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_TP1, wxT("Epoch"), wxDefaultPosition, wxSize(150,-1),0);
    timeParamTwoCheckBox = 
-	  new wxCheckBox(this, ID_CB_TP2, wxT("RAAN"), wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_TP2, wxT("RAAN"), wxDefaultPosition, wxSize(150,-1),0);
    timeParamThreeCheckBox = 
-	  new wxCheckBox(this, ID_CB_TP3, wxT("Initial Local Sidereal Time"), 
-	  wxDefaultPosition, wxSize(150,-1),0);
+          new wxCheckBox(this, ID_CB_TP3, wxT("Initial Local Sidereal Time"), 
+          wxDefaultPosition, wxSize(150,-1),0);
    
    //orbit parameter inputs
    param1TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""),
@@ -162,23 +162,23 @@ void OrbitDesignerDialog::Create()
    units1StaticText = 
       new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    units2StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    units3StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    units4StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
    units5StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    units6StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    units7StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    timeUnits1StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    timeUnits2StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
    timeUnits3StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
 
    orbitParamsFlexGridSizer = new wxFlexGridSizer(7,3,0,10);
 
@@ -245,98 +245,98 @@ void OrbitDesignerDialog::Create()
    paramOut1StaticText = 
       new wxStaticText( this, ID_TEXT, wxT("SMA"), wxDefaultPosition, wxDefaultSize, 0);
    paramOut2StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("Altitude"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("Altitude"), wxDefaultPosition, wxDefaultSize, 0);
    paramOut3StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("ECC"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("ECC"), wxDefaultPosition, wxDefaultSize, 0);
    paramOut4StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("INC"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("INC"), wxDefaultPosition, wxDefaultSize, 0);
    paramOut5StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("ROP"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("ROP"), wxDefaultPosition, wxDefaultSize, 0);
    paramOut6StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("ROA"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("ROA"), wxDefaultPosition, wxDefaultSize, 0);
    paramOut7StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("P"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("P"), wxDefaultPosition, wxDefaultSize, 0);
    paramOut8StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    paramOut9StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    timeParamOut1StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("Epoch"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("Epoch"), wxDefaultPosition, wxDefaultSize, 0);
    timeParamOut2StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("RAAN"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("RAAN"), wxDefaultPosition, wxDefaultSize, 0);
    timeParamOut3StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("Initial Local Time"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("Initial Local Time"), wxDefaultPosition, wxDefaultSize, 0);
    timeParamOut4StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
 
    //output values boxes
    output1TextCtrl = 
       new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output1TextCtrl->Disable();
    output2TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output2TextCtrl->Disable();
    output3TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output3TextCtrl->Disable();
    output4TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output4TextCtrl->Disable();
    output5TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output5TextCtrl->Disable();
    output6TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output6TextCtrl->Disable();
    output7TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output7TextCtrl->Disable();
    output8TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output8TextCtrl->Disable();
    output9TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    output9TextCtrl->Disable();
    timeOut1TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    timeOut1TextCtrl->Disable();
    timeOut2TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    timeOut2TextCtrl->Disable();
    timeOut3TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    timeOut3TextCtrl->Disable();
    timeOut4TextCtrl = 
-	  new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
+          new wxTextCtrl( this, ID_TEXTCTRL_PARAMS, wxT(""), wxDefaultPosition, wxSize(150,-1), 0);
    timeOut4TextCtrl->Disable();
 
    //output units text boxes
    unitsOut1StaticText = 
       new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    unitsOut2StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    unitsOut3StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    unitsOut4StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
    unitsOut5StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    unitsOut6StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    unitsOut7StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("km"), wxDefaultPosition, wxDefaultSize, 0);
    unitsOut8StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    unitsOut9StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    timeUnitsOut1StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    timeUnitsOut2StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0);
    timeUnitsOut3StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
    timeUnitsOut4StaticText = 
-	  new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+          new wxStaticText( this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
 
    outputsFlexGridSizer = new wxFlexGridSizer(13,3,0,10);
 
@@ -429,7 +429,7 @@ void OrbitDesignerDialog::SaveData()
    if (mIsOrbitChanged)
       updateOrbit = true;
    else
-	  updateOrbit = false;
+          updateOrbit = false;
 
    mIsOrbitChanged = false;
 }
@@ -439,7 +439,7 @@ void OrbitDesignerDialog::SaveData()
 //------------------------------------------------------------------------------
 void OrbitDesignerDialog::ResetData()
 {
-	updateOrbit = false;
+        updateOrbit = false;
 }
 
 //------------------------------------------------------------------------------
@@ -452,57 +452,57 @@ void OrbitDesignerDialog::OnComboBoxChange(wxCommandEvent& event)
       orbitType = orbitTypeComboBox->GetStringSelection().c_str();
       if (orbitType == "Sun Sync")
       {
-	      DisplaySunSync();
-		  DisplayTime();
+         DisplaySunSync();
+         DisplayTime();
       }
-	  else if (orbitType == "Repeat Sun Sync")
-	  {
-		  DisplayRepeatSunSync();
-		  DisplayTime();
-	  }
-	  else if (orbitType == "Repeat Ground Track")
-	  {
-		  DisplayRepeatGroundTrack();
-		  DisplayTime();
-	  }
-	  else if (orbitType == "Geostationary")
-	  {
-		  DisplayGeostationary();
-	  }
-	  else if (orbitType == "Molniya")
-	  {
-		  DisplayMolniya();
-		  DisplayTime();
-	  }
-	  else if (orbitType == "Frozen")
-	  {
-		  DisplayFrozen();
-		  DisplayTime();
-	  }
-	  //Refresh();
-	  outputsFlexGridSizer->Layout();
+      else if (orbitType == "Repeat Sun Sync")
+      {
+         DisplayRepeatSunSync();
+         DisplayTime();
+      }
+      else if (orbitType == "Repeat Ground Track")
+      {
+         DisplayRepeatGroundTrack();
+         DisplayTime();
+      }
+      else if (orbitType == "Geostationary")
+      {
+         DisplayGeostationary();
+      }
+      else if (orbitType == "Molniya")
+      {
+         DisplayMolniya();
+         DisplayTime();
+      }
+      else if (orbitType == "Frozen")
+      {
+         DisplayFrozen();
+         DisplayTime();
+      }
+      //Refresh();
+      outputsFlexGridSizer->Layout();
    }
    else if ((event.GetEventObject() == epochComboBox) )
    {
       epochType = epochComboBox->GetStringSelection().c_str();
-	  if (epochType == "A1ModJulian")
-	     timeIn1Val = "21545.00000039794";
-	  else if (epochType == "TAIModJulian")
-	     timeIn1Val = "21545";
-	  else if (epochType == "UTCModJulian")
-	     timeIn1Val = "21544.99962962963";
-	  else if (epochType == "TTModJulian")
-	     timeIn1Val = "21545.0003725";
-	  else if (epochType == "A1Gregorian")
-	     timeIn1Val = "01 Jan 2000 12:00:00.034";
-	  else if (epochType == "TAIGregorian")
-	     timeIn1Val = "01 Jan 2000 12:00:00.000";
-	  else if (epochType == "UTCGregorian")
-	     timeIn1Val = "01 Jan 2000 11:59:28.000";
-	  else if (epochType == "TTGregorian")
-	     timeIn1Val = "01 Jan 2000 12:00:32.184";
-	  time1TextCtrl->SetValue(timeIn1Val);
-	  time3TextCtrl->SetValue("12:00:00.000");
+      if (epochType == "A1ModJulian")
+         timeIn1Val = "21545.00000039794";
+      else if (epochType == "TAIModJulian")
+         timeIn1Val = "21545";
+      else if (epochType == "UTCModJulian")
+         timeIn1Val = "21544.99962962963";
+      else if (epochType == "TTModJulian")
+         timeIn1Val = "21545.0003725";
+      else if (epochType == "A1Gregorian")
+         timeIn1Val = "01 Jan 2000 12:00:00.034";
+      else if (epochType == "TAIGregorian")
+         timeIn1Val = "01 Jan 2000 12:00:00.000";
+      else if (epochType == "UTCGregorian")
+         timeIn1Val = "01 Jan 2000 11:59:28.000";
+      else if (epochType == "TTGregorian")
+         timeIn1Val = "01 Jan 2000 12:00:32.184";
+      time1TextCtrl->SetValue(timeIn1Val);
+      time3TextCtrl->SetValue("12:00:00.000");
    }
 }
 
@@ -512,132 +512,132 @@ void OrbitDesignerDialog::OnP1CheckBoxChange(wxCommandEvent& event)
    if (orbitType == "Sun Sync")
    {
       if (paramOneVal)
-	  {
-		 param1TextCtrl->Enable();
-		 paramTwoCheckBox->Disable();
-		 param2TextCtrl->Disable();
-		 units2StaticText->Disable();
-		 if (paramThreeVal)
-		 {
-		    paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+      {
+         param1TextCtrl->Enable();
+         paramTwoCheckBox->Disable();
+         param2TextCtrl->Disable();
+         units2StaticText->Disable();
+         if (paramThreeVal)
+         {
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFourVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFourVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFiveVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFiveVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSixVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSixVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSevenVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSevenVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-	  }
-	  else
-	  {
-		 paramOneCheckBox->Enable();
-		 param1TextCtrl->Enable();
-		 units1StaticText->Enable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+      }
+      else
+      {
+         paramOneCheckBox->Enable();
+         param1TextCtrl->Enable();
+         units1StaticText->Enable();
    
-		 paramTwoCheckBox->Enable();
-		 param2TextCtrl->Enable();
-		 units2StaticText->Enable();
+         paramTwoCheckBox->Enable();
+         param2TextCtrl->Enable();
+         units2StaticText->Enable();
 
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
-
-		 paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
-
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
-
-		 paramSixCheckBox->Enable();
-		 param6TextCtrl->Enable();
-		 units6StaticText->Enable();
-
-		 paramSevenCheckBox->Enable();
-		 param7TextCtrl->Enable();
-		 units7StaticText->Enable();
-	  }
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
+         
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
+         
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
+         
+         paramSixCheckBox->Enable();
+         param6TextCtrl->Enable();
+         units6StaticText->Enable();
+         
+         paramSevenCheckBox->Enable();
+         param7TextCtrl->Enable();
+         units7StaticText->Enable();
+      }
    }
 }
 
@@ -647,170 +647,170 @@ void OrbitDesignerDialog::OnP2CheckBoxChange(wxCommandEvent& event)
    if (orbitType == "Sun Sync")
    {
       if (paramTwoVal)
-	  {
-		 param2TextCtrl->Enable();
-		 paramOneCheckBox->Disable();
-		 param1TextCtrl->Disable();
-		 units1StaticText->Disable();
-		 if (paramThreeVal)
-		 {
-		    paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
-
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
-
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFourVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
-
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
-
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFiveVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
-
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
-
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSixVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
-
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
-
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
-
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSevenVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
-
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
-
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
-
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-	  }
-	  else
-	  {
-		 paramOneCheckBox->Enable();
-		 param1TextCtrl->Enable();
-		 units1StaticText->Enable();
-   
-		 paramTwoCheckBox->Enable();
-		 param2TextCtrl->Enable();
-		 units2StaticText->Enable();
-
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
-
-		 paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
-
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
-
-		 paramSixCheckBox->Enable();
-		 param6TextCtrl->Enable();
-		 units6StaticText->Enable();
-
-		 paramSevenCheckBox->Enable();
-		 param7TextCtrl->Enable();
-		 units7StaticText->Enable();
-	  }
+      {
+         param2TextCtrl->Enable();
+         paramOneCheckBox->Disable();
+         param1TextCtrl->Disable();
+         units1StaticText->Disable();
+         if (paramThreeVal)
+         {
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
+            
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
+            
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+            
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFourVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
+            
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
+            
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+            
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFiveVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
+            
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
+            
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+            
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSixVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
+            
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
+            
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
+            
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSevenVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
+            
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
+            
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
+            
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+      }
+      else
+      {
+         paramOneCheckBox->Enable();
+         param1TextCtrl->Enable();
+         units1StaticText->Enable();
+         
+         paramTwoCheckBox->Enable();
+         param2TextCtrl->Enable();
+         units2StaticText->Enable();
+         
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
+         
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
+         
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
+         
+         paramSixCheckBox->Enable();
+         param6TextCtrl->Enable();
+         units6StaticText->Enable();
+         
+         paramSevenCheckBox->Enable();
+         param7TextCtrl->Enable();
+         units7StaticText->Enable();
+      }
    }
    else if (orbitType == "Repeat Sun Sync")
    {
-	  if (paramTwoVal)
-	  {
-		 if (paramFourVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
-		 }
-		 else if (paramThreeVal)
-		 {
-		    paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramFourCheckBox->Enable();
-		    param4TextCtrl->Enable();
-		    units4StaticText->Enable();
+      if (paramTwoVal)
+      {
+         if (paramFourVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
+         }
+         else if (paramThreeVal)
+         {
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
+         }
+         else
+         {
+            paramFourCheckBox->Enable();
+            param4TextCtrl->Enable();
+            units4StaticText->Enable();
 
-		    paramThreeCheckBox->Enable();
-		    param3TextCtrl->Enable();
-		    units3StaticText->Enable();
-		 }
-	  }
-	  else
-	  {
-	     paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+            paramThreeCheckBox->Enable();
+            param3TextCtrl->Enable();
+            units3StaticText->Enable();
+         }
+      }
+      else
+      {
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
-	  }
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
+      }
    }
 }
 
@@ -820,264 +820,264 @@ void OrbitDesignerDialog::OnP3CheckBoxChange(wxCommandEvent& event)
    if (orbitType == "Sun Sync")
    {
       if (paramThreeVal)
-	  {
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+      {
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-		    paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramTwoVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFourVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFourVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFiveVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFiveVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSixVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSixVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSevenVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSevenVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-	  }
-	  else
-	  {
-		 if (paramTwoVal)
-		 {
-		    paramOneCheckBox->Disable();
-		    param1TextCtrl->Disable();
-		    units1StaticText->Disable();
-		 }
-		 else
-		 {
-			paramOneCheckBox->Enable();
-		    param1TextCtrl->Enable();
-		    units1StaticText->Enable();
-		 }
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+      }
+      else
+      {
+         if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
+         }
+         else
+         {
+            paramOneCheckBox->Enable();
+            param1TextCtrl->Enable();
+            units1StaticText->Enable();
+         }
    
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-		    param2TextCtrl->Disable();
-		    units2StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramTwoCheckBox->Enable();
-		    param2TextCtrl->Enable();
-		    units2StaticText->Enable();
-		 }
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
+         }
+         else
+         {
+            paramTwoCheckBox->Enable();
+            param2TextCtrl->Enable();
+            units2StaticText->Enable();
+         }
 
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
 
-		 paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
 
-		 paramSixCheckBox->Enable();
-		 param6TextCtrl->Enable();
-		 units6StaticText->Enable();
+         paramSixCheckBox->Enable();
+         param6TextCtrl->Enable();
+         units6StaticText->Enable();
 
-		 paramSevenCheckBox->Enable();
-		 param7TextCtrl->Enable();
-		 units7StaticText->Enable();
-	  }
+         paramSevenCheckBox->Enable();
+         param7TextCtrl->Enable();
+         units7StaticText->Enable();
+      }
    }
    else if (orbitType == "Repeat Sun Sync")
    {
-	  if (paramThreeVal)
-	  {
-		 if (paramFourVal)
-		 {
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
-		 }
-		 else if (paramTwoVal)
-		 {
-		    paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramFourCheckBox->Enable();
-		    param4TextCtrl->Enable();
-		    units4StaticText->Enable();
+      if (paramThreeVal)
+      {
+         if (paramFourVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
+         }
+         else if (paramTwoVal)
+         {
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
+         }
+         else
+         {
+            paramFourCheckBox->Enable();
+            param4TextCtrl->Enable();
+            units4StaticText->Enable();
 
-		    paramTwoCheckBox->Enable();
-		    param1TextCtrl->Enable();
-		    units1StaticText->Enable();
-		 }
-	  }
-	  else
-	  {
-	     paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+            paramTwoCheckBox->Enable();
+            param1TextCtrl->Enable();
+            units1StaticText->Enable();
+         }
+      }
+      else
+      {
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramTwoCheckBox->Enable();
-		 param2TextCtrl->Enable();
-		 units2StaticText->Enable();
-	  }
+         paramTwoCheckBox->Enable();
+         param2TextCtrl->Enable();
+         units2StaticText->Enable();
+      }
    }
    else if (orbitType == "Repeat Ground Track")
    {
-	  if (paramThreeVal)
-	  {
-		 if (paramFourVal)
-		 {
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
-		 }
-		 else if (paramFiveVal)
-		 {
-		    paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
-		 }
-		 else
-		 {
-			paramFourCheckBox->Enable();
-		    param4TextCtrl->Enable();
-		    units4StaticText->Enable();
+      if (paramThreeVal)
+      {
+         if (paramFourVal)
+         {
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
+         }
+         else if (paramFiveVal)
+         {
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
+         }
+         else
+         {
+            paramFourCheckBox->Enable();
+            param4TextCtrl->Enable();
+            units4StaticText->Enable();
 
-		    paramFiveCheckBox->Enable();
-		    param5TextCtrl->Enable();
-		    units5StaticText->Enable();
-		 }
-	  }
-	  else
-	  {
-	     paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+            paramFiveCheckBox->Enable();
+            param5TextCtrl->Enable();
+            units5StaticText->Enable();
+         }
+      }
+      else
+      {
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
-	  }
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
+      }
    }
 }
 
@@ -1087,264 +1087,264 @@ void OrbitDesignerDialog::OnP4CheckBoxChange(wxCommandEvent& event)
    if (orbitType == "Sun Sync")
    {
       if (paramFourVal)
-	  {
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+      {
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-		    paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramTwoVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramThreeVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramThreeVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFiveVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFiveVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSixVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSixVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSevenVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSevenVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-	  }
-	  else
-	  {
-		 if (paramTwoVal)
-		 {
-		    paramOneCheckBox->Disable();
-		    param1TextCtrl->Disable();
-		    units1StaticText->Disable();
-		 }
-		 else
-		 {
-			paramOneCheckBox->Enable();
-		    param1TextCtrl->Enable();
-		    units1StaticText->Enable();
-		 }
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+      }
+      else
+      {
+         if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
+         }
+         else
+         {
+            paramOneCheckBox->Enable();
+            param1TextCtrl->Enable();
+            units1StaticText->Enable();
+         }
    
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-		    param2TextCtrl->Disable();
-		    units2StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramTwoCheckBox->Enable();
-		    param2TextCtrl->Enable();
-		    units2StaticText->Enable();
-		 }
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
+         }
+         else
+         {
+            paramTwoCheckBox->Enable();
+            param2TextCtrl->Enable();
+            units2StaticText->Enable();
+         }
 
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
 
-		 paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
 
-		 paramSixCheckBox->Enable();
-		 param6TextCtrl->Enable();
-		 units6StaticText->Enable();
+         paramSixCheckBox->Enable();
+         param6TextCtrl->Enable();
+         units6StaticText->Enable();
 
-		 paramSevenCheckBox->Enable();
-		 param7TextCtrl->Enable();
-		 units7StaticText->Enable();
-	  }
+         paramSevenCheckBox->Enable();
+         param7TextCtrl->Enable();
+         units7StaticText->Enable();
+      }
    }
    else if (orbitType == "Repeat Sun Sync")
    {
-	  if (paramFourVal)
-	  {
-		 if (paramThreeVal)
-		 {
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
-		 }
-		 else if (paramTwoVal)
-		 {
-		    paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramThreeCheckBox->Enable();
-		    param3TextCtrl->Enable();
-		    units3StaticText->Enable();
+      if (paramFourVal)
+      {
+         if (paramThreeVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
+         }
+         else if (paramTwoVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
+         }
+         else
+         {
+            paramThreeCheckBox->Enable();
+            param3TextCtrl->Enable();
+            units3StaticText->Enable();
 
-		    paramTwoCheckBox->Enable();
-		    param1TextCtrl->Enable();
-		    units1StaticText->Enable();
-		 }
-	  }
-	  else
-	  {
-	     paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
+            paramTwoCheckBox->Enable();
+            param1TextCtrl->Enable();
+            units1StaticText->Enable();
+         }
+      }
+      else
+      {
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
 
-		 paramTwoCheckBox->Enable();
-		 param2TextCtrl->Enable();
-		 units2StaticText->Enable();
-	  }
+         paramTwoCheckBox->Enable();
+         param2TextCtrl->Enable();
+         units2StaticText->Enable();
+      }
    }
    else if (orbitType == "Repeat Ground Track")
    {
-	  if (paramFourVal)
-	  {
-		 if (paramFiveVal)
-		 {
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
-		 }
-		 else if (paramThreeVal)
-		 {
-		    paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramThreeCheckBox->Enable();
-		    param3TextCtrl->Enable();
-		    units3StaticText->Enable();
+      if (paramFourVal)
+      {
+         if (paramFiveVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
+         }
+         else if (paramThreeVal)
+         {
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
+         }
+         else
+         {
+            paramThreeCheckBox->Enable();
+            param3TextCtrl->Enable();
+            units3StaticText->Enable();
 
-		    paramFiveCheckBox->Enable();
-		    param5TextCtrl->Enable();
-		    units5StaticText->Enable();
-		 }
-	  }
-	  else
-	  {
-	     paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
+            paramFiveCheckBox->Enable();
+            param5TextCtrl->Enable();
+            units5StaticText->Enable();
+         }
+      }
+      else
+      {
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
 
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
-	  }
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
+      }
    }
 }
 
@@ -1354,226 +1354,226 @@ void OrbitDesignerDialog::OnP5CheckBoxChange(wxCommandEvent& event)
    if (orbitType == "Sun Sync")
    {
       if (paramFiveVal)
-	  {
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+      {
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-		    paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramTwoVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramThreeVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramThreeVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFourVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFourVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSixVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSixVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSevenVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSevenVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-	  }
-	  else
-	  {
-		 if (paramTwoVal)
-		 {
-		    paramOneCheckBox->Disable();
-		    param1TextCtrl->Disable();
-		    units1StaticText->Disable();
-		 }
-		 else
-		 {
-			paramOneCheckBox->Enable();
-		    param1TextCtrl->Enable();
-		    units1StaticText->Enable();
-		 }
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+      }
+      else
+      {
+         if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
+         }
+         else
+         {
+            paramOneCheckBox->Enable();
+            param1TextCtrl->Enable();
+            units1StaticText->Enable();
+         }
    
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-		    param2TextCtrl->Disable();
-		    units2StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramTwoCheckBox->Enable();
-		    param2TextCtrl->Enable();
-		    units2StaticText->Enable();
-		 }
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
+         }
+         else
+         {
+            paramTwoCheckBox->Enable();
+            param2TextCtrl->Enable();
+            units2StaticText->Enable();
+         }
 
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
 
-		 paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
 
-		 paramSixCheckBox->Enable();
-		 param6TextCtrl->Enable();
-		 units6StaticText->Enable();
+         paramSixCheckBox->Enable();
+         param6TextCtrl->Enable();
+         units6StaticText->Enable();
 
-		 paramSevenCheckBox->Enable();
-		 param7TextCtrl->Enable();
-		 units7StaticText->Enable();
-	  }
+         paramSevenCheckBox->Enable();
+         param7TextCtrl->Enable();
+         units7StaticText->Enable();
+      }
    }
    else if (orbitType == "Repeat Ground Track")
    {
-	  if (paramFiveVal)
-	  {
-		 if (paramThreeVal)
-		 {
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
-		 }
-		 else if (paramFourVal)
-		 {
-		    paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramFourCheckBox->Enable();
-		    param4TextCtrl->Enable();
-		    units4StaticText->Enable();
+      if (paramFiveVal)
+      {
+         if (paramThreeVal)
+         {
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
+         }
+         else if (paramFourVal)
+         {
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
+         }
+         else
+         {
+            paramFourCheckBox->Enable();
+            param4TextCtrl->Enable();
+            units4StaticText->Enable();
 
-		    paramThreeCheckBox->Enable();
-		    param3TextCtrl->Enable();
-		    units3StaticText->Enable();
-		 }
-	  }
-	  else
-	  {
-	     paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+            paramThreeCheckBox->Enable();
+            param3TextCtrl->Enable();
+            units3StaticText->Enable();
+         }
+      }
+      else
+      {
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
-	  }
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
+      }
    }
 }
 
@@ -1583,188 +1583,188 @@ void OrbitDesignerDialog::OnP6CheckBoxChange(wxCommandEvent& event)
    if (orbitType == "Sun Sync")
    {
       if (paramSixVal)
-	  {
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+      {
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-		    paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramTwoVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramThreeVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramThreeVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFourVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFourVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramFiveVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramFiveVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSevenCheckBox->Disable();
-			param7TextCtrl->Disable();
-			units7StaticText->Disable();
-		 }
-		 else if (paramSevenVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSevenCheckBox->Disable();
+            param7TextCtrl->Disable();
+            units7StaticText->Disable();
+         }
+         else if (paramSevenVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
-		 }
-	  }
-	  else
-	  {
-		 if (paramTwoVal)
-		 {
-		    paramOneCheckBox->Disable();
-		    param1TextCtrl->Disable();
-		    units1StaticText->Disable();
-		 }
-		 else
-		 {
-			paramOneCheckBox->Enable();
-		    param1TextCtrl->Enable();
-		    units1StaticText->Enable();
-		 }
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
+         }
+      }
+      else
+      {
+         if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
+         }
+         else
+         {
+            paramOneCheckBox->Enable();
+            param1TextCtrl->Enable();
+            units1StaticText->Enable();
+         }
    
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-		    param2TextCtrl->Disable();
-		    units2StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramTwoCheckBox->Enable();
-		    param2TextCtrl->Enable();
-		    units2StaticText->Enable();
-		 }
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
+         }
+         else
+         {
+            paramTwoCheckBox->Enable();
+            param2TextCtrl->Enable();
+            units2StaticText->Enable();
+         }
 
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
 
-		 paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
 
-		 paramSixCheckBox->Enable();
-		 param6TextCtrl->Enable();
-		 units6StaticText->Enable();
+         paramSixCheckBox->Enable();
+         param6TextCtrl->Enable();
+         units6StaticText->Enable();
 
-		 paramSevenCheckBox->Enable();
-		 param7TextCtrl->Enable();
-		 units7StaticText->Enable();
-	  }
+         paramSevenCheckBox->Enable();
+         param7TextCtrl->Enable();
+         units7StaticText->Enable();
+      }
    }
 }
 
@@ -1774,188 +1774,188 @@ void OrbitDesignerDialog::OnP7CheckBoxChange(wxCommandEvent& event)
    if (orbitType == "Sun Sync")
    {
       if (paramSevenVal)
-	  {
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+      {
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-		    paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-		 else if (paramTwoVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+         else if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-		 else if (paramThreeVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+         else if (paramThreeVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-		 else if (paramFourVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+         else if (paramFourVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-		 else if (paramFiveVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+         else if (paramFiveVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramSixCheckBox->Disable();
-			param6TextCtrl->Disable();
-			units6StaticText->Disable();
-		 }
-		 else if (paramSixVal)
-		 {
-			paramOneCheckBox->Disable();
-			param1TextCtrl->Disable();
-			units1StaticText->Disable();
+            paramSixCheckBox->Disable();
+            param6TextCtrl->Disable();
+            units6StaticText->Disable();
+         }
+         else if (paramSixVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
 
-			paramTwoCheckBox->Disable();
-			param2TextCtrl->Disable();
-			units2StaticText->Disable();
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
 
-			paramThreeCheckBox->Disable();
-			param3TextCtrl->Disable();
-			units3StaticText->Disable();
+            paramThreeCheckBox->Disable();
+            param3TextCtrl->Disable();
+            units3StaticText->Disable();
 
-			paramFourCheckBox->Disable();
-			param4TextCtrl->Disable();
-			units4StaticText->Disable();
+            paramFourCheckBox->Disable();
+            param4TextCtrl->Disable();
+            units4StaticText->Disable();
 
-			paramFiveCheckBox->Disable();
-			param5TextCtrl->Disable();
-			units5StaticText->Disable();
-		 }
-	  }
-	  else
-	  {
-		 if (paramTwoVal)
-		 {
-		    paramOneCheckBox->Disable();
-		    param1TextCtrl->Disable();
-		    units1StaticText->Disable();
-		 }
-		 else
-		 {
-			paramOneCheckBox->Enable();
-		    param1TextCtrl->Enable();
-		    units1StaticText->Enable();
-		 }
+            paramFiveCheckBox->Disable();
+            param5TextCtrl->Disable();
+            units5StaticText->Disable();
+         }
+      }
+      else
+      {
+         if (paramTwoVal)
+         {
+            paramOneCheckBox->Disable();
+            param1TextCtrl->Disable();
+            units1StaticText->Disable();
+         }
+         else
+         {
+            paramOneCheckBox->Enable();
+            param1TextCtrl->Enable();
+            units1StaticText->Enable();
+         }
    
-		 if (paramOneVal)
-		 {
-			paramTwoCheckBox->Disable();
-		    param2TextCtrl->Disable();
-		    units2StaticText->Disable();
-		 }
-		 else
-		 {
-		    paramTwoCheckBox->Enable();
-		    param2TextCtrl->Enable();
-		    units2StaticText->Enable();
-		 }
+         if (paramOneVal)
+         {
+            paramTwoCheckBox->Disable();
+            param2TextCtrl->Disable();
+            units2StaticText->Disable();
+         }
+         else
+         {
+            paramTwoCheckBox->Enable();
+            param2TextCtrl->Enable();
+            units2StaticText->Enable();
+         }
 
-		 paramThreeCheckBox->Enable();
-		 param3TextCtrl->Enable();
-		 units3StaticText->Enable();
+         paramThreeCheckBox->Enable();
+         param3TextCtrl->Enable();
+         units3StaticText->Enable();
 
-		 paramFourCheckBox->Enable();
-		 param4TextCtrl->Enable();
-		 units4StaticText->Enable();
+         paramFourCheckBox->Enable();
+         param4TextCtrl->Enable();
+         units4StaticText->Enable();
 
-		 paramFiveCheckBox->Enable();
-		 param5TextCtrl->Enable();
-		 units5StaticText->Enable();
+         paramFiveCheckBox->Enable();
+         param5TextCtrl->Enable();
+         units5StaticText->Enable();
 
-		 paramSixCheckBox->Enable();
-		 param6TextCtrl->Enable();
-		 units6StaticText->Enable();
+         paramSixCheckBox->Enable();
+         param6TextCtrl->Enable();
+         units6StaticText->Enable();
 
-		 paramSevenCheckBox->Enable();
-		 param7TextCtrl->Enable();
-		 units7StaticText->Enable();
-	  }
+         paramSevenCheckBox->Enable();
+         param7TextCtrl->Enable();
+         units7StaticText->Enable();
+      }
    }
 }
 
@@ -1964,31 +1964,31 @@ void OrbitDesignerDialog::OnTP1CheckBoxChange(wxCommandEvent& event)
    timeParamOneVal = timeParamOneCheckBox->GetValue();
    if (timeParamOneVal)
    {
-	  time1TextCtrl->Enable();
-	  timeUnits1StaticText->Enable();
+      time1TextCtrl->Enable();
+      timeUnits1StaticText->Enable();
 
-	  timeParamTwoCheckBox->Enable();
-	  time2TextCtrl->Enable();
-	  timeUnits2StaticText->Enable();
+      timeParamTwoCheckBox->Enable();
+      time2TextCtrl->Enable();
+      timeUnits2StaticText->Enable();
 
-	  timeParamThreeCheckBox->Enable();
-	  time3TextCtrl->Enable();
-	  timeUnits3StaticText->Enable();
+      timeParamThreeCheckBox->Enable();
+      time3TextCtrl->Enable();
+      timeUnits3StaticText->Enable();
    }
    else
    {
-	  time1TextCtrl->Disable();
-	  timeUnits1StaticText->Disable();
+      time1TextCtrl->Disable();
+      timeUnits1StaticText->Disable();
 
       timeParamTwoCheckBox->Disable();
-	  timeParamTwoCheckBox->SetValue(false);
+      timeParamTwoCheckBox->SetValue(false);
       time2TextCtrl->Disable();
-	  timeUnits2StaticText->Disable();
+      timeUnits2StaticText->Disable();
 
       timeParamThreeCheckBox->Disable();
       timeParamThreeCheckBox->SetValue(false);
-	  time3TextCtrl->Disable();
-	  timeUnits3StaticText->Disable();
+      time3TextCtrl->Disable();
+      timeUnits3StaticText->Disable();
    }
 }
 
@@ -1997,15 +1997,15 @@ void OrbitDesignerDialog::OnTP2CheckBoxChange(wxCommandEvent& event)
    timeParamTwoVal = timeParamTwoCheckBox->GetValue();
    if (timeParamTwoVal)
    {
-	  timeParamThreeCheckBox->Disable();
-	  time3TextCtrl->Disable();
-	  timeUnits3StaticText->Disable();
+      timeParamThreeCheckBox->Disable();
+      time3TextCtrl->Disable();
+      timeUnits3StaticText->Disable();
    }
    else
    {
-	  timeParamThreeCheckBox->Enable();
-	  time3TextCtrl->Enable();
-	  timeUnits3StaticText->Enable();
+      timeParamThreeCheckBox->Enable();
+      time3TextCtrl->Enable();
+      timeUnits3StaticText->Enable();
    }
 }
 
@@ -2014,15 +2014,15 @@ void OrbitDesignerDialog::OnTP3CheckBoxChange(wxCommandEvent& event)
    timeParamThreeVal = timeParamThreeCheckBox->GetValue();
    if (timeParamThreeVal)
    {
-	  timeParamTwoCheckBox->Disable();
-	  time2TextCtrl->Disable();
-	  timeUnits2StaticText->Disable();
+      timeParamTwoCheckBox->Disable();
+      time2TextCtrl->Disable();
+      timeUnits2StaticText->Disable();
    }
    else
    {
-	  timeParamTwoCheckBox->Enable();
-	  time2TextCtrl->Enable();
-	  timeUnits2StaticText->Enable();
+      timeParamTwoCheckBox->Enable();
+      time2TextCtrl->Enable();
+      timeUnits2StaticText->Enable();
    }
 }
 
@@ -2065,7 +2065,7 @@ void OrbitDesignerDialog::OnParamChange(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == time1TextCtrl)
    {
-	  timeIn1Val = time1TextCtrl->GetValue();
+      timeIn1Val = time1TextCtrl->GetValue();
    }
    else if (event.GetEventObject() == time2TextCtrl)
    {
@@ -2074,7 +2074,7 @@ void OrbitDesignerDialog::OnParamChange(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == time3TextCtrl)
    {
-	  timeIn3Val=time3TextCtrl->GetValue();
+      timeIn3Val=time3TextCtrl->GetValue();
    }
 
 }
@@ -2085,261 +2085,261 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
 
    if (orbitType == "Sun Sync")
    {
-	  orbitSS.CalculateSunSync(paramOneVal, input1Val, paramTwoVal, input2Val, paramThreeVal, 
-		 input3Val, paramFourVal, input4Val, paramFiveVal, input5Val, paramSixVal, input6Val, 
-		 paramSevenVal, input7Val);
-	  if (orbitSS.IsError())
-	  {
-		 mIsOrbitChanged = false;
-		 canClose = false;
-		 MessageInterface::PopupMessage(Gmat::ERROR_, orbitSS.GetError());
-		 return;
-	  }
+      orbitSS.CalculateSunSync(paramOneVal, input1Val, paramTwoVal, input2Val, paramThreeVal, 
+                               input3Val, paramFourVal, input4Val, paramFiveVal, input5Val, paramSixVal, input6Val, 
+                               paramSevenVal, input7Val);
+      if (orbitSS.IsError())
+      {
+         mIsOrbitChanged = false;
+         canClose = false;
+         MessageInterface::PopupMessage(Gmat::ERROR_, orbitSS.GetError());
+         return;
+      }
       wxString sma;
-	  sma.Printf("%.16f", orbitSS.GetSMA());
-	  output1TextCtrl->SetValue(sma);
-	  wxString alt;
-	  alt.Printf("%.16f", orbitSS.GetALT());
-	  output2TextCtrl->SetValue(alt);
-	  wxString ecc;
-	  ecc.Printf("%.16f", orbitSS.GetECC());
-	  output3TextCtrl->SetValue(ecc);
-	  wxString inc;
-	  inc.Printf("%.16f", orbitSS.GetINC());
-	  output4TextCtrl->SetValue(inc);
-	  wxString rop;
-	  rop.Printf("%.16f", orbitSS.GetROP());
-	  output5TextCtrl->SetValue(rop);
-	  wxString roa;
-	  roa.Printf("%.16f", orbitSS.GetROA());
-	  output6TextCtrl->SetValue(roa);
-	  wxString p;
-	  p.Printf("%.16f", orbitSS.GetP());
-	  output7TextCtrl->SetValue(p);
+      sma.Printf("%.16f", orbitSS.GetSMA());
+      output1TextCtrl->SetValue(sma);
+      wxString alt;
+      alt.Printf("%.16f", orbitSS.GetALT());
+      output2TextCtrl->SetValue(alt);
+      wxString ecc;
+      ecc.Printf("%.16f", orbitSS.GetECC());
+      output3TextCtrl->SetValue(ecc);
+      wxString inc;
+      inc.Printf("%.16f", orbitSS.GetINC());
+      output4TextCtrl->SetValue(inc);
+      wxString rop;
+      rop.Printf("%.16f", orbitSS.GetROP());
+      output5TextCtrl->SetValue(rop);
+      wxString roa;
+      roa.Printf("%.16f", orbitSS.GetROA());
+      output6TextCtrl->SetValue(roa);
+      wxString p;
+      p.Printf("%.16f", orbitSS.GetP());
+      output7TextCtrl->SetValue(p);
 
-	  mIsOrbitChanged = true;
+      mIsOrbitChanged = true;
    }
    else if (orbitType == "Repeat Sun Sync")
    {
-	  orbitRSS.CalculateRepeatSunSync(paramOneVal, input1Val, paramTwoVal, input2Val, paramThreeVal,
-		                              input3Val, paramFourVal, input4Val);
-	  if (orbitRSS.IsError())
-	  {
-		 canClose = false;
-		 mIsOrbitChanged = false;
-		 MessageInterface::PopupMessage(Gmat::ERROR_, orbitRSS.GetError());
-		 return;
-	  }
-	  wxString sma;
-	  sma.Printf("%.16f", orbitRSS.GetSMA());
-	  output1TextCtrl->SetValue(sma);
-	  wxString alt;
-	  alt.Printf("%.16f", orbitRSS.GetALT());
+      orbitRSS.CalculateRepeatSunSync(paramOneVal, input1Val, paramTwoVal, input2Val, paramThreeVal,
+                                      input3Val, paramFourVal, input4Val);
+      if (orbitRSS.IsError())
+      {
+         canClose = false;
+         mIsOrbitChanged = false;
+         MessageInterface::PopupMessage(Gmat::ERROR_, orbitRSS.GetError());
+         return;
+      }
+      wxString sma;
+      sma.Printf("%.16f", orbitRSS.GetSMA());
+      output1TextCtrl->SetValue(sma);
+      wxString alt;
+      alt.Printf("%.16f", orbitRSS.GetALT());
       output2TextCtrl->SetValue(alt);
-	  wxString ecc;
+      wxString ecc;
       ecc.Printf("%.16f", orbitRSS.GetECC());
       output3TextCtrl->SetValue(ecc);
-	  wxString inc;
-	  inc.Printf("%.16f", orbitRSS.GetINC());
-	  output4TextCtrl->SetValue(inc);
-	  wxString rop;
-	  rop.Printf("%.16f", orbitRSS.GetROP());
-	  output5TextCtrl->SetValue(rop);
-	  wxString roa;
-	  roa.Printf("%.16f", orbitRSS.GetROA());
-	  output6TextCtrl->SetValue(roa);
-	  wxString p;
-	  p.Printf("%.16f", orbitRSS.GetP());
-	  output7TextCtrl->SetValue(p);
+      wxString inc;
+      inc.Printf("%.16f", orbitRSS.GetINC());
+      output4TextCtrl->SetValue(inc);
+      wxString rop;
+      rop.Printf("%.16f", orbitRSS.GetROP());
+      output5TextCtrl->SetValue(rop);
+      wxString roa;
+      roa.Printf("%.16f", orbitRSS.GetROA());
+      output6TextCtrl->SetValue(roa);
+      wxString p;
+      p.Printf("%.16f", orbitRSS.GetP());
+      output7TextCtrl->SetValue(p);
 
-	  mIsOrbitChanged = true;
+      mIsOrbitChanged = true;
    }
    else if (orbitType == "Repeat Ground Track")
    {
-	  orbitRGT.CalculateRepeatGroundTrack(paramOneVal, input1Val, paramTwoVal, input2Val, 
-		                                  paramThreeVal, input3Val, paramFourVal, input4Val, 
-										  paramFiveVal, input5Val);
-	  if (orbitRGT.IsError())
-	  {
-		 canClose = false;
-		 mIsOrbitChanged = false;
-		 MessageInterface::PopupMessage(Gmat::ERROR_, orbitRGT.GetError());
-		 return;
-	  }
-	  wxString sma;
-	  sma.Printf("%.16f", orbitRGT.GetSMA());
-	  output1TextCtrl->SetValue(sma);
-	  wxString alt;
-	  alt.Printf("%.16f", orbitRGT.GetALT());
+      orbitRGT.CalculateRepeatGroundTrack(paramOneVal, input1Val, paramTwoVal, input2Val, 
+                                          paramThreeVal, input3Val, paramFourVal, input4Val, 
+                                          paramFiveVal, input5Val);
+      if (orbitRGT.IsError())
+      {
+         canClose = false;
+         mIsOrbitChanged = false;
+         MessageInterface::PopupMessage(Gmat::ERROR_, orbitRGT.GetError());
+         return;
+      }
+      wxString sma;
+      sma.Printf("%.16f", orbitRGT.GetSMA());
+      output1TextCtrl->SetValue(sma);
+      wxString alt;
+      alt.Printf("%.16f", orbitRGT.GetALT());
       output2TextCtrl->SetValue(alt);
-	  wxString ecc;
+      wxString ecc;
       ecc.Printf("%.16f", orbitRGT.GetECC());
       output3TextCtrl->SetValue(ecc);
-	  wxString inc;
-	  inc.Printf("%.16f", orbitRGT.GetINC());
-	  output4TextCtrl->SetValue(inc);
-	  wxString rop;
-	  rop.Printf("%.16f", orbitRGT.GetROP());
-	  output5TextCtrl->SetValue(rop);
-	  wxString roa;
-	  roa.Printf("%.16f", orbitRGT.GetROA());
-	  output6TextCtrl->SetValue(roa);
-	  wxString p;
-	  p.Printf("%.16f", orbitRGT.GetP());
-	  output7TextCtrl->SetValue(p);
+      wxString inc;
+      inc.Printf("%.16f", orbitRGT.GetINC());
+      output4TextCtrl->SetValue(inc);
+      wxString rop;
+      rop.Printf("%.16f", orbitRGT.GetROP());
+      output5TextCtrl->SetValue(rop);
+      wxString roa;
+      roa.Printf("%.16f", orbitRGT.GetROA());
+      output6TextCtrl->SetValue(roa);
+      wxString p;
+      p.Printf("%.16f", orbitRGT.GetP());
+      output7TextCtrl->SetValue(p);
 
-	  mIsOrbitChanged = true;
+      mIsOrbitChanged = true;
    }
    else if (orbitType == "Frozen")
    {
       orbitFZN.CalculateFrozen(input1Val, paramOneVal, input2Val, paramTwoVal);
-	  if (orbitFZN.IsError())
-	  {
-		 canClose = false;
-		 mIsOrbitChanged = false;
-		 MessageInterface::PopupMessage(Gmat::ERROR_, orbitFZN.GetError());
-		 return;
-	  }
-	  wxString sma;
-	  sma.Printf("%.16f", orbitFZN.GetSMA());
-	  output1TextCtrl->SetValue(sma);
-	  wxString aalt;
-	  aalt.Printf("%.16f", orbitFZN.GetAALT());
-	  output2TextCtrl->SetValue(aalt);
-	  wxString palt;
-	  palt.Printf("%.16f", orbitFZN.GetPALT());
-	  output3TextCtrl->SetValue(palt);
-	  wxString ecc;
-	  ecc.Printf("%.16f", orbitFZN.GetECC());
-	  output4TextCtrl->SetValue(ecc);
+      if (orbitFZN.IsError())
+      {
+         canClose = false;
+         mIsOrbitChanged = false;
+         MessageInterface::PopupMessage(Gmat::ERROR_, orbitFZN.GetError());
+         return;
+      }
+      wxString sma;
+      sma.Printf("%.16f", orbitFZN.GetSMA());
+      output1TextCtrl->SetValue(sma);
+      wxString aalt;
+      aalt.Printf("%.16f", orbitFZN.GetAALT());
+      output2TextCtrl->SetValue(aalt);
+      wxString palt;
+      palt.Printf("%.16f", orbitFZN.GetPALT());
+      output3TextCtrl->SetValue(palt);
+      wxString ecc;
+      ecc.Printf("%.16f", orbitFZN.GetECC());
+      output4TextCtrl->SetValue(ecc);
 
-	  mIsOrbitChanged = true;
+      mIsOrbitChanged = true;
    }
 
    if (timeParamOneVal)
    {
-	  std::string str = time1TextCtrl->GetValue();
-	  orbitTime.SetEpoch(str);
-	  if ((epochType == "UTCGregorian") || (epochType == "A1Gregorian") || 
-		 (epochType == "TAIGregorian") || (epochType == "TTGregorian"))
-	  {
-	     if(!validator.CheckTimeFormatAndValue("UTCGregorian", str, "Epoch"))
-		    return;
-	  }
-	  else
-	  {
-	     if(!validator.CheckTimeFormatAndValue("UTCModJulian", str, "Epoch"))
-		    return;
-	  }
-	  if (orbitType == "Geostationary")
-	  {
-		 orbitTime = OrbitDesignerTime(std::string(timeIn1Val), std::string(epochType), 
-			                           timeParamTwoVal, timeIn2Val, timeParamThreeVal, 
-									   std::string(timeIn3Val));
-	     if (!timeParamTwoVal && timeParamThreeVal)
-	     {
-			str = "01 Jan 2000 " + time3TextCtrl->GetValue();
-		    if(!validator.CheckTimeFormatAndValue("UTCGregorian", str, "Initial Local Sidereal Time"))
-		       return;
-			orbitTime.FindRAAN();
-			if (orbitTime.IsError())
-	        {
-			   isEpochChanged = false;
-			   mIsOrbitChanged = false;
-		       canClose = false;
-		       MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
-		       return;
-	        }
-			Real lonVal = orbitTime.GetRAAN();
-			if (lonVal>180)
-				lonVal = lonVal-360;
-			wxString lon;
-	        lon.Printf("%.16f", lonVal);//use value of raan for value of lon in geosynchronous case
-			timeOut2TextCtrl->SetValue(lon);//TA
-		    timeOut3TextCtrl->SetValue(time3TextCtrl->GetValue());//start time
-			timeOut4TextCtrl->SetValue(lon);//longitude
-		 }
-		 else if (timeParamTwoVal && !timeParamThreeVal)
-	     {
+      std::string str = time1TextCtrl->GetValue().c_str();
+      orbitTime.SetEpoch(str);
+      if ((epochType == "UTCGregorian") || (epochType == "A1Gregorian") || 
+          (epochType == "TAIGregorian") || (epochType == "TTGregorian"))
+      {
+         if(!validator.CheckTimeFormatAndValue("UTCGregorian", str, "Epoch"))
+            return;
+      }
+      else
+      {
+         if(!validator.CheckTimeFormatAndValue("UTCModJulian", str, "Epoch"))
+            return;
+      }
+      if (orbitType == "Geostationary")
+      {
+         orbitTime = OrbitDesignerTime(std::string(timeIn1Val), std::string(epochType), 
+                                       timeParamTwoVal, timeIn2Val, timeParamThreeVal, 
+                                       std::string(timeIn3Val));
+         if (!timeParamTwoVal && timeParamThreeVal)
+         {
+            str = "01 Jan 2000 " + time3TextCtrl->GetValue();
+            if(!validator.CheckTimeFormatAndValue("UTCGregorian", str, "Initial Local Sidereal Time"))
+               return;
+            orbitTime.FindRAAN();
+            if (orbitTime.IsError())
+            {
+               isEpochChanged = false;
+               mIsOrbitChanged = false;
+               canClose = false;
+               MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
+               return;
+            }
+            Real lonVal = orbitTime.GetRAAN();
+            if (lonVal>180)
+               lonVal = lonVal-360;
+            wxString lon;
+            lon.Printf("%.16f", lonVal);//use value of raan for value of lon in geosynchronous case
+            timeOut2TextCtrl->SetValue(lon);//TA
+            timeOut3TextCtrl->SetValue(time3TextCtrl->GetValue());//start time
+            timeOut4TextCtrl->SetValue(lon);//longitude
+         }
+         else if (timeParamTwoVal && !timeParamThreeVal)
+         {
             timeOut2TextCtrl->SetValue(time2TextCtrl->GetValue());//TA
-			Real lon;
-			std::string s = time2TextCtrl->GetValue();
-			GmatStringUtil::ToReal(s, lon);
-			std::string start = orbitTime.FindStartTime(true, lon);
-			if (orbitTime.IsError())
-	        {
-			   isEpochChanged = false;
-		       canClose = false;
-			   mIsOrbitChanged = false;
-		       MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
-		       return;
-	        }
-			timeOut3TextCtrl->SetValue(start);//start time
-			timeOut4TextCtrl->SetValue(time2TextCtrl->GetValue());//longitude
-	     }
-		 else
-		 {
-	        timeOut2TextCtrl->SetValue("");//TA
-			timeOut3TextCtrl->SetValue("");//start time
-			timeOut4TextCtrl->SetValue("");//longitude
-		 }
-		 timeOut1TextCtrl->SetValue(time1TextCtrl->GetValue());//epoch
-		 isEpochChanged = true;
-		 mIsOrbitChanged = true;
-	  }
-	  else
-	  {
-	     orbitTime = OrbitDesignerTime(std::string(timeIn1Val), std::string(epochType), 
-			                           timeParamTwoVal, timeIn2Val, timeParamThreeVal, 
-									   std::string(timeIn3Val));
-	     timeOut1TextCtrl->SetValue(orbitTime.GetEpoch());
-		 std::string start = orbitTime.GetStartTime();
-	     if (!timeParamTwoVal && timeParamThreeVal)
-	     {
-	        orbitTime.FindRAAN();
-			if (orbitTime.IsError())
-	        {
-			   isEpochChanged = false;
-		       canClose = false;
-			   mIsOrbitChanged = false;
-		       MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
-		       return;
-	        }
-			wxString raan;
-	        raan.Printf("%.16f", orbitTime.GetRAAN());
-	        timeOut2TextCtrl->SetValue(raan);
-			timeOut3TextCtrl->SetValue(start);
-	     }
-	     else if (timeParamTwoVal && !timeParamThreeVal)
-	     {
-		    start = orbitTime.FindStartTime();
-			if (orbitTime.IsError())
-	        {
-			   isEpochChanged = false;
-		       canClose = false;
-			   mIsOrbitChanged = false;
-		       MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
-		       return;
-	        }
-			wxString raan;
-	        raan.Printf("%.16f", orbitTime.GetRAAN());
-	        timeOut2TextCtrl->SetValue(raan);
-			timeOut3TextCtrl->SetValue(start);
-	     }
-	     else
-	     {
-		    orbitTime.SetRAAN(theSpacecraft->GetRealParameter(10009));
-			timeOut2TextCtrl->SetValue("");
-			timeOut3TextCtrl->SetValue("");
-	     }
-	          
-	     isEpochChanged = true;
-	  }
+            Real lon;
+            std::string s = time2TextCtrl->GetValue().c_str();
+            GmatStringUtil::ToReal(s, lon);
+            std::string start = orbitTime.FindStartTime(true, lon);
+            if (orbitTime.IsError())
+            {
+               isEpochChanged = false;
+               canClose = false;
+               mIsOrbitChanged = false;
+               MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
+               return;
+            }
+            timeOut3TextCtrl->SetValue(start);//start time
+            timeOut4TextCtrl->SetValue(time2TextCtrl->GetValue());//longitude
+         }
+         else
+         {
+            timeOut2TextCtrl->SetValue("");//TA
+            timeOut3TextCtrl->SetValue("");//start time
+            timeOut4TextCtrl->SetValue("");//longitude
+         }
+         timeOut1TextCtrl->SetValue(time1TextCtrl->GetValue());//epoch
+         isEpochChanged = true;
+         mIsOrbitChanged = true;
+      }
+      else
+      {
+         orbitTime = OrbitDesignerTime(std::string(timeIn1Val), std::string(epochType), 
+                                       timeParamTwoVal, timeIn2Val, timeParamThreeVal, 
+                                       std::string(timeIn3Val));
+         timeOut1TextCtrl->SetValue(orbitTime.GetEpoch());
+         std::string start = orbitTime.GetStartTime();
+         if (!timeParamTwoVal && timeParamThreeVal)
+         {
+            orbitTime.FindRAAN();
+            if (orbitTime.IsError())
+            {
+               isEpochChanged = false;
+               canClose = false;
+               mIsOrbitChanged = false;
+               MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
+               return;
+            }
+            wxString raan;
+            raan.Printf("%.16f", orbitTime.GetRAAN());
+            timeOut2TextCtrl->SetValue(raan);
+            timeOut3TextCtrl->SetValue(start);
+         }
+         else if (timeParamTwoVal && !timeParamThreeVal)
+         {
+            start = orbitTime.FindStartTime();
+            if (orbitTime.IsError())
+            {
+               isEpochChanged = false;
+               canClose = false;
+               mIsOrbitChanged = false;
+               MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
+               return;
+            }
+            wxString raan;
+            raan.Printf("%.16f", orbitTime.GetRAAN());
+            timeOut2TextCtrl->SetValue(raan);
+            timeOut3TextCtrl->SetValue(start);
+         }
+         else
+         {
+            orbitTime.SetRAAN(theSpacecraft->GetRealParameter(10009));
+            timeOut2TextCtrl->SetValue("");
+            timeOut3TextCtrl->SetValue("");
+         }
+                  
+         isEpochChanged = true;
+      }
    }
    else
    {
-	  orbitTime.SetRAAN(theSpacecraft->GetRealParameter(10009));
-	  isEpochChanged = false;
+      orbitTime.SetRAAN(theSpacecraft->GetRealParameter(10009));
+      isEpochChanged = false;
    }
 
 }
@@ -2356,13 +2356,13 @@ void OrbitDesignerDialog::OnSummary(wxCommandEvent& event)
       summaryString += "Apogee ALT = ";
       summaryString += output2TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "Perigee ALT = ";
+      summaryString += "Perigee ALT = ";
       summaryString += output3TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "ECC = ";
+      summaryString += "ECC = ";
       summaryString += output4TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "INC = ";
+      summaryString += "INC = ";
       summaryString += param2TextCtrl->GetValue();
       summaryString += "\n";
    }
@@ -2371,26 +2371,26 @@ void OrbitDesignerDialog::OnSummary(wxCommandEvent& event)
       summaryString += "ALT = ";
       summaryString += output2TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "ECC = ";
+      summaryString += "ECC = ";
       summaryString += output3TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "INC = ";
+      summaryString += "INC = ";
       summaryString += output4TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "RP = ";
+      summaryString += "RP = ";
       summaryString += output5TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "RA = ";
+      summaryString += "RA = ";
       summaryString += output6TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "P = ";
+      summaryString += "P = ";
       summaryString += output7TextCtrl->GetValue();
       summaryString += "\n";
    }
 
    if (orbitType == "Molniya")
    {
-	  summaryString += "AOP = ";
+      summaryString += "AOP = ";
       summaryString += output8TextCtrl->GetValue();
       summaryString += "\n";
    }
@@ -2401,28 +2401,28 @@ void OrbitDesignerDialog::OnSummary(wxCommandEvent& event)
 
    if (orbitType == "Geostationary")
    {
-	  summaryString += "RAAN = ";
+      summaryString += "RAAN = ";
       summaryString += output8TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "AOP = ";
+      summaryString += "AOP = ";
       summaryString += output9TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "TA = ";
+      summaryString += "TA = ";
       summaryString += timeOut2TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "Longitude = ";
+      summaryString += "Longitude = ";
       summaryString += timeOut4TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "Initial Local Sidereal Time = ";
+      summaryString += "Initial Local Sidereal Time = ";
       summaryString += timeOut3TextCtrl->GetValue();
       summaryString += "\n";
    }
    else
    {
-	  summaryString += "RAAN = ";
+      summaryString += "RAAN = ";
       summaryString += timeOut2TextCtrl->GetValue();
       summaryString += "\n";
-	  summaryString += "Initial Local Sidereal Time = ";
+      summaryString += "Initial Local Sidereal Time = ";
       summaryString += timeOut3TextCtrl->GetValue();
       summaryString += "\n";
    }
@@ -2443,7 +2443,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param1TextCtrl->Enable();
    param1TextCtrl->SetValue(wxT("7000.0000000000000000"));
    param1TextCtrl->SetToolTip("6478.1363<SMA<8378.1363");
-   std::string in1 = param1TextCtrl->GetValue();
+   std::string in1 = param1TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in1, input1Val);
    units1StaticText->Show(true);
    units1StaticText->SetLabel(wxT("km"));
@@ -2458,7 +2458,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param2TextCtrl->Disable();
    param2TextCtrl->SetValue(wxT("621.863699999999880"));
    param2TextCtrl->SetToolTip("100<ALT<2000");
-   std::string in2 = param2TextCtrl->GetValue();
+   std::string in2 = param2TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in2, input2Val);
    units2StaticText->Show(true);
    units2StaticText->SetLabel(wxT("km"));
@@ -2473,7 +2473,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param3TextCtrl->Enable();
    param3TextCtrl->SetValue(wxT("0.0010000000000000"));
    param3TextCtrl->SetToolTip("0<=ECC<1");
-   std::string in3 = param3TextCtrl->GetValue();
+   std::string in3 = param3TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in3, input3Val);
    units3StaticText->Show(true);
    units3StaticText->SetLabel(wxT(""));
@@ -2488,7 +2488,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param4TextCtrl->Disable();
    param4TextCtrl->SetValue(wxT("97.8739286731882600"));
    param4TextCtrl->SetToolTip("90<INC<110");
-   std::string in4 = param4TextCtrl->GetValue();
+   std::string in4 = param4TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in4, input4Val);
    units4StaticText->Show(true);
    units4StaticText->SetLabel(wxT("deg"));
@@ -2503,7 +2503,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param5TextCtrl->Disable();
    param5TextCtrl->SetValue(wxT("6993.0000000000000000"));
    param5TextCtrl->SetToolTip("6478.1363<RP<8378.1363");
-   std::string in5 = param5TextCtrl->GetValue();
+   std::string in5 = param5TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in5, input5Val);
    units5StaticText->Show(true);
    units5StaticText->SetLabel(wxT("km"));
@@ -2518,7 +2518,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param6TextCtrl->Disable();
    param6TextCtrl->SetValue(wxT("7006.9999999999991000"));
    param6TextCtrl->SetToolTip("6478.1363<RA<10278.1363");
-   std::string in6 = param6TextCtrl->GetValue();
+   std::string in6 = param6TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in6, input6Val);
    units6StaticText->Show(true);
    units6StaticText->SetLabel(wxT("km"));
@@ -2533,7 +2533,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param7TextCtrl->Disable();
    param7TextCtrl->SetValue(wxT("6999.9929999999995000"));
    param7TextCtrl->SetToolTip("0<P<8378.1363");
-   std::string in7 = param7TextCtrl->GetValue();
+   std::string in7 = param7TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in7, input7Val);
    units7StaticText->Show(true);
    units7StaticText->SetLabel(wxT("km"));
@@ -2610,7 +2610,7 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    param1TextCtrl->Enable();
    param1TextCtrl->SetValue(wxT("0.001"));
    param1TextCtrl->SetToolTip("0<=ECC<1");
-   std::string in1 = param1TextCtrl->GetValue();
+   std::string in1 = param1TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in1, input1Val);
    units1StaticText->Show(true);
    units1StaticText->SetLabel(wxT(""));
@@ -2625,7 +2625,7 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    param2TextCtrl->Enable();
    param2TextCtrl->SetValue(wxT("16"));
    param2TextCtrl->SetToolTip("");
-   std::string in2 = param2TextCtrl->GetValue();
+   std::string in2 = param2TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in2, input2Val);
    units2StaticText->Show(true);
    units2StaticText->SetLabel(wxT(""));
@@ -2640,7 +2640,7 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    param3TextCtrl->Enable();
    param3TextCtrl->SetValue(wxT("232"));
    param3TextCtrl->SetToolTip("");
-   std::string in3 = param3TextCtrl->GetValue();
+   std::string in3 = param3TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in3, input3Val);
    units3StaticText->Show(true);
    units3StaticText->SetLabel(wxT(""));
@@ -2655,7 +2655,7 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    param4TextCtrl->Enable();
    param4TextCtrl->SetValue(wxT("14.5"));
    param4TextCtrl->SetToolTip("");
-   std::string in4 = param4TextCtrl->GetValue();
+   std::string in4 = param4TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in4, input4Val);
    units4StaticText->Show(true);
    units4StaticText->SetLabel(wxT(""));
@@ -2743,7 +2743,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param1TextCtrl->Enable();
    param1TextCtrl->SetValue(wxT("0.00117604"));
    param1TextCtrl->SetToolTip("0<=ECC<1");
-   std::string in1 = param1TextCtrl->GetValue();
+   std::string in1 = param1TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in1, input1Val);
    units1StaticText->Show(true);
    units1StaticText->SetLabel(wxT(""));
@@ -2758,7 +2758,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param2TextCtrl->Enable();
    param2TextCtrl->SetValue(wxT("98.2"));
    param2TextCtrl->SetToolTip("0<INC<180");
-   std::string in2 = param2TextCtrl->GetValue();
+   std::string in2 = param2TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in2, input2Val);
    units2StaticText->Show(true);
    units2StaticText->SetLabel(wxT("deg"));
@@ -2773,7 +2773,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param3TextCtrl->Enable();
    param3TextCtrl->SetValue(wxT("232"));
    param3TextCtrl->SetToolTip("");
-   std::string in3 = param3TextCtrl->GetValue();
+   std::string in3 = param3TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in3, input3Val);
    units3StaticText->Show(true);
    units3StaticText->SetLabel(wxT(""));
@@ -2788,7 +2788,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param4TextCtrl->Enable();
    param4TextCtrl->SetValue(wxT("16"));
    param4TextCtrl->SetToolTip("");
-   std::string in4 = param4TextCtrl->GetValue();
+   std::string in4 = param4TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in4, input4Val);
    units4StaticText->Show(true);
    units4StaticText->SetLabel(wxT(""));
@@ -2803,7 +2803,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param5TextCtrl->Enable();
    param5TextCtrl->SetValue(wxT("14.5"));
    param5TextCtrl->SetToolTip("");
-   std::string in5 = param5TextCtrl->GetValue();
+   std::string in5 = param5TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in5, input5Val);
    units5StaticText->Show(true);
    units5StaticText->SetLabel(wxT(""));
@@ -2905,7 +2905,7 @@ void OrbitDesignerDialog::DisplayGeostationary()
    time2TextCtrl->Disable();
    time2TextCtrl->SetValue(wxT("-79.5390165757071940"));
    time1TextCtrl->SetToolTip("-180<Lon<180");
-   std::string tIn2 = time2TextCtrl->GetValue();
+   std::string tIn2 = time2TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(tIn2, timeIn2Val);
    timeUnits2StaticText->Show(true);
    timeUnits2StaticText->SetLabel(wxT("deg"));
@@ -2959,7 +2959,7 @@ void OrbitDesignerDialog::DisplayGeostationary()
    paramOut2StaticText->SetLabel(wxT("Altitude"));
    paramOut2StaticText->Show(true);
    output2TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA - 
-	                             GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2])));
+                                     GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2])));
    output2TextCtrl->Show(true);
    unitsOut2StaticText->SetLabel(wxT("km"));
    unitsOut2StaticText->Show(true);
@@ -3083,7 +3083,7 @@ void OrbitDesignerDialog::DisplayMolniya()
    paramOut2StaticText->SetLabel(wxT("Altitude"));
    paramOut2StaticText->Show(true);
    output2TextCtrl->SetValue(wxT(GmatStringUtil::ToString(26554 - 
-	                             GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2])));
+                                     GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2])));
    output2TextCtrl->Show(true);
    unitsOut2StaticText->SetLabel(wxT("km"));
    unitsOut2StaticText->Show(true);
@@ -3151,7 +3151,7 @@ void OrbitDesignerDialog::DisplayFrozen()
    param1TextCtrl->Enable();
    param1TextCtrl->SetValue(wxT("790"));
    param1TextCtrl->SetToolTip("0<ALT");
-   std::string in1 = param1TextCtrl->GetValue();
+   std::string in1 = param1TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in1, input1Val);
    units1StaticText->Show(true);
    units1StaticText->SetLabel(wxT("km"));
@@ -3166,7 +3166,7 @@ void OrbitDesignerDialog::DisplayFrozen()
    param2TextCtrl->Enable();
    param2TextCtrl->SetValue(wxT("98.6"));
    param2TextCtrl->SetToolTip("0<=INC<180");
-   std::string in2 = param2TextCtrl->GetValue();
+   std::string in2 = param2TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(in2, input2Val);
    units2StaticText->Show(true);
    units2StaticText->SetLabel(wxT("deg"));
@@ -3260,7 +3260,7 @@ void OrbitDesignerDialog::DisplayTime()
    time2TextCtrl->Show(true);
    time2TextCtrl->Disable();
    time2TextCtrl->SetValue(wxT("280.4609834242928100"));
-   std::string tIn2 = time2TextCtrl->GetValue();
+   std::string tIn2 = time2TextCtrl->GetValue().c_str();
    GmatStringUtil::ToReal(tIn2, timeIn2Val);
    time2TextCtrl->SetToolTip("0<=RAAN<360");
    timeUnits2StaticText->Show(true);
@@ -3331,7 +3331,7 @@ wxArrayString OrbitDesignerDialog::GetElementsString()
    }
    else if (orbitType == "Repeat Sun Sync")
    {
-	  str.Printf("%.16f", orbitRSS.GetSMA());
+          str.Printf("%.16f", orbitRSS.GetSMA());
       elements.Add(str);   
       str.Printf("%.16f", orbitRSS.GetECC());
       elements.Add(str);
@@ -3348,12 +3348,12 @@ wxArrayString OrbitDesignerDialog::GetElementsString()
    }
    else if (orbitType == "Repeat Ground Track")
    {
-	  str.Printf("%.16f", orbitRGT.GetSMA());
+          str.Printf("%.16f", orbitRGT.GetSMA());
       elements.Add(str);   
       str.Printf("%.16f", orbitRGT.GetECC());
       elements.Add(str);
       str.Printf("%.16f", orbitRGT.GetINC());
-      elements.Add(str);		
+      elements.Add(str);                
       str.Printf("%.16f", orbitTime.GetRAAN());
       elements.Add(str);
       //aop
@@ -3365,11 +3365,11 @@ wxArrayString OrbitDesignerDialog::GetElementsString()
    }
    else if (orbitType == "Geostationary")
    {
-	  Real SMA = 
+      Real SMA = 
          pow(GmatSolarSystemDefaults::PLANET_MU[2]*pow(86164.09054/(2*GmatMathConstants::PI),2),1/3.0);
-	  elements.Add(GmatStringUtil::ToString(SMA));   
+      elements.Add(GmatStringUtil::ToString(SMA));   
       elements.Add("0");
-      elements.Add("0");		
+      elements.Add("0");                
       elements.Add("0");
       elements.Add("0");
       elements.Add("0.6931030628395508");
@@ -3378,7 +3378,7 @@ wxArrayString OrbitDesignerDialog::GetElementsString()
    {
       elements.Add("26554");   
       elements.Add("0.72");
-      elements.Add("63.4");		
+      elements.Add("63.4");             
       str.Printf("%.16f", orbitTime.GetRAAN());
       elements.Add(str);
       elements.Add("270");
@@ -3387,12 +3387,12 @@ wxArrayString OrbitDesignerDialog::GetElementsString()
    }
    else if (orbitType == "Frozen")
    {
-	  str.Printf("%.16f", orbitFZN.GetSMA());
+          str.Printf("%.16f", orbitFZN.GetSMA());
       elements.Add(str);   
       str.Printf("%.16f", orbitFZN.GetECC());
       elements.Add(str);
       str.Printf("%.16f", orbitFZN.GetINC());
-      elements.Add(str);		
+      elements.Add(str);                
       str.Printf("%.16f", orbitTime.GetRAAN());
       elements.Add(str);
       //aop
@@ -3412,52 +3412,52 @@ Rvector6 OrbitDesignerDialog::GetElementsDouble()
    if (orbitType == "Sun Sync")
    {
       elementVector = 
-	     Rvector6(orbitSS.GetSMA(), orbitSS.GetECC(), orbitSS.GetINC(), orbitTime.GetRAAN(),
-		          theSpacecraft->GetRealParameter(10010), theSpacecraft->GetRealParameter(10011));
+         Rvector6(orbitSS.GetSMA(), orbitSS.GetECC(), orbitSS.GetINC(), orbitTime.GetRAAN(),
+                  theSpacecraft->GetRealParameter(10010), theSpacecraft->GetRealParameter(10011));
    }
    else if (orbitType == "Repeat Sun Sync")
    {
-	  elementVector = 
-	     Rvector6(orbitRSS.GetSMA(), orbitRSS.GetECC(), orbitRSS.GetINC(),
-		          theSpacecraft->GetRealParameter(10009), theSpacecraft->GetRealParameter(10010), 
-				  theSpacecraft->GetRealParameter(10011));
+      elementVector = 
+         Rvector6(orbitRSS.GetSMA(), orbitRSS.GetECC(), orbitRSS.GetINC(),
+                  theSpacecraft->GetRealParameter(10009), theSpacecraft->GetRealParameter(10010), 
+                  theSpacecraft->GetRealParameter(10011));
    }
    else if (orbitType == "Repeat Ground Track")
    {
-	  elementVector = 
-	     Rvector6(orbitRGT.GetSMA(), orbitRGT.GetECC(), orbitRGT.GetINC(), 
-		          theSpacecraft->GetRealParameter(10009), theSpacecraft->GetRealParameter(10010), 
-				  theSpacecraft->GetRealParameter(10011));
+      elementVector = 
+         Rvector6(orbitRGT.GetSMA(), orbitRGT.GetECC(), orbitRGT.GetINC(), 
+                  theSpacecraft->GetRealParameter(10009), theSpacecraft->GetRealParameter(10010), 
+                  theSpacecraft->GetRealParameter(10011));
    }
    else if (orbitType == "Geostationary")
    {
-	  Real SMA = 
+          Real SMA = 
          pow(GmatSolarSystemDefaults::PLANET_MU[2]*pow(86164.09054/(2*GmatMathConstants::PI),2),1/3.0);
-	  elementVector = 
-	     Rvector6(SMA, 0, 0, 0, 0, 0.6931030628395508);
+          elementVector = 
+             Rvector6(SMA, 0, 0, 0, 0, 0.6931030628395508);
    }
    else if (orbitType == "Molniya")
    {
-	   elementVector = 
-	      Rvector6(26554, 0.72, 63.4, orbitTime.GetRAAN(), 270, 
-		           theSpacecraft->GetRealParameter(10011));
+      elementVector = 
+         Rvector6(26554, 0.72, 63.4, orbitTime.GetRAAN(), 270, 
+                  theSpacecraft->GetRealParameter(10011));
    }
    else if (orbitType == "Frozen")
    {
-	  elementVector = 
-	     Rvector6(orbitFZN.GetSMA(), orbitFZN.GetECC(), orbitFZN.GetINC(), 
-		 theSpacecraft->GetRealParameter(10009), theSpacecraft->GetRealParameter(10010), 
-		 theSpacecraft->GetRealParameter(10011));
+      elementVector = 
+         Rvector6(orbitFZN.GetSMA(), orbitFZN.GetECC(), orbitFZN.GetINC(), 
+                  theSpacecraft->GetRealParameter(10009), theSpacecraft->GetRealParameter(10010), 
+                  theSpacecraft->GetRealParameter(10011));
    }
    return elementVector;
 }
 
 std::string OrbitDesignerDialog::GetEpochFormat()
 {
-	return orbitTime.GetEpochFormat();
+   return orbitTime.GetEpochFormat();
 }
 
 std::string OrbitDesignerDialog::GetEpoch()
 {
-	return orbitTime.GetEpoch();
+   return orbitTime.GetEpoch();
 }

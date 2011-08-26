@@ -1,4 +1,4 @@
-//
+//$Id$
 //------------------------------------------------------------------------------
 //                           RepeatSunSync      
 //------------------------------------------------------------------------------
@@ -31,8 +31,8 @@ public:
    ~RepeatSunSync();
 
    void CalculateRepeatSunSync(bool eccVal, Real ECC, bool dtrVal, 
-	                           Real daysToRepeat, bool rtrVal, Real revsToRepeat,
-							   bool rpdVal, Real revsPerDay);
+                                   Real daysToRepeat, bool rtrVal, Real revsToRepeat,
+                                                           bool rpdVal, Real revsPerDay);
 
    //accessor functions
    Real GetSMA();
@@ -63,3 +63,4 @@ private:
 };
 
 #endif
+

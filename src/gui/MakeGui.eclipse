@@ -285,6 +285,8 @@ OBJECTS = \
     spacecraft/BallisticsMassPanel.o \
     spacecraft/FormationSetupPanel.o \
     spacecraft/OrbitPanel.o \
+    spacecraft/OrbitDesignerDialog.o \
+    spacecraft/OrbitSummaryDialog.o \
     spacecraft/SpacecraftPanel.o \
     spacecraft/SpaceObjectSelectDialog.o \
     spacecraft/TankPanel.o \

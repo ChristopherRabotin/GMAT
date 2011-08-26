@@ -520,6 +520,7 @@ OBJECTS = \
     util/EopFile.o \
     util/FileManager.o \
     util/FileUtil.o \
+    util/Frozen.o \
     util/GmatGlobal.o \
     util/GravityFile.o \
     util/GregorianDate.o \
@@ -531,7 +532,10 @@ OBJECTS = \
     util/MessageInterface.o \
     util/MessageReceiver.o \
     util/ModKeplerian.o \
+    util/OrbitDesignerTime.o \
     util/RealUtilities.o \
+    util/RepeatGroundTrack.o \
+    util/RepeatSunSync.o \
     util/RgbColor.o \
     util/Rmatrix33.o \
     util/Rmatrix66.o \
@@ -541,6 +545,7 @@ OBJECTS = \
     util/Rvector.o \
     util/StringTokenizer.o \
     util/StringUtil.o \
+    util/SunSync.o \
     util/TextParser.o \
     util/TimeSystemConverter.o \
     util/TimeTypes.o \
