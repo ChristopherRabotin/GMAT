@@ -131,6 +131,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    commandChangedState  (false),
    commandSummary       (""),
    summaryCoordSysName  ("EarthMJ2000Eq"),
+   summaryCoordSys      (NULL),
    summaryForEntireMission (false),
    missionPhysicsBasedOnly (false),
    physicsBasedCommand  (false),
@@ -270,6 +271,7 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    commandChangedState  (c.commandChangedState),
    commandSummary       (c.commandSummary),
    summaryCoordSysName  (c.summaryCoordSysName),
+   summaryCoordSys      (NULL),
    summaryForEntireMission (c.summaryForEntireMission),
    missionPhysicsBasedOnly (c.missionPhysicsBasedOnly),
    physicsBasedCommand  (c.physicsBasedCommand),
@@ -334,6 +336,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    commandChangedState = c.commandChangedState;
    commandSummary      = c.commandSummary;
    summaryCoordSysName = c.summaryCoordSysName;
+   summaryCoordSys     = c.summaryCoordSys;
    summaryForEntireMission = c.summaryForEntireMission;
    missionPhysicsBasedOnly = c.missionPhysicsBasedOnly;
    physicsBasedCommand = c.physicsBasedCommand;
@@ -2075,7 +2078,6 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
          Real       originFlattening = 0.0;
          Real       originHourAngle  = 0.0;
 
-         CoordinateSystem *summaryCoordSys = NULL;
          CoordinateConverter cc;
          A1Mjd       a1;
 
@@ -2089,8 +2091,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             summaryCoordSys          = (CoordinateSystem*) FindObject(summaryCoordSysName);
             if (summaryCoordSys == NULL)
             {
-               std::string errmsg = "Cannot find coordinate system ";
+               std::string errmsg = "Cannot use coordinate system ";
                errmsg += summaryCoordSysName + " to build command summary.\n";
+               errmsg += "Please execute script to make " + summaryCoordSysName + " available.\n";
                throw CommandException(errmsg);
             }
             cmdOrigin                = summaryCoordSys->GetOrigin();

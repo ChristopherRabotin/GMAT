@@ -273,6 +273,8 @@ protected:
    std::string          commandSummary;
    /// Coordinate System used for the Command Summary display
    std::string          summaryCoordSysName;
+   /// Current coordinate system for Command Summary
+   CoordinateSystem     *summaryCoordSys;
    /// flag indicating whether or not the summary for the command is part of
    /// a requested summary for the entire misison (or branch)
    bool                 summaryForEntireMission;
