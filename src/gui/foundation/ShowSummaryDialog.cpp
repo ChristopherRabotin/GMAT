@@ -129,7 +129,7 @@ void ShowSummaryDialog::Create()
       #ifdef __WXMAC__
          scriptPanelSize.Set(690, 735);
       #else
-         scriptPanelSize.Set(750, 735);
+         scriptPanelSize.Set(775, 735);
       #endif
 
       SetSize(wxDefaultCoord, wxDefaultCoord, w, h);
@@ -144,8 +144,8 @@ void ShowSummaryDialog::Create()
    theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                     wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
    theSummary->SetFont(GmatAppData::Instance()->GetFont() );
-   theMiddleSizer->Add(coordSizer, 1, wxGROW|wxALL, 3);
-   theMiddleSizer->Add(theSummary, 0, wxGROW|wxALL, 3);
+   theMiddleSizer->Add(coordSizer, 0, wxGROW|wxALL, 3);
+   theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
 }
 
 
