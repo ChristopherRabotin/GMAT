@@ -2043,7 +2043,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 
    // Write the separator and the name and type of the command first
    if (summaryForEntireMission)
-      data << "========================================================\n";
+      data << "======  ";
    data << typeName << " Command: " << summaryName << "\n";
 
    if (((objectMap == NULL) && (globalObjectMap == NULL)) ||
@@ -2400,6 +2400,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                        << BuildNumber(obj->GetRefObject(Gmat::HARDWARE, (*i))->
                              GetRealParameter("FuelMass")) << " kg\n";
             }
+            data << "\n";
          }    // for i 0 -> satsInMaps
       }
    }
