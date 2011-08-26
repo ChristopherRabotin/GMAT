@@ -126,7 +126,11 @@ void ShowSummaryDialog::Create()
 //      GetTextExtent(text, &w, &h);
 //      w = (w + 200 > 1000 ? 1000 : w + 200);
 //      h = (h > 700 ? 700 : h);
-      scriptPanelSize.Set(720, 735);
+      #ifdef __WXMAC__
+         scriptPanelSize.Set(690, 735);
+      #else
+         scriptPanelSize.Set(750, 735);
+      #endif
 
       SetSize(wxDefaultCoord, wxDefaultCoord, w, h);
    }
