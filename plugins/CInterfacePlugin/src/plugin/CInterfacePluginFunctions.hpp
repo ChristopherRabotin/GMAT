@@ -46,8 +46,9 @@ extern "C"
    #include "CInterfaceFunctions.h"
 
    // Internal helper functions
-   void GetODEModel(GmatCommand *cmd, const char *modelName = "");
+   int GetODEModel(GmatCommand **cmd, const char *modelName = "");
    PropSetup *GetFirstPropagator(GmatCommand *cmd);
+   PropSetup *GetPropagator(GmatCommand **current);
 };
 
 #endif /*CInterfacePluginFunctions_hpp*/

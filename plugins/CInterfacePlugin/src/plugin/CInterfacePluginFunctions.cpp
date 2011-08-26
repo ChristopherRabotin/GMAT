@@ -35,6 +35,13 @@ ODEModel    *ode = NULL;
 PropSetup   *pSetup = NULL;
 std::string lastMsg = "";
 std::string extraMsg = "";
+Integer     nextOdeIndex = 1000;
+std::map<Integer,ODEModel*> odeTable;
+std::map<std::string,Integer> odeNameTable;
+
+#ifdef DEBUG_INTERFACE_FROM_MATLAB
+FILE *fp;
+#endif
 
 extern "C"
 {
@@ -124,6 +131,10 @@ extern "C"
    //---------------------------------------------------------------------------
    int StartGmat()
    {
+      #ifdef DEBUG_INTERFACE_FROM_MATLAB
+         fp = fopen("CInterfaceDebug.txt", "w");
+         fprintf(fp, "Starting GMAT\n");
+      #endif
       Moderator *theModerator = Moderator::Instance();
       if (theModerator == NULL)
          return -1;
@@ -134,6 +145,9 @@ extern "C"
       lastMsg = "The Moderator has been initialized";
       ode     = NULL;
       pSetup  = NULL;
+      nextOdeIndex = 1000;
+      odeTable.clear();
+      odeNameTable.clear();
 
       return 0;
    }
@@ -166,6 +180,9 @@ extern "C"
       {
          lastMsg = "Interpreted the script " + script + " successfully.";
          retval = 0;
+         nextOdeIndex = 1000;
+         odeTable.clear();
+         odeNameTable.clear();
       }
       else
       {
@@ -271,6 +288,9 @@ extern "C"
    //---------------------------------------------------------------------------
    int FindOdeModel(const char* modelName)
    {
+      #ifdef DEBUG_INTERFACE_FROM_MATLAB
+         fprintf(fp, "Looking for ODE model '%s'\n", modelName);
+      #endif
       int retval = -1;
       ode = NULL;
       pSetup = NULL;
@@ -283,10 +303,15 @@ extern "C"
       }
 
       GmatCommand *current = theModerator->GetFirstCommand(1);
-      GetODEModel(current, modelName);
+      #ifdef DEBUG_INTERFACE_FROM_MATLAB
+         fprintf(fp, "FirstCommand: <%p> of type %s\n", current,
+               current->GetTypeName().c_str());
+      #endif
+
+      int modelIndex = GetODEModel(&current, modelName);
 
       if (ode != NULL)
-         retval = 0;
+         retval = modelIndex;
       else
          retval = -2;
    
@@ -438,6 +463,12 @@ extern "C"
    {
       double *retval = NULL;
       static double *deriv = NULL;
+      int modelIndex = *pdim;
+
+      if (modelIndex > 0)
+         if (odeTable.find(*pdim) != odeTable.end())
+            ode = odeTable[modelIndex];
+
       if (ode != NULL)
       {
          if (SetState(epoch, state, stateDim) == 0)
@@ -475,6 +506,12 @@ extern "C"
    {
       double *retval = NULL;
       static double *deriv = NULL;
+      int modelIndex = *pdim;
+
+      if (modelIndex > 0)
+         if (odeTable.find(*pdim) != odeTable.end())
+            ode = odeTable[modelIndex];
+
       if (ode != NULL)
       {
          double *state = GetState();
@@ -588,7 +625,7 @@ extern "C"
 //------------------------------------------------------------------------------
    
 //------------------------------------------------------------------------------
-// ODEModel *GetODEModel(GmatCommand *cmd, std::string modelName)
+// int GetODEModel(GmatCommand *cmd, std::string modelName)
 //------------------------------------------------------------------------------
 /**
    * Retrieves a PropSetup from the mission control sequence
@@ -597,49 +634,102 @@ extern "C"
    * pointer to it, along with the pSetup pointer to its owning PropSetup.
    *
    * @param cmd The starting command in teh mission control sequence
-   * @param modelName The name of the model that is wanted.  Currently not used.
+   * @param modelName The name of the model that is wanted.  An empty string
+   *                  returns the first model
    *
    * @return The ODEModel pointer, or NULL if it was not found
    *
    * @note The current implementation returns the first ODEModel found.
    */
 //------------------------------------------------------------------------------
-void GetODEModel(GmatCommand *cmd, const char *modelName)
+int GetODEModel(GmatCommand **cmd, const char *modelName)
 {
+   Integer retval = -1;
+
    ODEModel* model = NULL;
    ode = NULL;
    pSetup = NULL;
 
    char extraMsg[256] = "";
 
-   PropSetup *prop = GetFirstPropagator(cmd);
-   if (prop != NULL)
+   if (strcmp(modelName, "") == 0)
    {
-      model = prop->GetODEModel();
-      lastMsg = "In GetODEModel; found prop";
-      if (model != NULL)
+      PropSetup *prop = GetFirstPropagator(*cmd);
+      if (prop != NULL)
       {
-         #ifdef DEBUG_ODE_SEARCH
-            lastMsg += ", model != NULL\n";
-            lastMsg += ::extraMsg;
-         #else
-            lastMsg += " ";
-         #endif
-         lastMsg += model->GetName();
-         lastMsg += "\n";
-         pSetup = prop;
-         ode = model;
-         return;
-         if (ode != NULL)
-            sprintf(extraMsg, "%s", ode->GetName().c_str());
+         model = prop->GetODEModel();
+         lastMsg = "In GetODEModel; found prop";
+         if (model != NULL)
+         {
+            #ifdef DEBUG_ODE_SEARCH
+               lastMsg += ", model != NULL\n";
+               lastMsg += ::extraMsg;
+            #else
+               lastMsg += " ";
+            #endif
+            lastMsg += model->GetName();
+            lastMsg += "\n";
+            pSetup = prop;
+            ode = model;
+
+            if (ode != NULL)
+            {
+               sprintf(extraMsg, "%s", ode->GetName().c_str());
+               retval = 0;
+            }
+         }
+         else
+            lastMsg += ", model == NULL\n";
       }
       else
-         lastMsg += ", model == NULL\n";
+      {
+         lastMsg = "In GetODEModel; did not find prop\n";
+         lastMsg += ::extraMsg;
+      }
    }
-   else
+   else // Find a named ODEModel
    {
-      lastMsg = "In GetODEModel; did not find prop\n";
-      lastMsg += ::extraMsg;
+      // First see if it has been located before
+      if (odeNameTable.find(modelName) != odeNameTable.end())
+      {
+         ode = odeTable[odeNameTable[modelName]];
+         return odeNameTable[modelName];
+      }
+
+      while ((*cmd) != NULL)
+      {
+         #ifdef DEBUG_INTERFACE_FROM_MATLAB
+            fprintf(fp, "Command: '%s', <%p>\n",
+                  (*cmd)->GetGeneratingString(Gmat::NO_COMMENTS).c_str(), (*cmd));
+         #endif
+         PropSetup *setup = GetPropagator(cmd);
+         #ifdef DEBUG_INTERFACE_FROM_MATLAB
+            fprintf(fp, "   setup <%p>: %s\n", setup,
+                  (setup != NULL ? setup->GetName().c_str() : "<undefined>"));
+         #endif
+         if (setup != NULL)
+         {
+            model = setup->GetODEModel();
+            #ifdef DEBUG_INTERFACE_FROM_MATLAB
+               fprintf(fp, "   model <%p>: %s\n", model,
+                     (model != NULL ? model->GetName().c_str() : "<undefined>"));
+            #endif
+            if (model != NULL)
+            {
+               if (strcmp(modelName, model->GetName().c_str()) == 0)
+               {
+                  ode = model;
+                  retval = nextOdeIndex++;
+                  odeNameTable[modelName] = retval;
+                  odeTable[retval] = model;
+                  break;
+               }
+            }
+         }
+         #ifdef DEBUG_INTERFACE_FROM_MATLAB
+            fprintf(fp, "On return, cmd is <%p>\n", (*cmd));
+         #endif
+      }
    }
 
    if (ode != NULL)
@@ -651,13 +741,15 @@ void GetODEModel(GmatCommand *cmd, const char *modelName)
    {
       lastMsg += "No ODE model found\n";
    }
+
+   return retval;
 }
 
 //------------------------------------------------------------------------------
 // PropSetup *GetFirstPropagator(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
-   * Finds the first PropSetup in teh mission control sequence
+   * Finds the first PropSetup in the mission control sequence
    * 
    * @param cmd The first command in the mission control sequence
    * 
@@ -707,7 +799,123 @@ PropSetup *GetFirstPropagator(GmatCommand *cmd)
             break;
          }
       }
+
       current = current->GetNext();
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// PropSetup *GetPropagator(GmatCommand **cmd)
+//------------------------------------------------------------------------------
+/**
+   * Finds the first PropSetup in the mission control sequence
+   *
+   * @param cmd The first command in the mission control sequence
+   *
+   * @return The first PropSetup found, or NULL if none were located
+   */
+//------------------------------------------------------------------------------
+PropSetup *GetPropagator(GmatCommand **cmd)
+{
+   PropSetup *retval = NULL;
+   static Integer setupIndex = 0;
+
+   if ((*cmd) != NULL)
+   {
+      bool findNextPropagate = false;
+      std::string currentType = (*cmd)->GetTypeName();
+
+      if (currentType == "Propagate")
+      {
+         try
+         {
+            try
+            {
+               // Set all of the internal connections
+   //               current->TakeAction("PrepareToPropagate");
+               (*cmd)->Execute();
+            }
+            catch (BaseException &ex)
+            {
+               lastMsg = ex.GetFullMessage();
+            }
+
+            if ((*cmd)->GetRefObject(Gmat::PROP_SETUP, "", setupIndex) == NULL)
+            {
+               findNextPropagate = true;
+               (*cmd) = (*cmd)->GetNext();
+            }
+         }
+         catch (BaseException &ex)
+         {
+            findNextPropagate = true;
+            (*cmd) = (*cmd)->GetNext();
+         }
+      }
+      else
+         findNextPropagate = true;
+
+      if (findNextPropagate)
+      {
+         // Find the next propagate command
+         setupIndex = 0;
+         if ((*cmd) != NULL)
+         {
+            while ((*cmd)->GetTypeName() != "Propagate")
+            {
+               (*cmd) = (*cmd)->GetNext();
+               if ((*cmd) == NULL)
+                  break;
+            }
+         }
+      }
+
+      if ((*cmd) != NULL)
+      {
+         #ifdef DEBUG_INTERFACE_FROM_MATLAB
+            fprintf(fp, "Current <%p>: %s; SetupIndex %d\n", (*cmd),
+                  (*cmd)->GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+                  setupIndex);
+         #endif
+         GmatBase *obj = NULL;
+         try
+         {
+            try
+            {
+               // Set all of the internal connections
+   //               current->TakeAction("PrepareToPropagate");
+               (*cmd)->Execute();
+            }
+            catch (BaseException &ex)
+            {
+               lastMsg = ex.GetFullMessage();
+            }
+            obj = (*cmd)->GetRefObject(Gmat::PROP_SETUP, "", setupIndex);
+         }
+         catch (BaseException *ex)
+         {
+            obj = NULL;
+         }
+
+         if (obj == NULL)
+         {
+            (*cmd) = (*cmd)->GetNext();
+            #ifdef DEBUG_INTERFACE_FROM_MATLAB
+               fprintf(fp, "obj was NULL; new command is <%p>: %s\n", (*cmd),
+                     (*cmd)->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+            #endif
+            setupIndex = 0;
+         }
+         else
+         {
+            if (obj->IsOfType(Gmat::PROP_SETUP))
+               retval = (PropSetup*)obj;
+            ++setupIndex;
+         }
+      }
    }
 
    return retval;
