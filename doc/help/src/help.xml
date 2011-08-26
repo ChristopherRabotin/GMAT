@@ -80,6 +80,12 @@
 		-->
 		
   </chapter>
+  
+    <chapter>
+        <title>Using the GMAT Interface</title>
+        
+        <xi:include href="Using_OrbitDesigner.xml" />
+    </chapter>
 
     <part xml:id="RefGuide">
         <title>Reference Guide</title>
