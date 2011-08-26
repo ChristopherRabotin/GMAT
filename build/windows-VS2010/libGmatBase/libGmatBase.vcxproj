@@ -675,6 +675,7 @@
     <ClCompile Include="..\..\..\src\base\util\EopFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\FileManager.cpp" />
     <ClCompile Include="..\..\..\src\base\util\FileUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Frozen.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GravityFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
@@ -686,7 +687,10 @@
     <ClCompile Include="..\..\..\src\base\util\MessageInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MessageReceiver.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ModKeplerian.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\OrbitDesignerTime.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RealUtilities.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\RepeatGroundTrack.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\RepeatSunSync.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RgbColor.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rmatrix.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rmatrix33.cpp" />
@@ -738,6 +742,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SunSync.cpp" />
     <ClCompile Include="..\..\..\src\base\util\TextParser.cpp" />
     <ClCompile Include="..\..\..\src\base\util\TimeSystemConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\TimeTypes.cpp" />
@@ -1127,6 +1132,7 @@
     <ClInclude Include="..\..\..\src\base\util\FileManager.hpp" />
     <ClInclude Include="..\..\..\src\base\util\FileTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\FileUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Frozen.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GmatConstants.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GravityFile.hpp" />
@@ -1139,9 +1145,12 @@
     <ClInclude Include="..\..\..\src\base\util\MessageInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MessageReceiver.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ModKeplerian.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\OrbitDesignerTime.hpp" />
     <ClInclude Include="..\..\..\src\base\util\OrbitTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\RealTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\RealUtilities.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\RepeatGroundTrack.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\RepeatSunSync.hpp" />
     <ClInclude Include="..\..\..\src\base\util\RgbColor.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rmatrix.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rmatrix33.hpp" />
@@ -1193,6 +1202,7 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SunSync.hpp" />
     <ClInclude Include="..\..\..\src\base\util\TableTemplate.hpp" />
     <ClInclude Include="..\..\..\src\base\util\TextParser.hpp" />
     <ClInclude Include="..\..\..\src\base\util\TimeSystemConverter.hpp" />

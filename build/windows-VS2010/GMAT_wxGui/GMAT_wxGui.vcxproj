@@ -455,6 +455,7 @@
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\MissionTree.cpp" />
+    <ClCompile Include="..\..\..\src\gui\mission\MissionTreeDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\TreeViewOptionDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\CompareReportPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp" />
@@ -488,7 +489,9 @@
     <ClCompile Include="..\..\..\src\gui\spacecraft\AttitudePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\BallisticsMassPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\FormationSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp" />
@@ -717,6 +720,7 @@
     <ClInclude Include="..\..\..\src\gui\include\gmatwxrcs.hpp" />
     <ClInclude Include="..\..\..\src\gui\mission\DecoratedTree.hpp" />
     <ClInclude Include="..\..\..\src\gui\mission\MissionTree.hpp" />
+    <ClInclude Include="..\..\..\src\gui\mission\MissionTreeDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\mission\TreeViewOptionDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\CompareReportPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp" />
@@ -750,7 +754,9 @@
     <ClInclude Include="..\..\..\src\gui\spacecraft\AttitudePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\BallisticsMassPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\FormationSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp" />

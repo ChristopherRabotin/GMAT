@@ -24,7 +24,7 @@
 
 #include "StringUtil.hpp"
 
-class Frozen
+class GMAT_API Frozen
 {
 public:
    Frozen();

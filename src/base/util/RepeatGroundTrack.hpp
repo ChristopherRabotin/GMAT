@@ -24,16 +24,16 @@
 
 #include "StringUtil.hpp"
 
-class RepeatGroundTrack
+class GMAT_API RepeatGroundTrack
 {
 public:
    RepeatGroundTrack();
    ~RepeatGroundTrack();
 
    void CalculateRepeatGroundTrack(bool eccVal, Real ECC, bool incVal, Real INC, 
-                                       bool rtrVal, Real revsToRepeat, bool dtrVal, 
-                                                                   Real daysToRepeat, bool rpdVal, 
-                                                                   Real revsPerDay);
+                                   bool rtrVal, Real revsToRepeat, bool dtrVal, 
+                                   Real daysToRepeat, bool rpdVal, 
+                                   Real revsPerDay);
 
    //accessor functions
    Real GetSMA();

@@ -24,7 +24,7 @@
 
 #include "StringUtil.hpp"
 
-class RepeatSunSync
+class GMAT_API RepeatSunSync
 {
 public:
    RepeatSunSync();
