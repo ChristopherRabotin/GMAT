@@ -37,6 +37,7 @@
 #include "CoordinateSystem.hpp"
 #include "Rvector6.hpp"
 #include "Anomaly.hpp"
+#include "OrbitDesignerDialog.hpp"
 
 class OrbitPanel: public wxPanel
 {
@@ -113,6 +114,7 @@ private:
    DECLARE_EVENT_TABLE();
    void OnComboBoxChange(wxCommandEvent& event);
    void OnTextChange(wxCommandEvent& event);
+   void OnButton(wxCommandEvent& event);
 
    void InitializeCoordinateSystem(CoordinateSystem *cs);
    void SetLabelsUnits(const std::string &stateType);
@@ -152,6 +154,8 @@ private:
    wxStaticText *unit5;
    wxStaticText *unit6;
    
+   wxButton *orbitDesignerButton;
+
    wxStaticText *anomalyStaticText;
 
    wxTextCtrl *textCtrl[6];   
@@ -170,6 +174,7 @@ private:
       ID_TEXT = 30200,
       ID_TEXTCTRL,
       ID_COMBOBOX,
+	  ID_BUTTON,
         
       ID_STATIC_ELEMENT     
    };

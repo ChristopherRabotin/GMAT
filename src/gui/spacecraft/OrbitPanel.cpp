@@ -95,6 +95,7 @@
 BEGIN_EVENT_TABLE(OrbitPanel, wxPanel)
    EVT_COMBOBOX(ID_COMBOBOX, OrbitPanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, OrbitPanel::OnTextChange)
+   EVT_BUTTON(ID_BUTTON, OrbitPanel::OnButton)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -644,6 +645,11 @@ void OrbitPanel::Create()
    AddElements(this);
    orbitDefSizer->Add( epochSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    elementSizer->Add( elementsPanel, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   //add orbit designer button
+   orbitDesignerButton = new wxButton
+      (this, ID_BUTTON, wxT("Orbit Designer"), wxDefaultPosition, wxDefaultSize, 0);
+   elementSizer->Add(orbitDesignerButton, 0, wxALIGN_RIGHT|wxALIGN_BOTTOM, bsize );
    
    orbitSizer->Add( orbitDefSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    orbitSizer->Add( elementSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize );
@@ -2021,3 +2027,136 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// void OnButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void OrbitPanel::OnButton(wxCommandEvent& event)
+{    
+
+   OrbitDesignerDialog orbitDlg(this, theSpacecraft);
+   orbitDlg.ShowModal();
+
+   if (!orbitDlg.updateOrbit)
+	   return;
+   stateTypeComboBox->SetValue(wxT("Keplerian"));
+   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+
+
+   Rvector6 state;
+   mIsStateTypeChanged = true;
+   bool retval = false;
+
+   retval = CheckState(state);
+
+   CoordinateSystem *prevCoord = mOutCoord;
+
+   if (retval)
+   {
+      BuildValidCoordinateSystemList(stateTypeStr);
+      
+      mOutCoord = (CoordinateSystem*)theGuiInterpreter->
+      GetConfiguredObject(mCoordSysComboBox->GetValue().c_str());
+   }
+
+   BuildValidStateTypes();
+
+   try
+   {
+      DisplayState();
+         
+      if (event.GetEventObject() == mCoordSysComboBox)
+         mFromCoordSysStr = mCoordSysComboBox->GetValue().c_str();
+         
+      if (event.GetEventObject() == stateTypeComboBox)
+         mFromStateTypeStr = stateTypeComboBox->GetValue().c_str();
+         
+      mFromCoord = mOutCoord;
+      theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, mOutCoord->GetName());
+      theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
+   }
+   catch (BaseException &)
+   {
+      mCoordSysComboBox->SetValue(mFromCoordSysStr.c_str());
+      stateTypeComboBox->SetValue(mFromStateTypeStr.c_str());
+      mOutCoord = prevCoord;
+      BuildValidStateTypes();
+      return;
+   }
+
+   wxArrayString keplerianElements;
+   keplerianElements = orbitDlg.GetElementsString();
+
+   for(int i=0; i<6; i++)
+      textCtrl[i]->SetValue(keplerianElements[i]);
+
+   Rvector6 kepState = orbitDlg.GetElementsDouble();
+   mCartState = stateConverter.FromKeplerian(kepState, "Cartesian", "TA");
+   mOutState = mCartState;
+
+   dataChanged = true;
+   theScPanel->EnableUpdate(true);
+
+   if (orbitDlg.isEpochChanged)
+   {
+      mIsEpochChanged = true;
+	  mIsEpochFormatChanged = true;
+	  
+      std::string toEpochFormat = orbitDlg.GetEpochFormat();   
+	  epochFormatComboBox->SetValue(toEpochFormat);
+      
+      try
+      {
+         Real fromMjd = -999.999;
+         Real outMjd;
+         std::string outStr;
+         
+         // if modified by user, check if epoch is valid first
+         if (mIsEpochModified)
+         {
+			 mEpochStr = orbitDlg.GetEpoch();
+            
+            // Save to TAIModJulian string to avoid keep reading the field
+            // and convert to proper format when ComboBox is changed.
+            if (mFromEpochFormat == "TAIModJulian")
+            {
+               mTaiMjdStr = mEpochStr;
+            }
+            else
+            {
+               TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+                                          "TAIModJulian", outMjd, outStr);
+               mTaiMjdStr = outStr;
+            }
+            
+            // Convert to desired format with new date
+            TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+                                       toEpochFormat, outMjd, outStr);
+            
+            epochValue->SetValue(outStr.c_str());
+            mIsEpochModified = false;
+            mFromEpochFormat = toEpochFormat;
+         }
+         else
+         {            
+            // Convert to desired format using TAIModJulian date
+            TimeConverterUtil::Convert("TAIModJulian", fromMjd, mTaiMjdStr,
+                                       toEpochFormat, outMjd, outStr);
+            
+            epochValue->SetValue(outStr.c_str());
+            mFromEpochFormat = toEpochFormat;
+         }
+      }
+      catch (BaseException &e)
+      {
+         epochFormatComboBox->SetValue(mFromEpochFormat.c_str());
+         theSpacecraft->SetDateFormat(mFromEpochFormat);
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, e.GetFullMessage() +
+             "\nPlease enter valid Epoch before changing the Epoch Format\n");
+      }
+
+	  epochValue->SetValue(orbitDlg.GetEpoch());
+   }
+
+}
