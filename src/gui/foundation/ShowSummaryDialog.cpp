@@ -203,9 +203,9 @@ void ShowSummaryDialog::OnComboBoxChange(wxCommandEvent& event)
    //-----------------------------------------------------------------
    if (event.GetEventObject() == coordSysComboBox)
    {
-      isCoordSysModified     = true;
-      std::string lastCSName = currentCoordSysName;
-      currentCoordSysName    = coordSysComboBox->GetValue().c_str();
+      isCoordSysModified          = true;
+      std::string lastCSName      = currentCoordSysName;
+      currentCoordSysName         = coordSysComboBox->GetValue().c_str();
       theObject->SetupSummary(currentCoordSysName, summaryForEntireMission, physicsBasedOnly);
       try
       {
@@ -245,7 +245,6 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
    SpacePoint       *origin = NULL;
    std::string      currentCS = coordSysComboBox->GetValue().c_str();
    std::string      newCS     = currentCS;
-   bool             usesSC    = false;
    Integer          sz;
 
    // The only valid coordinate system for use here:
@@ -265,11 +264,8 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
       if (ii == 0)                                   newCS = coordSystemNames.at(ii);
       else if (currentCS == coordSystemNames.at(ii)) newCS = currentCS;
       tmpCS      = (CoordinateSystem*) theGuiInterpreter->GetConfiguredObject(coordSystemNames.at(ii));
-      usesSC     = tmpCS->UsesSpacecraft();
       origin     = tmpCS->GetOrigin();
-//      if (tmpCS->GetName() == "EarthMJ2000Eq")    // TEMPORARY - until other issues get worked out!!! <<<<<<<<<
-//         coordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
-      if (origin->IsOfType("CelestialBody") && !usesSC)  // add it to the list
+      if (origin->IsOfType("CelestialBody") && (!tmpCS->UsesSpacecraft()))  // add it to the list
          coordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
    }
    coordSysComboBox->SetValue(newCS.c_str());
