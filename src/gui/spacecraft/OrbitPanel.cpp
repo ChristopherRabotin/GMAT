@@ -2103,7 +2103,7 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
 	  mIsEpochFormatChanged = true;
 	  
       std::string toEpochFormat = orbitDlg.GetEpochFormat();   
-	  epochFormatComboBox->SetValue(toEpochFormat);
+	  epochFormatComboBox->SetValue(toEpochFormat.c_str());
       
       try
       {
@@ -2156,7 +2156,7 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
              "\nPlease enter valid Epoch before changing the Epoch Format\n");
       }
 
-	  epochValue->SetValue(orbitDlg.GetEpoch());
+	  epochValue->SetValue(orbitDlg.GetEpoch().c_str());
    }
 
 }

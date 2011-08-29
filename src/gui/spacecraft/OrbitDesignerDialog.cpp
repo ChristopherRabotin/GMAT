@@ -2274,7 +2274,7 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
                MessageInterface::PopupMessage(Gmat::ERROR_, orbitTime.GetError());
                return;
             }
-            timeOut3TextCtrl->SetValue(start);//start time
+            timeOut3TextCtrl->SetValue(start.c_str());//start time
             timeOut4TextCtrl->SetValue(time2TextCtrl->GetValue());//longitude
          }
          else
@@ -2292,7 +2292,7 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
          orbitTime = OrbitDesignerTime(std::string(timeIn1Val), std::string(epochType), 
                                        timeParamTwoVal, timeIn2Val, timeParamThreeVal, 
                                        std::string(timeIn3Val));
-         timeOut1TextCtrl->SetValue(orbitTime.GetEpoch());
+         timeOut1TextCtrl->SetValue(orbitTime.GetEpoch().c_str());
          std::string start = orbitTime.GetStartTime();
          if (!timeParamTwoVal && timeParamThreeVal)
          {
@@ -2308,7 +2308,7 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
             wxString raan;
             raan.Printf("%.16f", orbitTime.GetRAAN());
             timeOut2TextCtrl->SetValue(raan);
-            timeOut3TextCtrl->SetValue(start);
+            timeOut3TextCtrl->SetValue(start.c_str());
          }
          else if (timeParamTwoVal && !timeParamThreeVal)
          {
@@ -2324,7 +2324,7 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
             wxString raan;
             raan.Printf("%.16f", orbitTime.GetRAAN());
             timeOut2TextCtrl->SetValue(raan);
-            timeOut3TextCtrl->SetValue(start);
+            timeOut3TextCtrl->SetValue(start.c_str());
          }
          else
          {
@@ -2951,7 +2951,7 @@ void OrbitDesignerDialog::DisplayGeostationary()
    //show outputs
    paramOut1StaticText->SetLabel(wxT("SMA"));
    paramOut1StaticText->Show(true);
-   output1TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA)));
+   output1TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA).c_str()));
    output1TextCtrl->Show(true);
    unitsOut1StaticText->SetLabel(wxT("km"));
    unitsOut1StaticText->Show(true);
@@ -2959,7 +2959,7 @@ void OrbitDesignerDialog::DisplayGeostationary()
    paramOut2StaticText->SetLabel(wxT("Altitude"));
    paramOut2StaticText->Show(true);
    output2TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA - 
-                                     GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2])));
+                                     GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]).c_str()));
    output2TextCtrl->Show(true);
    unitsOut2StaticText->SetLabel(wxT("km"));
    unitsOut2StaticText->Show(true);
@@ -2980,21 +2980,21 @@ void OrbitDesignerDialog::DisplayGeostationary()
 
    paramOut5StaticText->SetLabel(wxT("RP"));
    paramOut5StaticText->Show(true);
-   output5TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA)));
+   output5TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA).c_str()));
    output5TextCtrl->Show(true);
    unitsOut5StaticText->SetLabel(wxT("km"));
    unitsOut5StaticText->Show(true);
 
    paramOut6StaticText->SetLabel(wxT("RA"));
    paramOut6StaticText->Show(true);
-   output6TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA)));
+   output6TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA).c_str()));
    output6TextCtrl->Show(true);
    unitsOut6StaticText->SetLabel(wxT("km"));
    unitsOut6StaticText->Show(true);
 
    paramOut7StaticText->SetLabel("P");
    paramOut7StaticText->Show(true);
-   output7TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA)));
+   output7TextCtrl->SetValue(wxT(GmatStringUtil::ToString(SMA).c_str()));
    output7TextCtrl->Show(true);
    unitsOut7StaticText->SetLabel(wxT("km"));
    unitsOut7StaticText->Show(true);
@@ -3083,7 +3083,7 @@ void OrbitDesignerDialog::DisplayMolniya()
    paramOut2StaticText->SetLabel(wxT("Altitude"));
    paramOut2StaticText->Show(true);
    output2TextCtrl->SetValue(wxT(GmatStringUtil::ToString(26554 - 
-                                     GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2])));
+                                     GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]).c_str()));
    output2TextCtrl->Show(true);
    unitsOut2StaticText->SetLabel(wxT("km"));
    unitsOut2StaticText->Show(true);
@@ -3104,21 +3104,21 @@ void OrbitDesignerDialog::DisplayMolniya()
 
    paramOut5StaticText->SetLabel(wxT("RP"));
    paramOut5StaticText->Show(true);
-   output5TextCtrl->SetValue(wxT(GmatStringUtil::ToString(26554*(1+.72))));
+   output5TextCtrl->SetValue(wxT(GmatStringUtil::ToString(26554*(1+.72)).c_str()));
    output5TextCtrl->Show(true);
    unitsOut5StaticText->SetLabel(wxT("km"));
    unitsOut5StaticText->Show(true);
 
    paramOut6StaticText->SetLabel(wxT("RA"));
    paramOut6StaticText->Show(true);
-   output6TextCtrl->SetValue(wxT(GmatStringUtil::ToString(26554*(1-.72))));
+   output6TextCtrl->SetValue(wxT(GmatStringUtil::ToString(26554*(1-.72)).c_str()));
    output6TextCtrl->Show(true);
    unitsOut6StaticText->SetLabel(wxT("km"));
    unitsOut6StaticText->Show(true);
 
    paramOut7StaticText->SetLabel("P");
    paramOut7StaticText->Show(true);
-   output7TextCtrl->SetValue(wxT(GmatStringUtil::ToString(26554*(1-pow(.72,2)))));
+   output7TextCtrl->SetValue(wxT(GmatStringUtil::ToString(26554*(1-pow(.72,2))).c_str()));
    output7TextCtrl->Show(true);
    unitsOut7StaticText->SetLabel(wxT("km"));
    unitsOut7StaticText->Show(true);
@@ -3367,7 +3367,7 @@ wxArrayString OrbitDesignerDialog::GetElementsString()
    {
       Real SMA = 
          pow(GmatSolarSystemDefaults::PLANET_MU[2]*pow(86164.09054/(2*GmatMathConstants::PI),2),1/3.0);
-      elements.Add(GmatStringUtil::ToString(SMA));   
+      elements.Add(GmatStringUtil::ToString(SMA).c_str());
       elements.Add("0");
       elements.Add("0");                
       elements.Add("0");
