@@ -1,4 +1,4 @@
-disp('This script biulds the GMAT interface prototypes by calling ');
+disp('This script builds the GMAT interface prototypes by calling ');
 disp('loadlibrary.  The loadlibrary call will fail; this is expected.');
 disp('The interfacewrapper should be built anyway.');
 

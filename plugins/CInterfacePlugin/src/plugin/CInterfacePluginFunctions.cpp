@@ -27,6 +27,8 @@
 
 #include "CCommandFactory.hpp"
 
+//#define DEBUG_INTERFACE_FROM_MATLAB
+
 
 // Library globals - lastMsg or internal statics are needed for messaging, the 
 // others (ode, pSetup) are here for convenience but could be made internal to
@@ -37,10 +39,11 @@ std::string lastMsg = "";
 std::string extraMsg = "";
 Integer     nextOdeIndex = 1000;
 std::map<Integer,ODEModel*> odeTable;
+std::map<Integer,PropSetup*> setupTable;
 std::map<std::string,Integer> odeNameTable;
 
 #ifdef DEBUG_INTERFACE_FROM_MATLAB
-FILE *fp;
+   FILE *fp;
 #endif
 
 extern "C"
@@ -135,6 +138,7 @@ extern "C"
          fp = fopen("CInterfaceDebug.txt", "w");
          fprintf(fp, "Starting GMAT\n");
       #endif
+
       Moderator *theModerator = Moderator::Instance();
       if (theModerator == NULL)
          return -1;
@@ -148,6 +152,7 @@ extern "C"
       nextOdeIndex = 1000;
       odeTable.clear();
       odeNameTable.clear();
+      setupTable.clear();
 
       return 0;
    }
@@ -183,6 +188,7 @@ extern "C"
          nextOdeIndex = 1000;
          odeTable.clear();
          odeNameTable.clear();
+         setupTable.clear();
       }
       else
       {
@@ -282,8 +288,8 @@ extern "C"
     * @return A status flag indicating the status upon return; 0 means success
     *
     * @note The current implementation finds the first ODE model and sets the 
-    *       libary pointer to it.  A later implementation will find the instance 
-    *       by name.
+    *       library pointer to it.  A later implementation will find the
+    *       instance by name.
     */
    //---------------------------------------------------------------------------
    int FindOdeModel(const char* modelName)
@@ -294,6 +300,34 @@ extern "C"
       int retval = -1;
       ode = NULL;
       pSetup = NULL;
+      lastMsg = "";
+
+      // First see if it has been located before
+      if (odeNameTable.find(modelName) != odeNameTable.end())
+      {
+         ode = odeTable[odeNameTable[modelName]];
+         pSetup = setupTable[odeNameTable[modelName]];
+         extraMsg = ode->GetName().c_str();
+
+         lastMsg = "ODE Model \"";
+         lastMsg += extraMsg;
+         lastMsg += "\" was previously located";
+
+         return odeNameTable[modelName];
+      }
+      else if ((odeTable.size() > 0) && (strcmp(modelName, "") == 0))
+      {
+         // If no name specified, return first one in table if there is an entry
+         ode = odeTable.begin()->second;
+         extraMsg = ode->GetName().c_str();
+         pSetup = setupTable.begin()->second;
+
+         lastMsg = "Unnamed model; using ODE Model \"";
+         lastMsg += ode->GetName();
+         lastMsg += "\" previously located";
+
+         return 0;
+      }
 
       Moderator *theModerator = Moderator::Instance();
       if (theModerator == NULL)
@@ -315,6 +349,58 @@ extern "C"
       else
          retval = -2;
    
+      return retval;
+   }
+
+   //---------------------------------------------------------------------------
+   // int SetModel(int modelID)
+   //---------------------------------------------------------------------------
+   /**
+    * Sets the current ODE Model and propSetup based in the model ID
+    *
+    * @param modelID The ID of the requested model
+    *
+    * @return The model's ID, or a negative number on error
+    */
+   //---------------------------------------------------------------------------
+   int SetModel(int modelID)
+   {
+      int retval = modelID;
+      if (odeTable.find(modelID) != odeTable.end())
+      {
+         ode = odeTable[modelID];
+         pSetup = setupTable[modelID];
+         lastMsg = "The ODE model is now " + ode->GetName();
+      }
+      else
+      {
+         lastMsg = "The requested ODE model is not in the table of models";
+         retval = -1;
+      }
+
+      return retval;
+   }
+
+   //---------------------------------------------------------------------------
+   // int SetModelByName(const char* modelName)
+   //---------------------------------------------------------------------------
+   /**
+    * Sets the current ODE Model and propSetup based in the model ID
+    *
+    * @param modelName The scripted name of the requested model
+    *
+    * @return The model's ID, or a negative number on error
+    */
+   //---------------------------------------------------------------------------
+   int SetModelByName(const char* modelName)
+   {
+      int retval = -1;
+
+      if (odeNameTable.find(modelName) != odeNameTable.end())
+      {
+         retval = SetModel(odeNameTable[modelName]);
+      }
+
       return retval;
    }
 
@@ -404,7 +490,7 @@ extern "C"
          }
       }
       else
-         lastMsg = "ERROR: The propagation setup is not yet set.";
+         lastMsg = "ERROR in SetState: The propagation setup is not yet set.";
 
 
       return retval;
@@ -428,7 +514,7 @@ extern "C"
          retval = pSetup->GetPropStateManager()->GetState()->GetState();
       }
       else
-         lastMsg = "ERROR: The propagation setup is not yet set.";
+         lastMsg = "ERROR in GetState: The propagation setup is not yet set.";
 
       return retval; 
    }
@@ -467,7 +553,10 @@ extern "C"
 
       if (modelIndex > 0)
          if (odeTable.find(*pdim) != odeTable.end())
+         {
             ode = odeTable[modelIndex];
+            pSetup = setupTable[modelIndex];
+         }
 
       if (ode != NULL)
       {
@@ -508,9 +597,16 @@ extern "C"
       static double *deriv = NULL;
       int modelIndex = *pdim;
 
+      char dvData[1024];
+      sprintf(dvData, "ODE Model index: %d\n", modelIndex);
+      lastMsg = dvData;
+
       if (modelIndex > 0)
          if (odeTable.find(*pdim) != odeTable.end())
+         {
             ode = odeTable[modelIndex];
+            pSetup = setupTable[modelIndex];
+         }
 
       if (ode != NULL)
       {
@@ -521,8 +617,18 @@ extern "C"
             deriv = new double[dim];
          ode->GetDerivatives(state, dt, order);
          const double *ddt = ode->GetDerivativeArray();
+
+
+         sprintf(dvData, "   %lf\n   %lf\n   %lf\n   %le\n   %le\n   %le\n   "
+               "%le\n   %le\n   %le\n   %le\n   %le\n   %le\n",
+               state[0], state[1], state[2], state[3], state[4], state[5],
+               ddt[0], ddt[1], ddt[2], ddt[3], ddt[4], ddt[5]);
+         lastMsg += dvData;
+
          memcpy(deriv, ddt, dim * sizeof(double));
          retval = deriv;
+
+         lastMsg += ode->GetGeneratingString(Gmat::NO_COMMENTS);
       }
       return retval;
    }
@@ -652,6 +758,21 @@ int GetODEModel(GmatCommand **cmd, const char *modelName)
 
    char extraMsg[256] = "";
 
+//   // First see if it has been located before
+//   if (odeNameTable.find(modelName) != odeNameTable.end())
+//   {
+//      ode = odeTable[odeNameTable[modelName]];
+//      sprintf(extraMsg, "%s", ode->GetName().c_str());
+//      return odeNameTable[modelName];
+//   }
+//   else if ((odeTable.size() > 0) && (strcmp(modelName, "") == 0))
+//   {
+//      // If no name specified, return first one in table if there is an entry
+//      ode = odeTable.begin()->second;
+//      sprintf(extraMsg, "%s", ode->GetName().c_str());
+//      return 0;
+//   }
+
    if (strcmp(modelName, "") == 0)
    {
       PropSetup *prop = GetFirstPropagator(*cmd);
@@ -675,6 +796,9 @@ int GetODEModel(GmatCommand **cmd, const char *modelName)
             if (ode != NULL)
             {
                sprintf(extraMsg, "%s", ode->GetName().c_str());
+               odeNameTable[ode->GetName()] = nextOdeIndex++;
+               odeTable[odeNameTable[ode->GetName()]] = model;
+               setupTable[odeNameTable[ode->GetName()]] = pSetup;
                retval = 0;
             }
          }
@@ -689,13 +813,6 @@ int GetODEModel(GmatCommand **cmd, const char *modelName)
    }
    else // Find a named ODEModel
    {
-      // First see if it has been located before
-      if (odeNameTable.find(modelName) != odeNameTable.end())
-      {
-         ode = odeTable[odeNameTable[modelName]];
-         return odeNameTable[modelName];
-      }
-
       while ((*cmd) != NULL)
       {
          #ifdef DEBUG_INTERFACE_FROM_MATLAB
@@ -722,6 +839,7 @@ int GetODEModel(GmatCommand **cmd, const char *modelName)
                   retval = nextOdeIndex++;
                   odeNameTable[modelName] = retval;
                   odeTable[retval] = model;
+                  setupTable[retval] = setup;
                   break;
                }
             }
@@ -739,7 +857,13 @@ int GetODEModel(GmatCommand **cmd, const char *modelName)
    }
    else
    {
-      lastMsg += "No ODE model found\n";
+      if (strcmp(modelName, "") == 0)
+         lastMsg += "No ODE model found\n";
+      else
+      {
+         std::string notFoundName = modelName;
+         lastMsg += "The ODE model named \"" + notFoundName + "\" was not found\n";
+      }
    }
 
    return retval;
@@ -828,25 +952,15 @@ PropSetup *GetPropagator(GmatCommand **cmd)
       bool findNextPropagate = false;
       std::string currentType = (*cmd)->GetTypeName();
 
-      if (currentType == "Propagate")
+      if ((currentType == "Propagate") && (setupIndex > 0))
       {
          try
          {
-            try
-            {
-               // Set all of the internal connections
-   //               current->TakeAction("PrepareToPropagate");
-               (*cmd)->Execute();
-            }
-            catch (BaseException &ex)
-            {
-               lastMsg = ex.GetFullMessage();
-            }
-
             if ((*cmd)->GetRefObject(Gmat::PROP_SETUP, "", setupIndex) == NULL)
             {
                findNextPropagate = true;
                (*cmd) = (*cmd)->GetNext();
+               setupIndex = 0;
             }
          }
          catch (BaseException &ex)
@@ -883,16 +997,20 @@ PropSetup *GetPropagator(GmatCommand **cmd)
          GmatBase *obj = NULL;
          try
          {
-            try
+            if (setupIndex == 0)
             {
-               // Set all of the internal connections
-   //               current->TakeAction("PrepareToPropagate");
-               (*cmd)->Execute();
+               try
+               {
+                  // Set all of the internal connections
+      //               current->TakeAction("PrepareToPropagate");
+                  (*cmd)->Execute();
+               }
+               catch (BaseException &ex)
+               {
+                  lastMsg = ex.GetFullMessage();
+               }
             }
-            catch (BaseException &ex)
-            {
-               lastMsg = ex.GetFullMessage();
-            }
+
             obj = (*cmd)->GetRefObject(Gmat::PROP_SETUP, "", setupIndex);
          }
          catch (BaseException *ex)

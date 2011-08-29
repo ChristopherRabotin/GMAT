@@ -1,7 +1,5 @@
 # Makefile for the C-Interface test program
 
-GMAT_TARGET_DIRECTORY = /Users/djc/TS_Code/GmatDevelopment/application/bin64
-
 TARGET = CInterfaceTester
 
 CC = gcc
@@ -18,8 +16,8 @@ prep:
 	rm -rf *.o
 
 $(OBJECTS): %.o: %.c %.h
-	$(CC) $(CFLAGS) $(HEADERS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(HEADERS) -DLINUX $(DEBUG_FLAGS) -c -o $@ $<
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
-	mv $(TARGET) $(GMAT_TARGET_DIRECTORY)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET) $(PLATFORM_LINK_FLAGS) $(DEBUG_FLAGS)
+	mv $(TARGET) $(GMAT_BIN_LOCATION)

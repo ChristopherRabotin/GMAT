@@ -47,6 +47,14 @@ endif
 SHARED_EXTENSION = .so
 SHARED_LIB_FLAGS = -shared -Wl
 
+PLATFORM_LINK_FLAGS = -ldl
+
+ifeq ($(DEBUG_BUILD), 1)
+DEBUG_FLAGS = -g
+else
+DEBUG_FLAGS = 
+endif
+
 # --out-implib
 
 DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \

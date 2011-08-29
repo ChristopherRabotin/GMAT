@@ -37,6 +37,9 @@ int CINTERFACE_API RunScript();
 int CINTERFACE_API LoadAndRunScript(const char* scriptName);
 
 int CINTERFACE_API FindOdeModel(const char* modelName);
+int CINTERFACE_API SetModel(int modelID);
+int CINTERFACE_API SetModelByName(const char* modelName);
+
 int CINTERFACE_API GetStateSize();
 const char CINTERFACE_API *GetStateDescription();
 int CINTERFACE_API SetState(double epoch, double state[], int stateDim);
