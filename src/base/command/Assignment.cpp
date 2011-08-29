@@ -86,6 +86,8 @@ Assignment::Assignment  () :
 {
    objectTypeNames.push_back("GMAT");
    objectTypeNames.push_back("Assignment");
+
+   includeInSummary = false;
 }
 
 
