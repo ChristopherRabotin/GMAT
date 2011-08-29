@@ -4195,6 +4195,7 @@ bool CelestialBody::SetUpSPICE()
             instanceName.c_str(), Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc].c_str());
       for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
          MessageInterface::ShowMessage("     %s\n", (orbitSpiceKernelNames.at(ii)).c_str());
+      MessageInterface::ShowMessage("   posVelSrc = %s\n", Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc].c_str());
       if (kernelReader == NULL)
          MessageInterface::ShowMessage("   kernelReader is NULL\n");
    #endif
@@ -4232,12 +4233,19 @@ bool CelestialBody::SetUpSPICE()
          }
       }
    }
+   #ifdef DEBUG_CB_SPICE
+      MessageInterface::ShowMessage("   now loading main SPK kernel ...\n");
+   #endif
    // make sure the "main" Solar System Kernel(s) are loaded first
    theSolarSystem->LoadSpiceKernels();
    // now load the spice kernels specified for this body
    for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
    {
+      #ifdef DEBUG_CB_SPICE
+         MessageInterface::ShowMessage("   now checking %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
+      #endif
       if (!(kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii))))
+      {
          try
          {
             kernelReader->LoadKernel(orbitSpiceKernelNames.at(ii));
@@ -4246,8 +4254,11 @@ bool CelestialBody::SetUpSPICE()
                      (orbitSpiceKernelNames.at(ii)).c_str());
             #endif
          }
-         catch (UtilityException&)
+         catch (UtilityException &ue)
          {
+            #ifdef DEBUG_CB_SPICE
+               MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+            #endif
             // try again with path name if no path found
             std::string spkName = orbitSpiceKernelNames.at(ii);
             if (spkName.find("/") == spkName.npos &&
@@ -4258,20 +4269,30 @@ bool CelestialBody::SetUpSPICE()
                spkName = spkPath + spkName;
                try
                {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   now attempting to load %s ...\n", spkName.c_str());
+                  #endif
                   kernelReader->LoadKernel(spkName);
                   #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
                      spkName.c_str());
                   #endif
                }
-               catch (UtilityException&)
+               catch (UtilityException &ue2)
                {
                   MessageInterface::ShowMessage("ERROR loading kernel %s\n",
-                     (orbitSpiceKernelNames.at(ii).c_str()));
+                     (spkName.c_str()));
                   throw; // rethrow the exception, for now
                }
             }
+            else
+            {
+               MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                  (orbitSpiceKernelNames.at(ii).c_str()));
+               throw; // rethrow the exception, for now
+            }
          }
+      }
    }
    // get the NAIF Id from the Spice Kernel(s)   @todo - should this be moved to SpacePoint?
    if (!naifIdSet)
