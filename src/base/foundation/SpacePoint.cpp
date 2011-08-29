@@ -119,6 +119,7 @@ j2000Body      (NULL),
 j2000BodyName  ("Earth"),
 naifId         (UNDEFINED_NAIF_ID),
 naifIdRefFrame (UNDEFINED_NAIF_ID),
+spiceSetupDone (false),
 hasAttitude    (false)
 {
    objectTypes.push_back(Gmat::SPACE_POINT);
@@ -147,6 +148,7 @@ naifId                   (sp.naifId),
 naifIdRefFrame           (sp.naifIdRefFrame),
 default_j2000BodyName    (sp.default_j2000BodyName),
 default_naifId           (sp.default_naifId),
+spiceSetupDone           (false),
 orbitSpiceKernelNames    (sp.orbitSpiceKernelNames),
 attitudeSpiceKernelNames (sp.attitudeSpiceKernelNames),
 scClockSpiceKernelNames  (sp.scClockSpiceKernelNames),
@@ -177,6 +179,7 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
    j2000BodyName            = sp.j2000BodyName;
    naifId                   = sp.naifId;
    naifIdRefFrame           = sp.naifIdRefFrame;
+   spiceSetupDone           = sp.spiceSetupDone;
    orbitSpiceKernelNames    = sp.orbitSpiceKernelNames;
    attitudeSpiceKernelNames = sp.attitudeSpiceKernelNames;
    scClockSpiceKernelNames  = sp.scClockSpiceKernelNames;
@@ -811,6 +814,7 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
              value) == orbitSpiceKernelNames.end())
             orbitSpiceKernelNames.push_back(value);
       }
+      spiceSetupDone = false;
       return true;
    }
    if (id == ATTITUDE_SPICE_KERNEL_NAME)
@@ -829,6 +833,7 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
              value) == attitudeSpiceKernelNames.end())
             attitudeSpiceKernelNames.push_back(value);
      }
+      spiceSetupDone = false;
       return true;
    }
    if (id == SC_CLOCK_SPICE_KERNEL_NAME)
@@ -847,6 +852,7 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
              value) == scClockSpiceKernelNames.end())
             scClockSpiceKernelNames.push_back(value);
       }
+      spiceSetupDone = false;
       return true;
    }
    if (id == FRAME_SPICE_KERNEL_NAME)
@@ -865,7 +871,8 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
              value) == frameSpiceKernelNames.end())
             frameSpiceKernelNames.push_back(value);
       }
-         return true;
+      spiceSetupDone = false;
+      return true;
    }
 
 
@@ -1103,6 +1110,7 @@ bool SpacePoint::SetStringParameter(const Integer id,
          else if (find(orbitSpiceKernelNames.begin(), orbitSpiceKernelNames.end(),
                value) == orbitSpiceKernelNames.end())
             orbitSpiceKernelNames.push_back(value);
+         spiceSetupDone = false;
          return true;
       }
    case ATTITUDE_SPICE_KERNEL_NAME:
@@ -1113,6 +1121,7 @@ bool SpacePoint::SetStringParameter(const Integer id,
          else if (find(attitudeSpiceKernelNames.begin(), attitudeSpiceKernelNames.end(),
                value) == attitudeSpiceKernelNames.end())
             attitudeSpiceKernelNames.push_back(value);
+         spiceSetupDone = false;
          return true;
      }
    case SC_CLOCK_SPICE_KERNEL_NAME:
@@ -1123,6 +1132,7 @@ bool SpacePoint::SetStringParameter(const Integer id,
          else if (find(scClockSpiceKernelNames.begin(), scClockSpiceKernelNames.end(),
                value) == scClockSpiceKernelNames.end())
             scClockSpiceKernelNames.push_back(value);
+         spiceSetupDone = false;
          return true;
       }
    case FRAME_SPICE_KERNEL_NAME:
@@ -1133,6 +1143,7 @@ bool SpacePoint::SetStringParameter(const Integer id,
          else if (find(frameSpiceKernelNames.begin(), frameSpiceKernelNames.end(),
                value) == frameSpiceKernelNames.end())
             frameSpiceKernelNames.push_back(value);
+         spiceSetupDone = false;
          return true;
      }
 

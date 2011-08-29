@@ -223,6 +223,9 @@ protected:
    /// default value for NAIF ID for the body/spacecraft reference frame
    Integer         default_naifIdRefFrame;
    
+   /// flag indicating whether or not the SPICE code is setup
+   bool                   spiceSetupDone;
+
    /// Orbit SPICE kernel name(s)
    StringArray     orbitSpiceKernelNames;
    /// Attitude SPICE kernel name(s)

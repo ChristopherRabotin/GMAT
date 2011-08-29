@@ -757,7 +757,7 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
       case Gmat::SPICE :
       {
          #ifdef __USE_SPICE__
-         SetUpSPICE();
+         if (!spiceSetupDone) SetUpSPICE();
 //         #ifdef DEBUG_CB_SPICE
 //            MessageInterface::ShowMessage("In GetState, after SetUpSpice ...kernelReader is %s NULL\n",
 //                  (kernelReader == NULL? "really" : "NOT"));       
@@ -862,7 +862,7 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
          break;
       case Gmat::SPICE :
       #ifdef __USE_SPICE__
-         SetUpSPICE();
+         if (!spiceSetupDone) SetUpSPICE();
 //         state = kernelReader->GetTargetState(instanceName, naifId, atTime, j2000BodyName);
          state = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName);
          for (Integer i=0;i<6;i++) outState[i] = state[i];
@@ -895,7 +895,8 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
 #ifdef __USE_SPICE__
 void CelestialBody::SetSpiceOrbitKernelReader(SpiceOrbitKernelReader *skr)
 {
-   kernelReader = skr;
+   kernelReader   = skr;
+   spiceSetupDone = false;
 }
 #endif
 
@@ -1712,6 +1713,7 @@ bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
          errmsg += instanceName + "\n";
          throw SolarSystemException(errmsg);
       }
+      spiceSetupDone = false;
    }
    posVelSrc           = pvSrc;
    return true;
@@ -1756,6 +1758,7 @@ bool CelestialBody::SetAllowSpice(const bool allow)
                instanceName.c_str(), (allow? "true" : "false"));
    #endif
    if (!userDefined) allowSpice = allow; // set for default bodies only
+   if (allowSpice)   spiceSetupDone = false;
    return true;
 }
 
@@ -4315,6 +4318,8 @@ bool CelestialBody::SetUpSPICE()
       MessageInterface::ShowMessage("   naifID for body %s is %d\n",
             instanceName.c_str(), naifId);
    #endif
+
+   spiceSetupDone = true;
 #endif
    return true;
 }
