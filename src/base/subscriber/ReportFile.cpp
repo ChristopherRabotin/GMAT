@@ -28,6 +28,7 @@
 #include "SubscriberException.hpp"
 #include "StringUtil.hpp"          // for GetArrayIndex()
 #include "FileUtil.hpp"            // for GmatFileUtil::
+#include "RealUtilities.hpp"
 #include <iomanip>
 #include <sstream>
 
@@ -40,6 +41,7 @@
 //#define DBGLVL_REPORTFILE_REF_OBJ 1
 //#define DBGLVL_REPORTFILE_DATA 2
 //#define DBGLVL_WRITE_DATA 2
+//#define DEBUG_REAL_DATA
 
 //---------------------------------
 // static data
@@ -405,7 +407,13 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
       case Gmat::OBJECT_PROPERTY_WT:
          {
             rval = wrapperArray[i]->EvaluateReal();
-            output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
+            if (IsNotANumber(rval))
+               output[i].push_back("NaN");
+            else
+               output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
+            #ifdef DEBUG_REAL_DATA
+               MessageInterface::ShowMessage("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+            #endif
             break;
          }
       case Gmat::PARAMETER_WT:
@@ -420,7 +428,13 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
             case Gmat::REAL_TYPE:
                {
                   rval = wrapperArray[i]->EvaluateReal();
-                  output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
+                  if (IsNotANumber(rval))
+                     output[i].push_back("NaN");
+                  else
+                     output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
+                  #ifdef DEBUG_REAL_DATA
+                     MessageInterface::ShowMessage("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+                  #endif
                   break;
                }
             case Gmat::RMATRIX_TYPE:
@@ -1628,5 +1642,25 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    }
    
    return true;
+}
+
+bool ReportFile::IsNotANumber(Real rval)
+{
+   #ifdef DEBUG_REAL_DATA
+      MessageInterface::ShowMessage("Entering IsNotANumber with value = %12.10f\n", rval);
+   #endif
+   if (GmatMathUtil::IsEqual(rval, GmatRealConstants::REAL_UNDEFINED)        ||
+       GmatMathUtil::IsEqual(rval, GmatRealConstants::REAL_UNDEFINED_LARGE)  ||
+       GmatMathUtil::IsNaN(rval))
+   {
+      #ifdef DEBUG_REAL_DATA
+         MessageInterface::ShowMessage("         IsNotANumber returning true\n");
+      #endif
+      return true;
+   }
+   #ifdef DEBUG_REAL_DATA
+      MessageInterface::ShowMessage("         IsNotANumber returning false\n");
+   #endif
+   return false;
 }
 

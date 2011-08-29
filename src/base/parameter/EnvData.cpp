@@ -23,6 +23,7 @@
 #include "EnvData.hpp"
 #include "ParameterException.hpp"
 #include "CelestialBody.hpp"
+#include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_ENVDATA_INIT 1
@@ -34,7 +35,7 @@ using namespace GmatMathUtil;
 // static data
 //---------------------------------
 
-const Real EnvData::ENV_REAL_UNDEFINED = -9876543210.1234;
+const Real EnvData::ENV_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 
 const std::string
 EnvData::VALID_OBJECT_TYPE_LIST[EnvDataObjectCount] =

@@ -22,6 +22,7 @@
 #include "SpacecraftData.hpp"
 #include "ParameterException.hpp"
 #include "StringUtil.hpp"          // ToString()
+#include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_SPACECRAFTDATA_INIT
@@ -34,7 +35,7 @@ SpacecraftData::VALID_OBJECT_TYPE_LIST[SpacecraftDataObjectCount] =
    "Spacecraft"
 }; 
 
-const Real SpacecraftData::BALLISTIC_REAL_UNDEFINED = -9876543210.1234;
+const Real SpacecraftData::BALLISTIC_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 
 //------------------------------------------------------------------------------
 // SpacecraftData()

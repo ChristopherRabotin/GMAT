@@ -43,7 +43,7 @@ using namespace GmatMathUtil;
 // static data
 //---------------------------------
 
-const Real PlanetData::PLANET_REAL_UNDEFINED = -9876543210.1234;
+const Real PlanetData::PLANET_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 
 const std::string
 PlanetData::VALID_OBJECT_TYPE_LIST[PlanetDataObjectCount] =

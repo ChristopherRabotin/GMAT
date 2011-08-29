@@ -39,7 +39,7 @@ AttitudeData::VALID_OBJECT_TYPE_LIST[AttitudeDataObjectCount] =
    "Spacecraft"
 }; 
 
-const Real AttitudeData::ATTITUDE_REAL_UNDEFINED = -9876543210.1234;
+const Real AttitudeData::ATTITUDE_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 
 //------------------------------------------------------------------------------
 // AttitudeData()

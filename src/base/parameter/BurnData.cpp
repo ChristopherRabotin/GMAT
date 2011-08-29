@@ -23,6 +23,7 @@
 #include "ParameterException.hpp"
 #include "RealUtilities.hpp"
 #include "Linear.hpp"           // for GmatRealUtil::ToString()
+#include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_BURNDATA_INIT 1
@@ -45,7 +46,7 @@ BurnData::VALID_OBJECT_TYPE_LIST[BurnDataObjectCount] =
    "Spacecraft"
 }; 
 
-const Real BurnData::BURN_REAL_UNDEFINED = -9876543210.1234;
+const Real BurnData::BURN_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 const Real BurnData::BURN_TOL            = 1.0e-10;
 
 

@@ -24,12 +24,13 @@
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 #include "Linear.hpp"
+#include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
 //  static data
 //---------------------------------
-const Real Rvector6::UTIL_REAL_UNDEFINED = -987654321.0123e-45;
+const Real Rvector6::UTIL_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED;
 const Integer Rvector6::NUM_DATA = NUM_DATA_INIT;
 
 const Rvector6

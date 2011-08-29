@@ -25,6 +25,7 @@
 #include "TimeSystemConverter.hpp"
 #include "TimeTypes.hpp"
 #include "Linear.hpp"               // for GmatRealUtil::ToString()
+#include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_TIMEDATA
@@ -34,7 +35,7 @@
 //---------------------------------
 
 //const Real TimeData::MJD_OFFSET = GmatTimeConstants::JD_JAN_5_1941;
-const Real TimeData::TIME_REAL_UNDEFINED = -9876543210.1234;
+const Real TimeData::TIME_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 const std::string TimeData::TIME_STRING_UNDEFINED = "INVALID_TIME";
 
 const std::string

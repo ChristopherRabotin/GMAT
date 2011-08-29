@@ -51,7 +51,8 @@
 //#define DEBUG_CLOAKING
 
 /// Set the static "undefined" parameters
-const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
+//const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
+const Real        GmatBase::REAL_PARAMETER_UNDEFINED = GmatRealConstants::REAL_UNDEFINED;
 const Integer     GmatBase::INTEGER_PARAMETER_UNDEFINED = -987654321;
 const UnsignedInt GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED = 987654321;
 const std::string GmatBase::STRING_PARAMETER_UNDEFINED = "STRING_PARAMETER_UNDEFINED";

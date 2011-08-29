@@ -74,9 +74,10 @@ Real GmatCalcUtil::CalculateBPlaneData(const std::string &item, const Rvector6 &
 
    // if eMag <= 1, then the method fails, orbit should be hyperbolic
    if (eMag <= 1.0)
-      throw UtilityException
-         ("CalculationUtilities::CalculateBPlaneData() : ERROR - eccentricity magnitude is <= 1.0. eMag: " +
-          GmatRealUtil::ToString(eMag));
+      return GmatMathConstants::QUIET_NAN;
+//      throw UtilityException
+//         ("CalculationUtilities::CalculateBPlaneData() : ERROR - eccentricity magnitude is <= 1.0. eMag: " +
+//          GmatRealUtil::ToString(eMag));
 
    eVec.Normalize();
 
