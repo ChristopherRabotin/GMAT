@@ -2469,9 +2469,10 @@ const std::string GmatCommand::BuildNumber(Real value, bool useExp, Integer leng
       Integer fraction = 1;
 
       // check for a NaN first
-      if (GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED)        ||
+      if ((!GmatMathUtil::IsEqual(value, 0.0)) &&
+         (GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED)        ||
           GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED_LARGE)  ||
-          GmatMathUtil::IsNaN(value))
+          GmatMathUtil::IsNaN(value)))
       {
          sprintf(defstr, "%%%ds", length);
          sprintf(temp, defstr, "NaN");

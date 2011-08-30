@@ -1649,6 +1649,9 @@ bool ReportFile::IsNotANumber(Real rval)
    #ifdef DEBUG_REAL_DATA
       MessageInterface::ShowMessage("Entering IsNotANumber with value = %12.10f\n", rval);
    #endif
+   // zero is OK
+   if (GmatMathUtil::IsEqual(rval, 0.0))   return false;
+
    if (GmatMathUtil::IsEqual(rval, GmatRealConstants::REAL_UNDEFINED)        ||
        GmatMathUtil::IsEqual(rval, GmatRealConstants::REAL_UNDEFINED_LARGE)  ||
        GmatMathUtil::IsNaN(rval))
