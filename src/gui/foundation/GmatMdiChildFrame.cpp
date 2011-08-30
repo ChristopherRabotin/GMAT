@@ -33,6 +33,7 @@
 
 //#define DEBUG_MDI_CHILD_FRAME
 //#define DEBUG_UPDATE_GUI_ITEM
+//#define DEBUG_CLOSE
 
 //------------------------------
 // event tables for wxWindows
@@ -314,7 +315,7 @@ void GmatMdiChildFrame::OnActivate(wxActivateEvent &event)
 //------------------------------------------------------------------------------
 void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 {
-   #ifdef DEBUG_MDI_CHILD_FRAME
+   #ifdef DEBUG_CLOSE
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::OnClose() entered, mDirty=%d, mOverrideDirty=%d\n",
        mDirty, mOverrideDirty);
@@ -347,7 +348,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    // check if window is dirty?
    if (mDirty)
    {
-      #ifdef DEBUG_MDI_CHILD_FRAME
+      #ifdef DEBUG_CLOSE
       MessageInterface::ShowMessage
          ("   Panel has been changed, show exit confirm message\n");
       #endif
@@ -360,7 +361,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
          event.Veto();
          mCanClose = false;
          
-         #ifdef DEBUG_MDI_CHILD_FRAME
+         #ifdef DEBUG_CLOSE
          MessageInterface::ShowMessage
             ("GmatMdiChildFrame::OnClose() exiting, close event was vetoed\n");
          #endif
@@ -370,18 +371,20 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    }
    else
    {
-      #ifdef DEBUG_MDI_CHILD_FRAME
+      #ifdef DEBUG_CLOSE
       MessageInterface::ShowMessage("   No changes made to panel\n");
       #endif
    }
+   
+   #ifdef DEBUG_CLOSE
+   MessageInterface::ShowMessage
+      ("GmatMdiChildFrame::OnClose() will call GmatMainFrame to remove child and exit\n");
+   #endif
    
    // remove from list of frames
    GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType);   
    wxSafeYield();
    
-   #ifdef DEBUG_MDI_CHILD_FRAME
-   MessageInterface::ShowMessage("GmatMdiChildFrame::OnClose() exiting\n");
-   #endif
 }
 
 
