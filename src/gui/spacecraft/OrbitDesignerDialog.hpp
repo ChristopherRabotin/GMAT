@@ -1,4 +1,4 @@
-//
+//$Id$
 //------------------------------------------------------------------------------
 //                            OrbitDesignerDialog
 //------------------------------------------------------------------------------
@@ -41,21 +41,21 @@
 class OrbitDesignerDialog: public GmatDialog
 {
 public:
-	// constructors
-	OrbitDesignerDialog(wxWindow *parent, Spacecraft *spacecraft); 
-
-	~OrbitDesignerDialog(); 
-
-	wxArrayString GetElementsString();
-
-	//accessor functions
-	Rvector6 GetElementsDouble();
-	std::string GetEpochFormat();
-	std::string GetEpoch();
-
-	bool isEpochChanged;
-	bool updateOrbit;
-
+   // constructors
+   OrbitDesignerDialog(wxWindow *parent, Spacecraft *spacecraft); 
+   
+   ~OrbitDesignerDialog(); 
+   
+   wxArrayString GetElementsString();
+   
+   //accessor functions
+   Rvector6 GetElementsDouble();
+   std::string GetEpochFormat();
+   std::string GetEpoch();
+   
+   bool isEpochChanged;
+   bool updateOrbit;
+   
 private:
    UserInputValidator validator;
 
@@ -85,18 +85,18 @@ private:
 
    struct sunElements 
    {
-	  Real SMA;
-	  Real ALT;
-	  Real ECC;
-	  Real INC;
+      Real SMA;
+      Real ALT;
+      Real ECC;
+      Real INC;
       Real ROP;
       Real ROA;
-	  Real P;
-	  wxString epoch;
-	  wxString epochFormat;
-	  wxString startTime;
+      Real P;
+      wxString epoch;
+      wxString epochFormat;
+      wxString startTime;
       Real RAAN;
-	  wxString errormsg;
+      wxString errormsg;
    };
 
    wxString orbitType;
@@ -248,28 +248,29 @@ private:
    void DisplayMolniya();
    void DisplayFrozen();
    void DisplayTime();
-	
+        
    DECLARE_EVENT_TABLE();
 
    // IDs for the controls and the menu commands
    enum
    {     
-	  ID_TEXT = 81000,
-	  ID_BUTTON_SUMMARY,
+      ID_TEXT = 81000,
+      ID_BUTTON_SUMMARY,
       ID_COMBO,
-	  ID_TEXTCTRL_PARAMS,
-	  ID_BUTTON_FINDORBIT,
-	  ID_CB_P1,
-	  ID_CB_P2,
-	  ID_CB_P3,
-	  ID_CB_P4,
-	  ID_CB_P5,
-	  ID_CB_P6,
-	  ID_CB_P7,
-	  ID_CB_TP1,
-	  ID_CB_TP2,
-	  ID_CB_TP3
+      ID_TEXTCTRL_PARAMS,
+      ID_BUTTON_FINDORBIT,
+      ID_CB_P1,
+      ID_CB_P2,
+      ID_CB_P3,
+      ID_CB_P4,
+      ID_CB_P5,
+      ID_CB_P6,
+      ID_CB_P7,
+      ID_CB_TP1,
+      ID_CB_TP2,
+      ID_CB_TP3
    };
 };
 
 #endif
+
