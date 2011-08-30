@@ -253,6 +253,8 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mCommandListForViewControl.Add("While");
    mCommandListForViewControl.Add("Achieve");
    mCommandListForViewControl.Add("Vary");
+   mCommandListForViewControl.Add("Minimize");
+   mCommandListForViewControl.Add("NonlinearConstraint");
    mCommandListForViewControl.Add("CallMatlabFunction");
    
    // Should we sort the command list?
