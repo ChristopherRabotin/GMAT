@@ -2468,24 +2468,35 @@ const std::string GmatCommand::BuildNumber(Real value, bool useExp, Integer leng
       char temp[100], defstr[40];
       Integer fraction = 1;
 
-      if (useExp)
+      // check for a NaN first
+      if (GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED)        ||
+          GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED_LARGE)  ||
+          GmatMathUtil::IsNaN(value))
       {
-         fraction = length - 8;
-         sprintf(defstr, "%%%d.%de", length, fraction);
+         sprintf(defstr, "%%%ds", length);
+         sprintf(temp, defstr, "NaN");
       }
       else
       {
-         Real shift = GmatMathUtil::Abs(value);
-         while (shift > 10.0)
+         if (useExp)
          {
-            ++fraction;
-            shift *= 0.1;
+            fraction = length - 8;
+            sprintf(defstr, "%%%d.%de", length, fraction);
          }
-         fraction = length - 3 - fraction;
-         sprintf(defstr, "%%%d.%dlf", length, fraction);
-      }
+         else
+         {
+            Real shift = GmatMathUtil::Abs(value);
+            while (shift > 10.0)
+            {
+               ++fraction;
+               shift *= 0.1;
+            }
+            fraction = length - 3 - fraction;
+            sprintf(defstr, "%%%d.%dlf", length, fraction);
+         }
 
-      sprintf(temp, defstr, value);
+         sprintf(temp, defstr, value);
+      }
       retval = temp;
    }
 
