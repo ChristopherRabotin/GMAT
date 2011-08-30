@@ -840,6 +840,7 @@ int GetODEModel(GmatCommand **cmd, const char *modelName)
                   odeNameTable[modelName] = retval;
                   odeTable[retval] = model;
                   setupTable[retval] = setup;
+                  pSetup = setup;
                   break;
                }
             }
@@ -853,7 +854,7 @@ int GetODEModel(GmatCommand **cmd, const char *modelName)
    if (ode != NULL)
    {
       lastMsg = "ODE model is set to ";
-      lastMsg += extraMsg;
+      lastMsg += ode->GetName();
    }
    else
    {
