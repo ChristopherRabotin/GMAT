@@ -525,6 +525,12 @@
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\MissionTreeToolBar.cpp">
+      <Filter>Source Files\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\UndockedMissionPanel.cpp">
+      <Filter>Source Files\mission</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -988,6 +994,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp">
       <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\MissionTreeToolBar.hpp">
+      <Filter>Source Files\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\UndockedMissionPanel.hpp">
+      <Filter>Source Files\mission</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
