@@ -196,7 +196,8 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
      inFiniteBurn(false),
      mShowDetailedItem(false)
 {
-   mParent = parent;   
+   mParent = parent;
+   theNotebook = NULL;
    theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    mViewCommands.Add("All");
@@ -2030,7 +2031,8 @@ void MissionTree::AddDefaultMission()
    //-----------------------------------------------------------------
    
    UpdateCommand();
-   theNotebook->SetMissionTreeExpandLevel(10); // level > 3 expands all
+   if (theNotebook)
+      theNotebook->SetMissionTreeExpandLevel(10); // level > 3 expands all
    theGuiInterpreter->ResetConfigurationChanged(false, true);
    
 }
@@ -2240,10 +2242,12 @@ void MissionTree::OnDoubleClick(wxMouseEvent &event)
    wxTreeItemId itemId = GetSelection();
    MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(itemId);
    MissionTreeItemData *parent = (MissionTreeItemData *)GetItemData(GetItemParent(itemId));
-
+   
    #if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage("MissionTree::OnDoubleClick() item=%s parent=%s\n",
-                                 item->GetTitle().c_str(), parent->GetTitle().c_str());
+   MessageInterface::ShowMessage
+      ("MissionTree::OnDoubleClick() item='%s', parent='%s', theMainFrame=<%p>, "
+       "theMainFrame->theMdiChildren=<%p>\n", item->GetTitle().c_str(), parent->GetTitle().c_str(),
+       theMainFrame);
    #endif
    
    // Since VaryPanel is used for both Target and Optimize,
@@ -2254,7 +2258,7 @@ void MissionTree::OnDoubleClick(wxMouseEvent &event)
    
    // Show panel here. because OnItemActivated() always collapse the node.
    theMainFrame->CreateChild(item);
-
+   
    //CheckClickIn(position);
 }
 

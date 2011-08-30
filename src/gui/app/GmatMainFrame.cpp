@@ -97,6 +97,7 @@
 #include "CelestialBodyPanel.hpp"
 #include "CompareReportPanel.hpp"
 #include "GmatCommandPanel.hpp"
+#include "UndockedMissionPanel.hpp"
 // dialogs
 #include "CompareFilesDialog.hpp"
 #include "CompareTextDialog.hpp"
@@ -148,6 +149,7 @@
 //#define DEBUG_FILE_COMPARE
 //#define DEBUG_SERVER
 //#define DEBUG_CREATE_CHILD
+//#define DEBUG_CHILD_OPEN
 //#define DEBUG_REMOVE_CHILD
 //#define DEBUG_OPEN_SCRIPT
 //#define DEBUG_REFRESH_SCRIPT
@@ -278,7 +280,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    : wxMDIParentFrame(parent, id, title, pos, size, style)
 {
    #ifdef DEBUG_MAINFRAME
-   MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() entered\n");
+   MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() this=<%p> entered\n", this);
    #endif
 
    theMessageWin = NULL;
@@ -366,7 +368,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 
    // used to store the list of open children
    theMdiChildren = new wxList();
-
+   
    int w, h;
    GetClientSize(&w, &h);
 
@@ -458,20 +460,22 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    theMainWin->SetOrientation(wxLAYOUT_VERTICAL);
    theMainWin->SetAlignment(wxLAYOUT_LEFT);
    theMainWin->SetSashVisible(wxSASH_RIGHT, TRUE);
-
+   
+   //-----------------------------------------------------------------
    // Create Resource, Mission, and Output notebook tabs
-   new GmatNotebook(theMainWin, -1, wxDefaultPosition,
-                    wxDefaultSize, wxCLIP_CHILDREN);
-
+   //-----------------------------------------------------------------
+   theNotebook = new GmatNotebook(theMainWin, -1, wxDefaultPosition,
+                                  wxDefaultSize, wxCLIP_CHILDREN);
+   
    // Set the main frame, because there will no longer be right notebook
    gmatAppData->SetMainFrame(this);
    gmatAppData->GetResourceTree()->SetMainFrame(this);
    gmatAppData->GetMissionTree()->SetMainFrame(this);
-
+   
    mMatlabServer = NULL;
    mRunPaused = false;
    mRunCompleted = true;
-
+   
    // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
    try
@@ -514,7 +518,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    #endif
    
    #ifdef DEBUG_MAINFRAME
-   MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
+   MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() this=<%p> exiting\n", this);
    #endif
 }
 
@@ -604,23 +608,19 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
 {
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CreateChild() title='%s', name='%s', restore=%d\n",
-       item->GetTitle().c_str(), item->GetName().c_str(), restore);
+      ("GmatMainFrame::CreateChild() this=<%p>, title='%s', name='%s', type=%d, "
+       "restore=%d\n", this, item->GetTitle().c_str(), item->GetName().c_str(),
+       item->GetItemType(), restore);
    #endif
    
    GmatMdiChildFrame *newChild = NULL;
-
+   
    // if child already open, just return
    if (IsChildOpen(item, restore))
       return NULL;
-
+   
    GmatTree::ItemType itemType = item->GetItemType();
-
-   #ifdef DEBUG_CREATE_CHILD
-   MessageInterface::ShowMessage
-      ("   itemName='%s', itemType=%d\n", item->GetName().c_str(), itemType);
-   #endif
-
+   
    //----------------------------------------------------------------------
    // create a mdi child
    // Note: Do not change the order of ItemType in GmatTreeItemData.hpp.
@@ -676,6 +676,10 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
           itemType == GmatTree::COMPARE_REPORT)
          newChild = CreateNewOutput(item->GetTitle(), item->GetName(), itemType);
    }
+   else if (itemType == GmatTree::MISSION_TREE_UNDOCKED)
+   {
+      newChild = CreateUndockedMissionPanel(item->GetTitle(), item->GetName(), itemType);
+   }
    else
    {
       // do nothing
@@ -692,18 +696,74 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
       int numChildren = GetNumberOfChildOpen(false, true);
       if (numChildren > 0)
       {
+         
+         int toolW, toolH;
+         theToolBar->GetSize(&toolW, &toolH);
          int x = (numChildren - 1) * 20;
          #ifdef __WXMAC__
             // reposition vertical position of first panel for Mac, so top button bar is visible
             int y = (numChildren) * 20;
          #else
+            wxMDIClientWindow* clientW = GetClientWindow();
+            #if DEBUG_CHILD_WINDOW
+            if (clientW != NULL)
+            {
+               int cx, cy, cw, ch;
+               clientW->GetPosition(&cx, &cy);
+               clientW->GetSize(&cw, &ch);
+               MessageInterface::ShowMessage
+                  ("client window: cx=%d, cy=%d, cw=%d, ch=%d\n", cx, cy, cw, ch);
+            }
+            #endif
+            
             int y = x;
+            
+            // Why it doesn't position first child (0,0) to top left corner?
+            if (newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED)
+               y = -toolH;
          #endif
          newChild->SetPosition(wxPoint(x, y));
       }
    }
    
+   newChild->Show();
    return newChild;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatMdiChildFrame* GetChild(const wxString &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves mdi child frame by name
+ */
+//------------------------------------------------------------------------------
+GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
+{
+   #ifdef DEBUG_MAINFRAME
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GetChild() name=%s\n", name.c_str());
+   #endif
+
+   GmatMdiChildFrame *theChild = NULL;
+   wxNode *node = theMdiChildren->GetFirst();
+   while (node)
+   {
+      theChild = (GmatMdiChildFrame *)node->GetData();
+
+      #ifdef DEBUG_MAINFRAME
+      MessageInterface::ShowMessage
+         ("   theChild=%s\n", theChild->GetName().c_str());
+      #endif
+
+      if (theChild->GetName().IsSameAs(name))
+      {
+         return theChild;
+      }
+      node = node->GetNext();
+   }
+
+   return NULL;
 }
 
 
@@ -775,8 +835,9 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item, bool restore)
 {
    #ifdef DEBUG_CHILD_OPEN
    MessageInterface::ShowMessage
-      ("GmatMainFrame::IsChildOpen() entered, title='%s'\n   name='%s'\n",
-       item->GetTitle().c_str(), item->GetName().c_str());
+      ("GmatMainFrame::IsChildOpen() this=<%p> entered, title='%s'\n   name='%s'\n   "
+       "theMdiChildren=<%p>\n", this, item->GetTitle().c_str(), item->GetName().c_str(),
+       theMdiChildren);
    #endif
    
    wxNode *node = theMdiChildren->GetFirst();
@@ -806,57 +867,26 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item, bool restore)
       
       if (isChildAlreadyOpen)
       {
-         #ifdef DEBUG_CHILD_OPEN
-         MessageInterface::ShowMessage("   child is already open\n");
-         #endif
          // move child to the front
          if (restore)
          {
             theChild->Activate();
             theChild->Restore();
          }
+         
+         #ifdef DEBUG_CHILD_OPEN
+         MessageInterface::ShowMessage("GmatMainFrame::IsChildOpen() returning true\n");
+         #endif
          return TRUE;
       }
       
       node = node->GetNext();
    }
    
-   return FALSE;
-}
-
-
-//------------------------------------------------------------------------------
-// GmatMdiChildFrame* GetChild(const wxString &name)
-//------------------------------------------------------------------------------
-/**
- */
-//------------------------------------------------------------------------------
-GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
-{
-   #ifdef DEBUG_MAINFRAME
-   MessageInterface::ShowMessage
-      ("GmatMainFrame::GetChild() name=%s\n", name.c_str());
+   #ifdef DEBUG_CHILD_OPEN
+   MessageInterface::ShowMessage("GmatMainFrame::IsChildOpen() returning false\n");
    #endif
-
-   GmatMdiChildFrame *theChild = NULL;
-   wxNode *node = theMdiChildren->GetFirst();
-   while (node)
-   {
-      theChild = (GmatMdiChildFrame *)node->GetData();
-
-      #ifdef DEBUG_MAINFRAME
-      MessageInterface::ShowMessage
-         ("   theChild=%s\n", theChild->GetName().c_str());
-      #endif
-
-      if (theChild->GetName().IsSameAs(name))
-      {
-         return theChild;
-      }
-      node = node->GetNext();
-   }
-
-   return NULL;
+   return false;
 }
 
 
@@ -1124,7 +1154,7 @@ void GmatMainFrame::CloseActiveChild()
 
 //------------------------------------------------------------------------------
 // bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-//                       bool closeReports = true)
+//                       bool closeReports = true, bool closeUndockedMissionTree = true)
 //------------------------------------------------------------------------------
 /*
  * Closes all mdi children frames.
@@ -1136,7 +1166,7 @@ void GmatMainFrame::CloseActiveChild()
  */
 //------------------------------------------------------------------------------
 bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
-                                     bool closeReports)
+                                     bool closeReports, bool closeUndockedMissionTree)
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
@@ -1206,6 +1236,14 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          if (closePlots && type != GmatTree::COMPARE_REPORT)
          {
             gmatAppData->GetOutputTree()->UpdateOutput(true, closeReports);
+            canDelete = true;
+         }
+      }
+      else if (type == GmatTree::MISSION_TREE_UNDOCKED)
+      {
+         // delete output child except compare
+         if (closeUndockedMissionTree)
+         {
             canDelete = true;
          }
       }
@@ -1375,7 +1413,7 @@ void GmatMainFrame::CloseCurrentProject()
    #endif
 
    // close all windows
-   CloseAllChildren();
+   CloseAllChildren(true, true, true, false);
 
    // update title and status bar
    wxString statusText;
@@ -1443,7 +1481,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    GmatAppData *gmatAppData = GmatAppData::Instance();
 
    // Always refresh the gui before new scripts are read
-   CloseAllChildren(closeScript, true, true);
+   CloseAllChildren(closeScript, true, true, false);
    gmatAppData->GetResourceTree()->ClearResource(true);
    gmatAppData->GetMissionTree()->ClearMission();
    gmatAppData->GetOutputTree()->UpdateOutput(true, true);
@@ -1480,6 +1518,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
          // Update ResourceTree and MissionTree
          gmatAppData->GetResourceTree()->UpdateResource(true);
          gmatAppData->GetMissionTree()->UpdateMission(true);
+         RestoreUndockedMissionPanel();
          
          UpdateGuiScriptSyncStatus(1, 1);
          
@@ -1781,7 +1820,7 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    }
    
    // close all child windows first
-   if (CloseAllChildren(true, true))
+   if (CloseAllChildren(true, true, true, true))
    {
       // if user canceled, veto the event
       if (ShowSaveMessage())
@@ -2164,6 +2203,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    gmatAppData->GetResourceTree()->UpdateResource(true);
    gmatAppData->GetMissionTree()->UpdateMission(true);
    gmatAppData->GetOutputTree()->UpdateOutput(true, true);
+   RestoreUndockedMissionPanel();
    
    // Update GUI/Script sync status
    UpdateGuiScriptSyncStatus(1, 1);
@@ -2394,7 +2434,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
 {
-   CloseAllChildren(true, true, false);
+   CloseAllChildren(true, true, false, false);
    wxSafeYield();
 
    wxToolBar* toolBar = GetToolBar();
@@ -3049,6 +3089,119 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
    #endif
 
    return newChild;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatMdiChildFrame* CreateUndockedMissionPanel(GmatTree::ItemType itemType, ...)
+//------------------------------------------------------------------------------
+/**
+ * Creates MissionTreePage as it appears in the GmatNotebook.
+ * This panel is created when user undocks the MissionPage from the GmatNotebook
+ * by dragging the tab.
+ */
+//------------------------------------------------------------------------------
+GmatMdiChildFrame*
+GmatMainFrame::CreateUndockedMissionPanel(const wxString &title,
+                                          const wxString &name,
+                                          GmatTree::ItemType itemType)
+{
+   #ifdef DEBUG_CREATE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CreateUndockedMissionPanel() title=%s, name=%s, itemType=%d\n",
+       title.c_str(), name.c_str(), itemType);
+   #endif
+   
+   wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
+   GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, name, title, itemType);
+   wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
+   
+   switch (itemType)
+   {
+   case GmatTree::MISSION_TREE_UNDOCKED:
+      {
+         UndockedMissionPanel *mtPanel = new UndockedMissionPanel(scrolledWin, name);
+         MissionTree *newMissionTree = mtPanel->GetMissionTree();
+         
+         // Now GMAT will work new mission tree, so set apppropriate pointers
+         #ifdef DEBUG_MISSION_TREE
+         MessageInterface::ShowMessage("   newMissionTree=<%p>\n", newMissionTree);
+         #endif
+         
+         mtPanel->SetGmatNotebook(theNotebook);
+         //MessageInterface::ShowMessage
+         //   ("---> In GmatMainFrame, setting this<%p> to newMissionTree<%p>\n", this, newMissionTree);
+         newMissionTree->SetMainFrame(this);
+         //MessageInterface::ShowMessage
+         //   ("---> In GmatMainFrame, setting theNotebook<%p> to newMissionTree<%p>\n", theNotebook, newMissionTree);
+         newMissionTree->SetNotebook(theNotebook);
+         //MessageInterface::ShowMessage
+         //   ("---> In GmatMainFrame, setting newMissionTree<%p> to appData<%p>\n",
+         //    newMissionTree, GmatAppData::Instance());
+         GmatAppData::Instance()->SetMissionTree(newMissionTree);
+         sizer->Add(mtPanel, 0, wxGROW|wxALL, 0);
+         break;
+      }
+   default:
+      return NULL;
+   }
+   
+   scrolledWin->SetScrollRate(5, 5);
+   scrolledWin->SetAutoLayout(TRUE);
+   scrolledWin->SetSizer(sizer);
+   sizer->Fit(scrolledWin);
+   sizer->SetSizeHints(scrolledWin);
+   
+   #ifdef __USE_CHILD_BEST_SIZE__
+   if (itemType != GmatTree::SCRIPT_FILE)
+   {
+      wxSize bestSize = newChild->GetBestSize();
+      newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+   }
+   else
+   {
+      #ifndef __WXMSW__
+      wxSize bestSize = newChild->GetBestSize();
+      newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+      #endif
+   }
+   #endif
+   
+   // list of open children
+   theMdiChildren->Append(newChild);
+   
+   // djc: Under linux, force the new child to display
+   #ifndef __WXMSW__
+      newChild->Show();
+   #endif
+
+   #ifdef DEBUG_CREATE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CreateUndockedMissionPanel() returning newChild=<%p>\n", newChild);
+   #endif
+   return newChild;
+}
+
+
+//------------------------------------------------------------------------------
+// void RestoreUndockedMissionPanel()
+//------------------------------------------------------------------------------
+void GmatMainFrame::RestoreUndockedMissionPanel()
+{
+   if (GetNumberOfChildOpen(true, true) > 0)
+   {
+      wxNode *node = theMdiChildren->GetFirst();
+      while (node)
+      {
+         GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+         GmatTree::ItemType itemType = theChild->GetItemType();
+         if (itemType == GmatTree::MISSION_TREE_UNDOCKED)
+         {
+            theChild->Restore();
+            break;
+         }
+      }
+   }
 }
 
 

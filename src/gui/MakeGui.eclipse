@@ -251,7 +251,9 @@ OBJECTS = \
     hardware/ThrusterConfigPanel.o \
     mission/DecoratedTree.o \
     mission/MissionTree.o \
+    mission/MissionTreeToolBar.o \
     mission/TreeViewOptionDialog.o \
+    mission/UndockedMissionPanel.o \
     output/CompareReportPanel.o \
     output/OutputTree.o \
     output/ReportFilePanel.o \

@@ -35,10 +35,9 @@
 #include "GuiInterpreter.hpp"
 #include "GmatTreeItemData.hpp"
 #include "GmatServer.hpp"
-//#include "MdiChildViewFrame.hpp"
-//#include "MdiChildTsFrame.hpp"
 #include "GmatMdiChildFrame.hpp"
 #include "WelcomePanel.hpp"
+#include "GmatNotebook.hpp"
 
 #include <wx/notebook.h>
 #include <wx/toolbar.h>
@@ -71,6 +70,7 @@ public:
    
    GmatMdiChildFrame* CreateChild(GmatTreeItemData *item, bool restore = true);
    GmatMdiChildFrame* GetChild(const wxString &name);
+   
    Integer GetNumberOfChildOpen(bool incPlots = false, bool incScripts = false);
    bool IsChildOpen(GmatTreeItemData *item, bool restore = true);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
@@ -83,7 +83,7 @@ public:
    void CloseWelcomePanel();
    void CloseActiveChild();
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-                         bool closeReports = true);
+                         bool closeReports = true, bool closeUndockedMissionTree = true);
    void MinimizeChildren();
    void SetActiveChildDirty(bool dirty);
    void OverrideActiveChildDirty(bool override);
@@ -220,6 +220,7 @@ private:
    
    wxSashLayoutWindow* theMainWin;
    wxSashLayoutWindow* theMessageWin;
+   GmatNotebook *theNotebook;
    
    ViewTextFrame *mTextFrame;
    WelcomePanel *mWelcomePanel;
@@ -241,6 +242,10 @@ private:
    GmatMdiChildFrame* CreateNewOutput(const wxString &title,
                                       const wxString &name,
                                       GmatTree::ItemType itemType);
+   GmatMdiChildFrame* CreateUndockedMissionPanel(const wxString &title,
+                                                 const wxString &name,
+                                                 GmatTree::ItemType itemType);
+   void RestoreUndockedMissionPanel();
    
    bool ShowScriptOverwriteMessage();
    bool ShowSaveMessage();

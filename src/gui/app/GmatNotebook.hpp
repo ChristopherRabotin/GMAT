@@ -22,8 +22,9 @@
 #include "MissionTree.hpp"
 #include "OutputTree.hpp"
 #include "GmatStaticBoxSizer.hpp"
+#include "MissionTreeToolBar.hpp"
+#include "UndockedMissionPanel.hpp"
 #include <wx/notebook.h>
-#include <wx/tglbtn.h>
 
 class GmatNotebook : public wxNotebook
 {
@@ -32,66 +33,36 @@ public:
    GmatNotebook( wxWindow *parent, wxWindowID id = -1,
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize, long style = 0 );
-   
+   virtual ~GmatNotebook();
+
    void SetMissionTreeExpandLevel(int level);
-   void ResetMissionTreeTools();
+   void RestoreMissionPage();
    
 protected:
 private:
-   wxWindow     *mParent;
-   ResourceTree *resourceTree;
-   MissionTree  *missionTree;
-   OutputTree   *outputTree;
-   wxPanel      *mMissionTreePanel;
+   wxWindow          *mParent;
+   ResourceTree      *resourceTree;
+   MissionTree       *missionTree;
+   OutputTree        *outputTree;
+   wxPanel           *mMissionPagePanel;
+   UndockedMissionPanel *mUndockedMissionPanel;
    
    // toolbar for mission page
-   wxToolBar    *mMissionToolBar;
-
-   int     mLastLevelClicked;
-   int     mLastIncCategoryClicked;
-   int     mLastExcCategoryClicked;
+   MissionTreeToolBar *mMissionTreeToolBar;
    
    wxPanel *CreateResourcePage();
    wxPanel *CreateMissionPage();
    wxPanel *CreateOutputPage();
    
-   void CreateMissionTreeToolBar();
-   void ResetMissionTreeLevel();
-   void ResetMissionTreeIncludeCategory();
-   void ResetMissionTreeExcludeCategory();
-   int  GetOnlyOneClicked(int category);
+   void CreateUndockedMissionPanel();
    
    // event handlers
    void OnNotebookSelChange(wxNotebookEvent &event);
    void OnNotebookSelChanging(wxNotebookEvent &event);
-   void OnViewByLevelClicked(wxCommandEvent& event);
-   void OnViewByCategory(wxCommandEvent& event);
-   void OnCustomView(wxCommandEvent& event);
-   //void OnViewByLevelReclicked(wxCommandEvent& event);
-   
+   void OnMouse(wxMouseEvent &event);
    
    DECLARE_EVENT_TABLE();
    
-   // IDs for the controls and the menu commands
-   enum
-   {
-      // 93500 is too high and it doesn't trigger tool events
-      //ID_BUTTON = 93500, 
-      ID_BUTTON = 14500,
-      TOOL_LEVEL_ALL,
-      TOOL_LEVEL_1,
-      TOOL_LEVEL_2,
-      TOOL_LEVEL_3,
-      TOOL_INC_PHYSICS,
-      TOOL_INC_SOLVER,
-      TOOL_INC_SCRIPT,
-      TOOL_INC_CONTROL,
-      TOOL_EXC_REPORT,
-      TOOL_EXC_EQUATION,
-      TOOL_EXC_PLOT,
-      TOOL_EXC_CALL,
-      TOOL_CUSTOM_VIEW,
-   };
 };
 
 #endif // GmatNotebook_hpp

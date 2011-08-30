@@ -197,9 +197,6 @@ void TreeViewOptionDialog::OnButtonClick(wxCommandEvent &event)
       if (missionTree != NULL)
          missionTree->SetViewCommands(viewCmds);
       
-      GmatNotebook *noteBook = (GmatNotebook*)(mParent);
-      noteBook->ResetMissionTreeTools();
-      //Close();
    }
 }
 

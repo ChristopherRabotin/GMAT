@@ -268,7 +268,8 @@ namespace GmatTree
       MISSION_SEQ_TOP_FOLDER,
       MISSION_SEQ_SUB_FOLDER,
       MISSION_SEQ_COMMAND,
-
+      MISSION_TREE_UNDOCKED,
+      
       // command
       BEGIN_OF_COMMAND = 43000,
       PROPAGATE,
