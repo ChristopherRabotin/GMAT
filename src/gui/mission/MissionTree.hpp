@@ -171,6 +171,7 @@ private:
    void OnRun(wxCommandEvent &event);
    void OnShowDetail(wxCommandEvent &event);
    void OnShowScript(wxCommandEvent &event);
+   void OnShowCommandSummary(wxCommandEvent &event);
    void OnShowMissionSummaryAll(wxCommandEvent &event);
    void OnShowMissionSummaryPhysics(wxCommandEvent &event);
    
@@ -356,6 +357,7 @@ private:
       POPUP_RUN,
       POPUP_SHOW_DETAIL,
       POPUP_SHOW_SCRIPT,
+      POPUP_COMMAND_SUMMARY,
       POPUP_MISSION_SUMMARY_ALL,
       POPUP_MISSION_SUMMARY_PHYSICS,
       

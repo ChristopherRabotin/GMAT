@@ -158,6 +158,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    
    EVT_MENU(POPUP_SHOW_DETAIL, MissionTree::OnShowDetail)
    EVT_MENU(POPUP_SHOW_SCRIPT, MissionTree::OnShowScript)
+   EVT_MENU(POPUP_COMMAND_SUMMARY, MissionTree::OnShowCommandSummary)
    EVT_MENU(POPUP_MISSION_SUMMARY_ALL, MissionTree::OnShowMissionSummaryAll)
    EVT_MENU(POPUP_MISSION_SUMMARY_PHYSICS, MissionTree::OnShowMissionSummaryPhysics)
 
@@ -2436,7 +2437,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
          menu.Append(POPUP_DELETE, wxT("Delete"));
       }
       
-      //menu.Enable(POPUP_RENAME, FALSE);
+      menu.AppendSeparator();
+      menu.Append(POPUP_COMMAND_SUMMARY, wxT("Command Summary"));
       
    }
    
@@ -3210,6 +3212,40 @@ void MissionTree::OnShowScript(wxCommandEvent &event)
    vtf->Show(true);
    
 }
+
+//------------------------------------------------------------------------------
+// void OnShowCommandSummary()
+//------------------------------------------------------------------------------
+void MissionTree::OnShowCommandSummary(wxCommandEvent &event)
+{
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("OnShowCommandSummary() entered\n");
+   #endif
+   
+   // get selected item
+   wxTreeItemId itemId = GetSelection();
+   GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(itemId);
+   MissionTreeItemData *item = (MissionTreeItemData *)selItem;
+   GmatCommand *cmd = item->GetCommand();
+   
+   // open window to show command summary
+   if (cmd != NULL)
+   {
+      wxString title = "Command Summary for ";
+      if (cmd->GetName() != "")
+         title += cmd->GetName().c_str();
+      else
+         title += cmd->GetTypeName().c_str();
+      
+      ShowSummaryDialog ssd(this, -1, title, cmd);
+      ssd.ShowModal();
+   }
+   
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("OnShowCommandSummary() leaving\n");
+   #endif
+}
+
 
 //---------------------------------------------------------------------------
 // void MissionTree::OnShowMissionSummaryAll()
