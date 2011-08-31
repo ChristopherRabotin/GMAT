@@ -153,6 +153,9 @@ const StringArray& ClearPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 bool ClearPlot::InterpretAction()
 {
+   plotNameList.clear();
+   thePlotList.clear();
+   
    Integer loc = generatingString.find("ClearPlot", 0) + 9;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')

@@ -97,17 +97,25 @@ bool Toggle::InterpretAction()
 {
    // Sample string:  "Toggle Report On"
    
-   Integer loc = generatingString.find("Toggle", 0) + 6;
-   const char *str = generatingString.c_str();
+   subNames.clear();
+   subs.clear();
+   
+   std::string genStr = generatingString;
+   
+   // Trim it first
+   genStr = GmatStringUtil::Trim(genStr, GmatStringUtil::BOTH, true, true);
+   
+   Integer loc = genStr.find("Toggle", 0) + 6;
+   const char *str = genStr.c_str();
    while (str[loc] == ' ')
       ++loc;
    Integer subEnd, commentStart;
-   if ((commentStart = (Integer) generatingString.find_first_of("%", 0)) != 
-       (Integer)generatingString.npos)  
+   if ((commentStart = (Integer) genStr.find_first_of("%", 0)) != 
+       (Integer)genStr.npos)  
       subEnd = commentStart;
    else 
-      subEnd = (Integer) generatingString.size();
-   std::string str1 = generatingString.substr(loc, subEnd-loc);
+      subEnd = (Integer) genStr.size();
+   std::string str1 = genStr.substr(loc, subEnd-loc);
    #ifdef DEBUG_TOGGLE_IA
       MessageInterface::ShowMessage("In InterpretAction, str1 = \n");
       MessageInterface::ShowMessage("   %s\n", str1.c_str());

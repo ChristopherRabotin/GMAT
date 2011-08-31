@@ -158,6 +158,9 @@ const StringArray& PenUp::GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 bool PenUp::InterpretAction()
 {
+   plotNameList.clear();
+   thePlotList.clear();
+   
    Integer loc = generatingString.find("PenUp", 0) + 5; //, end;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')

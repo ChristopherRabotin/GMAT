@@ -39,6 +39,7 @@
 #include "bitmaps/mtc_ExcCall.xpm"
 #include "bitmaps/mtc_CustomView.xpm"
 
+//#define DEBUG_MORE_VIEW_OPTIONS
 
 BEGIN_EVENT_TABLE(MissionTreeToolBar, wxToolBar)
    EVT_TOOL_RANGE (TOOL_LEVEL_ALL, TOOL_LEVEL_3, MissionTreeToolBar::OnViewByLevel)
@@ -478,31 +479,50 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void MissionTreeToolBar::OnCustomView(wxCommandEvent& event)
 {
-   int x = 0, y = 0, w = 0, h = 0;
+   #ifdef DEBUG_MORE_VIEW_OPTIONS
+   MessageInterface::ShowMessage("MissionTreeToolBar::OnCustomView() entered\n");
+   #endif
+   
+   int grandpX = 0, grandpY = 0, grandpW = 0, grandpH = 0;
+   int parentX = 0, parentY = 0, parentW = 0, parentH = 0;
+   int x = 0, y = 0;
+   
    if (mParent->GetParent() != NULL)
    {
-      mParent->GetParent()->GetPosition(&x, &y);
-      mParent->GetParent()->GetSize(&w, &h);
+      mParent->GetParent()->GetScreenPosition(&grandpX, &grandpY);
+      mParent->GetParent()->GetSize(&grandpW, &grandpH);
+   }
+   
+   mParent->GetScreenPosition(&parentX, &parentY);
+   mParent->GetSize(&parentW, &parentH);
+   
+   #ifdef DEBUG_MORE_VIEW_OPTIONS
+   MessageInterface::ShowMessage
+      ("   grandpX = %3d, grandpY = %3d, grandpW = %3d, grandpH = %3d\n", grandpX, grandpY, grandpW, grandpH);
+   MessageInterface::ShowMessage
+      ("   parentX = %3d, parentY = %3d, parentW = %3d, parentH = %3d\n", parentX, parentY, parentW, parentH);
+   #endif
+   
+   if (parentX == grandpX)
+   {
+      x = parentX + parentW + 9;
+      y = parentY - 30;
    }
    else
    {
-      mParent->GetPosition(&x, &y);
-      mParent->GetSize(&w, &h);
+      x = parentX + grandpW;
+      y = grandpY;
    }
    
-   if (x == 0) x = 5;
-   if (y == 0) y = 75;
-      
+   
    #ifdef DEBUG_MORE_VIEW_OPTIONS
-   MessageInterface::ShowMessage
-      ("MissionTreeToolBar::OnCustomView() entered, x=%d, y=%d, w=%d, h=%d\n",
-       x, y, w, h);
+   MessageInterface::ShowMessage("         x = %3d,       y = %3d\n", x, y);
    #endif
    
    ResetMissionTreeTools();
    TreeViewOptionDialog optionDlg(this, mMissionTree,
                                   "MissionTree Customize View",
-                                  wxPoint(x+w+5, y), wxDefaultSize,
+                                  wxPoint(x, y), wxDefaultSize,
                                   wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE);
    
    optionDlg.ShowModal();

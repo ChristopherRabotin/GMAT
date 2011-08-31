@@ -133,7 +133,7 @@ void UndockedMissionPanel::Create()
    // @note - This option confuses with double click on the active node.
    // It opens the panel and tried to rename the node. So getting warning message.
    mMissionTree = new MissionTree(this, -1, wxDefaultPosition,
-                                  wxSize(200,300), style);
+                                  wxSize(180,300), style);
    
    #ifdef DEBUG_CREATE
    MessageInterface::ShowMessage("   mMissionTree<%p> created\n", mMissionTree);

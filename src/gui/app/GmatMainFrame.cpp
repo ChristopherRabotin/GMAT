@@ -695,38 +695,65 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    {
       int numChildren = GetNumberOfChildOpen(false, true);
       if (numChildren > 0)
-      {
-         
+      {         
          int toolW, toolH;
-         theToolBar->GetSize(&toolW, &toolH);
-         int x = (numChildren - 1) * 20;
+         theToolBar->GetSize(&toolW, &toolH);         
+         int x = (numChildren - 1) * 20;         
          #ifdef __WXMAC__
             // reposition vertical position of first panel for Mac, so top button bar is visible
             int y = (numChildren) * 20;
          #else
-            wxMDIClientWindow* clientW = GetClientWindow();
-            #if DEBUG_CHILD_WINDOW
-            if (clientW != NULL)
+            wxMDIClientWindow* clientWin = GetClientWindow();
+            int clientX, clientY, clientW = -1, clientH = -1;
+            if (clientWin != NULL)
             {
-               int cx, cy, cw, ch;
-               clientW->GetPosition(&cx, &cy);
-               clientW->GetSize(&cw, &ch);
-               MessageInterface::ShowMessage
-                  ("client window: cx=%d, cy=%d, cw=%d, ch=%d\n", cx, cy, cw, ch);
+               clientWin->GetPosition(&clientX, &clientY);
+               clientWin->GetSize(&clientW, &clientH);
             }
+            #if DEBUG_CHILD_WINDOW
+            MessageInterface::ShowMessage
+               ("client window: clientX=%d, clientY=%d, clientW=%d, clientH=%d\n",
+                clientX, clientY, clientW, clientH);
             #endif
             
-            int y = x;
+            int y = x - toolH;
             
             // Why it doesn't position first child (0,0) to top left corner?
+            // Put UndockedMissionPanel alway in the top left corner
             if (newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED)
+            {
+               int mpW, mpH;
+               newChild->GetSize(&mpW, &mpH);
+               x = 0;
                y = -toolH;
+               
+               // Need to resize this child depends on the command length
+               // Set to full mdi height for now
+               newChild->SetSize(-1, clientH);
+               
+               // Reposition other children
+               if (numChildren > 1)
+                  RepositionChildren(mpW);
+            }
+            else
+            {
+               // If Mission panel is opened, place child besides it
+               GmatMdiChildFrame *mp = GetChild("Mission");
+               if (mp != NULL && numChildren > 1)
+               {
+                  int mpW, mpH;
+                  mp->GetSize(&mpW, &mpH);
+                  x = (numChildren - 2) * 20 + mpW;
+                  y = (numChildren - 2) * 20 - toolH;
+               }
+            }
          #endif
          newChild->SetPosition(wxPoint(x, y));
       }
+      
+      newChild->Show();
    }
    
-   newChild->Show();
    return newChild;
 }
 
@@ -826,9 +853,9 @@ Integer GmatMainFrame::GetNumberOfChildOpen(bool incPlots, bool incScripts)
  * page as the selected page.
  *
  * @param <item> input GmatTreeItemData.
- * @param <restore> if true the child will be restored if minimized
+ * @param <restore> if true the child will be restored if it was minimized
  *
- * @return True if page should be opened, false if it should not be opened.
+ * @return true if child was already opened, false otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item, bool restore)
@@ -1360,7 +1387,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
 
 
 //------------------------------------------------------------------------------
-// void GmatMainFrame::MinimizeChildren()
+// void MinimizeChildren()
 //------------------------------------------------------------------------------
 void GmatMainFrame::MinimizeChildren()
 {
@@ -1375,7 +1402,31 @@ void GmatMainFrame::MinimizeChildren()
          child->Iconize(TRUE);
       node = node->GetNext();
    }
+}
 
+
+//------------------------------------------------------------------------------
+// void RepositionChildren(int xOffset)
+//------------------------------------------------------------------------------
+void GmatMainFrame::RepositionChildren(int xOffset)
+{
+   // do not need to check if script window is open
+   int toolW, toolH;
+   theToolBar->GetSize(&toolW, &toolH);         
+   wxNode *node = theMdiChildren->GetFirst();
+   int numChildren = 0;
+   while (node)
+   {
+      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
+      if (child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED)
+      {
+         numChildren++;
+         int x = (numChildren - 1) * 20 + xOffset;
+         int y = (numChildren - 1) * 20 - toolH;
+         child->Move(wxPoint(x,y));
+      }
+      node = node->GetNext();
+   }
 }
 
 
@@ -2901,10 +2952,13 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
       sizer->Add(new ReportPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::TOGGLE:
-      sizer->Add(new TogglePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      sizer->Add(new TogglePanel(scrolledWin, cmd, false, true), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::XY_PLOT_ACTION:
-      sizer->Add(new TogglePanel(scrolledWin, cmd, true), 0, wxGROW|wxALL, 0);
+      sizer->Add(new TogglePanel(scrolledWin, cmd, true, false), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::PLOT_ACTION:
+      sizer->Add(new TogglePanel(scrolledWin, cmd, false, false), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::CALL_FUNCTION:
       sizer->Add(new CallFunctionPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);

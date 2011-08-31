@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Allison Greene
 // Created: 2003/10/08
 /**
@@ -285,6 +283,7 @@ namespace GmatTree
       NON_LINEAR_CONSTRAINT,
       SAVE,
       TOGGLE,
+      PLOT_ACTION,
       XY_PLOT_ACTION,
       REPORT,
       CALL_FUNCTION,

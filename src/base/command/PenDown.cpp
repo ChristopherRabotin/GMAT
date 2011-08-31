@@ -151,6 +151,9 @@ const StringArray& PenDown::GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 bool PenDown::InterpretAction()
 {
+   plotNameList.clear();
+   thePlotList.clear();
+   
    Integer loc = generatingString.find("PenDown", 0) + 7;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')

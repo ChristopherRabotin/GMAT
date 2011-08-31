@@ -29,13 +29,15 @@ class TogglePanel : public GmatPanel
 {
 public:
    // constructors
-   TogglePanel(wxWindow *parent, GmatCommand *cmd, bool forXyPlotOnly = false);
+   TogglePanel(wxWindow *parent, GmatCommand *cmd, bool forXyPlotOnly = false,
+               bool showToggleState = false);
    ~TogglePanel();
    
 protected:
    // member data
    GmatCommand *theCommand;
    bool         isForXyPlotOnly;
+   bool         mShowToggleState;
    
    wxCheckListBox *mSubsCheckListBox;
    wxRadioButton *mOnRadioButton;

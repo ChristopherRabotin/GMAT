@@ -85,6 +85,7 @@ public:
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          bool closeReports = true, bool closeUndockedMissionTree = true);
    void MinimizeChildren();
+   void RepositionChildren(int xOffset);
    void SetActiveChildDirty(bool dirty);
    void OverrideActiveChildDirty(bool override);
    void CloseCurrentProject();

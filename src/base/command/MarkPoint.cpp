@@ -151,6 +151,9 @@ const StringArray& MarkPoint::GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 bool MarkPoint::InterpretAction()
 {
+   plotNameList.clear();
+   thePlotList.clear();
+   
    Integer loc = generatingString.find("MarkPoint", 0) + 9;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
