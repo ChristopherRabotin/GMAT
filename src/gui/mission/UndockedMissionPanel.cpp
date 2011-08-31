@@ -152,7 +152,7 @@ void UndockedMissionPanel::Create()
    //---------------------------------------------
    // add to sizer
    //---------------------------------------------
-   int bsize = 5;
+   int bsize = 2;
    #ifndef __WXMAC__
       GmatStaticBoxSizer *treeSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
       treeSizer->Add(mMissionTree, 1, wxGROW|wxALL, bsize);
