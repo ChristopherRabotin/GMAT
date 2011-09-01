@@ -165,7 +165,7 @@ void UndockedMissionPanel::Create()
       panelSizer->Add( treeSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, 0 );
       panelSizer->Add( treeCtrlSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, 0 );
    #else
-      panelSizer->Add( missionTree, 1, wxGROW|wxALIGN_CENTER|wxALL, 0 );
+      panelSizer->Add( mMissionTree, 1, wxGROW|wxALIGN_CENTER|wxALL, 0 );
    #endif
       
    //------------------------------------------------------
