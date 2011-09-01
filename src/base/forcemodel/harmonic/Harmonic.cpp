@@ -228,7 +228,7 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
       Real sum34 = 0;
       Real sum44 = 0;
 
-      for (Integer m=0;  m<=MM && m<=mm;  ++m) // wcs - removed "m<=n"
+      for (Integer m=0;  m <= n && m<=MM && m<=mm;  ++m) // wcs - removed "m<=n"
       {
          Real Cval,Sval;
          Cval = Cnm (jday,n,m);
