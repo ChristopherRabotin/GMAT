@@ -71,7 +71,8 @@ public:
    GmatMdiChildFrame* CreateChild(GmatTreeItemData *item, bool restore = true);
    GmatMdiChildFrame* GetChild(const wxString &name);
    
-   Integer GetNumberOfChildOpen(bool incPlots = false, bool incScripts = false);
+   Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
+                                bool incScripts = false);
    bool IsChildOpen(GmatTreeItemData *item, bool restore = true);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
    bool RenameChild(const wxString &oldName, const wxString &newName);

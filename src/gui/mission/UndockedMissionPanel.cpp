@@ -218,11 +218,13 @@ void UndockedMissionPanel::SaveData()
 //------------------------------------------------------------------------------
 void UndockedMissionPanel::OnClose(wxCloseEvent& event)
 {
+   #ifdef DEBUG_CLOSE
    MessageInterface::ShowMessage
-      ("---> UndockedMissionPanel::OnClose() entered, mGmatNotebook=<%p>\n",
+      ("UndockedMissionPanel::OnClose() entered, mGmatNotebook=<%p>\n",
        mGmatNotebook);
+   #endif
    
-   // This dialog is deleted from the GmatNotebook::RestoreMissionPage()
+   // This panel is deleted from the GmatNotebook::RestoreMissionPage()
    if (mGmatNotebook != NULL)
       mGmatNotebook->RestoreMissionPage();
    

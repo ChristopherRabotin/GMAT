@@ -162,6 +162,9 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_MISSION_SUMMARY_ALL, MissionTree::OnShowMissionSummaryAll)
    EVT_MENU(POPUP_MISSION_SUMMARY_PHYSICS, MissionTree::OnShowMissionSummaryPhysics)
 
+   EVT_MENU_RANGE(POPUP_DOCK_MISSION_TREE, POPUP_UNDOCK_MISSION_TREE,
+                  MissionTree::OnDockUndockMissionTree)
+   
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    EVT_MENU(POPUP_START_SAVE_ACTIONS, MissionTree::OnStartSaveActions)
    EVT_MENU(POPUP_STOP_SAVE_ACTIONS, MissionTree::OnStopSaveActions)
@@ -2323,6 +2326,10 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(POPUP_MISSION_SUMMARY_ALL, wxT("Mission Summary - All"));
       menu.Append(POPUP_MISSION_SUMMARY_PHYSICS, wxT("Mission Summary - Physics"));
       
+      menu.AppendSeparator();
+      menu.Append(POPUP_DOCK_MISSION_TREE, wxT("Dock Mission Tree"));
+      menu.Append(POPUP_UNDOCK_MISSION_TREE, wxT("Undock Mission Tree"));
+      
       //----- for auto testing actions
       #ifdef __TEST_MISSION_TREE_ACTIONS__
       menu.AppendSeparator();
@@ -3284,6 +3291,22 @@ void MissionTree::OnShowMissionSummaryPhysics(wxCommandEvent &event)
    {
       std::string errmsg = "\'Mission Summary\' - unable to obtain pointer to first command.\n";
       MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+   }
+}
+
+
+//---------------------------------------------------------------------------
+// void OnDockUndockMissionTree(wxCommandEvent &event)
+//---------------------------------------------------------------------------
+void MissionTree::OnDockUndockMissionTree(wxCommandEvent &event)
+{
+   if (event.GetId() == POPUP_DOCK_MISSION_TREE)
+   {
+      theMainFrame->CloseChild("Mission", GmatTree::MISSION_TREE_UNDOCKED);
+   }
+   else if (event.GetId() == POPUP_UNDOCK_MISSION_TREE)
+   {
+      theNotebook->CreateUndockedMissionPanel();
    }
 }
 

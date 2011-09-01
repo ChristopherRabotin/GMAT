@@ -174,6 +174,7 @@ private:
    void OnShowCommandSummary(wxCommandEvent &event);
    void OnShowMissionSummaryAll(wxCommandEvent &event);
    void OnShowMissionSummaryPhysics(wxCommandEvent &event);
+   void OnDockUndockMissionTree(wxCommandEvent &event);
    
    void OnCollapse(wxCommandEvent &event);
    void OnExpand(wxCommandEvent &event);
@@ -360,6 +361,8 @@ private:
       POPUP_COMMAND_SUMMARY,
       POPUP_MISSION_SUMMARY_ALL,
       POPUP_MISSION_SUMMARY_PHYSICS,
+      POPUP_DOCK_MISSION_TREE,
+      POPUP_UNDOCK_MISSION_TREE,
       
       //----- for auto testing actions
       POPUP_START_SAVE_ACTIONS,

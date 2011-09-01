@@ -107,7 +107,7 @@
 // If we are ready to handle Constellations, enable this
 //define __ENABLE_CONSTELLATIONS__
 
-//#define DEBUG_RESOURCE_TREE
+#define DEBUG_RESOURCE_TREE
 //#define DEBUG_ADD_DEFAULT_OBJECTS
 //#define DEBUG_RENAME
 //#define DEBUG_DELETE

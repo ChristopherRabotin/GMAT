@@ -693,7 +693,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    // Reposition mdi child windows (LOJ: 2011.02.01 Bug 2320 fix)
    if (newChild != NULL)
    {
-      int numChildren = GetNumberOfChildOpen(false, true);
+      int numChildren = GetNumberOfChildOpen(false, false, true);
       if (numChildren > 0)
       {         
          int toolW, toolH;
@@ -728,8 +728,16 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
                y = -toolH;
                
                // Need to resize this child depends on the command length
-               // Set to full mdi height for now
-               newChild->SetSize(-1, clientH);
+               // Set to full mdi height for now.
+               // We don't want to hide iconized script, so reduce the height.
+               int height = clientH;
+               Integer scriptCount = GetNumberOfChildOpen(true, false, false);
+               #if DEBUG_CHILD_WINDOW
+               MessageInterface::ShowMessage("   scriptCount = %d\n", scriptCount);
+               #endif
+               if (scriptCount > 0)
+                  height = clientH - 30;
+               newChild->SetSize(-1, height);
                
                // Reposition other children
                if (numChildren > 1)
@@ -795,17 +803,28 @@ GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
 
 
 //------------------------------------------------------------------------------
-// Integer GetNumberOfChildOpen(bool incPlots = false, bool incScripts = false)
+// Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
+//            bool incScripts = false)
 //------------------------------------------------------------------------------
-Integer GmatMainFrame::GetNumberOfChildOpen(bool incPlots, bool incScripts)
+/**
+ * Returns number of children opened.
+ *
+ * @param  scriptsOnly  Set this to true if only scripts to be included in counting
+ * @param  incPlots     Set this to true if plotcs to be included in counting
+ * @param  incScripts   Set this to true if scripts to be included in counting
+ */
+//------------------------------------------------------------------------------
+Integer GmatMainFrame::GetNumberOfChildOpen(bool scriptsOnly, bool incPlots,
+                                            bool incScripts)
 {
    #ifdef DEBUG_MAINFRAME_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::GetNumberOfChildOpen() incPlots=%d, incScripts=%d\n",
-       incPlots, incScripts);
+      ("GmatMainFrame::GetNumberOfChildOpen() scriptsOnly=%d, incPlots=%d, incScripts=%d\n",
+       scriptsOnly, incPlots, incScripts);
    #endif
-
+   
    Integer openCount = 0;
+   Integer scriptOpenCount = 0;
    wxNode *node = theMdiChildren->GetFirst();
    while (node)
    {
@@ -816,9 +835,10 @@ Integer GmatMainFrame::GetNumberOfChildOpen(bool incPlots, bool incScripts)
       MessageInterface::ShowMessage
          ("   itemType=%d, title=%s\n", itemType, theChild->GetName().c_str());
       #endif
-
+      
       if (itemType == GmatTree::SCRIPT_FILE)
       {
+         scriptOpenCount++;
          if (incScripts)
             openCount++;
       }
@@ -831,17 +851,20 @@ Integer GmatMainFrame::GetNumberOfChildOpen(bool incPlots, bool incScripts)
       {
          openCount++;
       }
-
+      
       node = node->GetNext();
-
+      
    }
-
+   
    #ifdef DEBUG_MAINFRAME_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::GetNumberOfChildOpen() returning %d\n", openCount);
    #endif
-
-   return openCount;
+   
+   if (scriptsOnly)
+      return scriptOpenCount;
+   else
+      return openCount;
 }
 
 
@@ -1398,6 +1421,7 @@ void GmatMainFrame::MinimizeChildren()
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
       if (child->GetItemType() != GmatTree::OUTPUT_ORBIT_VIEW &&
           child->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
+          child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED &&
           child->GetItemType() != GmatTree::COMPARE_REPORT)
          child->Iconize(TRUE);
       node = node->GetNext();
@@ -1418,7 +1442,23 @@ void GmatMainFrame::RepositionChildren(int xOffset)
    while (node)
    {
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
-      if (child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED)
+      GmatTree::ItemType itemType = child->GetItemType();
+      bool isScriptChild = false;
+      bool isIconized = false;
+      
+      if (child->GetItemType() == GmatTree::SCRIPT_FILE)
+         isScriptChild = true;
+      if (child->IsIconized())
+         isIconized = true;
+      
+      #ifdef DEBUG_REPOSITION_CHILDREN
+      MessageInterface::ShowMessage
+         ("RepositionChildren() child='%s', isIconized=%d\n", child->GetName().c_str(), isIconized);
+      #endif
+      
+      if (itemType != GmatTree::MISSION_TREE_UNDOCKED &&
+          (itemType != GmatTree::SCRIPT_FILE ||
+           itemType == GmatTree::SCRIPT_FILE && !isIconized))
       {
          numChildren++;
          int x = (numChildren - 1) * 20 + xOffset;
@@ -1566,17 +1606,27 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       
       if (success)
       {
+         #ifdef DEBUG_INTERPRET
+         MessageInterface::ShowMessage("   Now updating ResourceTree and MissionTree\n");
+         #endif
          // Update ResourceTree and MissionTree
          gmatAppData->GetResourceTree()->UpdateResource(true);
          gmatAppData->GetMissionTree()->UpdateMission(true);
+         
+         #ifdef DEBUG_INTERPRET
+         MessageInterface::ShowMessage("   Now restoring UndockedMissionPanel\n");
+         #endif
          RestoreUndockedMissionPanel();
          
+         #ifdef DEBUG_INTERPRET
+         MessageInterface::ShowMessage("   Now updating GUI/Script sync status\n");
+         #endif
          UpdateGuiScriptSyncStatus(1, 1);
          
          // if not running script folder, clear status
          if (!multiScripts)
             SetStatusText("", 2);
-
+         
          // open script editor
          if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT)
             OpenScript(false);
@@ -1765,7 +1815,7 @@ void GmatMainFrame::NotifyRunCompleted()
 void GmatMainFrame::ProcessPendingEvent()
 {
    #ifdef DEBUG_PENDING_EVENTS
-      MessageInterface::ShowMessage("---> GmatMainFrame::ProcessPendingEvent() entered\n");
+      MessageInterface::ShowMessage("GmatMainFrame::ProcessPendingEvent() entered\n");
    #endif
    wxYield();
 }
@@ -3242,7 +3292,7 @@ GmatMainFrame::CreateUndockedMissionPanel(const wxString &title,
 //------------------------------------------------------------------------------
 void GmatMainFrame::RestoreUndockedMissionPanel()
 {
-   if (GetNumberOfChildOpen(true, true) > 0)
+   if (GetNumberOfChildOpen(false, false, false) > 0)
    {
       wxNode *node = theMdiChildren->GetFirst();
       while (node)
@@ -3254,6 +3304,8 @@ void GmatMainFrame::RestoreUndockedMissionPanel()
             theChild->Restore();
             break;
          }
+         
+         node = node->GetNext();
       }
    }
 }

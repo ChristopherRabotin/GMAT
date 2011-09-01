@@ -34,8 +34,9 @@ public:
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize, long style = 0 );
    virtual ~GmatNotebook();
-
+   
    void SetMissionTreeExpandLevel(int level);
+   void CreateUndockedMissionPanel();
    void RestoreMissionPage();
    
 protected:
@@ -53,8 +54,6 @@ private:
    wxPanel *CreateResourcePage();
    wxPanel *CreateMissionPage();
    wxPanel *CreateOutputPage();
-   
-   void CreateUndockedMissionPanel();
    
    // event handlers
    void OnNotebookSelChange(wxNotebookEvent &event);

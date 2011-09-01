@@ -114,6 +114,42 @@ void GmatNotebook::SetMissionTreeExpandLevel(int level)
 
 
 //------------------------------------------------------------------------------
+// void CreateUndockedMissionPanel()
+//------------------------------------------------------------------------------
+void GmatNotebook::CreateUndockedMissionPanel()
+{
+   #ifdef DEBUG_UNDOCK_MISSION_PAGE
+   MessageInterface::ShowMessage
+      ("GmatNotebook::CreateUndockedMissionPanel() entered, creating MDI child "
+       "UndockedMissionPanel through GmatMainFrame\n");
+   MessageInterface::ShowMessage
+      ("   mUndockedMissionPanel=<%p>\n", mUndockedMissionPanel);
+   #endif
+   
+   // Create panel as MDIChildFrame
+   GmatTreeItemData item("Mission", GmatTree::MISSION_TREE_UNDOCKED);
+   item.SetTitle("Mission");
+   mUndockedMissionPanel = (UndockedMissionPanel*)
+      (GmatAppData::Instance()->GetMainFrame()->CreateChild(&item, true));
+   
+   // Set selection to resource page
+   SetSelection(0);
+   
+   // Delete Mission page and reset pointers
+   DeletePage(1);             
+   mMissionPagePanel = NULL;
+   missionTree = NULL;
+   mMissionTreeToolBar = NULL;
+   
+   #ifdef DEBUG_UNDOCK_MISSION_PAGE
+   MessageInterface::ShowMessage
+      ("GmatNotebook::CreateUndockedMissionPanel() leaving, mUndockedMissionPanel=<%p>\n",
+       mUndockedMissionPanel);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // void RestoreMissionPage()
 //------------------------------------------------------------------------------
 void GmatNotebook::RestoreMissionPage()
@@ -281,30 +317,6 @@ wxPanel *GmatNotebook::CreateOutputPage()
 
 
 //------------------------------------------------------------------------------
-// void CreateUndockedMissionPanel()
-//------------------------------------------------------------------------------
-void GmatNotebook::CreateUndockedMissionPanel()
-{
-   #ifdef DEBUG_UNDOCK_MISSION_PAGE
-   MessageInterface::ShowMessage
-      ("GmatNotebook::CreateUndockedMissionPanel() entered, creating MDI child "
-       "UndockedMissionPanel through GmatMainFrame\n");
-   #endif
-   
-   // Create panel as MDIChildFrame
-   GmatTreeItemData item("Mission", GmatTree::MISSION_TREE_UNDOCKED);
-   item.SetTitle("Mission");
-   mUndockedMissionPanel = (UndockedMissionPanel*)
-      (GmatAppData::Instance()->GetMainFrame()->CreateChild(&item, true));
-   
-   #ifdef DEBUG_UNDOCK_MISSION_PAGE
-   MessageInterface::ShowMessage
-      ("GmatNotebook::CreateUndockedMissionPanel() leaving\n");
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
 // void OnNoetbookSelChange(wxNotebookEvent &event)
 //------------------------------------------------------------------------------
 /**
@@ -385,16 +397,7 @@ void GmatNotebook::OnMouse(wxMouseEvent& event)
                 GetSelection());
             #endif
             
-            CreateUndockedMissionPanel();
-            
-            // Set selection to resource page
-            SetSelection(0);
-            
-            // Delete Mission page and reset pointers
-            DeletePage(1);             
-            mMissionPagePanel = NULL;
-            missionTree = NULL;
-            mMissionTreeToolBar = NULL;
+            CreateUndockedMissionPanel();            
          }
          else
          {
@@ -408,6 +411,5 @@ void GmatNotebook::OnMouse(wxMouseEvent& event)
    }
    
    event.Skip();
-   
 }
 
