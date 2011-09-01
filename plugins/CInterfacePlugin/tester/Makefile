@@ -1,4 +1,5 @@
 # Makefile for the C-Interface test program
+include ../src/CInterfaceEnv.mk
 
 TARGET = CInterfaceTester
 
