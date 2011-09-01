@@ -787,7 +787,7 @@ RLA::~RLA()
 //------------------------------------------------------------------------------
 bool RLA::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherAngleReal(HYPERBOLIC_RLA);
+   mRealValue = OrbitData::GetAngularReal(HYPERBOLIC_RLA);
 
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -898,7 +898,7 @@ DLA::~DLA()
 //------------------------------------------------------------------------------
 bool DLA::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherAngleReal(HYPERBOLIC_DLA);
+   mRealValue = OrbitData::GetAngularReal(HYPERBOLIC_DLA);
 
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;

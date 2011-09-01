@@ -205,7 +205,7 @@ Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Rvector6 
       Real     s_1   = 1.0 / (1.0 + C3 * (h / originMu) * (h / originMu));
       Rvector3 s     = s_1 * ((Sqrt(C3) / originMu) * Cross(hVec3, e) - e);
       if (item == "RLA")
-         return ATan2(s[0], s[1]) * GmatMathConstants::DEG_PER_RAD;
+         return ATan2(s[1], s[0]) * GmatMathConstants::DEG_PER_RAD;
       else // DLA
          return ASin(s[2]) * GmatMathConstants::DEG_PER_RAD;
    }
