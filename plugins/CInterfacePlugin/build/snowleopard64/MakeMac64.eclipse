@@ -1,0 +1,609 @@
+# $Id: MakeBase.eclipse 9672 2011-07-01 00:34:32Z djcinsb $
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+#  Copyright (c) 2002-2011 United States Government as represented by the
+#  Administrator of The National Aeronautics and Space Administration.
+#  All Other Rights Reserved.
+
+# 
+# Eclipse makefile for GMAT base library
+# Initial Version - D. Conway - 2005/06/17
+# Modifed for Mac OS 10.3  W. Shoan - 2005.11.10
+
+# Updated 2005/08/11.  
+# This file now requires the file BuildEnv.mk in the top level folder.
+
+include ../BuildEnv64.mk
+
+ifeq ($(SHARED_BASE), 1)
+
+ifeq ($(LINUX_MAC), 1)
+
+ifdef MAC_SPECIFIC
+SHARED_EXTENSION = .dylib
+SHARED_LIB_FLAGS = $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup 
+# $(WX_CARBON_BUILD)
+MSISE_C_OBJECTS  = 
+else
+SHARED_EXTENSION = .so
+SHARED_LIB_FLAGS = -shared -Wl -L$(SPICE_LIB_DIR) -lcspice
+# No longer in gcc 4.6: --out-implib
+MSISE_C_OBJECTS  = solarsys/msise90_sub.o
+endif
+
+#SHARED_LIB_FLAGS = -shared -Wl
+# No longer in gcc 4.6: --out-implib
+
+else
+
+SHARED_EXTENSION = .dll
+
+endif
+
+WXTARGET = lib64/libGmatBase$(SHARED_EXTENSION)
+
+else
+
+WXTARGET = lib64/libGmatBase.a
+
+endif
+
+CONSOLETARGET = lib64/libGmatConsole.a
+
+ifeq ($(CONSOLE_APP),1)
+
+TARGET = $(CONSOLETARGET)
+# Console (no wx code) versions of these objects
+BRIDGEOBJECTS =
+
+else
+
+TARGET = $(WXTARGET)
+# GUI versions of these objects
+# Note: ExternalOptimizer also uses some wx code, so it is included here
+
+#BRIDGEOBJECTS =
+# ExternalOptimizer now part of base code
+# solver/ExternalOptimizer.o 
+# FminconOptimizer moved to plug-in
+# solver/FminconOptimizer.o       
+#else
+#BRIDGEOBJECTS = 
+# GuiInterpreter now part of the gui code.
+# interpreter/GuiInterpreter.o
+
+endif
+
+ifeq ($(USE_SPICE),1)
+SPICE_OBJECTS = \
+	 attitude/SpiceAttitude.o \
+    propagator/SPKPropagator.o \
+    util/SpiceAttitudeKernelReader.o \
+	 util/SpiceInterface.o \
+    util/SpiceOrbitKernelReader.o \
+    util/SpiceKernelReader.o \
+    util/SpiceKernelWriter.o \
+	 util/SpiceOrbitKernelWriter.o
+else
+SPICE_OBJECTS =
+endif
+
+
+all: $(TARGET)
+gui: $(WXTARGET)
+console: $(CONSOLETARGET)
+
+
+clean : archclean
+
+archclean :
+	rm -rf */*.o
+	rm -rf */*/*.o
+	rm -rf $(TARGETS)
+	rm -rf */*~
+	rm -rf core
+	rm -rf */core
+	rm -rf bin/*
+	rm -rf obj/*
+	rm -rf $(WXTARGET)
+	rm -rf ../matlab/gmat_mex/src/*.o
+
+
+
+HEADERS = -Iinclude \
+          -Ifoundation \
+          -Ihardware \
+          -Iexecutive \
+          -Ievent \
+          -Iattitude \
+          -Ispacecraft \
+          -Iasset \
+          -Iforcemodel \
+          -Iforcemodel/harmonic \
+          -Ipropagator \
+          -Isubscriber \
+          -Icommand \
+          -Isolarsys \
+          -Ifactory \
+          -Istopcond \
+          -Iinterpreter \
+          -Iutil \
+          -Iinterpolator \
+          -Iinterface \
+          -Iparameter \
+          -Iconfigs \
+          -Iburn \
+          -Isolver \
+          -Ifunction \
+          -Icoordsystem \
+          -Imath \
+          -Iplugin \
+          -I../gui/include \
+          -I../gui/include/bitmaps \
+          -I../gui/app \
+          -I../gui/view \
+          -I../gui/output \
+          -I../gui/foundation \
+          -I../gui/subscriber \
+          -I../gui/mission 
+
+
+OBJECTS = \
+    asset/AssetException.o \
+    asset/BodyFixedPoint.o \
+    asset/GroundStation.o \
+    attitude/Attitude.o \
+    attitude/AttitudeException.o \
+    attitude/CSFixed.o \
+    attitude/Kinematic.o \
+    attitude/Spinner.o \
+    burn/BurnException.o \
+    burn/Burn.o \
+    burn/FiniteBurn.o \
+    burn/ImpulsiveBurn.o \
+    burn/InertialManeuverFrame.o \
+    burn/ManeuverFrameManager.o \
+    burn/ManeuverFrame.o \
+    burn/VnbManeuverFrame.o \
+    command/Achieve.o \
+    command/Assignment.o \
+    command/BeginFiniteBurn.o \
+    command/BeginFunction.o \
+    command/BeginMissionSequence.o \
+    command/BeginScript.o \
+    command/BranchCommand.o \
+    command/CallFunction.o \
+    command/CallGmatFunction.o \
+    command/CommandException.o \
+    command/GmatCommand.o \
+    command/CommandUtil.o \
+    command/ClearPlot.o \
+    command/ConditionalBranch.o \
+    command/Create.o \
+    command/Else.o \
+    command/EndFiniteBurn.o \
+    command/EndFor.o \
+    command/EndFunction.o \
+    command/EndIf.o \
+    command/EndOptimize.o \
+    command/EndScript.o \
+    command/EndTarget.o \
+    command/EndWhile.o \
+    command/For.o \
+    command/Global.o \
+    command/If.o \
+    command/ManageObject.o \
+    command/Maneuver.o \
+    command/MarkPoint.o \
+    command/Minimize.o \
+    command/NonlinearConstraint.o \
+    command/NoOp.o \
+    command/Optimize.o \
+    command/PenDown.o \
+    command/PenUp.o \
+    command/Propagate.o \
+    command/PropagationEnabledCommand.o \
+    command/Report.o \
+    command/RunSolver.o \
+    command/Save.o \
+    command/SaveMission.o \
+    command/SolverBranchCommand.o \
+    command/Stop.o \
+    command/Target.o \
+    command/Toggle.o \
+    command/Vary.o \
+    command/While.o \
+    configs/ConfigManagerException.o \
+    configs/ConfigManager.o \
+    coordsystem/AxisSystem.o \
+    coordsystem/BodyFixedAxes.o \
+    coordsystem/BodyInertialAxes.o \
+    coordsystem/CoordinateBase.o \
+    coordsystem/CoordinateConverter.o \
+    coordsystem/CoordinateSystemException.o \
+    coordsystem/CoordinateSystem.o \
+    coordsystem/DynamicAxes.o \
+    coordsystem/EquatorAxes.o \
+    coordsystem/GeocentricSolarEclipticAxes.o \
+    coordsystem/GeocentricSolarMagneticAxes.o \
+    coordsystem/InertialAxes.o \
+    coordsystem/ItrfCoefficientsFile.o \
+    coordsystem/MeanOfDateAxes.o \
+    coordsystem/MJ2000EcAxes.o \
+    coordsystem/MJ2000EqAxes.o \
+    coordsystem/MODEcAxes.o \
+    coordsystem/MODEqAxes.o \
+    coordsystem/MOEEcAxes.o \
+    coordsystem/MOEEqAxes.o \
+    coordsystem/ObjectReferencedAxes.o \
+    coordsystem/TODEcAxes.o \
+    coordsystem/TODEqAxes.o \
+    coordsystem/TOEEcAxes.o \
+    coordsystem/TOEEqAxes.o \
+    coordsystem/TopocentricAxes.o \
+    coordsystem/TrueOfDateAxes.o \
+    event/EventFunction.o \
+    event/EventLocator.o \
+    event/LocatedEventTable.o \
+    event/LocatedEvent.o \
+    executive/Moderator.o \
+    executive/PlotInterface.o \
+    executive/PlotReceiver.o \
+    executive/PublisherException.o \
+    executive/Publisher.o \
+    executive/SandboxException.o \
+    executive/Sandbox.o \
+    factory/AtmosphereFactory.o \
+    factory/AssetFactory.o \
+    factory/AttitudeFactory.o \
+    factory/AxisSystemFactory.o \
+    factory/BurnFactory.o \
+    factory/CalculatedPointFactory.o \
+    factory/CelestialBodyFactory.o \
+    factory/CommandFactory.o \
+    factory/CoordinateSystemFactory.o \
+    factory/FactoryException.o \
+    factory/FactoryManager.o \
+    factory/Factory.o \
+    factory/ODEModelFactory.o \
+    factory/FunctionFactory.o \
+    factory/HardwareFactory.o \
+    factory/InterfaceFactory.o \
+    factory/MathFactory.o \
+    factory/ParameterFactory.o \
+    factory/PhysicalModelFactory.o \
+    factory/PropagatorFactory.o \
+    factory/PropSetupFactory.o \
+    factory/SolarSystemFactory.o \
+    factory/SolverFactory.o \
+    factory/SpacecraftFactory.o \
+    factory/StopConditionFactory.o \
+    factory/SubscriberFactory.o \
+    forcemodel/DragForce.o \
+    forcemodel/FiniteThrust.o \
+    forcemodel/GravityField.o \
+    forcemodel/HarmonicField.o \
+    forcemodel/ODEModelException.o \
+    forcemodel/ODEModel.o \
+    forcemodel/PhysicalModel.o \
+    forcemodel/PointMassForce.o \
+    forcemodel/RelativisticCorrection.o \
+    forcemodel/SolarRadiationPressure.o \
+    forcemodel/harmonic/Harmonic.o \
+    forcemodel/harmonic/HarmonicGravity.o \
+    forcemodel/harmonic/HarmonicGravityCof.o \
+    forcemodel/harmonic/HarmonicGravityGrv.o \
+    foundation/Covariance.o \
+    foundation/ElementWrapper.o \
+    foundation/GmatBaseException.o \
+    foundation/GmatBase.o \
+    foundation/GmatState.o \
+    foundation/ObjectInitializer.o \
+    foundation/SpacePoint.o \
+    foundation/StateManager.o \
+    foundation/TriggerManager.o \
+    function/Function.o \
+    function/FunctionException.o \
+    function/FunctionManager.o \
+    function/GmatFunction.o \
+    function/MatlabFunction.o \
+    hardware/FuelTank.o \
+    hardware/HardwareException.o \
+    hardware/Hardware.o \
+    hardware/Thruster.o \
+    interface/InterfaceException.o \
+    interface/Interface.o \
+    interface/GmatInterface.o \
+    interpolator/InterpolatorException.o \
+    interpolator/Interpolator.o \
+    interpolator/BrentDekkerZero.o \
+    interpolator/CubicSplineInterpolator.o \
+    interpolator/LinearInterpolator.o \
+    interpolator/NotAKnotInterpolator.o \
+    interpolator/LagrangeInterpolator.o \
+    interpreter/InterpreterException.o \
+    interpreter/Interpreter.o \
+    interpreter/MathParser.o \
+    interpreter/MathTree.o \
+    interpreter/ScriptInterpreter.o \
+    interpreter/ScriptReadWriter.o \
+    interpreter/Validator.o \
+    math/Abs.o \
+    math/Acos.o \
+    math/Acosh.o \
+    math/Add.o \
+    math/Asin.o \
+    math/Asinh.o \
+    math/Atan.o \
+    math/Atan2.o \
+    math/Cos.o \
+    math/Cosh.o \
+    math/DegToRad.o \
+    math/Determinant.o \
+    math/Divide.o \
+    math/Exp.o \
+    math/FunctionRunner.o \
+    math/Log.o \
+    math/Log10.o \
+    math/Inverse.o \
+    math/MathElement.o \
+    math/MathException.o \
+    math/MathFunction.o \
+    math/MathNode.o \
+    math/Multiply.o \
+    math/Negate.o \
+    math/Norm.o \
+    math/Power.o \
+    math/RadToDeg.o \
+    math/Sin.o \
+    math/Sinh.o \
+    math/Sqrt.o \
+    math/Subtract.o \
+    math/Tan.o \
+    math/Tanh.o \
+    math/Transpose.o \
+    parameter/AngularParameters.o \
+    parameter/Array.o \
+    parameter/ArrayWrapper.o \
+    parameter/ArrayElementWrapper.o \
+    parameter/AttitudeData.o \
+    parameter/AttitudeParameters.o \
+    parameter/AttitudeReal.o \
+    parameter/BallisticMassParameters.o \
+    parameter/BallisticMassReal.o \
+    parameter/BooleanWrapper.o \
+    parameter/BplaneData.o \
+    parameter/BplaneParameters.o \
+    parameter/BplaneReal.o \
+    parameter/BurnData.o \
+    parameter/BurnParameters.o \
+    parameter/BurnReal.o \
+    parameter/CartesianParameters.o \
+    parameter/EnvData.o \
+    parameter/EnvParameters.o \
+    parameter/EnvReal.o \
+    parameter/EquinoctialParameters.o \
+    parameter/ExpressionParser.o \
+    parameter/HardwareReal.o \
+    parameter/HardwareParameters.o \
+    parameter/KeplerianParameters.o \
+    parameter/NumberWrapper.o \
+    parameter/ObjectWrapper.o \
+    parameter/ObjectPropertyWrapper.o \
+    parameter/OnOffWrapper.o \
+    parameter/OrbitalParameters.o \
+    parameter/OrbitData.o \
+    parameter/OrbitReal.o \
+    parameter/OrbitRmat33.o \
+    parameter/OrbitRmat66.o \
+    parameter/OrbitRvec6.o \
+    parameter/OrbitStmParameters.o \
+    parameter/ParameterDatabase.o \
+    parameter/ParameterInfo.o \
+    parameter/Parameter.o \
+    parameter/ParameterWrapper.o \
+    parameter/PlanetData.o \
+    parameter/PlanetParameters.o \
+    parameter/PlanetReal.o \
+    parameter/RealVar.o \
+    parameter/RefData.o \
+    parameter/Rmat33Var.o \
+    parameter/Rmat66Var.o \
+    parameter/Rvec6Var.o \
+    parameter/SpacecraftData.o \
+    parameter/SphericalParameters.o \
+    parameter/StringWrapper.o \
+    parameter/StringObjectWrapper.o \
+    parameter/StringVar.o \
+    parameter/TimeData.o \
+    parameter/TimeParameters.o \
+    parameter/TimeReal.o \
+    parameter/TimeString.o \
+    parameter/Variable.o \
+    parameter/VariableWrapper.o \
+    plugin/DynamicLibrary.o \
+    propagator/AdamsBashforthMoulton.o \
+    propagator/BulirschStoer.o \
+    propagator/DormandElMikkawyPrince68.o \
+    propagator/Integrator.o \
+    propagator/PredictorCorrector.o \
+    propagator/PrinceDormand45.o \
+    propagator/PrinceDormand78.o \
+    propagator/PropagationStateManager.o \
+    propagator/Propagator.o \
+    propagator/PropSetup.o \
+    propagator/RungeKutta89.o \
+    propagator/RungeKuttaFehlberg56.o \
+    propagator/RungeKuttaNystrom.o \
+    propagator/RungeKutta.o \
+    propagator/EphemerisPropagator.o \
+    solarsys/Asteroid.o \
+    solarsys/AtmosphereModel.o \
+    solarsys/Barycenter.o \
+    solarsys/CalculatedPoint.o \
+    solarsys/CelestialBody.o \
+    solarsys/Comet.o \
+    solarsys/DeFile.o \
+    solarsys/ExponentialAtmosphere.o \
+    solarsys/JacchiaRobertsAtmosphere.o \
+    solarsys/LibrationPoint.o \
+    solarsys/Moon.o \
+    solarsys/Msise90Atmosphere.o \
+    solarsys/PlanetaryEphemException.o \
+    solarsys/PlanetaryEphem.o \
+    solarsys/Planet.o \
+    solarsys/SlpFile.o \
+    solarsys/SolarFluxFileReader.o \
+    solarsys/SolarSystemException.o \
+    solarsys/SolarSystem.o \
+    solarsys/SpecialCelestialPoint.o \
+    solarsys/Star.o \
+    solver/Solver.o \
+    solver/DifferentialCorrector.o \
+    solver/Optimizer.o \
+    solver/InternalOptimizer.o \
+    solver/ExternalOptimizer.o \
+    solver/SteepestDescent.o \
+    solver/DerivativeModel.o \
+    solver/Gradient.o \
+    solver/Jacobian.o \
+    solver/LineSearch.o \
+    spacecraft/Converter.o \
+    spacecraft/Formation.o \
+    spacecraft/Spacecraft.o \
+    spacecraft/SpaceObject.o \
+    spacecraft/StateConverter.o \
+    spacecraft/TextTrajectoryFile.o \
+    spacecraft/TimeConverter.o \
+    stopcond/StopCondition.o \
+    subscriber/EphemerisFile.o \
+    subscriber/MessageWindow.o \
+    subscriber/TextEphemFile.o \
+    subscriber/OrbitPlot.o \
+    subscriber/GroundTrackPlot.o \
+    subscriber/OrbitView.o \
+    subscriber/OwnedPlot.o \
+    subscriber/ReportFile.o \
+    subscriber/Subscriber.o \
+    subscriber/XyPlot.o \
+    util/A1Date.o \
+    util/A1Mjd.o \
+    util/AngleUtil.o \
+    util/Anomaly.o \
+    util/AttitudeUtil.o \
+    util/BaseException.o \
+    util/BodyFixedStateConverter.o \
+    util/Cartesian.o \
+    util/CalculationUtilities.o \
+    util/CoordUtil.o \
+    util/Date.o \
+    util/DateUtil.o \
+    util/ElapsedTime.o \
+    util/EopFile.o \
+    util/FileManager.o \
+    util/FileUtil.o \
+    util/GmatGlobal.o \
+    util/GravityFile.o \
+    util/GregorianDate.o \
+    util/Keplerian.o \
+    util/LatLonHgt.o \
+    util/LeapSecsFileReader.o \
+    util/Linear.o \
+    util/MemoryTracker.o \
+    util/MessageInterface.o \
+    util/MessageReceiver.o \
+    util/ModKeplerian.o \
+    util/RealUtilities.o \
+    util/RgbColor.o \
+    util/Rmatrix33.o \
+    util/Rmatrix66.o \
+    util/Rmatrix.o \
+    util/Rvector3.o \
+    util/Rvector6.o \
+    util/Rvector.o \
+    util/StringTokenizer.o \
+    util/StringUtil.o \
+    util/TextParser.o \
+    util/TimeSystemConverter.o \
+    util/TimeTypes.o \
+    util/UtcDate.o \
+    solarsys/SimpleExponentialAtmosphere.o \
+    $(TCPIP_OBJECTS) \
+    $(SPICE_OBJECTS)
+ 
+# solarsys/NRLMsise00Atmosphere.o \
+ 
+#    solarsys/BodyDataReader.o \
+
+#    parameter/OrbitAMatrixParameters.o \
+#    forcemodel/harmonic/EarthTide.o \
+#    $(BRIDGEOBJECTS)
+
+# Future classes:
+#    propagator/Cowell.o \
+
+
+
+FORTRAN_OBJECTS = solarsys/msise90_sub.o 
+
+     #   solarsys/nrlmsise00_sub.o
+
+    # parameter/EquinoctialParameters.o \
+    # stopcond/BaseStopCondition.o \
+
+
+ifeq ($(SHARED_BASE), 1)
+$(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
+	mkdir -p lib64
+	mkdir -p ../../application/bin64
+	$(CPP) -o $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS) $(SHARED_LIB_FLAGS)
+	cp $(TARGET) ../../application/bin64
+else
+$(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
+	mkdir -p lib64
+	ar rs $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
+	ranlib $(TARGET)
+endif	
+
+$(OBJECTS): %.o: %.cpp %.hpp
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+
+#$(OBJECTS): %.o: %.c
+#	$(C) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+
+
+ifeq ($(CONSOLE_APP), 0)
+$(BRIDGEOBJECTS): %.o: %.cpp %.hpp
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+endif
+
+
+# Specific instructions for the fortran code
+ifeq ($(USE_F2C_VERSION), 0)
+
+solarsys/msise90_sub.o: solarsys/msise90_sub.for
+	$(FORTRAN) -c solarsys/msise90_sub.for -o solarsys/msise90_sub.o $(F77_FLAGS) 
+
+else
+
+solarsys/msise90_sub.o: solarsys/msise90_sub.for
+	$(C) -c solarsys/msise90_sub.c -o solarsys/msise90_sub.o $(F2C_INCLUDE) $(CPPFLAGS)
+
+endif
+
+# Instructions for the console app interfaces
+interpreter/GuiInterpreterConsole.o : interpreter/GuiInterpreter.cpp \
+                                      interpreter/GuiInterpreter.hpp
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c interpreter/GuiInterpreter.cpp \
+	                              -o interpreter/GuiInterpreterConsole.o
+
+#executive/MessageInterfaceConsole.o : executive/MessageInterface.cpp \
+#                                      executive/MessageInterface.hpp
+#	$(CPP) $(CPPFLAGS) $(HEADERS) -c executive/MessageInterface.cpp \
+#	                              -o executive/MessageInterfaceConsole.o
+
+#executive/PlotInterfaceConsole.o : executive/PlotInterface.cpp \
+#                                   executive/PlotInterface.hpp
+#	$(CPP) $(CPPFLAGS) $(HEADERS) -c executive/PlotInterface.cpp \
+#	                              -o executive/PlotInterfaceConsole.o
