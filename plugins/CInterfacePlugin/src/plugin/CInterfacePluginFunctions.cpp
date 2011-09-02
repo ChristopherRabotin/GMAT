@@ -964,7 +964,7 @@ PropSetup *GetPropagator(GmatCommand **cmd)
                setupIndex = 0;
             }
          }
-         catch (BaseException &ex)
+         catch (BaseException &)
          {
             findNextPropagate = true;
             (*cmd) = (*cmd)->GetNext();
@@ -1014,7 +1014,7 @@ PropSetup *GetPropagator(GmatCommand **cmd)
 
             obj = (*cmd)->GetRefObject(Gmat::PROP_SETUP, "", setupIndex);
          }
-         catch (BaseException *ex)
+         catch (BaseException *)
          {
             obj = NULL;
          }
