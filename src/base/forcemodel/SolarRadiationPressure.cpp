@@ -117,6 +117,7 @@ SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount - PhysicalModelParamCount] 
 //------------------------------------------------------------------------------
 SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    PhysicalModel       (Gmat::PHYSICAL_MODEL, "SolarRadiationPressure", name),   
+   theSun              (NULL),
    useAnalytic         (true),
    shadowModel         (CONICAL_MODEL),
    vectorModel         (SUN_PARALLEL),
@@ -130,6 +131,10 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    sunDistance         (149597870.691),
    nominalSun          (149597870.691),
    bodyIsTheSun        (false),
+   psunrad             (0.0),
+   pcbrad              (0.0),
+   percentSun          (1.0),
+   bodyID              (-1),
    satCount            (0),
    massID              (-1),
    crID                (-1),
@@ -757,9 +762,9 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          }
          else
          {
-        	 inSunlight= true;
-        	 inShadow = false;
-        	 percentSun = 1.0;
+             inSunlight= true;
+             inShadow = false;
+             percentSun = 1.0;
          }
 
          #ifdef IGNORE_SHADOWS
