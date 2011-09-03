@@ -51,6 +51,7 @@ class MathNode;
 class Attitude;
 class SpacePoint;
 class Event;
+class EventLocator;
 class Interface;
 
 class MeasurementModel;
@@ -133,6 +134,8 @@ public:
    virtual TrackingData*    CreateTrackingData(const std::string &ofType,
                                            const std::string &withName = "");
    virtual Event*           CreateEvent(const std::string &ofType,
+                                        const std::string &withName = "");
+   virtual EventLocator*    CreateEventLocator(const std::string &ofType,
                                         const std::string &withName = "");
    virtual Interface*       CreateInterface(const std::string &ofType,
                                             const std::string &withName = "");

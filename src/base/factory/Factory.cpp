@@ -850,6 +850,34 @@ Event* Factory::CreateEvent(const std::string &ofType, const std::string &withNa
 
 
 //------------------------------------------------------------------------------
+// Event* CreateEvent(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates an EventLocator object.
+ *
+ * Must be implemented by derived classes that create EventLocator objects -
+ * in that case, it returns a new EventLocator object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type EventLocator.
+ *
+ * @param <ofType>   specific type of EventLocator object to create.
+ * @param <withName> name to give to the newly created EventLocator object.
+ *
+ * @return pointer to a new EventLocator object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type EventLocator.
+ */
+//------------------------------------------------------------------------------
+EventLocator* Factory::CreateEventLocator(const std::string &ofType,
+                                     const std::string &withName)
+{
+   throw FactoryException
+         ("Factory::CreateEventLocator() must be implemented by an "
+               "EventLocatorFactory\n");
+}
+
+//------------------------------------------------------------------------------
 // Interface* CreateInterface(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
