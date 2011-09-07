@@ -1221,14 +1221,25 @@ MissionTree::InsertNodeAfter(wxTreeItemId parentId, wxTreeItemId currId,
        realParentId,  parentName.c_str(), realPrevId, realPrevName.c_str(),
        prevVisId, prevVisName.c_str());
    #endif
-      
+   
    if (GetItemParent(currId) == prevVisId)
    {
-      #if DEBUG_MISSION_TREE_INSERT
-      MessageInterface::ShowMessage("   311 inserting by realPrevId and position 0\n");
-      #endif
-      node = InsertItem(prevVisId, 0, nodeName, icon, -1,
-                        new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
+      if (insertBefore)
+      {
+         #if DEBUG_MISSION_TREE_INSERT
+         MessageInterface::ShowMessage("   311 inserting by prevVisId and position 0\n");
+         #endif
+         node = InsertItem(prevVisId, 0, nodeName, icon, -1,
+                           new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
+      }
+      else
+      {
+         #if DEBUG_MISSION_TREE_INSERT
+         MessageInterface::ShowMessage("   312 appending to realPrevId \n");
+         #endif
+         node = AppendItem(prevVisId, nodeName, icon, -1,
+                           new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
+      }
    }
    else if (realPrevId == prevVisId)
    {
@@ -1791,6 +1802,8 @@ void MissionTree::Append(const wxString &cmdTypeName)
          // doesn't appear on the tree, such as EndScript
          prevCmd = GmatCommandUtil::GetLastCommand(prevCmd);
          #if DEBUG_MISSION_TREE_APPEND
+         MessageInterface::ShowMessage
+            ("   Current command is NoOp or BeginMissionSequence\n");
          WriteCommand("   ==>", " new prevCmd = ", prevCmd);
          #endif
          
@@ -1799,6 +1812,7 @@ void MissionTree::Append(const wxString &cmdTypeName)
          
          // Need to set previous command of new command
          cmd->ForceSetPrevious(prevCmd);
+         insertBefore = false;
       }
       else if (currCmd->IsOfType("BranchCommand"))
       {
