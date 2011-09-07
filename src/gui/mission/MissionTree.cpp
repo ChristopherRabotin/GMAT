@@ -1234,11 +1234,22 @@ MissionTree::InsertNodeAfter(wxTreeItemId parentId, wxTreeItemId currId,
       }
       else
       {
-         #if DEBUG_MISSION_TREE_INSERT
-         MessageInterface::ShowMessage("   312 appending to realPrevId \n");
-         #endif
-         node = AppendItem(prevVisId, nodeName, icon, -1,
-                           new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
+         if (realPrevName == prevVisName)
+         {
+            #if DEBUG_MISSION_TREE_INSERT
+            MessageInterface::ShowMessage("   312 appending to realPrevId\n");
+            #endif
+            node = AppendItem(prevVisId, nodeName, icon, -1,
+                              new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
+         }
+         else
+         {
+            #if DEBUG_MISSION_TREE_INSERT
+            MessageInterface::ShowMessage("   313 insertnig by realParentId and realPrevId\n");
+            #endif
+            node = InsertItem(realParentId, realPrevId, nodeName, icon, -1,
+                              new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
+         }
       }
    }
    else if (realPrevId == prevVisId)
@@ -4026,8 +4037,6 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::VARY;
    if (cmd == "Save")
       return GmatTree::SAVE;
-   if (cmd == "Toggle")
-      return GmatTree::TOGGLE;
    if (cmd == "Report")
       return GmatTree::REPORT;
    if (cmd == "For")
@@ -4058,10 +4067,12 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::ASSIGNMENT;
    if (cmd == "BeginScript")
       return GmatTree::SCRIPT_EVENT;
-   if (cmd == "MarkPoint")
+   if (cmd == "MarkPoint" || cmd == "ClearPlot")
       return GmatTree::XY_PLOT_ACTION;
-   if (cmd == "ClearPlot" || cmd == "PenUp" || cmd == "PenDown")
+   if (cmd == "PenUp" || cmd == "PenDown")
       return GmatTree::PLOT_ACTION;
+   if (cmd == "Toggle")
+      return GmatTree::TOGGLE;
    
    return GmatTree::OTHER_COMMAND;
 }
