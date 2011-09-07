@@ -97,6 +97,9 @@
     <Filter Include="Source Files\forcemodel\harmonic">
       <UniqueIdentifier>{fd9133da-290d-4694-a5a6-6684bd03cf1f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\event">
+      <UniqueIdentifier>{fcf2b7f5-d884-4bd8-8313-e12c935430e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp">
@@ -1280,6 +1283,21 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\SunSync.cpp">
       <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\EventException.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp">
+      <Filter>Source Files\event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2518,6 +2536,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\SunSync.hpp">
       <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\EventException.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp">
+      <Filter>Source Files\event</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

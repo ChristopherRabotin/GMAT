@@ -396,6 +396,11 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\TOEEqAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TopocentricAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\EventException.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\Moderator.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotReceiver.cpp" />
@@ -848,6 +853,11 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\TOEEqAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TopocentricAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\EventException.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\Moderator.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotReceiver.hpp" />
