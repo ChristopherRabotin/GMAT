@@ -15,6 +15,8 @@
  */
 //------------------------------------------------------------------------------
 #include "gmatwxrcs.hpp"
+#include "Subscriber.hpp"
+#include "SubscriberException.hpp"
 #include "MdiChildViewFrame.hpp"
 #include "MdiGlPlotData.hpp"
 #include "ViewCanvas.hpp"
@@ -39,7 +41,6 @@ MdiChildViewFrame::MdiChildViewFrame(wxMDIParentFrame *parent,
                        pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mCanvas = (ViewCanvas *) NULL;
-   mPlotName = plotName;
    mPlotTitle = plotName;
    mViewType = viewType;
    mOverlapPlot = false;
@@ -81,14 +82,6 @@ MdiChildViewFrame::~MdiChildViewFrame()
    #endif
 }
 
-
-//------------------------------------------------------------------------------
-// wxString GetPlotName()
-//------------------------------------------------------------------------------
-wxString MdiChildViewFrame::GetPlotName()
-{
-   return mPlotName;
-}
 
 
 //------------------------------------------------------------------------------
@@ -288,7 +281,7 @@ void MdiChildViewFrame::SetPlotName(const wxString &name)
          ("MdiChildViewFrame::SetPlotName() name=%s\n", name.c_str());
    #endif
    
-   mPlotName = name;
+   GmatMdiChildFrame::SetPlotName(name);
    mPlotTitle = name;
    SetTitle(mPlotTitle);
 }
@@ -919,6 +912,52 @@ void MdiChildViewFrame::SetEndOfRun()
       mCanvas->Refresh(false);
       Update();
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void SavePlotPositionAndSize()
+//------------------------------------------------------------------------------
+void MdiChildViewFrame::SavePlotPositionAndSize()
+{
+   // Get the position and size of the window first
+   Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+   Integer screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+//   wxRect      wxR         = GetScreenRect();
+//   wxPoint     wxP         = wxR.GetPosition();
+//   wxSize      wxS         = wxR.GetSize();
+//   Integer     x           = (Integer) wxP.x;
+//   Integer     y           = (Integer) wxP.y;
+//   Integer     w           = (Integer) wxS.GetWidth();
+//   Integer     h           = (Integer) wxS.GetHeight();
+   int tmpX = -1, tmpY = -1;
+   int tmpW = -1, tmpH = -1;
+   GetPosition(&tmpX, &tmpY);
+   GetSize(&tmpW, &tmpH);
+   Rvector upperLeft(2, ((Real) tmpX /(Real)  screenWidth), ((Real) tmpY /(Real)  screenHeight));
+   Rvector plotSize(2,  ((Real) tmpW /(Real)  screenWidth), ((Real) tmpH /(Real)  screenHeight));
+//   // ======================= begin temporary ==============================
+//   MessageInterface::ShowMessage("*** Size of SCREEN %s is:     width = %d, height = %d\n", mPlotName.c_str(), screenWidth, screenHeight);
+//   MessageInterface::ShowMessage("Position of View plot %s is: x     = %d, y      = %d\n", mPlotName.c_str(), tmpX, tmpY);
+//   MessageInterface::ShowMessage("Size of View plot %s is:     width = %d, height = %d\n", mPlotName.c_str(), tmpW, tmpH);
+//   MessageInterface::ShowMessage("Position of View plot %s in pixels rel. to parent window is: x     = %d, y      = %d\n",
+//         mPlotName.c_str(), (Integer) tmpX, (Integer) tmpY);
+//   MessageInterface::ShowMessage("Size of View plot %s in pixels rel. to parent window is:     x     = %d, y      = %d\n",
+//         mPlotName.c_str(), (Integer) tmpW, (Integer) tmpH);
+//   wxPoint tmpPt = ScreenToClient(wxP);
+//   MessageInterface::ShowMessage("--- Position of View plot %s in client coords is: x     = %d, y      = %d\n",
+//         mPlotName.c_str(), (Integer) tmpPt.x, (Integer) tmpPt.y);
+   // ======================= end temporary ==============================
+   Subscriber *sub =
+      (Subscriber*)theGuiInterpreter->GetConfiguredObject(mPlotName.c_str());
+   if (!sub)
+   {
+      std::string errmsg = "Cannot find subscriber ";
+      errmsg += mPlotName + "\n";
+      throw SubscriberException(errmsg);
+   }
+   sub->SetRvectorParameter(sub->GetParameterID("UpperLeft"), upperLeft);
+   sub->SetRvectorParameter(sub->GetParameterID("Size"), plotSize);
 }
 
 

@@ -123,6 +123,20 @@ public:
    virtual std::string  GetOnOffParameter(const std::string &label) const;
    virtual bool         SetOnOffParameter(const std::string &label, 
                                           const std::string &value);
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
+   virtual const Rvector& GetRvectorParameter(const Integer id) const;
+   virtual const Rvector& SetRvectorParameter(const Integer id,
+                                              const Rvector &value);
+   virtual const Rvector& GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector& SetRvectorParameter(const std::string &label,
+                                              const Rvector &value);
    
    enum SolverIterOption
    {
@@ -158,6 +172,11 @@ protected:
    bool                 isDataOn;
    bool                 isDataStateChanged;
    
+   // arrays for holding position and size
+   Rvector              mPlotUpperLeft;
+   Rvector              mPlotSize;
+
+
    /// The current run state, so actions based on state can be taken
    Gmat::RunState       runstate;
    Integer              currProviderId;
@@ -186,12 +205,17 @@ protected:
    virtual void         HandleScPropertyChange(GmatBase *originator, Real epoch,
                                                const std::string &satName,
                                                const std::string &desc);
-   
+
+   /// Parses string value such as "[0 127 255]" and converts to unsigned int array for color, position, size, etc.
+   virtual void         PutUnsignedIntValue(Integer id, const std::string &sval);
+
 public:
    enum
    {
       SOLVER_ITERATIONS = GmatBaseParamCount,
       TARGET_STATUS,
+      UPPER_LEFT,
+      SIZE,
       SubscriberParamCount,
    };
    

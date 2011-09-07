@@ -161,7 +161,7 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
 // OrbitPlot(const OrbitPlot &plot)
 //------------------------------------------------------------------------------
 /**
- * The copy consturctor
+ * The copy constructor
  */
 //------------------------------------------------------------------------------
 OrbitPlot::OrbitPlot(const OrbitPlot &plot)
@@ -785,6 +785,8 @@ std::string OrbitPlot::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool OrbitPlot::IsParameterReadOnly(const Integer id) const
 {
+   if ((id == UPPER_LEFT) || (id == SIZE))
+      return false;
    return Subscriber::IsParameterReadOnly(id);
 }
 
@@ -1899,22 +1901,6 @@ void OrbitPlot::UpdateObjectList(SpacePoint *sp, bool show)
           mObjectNameArray[i].c_str(), draw, showObj, mOrbitColorArray[i]);
    }
    #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void PutUnsignedIntValue(Integer id, const std::string &sval)
-//------------------------------------------------------------------------------
-void OrbitPlot::PutUnsignedIntValue(Integer id, const std::string &sval)
-{
-   #ifdef DEBUG_PUT
-   MessageInterface::ShowMessage
-      ("PutUnsignedIntValue() id=%d, sval='%s'\n", id, sval.c_str());
-   #endif
-   
-   UnsignedIntArray vals = GmatStringUtil::ToUnsignedIntArray(sval);
-   for (UnsignedInt i=0; i<vals.size(); i++)
-      SetUnsignedIntParameter(id, vals[i], i);
 }
 
 

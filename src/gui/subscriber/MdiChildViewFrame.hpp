@@ -46,7 +46,6 @@ public:
    virtual ~MdiChildViewFrame();
    
    // getters
-   virtual wxString GetPlotName();
    virtual bool GetOverlapPlot();
    virtual ViewCanvas* GetGlCanvas();
    virtual wxGLContext* GetGLContext();
@@ -151,6 +150,9 @@ public:
    virtual void RefreshPlot();
    virtual void DeletePlot();
    virtual void SetEndOfRun();
+
+   virtual void SavePlotPositionAndSize();
+
       
 protected:
    
@@ -158,7 +160,6 @@ protected:
    
    ViewCanvas *mCanvas;
    
-   wxString mPlotName;
    wxString mPlotTitle;
    wxString mViewType;
    bool mOverlapPlot;

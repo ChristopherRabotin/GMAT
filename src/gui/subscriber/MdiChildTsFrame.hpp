@@ -92,7 +92,6 @@ public:
    void RedrawCurve();
     
    // getter
-   wxString GetPlotName() {return mPlotName;}
    wxString GetPlotTitle() {return mPlotTitle;}
    wxString GetXAxisTitle() {return mXAxisTitle;}
    wxString GetYAxisTitle() {return mYAxisTitle;}
@@ -124,6 +123,7 @@ public:
    void OnPlotClose(wxCloseEvent& event);
    void OnClose(wxCloseEvent& event);
    
+   virtual void SavePlotPositionAndSize();
    
 protected:
    
@@ -133,7 +133,6 @@ protected:
    
    static const int MAX_NUM_CURVE = 6;
     
-   wxString mPlotName;
    wxString mPlotTitle;
    wxString mXAxisTitle;
    wxString mYAxisTitle;

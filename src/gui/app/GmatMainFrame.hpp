@@ -256,6 +256,8 @@ private:
    void UpdateTitle(const wxString &filename = "");
    void SaveGuiToActiveScript();
    
+   void SavePlotPositionsAndSizes();
+
    // IDs for the controls
    enum
    {

@@ -212,8 +212,6 @@ protected:
    void                 ClearDynamicArrays();
    /// Updates plotting object information such as plotting object pointer, option flags, etc.
    void                 UpdateObjectList(SpacePoint *sp, bool show = false);
-   /// Parses string value such as "[0 127 255]" and converts to unsigned int array for color
-   void                 PutUnsignedIntValue(Integer id, const std::string &sval);
    
    enum
    {

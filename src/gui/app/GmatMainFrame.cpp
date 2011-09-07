@@ -2110,6 +2110,7 @@ bool GmatMainFrame::SaveScriptAs()
          if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"),
                           _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
          {
+            SavePlotPositionsAndSizes();
             theGuiInterpreter->SaveScript(mScriptFilename);
          }
          else
@@ -2120,6 +2121,7 @@ bool GmatMainFrame::SaveScriptAs()
       }
       else
       {
+         SavePlotPositionsAndSizes();
          theGuiInterpreter->SaveScript(mScriptFilename);
       }
    }
@@ -4930,6 +4932,24 @@ void GmatMainFrame::SaveGuiToActiveScript()
          ("***** Old script saved to backup file \"%s\"\n", backupFilename.c_str());
    }
    
+   SavePlotPositionsAndSizes();
    theGuiInterpreter->SaveScript(mScriptFilename);
 }
 
+//------------------------------------------------------------------------------
+// void SavePlotPositionsAndSizes()
+//------------------------------------------------------------------------------
+void GmatMainFrame::SavePlotPositionsAndSizes()
+{
+#ifdef __WXMAC__
+   wxNode *node = theMdiChildren->GetFirst();
+
+   while (node)
+   {
+      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
+      child->SavePlotPositionAndSize();
+
+      node = node->GetNext();
+   }
+#endif
+}

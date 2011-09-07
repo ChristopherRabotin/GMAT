@@ -48,7 +48,8 @@
 //#define DEBUG_SUBSCRIBER_PARAM
 //#define DEBUG_RECEIVE_DATA
 //#define DEBUG_RENAME
-
+//#define DEBUG_SUBSCRIBER_PUT
+//#define DEBUG_SUBSCRIBER_SET
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
 //#endif
@@ -75,6 +76,8 @@ Subscriber::PARAMETER_TEXT[SubscriberParamCount - GmatBaseParamCount] =
 {
    "SolverIterations",
    "TargetStatus",
+   "UpperLeft",
+   "Size",
 };
 
 const Gmat::ParameterType
@@ -82,6 +85,8 @@ Subscriber::PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount] =
 {
    Gmat::ENUMERATION_TYPE,         // "SolverIterations"
    Gmat::ON_OFF_TYPE,              // "TargetStatus"
+   Gmat::RVECTOR_TYPE,   //"Position",
+   Gmat::RVECTOR_TYPE,   //"Size",
 };
 
 
@@ -94,24 +99,24 @@ Subscriber::PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    GmatBase (Gmat::SUBSCRIBER, typeStr, nomme),
-   data(NULL),
-   next(NULL),
+   data                  (NULL),
+   next                  (NULL),
    theInternalCoordSystem(NULL),
-   theDataCoordSystem(NULL),
-   theDataMJ2000EqOrigin(NULL),
-   theSolarSystem(NULL),
-   currentProvider(NULL),
-   active(true),
-   isManeuvering(false),
-   isEndOfReceive(false),
-   isEndOfDataBlock(false),
-   isEndOfRun(false),
-   isInitialized(false),
-   isFinalized(false),
-   isDataOn(true),
-   isDataStateChanged(false),
-   runstate(Gmat::IDLE),
-   currProviderId(0)
+   theDataCoordSystem    (NULL),
+   theDataMJ2000EqOrigin (NULL),
+   theSolarSystem        (NULL),
+   currentProvider       (NULL),
+   active                (true),
+   isManeuvering         (false),
+   isEndOfReceive        (false),
+   isEndOfDataBlock      (false),
+   isEndOfRun            (false),
+   isInitialized         (false),
+   isFinalized           (false),
+   isDataOn              (true),
+   isDataStateChanged    (false),
+   runstate              (Gmat::IDLE),
+   currProviderId        (0)
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
    objectTypeNames.push_back("Subscriber");
@@ -124,6 +129,9 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    solverIterOptions.clear();
    for (UnsignedInt i = 0; i < SolverIterOptionCount; i++)
       solverIterOptions.push_back(SOLVER_ITER_OPTION_TEXT[i]);
+
+   mPlotUpperLeft = Rvector(2,0.0,0.0);
+   mPlotSize      = Rvector(2,0.0,0.0);
 }
 
 
@@ -132,29 +140,34 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
 //------------------------------------------------------------------------------
 Subscriber::Subscriber(const Subscriber &copy) :
    GmatBase(copy),
-   data(NULL),
-   next(NULL),
+   data                  (NULL),
+   next                  (NULL),
    theInternalCoordSystem(copy.theInternalCoordSystem),
-   theDataCoordSystem(copy.theDataCoordSystem),
-   theDataMJ2000EqOrigin(copy.theDataMJ2000EqOrigin),
-   theSolarSystem(copy.theSolarSystem),
-   currentProvider(NULL),
-   active(copy.active),
-   isManeuvering(copy.isManeuvering),
-   isEndOfReceive(copy.isEndOfReceive),
-   isEndOfRun(copy.isEndOfRun),
-   isInitialized(copy.isInitialized),
-   isFinalized(copy.isFinalized),
-   isDataOn(copy.isDataOn),
-   isDataStateChanged(copy.isDataStateChanged),
-   runstate(copy.runstate),
-   currProviderId(copy.currProviderId),
-   wrapperObjectNames(copy.wrapperObjectNames)
+   theDataCoordSystem    (copy.theDataCoordSystem),
+   theDataMJ2000EqOrigin (copy.theDataMJ2000EqOrigin),
+   theSolarSystem        (copy.theSolarSystem),
+   currentProvider       (NULL),
+   active                (copy.active),
+   isManeuvering         (copy.isManeuvering),
+   isEndOfReceive        (copy.isEndOfReceive),
+   isEndOfRun            (copy.isEndOfRun),
+   isInitialized         (copy.isInitialized),
+   isFinalized           (copy.isFinalized),
+   isDataOn              (copy.isDataOn),
+   isDataStateChanged    (copy.isDataStateChanged),
+//   mPlotUpperLeft        (copy.mPlotUpperLeft),
+//   mPlotSize             (copy.mPlotSize),
+   runstate              (copy.runstate),
+   currProviderId        (copy.currProviderId),
+   wrapperObjectNames    (copy.wrapperObjectNames)
 {
    mSolverIterations = copy.mSolverIterations;
    mSolverIterOption = copy.mSolverIterOption;
-   wrappersCopied = true;
+   wrappersCopied    = true;
    
+   mPlotUpperLeft    = Rvector(2,copy.mPlotUpperLeft[0], copy.mPlotUpperLeft[1]);
+   mPlotSize         = Rvector(2,copy.mPlotSize[0],      copy.mPlotSize[1]);
+
 #ifdef __ENABLE_CLONING_WRAPPERS__
    // Create new wrappers by cloning (LOJ: 2009.03.10)
    CloneWrappers(depParamWrappers, copy.depParamWrappers);
@@ -202,6 +215,9 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    isFinalized = rhs.isFinalized;
    isDataOn = rhs.isDataOn;
    isDataStateChanged = rhs.isDataStateChanged;
+
+   mPlotUpperLeft     = rhs.mPlotUpperLeft;
+   mPlotSize          = rhs.mPlotSize;
    runstate = rhs.runstate;
    currProviderId = rhs.currProviderId;
    
@@ -926,6 +942,10 @@ bool Subscriber::IsParameterReadOnly(const Integer id) const
 {
    if (id == TARGET_STATUS)
       return true;
+   if (id == UPPER_LEFT)
+      return true;
+   if (id == SIZE)
+      return true;
    
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -1079,6 +1099,11 @@ bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
             }
          }
       }
+//   case UPPER_LEFT:
+//   case SIZE:
+//      if (value[0] == '[')
+//         PutUnsignedIntValue(id, value);
+//      return true;
    default:
       return GmatBase::SetStringParameter(id, value);
    }
@@ -1214,6 +1239,103 @@ bool Subscriber::SetOnOffParameter(const std::string &label,
    return SetOnOffParameter(GetParameterID(label), value);
 }
 
+Real Subscriber::GetRealParameter(const Integer id) const
+{
+   return GmatBase::GetRealParameter(id);
+}
+
+Real Subscriber::SetRealParameter(const Integer id, const Real value)
+{
+   return GmatBase::SetRealParameter(id, value);
+}
+
+Real Subscriber::GetRealParameter(const Integer id, const Integer index) const
+{
+   if ((index < 0) || (index > 1))
+   {
+      std::string errmsg = "Index is out-of-bounds for upper left or size for plot ";
+      errmsg += instanceName + ".\n";
+      throw SubscriberException(errmsg);
+   }
+   switch (id)
+   {
+   case UPPER_LEFT:
+      return mPlotUpperLeft[index];
+
+   case SIZE:
+      return mPlotSize[index];
+
+   default:
+      return GmatBase::GetRealParameter(id, index);
+   }
+}
+Real Subscriber::SetRealParameter(const Integer id, const Real value, const Integer index)
+{
+   if (index < 0 || (index > 1))
+      throw SubscriberException
+         ("index out of bounds for " + GetParameterText(id));
+
+   switch (id)
+   {
+   case UPPER_LEFT:
+   {
+      mPlotUpperLeft[index] = value;
+      return mPlotUpperLeft[index];
+   }
+   case SIZE:
+   {
+      mPlotSize[index] = value;
+      return mPlotSize[index];
+   }
+   default:
+      return GmatBase::GetRealParameter(id, index);
+   }
+}
+
+const Rvector& Subscriber::GetRvectorParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case UPPER_LEFT:
+      return mPlotUpperLeft;
+   case SIZE:
+      return mPlotSize;
+   default:
+      return GmatBase::GetRvectorParameter(id);
+   }
+}
+
+const Rvector& Subscriber::SetRvectorParameter(const Integer id, const Rvector &value)
+{
+   if (value.GetSize() != 2)
+      throw SubscriberException
+         ("incorrect size vector for " + GetParameterText(id));
+   switch (id)
+   {
+   case UPPER_LEFT:
+   {
+      mPlotUpperLeft = value;
+      return mPlotUpperLeft;
+   }
+   case SIZE:
+   {
+      mPlotSize = value;
+      return mPlotSize;
+   }
+   default:
+      return GmatBase::SetRvectorParameter(id, value);
+   }
+}
+
+const Rvector& Subscriber::GetRvectorParameter(const std::string &label) const
+{
+   return GetRvectorParameter(GetParameterID(label));
+}
+
+const Rvector& Subscriber::SetRvectorParameter(const std::string &label, const Rvector &value)
+{
+   return SetRvectorParameter(GetParameterID(label), value);
+}
 
 //------------------------------------------------------------------------------
 // const std::string* GetSolverIterOptionList()
@@ -1460,6 +1582,22 @@ void Subscriber::HandleScPropertyChange(GmatBase *originator, Real epoch,
                                         const std::string &desc)
 {
    // do nothing here
+}
+
+
+//------------------------------------------------------------------------------
+// void PutUnsignedIntValue(Integer id, const std::string &sval)
+//------------------------------------------------------------------------------
+void Subscriber::PutUnsignedIntValue(Integer id, const std::string &sval)
+{
+   #ifdef DEBUG_SUBSCRIBER_PUT
+   MessageInterface::ShowMessage
+      ("PutUnsignedIntValue() id=%d, sval='%s'\n", id, sval.c_str());
+   #endif
+
+   UnsignedIntArray vals = GmatStringUtil::ToUnsignedIntArray(sval);
+   for (UnsignedInt i=0; i<vals.size(); i++)
+      SetUnsignedIntParameter(id, vals[i], i);
 }
 
 

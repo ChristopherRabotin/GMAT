@@ -50,6 +50,8 @@ public:
    
    virtual bool CreateGlPlotWindow(const std::string &plotName,
                         const std::string &oldName,
+                        Real positionX, Real positionY,
+                        Real width, Real height,
                         Integer numPtsToRedraw) = 0;
    
    virtual void SetGlSolarSystem(const std::string &plotName,
@@ -117,6 +119,8 @@ public:
    // for XY plot
    virtual bool CreateXyPlotWindow(const std::string &plotName,
                         const std::string &oldName,
+                        Real positionX, Real positionY,
+                        Real width, Real height,
                         const std::string &plotTitle,
                         const std::string &xAxisTitle,
                         const std::string &yAxisTitle,

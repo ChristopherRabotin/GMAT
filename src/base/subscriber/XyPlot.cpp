@@ -321,7 +321,8 @@ bool XyPlot::Initialize()
          ("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
       #endif
       
-      PlotInterface::CreateXyPlotWindow(instanceName, mOldName, mPlotTitle,
+      PlotInterface::CreateXyPlotWindow(instanceName, mOldName, mPlotUpperLeft[0], mPlotUpperLeft[1],
+                                        mPlotSize[0], mPlotSize[1], mPlotTitle,
                                         mXAxisTitle, mYAxisTitle, mDrawGrid);
       
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
@@ -654,6 +655,9 @@ bool XyPlot::IsParameterReadOnly(const Integer id) const
       )
       return true;
    
+   if ((id == UPPER_LEFT) || (id == SIZE))
+      return false;
+
    return Subscriber::IsParameterReadOnly(id);
 }
 

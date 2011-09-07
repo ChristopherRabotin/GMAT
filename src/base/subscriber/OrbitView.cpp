@@ -410,7 +410,8 @@ bool OrbitView::Initialize()
       PlotInterface::SetViewType(GmatPlot::ENHANCED_3D_VIEW);
       
       if (PlotInterface::CreateGlPlotWindow
-          (instanceName, mOldName, mNumPointsToRedraw))
+          (instanceName, mOldName, mPlotUpperLeft[0], mPlotUpperLeft[1],
+           mPlotSize[0], mPlotSize[1], mNumPointsToRedraw))
       {
          #if DBGLVL_INIT
          MessageInterface::ShowMessage

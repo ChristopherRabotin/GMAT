@@ -72,6 +72,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
        "name='%s'\n   title='%s', ", type, name.c_str(), title.c_str());
    #endif
    
+   mPlotName = name;
    theParent = parent;
    mDirty = false;
    mOverrideDirty = false;
@@ -81,6 +82,9 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    theMenuBar = NULL;
    theAssociatedWin = NULL;
    
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   theGuiInterpreter = gmatAppData->GetGuiInterpreter();
+
    #ifdef __USE_STC_EDITOR__
    theEditor = NULL;
    #endif
@@ -168,6 +172,21 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
    #endif
 }
 
+//------------------------------------------------------------------------------
+// wxString GetPlotName()
+//------------------------------------------------------------------------------
+wxString GmatMdiChildFrame::GetPlotName()
+{
+   return mPlotName;
+}
+
+//------------------------------------------------------------------------------
+// void SetPlotName(const wxString &name)
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::SetPlotName(const wxString &name)
+{
+   mPlotName = name;
+}
 
 //------------------------------------------------------------------------------
 // wxMenuBar* GetMenuBar()
@@ -396,6 +415,13 @@ void GmatMdiChildFrame::UpdateScriptActiveStatus(bool isActive)
    // Do nothing here
 }
 
+//------------------------------------------------------------------------------
+// void SavePlotPositionAndSize()
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::SavePlotPositionAndSize()
+{
+  ; // plots will need to implement this
+}
 
 #ifdef __WXMAC__
 //------------------------------------------------------------------------------

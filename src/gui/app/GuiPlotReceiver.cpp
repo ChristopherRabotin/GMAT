@@ -36,6 +36,7 @@
 
 #include "GuiPlotReceiver.hpp"
 #include "MessageInterface.hpp"
+#include "RealUtilities.hpp"
 
 //#define DEBUG_PLOTIF_GL_SET 1
 //#define DEBUG_PLOTIF_GL_CREATE 1
@@ -103,6 +104,8 @@ GuiPlotReceiver::~GuiPlotReceiver()
  *
  * @param <plotName> plot name
  * @param <oldName>  old plot name, this is needed for renaming plot
+ * @param <positionX, positionY>     position of the plot in screen coordinates
+ * @param <width, height>     size of the plot in screen coordinates
  * @param <drawEcPlane>  true if draw ecliptic plane
  * @param <drawXyPlane>  true if draw XY plane
  * @param <drawWirePlane>  true if draw wire frame
@@ -119,6 +122,8 @@ GuiPlotReceiver::~GuiPlotReceiver()
 //------------------------------------------------------------------------------
 bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
                                          const std::string &oldName,
+                                         Real positionX, Real positionY,
+                                         Real width, Real height,
                                          Integer numPtsToRedraw)
 {
    //-------------------------------------------------------
@@ -175,22 +180,37 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
           "%s\n", plotName.c_str());
       #endif
       
-      Integer x,y, w, h;
-      #ifdef __WXMAC__
-         wxSize size = wxGetDisplaySize();
-         Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
-         w = (size.GetWidth() - 239) / 2;
-         h = 350;
-         Integer hLoc = plotCount % 2;
-         Integer vLoc = (Integer)((plotCount) / 2);
-         x = 238 + hLoc * w + 1;
-         y = 20  + vLoc * (h+10);
-      #else
-         x = -1;
-         y = -1;
-         w = -1;
-         h = -1;
-      #endif
+      Integer x, y, w, h;
+
+      // if position and size were not saved from an earlier run, figure out the initial values
+      if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
+          GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
+      {
+         #ifdef __WXMAC__
+            wxSize size = wxGetDisplaySize();
+            Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
+            w = (size.GetWidth() - 239) / 2;
+            h = 350;
+            Integer hLoc = plotCount % 2;
+            Integer vLoc = (Integer)((plotCount) / 2);
+            x = 238 + hLoc * w + 1;
+            y = 20  + vLoc * (h+10);
+         #else
+            x = -1;
+            y = -1;
+            w = -1;
+            h = -1;
+         #endif
+      }
+      else
+      {
+         Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+         Integer screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+         x = (Integer) (positionX * (Real) screenWidth);
+         y = (Integer) (positionY * (Real) screenHeight);
+         w = (Integer) (width     * (Real) screenWidth);
+         h = (Integer) (height    * (Real) screenHeight);
+      }
          
       if (currentView == GmatPlot::ENHANCED_3D_VIEW)
       {
@@ -791,6 +811,8 @@ bool GuiPlotReceiver::TakeGlAction(const std::string &plotName,
  *
  * @param plotName Name of the plot
  * @param oldName Former name of the plot
+ * @param positionX, positionY    Position of the plot in screen coordinates
+ * @param width, height    Size of the plot in screen coordinates
  * @param plotTitle Title of the plot
  * @param xAxisTitle X-axis label for the plot
  * @param yAxisTitle Y-axis label for the plot
@@ -801,6 +823,8 @@ bool GuiPlotReceiver::TakeGlAction(const std::string &plotName,
 //------------------------------------------------------------------------------
 bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
                                        const std::string &oldName,
+                                       Real positionX, Real positionY,
+                                       Real width, Real height,
                                        const std::string &plotTitle,
                                        const std::string &xAxisTitle,
                                        const std::string &yAxisTitle,
@@ -850,22 +874,37 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
           xAxisTitle.c_str(), yAxisTitle.c_str());
       #endif
 
-      Integer x,y, w, h;
-      #ifdef __WXMAC__
-         wxSize size = wxGetDisplaySize();
-         Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
-         w = (size.GetWidth() - 239) / 2;
-         h = 350;
-         Integer hLoc = plotCount % 2;
-         Integer vLoc = (Integer)((plotCount) / 2);
-         x = 238 + hLoc * w + 1;
-         y = 20  + vLoc * (h+10);
-      #else
-         x = -1;
-         y = -1;
-         w = 500;
-         h = 350;
-      #endif
+      Integer x, y, w, h;
+
+      // if position and size were not saved from an earlier run, figure out the initial values
+      if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
+          GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
+      {
+         #ifdef __WXMAC__
+            wxSize size = wxGetDisplaySize();
+            Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
+            w = (size.GetWidth() - 239) / 2;
+            h = 350;
+            Integer hLoc = plotCount % 2;
+            Integer vLoc = (Integer)((plotCount) / 2);
+            x = 238 + hLoc * w + 1;
+            y = 20  + vLoc * (h+10);
+         #else
+            x = -1;
+            y = -1;
+            w = 500;
+            h = 350;
+         #endif
+      }
+      else
+      {
+         Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+         Integer screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+         x = (Integer) (positionX * (Real) screenWidth);
+         y = (Integer) (positionY * (Real) screenHeight);
+         w = (Integer) (width     * (Real) screenWidth);
+         h = (Integer) (height    * (Real) screenHeight);
+      }
 
 
       // create a frame, containing a XY plot canvas

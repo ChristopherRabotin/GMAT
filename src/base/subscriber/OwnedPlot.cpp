@@ -270,7 +270,7 @@ bool OwnedPlot::Initialize()
                ("OwnedPlot::Initialize() calling CreateOwnedPlotWindow()\n");
       #endif
       
-      PlotInterface::CreateXyPlotWindow(instanceName, mOldName, mPlotTitle,
+      PlotInterface::CreateXyPlotWindow(instanceName, mOldName, 0.0, 0.0, 0.0, 0.0, mPlotTitle,
             mXAxisTitle, mYAxisTitle, (mDrawGrid == "On"));
       
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
