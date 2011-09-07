@@ -50,6 +50,7 @@ class DataFile;
 class ObType;
 class TrackingSystem;
 class TrackingData;
+class EventLocator;
 
 
 /**
@@ -90,6 +91,7 @@ public:
    void                AddMeasurement(CoreMeasurement *meas);
    void                AddDataFile(DataFile *meas);
    void                AddObType(ObType *meas);
+   void                AddEventLocator(EventLocator *el);
    void                AddTrackingSystem(TrackingSystem *ts);
    void                AddTrackingData(TrackingData *td);
 
@@ -137,6 +139,8 @@ public:
    TrackingData*       GetTrackingData(const std::string &name);
 
    DataFile *          GetDataStream(const std::string &name);
+
+   EventLocator*       GetEventLocator(const std::string &name);
 
    bool                HasConfigurationChanged();
    void                ConfigurationChanged(bool tf);

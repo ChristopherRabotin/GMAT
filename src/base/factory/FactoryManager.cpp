@@ -654,6 +654,14 @@ TrackingData* FactoryManager::CreateTrackingData(const std::string &withName)
    return NULL;
 }
 
+EventLocator* FactoryManager::CreateEventLocator(const std::string &ofType,
+                                          const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::EVENT_LOCATOR, ofType);
+   if (f != NULL)
+      return f->CreateEventLocator(ofType, withName);
+   return NULL;
+}
 
 //------------------------------------------------------------------------------
 // ObType* FactoryManager::CreateObType(const std::string &ofType,
@@ -1048,7 +1056,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
          
          if (!listObj.empty())
          {
-            StringArray::iterator s = listObj.begin();
+//            StringArray::iterator s = listObj.begin();
             std::string objType = forType;
             
             // Make sure that all type name begins with upper case if

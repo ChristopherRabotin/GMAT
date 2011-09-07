@@ -1,25 +1,36 @@
-/*
- * EventFunction.cpp
- *
- *  Created on: Aug 16, 2011
- *      Author: djc
+//$Id$
+//------------------------------------------------------------------------------
+//                           EventFunction
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under NASA Prime
+// Contract NNG10CP02C, Task Order 28
+//
+// Author: Darrel J. Conway, Thinking Systems, Inc.
+// Created: Jul 6, 2011
+//
+/**
+ * Definition of the ...
  */
+//------------------------------------------------------------------------------
 
 #include "gmatdefs.hpp"
 #include "EventFunction.hpp"
 
-EventFunction::EventFunction(const std::string &type, const std::string &name) :
-   value             (99999.99999),
-   derivative        (99999.99999),
+EventFunction::EventFunction() :
+   value             (999.999999),
+   derivative        (999.9999999),
    primary           (NULL)
 {
-   // TODO Auto-generated constructor stub
-
 }
 
 EventFunction::~EventFunction()
 {
-   // TODO Auto-generated destructor stub
 }
 
 EventFunction::EventFunction(const EventFunction& ef)
@@ -29,7 +40,7 @@ EventFunction::EventFunction(const EventFunction& ef)
 
 EventFunction& EventFunction::operator=(const EventFunction& ef)
 {
-   if (&ef != this)
+   if (this != &ef)
    {
 
    }

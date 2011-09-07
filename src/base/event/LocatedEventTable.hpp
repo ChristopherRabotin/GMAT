@@ -1,27 +1,44 @@
-/*
- * LocatedEventTable.hpp
- *
- *  Created on: Aug 16, 2011
- *      Author: djc
+//$Id$
+//------------------------------------------------------------------------------
+//                           LocatedEventTable
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under NASA Prime
+// Contract NNG10CP02C, Task Order 28
+//
+// Author: Darrel J. Conway, Thinking Systems, Inc.
+// Created: Sep 2, 2011
+//
+/**
+ * Definition of the ...
  */
+//------------------------------------------------------------------------------
 
-#ifndef LOCATEDEVENTTABLE_HPP_
-#define LOCATEDEVENTTABLE_HPP_
+
+#ifndef LocatedEventTable_hpp
+#define LocatedEventTable_hpp
 
 #include "LocatedEvent.hpp"
 
 
 enum SortStyle
 {
-   CHRONOLOGICAL,       // Sorts the event data in time order.
-   BY_TYPE,             // Groups the data by event type.
-   DURATION_ASCENDING,  // Groups the event data from shortest to longest.
-   DURATION_DESCENDING, // Groups the event data from longest to shortest.
-   UNSORTED             // Uses the current buffer ordering
+   CHRONOLOGICAL = 12000,  // Sorts the event data in time order.
+   BY_TYPE,                // Groups the data by event type.
+   DURATION_ASCENDING,     // Groups the event data from shortest to longest.
+   DURATION_DESCENDING,    // Groups the event data from longest to shortest.
+   BY_START,               // Sorts by start epoch
+   UNSORTED                // Uses the current buffer ordering
 };
 
-
-
+/**
+ * The table of events located during a run
+ */
 class LocatedEventTable
 {
 public:
@@ -50,4 +67,4 @@ protected:
    std::vector<LocatedEvent*>    events;
 };
 
-#endif /* LOCATEDEVENTTABLE_HPP_ */
+#endif /* LocatedEventTable_hpp */

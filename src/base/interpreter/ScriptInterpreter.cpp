@@ -1446,7 +1446,7 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
          {
             InterpreterException ex
                ("Cannot create an object \"" + names[i] + "\". The \"" +
-                type + "\" is unknown object type");
+                type + "\" is an unknown object type");
             HandleError(ex);
             return false;
          }

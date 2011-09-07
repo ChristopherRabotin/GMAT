@@ -712,6 +712,30 @@ void ConfigManager::AddObType(ObType *ot)
 
 
 //------------------------------------------------------------------------------
+// void AddEventLocator(EventLocator *el)
+//------------------------------------------------------------------------------
+/**
+ * Adds a named EventLocator to the configuration
+ *
+ * @param el The EventLocator that is being added
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::AddEventLocator(EventLocator *el)
+{
+   GmatBase *obj = (GmatBase*)el;
+
+   std::string name = obj->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+
+   if (!obj->IsOfType(Gmat::EVENT_LOCATOR))
+      throw ConfigManagerException(name + " is not an EventLocator");
+
+   AddObject(obj);
+}
+
+
+//------------------------------------------------------------------------------
 // void AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
@@ -2078,6 +2102,17 @@ TrackingData* ConfigManager::GetTrackingData(const std::string &name)
    return obj;
 }
 
+//------------------------------------------------------------------------------
+// DataFile* GetDataStream(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a DataStream from the configuration.
+ *
+ * @param name The name of the DataStream.
+ *
+ * @return A pointer to the DataStream.
+ */
+//------------------------------------------------------------------------------
 DataFile* ConfigManager::GetDataStream(const std::string &name)
 {
    DataFile *df = NULL;
@@ -2091,7 +2126,29 @@ DataFile* ConfigManager::GetDataStream(const std::string &name)
    return df;
 }
 
-
+//------------------------------------------------------------------------------
+// EventLocator* GetEventLocator(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an EventLocator from the configuration.
+ *
+ * @param name The name of the EventLocator.
+ *
+ * @return A pointer to the locator.
+ */
+//------------------------------------------------------------------------------
+EventLocator* ConfigManager::GetEventLocator(const std::string &name)
+{
+   EventLocator *el = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->IsOfType(Gmat::EVENT_LOCATOR))
+      {
+         el = (EventLocator *)mapping[name];
+      }
+   }
+   return el;
+}
 //------------------------------------------------------------------------------
 // bool HasConfigurationChanged()
 //------------------------------------------------------------------------------

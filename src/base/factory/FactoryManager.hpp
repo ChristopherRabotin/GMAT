@@ -56,6 +56,7 @@ class TrackingSystem;
 class TrackingData;
 class EphemerisFile;
 class Interface;
+class EventLocator;
 
 /**
  * GMAT Factory Manager Class, the interface between the Moderator and the
@@ -144,6 +145,8 @@ public:
    TrackingSystem*        CreateTrackingSystem(const std::string &ofType,
                                                const std::string &withName);
    TrackingData*          CreateTrackingData(const std::string &withName = "");
+   EventLocator*          CreateEventLocator(const std::string &ofType,
+                                             const std::string &withName = "");
 
    // method to return a list of strings representing the objects of the input
    // type that may be created in the system

@@ -52,6 +52,7 @@ class Moderator;
 class Validator;
 class Interface;
 
+
 /**
  * Interpreter is the base class for the GMAT Interpreter subsystem.  
  * 
@@ -357,6 +358,7 @@ private:
    StringArray   subscriberList;
    StringArray   spacePointList;
    StringArray   celestialBodyList;
+   StringArray   eventLocatorList;
    
    StringArray   matlabFunctionNames;
    

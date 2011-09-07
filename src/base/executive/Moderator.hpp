@@ -65,6 +65,7 @@
 class DataFile;
 class ObType;
 class Interface;
+class EventLocator;
 
 namespace Gmat
 {
@@ -266,7 +267,12 @@ public:
    ObType* CreateObType(const std::string &type,
                         const std::string &name);
    ObType* GetObType(const std::string &name);
-   
+
+   // EventLocator
+   EventLocator* CreateEventLocator(const std::string &type,
+                            const std::string &name);
+   EventLocator* GetEventLocator(const std::string &name);
+
    // Interpolator
    Interpolator* CreateInterpolator(const std::string &type,
                                     const std::string &name);

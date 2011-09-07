@@ -4248,6 +4248,98 @@ ObType* Moderator::GetObType(const std::string &name)
       return (ObType*)FindObject(name);
 }
 
+
+//------------------------------------------------------------------------------
+// EventLocator* Moderator::CreateEventLocator(const std::string &type,
+//                          const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Calls the FactoryManager to create an EventLocator
+ *
+ * @param type The type of event locator to be created
+ * @param name The name of the new EventLocator
+ *
+ * @return The named EventLocator
+ */
+//------------------------------------------------------------------------------
+EventLocator* Moderator::CreateEventLocator(const std::string &type,
+                         const std::string &name)
+{
+   #if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("====================\n");
+   MessageInterface::ShowMessage("Moderator::CreateEventLocator() name='%s'\n",
+                                 name.c_str());
+   #endif
+
+   if (GetEventLocator(name) == NULL)
+   {
+      EventLocator *el = theFactoryManager->CreateEventLocator(type, name);
+
+      if (el == NULL)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "The Moderator cannot create an EventLocator.\n"
+             "Make sure EventLocator is correct type and registered to a "
+             "EventLocatorFactory.\n");
+         return NULL;
+      }
+
+      #ifdef DEBUG_MEMORY
+      if (el)
+      {
+         std::string funcName;
+         funcName = currentFunction ?
+               "function: " + currentFunction->GetName() : "";
+         MemoryTracker::Instance()->Add
+            (el, name, "Moderator::CreateEventLocator()", funcName);
+      }
+      #endif
+
+      if (name != "" && objectManageOption == 1)
+         theConfigManager->AddEventLocator(el);
+
+      #if DEBUG_CREATE_RESOURCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateEventLocator() returning new EventLocator "
+               "<%p>\n", el);
+      #endif
+
+      return el;
+   }
+   else
+   {
+      #if DEBUG_CREATE_RESOURCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateEventLocator() Unable to create "
+          "EventLocator name: %s already exists\n", name.c_str());
+      #endif
+      return GetEventLocator(name);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// EventLocator* GetEventLocator(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a previously created EvantLoactor
+ *
+ * @param name The name of the EventLocator
+ *
+ * @return A pointer to the EventLocator, or NULL if it is not in the
+ *         configuration.
+ */
+//------------------------------------------------------------------------------
+EventLocator* Moderator::GetEventLocator(const std::string &name)
+{
+   if (name == "")
+      return NULL;
+   else
+      return (EventLocator*)FindObject(name);
+}
+
+
+
 //------------------------------------------------------------------------------
 // Interpolator* CreateInterpolator(const std::string &type,
 //                                  const std::string &name)
