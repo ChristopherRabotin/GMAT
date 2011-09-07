@@ -758,12 +758,6 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
       {
          #ifdef __USE_SPICE__
          if (!spiceSetupDone) SetUpSPICE();
-//         #ifdef DEBUG_CB_SPICE
-//            MessageInterface::ShowMessage("In GetState, after SetUpSpice ...kernelReader is %s NULL\n",
-//                  (kernelReader == NULL? "really" : "NOT"));       
-//         #endif
-         // @todo - what is the observing body here??  Need to handle exceptions here
-//         Rvector6 spiceState = kernelReader->GetTargetState(instanceName, naifId, atTime, j2000BodyName);
          Rvector6 spiceState = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName);
          state.Set(spiceState[0], spiceState[1], spiceState[2],
                    spiceState[3], spiceState[4], spiceState[5]);
