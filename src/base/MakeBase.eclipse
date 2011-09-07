@@ -259,6 +259,7 @@ OBJECTS = \
     coordsystem/TOEEqAxes.o \
     coordsystem/TopocentricAxes.o \
     coordsystem/TrueOfDateAxes.o \
+    event/EventException.o \
     event/EventFunction.o \
     event/EventLocator.o \
     event/LocatedEventTable.o \
