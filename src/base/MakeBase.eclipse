@@ -218,6 +218,7 @@ OBJECTS = \
     command/Optimize.o \
     command/PenDown.o \
     command/PenUp.o \
+    command/PlotCommand.o \
     command/Propagate.o \
     command/PropagationEnabledCommand.o \
     command/Report.o \

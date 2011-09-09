@@ -401,8 +401,8 @@ const StringArray& Toggle::GetRefObjectNameArray(const Gmat::ObjectType type)
  */
 //------------------------------------------------------------------------------
 const std::string& Toggle::GetGeneratingString(Gmat::WriteMode mode,
-                                                  const std::string &prefix,
-                                                  const std::string &useName)
+                                               const std::string &prefix,
+                                               const std::string &useName)
 {
    generatingString = prefix + "Toggle ";
    for (StringArray::iterator i = subNames.begin(); i != subNames.end(); ++i)

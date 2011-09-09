@@ -229,6 +229,15 @@ void GmatPanel::EnableUpdate(bool enable)
 
 
 //------------------------------------------------------------------------------
+// virtual bool TakeAction(const wxString &action)
+//------------------------------------------------------------------------------
+bool GmatPanel::TakeAction(const wxString &action)
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // virtual bool PrepareObjectNameChange()
 //------------------------------------------------------------------------------
 bool GmatPanel::PrepareObjectNameChange()

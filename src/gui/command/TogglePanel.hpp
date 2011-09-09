@@ -32,10 +32,13 @@ public:
    TogglePanel(wxWindow *parent, GmatCommand *cmd, bool forXyPlotOnly = false,
                bool showToggleState = false);
    ~TogglePanel();
+
+   virtual bool TakeAction(const wxString &action);
    
 protected:
    // member data
    GmatCommand *theCommand;
+   wxString     mCmdTypeName;
    bool         isForXyPlotOnly;
    bool         mShowToggleState;
    

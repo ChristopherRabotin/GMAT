@@ -15,7 +15,7 @@
 // number NNG06CA54C
 //
 /**
- * Class implementation for the PenUp command
+ * Class declaration for the PenUp command
  */
 //------------------------------------------------------------------------------
 
@@ -23,39 +23,27 @@
 #ifndef PenUp_hpp
 #define PenUp_hpp
 
-#include "GmatCommand.hpp"
-//#include "XyPlot.hpp"
-#include "Subscriber.hpp"
+#include "PlotCommand.hpp"
 
 
 /**
  * Command used to stop drawing data on an XY plot during a run.
  */
-class GMAT_API PenUp : public GmatCommand
+class GMAT_API PenUp : public PlotCommand
 {
 public:
-        PenUp();
-        virtual          ~PenUp();
+   PenUp();
+   virtual     ~PenUp();
    PenUp(const PenUp &c);
-   PenUp&        operator=(const PenUp &c);
+   PenUp&      operator=(const PenUp &c);
    
    virtual GmatBase* Clone() const;
-
-   virtual const ObjectTypeArray&
-                     GetRefObjectTypeArray();
-   virtual const StringArray&
-                     GetRefObjectNameArray(const Gmat::ObjectType type);
-
-   bool              InterpretAction();
+   
    bool              Initialize();
    bool              Execute();
 
 protected:
-   //std::string plotName;
-   //XyPlot      *thePlot;
-   StringArray          plotNameList;   
-   //std::vector<XyPlot*> thePlotList;
-   std::vector<Subscriber*> thePlotList;
+
 };
 
 #endif /* PenUp_hpp */

@@ -23,35 +23,27 @@
 #ifndef ClearPlot_hpp
 #define ClearPlot_hpp
 
-#include "GmatCommand.hpp"
-#include "XyPlot.hpp"
+#include "PlotCommand.hpp"
 
 
 /**
  * Command used to remove data from an XY plot during a run
  */
-class GMAT_API ClearPlot : public GmatCommand
+class GMAT_API ClearPlot : public PlotCommand
 {
 public:
-        ClearPlot();
-        virtual          ~ClearPlot();
+   ClearPlot();
+   virtual          ~ClearPlot();
    ClearPlot(const ClearPlot &c);
-   ClearPlot&        operator=(const ClearPlot &c);
+   ClearPlot&      operator=(const ClearPlot &c);
    
-   virtual GmatBase* Clone() const;
+   virtual GmatBase* Clone() const;   
    
-   virtual const ObjectTypeArray&
-                     GetRefObjectTypeArray();
-   virtual const StringArray&
-                     GetRefObjectNameArray(const Gmat::ObjectType type);
-
-   bool              InterpretAction();
    bool              Initialize();
    bool              Execute();
 
 protected:
-   StringArray          plotNameList;   
-   std::vector<XyPlot*> thePlotList;
+
 };
 
 #endif /* ClearPlot_hpp */

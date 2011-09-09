@@ -5351,6 +5351,29 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          cmd->SetRefObjectName(Gmat::SPACECRAFT,
                                GetDefaultSpacecraft()->GetName());
       }
+      else if (type == "ClearPlot" || type == "MarkPoint" ||
+               type == "PenUp" || type == "PenDown")
+      {
+         Subscriber *defSub = GetDefaultSubscriber("XYPlot", false, false);
+         if (defSub != NULL)
+         {
+            // Set default XYPlot
+            if (defSub != NULL)
+               cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
+                                       defSub->GetName(), 0);
+         }
+         else
+         {
+            if (type == "PenUp" || type == "PenDown")
+            {
+               // default XYPlot not found so set default GroundTrackPlot
+               defSub = GetDefaultSubscriber("GroundTrackPlot", false, false);          
+               if (defSub != NULL)
+                  cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
+                                          defSub->GetName(), 0);
+            }
+         }
+      }
       else if (type == "Toggle")
       {
          cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
@@ -8246,9 +8269,16 @@ Hardware* Moderator::GetDefaultHardware(const std::string &type)
 
 
 //------------------------------------------------------------------------------
-// Subscriber* GetDefaultSubscriber(const std::string &type, bool addObjects = true)
+// Subscriber* GetDefaultSubscriber(const std::string &type, bool addObjects = true,
+//                                  bool createIfNoneFound = true)
 //------------------------------------------------------------------------------
-Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObjects)
+/**
+ * Returns default subcriber of given type, if createIfNoneFound is true, it will
+ * create default subscriber.
+ */
+//------------------------------------------------------------------------------
+Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObjects,
+                                            bool createIfNoneFound)
 {
    StringArray configList = GetListOfObjects(Gmat::SUBSCRIBER);
    int subSize = configList.size();
@@ -8260,6 +8290,10 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
       if (sub->GetTypeName() == type)
          return sub;
    }
+   
+   // If not creating default subscriber, just return NULL
+   if (!createIfNoneFound)
+      return NULL;
    
    if (type == "OrbitView")
    {
@@ -8283,10 +8317,10 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
    {
       // create default XYPlot
       sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
-      sub->SetStringParameter("IndVar", "DefaultSC.A1ModJulian");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);      
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z", 2);
+      sub->SetStringParameter("XVariable", "DefaultSC.A1ModJulian");
+      sub->SetStringParameter("YVariables", "DefaultSC.EarthMJ2000Eq.X", 0);      
+      sub->SetStringParameter("YVariables", "DefaultSC.EarthMJ2000Eq.Y", 1);
+      sub->SetStringParameter("YVariables", "DefaultSC.EarthMJ2000Eq.Z", 2);
       sub->Activate(true);
    }
    else if (type == "ReportFile")

@@ -21,6 +21,7 @@
 
 
 #include "MarkPoint.hpp"
+#include "XyPlot.hpp"
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"
 
@@ -28,17 +29,15 @@
 
 
 //------------------------------------------------------------------------------
-// ~MarkPoint()
+// MarkPoint()
 //------------------------------------------------------------------------------
 /**
  * Constructor
  */
 //------------------------------------------------------------------------------
 MarkPoint::MarkPoint() :
-   GmatCommand    ("MarkPoint")
+   PlotCommand("MarkPoint")
 {
-   plotNameList.clear();
-   thePlotList.clear();
 }
 
 
@@ -51,8 +50,6 @@ MarkPoint::MarkPoint() :
 //------------------------------------------------------------------------------
 MarkPoint::~MarkPoint()
 {
-   plotNameList.clear();
-   thePlotList.clear();
 }
 
 
@@ -66,11 +63,10 @@ MarkPoint::~MarkPoint()
  */
 //------------------------------------------------------------------------------
 MarkPoint::MarkPoint(const MarkPoint &c) :
-   GmatCommand    (c),
-   plotNameList   (c.plotNameList),
-   thePlotList    (c.thePlotList)
+   PlotCommand    (c)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // MarkPoint& operator=(const MarkPoint &c)
@@ -87,8 +83,7 @@ MarkPoint& MarkPoint::operator=(const MarkPoint &c)
 {
    if (&c != this)
    {
-      plotNameList = c.plotNameList;
-      thePlotList.clear();
+      PlotCommand::operator=(c);
    }
    
    return *this;
@@ -109,89 +104,6 @@ GmatBase* MarkPoint::Clone() const
    return new MarkPoint(*this);
 }
 
-//------------------------------------------------------------------------------
-// const ObjectTypeArray& GetRefObjectTypeArray()
-//------------------------------------------------------------------------------
-/**
- * Retrieves the list of ref object types used by the Achieve.
- *
- * @return the list of object types.
- * 
- */
-//------------------------------------------------------------------------------
-const ObjectTypeArray& MarkPoint::GetRefObjectTypeArray()
-{
-   refObjectTypes.clear();
-   refObjectTypes.push_back(Gmat::SUBSCRIBER);
-   return refObjectTypes;
-}
-
-
-
-//------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
-//------------------------------------------------------------------------------
-/**
- * Accesses arrays of names for referenced objects.
- * 
- * @param type Type of object requested.
- * 
- * @return the StringArray containing the referenced object names.
- */
-//------------------------------------------------------------------------------
-const StringArray& MarkPoint::GetRefObjectNameArray(const Gmat::ObjectType type)
-{
-   // There are only subscribers, so ignore object type
-   return plotNameList;
-}
-
-
-//------------------------------------------------------------------------------
-// bool InterpretAction()
-//------------------------------------------------------------------------------
-bool MarkPoint::InterpretAction()
-{
-   plotNameList.clear();
-   thePlotList.clear();
-   
-   Integer loc = generatingString.find("MarkPoint", 0) + 9;
-   const char *str = generatingString.c_str();
-   while (str[loc] == ' ')
-      ++loc;
-
-   // this command, for compatability with MATLAB, should not have
-   // parentheses (except to indicate array elements), brackets, or braces
-   if (!GmatStringUtil::HasNoBrackets(str, false))
-   {
-      std::string msg = 
-         "The MarkPoint command is not allowed to contain brackets, braces, or "
-         "parentheses";
-      throw CommandException(msg);
-   }
-
-   // Find the Subscriber list
-   std::string sub = generatingString.substr(loc, generatingString.size()-loc);
-   StringArray parts = GmatStringUtil::SeparateBy(sub," ", false);
-   Integer partsSz = (Integer) parts.size();
-   #ifdef DEBUG_MarkPoint
-      MessageInterface::ShowMessage("In MarkPoint::InterpretAction, parts = \n");
-      for (Integer jj = 0; jj < partsSz; jj++)
-         MessageInterface::ShowMessage("   %s\n", parts.at(jj).c_str());
-   #endif
-   if (partsSz < 1) // 'MarkPoint' already found
-      throw CommandException("Missing field in MarkPoint command");
-   for (Integer ii = 0; ii < partsSz; ii++)
-      plotNameList.push_back(parts.at(ii));
-   
-   #ifdef DEBUG_MarkPoint
-      MessageInterface::ShowMessage("Plots to be MarkPointed:\n");
-      for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
-         MessageInterface::ShowMessage("   %s\n", (plotNameList.at(ii)).c_str());
-   #endif
-
-   return true;
-}
-
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -208,7 +120,7 @@ bool MarkPoint::Initialize()
       MessageInterface::ShowMessage("MarkPoint::Initialize() entered\n");
    #endif
       
-   GmatCommand::Initialize();
+   PlotCommand::Initialize();
    
    GmatBase *xy;
    thePlotList.clear();
@@ -219,7 +131,6 @@ bool MarkPoint::Initialize()
       {
          if (xy->GetTypeName() == "XYPlot") 
             thePlotList.push_back((XyPlot*) xy);
-            //thePlot = (XyPlot*)xy;
          else
             throw CommandException(
                "Object named \"" + plotNameList.at(ii) + "\" should be an XYPlot to use the "
@@ -245,10 +156,10 @@ bool MarkPoint::Initialize()
 
 
 //---------------------------------------------------------------------------
-//  bool GmatCommand::Execute()
+//  bool PlotCommand::Execute()
 //---------------------------------------------------------------------------
 /**
- * The method that is fired to perform the GmatCommand.
+ * The method that is fired to perform the PlotCommand.
  *
  * Derived classes implement this method to perform their actions on
  * GMAT objects.

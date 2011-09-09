@@ -446,7 +446,8 @@ private:
    Hardware*   GetDefaultHardware(const std::string &type);
    Solver*     GetDefaultSolver();
    Subscriber* GetDefaultSubscriber(const std::string &type,
-                                    bool addObjects = true);
+                                    bool addObjects = true,
+                                    bool createIfNoneFound = true);
    Parameter*  GetDefaultX();
    Parameter*  GetDefaultY();
    StopCondition* CreateDefaultStopCondition();

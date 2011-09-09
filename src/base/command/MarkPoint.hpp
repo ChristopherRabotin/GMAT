@@ -23,35 +23,27 @@
 #ifndef MarkPoint_hpp
 #define MarkPoint_hpp
 
-#include "GmatCommand.hpp"
-#include "XyPlot.hpp"
+#include "PlotCommand.hpp"
 
 
 /**
  * Command used to restore plotting on an XY plot during a run.
  */
-class GMAT_API MarkPoint : public GmatCommand
+class GMAT_API MarkPoint : public PlotCommand
 {
 public:
    MarkPoint();
-   virtual          ~MarkPoint();
+   virtual         ~MarkPoint();
    MarkPoint(const MarkPoint &c);
-   MarkPoint&        operator=(const MarkPoint &c);
+   MarkPoint&      operator=(const MarkPoint &c);
    
-   virtual GmatBase* Clone() const;
+   virtual GmatBase*    Clone() const;
    
-   virtual const ObjectTypeArray&
-                     GetRefObjectTypeArray();
-   virtual const StringArray&
-                     GetRefObjectNameArray(const Gmat::ObjectType type);
-
-   bool              InterpretAction();
-   bool              Initialize();
-   bool              Execute();
-
+   bool                 Initialize();
+   bool                 Execute();
+      
 protected:
-   StringArray          plotNameList;   
-   std::vector<XyPlot*> thePlotList;
+   
 };
 
 #endif /* MarkPoint_hpp */
