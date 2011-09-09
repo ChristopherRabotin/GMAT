@@ -25,7 +25,6 @@
 #include "AtmosphereModel.hpp"
 #include "ExponentialAtmosphere.hpp"
 #include "Msise90Atmosphere.hpp"
-#include "NRLMsise00Atmosphere.hpp"
 #include "JacchiaRobertsAtmosphere.hpp"
 #include "SimpleExponentialAtmosphere.hpp"
 
@@ -62,10 +61,6 @@ AtmosphereFactory::CreateAtmosphereModel(const std::string &ofType,
       return new SimpleExponentialAtmosphere(withName);
    else if (ofType == "MSISE90")
       return new Msise90Atmosphere(withName);
-//    else if (ofType == "MSISE86")
-//       return new Msise86Atmosphere(withName);
-   else if (ofType == "NRLMSISE00")
-      return new NRLMsise00Atmosphere(withName);
    else if (ofType == "JacchiaRoberts")
       return new JacchiaRobertsAtmosphere(withName);
    return NULL;
@@ -90,8 +85,6 @@ Factory(Gmat::ATMOSPHERE)
       creatables.push_back("Exponential");
       creatables.push_back("Simple");
       creatables.push_back("MSISE90");
-      //creatables.push_back("MSISE86");
-      creatables.push_back("NRLMSISE00");
       creatables.push_back("JacchiaRoberts");
    }
 }
