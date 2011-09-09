@@ -355,6 +355,7 @@
     <ClCompile Include="..\..\..\src\base\command\Optimize.cpp" />
     <ClCompile Include="..\..\..\src\base\command\PenDown.cpp" />
     <ClCompile Include="..\..\..\src\base\command\PenUp.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\PlotCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Propagate.cpp" />
     <ClCompile Include="..\..\..\src\base\command\PropagationEnabledCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Report.cpp" />
@@ -812,6 +813,7 @@
     <ClInclude Include="..\..\..\src\base\command\Optimize.hpp" />
     <ClInclude Include="..\..\..\src\base\command\PenDown.hpp" />
     <ClInclude Include="..\..\..\src\base\command\PenUp.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\PlotCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Propagate.hpp" />
     <ClInclude Include="..\..\..\src\base\command\PropagationEnabledCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Report.hpp" />

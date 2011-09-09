@@ -1299,6 +1299,9 @@
     <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\PlotCommand.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2551,6 +2554,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp">
       <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\PlotCommand.hpp">
+      <Filter>Source Files\command</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
