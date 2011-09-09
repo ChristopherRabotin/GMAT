@@ -24,10 +24,10 @@
 #include "SubscriberException.hpp"
 #include "MessageInterface.hpp"  // for ShowMessage()
 
-//#define DEBUG_TSPLOT_INIT 1
-//#define DEBUG_TSPLOT_PARAM 1
-//#define DEBUG_TSPLOT_OBJECT 1 
-//#define DEBUG_TSPLOT_UPDATE 2
+//#define DEBUG_XYPLOT_INIT 1
+//#define DEBUG_XYPLOT_PARAM 1
+//#define DEBUG_XYPLOT_OBJECT 1 
+//#define DEBUG_XYPLOT_UPDATE 2
 //#define DEBUG_ACTION_REMOVE 1
 //#define DEBUG_RENAME 1
 
@@ -241,7 +241,7 @@ bool XyPlot::SetXParameter(const std::string &paramName)
 //------------------------------------------------------------------------------
 bool XyPlot::AddYParameter(const std::string &paramName, Integer index)
 {
-   #if DEBUG_TSPLOT_PARAM
+   #if DEBUG_XYPLOT_PARAM
    MessageInterface::ShowMessage("XyPlot::AddYParameter() name = %s\n",
                                  paramName.c_str());
    #endif
@@ -274,7 +274,7 @@ bool XyPlot::Initialize()
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS)
       return true;
    
-   #if DEBUG_TSPLOT_INIT
+   #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage
       ("XyPlot::Initialize() active=%d, mNumYParams=%d\n", active, mNumYParams);
    #endif
@@ -316,7 +316,7 @@ bool XyPlot::Initialize()
       BuildPlotTitle();
       
       // Create XyPlotWindow, if not exist
-      #if DEBUG_TSPLOT_INIT
+      #if DEBUG_XYPLOT_INIT
       MessageInterface::ShowMessage
          ("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
       #endif
@@ -334,7 +334,7 @@ bool XyPlot::Initialize()
       Real yMin = -40000.0; //loj: should parameter provide minimum value?
       Real yMax =  40000.0; //loj: should parameter provide maximum value?
       
-      #if DEBUG_TSPLOT_INIT
+      #if DEBUG_XYPLOT_INIT
       MessageInterface::ShowMessage
          ("XyPlot::Initialize() Get curveTitle and penColor\n");
       #endif
@@ -344,7 +344,7 @@ bool XyPlot::Initialize()
          std::string curveTitle = mYParams[i]->GetName();
          UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
             
-         #if DEBUG_TSPLOT_INIT
+         #if DEBUG_XYPLOT_INIT
          MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
                                        curveTitle.c_str());
          #endif
@@ -356,7 +356,7 @@ bool XyPlot::Initialize()
       PlotInterface::ShowXyPlotLegend(instanceName);
       status = true;
       
-      #if DEBUG_TSPLOT_INIT
+      #if DEBUG_XYPLOT_INIT
       MessageInterface::ShowMessage("XyPlot::Initialize() calling ClearXyPlotData()\n");
       #endif
       
@@ -366,14 +366,14 @@ bool XyPlot::Initialize()
    }
    else
    {
-      #if DEBUG_TSPLOT_INIT
+      #if DEBUG_XYPLOT_INIT
       MessageInterface::ShowMessage("XyPlot::Initialize() DeleteXyPlot()\n");
       #endif
       
       status =  PlotInterface::DeleteXyPlot(instanceName);
    }
    
-   #if DEBUG_TSPLOT_INIT
+   #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::Initialize() leaving stauts=%d\n", status);
    #endif
    
@@ -822,7 +822,7 @@ std::string XyPlot::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
 {
-   #if DEBUG_TSPLOT_PARAM
+   #if DEBUG_XYPLOT_PARAM
    MessageInterface::ShowMessage("XyPlot::SetStringParameter() id = %d, "
                                  "value = %s \n", id, value.c_str());
    #endif
@@ -859,7 +859,7 @@ bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
 bool XyPlot::SetStringParameter(const std::string &label,
                                 const std::string &value)
 {
-   #if DEBUG_TSPLOT_PARAM
+   #if DEBUG_XYPLOT_PARAM
    MessageInterface::ShowMessage("XyPlot::SetStringParameter() label = %s, "
                                  "value = %s \n", label.c_str(), value.c_str());
    #endif
@@ -896,7 +896,7 @@ bool XyPlot::SetStringParameter(const std::string &label,
                                 const std::string &value,
                                 const Integer index)
 {
-   #if DEBUG_TSPLOT_PARAM
+   #if DEBUG_XYPLOT_PARAM
    MessageInterface::ShowMessage
       ("XyPlot::SetStringParameter() label=%s, value=%s, index=%d \n",
        label.c_str(), value.c_str(), index);
@@ -1033,7 +1033,7 @@ bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                   ("The X parameter: " + name + " of " + instanceName +
                    " is not plottable\n");
          
-         #if DEBUG_TSPLOT_OBJECT
+         #if DEBUG_XYPLOT_OBJECT
          MessageInterface::ShowMessage
             ("XyPlot::SetRefObject() mXParam:%s successfully set\n",
              obj->GetName().c_str());
@@ -1054,7 +1054,7 @@ bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                    " is not plottable\n");
             }
             
-            #if DEBUG_TSPLOT_OBJECT
+            #if DEBUG_XYPLOT_OBJECT
             MessageInterface::ShowMessage
                ("XyPlot::SetRefObject() mYParams[%s] successfully set\n",
                 obj->GetName().c_str());
@@ -1149,7 +1149,7 @@ void XyPlot::BuildPlotTitle()
       }
       //}
       
-   #if DEBUG_TSPLOT_INIT
+   #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
                                  mXAxisTitle.c_str());
    #endif
@@ -1161,14 +1161,14 @@ void XyPlot::BuildPlotTitle()
    }
    mYAxisTitle += mYParams[mNumYParams-1]->GetName();
    
-   #if DEBUG_TSPLOT_INIT
+   #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mYAxisTitle = %s\n",
                                  mYAxisTitle.c_str());
    #endif
    
    mPlotTitle = "(" + mXAxisTitle + ")" + " vs " + "(" + mYAxisTitle + ")";
    
-   #if DEBUG_TSPLOT_INIT
+   #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mPlotTitle = %s\n",
                                  mPlotTitle.c_str());
    #endif
@@ -1393,7 +1393,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS)
       return true;
    
-   #if DEBUG_TSPLOT_UPDATE > 1
+   #if DEBUG_XYPLOT_UPDATE > 1
    MessageInterface::ShowMessage
       ("XyPlot::Distribute() entered. isEndOfReceive=%d, active=%d, runState=%d\n",
        isEndOfReceive, active, runstate);
@@ -1424,7 +1424,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
          // get x param
          Real xval = mXParam->EvaluateReal();
 
-         #if DEBUG_TSPLOT_UPDATE
+         #if DEBUG_XYPLOT_UPDATE
          MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
          #endif
          
@@ -1446,7 +1446,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
             
             yvals[i] = mYParams[i]->EvaluateReal();
             
-            #if DEBUG_TSPLOT_UPDATE
+            #if DEBUG_XYPLOT_UPDATE
             MessageInterface::ShowMessage
                ("XyPlot::Distribute() yvals[%d] = %f\n", i, yvals[i]);
             #endif
@@ -1464,14 +1464,17 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                mNumCollected++;
                bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
                
-               #if DEBUG_TSPLOT_UPDATE > 1
+               #if DEBUG_XYPLOT_UPDATE > 1
                MessageInterface::ShowMessage
                   ("XyPlot::Distribute() calling PlotInterface::UpdateXyPlot()\n");
                #endif
                
-               return PlotInterface::UpdateXyPlot(instanceName, mOldName, xval,
+               // return flag is ignored here since it needs to return true
+               // for all case
+               PlotInterface::UpdateXyPlot(instanceName, mOldName, xval,
                      yvals, mPlotTitle, mXAxisTitle, mYAxisTitle,
                      mSolverIterOption, update, mDrawGrid);
+               
                if (update)
                   mNumCollected = 0;
             }
