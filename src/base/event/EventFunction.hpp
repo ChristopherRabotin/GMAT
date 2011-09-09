@@ -32,18 +32,26 @@ class SpaceObject;
 class GMAT_API EventFunction //: public GmatBase
 {
 public:
-   EventFunction();
+   EventFunction(const std::string &typeStr);
    virtual ~EventFunction();
    EventFunction(const EventFunction& ef);
    EventFunction& operator=(const EventFunction& ef);
 
+   // Methods used to identify the EventFunction
+   std::string GetTypeName();
+   std::string GetName();
+
+   bool SetPrimary(SpaceObject *so);
+   virtual bool Initialize();
    virtual Real* Evaluate() = 0;
 
 protected:
-   /// The value of the event function when last evaluated
-   Real              value;
-   /// The value of the event function derivative when last evaluated
-   Real              derivative;
+   /// Event function type
+   std::string       typeName;
+   /// Event function descriptor
+   std::string       instanceName;
+   /// Current/most recently evaluated epoch, event value, derivative
+   Real              eventData[3];
    /// SpaceObject that plays the role of “target” in the event computations.
    SpaceObject       *primary;
 };

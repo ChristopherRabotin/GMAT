@@ -22,6 +22,15 @@
 
 #include "EventLocator.hpp"
 #include "EventException.hpp"
+#include "MessageInterface.hpp"
+
+
+//#define DEBUG_DUMPEVENTDATA
+
+#ifdef DEBUG_DUMPEVENTDATA
+   #include <fstream>
+   std::ofstream dumpfile("LocatorData.txt");
+#endif
 
 //------------------------------------------------------------------------------
 // Static data
@@ -51,8 +60,11 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
 EventLocator::EventLocator(const std::string &typeStr,
       const std::string &nomme) :
    GmatBase       (Gmat::EVENT_LOCATOR, typeStr, nomme),
+   filename       ("LocatedEvents.txt"),
+   efCount        (0),
+   lastData       (NULL),
    eventTolerance (1.0e-3),
-   eventFile      ("LocatedEvents.txt")
+   solarSys       (NULL)
 {
    objectTypes.push_back(Gmat::EVENT_LOCATOR);
    objectTypeNames.push_back("EventLocator");
@@ -60,15 +72,22 @@ EventLocator::EventLocator(const std::string &typeStr,
 
 EventLocator::~EventLocator()
 {
+   if (lastData != NULL)
+      delete [] lastData;
+
+   // todo: Delete the member EventFunctions
 }
 
 EventLocator::EventLocator(const EventLocator& el):
    GmatBase          (el),
+   filename          (el.filename),
+   efCount           (0),
+   lastData          (NULL),
    satNames          (el.satNames),
+   targets           (el.targets),
    eventTolerance    (el.eventTolerance),
-   eventFile         (el.eventFile)
+   solarSys          (el.solarSys)
 {
-
 }
 
 EventLocator& EventLocator::operator=(const EventLocator& el)
@@ -77,9 +96,17 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
    {
       GmatBase::operator =(el);
 
+      filename       = el.filename;
+      efCount        = 0;
+      lastData       = NULL;
       satNames       = el.satNames;
+      targets        = el.targets;
       eventTolerance = el.eventTolerance;
-      eventFile      = el.eventFile;
+      solarSys       = el.solarSys;
+
+      eventFunctions.clear();
+      maxSpan.clear();
+      lastSpan.clear();
    }
 
    return *this;
@@ -215,7 +242,7 @@ Real EventLocator::SetRealParameter(const std::string &label,
 std::string EventLocator::GetStringParameter(const Integer id) const
 {
    if (id == EVENT_FILENAME)
-      return eventFile;
+      return filename;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -227,7 +254,7 @@ bool EventLocator::SetStringParameter(const Integer id,
    {
       if (value != "")
       {
-         eventFile = value;
+         filename = value;
          return true;
       }
       return false;
@@ -266,6 +293,7 @@ bool EventLocator::SetStringParameter(const Integer id,
       else
       {
          satNames.push_back(value);
+         targets.push_back(NULL);
          return true;
       }
    }
@@ -311,36 +339,143 @@ bool EventLocator::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value, index);
 }
 
-const StringArray& EventLocator::GetStringArrayParameter(const std::string &label) const
+
+const StringArray& EventLocator::GetStringArrayParameter(
+      const std::string &label) const
 {
    return GetStringArrayParameter(GetParameterID(label));
 }
 
-const StringArray& EventLocator::GetStringArrayParameter(const std::string &label,
-                                             const Integer index) const
+
+const StringArray& EventLocator::GetStringArrayParameter(
+      const std::string &label, const Integer index) const
 {
    return GetStringArrayParameter(GetParameterID(label), index);
 }
+
+
+void EventLocator::SetSolarSystem(SolarSystem *ss)
+{
+   solarSys = ss;
+}
+
+
+const StringArray& EventLocator::GetRefObjectNameArray(
+      const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACEOBJECT)
+   {
+      // Get ref. objects for requesting type from the parent class
+      GmatBase::GetRefObjectNameArray(type);
+
+      // Add ref. objects for requesting type from this class
+      refObjectNames.insert(refObjectNames.begin(), satNames.begin(),
+            satNames.end());
+
+      #ifdef DEBUG_EVENTLOCATOR_OBJECT
+         MessageInterface::ShowMessage
+            ("EventLocator::GetRefObjectNameArray() this=<%p>'%s' returning %d "
+             "ref. object names\n", this, GetName().c_str(),
+             refObjectNames.size());
+         for (UnsignedInt i=0; i<refObjectNames.size(); i++)
+            MessageInterface::ShowMessage("   '%s'\n",
+                  refObjectNames[i].c_str());
+      #endif
+
+      return refObjectNames;
+   }
+
+   return GmatBase::GetRefObjectNameArray(type);
+}
+
+
+bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                              const std::string &name)
+{
+   for (UnsignedInt i = 0; i < satNames.size(); ++i)
+   {
+      if (satNames[i] == name)
+      {
+         if (obj->IsOfType(Gmat::SPACEOBJECT))
+         {
+            targets[i] = (SpaceObject*)obj;
+            return true;
+         }
+         return false;
+      }
+   }
+   return GmatBase::SetRefObject(obj, type, name);
+}
+
 
 bool EventLocator::Initialize()
 {
    bool retval = false;
 
+   StringArray badInits;
+   efCount = eventFunctions.size();
+
+   // Loop through the event functions, evaluating each and storing their data
+   for (UnsignedInt i = 0; i < efCount; ++i)
+   {
+      if (eventFunctions[i]->Initialize() == false)
+         badInits.push_back(eventFunctions[i]->GetName());
+   }
+
+   if (badInits.size() == 0)
+      retval = true;
+   else
+   {
+      std::string errorList;
+      for (UnsignedInt i = 0; i < badInits.size(); ++i)
+         errorList = errorList + "   " + badInits[i] + "\n";
+      throw EventException("These event functions failed to initialize:\n" +
+            errorList);
+   }
+
+   if (lastData != NULL)
+      delete [] lastData;
+   if (efCount > 0)
+      lastData = new Real[efCount * 3];
+
    return retval;
 }
-
-
 
 
 /// Evaluates the EventFunctions and returns their values and derivatives.
 Real *EventLocator::Evaluate()
 {
    Real *vals;
+
+   #ifdef DEBUG_EVENTLOCATION
+      MessageInterface::ShowMessage("Evaluating %d event functions; "
+            "locator %s\n", eventFunctions.size(), instanceName.c_str());
+   #endif
+
+   UnsignedInt i3;
+
    // Loop through the event functions, evaluating each and storing their data
    for (UnsignedInt i = 0; i < eventFunctions.size(); ++i)
    {
+      i3 = i * 3;
       vals = eventFunctions[i]->Evaluate();
+
+      #ifdef DEBUG_DUMPEVENTDATA
+         dumpfile.precision(15);
+         dumpfile << vals[0] << " " << vals[1] << " " << vals[2] << " ";
+      #endif
+
+      // Load the returned data into lastData
+      lastData[  i3  ] = vals[0];
+      lastData[i3 + 1] = vals[1];
+      lastData[i3 + 2] = vals[2];
    }
+
+   #ifdef DEBUG_DUMPEVENTDATA
+      dumpfile << "\n";
+   #endif
+
    return lastData;
 }
 

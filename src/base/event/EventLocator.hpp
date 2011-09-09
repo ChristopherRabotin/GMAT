@@ -101,10 +101,15 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
 
+   virtual void         SetSolarSystem(SolarSystem *ss);
+//   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
+//   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                              const std::string &name);
+
    virtual bool         Initialize();
-
-
-
 
    /// Evaluates contained EventFunctions and returns values and derivatives.
    virtual Real *Evaluate();
@@ -131,15 +136,19 @@ protected:
    LocatedEventTable eventTable;
    /// Name of the event data file
    std::string filename;
+   /// The number of event functions to be processed
+   UnsignedInt efCount;
    /// The last data set computed
    Real *lastData;
 
    /// Names of the "target" spacecraft in the location
    StringArray satNames;
+   /// Pointers to the sats -- using SpaceObject so Formations can be supported
+   std::vector<SpaceObject*> targets;
    /// Event location tolerance
    Real eventTolerance;
-   /// Name of the output file
-   std::string eventFile;
+   /// The space environment
+   SolarSystem *solarSys;
 
    /// Published parameters for event locators
     enum

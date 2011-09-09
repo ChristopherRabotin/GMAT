@@ -48,6 +48,7 @@
 //#define DEBUG_SANDBOX_CLEAR
 //#define DEBUG_SANDBOX_CLONING
 //#define DEBUG_SS_CLONING
+//#define DEBUG_EVENTLOCATION
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -178,7 +179,6 @@ GmatBase* Sandbox::AddObject(GmatBase *obj)
    GmatBase *cloned = obj;
    
    // Check to see if the object is already in the map
-   //if (objectMap.find(name) == objectMap.end())
    if (FindObject(name) == NULL)
    {
       // If not, store the new object pointer
@@ -186,19 +186,22 @@ GmatBase* Sandbox::AddObject(GmatBase *obj)
          MessageInterface::ShowMessage("Cloning %s <%p> -> ",
                obj->GetName().c_str(), obj);
       #endif
-         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-         MessageInterface::ShowMessage(
-            "Cloning object %s of type %s\n", obj->GetName().c_str(),
-            obj->GetTypeName().c_str());
-         #endif
-         
-         cloned = obj->Clone();
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Add
-            (cloned, obj->GetName(), "Sandbox::AddObject()",
-             "*cloned = obj->Clone()");
-         #endif
-         SetObjectByNameInMap(name, cloned);
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+      MessageInterface::ShowMessage(
+         "Cloning object %s of type %s\n", obj->GetName().c_str(),
+         obj->GetTypeName().c_str());
+      #endif
+
+      cloned = obj->Clone();
+
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (cloned, obj->GetName(), "Sandbox::AddObject()",
+          "*cloned = obj->Clone()");
+      #endif
+
+      SetObjectByNameInMap(name, cloned);
+
       #ifdef DEBUG_SANDBOX_CLONING
          MessageInterface::ShowMessage("<%p>\n", cloned);
 
@@ -496,10 +499,8 @@ bool Sandbox::Initialize()
    if (moderator == NULL)
       moderator = Moderator::Instance();
    
-   // this should be clear() (loj: 2008.11.03)
-   //transientForces.empty();
    transientForces.clear();
-   
+   events.clear();
    
    // Already initialized
    if (state == INITIALIZED)
@@ -546,7 +547,8 @@ bool Sandbox::Initialize()
       delete objInit;  // if Initialize is called more than once, delete 'old' objInit
    }
    
-   objInit = new ObjectInitializer(solarSys, &objectMap, &globalObjectMap, internalCoordSys);
+   objInit = new ObjectInitializer(solarSys, &objectMap, &globalObjectMap,
+         internalCoordSys);
    
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
@@ -616,6 +618,38 @@ bool Sandbox::Initialize()
    StringArray exceptions;
    IntegerArray exceptionTypes;
    UnsignedInt exceptionCount = 0;
+
+   // Set the EventLocators
+   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
+   {
+      obj = omi->second;
+      if (obj->IsOfType(Gmat::EVENT_LOCATOR))
+      {
+         if (find(events.begin(), events.end(), (EventLocator*)obj) == events.end())
+         {
+            #ifdef DEBUG_EVENTLOCATION
+               MessageInterface::ShowMessage("Adding event locator %s to the "
+                     "event list\n", obj->GetName().c_str());
+            #endif
+            events.push_back((EventLocator*)obj);
+         }
+      }
+   }
+   for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); ++omi)
+   {
+      obj = omi->second;
+      if (obj->IsOfType(Gmat::EVENT_LOCATOR))
+      {
+         if (find(events.begin(), events.end(), (EventLocator*)obj) == events.end())
+         {
+            #ifdef DEBUG_EVENTLOCATION
+               MessageInterface::ShowMessage("Adding event locator %s to the "
+                     "event list\n", obj->GetName().c_str());
+            #endif
+            events.push_back((EventLocator*)obj);
+         }
+      }
+   }
 
    // Initialize commands
    while (current)
@@ -760,7 +794,7 @@ bool Sandbox::Execute()
 
    state = RUNNING;
    Gmat::RunState runState = Gmat::IDLE, currentState = Gmat::RUNNING;
-   GmatCommand *prev = NULL;
+//   GmatCommand *prev = NULL;
    
    current = sequence;
    if (!current)
@@ -833,7 +867,7 @@ bool Sandbox::Execute()
             throw SandboxException(str);
          }
          
-         prev = current;
+//         prev = current;
          current = current->GetNext();
       }
    }
@@ -1085,6 +1119,8 @@ void Sandbox::Clear()
    
    transientForces.clear();
    
+   events.clear();
+
    // Update the sandbox state
    if ((state != STOPPED) && (state != IDLE))
           MessageInterface::ShowMessage(
@@ -1131,7 +1167,7 @@ bool Sandbox::AddSubscriber(Subscriber *sub)
  *  Finds an object by name, searching through the SandboxObjectMap first,
  *  then the GlobalObjectMap
  *
- *  @param <spname> The name of the SpacePoint.
+ *  @param spname The name of the SpacePoint.
  *
  *  @return A pointer to the SpacePoint, or NULL if it does not exist in the
  *          Sandbox.
@@ -1149,6 +1185,7 @@ GmatBase* Sandbox::FindObject(const std::string &name)
    else
       return objectMap[name];
 }
+
 
 //------------------------------------------------------------------------------
 // bool Sandbox::SetObjectByNameInMap(const std::string &name,
@@ -1398,6 +1435,7 @@ void Sandbox::SetGlobalRefObject(GmatCommand *cmd)
    #endif
    cmd->SetSolarSystem(solarSys);
    cmd->SetTransientForces(&transientForces);
+   cmd->SetEventLocators(&events);
    cmd->SetInternalCoordSystem(internalCoordSys);
    cmd->SetPublisher(publisher);
 }

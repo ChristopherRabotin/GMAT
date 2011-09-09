@@ -118,6 +118,7 @@ HEADERS = -I../base/include \
           -I../base/command \
           -I../base/configs \
           -I../base/coordsystem \
+          -I../base/event \
           -I../base/executive \
           -I../base/factory \
           -I../base/forcemodel \

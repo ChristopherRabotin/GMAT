@@ -21,29 +21,72 @@
 
 #include "gmatdefs.hpp"
 #include "EventFunction.hpp"
+#include "EventException.hpp"
 
-EventFunction::EventFunction() :
-   value             (999.999999),
-   derivative        (999.9999999),
+EventFunction::EventFunction(const std::string &typeStr) :
+   typeName          (typeStr),
+   instanceName      ("Base EventFunction (Name not set)"),
    primary           (NULL)
 {
+   eventData[0] = 0.0;
+   eventData[1] = 999.999;
+   eventData[2] = 999.999;
 }
 
 EventFunction::~EventFunction()
 {
 }
 
-EventFunction::EventFunction(const EventFunction& ef)
+EventFunction::EventFunction(const EventFunction& ef) :
+   typeName          (ef.typeName),
+   instanceName      (ef.instanceName),
+   primary           (ef.primary)
 {
-
+   eventData[0] = ef.eventData[0];
+   eventData[1] = ef.eventData[1];
+   eventData[2] = ef.eventData[2];
 }
 
 EventFunction& EventFunction::operator=(const EventFunction& ef)
 {
    if (this != &ef)
    {
-
+      typeName     = ef.typeName;
+      instanceName = ef.instanceName;
+      eventData[0] = ef.eventData[0];
+      eventData[1] = ef.eventData[1];
+      eventData[2] = ef.eventData[2];
+      primary      = ef.primary;
    }
 
    return *this;
 }
+
+std::string EventFunction::GetTypeName()
+{
+   return typeName;
+}
+
+std::string EventFunction::GetName()
+{
+   return instanceName;
+}
+
+bool EventFunction::SetPrimary(SpaceObject *so)
+{
+   primary = so;
+   return (so != NULL);
+}
+
+
+
+bool EventFunction::Initialize()
+{
+   if (primary == NULL)
+      throw EventException("Unable to initialize the " + typeName +
+            " EventFunction; the primary is not set.");
+
+   return true;
+}
+
+

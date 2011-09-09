@@ -39,6 +39,7 @@
 #include "Burn.hpp"
 #include "GmatFunction.hpp"
 #include "ObjectInitializer.hpp"
+#include "EventLocator.hpp"
 
 
 //#define DEBUG_SANDBOX_CLONING
@@ -111,9 +112,10 @@ private:
    /// The object initializer
    ObjectInitializer                 *objInit;
    
-   // Additions made for finite maneuvers
    /// List of FiniteThrust objects that are currently available
    std::vector<PhysicalModel *>      transientForces;
+   /// List of EventLocation objects used to find event entry and exit
+   std::vector<EventLocator *>       events;
    /// Trigger managers for this Sandbox
    std::vector<TriggerManager*>      triggerManagers;
 

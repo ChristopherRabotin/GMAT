@@ -280,6 +280,7 @@ namespace Gmat
       ORBIT_STATE_TRANSITION_MATRIX,   // 6x6 STM for the orbit
       ORBIT_A_MATRIX,
       MASS_FLOW,                       // m dot
+      EVENT_FUNCTION_STATE,            // For event location
       PREDEFINED_STATE_MAX,
       USER_DEFINED_BEGIN = 3800,
       USER_DEFINED_END = 3999          // Allow up to 200 dynamic entries

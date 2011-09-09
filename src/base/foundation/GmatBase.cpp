@@ -586,10 +586,6 @@ const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
    // Changed to return empty array (LOJ: 2010.05.13)
    refObjectNames.clear();
    return refObjectNames;
-   
-   //throw GmatBaseException("GetRefObjectNameArray(" + GetObjectTypeString(type) +
-   //                        ") not defined for " + typeName + " named \"" +
-   //                        instanceName + "\"\n");
 }
 
 //---------------------------------------------------------------------------

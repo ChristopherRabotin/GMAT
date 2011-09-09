@@ -134,11 +134,6 @@ public:
    PhysicalModel(const PhysicalModel&);
    PhysicalModel& operator=(const PhysicalModel&);
     
-   //loj: 5/11/04 removed Get/SetBody()   
-   //CelestialBody* GetBody();
-   //void SetBody(CelestialBody *body);
-   //bool SetBody(const std::string &name);
-
    virtual bool Initialize();
 
    virtual CelestialBody* GetBody();
