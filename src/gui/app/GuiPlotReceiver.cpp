@@ -106,18 +106,7 @@ GuiPlotReceiver::~GuiPlotReceiver()
  * @param <oldName>  old plot name, this is needed for renaming plot
  * @param <positionX, positionY>     position of the plot in screen coordinates
  * @param <width, height>     size of the plot in screen coordinates
- * @param <drawEcPlane>  true if draw ecliptic plane
- * @param <drawXyPlane>  true if draw XY plane
- * @param <drawWirePlane>  true if draw wire frame
- * @param <drawAxes>  true if draw axes
- * @param <drawGrid>  true if draw grid
- * @param <drawSunLine>  true if draw earth sun lines
- * @param <overlapPlot>  true if overlap plot without clearing the plot
- * @param <usevpInfo>  true if use viewpoint info to draw plot
  * @param <numPtsToRedraw>  number of points to redraw during the run
- * @param <drawStars> true if we want to draw the stars
- * @param <drawConstellations> true if we want to the draw the constellation lines
- * @param <starCount> the approximate maximum stars we want drawn
  */
 //------------------------------------------------------------------------------
 bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
@@ -181,14 +170,22 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       #endif
       
       Integer x, y, w, h;
-
+      Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
+      
+      #if 0
+      wxSize size = wxGetDisplaySize();
+      int cw, ch;
+      MessageInterface::ShowMessage("---> dw=%d, dh=%d\n", size.GetWidth(), size.GetHeight());
+      GmatAppData::Instance()->GetMainFrame()->GetClientSize(&cw, &ch);
+      MessageInterface::ShowMessage("---> cw=%d, ch=%d\n", cw, ch);
+      #endif      
+      
       // if position and size were not saved from an earlier run, figure out the initial values
       if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
           GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
       {
          #ifdef __WXMAC__
             wxSize size = wxGetDisplaySize();
-            Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
             w = (size.GetWidth() - 239) / 2;
             h = 350;
             Integer hLoc = plotCount % 2;
@@ -200,18 +197,37 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
             y = -1;
             w = -1;
             h = -1;
+            // Work this on later
+            #if 0
+            w = (size.GetWidth() - 239) / 2;
+            h = 350;
+            Integer hLoc = plotCount % 2;
+            Integer vLoc = (Integer)((plotCount) / 2);
+            x = 238 + hLoc * w + 1;
+            y = 20  + vLoc * (h+10);
+            #endif
          #endif
       }
       else
       {
-         Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
-         Integer screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+         Integer screenWidth = 0;
+         Integer screenHeight = 0;
+         
+         #ifdef __WXMAC__
+            screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+            screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+         #else
+            GmatAppData::Instance()->GetMainFrame()->GetClientSize(&screenWidth, &screenHeight);
+         #endif
+
+         //MessageInterface::ShowMessage("---> sw=%d, sh=%d\n", screenWidth, screenHeight);
          x = (Integer) (positionX * (Real) screenWidth);
          y = (Integer) (positionY * (Real) screenHeight);
          w = (Integer) (width     * (Real) screenWidth);
          h = (Integer) (height    * (Real) screenHeight);
+         //MessageInterface::ShowMessage("---> x=%d, y=%d, w=%d, h=%d\n", x, y, w,h);
       }
-         
+      
       if (currentView == GmatPlot::ENHANCED_3D_VIEW)
       {
          #if DEBUG_PLOTIF_GL_CREATE
@@ -246,8 +262,22 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       
       #if __WXMAC__
          frame->SetSize(w-1, h-1);
+      #else
+         //MessageInterface::ShowMessage("---> w = %d,  h = %d\n", w, h);
+         if (w == -1 || h == -1)
+         {
+            // Set default size?
+            //frame->SetSize(600, 400);
+         }
+         else
+         {
+            // Why not showing the ground track plot without resetting the size?
+            // It just shows grey background. When tiling it shows the plot.
+            frame->SetSize(w-1, h-1);
+            frame->SetSize(w+1, h+1);
+         }
       #endif
-
+         
       #if DEBUG_PLOTIF_GL_CREATE
       MessageInterface::ShowMessage
          ("GuiPlotReceiver::CreateGlPlotWindow() frame created, frame->GetPlotName()=%s\n",
@@ -255,8 +285,10 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       #endif
       
       ++MdiGlPlot::numChildren;
+      
       // Tile vertically
-      GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      if (w == -1 || h == -1)
+         GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
    }
    else
    {
@@ -660,7 +692,7 @@ bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
             gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_ORBIT_VIEW);
             
             // Tile vertically
-            GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+            ////GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
          }
       }
    }
@@ -892,8 +924,8 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
          #else
             x = -1;
             y = -1;
-            w = 500;
-            h = 350;
+            w = -1;
+            h = -1;
          #endif
       }
       else
@@ -922,7 +954,8 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
       ++MdiTsPlot::numChildren;
       
       // Tile vertically
-      GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      if (w == -1 || h == -1)
+         GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
       
       frame->RedrawCurve();
    }
@@ -970,7 +1003,7 @@ bool GuiPlotReceiver::DeleteXyPlot(const std::string &plotName)
                   GmatTree::OUTPUT_XY_PLOT);
             
             // Tile vertically
-            GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+            ////GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
             break;
          }
       }
