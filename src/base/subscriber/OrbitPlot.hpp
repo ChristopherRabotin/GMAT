@@ -124,6 +124,10 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    
+   // for GUI population
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+   
 protected:
    
    CoordinateSystem *mViewCoordSystem;

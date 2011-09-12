@@ -54,6 +54,7 @@ BEGIN_EVENT_TABLE(GmatBaseSetupPanel, GmatPanel)
    EVT_TEXT(ID_TEXTCTRL, GmatBaseSetupPanel::OnTextChange)
    EVT_CHECKBOX(ID_CHECKBOX, GmatBaseSetupPanel::OnComboBoxChange)
    EVT_BUTTON(ID_BUTTON_BROWSE, GmatBaseSetupPanel::OnBrowseButton)
+   EVT_CHECKLISTBOX(ID_CHECKLISTBOX, GmatBaseSetupPanel::OnCheckListBoxChange)
 END_EVENT_TABLE()
 
 
@@ -103,9 +104,12 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name)
 GmatBaseSetupPanel::~GmatBaseSetupPanel()
 {
    // Unregister automatically registered ComboBoxes
-   std::map<wxString, wxComboBox *>::iterator iter;
-   for (iter = managedComboBoxMap.begin(); iter != managedComboBoxMap.end(); ++iter)
-      theGuiManager->UnregisterComboBox(iter->first, iter->second);
+   std::map<wxString, wxComboBox *>::iterator iter1;
+   std::map<wxString, wxCheckListBox *>::iterator iter2;
+   for (iter1 = managedComboBoxMap.begin(); iter1 != managedComboBoxMap.end(); ++iter1)
+      theGuiManager->UnregisterComboBox(iter1->first, iter1->second);
+   for (iter2 = managedCheckListBoxMap.begin(); iter2 != managedCheckListBoxMap.end(); ++iter2)
+      theGuiManager->UnregisterCheckListBox(iter2->first, iter2->second);
    delete localObject;
 }
 
@@ -246,7 +250,8 @@ void GmatBaseSetupPanel::LoadData()
       
       for (Integer i = 0; i < propertyCount; ++i)
       {
-         if (localObject->IsParameterReadOnly(i) == false)
+         if (localObject->IsParameterReadOnly(i) == false &&
+             localObject->IsParameterVisible(i))
          {
             label = localObject->GetParameterText(i);
             LoadControl(localObject, label);
@@ -346,7 +351,8 @@ void GmatBaseSetupPanel::CreateControls(wxFlexGridSizer *mainSizer, GmatBase *th
         MessageInterface::ShowMessage
           ("   ParameterText(%d)='%s' ReadOnly=False\n", i, theObject->GetParameterText(i).c_str());
       #endif
-      if (!theObject->IsParameterReadOnly(i))
+      if (!theObject->IsParameterReadOnly(i) &&
+          theObject->IsParameterVisible(i))
          propertyNames.push_back(theObject->GetParameterText(i));
    }
    
@@ -576,14 +582,19 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
 {
    wxControl *control = NULL;
    
-   Gmat::ParameterType type = theObject->GetParameterType(index);
+   Gmat::ParameterType paramType = theObject->GetParameterType(index);
+   Gmat::ObjectType paramObjType = theObject->GetPropertyObjectType(index);
+   #ifdef DEBUG_BASEPANEL_CREATE
+   MessageInterface::ShowMessage
+      ("    object type is %s\n", GmatBase::GetObjectTypeString(paramObjType).c_str());
+   #endif
    
    #ifdef DEBUG_BASEPANEL_CREATE
    MessageInterface::ShowMessage
       ("Building control %s (type=%s)\n", label.c_str(),
        theObject->GetParameterTypeString(index).c_str());
    #endif
-   switch (type)
+   switch (paramType)
    {
    case Gmat::ON_OFF_TYPE:
       {
@@ -604,97 +615,115 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
       break;
    case Gmat::OBJECT_TYPE:
       {
-         Gmat::ObjectType type = theObject->GetPropertyObjectType(index);
+         #if 0
+         Gmat::ObjectType paramObjType = theObject->GetPropertyObjectType(index);
          #ifdef DEBUG_BASEPANEL_CREATE
          MessageInterface::ShowMessage
-            ("    object type is %s\n", GmatBase::GetObjectTypeString(type).c_str());
+            ("    object type is %s\n", GmatBase::GetObjectTypeString(paramObjType).c_str());
          #endif
-         if (type == Gmat::SPACE_POINT)
+         #endif
+         if (paramObjType== Gmat::SPACE_POINT)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
             // listen for any SpacePoint updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX,
-                                                    wxSize(180,-1), false);
+                                                    wxSize(200,-1), false);
             managedComboBoxMap.insert(std::make_pair("SpacePoint", cbControl));
             control = cbControl;
          }
-         else if (type == Gmat::CELESTIAL_BODY)
+         else if (paramObjType== Gmat::CELESTIAL_BODY)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
             // listen for any SpacePoint updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
             theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX,
-                                                    wxSize(180,-1));
+                                                    wxSize(200,-1));
             managedComboBoxMap.insert(std::make_pair("CelestialBody", cbControl));
             control = cbControl;
          }
-         else if (type == Gmat::SPACECRAFT)
+         else if (paramObjType== Gmat::SPACECRAFT)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
             // listen for any SpacePoint updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX,
-                                                    wxSize(180,-1));
+                                                    wxSize(200,-1));
             managedComboBoxMap.insert(std::make_pair("Spacecraft", cbControl));
             control = cbControl;
          }
-         else if (type == Gmat::COORDINATE_SYSTEM)
+         else if (paramObjType== Gmat::COORDINATE_SYSTEM)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
             // listen for any SpacePoint updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX,
-                                                  wxSize(180,-1));
+                                                  wxSize(200,-1));
             managedComboBoxMap.insert(std::make_pair("CoordinateSystem", cbControl));
             control = cbControl;
          }
-         else if (type == Gmat::ANTENNA)
+         else if (paramObjType== Gmat::ANTENNA)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
             // listen for any SpacePoint updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetAntennaComboBox(this, ID_COMBOBOX,
-                                                  wxSize(180,-1));
+                                                  wxSize(200,-1));
             managedComboBoxMap.insert(std::make_pair("Antenna", cbControl));
             control = cbControl;
          }
-         else if (type == Gmat::SENSOR)
+         else if (paramObjType== Gmat::SENSOR)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
             // listen for any SpacePoint updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetSensorComboBox(this, ID_COMBOBOX,
-                                                  wxSize(180,-1));
+                                                  wxSize(200,-1));
             managedComboBoxMap.insert(std::make_pair("Sensor", cbControl));
             control = cbControl;
          }
          else
          {
-
             // Check if enumeration strings available for owned object types
             wxArrayString enumList;
-            StringArray enumStrings = theGuiInterpreter->GetListOfObjects(type);
+            StringArray enumStrings = theGuiInterpreter->GetListOfObjects(paramObjType);
             //StringArray enumStrings = theObject->GetPropertyEnumStrings(index);
             for (UnsignedInt i=0; i<enumStrings.size(); i++)
                enumList.Add(enumStrings[i].c_str());
             control = new wxComboBox(parent, ID_COMBOBOX, wxT(""),
-                                     wxDefaultPosition, wxSize(180,-1), enumList,
+                                     wxDefaultPosition, wxSize(200,-1), enumList,
                                      wxCB_READONLY);
          }
       }
       break;
    case Gmat::OBJECTARRAY_TYPE:
       {
-         //@todo Create ListBox later
-         control = new wxTextCtrl(parent, ID_TEXTCTRL,
-                                  wxT(""), wxDefaultPosition, wxSize(180,-1));
+         //@todo Create CheckListBox later
+         //control = new wxTextCtrl(parent, ID_TEXTCTRL,
+         //                         wxT(""), wxDefaultPosition, wxSize(200,-1));
+         if (paramObjType== Gmat::SPACE_POINT)
+         {
+            // The GuiItemManager automatically registers wxComboBox in order to
+            // listen for any SpacePoint updates, so need to unregister
+            // in the destructor
+            wxCheckListBox *clbControl =
+               theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX,
+                                                        wxSize(200,100));
+            managedCheckListBoxMap.insert(std::make_pair("CelestialBody", clbControl));
+            control = clbControl;
+         }
+         else
+         {
+            wxArrayString emptyList;
+            control = new wxCheckListBox(parent, ID_CHECKLISTBOX, wxDefaultPosition,
+                                         wxSize(200,100), emptyList, wxLB_SINGLE|wxLB_SORT);
+         }
       }
       break;
    case Gmat::ENUMERATION_TYPE:
@@ -710,14 +739,14 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
             // Show the value even if value is not in the list
             cbControl =
                new wxComboBox(parent, ID_COMBOBOX, "", wxDefaultPosition,
-                              wxSize(180,-1), enumList, 0);
+                              wxSize(200,-1), enumList, 0);
          }
          else
          {
             // Do not show the value if value is not in the list
             cbControl =
                new wxComboBox(parent, ID_COMBOBOX, "", wxDefaultPosition,
-                              wxSize(180,-1), enumList, wxCB_READONLY);
+                              wxSize(200,-1), enumList, wxCB_READONLY);
          }
          
          control = cbControl;
@@ -727,7 +756,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
    case Gmat::INTEGER_TYPE:
       {
          control = new wxTextCtrl(parent, ID_TEXTCTRL,
-                                  wxT(""), wxDefaultPosition, wxSize(180,-1), 0,
+                                  wxT(""), wxDefaultPosition, wxSize(200,-1), 0,
                                   wxTextValidator(wxGMAT_FILTER_NUMERIC));
       }
       break;
@@ -735,7 +764,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
    case Gmat::STRING_TYPE:
    default:
       control = new wxTextCtrl(parent, ID_TEXTCTRL,
-                               wxT(""), wxDefaultPosition, wxSize(180,-1));
+                               wxT(""), wxDefaultPosition, wxSize(200,-1));
       break;
    }
    
@@ -755,18 +784,18 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
 //------------------------------------------------------------------------------
 void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &label)
 {
-   #ifdef DEBUG_BASEPANEL_LOAD
+   #ifdef DEBUG_LOAD_CONTROL
    MessageInterface::ShowMessage
-      ("GmatBaseSetupPanel::LoadControl() label='%s'\n", label.c_str());
+      ("GmatBaseSetupPanel::LoadControl() entered, label='%s'\n", label.c_str());
    #endif
 
-   Integer index = theObject->GetParameterID(label);
-   Gmat::ParameterType type = theObject->GetParameterType(index);
+   Integer paramId = theObject->GetParameterID(label);
+   Gmat::ParameterType paramType = theObject->GetParameterType(paramId);
    
-   wxControl *theControl = controlMap[index];
+   wxControl *theControl = controlMap[paramId];
    wxString valueString;
    
-   switch (type)
+   switch (paramType)
    {
       case Gmat::ON_OFF_TYPE:
          ((wxComboBox*)(theControl))->
@@ -808,9 +837,24 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
          // why no break added? added break (loj: 2011.06.01)
          break;
       case Gmat::OBJECTARRAY_TYPE:
-         valueString = (theObject->GetStringParameter(theObject->GetParameterID(label))).c_str();
-         ((wxTextCtrl*)theControl)->ChangeValue(valueString);
-         break;
+         {
+            StringArray objs = theObject->GetStringArrayParameter(paramId);
+            wxCheckListBox *clb = (wxCheckListBox*)theControl;
+            int count = clb->GetCount();
+            for (UnsignedInt i = 0; i < objs.size(); i++)
+            {
+               wxString objName = objs[i].c_str();
+               #ifdef DEBUG_LOAD_CONTROL
+               MessageInterface::ShowMessage("   objName = '%s'\n", objName.c_str());
+               #endif
+               for (int j = 0; j < count; j++)
+               {
+                  if (objName == clb->GetString(j))
+                     clb->Check(j, true);
+               }
+            }
+            break;
+         }
       case Gmat::ENUMERATION_TYPE:
          {
             valueString = (theObject->GetStringParameter(theObject->GetParameterID(label))).c_str();
@@ -825,6 +869,10 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
       default:
          break;
    }
+   #ifdef DEBUG_LOAD_CONTROL
+   MessageInterface::ShowMessage
+      ("GmatBaseSetupPanel::LoadControl() leaving, label = '%s'\n", label.c_str());
+   #endif
 }
 
 
@@ -847,10 +895,10 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
        "showErrorMsgs=%d\n", theObject, label.c_str(), showErrorMsgs);
    #endif
    
-   Integer index = theObject->GetParameterID(label);
-   Gmat::ParameterType type = theObject->GetParameterType(index);
+   Integer paramId = theObject->GetParameterID(label);
+   Gmat::ParameterType type = theObject->GetParameterType(paramId);
    
-   wxControl *theControl = controlMap[index];
+   wxControl *theControl = controlMap[paramId];
    std::string valueString;
    
    switch (type)
@@ -858,12 +906,12 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
    case Gmat::ON_OFF_TYPE:
       {
          valueString = ((wxComboBox*)theControl)->GetValue();
-         theObject->SetOnOffParameter(index, valueString);
+         theObject->SetOnOffParameter(paramId, valueString);
       }
       break;
    case Gmat::BOOLEAN_TYPE:
       {
-         theObject->SetBooleanParameter(index, ((wxCheckBox*)theControl)->GetValue());
+         theObject->SetBooleanParameter(paramId, ((wxCheckBox*)theControl)->GetValue());
       }
       break;
    case Gmat::REAL_TYPE:
@@ -878,7 +926,7 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
          }
          else if (!GmatStringUtil::ToReal(valueString, &val))
             return false;
-         theObject->SetRealParameter(index, val);
+         theObject->SetRealParameter(paramId, val);
       }
       break;
       
@@ -895,27 +943,40 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
          }
          else if (!GmatStringUtil::ToInteger(valueString, &val))
             return false;
-         theObject->SetIntegerParameter(index, val);
+         theObject->SetIntegerParameter(paramId, val);
       }
       break;
       
    case Gmat::FILENAME_TYPE:
    case Gmat::STRING_TYPE:
       valueString = ((wxTextCtrl*)theControl)->GetValue();
-      theObject->SetStringParameter(index, valueString.c_str());
+      theObject->SetStringParameter(paramId, valueString.c_str());
       break;
       
    case Gmat::OBJECT_TYPE:
    case Gmat::ENUMERATION_TYPE:
       valueString = ((wxComboBox*)theControl)->GetValue();
-      theObject->SetStringParameter(index, valueString);
+      theObject->SetStringParameter(paramId, valueString);
       break;
       
    case Gmat::OBJECTARRAY_TYPE:
-      // For now use TextCtrl, use ListBoxCtrl later
-      valueString = ((wxTextCtrl*)theControl)->GetValue();
-      theObject->SetStringParameter(index, valueString.c_str());
-      break;
+      {
+         theObject->TakeAction("Clear");
+         wxCheckListBox *clb = (wxCheckListBox*)theControl;
+         int count = clb->GetCount();
+         for (int i = 0; i < count; i++)
+         {
+            if (clb->IsChecked(i))
+            {
+               std::string objName =  clb->GetString(i).c_str();
+               #ifdef DEBUG_SAVE_CONTROL
+               MessageInterface::ShowMessage("   objName = '%s'\n", objName.c_str());
+               #endif
+               theObject->SetStringParameter(paramId, objName);
+            }
+         }
+         break;
+      }
       
    default:
       break;
@@ -1017,10 +1078,13 @@ bool GmatBaseSetupPanel::GetLayoutConfig(GmatBase *theObject, wxFileConfig **con
        configPath = "";
     }
     
-    static bool loadMessageWritten = false;
     std::string filename = configPath+theObject->GetTypeName()+".ini";
     bool configFileExists = GmatFileUtil::DoesFileExist(filename);
     
+    // Do we need to show this message?
+    // Commented out for now (LOJ: 2011.09.09)
+    #ifdef DEBUG_LOAD_LAYOUT
+    static bool loadMessageWritten = false;
     if (!loadMessageWritten)
     {
        if (configFileExists)
@@ -1033,6 +1097,8 @@ bool GmatBaseSetupPanel::GetLayoutConfig(GmatBase *theObject, wxFileConfig **con
               filename.c_str());
        loadMessageWritten = true;
     }
+    #endif
+    
     *config = new wxFileConfig(wxEmptyString, wxEmptyString,
                                (filename).c_str(),
                                wxEmptyString, wxCONFIG_USE_LOCAL_FILE |
@@ -1244,6 +1310,23 @@ void GmatBaseSetupPanel::OnTextChange(wxCommandEvent& event)
    }
    #endif
    
+   EnableUpdate(true);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnCheckListBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Event handler for wxCheckListBox
+ *
+ * Activates the Apply button when ListBox is changed.
+ *
+ * @param event The triggering event.
+ */
+//------------------------------------------------------------------------------
+void GmatBaseSetupPanel::OnCheckListBoxChange(wxCommandEvent& event)
+{
    EnableUpdate(true);
 }
 

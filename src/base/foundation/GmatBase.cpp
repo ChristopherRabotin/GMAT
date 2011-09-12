@@ -1368,6 +1368,38 @@ bool GmatBase::IsParameterEqualToDefault(const std::string &label) const
    return IsParameterEqualToDefault(GetParameterID(label));
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterVisible(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is visible from the GUI
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return true if the parameter is visible from the GUI, false if not
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsParameterVisible(const Integer id) const
+{
+   return true;
+}
+
+//---------------------------------------------------------------------------
+//  bool IsParameterVisible(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is visible from the GUI
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is visible from the GUI, false if not
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsParameterVisible(const std::string &label) const
+{
+   return IsParameterVisible(GetParameterID(label));
+}
+
 //------------------------------------------------------------------------------
 // bool GmatBase::ParameterAffectsDynamics(const Integer id) const
 //------------------------------------------------------------------------------

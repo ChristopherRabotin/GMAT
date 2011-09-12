@@ -98,6 +98,9 @@ public:
    
    // methods for parameters
    virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterVisible(const Integer id) const;
+   virtual bool         IsParameterVisible(const std::string &label) const;
+   
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType

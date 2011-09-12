@@ -84,6 +84,7 @@ protected:
    void OnComboBoxChange(wxCommandEvent& event);
    void OnComboBoxTextChange(wxCommandEvent& event);
    void OnTextChange(wxCommandEvent& event);
+   void OnCheckListBoxChange(wxCommandEvent& event);
    
    /// List of used accelerator keys
    std::vector<char> accelKeys;
@@ -93,6 +94,9 @@ protected:
    std::map<wxControl *, Integer> inverseControlMap;
    /// Managed wxComboBox map used by GuiItemManager
    std::map<wxString, wxComboBox*>  managedComboBoxMap;
+   /// Managed wxCheckListBox map used by GuiItemManager
+   std::map<wxString, wxCheckListBox*>  managedCheckListBoxMap;
+   
    /// IDs used for event management
    enum
    {
@@ -100,6 +104,7 @@ protected:
       ID_TEXTCTRL,
       ID_COMBOBOX,
       ID_CHECKBOX,
+      ID_CHECKLISTBOX,
       ID_BUTTON_BROWSE
    };
    

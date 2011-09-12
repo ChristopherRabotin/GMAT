@@ -2116,6 +2116,79 @@ wxCheckListBox* GuiItemManager::GetXyPlotCheckListBox(wxWindow *parent, wxWindow
 
 
 //------------------------------------------------------------------------------
+// wxCheckListBox* GetSpacePointCheckListBox(wxWindow *parent, wxWindowID id, ...)
+//------------------------------------------------------------------------------
+/**
+ * @return Available CelestialPoint ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxCheckListBox*
+GuiItemManager::GetSpacePointCheckListBox(wxWindow *parent, wxWindowID id,
+                                          const wxSize &size, wxArrayString *excList,
+                                          bool includeCelesBodies, bool includeCalPoints)
+{
+   wxArrayString emptyList;
+   wxCheckListBox *checkListBox =
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
+                         wxLB_SINGLE|wxLB_SORT);
+   GmatBase *obj = NULL;
+   if (excList != NULL && excList->GetCount() > 0)
+   {
+      for (int i=0; i<theNumSpacePoint; i++)
+      {
+         if (excList->Index(theSpacePointList[i]) == wxNOT_FOUND)
+         {
+            obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
+            if (obj->IsOfType(Gmat::CELESTIAL_BODY))
+            {
+               if (includeCelesBodies)
+                  checkListBox->Append(theSpacePointList[i]);
+            }
+            else if (obj->IsOfType(Gmat::CALCULATED_POINT))
+            {
+               if (includeCalPoints)
+                  checkListBox->Append(theSpacePointList[i]);
+            }
+            else
+            {
+               checkListBox->Append(theSpacePointList[i]);
+            }
+         }
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumSpacePoint; i++)
+      {
+         obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
+         if (obj->IsOfType(Gmat::CELESTIAL_BODY))
+         {
+            if (includeCelesBodies)
+               checkListBox->Append(theSpacePointList[i]);
+         }
+         else if (obj->IsOfType(Gmat::CALCULATED_POINT))
+         {
+            if (includeCalPoints)
+               checkListBox->Append(theSpacePointList[i]);
+         }
+         else
+         {
+            checkListBox->Append(theSpacePointList[i]);
+         }
+      }
+   }
+   
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mSpacePointCLBList.push_back(checkListBox);
+   mSpacePointExcList.push_back(excList);
+   
+   return checkListBox;
+}
+
+
+//------------------------------------------------------------------------------
 // wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
 //                                           const wxSize &size, wxArrayString &excList)
 //------------------------------------------------------------------------------
@@ -2234,10 +2307,10 @@ wxListBox* GuiItemManager::GetSpacePointListBox(wxWindow *parent, wxWindowID id,
    
    for (int i=0; i<theNumSpacePoint; i++)
       spacePointListBox->Append(theSpacePointList[i]);
-      
+   
    // select first item
    spacePointListBox->SetSelection(0);
-
+   
    return spacePointListBox;
 }
 

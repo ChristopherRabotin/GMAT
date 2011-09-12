@@ -952,7 +952,6 @@ bool OrbitPlot::SetStringParameter(const Integer id, const std::string &value)
       {
          if (value[0] == '{')
          {
-            #if 1
             try
             {
                TextParser tp;
@@ -969,7 +968,6 @@ bool OrbitPlot::SetStringParameter(const Integer id, const std::string &value)
                              "Add", "Valid CelestialBody list");
                throw se;
             }
-            #endif
          }
          else
          {
@@ -1427,6 +1425,18 @@ bool OrbitPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
    
    return Subscriber::SetRefObject(obj, type, realName);
+}
+
+
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+Gmat::ObjectType OrbitPlot::GetPropertyObjectType(const Integer id) const
+{
+   if (id == ADD)
+      return Gmat::SPACE_POINT;
+   
+   return Subscriber::GetPropertyObjectType(id);
 }
 
 

@@ -951,6 +951,27 @@ bool Subscriber::IsParameterReadOnly(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+// bool IsParameterVisible(const Integer id) const
+//---------------------------------------------------------------------------
+bool Subscriber::IsParameterVisible(const Integer id) const
+{
+   if (id == TARGET_STATUS || id == UPPER_LEFT || id == SIZE)
+      return false;
+   
+   return GmatBase::IsParameterVisible(id);
+}
+
+
+//---------------------------------------------------------------------------
+// bool IsParameterVisible(const std::string &label) const
+//---------------------------------------------------------------------------
+bool Subscriber::IsParameterVisible(const std::string &label) const
+{
+   return IsParameterVisible(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
