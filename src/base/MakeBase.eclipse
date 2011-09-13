@@ -28,8 +28,8 @@ else
 SHARED_EXTENSION = .so
 SHARED_LIB_FLAGS = -shared -Wl -L$(SPICE_LIB_DIR) -lcspice
 # No longer in gcc 4.6: --out-implib
-MSISE_C_OBJECTS  = solarsys/msise90_sub.o \
-        solarsystem/nrlmsise00_sub.o
+MSISE_C_OBJECTS  = solarsys/msise90_sub.o
+#        solarsystem/nrlmsise00_sub.o
 endif
 
 #SHARED_LIB_FLAGS = -shared -Wl
@@ -468,7 +468,6 @@ OBJECTS = \
     solarsys/LibrationPoint.o \
     solarsys/Moon.o \
     solarsys/Msise90Atmosphere.o \
-    solarsys/NRLMsise00Atmosphere.o \
     solarsys/PlanetaryEphemException.o \
     solarsys/PlanetaryEphem.o \
     solarsys/Planet.o \
@@ -567,7 +566,6 @@ OBJECTS = \
 
 
 FORTRAN_OBJECTS = solarsys/msise90_sub.o \
-        solarsys/nrlmsise00_sub.o
 
     # parameter/EquinoctialParameters.o \
     # stopcond/BaseStopCondition.o \
@@ -601,15 +599,10 @@ ifeq ($(USE_F2C_VERSION), 0)
 
 solarsys/msise90_sub.o: solarsys/msise90_sub.for
 	$(FORTRAN) -c solarsys/msise90_sub.for -o solarsys/msise90_sub.o $(F77_FLAGS) 
-solarsys/nrlmsise00_sub.o: solarsys/nrlmsise00_sub.for
-	$(FORTRAN) -c solarsys/nrlmsise00_sub.for -o solarsys/nrlmsise00_sub.o $(F77_FLAGS) 
 
 else
-
 solarsys/msise90_sub.o: solarsys/msise90_sub.for
 	$(C) -c solarsys/msise90_sub.c -o solarsys/msise90_sub.o $(F2C_INCLUDE) $(CPPFLAGS)
-solarsys/nrlmsise00_sub.o: solarsys/nrlmsise00_sub.for
-	$(C) -c solarsys/nrlmsise00_sub.c -o solarsys/nrlmsise00_sub.o $(F2C_INCLUDE) $(CPPFLAGS)
 
 endif
 
