@@ -291,6 +291,9 @@ bool BranchCommand::Initialize()
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       currentPtr = *node;
+      if (events != NULL)
+         currentPtr->SetEventLocators(events);
+
       while (currentPtr != this)
       {
          #ifdef DEBUG_BRANCHCOMMAND_INIT

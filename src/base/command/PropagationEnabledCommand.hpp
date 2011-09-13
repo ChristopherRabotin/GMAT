@@ -105,6 +105,19 @@ protected:
    std::vector<Spacecraft *>    satBuffer;
    std::vector<Formation *>     formBuffer;
 
+   // Event location management structures
+   /// Number of active events in the current propagation
+   Integer              activeLocatorCount;
+   /// Indices of the active events
+   std::vector<Integer> activeEventIndices;
+   /// Start index in the previous event buffer for the function data
+   std::vector<Integer> eventStartIndices;
+   /// Values of event location data last time called
+   Real                 *previousEventData;
+   /// Values of event location data in the current call
+   Real                 *currentEventData;
+   /// Total number of elements in the data buffers
+   UnsignedInt          eventBufferSize;
 
    bool                 PrepareToPropagate();
    bool                 AssemblePropagators();
@@ -115,6 +128,12 @@ protected:
    virtual void         BufferSatelliteStates(bool fillingBuffer = true);
 
    virtual void         SetPropagationProperties(PropagationStateManager *psm);
+
+   virtual void         InitializeForEventLocation();
+   virtual void         CheckForEvents();
+   virtual void         LocateEvent(EventLocator* el);
+   virtual void         UpdateEventTable();
+
 };
 
 #endif /* PropagationEnabledCommand_hpp */

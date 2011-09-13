@@ -44,6 +44,8 @@ public:
    std::string boundary;
    /// The type of the event.
    std::string type;
+   /// The event function value at the located event
+   Real eventValue;
 };
 
 #endif /* LocatedEvent_hpp */

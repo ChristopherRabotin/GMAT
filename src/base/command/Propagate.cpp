@@ -2884,15 +2884,8 @@ bool Propagate::Initialize()
       ++index;
    } // End of loop through PropSetups
 
-   #ifdef DEBUG_EVENTLOCATORS
-      MessageInterface::ShowMessage("Propagating with %d event locators\n",
-            events->size());
-   #endif
    // Fire the locators to load initial data
-   for (UnsignedInt i = 0; i < events->size(); ++i)
-   {
-      events->at(i)->Evaluate();
-   }
+   InitializeForEventLocation();
 
    // Prep the publisher
    StringArray owners, elements;
@@ -3837,10 +3830,11 @@ bool Propagate::Execute()
 
             publisher->Publish(this, streamID, pubdata, dim+1);
 // Temporarily here
-            for (UnsignedInt i = 0; i < events->size(); ++i)
-            {
-               events->at(i)->Evaluate();
-            }
+//            for (UnsignedInt i = 0; i < events->size(); ++i)
+//            {
+//               events->at(i)->Evaluate();
+//            }
+            CheckForEvents();
          }
          else
          {

@@ -40,7 +40,8 @@ EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
 {
    "Spacecraft",        // SATNAMES,
    "Tolerance",         // TOLERANCE,
-   "Filename"           // EVENT_FILENAME,
+   "Filename",          // EVENT_FILENAME,
+   "IsActive"           // IS_ACTIVE
 };
 
 const Gmat::ParameterType
@@ -48,7 +49,8 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,       // SATNAMES,
    Gmat::REAL_TYPE,              // TOLERANCE,
-   Gmat::STRING_TYPE             // EVENT_FILENAME,
+   Gmat::STRING_TYPE,            // EVENT_FILENAME,
+   Gmat::BOOLEAN_TYPE            // IS_ACTIVE
 };
 
 
@@ -63,6 +65,7 @@ EventLocator::EventLocator(const std::string &typeStr,
    filename       ("LocatedEvents.txt"),
    efCount        (0),
    lastData       (NULL),
+   isActive       (true),
    eventTolerance (1.0e-3),
    solarSys       (NULL)
 {
@@ -83,6 +86,7 @@ EventLocator::EventLocator(const EventLocator& el):
    filename          (el.filename),
    efCount           (0),
    lastData          (NULL),
+   isActive          (el.isActive),
    satNames          (el.satNames),
    targets           (el.targets),
    eventTolerance    (el.eventTolerance),
@@ -99,6 +103,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       filename       = el.filename;
       efCount        = 0;
       lastData       = NULL;
+      isActive       = el.isActive;
       satNames       = el.satNames;
       targets        = el.targets;
       eventTolerance = el.eventTolerance;
@@ -146,12 +151,15 @@ std::string EventLocator::GetParameterTypeString(const Integer id) const
 
 bool EventLocator::IsParameterReadOnly(const Integer id) const
 {
+   if (id == IS_ACTIVE)
+      return true;
+
    return GmatBase::IsParameterReadOnly(id);
 }
 
 bool EventLocator::IsParameterReadOnly(const std::string &label) const
 {
-   return GmatBase::IsParameterReadOnly(label);
+   return IsParameterReadOnly(GetParameterID(label));
 }
 
 Real EventLocator::GetRealParameter(const Integer id) const
@@ -354,6 +362,59 @@ const StringArray& EventLocator::GetStringArrayParameter(
 }
 
 
+bool EventLocator::GetBooleanParameter(const Integer id) const
+{
+   if (id == IS_ACTIVE)
+      return isActive;
+
+   return GmatBase::GetBooleanParameter(id);
+}
+
+bool EventLocator::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == IS_ACTIVE)
+   {
+      isActive = value;
+      return isActive;
+   }
+   return GmatBase::SetBooleanParameter(id, value);
+}
+
+bool EventLocator::GetBooleanParameter(const Integer id,
+      const Integer index) const
+{
+   return GmatBase::GetBooleanParameter(id, index);
+}
+
+bool EventLocator::SetBooleanParameter(const Integer id, const bool value,
+      const Integer index)
+{
+   return GmatBase::SetBooleanParameter(id, value, index);
+}
+
+bool EventLocator::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool EventLocator::SetBooleanParameter(const std::string &label,
+      const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
+bool EventLocator::GetBooleanParameter(const std::string &label,
+      const Integer index) const
+{
+   return GetBooleanParameter(GetParameterID(label), index);
+}
+
+bool EventLocator::SetBooleanParameter(const std::string &label,
+      const bool value, const Integer index)
+{
+   return SetBooleanParameter(GetParameterID(label), value, index);
+}
+
 void EventLocator::SetSolarSystem(SolarSystem *ss)
 {
    solarSys = ss;
@@ -479,9 +540,15 @@ Real *EventLocator::Evaluate()
    return lastData;
 }
 
+UnsignedInt EventLocator::GetFunctionCount()
+{
+   return eventFunctions.size();
+}
+
 /// Adds an event to the LocatedEventTable.
 void EventLocator::BufferEvent(Real epoch, std::string type, bool isStart)
 {
+
 
 }
 

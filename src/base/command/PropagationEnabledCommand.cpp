@@ -25,6 +25,7 @@
 
 #include "ODEModel.hpp"
 #include "PropagationStateManager.hpp"
+#include "EventLocator.hpp"
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
@@ -61,7 +62,11 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    dim                  (0),
    epochID              (-1),
    j2kState             (NULL),
-   pubdata              (NULL)
+   pubdata              (NULL),
+   activeLocatorCount   (0),
+   previousEventData    (NULL),
+   currentEventData     (NULL),
+   eventBufferSize      (0)
 {
    objectTypeNames.push_back("PropagationEnabledCommand");
    physicsBasedCommand = true;
@@ -95,6 +100,12 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
 
    if (pubdata)
       delete [] pubdata;
+
+   if (previousEventData != NULL)
+      delete [] previousEventData;
+
+   if (currentEventData != NULL)
+      delete [] currentEventData;
 }
 
 
@@ -116,12 +127,18 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    dim                  (pec.dim),
    epochID              (pec.epochID),
    j2kState             (NULL),
-   pubdata              (NULL)
+   pubdata              (NULL),
+   activeLocatorCount     (0),
+   previousEventData    (NULL),
+   currentEventData     (NULL),
+   eventBufferSize      (0)
 {
    initialized = false;
    propagatorNames = pec.propagatorNames;
    for (UnsignedInt i = 0; i < pec.propObjectNames.size(); ++i)
       propObjectNames.push_back(pec.propObjectNames[i]);
+
+   activeEventIndices.clear();
 }
 
 
@@ -161,6 +178,17 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
       propagatorNames = pec.propagatorNames;
       for (UnsignedInt i = 0; i < pec.propObjectNames.size(); ++i)
          propObjectNames.push_back(pec.propObjectNames[i]);
+
+      activeLocatorCount  = 0;
+      if (previousEventData != NULL)
+         delete [] previousEventData;
+      previousEventData = NULL;
+
+      if (currentEventData != NULL)
+         delete [] currentEventData;
+      currentEventData = NULL;
+
+      eventBufferSize = 0;
    }
 
    return *this;
@@ -351,7 +379,6 @@ bool PropagationEnabledCommand::Initialize()
             MessageInterface::ShowMessage(
                   "PEC Initialize() failed to initialize the PropSetups\n");
       #endif
-
    }
 
    return retval;
@@ -927,5 +954,131 @@ void PropagationEnabledCommand::BufferSatelliteStates(bool fillingBuffer)
 }
 
 
+void PropagationEnabledCommand::InitializeForEventLocation()
+{
+   if (events == NULL)
+   {
+      #ifdef DEBUG_EVENTLOCATORS
+         MessageInterface::ShowMessage("Initializing with no event locators\n",
+               events->size());
+      #endif
+      return;
+   }
+
+   #ifdef DEBUG_EVENTLOCATORS
+      MessageInterface::ShowMessage("Initializing with %d event locators\n",
+            events->size());
+   #endif
+
+   activeLocatorCount = 0;
+   activeEventIndices.clear();
+   eventStartIndices.clear();
+   eventBufferSize = 0;
+
+   for (UnsignedInt i = 0; i < events->size(); ++i)
+   {
+      if (events->at(i)->GetBooleanParameter("IsActive"))
+      {
+         ++activeLocatorCount;
+         activeEventIndices.push_back(i);
+
+         // Data for the Locator starts at the end of the current size
+         eventStartIndices.push_back(eventBufferSize);
+         // Each function returns 3 datum
+         eventBufferSize += events->at(i)->GetFunctionCount() * 3;
+      }
+   }
+   #ifdef DEBUG_EVENTLOCATORS
+      MessageInterface::ShowMessage("Found %d active event locators\n",
+            activeLocatorCount);
+   #endif
+
+   if (previousEventData != NULL)
+      delete [] previousEventData;
+   previousEventData = new Real[eventBufferSize];
+
+   if (currentEventData != NULL)
+      delete [] currentEventData;
+   currentEventData = new Real[eventBufferSize];
+
+   Integer dataIndex;
+   for (Integer i = 0; i < activeLocatorCount; ++i)
+   {
+      Real *data = events->at(activeEventIndices[i])->Evaluate();
+      dataIndex = eventStartIndices[i];
+      UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
+      for (UnsignedInt j = 0; j < fc*3; ++j)
+         previousEventData[dataIndex + j] = data[j];
+   }
+}
+
+void PropagationEnabledCommand::CheckForEvents()
+{
+   if (events == NULL)
+   {
+      #ifdef DEBUG_EVENTLOCATORS
+         MessageInterface::ShowMessage("Checking with no event locators\n",
+               events->size());
+      #endif
+      return;
+   }
 
 
+   Integer dataIndex;
+   // First evaluate the event functions
+   for (Integer i = 0; i < activeLocatorCount; ++i)
+   {
+      Real *data = events->at(activeEventIndices[i])->Evaluate();
+      dataIndex = eventStartIndices[i];
+      UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
+      for (UnsignedInt j = 0; j < fc*3; ++j)
+         currentEventData[dataIndex + j] = data[j];
+   }
+
+   // Check function values
+   for (UnsignedInt i = 1; i < eventBufferSize; i += 3)
+   {
+      if (currentEventData[i] * previousEventData[i] <= 0.0)
+         MessageInterface::ShowMessage("Event function sign change detected\n"
+               "   Transition from %lf to %lf at index %d, epoch %lf\n",
+               currentEventData[i], previousEventData[i], i,
+               currentEventData[i-1]);
+   }
+
+   // Check derivative values
+   for (UnsignedInt i = 2; i < eventBufferSize; i += 3)
+   {
+      if (currentEventData[i] * previousEventData[i] <= 0.0)
+         MessageInterface::ShowMessage("Event function sign change detected\n"
+               "   Transition from %lf to %lf at index %d, epoch %lf\n",
+               currentEventData[i], previousEventData[i], i,
+               currentEventData[i-2]);
+   }
+
+   // Move current to previous
+   memcpy(previousEventData, currentEventData, eventBufferSize*sizeof(Real));
+}
+
+void PropagationEnabledCommand::LocateEvent(EventLocator* el)
+{
+   if (events == NULL)
+   {
+      #ifdef DEBUG_EVENTLOCATORS
+         MessageInterface::ShowMessage("Initializing with no event locators\n",
+               events->size());
+      #endif
+      return;
+   }
+}
+
+void PropagationEnabledCommand::UpdateEventTable()
+{
+   if (events == NULL)
+   {
+      #ifdef DEBUG_EVENTLOCATORS
+         MessageInterface::ShowMessage("Initializing with no event locators\n",
+               events->size());
+      #endif
+      return;
+   }
+}

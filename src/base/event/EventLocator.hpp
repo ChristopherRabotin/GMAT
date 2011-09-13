@@ -101,6 +101,24 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
 
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const Integer id,
+                                            const Integer index) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value,
+                                            const Integer index);
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const std::string &label,
+                                            const Integer index) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value,
+                                            const Integer index);
+
+
    virtual void         SetSolarSystem(SolarSystem *ss);
 //   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
 //   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
@@ -111,17 +129,13 @@ public:
 
    virtual bool         Initialize();
 
-   /// Evaluates contained EventFunctions and returns values and derivatives.
    virtual Real *Evaluate();
-   /// Adds an event to the LocatedEventTable.
+
+   UnsignedInt GetFunctionCount();
    void BufferEvent(Real epoch, std::string type, bool isStart);
-   /// Writes the event data to file.
    void ReportEventData();
-   /// Writes the event data statistics to file.
    void ReportEventStatistics();
-   /// Retrieves data for a specified event.
    Real *GetEventData(std::string type, Integer whichOne = 0);
-   /// Updates the data in the event table, possibly sorting as well
    void UpdateEventTable(SortStyle how);
 
 
@@ -140,6 +154,8 @@ protected:
    UnsignedInt efCount;
    /// The last data set computed
    Real *lastData;
+   /// Flag used to turn the locator on or off (default is on)
+   bool isActive;
 
    /// Names of the "target" spacecraft in the location
    StringArray satNames;
@@ -156,6 +172,7 @@ protected:
        SATNAMES = GmatBaseParamCount,
        TOLERANCE,
        EVENT_FILENAME,
+       IS_ACTIVE,
        EventLocatorParamCount
     };
 
