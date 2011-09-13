@@ -1260,12 +1260,6 @@
     <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\solarsys\nrlmsise00_sub.c">
-      <Filter>Source Files\solarsys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\solarsys\NRLMsise00Atmosphere.cpp">
-      <Filter>Source Files\solarsys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -2517,9 +2511,6 @@
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp">
-      <Filter>Source Files\solarsys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\solarsys\NRLMsise00Atmosphere.hpp">
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp">
