@@ -93,6 +93,10 @@ private:
    int mNumVary;
    int mNumSave;
    int mNumToggle;
+   int mNumClearPlot;
+   int mNumMarkPoint;
+   int mNumPenUp;
+   int mNumPenDown;
    int mNumReport;
    int mNumIfStatement;
    int mNumWhileLoop;

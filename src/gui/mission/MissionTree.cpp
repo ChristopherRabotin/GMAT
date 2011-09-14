@@ -534,6 +534,10 @@ void MissionTree::InitializeCounter()
    mNumSave = 0;
    mNumReport = 0;
    mNumToggle = 0;
+   mNumClearPlot = 0;
+   mNumMarkPoint = 0;
+   mNumPenUp = 0;
+   mNumPenDown = 0;
    mNumIfStatement = 0;
    mNumWhileLoop = 0;
    mNumForLoop = 0;
@@ -4332,6 +4336,14 @@ int* MissionTree::GetCommandCounter(const wxString &cmd)
       return &mNumSave;
    if (cmd == "Toggle")
       return &mNumToggle;
+   if (cmd == "ClearPlot")
+      return &mNumClearPlot;
+   if (cmd == "MarkPoint")
+      return &mNumMarkPoint;
+   if (cmd == "PenUp")
+      return &mNumPenUp;
+   if (cmd == "PenDown")
+      return &mNumPenDown;
    if (cmd == "Report")
       return &mNumReport;
    if (cmd == "For")
