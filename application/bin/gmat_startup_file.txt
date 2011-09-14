@@ -46,6 +46,9 @@ PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
 PLUGIN                 = ../plugins/libGmatEstimation
 PLUGIN                 = ../plugins/libMatlabInterface
 PLUGIN                 = ../plugins/libFminconOptimizer
+PLUGIN                 = ../plugins/libMarsGRAM
+PLUGIN                 = ../plugins/libNRLMsise00
+PLUGIN                 = ../plugins/libMsise86
 #PLUGIN                 = ../plugins/libEventLocator
 #-----------------------------------------------------------
 OUTPUT_PATH            = ../output/
