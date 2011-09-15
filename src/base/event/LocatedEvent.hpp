@@ -48,7 +48,7 @@ public:
    std::string type;
    /// The event function value at the located event
    Real eventValue;
-   /// The participant indicator
+   /// The participant indicator -- e.g. "Sat - Earth"
    std::string participants;
    /// The event that opens or closes this one
    LocatedEvent *partner;

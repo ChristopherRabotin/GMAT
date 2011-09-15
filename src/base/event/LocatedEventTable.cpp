@@ -21,10 +21,13 @@
 
 
 #include "LocatedEventTable.hpp"
+#include "TimeSystemConverter.hpp"
+#include "MessageInterface.hpp"
+
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include "MessageInterface.hpp"
+
 
 LocatedEventTable::LocatedEventTable()
 {
@@ -102,9 +105,6 @@ void LocatedEventTable::SortEvents(SortStyle how, SortStyle secondaryStyle)
 /// Writes the event data to an event data file with the specified name.
 bool LocatedEventTable::WriteToFile(std::string filename)
 {
-      MessageInterface::ShowMessage("Writing located event data to the "
-            "file %s\n", filename.c_str());
-
    bool retval = false;
 
    if (events.size() > 0)
@@ -130,8 +130,17 @@ bool LocatedEventTable::WriteToFile(std::string filename)
          else if (start > 0.0)
          {
             span = (events[i]->epoch - start) * 86400.0;
-            sprintf(pass, "%s%-12.6lf     %-16.9lf           %-16.9lf\n", pass,
-                  span, start, events[i]->epoch);
+
+            // Build the UTC strings
+            std::string instr, startstr, endstr;
+            Real outval;
+            TimeConverterUtil::Convert("A1ModJulian", start, instr,
+                  "UTCGregorian", outval, startstr, 1);
+            TimeConverterUtil::Convert("A1ModJulian", events[i]->epoch, instr,
+                  "UTCGregorian", outval, endstr, 1);
+
+            sprintf(pass, "%s%-12.6lf     %24s   %24s\n", pass,
+                  span, startstr.c_str(), endstr.c_str());
             theFile << pass;
          }
       }

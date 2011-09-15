@@ -22,6 +22,7 @@
 
 #include "EventLocator.hpp"
 #include "EventException.hpp"
+#include "FileManager.hpp"      // for GetPathname()
 #include "MessageInterface.hpp"
 
 
@@ -578,8 +579,25 @@ void EventLocator::BufferEvent(Real epoch, std::string type, bool isStart)
 /// Writes the event data to file.
 void EventLocator::ReportEventData()
 {
-   // todo Use the output folder if path unspecified
-   eventTable.WriteToFile(filename);
+   std::string fullFileName;
+
+   if ((filename.find('/', 0) == std::string::npos) &&
+       (filename.find('\\', 0) == std::string::npos))
+   {
+      FileManager *fm = FileManager::Instance();
+      std::string outPath = fm->GetAbsPathname(FileManager::OUTPUT_PATH);
+
+      // Check for terminating '/' and add if needed
+      Integer len = outPath.length();
+      if ((outPath.c_str()[len-1] != '/') && (outPath.c_str()[len-1] != '\\'))
+         outPath = outPath + "/";
+
+      fullFileName = outPath + filename;
+   }
+   else
+      fullFileName = filename;
+
+   eventTable.WriteToFile(fullFileName);
 }
 
 /// Writes the event data statistics to file.
