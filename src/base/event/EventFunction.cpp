@@ -26,7 +26,9 @@
 EventFunction::EventFunction(const std::string &typeStr) :
    typeName          (typeStr),
    instanceName      ("Base EventFunction (Name not set)"),
-   primary           (NULL)
+   primary           (NULL),
+   boundaryType      ("Undetermined"),
+   isStart           (false)
 {
    eventData[0] = 0.0;
    eventData[1] = 999.999;
@@ -40,7 +42,9 @@ EventFunction::~EventFunction()
 EventFunction::EventFunction(const EventFunction& ef) :
    typeName          (ef.typeName),
    instanceName      (ef.instanceName),
-   primary           (ef.primary)
+   primary           (ef.primary),
+   boundaryType      (ef.boundaryType),
+   isStart           (ef.isStart)
 {
    eventData[0] = ef.eventData[0];
    eventData[1] = ef.eventData[1];
@@ -57,6 +61,8 @@ EventFunction& EventFunction::operator=(const EventFunction& ef)
       eventData[1] = ef.eventData[1];
       eventData[2] = ef.eventData[2];
       primary      = ef.primary;
+      boundaryType = ef.boundaryType;
+      isStart      = ef.isStart;
    }
 
    return *this;
@@ -89,4 +95,23 @@ bool EventFunction::Initialize()
    return true;
 }
 
+Real* EventFunction::GetData()
+{
+   return eventData;
+}
 
+std::string EventFunction::GetBoundaryType()
+{
+   // Default: slope positive at entry
+   if (eventData[2] > 0.0)
+      boundaryType = "Entry";
+   else
+      boundaryType = "Exit";
+
+   return boundaryType;
+}
+
+bool EventFunction::IsEventEntry()
+{
+   return (eventData[2] > 0.0 ? true : false);
+}

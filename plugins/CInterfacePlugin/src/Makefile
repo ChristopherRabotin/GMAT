@@ -27,6 +27,7 @@ HEADERS = -Iinclude \
           -I$(GMAT_CODE_LOCATION)/base/configs \
           -I$(GMAT_CODE_LOCATION)/base/coordsystem \
           -I$(GMAT_CODE_LOCATION)/base/executive \
+          -I$(GMAT_CODE_LOCATION)/base/event \
           -I$(GMAT_CODE_LOCATION)/base/factory \
           -I$(GMAT_CODE_LOCATION)/base/forcemodel \
           -I$(GMAT_CODE_LOCATION)/base/foundation \

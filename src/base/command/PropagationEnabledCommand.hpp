@@ -30,6 +30,7 @@
 #include "Spacecraft.hpp"
 #include "Formation.hpp"
 
+
 /// A convenient typedef used in this code
 typedef std::vector<SpaceObject*> PropObjectArray;
 
@@ -131,9 +132,8 @@ protected:
 
    virtual void         InitializeForEventLocation();
    virtual void         CheckForEvents();
-   virtual void         LocateEvent(EventLocator* el);
-   virtual void         UpdateEventTable();
-
+   virtual void         LocateEvent(EventLocator* el, Integer index = 0);
+   virtual void         UpdateEventTable(EventLocator* el, Integer index);
 };
 
 #endif /* PropagationEnabledCommand_hpp */

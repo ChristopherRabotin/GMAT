@@ -894,6 +894,10 @@ bool Sandbox::Execute()
    publisher->SetRunState(currentState);
    publisher->NotifyEndOfRun();
    
+   // Write out event data, if any
+   for (UnsignedInt i = 0; i < events.size(); ++i)
+      events[i]->ReportEventData();
+
    return rv;
 }
 
@@ -1379,6 +1383,8 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
             }
             #endif
             
+            // todo: Figure out what makes sense for the "events" container and functions
+
             if ((fcsCmd->IsOfType("CallFunction")) ||
                 (fcsCmd->IsOfType("Assignment")))
             {

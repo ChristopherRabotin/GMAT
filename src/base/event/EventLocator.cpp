@@ -545,17 +545,41 @@ UnsignedInt EventLocator::GetFunctionCount()
    return eventFunctions.size();
 }
 
+
+void EventLocator::BufferEvent(Integer forEventFunction)
+{
+   // Build a LocatedEvent structure
+   LocatedEvent *theEvent = new LocatedEvent;
+
+   Real *theData = eventFunctions[forEventFunction]->GetData();
+   theEvent->epoch = theData[0];
+   theEvent->eventValue = theData[1];
+   theEvent->type = eventFunctions[forEventFunction]->GetTypeName();
+   theEvent->participants = eventFunctions[forEventFunction]->GetName();
+   theEvent->boundary = eventFunctions[forEventFunction]->GetBoundaryType();
+   theEvent->isEntry = eventFunctions[forEventFunction]->IsEventEntry();
+
+   #ifdef DEBUG_EVENTLOCATION
+      MessageInterface::ShowMessage("Adding event to event table:\n   "
+            "%-20s%-30s%-15s%15.9lf\n", theEvent->type.c_str(),
+            theEvent->participants.c_str(), theEvent->boundary.c_str(),
+            theEvent->epoch);
+   #endif
+
+   eventTable.AddEvent(theEvent);
+}
+
+
 /// Adds an event to the LocatedEventTable.
 void EventLocator::BufferEvent(Real epoch, std::string type, bool isStart)
 {
-
-
 }
 
 /// Writes the event data to file.
 void EventLocator::ReportEventData()
 {
-
+   // todo Use the output folder if path unspecified
+   eventTable.WriteToFile(filename);
 }
 
 /// Writes the event data statistics to file.

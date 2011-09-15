@@ -25,8 +25,11 @@
 LocatedEvent::LocatedEvent() :
    epoch       (0.0),
    boundary    (""),
+   isEntry     (false),
    type        (""),
-   eventValue  (999.999)
+   eventValue  (999.999),
+   participants(""),
+   partner     (NULL)
 {
 }
 
@@ -37,20 +40,25 @@ LocatedEvent::~LocatedEvent()
 LocatedEvent::LocatedEvent(const LocatedEvent& le) :
    epoch       (le.epoch),
    boundary    (le.boundary),
+   isEntry     (le.isEntry),
    type        (le.type),
-   eventValue  (le.eventValue)
+   eventValue  (le.eventValue),
+   participants(le.participants),
+   partner     (NULL)
 {
-
 }
 
 LocatedEvent& LocatedEvent::operator=(const LocatedEvent& le)
 {
    if (this != &le)
    {
-      epoch      = le.epoch;
-      boundary   = le.boundary;
-      type       = le.type;
-      eventValue = le.eventValue;
+      epoch        = le.epoch;
+      boundary     = le.boundary;
+      isEntry      = le.isEntry;
+      type         = le.type;
+      eventValue   = le.eventValue;
+      participants = le.participants;
+      partner      = NULL;
    }
 
    return *this;

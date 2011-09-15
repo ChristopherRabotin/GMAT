@@ -40,12 +40,18 @@ public:
 
    /// The epoch of the data element.
    GmatEpoch epoch;
-   /// Identifier for the type of datum represented
+   /// Identifier for the type of entry/exit represented
    std::string boundary;
-   /// The type of the event.
+   /// Flag for entry/exit
+   bool isEntry;
+   /// The type of the event (Umbra, Contact. etc).
    std::string type;
    /// The event function value at the located event
    Real eventValue;
+   /// The participant indicator
+   std::string participants;
+   /// The event that opens or closes this one
+   LocatedEvent *partner;
 };
 
 #endif /* LocatedEvent_hpp */

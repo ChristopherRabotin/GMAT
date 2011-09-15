@@ -48,6 +48,8 @@ public:
    LocatedEventTable& operator=(const LocatedEventTable& let);
 
    /// Adds a new event entry to the table of events.
+   void AddEvent(LocatedEvent *theEvent);
+   /// Adds a new event entry to the table of events.
    void AddEvent(GmatEpoch epoch, std::string boundaryType, std::string eventType);
    /// Returns the longest duration for the detected events of the specified type.
    Real GetMaxSpan(std::string eventType);

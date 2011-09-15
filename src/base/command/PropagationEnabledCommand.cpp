@@ -959,8 +959,8 @@ void PropagationEnabledCommand::InitializeForEventLocation()
    if (events == NULL)
    {
       #ifdef DEBUG_EVENTLOCATORS
-         MessageInterface::ShowMessage("Initializing with no event locators\n",
-               events->size());
+         MessageInterface::ShowMessage("Initializing with no event locator "
+               "pointer\n");
       #endif
       return;
    }
@@ -1017,8 +1017,8 @@ void PropagationEnabledCommand::CheckForEvents()
    if (events == NULL)
    {
       #ifdef DEBUG_EVENTLOCATORS
-         MessageInterface::ShowMessage("Checking with no event locators\n",
-               events->size());
+         MessageInterface::ShowMessage("Checking for events with no event "
+               "locator pointer\n");
       #endif
       return;
    }
@@ -1039,46 +1039,98 @@ void PropagationEnabledCommand::CheckForEvents()
    for (UnsignedInt i = 1; i < eventBufferSize; i += 3)
    {
       if (currentEventData[i] * previousEventData[i] <= 0.0)
-         MessageInterface::ShowMessage("Event function sign change detected\n"
-               "   Transition from %lf to %lf at index %d, epoch %lf\n",
-               currentEventData[i], previousEventData[i], i,
-               currentEventData[i-1]);
+      {
+         #ifdef DEBUG_EVENTLOCATORS
+            MessageInterface::ShowMessage("Event function sign change "
+                  "detected\n   Transition from %lf to %lf at index %d, epoch "
+                  "[%12lf %12lf]\n", previousEventData[i], currentEventData[i],
+                  i, previousEventData[i-1], currentEventData[i-1]);
+         #endif
+
+         Integer index;
+         for (index = 0; index < (Integer)(events->size()) - 1; ++index)
+         {
+            if (index + 1 < (Integer)events->size())
+               if ((Integer)i < activeEventIndices[index+1])
+                  break;
+         }
+
+         Integer functionIndex = (Integer)(i/3) - activeEventIndices[index];
+
+         #ifdef DEBUG_EVENTLOCATORS
+            MessageInterface::ShowMessage("i = %d gives function %d on "
+                  "locator %d\n", i, functionIndex, index);
+         #endif
+
+         LocateEvent(events->at(index), functionIndex);
+      }
    }
 
    // Check derivative values
    for (UnsignedInt i = 2; i < eventBufferSize; i += 3)
    {
       if (currentEventData[i] * previousEventData[i] <= 0.0)
-         MessageInterface::ShowMessage("Event function sign change detected\n"
-               "   Transition from %lf to %lf at index %d, epoch %lf\n",
-               currentEventData[i], previousEventData[i], i,
-               currentEventData[i-2]);
+      {
+         #ifdef DEBUG_EVENTLOCATORS
+            MessageInterface::ShowMessage("Event function derivative sign "
+                  "change detected\n   Transition from %lf to %lf at index %d, "
+                  "epoch %12lf\n", currentEventData[i], previousEventData[i], i,
+                  currentEventData[i-2]);
+         #endif
+      }
    }
 
    // Move current to previous
    memcpy(previousEventData, currentEventData, eventBufferSize*sizeof(Real));
 }
 
-void PropagationEnabledCommand::LocateEvent(EventLocator* el)
+void PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
 {
+   bool eventFound = false;
+
    if (events == NULL)
    {
       #ifdef DEBUG_EVENTLOCATORS
-         MessageInterface::ShowMessage("Initializing with no event locators\n",
-               events->size());
+         MessageInterface::ShowMessage("LocateEvent called; event locator "
+               "pointer not set\n");
       #endif
+
+      // TBD: Throw here?
+      MessageInterface::ShowMessage("PropagationEnabledCommand::LocateEvent "
+            "was called unexpectedly; no EventLocators have been set\n");
+
       return;
    }
+
+   // Temporary: Linear interpolate to get the epoch
+   #ifdef DEBUG_EVENTLOCATORS
+      Real bounds[2], epochs[2];
+      bounds[0] = previousEventData[index*3+1];
+      bounds[1] = currentEventData[index*3+1];
+
+      epochs[0] = previousEventData[index*3];
+      epochs[1] = currentEventData[index*3];
+
+      Real zero = epochs[0] - bounds[0] * (epochs[1] - epochs[0]) /
+            (bounds[1] - bounds[0]);
+
+      MessageInterface::ShowMessage("Zero at %12lf\n", zero);
+   #endif
+   eventFound = true;
+
+   // End of temporary section
+
+   if (eventFound)
+      UpdateEventTable(el, index);
 }
 
-void PropagationEnabledCommand::UpdateEventTable()
+
+void PropagationEnabledCommand::UpdateEventTable(EventLocator* el, Integer index)
 {
-   if (events == NULL)
-   {
-      #ifdef DEBUG_EVENTLOCATORS
-         MessageInterface::ShowMessage("Initializing with no event locators\n",
-               events->size());
-      #endif
-      return;
-   }
+   el->BufferEvent(index);
 }
+
+
+//void PropagationEnabledCommand::UpdateEventTable(EventLocator* el, LocatedEvent *le)
+//{
+//}

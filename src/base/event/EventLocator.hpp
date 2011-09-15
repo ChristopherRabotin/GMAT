@@ -132,6 +132,7 @@ public:
    virtual Real *Evaluate();
 
    UnsignedInt GetFunctionCount();
+   void BufferEvent(Integer forEventFunction = 0);
    void BufferEvent(Real epoch, std::string type, bool isStart);
    void ReportEventData();
    void ReportEventStatistics();
