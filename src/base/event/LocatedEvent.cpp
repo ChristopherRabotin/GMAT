@@ -29,7 +29,8 @@ LocatedEvent::LocatedEvent() :
    type        (""),
    eventValue  (999.999),
    participants(""),
-   partner     (NULL)
+   partner     (NULL),
+   duration    (0.0)
 {
 }
 
@@ -44,7 +45,8 @@ LocatedEvent::LocatedEvent(const LocatedEvent& le) :
    type        (le.type),
    eventValue  (le.eventValue),
    participants(le.participants),
-   partner     (NULL)
+   partner     (NULL),
+   duration    (le.duration)
 {
 }
 
@@ -59,6 +61,7 @@ LocatedEvent& LocatedEvent::operator=(const LocatedEvent& le)
       eventValue   = le.eventValue;
       participants = le.participants;
       partner      = NULL;
+      duration     = 0.0;
    }
 
    return *this;

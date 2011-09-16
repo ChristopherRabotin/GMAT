@@ -52,6 +52,8 @@ public:
    std::string participants;
    /// The event that opens or closes this one
    LocatedEvent *partner;
+   /// Duration of the event (set on both partners; zero until a pair is built
+   Real duration;
 };
 
 #endif /* LocatedEvent_hpp */
