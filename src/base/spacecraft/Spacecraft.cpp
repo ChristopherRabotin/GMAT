@@ -4535,9 +4535,11 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    std::stringstream value;
    value.precision(GetDataPrecision());
 
-   bool showAnomaly = false;
-   if (stateType == "Keplerian" || stateType == "ModKeplerian")
-      showAnomaly = true;
+   #ifdef __WRITE_ANOMALY_TYPE__
+      bool showAnomaly = false;
+      if (stateType == "Keplerian" || stateType == "ModKeplerian")
+         showAnomaly = true;
+   #endif
 
    Integer *parmOrder = new Integer[parameterCount];
    Integer parmIndex = 0;
