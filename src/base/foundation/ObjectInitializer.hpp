@@ -71,7 +71,8 @@ protected:
    void InitializeObjectsInTheMap(ObjectMap *objMap, Gmat::ObjectType objType,
                                   bool usingGOS = false,
                                   StringArray *unusedGOL = NULL);
-   void InitializeSystemParamters(ObjectMap *objMap);
+   void InitializeSystemParameters(ObjectMap *objMap);
+   void InitializeSubscribers(ObjectMap *objMap);
    void InitializeAllOtherObjects(ObjectMap *objMap);
    void InitializeInternalObjects();
    void InitializeCoordinateSystem(GmatBase *obj);

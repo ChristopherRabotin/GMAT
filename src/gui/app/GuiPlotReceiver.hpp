@@ -178,6 +178,11 @@ public:
 
    virtual bool DeactivateXyPlot(const std::string &plotName);
    virtual bool ActivateXyPlot(const std::string &plotName);
+
+protected:
+   bool ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
+                                   Real positionY, Real width, Real height,
+                                   Integer &x, Integer &y, Integer &w, Integer &h);
    
 private:
    GuiPlotReceiver();

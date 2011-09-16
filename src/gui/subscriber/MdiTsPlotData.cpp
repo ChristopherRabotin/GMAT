@@ -19,4 +19,5 @@
 #include "MdiTsPlotData.hpp" 
 
 wxList MdiTsPlot::mdiChildren;
-int MdiTsPlot::numChildren = 0;
+int    MdiTsPlot::numChildren = 0;
+bool   MdiTsPlot::usePresetSize = false;

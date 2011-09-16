@@ -19,8 +19,8 @@
 #include "MdiGlPlotData.hpp"
 
 wxList MdiGlPlot::mdiChildren;
-int MdiGlPlot::numChildren = 0;
-
+int    MdiGlPlot::numChildren = 0;
+bool   MdiGlPlot::usePresetSize = false;
 
 std::string GmatPlot::BodyInfo::BODY_NAME[GmatPlot::MAX_BODIES] =
 {

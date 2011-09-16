@@ -73,6 +73,8 @@ public:
    
    Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
                                 bool incScripts = false);
+   bool IsMissionTreeUndocked(Integer &width);
+   void IconizeUndockedMissionTree();
    bool IsChildOpen(GmatTreeItemData *item, bool restore = true);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
    bool RenameChild(const wxString &oldName, const wxString &newName);

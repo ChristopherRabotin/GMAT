@@ -46,6 +46,8 @@ public:
    bool FlushBuffers(bool endOfDataBlock = true);
    bool NotifyEndOfRun();
    
+   const std::list<Subscriber*> GetSubscriberList();
+   
    // Interface methods used to identify the data sent to the publisher and
    // subscribers
    Integer              RegisterPublishedData(GmatBase *provider, Integer id,

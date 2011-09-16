@@ -45,6 +45,7 @@
 //#define DEBUG_PLOTIF_XY 1
 //#define DEBUG_PLOTIF_XY_UPDATE 1
 //#define DEBUG_RENAME 1
+//#define DEBUG_PLOT_PERSISTENCY
 
 //---------------------------------
 //  static data
@@ -159,7 +160,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
    }
    
    //-------------------------------------------------------
-   // create MDI child frame if not exist
+   // create MDI child GL frame if not exist
    //-------------------------------------------------------
    if (createNewFrame)
    {
@@ -172,62 +173,16 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       Integer x, y, w, h;
       Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
       
-      #if 0
-      wxSize size = wxGetDisplaySize();
-      int cw, ch;
-      MessageInterface::ShowMessage("---> dw=%d, dh=%d\n", size.GetWidth(), size.GetHeight());
-      GmatAppData::Instance()->GetMainFrame()->GetClientSize(&cw, &ch);
-      MessageInterface::ShowMessage("---> cw=%d, ch=%d\n", cw, ch);
-      #endif      
+      #ifdef DEBUG_PLOT_PERSISTENCY
+      MessageInterface::ShowMessage
+         ("plotName = '%s', plotCount = %d\n", plotName.c_str(), plotCount);
+      #endif
       
-      // if position and size were not saved from an earlier run, figure out the initial values
-      if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
-          GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
-      {
-         #ifdef __WXMAC__
-            wxSize size = wxGetDisplaySize();
-            w = (size.GetWidth() - 239) / 2;
-            h = 350;
-            Integer hLoc = plotCount % 2;
-            Integer vLoc = (Integer)((plotCount) / 2);
-            x = 238 + hLoc * w + 1;
-            y = 20  + vLoc * (h+10);
-         #else
-            x = -1;
-            y = -1;
-            w = -1;
-            h = -1;
-            // Work this on later
-            #if 0
-            w = (size.GetWidth() - 239) / 2;
-            h = 350;
-            Integer hLoc = plotCount % 2;
-            Integer vLoc = (Integer)((plotCount) / 2);
-            x = 238 + hLoc * w + 1;
-            y = 20  + vLoc * (h+10);
-            #endif
-         #endif
-      }
-      else
-      {
-         Integer screenWidth = 0;
-         Integer screenHeight = 0;
-         
-         #ifdef __WXMAC__
-            screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
-            screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
-         #else
-            GmatAppData::Instance()->GetMainFrame()->GetClientSize(&screenWidth, &screenHeight);
-         #endif
-
-         //MessageInterface::ShowMessage("---> sw=%d, sh=%d\n", screenWidth, screenHeight);
-         x = (Integer) (positionX * (Real) screenWidth);
-         y = (Integer) (positionY * (Real) screenHeight);
-         w = (Integer) (width     * (Real) screenWidth);
-         h = (Integer) (height    * (Real) screenHeight);
-         //MessageInterface::ShowMessage("---> x=%d, y=%d, w=%d, h=%d\n", x, y, w,h);
-      }
+      bool isPresetSizeUsed = ComputePlotPositionAndSize(true, positionX, positionY,
+                                                         width, height, x, y, w, h);
       
+      
+      // create a frame, containing a plot canvas
       if (currentView == GmatPlot::ENHANCED_3D_VIEW)
       {
          #if DEBUG_PLOTIF_GL_CREATE
@@ -263,16 +218,9 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       #if __WXMAC__
          frame->SetSize(w-1, h-1);
       #else
-         //MessageInterface::ShowMessage("---> w = %d,  h = %d\n", w, h);
-         if (w == -1 || h == -1)
+         if (w != -1 && h != -1)
          {
-            // Set default size?
-            //frame->SetSize(600, 400);
-         }
-         else
-         {
-            // Why not showing the ground track plot without resetting the size?
-            // It just shows grey background. When tiling it shows the plot.
+            // Why not showing the plot without resetting the size?
             frame->SetSize(w-1, h-1);
             frame->SetSize(w+1, h+1);
          }
@@ -285,9 +233,10 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       #endif
       
       ++MdiGlPlot::numChildren;
+      plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
       
-      // Tile vertically
-      if (w == -1 || h == -1)
+      // If preset size is not used and plot is more than 5, then tile(LOJ: 2011.09.15)
+      if (!isPresetSizeUsed && plotCount > 5)
          GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
    }
    else
@@ -907,38 +856,16 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
       #endif
 
       Integer x, y, w, h;
-
-      // if position and size were not saved from an earlier run, figure out the initial values
-      if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
-          GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
-      {
-         #ifdef __WXMAC__
-            wxSize size = wxGetDisplaySize();
-            Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
-            w = (size.GetWidth() - 239) / 2;
-            h = 350;
-            Integer hLoc = plotCount % 2;
-            Integer vLoc = (Integer)((plotCount) / 2);
-            x = 238 + hLoc * w + 1;
-            y = 20  + vLoc * (h+10);
-         #else
-            x = -1;
-            y = -1;
-            w = -1;
-            h = -1;
-         #endif
-      }
-      else
-      {
-         Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
-         Integer screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
-         x = (Integer) (positionX * (Real) screenWidth);
-         y = (Integer) (positionY * (Real) screenHeight);
-         w = (Integer) (width     * (Real) screenWidth);
-         h = (Integer) (height    * (Real) screenHeight);
-      }
-
-
+      Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
+      
+      #ifdef DEBUG_PLOT_PERSISTENCY
+      MessageInterface::ShowMessage
+         ("plotName = '%s', plotCount = %d\n", plotName.c_str(), plotCount);
+      #endif
+      
+      bool isPresetSizeUsed = ComputePlotPositionAndSize(false, positionX, positionY,
+                                                         width, height, x, y, w, h);
+      
       // create a frame, containing a XY plot canvas
       frame =
          new MdiChildTsFrame(GmatAppData::Instance()->GetMainFrame(), true,
@@ -948,21 +875,34 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
                              wxString(yAxisTitle.c_str()),
                              wxPoint(x, y), wxSize(w, h),
                              wxDEFAULT_FRAME_STYLE);
-
+      
       frame->Show();
       
       ++MdiTsPlot::numChildren;
       
-      // Tile vertically
-      if (w == -1 || h == -1)
+      #if __WXMAC__
+         frame->SetSize(w-1, h-1);
+      #else
+         if (w != -1 && h != -1)
+         {
+            // Why not showing the plot without resetting the size?
+            frame->SetSize(w-1, h-1);
+            frame->SetSize(w+1, h+1);
+         }
+      #endif
+         
+      plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
+      
+      // If preset size is not used and plot is more than 5, then tile(LOJ: 2011.09.15)
+      if (!isPresetSizeUsed && plotCount > 5)
          GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
       
       frame->RedrawCurve();
    }
-
+   
    frame->SetShowGrid(drawGrid);
    frame->ResetZoom();
-
+   
    #if DEBUG_PLOTIF_XY
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::CreateXyPlotWindow() leaving\n");
@@ -1988,3 +1928,121 @@ bool GuiPlotReceiver::ActivateXyPlot(const std::string &plotName)
 
    return activated;
 }
+
+
+//------------------------------------------------------------------------------
+// bool ComputePlotPositionAndSize(bool isGLPlot, Integer &x, Integer &y, Integer &w, ...)
+//------------------------------------------------------------------------------
+bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
+                                                 Real positionY, Real width, Real height,
+                                                 Integer &x, Integer &y, Integer &w, Integer &h)
+{
+   #ifdef DEBUG_PLOT_PERSISTENCY
+   MessageInterface::ShowMessage
+      ("ComputePlotPositionAndSize() entered, %s, positionX = %f, positionY = %f, "
+       "width = %f, height = %f\n", isGLPlot ? "GLPlot" : "XYPlot", positionX,
+       positionY, width, height);
+   #endif
+   
+   Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
+   bool isPresetSizeUsed = false;
+   
+   Integer screenWidth = 0;
+   Integer screenHeight = 0;
+   
+   #ifdef __WXMAC__
+      screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+      screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+   #else
+      GmatAppData::Instance()->GetMainFrame()->GetClientSize(&screenWidth, &screenHeight);
+   #endif
+   
+   #ifdef DEBUG_PLOT_PERSISTENCY
+   MessageInterface::ShowMessage("   screen size  : w = %4d, h = %4d\n", screenWidth, screenHeight);
+   #endif
+   
+   // if position and size were not saved from an earlier run, figure out the initial values
+   if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
+       GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
+   {
+      if (MdiGlPlot::usePresetSize || MdiTsPlot::usePresetSize)
+         isPresetSizeUsed = true;
+      
+      #ifdef __WXMAC__
+         wxSize size = wxGetDisplaySize();
+         w = (size.GetWidth() - 239) / 2;
+         h = 350;
+         Integer hLoc = plotCount % 2;
+         Integer vLoc = (Integer)((plotCount) / 2);
+         x = 238 + hLoc * w + 1;
+         y = 20  + vLoc * (h+10);
+      #else
+         w = (Integer)((Real)screenWidth / 3.0);
+         h = (Integer)((Real)screenHeight / 2.5);
+         // customize size up to 4 plots for now
+         int newCount = plotCount + 1;
+         if (newCount <= 4)
+         {
+            // if odd number, put it in 1st row
+            if ((newCount % 2) == 1)
+            {
+               x = 0;
+               y = h * ((newCount + 1) / 2 - 1);
+            }
+            else  // even number, put it in 2nd row
+            {
+               x = w;
+               y = h * (newCount / 2 - 1);
+            }
+         }
+         else
+         {
+            x = -1;
+            y = -1;
+         }            
+      #endif
+   }
+   else
+   {
+      if (isGLPlot)
+         MdiGlPlot::usePresetSize = true;
+      else
+         MdiTsPlot::usePresetSize = true;
+      
+      isPresetSizeUsed = true;
+      
+      x = (Integer) (positionX * (Real) screenWidth);
+      y = (Integer) (positionY * (Real) screenHeight);
+      w = (Integer) (width     * (Real) screenWidth);
+      h = (Integer) (height    * (Real) screenHeight);
+      
+      #ifdef DEBUG_PLOT_PERSISTENCY
+      MessageInterface::ShowMessage("   before offset: x = %4d, y = %4d, w = %4d, h = %4d\n", x, y, w,h);
+      #endif
+      
+      // Since -1 is default position, change it to 0
+      #ifndef __WXMAC__
+         Real realW = (Real)screenWidth;
+         Real realH = (Real)screenHeight;
+         Integer xOffset = (Integer)((realW * 0.01) + (10000.0 / realW));
+         Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
+         if (x == -1) x = 0;
+         //else x -= xOffset;
+         y -= yOffset;
+         #ifdef DEBUG_PLOT_PERSISTENCY
+         MessageInterface::ShowMessage("   screen offset: x = %4d, y = %4d\n", xOffset, yOffset);
+         MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
+         #endif
+      #endif
+   }
+   
+   #ifdef DEBUG_PLOT_PERSISTENCY
+   MessageInterface::ShowMessage("   computed     : x = %4d, y = %4d, w = %4d, h = %4d\n", x, y, w, h);
+   MessageInterface::ShowMessage
+      ("ComputePlotPositionAndSize() returning isPresetSizeUsed = %d\n", isPresetSizeUsed);
+   #endif
+   
+   return isPresetSizeUsed;
+}
+
+

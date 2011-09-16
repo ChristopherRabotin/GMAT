@@ -493,6 +493,15 @@ bool Publisher::NotifyEndOfRun()
 
 
 //------------------------------------------------------------------------------
+// const std::list<Subscriber*> GetSubscriberList()
+//------------------------------------------------------------------------------
+const std::list<Subscriber*> Publisher::GetSubscriberList()
+{
+   return subscriberList;
+}
+
+
+//------------------------------------------------------------------------------
 // void ClearPublishedData()
 //------------------------------------------------------------------------------
 void Publisher::ClearPublishedData()

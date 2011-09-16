@@ -82,7 +82,8 @@ namespace GmatPlot
 struct MdiGlPlot
 {
    static wxList mdiChildren;
-   static int numChildren;
+   static int    numChildren;
+   static bool   usePresetSize;;
 };
 
 #endif

@@ -357,14 +357,14 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       #ifdef DEBUG_INITIALIZE_OBJ
       MessageInterface::ShowMessage("--- Initialize Sytem Parameters in LOS\n");
       #endif
-      InitializeSystemParamters(LOS);
+      InitializeSystemParameters(LOS);
       
       if (includeGOS)
       {
          #ifdef DEBUG_INITIALIZE_OBJ
          MessageInterface::ShowMessage("--- Initialize Sytem Parameters in LOS\n");
          #endif
-         InitializeSystemParamters(GOS);
+         InitializeSystemParameters(GOS);
       }
    }
    
@@ -408,14 +408,16 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       #ifdef DEBUG_INITIALIZE_OBJ
       MessageInterface::ShowMessage("--- Initialize Subscriber in LOS\n");
       #endif
-      InitializeObjectsInTheMap(LOS, Gmat::SUBSCRIBER);
+      //InitializeObjectsInTheMap(LOS, Gmat::SUBSCRIBER);
+      InitializeSubscribers(LOS);
       
       if (includeGOS)
       {
          #ifdef DEBUG_INITIALIZE_OBJ
          MessageInterface::ShowMessage("--- Initialize Subscriber in GOS\n");
          #endif
-         InitializeObjectsInTheMap(GOS, Gmat::SUBSCRIBER);
+         //InitializeObjectsInTheMap(GOS, Gmat::SUBSCRIBER);
+         InitializeSubscribers(GOS);
       }
    }
    
@@ -600,9 +602,9 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
 
 
 //------------------------------------------------------------------------------
-// void InitializeSystemParamters(ObjectMap *objMap)
+// void InitializeSystemParameters(ObjectMap *objMap)
 //------------------------------------------------------------------------------
-void ObjectInitializer::InitializeSystemParamters(ObjectMap *objMap)
+void ObjectInitializer::InitializeSystemParameters(ObjectMap *objMap)
 {
    std::map<std::string, GmatBase *>::iterator omi;
    for (omi = objMap->begin(); omi != objMap->end(); ++omi)
@@ -613,8 +615,8 @@ void ObjectInitializer::InitializeSystemParamters(ObjectMap *objMap)
          throw GmatBaseException
             ("Cannot initialize NULL pointer of \"" + omi->first + "\" object");
       
-      // Treat parameters as a special case -- because system parameters have
-      // to be initialized before other parameters.
+      // Treat parameters as a special case -- because system parameters must be
+      // initialized before other parameters.
       if (obj->IsOfType(Gmat::PARAMETER))
       {
          Parameter *param = (Parameter *)obj;
@@ -631,6 +633,53 @@ void ObjectInitializer::InitializeSystemParamters(ObjectMap *objMap)
          }
       }
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void InitializeSubscribers(ObjectMap *objMap)
+//------------------------------------------------------------------------------
+void ObjectInitializer::InitializeSubscribers(ObjectMap *objMap)
+{
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage("ObjectInitializer::InitializeSubscribers() entered\n");
+   #endif
+      
+   std::list<Subscriber*>::iterator subiter;
+   std::list<Subscriber*> subList = publisher->GetSubscriberList();
+   for (subiter = subList.begin(); subiter != subList.end(); ++subiter)
+   {
+      std::string subName = (*subiter)->GetName();      
+      std::map<std::string, GmatBase *>::iterator omi;
+      for (omi = objMap->begin(); omi != objMap->end(); ++omi)
+      {
+         GmatBase *obj = omi->second;
+         
+         if (obj == NULL)
+            throw GmatBaseException
+               ("Cannot initialize NULL pointer of \"" + omi->first + "\" Object");
+         
+         // Treat subscribers as a special case -- because they need to by initialized
+         // in the order they are created. So use initializing order from the Publisher.
+         if (obj->IsOfType(Gmat::SUBSCRIBER))
+         {
+            if (subName == obj->GetName())
+            {
+               #if defined(DEBUG_OBJECT_INITIALIZER) || defined(DEBUG_SUBSCRIBER)
+               MessageInterface::ShowMessage
+                  ("ObjectInitializer::Initialize objTypeName = %s, objName = %s\n",
+                   obj->GetTypeName().c_str(), obj->GetName().c_str());
+               #endif
+               
+               BuildReferencesAndInitialize(obj);
+            }
+         }
+      }
+   }
+   
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage("ObjectInitializer::InitializeSubscribers() leaving\n");
+   #endif
 }
 
 

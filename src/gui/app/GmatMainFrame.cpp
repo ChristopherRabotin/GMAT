@@ -244,7 +244,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_CLOSE (GmatMainFrame::OnClose)
    EVT_SET_FOCUS (GmatMainFrame::OnSetFocus)
    EVT_KEY_DOWN (GmatMainFrame::OnKeyDown)
-
+   
    EVT_MENU (MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
    EVT_MENU (MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
    EVT_MENU (MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
@@ -869,6 +869,50 @@ Integer GmatMainFrame::GetNumberOfChildOpen(bool scriptsOnly, bool incPlots,
 
 
 //------------------------------------------------------------------------------
+// bool IsMissionTreeUndocked(Integer &width)
+//------------------------------------------------------------------------------
+/**
+ * @param width  The width of undocked mission tree returned
+ * @return  true if MissionTree is undocked, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::IsMissionTreeUndocked(Integer &width)
+{
+   int w = 0;
+   int h = 0;
+   width = 0;
+   
+   GmatMdiChildFrame *child = GetChild("MissionTree");
+   if (child != NULL)
+   {
+      if (child->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED)
+      {
+         child->GetSize(&w, &h);
+         width = w;
+         return true;
+      }
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// void IconizeUndockedMissionTree()
+//------------------------------------------------------------------------------
+/**
+ * Iconizes undocled mission tree if opened
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::IconizeUndockedMissionTree()
+{
+   GmatMdiChildFrame *child = GetChild("MissionTree");
+   if (child != NULL)
+      child->Iconize();
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsChildOpen(GmatTreeItemData *item, bool restore)
 //------------------------------------------------------------------------------
 /**
@@ -1419,7 +1463,7 @@ void GmatMainFrame::MinimizeChildren()
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
       if (child->GetItemType() != GmatTree::OUTPUT_ORBIT_VIEW &&
           child->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
-          child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED &&
+          //child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED &&
           child->GetItemType() != GmatTree::COMPARE_REPORT)
          child->Iconize(TRUE);
       node = node->GetNext();
@@ -4932,7 +4976,6 @@ void GmatMainFrame::SaveGuiToActiveScript()
 //------------------------------------------------------------------------------
 void GmatMainFrame::SavePlotPositionsAndSizes()
 {
-   //#ifdef __WXMAC__
    wxNode *node = theMdiChildren->GetFirst();
 
    while (node)
@@ -4942,5 +4985,5 @@ void GmatMainFrame::SavePlotPositionsAndSizes()
 
       node = node->GetNext();
    }
-   //#endif
 }
+
