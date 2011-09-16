@@ -27,6 +27,14 @@
 #include "ColorTypes.hpp"         // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
+
+BEGIN_EVENT_TABLE(MdiChildViewFrame, GmatMdiChildFrame)
+   EVT_ACTIVATE(MdiChildViewFrame::OnActivate)
+   EVT_SIZE(MdiChildViewFrame::OnPlotSize)
+   EVT_MOVE(MdiChildViewFrame::OnMove)
+   EVT_CLOSE(MdiChildViewFrame::OnPlotClose) 
+END_EVENT_TABLE()
+
 //#define DEBUG_VIEW_FRAME
 //#define DEBUG_MDI_CHILD_FRAME_CLOSE
 //#define DEBUG_PLOT_PERSISTENCY
@@ -592,12 +600,9 @@ void MdiChildViewFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MdiChildViewFrame::OnActivate(wxActivateEvent& event)
 {
    if ( event.GetActive() && mCanvas )
-   {
       mCanvas->SetFocus();
-   }
    
    GmatMdiChildFrame::OnActivate(event);
-   event.Skip();
 }
 
 
@@ -609,9 +614,10 @@ void MdiChildViewFrame::OnPlotSize(wxSizeEvent& event)
    // VZ: under MSW the size event carries the client size (quite
    //     unexpectedly) *except* for the very first one which has the full
    //     size... what should it really be? TODO: check under wxGTK
-   wxSize size1 = event.GetSize();
-   wxSize size2 = GetSize();
-   wxSize size3 = GetClientSize();
+   
+   //wxSize size1 = event.GetSize();
+   //wxSize size2 = GetSize();
+   //wxSize size3 = GetClientSize();
 
    //wxLogStatus(GmatAppData::Instance()->GetMainFrame(),
    //            wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
@@ -626,11 +632,18 @@ void MdiChildViewFrame::OnPlotSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::OnMove(wxMoveEvent& event)
 {
+   // Refresh canvas when frame moves (LOJ: 2011.09.16)
+   // Implemented here so that when user moves scroll bar the plot will be repainted
+   // Without this, OrbitView or GroundTrack plot shows only white background.
+   if ( mCanvas )
+      mCanvas->Refresh();
+   
    // VZ: here everything is totally wrong under MSW, the positions are
    //     different and both wrong (pos2 is off by 2 pixels for me which seems
    //     to be the width of the MDI canvas border)
-   wxPoint pos1 = event.GetPosition();
-   wxPoint pos2 = GetPosition();
+   
+   //wxPoint pos1 = event.GetPosition();
+   //wxPoint pos2 = GetPosition();
    
    //wxLogStatus(GmatAppData::Instance()->GetMainFrame(),
    //            wxT("position from event: (%d, %d), from frame (%d, %d)"),

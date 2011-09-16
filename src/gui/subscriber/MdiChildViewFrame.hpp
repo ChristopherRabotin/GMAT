@@ -167,5 +167,7 @@ protected:
    
    wxArrayString mBodyNames;
    UnsignedIntArray mBodyColors;
+   
+   DECLARE_EVENT_TABLE()
 };
 #endif

@@ -28,10 +28,6 @@ BEGIN_EVENT_TABLE(MdiChildGroundTrackFrame, MdiChildViewFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, MdiChildViewFrame::OnShowDefaultView)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, MdiChildViewFrame::OnDrawWireFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildViewFrame::OnDrawXyPlane)
-   //EVT_ACTIVATE(MdiChildViewFrame::OnActivate)
-   //EVT_SIZE(MdiChildViewFrame::OnPlotSize)
-   EVT_MOVE(MdiChildViewFrame::OnMove)
-   EVT_CLOSE(MdiChildViewFrame::OnPlotClose) 
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
