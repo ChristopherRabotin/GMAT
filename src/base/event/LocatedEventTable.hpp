@@ -39,7 +39,7 @@ enum SortStyle
 /**
  * The table of events located during a run
  */
-class LocatedEventTable
+class GMAT_API LocatedEventTable
 {
 public:
    LocatedEventTable();

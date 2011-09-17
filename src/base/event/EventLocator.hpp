@@ -29,7 +29,7 @@
 #include "EventFunction.hpp"
 
 
-class EventLocator: public GmatBase
+class GMAT_API EventLocator: public GmatBase
 {
 public:
    EventLocator(const std::string &typeStr, const std::string &nomme = "");

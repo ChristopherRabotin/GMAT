@@ -30,7 +30,7 @@
  * storing the event location data.  Since it is a struct in use, all of the
  * attributes are public.
  */
-class LocatedEvent
+class GMAT_API LocatedEvent
 {
 public:
    LocatedEvent();
