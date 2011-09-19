@@ -1095,3 +1095,77 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
 //
 //   return geoHeight;
 }
+
+
+//------------------------------------------------------------------------------
+// Real CalculateGeocentrics(Real *position, bool includeLatLong)
+//------------------------------------------------------------------------------
+/**
+ * Calculates the geocentric height, latitude and longitude for the input state
+ *
+ * The method used here is the same as used in the parameter code.  We may want
+ * to refactor so that both call a common, low level source.
+ *
+ * @param position The cb-centered MJ2000 Cartesian state for the calculations
+ * @param includeLatLong true to calculate latitude and longitude, false to skip
+ * @param when Epoch for the lat/long calculations
+ *
+ * @return The geocentrics height.  The latitude and longitude are filled in to
+ *         class variables
+ */
+//------------------------------------------------------------------------------
+Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
+      bool includeLatLong)
+{
+   Rvector6 instate(position), state;
+
+   CoordinateSystem *j2000ToUse = (cbJ2000 == NULL ? mInternalCoordSystem : cbJ2000);
+
+   if (when == -1.0)
+      when = wUpdateEpoch;
+
+   #ifdef DEBUG_COORDINATE_TRANSFORMS
+      MessageInterface::ShowMessage("Geocentric calculations at epoch %.12lf\n",
+            when);
+      MessageInterface::ShowMessage("Internal CS:\n%s\nFixed:\n%s\n",
+            mInternalCoordSystem->GetGeneratingString(
+                  Gmat::NO_COMMENTS).c_str(),
+            cbFixed->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      if (cbJ2000 != NULL)
+         MessageInterface::ShowMessage("cbJ2000 CS:\n%s\n",
+            cbJ2000->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      MessageInterface::ShowMessage("Position: %lf, %lf, %lf\n", position[0], position[1], position[2]);
+   #endif
+
+   CoordinateConverter mCoordConverter;
+   mCoordConverter.Convert(A1Mjd(when), instate, j2000ToUse,
+                           state, cbFixed);
+
+   // Build angular momentum
+   if (wUpdateEpoch != when)
+      BuildAngularVelocity(when);
+
+   // Get the body fixed geocentric height
+   //
+   Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
+   geoLat = atan2(state[2], rxy);
+   geoHeight = rxy / cos(geoLat) - cbRadius;
+
+   // Only do lat/long (in degrees) if needed
+   if (includeLatLong)
+   {
+      geoLat = geoLat * GmatMathConstants::DEG_PER_RAD;
+      geoLat = AngleUtil::PutAngleInDegRange(geoLat, -90.0, 90.0);
+      geoLong = atan2(state[1], state[0]) * GmatMathConstants::DEG_PER_RAD;
+      geoLong = AngleUtil::PutAngleInDegRange(geoLong, -180.0, 180.0);
+   }
+
+   #ifdef DEBUG_COORDINATE_TRANSFORMS
+      MessageInterface::ShowMessage("Geocentrics:\n   Height = %.6lf\n   "
+            "Latitude = %.6lf\n   Longitude = %.6lf\n", geoHeight, geoLat,
+            (includeLatLong ? geoLong : -999999.999999));
+   #endif
+
+   return geoHeight;
+
+}

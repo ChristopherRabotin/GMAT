@@ -179,6 +179,10 @@ protected:
                                  GmatEpoch when = -1.0,
                                  bool includeLatLong = false);
 
+   Real                    CalculateGeocentrics(Real *position,
+                                 GmatEpoch when = -1.0,
+                                 bool includeLatLong = false);
+
    enum {
       NOMINAL_FLUX = GmatBaseParamCount,
       NOMINAL_AVERAGE_FLUX,
