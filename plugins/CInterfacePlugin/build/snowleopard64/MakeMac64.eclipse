@@ -202,6 +202,7 @@ OBJECTS = \
     command/Optimize.o \
     command/PenDown.o \
     command/PenUp.o \
+    command/PlotCommand.o \
     command/Propagate.o \
     command/PropagationEnabledCommand.o \
     command/Report.o \
@@ -243,6 +244,7 @@ OBJECTS = \
     coordsystem/TOEEqAxes.o \
     coordsystem/TopocentricAxes.o \
     coordsystem/TrueOfDateAxes.o \
+    event/EventException.o \
     event/EventFunction.o \
     event/EventLocator.o \
     event/LocatedEventTable.o \
@@ -503,6 +505,7 @@ OBJECTS = \
     util/EopFile.o \
     util/FileManager.o \
     util/FileUtil.o \
+    util/Frozen.o \
     util/GmatGlobal.o \
     util/GravityFile.o \
     util/GregorianDate.o \
@@ -514,7 +517,10 @@ OBJECTS = \
     util/MessageInterface.o \
     util/MessageReceiver.o \
     util/ModKeplerian.o \
+    util/OrbitDesignerTime.o \
     util/RealUtilities.o \
+    util/RepeatGroundTrack.o \
+    util/RepeatSunSync.o \
     util/RgbColor.o \
     util/Rmatrix33.o \
     util/Rmatrix66.o \
@@ -524,6 +530,7 @@ OBJECTS = \
     util/Rvector.o \
     util/StringTokenizer.o \
     util/StringUtil.o \
+    util/SunSync.o \
     util/TextParser.o \
     util/TimeSystemConverter.o \
     util/TimeTypes.o \
@@ -531,9 +538,6 @@ OBJECTS = \
     solarsys/SimpleExponentialAtmosphere.o \
     $(TCPIP_OBJECTS) \
     $(SPICE_OBJECTS)
- 
-# solarsys/NRLMsise00Atmosphere.o \
- 
 #    solarsys/BodyDataReader.o \
 
 #    parameter/OrbitAMatrixParameters.o \
@@ -545,9 +549,7 @@ OBJECTS = \
 
 
 
-FORTRAN_OBJECTS = solarsys/msise90_sub.o 
-
-     #   solarsys/nrlmsise00_sub.o
+FORTRAN_OBJECTS = solarsys/msise90_sub.o
 
     # parameter/EquinoctialParameters.o \
     # stopcond/BaseStopCondition.o \
