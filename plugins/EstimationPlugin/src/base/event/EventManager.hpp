@@ -26,7 +26,7 @@
 #include "estimation_defs.hpp"
 #include "TriggerManager.hpp"
 #include "Event.hpp"
-#include "RootFinder.hpp"
+#include "EstimationRootFinder.hpp"
 #include "PropSetup.hpp"
 
 
@@ -60,7 +60,7 @@ protected:
    /// Vector if pointers to the managed events
    ObjectArray events;
    /// A RootFinder used to locate events
-   RootFinder locater;
+   EstimationRootFinder locater;
    /// Current status for each managed event
    IntegerArray eventStatus;
    /// Flags indicating if the matching event is active

@@ -146,7 +146,7 @@ CPP_OBJECTS = \
     event/EventData.o \
     event/EventManager.o \
     event/LightTimeCorrection.o \
-    event/RootFinder.o \
+    event/EstimationRootFinder.o \
     factory/EstimationCommandFactory.o \
     factory/EstimatorFactory.o \
     factory/EventFactory.o \

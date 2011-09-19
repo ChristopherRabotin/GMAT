@@ -1,6 +1,6 @@
-//$Id: RootFinder.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: EstimationRootFinder.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
 //------------------------------------------------------------------------------
-//                         RootFinder
+//                         EstimationRootFinder
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------------
 
 
-#include "RootFinder.hpp"
+#include "EstimationRootFinder.hpp"
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 
@@ -30,54 +30,54 @@
 
 
 //------------------------------------------------------------------------------
-// RootFinder()
+// EstimationRootFinder()
 //------------------------------------------------------------------------------
 /**
  * Default constructor
  */
 //------------------------------------------------------------------------------
-RootFinder::RootFinder() :
+EstimationRootFinder::EstimationRootFinder() :
    propagator        (NULL)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// ~RootFinder()
+// ~EstimationRootFinder()
 //------------------------------------------------------------------------------
 /**
  * Destructor
  */
 //------------------------------------------------------------------------------
-RootFinder::~RootFinder()
+EstimationRootFinder::~EstimationRootFinder()
 {
 }
 
 
 //------------------------------------------------------------------------------
-// RootFinder(const RootFinder& rl)
+// EstimationRootFinder(const EstimationRootFinder& rl)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
  */
 //------------------------------------------------------------------------------
-RootFinder::RootFinder(const RootFinder& rl)
+EstimationRootFinder::EstimationRootFinder(const EstimationRootFinder& rl)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// RootFinder& operator =(const RootFinder& rl)
+// EstimationRootFinder& operator =(const EstimationRootFinder& rl)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
  *
- * @param rl The RootFinder that supplied the configuration data for this one
+ * @param rl The EstimationRootFinder that supplied the configuration data for this one
  *
- * @return This RootFinder
+ * @return This EstimationRootFinder
  */
 //------------------------------------------------------------------------------
-RootFinder& RootFinder::operator =(const RootFinder& rl)
+EstimationRootFinder& EstimationRootFinder::operator =(const EstimationRootFinder& rl)
 {
    if (this != &rl)
    {
@@ -97,23 +97,23 @@ RootFinder& RootFinder::operator =(const RootFinder& rl)
  * @param ps The propagator
  */
 //------------------------------------------------------------------------------
-void RootFinder::SetPropSetup(PropSetup* ps)
+void EstimationRootFinder::SetPropSetup(PropSetup* ps)
 {
    propagator = ps;
 
    #ifdef DEBUG_INITIALIZATION
       if (propagator != NULL)
-         MessageInterface::ShowMessage("RootFinder set to use the "
+         MessageInterface::ShowMessage("EstimationRootFinder set to use the "
                "PropSetup named %s\n", propagator->GetName().c_str());
       else
-         MessageInterface::ShowMessage("RootFinder PropSetup cleared (set to "
+         MessageInterface::ShowMessage("EstimationRootFinder PropSetup cleared (set to "
                "NULL)\n");
    #endif
 }
 
 
 //-----------------------------------------------------------------------------
-// void RootFinder::FixState(Event *thisOne)
+// void EstimationRootFinder::FixState(Event *thisOne)
 //-----------------------------------------------------------------------------
 /**
  * Fixes state data for an event
@@ -125,10 +125,10 @@ void RootFinder::SetPropSetup(PropSetup* ps)
  * @param thisOne The Event that needs to fix some state data
  */
 //-----------------------------------------------------------------------------
-void RootFinder::FixState(Event *thisOne)
+void EstimationRootFinder::FixState(Event *thisOne)
 {
    #ifdef DEBUG_FIXED_STEP
-      MessageInterface::ShowMessage("RootFinder::FixState(%s) called\n",
+      MessageInterface::ShowMessage("EstimationRootFinder::FixState(%s) called\n",
             thisOne->GetName().c_str());
    #endif
 
@@ -167,10 +167,10 @@ void RootFinder::FixState(Event *thisOne)
  * @return The epoch of the earliest event in the list
  */
 //------------------------------------------------------------------------------
-Real RootFinder::Locate(ObjectArray &whichOnes)
+Real EstimationRootFinder::Locate(ObjectArray &whichOnes)
 {
    #ifdef DEBUG_ROOT_SEARCH
-      MessageInterface::ShowMessage("RootFinder::Locate called with %d "
+      MessageInterface::ShowMessage("EstimationRootFinder::Locate called with %d "
             "events\n", whichOnes.size());
    #endif
    Real rootEpoch = -1.0;
@@ -192,7 +192,7 @@ Real RootFinder::Locate(ObjectArray &whichOnes)
 
 
 //------------------------------------------------------------------------------
-// Real RootFinder::FindRoot(Integer whichOne)
+// Real EstimationRootFinder::FindRoot(Integer whichOne)
 //------------------------------------------------------------------------------
 /**
  * Drives the root finding search
@@ -210,12 +210,12 @@ Real RootFinder::Locate(ObjectArray &whichOnes)
  * @return The epoch for the root
  */
 //------------------------------------------------------------------------------
-Real RootFinder::FindRoot(Integer whichOne)
+Real EstimationRootFinder::FindRoot(Integer whichOne)
 {
    Real rootEpoch = -1;
 
    #ifdef DEBUG_ROOT_SEARCH
-      MessageInterface::ShowMessage("RootFinder::FindRoot(%d) searching\n",
+      MessageInterface::ShowMessage("EstimationRootFinder::FindRoot(%d) searching\n",
             whichOne);
    #endif
 
@@ -253,7 +253,7 @@ Real RootFinder::FindRoot(Integer whichOne)
  * @param <fillingBuffer> Flag used to indicate the fill direction.
  */
 //------------------------------------------------------------------------------
-void RootFinder::BufferSatelliteStates(bool fillingBuffer)
+void EstimationRootFinder::BufferSatelliteStates(bool fillingBuffer)
 {
    Spacecraft *fromSat = NULL, *toSat = NULL;
    Formation *fromForm = NULL, *toForm = NULL;
