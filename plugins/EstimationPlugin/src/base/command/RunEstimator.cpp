@@ -733,7 +733,7 @@ void RunEstimator::LocateEvent()
       MessageInterface::ShowMessage("Entered RunEstimator::LocateEvent()\n");
    #endif
 
-   bool newEvent = false;
+//   bool newEvent = false;
    EventStatus status;
 
    // First time through, buffer the objects that get propagated
@@ -797,7 +797,7 @@ void RunEstimator::LocateEvent()
       else
       {
          currentEvent = ((Event*)eventList[0]);
-         newEvent = true;
+//         newEvent = true;
          eventIndex = 0;
          // Will need to be updated when multiple propagators are enabled:
          eventMan->SetObject(propagators[0]);
@@ -846,7 +846,7 @@ void RunEstimator::LocateEvent()
          // Prepare to work with the next active event
          eventMan->ClearObject(currentEvent);
          currentEvent = (Event*)eventList[eventIndex];
-         newEvent = true;
+//         newEvent = true;
 
          // Eventually, set propagators associated with specific events here
          eventMan->SetObject(currentEvent);

@@ -701,7 +701,7 @@ void RunSimulator::LocateEvent()
             "bufferFilled is %s\n", (bufferFilled ? "true" : "false"));
    #endif
 
-   bool newEvent = false;
+//   bool newEvent = false;
    EventStatus status;
 
    // First time through, buffer the objects that get propagated
@@ -761,7 +761,7 @@ void RunSimulator::LocateEvent()
       else
       {
          currentEvent = ((Event*)eventList[0]);
-         newEvent = true;
+//         newEvent = true;
          eventIndex = 0;
          // Will need to be updated when multiple propagators are enabled:
          eventMan->SetObject(propagators[0]);
@@ -807,7 +807,7 @@ void RunSimulator::LocateEvent()
          // Prepare to work with the next active event
          eventMan->ClearObject(currentEvent);
          currentEvent = (Event*)eventList[eventIndex];
-         newEvent = true;
+//         newEvent = true;
 
          // Eventually, set propagators associated with specific events here
          eventMan->SetObject(currentEvent);

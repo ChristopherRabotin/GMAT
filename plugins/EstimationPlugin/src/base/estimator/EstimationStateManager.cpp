@@ -951,14 +951,14 @@ bool EstimationStateManager::MapSTMToObjects()
 
    // Fill in the STM based on the objects that comprise the state vector
    GmatBase* obj;
-   Integer elementId, elementLength;
+   Integer elementId; //, elementLength;
    for (UnsignedInt h = 0; h < stateMap.size(); ++h)
    {
       obj = stateMap[h]->object;
       if (stateMap[h]->subelement == 1)
       {
          elementId = stateMap[h]->parameterID;
-         elementLength = stateMap[h]->length;
+//         elementLength = stateMap[h]->length;
 
          bool hasDstm = obj->HasDynamicParameterSTM(elementId);
 
@@ -994,14 +994,14 @@ bool EstimationStateManager::MapObjectsToSTM()
 
    // Fill in the STM based on the objects that comprise the state vector
    GmatBase* obj;
-   Integer elementId, elementLength;
+   Integer elementId; //, elementLength;
    for (UnsignedInt h = 0; h < stateMap.size(); ++h)
    {
       obj = stateMap[h]->object;
       if (stateMap[h]->subelement == 1)
       {
          elementId = stateMap[h]->parameterID;
-         elementLength = stateMap[h]->length;
+//         elementLength = stateMap[h]->length;
 
          bool hasDstm = obj->HasDynamicParameterSTM(elementId);
 

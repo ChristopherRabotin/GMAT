@@ -185,11 +185,11 @@ Real LightTimeCorrection::Evaluate()
       #endif
 
 
-      Real epoch;
-      if (participants[0]->IsOfType(Gmat::SPACEOBJECT))
-         epoch = ((SpaceObject*)participants[0])->GetEpoch();
-      else
-         epoch = ((SpaceObject*)participants[1])->GetEpoch();
+//      Real epoch;
+//      if (participants[0]->IsOfType(Gmat::SPACEOBJECT))
+//         epoch = ((SpaceObject*)participants[0])->GetEpoch();
+//      else
+//         epoch = ((SpaceObject*)participants[1])->GetEpoch();
    }
 
    #ifdef DEBUG_LIGHTTIME

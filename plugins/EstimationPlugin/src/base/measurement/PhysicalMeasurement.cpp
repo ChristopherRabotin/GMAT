@@ -247,13 +247,13 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
    	troposphere->SetElevationAngle(elevationAngle);
    	troposphere->SetRange(rVec.GetMagnitude()*GmatMathConstants::KM_TO_M);
    	tropoCorrection = troposphere->Correction();
-   	Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
+//   	Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
 
 		#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
 			MessageInterface::ShowMessage("       Apply Troposphere media correction:\n");
 			MessageInterface::ShowMessage("         .Wave length = %.12lf m\n", wavelength);
 			MessageInterface::ShowMessage("         .Elevation angle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
-			MessageInterface::ShowMessage("         .Range correction = %.12lf km\n", rangeCorrection);
+//			MessageInterface::ShowMessage("         .Range correction = %.12lf km\n", rangeCorrection);
 		#endif
    }
    else
