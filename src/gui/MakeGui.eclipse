@@ -318,24 +318,25 @@ OBJECTS = \
     view/ViewTextFrame.o \
     $(STC_EDITOR_OBJECTS) \
     $(SPICE_OBJECTS)
+#    app/GmatSocketServer.o \
 
 ifeq ($(SHARED_BASE), 1)
 
 ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
 	cp -f $(WXTARGET) ../../application/bin/.
 	cp -f $(LIBNAME) ../../application/bin/.
 else
 
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
 	mv -f $(WXTARGET)* ../../application/bin/.
 	cp -f $(LIBNAME) ../../application/bin/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBNAME)
-	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
 	mv -f $(WXTARGET)* ../../application/bin/.
 	cp -f $(LIBNAME) ../../application/bin/.
 endif
@@ -346,17 +347,17 @@ else
 
 ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBS)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
 	cp -f $(WXTARGET) ../../application/bin/.
 else
 
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBS)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
 	mv -f $(WXTARGET)* ../../application/bin/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBS)
-	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
 	mv -f $(WXTARGET)* ../../application/bin/.
 endif
 
@@ -391,10 +392,10 @@ macstacksize:
 	$(SPICE_STACKSIZE)
 
 .cpp.o:
-	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+	$(CPP) $(CPPFLAGS) $(WXCPPFLAGS) $(HEADERS) -c -o $@ $<
 
 .c.o:
-	$(C) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+	$(C) $(CPPFLAGS) $(WXCPPFLAGS) $(HEADERS) -c -o $@ $<
 
 $(GMAT_ICON_O):
 	windres -o $(GMAT_ICON_O) $(GMAT_ICON_RC) -I$(GMAT_ICON_DIR)

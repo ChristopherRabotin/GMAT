@@ -12,21 +12,22 @@ include ../BuildEnv.mk
 
 ifdef LINUX_MAC
 EXTENSION =
+BASE_LIB_LOCATION = ../bin/
 else
 EXTENSION = .exe
 endif
 
 ifeq ($(PROFILE_BUILD),0)
-	TARGET = gmatConsole$(EXTENSION)
+	TARGET = GmatConsole$(EXTENSION)
 else
-	TARGET = gmatConsoleP$(EXTENSION)
+	TARGET = GmatConsoleP$(EXTENSION)
 endif
 
 all: clean $(TARGET)
 
 OBJECTS = driver.o ConsoleAppException.o PrintUtility.o ConsoleMessageReceiver.o
 
-LIBRARIES = -L../base/lib -lGmatConsole
+LIBRARIES = -L../base/lib -lGmatBase
 
 HEADERS = -I../base/include -I../base/foundation \
           -I../base/executive -I../base/factory \
@@ -39,7 +40,7 @@ HEADERS = -I../base/include -I../base/foundation \
           -I../base/configs -I../base/burn \
           -I../base/solver -I../base/function \
           -I../base/coordsystem -I../base/attitude \
-          -I../base/math -I../base/plugin
+          -I../base/math -I../base/plugin -I../base/event
 
 clean : archclean
 
@@ -56,11 +57,19 @@ archclean :
 .cpp.o: 
 	$(CPP) $(CPPFLAGS) $(HEADERS) $(OPTIMIZATIONS) -c $<
 
+ifdef MAC_SPECIFIC
+$(TARGET): $(OBJECTS)
+	$(CPP) $(OBJECTS) $(CONSOLE_LINK_FLAGS) $(LIBRARIES) $(OPTIMIZATIONS) $(SPICE_LIBRARIES) \
+	$(FORTRAN_LIB) -o $(TARGET)
+	mkdir -p ../../application
+	mkdir -p ../../application/bin
+	install_name_tool -change lib/libGmatBase.dylib $(BASE_LIB_LOCATION)libGmatBase.dylib $(TARGET)
+	cp $(TARGET) ../../application/bin/$(TARGET)
+else
 $(TARGET): $(OBJECTS)
 	$(CPP) $(OBJECTS) $(CONSOLE_LINK_FLAGS) $(LIBRARIES) $(OPTIMIZATIONS) $(SPICE_LIBRARIES) \
 	$(FORTRAN_LIB) -o $(TARGET)
 	mkdir -p ../../application
 	mkdir -p ../../application/bin
 	cp $(TARGET) ../../application/bin/$(TARGET)
-#	cp  ../base/lib/libGmatConsole* ../../application/bin/
-	
+endif

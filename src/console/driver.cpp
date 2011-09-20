@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                           TestScriptInterpreter driver
+//                           GmatConsole driver
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
@@ -15,7 +15,7 @@
 // number S-67573-G
 //
 /**
- * Program entry point for TestScriptInterpreter.
+ * Program entry point for GmatConsole.
  */
 //------------------------------------------------------------------------------
 
@@ -44,9 +44,9 @@
 void ShowHelp()
 {
    std::cout << "Usage: One of the following\n"  
-             << "   TestScriptInterpreter\n"
-             << "   TestScriptInterpreter ScriptFileName\n"
-             << "   TestScriptInterpreter <option> <string>\n\n"
+             << "   GmatConsole\n"
+             << "   GmatConsole ScriptFileName\n"
+             << "   GmatConsole <option> <string>\n\n"
              << "The first selection runs an interactive session.\n"
              << "The second runs the input script once and then exits.\n"
              << "The third selection executes specific testing scenarios.\n\n" 
@@ -501,7 +501,8 @@ int main(int argc, char *argv[])
       StringArray parms;
       
       do {
-         if (argc < 2) {
+         if (argc < 2)
+         {
             std::cout << "Enter a script file, " 
                       << "q to quit, or an option:  ";
             
@@ -513,7 +514,8 @@ int main(int argc, char *argv[])
             std::string chunk;
             // Integer start = 0, finish;
          }
-         else {
+         else
+         {
             strcpy(scriptfile, argv[1]);
             if (argc == 3)
                optionParm = argv[2];
@@ -524,20 +526,26 @@ int main(int argc, char *argv[])
          if ((!strcmp(scriptfile, "q")) || (!strcmp(scriptfile, "Q")))
             runcomplete = true;
             
-         if (scriptfile[0] == '-') {
-            if (!strcmp(scriptfile, "--help")) {
+         if (scriptfile[0] == '-')
+         {
+            if (!strcmp(scriptfile, "--help"))
+            {
                ShowHelp();
             }
-            else if (!strcmp(scriptfile, "--batch")) {
+            else if (!strcmp(scriptfile, "--batch"))
+            {
                RunBatch(optionParm);
             }
-            else if (!strcmp(scriptfile, "--save")) {
+            else if (!strcmp(scriptfile, "--save"))
+            {
                SaveScript();
             }
-            else if (!strcmp(scriptfile, "--summary")) {
+            else if (!strcmp(scriptfile, "--summary"))
+            {
                ShowCommandSummary();
             }
-            else if (!strcmp(scriptfile, "--sync")) {
+            else if (!strcmp(scriptfile, "--sync"))
+            {
                TestSyncModeAccess();
             }
             else if (!strcmp(scriptfile, "--verbose"))
@@ -551,10 +559,12 @@ int main(int argc, char *argv[])
             }
             // Options used for some detailed tests but hidden from casual users
             // (i.e. missing from the help messages)
-            else if (!strcmp(scriptfile, "--DumpDEData")) {
+            else if (!strcmp(scriptfile, "--DumpDEData"))
+            {
                DumpDEData(0.001, 0.2);
             }
-            else {
+            else
+            {
                std::cout << "Unrecognized option.\n\n";
                ShowHelp();
             }

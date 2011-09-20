@@ -15,6 +15,9 @@ WX_28_SYNTAX = 1
 USE_STC_EDITOR = 0
 USE_F2C_VERSION = 1
 
+LINUX_MAC = 1
+MAC_SPECIFIC = 1
+
 # Not currently used 
 USE_SHARED = 1
 
@@ -50,7 +53,7 @@ BUILD = release
 ifeq ($(USE_SPICE), 1)
 # location of CSPICE headers and libraries
 # *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
-SPICE_DIR = /Applications/CSPICE
+SPICE_DIR = /Applications/CSPICE_N0064
 SPICE_INCLUDE = -I$(SPICE_DIR)/cspice/include
 SPICE_LIB_DIR = $(SPICE_DIR)/cspice/lib
 SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
@@ -71,9 +74,9 @@ USE_PROFILING = 0
 endif
 
 # currently cannot use MATLAB or shared base library with console version 
-ifeq ($(CONSOLE_APP), 1)
-SHARED_BASE = 0
-endif
+#ifeq ($(CONSOLE_APP), 1)
+#SHARED_BASE = 0
+#endif
 
 
 # DevIL data
@@ -101,10 +104,10 @@ SHARED_BASE_FLAGS =
 endif
 
 # Snow Leopard Specific Build -- to use carbon based wx
-#WX_CARBON_BUILD =  -m32 -arch i386
-WX_CARBON_BUILD = -arch i386
+#USE_CARBON =  -m32 -arch i386
+USE_CARBON = -arch i386
 
-WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`
+WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
 WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
 
 #
@@ -125,8 +128,6 @@ else
 OPTIMIZATIONS = $(SOME_OPTIMIZATIONS) 
 endif
 
-LINUX_MAC = 1
-MAC_SPECIFIC = 1
 
 # For MacOS application
 ifeq ($(MAC_SPECIFIC),1)
@@ -154,10 +155,10 @@ MAC_ICONS    = $(RES_DIR)/gmat.icns
 # Define macros for linking the Carbon and wx resource files
 REZ = /Developer/Tools/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r -arch i386
 # *** EDIT THIS *** - Point to where the FORTRAN libraries are
-ifeq ($(USE_F2C_VERSION), 0)
-FORTRAN_LIB = -L/usr/local/gfortran/lib -lgfortran 
-else
+ifeq ($(USE_F2C_VERSION), 1)
 FORTRAN_LIB = -L$(F2C_LIB_PATH) -lf2c
+else
+FORTRAN_LIB = -L/usr/local/gfortran/lib -lgfortran 
 endif
 else 
 REZ = 
@@ -174,20 +175,20 @@ endif
 DEBUG_FLAGS = 
 
 # Build the complete list of flags for the compilers
-CPPFLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(SHARED_BASE_FLAGS) \
-           $(WXCPPFLAGS) $(SPICE_INCLUDE) $(SPICE_DIRECTIVE) $(IL_HEADERS) -D__WXMAC__ $(WX_28_DEFINES) $(WX_CARBON_BUILD)
-F77_FLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall -m32 \
-            $(WXCPPFLAGS) $(IL_HEADERS) -D__WXMAC__ $(WX_28_DEFINES)
+CPPFLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(SHARED_BASE_FLAGS) -DLINUX_MAC\
+           $(SPICE_INCLUDE) $(SPICE_DIRECTIVE) $(IL_HEADERS) $(USE_CARBON)
+F77_FLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall -m32 $(IL_HEADERS)
 
 
 # Link specific flags
 # *** EDIT THIS *** - put the correct wx lib here (based on the version you're using, 
 #                     i.e. 2.8, 2.6, etc.)
-LINK_FLAGS =  $(WXLINKFLAGS) /usr/lib/libstdc++.6.dylib \
-               -framework OpenGL -framework AGL  -headerpad_max_install_names \
+LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
+               -framework OpenGL -framework AGL  -headerpad_max_install_names -DLINUX_MAC\
                $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
-             -lwx_mac_gl-2.8 $(DEBUG_FLAGS) $(IL_LIBRARIES) $(WX_CARBON_BUILD)
+             -lwx_mac_gl-2.8 $(DEBUG_FLAGS) $(IL_LIBRARIES) $(USE_CARBON)
+
 
 # currently cannot use MATLAB with console version
-CONSOLE_LINK_FLAGS = -L../../base/lib $(FORTRAN_LIB) $(SPICE_LIBRARIES) -lm -ldl $(DEBUG_FLAGS) 
+CONSOLE_LINK_FLAGS = $(FORTRAN_LIB) $(SPICE_LIBRARIES) -lm -ldl $(DEBUG_FLAGS) $(USE_CARBON)
 
