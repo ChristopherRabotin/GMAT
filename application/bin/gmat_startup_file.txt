@@ -91,7 +91,7 @@ JGM2_FILE              = EARTH_POT_PATH/JGM2.cof
 JGM3_FILE              = EARTH_POT_PATH/JGM3.cof
 MARS50C_FILE           = MARS_POT_PATH/Mars50c.cof
 MGNP180U_FILE          = VENUS_POT_PATH/MGNP180U.cof
-LP165P_FILE            = LUNA_POT_PATH/lp165p.cof
+LP165P_FILE            = LUNA_POT_PATH/LP165P.cof
 #-----------------------------------------------------------
 GUI_CONFIG_PATH        = DATA_PATH/gui_config/
 PERSONALIZATION_FILE   = DATA_PATH/gui_config/MyGmat.ini
