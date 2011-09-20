@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\include\msvc&quot;"
+				AdditionalIncludeDirectories="..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\net;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\contrib\include&quot;;&quot;$(WXWIN)\include\msvc&quot;"
 				PreprocessorDefinitions="__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__USE_WX280__;__USE_WX280_GL__;SKIP_DEVIL;__SKIP_MSISE90__;__SHOW_HELP_BUTTON__;__SMART_APPLY_BUTTON__;DEBUG_MEMORY"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -1914,6 +1914,14 @@
 					</File>
 					<File
 						RelativePath="..\..\..\src\base\solarsys\PlanetaryEphemException.hpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp"
 						>
 					</File>
 					<File
@@ -4370,6 +4378,34 @@
 					</File>
 					<File
 						RelativePath="..\..\..\src\gui\rendering\Rendering.hpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="net"
+					>
+					<File
+						RelativePath="..\..\..\src\gui\net\email.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\gui\net\email.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\gui\net\smapi.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\gui\net\smapi.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\gui\net\web.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\gui\net\web.h"
 						>
 					</File>
 				</Filter>
