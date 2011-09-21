@@ -8,6 +8,11 @@
 #ifndef SocketServer_hpp
 #define SocketServer_hpp
 
+#ifndef _WIN32
+#define LINUX_MAC
+#endif
+
+
 #ifdef LINUX_MAC
 	#include <unistd.h>
 	#include <pthread.h>
@@ -56,11 +61,13 @@ public:
 	{
 		SocketServer* pThis = (SocketServer*)objPtr;
 		pThis->OnAccept(pThis->client_sock);
+		return NULL;
 	}
 	static void* StaticRunServer(void* objPtr)
 	{
 		SocketServer* pThis = (SocketServer*)objPtr;
 		pThis->RunServer();
+      return NULL;
 	}
 #else
 	void OnAccept(SOCKET sock);
