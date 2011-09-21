@@ -636,7 +636,11 @@ void MdiChildViewFrame::OnMove(wxMoveEvent& event)
    // Implemented here so that when user moves scroll bar the plot will be repainted
    // Without this, OrbitView or GroundTrack plot shows only white background.
    if ( mCanvas )
-      mCanvas->Refresh();
+   {
+      // Do not use Refresh, it makes flickering
+      //mCanvas->Refresh(false);
+      mCanvas->Update();
+   }
    
    // VZ: here everything is totally wrong under MSW, the positions are
    //     different and both wrong (pos2 is off by 2 pixels for me which seems
