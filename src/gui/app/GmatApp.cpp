@@ -293,7 +293,7 @@ bool GmatApp::OnInit()
       std::string nowStr = wxNowStr.c_str();
       
       MessageInterface::LogMessage
-         (nowStr + "Error encounted while launching GMAT GUI.\n\n");
+         (nowStr + "Error encountered while launching GMAT GUI.\n\n");
       
       MessageInterface::LogMessage(e.GetFullMessage());
       return false;
