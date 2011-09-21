@@ -1,8 +1,8 @@
 # $Id: OdEnv.mk,v 1.1.1.1 2010/01/14 23:37:24 djc Exp $
 # Environment settings for the estimation plugin
-GMAT_Code_Location = ../../../../../development/src
-GMAT_Bin_Location = ../../../../../development/application/bin
-GMAT_Plugin_Location = ../../../../../development/application/plugins
+GMAT_Code_Location = ../../../../../trunk/src
+GMAT_Bin_Location = ../../../../../trunk/application/bin
+GMAT_Plugin_Location = ../../../../../trunk/application/plugins
 GMAT_DataFile_Location = ./../../DataFilePlugin/src  # TBD #
 
 # Toggle for using the older datafile code or the plugin code
@@ -37,8 +37,8 @@ endif
 
 # Select the base library
 BASE_LIBRARY = GmatBase
-# BASE_LIB_LOCATION is only used on Mac
-BASE_LIB_LOCATION = ../bin/GMAT.app/Contents/Frameworks/
+# BASE_LIB_LOCATION is only used on Mac - the plugins must point to the lib OUTSIDE the bundle
+BASE_LIB_LOCATION = ../bin/
 
 # Compiler options
 CPP = g++
