@@ -399,7 +399,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::OnClose() will call GmatMainFrame to remove child and exit\n");
    #endif
-   
+   SavePlotPositionAndSize();
    // remove from list of frames
    GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType);   
    wxSafeYield();
