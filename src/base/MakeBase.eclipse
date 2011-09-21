@@ -333,7 +333,6 @@ OBJECTS = \
     interface/InterfaceException.o \
     interface/Interface.o \
     interface/GmatInterface.o \
-    interface/SocketServer.o \
     interpolator/InterpolatorException.o \
     interpolator/Interpolator.o \
     interpolator/BrentDekkerZero.o \
@@ -556,6 +555,7 @@ OBJECTS = \
     $(TCPIP_OBJECTS) \
     $(SPICE_OBJECTS)
 #    solarsys/BodyDataReader.o \
+#    interface/SocketServer.o \
 
 #    parameter/OrbitAMatrixParameters.o \
 #    forcemodel/harmonic/EarthTide.o \

@@ -324,19 +324,19 @@ ifeq ($(SHARED_BASE), 1)
 
 ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
 	cp -f $(WXTARGET) ../../application/bin/.
 	cp -f $(LIBNAME) ../../application/bin/.
 else
 
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
 	mv -f $(WXTARGET)* ../../application/bin/.
 	cp -f $(LIBNAME) ../../application/bin/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBNAME)
-	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
+	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
 	mv -f $(WXTARGET)* ../../application/bin/.
 	cp -f $(LIBNAME) ../../application/bin/.
 endif
@@ -347,17 +347,17 @@ else
 
 ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBS)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
 	cp -f $(WXTARGET) ../../application/bin/.
 else
 
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBS)
-	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
 	mv -f $(WXTARGET)* ../../application/bin/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBS)
-	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(WXLINKFLAGS)
+	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
 	mv -f $(WXTARGET)* ../../application/bin/.
 endif
 
@@ -392,10 +392,10 @@ macstacksize:
 	$(SPICE_STACKSIZE)
 
 .cpp.o:
-	$(CPP) $(CPPFLAGS) $(WXCPPFLAGS) $(HEADERS) -c -o $@ $<
+	$(CPP) $(CPPFLAGS) $(GUI_CPP_FLAGS) $(HEADERS) -c -o $@ $<
 
 .c.o:
-	$(C) $(CPPFLAGS) $(WXCPPFLAGS) $(HEADERS) -c -o $@ $<
+	$(C) $(CPPFLAGS) $(GUI_CPP_FLAGS) $(HEADERS) -c -o $@ $<
 
 $(GMAT_ICON_O):
 	windres -o $(GMAT_ICON_O) $(GMAT_ICON_RC) -I$(GMAT_ICON_DIR)

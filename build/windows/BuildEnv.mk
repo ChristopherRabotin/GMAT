@@ -76,9 +76,9 @@ EMAIL_CPP_FLAGS =
 EMAIL_LIBRARIES =
 endif
 
-#GMAT_CPP_FLAGS = -DDEBUG_MEMORY $(SPICE_CPP_FLAGS) $(IL_CPP_FLAGS) $(STC_CPP_FLAGS) $(EMAIL_CPP_FLAGS) $(GUI_CPP_FLAGS) 
-GMAT_CPP_FLAGS = $(SPICE_CPP_FLAGS) $(IL_CPP_FLAGS) $(STC_CPP_FLAGS) $(EMAIL_CPP_FLAGS) $(GUI_CPP_FLAGS) 
-GMAT_LINK_FLAGS = $(SPICE_LIBRARIES) $(IL_LIBRARIES) $(STC_LIBRARIES) $(EMAIL_LIBRARIES) 
+#BASE_CPP_FLAGS = -DDEBUG_MEMORY $(SPICE_CPP_FLAGS)
+BASE_CPP_FLAGS = $(SPICE_CPP_FLAGS)
+BASE_LINK_FLAGS = $(SPICE_LIBRARIES)
 
 # wxWidgets settings
 ifeq ($(WX_28_SYNTAX), 1)
@@ -104,7 +104,7 @@ PROFILE_FLAGS =
 endif
 
 ifeq ($(SHARED_BASE), 1)
-SHARED_LIB_FLAGS = $(FORTRAN_LIB) $(GMAT_LINK_FLAGS) -shared -Wl --out-implib
+SHARED_LIB_FLAGS = $(FORTRAN_LIB) $(BASE_LINK_FLAGS) -shared -Wl --out-implib
 else
 SHARED_LIB_FLAGS = 
 endif
@@ -121,9 +121,12 @@ OPTIMIZATIONS =  -DwxUSE_UNIX=0 -D_X86_=1 -DWIN32 -DWINVER=0x0400 -D__WIN95__ \
 # Do not edit below this line -- here we build up longer compile/link strings
 LINUX_MAC = 0
 
-WXCPPFLAGS = `/usr/local/bin/wx-config --cppflags`
-WXLINKFLAGS = `/usr/local/bin/wx-config --libs --gl-libs --static=no` \
-               -lopengl32 -lglu32
+WX_CPP_FLAGS = $(STC_CPP_FLAGS) $(EMAIL_CPP_FLAGS)
+WX_LINK_FLAGS = $(STC_LIBRARIES) $(EMAIL_LIBRARIES)
+
+GUI_CPP_FLAGS = `/usr/local/bin/wx-config --cppflags` $(WX_CPP_FLAGS) $(IL_CPP_FLAGS) 
+GUI_LINK_FLAGS = `/usr/local/bin/wx-config --libs --gl-libs --static=no` \
+               $(WX_LINK_FLAGS) $(IL_LIBRARIES) -lopengl32 -lglu32
 
 # Set options for debugging and profiling
 ifeq ($(DEBUG_BUILD), 1)
@@ -133,15 +136,14 @@ DEBUG_FLAGS =
 endif
 
 # Build the complete list of flags for the compilers
-CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) $(GMAT_CPP_FLAGS) -Wall \
-           $(WXCPPFLAGS) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
+CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) $(BASE_CPP_FLAGS) -Wall \
+           $(PROFILE_FLAGS) $(DEBUG_FLAGS)
 
 CPPFLAGS = $(CPP_BASE) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
 
 F77_FLAGS = $(CPPFLAGS)
 
-LINK_FLAGS = $(GMAT_LINK_FLAGS) $(WXLINKFLAGS) \
-             $(FORTRAN_LIB) $(DEBUG_FLAGS)
+LINK_FLAGS = $(BASE_LINK_FLAGS) $(FORTRAN_LIB) $(DEBUG_FLAGS)
 
 CONSOLE_LINK_FLAGS = -L../base/lib $(FORTRAN_LIB) $(DEBUG_FLAGS) $(PROFILE_FLAGS)
 
