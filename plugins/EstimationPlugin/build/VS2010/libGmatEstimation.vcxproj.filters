@@ -96,9 +96,6 @@
     <ClInclude Include="..\..\src\base\event\LightTimeCorrection.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\event\RootFinder.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\event\Event.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
@@ -288,6 +285,9 @@
     <ClInclude Include="..\..\src\base\trackingsystem\USNTrackingSystem.hpp">
       <Filter>Source Files\trackingsystem</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\event\EstimationRootFinder.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -327,9 +327,6 @@
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\event\LightTimeCorrection.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\event\RootFinder.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\event\Event.cpp">
@@ -515,5 +512,11 @@
     <ClCompile Include="..\..\src\base\trackingsystem\USNTrackingSystem.cpp">
       <Filter>Source Files\trackingsystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\base\event\EstimationRootFinder.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
 </Project>

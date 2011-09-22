@@ -200,12 +200,12 @@
     <ClInclude Include="..\..\src\base\estimator\ExtendedKalmanInv.hpp" />
     <ClInclude Include="..\..\src\base\estimator\SequentialEstimator.hpp" />
     <ClInclude Include="..\..\src\base\estimator\Simulator.hpp" />
+    <ClInclude Include="..\..\src\base\event\EstimationRootFinder.hpp" />
     <ClInclude Include="..\..\src\base\event\Event.hpp" />
     <ClInclude Include="..\..\src\base\event\EventData.hpp" />
     <ClInclude Include="..\..\src\base\event\EventException.hpp" />
     <ClInclude Include="..\..\src\base\event\EventManager.hpp" />
     <ClInclude Include="..\..\src\base\event\LightTimeCorrection.hpp" />
-    <ClInclude Include="..\..\src\base\event\RootFinder.hpp" />
     <ClInclude Include="..\..\src\base\factory\DataFileFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\EstimationCommandFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\EstimatorFactory.hpp" />
@@ -281,12 +281,12 @@
     <ClCompile Include="..\..\src\base\estimator\ExtendedKalmanInv.cpp" />
     <ClCompile Include="..\..\src\base\estimator\SequentialEstimator.cpp" />
     <ClCompile Include="..\..\src\base\estimator\Simulator.cpp" />
+    <ClCompile Include="..\..\src\base\event\EstimationRootFinder.cpp" />
     <ClCompile Include="..\..\src\base\event\Event.cpp" />
     <ClCompile Include="..\..\src\base\event\EventData.cpp" />
     <ClCompile Include="..\..\src\base\event\EventException.cpp" />
     <ClCompile Include="..\..\src\base\event\EventManager.cpp" />
     <ClCompile Include="..\..\src\base\event\LightTimeCorrection.cpp" />
-    <ClCompile Include="..\..\src\base\event\RootFinder.cpp" />
     <ClCompile Include="..\..\src\base\factory\DataFileFactory.cpp" />
     <ClCompile Include="..\..\src\base\factory\EstimationCommandFactory.cpp" />
     <ClCompile Include="..\..\src\base\factory\EstimatorFactory.cpp" />
