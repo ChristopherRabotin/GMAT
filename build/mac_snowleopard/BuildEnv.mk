@@ -103,7 +103,7 @@ else
 SHARED_BASE_FLAGS =
 endif
 
-# Snow Leopard Specific Build -- to use carbon based wx
+# Use carbon based wx (32-bit); else use 64-bit
 #USE_CARBON =  -m32 -arch i386
 USE_CARBON = -arch i386
 
@@ -188,6 +188,8 @@ LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
                $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
              -lwx_mac_gl-2.8 $(DEBUG_FLAGS) $(IL_LIBRARIES) $(USE_CARBON)
 
+GUI_CPP_FLAGS = $(WXCPPFLAGS)
+GUI_LINK_FLAGS = $(WXLINKFLAGS)
 
 # currently cannot use MATLAB with console version
 CONSOLE_LINK_FLAGS = $(FORTRAN_LIB) $(SPICE_LIBRARIES) -lm -ldl $(DEBUG_FLAGS) $(USE_CARBON)
