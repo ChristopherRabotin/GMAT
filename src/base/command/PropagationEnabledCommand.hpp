@@ -29,6 +29,7 @@
 
 #include "Spacecraft.hpp"
 #include "Formation.hpp"
+#include "RootFinder.hpp"
 
 
 /// A convenient typedef used in this code
@@ -119,6 +120,8 @@ protected:
    Real                 *currentEventData;
    /// Total number of elements in the data buffers
    UnsignedInt          eventBufferSize;
+   /// Root finder used in event location
+   RootFinder           *finder;
 
    bool                 PrepareToPropagate();
    bool                 AssemblePropagators();

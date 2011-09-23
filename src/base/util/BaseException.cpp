@@ -134,6 +134,9 @@ void BaseException::SetDetails(const char *details, ...)
       ret = vsprintf(msgBuffer, details, marker);
       #endif
 
+      if (ret < 0)
+         ;   // Neg number means the call failed; should we do anything?
+
       va_end(marker);
    }
 

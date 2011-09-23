@@ -1,4 +1,4 @@
-//$Id: EstimationRootFinder.hpp,v 1.2 2010/01/19 00:00:07 djc Exp $
+//$Id$
 //------------------------------------------------------------------------------
 //                         EstimationRootFinder
 //------------------------------------------------------------------------------
@@ -47,9 +47,9 @@ public:
    EstimationRootFinder(const EstimationRootFinder& rl);
    EstimationRootFinder& operator=(const EstimationRootFinder& rl);
 
-   void SetPropSetup(PropSetup* ps);
-   void FixState(Event *thisOne);
-   Real Locate(ObjectArray &whichOnes);
+   virtual void SetPropSetup(PropSetup* ps);
+   virtual void FixState(Event *thisOne);
+   virtual Real Locate(ObjectArray &whichOnes);
 
 protected:
    /// The propagator used to locate the root
@@ -66,8 +66,8 @@ protected:
    /// The current set of events that the EstimationRootFinder is using
    std::vector<Event*> *events;
 
-   Real FindRoot(Integer whichOne);
-   void BufferSatelliteStates(bool fillingBuffer);
+   virtual Real FindRoot(Integer whichOne);
+   virtual void BufferSatelliteStates(bool fillingBuffer);
 };
 
 #endif // EstimationRootFinder_hpp

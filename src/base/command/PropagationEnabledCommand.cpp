@@ -26,6 +26,8 @@
 #include "ODEModel.hpp"
 #include "PropagationStateManager.hpp"
 #include "EventLocator.hpp"
+#include "Brent.hpp"
+
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
@@ -66,7 +68,8 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    activeLocatorCount   (0),
    previousEventData    (NULL),
    currentEventData     (NULL),
-   eventBufferSize      (0)
+   eventBufferSize      (0),
+   finder               (NULL)
 {
    objectTypeNames.push_back("PropagationEnabledCommand");
    physicsBasedCommand = true;
@@ -106,6 +109,9 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
 
    if (currentEventData != NULL)
       delete [] currentEventData;
+
+   if (finder != NULL)
+      delete finder;
 }
 
 
@@ -128,10 +134,11 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    epochID              (pec.epochID),
    j2kState             (NULL),
    pubdata              (NULL),
-   activeLocatorCount     (0),
+   activeLocatorCount   (0),
    previousEventData    (NULL),
    currentEventData     (NULL),
-   eventBufferSize      (0)
+   eventBufferSize      (0),
+   finder               (NULL)
 {
    initialized = false;
    propagatorNames = pec.propagatorNames;
@@ -993,22 +1000,32 @@ void PropagationEnabledCommand::InitializeForEventLocation()
             activeLocatorCount);
    #endif
 
-   if (previousEventData != NULL)
-      delete [] previousEventData;
-   previousEventData = new Real[eventBufferSize];
-
    if (currentEventData != NULL)
       delete [] currentEventData;
-   currentEventData = new Real[eventBufferSize];
+   if (previousEventData != NULL)
+      delete [] previousEventData;
 
-   Integer dataIndex;
-   for (Integer i = 0; i < activeLocatorCount; ++i)
+   if (eventBufferSize != 0)
    {
-      Real *data = events->at(activeEventIndices[i])->Evaluate();
-      dataIndex = eventStartIndices[i];
-      UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
-      for (UnsignedInt j = 0; j < fc*3; ++j)
-         previousEventData[dataIndex + j] = data[j];
+      currentEventData = new Real[eventBufferSize];
+      previousEventData = new Real[eventBufferSize];
+
+      Integer dataIndex;
+      for (Integer i = 0; i < activeLocatorCount; ++i)
+      {
+         Real *data = events->at(activeEventIndices[i])->Evaluate();
+         dataIndex = eventStartIndices[i];
+         UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
+         for (UnsignedInt j = 0; j < fc*3; ++j)
+            previousEventData[dataIndex + j] = data[j];
+      }
+
+      finder = new Brent;
+   }
+   else
+   {
+      currentEventData = NULL;
+      previousEventData = NULL;
    }
 }
 
@@ -1102,8 +1119,8 @@ void PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
       return;
    }
 
-   // Temporary: Linear interpolate to get the epoch
    #ifdef DEBUG_EVENTLOCATORS
+      // Linear interpolate to guess the epoch
       Real bounds[2], epochs[2];
       bounds[0] = previousEventData[index*3+1];
       bounds[1] = currentEventData[index*3+1];
@@ -1116,18 +1133,30 @@ void PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
 
       MessageInterface::ShowMessage("Zero at %12lf\n", zero);
    #endif
+
    eventFound = true;
 
    // End of temporary section
 
    if (eventFound)
+   {
+      finder->Initialize(previousEventData[index*3],
+            previousEventData[index*3+1], currentEventData[index*3],
+            currentEventData[index*3+1]);
       UpdateEventTable(el, index);
+   }
 }
 
 
 void PropagationEnabledCommand::UpdateEventTable(EventLocator* el, Integer index)
 {
-   el->BufferEvent(index);
+//   while (GmatMathUtil::Abs((el->Evaluate())[index*3+1]) >
+//             el->GetRealParameter("Tolerance"))
+   {
+      Real step = finder->GetStep(currentEventData[index]);
+      MessageInterface::ShowMessage("Step by %lf from epoch %15.9lf\n", step,
+            currentEventData[index]);
+   }
 }
 
 

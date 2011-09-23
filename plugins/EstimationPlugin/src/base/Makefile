@@ -88,6 +88,7 @@ HEADERS = -Iinclude \
           $(DATAFILE_INCLUDES) \
           -I$(GMAT_Code_Location)/base/include \
           -I$(GMAT_Code_Location)/base/foundation \
+          -I$(GMAT_Code_Location)/base/event \
           -I$(GMAT_Code_Location)/base/executive \
           -I$(GMAT_Code_Location)/base/attitude \
           -I$(GMAT_Code_Location)/base/hardware \
