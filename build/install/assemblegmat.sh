@@ -126,3 +126,7 @@ then
     pwstring="--password $pw"
 fi
 svn export $ustring $pwstring --force "$mgpath" "$dest/data"
+
+# libCInterface MATLAB files
+cifacepath="$sfrepo/trunk/plugins/CInterfacePlugin"
+svn export --force "$cifacepath/matlab" "$dest/matlab/libCInterface"
