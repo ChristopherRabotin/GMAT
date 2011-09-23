@@ -58,7 +58,6 @@
 #include "BeginFiniteBurnPanel.hpp"
 #include "EndFiniteBurnPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
-#include "OpenGlPlotSetupPanel.hpp"
 #include "OrbitViewPanel.hpp"
 #include "ReportFileSetupPanel.hpp"
 #include "EphemerisFilePanel.hpp"
