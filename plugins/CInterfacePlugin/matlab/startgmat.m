@@ -1,29 +1,38 @@
-function [retval] = startgmat(filename)
+function [odeId] = startgmat(filename, odemodelname)
 
 % STARTGMAT GMAT engine initialization routine
-%  [retval] = startgmat() Loads the GMAT interface and core library, 
+%  [odeId] = startgmat() Loads the GMAT interface and core library, 
 %  initializes the objects in GMAT using the default script
-%  (defaultOdtbx.script), populates GMAT's sandbox with the configuration
+%  (GmatConfig.script), populates GMAT's sandbox with the configuration
 %  described in the script, runs the script, forcing GMAT to establish all
 %  object-to-object interconnections, and then locates the first ODE model 
 %  in the Mission Control Sequence for use by ODTBX.
 %
-%  [retval] = startgmat(filename) Loads the GMAT interface and core 
+%  [odeId] = startgmat(filename) Loads the GMAT interface and core 
 %  library, initializes the objects in GMAT using the specified script, 
 %  populates GMAT's sandbox with the configuration described in the script, 
 %  runs the script, forcing GMAT to establish all object-to-object 
 %  interconnections, and then locates the first ODE model in the Mission 
 %  Control Sequence for use by ODTBX.
 % 
+%  [odeId] = startgmat(filename, odemodelname) Loads the GMAT interface and core 
+%  library, initializes the objects in GMAT using the specified script, 
+%  populates GMAT's sandbox with the configuration described in the script, 
+%  runs the script, forcing GMAT to establish all object-to-object 
+%  interconnections, and then locates the named ODE model in the Mission 
+%  Control Sequence for use by ODTBX.
 %
 %   INPUTS
 %   VARIABLE        SIZE    	DESCRIPTION (Optional/Default)
 %   filename        (1x1)       (Optional) GMAT script used to configure
 %                               and populate the GMAT sandbox.
+%   odemodelname    (1x1)       (Optional) Name of the desired ODE model. 
+%                               If omitted, the first ODE model found is 
+%                               selected.
 %
 %   OUTPUTS
-%   retval          (1x1)       Integer return code indicating the status
-%                               of the GMAT startup process.
+%   odeId           (1x1)       The ID for the first ODE model in the GMAT
+%                               script.
 %
 %   keyword: GMAT Integrators Forces 
 %
@@ -60,25 +69,22 @@ end
 
 
 % Load the library and start the GMAT engine
-opengmat;
+opengmat();
 
 % Load and populate a configuration
-retval = calllib('libCInterface', 'LoadScript', filename);
-if retval ~= 0
-    error('The configuration script "%s" failed to load\n', filename); 
-end
-retval = calllib('libCInterface','RunScript');
-if retval ~= 0
-    error('The configuration script "%s" failed to run\n', filename); 
-end
+preparescript(filename);
 
 % Show the run status
 ode = calllib('libCInterface','getLastMessage');
 disp(ode);
 
 % Set the ODE model to the one named in the script (uses the
-% first model found)
-findodemodel;
+% first model found by default)
+if exist('odemodelname', 'var')
+    odeId = findodemodel(odemodelname);
+else
+    odeId = findodemodel();
+end
 
 ode = calllib('libCInterface','getLastMessage');
 disp(ode);
