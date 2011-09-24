@@ -149,35 +149,47 @@ void MissionTreeToolBar::CreateMissionTreeToolBar()
    guiManager->LoadIcon("mtc_ExcCall", bitmapType, &bitmaps[++index], mtc_ExcCall_xpm);
    guiManager->LoadIcon("mtc_CustomView", bitmapType, &bitmaps[++index], mtc_CustomView_xpm);
    
-   index = -1;
-   AddCheckTool(TOOL_LEVEL_ALL, wxT("LevelA"), *bitmaps[++index],
+   index = 0;
+   AddCheckTool(TOOL_LEVEL_ALL, wxT("LevelA"), *bitmaps[index],
                                  *bitmaps[index], wxT("Expand All Levels"));
-   AddCheckTool(TOOL_LEVEL_1, wxT("Level1"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_LEVEL_1, wxT("Level1"), *bitmaps[index],
                                  *bitmaps[index], wxT("Expand One Level"));
-   AddCheckTool(TOOL_LEVEL_2, wxT("Level2"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_LEVEL_2, wxT("Level2"), *bitmaps[index],
                                  *bitmaps[index], wxT("Expand Two Levels"));
-   AddCheckTool(TOOL_LEVEL_3, wxT("Level3"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_LEVEL_3, wxT("Level3"), *bitmaps[index],
                                  *bitmaps[index], wxT("Expand Three Levels"));
    AddSeparator();
-   AddCheckTool(TOOL_INC_PHYSICS, wxT("IncPhysics"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_INC_PHYSICS, wxT("IncPhysics"), *bitmaps[index],
                                  *bitmaps[index], wxT("Include Physics Related commands"));
-   AddCheckTool(TOOL_INC_SOLVER, wxT("IncSolver"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_INC_SOLVER, wxT("IncSolver"), *bitmaps[index],
                                  *bitmaps[index], wxT("Include Solver Related commands"));
-   AddCheckTool(TOOL_INC_SCRIPT, wxT("IncScript"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_INC_SCRIPT, wxT("IncScript"), *bitmaps[index],
                                  *bitmaps[index], wxT("Include ScriptEvent"));
-   AddCheckTool(TOOL_INC_CONTROL, wxT("IncControl"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_INC_CONTROL, wxT("IncControl"), *bitmaps[index],
                                  *bitmaps[index], wxT("Include Control Flow"));
    AddSeparator();
-   AddCheckTool(TOOL_EXC_REPORT, wxT("ExcReport"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_EXC_REPORT, wxT("ExcReport"), *bitmaps[index],
                                  *bitmaps[index], wxT("Exclude Report"));
-   AddCheckTool(TOOL_EXC_EQUATION, wxT("ExcEquation"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_EXC_EQUATION, wxT("ExcEquation"), *bitmaps[index],
                                  *bitmaps[index], wxT("Exclude Equation"));
-   AddCheckTool(TOOL_EXC_PLOT, wxT("ExcPlot"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_EXC_PLOT, wxT("ExcPlot"), *bitmaps[index],
                                  *bitmaps[index], wxT("Exclude Toggle, PenUp/Down, ClearPlot, and MarkPoint commands"));
-   AddCheckTool(TOOL_EXC_CALL, wxT("ExcCall"), *bitmaps[++index],
+   ++index;
+   AddCheckTool(TOOL_EXC_CALL, wxT("ExcCall"), *bitmaps[index],
                                  *bitmaps[index], wxT("Exclude CallFunction, Save commands"));
    AddSeparator();
-   AddTool(TOOL_CUSTOM_VIEW, wxT("CustomizeView"), *bitmaps[++index],
+   ++index;
+   AddTool(TOOL_CUSTOM_VIEW, wxT("CustomizeView"), *bitmaps[index],
                             wxT("Customize Mission Tree View"));
    Realize();
    
