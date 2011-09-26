@@ -407,7 +407,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::OnClose() will call GmatMainFrame to remove child and exit\n");
    #endif
-   if (mItemType == GmatTree::MISSION_TREE_UNDOCKED) SaveChildPositionAndSize();
+   SaveChildPositionAndSize();
    // remove from list of frames
    GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType);   
    wxSafeYield();
