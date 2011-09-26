@@ -85,6 +85,8 @@ protected:
    GmatBase*   FindObject(const std::string &name);
    void        ShowObjectMaps(const std::string &title = "");
    
+   std::list<Subscriber*> GetSubscribersInZOrder(std::list<Subscriber*> subList);
+
 private:
    
    ObjectInitializer();

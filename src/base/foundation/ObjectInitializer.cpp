@@ -24,6 +24,7 @@
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
+#include "GmatConstants.hpp"
 #include "Moderator.hpp"
 #include "ObjectInitializer.hpp"
 #include "SolarSystem.hpp"
@@ -39,6 +40,7 @@
 //#define DEBUG_INITIALIZE_CS
 //#define DEBUG_BUILD_ASSOCIATIONS
 //#define DEBUG_OBJECT_MAP
+//#define DEBUG_Z_ORDER
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -647,7 +649,10 @@ void ObjectInitializer::InitializeSubscribers(ObjectMap *objMap)
       
    std::list<Subscriber*>::iterator subiter;
    std::list<Subscriber*> subList = publisher->GetSubscriberList();
-   for (subiter = subList.begin(); subiter != subList.end(); ++subiter)
+   /// Initialize in z-order here, if relative z-order values have been saved from a previous run
+   std::list<Subscriber*> orderedList = GetSubscribersInZOrder(subList);
+
+   for (subiter = orderedList.begin(); subiter != orderedList.end(); ++subiter)
    {
       std::string subName = (*subiter)->GetName();      
       std::map<std::string, GmatBase *>::iterator omi;
@@ -1525,6 +1530,73 @@ void ObjectInitializer::ShowObjectMaps(const std::string &str)
    MessageInterface::ShowMessage
       ("======================================================================\n");
 }
+
+//------------------------------------------------------------------------------
+// std::list<Subscriber*> GetSubscribersInZOrder(std::list<Subscriber*> subList)
+//------------------------------------------------------------------------------
+std::list<Subscriber*> ObjectInitializer::GetSubscribersInZOrder(std::list<Subscriber*> subList)
+{
+   if (subList.empty()) return subList;
+
+   #ifdef DEBUG_Z_ORDER
+      MessageInterface::ShowMessage("Now checking for a non-zero z-order\n");
+   #endif
+   bool noZOrder    = true;
+   Integer zOrderID = (subList.front())->GetParameterID("RelativeZOrder");
+
+   // if we find a relative z-order for any of the subscribers that is non-zero, we
+   // know we need to order them all
+   std::list<Subscriber*>::iterator si;
+   for (si = subList.begin(); si != subList.end(); si++)
+   {
+      #ifdef DEBUG_Z_ORDER
+         MessageInterface::ShowMessage("Relative z-order for %s is %d\n", ((*si)->GetName()).c_str(), ((*si)->GetIntegerParameter(zOrderID)));
+      #endif
+      if ((*si)->GetIntegerParameter(zOrderID) != 0)
+      {
+         noZOrder = false;
+         break;
+      }
+
+   }
+   // if we didn't find any non-zero z-order values, just return the input list
+   if (noZOrder) return subList;
+
+   // put the subscribers in z-order, from lowest to highest
+   std::list<Subscriber*> tmpList = subList;
+   std::list<Subscriber*> orderedList;
+   Integer currentZOrder        = GmatRealConstants::INTEGER_MAX;
+   Subscriber *hasLowestZOrder  = NULL;
+   unsigned int origSize        = tmpList.size();
+   for (unsigned int jj = 0; jj < origSize; jj++)
+   {
+      currentZOrder   = GmatRealConstants::INTEGER_MAX;
+      hasLowestZOrder = NULL;
+      for (si = tmpList.begin(); si != tmpList.end(); si++)
+      {
+         Integer zOrder   = (*si)->GetIntegerParameter(zOrderID);
+         #ifdef DEBUG_Z_ORDER
+            MessageInterface::ShowMessage("ORDERING: Relative z-order for %s is %d\n", ((*si)->GetName()).c_str(), zOrder);
+         #endif
+         if (zOrder < currentZOrder)
+         {
+            currentZOrder   = zOrder;
+            hasLowestZOrder = (*si);
+         }
+      }
+      if (hasLowestZOrder == NULL)
+      {
+         throw GmatBaseException("ERROR ordering subscriber list!\n");
+      }
+      #ifdef DEBUG_Z_ORDER
+         MessageInterface::ShowMessage("------> ADDING %s to orderedList\n", (hasLowestZOrder->GetName()).c_str());
+      #endif
+      orderedList.push_back(hasLowestZOrder);
+      tmpList.remove(hasLowestZOrder);
+   }
+   return orderedList;
+}
+
 
 //------------------------------------------------------------------------------
 // ObjectInitializer::ObjectInitializer()
