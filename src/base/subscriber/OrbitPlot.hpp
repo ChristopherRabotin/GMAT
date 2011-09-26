@@ -99,7 +99,10 @@ public:
                         GetStringArrayParameter(const Integer id) const;
    
    virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         GetBooleanParameter(const std::string &label) const;
    virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         SetBooleanParameter(const std::string &label,
                                             const bool value);
    
    virtual const BooleanArray&

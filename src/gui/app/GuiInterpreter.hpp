@@ -82,6 +82,7 @@ public:
                                 const std::string &name,
                                 const std::string &filename = "",
                                 bool createDefault = true);
+   Integer GetNumberOfActivePlots();
    
    GmatBase* CreateDefaultPropSetup(const std::string &name);
    GmatBase* CreateNewODEModel(const std::string &name);

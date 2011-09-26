@@ -42,7 +42,8 @@ public:
    MdiChildViewFrame(wxMDIParentFrame *parent, const wxString& plotName,
                      const wxString& title, const wxPoint& pos,
                      const wxSize& size, const long style,
-                     const wxString &viewType);
+                     const wxString &viewType,
+                     const GmatTree::ItemType itemType);
    virtual ~MdiChildViewFrame();
    
    // getters

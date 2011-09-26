@@ -51,6 +51,7 @@
 #include "MathFactory.hpp"
 #include "Interface.hpp"
 #include "XyPlot.hpp"
+#include "OrbitPlot.hpp"
 #include "GmatDefaults.hpp"
 
 #include "NoOp.hpp"
@@ -4691,6 +4692,51 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
    else
       return (Subscriber*)FindObject(name);
 }
+
+
+//------------------------------------------------------------------------------
+// Integer GetNumberOfActivePlots()
+//------------------------------------------------------------------------------
+/**
+ * Returns number of active plots which means plots with ShowPlot is on.
+ */
+//------------------------------------------------------------------------------
+Integer Moderator::GetNumberOfActivePlots()
+{
+   Integer activePlotCount = 0;
+   Subscriber *obj;
+   StringArray names = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
+   
+   #ifdef DEBUG_ACTIVE_PLOTS
+   MessageInterface::ShowMessage
+      ("Moderator::GetNumberOfActivePlots() subscriber count = %d\n", names.size());
+   #endif
+   
+   //@todo
+   // Should we create a new class GmatPlot and derive XYPlot and OrbitPlot from it?
+   for (Integer i=0; i<(Integer)names.size(); i++)
+   {
+      obj = theConfigManager->GetSubscriber(names[i]);
+      if (obj->IsOfType("XYPlot"))
+      {
+         if ( ((XyPlot*)obj)->GetBooleanParameter("ShowPlot") )
+            activePlotCount++;
+      }
+      else if (obj->IsOfType("OrbitPlot"))
+      {
+         if ( ((OrbitPlot*)obj)->GetBooleanParameter("ShowPlot") )
+            activePlotCount++;
+      }
+   }
+   
+   #ifdef DEBUG_ACTIVE_PLOTS
+   MessageInterface::ShowMessage
+      ("Moderator::GetNumberOfActivePlots() returning %d\n", activePlotCount);
+   #endif
+   
+   return activePlotCount;
+}
+
 
 //------------------------------------------------------------------------------
 // Subscriber* CreateEphemerisFile(const std::string &type,

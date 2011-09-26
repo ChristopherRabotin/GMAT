@@ -1963,7 +1963,8 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
       ("ResourceTree::OnDelete() name=%s\n", selItemData->GetName().c_str());
    #endif
    GmatTree::ItemType itemType = selItemData->GetItemType();
-
+   wxString itemName = selItemData->GetName();
+   
    // if panel is currently opened, give warning and return
    // Bug 547 fix (loj: 2008.11.25)
    if (theMainFrame->IsChildOpen(selItemData))
@@ -1973,32 +1974,34 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
       wxLog::FlushActive();
       return;
    }
-
+   
    Gmat::ObjectType objType = GetObjectType(itemType);
    if (objType == Gmat::UNKNOWN_OBJECT)
       return;
-
+   
    #ifdef DEBUG_DELETE
    MessageInterface::ShowMessage
       ("ResourceTree::OnDelete() name=%s\n", selItemData->GetName().c_str());
    #endif
-
-   wxString itemName = selItemData->GetName();
+   
    // delete item if object successfully deleted
    if (theGuiInterpreter->RemoveObjectIfNotUsed(objType, itemName.c_str()))
    {
       // delete item and close all opened windows
       this->Delete(itemId);
-
+      
       // We don't want to delete all children (bug 547 fix, loj: 2008.11.25)
       //theMainFrame->CloseAllChildren(false, true);
-
+      
       #ifdef DEBUG_DELETE
       MessageInterface::ShowMessage
          ("ResourceTree::OnDelete() now calling theGuiManager->UpdateAll(%d)\n",
           objType);
       #endif
       theGuiManager->UpdateAll(objType);
+      
+      // Remove output also
+      theMainFrame->RemoveOutputIfOpened(itemName);
    }
    else
    {
@@ -4187,9 +4190,14 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    bool showRemoveDelete = true;
 
    // We don't want to show Remove and Delete menu if any non-plot panel is open
-   if (theMainFrame->GetNumberOfChildOpen() > 0)
+   // except MissionTree panel
+   Integer x, y, w;
+   Integer numChildren = theMainFrame->GetNumberOfChildOpen();
+   if (numChildren == 1 && theMainFrame->IsMissionTreeUndocked(x, y, w))
+      showRemoveDelete = true;
+   else if (numChildren > 0)
       showRemoveDelete = false;
-
+   
    #ifdef DEBUG_SHOW_MENU
    MessageInterface::ShowMessage
       ("ResourceTree::ShowMenu() title=%s, itemType=%d\n", title.c_str(),

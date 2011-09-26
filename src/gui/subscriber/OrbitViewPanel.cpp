@@ -740,7 +740,7 @@ void OrbitViewPanel::LoadData()
       str.Printf("%d", mOrbitView->GetIntegerParameter("StarCount"));
       mStarCountTextCtrl->SetValue(str);
       
-      mShowPlotCheckBox->SetValue(mOrbitView->IsActive());
+      mShowPlotCheckBox->SetValue(mOrbitView->GetBooleanParameter("ShowPlot"));
       mXYPlaneCheckBox->
          SetValue(mOrbitView->GetOnOffParameter("XYPlane") == "On");
       mEclipticPlaneCheckBox->
@@ -1233,7 +1233,8 @@ void OrbitViewPanel::SaveData()
          #endif
          mHasDrawingOptionChanged = false;
          
-         mOrbitView->Activate(mShowPlotCheckBox->IsChecked());
+         mOrbitView->SetBooleanParameter("ShowPlot", mShowPlotCheckBox->IsChecked());
+         //mOrbitView->Activate(mShowPlotCheckBox->IsChecked());
          
          if (mXYPlaneCheckBox->IsChecked())
             mOrbitView->SetOnOffParameter("XYPlane", "On");

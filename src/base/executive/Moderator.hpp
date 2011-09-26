@@ -292,6 +292,7 @@ public:
                                 const std::string &fileName = "",
                                 bool createDefault = false);
    Subscriber* GetSubscriber(const std::string &name);
+   Integer GetNumberOfActivePlots();
    
    // EphemerisFile
    Subscriber* CreateEphemerisFile(const std::string &type,

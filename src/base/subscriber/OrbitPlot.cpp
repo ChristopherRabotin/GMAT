@@ -99,6 +99,7 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
 {
    // GmatBase data
    parameterCount = OrbitPlotParamCount;
+   objectTypeNames.push_back("OrbitPlot");
    
    mViewCoordSystem = NULL;
    
@@ -1132,6 +1133,15 @@ bool OrbitPlot::GetBooleanParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+bool OrbitPlot::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
 // bool SetBooleanParameter(const Integer id, const bool value)
 //------------------------------------------------------------------------------
 bool OrbitPlot::SetBooleanParameter(const Integer id, const bool value)
@@ -1149,6 +1159,15 @@ bool OrbitPlot::SetBooleanParameter(const Integer id, const bool value)
    }
    
    return Subscriber::SetBooleanParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+bool OrbitPlot::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
 }
 
 

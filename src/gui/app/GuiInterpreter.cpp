@@ -447,6 +447,15 @@ Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
 
 
 //------------------------------------------------------------------------------
+// Integer GetNumberOfActivePlots()
+//------------------------------------------------------------------------------
+Integer GuiInterpreter::GetNumberOfActivePlots()
+{
+   return theModerator->GetNumberOfActivePlots();
+}
+
+
+//------------------------------------------------------------------------------
 // GmatBase* CreateDefaultPropSetup(const std::string &name)
 //------------------------------------------------------------------------------
 /**

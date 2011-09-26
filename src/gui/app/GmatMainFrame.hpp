@@ -68,19 +68,24 @@ public:
                  const wxPoint& pos, const wxSize& size, const long style);
    ~GmatMainFrame();
    
+   void GetActualClientSize(Integer *w, Integer *h);
    GmatMdiChildFrame* CreateChild(GmatTreeItemData *item, bool restore = true);
    GmatMdiChildFrame* GetChild(const wxString &name);
    
    Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
                                 bool incScripts = false);
-   bool IsMissionTreeUndocked(Integer &width);
+   Integer GetNumberOfActivePlots();
+   bool IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer &width);
    void IconizeUndockedMissionTree();
    bool IsChildOpen(GmatTreeItemData *item, bool restore = true);
+   bool IsChildOpen(const wxString &name, GmatTree::ItemType itemType,
+                    bool restore = true);
    bool RenameChild(GmatTreeItemData *item, wxString newName);
    bool RenameChild(const wxString &oldName, const wxString &newName);
    bool RenameActiveChild(const wxString &newName);
    bool RemoveChild(const wxString &name, GmatTree::ItemType itemType,
                     bool deleteChild = true);
+   void RemoveOutputIfOpened(const wxString &name);
    void CloseChild(const wxString &name, GmatTree::ItemType itemType);
    void CloseChild(GmatMdiChildFrame *child);
    void CloseWelcomePanel();
@@ -104,6 +109,7 @@ public:
    void StartMatlabServer();
    void StopMatlabServer();
    void UpdateRecentMenu(wxArrayString files);
+   Integer GetToolBarHeight();
    wxToolBar* GetMainFrameToolBar();
    wxStatusBar* GetMainFrameStatusBar();
    

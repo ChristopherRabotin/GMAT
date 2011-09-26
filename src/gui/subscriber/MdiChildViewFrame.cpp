@@ -45,8 +45,9 @@ END_EVENT_TABLE()
 MdiChildViewFrame::MdiChildViewFrame(wxMDIParentFrame *parent,
                                      const wxString& plotName, const wxString& title,
                                      const wxPoint& pos, const wxSize& size,
-                                     const long style, const wxString &viewType)
-   : GmatMdiChildFrame(parent, plotName, title, GmatTree::OUTPUT_ORBIT_VIEW, -1,
+                                     const long style, const wxString &viewType,
+                                     const GmatTree::ItemType itemType)
+   : GmatMdiChildFrame(parent, plotName, title, itemType, -1,
                        pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mCanvas = (ViewCanvas *) NULL;

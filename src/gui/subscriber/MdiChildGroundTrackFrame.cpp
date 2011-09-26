@@ -37,7 +37,8 @@ MdiChildGroundTrackFrame::MdiChildGroundTrackFrame(wxMDIParentFrame *parent,
                              const wxString& plotName, const wxString& title,
                              const wxPoint& pos, const wxSize& size,
                              const long style)
-   : MdiChildViewFrame(parent, plotName, title, pos, size, style, "2D")
+   : MdiChildViewFrame(parent, plotName, title, pos, size, style, "2D",
+                       GmatTree::OUTPUT_GROUND_TRACK_PLOT)
 {
    // Create GLCanvas
    int width, height;
