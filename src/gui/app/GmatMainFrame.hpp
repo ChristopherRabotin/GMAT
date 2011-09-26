@@ -108,6 +108,7 @@ public:
    wxStatusBar* GetMainFrameStatusBar();
    
    void EnableAnimation(bool enable = true);
+   void ManageMissionTree();
    
    // event handling
    void OnClose(wxCloseEvent& event);
@@ -215,6 +216,7 @@ private:
    bool mRunCompleted;
    bool mInterpretFailed;
    bool mExitWithoutConfirm;
+   bool mUndockedMissionTreePresized;
    Integer mRunStatus;
    
    GmatServer *mMatlabServer;
@@ -258,7 +260,8 @@ private:
    void UpdateTitle(const wxString &filename = "");
    void SaveGuiToActiveScript();
    
-   void SavePlotPositionsAndSizes();
+   void SaveChildPositionsAndSizes();
+   bool GetConfigurationData(const std::string &forItem, Integer &x, Integer &y, Integer &w, Integer &h);
 
    // IDs for the controls
    enum

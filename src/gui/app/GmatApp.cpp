@@ -240,8 +240,11 @@ bool GmatApp::OnInit()
          if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
             theMainFrame->Show(false);
          else
+         {
             theMainFrame->Show(true);
-         
+            theMainFrame->ManageMissionTree();
+         }
+
          if (runScript)
          {
             if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
