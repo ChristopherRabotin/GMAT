@@ -32,8 +32,12 @@ namespace GmatRealConstants
    const Real    REAL_UNDEFINED       = -987654321.0123e-45;
    const Real    REAL_UNDEFINED_LARGE = -9876543210.1234;
 
-   const Integer INTEGER_MAX          = std::numeric_limits<Integer>::max();
-
+   #ifdef _MSC_VER
+      const Integer INTEGER_MAX          = _I32_MAX;
+   #else
+      const Integer INTEGER_MAX          = std::numeric_limits<Integer>::max();
+   #endif
+   
    #ifdef __glibcpp_f64_radix
       const Integer SHORT_REAL_RADIX = __glibcpp_f64_radix;
    #else
