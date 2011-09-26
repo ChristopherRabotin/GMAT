@@ -107,6 +107,9 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
    
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -120,6 +123,12 @@ public:
                                            const std::string &value,
                                            const Integer index);
    
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
    virtual std::string  GetOnOffParameter(const Integer id) const;
    virtual bool         SetOnOffParameter(const Integer id, 
                                           const std::string &value);
@@ -178,6 +187,8 @@ protected:
    // arrays for holding position and size
    Rvector              mPlotUpperLeft;
    Rvector              mPlotSize;
+   Integer              relativeZOrder;
+   bool                 isMinimized;
 
 
    /// The current run state, so actions based on state can be taken
@@ -219,6 +230,8 @@ public:
       TARGET_STATUS,
       UPPER_LEFT,
       SIZE,
+      RELATIVE_Z_ORDER,
+      MINIMIZED,
       SubscriberParamCount,
    };
    

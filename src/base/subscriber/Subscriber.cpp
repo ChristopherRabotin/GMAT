@@ -78,6 +78,8 @@ Subscriber::PARAMETER_TEXT[SubscriberParamCount - GmatBaseParamCount] =
    "TargetStatus",
    "UpperLeft",
    "Size",
+   "RelativeZOrder",
+   "Minimized",
 };
 
 const Gmat::ParameterType
@@ -87,6 +89,8 @@ Subscriber::PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount] =
    Gmat::ON_OFF_TYPE,              // "TargetStatus"
    Gmat::RVECTOR_TYPE,   //"Position",
    Gmat::RVECTOR_TYPE,   //"Size",
+   Gmat::INTEGER_TYPE,   // "RelativeZOrder"
+   Gmat::BOOLEAN_TYPE,  // "Minimized"
 };
 
 
@@ -132,6 +136,8 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
 
    mPlotUpperLeft = Rvector(2,0.0,0.0);
    mPlotSize      = Rvector(2,0.0,0.0);
+   relativeZOrder = 0;
+   isMinimized    = false;
 }
 
 
@@ -167,6 +173,8 @@ Subscriber::Subscriber(const Subscriber &copy) :
    
    mPlotUpperLeft    = Rvector(2,copy.mPlotUpperLeft[0], copy.mPlotUpperLeft[1]);
    mPlotSize         = Rvector(2,copy.mPlotSize[0],      copy.mPlotSize[1]);
+   relativeZOrder    = 0;
+   isMinimized       = false;
 
 #ifdef __ENABLE_CLONING_WRAPPERS__
    // Create new wrappers by cloning (LOJ: 2009.03.10)
@@ -218,6 +226,9 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
 
    mPlotUpperLeft     = rhs.mPlotUpperLeft;
    mPlotSize          = rhs.mPlotSize;
+   relativeZOrder     = rhs.relativeZOrder;
+   isMinimized        = rhs.isMinimized;
+
    runstate = rhs.runstate;
    currProviderId = rhs.currProviderId;
    
@@ -942,10 +953,7 @@ bool Subscriber::IsParameterReadOnly(const Integer id) const
 {
    if (id == TARGET_STATUS)
       return true;
-   if (id == UPPER_LEFT)
-      return true;
-   if (id == SIZE)
-      return true;
+   if (id == MINIMIZED) return true;  // ******* temporary, until saving of minimized/maximized can be implemented
    
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -956,7 +964,7 @@ bool Subscriber::IsParameterReadOnly(const Integer id) const
 //---------------------------------------------------------------------------
 bool Subscriber::IsParameterVisible(const Integer id) const
 {
-   if (id == TARGET_STATUS || id == UPPER_LEFT || id == SIZE)
+   if (id == TARGET_STATUS || id == UPPER_LEFT || id == SIZE || id == RELATIVE_Z_ORDER|| id == MINIMIZED)
       return false;
    
    return GmatBase::IsParameterVisible(id);
@@ -1019,6 +1027,48 @@ std::string Subscriber::GetParameterTypeString(const Integer id) const
 {
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
+
+//---------------------------------------------------------------------------
+//  Integer GetIntegerParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an Integer parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The parameter's value.
+ */
+//------------------------------------------------------------------------------
+Integer Subscriber::GetIntegerParameter(const Integer id) const
+{
+   if (id == RELATIVE_Z_ORDER)  return relativeZOrder;
+
+   return GmatBase::GetIntegerParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  Integer SetIntegerParameter(const Integer id, const Integer value)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an Integer parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new parameter value.
+ *
+ * @return the parameter value at the end of this call
+ */
+//------------------------------------------------------------------------------
+Integer Subscriber::SetIntegerParameter(const Integer id, const Integer value)
+{
+   if (id == RELATIVE_Z_ORDER)
+   {
+      relativeZOrder = value;
+      return relativeZOrder;
+   }
+   return GmatBase::SetIntegerParameter(id, value);
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -1180,6 +1230,58 @@ bool Subscriber::SetStringParameter(const std::string &label,
    #endif
    
    return SetStringParameter(GetParameterID(label), value, index);
+}
+
+//---------------------------------------------------------------------------
+//  bool GetBooleanParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param  id  The integer ID for the parameter.
+ *
+ * @return the boolean value for this parameter
+ */
+//------------------------------------------------------------------------------
+bool Subscriber::GetBooleanParameter(const Integer id) const
+{
+   if (id == MINIMIZED) return isMinimized;
+
+   return GmatBase::GetBooleanParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetBooleanParameter(const Integer id, const bool value)
+//---------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new value.
+ *
+ * @return the boolean value for this parameter
+ */
+//------------------------------------------------------------------------------
+bool Subscriber::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == MINIMIZED)
+   {
+      isMinimized = value;
+      return isMinimized;
+   }
+
+   return GmatBase::SetBooleanParameter(id, value);
+}
+
+bool Subscriber::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool Subscriber::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
 }
 
 //---------------------------------------------------------------------------

@@ -183,6 +183,26 @@ std::string MessageWindow::GetParameterTypeString(const Integer id) const
       return Subscriber::GetParameterTypeString(id);
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool MessageWindow::IsParameterReadOnly(const Integer id) const
+{
+   if (id == UPPER_LEFT || id == SIZE || id == RELATIVE_Z_ORDER || id == MINIMIZED)
+      return true;
+
+   return Subscriber::IsParameterReadOnly(id);
+}
+
 
 //------------------------------------------------------------------------------
 // Integer GetIntegerParameter(const Integer id) const

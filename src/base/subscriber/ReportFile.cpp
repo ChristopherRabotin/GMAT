@@ -782,24 +782,6 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
 }
 
 
-//---------------------------------------------------------------------------
-//  bool IsParameterReadOnly(const Integer id) const
-//---------------------------------------------------------------------------
-/**
- * Checks to see if the requested parameter is read only.
- *
- * @param <id> Description for the parameter.
- *
- * @return true if the parameter is read only, false (the default) if not,
- *         throws if the parameter is out of the valid range of values.
- */
-//---------------------------------------------------------------------------
-bool ReportFile::IsParameterReadOnly(const Integer id) const
-{
-   return Subscriber::IsParameterReadOnly(id);
-}
-
-
 //------------------------------------------------------------------------------
 // bool GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------

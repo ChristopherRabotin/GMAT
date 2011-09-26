@@ -841,6 +841,8 @@ bool EphemerisFile::IsParameterReadOnly(const Integer id) const
    // ephem file format
    if (id == INTERPOLATOR)
       return true;
+   if (id == UPPER_LEFT || id == SIZE || id == RELATIVE_Z_ORDER || id == MINIMIZED)
+      return true;
    
    return Subscriber::IsParameterReadOnly(id);
 }

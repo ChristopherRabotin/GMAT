@@ -771,26 +771,6 @@ std::string OrbitPlot::GetParameterTypeString(const Integer id) const
 }
 
 
-//---------------------------------------------------------------------------
-//  bool IsParameterReadOnly(const Integer id) const
-//---------------------------------------------------------------------------
-/**
- * Checks to see if the requested parameter is read only.
- *
- * @param <id> Description for the parameter.
- *
- * @return true if the parameter is read only, false (the default) if not,
- *         throws if the parameter is out of the valid range of values.
- */
-//---------------------------------------------------------------------------
-bool OrbitPlot::IsParameterReadOnly(const Integer id) const
-{
-   if ((id == UPPER_LEFT) || (id == SIZE))
-      return false;
-   return Subscriber::IsParameterReadOnly(id);
-}
-
-
 //------------------------------------------------------------------------------
 // virtual Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------

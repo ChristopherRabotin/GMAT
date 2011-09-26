@@ -655,9 +655,6 @@ bool XyPlot::IsParameterReadOnly(const Integer id) const
       )
       return true;
    
-   if ((id == UPPER_LEFT) || (id == SIZE))
-      return false;
-
    return Subscriber::IsParameterReadOnly(id);
 }
 
