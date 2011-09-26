@@ -20,10 +20,12 @@
 #include "GmatMdiChildFrame.hpp"
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"
+#include "SubscriberException.hpp"
 #include "GuiInterpreter.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 #include "GuiItemManager.hpp"
+#include "GmatTreeItemData.hpp"
 #include "GmatMenuBar.hpp"       // for namespace GmatMenu
 
 // @todo We cannot create own MenuBar yet.
@@ -34,6 +36,10 @@
 //#define DEBUG_MDI_CHILD_FRAME
 //#define DEBUG_UPDATE_GUI_ITEM
 //#define DEBUG_CLOSE
+//#define DEBUG_PERSISTENCE
+
+
+Integer GmatMdiChildFrame::maxZOrder = 0;
 
 //------------------------------
 // event tables for wxWindows
@@ -72,6 +78,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
        "name='%s'\n   title='%s', ", type, name.c_str(), title.c_str());
    #endif
    
+   relativeZOrder = maxZOrder++;
    mPlotName = name;
    theParent = parent;
    mDirty = false;
@@ -325,6 +332,7 @@ void GmatMdiChildFrame::OnActivate(wxActivateEvent &event)
    #endif
    UpdateGuiItem(1, 1);
    
+   relativeZOrder = maxZOrder++;
    event.Skip();
 }
 
@@ -399,7 +407,7 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::OnClose() will call GmatMainFrame to remove child and exit\n");
    #endif
-   SavePlotPositionAndSize();
+   if (mItemType == GmatTree::MISSION_TREE_UNDOCKED) SaveChildPositionAndSize();
    // remove from list of frames
    GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType);   
    wxSafeYield();
@@ -416,11 +424,82 @@ void GmatMdiChildFrame::UpdateScriptActiveStatus(bool isActive)
 }
 
 //------------------------------------------------------------------------------
-// void SavePlotPositionAndSize()
+// void SaveChildPositionAndSize()
 //------------------------------------------------------------------------------
-void GmatMdiChildFrame::SavePlotPositionAndSize()
+void GmatMdiChildFrame::SaveChildPositionAndSize()
 {
-  ; // plots will need to implement this
+   // Get the position and size of the window first
+   #ifdef __WXMAC__
+      Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+      Integer screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+   #else
+      Integer screenWidth;
+      Integer screenHeight;
+      theParent->GetClientSize(&screenWidth, &screenHeight);
+   #endif
+
+   #ifdef DEBUG_PERSISTENCE
+   wxRect      wxR         = GetScreenRect();
+   wxPoint     wxP         = wxR.GetPosition();
+   wxSize      wxS         = wxR.GetSize();
+   Integer     x           = (Integer) wxP.x;
+   Integer     y           = (Integer) wxP.y;
+   Integer     w           = (Integer) wxS.GetWidth();
+   Integer     h           = (Integer) wxS.GetHeight();
+   MessageInterface::ShowMessage
+      ("wxP.x = %d, wxP.y = %d, wxS.w = %d, wxS.h = %d\n", x, y, w, h);
+   #endif
+
+   int tmpX = -1, tmpY = -1;
+   int tmpW = -1, tmpH = -1;
+   GetPosition(&tmpX, &tmpY);
+   GetSize(&tmpW, &tmpH);
+   Rvector upperLeft(2, ((Real) tmpX /(Real)  screenWidth), ((Real) tmpY /(Real)  screenHeight));
+   Rvector childSize(2,  ((Real) tmpW /(Real)  screenWidth), ((Real) tmpH /(Real)  screenHeight));
+
+   #ifdef DEBUG_PERSISTENCE
+   // ======================= begin temporary ==============================
+   MessageInterface::ShowMessage("*** Size of SCREEN %s is: width = %d, height = %d\n", mPlotName.c_str(), screenWidth, screenHeight);
+   MessageInterface::ShowMessage("Position of View plot %s is: x = %d, y = %d\n", mPlotName.c_str(), tmpX, tmpY);
+   MessageInterface::ShowMessage("Size of View plot %s is: width = %d, height = %d\n", mPlotName.c_str(), tmpW, tmpH);
+   MessageInterface::ShowMessage("Position of View plot %s in pixels rel. to parent window is: x = %d, y = %d\n",
+                                 mPlotName.c_str(), (Integer) tmpX, (Integer) tmpY);
+   MessageInterface::ShowMessage("Size of View plot %s in pixels rel. to parent window is: x = %d, y = %d\n",
+                                 mPlotName.c_str(), (Integer) tmpW, (Integer) tmpH);
+   wxPoint tmpPt = ScreenToClient(wxP);
+   MessageInterface::ShowMessage("--- Position of View plot %s in client coords is: x = %d, y = %d\n",
+                                 mPlotName.c_str(), (Integer) tmpPt.x, (Integer) tmpPt.y);
+   // ======================= end temporary ==============================
+   #endif
+
+   if ((mItemType == GmatTree::OUTPUT_REPORT)  || (mItemType == GmatTree::OUTPUT_ORBIT_VIEW) ||
+       (mItemType == GmatTree::OUTPUT_XY_PLOT))
+   {
+      GmatBase *obj =
+         (Subscriber*)theGuiInterpreter->GetConfiguredObject(mPlotName.c_str());
+      if (!obj || !obj->IsOfType("Subscriber"))
+      {
+         std::string errmsg = "Cannot find subscriber ";
+         errmsg += mPlotName + "\n";
+         throw SubscriberException(errmsg);
+      }
+      Subscriber *sub = (Subscriber*) obj;
+      sub->SetRvectorParameter(sub->GetParameterID("UpperLeft"), upperLeft);
+      sub->SetRvectorParameter(sub->GetParameterID("Size"), childSize);
+      sub->SetIntegerParameter(sub->GetParameterID("RelativeZOrder"), relativeZOrder);
+   }
+   else if (mItemType == GmatTree::MISSION_TREE_UNDOCKED)
+   {
+      // get the config object
+      wxFileConfig *pConfig;
+      pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
+      std::stringstream location("");
+      location << upperLeft[0] << " " << upperLeft[1];
+      std::stringstream size("");
+      size << childSize[0] << " " << childSize[1];
+      pConfig->Write("/MissionTree/UpperLeft", location.str().c_str());
+      pConfig->Write("/MissionTree/Size", size.str().c_str());
+   }
 }
 
 #ifdef __WXMAC__

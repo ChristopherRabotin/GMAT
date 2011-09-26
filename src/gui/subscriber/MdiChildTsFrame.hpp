@@ -122,9 +122,7 @@ public:
    void OnMove(wxMoveEvent& event);
    void OnPlotClose(wxCloseEvent& event);
    void OnClose(wxCloseEvent& event);
-   
-   virtual void SavePlotPositionAndSize();
-   
+
 protected:
    
    void AdjustYScale();

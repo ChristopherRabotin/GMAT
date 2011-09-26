@@ -151,8 +151,6 @@ public:
    virtual void DeletePlot();
    virtual void SetEndOfRun();
 
-   virtual void SavePlotPositionAndSize();
-
       
 protected:
    

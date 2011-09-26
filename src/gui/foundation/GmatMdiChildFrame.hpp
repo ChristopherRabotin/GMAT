@@ -74,7 +74,7 @@ public:
    virtual void OnClose(wxCloseEvent &event);
    virtual void UpdateScriptActiveStatus(bool isActive);
    
-   virtual void SavePlotPositionAndSize();
+   virtual void SaveChildPositionAndSize();
 
 protected:
    
@@ -82,6 +82,9 @@ protected:
    wxString childTitle;
 #endif
    
+   static Integer maxZOrder;
+   Integer        relativeZOrder;
+
    wxString mPlotName;
 
    bool mDirty;
