@@ -79,7 +79,8 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
        "name='%s'\n   title='%s', ", type, name.c_str(), title.c_str());
    #endif
    
-   relativeZOrder = maxZOrder++;
+   relativeZOrder          = maxZOrder++;
+   usingSavedConfiguration = false;
    mPlotName = name;
    theParent = parent;
    mDirty = false;
@@ -194,6 +195,22 @@ wxString GmatMdiChildFrame::GetPlotName()
 void GmatMdiChildFrame::SetPlotName(const wxString &name)
 {
    mPlotName = name;
+}
+
+//------------------------------------------------------------------------------
+// void SetSavedConfigFlag(bool isPreset)
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::SetSavedConfigFlag(bool isPreset)
+{
+   usingSavedConfiguration = isPreset;
+}
+
+//------------------------------------------------------------------------------
+// bool GetSavedConfigFlag()
+//------------------------------------------------------------------------------
+bool GmatMdiChildFrame::GetSavedConfigFlag()
+{
+   return usingSavedConfiguration;
 }
 
 //------------------------------------------------------------------------------

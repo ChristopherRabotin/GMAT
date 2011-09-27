@@ -743,7 +743,8 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
       #endif
       
       #ifdef __WXMAC__
-      if ((numChildren > 0) && !((newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED) && mUndockedMissionTreePresized))
+      if ((numChildren > 0) && !((newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED) && mUndockedMissionTreePresized) &&
+          !((newChild->GetItemType() == GmatTree::OUTPUT_REPORT) && newChild->GetSavedConfigFlag()))
       #else
       if (numChildren > 0)
       #endif
@@ -3489,6 +3490,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
          Integer y = 0.0;
          Integer w = 0.0;
          Integer h = 0.0;
+         bool isUsingSaved = false;
          // ********* replace this with cross-platform code *********
          Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
          Integer screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
@@ -3533,6 +3535,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
             y = (Integer) (positionY * (Real) screenHeight);
             w = (Integer) (width     * (Real) screenWidth);
             h = (Integer) (height    * (Real) screenHeight);
+            isUsingSaved = true;
          }
          #ifndef __WXMAC__
             Real realW = (Real)screenWidth;
@@ -3553,6 +3556,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
          ReportFilePanel *reportPanel = new ReportFilePanel(scrolledWin, name);
          sizer->Add(reportPanel, 0, wxGROW|wxALL, 0);
          newChild->SetScriptTextCtrl(reportPanel->mFileContentsTextCtrl);
+         newChild->SetSavedConfigFlag(isUsingSaved);
          break;
       }
    case GmatTree::COMPARE_REPORT:

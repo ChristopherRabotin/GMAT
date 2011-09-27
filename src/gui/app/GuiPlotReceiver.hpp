@@ -182,7 +182,8 @@ public:
 protected:
    bool ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
                                    Real positionY, Real width, Real height,
-                                   Integer &x, Integer &y, Integer &w, Integer &h);
+                                   Integer &x, Integer &y, Integer &w, Integer &h,
+                                   bool usingSaved = false);
    
 private:
    GuiPlotReceiver();

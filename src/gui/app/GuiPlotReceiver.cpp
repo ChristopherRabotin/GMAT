@@ -177,9 +177,10 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       MessageInterface::ShowMessage
          ("plotName = '%s', plotCount = %d\n", plotName.c_str(), plotCount);
       #endif
-      
+      bool isUsingSaved = false;
       bool isPresetSizeUsed = ComputePlotPositionAndSize(true, positionX, positionY,
-                                                         width, height, x, y, w, h);
+                                                         width, height, x, y, w, h,
+                                                         isUsingSaved);
       
       
       // create a frame, containing a plot canvas
@@ -210,6 +211,8 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
          return false;
       }
       
+      frame->SetSavedConfigFlag(isUsingSaved);
+
       if (frame)
          frame->Show();
       else
@@ -857,6 +860,7 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
 
       Integer x, y, w, h;
       Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
+      bool isUsingSaved = false;
       
       #ifdef DEBUG_PLOT_PERSISTENCY
       MessageInterface::ShowMessage
@@ -864,7 +868,8 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
       #endif
       
       bool isPresetSizeUsed = ComputePlotPositionAndSize(false, positionX, positionY,
-                                                         width, height, x, y, w, h);
+                                                         width, height, x, y, w, h,
+                                                         isUsingSaved);
       
       // create a frame, containing a XY plot canvas
       frame =
@@ -877,6 +882,7 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
                              wxDEFAULT_FRAME_STYLE);
       
       frame->Show();
+      frame->SetSavedConfigFlag(isUsingSaved);
       
       ++MdiTsPlot::numChildren;
       
@@ -1935,7 +1941,8 @@ bool GuiPlotReceiver::ActivateXyPlot(const std::string &plotName)
 //------------------------------------------------------------------------------
 bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
                                                  Real positionY, Real width, Real height,
-                                                 Integer &x, Integer &y, Integer &w, Integer &h)
+                                                 Integer &x, Integer &y, Integer &w, Integer &h,
+                                                 bool usingSaved)
 {
    #ifdef DEBUG_PLOT_PERSISTENCY
    MessageInterface::ShowMessage
@@ -1946,18 +1953,18 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
    
    Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
    bool isPresetSizeUsed = false;
-   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    
    Integer screenWidth = 0;
    Integer screenHeight = 0;
-   Integer missionTreeX = 0;
-   Integer missionTreeY = 0;
-   Integer missionTreeW = 0;
    
    #ifdef __WXMAC__
       screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
       screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
    #else
+      GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
+      Integer missionTreeX = 0;
+      Integer missionTreeY = 0;
+      Integer missionTreeW = 0;
       //mainFrame->GetClientSize(&screenWidth, &screenHeight);
       mainFrame->GetActualClientSize(&screenWidth, &screenHeight);
       // If MissionTree is undocked, subtract its width before computing w
@@ -1977,6 +1984,7 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       if (MdiGlPlot::usePresetSize || MdiTsPlot::usePresetSize)
          isPresetSizeUsed = true;
       
+      usingSaved = false;
       #ifdef __WXMAC__
          wxSize size = wxGetDisplaySize();
          w = (size.GetWidth() - 239) / 2;
@@ -2041,6 +2049,7 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
          MdiTsPlot::usePresetSize = true;
       
       isPresetSizeUsed = true;
+      usingSaved       = true;
       
       x = (Integer) (positionX * (Real) screenWidth);
       y = (Integer) (positionY * (Real) screenHeight);

@@ -49,6 +49,8 @@ public:
 
    virtual wxString   GetPlotName();
    virtual void       SetPlotName(const wxString &name);
+   virtual void       SetSavedConfigFlag(bool isPreset);
+   virtual bool       GetSavedConfigFlag();
 
    wxMenuBar*         GetMenuBar();
    GmatTree::ItemType GetItemType();
@@ -84,6 +86,7 @@ protected:
    
    static Integer maxZOrder;
    Integer        relativeZOrder;
+   bool           usingSavedConfiguration;
 
    wxString mPlotName;
 
