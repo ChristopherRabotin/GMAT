@@ -738,9 +738,11 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    if (newChild != NULL)
    {
       int numChildren = GetNumberOfChildOpen(false, true, true);
-      #if DEBUG_CHILD_WINDOW
-      MessageInterface::ShowMessage("   numChildren = %d\n", numChildren);
-      #endif
+      //#if DEBUG_CHILD_WINDOW
+      MessageInterface::ShowMessage
+         ("   numChildren = %d, mUndockedMissionTreePresized = %d\n", numChildren,
+          mUndockedMissionTreePresized);
+      //#endif
       
       #ifdef __WXMAC__
       if ((numChildren > 0) && !((newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED) && mUndockedMissionTreePresized) &&
@@ -759,6 +761,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
          #ifdef __WXMAC__
             // reposition vertical position of first panel for Mac, so top button bar is visible
             int y = (numChildren) * 20;
+            newChild->SetPosition(wxPoint(x, y));
          #else
             wxMDIClientWindow* clientWin = GetClientWindow();
             int clientX, clientY, clientW = -1, clientH = -1;
@@ -781,42 +784,44 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
             {
                int mpW, mpH;
                newChild->GetSize(&mpW, &mpH);
-               x = 0;
-               y = -toolH;
                
-               // Need to resize this child depends on the command length
-               // Set to full mdi height for now.
-               // We don't want to hide iconized script, so reduce the height.
-               int height = clientH;
-               //Integer numChildren = GetNumberOfChildOpen(false, true, true);
-               //#if DEBUG_CHILD_WINDOW
-               //MessageInterface::ShowMessage("   numChildren = %d\n", numChildren);
-               //#endif
-               // We don't want to hide iconized children, so reduce the height by 40.
-               //if (numChildren > 0)
-               height = clientH - 40;
-               newChild->SetSize(-1, height);
-               
-               // Reposition other children
-               if (numChildren > 1)
-                  RepositionChildren(mpW);
+               if (!mUndockedMissionTreePresized)
+               {
+                  // For default size, we need to resize this child depends on
+                  // the command length. Set to full mdi height for now.
+                  // We don't want to hide iconized script, so reduce the height.
+                  x = 0;
+                  y = -toolH;
+                  int height = clientH;
+                  // We don't want to hide iconized children at the bottom, so reduce the height by 40.
+                  height = clientH - 40;
+                  newChild->SetSize(-1, height);
+                  
+                  // Reposition other children
+                  if (numChildren > 1)
+                     RepositionChildren(mpW);
+               }
             }
             else
             {
-               // If Mission panel is opened, place child besides it
-               GmatMdiChildFrame *mp = GetChild("Mission");
-               if (mp != NULL && numChildren > 1)
+               // If Mission panel is opened and it is at the left,
+               // place child besides it
+               Integer mtX, mtY, mtW;
+               if (IsMissionTreeUndocked(mtX, mtY, mtW))
                {
-                  int mpW, mpH;
-                  mp->GetSize(&mpW, &mpH);
-                  x = (numChildren - 2) * 20 + mpW;
-                  y = (numChildren - 2) * 20 - toolH;
+                  if (mtX < 10)
+                  {
+                     if (numChildren > 1)
+                     {
+                        x = (numChildren - 2) * 20 + mtW;
+                        y = (numChildren - 2) * 20 - toolH;
+                     }
+                     newChild->SetPosition(wxPoint(x, y));
+                  }
                }
             }
          #endif
-         newChild->SetPosition(wxPoint(x, y));
       }
-      
       newChild->Show();
    }
    
@@ -5200,7 +5205,8 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
    }
    
    // active child is not OrbitView, just return
-   if (child->GetItemType() != GmatTree::OUTPUT_ORBIT_VIEW)
+   if (child->GetItemType() != GmatTree::OUTPUT_ORBIT_VIEW &&
+       child->GetItemType() != GmatTree::OUTPUT_GROUND_TRACK_PLOT)
    {
       toolBar->ToggleTool(TOOL_ANIMATION_PLAY, false);
       return;
@@ -5210,7 +5216,7 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
    MdiChildViewFrame *frame = NULL;
    bool frameFound = false;
 
-   #if DEBUG_ANIMATION
+   #ifdef DEBUG_ANIMATION
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnAnimation() title=%s\n", title.c_str());
    #endif
@@ -5228,7 +5234,7 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
    if (!frameFound)
       return;
 
-   #if DEBUG_ANIMATION
+   #ifdef DEBUG_ANIMATION
    MessageInterface::ShowMessage
       ("===> Now start animation of %s\n", frame->GetPlotName().c_str());
    #endif
@@ -5422,7 +5428,7 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
       Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
       if (x == -1) x = 0;
       //else x -= xOffset;
-      y -= yOffset;
+      //y -= yOffset;
       #ifdef DEBUG_CONFIG_DATA
       MessageInterface::ShowMessage("   screen offset: x = %4d, y = %4d\n", xOffset, yOffset);
       MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
