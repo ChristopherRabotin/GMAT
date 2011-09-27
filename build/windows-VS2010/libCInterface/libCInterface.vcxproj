@@ -89,8 +89,8 @@
       <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>call buildMatlabPrototype</Command>
+      <Message>Building MATLAB protype file</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
