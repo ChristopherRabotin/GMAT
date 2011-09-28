@@ -186,10 +186,10 @@ GmatCommand* GmatCommandUtil::GetPreviousCommand(GmatCommand *from,
 // GmatCommand* GetMatchingEnd(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /*
- * Returns EndScript of matching BeginScrpt.
+ * Returns matching EndScript of BeginScrpt or matching EndBranch of BranchCommand
  *
  * @param  cmd  BeginScript command which search begins from
- * @return next Matching EndScript, NULL if matching EndScript not found
+ * @return  Matching end command, NULL if matching end command not found
  */
 //------------------------------------------------------------------------------
 GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd)
@@ -567,6 +567,69 @@ GmatCommand* GmatCommandUtil::RemoveCommand(GmatCommand *seq, GmatCommand *cmd)
    
    // Just return cmd, it should be deleted by the caller.
    return cmd;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsElseFoundInIf(GmatCommand *ifCmd)
+//------------------------------------------------------------------------------
+/**
+ * @return true if Else command is found in the If command, flase otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatCommandUtil::IsElseFoundInIf(GmatCommand *ifCmd)
+{
+   if (ifCmd == NULL)
+      return false;
+   
+   #ifdef DEBUG_IF_ELSE
+   ShowCommand
+      ("===> GmatCommandUtil::IsElseFoundInIf() ifCmd = ", ifCmd);
+   #endif
+   
+   if (!ifCmd->IsOfType("If"))
+   {
+      #ifdef DEBUG_IF_ELSE
+      MessageInterface::ShowMessage
+         ("IsElseFoundInIf() returning false, it is not If command\n");
+      #endif
+      return false;
+   }
+   
+   GmatCommand *current = ifCmd;
+   GmatCommand *child = NULL;
+   Integer branch = 0;
+   bool elseFound = false;
+   
+   // Check only one level first branch
+   child = current->GetChildCommand(branch);
+   
+   while (child != NULL)
+   {
+      #ifdef DEBUG_IF_ELSE
+      ShowCommand("   child = ", child);
+      #endif
+      
+      if (child->IsOfType("BranchEnd"))
+      {
+         if (child->GetTypeName() == "Else")
+         {
+            #ifdef DEBUG_IF_ELSE
+            MessageInterface::ShowMessage("IsElseFoundInIf() returning true\n");
+            #endif
+            return true;
+         }            
+         break;
+      }
+      
+      child = child->GetNext();
+   }
+   
+   #ifdef DEBUG_IF_ELSE
+   MessageInterface::ShowMessage("IsElseFoundInIf() returning false\n");
+   #endif
+   
+   return false;
 }
 
 

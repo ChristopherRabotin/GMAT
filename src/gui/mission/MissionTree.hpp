@@ -124,6 +124,8 @@ private:
    void ShowEllipsisInPreviousNode(wxTreeItemId parent, wxTreeItemId node);
    wxTreeItemId BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
                               Integer level, bool &isPrevItemHidden);
+   wxTreeItemId BuildTreeItemInBranch(wxTreeItemId parent, GmatCommand *branch,
+                              Integer level, bool &isPrevItemHidden);
    
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd,
                                    Integer level);
@@ -168,6 +170,7 @@ private:
    bool CheckClickIn(wxPoint position);
    
    void OnAddMissionSeq(wxCommandEvent &event);
+   void OnPopupAppend(wxCommandEvent &event);
    
    void OnAppend(wxCommandEvent &event);
    void OnInsertBefore(wxCommandEvent &event);
@@ -196,12 +199,12 @@ private:
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
    
-   wxMenu* CreatePopupMenu(int type, ActionType action);
-   wxMenu* CreateTargetPopupMenu(int type, ActionType action);
-   wxMenu* CreateOptimizePopupMenu(int type, ActionType action);
-   wxMenu* AppendTargetPopupMenu(wxMenu *menu, ActionType action);
-   wxMenu* AppendOptimizePopupMenu(wxMenu *menu, ActionType action);
-   wxMenu* CreateControlLogicPopupMenu(int type, ActionType action);
+   wxMenu* CreateSubMenu(int type, ActionType action);
+   wxMenu* CreateTargetSubMenu(int type, ActionType action);
+   wxMenu* CreateOptimizeSubMenu(int type, ActionType action);
+   wxMenu* AppendTargetSubMenu(wxMenu *menu, ActionType action);
+   wxMenu* AppendOptimizeSubMenu(wxMenu *menu, ActionType action);
+   wxMenu* CreateControlLogicSubMenu(int type, ActionType action);
    
    wxString GetCommandString(GmatCommand *cmd, const wxString &currStr);
    GmatTree::ItemType GetCommandId(const wxString &cmd);
@@ -213,6 +216,7 @@ private:
    
    GmatTree::MissionIconType GetIconId(const wxString &cmd);
    wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd);
+   wxTreeItemId FindElse(wxTreeItemId parentId);
    bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType);
    
    // for Debug

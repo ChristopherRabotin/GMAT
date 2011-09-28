@@ -34,19 +34,20 @@ namespace GmatCommandUtil
    GmatCommand GMAT_API *GetParentCommand(GmatCommand *top, GmatCommand *cmd);
    GmatCommand GMAT_API *GetSubParent(GmatCommand *brCmd, GmatCommand *cmd);
    GmatCommand GMAT_API *RemoveCommand(GmatCommand *seq, GmatCommand *cmd);
+   bool GMAT_API IsElseFoundInIf(GmatCommand *ifCmd);
    bool GMAT_API ClearCommandSeq(GmatCommand *seq, bool leaveFirstCmd = true,
-                        bool callRunComplete = true);
+                    bool callRunComplete = true);
    bool GMAT_API IsAfter(GmatCommand *cmd1, GmatCommand *cmd2);
    bool GMAT_API FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
-                   const std::string &objName, std::string &cmdName);
+                    const std::string &objName, std::string &cmdName);
    bool GMAT_API FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
-                                  Gmat::ObjectType objType,
-                                  const std::string &objName, std::string &cmdName);
+                    Gmat::ObjectType objType,
+                    const std::string &objName, std::string &cmdName);
    std::string GMAT_API GetCommandSeqString(GmatCommand *cmd, bool showAddr = true,
-                                   bool showGenStr = false);
+                    bool showGenStr = false);
    void GMAT_API GetSubCommandString(GmatCommand* brCmd, Integer level,
-                            std::string &cmdseq, bool showAddr = true,
-                            bool showGenStr = false);
+                    std::string &cmdseq, bool showAddr = true,
+                    bool showGenStr = false);
    void GMAT_API ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
 }
