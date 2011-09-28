@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Allison Greene
 // Created: 2003/08/28
 /**
@@ -458,7 +456,8 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    #else
       Integer screenWidth;
       Integer screenHeight;
-      theParent->GetClientSize(&screenWidth, &screenHeight);
+      //theParent->GetClientSize(&screenWidth, &screenHeight);
+      GmatAppData::Instance()->GetMainFrame()->GetActualClientSize(&screenWidth, &screenHeight, true);
    #endif
 
 //   #ifdef DEBUG_PERSISTENCE

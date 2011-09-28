@@ -1947,29 +1947,26 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
    #ifdef DEBUG_PLOT_PERSISTENCY
    MessageInterface::ShowMessage
       ("ComputePlotPositionAndSize() entered, %s, positionX = %f, positionY = %f, "
-       "width = %f, height = %f\n", isGLPlot ? "GLPlot" : "XYPlot", positionX,
-       positionY, width, height);
+       "width = %f, height = %f, usingSaved = %d\n", isGLPlot ? "GLPlot" : "XYPlot", positionX,
+       positionY, width, height, usingSaved);
    #endif
    
    Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
    bool isPresetSizeUsed = false;
+   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    
    Integer screenWidth = 0;
    Integer screenHeight = 0;
+   Integer missionTreeX = 0;
+   Integer missionTreeY = 0;
+   Integer missionTreeW = 0;
    
    #ifdef __WXMAC__
       screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
       screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
    #else
-      GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
-      Integer missionTreeX = 0;
-      Integer missionTreeY = 0;
-      Integer missionTreeW = 0;
       //mainFrame->GetClientSize(&screenWidth, &screenHeight);
-      mainFrame->GetActualClientSize(&screenWidth, &screenHeight);
-      // If MissionTree is undocked, subtract its width before computing w
-      if (mainFrame->IsMissionTreeUndocked(missionTreeX, missionTreeY, missionTreeW))
-         screenWidth -= missionTreeW;
+      mainFrame->GetActualClientSize(&screenWidth, &screenHeight, true);
    #endif
    
    #ifdef DEBUG_PLOT_PERSISTENCY
@@ -1984,6 +1981,8 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       if (MdiGlPlot::usePresetSize || MdiTsPlot::usePresetSize)
          isPresetSizeUsed = true;
       
+      //mainFrame->GetActualClientSize(&screenWidth, &screenHeight, false);
+      
       usingSaved = false;
       #ifdef __WXMAC__
          wxSize size = wxGetDisplaySize();
@@ -1994,6 +1993,10 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
          x = 238 + hLoc * w + 1;
          y = 20  + vLoc * (h+10);
       #else
+         // If MissionTree is undocked, subtract its width before computing w
+         if (mainFrame->IsMissionTreeUndocked(missionTreeX, missionTreeY, missionTreeW))
+            screenWidth -= missionTreeW;
+         
          // Get active plot count
          Integer activePlotCount = mainFrame->GetNumberOfActivePlots();
          int newCount = plotCount + 1;
@@ -2050,6 +2053,8 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       
       isPresetSizeUsed = true;
       usingSaved       = true;
+      
+      //mainFrame->GetActualClientSize(&screenWidth, &screenHeight, false);
       
       x = (Integer) (positionX * (Real) screenWidth);
       y = (Integer) (positionY * (Real) screenHeight);

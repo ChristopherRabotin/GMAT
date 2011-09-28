@@ -151,7 +151,6 @@
 //#define DEBUG_CREATE_CHILD
 //#define DEBUG_CHILD_OPEN
 //#define DEBUG_CHILD_WINDOW
-
 //#define DEBUG_REMOVE_CHILD
 //#define DEBUG_OPEN_SCRIPT
 //#define DEBUG_REFRESH_SCRIPT
@@ -597,13 +596,13 @@ bool GmatMainFrame::Show(bool show)
 
 
 //------------------------------------------------------------------------------
-// void GetActualClientSize(Integer *w, Integer *h)
+// void GetActualClientSize(Integer *w, Integer *h, bool ignoreMissionTree)
 //------------------------------------------------------------------------------
 /**
  * Returns actual client size that plots can be positioned without offset
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::GetActualClientSize(Integer *w, Integer *h)
+void GmatMainFrame::GetActualClientSize(Integer *w, Integer *h, bool ignoreMissionTree)
 {
    Integer toolW, toolH;
    Integer msgSashWinW, msgSashWinH;
@@ -627,8 +626,13 @@ void GmatMainFrame::GetActualClientSize(Integer *w, Integer *h)
    actW = mainClientWinW;
    actH = mainSashWinH;
    
-   if (IsMissionTreeUndocked(mtWinX, mtWinY, mtWinW))
-      actW -= mtWinW;
+   if (!ignoreMissionTree)
+      if (IsMissionTreeUndocked(mtWinX, mtWinY, mtWinW))
+         actW -= mtWinW;
+   
+   #ifdef DEBUG_ACTUAL_CLIENT_SIZE
+   MessageInterface::ShowMessage("     ActualSize: w = %4d, h = %4d\n", actW, actH);
+   #endif
    
    *w = actW;
    *h = actH;
@@ -738,11 +742,11 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    if (newChild != NULL)
    {
       int numChildren = GetNumberOfChildOpen(false, true, true);
-      //#if DEBUG_CHILD_WINDOW
+      #ifdef DEBUG_CHILD_WINDOW
       MessageInterface::ShowMessage
          ("   numChildren = %d, mUndockedMissionTreePresized = %d\n", numChildren,
           mUndockedMissionTreePresized);
-      //#endif
+      #endif
       
       #ifdef __WXMAC__
       if ((numChildren > 0) && !((newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED) && mUndockedMissionTreePresized) &&
@@ -763,17 +767,11 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
             int y = (numChildren) * 20;
             newChild->SetPosition(wxPoint(x, y));
          #else
-            wxMDIClientWindow* clientWin = GetClientWindow();
             int clientX, clientY, clientW = -1, clientH = -1;
-            if (clientWin != NULL)
-            {
-               clientWin->GetPosition(&clientX, &clientY);
-               clientWin->GetSize(&clientW, &clientH);
-            }
-            #if DEBUG_CHILD_WINDOW
+            GetActualClientSize(&clientW, &clientH, true);
+            #ifdef DEBUG_CHILD_WINDOW
             MessageInterface::ShowMessage
-               ("client window: clientX=%d, clientY=%d, clientW=%d, clientH=%d\n",
-                clientX, clientY, clientW, clientH);
+               ("client window: clientW=%d, clientH=%d\n", clientW, clientH);
             #endif
             
             int y = x - toolH;
@@ -782,8 +780,13 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
             // Put UndockedMissionPanel always in the top left corner
             if (newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED)
             {
-               int mpW, mpH;
-               newChild->GetSize(&mpW, &mpH);
+               int mtX, mtY, mtW, mtH;
+               newChild->GetPosition(&mtX, &mtY);
+               newChild->GetSize(&mtW, &mtH);
+               #ifdef DEBUG_CHILD_WINDOW
+               MessageInterface::ShowMessage
+                  ("MissionTree window: W = %d, H = %d\n", mtW, mtH);
+               #endif
                
                if (!mUndockedMissionTreePresized)
                {
@@ -799,8 +802,14 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
                   
                   // Reposition other children
                   if (numChildren > 1)
-                     RepositionChildren(mpW);
+                     RepositionChildren(mtW + mtX);
                }
+               else
+               {
+                  // Reposition other children
+                  if (numChildren > 1)
+                     RepositionChildren(mtW + mtX);
+              }
             }
             else
             {
@@ -809,11 +818,11 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
                Integer mtX, mtY, mtW;
                if (IsMissionTreeUndocked(mtX, mtY, mtW))
                {
-                  if (mtX < 10)
+                  if (mtX < 20)
                   {
                      if (numChildren > 1)
                      {
-                        x = (numChildren - 2) * 20 + mtW;
+                        x = (numChildren - 2) * 20 + mtW + 20;
                         y = (numChildren - 2) * 20 - toolH;
                      }
                      newChild->SetPosition(wxPoint(x, y));
@@ -3511,28 +3520,9 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
             #else
                w = (Integer)((Real)screenWidth / 3.0);
                h = (Integer)((Real)screenHeight / 2.5);
-            // customize size up to 4 plots for now
-//            int newCount = plotCount + 1;
-//            if (newCount <= 4)
-//            {
-//               // if odd number, put it in 1st row
-//               if ((newCount % 2) == 1)
-//               {
-//                  x = 0;
-//                  y = h * ((newCount + 1) / 2 - 1);
-//               }
-//               else  // even number, put it in 2nd row
-//               {
-//                  x = w;
-//                  y = h * (newCount / 2 - 1);
-//               }
-//            }
-//            else
-//            {
                x = -1;
                y = -1;
-//            }
-         #endif
+            #endif
          }
          else
          {
@@ -3550,7 +3540,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
             if (x == -1) x = 0;
             //else x -= xOffset;
             y -= yOffset;
-            #ifdef DEBUG_PLOT_PERSISTENCY
+            #ifdef DEBUG_CHILD_PERSISTENCY
             MessageInterface::ShowMessage("   screen offset: x = %4d, y = %4d\n", xOffset, yOffset);
             MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
             #endif
@@ -5401,7 +5391,7 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
       screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
       screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
    #else
-      GetClientSize(&screenWidth, &screenHeight);
+      GetActualClientSize(&screenWidth, &screenHeight, true);
    #endif
 
    // Do we need the part with the plotCount, etc. (see GuiPlotReceiver)?????? <<<<<<<<<<<<<<<<<<<<

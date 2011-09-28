@@ -68,7 +68,7 @@ public:
                  const wxPoint& pos, const wxSize& size, const long style);
    ~GmatMainFrame();
    
-   void GetActualClientSize(Integer *w, Integer *h);
+   void GetActualClientSize(Integer *w, Integer *h, bool ignoreMissionTree);
    GmatMdiChildFrame* CreateChild(GmatTreeItemData *item, bool restore = true);
    GmatMdiChildFrame* GetChild(const wxString &name);
    
