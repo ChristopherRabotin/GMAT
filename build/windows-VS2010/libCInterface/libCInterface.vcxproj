@@ -82,7 +82,7 @@
       <PreprocessorDefinitions>_DYNAMICLINK;CINTERFACE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\..\..\application\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

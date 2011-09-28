@@ -244,7 +244,7 @@
       <DisableSpecificWarnings>4231;4996;4251;4430</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\application\plugins;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
