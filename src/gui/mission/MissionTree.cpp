@@ -405,7 +405,7 @@ void MissionTree::UpdateMissionForRename()
    }
 }
 
-
+//#define DEBUG_CHANGE_NODE_LABEL
 //------------------------------------------------------------------------------
 // void ChangeNodeLabel(const wxString &oldLabel)
 //------------------------------------------------------------------------------
@@ -1796,7 +1796,7 @@ void MissionTree::Append(const wxString &cmdTypeName)
    
    #if DEBUG_MISSION_TREE_APPEND
    MessageInterface::ShowMessage
-      ("   after FindChild(Else) itemId=<%s>, lastChildId=<%s>, elseFound = %d\n",
+      ("   after FindElse itemId=<%s>, lastChildId=<%s>, elseFound = %d\n",
        GetItemText(itemId).c_str(), GetItemText(lastChildId).c_str(), elseFound);
    #endif
 
@@ -3503,7 +3503,10 @@ wxMenu* MissionTree::CreateControlLogicSubMenu(int type, ActionType action)
          parentId = GetItemParent(itemId);
       
       // show only one Else
-      wxTreeItemId elseId = FindChild(parentId, "Else");
+      // We should look for in the first level children only,
+      // so use FindElse() (LOJ: 2011.09.28)
+      //wxTreeItemId elseId = FindChild(parentId, "Else");
+      wxTreeItemId elseId = FindElse(parentId);
       if (elseId.IsOk() && GetItemText(elseId) != "")
          addElse = false;
    }
@@ -4552,14 +4555,12 @@ int* MissionTree::GetCommandCounter(const wxString &cmd)
 // wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd)
 //------------------------------------------------------------------------------
 /*
- * Finds a item from the parent node of the tree. 
+ * Finds a item from the parent node of the tree. It compares item command name
+ * and cmd for finding cmd.
  *
  * @param <parentId> Parent item id
- * @param <cmd> Name of the command to find
+ * @param <cmd> Comand string to find
  *
- * @note If any node is collapsed the requsted command cannot be found since
- *       it looks only visiable node items
- * 
  */
 //------------------------------------------------------------------------------
 wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
@@ -4570,54 +4571,40 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
        GetItemText(parentId).c_str(), cmd.c_str());
    #endif
    
-   MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parentId);
-   GmatTree::ItemType parentType = parentItem->GetItemType();
-   unsigned int itemCount = 0;
-   wxTreeItemId firstItem;
+   int numChildren = GetChildrenCount(parentId);
+   wxTreeItemId childId;
+   wxString childText;
    
-   // if parent is top node, then get total count
-   if (parentType == GmatTree::MISSION_SEQ_SUB_FOLDER)
+   if (numChildren > 0)
    {
-      itemCount = GetCount();
-      firstItem = GetFirstVisibleItem();
-   }
-   else
-   {
-      itemCount = GetChildrenCount(parentId);
-      firstItem = parentId;
-   }
-   
-   wxTreeItemId itemId = firstItem;
-   wxString itemText;
-   
-   for (unsigned int i=0; i<itemCount; i++)
-   {
-      MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
-      GmatCommand *currCmd = currItem->GetCommand();
-      wxString currCmdType = currCmd->GetTypeName().c_str();
+      wxTreeItemIdValue cookie;
+      childId = GetFirstChild(parentId, cookie);
       
-      itemText = GetItemText(itemId);
-      
-      #if DEBUG_MISSION_TREE_FIND > 1
-      MessageInterface::ShowMessage("   item=<%s>\n", itemText.c_str());
-      MessageInterface::ShowMessage("    cmd=<%s>\n", currCmdType.c_str());
-      #endif
-      
-      //if (itemText.Contains(cmd))
-      if (currCmdType == cmd)
-         return itemId;
-      
-      itemId = GetNextVisible(itemId);
+      while (childId.IsOk())
+      {
+         MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(childId);
+         GmatCommand *currCmd = currItem->GetCommand();
+         wxString currCmdType = currCmd->GetTypeName().c_str();
+         wxString currCmdName = currCmd->GetName().c_str();
+         childText = GetItemText(childId);
+         
+         #if DEBUG_MISSION_TREE_FIND > 1
+         MessageInterface::ShowMessage("---> childText   ='%s'\n", childText.c_str());
+         MessageInterface::ShowMessage("     cmdTypeName ='%s'\n", currCmdType.c_str());
+         MessageInterface::ShowMessage("     cmdName     ='%s'\n", currCmdType.c_str());
+         #endif
+         
+         if (currCmdName == cmd)
+            break;
+         
+         if (GetChildrenCount(childId) > 0)
+            FindChild(childId, cmd);
+         
+         childId = GetNextChild(parentId, cookie);
+      }
    }
    
-   #if DEBUG_MISSION_TREE_FIND
-   MessageInterface::ShowMessage
-      ("MissionTree::FindChild() returning unknown child\n");
-   #endif
-   
-   wxTreeItemId nullId;
-   return nullId;
-   
+   return childId;
 }
 
 
@@ -4625,7 +4612,8 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
 // wxTreeItemId FindElse(wxTreeItemId parentId)
 //------------------------------------------------------------------------------
 /*
- * Finds a Else from the parent node of the tree. 
+ * Finds a Else from the children of the parent node of the tree. It checks
+ * only one level.
  *
  * @param <parentId> Parent item id
  *
