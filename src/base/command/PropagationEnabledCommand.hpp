@@ -62,6 +62,8 @@ protected:
 
    /// Names of the PropSetups used by this command, as set in a derived class
    StringArray                   propagatorNames;
+   /// Step direction multipliers used to switch btwn forwards & backwards prop
+   Real                          direction;
    /// The PropSetup used by this command, as set in a derived class
    std::vector<PropSetup*>       propagators;
    /// Flag used to indicate that the PropSetups were built in a derived class
@@ -89,9 +91,9 @@ protected:
    RealArray                    elapsedTime;
    /// Start epoch for the step
    RealArray                    currEpoch;
-   /// The Propagator
+   /// The Propagators
    std::vector<Propagator*>     p;
-   /// The ForceModel
+   /// The ForceModels
    std::vector<ODEModel*>       fm;
    /// The Propagation State Managers
    std::vector<PropagationStateManager*>  psm;
@@ -118,14 +120,19 @@ protected:
    Real                 *previousEventData;
    /// Values of event location data in the current call
    Real                 *currentEventData;
+   /// Values of event location data used while searching
+   Real                 *tempEventData;
    /// Total number of elements in the data buffers
    UnsignedInt          eventBufferSize;
    /// Root finder used in event location
    RootFinder           *finder;
+   /// Flag used to turn off publishing during event location
+   bool                 publishOnStep;
 
    bool                 PrepareToPropagate();
    bool                 AssemblePropagators();
    bool                 Step(Real dt);
+   virtual bool         TakeAStep(Real propStep = 0.0);
 
    virtual void         AddToBuffer(SpaceObject *so);
    virtual void         EmptyBuffer();
@@ -135,7 +142,7 @@ protected:
 
    virtual void         InitializeForEventLocation();
    virtual void         CheckForEvents();
-   virtual void         LocateEvent(EventLocator* el, Integer index = 0);
+   virtual bool         LocateEvent(EventLocator* el, Integer index = 0);
    virtual void         UpdateEventTable(EventLocator* el, Integer index);
 };
 

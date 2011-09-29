@@ -143,6 +143,8 @@ namespace GmatTimeConstants
    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
    const Integer JULIAN_DATE_OF_010541 = 2430000;
 
+   const Real MJD_EPOCH_PRECISION = 7.27e-12;    // 37 bits for decimal piece
+
    enum DayName {SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY};
 
    enum MonthName {JANUARY = 1, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST,

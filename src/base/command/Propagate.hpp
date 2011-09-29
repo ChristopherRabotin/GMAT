@@ -164,10 +164,7 @@ public:
 protected:
    /// Name of the propagator setup(s) used in this command
    StringArray                  propName;
-   /// Step direction multipliers used to switch btwn forwards & backwards prop
-   Real                         direction;
-   /// The (1 or more) spacecraft associated with this propagation, grouped by
-   /// propagator
+   /// The spacecraft associated with this propagation, grouped by propagator
    std::vector<StringArray *>   satName;
    /// Flag used to determine if the spacecraft are propagated coupled
    std::string                  currentPropMode;
@@ -179,8 +176,8 @@ protected:
    bool                         hasFired;
    /// ID for the spacecraft epoch parameter
    Integer                      epochID;
-   /// Starting epoch for the propagation
-   std::vector<Real>            baseEpoch;
+//   /// Starting epoch for the propagation
+//   std::vector<Real>            baseEpoch;
    
    /// The propagator(s) used by this command
    std::vector<PropSetup*>      prop;
@@ -220,10 +217,10 @@ protected:
    RealArray                    elapsedTime;
    /// Start epoch for the step
    RealArray                    currEpoch;
-   /// The Propagator
-   std::vector<Propagator*>     p;
-   /// The ForceModel
-   std::vector<ODEModel*>       fm;
+//   /// The Propagator
+//   std::vector<Propagator*>     p;
+//   /// The ForceModel
+//   std::vector<ODEModel*>       fm;
    /// The Propagation State Managers
    std::vector<PropagationStateManager*>  psm;
    

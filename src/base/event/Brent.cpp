@@ -26,6 +26,10 @@
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_BRENT
+//#define DEBUG_BRENT_BUFFER
+
+
 //------------------------------------------------------------------------------
 // Brent()
 //------------------------------------------------------------------------------
@@ -121,8 +125,10 @@ Brent & Brent::operator =(const Brent & b)
 //------------------------------------------------------------------------------
 bool Brent::Initialize(GmatEpoch t0, Real f0, GmatEpoch t1, Real f1)
 {
-   MessageInterface::ShowMessage("Brent::Initialize(%15.9lf, %12lf, %15.9lf, "
-         "%12lf) called\n", t0, f0, t1, f1);
+   #ifdef DEBUG_BRENT
+      MessageInterface::ShowMessage("Brent::Initialize(%15.9lf, %12lf, %15.9lf, "
+            "%12lf) called\n", t0, f0, t1, f1);
+   #endif
 
    if (f0 * f1 >= 0.0)
       throw EventException("Error initializing Brent's method; the solution is "
@@ -142,10 +148,11 @@ bool Brent::Initialize(GmatEpoch t0, Real f0, GmatEpoch t1, Real f1)
       bisectionUsed  = true;        // Act as if bisection was used previously
    }
 
-   MessageInterface::ShowMessage("Brent::Buffer Data:\n   %15.9lf  %12lf\n   "
-         "%15.9lf  %12lf\n   %15.9lf  %12lf\n", epochBuffer[0], buffer[0],
-         epochBuffer[1], buffer[1], epochBuffer[2], buffer[2]);
-
+   #ifdef DEBUG_BRENT_BUFFER
+      MessageInterface::ShowMessage("Brent::Buffer Data:\n   %15.9lf  "
+            "%.12lf\n   %15.9lf  %.12lf\n   %15.9lf  %.12lf\n", epochBuffer[0],
+            buffer[0], epochBuffer[1], buffer[1], epochBuffer[2], buffer[2]);
+   #endif
 
    return retval;
 }
@@ -165,6 +172,15 @@ bool Brent::Initialize(GmatEpoch t0, Real f0, GmatEpoch t1, Real f1)
 //------------------------------------------------------------------------------
 bool Brent::SetValue(GmatEpoch forEpoch, Real withValue)
 {
+   #ifdef DEBUG_BRENT_BUFFER
+      MessageInterface::ShowMessage("Received data: %15.9lf %.12lf\n", forEpoch,
+            withValue);
+      MessageInterface::ShowMessage("Brent::SetValue Initial Buffer Data:\n   "
+            "%15.9lf  %.12lf\n   %15.9lf  %.12lf\n   %15.9lf  %.12lf\n",
+            epochBuffer[0], buffer[0], epochBuffer[1], buffer[1],
+            epochBuffer[2], buffer[2]);
+   #endif
+
    bool retval = true;
 
    oldCValue = epochBuffer[2];
@@ -185,6 +201,12 @@ bool Brent::SetValue(GmatEpoch forEpoch, Real withValue)
    if (GmatMathUtil::Abs(buffer[0]) < GmatMathUtil::Abs(buffer[1]))
       Swap(0,1);
 
+   #ifdef DEBUG_BRENT_BUFFER
+      MessageInterface::ShowMessage("Brent::SetValue Updated Buffer Data:\n   "
+            "%15.9lf  %.12lf\n   %15.9lf  %.12lf\n   %15.9lf  %.12lf\n",
+            epochBuffer[0], buffer[0], epochBuffer[1], buffer[1],
+            epochBuffer[2], buffer[2]);
+   #endif
    return retval;
 }
 
@@ -203,46 +225,46 @@ bool Brent::SetValue(GmatEpoch forEpoch, Real withValue)
 //------------------------------------------------------------------------------
 Real Brent::FindStep(const GmatEpoch currentEpoch)
 {
-   Real diffAB, diffAC, diffBC;
-
-   diffAB = buffer[0] - buffer[1];
-   if ((buffer[0] != buffer[2]) && (buffer[1] != buffer[2]))
-   {
-      diffAC = buffer[0] - buffer[2];
-      diffBC = buffer[1] - buffer[2];
-      // Inverse quadratic interpolation
-      epochOfStep = epochBuffer[0] * buffer[1] * buffer[2] / ((diffAB*diffAC)) +
-            epochBuffer[1] * buffer[0] * buffer[2] / ((-diffAB*diffBC)) +
-            epochBuffer[2] * buffer[0] * buffer[1] / ((diffAC*diffBC));
-   }
-   else
-   {
-      // Secant method
-      epochOfStep = epochBuffer[1] - buffer[1] *
-            (epochBuffer[0] - epochBuffer[1])/diffAB;
-   }
-
-   // Figure out if we need to drop back to bisection
-   Real delta = 1.0e-8;    // Numerical tolerance for epochs; set to ~1 msec
-   Real deltaC, bMinusC, sMinusB;
-
-   deltaC  = GmatMathUtil::Abs(epochBuffer[2] - oldCValue);
-   bMinusC = GmatMathUtil::Abs(epochBuffer[1]-epochBuffer[2]);
-   sMinusB = GmatMathUtil::Abs(epochOfStep - epochBuffer[1]);
-
-   if ( ((epochOfStep >= (3.0 * epochBuffer[0] + epochBuffer[1]) / 4.0) &&
-         (epochOfStep <= epochBuffer[1])) ||
-        (bisectionUsed && (sMinusB >= bMinusC / 2.0)) ||
-        (!bisectionUsed && (sMinusB >= deltaC / 2.0)) ||
-        (bisectionUsed && (bMinusC < delta)) ||
-        (!bisectionUsed && deltaC < delta) )
+//   Real diffAB, diffAC, diffBC;
+//
+//   diffAB = buffer[0] - buffer[1];
+//   if ((buffer[0] != buffer[2]) && (buffer[1] != buffer[2]))
+//   {
+//      diffAC = buffer[0] - buffer[2];
+//      diffBC = buffer[1] - buffer[2];
+//      // Inverse quadratic interpolation
+//      epochOfStep = epochBuffer[0] * buffer[1] * buffer[2] / ((diffAB*diffAC)) +
+//            epochBuffer[1] * buffer[0] * buffer[2] / ((-diffAB*diffBC)) +
+//            epochBuffer[2] * buffer[0] * buffer[1] / ((diffAC*diffBC));
+//   }
+//   else
+//   {
+//      // Secant method
+//      epochOfStep = epochBuffer[1] - buffer[1] *
+//            (epochBuffer[0] - epochBuffer[1])/diffAB;
+//   }
+//
+//   // Figure out if we need to drop back to bisection
+//   Real delta = 1.0e-8;    // Numerical tolerance for epochs; set to ~1 msec
+//   Real deltaC, bMinusC, sMinusB;
+//
+//   deltaC  = GmatMathUtil::Abs(epochBuffer[2] - oldCValue);
+//   bMinusC = GmatMathUtil::Abs(epochBuffer[1]-epochBuffer[2]);
+//   sMinusB = GmatMathUtil::Abs(epochOfStep - epochBuffer[1]);
+//
+//   if ( ((epochOfStep >= (3.0 * epochBuffer[0] + epochBuffer[1]) / 4.0) &&
+//         (epochOfStep <= epochBuffer[1])) ||
+//        (bisectionUsed && (sMinusB >= bMinusC / 2.0)) ||
+//        (!bisectionUsed && (sMinusB >= deltaC / 2.0)) ||
+//        (bisectionUsed && (bMinusC < delta)) ||
+//        (!bisectionUsed && deltaC < delta) )
    {
       // Drop back to bisection. Sigh.
       epochOfStep = 0.5 * (epochBuffer[0] + epochBuffer[1]);
       bisectionUsed = true;
    }
-   else
-      bisectionUsed = false;
+//   else
+//      bisectionUsed = false;
 
    // Get the step in seconds to the epochOfStep if input in days was set
    if (currentEpoch != -1.0)
@@ -250,9 +272,11 @@ Real Brent::FindStep(const GmatEpoch currentEpoch)
    else
       step = epochOfStep;
 
-   MessageInterface::ShowMessage("Brent's Method: Current Epoch: %15.9lf, "
-         "Epoch of Step: %15.9lf, step: %15.9lf\n", currentEpoch, epochOfStep,
-         step);
+   #ifdef DEBUG_BRENT
+      MessageInterface::ShowMessage("Brent's Method: Current Epoch: %15.9lf, "
+            "Epoch of Step: %15.9lf, step: %15.9lf\n", currentEpoch, epochOfStep,
+            step);
+   #endif
 
    return step;
 }

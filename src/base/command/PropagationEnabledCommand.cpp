@@ -58,6 +58,7 @@
 PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
 :
    GmatCommand          (typeStr),
+   direction            (1.0),
    overridePropInit     (false),
    hasFired             (false),
    inProgress           (false),
@@ -68,8 +69,10 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    activeLocatorCount   (0),
    previousEventData    (NULL),
    currentEventData     (NULL),
+   tempEventData        (NULL),
    eventBufferSize      (0),
-   finder               (NULL)
+   finder               (NULL),
+   publishOnStep        (true)
 {
    objectTypeNames.push_back("PropagationEnabledCommand");
    physicsBasedCommand = true;
@@ -110,6 +113,9 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
    if (currentEventData != NULL)
       delete [] currentEventData;
 
+   if (tempEventData != NULL)
+      delete [] tempEventData;
+
    if (finder != NULL)
       delete finder;
 }
@@ -127,6 +133,7 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
 PropagationEnabledCommand::PropagationEnabledCommand(
       const PropagationEnabledCommand& pec) :
    GmatCommand          (pec),
+   direction            (pec.direction),
    overridePropInit     (pec.overridePropInit),
    hasFired             (false),
    inProgress           (false),
@@ -137,8 +144,10 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    activeLocatorCount   (0),
    previousEventData    (NULL),
    currentEventData     (NULL),
+   tempEventData        (NULL),
    eventBufferSize      (0),
-   finder               (NULL)
+   finder               (NULL),
+   publishOnStep        (true)
 {
    initialized = false;
    propagatorNames = pec.propagatorNames;
@@ -164,9 +173,10 @@ PropagationEnabledCommand::PropagationEnabledCommand(
 PropagationEnabledCommand& PropagationEnabledCommand::operator=(
       const PropagationEnabledCommand& pec)
 {
-   if (this == &pec)
+   if (this != &pec)
    {
       overridePropInit    = pec.overridePropInit;
+      direction           = pec.direction;
       hasFired            = false;
       inProgress          = false;
       dim                 = pec.dim;
@@ -195,7 +205,12 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
          delete [] currentEventData;
       currentEventData = NULL;
 
+      if (tempEventData != NULL)
+         delete [] tempEventData;
+      tempEventData = NULL;
+
       eventBufferSize = 0;
+      publishOnStep   = true;
    }
 
    return *this;
@@ -737,23 +752,45 @@ bool PropagationEnabledCommand::Step(Real dt)
       fm[i]->UpdateSpaceObject(currEpoch[i]);
    }
 
-   // Publish the data here
-   pubdata[0] = currEpoch[0];
-   memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
-   
-   #ifdef DEBUG_PUBLISH_DATA
-      MessageInterface::ShowMessage
-         ("PropagationEnabledCommand::Step() '%s' publishing %d data to stream %d, 1st data = "
-          "%f\n", GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
-          dim+1, streamID, pubdata[0]);
-   #endif
-   
-   publisher->Publish(this, streamID, pubdata, dim+1);
+   if (publishOnStep)
+   {
+      // Publish the data here
+      pubdata[0] = currEpoch[0];
+      memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
 
+      #ifdef DEBUG_PUBLISH_DATA
+         MessageInterface::ShowMessage
+            ("PropagationEnabledCommand::Step() '%s' publishing %d data to stream %d, 1st data = "
+             "%f\n", GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+             dim+1, streamID, pubdata[0]);
+      #endif
+
+      publisher->Publish(this, streamID, pubdata, dim+1);
+   }
+   
    return retval;
 }
 
 
+//------------------------------------------------------------------------------
+// bool TakeAStep(Real propStep)
+//------------------------------------------------------------------------------
+/**
+ * Advances state but the input interval
+ *
+ * @param propStep Interval to step, in seconds.
+ *
+ * @return true on success, false on failure
+ *
+ * @note This default version always throws.  The method must be overridden in
+ *       a derived class before using it.
+ */
+//------------------------------------------------------------------------------
+bool PropagationEnabledCommand::TakeAStep(Real propStep)
+{
+   throw CommandException("TakeAStep must be overridden to use it; no override "
+         "exists for " + typeName + " commands.");
+}
 
 //------------------------------------------------------------------------------
 // void AddToBuffer(SpaceObject *so)
@@ -961,6 +998,13 @@ void PropagationEnabledCommand::BufferSatelliteStates(bool fillingBuffer)
 }
 
 
+//------------------------------------------------------------------------------
+// void InitializeForEventLocation()
+//------------------------------------------------------------------------------
+/**
+ * Prepares the event location functions to seek event boundaries
+ */
+//------------------------------------------------------------------------------
 void PropagationEnabledCommand::InitializeForEventLocation()
 {
    if (events == NULL)
@@ -1004,11 +1048,14 @@ void PropagationEnabledCommand::InitializeForEventLocation()
       delete [] currentEventData;
    if (previousEventData != NULL)
       delete [] previousEventData;
+   if (tempEventData != NULL)
+      delete [] tempEventData;
 
    if (eventBufferSize != 0)
    {
       currentEventData = new Real[eventBufferSize];
       previousEventData = new Real[eventBufferSize];
+      tempEventData = new Real[eventBufferSize];
 
       Integer dataIndex;
       for (Integer i = 0; i < activeLocatorCount; ++i)
@@ -1026,9 +1073,17 @@ void PropagationEnabledCommand::InitializeForEventLocation()
    {
       currentEventData = NULL;
       previousEventData = NULL;
+      tempEventData = NULL;
    }
 }
 
+//------------------------------------------------------------------------------
+// void CheckForEvents()
+//------------------------------------------------------------------------------
+/**
+ * Looks for a sign change in event function values and derivative values
+ */
+//------------------------------------------------------------------------------
 void PropagationEnabledCommand::CheckForEvents()
 {
    if (events == NULL)
@@ -1079,7 +1134,13 @@ void PropagationEnabledCommand::CheckForEvents()
                   "locator %d\n", i, functionIndex, index);
          #endif
 
-         LocateEvent(events->at(index), functionIndex);
+         bool found = LocateEvent(events->at(index), functionIndex);
+         if (found)
+         {
+//            MessageInterface::ShowMessage("Found an event on locator %s "
+//                  "index %d",events->at(index)->GetTypeName().c_str(),
+//                  functionIndex);
+         }
       }
    }
 
@@ -1101,7 +1162,20 @@ void PropagationEnabledCommand::CheckForEvents()
    memcpy(previousEventData, currentEventData, eventBufferSize*sizeof(Real));
 }
 
-void PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
+
+//------------------------------------------------------------------------------
+// bool LocateEvent(EventLocator* el, Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Seeks event boundaries given bracketing in the event function value
+ *
+ * @param el The EventLocator that holds the triggered event
+ * @param index The index to the event in the locator that was triggered
+ *
+ * @return true if an event zero was found
+ */
+//------------------------------------------------------------------------------
+bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
 {
    bool eventFound = false;
 
@@ -1116,7 +1190,7 @@ void PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
       MessageInterface::ShowMessage("PropagationEnabledCommand::LocateEvent "
             "was called unexpectedly; no EventLocators have been set\n");
 
-      return;
+      return false;
    }
 
    #ifdef DEBUG_EVENTLOCATORS
@@ -1134,29 +1208,127 @@ void PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
       MessageInterface::ShowMessage("Zero at %12lf\n", zero);
    #endif
 
+   // Preserve the current state data
+   Real propDir = direction;
+   BufferSatelliteStates(true);
+   bool wasPublishing = publishOnStep;
+   publishOnStep = false;
+
+   Integer stepsTaken = 0;
+   Integer maxStepsAllowed = 31;  // 2^31 = 2.14e10
+
+   // Build an estimate of machine precision for the independent variable
+ //  Real machineEpochPrecision   = currentEventData[epochIndex];
+   Real lastEpoch = currentEventData[index*3], currentStep, desiredEpoch;
+
+   // Prepare the RootFinder
+   finder->Initialize(previousEventData[index*3],
+         previousEventData[index*3+1], currentEventData[index*3],
+         currentEventData[index*3+1]);
+
+   Real elapsedSeconds = 0.0;
+
+   // Loop until (1) the maximum number of steps is taken, (2) the step
+   // tolerance is at the numerical precision of the data, or (3) the step
+   // achieves the step tolerance
+   do
+   {
+      // Get the step desired
+      desiredEpoch = finder->GetStep();
+      currentStep = (desiredEpoch - lastEpoch) * GmatTimeConstants::SECS_PER_DAY;
+
+//MessageInterface::ShowMessage("%15.9lf - %15.9lf -> %lf      ", desiredEpoch, lastEpoch, currentStep);
+
+      // Take the step
+      std::vector<Propagator*>::iterator current = p.begin();
+      // Step all of the propagators by the input amount
+      while (current != p.end())
+      {
+         (*current)->SetAsFinalStep(true);
+         bool isForward = (*current)->PropagatesForward();
+         if (!(*current)->Step(currentStep))
+         {
+            char size[32];
+            std::sprintf(size, "%.12lf", currentStep);
+            throw CommandException("Propagator " + (*current)->GetName() +
+               " failed to take a good final step (size = " + size + ")\n");
+         }
+         (*current)->SetAsFinalStep(false);
+         (*current)->SetForwardPropagation(isForward);
+
+         ++current;
+      }
+
+      for (UnsignedInt i = 0; i < fm.size(); ++i)
+      {
+         // events and orbit related parameters use spacecraft for data
+         Real elapsedTime = fm[i]->GetTime();
+
+         GmatEpoch tempEpoch = baseEpoch[i] + elapsedTime /
+            GmatTimeConstants::SECS_PER_DAY;
+
+         // Update spacecraft epoch, without argument the spacecraft epoch
+         // won't get updated for consecutive Propagate command
+         if (fm[i])
+            fm[i]->UpdateSpaceObject(tempEpoch);
+         else
+            p[i]->UpdateSpaceObject(tempEpoch);
+      }
+
+      elapsedSeconds += currentStep;
+
+      // Evaluate the function and buffer it
+      // First evaluate the event functions
+      for (Integer i = 0; i < activeLocatorCount; ++i)
+      {
+         Real *data = events->at(activeEventIndices[i])->Evaluate();
+         Integer dataIndex = eventStartIndices[i];
+         UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
+         for (UnsignedInt j = 0; j < fc*3; ++j)
+            tempEventData[dataIndex + j] = data[j];
+      }
+
+      #ifdef DEBUG_EVENT_LOCATION
+         MessageInterface::ShowMessage("ElapsedSecs = %.12lf; Passing in new "
+               "data: %12lf %.12lf\n", elapsedSeconds, tempEventData[index*3],
+               tempEventData[index*3+1]);
+      #endif
+
+      finder->SetValue(tempEventData[index*3], tempEventData[index*3+1]);
+
+      lastEpoch = tempEventData[index*3];
+      ++stepsTaken;
+   }
+   while ((stepsTaken < maxStepsAllowed) &&
+          (GmatMathUtil::Abs(tempEventData[index*3+1]) > 1e-5));
+//         &&
+//          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
+
    eventFound = true;
 
    // End of temporary section
 
    if (eventFound)
    {
-      finder->Initialize(previousEventData[index*3],
-            previousEventData[index*3+1], currentEventData[index*3],
-            currentEventData[index*3+1]);
       UpdateEventTable(el, index);
    }
+
+   // Preserve the current state data
+   BufferSatelliteStates(false);
+   publishOnStep = wasPublishing;
+
+   direction = propDir;
+
+   return eventFound;
 }
+
+
+
 
 
 void PropagationEnabledCommand::UpdateEventTable(EventLocator* el, Integer index)
 {
-//   while (GmatMathUtil::Abs((el->Evaluate())[index*3+1]) >
-//             el->GetRealParameter("Tolerance"))
-   {
-      Real step = finder->GetStep(currentEventData[index]);
-      MessageInterface::ShowMessage("Step by %lf from epoch %15.9lf\n", step,
-            currentEventData[index]);
-   }
+   el->BufferEvent(index);
 }
 
 

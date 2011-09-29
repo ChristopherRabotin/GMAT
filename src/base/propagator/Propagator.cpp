@@ -990,6 +990,36 @@ void Propagator::SetTime(Real t)
 }
 
 
+//------------------------------------------------------------------------------
+// bool PropagatesForward()
+//------------------------------------------------------------------------------
+/**
+ * Accesses the current step direction
+ *
+ * @return true for forward propagation, false for backwards
+ */
+//------------------------------------------------------------------------------
+bool Propagator::PropagatesForward()
+{
+   return (stepSize > 0.0 ? true : false);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetForwardPropagation(bool tf)
+//------------------------------------------------------------------------------
+/**
+ * Sets the current propagation direction
+ *
+ * @param tf Flag indicating if the direction is forwards (true) or backwards
+ */
+//------------------------------------------------------------------------------
+void Propagator::SetForwardPropagation(bool tf)
+{
+   stepSize       = (tf ? 1.0 : -1.0) * GmatMathUtil::Abs(stepSize);
+   stepSizeBuffer = (tf ? 1.0 : -1.0) * GmatMathUtil::Abs(stepSizeBuffer);
+}
+
 
 //------------------------------------------------------------------------------
 // bool Step(Real dt)

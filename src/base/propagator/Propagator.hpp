@@ -148,6 +148,9 @@ public:
    virtual Real GetTime();
    virtual void SetTime(Real t);
 
+   virtual bool PropagatesForward();
+   virtual void SetForwardPropagation(bool tf);
+
    // Abstract methods
 
    //---------------------------------------------------------------------------
