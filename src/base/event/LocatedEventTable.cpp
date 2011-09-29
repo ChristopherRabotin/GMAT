@@ -547,13 +547,12 @@ std::string LocatedEventTable::BuildEventSummary()
    std::string parties;
    Real span;
 
-//   Max Umbra Duration (sec)    : 2187.082 s (LEO1 - Earth)
-//                               : 990.414 s  (LEO2 - Earth)
    // Find maxima, type by type
    for (UnsignedInt i = 0; i < eventTypes.size(); ++i)
    {
       eventNames.clear();
       span = 0.0;
+      sprintf(sub, "  Max %s Duration", eventTypes[i].c_str());
       for (UnsignedInt j = 0; j < events.size(); ++j)
       {
          if ((events[j]->isEntry) && (events[j]->partner != NULL) &&
@@ -565,13 +564,10 @@ std::string LocatedEventTable::BuildEventSummary()
             span = GetMaxSpan(eventTypes[i], parties);
             if (span > 0.0)
             {
-               if (eventNames.size() == 1)
-                  sprintf(sub, "  Max %s Duration", eventTypes[i].c_str());
-               else
-                  sprintf(sub, " ");
                sprintf(data, "%-34s: %12.3lf s (%s)\n", sub, span,
                      parties.c_str());
                summary += data;
+               sprintf(sub, " ");
             }
          }
       }

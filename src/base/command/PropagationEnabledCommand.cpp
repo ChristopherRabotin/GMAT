@@ -1304,7 +1304,9 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
 //         &&
 //          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
 
-   eventFound = true;
+   if ((GmatMathUtil::Abs(tempEventData[index*3+1]) < 1e-5) &&
+       (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
+      eventFound = true;
 
    // End of temporary section
 

@@ -66,6 +66,7 @@ EventLocator::EventLocator(const std::string &typeStr,
    filename       ("LocatedEvents.txt"),
    efCount        (0),
    lastData       (NULL),
+   lastEpochs     (NULL),
    isActive       (true),
    eventTolerance (1.0e-3),
    solarSys       (NULL)
@@ -79,6 +80,9 @@ EventLocator::~EventLocator()
    if (lastData != NULL)
       delete [] lastData;
 
+   if (lastEpochs != NULL)
+      delete [] lastEpochs;
+
    // todo: Delete the member EventFunctions
 }
 
@@ -87,6 +91,7 @@ EventLocator::EventLocator(const EventLocator& el):
    filename          (el.filename),
    efCount           (0),
    lastData          (NULL),
+   lastEpochs        (NULL),
    isActive          (el.isActive),
    satNames          (el.satNames),
    targets           (el.targets),
@@ -103,7 +108,12 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
 
       filename       = el.filename;
       efCount        = 0;
+      if (lastData != NULL)
+         delete [] lastData;
+      if (lastEpochs != NULL)
+         delete [] lastEpochs;
       lastData       = NULL;
+      lastEpochs     = NULL;
       isActive       = el.isActive;
       satNames       = el.satNames;
       targets        = el.targets;
@@ -498,8 +508,16 @@ bool EventLocator::Initialize()
 
    if (lastData != NULL)
       delete [] lastData;
+   if (lastEpochs != NULL)
+      delete [] lastEpochs;
+
    if (efCount > 0)
+   {
       lastData = new Real[efCount * 3];
+      lastEpochs = new GmatEpoch[efCount];
+      for (UnsignedInt i = 0; i < efCount; ++i)
+         lastEpochs[i] = -1.0;
+   }
 
    return retval;
 }
@@ -554,6 +572,7 @@ void EventLocator::BufferEvent(Integer forEventFunction)
 
    Real *theData = eventFunctions[forEventFunction]->GetData();
    theEvent->epoch = theData[0];
+   lastEpochs[forEventFunction] = theEvent->epoch;
    theEvent->eventValue = theData[1];
    theEvent->type = eventFunctions[forEventFunction]->GetTypeName();
    theEvent->participants = eventFunctions[forEventFunction]->GetName();
@@ -616,4 +635,9 @@ Real* EventLocator::GetEventData(std::string type, Integer whichOne)
 void EventLocator::UpdateEventTable(SortStyle how)
 {
 
+}
+
+GmatEpoch EventLocator::GetLastEpoch(Integer index)
+{
+   return lastEpochs[index];
 }
