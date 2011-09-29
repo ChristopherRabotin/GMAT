@@ -1305,6 +1305,16 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objs.size() > 0)
       WriteObjects(objs, "TrackingSystems", mode);
 
+   //---------------------------------------------
+   // Event Locators
+   //---------------------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::EVENT_LOCATOR);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d Event Locators\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "EventLocators", mode);
+
    //-----------------------------------
    // Solver
    //-----------------------------------
