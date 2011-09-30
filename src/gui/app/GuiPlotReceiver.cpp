@@ -241,6 +241,9 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       // Do no tile at all (LOj: 2011.09.23)
       //if (!isPresetSizeUsed && plotCount > 5)
       //   GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
+         GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      
    }
    else
    {
@@ -902,6 +905,8 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
       // Do no tile at all (LOj: 2011.09.23)
       //if (!isPresetSizeUsed && plotCount > 5)
       //   GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
+         GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
       
       frame->RedrawCurve();
    }
@@ -1950,6 +1955,15 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
        "width = %f, height = %f, usingSaved = %d\n", isGLPlot ? "GLPlot" : "XYPlot", positionX,
        positionY, width, height, usingSaved);
    #endif
+   
+   if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
+   {
+      x = -1;
+      y = -1;
+      w = -1;
+      h = -1;
+      return false;
+   }
    
    Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
    bool isPresetSizeUsed = false;

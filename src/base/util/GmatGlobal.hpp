@@ -45,6 +45,13 @@ public:
       MINIMIZED_GUI,
    };
    
+   enum PlotMode
+   {
+      NORMAL_PLOT = 25,
+      TILED_PLOT,
+      CASCADED_PLOT,
+   };
+   
    ///@note MatlabInterface uses the same enum
    enum MatlabMode
    {
@@ -90,6 +97,8 @@ public:
    void SetRunMode(Integer mode);
    Integer GetGuiMode();
    void SetGuiMode(Integer mode);
+   Integer GetPlotMode();
+   void SetPlotMode(Integer mode);
    
    // MATLAB
    Integer GetMatlabMode();
@@ -98,6 +107,8 @@ public:
    void SetMatlabAvailable(bool flag);
    bool IsMatlabDebugOn();
    void SetMatlabDebug(bool flag);
+   bool IsMissionTreeDebugOn();
+   void SetMissionTreeDebug(bool flag);
 
    // IO formatting
    bool IsScientific();
@@ -207,9 +218,11 @@ private:
    bool runInterrupted;
    bool isMatlabAvailable;
    bool isMatlabDebugOn;
+   bool isMissionTreeDebugOn;
    
    Integer runMode;
    Integer guiMode;
+   Integer plotMode;
    Integer matlabMode;
    IoFormat defaultFormat;
    IoFormat currentFormat;

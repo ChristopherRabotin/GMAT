@@ -574,6 +574,8 @@ GmatCommand* GmatCommandUtil::RemoveCommand(GmatCommand *seq, GmatCommand *cmd)
 // bool IsElseFoundInIf(GmatCommand *ifCmd)
 //------------------------------------------------------------------------------
 /**
+ * Checks if Else command exist in the first children of If branch command.
+ *
  * @return true if Else command is found in the If command, flase otherwise
  */
 //------------------------------------------------------------------------------
@@ -599,7 +601,6 @@ bool GmatCommandUtil::IsElseFoundInIf(GmatCommand *ifCmd)
    GmatCommand *current = ifCmd;
    GmatCommand *child = NULL;
    Integer branch = 0;
-   bool elseFound = false;
    
    // Check only one level first branch
    child = current->GetChildCommand(branch);
@@ -921,7 +922,7 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
 
 //------------------------------------------------------------------------------
 // std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true,
-//                                 bool showGenStr = false)
+//                bool showGenStr = false, const std::string &indentStr = "---")
 //------------------------------------------------------------------------------
 /*
  * Returns string of command sequence given by cmd.
@@ -930,8 +931,9 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
  * comment with % in the scripts
  */
 //------------------------------------------------------------------------------
-std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr,
-                                                 bool showGenStr)
+std::string GmatCommandUtil::
+GetCommandSeqString(GmatCommand *cmd, bool showAddr, bool showGenStr,
+                    const std::string &indentStr)
 {
    char buf[13];
    GmatCommand *current = cmd;
@@ -962,8 +964,13 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr
          else
             genStr = " <" + current->GetGeneratingString(Gmat::NO_COMMENTS) + ">";
       }
+
+      // if indentation string is not blank, use it from the first level
+      if (indentStr.find(" ") == indentStr.npos)
+         cmdstr = indentStr + " " + std::string(buf) + current->GetTypeName() + genStr + "\n";
+      else
+         cmdstr = std::string(buf) + current->GetTypeName() + genStr + "\n";
       
-      cmdstr = "--- " + std::string(buf) + current->GetTypeName() + genStr + "\n";
       cmdseq.append(cmdstr);
       
       #ifdef DEBUG_COMMAND_SEQ_STRING
@@ -971,7 +978,7 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr
       #endif
       
       if ((current->GetChildCommand(0)) != NULL)
-         GetSubCommandString(current, 0, cmdseq, showAddr, showGenStr);
+         GetSubCommandString(current, 0, cmdseq, showAddr, showGenStr, indentStr);
       
       current = current->GetNext();
    }
@@ -984,11 +991,12 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr
 
 //------------------------------------------------------------------------------
 // void GetSubCommandString(GmatCommand* brCmd, Integer level, std::string &cmdseq,
-//                          bool showAddr = true, bool showGenStr = false)
+//                          bool showAddr = true, bool showGenStr = false,
+//                          const std::string &indentStr = "---")
 //------------------------------------------------------------------------------
-void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
-                                          std::string &cmdseq, bool showAddr,
-                                          bool showGenStr)
+void GmatCommandUtil::
+GetSubCommandString(GmatCommand* brCmd, Integer level, std::string &cmdseq,
+                    bool showAddr, bool showGenStr, const std::string &indentStr)
 {
    char buf[13];
    GmatCommand* current = brCmd;
@@ -1006,10 +1014,10 @@ void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
       {
          for (int i=0; i<=level; i++)
          {
-            cmdseq.append("---");
+            cmdseq.append(indentStr);
             
             #ifdef DEBUG_COMMAND_SEQ_STRING
-            MessageInterface::ShowMessage("---");
+            MessageInterface::ShowMessage(indentStr);
             #endif
          }
          
@@ -1024,7 +1032,12 @@ void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
          else
             genStr = " <" + nextInBranch->GetGeneratingString(Gmat::NO_COMMENTS) + ">";
          
-         cmdstr = "--- " + std::string(buf) + nextInBranch->GetTypeName() + genStr + "\n";
+         // if indentation string is not blank, use it from the first sub level
+         if (indentStr.find(" ") == indentStr.npos)
+            cmdstr = indentStr + " " + std::string(buf) + nextInBranch->GetTypeName() + genStr + "\n";
+         else
+            cmdstr = std::string(buf) + nextInBranch->GetTypeName() + genStr + "\n";
+         
          cmdseq.append(cmdstr);
          
          #ifdef DEBUG_COMMAND_SEQ_STRING
@@ -1032,7 +1045,7 @@ void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
          #endif
          
          if (nextInBranch->GetChildCommand() != NULL)
-            GetSubCommandString(nextInBranch, level+1, cmdseq, showAddr, showGenStr);
+            GetSubCommandString(nextInBranch, level+1, cmdseq, showAddr, showGenStr, indentStr);
          
          nextInBranch = nextInBranch->GetNext();
       }

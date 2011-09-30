@@ -161,10 +161,11 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    
    EVT_MENU(POPUP_SHOW_DETAIL, MissionTree::OnShowDetail)
    EVT_MENU(POPUP_SHOW_SCRIPT, MissionTree::OnShowScript)
+   EVT_MENU(POPUP_SHOW_MISSION_SEQUENCE, MissionTree::OnShowMissionSequence)
    EVT_MENU(POPUP_COMMAND_SUMMARY, MissionTree::OnShowCommandSummary)
    EVT_MENU(POPUP_MISSION_SUMMARY_ALL, MissionTree::OnShowMissionSummaryAll)
    EVT_MENU(POPUP_MISSION_SUMMARY_PHYSICS, MissionTree::OnShowMissionSummaryPhysics)
-
+   
    EVT_MENU_RANGE(POPUP_DOCK_MISSION_TREE, POPUP_UNDOCK_MISSION_TREE,
                   MissionTree::OnDockUndockMissionTree)
    
@@ -210,7 +211,17 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mViewCommands.Add("All");
    mViewAll = true;
    mUsingViewLevel = true;
+   mWriteMissionSeq = false;
    mViewLevel = 10;
+   
+   // Set mWriteMissionSeq to true if debugging or
+   // DEBUG_MISSION_TREE = ON in the startup file.
+   #ifdef DEBUG_MISSION_TREE_SHOW_CMD
+   mWriteMissionSeq = true;
+   #endif
+   
+   if (GmatGlobal::Instance()->IsMissionTreeDebugOn())
+      mWriteMissionSeq = true;
    
    //-----------------------------------------------------------------
    #ifdef __AUTO_ADD_NEW_COMMANDS__
@@ -571,24 +582,24 @@ void MissionTree::InitializeCounter()
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* CreateCommand(const wxString &cmdName)
+// GmatCommand* CreateCommand(const wxString &cmdTypeName)
 //------------------------------------------------------------------------------
-GmatCommand* MissionTree::CreateCommand(const wxString &cmdName)
+GmatCommand* MissionTree::CreateCommand(const wxString &cmdTypeName)
 {
    #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("MissionTree::CreateCommand() entered, cmdName='%s'\n", cmdName.c_str());
+      ("MissionTree::CreateCommand() entered, cmdTypeName='%s'\n", cmdTypeName.c_str());
    #endif
    
    GmatCommand *cmd = NULL;
    try
    {
-      if (cmdName == "IfElse")
+      if (cmdTypeName == "IfElse")
          cmd = theGuiInterpreter->CreateDefaultCommand("If");
-      else if (cmdName == "Equation")
+      else if (cmdTypeName == "Equation")
          cmd = theGuiInterpreter->CreateDefaultCommand("GMAT");
       else
-         cmd = theGuiInterpreter->CreateDefaultCommand(cmdName.c_str());
+         cmd = theGuiInterpreter->CreateDefaultCommand(cmdTypeName.c_str());
    }
    catch (BaseException &be)
    {
@@ -869,7 +880,6 @@ void MissionTree::UpdateCommand()
 {
    #if DEBUG_MISSION_TREE_SHOW_CMD
    MessageInterface::ShowMessage("MissionTree::UpdateCommand() entered\n");
-   ShowCommands("InUpdateCommand()");
    #endif
    
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
@@ -904,8 +914,11 @@ void MissionTree::UpdateCommand()
       cmd = cmd->GetNext();
    }
    
-   Expand(mMissionSeqSubId);   
+   Expand(mMissionSeqSubId);
    ////ScrollTo(mMissionSeqSubId);
+   
+   if (mWriteMissionSeq)
+      ShowCommands("After Updating Command Sequence");
    
 }
 
@@ -1420,7 +1433,7 @@ MissionTree::InsertNodeAfter(wxTreeItemId parentId, wxTreeItemId currId,
  * @param  prevId  Previous item id
  * @param  icon  Icon to be used
  * @param  itemType  Item type, such as GmatTree::PROPAGATE
- * @param  cmdName  Command name to be inserted
+ * @param  cmdName  Command type name to be inserted
  * @param  prevCmd  Previous command pointer
  * @param  cmd  Command pointer to be inserted
  * @param  cmdCount  Command counter to be appended to command name
@@ -1753,14 +1766,12 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
  * on branch command, such as Target, If, For, Optimize.
  * It sets parent item id, current item id, and previous item id and pass them
  * to InsertCommand() with insertBefore flag to true.
+ *
+ * @param  cmdName  Command type name to be appended
  */
 //------------------------------------------------------------------------------
 void MissionTree::Append(const wxString &cmdTypeName)
 {
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("Before Append: " + cmdTypeName);
-   #endif
-   
    wxTreeItemId itemId = GetSelection();
    wxTreeItemId lastChildId = GetLastChild(itemId);
    wxTreeItemId parentId = GetItemParent(itemId);
@@ -1769,6 +1780,10 @@ void MissionTree::Append(const wxString &cmdTypeName)
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
    GmatCommand *currCmd = currItem->GetCommand();
    bool elseFound = false;
+   
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   ShowCommands("Before Appending '" + cmdTypeName + "' to '" + itemText + "'");
+   #endif
    
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    if (mSaveActions)
@@ -2028,15 +2043,302 @@ void MissionTree::Append(const wxString &cmdTypeName)
       SelectItem(node);
    }
    
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("After Append: " + cmdTypeName);
-   #endif
+   if (mWriteMissionSeq)
+      ShowCommands("After Appending '" + cmdTypeName + "' to '" + itemText + "'");
    
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    if (mSaveActions || mPlaybackActions)
       WriteResults();
    #endif
 }
+
+
+//------------------------------------------------------------------------------
+// void InsertBefore(const wxString &cmdTypeName)
+//------------------------------------------------------------------------------
+/*
+ * Inserts a command before current selection.
+ *
+ * @param  cmdTypeName  Command type name to be inserted
+ */
+//------------------------------------------------------------------------------
+void MissionTree::InsertBefore(const wxString &cmdTypeName)
+{
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId parentId = GetItemParent(itemId);
+   wxString itemText = GetItemText(itemId);
+   
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   ShowCommands("Before Inserting '" + cmdTypeName + "' before '" + itemText + "'");
+   #endif
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions)
+   {
+      wxString str;
+      str.Printf("Insert '%s' before '%s'\n", cmdTypeName.c_str(), GetItemText(itemId).c_str());
+      WriteActions(str);
+   }
+   #endif
+   
+#ifdef __WXMAC__
+   wxTreeItemId prevId = GetPrevSibling(itemId);
+
+   // Check if no previous item then get parent item
+   if (!prevId.IsOk())
+   {
+      if (parentId.IsOk())
+         prevId = parentId;
+   }
+#else
+   wxTreeItemId prevId = GetPrevVisible(itemId);
+#endif
+
+   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
+   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
+   
+   // Do not insert anything if previous item is empty
+   if (prevItem == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("\n***************  Warning ***************"
+          "\nMissionTree::InsertBefore() has empty prevItem "
+          "so it can't insert before this."
+          "\n****************************************");
+      return;
+   }
+   
+   GmatCommand *currCmd = currItem->GetCommand();
+   GmatCommand *prevCmd = currCmd->GetPrevious();
+   GmatCommand *realPrevCmd = currCmd->GetPrevious();
+   GmatCommand *cmd = NULL;
+   
+   // We want to use real previous command via cmd->GetPrevious(), not from
+   // the tree, because some commands are not visible from the tree.
+      
+   if (currCmd == NULL)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "*** Internal Error Occurred ***\n"
+          "Current item has empty command. Cannot insert the command.\n");
+      return;
+   }
+   
+   #if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage
+      ("MissionTree::InsertBefore('%s') currCmd='%s'(%p)\n", cmdTypeName.c_str(),
+       currCmd->GetTypeName().c_str(), currCmd);
+   WriteCommand("   ", "prevCmd = ", prevCmd, ", realPrevCmd = ", realPrevCmd);
+   #endif
+   
+   
+   if (prevCmd == NULL)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "*** Internal Error Occurred ***\n"
+          "The previous command is empty. Cannot insert the command.\n");
+      
+      ShowCommands("Before Insert: " + cmdTypeName);
+      MessageInterface::ShowMessage
+         ("InsertBefore('%s') currCmd='%s', addr=%p\n",
+          cmdTypeName.c_str(), currCmd->GetTypeName().c_str(), currCmd);
+      
+      return;
+   }
+   
+   #if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage
+      ("MissionTree::InsertBefore('%s') prevCmd='%s'(%p)\n",
+       cmdTypeName.c_str(), prevCmd->GetTypeName().c_str(), prevCmd);
+   #endif
+   
+   // If previous command is BranchCmmand check to see we need to use matching
+   // BranchEnd as previous command
+   if (prevCmd->IsOfType("BranchCommand"))
+   {
+      // check if first child is current command
+      if (prevCmd->GetChildCommand(0) == currCmd)
+         realPrevCmd = prevCmd;
+      else
+         realPrevCmd = GmatCommandUtil::GetMatchingEnd(prevCmd);
+   }
+   
+   #if DEBUG_MISSION_TREE_INSERT
+   WriteCommand("   ", "realPrevCmd = ", realPrevCmd);
+   #endif
+   
+   if (realPrevCmd != NULL)
+   {
+      cmd = CreateCommand(cmdTypeName);      
+      
+      if (cmd != NULL)
+      {
+         // Set previous command to realPrevCmd (loj: 2007.05.16)
+         cmd->ForceSetPrevious(realPrevCmd);
+         
+         #if DEBUG_MISSION_TREE_INSERT
+         WriteCommand("   ", "cmd->GetPrevious() = ", cmd->GetPrevious());
+         #endif
+         
+         UpdateGuiManager(cmdTypeName);
+         
+         wxTreeItemId node =
+            InsertCommand(parentId, itemId, prevId, GetIconId(cmdTypeName),
+                          GetCommandId(cmdTypeName), cmdTypeName, realPrevCmd, cmd,
+                          GetCommandCounter(cmdTypeName), true);
+         
+         ////Expand(parentId);
+         ////Expand(prevId);
+         Expand(node);
+         SelectItem(node);
+      }
+   }
+   
+   if (mWriteMissionSeq)
+      ShowCommands("After Inserting '" + cmdTypeName + "' before '" + itemText + "'");
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions || mPlaybackActions)
+      WriteResults();
+   #endif
+} // InsertBefore()
+
+
+//------------------------------------------------------------------------------
+// void InsertAfter(const wxString &cmdTypeName)
+//------------------------------------------------------------------------------
+/*
+ * Inserts a command after current selection.
+ *
+ * @param  cmdTypeName  Command name to be inserted
+ */
+//------------------------------------------------------------------------------
+void MissionTree::InsertAfter(const wxString &cmdTypeName)
+{
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId parentId = GetItemParent(itemId);
+   wxString itemText = GetItemText(itemId);
+   
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   ShowCommands("Before Inserting '" + cmdTypeName + "' after '" + itemText + "'");
+   #endif
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions)
+   {
+      wxString str;
+      str.Printf("Insert '%s' after '%s'\n", cmdTypeName.c_str(), itemText.c_str());
+      WriteActions(str);
+   }
+   #endif
+   
+#ifdef __WXMAC__
+   wxTreeItemId prevId = GetPrevSibling(itemId);
+
+   // Check if no previous item then get parent item
+   if (!prevId.IsOk())
+   {
+      if (parentId.IsOk())
+         prevId = parentId;
+   }
+#else
+   wxTreeItemId prevId = GetPrevVisible(itemId);
+#endif
+   
+   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
+   GmatCommand *currCmd = currItem->GetCommand();
+   
+   if (currCmd == NULL)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "*** Internal Error Occurred ***\n"
+          "Current item has empty command. Cannot insert the command.\n");
+      return;
+   }
+   
+   #if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage
+      ("MissionTree::InsertAfter('%s') currCmd='%s'(%p)\n", cmdTypeName.c_str(),
+       currCmd->GetTypeName().c_str(), currCmd);
+   #endif
+   
+   GmatCommand *prevCmd = currCmd;   
+   GmatCommand *cmd = NULL;
+   
+   if (currCmd != NULL)
+   {
+      cmd = CreateCommand(cmdTypeName);
+      
+      // Need to set previous command
+      //cmd->ForceSetPrevious(currCmd);
+      
+      // Set parentId, itemId, prevId properly to pass to InsertCommand()
+      // If current node is BranchCommand, it inserts after BranchEnd (2011.09.27 new Requirement)
+      if (currCmd->IsOfType("BranchCommand") || currCmd->GetTypeName() == "Else")
+      {
+         GmatCommand *branchEnd = NULL;
+         if (currCmd->IsOfType("BranchCommand"))
+         {
+            branchEnd = GmatCommandUtil::GetMatchingEnd(currCmd);
+            #if DEBUG_MISSION_TREE_INSERT
+            MessageInterface::ShowMessage
+               ("   ==> Insert after BranchCommand, branchEnd=<%p><%s>\n",
+                branchEnd, branchEnd->GetTypeName().c_str());
+            #endif
+            cmd->ForceSetPrevious(branchEnd);
+            prevCmd = branchEnd;
+            prevId = itemId;
+            parentId = GetItemParent(itemId);
+         }
+         else // command type is Else
+         {
+            cmd->ForceSetPrevious(currCmd);
+            prevCmd = currCmd;
+            parentId = itemId;
+            prevId = itemId;
+         }
+      }
+      else if (currCmd->IsOfType("BranchEnd"))
+      {
+         cmd->ForceSetPrevious(currCmd);
+         prevId = itemId;
+         itemId = parentId;
+         parentId = GetItemParent(itemId);
+      }
+      else
+      {
+         cmd->ForceSetPrevious(currCmd);
+         prevId = itemId;
+      }
+      
+      
+      if (cmd != NULL)
+      {
+         UpdateGuiManager(cmdTypeName);
+         
+         #if DEBUG_MISSION_TREE_INSERT
+         MessageInterface::ShowMessage("   ==> Calling InsertCommand(false)\n");
+         #endif
+         
+         wxTreeItemId node =
+            InsertCommand(parentId, itemId, prevId, GetIconId(cmdTypeName),
+                          GetCommandId(cmdTypeName), cmdTypeName, prevCmd, cmd,
+                          GetCommandCounter(cmdTypeName), false);
+         
+         ////Expand(parentId);
+         Expand(node);
+         SelectItem(node);
+      }
+   }
+   
+   if (mWriteMissionSeq)
+      ShowCommands("After Inserting '" + cmdTypeName + "' after '" + itemText + "'");
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions || mPlaybackActions)
+      WriteResults();
+   #endif
+} // InsertAfter()
 
 
 //------------------------------------------------------------------------------
@@ -2055,17 +2357,18 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
       ("MissionTree::Delete() entered, cmdName='%s'\n", cmdName.c_str());
    #endif
    
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("Before Delete(): " + cmdName);
-   #endif
-   
-   // get selected item
+   // Get selected item
    wxTreeItemId itemId = GetSelection();
    wxTreeItemId parentId = GetItemParent(itemId);
+   wxString itemText = GetItemText(itemId);
+   
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   ShowCommands("Before Deleting '" + cmdName + "' from '" + itemText + "'");
+   #endif
    
    #if DEBUG_MISSION_TREE_DELETE
    MessageInterface::ShowMessage
-      ("   itemId='%s', parentId='%s'\n", GetItemText(itemId).c_str(),
+      ("   itemId='%s', parentId='%s'\n", itemText.c_str(),
        GetItemText(parentId).c_str());
    #endif
    
@@ -2073,7 +2376,7 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    if (mSaveActions)
    {
       wxString str;
-      str.Printf("Delete '%s' from '%s'\n", GetItemText(itemId).c_str(),
+      str.Printf("Delete '%s' from '%s'\n", itemText.c_str(),
                  GetItemText(parentId).c_str());
       WriteActions(str);
    }
@@ -2161,13 +2464,12 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_DELETE
    MessageInterface::ShowMessage
-      ("   About to delete tree item '%s'\n", GetItemText(itemId).c_str());
+      ("   About to delete tree item '%s'\n", itemText.c_str());
    #endif
    this->Delete(itemId);
    
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("After Delete()");
-   #endif
+   if (mWriteMissionSeq)
+      ShowCommands("After Deleting '" + cmdName + "' from '" + itemText + "'");
    
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    if (mSaveActions || mPlaybackActions)
@@ -2179,294 +2481,6 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
       ("MissionTree::Delete() leaving, cmdName='%s'\n", cmdName.c_str());
    #endif
 }
-
-
-//------------------------------------------------------------------------------
-// void InsertBefore(const wxString &cmdName)
-//------------------------------------------------------------------------------
-/*
- * Inserts a command before current selection.
- *
- * @param  cmdName  Command name to be inserted
- */
-//------------------------------------------------------------------------------
-void MissionTree::InsertBefore(const wxString &cmdName)
-{
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("Before InsertBefore(): " + cmdName);
-   #endif
-   
-   wxTreeItemId itemId = GetSelection();
-   wxTreeItemId parentId = GetItemParent(itemId);
-
-   #ifdef __TEST_MISSION_TREE_ACTIONS__
-   if (mSaveActions)
-   {
-      wxString str;
-      str.Printf("Insert '%s' before '%s'\n", cmdName.c_str(), GetItemText(itemId).c_str());
-      WriteActions(str);
-   }
-   #endif
-   
-#ifdef __WXMAC__
-   wxTreeItemId prevId = GetPrevSibling(itemId);
-
-   // Check if no previous item then get parent item
-   if (!prevId.IsOk())
-   {
-      if (parentId.IsOk())
-         prevId = parentId;
-   }
-#else
-   wxTreeItemId prevId = GetPrevVisible(itemId);
-#endif
-
-   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
-   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
-   
-   // Do not insert anything if previous item is empty
-   if (prevItem == NULL)
-   {
-      MessageInterface::ShowMessage
-         ("\n***************  Warning ***************"
-          "\nMissionTree::InsertBefore() has empty prevItem "
-          "so it can't insert before this."
-          "\n****************************************");
-      return;
-   }
-   
-   GmatCommand *currCmd = currItem->GetCommand();
-   GmatCommand *prevCmd = currCmd->GetPrevious();
-   GmatCommand *realPrevCmd = currCmd->GetPrevious();
-   GmatCommand *cmd = NULL;
-   
-   // We want to use real previous command via cmd->GetPrevious(), not from
-   // the tree, because some commands are not visible from the tree.
-      
-   if (currCmd == NULL)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "*** Internal Error Occurred ***\n"
-          "Current item has empty command. Cannot insert the command.\n");
-      return;
-   }
-   
-   #if DEBUG_MISSION_TREE_INSERT
-   MessageInterface::ShowMessage
-      ("MissionTree::InsertBefore('%s') currCmd='%s'(%p)\n", cmdName.c_str(),
-       currCmd->GetTypeName().c_str(), currCmd);
-   WriteCommand("   ", "prevCmd = ", prevCmd, ", realPrevCmd = ", realPrevCmd);
-   #endif
-   
-   
-   if (prevCmd == NULL)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "*** Internal Error Occurred ***\n"
-          "The previous command is empty. Cannot insert the command.\n");
-      
-      ShowCommands("Before Insert: " + cmdName);
-      MessageInterface::ShowMessage
-         ("InsertBefore('%s') currCmd='%s', addr=%p\n",
-          cmdName.c_str(), currCmd->GetTypeName().c_str(), currCmd);
-      
-      return;
-   }
-   
-   #if DEBUG_MISSION_TREE_INSERT
-   MessageInterface::ShowMessage
-      ("MissionTree::InsertBefore('%s') prevCmd='%s'(%p)\n",
-       cmdName.c_str(), prevCmd->GetTypeName().c_str(), prevCmd);
-   #endif
-   
-   // If previous command is BranchCmmand check to see we need to use matching
-   // BranchEnd as previous command
-   if (prevCmd->IsOfType("BranchCommand"))
-   {
-      // check if first child is current command
-      if (prevCmd->GetChildCommand(0) == currCmd)
-         realPrevCmd = prevCmd;
-      else
-         realPrevCmd = GmatCommandUtil::GetMatchingEnd(prevCmd);
-   }
-   
-   #if DEBUG_MISSION_TREE_INSERT
-   WriteCommand("   ", "realPrevCmd = ", realPrevCmd);
-   #endif
-   
-   if (realPrevCmd != NULL)
-   {
-      cmd = CreateCommand(cmdName);      
-      
-      if (cmd != NULL)
-      {
-         // Set previous command to realPrevCmd (loj: 2007.05.16)
-         cmd->ForceSetPrevious(realPrevCmd);
-         
-         #if DEBUG_MISSION_TREE_INSERT
-         WriteCommand("   ", "cmd->GetPrevious() = ", cmd->GetPrevious());
-         #endif
-         
-         UpdateGuiManager(cmdName);
-         
-         wxTreeItemId node =
-            InsertCommand(parentId, itemId, prevId, GetIconId(cmdName),
-                          GetCommandId(cmdName), cmdName, realPrevCmd, cmd,
-                          GetCommandCounter(cmdName), true);
-         
-         ////Expand(parentId);
-         ////Expand(prevId);
-         Expand(node);
-         SelectItem(node);
-      }
-   }
-   
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("After InsertBefore(): " + cmdName);
-   #endif
-   
-   #ifdef __TEST_MISSION_TREE_ACTIONS__
-   if (mSaveActions || mPlaybackActions)
-      WriteResults();
-   #endif
-} // InsertBefore()
-
-
-//------------------------------------------------------------------------------
-// void InsertAfter(const wxString &cmdName)
-//------------------------------------------------------------------------------
-/*
- * Inserts a command after current selection.
- *
- * @param  cmdName  Command name to be inserted
- */
-//------------------------------------------------------------------------------
-void MissionTree::InsertAfter(const wxString &cmdName)
-{
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("Before InsertAfter(): " + cmdName);
-   #endif
-   
-   wxTreeItemId itemId = GetSelection();
-   wxTreeItemId parentId = GetItemParent(itemId);
-   
-   #ifdef __TEST_MISSION_TREE_ACTIONS__
-   if (mSaveActions)
-   {
-      wxString str;
-      str.Printf("Insert '%s' after '%s'\n", cmdName.c_str(), GetItemText(itemId).c_str());
-      WriteActions(str);
-   }
-   #endif
-   
-#ifdef __WXMAC__
-   wxTreeItemId prevId = GetPrevSibling(itemId);
-
-   // Check if no previous item then get parent item
-   if (!prevId.IsOk())
-   {
-      if (parentId.IsOk())
-         prevId = parentId;
-   }
-#else
-   wxTreeItemId prevId = GetPrevVisible(itemId);
-#endif
-   
-   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
-   GmatCommand *currCmd = currItem->GetCommand();
-   
-   if (currCmd == NULL)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "*** Internal Error Occurred ***\n"
-          "Current item has empty command. Cannot insert the command.\n");
-      return;
-   }
-   
-   #if DEBUG_MISSION_TREE_INSERT
-   MessageInterface::ShowMessage
-      ("MissionTree::InsertAfter('%s') currCmd='%s'(%p)\n", cmdName.c_str(),
-       currCmd->GetTypeName().c_str(), currCmd);
-   #endif
-   
-   GmatCommand *prevCmd = currCmd;   
-   GmatCommand *cmd = NULL;
-   
-   if (currCmd != NULL)
-   {
-      cmd = CreateCommand(cmdName);
-      
-      // Need to set previous command
-      //cmd->ForceSetPrevious(currCmd);
-      
-      // Set parentId, itemId, prevId properly to pass to InsertCommand()
-      // If current node is BranchCommand, it inserts after BranchEnd (2011.09.27 new Requirement)
-      if (currCmd->IsOfType("BranchCommand") || currCmd->GetTypeName() == "Else")
-      {
-         GmatCommand *branchEnd = NULL;
-         if (currCmd->IsOfType("BranchCommand"))
-         {
-            branchEnd = GmatCommandUtil::GetMatchingEnd(currCmd);
-            #if DEBUG_MISSION_TREE_INSERT
-            MessageInterface::ShowMessage
-               ("   ==> Insert after BranchCommand, branchEnd=<%p><%s>\n",
-                branchEnd, branchEnd->GetTypeName().c_str());
-            #endif
-            cmd->ForceSetPrevious(branchEnd);
-            prevCmd = branchEnd;
-            prevId = itemId;
-            parentId = GetItemParent(itemId);
-         }
-         else // command type is Else
-         {
-            cmd->ForceSetPrevious(currCmd);
-            prevCmd = currCmd;
-            parentId = itemId;
-            prevId = itemId;
-         }
-      }
-      else if (currCmd->IsOfType("BranchEnd"))
-      {
-         cmd->ForceSetPrevious(currCmd);
-         prevId = itemId;
-         itemId = parentId;
-         parentId = GetItemParent(itemId);
-      }
-      else
-      {
-         cmd->ForceSetPrevious(currCmd);
-         prevId = itemId;
-      }
-      
-      
-      if (cmd != NULL)
-      {
-         UpdateGuiManager(cmdName);
-         
-         #if DEBUG_MISSION_TREE_INSERT
-         MessageInterface::ShowMessage("   ==> Calling InsertCommand(false)\n");
-         #endif
-         
-         wxTreeItemId node =
-            InsertCommand(parentId, itemId, prevId, GetIconId(cmdName),
-                          GetCommandId(cmdName), cmdName, prevCmd, cmd,
-                          GetCommandCounter(cmdName), false);
-         
-         ////Expand(parentId);
-         Expand(node);
-         SelectItem(node);
-      }
-   }
-   
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("After InsertAfter(): " + cmdName);
-   #endif
-   
-   #ifdef __TEST_MISSION_TREE_ACTIONS__
-   if (mSaveActions || mPlaybackActions)
-      WriteResults();
-   #endif
-} // InsertAfter()
 
 
 //------------------------------------------------------------------------------
@@ -2826,10 +2840,10 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.AppendSeparator();
       menu.Append(POPUP_RUN, wxT("Run"));
       menu.AppendSeparator();
+      
       menu.AppendCheckItem(POPUP_SHOW_DETAIL, wxT("Show Detail"));
       menu.Check(POPUP_SHOW_DETAIL, mShowDetailedItem);
-      
-      menu.AppendSeparator();
+      menu.Append(POPUP_SHOW_MISSION_SEQUENCE, wxT("Show Mission Sequence"));
       menu.Append(POPUP_SHOW_SCRIPT, wxT("Show Script"));
       menu.AppendSeparator();
       menu.Append(POPUP_MISSION_SUMMARY_ALL, wxT("Mission Summary - All"));
@@ -3736,6 +3750,26 @@ void MissionTree::OnShowDetail(wxCommandEvent &event)
    UpdateMission(true);
 }
 
+
+//---------------------------------------------------------------------------
+// void OnShowMissionSequence()
+//--------------------------------------------------------------------------
+void MissionTree::OnShowMissionSequence(wxCommandEvent &event)
+{
+   GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
+   std::string str = GmatCommandUtil::GetCommandSeqString(cmd, false, false, "   ");
+   
+   if (str == "")
+      return;
+   
+   ViewTextFrame *vtf =
+      new ViewTextFrame(theMainFrame, _T("Show Mission Sequence"),
+       50, 50, 800, 500, "Temporary", "Mission Sequence");
+   
+   vtf->AppendText(str.c_str());
+   vtf->Show(true);
+   
+}
 
 //---------------------------------------------------------------------------
 // void OnShowScript()
@@ -4716,9 +4750,15 @@ void MissionTree::ShowCommands(const wxString &msg)
    
    while (cmd != NULL)
    {
+      #ifdef DEBUG_MISSION_TREE_SHOW_CMD
       MessageInterface::ShowMessage
-         ("----- (%p) %s '%s'<%s>\n", cmd, cmd->GetTypeName().c_str(),
+         ("----- <%p> %s '%s' (%s)\n", cmd, cmd->GetTypeName().c_str(),
           cmd->GetName().c_str(), cmd->GetSummaryName().c_str());
+      #else
+      MessageInterface::ShowMessage
+         ("----- %s '%s' (%s)\n", cmd->GetTypeName().c_str(),
+          cmd->GetName().c_str(), cmd->GetSummaryName().c_str());
+      #endif
       
       if ((cmd->GetChildCommand(0)) != NULL)
          ShowSubCommands(cmd, 0);
@@ -4748,9 +4788,15 @@ void MissionTree::ShowSubCommands(GmatCommand* brCmd, Integer level)
          for (int i=0; i<=level; i++)
             MessageInterface::ShowMessage("-----");
          
+         #ifdef DEBUG_MISSION_TREE_SHOW_CMD
          MessageInterface::ShowMessage
-            ("----- (%p) %s '%s'<%s>\n", nextInBranch, nextInBranch->GetTypeName().c_str(),
+            ("----- <%p> %s '%s' (%s)\n", nextInBranch, nextInBranch->GetTypeName().c_str(),
              nextInBranch->GetName().c_str(), nextInBranch->GetSummaryName().c_str());
+         #else
+         MessageInterface::ShowMessage
+            ("----- %s '%s' (%s)\n", nextInBranch->GetTypeName().c_str(),
+             nextInBranch->GetName().c_str(), nextInBranch->GetSummaryName().c_str());
+         #endif
          
          if (nextInBranch->GetChildCommand() != NULL)
             ShowSubCommands(nextInBranch, level+1);

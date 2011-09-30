@@ -447,6 +447,12 @@ void FileManager::ReadStartupFile(const std::string &fileName)
          else if (name == "EXIT_AFTER_RUN")
             GmatGlobal::Instance()->SetRunMode(GmatGlobal::EXIT_AFTER_RUN);
       }
+      else if (type == "PLOT_MODE")
+      {
+         mPlotMode = name;
+         if (name == "TILE")
+            GmatGlobal::Instance()->SetPlotMode(GmatGlobal::TILED_PLOT);
+      }
       else if (type == "MATLAB_MODE")
       {
          mMatlabMode = name;
@@ -463,6 +469,14 @@ void FileManager::ReadStartupFile(const std::string &fileName)
          {
             mDebugMatlab = name;
             GmatGlobal::Instance()->SetMatlabDebug(true);
+         }
+      }
+      else if (type == "DEBUG_MISSION_TREE")
+      {
+         if (name == "ON")
+         {
+            mDebugMissionTree = name;
+            GmatGlobal::Instance()->SetMissionTreeDebug(true);
          }
       }
       else
@@ -564,12 +578,27 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    outStream << std::setw(22) << "#RUN_MODE" << " = EXIT_AFTER_RUN\n";
    
    //---------------------------------------------
+   // write PLOT_MODE if not blank
+   //---------------------------------------------
+   if (mPlotMode != "")
+   {
+      #ifdef DEBUG_WRITE_STARTUP_FILE
+      MessageInterface::ShowMessage("   .....Writing PLOT_MODE\n");
+      #endif
+      outStream << std::setw(22) << "PLOT_MODE" << " = " << mRunMode << "\n";
+   }
+   
+   // Write other option as comments
+   // There are no other options implemented for now
+   //outStream << std::setw(22) << "#PLOT_MODE" << " = TILE\n";
+   
+   //---------------------------------------------
    // write MATLAB_MODE if not blank
    //---------------------------------------------
    if (mMatlabMode != "")
    {
       #ifdef DEBUG_WRITE_STARTUP_FILE
-      MessageInterface::ShowMessage("   .....Writing RUN_MODE\n");
+      MessageInterface::ShowMessage("   .....Writing MATLAB_MODE\n");
       #endif
       outStream << std::setw(22) << "MATLAB_MODE" << " = " << mMatlabMode << "\n";
    }
@@ -585,12 +614,24 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    if (mDebugMatlab != "")
    {
       #ifdef DEBUG_WRITE_STARTUP_FILE
-      MessageInterface::ShowMessage("   .....Writing RUN_MODE\n");
+      MessageInterface::ShowMessage("   .....Writing DEBUG_MATLAB\n");
       #endif
       outStream << std::setw(22) << "DEBUG_MATLAB" << " = " << mDebugMatlab << "\n";
    }
+      
+   //---------------------------------------------
+   // write DEBUG_MISSION_TREE if not blank
+   //---------------------------------------------
+   if (mDebugMissionTree != "")
+   {
+      #ifdef DEBUG_WRITE_STARTUP_FILE
+      MessageInterface::ShowMessage("   .....Writing DEBUG_MISSION_TREE\n");
+      #endif
+      outStream << std::setw(22) << "DEBUG_MISSION_TREE" << " = " << mDebugMissionTree << "\n";
+   }
    
-   if (mRunMode != "" || mMatlabMode != "" || mDebugMatlab != "")
+   if (mRunMode != "" || mPlotMode != "" || mMatlabMode != "" ||
+       mDebugMatlab != "" || mDebugMissionTree != "")
       outStream << "#-----------------------------------------------------------\n";
    
    //---------------------------------------------
@@ -1980,8 +2021,10 @@ void FileManager::WriteFiles(std::ofstream &outStream, const std::string &type)
 void FileManager::RefreshFiles()
 {
    mRunMode = "";
+   mPlotMode = "";
    mMatlabMode = "";
    mDebugMatlab = "";
+   mDebugMissionTree = "";
    mPathMap.clear();
    mGmatFunctionPaths.clear();
    mMatlabFunctionPaths.clear();

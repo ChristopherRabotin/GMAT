@@ -210,6 +210,16 @@ Integer GmatGlobal::GetRunMode()
 }
 
 //------------------------------------------------------------------------------
+// void SetRunMode(Integer mode)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetRunMode(Integer mode)
+{
+   runMode = mode;
+   if (runMode == EXIT_AFTER_RUN)
+      isBatchMode = true;
+}
+
+//------------------------------------------------------------------------------
 // Integer GetGuiMode()
 //------------------------------------------------------------------------------
 Integer GmatGlobal::GetGuiMode()
@@ -223,6 +233,22 @@ Integer GmatGlobal::GetGuiMode()
 void GmatGlobal::SetGuiMode(Integer mode)
 {
    guiMode = mode;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetGuiMode()
+//------------------------------------------------------------------------------
+Integer GmatGlobal::GetPlotMode()
+{
+   return plotMode;
+}
+
+//------------------------------------------------------------------------------
+// void SetPlotMode(Integer mode)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetPlotMode(Integer mode)
+{
+   plotMode = mode;
 }
 
 //------------------------------------------------------------------------------
@@ -263,6 +289,22 @@ bool GmatGlobal::IsMatlabDebugOn()
 void GmatGlobal::SetMatlabDebug(bool flag)
 {
    isMatlabDebugOn = flag;
+}
+
+//------------------------------------------------------------------------------
+// bool IsMissionTreeDebugOn()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsMissionTreeDebugOn()
+{
+   return isMissionTreeDebugOn;
+}
+
+//------------------------------------------------------------------------------
+// void SetMissionTreeDebug(bool flag)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetMissionTreeDebug(bool flag)
+{
+   isMissionTreeDebugOn = flag;
 }
 
 //------------------------------------------------------------------------------
@@ -375,16 +417,6 @@ void GmatGlobal::SetPrefix(const std::string &prefix)
 void GmatGlobal::SetAppendEol(bool flag)
 {
    actualFormat.mAppendEol = flag;
-}
-
-//------------------------------------------------------------------------------
-// void SetRunMode(Integer mode)
-//------------------------------------------------------------------------------
-void GmatGlobal::SetRunMode(Integer mode)
-{
-   runMode = mode;
-   if (runMode == EXIT_AFTER_RUN)
-      isBatchMode = true;
 }
 
 //------------------------------------------------------------------------------
@@ -562,8 +594,10 @@ GmatGlobal::GmatGlobal()
    runInterrupted = false;
    isMatlabAvailable = false;
    isMatlabDebugOn = false;
+   isMissionTreeDebugOn = false;
    runMode = NORMAL;
    guiMode = NORMAL_GUI;
+   plotMode = NORMAL_PLOT;
    matlabMode = SHARED;
    matlabExt = "__m__";
 }

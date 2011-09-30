@@ -72,6 +72,9 @@ private:
    bool            mUsingViewLevel;
    int             mViewLevel;
    
+   // For debug or DEBUG_MISSION_TREE = ON in the startup file
+   bool            mWriteMissionSeq;
+   
    wxArrayString mCommandList;
    wxArrayString mCommandListForViewControl;
    wxWindow *mParent;
@@ -117,7 +120,7 @@ private:
    int  mScriptEventCount;
    
    void InitializeCounter();
-   GmatCommand* CreateCommand(const wxString &cmdName);
+   GmatCommand* CreateCommand(const wxString &cmdTypeName);
    void UpdateCommand();
    
    bool IsAnyViewCommandInBranch(GmatCommand *branch);
@@ -151,11 +154,11 @@ private:
                               GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount,
                               bool insertBefore);
    
-   void Append(const wxString &cmdName);
+   void Append(const wxString &cmdTypeName);
+   void InsertBefore(const wxString &cmdTypeName);
+   void InsertAfter(const wxString &cmdTypeName);
    void DeleteCommand(const wxString &cmdName);
-   void InsertBefore(const wxString &cmdName);
-   void InsertAfter(const wxString &cmdName);
-   void UpdateGuiManager(const wxString &cmdName);
+   void UpdateGuiManager(const wxString &cmdTypeName);
    
    void AddDefaultMissionSeq(wxTreeItemId universe);
    void AddIcons();
@@ -187,6 +190,7 @@ private:
    
    void OnRun(wxCommandEvent &event);
    void OnShowDetail(wxCommandEvent &event);
+   void OnShowMissionSequence(wxCommandEvent &event);
    void OnShowScript(wxCommandEvent &event);
    void OnShowCommandSummary(wxCommandEvent &event);
    void OnShowMissionSummaryAll(wxCommandEvent &event);
@@ -375,6 +379,7 @@ private:
       
       POPUP_RUN,
       POPUP_SHOW_DETAIL,
+      POPUP_SHOW_MISSION_SEQUENCE,
       POPUP_SHOW_SCRIPT,
       POPUP_COMMAND_SUMMARY,
       POPUP_MISSION_SUMMARY_ALL,
