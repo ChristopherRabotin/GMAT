@@ -77,9 +77,10 @@ then
     fi
 
     # Validate build
-    if [ ! -e "$winbuildspath"/"$buildname"/bin/GMAT.exe ]
+    exepath="$winbuildspath/$buildname/bin/GMAT.exe"
+    if [ ! -e "$exepath" ]
     then
-        echo 'Invalid build: cannot find GMAT.exe'
+        echo "Invalid build: cannot find $exepath"
         exit 2;
     fi
 
