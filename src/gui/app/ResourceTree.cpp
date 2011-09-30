@@ -4043,16 +4043,20 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    if (runInterruptedScripts.GetCount() > 0)
    {
-      int numInterrupted = failedToRunScripts.GetCount();
+      int numInterrupted = runInterruptedScripts.GetCount();
       wxString scriptNames3;
       msg3.Printf("\nThe following %d script(s) were interrupted by user:\n",
                   numInterrupted);
       
+      // Why following line causes crash?
       for (int i = 0; i < numInterrupted; i++)
+      {
          scriptNames3 = scriptNames3 + runInterruptedScripts[i] + "\n";
+      }
       
       msg3 = msg3 + scriptNames3;
    }
+   
    
    if (msg1 != "" || msg2 != "" || msg3 != "")
    {
