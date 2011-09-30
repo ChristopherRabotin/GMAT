@@ -128,6 +128,7 @@ public:
                               const std::string &name);
 
    virtual bool         Initialize();
+   virtual Real         GetTolerance();
 
    virtual Real *Evaluate();
 

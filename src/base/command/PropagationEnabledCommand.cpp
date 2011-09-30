@@ -1231,13 +1231,12 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
    // Loop until (1) the maximum number of steps is taken, (2) the step
    // tolerance is at the numerical precision of the data, or (3) the step
    // achieves the step tolerance
+   Real locateTolerance = el->GetTolerance();
    do
    {
       // Get the step desired
       desiredEpoch = finder->GetStep();
       currentStep = (desiredEpoch - lastEpoch) * GmatTimeConstants::SECS_PER_DAY;
-
-//MessageInterface::ShowMessage("%15.9lf - %15.9lf -> %lf      ", desiredEpoch, lastEpoch, currentStep);
 
       // Take the step
       std::vector<Propagator*>::iterator current = p.begin();
@@ -1250,7 +1249,8 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
          {
             char size[32];
             std::sprintf(size, "%.12lf", currentStep);
-            throw CommandException("Propagator " + (*current)->GetName() +
+            throw CommandException("In LocateEvent, Propagator " + 
+               (*current)->GetName() +
                " failed to take a good final step (size = " + size + ")\n");
          }
          (*current)->SetAsFinalStep(false);
@@ -1300,7 +1300,7 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
       ++stepsTaken;
    }
    while ((stepsTaken < maxStepsAllowed) &&
-          (GmatMathUtil::Abs(tempEventData[index*3+1]) > 1e-5));
+          (GmatMathUtil::Abs(tempEventData[index*3+1]) > locateTolerance));
 //         &&
 //          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
 
@@ -1323,9 +1323,6 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
 
    return eventFound;
 }
-
-
-
 
 
 void PropagationEnabledCommand::UpdateEventTable(EventLocator* el, Integer index)

@@ -522,6 +522,10 @@ bool EventLocator::Initialize()
    return retval;
 }
 
+Real EventLocator::GetTolerance()
+{
+   return eventTolerance;
+}
 
 /// Evaluates the EventFunctions and returns their values and derivatives.
 Real *EventLocator::Evaluate()
