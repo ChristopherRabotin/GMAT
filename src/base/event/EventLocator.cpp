@@ -42,7 +42,8 @@ EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
    "Spacecraft",        // SATNAMES,
    "Tolerance",         // TOLERANCE,
    "Filename",          // EVENT_FILENAME,
-   "IsActive"           // IS_ACTIVE
+   "IsActive",          // IS_ACTIVE
+   "ShowPlot"           // SHOW_PLOT
 };
 
 const Gmat::ParameterType
@@ -51,7 +52,8 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
    Gmat::STRINGARRAY_TYPE,       // SATNAMES,
    Gmat::REAL_TYPE,              // TOLERANCE,
    Gmat::STRING_TYPE,            // EVENT_FILENAME,
-   Gmat::BOOLEAN_TYPE            // IS_ACTIVE
+   Gmat::BOOLEAN_TYPE,           // IS_ACTIVE
+   Gmat::BOOLEAN_TYPE            // SHOW_PLOT
 };
 
 
@@ -68,6 +70,7 @@ EventLocator::EventLocator(const std::string &typeStr,
    lastData       (NULL),
    lastEpochs     (NULL),
    isActive       (true),
+   showPlot       (false),
    eventTolerance (1.0e-3),
    solarSys       (NULL)
 {
@@ -93,6 +96,7 @@ EventLocator::EventLocator(const EventLocator& el):
    lastData          (NULL),
    lastEpochs        (NULL),
    isActive          (el.isActive),
+   showPlot          (el.showPlot),
    satNames          (el.satNames),
    targets           (el.targets),
    eventTolerance    (el.eventTolerance),
@@ -115,6 +119,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       lastData       = NULL;
       lastEpochs     = NULL;
       isActive       = el.isActive;
+      showPlot       = el.showPlot;
       satNames       = el.satNames;
       targets        = el.targets;
       eventTolerance = el.eventTolerance;
@@ -163,6 +168,8 @@ std::string EventLocator::GetParameterTypeString(const Integer id) const
 bool EventLocator::IsParameterReadOnly(const Integer id) const
 {
    if (id == IS_ACTIVE)
+      return true;
+   if (id == SHOW_PLOT)
       return true;
 
    return GmatBase::IsParameterReadOnly(id);
@@ -377,6 +384,8 @@ bool EventLocator::GetBooleanParameter(const Integer id) const
 {
    if (id == IS_ACTIVE)
       return isActive;
+   if (id == SHOW_PLOT)
+      return showPlot;
 
    return GmatBase::GetBooleanParameter(id);
 }
@@ -387,6 +396,11 @@ bool EventLocator::SetBooleanParameter(const Integer id, const bool value)
    {
       isActive = value;
       return isActive;
+   }
+   if (id == SHOW_PLOT)
+   {
+      showPlot = value;
+      return showPlot;
    }
    return GmatBase::SetBooleanParameter(id, value);
 }
@@ -621,6 +635,8 @@ void EventLocator::ReportEventData()
       fullFileName = filename;
 
    eventTable.WriteToFile(fullFileName);
+   if (showPlot)
+      eventTable.ShowPlot();
 }
 
 /// Writes the event data statistics to file.

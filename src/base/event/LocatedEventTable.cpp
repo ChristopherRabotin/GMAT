@@ -24,6 +24,7 @@
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
+#include "OwnedPlot.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -41,7 +42,8 @@
 LocatedEventTable::LocatedEventTable() :
    primarySortStyle        (UNSORTED),
    secondarySortStyle      (UNSORTED),
-   associationsCurrent     (false)
+   associationsCurrent     (false),
+   thePlot                 (NULL)
 {
 }
 
@@ -56,6 +58,9 @@ LocatedEventTable::~LocatedEventTable()
 {
    for (UnsignedInt i = 0; i < events.size(); ++i)
       delete events[i];
+
+   // Here or elsewhere?
+//   delete thePlot;
 }
 
 //------------------------------------------------------------------------------
@@ -71,7 +76,8 @@ LocatedEventTable::LocatedEventTable(const LocatedEventTable& let) :
    events                  (let.events),
    primarySortStyle        (let.primarySortStyle),
    secondarySortStyle      (let.secondarySortStyle),
-   associationsCurrent     (false)
+   associationsCurrent     (false),
+   thePlot                 (NULL)
 {
 }
 
@@ -94,6 +100,7 @@ LocatedEventTable& LocatedEventTable::operator=(const LocatedEventTable& let)
       primarySortStyle    = let.primarySortStyle;
       secondarySortStyle  = let.secondarySortStyle;
       associationsCurrent = false;
+      thePlot             = NULL;
       sortOrder.clear();
    }
 
@@ -534,6 +541,8 @@ std::string LocatedEventTable::BuildEventSummary()
 //   std::map<std::string, std::string> typeNameMap;
    std::string name;
 
+   eventTypesWithNames.clear();
+
    // Build the list of types
    for (UnsignedInt i = 0; i < events.size(); ++i)
    {
@@ -564,6 +573,7 @@ std::string LocatedEventTable::BuildEventSummary()
             span = GetMaxSpan(eventTypes[i], parties);
             if (span > 0.0)
             {
+               eventTypesWithNames.push_back(eventTypes[i] + "-" + parties);
                sprintf(data, "%-34s: %12.3lf s (%s)\n", sub, span,
                      parties.c_str());
                summary += data;
@@ -591,4 +601,49 @@ std::string LocatedEventTable::BuildEventSummary()
    }
 
    return summary;
+}
+
+
+void LocatedEventTable::ShowPlot()
+{
+   BuildPlot("Event Data");
+}
+
+//------------------------------------------------------------------------------
+// void BuildPlot(const std::string &plotName,
+//       const StringArray &measurementNames)
+//------------------------------------------------------------------------------
+/**
+ * Creates an OwnedPlot instance that is used for plotting residuals
+ *
+ * @param plotName The name of the plot.  This name needs to ne unique in the
+ *                 Sandbox
+ * @param measurementNames The names of the measurement models that are sources
+ *                         for the residuals being plotted
+ */
+//------------------------------------------------------------------------------
+void LocatedEventTable::BuildPlot(const std::string &plotName)
+{
+   // Commented out for stability
+
+//   thePlot = new OwnedPlot(plotName);
+//
+//   thePlot->SetStringParameter("PlotTitle", plotName);
+//   thePlot->SetBooleanParameter("UseLines", false);
+//   thePlot->SetBooleanParameter("UseHiLow", false);
+//
+//   for (UnsignedInt i = 0; i < eventTypesWithNames.size(); ++i)
+//   {
+//      std::string curveName = eventTypesWithNames[i];
+//      thePlot->SetStringParameter("Add", curveName);
+//      // Register measurement ID for this curve
+////      Integer id = measManager.GetMeasurementId(measurementNames[i]);
+//
+////      thePlot->SetUsedDataID(id);
+//
+//      // todo: Register participants for this curve
+//      //rPlot->SetUsedObjectID(Integer id);
+//   }
+//
+//   thePlot->Initialize();
 }

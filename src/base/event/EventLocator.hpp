@@ -160,6 +160,8 @@ protected:
    GmatEpoch *lastEpochs;
    /// Flag used to turn the locator on or off (default is on)
    bool isActive;
+   /// Flag used to show or hide plot of the data
+   bool showPlot;
 
    /// Names of the "target" spacecraft in the location
    StringArray satNames;
@@ -177,6 +179,7 @@ protected:
        TOLERANCE,
        EVENT_FILENAME,
        IS_ACTIVE,
+       SHOW_PLOT,
        EventLocatorParamCount
     };
 

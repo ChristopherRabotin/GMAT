@@ -26,6 +26,9 @@
 #include "LocatedEvent.hpp"
 
 
+class OwnedPlot;
+
+
 enum SortStyle
 {
    CHRONOLOGICAL = 12000,  // Sorts the event data in time order.
@@ -47,22 +50,17 @@ public:
    LocatedEventTable(const LocatedEventTable& let);
    LocatedEventTable& operator=(const LocatedEventTable& let);
 
-   /// Adds a new event entry to the table of events.
    void AddEvent(LocatedEvent *theEvent);
-   /// Adds a new event entry to the table of events.
    void AddEvent(GmatEpoch epoch, std::string boundaryType, std::string eventType);
-   /// Returns the longest duration for the detected events of the specified type.
    Real GetMaxSpan(std::string eventType, std::string parties);
-   /// Returns the duration of the most recent detected event of the specified type.
    Real GetLastSpan(std::string eventType, std::string parties = "");
-   /// Returns the average duration for the detected events of the specified type.
    Real GetAverageSpan(std::string eventType, std::string parties = "");
-   /// Sets flags to sort the event data in the specified primary and secondary order when generating the event data file.
    void SortEvents(SortStyle how, SortStyle secondaryStyle);
-   /// Writes the event data to an event data file with the specified name.
-   bool WriteToFile(std::string filename);
-   /// Accessor function that allows for retrieving the event data directly.
    std::vector<LocatedEvent*> *GetEvents();
+
+   bool WriteToFile(std::string filename);
+   void ShowPlot();
+   void BuildPlot(const std::string &plotName);
 
 protected:
    /// The table of located event boundaries
@@ -75,6 +73,10 @@ protected:
    std::vector<UnsignedInt> sortOrder;
    /// Flag indicating stale associations
    bool associationsCurrent;
+   /// List of the types of events
+   StringArray eventTypesWithNames;
+   /// Plot of the event data
+   OwnedPlot *thePlot;
 
    void BuildAssociations();
    void SortEvents();
