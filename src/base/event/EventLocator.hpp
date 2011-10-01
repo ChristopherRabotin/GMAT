@@ -15,7 +15,7 @@
 // Created: Jul 6, 2011
 //
 /**
- * Definition of the ...
+ * Definition of the the event locator base class
  */
 //------------------------------------------------------------------------------
 
@@ -29,6 +29,14 @@
 #include "EventFunction.hpp"
 
 
+/**
+ * Base class for the event locators.
+ *
+ * EventLocators are container classes that collect together a set of event
+ * functions defining a specific type of location process.  For example, the
+ * EclipseLocator class collects together Penumbra, Umbra, and Antumbra event
+ * functions.
+ */
 class GMAT_API EventLocator: public GmatBase
 {
 public:

@@ -221,6 +221,9 @@ bool Brent::SetValue(GmatEpoch forEpoch, Real withValue)
  *        from days to seconds from the current epoch.
  *
  * @return The next step
+ *
+ * @todo Complete the implementation of Brent's algorithm.  THe current code is
+ *       performing bisection.
  */
 //------------------------------------------------------------------------------
 Real Brent::FindStep(const GmatEpoch currentEpoch)
@@ -280,11 +283,3 @@ Real Brent::FindStep(const GmatEpoch currentEpoch)
 
    return step;
 }
-
-
-
-//bool Brent::FindRoot(Integer whichOne, GmatEpoch roots[2])
-//{
-//}
-
-

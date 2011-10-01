@@ -9,13 +9,13 @@
 // All Other Rights Reserved.
 //
 // Author: Darrel J. Conway
-// Created: 2004/1/13
+// Created: 2011/09/01
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
 //
 /**
- * Exception class used by the Located Event subsystem.
+ * Exception class used by the Event Location subsystem.
  */
 //------------------------------------------------------------------------------
 
@@ -26,6 +26,9 @@
 #include "BaseException.hpp"
 #include "gmatdefs.hpp"          // For GMAT_API
 
+/**
+ * Exception class used to report issues with event location.
+ */
 class GMAT_API EventException : public BaseException
 {
 public:
