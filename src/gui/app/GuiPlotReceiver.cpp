@@ -45,7 +45,7 @@
 //#define DEBUG_PLOTIF_XY 1
 //#define DEBUG_PLOTIF_XY_UPDATE 1
 //#define DEBUG_RENAME 1
-//#define DEBUG_PLOT_PERSISTENCY
+//#define DEBUG_PLOT_PERSISTENCE
 
 //---------------------------------
 //  static data
@@ -173,14 +173,14 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       Integer x, y, w, h;
       Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
       
-      #ifdef DEBUG_PLOT_PERSISTENCY
+      #ifdef DEBUG_PLOT_PERSISTENCE
       MessageInterface::ShowMessage
          ("plotName = '%s', plotCount = %d\n", plotName.c_str(), plotCount);
       #endif
       bool isUsingSaved = false;
-      bool isPresetSizeUsed = ComputePlotPositionAndSize(true, positionX, positionY,
-                                                         width, height, x, y, w, h,
-                                                         isUsingSaved);
+      ComputePlotPositionAndSize(true, positionX, positionY,
+                                 width, height, x, y, w, h,
+                                 isUsingSaved);
       
       
       // create a frame, containing a plot canvas
@@ -865,14 +865,18 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
       Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
       bool isUsingSaved = false;
       
-      #ifdef DEBUG_PLOT_PERSISTENCY
+      #ifdef DEBUG_PLOT_PERSISTENCE
       MessageInterface::ShowMessage
          ("plotName = '%s', plotCount = %d\n", plotName.c_str(), plotCount);
       #endif
       
-      bool isPresetSizeUsed = ComputePlotPositionAndSize(false, positionX, positionY,
-                                                         width, height, x, y, w, h,
-                                                         isUsingSaved);
+      ComputePlotPositionAndSize(false, positionX, positionY,
+                                 width, height, x, y, w, h,
+                                 isUsingSaved);
+      #ifdef DEBUG_PLOT_PERSISTENCE
+      MessageInterface::ShowMessage
+         ("About to create an XYPlot at position x = %d, y = %d, and size w = %d, h = %d\n", x, y, w, h);
+      #endif
       
       // create a frame, containing a XY plot canvas
       frame =
@@ -1949,7 +1953,7 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
                                                  Integer &x, Integer &y, Integer &w, Integer &h,
                                                  bool usingSaved)
 {
-   #ifdef DEBUG_PLOT_PERSISTENCY
+   #ifdef DEBUG_PLOT_PERSISTENCE
    MessageInterface::ShowMessage
       ("ComputePlotPositionAndSize() entered, %s, positionX = %f, positionY = %f, "
        "width = %f, height = %f, usingSaved = %d\n", isGLPlot ? "GLPlot" : "XYPlot", positionX,
@@ -1967,25 +1971,27 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
    
    Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
    bool isPresetSizeUsed = false;
-   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    
    Integer screenWidth = 0;
    Integer screenHeight = 0;
-   Integer missionTreeX = 0;
-   Integer missionTreeY = 0;
-   Integer missionTreeW = 0;
    
    #ifdef __WXMAC__
       screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
       screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
    #else
+      GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
+      Integer missionTreeX = 0;
+      Integer missionTreeY = 0;
+      Integer missionTreeW = 0;
       //mainFrame->GetClientSize(&screenWidth, &screenHeight);
       mainFrame->GetActualClientSize(&screenWidth, &screenHeight, true);
    #endif
    
-   #ifdef DEBUG_PLOT_PERSISTENCY
+   #ifdef DEBUG_PLOT_PERSISTENCE
    MessageInterface::ShowMessage("   screen size  : w = %4d, h = %4d\n", screenWidth, screenHeight);
-   MessageInterface::ShowMessage("   mission tree : w = %4d\n", missionTreeW);
+   #ifndef __WXMAC__
+      MessageInterface::ShowMessage("   mission tree : w = %4d\n", missionTreeW);
+   #endif
    #endif
    
    // if position and size were not saved from an earlier run, figure out the initial values
@@ -2017,7 +2023,7 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
          Real realH = (Real)screenHeight;
          Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
          if (yOffset > 40) yOffset = 40;
-         #ifdef DEBUG_PLOT_PERSISTENCY
+         #ifdef DEBUG_PLOT_PERSISTENCE
          MessageInterface::ShowMessage
             ("   activePlotCount = %d, newCount = %d\n", activePlotCount, newCount);
          MessageInterface::ShowMessage("   screen y offset = %4d\n", yOffset);
@@ -2053,7 +2059,7 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
          }
          y -= yOffset;
          
-         #ifdef DEBUG_PLOT_PERSISTENCY
+         #ifdef DEBUG_PLOT_PERSISTENCE
          MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
          #endif
       #endif
@@ -2075,7 +2081,7 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       w = (Integer) (width     * (Real) screenWidth);
       h = (Integer) (height    * (Real) screenHeight);
       
-      #ifdef DEBUG_PLOT_PERSISTENCY
+      #ifdef DEBUG_PLOT_PERSISTENCE
       MessageInterface::ShowMessage("   before offset: x = %4d, y = %4d, w = %4d, h = %4d\n", x, y, w,h);
       #endif
       
@@ -2091,14 +2097,14 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
          if (x == -1) x = 0;
          //else x -= xOffset;
          y -= yOffset;
-         #ifdef DEBUG_PLOT_PERSISTENCY
+         #ifdef DEBUG_PLOT_PERSISTENCE
          MessageInterface::ShowMessage("   screen offset: x = %4d, y = %4d\n", xOffset, yOffset);
          MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
          #endif
       #endif
    }
    
-   #ifdef DEBUG_PLOT_PERSISTENCY
+   #ifdef DEBUG_PLOT_PERSISTENCE
    MessageInterface::ShowMessage("   computed     : x = %4d, y = %4d, w = %4d, h = %4d\n", x, y, w, h);
    MessageInterface::ShowMessage
       ("ComputePlotPositionAndSize() returning isPresetSizeUsed = %d\n", isPresetSizeUsed);
