@@ -30,7 +30,8 @@ LocatedEvent::LocatedEvent() :
    eventValue  (999.999),
    participants(""),
    partner     (NULL),
-   duration    (0.0)
+   duration    (0.0),
+   dataName    ("")
 {
 }
 
@@ -46,7 +47,8 @@ LocatedEvent::LocatedEvent(const LocatedEvent& le) :
    eventValue  (le.eventValue),
    participants(le.participants),
    partner     (NULL),
-   duration    (le.duration)
+   duration    (le.duration),
+   dataName    (le.dataName)
 {
 }
 
@@ -62,6 +64,7 @@ LocatedEvent& LocatedEvent::operator=(const LocatedEvent& le)
       participants = le.participants;
       partner      = NULL;
       duration     = 0.0;
+      dataName     = le.dataName;
    }
 
    return *this;

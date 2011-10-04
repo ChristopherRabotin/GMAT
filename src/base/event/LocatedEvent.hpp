@@ -54,6 +54,8 @@ public:
    LocatedEvent *partner;
    /// Duration of the event (set on both partners; zero until a pair is built
    Real duration;
+   /// Name used on the data plots
+   std::string dataName;
 };
 
 #endif /* LocatedEvent_hpp */

@@ -436,9 +436,13 @@ void LocatedEventTable::BuildAssociations()
       events[i]->duration = 0.0;
    }
 
+   xData.clear();
+   yData.clear();
+
    // Build the links
    for (UnsignedInt i = 0; i < events.size(); ++i)
    {
+      events[i]->dataName = events[i]->type + "-" + events[i]->participants;
       if (events[i]->isEntry)
       {
          Integer mate = -1;
@@ -573,7 +577,7 @@ std::string LocatedEventTable::BuildEventSummary()
             span = GetMaxSpan(eventTypes[i], parties);
             if (span > 0.0)
             {
-               eventTypesWithNames.push_back(eventTypes[i] + "-" + parties);
+               eventTypesWithNames.push_back(events[j]->dataName);
                sprintf(data, "%-34s: %12.3lf s (%s)\n", sub, span,
                      parties.c_str());
                summary += data;
@@ -626,24 +630,66 @@ void LocatedEventTable::BuildPlot(const std::string &plotName)
 {
    // Commented out for stability
 
-//   thePlot = new OwnedPlot(plotName);
-//
-//   thePlot->SetStringParameter("PlotTitle", plotName);
-//   thePlot->SetBooleanParameter("UseLines", false);
-//   thePlot->SetBooleanParameter("UseHiLow", false);
-//
-//   for (UnsignedInt i = 0; i < eventTypesWithNames.size(); ++i)
-//   {
-//      std::string curveName = eventTypesWithNames[i];
-//      thePlot->SetStringParameter("Add", curveName);
-//      // Register measurement ID for this curve
-////      Integer id = measManager.GetMeasurementId(measurementNames[i]);
-//
-////      thePlot->SetUsedDataID(id);
-//
-//      // todo: Register participants for this curve
-//      //rPlot->SetUsedObjectID(Integer id);
-//   }
-//
-//   thePlot->Initialize();
+   thePlot = new OwnedPlot(plotName);
+
+   thePlot->SetStringParameter("PlotTitle", plotName);
+   thePlot->SetBooleanParameter("UseLines", false);
+   thePlot->SetBooleanParameter("UseHiLow", false);
+   // Turn on automatic marker colors
+   thePlot->SetIntegerParameter(thePlot->GetParameterID("DefaultColor"), 0);
+
+   eventTypesWithNames.clear();
+   for (UnsignedInt i = 0; i < events.size(); ++i)
+      if (find(eventTypesWithNames.begin(), eventTypesWithNames.end(),
+            events[i]->dataName) == eventTypesWithNames.end())
+         eventTypesWithNames.push_back(events[i]->dataName);
+
+   for (UnsignedInt i = 0; i < eventTypesWithNames.size(); ++i)
+   {
+      std::string curveName = eventTypesWithNames[i];
+      thePlot->SetStringParameter("Add", curveName);
+   }
+
+   thePlot->Initialize();
+
+   for (UnsignedInt i = 0; i < eventTypesWithNames.size(); ++i)
+   {
+      // Load up the data
+      RealArray xd, yd;
+      CollectData(eventTypesWithNames[i], xd, yd); 
+      
+      if (xd.size() > 0)
+         thePlot->SetCurveData(i, &xd, &yd);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void CollectData(const std::string &forCurve, RealArray &xv, RealArray &yv)
+//------------------------------------------------------------------------------
+/**
+ * Collects data for an event plot curve
+ *
+ * @param forCurve The label associated with teh curve that receives the data
+ * @param xv The container for the X data
+ * @param yv The container for the Y data
+ */
+//------------------------------------------------------------------------------
+void LocatedEventTable::CollectData(const std::string &forCurve, RealArray &xv,
+      RealArray &yv)
+{
+   xv.clear();
+   yv.clear();
+
+   for (UnsignedInt i = 0; i < events.size(); ++i)
+   {
+      if ((events[i]->dataName == forCurve) && (events[i]->partner != NULL))
+      {
+         if (events[i]->isEntry)
+         {
+            xv.push_back(events[i]->epoch);
+            yv.push_back(events[i]->duration);
+         }
+      }
+   }
 }

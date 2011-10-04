@@ -77,10 +77,15 @@ protected:
    StringArray eventTypesWithNames;
    /// Plot of the event data
    OwnedPlot *thePlot;
+   /// X Data for plotting
+   std::map<std::string,RealArray> xData;
+   /// Y Data for plotting
+   std::map<std::string,RealArray> yData;
 
    void BuildAssociations();
    void SortEvents();
    std::string BuildEventSummary();
+   void CollectData(const std::string &forCurve, RealArray &xv, RealArray &yv);
 };
 
 #endif /* LocatedEventTable_hpp */
