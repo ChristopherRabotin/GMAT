@@ -124,7 +124,8 @@ public:
                         const std::string &plotTitle,
                         const std::string &xAxisTitle,
                         const std::string &yAxisTitle,
-                        bool drawGrid = false) = 0;
+                        bool drawGrid = false,
+                        bool canSaveLocation = true) = 0;
    virtual bool DeleteXyPlot(const std::string &plotName) = 0;
    virtual bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
                         int yOffset, Real yMin, Real yMax,

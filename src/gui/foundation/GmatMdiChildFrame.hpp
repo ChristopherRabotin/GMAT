@@ -76,6 +76,7 @@ public:
    virtual void OnClose(wxCloseEvent &event);
    virtual void UpdateScriptActiveStatus(bool isActive);
    
+   virtual void SetSaveLocationFlag(bool tf = true);
    virtual void SaveChildPositionAndSize();
 
 protected:
@@ -93,6 +94,7 @@ protected:
    bool mDirty;
    bool mOverrideDirty;
    bool mCanClose;
+   bool mCanSaveLocation;
    GmatTree::ItemType mItemType;
    wxTextCtrl *theScriptTextCtrl;
    GmatMenuBar *theMenuBar;

@@ -396,11 +396,11 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
                                        const std::string &plotTitle,
                                        const std::string &xAxisTitle,
                                        const std::string &yAxisTitle,
-                                       bool drawGrid)
+                                       bool drawGrid, bool canSave)
 {    
    if (thePlotReceiver != NULL)
       return thePlotReceiver->CreateXyPlotWindow(plotName, oldName, positionX, positionY, width, height, plotTitle,
-            xAxisTitle, yAxisTitle, drawGrid);
+            xAxisTitle, yAxisTitle, drawGrid, canSave);
    
    return false;
 }

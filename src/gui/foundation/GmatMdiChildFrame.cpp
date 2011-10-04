@@ -74,7 +74,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    #ifdef DEBUG_MDI_CHILD_FRAME
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::GmatMdiChildFrame() entered, type=%d\n    "
-       "name='%s'\n   title='%s', ", type, name.c_str(), title.c_str());
+       "name='%s'\n   title='%s'", type, name.c_str(), title.c_str());
    #endif
    
    relativeZOrder          = maxZOrder++;
@@ -84,6 +84,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    mDirty = false;
    mOverrideDirty = false;
    mCanClose = true;
+   mCanSaveLocation = true;
    mItemType = type;
    theScriptTextCtrl = NULL;
    theMenuBar = NULL;
@@ -445,10 +446,30 @@ void GmatMdiChildFrame::UpdateScriptActiveStatus(bool isActive)
 }
 
 //------------------------------------------------------------------------------
+// void SetSaveLocationFlag(bool tf)
+//------------------------------------------------------------------------------
+/**
+ * Allows the programmer to turn off location saving for a frame
+ *
+ * OwnedPlot objects use this method to turn off saving, which is currently
+ * not working.
+ *
+ * @param tf The flag value; true to enable saving, false to disable it
+ */
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::SetSaveLocationFlag(bool tf)
+{
+   mCanSaveLocation = tf;
+}
+
+//------------------------------------------------------------------------------
 // void SaveChildPositionAndSize()
 //------------------------------------------------------------------------------
 void GmatMdiChildFrame::SaveChildPositionAndSize()
 {
+   if (mCanSaveLocation == false)
+      return;
+
    // Get the position and size of the window first
    #ifdef __WXMAC__
       Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
@@ -499,6 +520,7 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    {
       GmatBase *obj =
          (Subscriber*)theGuiInterpreter->GetConfiguredObject(mPlotName.c_str());
+
       if (!obj || !obj->IsOfType("Subscriber"))
       {
          std::string errmsg = "Cannot find subscriber ";

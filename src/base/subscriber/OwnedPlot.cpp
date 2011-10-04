@@ -128,6 +128,7 @@ OwnedPlot::OwnedPlot(const std::string &name, const std::string &plotTitle,
    // GmatBase data
    objectTypes.push_back(Gmat::XY_PLOT);
    objectTypeNames.push_back("XYPlot");
+   objectTypeNames.push_back("OwnedPlot");
    parameterCount = OwnedPlotParamCount;
 }
 
@@ -271,7 +272,7 @@ bool OwnedPlot::Initialize()
       #endif
       
       PlotInterface::CreateXyPlotWindow(instanceName, mOldName, 0.0, 0.0, 0.0, 0.0, mPlotTitle,
-            mXAxisTitle, mYAxisTitle, (mDrawGrid == "On"));
+            mXAxisTitle, mYAxisTitle, (mDrawGrid == "On"), false);
       
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
       mIsOwnedPlotWindowSet = true;

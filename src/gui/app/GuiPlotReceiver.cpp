@@ -815,7 +815,8 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
                                        const std::string &plotTitle,
                                        const std::string &xAxisTitle,
                                        const std::string &yAxisTitle,
-                                       bool drawGrid)
+                                       bool drawGrid,
+                                       bool canSaveLocation)
 {
    //-------------------------------------------------------
    // check if new MDI child frame needed
@@ -890,6 +891,7 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
       
       frame->Show();
       frame->SetSavedConfigFlag(isUsingSaved);
+      frame->SetSaveLocationFlag(canSaveLocation);
       
       ++MdiTsPlot::numChildren;
       
