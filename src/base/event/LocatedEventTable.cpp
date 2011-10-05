@@ -633,8 +633,11 @@ void LocatedEventTable::BuildPlot(const std::string &plotName)
    thePlot = new OwnedPlot(plotName);
 
    thePlot->SetStringParameter("PlotTitle", plotName);
+   thePlot->SetStringParameter("XAxisTitle", "A.1 Epoch");
+   thePlot->SetStringParameter("YAxisTitle", "Duration (sec)");
    thePlot->SetBooleanParameter("UseLines", false);
    thePlot->SetBooleanParameter("UseHiLow", false);
+
    // Turn on automatic marker colors
    thePlot->SetIntegerParameter(thePlot->GetParameterID("DefaultColor"), 0);
 

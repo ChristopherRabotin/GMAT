@@ -132,6 +132,9 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
                        wxTAB_TRAVERSAL,//wxPLOT_DEFAULT,
                        plotTitle);
    
+   frame->SetLabel(xAxisTitle.c_str(), TsPlotCanvas::X_LABEL);
+   frame->SetLabel(yAxisTitle.c_str(), TsPlotCanvas::Y_LABEL);
+
    mXyPlot = frame;
    
    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
