@@ -831,7 +831,10 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
             }
          #endif
       }
-      newChild->Show();
+      if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
+         newChild->Show(false);
+      else
+         newChild->Show(true);
    }
    
    return newChild;
@@ -997,6 +1000,38 @@ bool GmatMainFrame::IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer 
       }
    #endif
    
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool IsScriptEditorOpen(Integer &x, Integer &y, Integer &width)
+//------------------------------------------------------------------------------
+/**
+ * @param x  The upper left x position of undocked mission tree returned
+ * @param y  The upper left y position of undocked mission tree returned
+ * @param width  The width of undocked mission tree returned
+ * @return  true if MissionTree is undocked, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width)
+{
+   int x = 0, y = 0, h = 0, w = 0;
+   xPos = 0, yPos = 0, width = 0;
+
+   GmatMdiChildFrame *child = GetChild("ScriptEditor");  // TBD - this does not work because script file name is used
+   if (child != NULL)
+   {
+      if (child->GetItemType() == GmatTree::SCRIPT_FILE)
+      {
+         child->GetPosition(&x, &y);
+         child->GetSize(&w, &h);
+         xPos = x;
+         yPos = y;
+         width = w;
+         return true;
+      }
+   }
+
    return false;
 }
 
@@ -1498,6 +1533,19 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          pConfig->Write("/MissionTree/Docked", "false");
       else
          pConfig->Write("/MissionTree/Docked", "true");
+   }
+   // Make sure the Script Editor data is set in the personalization file
+   if (closeScriptWindow)
+   {
+      wxFileConfig *pConfig;
+      pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
+      Integer x = 0, y = 0, width = 0;
+      if (IsScriptEditorOpen(x, y, width))
+      {
+         pConfig->Write("/ScriptEditor/Open", "true");
+      }
+      else
+         pConfig->Write("/ScriptEditor/Open", "false");
    }
    wxString name;
    wxString title;
@@ -3108,6 +3156,11 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    }
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
+   // if we are creating a script editor, we need to use saved configuration data, if it exists
+   if (itemType == GmatTree::SCRIPT_FILE)
+   {
+      ; // TBD <<<<<<<<<<
+   }
    GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, name, title, itemType);   
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
    
@@ -3577,7 +3630,10 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
 
    // djc: Under linux, force the new child to display
    #ifndef __WXMSW__
-      newChild->Show();
+   if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
+      newChild->Show(false);
+   else
+      newChild->Show(true);
    #endif
 
    return newChild;
@@ -3664,7 +3720,10 @@ GmatMainFrame::CreateUndockedMissionPanel(const wxString &title,
    
    // djc: Under linux, force the new child to display
    #ifndef __WXMSW__
-      newChild->Show();
+   if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
+      newChild->Show(false);
+   else
+      newChild->Show(true);
    #endif
 
    #ifdef DEBUG_CREATE_CHILD

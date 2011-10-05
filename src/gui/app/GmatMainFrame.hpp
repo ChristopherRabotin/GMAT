@@ -76,6 +76,7 @@ public:
                                 bool incScripts = false);
    Integer GetNumberOfActivePlots();
    bool IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer &width);
+   bool IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width);
    void IconizeUndockedMissionTree();
    bool IsChildOpen(GmatTreeItemData *item, bool restore = true);
    bool IsChildOpen(const wxString &name, GmatTree::ItemType itemType,

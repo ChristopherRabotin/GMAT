@@ -214,7 +214,12 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       frame->SetSavedConfigFlag(isUsingSaved);
 
       if (frame)
-         frame->Show();
+      {
+         if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
+            frame->Show(false);
+         else
+            frame->Show(true);
+      }
       else
          return false;
       
@@ -889,7 +894,10 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
                              wxPoint(x, y), wxSize(w, h),
                              wxDEFAULT_FRAME_STYLE);
       
-      frame->Show();
+      if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
+         frame->Show(false);
+      else
+         frame->Show(true);
       frame->SetSavedConfigFlag(isUsingSaved);
       frame->SetSaveLocationFlag(canSaveLocation);
       
