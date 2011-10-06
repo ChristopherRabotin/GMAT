@@ -384,12 +384,12 @@ void GmatApp::ProcessCommandLineOptions()
 {
    wxString commandLineOptions =
       "Valid command line options are:\n"
-      "   -help            Shows available options\n"
-      "   -date            Shows GMAT build date\n"
-      "   -ms              Starts MATLAB server when GMAT launches\n"
-      "   -br 'filename'   Builds and runs the script\n"
-      "   -minimize        Minimizes GMAT window\n"
-      "   -exit            Exits GMAT after a script is run\n\n";
+      "   --help, -h              Shows available options\n"
+      "   --version, -v           Shows GMAT build date\n"
+      "   --start-server          Starts GMAT server on start-up\n"
+      "   --run, -r <scriptname>  Builds and runs the script\n"
+      "   --minimize, -m          Minimizes GMAT window\n"
+      "   --exit, -x              Exits GMAT after a script is run\n\n";
 
    #ifdef DEBUG_CMD_LINE
    MessageInterface::ShowMessage("argc = %d\n", argc);
@@ -404,17 +404,20 @@ void GmatApp::ProcessCommandLineOptions()
          #ifdef DEBUG_CMD_LINE
          MessageInterface::ShowMessage("arg = %s\n", arg.c_str());
          #endif
-         if (arg == "-ms")
+//         if (arg == "-ms")
+         if (arg == "--start-server")
          {
             startMatlabServer = true;
          }
-         else if (arg == "-date")
+//         else if (arg == "-date")
+         else if ((arg == "--version") || (arg == "-v"))
          {
             wxString buildDate;
             buildDate.Printf("Build Date: %s %s\n", __DATE__, __TIME__);
             MessageInterface::ShowMessage(buildDate.c_str());
          }
-         else if (arg == "-br")
+//         else if (arg == "-br")
+         else if ((arg == "--run") || (arg == "-r"))
          {
             if (argc < 3)
             {
@@ -433,15 +436,18 @@ void GmatApp::ProcessCommandLineOptions()
                #endif
             }
          }
-         else if (arg == "-help")
+//         else if (arg == "-help")
+         else if ((arg == "--help") || (arg == "-h"))
          {
             MessageInterface::ShowMessage(commandLineOptions.c_str());
          }
-         else if (arg == "-exit")
+//         else if (arg == "-exit")
+         else if ((arg == "--exit") || (arg == "-x"))
          {
             GmatGlobal::Instance()->SetRunMode(GmatGlobal::EXIT_AFTER_RUN);
          }
-         else if (arg == "-minimize")
+//         else if (arg == "-minimize")
+         else if ((arg == "--minimize") || (arg == "-m"))
          {
             GmatGlobal::Instance()->SetGuiMode(GmatGlobal::MINIMIZED_GUI);
          }
