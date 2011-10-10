@@ -27,6 +27,7 @@
 #include "PropagationStateManager.hpp"
 #include "EventLocator.hpp"
 #include "Brent.hpp"
+//#include "Brent73.hpp"
 
 
 //#define DEBUG_INITIALIZATION
@@ -1057,6 +1058,7 @@ void PropagationEnabledCommand::InitializeForEventLocation()
       previousEventData = new Real[eventBufferSize];
       tempEventData = new Real[eventBufferSize];
 
+      // Load the initial data used in event location
       Integer dataIndex;
       for (Integer i = 0; i < activeLocatorCount; ++i)
       {
@@ -1259,6 +1261,7 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
          ++current;
       }
 
+      // todo: This loop will miss propagators that do not have force models
       for (UnsignedInt i = 0; i < fm.size(); ++i)
       {
          // events and orbit related parameters use spacecraft for data

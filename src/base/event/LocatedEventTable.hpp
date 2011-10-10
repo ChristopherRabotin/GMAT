@@ -55,12 +55,11 @@ public:
    Real GetMaxSpan(std::string eventType, std::string parties);
    Real GetLastSpan(std::string eventType, std::string parties = "");
    Real GetAverageSpan(std::string eventType, std::string parties = "");
-   void SortEvents(SortStyle how, SortStyle secondaryStyle);
+   void SortEvents(SortStyle how, SortStyle secondaryStyle = UNSORTED);
    std::vector<LocatedEvent*> *GetEvents();
 
    bool WriteToFile(std::string filename);
    void ShowPlot();
-   void BuildPlot(const std::string &plotName);
 
 protected:
    /// The table of located event boundaries
@@ -86,6 +85,7 @@ protected:
    void SortEvents();
    std::string BuildEventSummary();
    void CollectData(const std::string &forCurve, RealArray &xv, RealArray &yv);
+   void BuildPlot(const std::string &plotName);
 };
 
 #endif /* LocatedEventTable_hpp */

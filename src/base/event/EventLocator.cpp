@@ -268,8 +268,6 @@ bool EventLocator::IsParameterReadOnly(const Integer id) const
 {
    if (id == IS_ACTIVE)
       return true;
-   if (id == SHOW_PLOT)
-      return true;
 
    return GmatBase::IsParameterReadOnly(id);
 }

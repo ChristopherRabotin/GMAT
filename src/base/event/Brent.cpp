@@ -228,46 +228,55 @@ bool Brent::SetValue(GmatEpoch forEpoch, Real withValue)
 //------------------------------------------------------------------------------
 Real Brent::FindStep(const GmatEpoch currentEpoch)
 {
-//   Real diffAB, diffAC, diffBC;
-//
-//   diffAB = buffer[0] - buffer[1];
-//   if ((buffer[0] != buffer[2]) && (buffer[1] != buffer[2]))
-//   {
-//      diffAC = buffer[0] - buffer[2];
-//      diffBC = buffer[1] - buffer[2];
-//      // Inverse quadratic interpolation
-//      epochOfStep = epochBuffer[0] * buffer[1] * buffer[2] / ((diffAB*diffAC)) +
-//            epochBuffer[1] * buffer[0] * buffer[2] / ((-diffAB*diffBC)) +
-//            epochBuffer[2] * buffer[0] * buffer[1] / ((diffAC*diffBC));
-//   }
-//   else
-//   {
-//      // Secant method
-//      epochOfStep = epochBuffer[1] - buffer[1] *
-//            (epochBuffer[0] - epochBuffer[1])/diffAB;
-//   }
-//
-//   // Figure out if we need to drop back to bisection
-//   Real delta = 1.0e-8;    // Numerical tolerance for epochs; set to ~1 msec
-//   Real deltaC, bMinusC, sMinusB;
-//
-//   deltaC  = GmatMathUtil::Abs(epochBuffer[2] - oldCValue);
-//   bMinusC = GmatMathUtil::Abs(epochBuffer[1]-epochBuffer[2]);
-//   sMinusB = GmatMathUtil::Abs(epochOfStep - epochBuffer[1]);
-//
-//   if ( ((epochOfStep >= (3.0 * epochBuffer[0] + epochBuffer[1]) / 4.0) &&
-//         (epochOfStep <= epochBuffer[1])) ||
-//        (bisectionUsed && (sMinusB >= bMinusC / 2.0)) ||
-//        (!bisectionUsed && (sMinusB >= deltaC / 2.0)) ||
-//        (bisectionUsed && (bMinusC < delta)) ||
-//        (!bisectionUsed && deltaC < delta) )
+   bool bisectOnly = false;
+
+   if (bisectOnly)
    {
-      // Drop back to bisection. Sigh.
       epochOfStep = 0.5 * (epochBuffer[0] + epochBuffer[1]);
-      bisectionUsed = true;
    }
-//   else
-//      bisectionUsed = false;
+   else
+   {
+      Real diffAB, diffAC, diffBC;
+
+      diffAB = buffer[0] - buffer[1];
+      if ((buffer[0] != buffer[2]) && (buffer[1] != buffer[2]))
+      {
+         diffAC = buffer[0] - buffer[2];
+         diffBC = buffer[1] - buffer[2];
+         // Inverse quadratic interpolation
+         epochOfStep = epochBuffer[0] * buffer[1] * buffer[2] / ((diffAB*diffAC)) +
+               epochBuffer[1] * buffer[0] * buffer[2] / ((-diffAB*diffBC)) +
+               epochBuffer[2] * buffer[0] * buffer[1] / ((diffAC*diffBC));
+      }
+      else
+      {
+         // Secant method
+         epochOfStep = epochBuffer[1] - buffer[1] *
+               (epochBuffer[0] - epochBuffer[1])/diffAB;
+      }
+
+      // Figure out if we need to drop back to bisection
+      Real delta = 1.0e-8;    // Numerical tolerance for epochs; set to ~1 msec
+      Real deltaC, bMinusC, sMinusB;
+
+      deltaC  = GmatMathUtil::Abs(epochBuffer[2] - oldCValue);
+      bMinusC = GmatMathUtil::Abs(epochBuffer[1]-epochBuffer[2]);
+      sMinusB = GmatMathUtil::Abs(epochOfStep - epochBuffer[1]);
+
+      if ( ((epochOfStep >= (3.0 * epochBuffer[0] + epochBuffer[1]) / 4.0) &&
+            (epochOfStep <= epochBuffer[1])) ||
+           (bisectionUsed && (sMinusB >= bMinusC / 2.0)) ||
+           (!bisectionUsed && (sMinusB >= deltaC / 2.0)) ||
+           (bisectionUsed && (bMinusC < delta)) ||
+           (!bisectionUsed && deltaC < delta) )
+      {
+         // Drop back to bisection. Sigh.
+         epochOfStep = 0.5 * (epochBuffer[0] + epochBuffer[1]);
+         bisectionUsed = true;
+      }
+      else
+         bisectionUsed = false;
+   }
 
    // Get the step in seconds to the epochOfStep if input in days was set
    if (currentEpoch != -1.0)
