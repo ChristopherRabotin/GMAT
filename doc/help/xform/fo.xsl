@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-<xsl:import href="../contrib/docbook-xsl-ns/fo/docbook.xsl"/>
+<xsl:import href="../../build/contrib/docbook-xsl-ns/fo/docbook.xsl"/>
 
 <!-- caution, warning, note, information blocks -->
 <xsl:attribute-set name="admonition.properties">

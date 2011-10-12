@@ -1,11 +1,13 @@
 # Tools
-fop = sh ./contrib/fop/fop
+fop = sh ../build/contrib/fop/fop
 rm = rm -rf
 
 # Build Xalan classpath
-xalancp = "contrib/xalan-j/xalan.jar:contrib/xalan-j/serializer.jar:\
-	contrib/xalan-j/xml-apis.jar:contrib/xalan-j/xercesImpl.jar:\
-	contrib/docbook-xsl-ns/extensions/xalan27.jar"
+xalancp = "../build/contrib/xalan-j/xalan.jar:\
+	../build/contrib/xalan-j/serializer.jar:\
+	../build/contrib/xalan-j/xml-apis.jar:\
+	../build/contrib/xalan-j/xercesImpl.jar:\
+	../build/contrib/docbook-xsl-ns/extensions/xalan27.jar"
 
 include Common.mk
 

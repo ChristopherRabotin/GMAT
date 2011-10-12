@@ -4,13 +4,15 @@
 #   svn (Subversion command-line client)
 
 # Tools
-fop = .\contrib\fop\fop.cmd
+fop = ..\build\contrib\fop\fop.cmd
 rm = del
 
 # Build Xalan classpath
-xalancp = "contrib/xalan-j/xalan.jar;contrib/xalan-j/serializer.jar;\
-	contrib/xalan-j/xml-apis.jar;contrib/xalan-j/xercesImpl.jar;\
-	contrib/docbook-xsl-ns/extensions/xalan27.jar"
+xalancp = "../build/contrib/xalan-j/xalan.jar;\
+	../build/contrib/xalan-j/serializer.jar;\
+	../build/contrib/xalan-j/xml-apis.jar;\
+	../build/contrib/xalan-j/xercesImpl.jar;\
+	../build/contrib/docbook-xsl-ns/extensions/xalan27.jar"
 
 include Common.mk
 
@@ -41,7 +43,7 @@ help.chm : files/style.css validate $(xmlfiles)
 		-PARAM use.id.as.filename 1 \
 		-PARAM variablelist.as.table 1 \
 		-IN $(top) \
-		-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
+		-XSL ..\build\contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
 	xcopy files chm\files /i /s /e /q /v /y
 	-hhc chm\htmlhelp.hhp
 	move chm\htmlhelp.chm help.chm

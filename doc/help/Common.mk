@@ -1,3 +1,6 @@
+# Build files
+contribdir = ../build/contrib
+
 # Java config
 java = java $(javaDefs)
 javaDefs = -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=$(xercesP)
@@ -7,10 +10,10 @@ xercesP = org.apache.xerces.parsers.XIncludeParserConfiguration
 xslopts = -PARAM part.autolabel 0 \
     -PARAM chapter.autolabel 0 \
     -PARAM use.extensions 1 \
-	-PARAM graphicsize.extension 1 \
-	-PARAM tablecolumns.extension 1 \
-	-PARAM refentry.generate.name 0 \
-	-PARAM refentry.generate.title 1 \
+    -PARAM graphicsize.extension 1 \
+    -PARAM tablecolumns.extension 1 \
+    -PARAM refentry.generate.name 0 \
+    -PARAM refentry.generate.title 1 \
     -PARAM ulink.show 0
 
 # Source files
@@ -34,11 +37,11 @@ help-a4.pdf : files/style.css help-a4.fo
 help.html : files/style.css validate $(xmlfiles)
 	$(java) -cp $(xalancp) org.apache.xalan.xslt.Process \
 	$(xslopts) \
-    -PARAM html.stylesheet files/style.css \
+	-PARAM html.stylesheet files/style.css \
 	-PARAM use.id.as.filename 1 \
-    -PARAM variablelist.as.table 1 \
+	-PARAM variablelist.as.table 1 \
 	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/html/docbook.xsl \
+	-XSL $(contribdir)/docbook-xsl-ns/html/docbook.xsl \
 	-OUT help.html
 
 html/index.html : files/style.css validate $(xmlfiles)
@@ -46,19 +49,19 @@ html/index.html : files/style.css validate $(xmlfiles)
 	$(xslopts) \
 	-PARAM base.dir ../html/ \
 	-PARAM img.src.path ../ \
-    -PARAM html.stylesheet ../files/style.css \
-    -PARAM chunk.quietly 1 \
+	-PARAM html.stylesheet ../files/style.css \
+	-PARAM chunk.quietly 1 \
 	-PARAM use.id.as.filename 1 \
-    -PARAM variablelist.as.table 1 \
+	-PARAM variablelist.as.table 1 \
 	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/html/chunkfast.xsl
+	-XSL $(contribdir)/docbook-xsl-ns/html/chunkfast.xsl
 
 # stand-in for entire files directory
 files/style.css : src/files/style.css
 	svn export --force src/files files
     
 validate :
-	$(java) -jar contrib/jing/bin/jing.jar contrib/docbook/docbookxi.rng $(top)
+	$(java) -jar $(contribdir)/jing/bin/jing.jar $(contribdir)/docbook/docbookxi.rng $(top)
 
 help-letter.fo : validate $(xmlfiles)
 	$(java) -cp $(xalancp) org.apache.xalan.xslt.Process \
