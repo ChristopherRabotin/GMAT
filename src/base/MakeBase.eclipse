@@ -49,15 +49,16 @@ BASETARGET = lib/libGmatBase.a
 
 endif
 
-CONSOLETARGET = lib/libGmatConsole.a
+#CONSOLETARGET = lib/libGmatConsole.a - we can now link to the regular base target
+CONSOLETARGET=$(BASETARGET)
 
-ifeq ($(CONSOLE_APP),1)
+#ifeq ($(CONSOLE_APP),1)
 
-TARGET = $(CONSOLETARGET)
+#TARGET = $(CONSOLETARGET)
 # Console (no wx code) versions of these objects
-BRIDGEOBJECTS =
-
-else
+#BRIDGEOBJECTS =
+#
+#else
 
 TARGET = $(BASETARGET)
 # GUI versions of these objects
@@ -73,7 +74,7 @@ TARGET = $(BASETARGET)
 # GuiInterpreter now part of the gui code.
 # interpreter/GuiInterpreter.o
 
-endif
+#endif
 
 ifeq ($(USE_SPICE),1)
 SPICE_OBJECTS = \

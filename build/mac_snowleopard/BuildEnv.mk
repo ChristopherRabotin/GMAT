@@ -73,11 +73,6 @@ else
 USE_PROFILING = 0
 endif
 
-# currently cannot use MATLAB or shared base library with console version 
-#ifeq ($(CONSOLE_APP), 1)
-#SHARED_BASE = 0
-#endif
-
 
 # DevIL data
 ifeq ($(USE_DEVIL), 1)
@@ -153,7 +148,7 @@ MAC_ICONS    = $(RES_DIR)/gmat.icns
 
 #REZ =
 # Define macros for linking the Carbon and wx resource files
-REZ = /Developer/Tools/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r -arch i386
+REZ = /Developer/Tools/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r $(USE_CARBON)
 # *** EDIT THIS *** - Point to where the FORTRAN libraries are
 ifeq ($(USE_F2C_VERSION), 1)
 FORTRAN_LIB = -L$(F2C_LIB_PATH) -lf2c
@@ -165,26 +160,26 @@ REZ =
 FORTRAN_LIB =                
 endif 
 
-ifeq ($(CONSOLE_APP),1)
-CONSOLE_FLAGS = -D__CONSOLE_APP__
-else
-CONSOLE_FLAGS = 
-endif
+#ifeq ($(CONSOLE_APP),1)
+#CONSOLE_FLAGS = -D__CONSOLE_APP__
+#else
+#CONSOLE_FLAGS = 
+#endif
 
 # Set options for debugging and profiling
 DEBUG_FLAGS = 
 
-# Build the complete list of flags for the compilers
-CPPFLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(SHARED_BASE_FLAGS) -DLINUX_MAC\
+# Build the complete list of flags for the compilers - REMOVED $(CONSOLE_FLAGS)
+CPPFLAGS = $(OPTIMIZATIONS) -Wall $(SHARED_BASE_FLAGS) \
            $(SPICE_INCLUDE) $(SPICE_DIRECTIVE) $(IL_HEADERS) $(USE_CARBON)
-F77_FLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall -m32 $(IL_HEADERS)
+F77_FLAGS = $(OPTIMIZATIONS) -Wall -m32 $(IL_HEADERS)
 
 
 # Link specific flags
 # *** EDIT THIS *** - put the correct wx lib here (based on the version you're using, 
 #                     i.e. 2.8, 2.6, etc.)
 LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
-               -framework OpenGL -framework AGL  -headerpad_max_install_names -DLINUX_MAC\
+               -framework OpenGL -framework AGL  -headerpad_max_install_names \
                $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
              -lwx_mac_gl-2.8 $(DEBUG_FLAGS) $(IL_LIBRARIES) $(USE_CARBON)
 

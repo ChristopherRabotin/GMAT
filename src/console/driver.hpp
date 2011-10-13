@@ -41,9 +41,9 @@ void ShowHelp();
 void RunScriptInterpreter(std::string script, int verbosity, 
                           bool batchmode = false);
 Integer RunBatch(std::string& batchfilename);
-void SaveScript(std::string filename = "Output.script");
+void SaveScript(std::string filename = "");
+void ShowVersionInfo();
 void ShowCommandSummary(std::string filename = "");
-void TestSyncModeAccess(std::string filename = "Output.script");
 void DumpDEData(double secsToStep, double spanInSecs = 86400.0);
 int main(int argc, char *argv[]);
 

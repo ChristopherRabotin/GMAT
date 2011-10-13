@@ -28,11 +28,14 @@
 #include "ConsoleAppException.hpp"
 #include "ConsoleMessageReceiver.hpp"
 #include "Moderator.hpp"
+#include "StringUtil.hpp"
 
 #include "CommandFactory.hpp"
 #include "PointMassForce.hpp"
 #include "PrintUtility.hpp"
 
+
+static Moderator *mod = NULL;
 
 //------------------------------------------------------------------------------
 //  void ShowHelp()
@@ -51,18 +54,17 @@ void ShowHelp()
              << "The second runs the input script once and then exits.\n"
              << "The third selection executes specific testing scenarios.\n\n" 
              << "Valid options are:\n"
-             << "   --help               Shows available options\n"
-             << "   --save               Saves current script (interactive "
-             << "mode only)\n"
-             << "   --summary            Writes command summary (interactive "
-             << "mode only)\n"
-             << "   --batch <filename>   "
-             << "Runs multiple scripts listed in specified file\n"
-             << "   --verbose <on/off>   "
-             << "Toggles display of command sequence prior to a run\n"
-             << "                        This option is set on the startup line\n"
-             << "                        (default is on)\n"
-             << std::endl;   
+             << "   --help, -h              Shows available options\n"
+             << "   --version, -v           Show version and build information\n"
+             << "   --batch, -b <filename>  Runs multiple scripts listed in specified file\n"
+             << "   --run, -r <filename>    Runs the input script once, then exits\n"
+             << "   --minimize, -m          Opens with GUI minimized (ignored for Console)\n"
+             << "   --start-server          Starts GMAT Server on start-up (ignored for Console)\n"
+             << "   --save                  Saves current script (interactive mode only)\n"
+             << "   --summary               Writes command summary (interactive mode only)\n"
+             << "   --verbose <on/off>      Dump info messages to screen during run (default is on)\n"
+             << "   --exit, -x              Exit after run (default)\n"
+             << std::endl << std::endl;
 }
 
 
@@ -81,14 +83,16 @@ void ShowHelp()
 //------------------------------------------------------------------------------
 void RunScriptInterpreter(std::string script, int verbosity, bool batchmode)
 {
-   static bool moderatorInitialized = false;
+//   static bool moderatorInitialized = false;
    
    std::ifstream fin(script.c_str());
-   if (!(fin)) {
+   if (!(fin))
+   {
       std::string errstr = "Script file ";
       errstr += script;
       errstr += " does not exist";
-      if (!batchmode) {
+      if (!batchmode)
+      {
          std::cout << errstr << std::endl;
          return;
       }
@@ -98,24 +102,29 @@ void RunScriptInterpreter(std::string script, int verbosity, bool batchmode)
    else
       fin.close();
 
-   ConsoleMessageReceiver *theMessageReceiver = 
-      ConsoleMessageReceiver::Instance();
-   MessageInterface::SetMessageReceiver(theMessageReceiver);
-   
-   Moderator *mod = Moderator::Instance();
-   
-   if (!moderatorInitialized) {
-      if (!mod->Initialize()) {
-         throw ConsoleAppException("Moderator failed to initialize!");
-      }
-      
-      moderatorInitialized = true;
-   }
+   // moved to main - wcs - Oct 2011
+//   ConsoleMessageReceiver *theMessageReceiver =
+//      ConsoleMessageReceiver::Instance();
+//   MessageInterface::SetMessageReceiver(theMessageReceiver);
+//
+//   Moderator *mod = Moderator::Instance();
+//
+//   if (!moderatorInitialized)
+//   {
+//      if (!mod->Initialize())
+//      {
+//         throw ConsoleAppException("Moderator failed to initialize!");
+//      }
+//
+//      moderatorInitialized = true;
+//   }
    
    try
    {
-      if (!mod->InterpretScript(script)) {
-         if (!batchmode) {
+      if (!mod->InterpretScript(script))
+      {
+         if (!batchmode)
+         {
             std::cout << "\n***Could not read script.***\n\n";
             ShowHelp();
          }
@@ -169,17 +178,19 @@ Integer RunBatch(std::string& batchfilename)
    std::cout << "Running batch file \"" << batchfilename << "\"" << std::endl;
    std::ifstream batchfile(batchfilename.c_str());
    
-   if (!(batchfile)) {
+   if (!(batchfile))
+   {
       std::string errstr = "Batch file ";
       errstr += batchfilename;
       errstr += " does not exist";
       std::cout << errstr << std::endl;
-         return 0;
+      return 0;
    }
    
    batchfile >> script;
 
-   while (!batchfile.eof()) {
+   while (!batchfile.eof())
+   {
       if (script == "--summary")
       {
          ShowCommandSummary();
@@ -272,9 +283,30 @@ Integer RunBatch(std::string& batchfilename)
 //------------------------------------------------------------------------------
 void SaveScript(std::string filename)
 {
-    Moderator *mod = Moderator::Instance();
-    mod->SaveScript(filename);
-    std::cout << "\n\n";
+//    Moderator *mod = Moderator::Instance();
+   if ((mod == NULL) || (filename == ""))
+   {
+      std::cout << "\nUnable to save script - no script has been run.\n\n";
+      return;
+   }
+   std::cout << "Now saving script " << filename << "." << std::endl;
+   mod->SaveScript(filename);
+   std::cout << "\n\n";
+}
+
+//------------------------------------------------------------------------------
+// void ShowVersionInfo()
+//------------------------------------------------------------------------------
+/**
+ * Displays the version information, either on screen or writing to a file
+ */
+void ShowVersionInfo()
+{
+   std::string msg = "\n\nBuild Date: ";
+   msg += __DATE__;
+   msg += "  ";
+   msg += __TIME__;
+   std::cout << msg << std::endl << std::endl;
 }
 
 
@@ -282,23 +314,35 @@ void SaveScript(std::string filename)
 // void ShowCommandSummary(std::string filename)
 //------------------------------------------------------------------------------
 /**
- * Displays the command summary, either on screen or writing to a file
+ * Displays the command summary, on screen
  * 
  * @param <filename> The name of the summary file.
  */
 //------------------------------------------------------------------------------
 void ShowCommandSummary(std::string filename)
 {
-   Moderator *mod = Moderator::Instance();
-   GmatCommand *cmd = mod->GetFirstCommand();
-   if (cmd->GetTypeName() == "NoOp")
-      cmd = cmd->GetNext();
-   
-   if (cmd == NULL)
+//   Moderator *mod = Moderator::Instance();
+   if (mod == NULL)
    {
-      std::cout << "Command stream is empty.\n\n";
+      std::cout << "\nUnable to show command summary - no script has been run.\n\n";
       return;
    }
+   GmatCommand *cmd = mod->GetFirstCommand();
+   if (cmd == NULL)
+   {
+      std::cout << "Unable to show command summary - command stream is empty.\n\n";
+      return;
+   }
+   if (cmd->GetTypeName() == "NoOp")
+   {
+      cmd = cmd->GetNext();
+      if (!cmd)
+      {
+         std::cout << "Unable to show command summary - no script has been run.\n\n";
+         return;
+      }
+   }
+   std::cout << "command type is: " << cmd->GetTypeName() << std::endl;
    
    if (filename == "")
    {
@@ -310,105 +354,6 @@ void ShowCommandSummary(std::string filename)
    {
       std::cout << "File output for command summaries is not yet available\n\n";
    }
-}
-
-
-//------------------------------------------------------------------------------
-// void TestSyncModeAccess(std::string filename)
-//------------------------------------------------------------------------------
-/**
- * Tests the propsync script.
- * 
- * @note This looks like old code that should be removed.
- * 
- * @param <filename> The name of the script file.  (Not used)
- */
-//------------------------------------------------------------------------------
-void TestSyncModeAccess(std::string filwwename)
-{
-    Moderator *mod = Moderator::Instance();
-    
-    // First load up the Moderator with the propsync script
-    RunScriptInterpreter("propsync.script", 1);
-    std::cout << "\n\n";
-    
-    // Find the command entry point
-    GmatCommand *cmd = mod->GetFirstCommand();
-    StringArray props, sats;
-    
-    while (cmd) {
-       if (cmd->GetTypeName() == "Propagate") {
-          std::cout << "Found \"" << cmd->GetGeneratingString() << "\"\n";
-          std::cout << "Current propagation mode is \"" 
-                    << cmd->GetStringParameter("PropagateMode")
-                    << "\"\n";
-          props = cmd->GetStringArrayParameter("Propagator");
-          for (Integer i = 0; i < (Integer) props.size(); ++i) {
-             std::cout << "  Propagator: " << props[i] << "\n";
-             sats = cmd->GetStringArrayParameter("Spacecraft", i);
-             for (Integer i = 0; i < (Integer) sats.size(); ++i) {
-                std::cout << "    SpaceObject: " << sats[i] << "\n";
-             }
-          }
-          
-          // Now try clearing this puppy
-          std::cout << "*** Testing the \"Clear\" action\n";
-          cmd->TakeAction("Clear");
-          std::cout << "Current propagation mode is \"" 
-                    << cmd->GetStringParameter("PropagateMode")
-                    << "\"\n";
-          props = cmd->GetStringArrayParameter("Propagator");
-          for (Integer i = 0; i < (Integer) props.size(); ++i) {
-             std::cout << "  Propagator: " << props[i] << "\n";
-             sats = cmd->GetStringArrayParameter("Spacecraft", i);
-             for (Integer i = 0; i < (Integer) sats.size(); ++i) {
-                std::cout << "    SpaceObject: " << sats[i] << "\n";
-             }
-          }
-          
-          // Now add in some bogus data
-          std::cout << "*** Testing the \"SetString\" method: \"\", "
-                    << "\"Bogus\", \"Synchronized\"\n";
-          cmd->SetStringParameter("PropagateMode", "");
-          std::cout << "Current propagation mode is \"" 
-                    << cmd->GetStringParameter("PropagateMode")
-                    << "\"\n";
-//          cmd->SetStringParameter("PropagateMode", "Bogus");
-          std::cout << "Current propagation mode is \"" 
-                    << cmd->GetStringParameter("PropagateMode")
-                    << "\"\n";
-          cmd->SetStringParameter("PropagateMode", "Synchronized");
-          std::cout << "Current propagation mode is \"" 
-                    << cmd->GetStringParameter("PropagateMode")
-                    << "\"\n";
-
-          std::cout << "Setting the stooges as the PropSetups\n";
-          cmd->SetStringParameter("Propagator", "Moe");
-          cmd->SetStringParameter("Propagator", "Curly");
-          cmd->SetStringParameter("Propagator", "Larry");
-          std::cout << "Setting the dwarfs as the Spacecraft\n";
-          cmd->SetStringParameter("Spacecraft", "Dopey", 0);
-          cmd->SetStringParameter("Spacecraft", "Sleepy", 1);
-          cmd->SetStringParameter("Spacecraft", "Doc", 2);
-          cmd->SetStringParameter("Spacecraft", "Happy", 0);
-          cmd->SetStringParameter("Spacecraft", "Grumpy", 1);
-          cmd->SetStringParameter("Spacecraft", "Bashful", 2);
-          cmd->SetStringParameter("Spacecraft", "Sneezy", 0);
-          
-          props = cmd->GetStringArrayParameter("Propagator");
-          for (Integer i = 0; i < (Integer) props.size(); ++i) {
-             std::cout << "  Propagator: " << props[i] << "\n";
-             sats = cmd->GetStringArrayParameter("Spacecraft", i);
-             for (Integer i = 0; i < (Integer) sats.size(); ++i) {
-                std::cout << "    SpaceObject: " << sats[i] << "\n";
-             }
-          }
-       }
-       
-       cmd = cmd->GetNext();
-    }
-    
-    std::cout << "\n\n";
 }
 
 
@@ -429,10 +374,10 @@ void DumpDEData(double secsToStep, double spanInSecs)
    long step = 0;
    std::ofstream data("EarthMoonDe.txt");
 
-   Moderator *mod = Moderator::Instance();
-   if (!mod->Initialize()) {
-      throw ConsoleAppException("Moderator failed to initialize!");
-   }
+//   Moderator *mod = Moderator::Instance();
+//   if (!mod->Initialize()) {
+//      throw ConsoleAppException("Moderator failed to initialize!");
+//   }
 
    SolarSystem *sol = mod->GetSolarSystemInUse();
    if (sol == NULL)
@@ -480,7 +425,8 @@ void DumpDEData(double secsToStep, double spanInSecs)
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-   try {
+   try
+   {
       std::string msg = "General Mission Analysis Tool\nConsole Based Version\n";
 
       msg += "Build Date: ";
@@ -499,80 +445,230 @@ int main(int argc, char *argv[])
       int verbosity = 1;
       std::string optionParm = "";
       StringArray parms;
+      std::string currentArg("");
+      bool        batchRun = false;
+      bool        settingVerbose = false;
       
-      do {
-         if (argc < 2)
+      // Set the message receiver and moderator pointers here
+      ConsoleMessageReceiver *theMessageReceiver = ConsoleMessageReceiver::Instance();
+      MessageInterface::SetMessageReceiver(theMessageReceiver);
+
+      mod = Moderator::Instance();
+      if (mod == NULL || !(mod->Initialize("gmat_startup_file.txt")))
+      {
+         std::cout << "Moderator failed to initialize!  Unable to run GmatConsole." << std::endl;
+         return 1;
+      }
+
+      if (argc < 2)    // interactive mode
+      {
+         do
          {
-            std::cout << "Enter a script file, " 
+            std::cout << "Enter a script file, "
                       << "q to quit, or an option:  ";
-            
+
             std::cin >> scriptfile;
             // Drop the return character -- may be platform dependent
             std::cin.ignore(1);
-            
+
             parms.clear();
             std::string chunk;
-            // Integer start = 0, finish;
-         }
-         else
+
+            if ((!strcmp(scriptfile, "q"))      || (!strcmp(scriptfile, "Q")) ||
+                (!strcmp(scriptfile, "--exit")) || (!strcmp(scriptfile, "-x")))
+            {
+               runcomplete = true;
+            }
+            else if (scriptfile[0] == '-')
+            {
+               if ((!strcmp(scriptfile, "--help")) || (!strcmp(scriptfile, "-h")))
+               {
+                  ShowHelp();
+               }
+               else if ((!strcmp(scriptfile, "--run")) || (!strcmp(scriptfile, "-r")))
+               {
+                  batchRun = false;  // will grab script file name as next arg
+               }
+               else if ((!strcmp(scriptfile, "--batch")) || (!strcmp(scriptfile, "-b")))
+               {
+                  batchRun = true; // will grab batch file name as next arg
+               }
+               else if ((!strcmp(scriptfile, "--minimize")) || (!strcmp(scriptfile, "-m")))
+               {
+                  std::cout << "\n--minimize option ignored\n ";
+               }
+               else if (!strcmp(scriptfile, "--save"))
+               {
+                  SaveScript();
+               }
+               else if ((!strcmp(scriptfile, "--version")) || (!strcmp(scriptfile, "-v")))
+               {
+                  ShowVersionInfo();
+               }
+               else if (!strcmp(scriptfile, "--summary"))
+               {
+                  ShowCommandSummary();
+               }
+               else if (!strcmp(scriptfile, "--verbose"))
+               {
+                  settingVerbose = true;
+               }
+               else if (!strcmp(scriptfile, "--start-server"))
+               {
+                  std::cout << "\nGMAT server currently unavailable to GmatConsole\n ";
+               }
+               // Options used for some detailed tests but hidden from casual users
+               // (i.e. missing from the help messages)
+               else if (!strcmp(scriptfile, "--DumpDEData"))
+               {
+                  DumpDEData(0.001, 0.2);
+               }
+               else
+               {
+                  std::cout << "Unrecognized option.\n\n";
+                  ShowHelp();
+               }
+            }
+            else if (!runcomplete)
+            {
+               if (settingVerbose)
+               {
+                  if (!strcmp(scriptfile, "off"))
+                     verbosity = 0;
+                  else if (!strcmp(scriptfile, "on"))
+                     verbosity = 1;
+                  else
+                     MessageInterface::ShowMessage("Invalid option for --verbose: %s\n", scriptfile);
+                  std::cout << "Verbose mode is "
+                            << (verbosity == 0 ? "off" : "on")
+                            << "\n";
+                  settingVerbose = false;
+               }
+               else
+               {
+                  if (batchRun) // --batch or -b
+                  {
+                     std::string theFile(scriptfile);
+                     RunBatch(theFile);
+                  }
+                  else  // --run or -r
+                  {
+                     RunScriptInterpreter(scriptfile, verbosity);
+                  }
+                  batchRun = false;
+               }
+            }
+
+         } while (!runcomplete);
+      }
+      else   // non-interactive mode
+      {
+         std::string arg("");
+         // check for a single filename argument first
+         if (argc == 2)
          {
-            strcpy(scriptfile, argv[1]);
-            if (argc == 3)
-               optionParm = argv[2];
-            if (optionParm != "")
-               std::cout << "Optional parameter: \"" << optionParm << "\"\n";
+            arg = argv[1];
+            if (!GmatStringUtil::StartsWith(arg, "-"))
+            {
+               // Replace single quotes
+               GmatStringUtil::Replace(arg, "'", "");
+               RunScriptInterpreter(arg.c_str(), verbosity);
+               runcomplete = true;
+            }
          }
-            
-         if ((!strcmp(scriptfile, "q")) || (!strcmp(scriptfile, "Q")))
-            runcomplete = true;
-            
-         if (scriptfile[0] == '-')
+         if (!runcomplete)
          {
-            if (!strcmp(scriptfile, "--help"))
+            for (int i = 1; i < argc; ++i)
             {
-               ShowHelp();
+               arg = argv[i];
+               if (arg == "--start-server")
+               {
+                  std::cout << "\nGMAT server currently unavailable to GmatConsole\n ";
+               }
+               else if ((arg == "--minimize") || (arg == "-m"))
+               {
+                  std::cout << "\n--minimize option ignored by GmatConsole\n ";
+               }
+               else if ((arg == "--version") || (arg == "-v"))
+               {
+                  ShowVersionInfo();
+               }
+               else if (arg == "--save")
+               {
+                  SaveScript();
+               }
+               else if (arg == "--summary")
+               {
+                  ShowCommandSummary();
+               }
+               else if ((arg == "--help") || (arg == "-h"))
+               {
+                  ShowHelp();
+               }
+               else if (arg == "--verbose")
+               {
+                  if (argc < i + 2)
+                  {
+                     MessageInterface::ShowMessage("*** Missing verbose value\n");
+                  }
+                  else
+                  {
+                     std::string verboseValue = argv[i+1];
+                     ++i;
+                     if (verboseValue == "off")
+                        verbosity = 0;
+                     else if (verboseValue == "on")
+                        verbosity = 1;
+                     else
+                        MessageInterface::ShowMessage("Invalid option for --verbose: %s\n", scriptfile);
+                     std::cout << "Verbose mode is "
+                               << (verbosity == 0 ? "off" : "on")
+                               << "\n";
+                  }
+               }
+               else if ((arg == "--run") || (arg == "-r"))
+               {
+                  if (argc < i + 2)
+                  {
+                     MessageInterface::ShowMessage("*** Missing script file name\n");
+                  }
+                  else
+                  {
+                     std::string scriptToRun = argv[i+1];
+                     // Replace single quotes
+                     GmatStringUtil::Replace(scriptToRun, "'", "");
+                     ++i;
+                     RunScriptInterpreter(scriptToRun.c_str(), verbosity);
+                  }
+               }
+               else if ((arg == "--batch") || (arg == "-b"))
+               {
+                  if (argc < i + 2)
+                  {
+                     MessageInterface::ShowMessage("*** Missing batch file name\n");
+                  }
+                  else
+                  {
+                     std::string batchToRun = argv[i+1];
+                     // Replace single quotes
+                     GmatStringUtil::Replace(batchToRun, "'", "");
+                     ++i;
+                     RunBatch(batchToRun);
+                  }
+               }
+               else if ((arg == "--exit") || (arg == "-x"))
+               {
+                  ; // ignored - console always exits at end of non-interactive run
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("The option \"%s\" is not valid.\n", arg.c_str());
+                  ShowHelp();
+                  break;
+               }
             }
-            else if (!strcmp(scriptfile, "--batch"))
-            {
-               RunBatch(optionParm);
-            }
-            else if (!strcmp(scriptfile, "--save"))
-            {
-               SaveScript();
-            }
-            else if (!strcmp(scriptfile, "--summary"))
-            {
-               ShowCommandSummary();
-            }
-            else if (!strcmp(scriptfile, "--sync"))
-            {
-               TestSyncModeAccess();
-            }
-            else if (!strcmp(scriptfile, "--verbose"))
-            {
-               if (!strcmp(optionParm.c_str(), "off"))
-                  verbosity = 0;
-               std::cout << "Verbose mode is " 
-                         << (verbosity == 0 ? "off" : "on")
-                         << "\n";
-               argc = 1;
-            }
-            // Options used for some detailed tests but hidden from casual users
-            // (i.e. missing from the help messages)
-            else if (!strcmp(scriptfile, "--DumpDEData"))
-            {
-               DumpDEData(0.001, 0.2);
-            }
-            else
-            {
-               std::cout << "Unrecognized option.\n\n";
-               ShowHelp();
-            }
-         }
-         else if (!runcomplete)
-            RunScriptInterpreter(scriptfile, verbosity);
-         
-      } while ((!runcomplete) && (argc < 2));
+         } // !runcomplete
+      }
    }
    catch (BaseException &ex) {
       std::cout << ex.GetFullMessage() << std::endl;
