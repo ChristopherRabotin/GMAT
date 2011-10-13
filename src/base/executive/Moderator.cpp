@@ -5881,6 +5881,10 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::GetFirstCommand(Integer sandboxNum)
 {
+   if (commands.empty())
+   {
+      return NULL;
+   }
    return commands[sandboxNum-1];
 }
 
