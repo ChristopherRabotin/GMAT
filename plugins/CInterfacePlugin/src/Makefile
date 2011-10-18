@@ -6,8 +6,16 @@
 
 include ./CInterfaceEnv.mk
 
+# handle different bin and lib directories here; for now, set to bin and lib for non-Mac platforms
+ifeq ($(MAC_SPECIFIC), 1)
+else
+GMAT_LIB_DIR = lib
+GMAT_BIN_DIR = bin
+GMAT_PLUGIN_DIR = plugins
+endif
 
-TARGET = ../lib/libCInterface$(SHARED_EXTENSION)
+
+TARGET = ../$(GMAT_LIB_DIR)/libCInterface$(SHARED_EXTENSION)
 
 
 all: prep $(TARGET)
@@ -67,19 +75,19 @@ OBJECTS = \
 ifeq ($(LINUX_MAC), 1)
 ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET) : $(OBJECTS)
-	mkdir -p ../lib
+	mkdir -p ../$(GMAT_LIB_DIR)
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) -L$(GMAT_BIN_LOCATION) -l$(BASE_LIBRARY)
-	install_name_tool -change lib64/lib$(BASE_LIBRARY).dylib $(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
+	install_name_tool -change $(GMAT_LIB_DIR)/lib$(BASE_LIBRARY).dylib $(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)
 else
 $(TARGET) : $(OBJECTS)
-	mkdir -p ../lib
+	mkdir -p ../$(GMAT_LIB_DIR)
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) -L$(GMAT_BIN_LOCATION) -l$(BASE_LIBRARY) $(PLATFORM_LINK_FLAGS)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)
 endif	
 else
 $(TARGET) : $(OBJECTS)
-	mkdir -p ../lib
+	mkdir -p ../$(GMAT_LIB_DIR)
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)
 endif
