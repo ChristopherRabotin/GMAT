@@ -6,12 +6,20 @@
 
 include ../OdEnv.mk
 
+# handle different bin and lib directories here; for now, set to bin and lib for non-Mac platforms
+ifeq ($(MAC_SPECIFIC), 1)
+else
+GMAT_LIB_DIR = lib
+GMAT_BIN_DIR = bin
+GMAT_PLUGIN_DIR = plugins
+endif
+
 ifeq ($(LINUX_MAC), 1)
 
 ifeq ($(MAC_SPECIFIC), 1)
 SHARED_EXTENSION = .dylib
 SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup \
-                   -L$(GMAT_Code_Location)/base/lib -l$(BASE_LIBRARY) \
+                   -L$(GMAT_Code_Location)/base/$(GMAT_LIB_DIR) -l$(BASE_LIBRARY) \
                     $(MAC_CPP_FLAGS) $(ARCHITECTURE_FLAGS) $(LINK_FLAGS)
                    
 # -reexport-lGmatBaseNoMatlab -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup
@@ -25,11 +33,11 @@ endif
 else
 
 SHARED_EXTENSION = .dll
-SHARED_LIB_FLAGS = -shared -Wl --out-implib $(LINK_FLAGS) -L$(GMAT_Code_Location)/base/lib -lGmatBase
+SHARED_LIB_FLAGS = -shared -Wl --out-implib $(LINK_FLAGS) -L$(GMAT_Code_Location)/base/$(GMAT_LIB_DIR) -lGmatBase
 
 endif
 
-TARGET = ../../lib/libGmatEstimation$(SHARED_EXTENSION)
+TARGET = ../../$(GMAT_LIB_DIR)/libGmatEstimation$(SHARED_EXTENSION)
 
 
 ifeq ($(USE_DATAFILE_PLUGIN), 0)
@@ -196,15 +204,15 @@ CPP_OBJECTS = \
 
 ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET) : $(C_OBJECTS) $(CPP_OBJECTS)
-	mkdir -p ../../lib
+	mkdir -p ../../$(GMAT_LIB_DIR)
 	$(CPP) $(C_OBJECTS) $(CPP_OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) $(PLATFORM_FLAGS)
-	install_name_tool -change lib/lib$(BASE_LIBRARY).dylib $(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
-	cp $(TARGET) $(GMAT_Plugin_Location)/../plugins
+	install_name_tool -change $(GMAT_LIB_DIR)/lib$(BASE_LIBRARY).dylib $(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
+	cp $(TARGET) $(GMAT_Plugin_Location)/../$(GMAT_PLUGIN_DIR)
 else
 $(TARGET) : $(C_OBJECTS) $(CPP_OBJECTS)
-	mkdir -p ../../lib
+	mkdir -p ../../$(GMAT_LIB_DIR)
 	$(CPP) $(C_OBJECTS)  $(CPP_OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) $(PLATFORM_FLAGS)
-	cp $(TARGET) $(GMAT_Bin_Location)/../plugins
+	cp $(TARGET) $(GMAT_Bin_Location)/../$(GMAT_PLUGIN_DIR)
 endif
 
 
