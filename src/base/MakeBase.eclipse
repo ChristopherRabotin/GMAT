@@ -16,13 +16,20 @@
 
 include ../BuildEnv.mk
 
+ifdef MAC_SPECIFIC
+# use GMAT_LIB_DIR and GMAT_BIN_DIR from BuildEnv.mk
+else  ####### set BIN and LIB for other platforms for now
+GMAT_LIB_DIR = lib
+GMAT_BIN_DIR = bin
+endif
+
 ifeq ($(SHARED_BASE), 1)
 
 ifeq ($(LINUX_MAC), 1)
 
 ifdef MAC_SPECIFIC
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(USE_CARBON)
+SHARED_LIB_FLAGS = $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 else
 SHARED_EXTENSION = .so
@@ -41,11 +48,11 @@ SHARED_EXTENSION = .dll
 
 endif
 
-BASETARGET = lib/libGmatBase$(SHARED_EXTENSION)
+BASETARGET = $(GMAT_LIB_DIR)/libGmatBase$(SHARED_EXTENSION)
 
 else
 
-BASETARGET = lib/libGmatBase.a
+BASETARGET = $(GMAT_LIB_DIR)/libGmatBase.a
 
 endif
 
@@ -56,7 +63,7 @@ CONSOLETARGET=$(BASETARGET)
 
 #TARGET = $(CONSOLETARGET)
 # Console (no wx code) versions of these objects
-#BRIDGEOBJECTS =
+BRIDGEOBJECTS =
 #
 #else
 
@@ -94,6 +101,22 @@ endif
 all: $(TARGET)
 gui: $(BASETARGET)
 console: $(CONSOLETARGET)
+
+clean : archclean
+
+
+archclean :
+	rm -rf */*.o
+	rm -rf */*/*.o
+	rm -rf $(TARGETS)
+	rm -rf */*~
+	rm -rf core
+	rm -rf */core
+	rm -rf $(GMAT_BIN_DIR)/*
+	rm -rf obj/*
+	rm -rf $(BASETARGET)
+	rm -rf ../matlab/gmat_mex/src/*.o
+
 
 HEADERS = -Iinclude \
           -Ifoundation \
@@ -134,37 +157,6 @@ HEADERS = -Iinclude \
 
 
 
-clean : archclean
-
-ifeq ($(CONSOLE_APP),1)
-
-archclean :
-	rm -rf */*.o
-	rm -rf */*/*.o
-	rm -rf $(TARGETS)
-	rm -rf */*~
-	rm -rf core
-	rm -rf */core
-	rm -rf bin/*
-	rm -rf obj/*
-	rm -rf $(CONSOLETARGET)
-	rm -rf ../matlab/gmat_mex/src/*.o
-
-else
-
-archclean :
-	rm -rf */*.o
-	rm -rf */*/*.o
-	rm -rf $(TARGETS)
-	rm -rf */*~
-	rm -rf core
-	rm -rf */core
-	rm -rf bin/*
-	rm -rf obj/*
-	rm -rf $(BASETARGET)
-	rm -rf ../matlab/gmat_mex/src/*.o
-
-endif
 
 OBJECTS = \
     asset/AssetException.o \
@@ -576,11 +568,12 @@ FORTRAN_OBJECTS = solarsys/msise90_sub.o
 
 ifeq ($(SHARED_BASE), 1)
 $(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
-	mkdir -p lib
+	mkdir -p $(GMAT_LIB_DIR)
 	$(CPP) -o $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS) $(SHARED_LIB_FLAGS)
+	cp -f $(TARGET) ../../application/$(GMAT_BIN_DIR)/.
 else
 $(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
-	mkdir -p lib
+	mkdir -p $(GMAT_LIB_DIR)
 	ar rs $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
 	ranlib $(TARGET)
 endif	

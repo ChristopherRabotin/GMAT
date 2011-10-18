@@ -22,18 +22,16 @@ else
 EXTENSION = .exe
 endif
 
-#ifeq ($(USE_MATLAB),1)
-   WXTARGET = GMAT$(EXTENSION)
-#else
-#   WXTARGET = GMAT_NoMatlab$(EXTENSION)
-#endif
+WXTARGET = GMAT$(EXTENSION)
 
 ifdef MAC_SPECIFIC
 TARGETS = $(WXTARGET) macstacksize macrez macosx
 CLEANTARGET = archclean cleanmacosx
-else
+else   ########## for now, set the BIN and LIB dirs for other platforms
 TARGETS = $(WXTARGET)
 CLEANTARGET = archclean
+GMAT_LIB_DIR = lib
+GMAT_BIN_DIR = bin
 endif
 
 ifeq ($(SHARED_BASE), 1)
@@ -48,20 +46,20 @@ endif
 
 BASELIBNAME = libGmatBase
 #ifeq ($(USE_MATLAB),1)
-LIBS = -L../base -L../base/lib -lGmatBase
-LIBNAME = ../base/lib/libGmatBase$(SHARED_EXTENSION)
+LIBS = -L../base -L../base/$(GMAT_LIB_DIR) -lGmatBase
+LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBase$(SHARED_EXTENSION)
 #else
-#LIBS = -L../base -L../base/lib -lGmatBaseNoMatlab
-#LIBNAME = ../base/lib/libGmatBaseNoMatlab$(SHARED_EXTENSION)
+#LIBS = -L../base -L../base/$(GMAT_LIB_DIR) -lGmatBaseNoMatlab
+#LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBaseNoMatlab$(SHARED_EXTENSION)
 #endif
 
 else
 
 #ifeq ($(USE_MATLAB),1)
-LIBNAME = ../base/lib/libGmatBase.dll
+LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBase.dll
 LIBS = $(LIBNAME)
 #else
-#LIBNAME = ../base/lib/libGmatBaseNoMatlab.dll
+#LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBaseNoMatlab.dll
 #LIBS = $(LIBNAME)
 #endif
 
@@ -71,9 +69,9 @@ endif
 else
 
 #ifeq ($(USE_MATLAB),1)
-LIBS = ../base/lib/libGmatBase.a
+LIBS = ../base/$(GMAT_LIB_DIR)/libGmatBase.a
 #else
-#LIBS = ../base/lib/libGmatBaseNoMatlab.a
+#LIBS = ../base/$(GMAT_LIB_DIR)/libGmatBaseNoMatlab.a
 #endif
 
 endif
@@ -108,7 +106,7 @@ all: prep $(TARGETS)
 gui: $(WXTARGET)
 
 prep:
-	mkdir -p ../../application/bin
+	mkdir -p ../../application/$(GMAT_BIN_DIR)
 	rm -f app/AboutDialog.o
 
 HEADERS = -I../base/include \
@@ -170,13 +168,13 @@ archclean :
 	rm -rf */*~
 	rm -rf core
 	rm -rf */core
-	rm -rf bin/*
+	rm -rf $(GMAT_BIN_DIR)/*
 	rm -rf obj/*
 
 cleanmacosx :
 	echo 'cleaning macosx apps .......'
-	rm -rf $(TOP_DIR)/bin/GMAT.app
-	rm -rf $(TOP_DIR)/bin/GMATNoMatlab.app
+	rm -rf $(TOP_DIR)/$(GMAT_BIN_DIR)/GMAT.app
+	rm -rf $(TOP_DIR)/$(GMAT_BIN_DIR)/GMATNoMatlab.app
 
 OBJECTS = \
     app/AboutDialog.o \
@@ -325,20 +323,20 @@ ifeq ($(SHARED_BASE), 1)
 ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
-	cp -f $(WXTARGET) ../../application/bin/.
-	cp -f $(LIBNAME) ../../application/bin/.
+	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
+#	cp -f $(LIBNAME) ../../application/$(GMAT_BIN_DIR)/.   # moved to MakeBase
 else
 
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
-	mv -f $(WXTARGET)* ../../application/bin/.
-	cp -f $(LIBNAME) ../../application/bin/.
+	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
+	cp -f $(LIBNAME) ../../application/$(GMAT_BIN_DIR)/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
-	mv -f $(WXTARGET)* ../../application/bin/.
-	cp -f $(LIBNAME) ../../application/bin/.
+	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
+	cp -f $(LIBNAME) ../../application/$(GMAT_BIN_DIR)/.
 endif
 
 endif
@@ -348,17 +346,17 @@ else
 ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
-	cp -f $(WXTARGET) ../../application/bin/.
+	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
 else
 
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
-	mv -f $(WXTARGET)* ../../application/bin/.
+	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBS)
 	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
-	mv -f $(WXTARGET)* ../../application/bin/.
+	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
 endif
 
 endif
@@ -368,13 +366,13 @@ endif
 macrez:
 	echo "linking Carbon and wx resource files ......."
 	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
-	cp -f $(WXTARGET) ../../application/bin/.
-#	@chmod -R 755 ../../application/bin
+	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
+#	@chmod -R 755 ../../application/$(GMAT_BIN_DIR)
 #  $(REZ) -o $(WXTARGET)
 
 macosx: 
 	echo "building Mac application bundle ......."
-	/Developer/Tools/SetFile -a C $(TOP_DIR)/application/bin/$(WXTARGET)
+	/Developer/Tools/SetFile -a C $(TOP_DIR)/application/$(GMAT_BIN_DIR)/$(WXTARGET)
 	mkdir -p $(CONTENTS_DIR)
 	mkdir -p $(MACOS_DIR)
 	mkdir -p $(RES_DIR)
@@ -382,10 +380,10 @@ macosx:
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
 	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
-	ln -f $(TOP_DIR)/application/bin/$(WXTARGET) $(MAC_APP)
+	ln -f $(TOP_DIR)/application/$(GMAT_BIN_DIR)/$(WXTARGET) $(MAC_APP)
 	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/lib $(BASELIBNAME) $(PCRE_LIB_LOC)
+	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/$(GMAT_LIB_DIR) $(BASELIBNAME) $(PCRE_LIB_LOC)
 
 macstacksize:
 	echo "setting stack size needed for SPICE"
