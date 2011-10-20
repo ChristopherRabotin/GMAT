@@ -8,5 +8,46 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Introducing GMAT</title>
 
-  <para>GMAT is an open-source mission analysis and design tool.</para>
+
+<para> GMAT is an open source trajectory design and optimization system developed by NASA and private industry. We use an open source process to
+maximize tehcnology transfer and permit anyone to
+develop and validate new algorithms and to enable new algorithms to quickly
+transition into the high fidelity core. </para>
+
+<para>GMAT is designed to model and optimize spacecraft trajectories in flight
+regimes ranging from low Earth orbit to lunar applications, interplanetary
+trajectories, and other deep space missions. The system supports constrained
+and unconstrained trajectory optimization and built-in features make defining
+cost and constraint functions trivial so analysts can determine how their
+inclusion or exclusion effects solutions.</para>
+
+<para>The system also contains initial value solvers (propagation) and boundary
+value solvers and efficiently propagates spacecraft either singly or coupled.
+GMAT's propagators naturally synchronize the epochs of multiple vehicles and shorten run times by avoiding fixed step
+integration or interpolation to synchronize epochs of spacecraft.</para>
+
+<para>A user can interact with GMAT using either a graphical user interface (GUI) or script language that has a syntax similar to
+the MathWorks' MATLAB®1 system. All of the system elements can be expressed through either interface and users can
+configure elements in the GUI and then view the corresponding script, or
+write script and load it into GMAT.</para>
+
+<para>Analysts model space missions in GMAT by first creating resources such
+as spacecraft, propagators, and optimizers to name a few. These
+resources can be configured to meet the needs of specific applications and
+missions. After the resources are configured they are used in the mission
+sequence to model the motion of spacecraft and simulate events in a
+mission's time evolution. The mission sequence supports commands such
+as Nonlinear Constraint, Minimize, Propagate, Function Calls, Inline
+Math, and Script Events among others.</para>
+
+<para>The system can display trajectories in space, plot parameters against one
+another, and save parameters to files for later processing. The trajectory
+and plot capabilities are fully interactive, plotting data as a mission is run
+and allowing users to zoom into regions of interest. Trajectories and data
+can be viewed in any coordinate system defined in GMAT, and GMAT
+allows users to rotate the view and set the focus to any object in the
+display. The trajectory view can be animated so users can watch the
+evolution of the trajectory over time.</para>
+
+
 </section>

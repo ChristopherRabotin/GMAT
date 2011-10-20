@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="GroundTrackPlot"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <refmeta>
+    <refentrytitle>GroundTrackPlot</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>GroundTrack Plot</refname>
+
+    <refpurpose>A GroundTrack Plot.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis>Create GroundTrackPlot <replaceable>name</replaceable>
+<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
+</synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>A <guiicon>GroundTrackPlot</guiicon> is a graphical display of the
+    locus of subsatellite latitude and longitude points. The
+    <guibutton>GroundTrackPlot</guibutton> in GMAT allows you to view a
+    spacecraft's subsatellite point as illustrated by a spacecraft icon and
+    the label for the spacecraft. Similarly, <guiicon>GroundStation</guiicon>
+    locations are indicated with a ground station icon and label. The
+    <guibutton>GroundTrackPlot</guibutton> object can display the ground track
+    for multiple spacecraft simultaneously and can animate the ground track
+    evolution after a GMAT run is complete. Like other graphical dispaly
+    objects in GMAT, you can control how data is written to a ground track
+    plot in iterative processes.</para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <refsection>
+      <title>Fields Associated with Plot Options</title>
+
+      <variablelist>
+        <varlistentry>
+          <term>DataCollectFrequency</term>
+
+          <listitem>
+            <para>The <systemitem>DataCollectFrequency</systemitem> field
+            allows you to select a subset of the ephemeris data for drawing to
+            a <guiicon>GroundTrackPlot</guiicon>. It is often inefficient to
+            draw every ephemeris point associated with a trajectory and
+            drawing a subset of the data provides a smooth groundtrack plot
+            with faster execution times. The
+            <varname>DataCollectFrequency</varname> is an integer that
+            represents how many ephemeris points to skip between plotted data
+            points in a <guiicon>GroundTrackPlot</guiicon>. If
+            <varname>DataCollectFrequency</varname> is set to 10, then data is
+            collected every 10 integration steps.</para>
+
+            <variablelist spacing="compact">
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>1</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Limits</term>
+
+                <listitem>
+                  <para>Integer ≥ 1</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>Integration Steps</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>UpdatePlotFrequency</term>
+
+          <listitem>
+            <para>The UpdatePlotFrequency field allows you to specify the
+            number of ephemiris data points to collect before updating a
+            GroundTrackPlot with new latitude and longitude data. Data is
+            collected every N propagation steps where N is defined by
+            DataCollectFrequency. After M points are collected, where M is
+            defined by UpdatePlotFrequency, the GroundTrackPlot is updated
+            with new data. For example, if UpdatePlotFrequency is set to 10
+            and DataCollectFrequency is set to 2, then the plot is updated
+            with new data every 20 (10*2) integration steps.</para>
+
+            <variablelist spacing="compact">
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>50</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Limits</term>
+
+                <listitem>
+                  <para>Integer ≥ 1</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>Integration Steps</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>NumPointsToRedraw</term>
+
+          <listitem>
+            <para>When NumPointsToRedraw is set to zero, all collected
+            ephemeris points are drawn. When NumPointsToRedraw is set to a
+            positive integer, say 10 for example, only the last 10 collected
+            data points are drawn. See DataCollectFrequency and
+            UpdatePlotFrequency for an explanation of how data is collected
+            for a GroundTrackPlotx.</para>
+
+            <variablelist spacing="compact">
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>0</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Limits</term>
+
+                <listitem>
+                  <para>Integer ≥ 0</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>Integration Steps</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>ShowPlot</term>
+
+          <listitem>
+            <para>The ShowPlot field allows you to turn off the
+            GroundTrackPlot display window without deleting the plot object or
+            removing it from the script. If you select true, then the plot
+            will be displayed. If you select false, then the plot will not be
+            displayed.</para>
+
+            <variablelist spacing="compact">
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>true</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Limits</term>
+
+                <listitem>
+                  <para>true , false</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>N/A</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsection>
+
+    <refsection>
+      <title>Fields Associated with Drawing Options</title>
+
+      <variablelist>
+        <varlistentry>
+          <term>Add</term>
+
+          <listitem>
+            <para>The Add field allows you to add Spacecraft and
+            GroundStations to a GroundTrackPlot.</para>
+
+            <variablelist spacing="compact">
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>DefaultSC, Earth</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Limits</term>
+
+                <listitem>
+                  <para>SpacecraftName CelestialBodyName</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>N/A</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Central Body</term>
+
+          <listitem>
+            <para>The CentralBody field allows you to specify the central body
+            of a GroundTrackPlot. Currently, GMAT</para>
+
+            <variablelist spacing="compact">
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>Earth</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Limits</term>
+
+                <listitem>
+                  <para>CelestialBodyName</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>N/A</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsection>
+
+    <refsection>
+      <title>Fields Associated with Other Options</title>
+
+      <variablelist>
+        <varlistentry>
+          <term>SolverIterations</term>
+
+          <listitem>
+            <para>The SolverIterations field determines if and how perturbed
+            trajectories are drawn to a GroundTrackPlot during iterative a
+            solver sequences. When SolverIterations is set to All, all solver
+            iterations perturbations and iterations are shown on the plot.
+            When SolverIterations is set to Current, only the current solver
+            pass is shown on the plot and the iteration history is not
+            retained. When SolverIterations is set to None, no perturbations
+            or iterations are drawn and the GroundTrackPlot is not updated
+            until the solver has converged.</para>
+
+            <variablelist spacing="compact">
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>Current</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Limits</term>
+
+                <listitem>
+                  <para>All, Current, None</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>N/A</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>TextureMap</term>
+
+          <listitem>
+            <para>The TextureMap field allows you to define a custom map file
+            for use in a GroundTrackPlot.</para>
+
+            <variablelist spacing="compact">
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>Current</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Limits</term>
+
+                <listitem>
+                  <para>Texture map in jpg or bmp file.</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>N/A</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Additional Information</title>
+
+    <para>When working in the GroundTrackPlot GUI, if you change the
+    CentralBody field, the TextureMap field will automatically change to the
+    default texture map for the new central body. If you have specified a
+    custom texture map file and path, that information will be lost when you
+    change the CentralBody field.</para>
+  </refsection>
+
+  <refsection>
+    <title>Interactions</title>
+
+    <variablelist>
+      <varlistentry>
+        <term>Spacecraft</term>
+
+        <listitem>
+          <para>Any spacecraft in your mission is available to a
+          GroundTrackPlot for display.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>GroundStations</term>
+
+        <listitem>
+          <para>Any GroundSation in your mission is available to a
+          GroundTrackPlot for display.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>PenUp/PenDown Commands</term>
+
+        <listitem>
+          <para>You can use the PenUp and PenDown commands to control when
+          data is written to a GroundTrackPlot</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Toggle Command</term>
+
+        <listitem>
+          <para>You can use the Toggle command to control when data is written
+          to a GroundTrackPlot</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <programlisting><code>Create GroundTrackPlot GroundTrackPlot1;
+GMAT GroundTrackPlot1.CentralBody = Earth;
+GMAT GroundTrackPlot1.Add = {Sat, Earth};
+GMAT GroundTrackPlot1.SolverIterations = Current;
+GMAT GroundTrackPlot1.DataCollectFrequency = 1;
+GMAT GroundTrackPlot1.UpdatePlotFrequency = 50;
+GMAT GroundTrackPlot1.NumPointsToRedraw = 0;
+GMAT GroundTrackPlot1.ShowPlot = true;
+GMAT GroundTrackPlot1.TextureMap = '../MyMaps/MyTexture.jpg';
+GMAT GroundTrackPlot1.UpperLeft = [ 0 0 ];
+GMAT GroundTrackPlot1.Size = [ 0 0 ];
+GMAT GroundTrackPlot1.RelativeZOrder = 0;
+</code></programlisting>
+  </refsection>
+</refentry>

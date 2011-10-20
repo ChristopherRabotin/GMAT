@@ -39,6 +39,10 @@
     fuel is depleted. To use a FuelTank, you must first create the tank, and
     then attach it to the desired spacecraft and associate it with a thruster
     as shown in the examples below.</para>
+	
+	<para> When working in the script, you must add tanks to spacecraft before the 
+	begin mission sequence command.
+	</para>
   </refsection>
 
   <refsection>

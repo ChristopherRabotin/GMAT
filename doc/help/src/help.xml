@@ -113,6 +113,8 @@
         <xi:include href="Resource_FuelTank.xml" />
         
         <xi:include href="Resource_GroundStation.xml" />
+		
+		<xi:include href="Resource_GroundTrackPlot.xml" />
 
         <xi:include href="Resource_ImpulsiveBurn.xml" />
 
