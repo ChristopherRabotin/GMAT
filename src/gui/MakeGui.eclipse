@@ -43,36 +43,20 @@ SHARED_EXTENSION = .dylib
 else
 SHARED_EXTENSION = .so
 endif
-
 BASELIBNAME = libGmatBase
-#ifeq ($(USE_MATLAB),1)
 LIBS = -L../base -L../base/$(GMAT_LIB_DIR) -lGmatBase
 LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBase$(SHARED_EXTENSION)
-#else
-#LIBS = -L../base -L../base/$(GMAT_LIB_DIR) -lGmatBaseNoMatlab
-#LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBaseNoMatlab$(SHARED_EXTENSION)
-#endif
 
 else
-
-#ifeq ($(USE_MATLAB),1)
 LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBase.dll
 LIBS = $(LIBNAME)
-#else
-#LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBaseNoMatlab.dll
-#LIBS = $(LIBNAME)
-#endif
 
 endif
 
 
 else
 
-#ifeq ($(USE_MATLAB),1)
 LIBS = ../base/$(GMAT_LIB_DIR)/libGmatBase.a
-#else
-#LIBS = ../base/$(GMAT_LIB_DIR)/libGmatBaseNoMatlab.a
-#endif
 
 endif
 
@@ -95,13 +79,8 @@ SPICE_OBJECTS =
 endif
 
 
-#ifeq ($(USE_MATLAB),1)
 all: prep $(TARGETS) 
 	rm -f GMAT
-#else
-#all: prep $(TARGETS) 
-#	rm -f GMAT_NoMatlab
-#endif
 
 gui: $(WXTARGET)
 
@@ -174,7 +153,6 @@ archclean :
 cleanmacosx :
 	echo 'cleaning macosx apps .......'
 	rm -rf $(TOP_DIR)/$(GMAT_BIN_DIR)/GMAT.app
-	rm -rf $(TOP_DIR)/$(GMAT_BIN_DIR)/GMATNoMatlab.app
 
 OBJECTS = \
     app/AboutDialog.o \
@@ -324,7 +302,6 @@ ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
 	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
-#	cp -f $(LIBNAME) ../../application/$(GMAT_BIN_DIR)/.   # moved to MakeBase
 else
 
 ifeq ($(LINUX_MAC), 1)
@@ -367,8 +344,6 @@ macrez:
 	echo "linking Carbon and wx resource files ......."
 	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
 	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
-#	@chmod -R 755 ../../application/$(GMAT_BIN_DIR)
-#  $(REZ) -o $(WXTARGET)
 
 macosx: 
 	echo "building Mac application bundle ......."
@@ -383,7 +358,7 @@ macosx:
 	ln -f $(TOP_DIR)/application/$(GMAT_BIN_DIR)/$(WXTARGET) $(MAC_APP)
 	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/$(GMAT_LIB_DIR) $(BASELIBNAME) $(PCRE_LIB_LOC)
+	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/$(GMAT_LIB_DIR) $(BASELIBNAME) $(PCRE_LIB_LOC) $(GMAT_BIN_DIR) $(SPICE_LIB_DIR)
 
 macstacksize:
 	echo "setting stack size needed for SPICE"
