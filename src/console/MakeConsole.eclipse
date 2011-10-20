@@ -10,9 +10,16 @@
 
 include ../BuildEnv.mk
 
+ifdef MAC_SPECIFIC
+# use GMAT_LIB_DIR and GMAT_BIN_DIR defined in Mac BuildEnv.mk
+else ######## define BIN and LIB here for other platforms
+GMAT_LIB_DIR = lib
+GMAT_BIN_DIR = bin
+endif
+
 ifdef LINUX_MAC
 EXTENSION =
-BASE_LIB_LOCATION = ../bin/
+BASE_LIB_LOCATION = ../$(GMAT_BIN_DIR)/
 else
 EXTENSION = .exe
 endif
@@ -27,7 +34,7 @@ all: clean $(TARGET)
 
 OBJECTS = driver.o ConsoleAppException.o PrintUtility.o ConsoleMessageReceiver.o
 
-LIBRARIES = -L../base/lib -lGmatBase
+LIBRARIES = -L../../application/$(GMAT_BIN_DIR) -lGmatBase
 
 HEADERS = -I../base/include -I../base/foundation \
           -I../base/executive -I../base/factory \
@@ -50,9 +57,8 @@ archclean :
 	rm -r -f *~
 	rm -r -f core
 	rm -r -f */core
-	rm -rf TestScriptInterpreter
 	rm -rf $(TARGET)
-	rm -rf ../../application/bin/$(TARGET)
+	rm -rf ../../application/$(GMAT_BIN_DIR)/$(TARGET)
 
 .cpp.o: 
 	$(CPP) $(CPPFLAGS) $(HEADERS) $(OPTIMIZATIONS) -c $<
@@ -62,14 +68,14 @@ $(TARGET): $(OBJECTS)
 	$(CPP) $(OBJECTS) $(CONSOLE_LINK_FLAGS) $(LIBRARIES) $(OPTIMIZATIONS) $(SPICE_LIBRARIES) \
 	$(FORTRAN_LIB) -o $(TARGET)
 	mkdir -p ../../application
-	mkdir -p ../../application/bin
-	install_name_tool -change lib/libGmatBase.dylib $(BASE_LIB_LOCATION)libGmatBase.dylib $(TARGET)
-	cp $(TARGET) ../../application/bin/$(TARGET)
+	mkdir -p ../../application/$(GMAT_BIN_DIR)
+	install_name_tool -change $(GMAT_LIB_DIR)/libGmatBase.dylib $(BASE_LIB_LOCATION)libGmatBase.dylib $(TARGET)
+	cp $(TARGET) ../../application/$(GMAT_BIN_DIR)/$(TARGET)
 else
 $(TARGET): $(OBJECTS)
 	$(CPP) $(OBJECTS) $(CONSOLE_LINK_FLAGS) $(LIBRARIES) $(OPTIMIZATIONS) $(SPICE_LIBRARIES) \
 	$(FORTRAN_LIB) -o $(TARGET)
 	mkdir -p ../../application
-	mkdir -p ../../application/bin
-	cp $(TARGET) ../../application/bin/$(TARGET)
+	mkdir -p ../../application/$(GMAT_BIN_DIR)
+	cp $(TARGET) ../../application/$(GMAT_BIN_DIR)/$(TARGET)
 endif
