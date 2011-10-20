@@ -29,7 +29,8 @@ ifeq ($(LINUX_MAC), 1)
 
 ifdef MAC_SPECIFIC
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
+#SHARED_LIB_FLAGS = $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
+SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) -lcspice -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 else
 SHARED_EXTENSION = .so
