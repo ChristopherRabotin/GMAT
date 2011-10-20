@@ -7,7 +7,7 @@
 include ./CInterfaceEnv.mk
 
 # handle different bin and lib directories here; for now, set to bin and lib for non-Mac platforms
-ifeq ($(MAC_SPECIFIC), 1)
+ifeq ($(PLATFORM), mac)
 else
 GMAT_LIB_DIR = lib
 GMAT_BIN_DIR = bin
@@ -73,7 +73,7 @@ OBJECTS = \
     
     
 ifeq ($(LINUX_MAC), 1)
-ifeq ($(MAC_SPECIFIC), 1)
+ifeq ($(PLATFORM), mac)
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../$(GMAT_LIB_DIR)
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) -L$(GMAT_BIN_LOCATION) -l$(BASE_LIBRARY)

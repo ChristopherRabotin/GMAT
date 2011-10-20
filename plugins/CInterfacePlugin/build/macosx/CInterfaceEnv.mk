@@ -1,19 +1,16 @@
 # $Id$
 # Architecture flags
-# Set to 0 for Windows, 1 for Linux or Mac
+# Set to 0 for Windows, 1 for Linux or Mac - this is needed by the Makefile
 LINUX_MAC = 1
-# Set to 0 for Linux, 1 for Mac 
-MAC_SPECIFIC = 1
-BUILD_64BIT_MAC = 0
 
-ifeq ($(BUILD_64BIT_MAC), 1)
-CSPICE_VER = cspice64
+ifeq ($(BUILD_64BIT), 1)
+#CSPICE_VER = cspice64
 GMAT_BIN_DIR = bin64
 GMAT_LIB_DIR = lib64
 GMAT_PLUGIN_DIR = plugins64
 MAC_ARCHITECTURE_FLAGS = 
 else
-CSPICE_VER = cspice
+#CSPICE_VER = cspice
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
 GMAT_PLUGIN_DIR = plugins
@@ -28,24 +25,25 @@ GMAT_BIN_LOCATION = ../../../application/$(GMAT_BIN_DIR)
 
 DEBUG_BUILD = 0
 
-USE_SPICE = 1
 
-ifeq ($(USE_SPICE), 1)
-# location of CSPICE headers and libraries
-# *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
-SPICE_DIR = /Applications/CSPICE_N0064
-SPICE_INCLUDE = -I$(SPICE_DIR)/$(CSPICE_VER)/include
-SPICE_LIB_DIR = $(SPICE_DIR)/$(CSPICE_VER)/lib
-SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
-SPICE_DIRECTIVE = -D__USE_SPICE__
-SPICE_STACKSIZE = ulimit -s 61440
-else
-SPICE_INCLUDE =
-SPICE_LIB_DIR =
-SPICE_LIBRARIES =
-SPICE_DIRECTIVE = 
-SPICE_STACKSIZE = echo 'SPICE not included in this build ...'
-endif
+#USE_SPICE = 1
+
+#ifeq ($(USE_SPICE), 1)
+## location of CSPICE headers and libraries
+## *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
+#SPICE_DIR = /Applications/CSPICE_N0064
+#SPICE_INCLUDE = -I$(SPICE_DIR)/$(CSPICE_VER)/include
+#SPICE_LIB_DIR = $(SPICE_DIR)/$(CSPICE_VER)/lib
+#SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
+#SPICE_DIRECTIVE = -D__USE_SPICE__
+#SPICE_STACKSIZE = ulimit -s 61440
+#else
+#SPICE_INCLUDE =
+#SPICE_LIB_DIR =
+#SPICE_LIBRARIES =
+#SPICE_DIRECTIVE = 
+#SPICE_STACKSIZE = echo 'SPICE not included in this build ...'
+#endif
 
 # Select the base library
 BASE_LIBRARY = GmatBase

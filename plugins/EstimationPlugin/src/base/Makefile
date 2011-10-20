@@ -7,7 +7,7 @@
 include ../OdEnv.mk
 
 # handle different bin and lib directories here; for now, set to bin and lib for non-Mac platforms
-ifeq ($(MAC_SPECIFIC), 1)
+ifeq ($(PLATFORM), mac)
 else
 GMAT_LIB_DIR = lib
 GMAT_BIN_DIR = bin
@@ -16,7 +16,7 @@ endif
 
 ifeq ($(LINUX_MAC), 1)
 
-ifeq ($(MAC_SPECIFIC), 1)
+ifeq ($(PLATFORM), mac)
 SHARED_EXTENSION = .dylib
 SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup \
                    -L$(GMAT_Code_Location)/base/$(GMAT_LIB_DIR) -l$(BASE_LIBRARY) \
@@ -202,7 +202,7 @@ CPP_OBJECTS = \
     trackingsystem/TDRSSTrackingSystem.o \
     trackingsystem/USNTrackingSystem.o
 
-ifeq ($(MAC_SPECIFIC), 1)
+ifeq ($(PLATFORM), mac)
 $(TARGET) : $(C_OBJECTS) $(CPP_OBJECTS)
 	mkdir -p ../../$(GMAT_LIB_DIR)
 	$(CPP) $(C_OBJECTS) $(CPP_OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) $(PLATFORM_FLAGS)

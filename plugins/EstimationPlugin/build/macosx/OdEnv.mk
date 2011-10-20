@@ -1,12 +1,8 @@
 # $Id: OdEnv.mk,v 1.1.1.1 2010/01/14 23:37:24 djc Exp $
 # Architecture flags
-# Set to 0 for Windows, 1 for Linux or Mac
+# Set to 0 for Windows, 1 for Linux or Mac - needed by Makefile
 LINUX_MAC = 1
-# Set to 0 for Linux, 1 for Mac 
-MAC_SPECIFIC = 1
-BUILD_64BIT_MAC = 0
-
-ifeq ($(BUILD_64BIT_MAC), 1)
+ifeq ($(BUILD_64BIT), 1)
 GMAT_BIN_DIR = bin64
 GMAT_LIB_DIR = lib64
 GMAT_PLUGIN_DIR = plugins64
@@ -15,10 +11,8 @@ else
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
 GMAT_PLUGIN_DIR = plugins
-# Use carbon based wx (32-bit); else use 64-bit
 MAC_ARCHITECTURE_FLAGS = -arch i386
 endif
-
 
 # Environment settings for the estimation plugin
 GMAT_Code_Location = ../../../../../trunk/src
@@ -32,10 +26,6 @@ USE_DATAFILE_PLUGIN = 0
 # Toggle for including the ionosphere code
 
 INCLUDE_IONOSPHERE = 0
-
-
-# Set to 1 if building on Snow Leopard with Carbon based wxWidgetsS
-#SNOWLEOPARD_WX2_8_10 = 1
 
 DEBUG_BUILD = 0
 
@@ -66,25 +56,11 @@ else
 PROFILE_FLAGS = 
 endif
 
-DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \
-                 -finline-functions -funroll-loops -DNO_GCC_PRAGMA \
-                 -march=pentium -malign-double -fexceptions \
-                 -fexpensive-optimizations
-
 ifeq ($(DEBUG_BUILD), 1)
 OPTIMIZATIONS = -fno-strict-aliasing $(WX_28_DEFINES) -fno-rtti
 else
 OPTIMIZATIONS = -O3 -fno-strict-aliasing $(WX_28_DEFINES) -fno-rtti
 endif
-
-#ifeq ($(SNOWLEOPARD_WX2_8_10), 1)
-#ARCHITECTURE_FLAGS=-arch i386
-#PLATFORM_FLAGS=-fPIC
-#else
-#ARCHITECTURE_FLAGS=
-#PLATFORM_FLAGS=
-#endif
-
 
 ifeq ($(MAC_CPP_FLAGS), 1)
 MAC_CPP_FLAGS=-current_version 0.1 -compatibility_version 0.1 -fvisibility=default
