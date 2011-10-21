@@ -1,5 +1,5 @@
 # $Id$
-# Makefile for console version of GMAT (aka the Script Interpreter tester)
+# Makefile for console version of GMAT
 # 
 #  Copyright (c) 2002-2011 United States Government as represented by the
 #  Administrator of The National Aeronautics and Space Administration.
@@ -10,9 +10,8 @@
 
 include ../BuildEnv.mk
 
-ifdef MAC_SPECIFIC
-# use GMAT_LIB_DIR and GMAT_BIN_DIR defined in Mac BuildEnv.mk
-else ######## define BIN and LIB here for other platforms
+######## for now, define BIN and LIB here for non-Mac platforms
+ifndef MAC_SPECIFIC
 GMAT_LIB_DIR = lib
 GMAT_BIN_DIR = bin
 endif

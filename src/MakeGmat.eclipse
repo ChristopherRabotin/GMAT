@@ -13,11 +13,12 @@
 BUILD_GUI_WITH_WX = 1
 
 include BuildEnv.mk
+
 ifeq ($(LINUX_MAC),1)
 PROGRAM_EXTENSION =
 ifeq ($(MAC_SPECIFIC), 1)
 LIBRARY_EXTENSION=.dylib
-ifeq ($(BUILD_64BIT_MAC), 1)
+ifeq ($(BUILD_64BIT), 1)
 BUILD_GUI_WITH_WX = 0
 endif
 else
@@ -34,12 +35,12 @@ else
 PROGRAM = gmat$(PROGRAM_EXTENSION)
 endif
 ifeq ($(SHARED_BASE), 1)
-LIBRARY = base/lib/libGmatBase$(LIBRARY_EXTENSION)
+LIBRARY = base/$(GMAT_LIB_DIR)/libGmatBase$(LIBRARY_EXTENSION)
 else
-LIBRARY = base/lib/libGmatBase.a
+LIBRARY = base/$(GMAT_LIB_DIR)/libGmatBase.a
 endif
 
-TARGET = ../application/bin/$(PROGRAM)
+TARGET = ../application/$(GMAT_BIN_DIR)/$(PROGRAM)
 
 all: $(TARGET)
 
@@ -49,7 +50,6 @@ clean:
 	cd console; make -f MakeConsole.eclipse clean
 	rm -rf $(TARGET) $(LIBRARY) gui/$(PROGRAM)
 
-	
 base: $(LIBRARY)
 
 ifeq ($(CONSOLE_APP),1)

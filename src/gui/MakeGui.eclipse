@@ -27,9 +27,10 @@ WXTARGET = GMAT$(EXTENSION)
 ifdef MAC_SPECIFIC
 TARGETS = $(WXTARGET) macstacksize macrez macosx
 CLEANTARGET = archclean cleanmacosx
-else   ########## for now, set the BIN and LIB dirs for other platforms
+else
 TARGETS = $(WXTARGET)
 CLEANTARGET = archclean
+########## for now, set the BIN and LIB dirs for non-Mac platforms
 GMAT_LIB_DIR = lib
 GMAT_BIN_DIR = bin
 endif
@@ -52,7 +53,6 @@ LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBase.dll
 LIBS = $(LIBNAME)
 
 endif
-
 
 else
 
@@ -358,7 +358,7 @@ macosx:
 	ln -f $(TOP_DIR)/application/$(GMAT_BIN_DIR)/$(WXTARGET) $(MAC_APP)
 	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/$(GMAT_LIB_DIR) $(BASELIBNAME) $(PCRE_LIB_LOC) $(GMAT_BIN_DIR) $(SPICE_LIB_DIR)
+	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/$(GMAT_LIB_DIR) $(BASELIBNAME) $(PCRE_LIB_LOC) $(GMAT_BIN_DIR) $(SPICE_LIB_DIR) $(WX_LIB_LOC)
 
 macstacksize:
 	echo "setting stack size needed for SPICE"
