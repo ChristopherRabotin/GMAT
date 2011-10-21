@@ -44,6 +44,7 @@ SHARED_EXTENSION = .dylib
 else
 SHARED_EXTENSION = .so
 endif
+
 BASELIBNAME = libGmatBase
 LIBS = -L../base -L../base/$(GMAT_LIB_DIR) -lGmatBase
 LIBNAME = ../base/$(GMAT_LIB_DIR)/libGmatBase$(SHARED_EXTENSION)

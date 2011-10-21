@@ -49,10 +49,11 @@ public:
    // Methods used to identify the EventFunction
    std::string GetTypeName();
    std::string GetName();
+   std::string GetPrimaryName();
 
    virtual bool SetPrimary(SpaceObject *so);
    virtual bool Initialize();
-   virtual Real* Evaluate() = 0;
+   virtual Real* Evaluate(GmatEpoch atEpoch = -1.0, Real* forState = NULL) = 0;
    Real* GetData();
    virtual std::string GetBoundaryType();
    virtual bool IsEventEntry();

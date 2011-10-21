@@ -31,9 +31,10 @@
 #include "Formation.hpp"
 #include "RootFinder.hpp"
 
+class EventModel;
 
 /// A convenient typedef used in this code
-typedef std::vector<SpaceObject*> PropObjectArray;
+typedef std::vector<GmatBase*> PropObjectArray;
 
 
 #define TIME_ROUNDOFF 1.0e-6
@@ -55,6 +56,7 @@ public:
    PropagationEnabledCommand(const PropagationEnabledCommand& pec);
    PropagationEnabledCommand& operator=(const PropagationEnabledCommand& pec);
 
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual bool         Initialize();
 
 protected:
@@ -97,6 +99,8 @@ protected:
    std::vector<ODEModel*>       fm;
    /// The Propagation State Managers
    std::vector<PropagationStateManager*>  psm;
+   /// List of forces that can be turned on or off by other commands
+   std::vector<PhysicalModel*>  *transientForces;
 
    /// The Mean-of-J2000 propagation state vector data
    Real                         *j2kState;
@@ -126,6 +130,8 @@ protected:
    UnsignedInt          eventBufferSize;
    /// Root finder used in event location
    RootFinder           *finder;
+   /// Event model added to the ODEModel if events are present and integrated
+   EventModel           *em;
    /// Flag used to turn off publishing during event location
    bool                 publishOnStep;
 
@@ -140,6 +146,10 @@ protected:
 
    virtual void         SetPropagationProperties(PropagationStateManager *psm);
 
+   virtual void         LocateObjectEvents(const GmatBase *obj,
+                              ObjectArray &els);
+   virtual void         AddLocators(PropagationStateManager *currentPSM,
+                              ObjectArray &els);
    virtual void         InitializeForEventLocation();
    virtual void         CheckForEvents();
    virtual bool         LocateEvent(EventLocator* el, Integer index = 0);

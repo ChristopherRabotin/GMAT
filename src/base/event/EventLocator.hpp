@@ -82,6 +82,17 @@ public:
                                          const Real value, const Integer row,
                                          const Integer col);
 
+   virtual const Rvector&
+                        GetRvectorParameter(const Integer id) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const Integer id,
+                                            const Rvector &value);
+   virtual const Rvector&
+                        GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const std::string &label,
+                                            const Rvector &value);
+
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
@@ -138,7 +149,8 @@ public:
    virtual bool         Initialize();
    virtual Real         GetTolerance();
 
-   virtual Real *Evaluate();
+   virtual Real         *Evaluate(GmatEpoch atEpoch = -1.0,
+                                  Real *forState = NULL);
 
    UnsignedInt GetFunctionCount();
    void BufferEvent(Integer forEventFunction = 0);
@@ -148,6 +160,16 @@ public:
    Real *GetEventData(std::string type, Integer whichOne = 0);
    void UpdateEventTable(SortStyle how);
    virtual GmatEpoch GetLastEpoch(Integer index);
+
+   // Methods used in integration
+   virtual bool HasAssociatedStateObjects();
+   virtual std::string GetAssociateName(UnsignedInt val = 0);
+   std::string GetTarget(UnsignedInt forFunction);
+   StringArray GetDefaultPropItems();
+   Integer SetPropItem(const std::string &propItem);
+   Integer GetPropItemSize(const Integer item);
+   void SetStateIndices(UnsignedInt forFunction, Integer index,
+         Integer associate);
 
 protected:
    /// The collection of event functions used by the EventLocator.
@@ -179,6 +201,12 @@ protected:
    Real eventTolerance;
    /// The space environment
    SolarSystem *solarSys;
+   /// Indices for values/derivatives in the state/derivative vectors
+   std::vector<Integer> stateIndices;
+   /// Start indices for the associated state data
+   std::vector<Integer> associateIndices;
+   /// Vector of event function values used in integration
+   Rvector functionValues;
 
    /// Published parameters for event locators
     enum
@@ -188,6 +216,8 @@ protected:
        EVENT_FILENAME,
        IS_ACTIVE,
        SHOW_PLOT,
+       EPOCH,
+       EVENT_FUNCTION,
        EventLocatorParamCount
     };
 

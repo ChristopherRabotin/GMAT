@@ -27,13 +27,14 @@
 #include "PropagationStateManager.hpp"
 #include "EventLocator.hpp"
 #include "Brent.hpp"
-//#include "Brent73.hpp"
+#include "EventModel.hpp"
 
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
 //#define DEBUG_STATE_BUFFERING
 //#define DEBUG_PUBLISH_DATA
+//#define DEBUG_EVENTLOCATORS
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -65,6 +66,7 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    inProgress           (false),
    dim                  (0),
    epochID              (-1),
+   transientForces      (NULL),
    j2kState             (NULL),
    pubdata              (NULL),
    activeLocatorCount   (0),
@@ -73,6 +75,7 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    tempEventData        (NULL),
    eventBufferSize      (0),
    finder               (NULL),
+   em                   (NULL),
    publishOnStep        (true)
 {
    objectTypeNames.push_back("PropagationEnabledCommand");
@@ -119,6 +122,9 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
 
    if (finder != NULL)
       delete finder;
+
+   if (em != NULL)
+      delete em;
 }
 
 
@@ -140,6 +146,7 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    inProgress           (false),
    dim                  (pec.dim),
    epochID              (pec.epochID),
+   transientForces      (NULL),
    j2kState             (NULL),
    pubdata              (NULL),
    activeLocatorCount   (0),
@@ -148,6 +155,7 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    tempEventData        (NULL),
    eventBufferSize      (0),
    finder               (NULL),
+   em                   (NULL),
    publishOnStep        (true)
 {
    initialized = false;
@@ -210,12 +218,35 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
          delete [] tempEventData;
       tempEventData = NULL;
 
+      transientForces = NULL;
       eventBufferSize = 0;
       publishOnStep   = true;
+
+      if (em != NULL)
+      {
+         delete em;
+         em = NULL;
+      }
    }
 
    return *this;
 }
+
+
+//------------------------------------------------------------------------------
+// void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+ * Sets the array of transient forces, so it can be passed to the PropSetups.
+ *
+ * @param <tf> The array of transient forces.
+ */
+//------------------------------------------------------------------------------
+void PropagationEnabledCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+   transientForces = tf;
+}
+
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -289,6 +320,8 @@ bool PropagationEnabledCommand::Initialize()
       for (UnsignedInt i = 0; i < propObjectNames.size(); ++i)
       {
          PropObjectArray *objects;
+         ObjectArray els;
+
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("List %d contains %d prop objects\n",
                   i+1, propObjectNames[i].size());
@@ -343,6 +376,9 @@ bool PropagationEnabledCommand::Initialize()
 
                AddToBuffer(so);
 
+               // Add any locator that uses so to the PSM for step size control
+               LocateObjectEvents(obj, els);
+
 //               if (so->GetType() == Gmat::FORMATION)
 //                  FillFormation(so, owners, elements);
 //               else
@@ -355,6 +391,12 @@ bool PropagationEnabledCommand::Initialize()
                   MessageInterface::ShowMessage("   Found %s, not a space "
                         "object\n", obj->GetName().c_str());
             #endif
+         }
+
+         if (els.size() != 0)
+         {
+            AddLocators(currentPSM, els);
+            els.clear();
          }
 
          // Provide opportunity for derived cmds to set propagation properties
@@ -999,6 +1041,53 @@ void PropagationEnabledCommand::BufferSatelliteStates(bool fillingBuffer)
 }
 
 
+void PropagationEnabledCommand::LocateObjectEvents(const GmatBase *obj,
+                           ObjectArray &els)
+{
+   #ifdef DEBUG_EVENTLOCATORS
+      MessageInterface::ShowMessage("LocateObjectEvents called for %s\n",
+            obj->GetName().c_str());
+   #endif
+   if (events == NULL)
+      return;
+   if (events->size() == 0)
+      return;
+
+   std::string objName = obj->GetName();
+
+   // Walk through the events and see if any use this body as the target
+   for (UnsignedInt i = 0; i < events->size(); ++i)
+   {
+      UnsignedInt fc = events->at(i)->GetFunctionCount();
+      for (UnsignedInt j = 0; j < fc; ++j)
+      {
+         if (events->at(i)->GetTarget(j) == objName)
+         {
+            #ifdef DEBUG_EVENTLOCATORS
+               MessageInterface::ShowMessage("      %s uses %s\n",
+                     events->at(i)->GetName().c_str(), objName.c_str());
+            #endif
+            if (find(els.begin(), els.end(), events->at(i)) == els.end())
+               els.push_back(events->at(i));
+            break;
+         }
+      }
+   }
+}
+
+
+void PropagationEnabledCommand::AddLocators(PropagationStateManager *currentPSM,
+                           ObjectArray &els)
+{
+   #ifdef DEBUG_EVENTLOCATORS
+      MessageInterface::ShowMessage("AddLocators called with %d locators\n",
+            els.size());
+   #endif
+   for (UnsignedInt i = 0; i < els.size(); ++i)
+      currentPSM->SetObject(els[i]);
+}
+
+
 //------------------------------------------------------------------------------
 // void InitializeForEventLocation()
 //------------------------------------------------------------------------------
@@ -1070,6 +1159,39 @@ void PropagationEnabledCommand::InitializeForEventLocation()
       }
 
       finder = new Brent;
+
+      // Create the EventModel used for propagation stepsize control
+      #ifdef DEBUG_EVENT_MODEL_FORCE
+         MessageInterface::ShowMessage("***Building event model force***\n");
+      #endif
+      em = new EventModel();
+      #ifdef DEBUG_EVENT_MODEL_FORCE
+         MessageInterface::ShowMessage("   Created at %p\n", em);
+      #endif
+      em->SetEventLocators(events);
+      #ifdef DEBUG_EVENT_MODEL_FORCE
+         MessageInterface::ShowMessage("   Events set\n   %d propagators\n",
+               propagators.size());
+      #endif
+      for (UnsignedInt index = 0; index < propagators.size(); ++index)
+      {
+         if (propagators[index]->GetPropagator()->UsesODEModel())
+         {
+            #ifdef DEBUG_EVENT_MODEL_FORCE
+               MessageInterface::ShowMessage("   Adding to %s\n",
+                     propagators[index]->GetName().c_str());
+            #endif
+            propagators[index]->GetODEModel()->AddForce(em);
+
+            // Refresh ODE model mapping, since a new force was added
+            #ifdef DEBUG_EVENT_MODEL_FORCE
+               MessageInterface::ShowMessage("   Building model from map\n");
+            #endif
+            if (propagators[index]->GetODEModel()->BuildModelFromMap() == false)
+               throw CommandException("Unable to assemble the ODE "
+                     "model  after adding an Event Model");
+         }
+      }
    }
    else
    {

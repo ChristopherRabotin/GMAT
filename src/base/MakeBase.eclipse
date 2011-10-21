@@ -295,6 +295,7 @@ OBJECTS = \
     factory/StopConditionFactory.o \
     factory/SubscriberFactory.o \
     forcemodel/DragForce.o \
+    forcemodel/EventModel.o \
     forcemodel/FiniteThrust.o \
     forcemodel/GravityField.o \
     forcemodel/HarmonicField.o \

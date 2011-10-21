@@ -25,6 +25,8 @@
 
 #include "PhysicalModel.hpp"
 
+class EventLocator;
+
 /**
  * This PhysicalModel connects EventFunctions to Integrators.
  *
@@ -36,11 +38,13 @@
 class EventModel: public PhysicalModel
 {
 public:
-   EventModel(const std::string &typeStr, const std::string &nomme = "");
+   EventModel(const std::string &nomme = "");
    virtual ~EventModel();
    EventModel(const EventModel& em);
    EventModel& operator=(const EventModel& em);
+   virtual GmatBase* Clone() const;
 
+   virtual void SetEventLocators(std::vector<EventLocator*> *els);
    virtual bool Initialize();
 
 //   // Support for extra derivative calcs - the EventFunction contributions here
@@ -52,12 +56,23 @@ public:
    virtual bool SetStart(Gmat::StateElementId id, Integer index,
                          Integer quantity);
 
+   virtual const StringArray& GetRefObjectNameArray(
+         const Gmat::ObjectType type);
+   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+         const std::string &name = "");
+
    virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1,
          const Integer id = -1);
 
 private:
    /// The list of active EventLocators
    std::vector<EventLocator*> *events;
+   /// Event functions counts for the locators
+   std::vector<Integer> functionCounts;
+   /// Start indices for event functions embedded in the event locator vector
+   std::vector<Integer> eventStarts;
+   /// Associated state data for event calculations
+   std::vector<Integer> eventAssociates;
 };
 
 #endif /* EventModel_hpp */

@@ -140,6 +140,16 @@ std::string EventFunction::GetName()
    return instanceName;
 }
 
+std::string EventFunction::GetPrimaryName()
+{
+   std::string retval = "";
+
+   if (primary != NULL)
+      retval = primary->GetName();
+
+   return retval;
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetPrimary(SpaceObject *so)

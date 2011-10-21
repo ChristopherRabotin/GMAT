@@ -197,8 +197,9 @@ bool PropagationStateManager::SetObject(GmatBase* theObject)
          current->GetName().c_str());
       MessageInterface::ShowMessage("Managing %d objects:\n", objects.size());
       for (UnsignedInt i = 0; i < objects.size(); ++i)
-         MessageInterface::ShowMessage("   %2d: %s\n", i,
-               objects[i]->GetName().c_str());
+         MessageInterface::ShowMessage("   %2d: %s with %d prop items\n", i,
+               objects[i]->GetName().c_str(),
+               objects[i]->GetDefaultPropItems().size());
    #endif
 
    return true;
@@ -396,7 +397,7 @@ bool PropagationStateManager::BuildState()
       sel << stateMap[index]->subelement;
       state.SetElementProperties(index, stateMap[index]->elementID, 
             name + "." + stateMap[index]->elementName + "." + sel.str(), 
-            associateMap[name]);
+            associateMap[stateMap[index]->associateName]);
    }
    
    #ifdef DEBUG_STATE_CONSTRUCTION
@@ -404,8 +405,8 @@ bool PropagationStateManager::BuildState()
             "Propagation state vector has %d elements:\n", stateSize);
       StringArray props = state.GetElementDescriptions();
       for (Integer index = 0; index < stateSize; ++index)
-         MessageInterface::ShowMessage("   %d:  %s\n", index, 
-               props[index].c_str());
+         MessageInterface::ShowMessage("   %d:  %s  --> associate: %d\n", index,
+               props[index].c_str(), state.GetAssociateIndex(index));
    #endif
    
    #ifdef DUMP_STATE
@@ -462,6 +463,27 @@ bool PropagationStateManager::MapObjectsToVector()
             state[index] =value;
             break;
             
+         case Gmat::RVECTOR_TYPE:
+            value = stateMap[index]->object->GetRealParameter(
+                  stateMap[index]->parameterID, stateMap[index]->rowIndex);
+
+            if (GmatMathUtil::IsNaN(value))
+               throw PropagatorException("Value for array parameter " +
+                     stateMap[index]->object->GetParameterText(
+                     stateMap[index]->parameterID) + " on object " +
+                     stateMap[index]->object->GetName() +
+                     " is not a number");
+
+            if (GmatMathUtil::IsInf(value))
+               throw PropagatorException("Value for array parameter " +
+                     stateMap[index]->object->GetParameterText(
+                     stateMap[index]->parameterID) + " on object " +
+                     stateMap[index]->object->GetName() +
+                     " is infinite");
+
+            state[index] = value;
+            break;
+
          case Gmat::RMATRIX_TYPE:
             value = stateMap[index]->object->GetRealParameter(
                   stateMap[index]->parameterID, stateMap[index]->rowIndex,
@@ -561,6 +583,12 @@ bool PropagationStateManager::MapVectorToObjects()
                      stateMap[index]->parameterID, state[index]);
             break;
             
+         case Gmat::RVECTOR_TYPE:
+            stateMap[index]->object->SetRealParameter(
+                     stateMap[index]->parameterID, state[index],
+                     stateMap[index]->rowIndex);
+            break;
+
          case Gmat::RMATRIX_TYPE:
             stateMap[index]->object->SetRealParameter(
                      stateMap[index]->parameterID, state[index], 
@@ -717,7 +745,9 @@ Integer PropagationStateManager::SortVector()
       {
          id = (Gmat::StateElementId)current->SetPropItem(*j);
          if (id == Gmat::UNKNOWN_STATE)
-            throw PropagatorException("Unknown state element: " + (*j));
+            throw PropagatorException("Unknown state element: " + (*j) +
+                  " on object " + current->GetName() + ", a " +
+                  current->GetTypeName());
          size = current->GetPropItemSize(id);
          if (size <= 0)
             throw PropagatorException("State element " + (*j) +
@@ -777,6 +807,10 @@ Integer PropagationStateManager::SortVector()
       newItem = new ListItem;
       newItem->objectName  = owners[order[i]]->GetName();
       newItem->elementName = property[order[i]];
+      if (owners[order[i]]->HasAssociatedStateObjects())
+         newItem->associateName = owners[order[i]]->GetAssociateName(val);
+      else
+         newItem->associateName = owners[order[i]]->GetName();
       newItem->object      = owners[order[i]];
       newItem->elementID   = idList[order[i]];
       newItem->subelement  = ++val;
@@ -792,9 +826,10 @@ Integer PropagationStateManager::SortVector()
          newItem->parameterID += val - 1;
 
       #ifdef DEBUG_STATE_CONSTRUCTION
-         MessageInterface::ShowMessage("[%s, %s, %d, %d, %d, %d, %s]\n",
+         MessageInterface::ShowMessage("[%s, %s, %s, %d, %d, %d, %d, %s]\n",
                newItem->objectName.c_str(),
                newItem->elementName.c_str(),
+               newItem->associateName.c_str(),
                newItem->elementID,
                newItem->subelement,
                newItem->parameterID,
@@ -804,10 +839,10 @@ Integer PropagationStateManager::SortVector()
 
       if (newItem->parameterType == Gmat::RVECTOR_TYPE)
       {
-         const Rmatrix mat = 
-            owners[order[i]]->GetRmatrixParameter(property[order[i]]);
-         newItem->rowLength = mat.GetNumColumns();
-         newItem->rowIndex = val-1; 
+         const Rvector vec =
+            owners[order[i]]->GetRvectorParameter(property[order[i]]);
+         newItem->rowLength = vec.GetSize();
+         newItem->rowIndex = val - 1;
       }
 
       if (newItem->parameterType == Gmat::RMATRIX_TYPE)

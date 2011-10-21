@@ -426,6 +426,8 @@ public:
    virtual Real*           GetPropItem(const Integer item);
    virtual Integer         GetPropItemSize(const Integer item);
    virtual bool            PropItemNeedsFinalUpdate(const Integer item);
+   virtual bool            HasAssociatedStateObjects();
+   virtual std::string     GetAssociateName(UnsignedInt val = 0);
 
    virtual Integer         GetEstimationParameterID(const std::string &param);
    virtual Integer         SetEstimationParameter(const std::string &param);

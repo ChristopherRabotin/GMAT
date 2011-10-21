@@ -32,6 +32,7 @@ struct GMAT_API ListItem
 {
    std::string objectName;
    std::string elementName;
+   std::string associateName;
    GmatBase*   object;
    // Gmat::StateElementId
    Integer     elementID;

@@ -3559,6 +3559,17 @@ bool GmatBase::PropItemNeedsFinalUpdate(const Integer item)
    return false;
 }
 
+bool GmatBase::HasAssociatedStateObjects()
+{
+   return false;
+}
+
+std::string GmatBase::GetAssociateName(UnsignedInt val)
+{
+   return "";
+}
+
+
 Integer GmatBase::SetEstimationParameter(const std::string &param)
 {
    return -1;

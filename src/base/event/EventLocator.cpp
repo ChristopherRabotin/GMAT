@@ -43,7 +43,9 @@ EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
    "Tolerance",         // TOLERANCE,
    "Filename",          // EVENT_FILENAME,
    "IsActive",          // IS_ACTIVE
-   "ShowPlot"           // SHOW_PLOT
+   "ShowPlot",          // SHOW_PLOT
+   "Epoch",             // EPOCH (Read only)
+   "EventFunction"      // EVENT_FUNCTION (Read only)
 };
 
 const Gmat::ParameterType
@@ -53,7 +55,9 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
    Gmat::REAL_TYPE,              // TOLERANCE,
    Gmat::STRING_TYPE,            // EVENT_FILENAME,
    Gmat::BOOLEAN_TYPE,           // IS_ACTIVE
-   Gmat::BOOLEAN_TYPE            // SHOW_PLOT
+   Gmat::BOOLEAN_TYPE,           // SHOW_PLOT
+   Gmat::REAL_TYPE,              // EPOCH (Read only)
+   Gmat::RVECTOR_TYPE            // EVENT_FUNCTION (Read only)
 };
 
 
@@ -168,6 +172,8 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       eventFunctions.clear();
       maxSpan.clear();
       lastSpan.clear();
+      stateIndices.clear();
+      associateIndices.clear();
    }
 
    return *this;
@@ -266,7 +272,7 @@ std::string EventLocator::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool EventLocator::IsParameterReadOnly(const Integer id) const
 {
-   if (id == IS_ACTIVE)
+   if ((id == IS_ACTIVE) || (id == EPOCH) || (id == EVENT_FUNCTION))
       return true;
 
    return GmatBase::IsParameterReadOnly(id);
@@ -306,6 +312,13 @@ Real EventLocator::GetRealParameter(const Integer id) const
    if (id == TOLERANCE)
       return eventTolerance;
 
+   if (id == EPOCH)
+   {
+      if (targets.size() > 0)
+         return targets[0]->GetEpoch();
+      return -1.0;
+   }
+
    return GmatBase::GetRealParameter(id);
 }
 
@@ -335,6 +348,11 @@ Real EventLocator::SetRealParameter(const Integer id, const Real value)
       return eventTolerance;
    }
 
+   if (id == EPOCH)
+   {
+      return 0.0;
+   }
+
    return GmatBase::SetRealParameter(id, value);
 }
 
@@ -353,6 +371,9 @@ Real EventLocator::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 Real EventLocator::GetRealParameter(const Integer id, const Integer index) const
 {
+   if (id == EVENT_FUNCTION)
+      return 0.0;       // todo Return the event function value
+
    return GmatBase::GetRealParameter(id, index);
 }
 
@@ -395,6 +416,9 @@ Real EventLocator::GetRealParameter(const Integer id, const Integer row,
 Real EventLocator::SetRealParameter(const Integer id, const Real value,
       const Integer index)
 {
+   if (id == EVENT_FUNCTION)
+      return 0.0;       // todo Return the event function value
+
    return GmatBase::SetRealParameter(id, value, index);
 }
 
@@ -538,6 +562,39 @@ Real EventLocator::SetRealParameter(const std::string &label,
    return SetRealParameter(GetParameterID(label), value, row, col);
 }
 
+const Rvector& EventLocator::GetRvectorParameter(const Integer id) const
+{
+   if (id == EVENT_FUNCTION)
+      return functionValues;
+
+   return GmatBase::GetRvectorParameter(id);
+}
+
+const Rvector& EventLocator::SetRvectorParameter(const Integer id,
+      const Rvector &value)
+{
+   if (id == EVENT_FUNCTION)
+   {
+      Integer size = (value.GetSize() < functionValues.GetSize() ?
+            value.GetSize() : functionValues.GetSize());
+      for (Integer i = 0; i < size; ++i)
+         functionValues[i] = value[i];
+      return functionValues;
+   }
+
+   return GmatBase::SetRvectorParameter(id, value);
+}
+
+const Rvector& EventLocator::GetRvectorParameter(const std::string &label) const
+{
+   return GetRvectorParameter(GetParameterID(label));
+}
+
+const Rvector& EventLocator::SetRvectorParameter(const std::string &label,
+      const Rvector &value)
+{
+   return SetRvectorParameter(GetParameterID(label), value);
+}
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -1067,7 +1124,7 @@ bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
- * Prepares the locaor for use
+ * Prepares the locator for use
  *
  * @return true if initialization succeeds, false on failure
  */
@@ -1108,7 +1165,16 @@ bool EventLocator::Initialize()
       lastEpochs = new GmatEpoch[efCount];
       for (UnsignedInt i = 0; i < efCount; ++i)
          lastEpochs[i] = -1.0;
+
+      if (stateIndices.size() == 0)
+         stateIndices.insert(stateIndices.begin(), efCount, -1);
+      if (associateIndices.size() == 0)
+         associateIndices.insert(associateIndices.begin(), efCount, -1);
    }
+
+   functionValues.SetSize(efCount);
+   for (UnsignedInt i = 0; i < efCount; ++i)
+      functionValues[i] = 0.0;
 
    return retval;
 }
@@ -1135,10 +1201,15 @@ Real EventLocator::GetTolerance()
 /**
  * Evaluates the EventFunctions and returns their values and derivatives.
  *
+ * #param atEpoch  The epoch of the desired evaluation.  Set to -1 to pull epoch
+ *                 off the participants.
+ * #param forState The Cartesian state of the desired evaluation.  Set to -1 to
+ *                 pull state off the participants.
+ *
  * @return The event function data from the evaluation
  */
 //------------------------------------------------------------------------------
-Real *EventLocator::Evaluate()
+Real *EventLocator::Evaluate(GmatEpoch atEpoch, Real *forState)
 {
    Real *vals;
 
@@ -1153,12 +1224,22 @@ Real *EventLocator::Evaluate()
    for (UnsignedInt i = 0; i < eventFunctions.size(); ++i)
    {
       i3 = i * 3;
-      vals = eventFunctions[i]->Evaluate();
+      if (atEpoch == -1.0)
+      {
+         // Evaluate for event location
+         vals = eventFunctions[i]->Evaluate();
 
-      #ifdef DEBUG_DUMPEVENTDATA
-         dumpfile.precision(15);
-         dumpfile << vals[0] << " " << vals[1] << " " << vals[2] << " ";
-      #endif
+         #ifdef DEBUG_DUMPEVENTDATA
+            dumpfile.precision(15);
+            dumpfile << vals[0] << " " << vals[1] << " " << vals[2] << " ";
+         #endif
+      }
+      else
+      {
+         // Evaluate for integration
+         Real *theState = &(forState[associateIndices[i]]);
+         vals = eventFunctions[i]->Evaluate(atEpoch, theState);
+      }
 
       // Load the returned data into lastData
       lastData[  i3  ] = vals[0];
@@ -1337,4 +1418,86 @@ void EventLocator::UpdateEventTable(SortStyle how)
 GmatEpoch EventLocator::GetLastEpoch(Integer index)
 {
    return lastEpochs[index];
+}
+
+
+bool EventLocator::HasAssociatedStateObjects()
+{
+   return true;
+}
+
+std::string EventLocator::GetAssociateName(UnsignedInt val)
+{
+   std::string retval = "";
+   if (val < efCount)
+      retval = eventFunctions[val]->GetPrimaryName();
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetTarget(UnsignedInt forFunction)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of the target object
+ *
+ * @param forFunction Index of the event function being referenced
+ *
+ * @return The name of the target object
+ */
+//------------------------------------------------------------------------------
+std::string EventLocator::GetTarget(UnsignedInt forFunction)
+{
+   if (forFunction > efCount)
+      throw EventException("Requested event function target is not in the "
+            "locator named " + instanceName);
+
+   return eventFunctions[forFunction]->GetPrimaryName();
+}
+
+StringArray EventLocator::GetDefaultPropItems()
+{
+   StringArray propItems;
+   propItems.push_back("EventFunction");
+   return propItems;
+}
+
+Integer EventLocator::SetPropItem(const std::string &propItem)
+{
+   if (propItem == "EventFunction")
+      return Gmat::EVENT_FUNCTION_STATE;
+
+   return Gmat::UNKNOWN_STATE;
+}
+
+Integer EventLocator::GetPropItemSize(const Integer item)
+{
+   if (item == Gmat::EVENT_FUNCTION_STATE)
+      return efCount;
+
+   return GmatBase::GetPropItemSize(item);
+}
+
+//------------------------------------------------------------------------------
+// void SetStateIndices(UnsignedInt forFunction, Integer index,
+//       Integer associate)
+//------------------------------------------------------------------------------
+/**
+ * Sets the indices of the parameters in the state vector for an event function
+ *
+ * @param forFunction Index of the event function being referenced
+ * @param index The location of the event function in the state vector
+ * @param associate The index of the start of state data for the target object
+ */
+//------------------------------------------------------------------------------
+void EventLocator::SetStateIndices(UnsignedInt forFunction, Integer index,
+      Integer associate)
+{
+   if (forFunction > stateIndices.size())
+      throw EventException("Event locator " + instanceName +
+            "does not have the requested event function (has it been "
+            "initialized?)");
+
+   stateIndices[forFunction] = index;
+   associateIndices[forFunction] = associate;
 }

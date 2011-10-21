@@ -31,6 +31,7 @@
 #include "AngleUtil.hpp"  // for PutAngleInDegRange()
 #include "MessageInterface.hpp"
 #include "EventLocator.hpp"
+#include "EventModel.hpp"
 
 #include <sstream>
 #include <cmath>
@@ -262,7 +263,6 @@ Propagate::Propagate(const Propagate &prp) :
    dim                         (prp.dim),
    cartDim                     (prp.cartDim),
    singleStepMode              (prp.singleStepMode),
-   transientForces             (NULL),
    currentMode                 (prp.currentMode),
    stopCondEpochID             (prp.stopCondEpochID),
    stopCondBaseEpochID         (prp.stopCondBaseEpochID),
@@ -2627,21 +2627,6 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
 
 
 //------------------------------------------------------------------------------
-// void SetTransientForces(std::vector<PhysicalModel*> *tf)
-//------------------------------------------------------------------------------
-/**
- * Sets the array of transient forces, so it can be passed to the PropSetups.
- *
- * @param <tf> The array of transient forces.
- */
-//------------------------------------------------------------------------------
-void Propagate::SetTransientForces(std::vector<PhysicalModel*> *tf)
-{
-   transientForces = tf;
-}
-
-
-//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
@@ -2704,6 +2689,8 @@ bool Propagate::Initialize()
 
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i)
    {
+      ObjectArray els;
+
       if (satName.size() <= index)
          throw CommandException("Size mismatch for SpaceObject names\n");
 
@@ -2812,6 +2799,9 @@ bool Propagate::Initialize()
 
             AddToBuffer(so);
 
+            // Add any locator that uses so to the PSM for step size control
+            LocateObjectEvents(mapObj, els);
+
             if (so->GetType() == Gmat::FORMATION)
                ((Formation*)(so))->BuildState();
 //            FillFormation(so, owners, elements);
@@ -2820,6 +2810,12 @@ bool Propagate::Initialize()
 //               SetNames(so->GetName(), owners, elements);
 //            }
          }
+      }
+
+      if (els.size() != 0)
+      {
+         AddLocators(psm, els);
+         els.clear();
       }
 
       // Check for finite thrusts and update the force model if there are any
@@ -2881,6 +2877,26 @@ bool Propagate::Initialize()
 
       ++index;
    } // End of loop through PropSetups
+
+
+   if (em != NULL)
+   {
+      for (UnsignedInt index = 0; index < prop.size(); ++index)
+      {
+         if (prop[index]->GetPropagator()->UsesODEModel())
+         {
+            prop[index]->GetODEModel()->AddForce(em);
+
+//            // Refresh ODE model mapping, since a new force was added
+//            MessageInterface::ShowMessage("   Building model from map\n");
+//            if (prop[index]->GetODEModel()->BuildModelFromMap() == false)
+//               throw CommandException("Unable to assemble the ODE "
+//                     "model after adding an Event Model");
+         }
+      }
+   }
+
+
 
    // Prepare the locator buffers and data structures
    InitializeForEventLocation();
