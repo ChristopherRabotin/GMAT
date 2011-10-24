@@ -18,6 +18,12 @@ include ../BuildEnv.mk
 
 ifdef MAC_SPECIFIC
 # use GMAT_LIB_DIR and GMAT_BIN_DIR from BuildEnv.mk
+ifndef GMAT_BIN_DIR
+GMAT_BIN_DIR = bin
+endif
+ifndef GMAT_LIB_DIR
+GMAT_LIB_DIR = lib
+endif
 else  ####### set BIN and LIB for other platforms for now
 GMAT_LIB_DIR = lib
 GMAT_BIN_DIR = bin
@@ -29,31 +35,26 @@ ifeq ($(LINUX_MAC), 1)
 
 ifdef MAC_SPECIFIC
 SHARED_EXTENSION = .dylib
-#SHARED_LIB_FLAGS = $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
 SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) -lcspice -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 else
 SHARED_EXTENSION = .so
 SHARED_LIB_FLAGS = -shared -Wl -L$(SPICE_LIB_DIR) -lcspice
-# No longer in gcc 4.6: --out-implib
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
-#        solarsystem/nrlmsise00_sub.o
 endif
-
-#SHARED_LIB_FLAGS = -shared -Wl
-# No longer in gcc 4.6: --out-implib
 
 else
 
 SHARED_EXTENSION = .dll
 
 endif
-
-BASETARGET = $(GMAT_LIB_DIR)/libGmatBase$(SHARED_EXTENSION)
+BASE_LIB_NAME = libGmatBase$(SHARED_EXTENSION)
+BASETARGET = $(GMAT_LIB_DIR)/$(BASE_LIB_NAME)
 
 else
 
-BASETARGET = $(GMAT_LIB_DIR)/libGmatBase.a
+BASE_LIB_NAME = libGmatBase.a
+BASETARGET = $(GMAT_LIB_DIR)/$(BASE_LIB_NAME)
 
 endif
 
@@ -109,15 +110,13 @@ clean : archclean
 archclean :
 	rm -rf */*.o
 	rm -rf */*/*.o
-	rm -rf $(TARGETS)
 	rm -rf */*~
 	rm -rf core
 	rm -rf */core
-	rm -rf $(GMAT_BIN_DIR)/*
 	rm -rf obj/*
 	rm -rf $(BASETARGET)
 	rm -rf ../matlab/gmat_mex/src/*.o
-
+#   rm -rf $(GMAT_BIN_DIR)/$(BASE_LIB_NAME) # make doesn't like this line
 
 HEADERS = -Iinclude \
           -Ifoundation \

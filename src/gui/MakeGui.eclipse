@@ -27,6 +27,12 @@ WXTARGET = GMAT$(EXTENSION)
 ifdef MAC_SPECIFIC
 TARGETS = $(WXTARGET) macstacksize macrez macosx
 CLEANTARGET = archclean cleanmacosx
+ifndef GMAT_BIN_DIR
+GMAT_BIN_DIR = bin
+endif
+ifndef GMAT_LIB_DIR
+GMAT_LIB_DIR = lib
+endif
 else
 TARGETS = $(WXTARGET)
 CLEANTARGET = archclean
@@ -148,8 +154,8 @@ archclean :
 	rm -rf */*~
 	rm -rf core
 	rm -rf */core
-	rm -rf $(GMAT_BIN_DIR)/*
 	rm -rf obj/*
+#  	rm -rf $(GMAT_BIN_DIR)/$(WXTARGET) # make doesn't like this line
 
 cleanmacosx :
 	echo 'cleaning macosx apps .......'

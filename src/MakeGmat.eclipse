@@ -14,6 +14,13 @@ BUILD_GUI_WITH_WX = 1
 
 include BuildEnv.mk
 
+ifndef GMAT_BIN_DIR
+GMAT_BIN_DIR = bin
+endif
+ifndef GMAT_LIB_DIR
+GMAT_LIB_DIR = lib
+endif
+
 ifeq ($(LINUX_MAC),1)
 PROGRAM_EXTENSION =
 ifeq ($(MAC_SPECIFIC), 1)
