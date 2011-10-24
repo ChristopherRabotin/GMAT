@@ -1302,6 +1302,9 @@
     <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
+      <Filter>Source Files\forcemodel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2560,6 +2563,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp">
       <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
+      <Filter>Source Files\forcemodel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

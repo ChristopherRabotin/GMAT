@@ -438,6 +438,7 @@
     <ClCompile Include="..\..\..\src\base\factory\StopConditionFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\SubscriberFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\HarmonicField.cpp" />
@@ -896,6 +897,7 @@
     <ClInclude Include="..\..\..\src\base\factory\StopConditionFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\SubscriberFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\HarmonicField.hpp" />
