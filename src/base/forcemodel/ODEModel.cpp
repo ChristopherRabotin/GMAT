@@ -2468,24 +2468,24 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
       }
    }
 
-//   // Handle non-Cartesian state elements as an L1 norm
-//   for (int i = cartesianStart + cartStateSize; i < dimension; ++i)
-//   {
-//      // L1 norm
-//      mag = fabs(answer[ i ] - modelState[ i ]);
-//      err = fabs(diffs[i]);
-//      if (mag >relativeErrorThreshold)
-//         err = err / mag;
-//
-//      #ifdef DEBUG_ERROR_ESTIMATE
-//         MessageInterface::ShowMessage("   {%d EstErr = %le} ", i, err);
-//      #endif
-//
-//      if (err > retval)
-//      {
-//         retval = err;
-//      }
-//   }
+   // Handle non-Cartesian state elements as an L1 norm
+   for (int i = cartesianStart + cartStateSize; i < dimension; ++i)
+   {
+      // L1 norm
+      mag = fabs(answer[ i ] - modelState[ i ]);
+      err = fabs(diffs[i]);
+      if (mag >relativeErrorThreshold)
+         err = err / mag;
+
+      #ifdef DEBUG_ERROR_ESTIMATE
+         MessageInterface::ShowMessage("   {%d EstErr = %le} ", i, err);
+      #endif
+
+      if (err > retval)
+      {
+         retval = err;
+      }
+   }
 
    #ifdef DEBUG_ERROR_ESTIMATE
       MessageInterface::ShowMessage("   >>> Estimated Error = %le\n", retval);
