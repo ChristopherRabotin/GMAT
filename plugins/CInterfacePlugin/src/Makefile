@@ -60,7 +60,6 @@ clean : archclean
 
 archclean :
 	rm -rf */*.o
-	rm -rf $(MEX_OBJECTS)
 	rm -rf $(TARGET)
 	rm -rf */*~
 	rm -rf core
