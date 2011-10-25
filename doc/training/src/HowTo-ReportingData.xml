@@ -23,7 +23,7 @@
     by creating a <guilabel>ReportFile</guilabel> resource and adding data to
     it. Starting from the default mission:</para>
 
-    <orderedlist>
+    <orderedlist spacing="compact">
       <listitem>
         <para>On the <guilabel>Resources</guilabel> tree, right-click the
         <guilabel>Output</guilabel> folder, point to <guilabel>Add</guilabel>,

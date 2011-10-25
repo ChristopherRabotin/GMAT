@@ -1,4 +1,4 @@
-# Makefile for the GMAT Training Manual.
+# Makefile for the GMAT Style Example.
 # Must be run in an MSYS environment on Windows.
 
 # Common variables
@@ -7,7 +7,7 @@ JAVA = java
 
 # Xalan
 XALAN = $(JAVA) $(XALANDEFS) -cp $(XALANCP) org.apache.xalan.xslt.Process
-XALANCP = $(contribdir)/xalan-j/serializer.jar:$(contribdir)/xalan-j/xalan.jar:$(contribdir)/xalan-j/xercesImpl.jar:$(contribdir)/xml-apis.jar
+XALANCP = $(contribdir)/xalan-j/serializer.jar:$(contribdir)/xalan-j/xalan.jar:$(contribdir)/xalan-j/xercesImpl.jar:$(contribdir)/xml-apis.jar:$(contribdir)/docbook-xsl-ns/extensions/xalan27.jar
 XALANDEFS=-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=org.apache.xerces.parsers.XIncludeParserConfiguration
 
 # FOP
@@ -17,18 +17,21 @@ FOPCONF = config/fop.xconf
 # Rules
 all: pdf
 
-pdf: GmatTrainingManualA4.pdf
+pdf: GmatStyleExampleA4.pdf
 
 clean:
-	rm -f *.fo *.pdf
+	rm -f *.fo GmatStyleExampleA4.pdf
 
-GmatTrainingManualA4.pdf: GmatTrainingManualA4.fo $(FOPCONF)
+GmatStyleExampleA4.pdf: GmatStyleExampleA4.fo $(FOPCONF)
 	$(FOP) $< $@
 
-GmatTrainingManualA4.fo: src/*.xml xform/fo.xsl
+GmatStyleExampleA4.fo: src/*.xml xform/fo.xsl
 	$(XALAN) \
 	    -PARAM paper.type A4 \
-	    -IN src/GmatTrainingManual.xml \
+	    -PARAM img.src.path src/ \
+	    -PARAM use.extensions 1 \
+	    -PARAM graphicsize.extension 1 \
+	    -IN src/GmatStyleExample.xml \
 	    -XSL xform/fo.xsl \
 	    -OUT $@
 
