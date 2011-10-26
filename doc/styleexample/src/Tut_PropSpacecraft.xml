@@ -58,7 +58,10 @@
       Mission</guilabel> in the <guilabel>Toolbar</guilabel> or start a new
       GMAT session.</para>
 
-      <para>To rename <guilabel>DefaultSC</guilabel> to <guilabel>
+	  <section>
+      <title>Rename the Spacecraft</title>
+      
+	  <para>To rename <guilabel>DefaultSC</guilabel> to <guilabel>
       Sat</guilabel>.</para>
 
       <orderedlist spacing="compact">
@@ -77,7 +80,12 @@
           <para>Click <guilabel>OK</guilabel>.</para>
         </listitem>
       </orderedlist>
-
+	  
+	  </section>
+	  
+	  <section>
+      <title>Set the Spacecraft Epoch</title>
+	  
       <para>Now you will set the initial epoch of
       <guilabel>Sat</guilabel>.</para>
 
@@ -103,7 +111,12 @@
           <para>Click <guilabel>Apply</guilabel> to save these changes.</para>
         </listitem>
       </orderedlist>
+	  
+	  </section>
 
+	  	  <section>
+      <title>Set the Keplerian Orbital Elements</title>
+	  
       <para>To set the Keplerian oribital elements of
       <guilabel>Sat:</guilabel></para>
 
@@ -151,11 +164,15 @@
           differences, and click <guilabel>OK.</guilabel></para>
         </listitem>
       </orderedlist>
+	  
+
 
       <para>At this point, save your work to the disk: In the
       <guilabel>Toolbar </guilabel>, click the <guilabel> Save </guilabel>
       button. If this is the first time you have saved the mission, you'll be
       prompted to provide a name and location for the file.</para>
+	  
+	 
 
       <figure xml:id="Tut_PropASpacecraft_OrbitDialog">
         <title>Spacecraft State Setup</title>
@@ -170,6 +187,8 @@
           </mediaobject>
         </screenshot>
       </figure>
+	  
+	   	  </section>
     </section>
 
     <section>
@@ -375,7 +394,7 @@
 
       <para></para>
 
-      <figure>
+      <figure xml:id="Tut_PropASpacecraft_StopSetUp">
         <title>Propagate Command Parameter Select Dialog Configuration</title>
 
         <screenshot>
@@ -389,7 +408,7 @@
         </screenshot>
       </figure>
 
-      <figure>
+      <figure xml:id="Tut_PropASpacecraft_Propagate1Dialog">
         <title>Propagate Command Configuration</title>
 
         <screenshot>
@@ -409,7 +428,7 @@
     <title>Running the Mission</title>
 
     <para>Congratulations, you have now configured your first GMAT mission and
-    are ready to run the mission and analyze the results. </para>
+    are ready to run the mission and analyze the results.</para>
 
     <orderedlist spacing="compact">
       <listitem>
@@ -429,7 +448,7 @@
     manipulate the Orbit View plot using your mouse to zoom in/out and rotate
     the plot.</para>
 
-    <figure>
+    <figure xml:id="Tut_PropASpacecraft_FinalResults">
       <title>Orbit View Plot after Mission Run</title>
 
       <screenshot>
