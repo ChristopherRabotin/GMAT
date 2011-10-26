@@ -9,34 +9,46 @@
 
     <!-- Local variables -->
     <xsl:variable name="blue" select="'#0b3d91'"/>
+    <xsl:variable name="gray" select="'#79797c'"/>
 
     <!-- Fonts -->
-    <!-- other font option is Helvetica:
+    <!-- other font option is Helvetica:-->
     <xsl:param name="body.font.family">Helvetica</xsl:param>
-    -->
-    <xsl:param name="body.font.family">Garamond</xsl:param>
+    <!---->
+    <!-- <xsl:param name="body.font.family">Garamond</xsl:param> -->
     <xsl:param name="body.font.master">11</xsl:param>
     <xsl:param name="title.font.family">Helvetica</xsl:param>
 
     <!-- Titles -->
     <xsl:attribute-set name="component.title.properties">
-        <xsl:attribute name="color"><xsl:value-of select="$blue"/></xsl:attribute>
+        <xsl:attribute name="color">
+            <xsl:value-of select="$blue"/>
+        </xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="formal.title.properties">
         <xsl:attribute name="text-align">center</xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="section.title.properties">
-        <xsl:attribute name="color"><xsl:value-of select="$blue"/></xsl:attribute>
+        <xsl:attribute name="color">
+            <xsl:value-of select="$blue"/>
+        </xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="section.title.level1.properties">
-         <xsl:attribute name="font-size">14pt</xsl:attribute>
+        <xsl:attribute name="font-size">
+            <xsl:value-of select="$body.font.master * 1.3"/>
+        </xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="section.title.level2.properties">
-         <xsl:attribute name="font-size">12pt</xsl:attribute>
+        <xsl:attribute name="font-size">
+            <xsl:value-of select="$body.font.master * 1.2"/>
+        </xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="section.title.level3.properties">
         <xsl:attribute name="font-size">
-            <xsl:value-of select="$body.font.master"/>
+            <xsl:value-of select="$body.font.master * 1.1"/>
+        </xsl:attribute>
+        <xsl:attribute name="color">
+            <xsl:value-of select="$gray"/>
         </xsl:attribute>
     </xsl:attribute-set>
 
@@ -83,7 +95,8 @@
         task before
     </xsl:param>
 
-    <!-- Equation numbering -->
+    <!-- Equation numbering (templates copied from
+         DocBook XSL Stylesheets 1.76.1) -->
     <xsl:template match="d:equation">
         <fo:table width="100%" table-layout="fixed">
             <xsl:attribute name="id">
@@ -130,5 +143,12 @@
             </fo:table-body>
         </fo:table>
     </xsl:template>
+
+    <!-- Tables -->
+    <xsl:param name="table.frame.border.style">double</xsl:param>
+    <xsl:param name="table.frame.border.thickness">thick</xsl:param>
+
+    <!-- Cross-references -->
+    <xsl:param name="xref.with.number.and.title">0</xsl:param>
 
 </xsl:stylesheet>

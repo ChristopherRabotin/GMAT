@@ -5,6 +5,9 @@
 contribdir = ../build/contrib
 JAVA = java
 
+# Jing
+JING = $(JAVA) -jar $(contribdir)/jing/bin/jing.jar
+
 # Xalan
 XALAN = $(JAVA) $(XALANDEFS) -cp $(XALANCP) org.apache.xalan.xslt.Process
 XALANCP = $(contribdir)/xalan-j/serializer.jar:$(contribdir)/xalan-j/xalan.jar:$(contribdir)/xalan-j/xercesImpl.jar:$(contribdir)/xml-apis.jar:$(contribdir)/docbook-xsl-ns/extensions/xalan27.jar
@@ -22,10 +25,13 @@ pdf: GmatStyleExampleA4.pdf
 clean:
 	rm -f *.fo GmatStyleExampleA4.pdf
 
+validate:
+	$(JING) $(contribdir)/docbook/docbookxi.rng src/*.xml
+
 GmatStyleExampleA4.pdf: GmatStyleExampleA4.fo $(FOPCONF)
 	$(FOP) $< $@
 
-GmatStyleExampleA4.fo: src/*.xml xform/fo.xsl
+GmatStyleExampleA4.fo: validate src/*.xml xform/fo.xsl
 	$(XALAN) \
 	    -PARAM paper.type A4 \
 	    -PARAM img.src.path src/ \

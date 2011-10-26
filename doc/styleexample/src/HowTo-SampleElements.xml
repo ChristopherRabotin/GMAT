@@ -42,7 +42,7 @@
     </tgroup>
   </table>
 
-  <figure>
+  <figure xml:id="SmallSS">
     <title>An example small screenshot</title>
 
     <screenshot>
@@ -99,39 +99,53 @@ GMAT DefaultSC.DragArea = 15;
 GMAT DefaultSC.SRPArea = 1;</programlisting>
   </example>
 
-  <para><emphasis role="bold">A numbered equation:</emphasis></para>
+  <section>
+    <title>Miscellaneous elements</title>
 
-  <equation>
-    <m:math display="block">
-      <m:mn>3</m:mn>
+    <itemizedlist>
+      <listitem>
+        <para>A numbered equation:</para>
 
-      <m:mo>=</m:mo>
+        <equation>
+          <m:math display="block">
+            <m:mn>3</m:mn>
 
-      <m:mn>2</m:mn>
+            <m:mo>=</m:mo>
 
-      <m:mo>+</m:mo>
+            <m:mn>2</m:mn>
 
-      <m:mn>1</m:mn>
-    </m:math>
-  </equation>
+            <m:mo>+</m:mo>
 
-  <para><emphasis role="bold">An unnumbered equation:</emphasis></para>
+            <m:mn>1</m:mn>
+          </m:math>
+        </equation>
+      </listitem>
 
-  <informalequation>
-    <m:math display="block">
-      <m:mo>-</m:mo>
+      <listitem>
+        <para>An unnumbered equation:</para>
 
-      <m:mn>1</m:mn>
+        <informalequation>
+          <m:math display="block">
+            <m:mo>-</m:mo>
 
-      <m:mo>=</m:mo>
+            <m:mn>1</m:mn>
 
-      <m:mo>cos</m:mo>
+            <m:mo>=</m:mo>
 
-      <m:mo>(</m:mo>
+            <m:mo>cos</m:mo>
 
-      <m:mn>π</m:mn>
+            <m:mo>(</m:mo>
 
-      <m:mo>)</m:mo>
-    </m:math>
-  </informalequation>
+            <m:mn>π</m:mn>
+
+            <m:mo>)</m:mo>
+          </m:math>
+        </informalequation>
+      </listitem>
+
+      <listitem>
+        <para>A cross-reference to <xref linkend="SmallSS" /></para>
+      </listitem>
+    </itemizedlist>
+  </section>
 </chapter>
