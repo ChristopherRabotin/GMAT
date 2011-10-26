@@ -109,5 +109,26 @@
             </fo:table-body>
         </fo:table>
     </xsl:template>
+    <xsl:template match="d:informalequation">
+        <fo:table width="100%" table-layout="fixed">
+            <xsl:attribute name="id">
+                <xsl:call-template name="object.id"/>
+            </xsl:attribute>
+            <fo:table-column column-width="90%"/>
+            <fo:table-column column-width="10%"/>
+            <fo:table-body start-indent="0pt" end-indent="0pt">
+                <fo:table-row>
+                    <fo:table-cell text-align="center">
+                        <fo:block>
+                            <xsl:apply-templates/>
+                        </fo:block>
+                    </fo:table-cell>
+                    <fo:table-cell text-align="right" display-align="center">
+                        <fo:block></fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+            </fo:table-body>
+        </fo:table>
+    </xsl:template>
 
 </xsl:stylesheet>

@@ -8,17 +8,15 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Sample Elements</title>
 
-  <table>
+  <table colsep="0" frame="topbot">
     <title>An example table</title>
 
     <tgroup cols="2">
-      <colspec align="center" />
-
       <thead>
         <row>
-          <entry align="center">Column 1</entry>
+          <entry>Column 1</entry>
 
-          <entry align="center">Column 2</entry>
+          <entry>Column 2</entry>
         </row>
       </thead>
 
@@ -105,15 +103,35 @@ GMAT DefaultSC.SRPArea = 1;</programlisting>
 
   <equation>
     <m:math display="block">
-      <m:mi>3</m:mi>
+      <m:mn>3</m:mn>
 
       <m:mo>=</m:mo>
 
-      <m:mi>2</m:mi>
+      <m:mn>2</m:mn>
 
       <m:mo>+</m:mo>
 
-      <m:mi>1</m:mi>
+      <m:mn>1</m:mn>
     </m:math>
   </equation>
+
+  <para><emphasis role="bold">An unnumbered equation:</emphasis></para>
+
+  <informalequation>
+    <m:math display="block">
+      <m:mo>-</m:mo>
+
+      <m:mn>1</m:mn>
+
+      <m:mo>=</m:mo>
+
+      <m:mo>cos</m:mo>
+
+      <m:mo>(</m:mo>
+
+      <m:mn>π</m:mn>
+
+      <m:mo>)</m:mo>
+    </m:math>
+  </informalequation>
 </chapter>
