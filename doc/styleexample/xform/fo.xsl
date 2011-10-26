@@ -31,6 +31,14 @@
     <xsl:attribute-set name="section.title.level1.properties">
          <xsl:attribute name="font-size">14pt</xsl:attribute>
     </xsl:attribute-set>
+    <xsl:attribute-set name="section.title.level2.properties">
+         <xsl:attribute name="font-size">12pt</xsl:attribute>
+    </xsl:attribute-set>
+    <xsl:attribute-set name="section.title.level3.properties">
+        <xsl:attribute name="font-size">
+            <xsl:value-of select="$body.font.master"/>
+        </xsl:attribute>
+    </xsl:attribute-set>
 
     <!-- Auto-numering -->
     <xsl:param name="chapter.autolabel" select="0"></xsl:param>
@@ -64,5 +72,42 @@
         /section  toc
         set       toc,title
     </xsl:param>
+
+    <!-- Figure/Table/Example title placement -->
+    <xsl:param name="formal.title.placement">
+        figure after
+        example before
+        equation before
+        table before
+        procedure before
+        task before
+    </xsl:param>
+
+    <!-- Equation numbering -->
+    <xsl:template match="d:equation">
+        <fo:table width="100%" table-layout="fixed">
+            <xsl:attribute name="id">
+                <xsl:call-template name="object.id"/>
+            </xsl:attribute>
+            <fo:table-column column-width="90%"/>
+            <fo:table-column column-width="10%"/>
+            <fo:table-body start-indent="0pt" end-indent="0pt">
+                <fo:table-row>
+                    <fo:table-cell text-align="center">
+                        <fo:block>
+                            <xsl:apply-templates/>
+                        </fo:block>
+                    </fo:table-cell>
+                    <fo:table-cell text-align="right" display-align="center">
+                        <fo:block>
+                            <xsl:text>(</xsl:text>
+                            <xsl:apply-templates select="." mode="label.markup"/>
+                            <xsl:text>)</xsl:text>
+                        </fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+            </fo:table-body>
+        </fo:table>
+    </xsl:template>
 
 </xsl:stylesheet>

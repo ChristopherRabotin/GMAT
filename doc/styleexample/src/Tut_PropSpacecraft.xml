@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="CreatingandPropagatingaSpacecraft"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Propagating a Spacecraft</title>
+
+  <section>
+    <title>Objective and Overview</title>
+
+    <para>The objective of this tutorial is to learn how to create a
+    spacecraft and a propagator, and then propagate the spacecraft to the
+    desired position - in this example, to the orbit periapsis. The meaning of
+    the term "propagate" here is simulating the spacecraft travel from its
+    initial position until some given condition is met - for example, a
+    predefined location or elapsed time. (See the GMAT Help module for more
+    detail.) We perform this simulation by following the basic steps below.
+    (Here and elsewhere, unless specified further, "click" will mean
+    "left-click" of your computer cursor):</para>
+
+    <orderedlist spacing="compact">
+      <listitem>
+        <para>Configure the resources - create a spacecraft and define its
+        epoch and orbital elements.</para>
+      </listitem>
+
+      <listitem>
+        <para>Create and configure a propagator.</para>
+      </listitem>
+
+      <listitem>
+        <para>Modify the default Orbit View to visualize the spacecraft
+        trajectory.</para>
+      </listitem>
+
+      <listitem>
+        <para>Configure the mission sequence to propagate the spacecraft to
+        the periapsis.</para>
+      </listitem>
+
+      <listitem>
+        <para>Finally, run the mission.</para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>Configuring Resources</title>
+
+    <section>
+      <title>Creating and Configuring a Spacecraft</title>
+
+      <para>In this section we will set the spacecraft's initial epoch and
+      classical orbital elements. You will need GMAT open, with the default
+      mission loaded. The default mission is loaded when a new session of the
+      GMAT executable is started or when the New Mission button in the Toolbar
+      is clicked.</para>
+
+      <section>
+        <title>Creating a Spacecraft</title>
+
+        <para>Working from the GUI, you can create a new spacecraft by
+        starting at the Resource Tree.</para>
+
+        <orderedlist spacing="compact">
+          <listitem>
+            <para>Rename the default spacecraft DefaultSC, by right-clicking
+            it and selecting Rename from the drop-down menu. For this
+            tutorial, name the spacecraft Sat.</para>
+          </listitem>
+        </orderedlist>
+      </section>
+
+      <section>
+        <title>Setting a Spacecraft's Epoch</title>
+
+        <orderedlist spacing="compact">
+          <listitem>
+            <para>Double left-click your Sat spacecraft - this opens open the
+            Spacecraft dialog box. If it is not already selected, click on the
+            Orbit Tab.</para>
+          </listitem>
+
+          <listitem>
+            <para>Left-click the Epoch Format drop-down menu and select
+            UTCGregorian. You'll see the value in the Epoch field change to
+            the UTC Gregorian epoch format.</para>
+          </listitem>
+
+          <listitem>
+            <para>Left-click in the Epoch field, and type the desired value of
+            22 Jul 2014 11:29:10.811 (or you can cut and paste from this
+            text).</para>
+          </listitem>
+
+          <listitem>
+            <para>Save the changes by clicking the Apply button at the bottom
+            of the dialog box window.</para>
+          </listitem>
+        </orderedlist>
+      </section>
+
+      <section>
+        <title>Setting a Spacecraft's State</title>
+
+        <para>In this tutorial we will use the Keplerian orbital elements, and
+        we will enter them with respect to Earth's MJ2000 Equator
+        system.</para>
+
+        <orderedlist spacing="compact">
+          <listitem>
+            <para>Continuing with the Spacecraft dialog box: change the state
+            type to Keplerian by clicking the State Type drop-down menu and
+            selecting "Keplerian". In Elements on the right you will see the
+            GUI reconfiguring to the Keplerian representation.</para>
+          </listitem>
+
+          <listitem>
+            <para>Set the values of Elements as follows:</para>
+
+            <para>SMA = 83474.31800000001;</para>
+
+            <para>ECC = 0.8965199999999999;</para>
+
+            <para>INC = 12.4606;</para>
+
+            <para>RAAN = 112.8362;</para>
+
+            <para>AOP = 218.9805;</para>
+
+            <para>TA = 180</para>
+          </listitem>
+
+          <listitem>
+            <para>The figure below shows how the Orbit tab of your Sat dialog
+            box should look like if you set the epoch correctly.</para>
+          </listitem>
+
+          <listitem>
+            <para>Press OK button to save the changes and close the dialog box
+            .</para>
+          </listitem>
+
+          <listitem>
+            <para>Save your work to the hard disk: press the Save icon in the
+            GMAT toolbar. If this is the first time you' are saving the
+            mission, you'll be prompted to provide a name and location for the
+            file.</para>
+          </listitem>
+        </orderedlist>
+
+        <figure>
+          <title>Spacecraft State Setup</title>
+
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="media/img/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"
+                           scalefit="1" width="100%"></imagedata>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
+      </section>
+    </section>
+
+    <section>
+      <title>Creating and Configuring the Propagator</title>
+
+      <para>Creating a new propagator involves selecting a numerical
+      integrator and a force model. Let's start with the propagator:</para>
+
+      <section>
+        <title>Creating a Propagator</title>
+
+        <orderedlist spacing="compact">
+          <listitem>
+            <para>Locate the Propagators folder in the Resource Tree.</para>
+          </listitem>
+
+          <listitem>
+            <para>We will use the default propagator DefaultProp. (Or, you can
+            right-click the Propagators folder and select Add Propagator from
+            the drop-down menu.)</para>
+          </listitem>
+
+          <listitem>
+            <para>Rename DefaultProp to LowEarthProp. (For this, right-click
+            the DefaultProp, select Rename, type in the new name In the dialog
+            box, and click OK.)</para>
+          </listitem>
+
+          <listitem>
+            <para>Double left-click LowEarthProp to open its dialog box called
+            PropSet. On the left side of the box you find the Integrator
+            settings; we will use the default values. model.</para>
+          </listitem>
+        </orderedlist>
+      </section>
+
+      <section>
+        <title>Configuring the Force Model</title>
+
+        <para>For this tutorial we will use an Earth 10x10 non-spherical
+        gravity model, Jacchia-Roberts atmospheric model, and point mass
+        perturbations from the Sun and Moon.</para>
+
+        <orderedlist spacing="compact">
+          <listitem>
+            <para>We continue with the PropSet-LowEarthProp dialog box. We
+            will now configurets right side, which contains information on the
+            force model.</para>
+          </listitem>
+
+          <listitem>
+            <para>Locate the Primary Bodies group on the Force Model box. In
+            the Gravity group box, change both the Degree and Order to 10 by
+            typing in these values.</para>
+          </listitem>
+
+          <listitem>
+            <para>In the Drag group of Force Model, click the Atmosphere Model
+            pull-down menu and select the JacchiaRoberts model.</para>
+          </listitem>
+
+          <listitem>
+            <para>Click the Select button to the right of the Point Masses
+            text box. This opens a box with a list of gravitational bodies
+            from which we can select our Primary Bodies.</para>
+          </listitem>
+
+          <listitem>
+            <para>Select "Sun" in the Available Bodies list, and add it to
+            Selected Bodies on the right by clicking the right arrow found
+            between the two columns.</para>
+          </listitem>
+
+          <listitem>
+            <para>Add similarly the Moon (named Luna in GMAT) to Selected
+            Bodies. The Select Bodies box should now look as the one shown
+            below.</para>
+          </listitem>
+
+          <listitem>
+            <para>Click OK to save the selected bodies and close the
+            box.</para>
+          </listitem>
+        </orderedlist>
+
+        <figure>
+          <title>Force Model Point Mass Configuration</title>
+
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="media/img/Tut_PropSpacecraft_ForceModelPointMassConfiguration.png"
+                           scalefit="1" width="100%"></imagedata>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
+
+        <para>Back in the PropSetup dialog box, make sure the box Use Solar
+        Radiation Pressure is checked. You dialog box should now look as shown
+        below. Click OK to save and close it..</para>
+
+        <figure>
+          <title>Force Model Configuration</title>
+
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="media/img/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"
+                           scalefit="1" width="100%"></imagedata>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
+      </section>
+    </section>
+
+    <section>
+      <title>Configuring the Orbit View Plot</title>
+
+      <para>Here we will configure the default Orbit View plot that will show
+      our spacecraft Sat. We will also configure the view point, to allow us
+      to see the entire orbit as we propagate the spacecraft.</para>
+
+      <orderedlist spacing="compact">
+        <listitem>
+          <para>In the Output folder in Resource Tree, double-left-click the
+          DefaultOrbitView to open the OrbitView dialog box.</para>
+        </listitem>
+
+        <listitem>
+          <para>In the View Object group, make sure that our spacecraft Sat is
+          the only item in the Selected Spacecraft list. (If needed, use the
+          procedure we used above to form the Selected Bodies list.)</para>
+        </listitem>
+
+        <listitem>
+          <para>The orbit of Sat is highly eccentric. To view the entire orbit
+          in the plot, we need to adjust the settings in the View Definition
+          group. Namely, set the pull-down menu of the View Point Vector to
+          Vector, and set its three numerical settings to 30000, -5000, and
+          5000 respectively.</para>
+        </listitem>
+
+        <listitem>
+          <para>Uncheck the DrawXY Plane box in the Drawing Option
+          group.</para>
+        </listitem>
+
+        <listitem>
+          <para>Your OrbitView dialog box should now look as shown in the
+          figure below. Click OK to save and close it.</para>
+        </listitem>
+      </orderedlist>
+
+      <figure>
+        <title>DefaultOrbitView Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="media/img/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.jpeg"
+                         scalefit="1" width="100%"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+  </section>
+
+  <section>
+    <title>Configuring the Mission Tree</title>
+
+    <section>
+      <title>Creating a Propagate Command</title>
+
+      <para>The last step in this tutorial will be to propagate the spacecraft
+      along its orbit. To this end, we need to configure a propagate command
+      so that it will propagate until the spacecraft reaches the orbit
+      periapis.</para>
+
+      <orderedlist spacing="compact">
+        <listitem>
+          <para>Click the Mission tab to bring up the mission sequence. (The
+          tab appears next to the Resources tab, near the upper left-hand
+          corner of the GMAT GUI.)</para>
+        </listitem>
+
+        <listitem>
+          <para>Double left click on the event named Propagate1. This opens
+          the Propagate dialog box.</para>
+        </listitem>
+
+        <listitem>
+          <para>Make sure that the the field under the Propagator column
+          contains LowEarthProp. (If not, right-click the first line of that
+          column, and in the little Propagator box that opens, click
+          LowEarthProp. Your little box should look as shown below. Hit
+          OK.)</para>
+        </listitem>
+      </orderedlist>
+
+      <figure>
+        <title>Propagate Command Propagator Select Dialog</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="media/img/Tut_PropSpacecraft_PropagateCommandPropagatorSelectDialogConfiguration.png"
+                         scalefit="1" width="100%"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+
+    <section>
+      <title>Selecting a Spacecraft</title>
+
+      <orderedlist spacing="compact">
+        <listitem>
+          <para>Back in the Propagate1 dialog box, make sure that the
+          Spacecraft List on the right contains our spacecraft Sat. (If not,
+          right-click the list's top line, and select Sat in the list box that
+          opens; hit OK.)</para>
+        </listitem>
+      </orderedlist>
+
+      <figure>
+        <title>Propagate Command Space Object Select Dialog</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="media/img/Tut_PropSpacecraft_PropagateCommandSpaceObjectSelectdialogConfiguration.png"
+                         scalefit="1" width="100%"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+
+    <section>
+      <title>Selecting a Stopping Condition</title>
+
+      <para>The only remaining thing now is to tell the propagator when to
+      stop the propagation.</para>
+
+      <orderedlist spacing="compact">
+        <listitem>
+          <para>In the Stopping Conditions group of our Propagate1 dialog box,
+          right click the field in the Parameter column (it may now contain
+          something - e.g. Sat.ElapsedSecs.)</para>
+        </listitem>
+
+        <listitem>
+          <para>In the ParameterSelectDialog box that opens, select Sat in the
+          Object List on the left. (This directs GMAT to associate the
+          stopping condition with the spacecraft named Sat.)</para>
+        </listitem>
+
+        <listitem>
+          <para>Locate the Object Properties list in the middle of the box,
+          scroll down and select Periapsis.</para>
+        </listitem>
+
+        <listitem>
+          <para>Click the right-pointing arrow between the Object Properties
+          and Selected Value(s) columns. This forms a variable
+          Sat.Earth.Periapsis and places it in the Selected Value(s) column on
+          the right. (See the figure below.) Click OK to save your
+          changes.</para>
+        </listitem>
+      </orderedlist>
+
+      <para>The figure below shows how your ParameterSelectDialog box will
+      look like.</para>
+
+      <figure>
+        <title>Propagate Command Parameter Select Dialog Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="media/img/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.png"
+                         scalefit="1" width="100%"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+
+      <para>With the propagator, spacecraft, and the stopping condition set as
+      above, the Propagate1 dialog box should appear as the screen capture
+      below. When finished, click OK to save the changes made to
+      Propagate1.</para>
+
+      <figure>
+        <title>Propagate Command Configuration</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="media/img/Tut_PropSpacecraft_PropagateCommandConfiguration.jpeg"
+                         scalefit="1" width="100%"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+    </section>
+  </section>
+
+  <section>
+    <title>Running the Mission</title>
+
+    <para>With the mission now fully configured, it is time to run it and see
+    the results.</para>
+
+    <orderedlist spacing="compact">
+      <listitem>
+        <para>Click the Save button in the toolbar to save your mission
+        script.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click the Run button in the toolbar.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>You should see GMAT propagate the orbit and stop at orbit periapsis.
+    The screen capture below summarizes what you should see after correctly
+    completing this tutorial. You can manipulate the Orbit View plot using
+    your mouse to zoom in/out and rotate the plot.</para>
+
+    <figure>
+      <title>Orbit View Plot after Mission Run</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="media/img/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.jpeg"
+                       scalefit="1" width="100%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </figure>
+  </section>
+</chapter>

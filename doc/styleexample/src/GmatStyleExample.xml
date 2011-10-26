@@ -8,6 +8,7 @@
       xmlns:db="http://docbook.org/ns/docbook">
   <info>
     <title>General Mission Analysis Tool (GMAT)</title>
+
     <subtitle>Documentation Style Example</subtitle>
   </info>
 
@@ -15,10 +16,13 @@
     <title>How-tos</title>
 
     <xi:include href="HowTo-ReportingData.xml" xpointer="element(/1)" />
+
     <xi:include href="HowTo-SampleElements.xml" xpointer="element(/1)" />
   </part>
 
   <part>
     <title>Tutorials</title>
+
+    <xi:include href="Tut_PropSpacecraft.xml" xpointer="element(/1)" />
   </part>
 </book>

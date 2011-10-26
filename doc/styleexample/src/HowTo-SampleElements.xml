@@ -100,4 +100,20 @@ GMAT DefaultSC.Cr = 1.8;
 GMAT DefaultSC.DragArea = 15;
 GMAT DefaultSC.SRPArea = 1;</programlisting>
   </example>
+
+  <para><emphasis role="bold">A numbered equation:</emphasis></para>
+
+  <equation>
+    <m:math display="block">
+      <m:mi>3</m:mi>
+
+      <m:mo>=</m:mo>
+
+      <m:mi>2</m:mi>
+
+      <m:mo>+</m:mo>
+
+      <m:mi>1</m:mi>
+    </m:math>
+  </equation>
 </chapter>
