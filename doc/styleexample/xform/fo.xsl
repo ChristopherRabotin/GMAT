@@ -12,10 +12,10 @@
     <xsl:variable name="gray" select="'#79797c'"/>
 
     <!-- Fonts -->
-    <!-- other font option is Helvetica:-->
+    <!-- other font option is Helvetica:
     <xsl:param name="body.font.family">Helvetica</xsl:param>
-    <!---->
-    <!-- <xsl:param name="body.font.family">Garamond</xsl:param> -->
+    -->
+    <xsl:param name="body.font.family">Garamond</xsl:param>
     <xsl:param name="body.font.master">11</xsl:param>
     <xsl:param name="title.font.family">Helvetica</xsl:param>
 
