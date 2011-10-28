@@ -10,10 +10,22 @@
     <title>General Mission Analysis Tool (GMAT)</title>
 
     <subtitle>Documentation Style Example</subtitle>
+
+    <abstract>
+      <title>Introduction</title>
+
+      <para>This is an introductory paragraph.</para>
+    </abstract>
   </info>
 
   <part>
     <title>How-tos</title>
+
+    <partintro>
+      <title>Introduction</title>
+
+      <para>This is an introductory paragraph to the how-tos.</para>
+    </partintro>
 
     <xi:include href="HowTo-ReportingData.xml" xpointer="element(/1)" />
 
@@ -22,6 +34,12 @@
 
   <part>
     <title>Tutorials</title>
+
+    <partintro>
+      <title>Introduction</title>
+
+      <para>This is an introductory paragraph to the tutorials.</para>
+    </partintro>
 
     <xi:include href="Tut_PropSpacecraft.xml" xpointer="element(/1)" />
   </part>

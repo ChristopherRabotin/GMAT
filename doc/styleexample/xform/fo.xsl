@@ -11,6 +11,9 @@
     <xsl:variable name="blue" select="'#0b3d91'"/>
     <xsl:variable name="gray" select="'#79797c'"/>
 
+    <!-- Page layout -->
+    <xsl:param name="double.sided">1</xsl:param>
+
     <!-- Fonts -->
     <!-- other font option is Helvetica:
     <xsl:param name="body.font.family">Helvetica</xsl:param>
@@ -50,6 +53,9 @@
         <xsl:attribute name="color">
             <xsl:value-of select="$gray"/>
         </xsl:attribute>
+        <xsl:attribute name="start-indent">
+            <xsl:value-of select="$body.start.indent"/>
+        </xsl:attribute>
     </xsl:attribute-set>
 
     <!-- Auto-numering -->
@@ -67,13 +73,14 @@
     </xsl:template>
 
     <!-- Table of contents -->
+    <xsl:param name="toc.section.depth">1</xsl:param>
     <xsl:param name="generate.toc">
         /appendix toc,title
         article/appendix  nop
         /article  toc,title
         book      toc,title
         /chapter  toc,title
-        part      nop
+        part      toc,title
         /preface  toc,title
         reference toc,title
         /sect1    toc
@@ -84,6 +91,23 @@
         /section  toc
         set       toc,title
     </xsl:param>
+
+    <!-- copied from http://sagehill.net/docbookxsl/PrintToc.html#PartToc -->
+    <xsl:template name="part.titlepage.before.verso" priority="1">
+        <xsl:variable name="toc.params">
+            <xsl:call-template name="find.path.params">
+                <xsl:with-param name="table"
+                    select="normalize-space($generate.toc)"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:if test="contains($toc.params, 'toc')">
+            <xsl:call-template name="division.toc">
+                <xsl:with-param name="toc.context" select="."/>
+            </xsl:call-template>
+        </xsl:if>
+    </xsl:template>
+    <xsl:template name="generate.part.toc">
+    </xsl:template>
 
     <!-- Figure/Table/Example title placement -->
     <xsl:param name="formal.title.placement">
@@ -151,4 +175,62 @@
     <!-- Cross-references -->
     <xsl:param name="xref.with.number.and.title">0</xsl:param>
 
+    <!-- Headers/Footers -->
+    <xsl:attribute-set name="header.content.properties">
+        <xsl:attribute name="color">
+            <xsl:value-of select="$blue"/>
+        </xsl:attribute>
+    </xsl:attribute-set>
+    <xsl:attribute-set name="footer.content.properties">
+        <xsl:attribute name="color">
+            <xsl:value-of select="$blue"/>
+        </xsl:attribute>
+    </xsl:attribute-set>
+
+    <xsl:template name="header.content">
+        <xsl:param name="pageclass" select="''"/>
+        <xsl:param name="sequence" select="''"/>
+        <xsl:param name="position" select="''"/>
+        <xsl:param name="gentext-key" select="''"/>
+
+        <fo:block>
+            <xsl:choose>
+                <xsl:when test="$pageclass = 'titlepage'">
+                    <!-- empty -->
+                </xsl:when>
+
+                <!-- inside header -->
+                <xsl:when test="$double.sided != 0
+                                and $sequence = 'odd'
+                                and $position = 'left'">
+                    <xsl:apply-templates select="." mode="titleabbrev.markup"/> 
+                </xsl:when>
+                <xsl:when test="$double.sided != 0
+                                and $sequence = 'even'
+                                and $position = 'right'">
+                    <xsl:apply-templates select="." mode="titleabbrev.markup"/> 
+                </xsl:when>
+                <xsl:when test="$double.sided = 0
+                                and $position = 'right'">
+                    <xsl:apply-templates select="." mode="titleabbrev.markup"/> 
+                </xsl:when>
+
+                <!-- outside header -->
+                <xsl:when test="$double.sided != 0
+                                and ($sequence = 'odd' or $sequence = 'first')
+                                and $position = 'right'">
+                    <xsl:value-of select="ancestor-or-self::d:part/d:title"/> 
+                </xsl:when>
+                <xsl:when test="$double.sided != 0
+                                and $sequence = 'even'
+                                and $position = 'left'">
+                    <xsl:value-of select="ancestor-or-self::d:part/d:title"/> 
+                </xsl:when>
+                <xsl:when test="$double.sided = 0
+                                and $position = 'left'">
+                    <xsl:value-of select="ancestor-or-self::d:part/d:title"/> 
+                </xsl:when>
+            </xsl:choose>
+        </fo:block>
+    </xsl:template>
 </xsl:stylesheet>

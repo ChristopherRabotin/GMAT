@@ -36,6 +36,7 @@ GmatStyleExampleA4.fo: validate src/*.xml xform/fo.xsl
 	    -PARAM paper.type A4 \
 	    -PARAM img.src.path src/ \
 	    -PARAM use.extensions 1 \
+	    -PARAM fop1.extensions 1 \
 	    -PARAM graphicsize.extension 1 \
 	    -IN src/GmatStyleExample.xml \
 	    -XSL xform/fo.xsl \
