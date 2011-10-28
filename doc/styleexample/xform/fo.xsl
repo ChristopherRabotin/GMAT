@@ -45,6 +45,12 @@
         <xsl:attribute name="font-size">
             <xsl:value-of select="$body.font.master * 1.2"/>
         </xsl:attribute>
+        <xsl:attribute name="color">
+            <xsl:value-of select="$gray"/>
+        </xsl:attribute>
+        <xsl:attribute name="start-indent">
+            <xsl:value-of select="$body.start.indent"/>
+        </xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="section.title.level3.properties">
         <xsl:attribute name="font-size">
