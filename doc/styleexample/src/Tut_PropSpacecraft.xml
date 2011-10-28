@@ -45,9 +45,6 @@
     </orderedlist>
   </section>
 
-  <section>
-    <title>Configure the Resources</title>
-
     <section>
       <title>Configure the Spacecraft</title>
 
@@ -60,9 +57,6 @@
 
       <section>
         <title>Rename the Spacecraft</title>
-
-        <para>To rename <guilabel>DefaultSC</guilabel> to <guilabel>
-        Sat</guilabel>.</para>
 
         <orderedlist spacing="compact">
           <listitem>
@@ -84,9 +78,6 @@
 
       <section>
         <title>Set the Spacecraft Epoch</title>
-
-        <para>Now you will set the initial epoch of
-        <guilabel>Sat</guilabel>.</para>
 
         <orderedlist spacing="compact">
           <listitem>
@@ -115,9 +106,6 @@
 
       <section>
         <title>Set the Keplerian Orbital Elements</title>
-
-        <para>To set the Keplerian oribital elements of
-        <guilabel>Sat:</guilabel></para>
 
         <orderedlist spacing="compact">
           <listitem>
@@ -183,7 +171,7 @@
           </screenshot>
         </figure>
       </section>
-    </section>
+
 
     <section>
       <title>Configure the Propagator</title>
@@ -346,8 +334,6 @@
     </section>
   </section>
 
-  <section>
-    <title>Configure the Mission Tree</title>
 
     <section>
       <title>Configure the Propagate Command</title>
@@ -425,7 +411,7 @@
         </screenshot>
       </figure>
     </section>
-  </section>
+
 
   <section>
     <title>Running the Mission</title>
