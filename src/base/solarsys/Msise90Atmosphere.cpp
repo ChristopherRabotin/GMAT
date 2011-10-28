@@ -31,7 +31,11 @@
 #ifndef __SKIP_MSISE90__
 extern "C" 
 { 
-   void gtd6_(int*,float*,float*,float*,float*,float*,float*,float*,float*,int*,float*,float*);
+   #ifdef USE_64_BIT_LONGS
+      void gtd6_(long int*,float*,float*,float*,float*,float*,float*,float*,float*,long int*,float*,float*);
+   #else
+      void gtd6_(int*,float*,float*,float*,float*,float*,float*,float*,float*,int*,float*,float*);
+   #endif
 }
 #endif
 
@@ -225,6 +229,7 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       xmass = mass;
 
       #ifdef DEBUG_MSISE90_ATMOSPHERE
+      MessageInterface::ShowMessage("Writing Pre-GTDS6 MSISE90 data to log file ...\n");
       fprintf(logFile, "Pre-GTDS6() \n");
       fprintf(logFile, "=========== \n");
       fprintf(logFile, "Epoch                  = %le \n", epoch);
@@ -255,11 +260,25 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       fprintf(logFile, "Temperature at Alt     = %le \n", xtemp[1]);
       fprintf(logFile, "\n");
       fprintf(logFile, "\n");
+      MessageInterface::ShowMessage("DONE Writing Pre-GTDS6 MSISE90 data to log file ...\n");
       #endif
       
       #ifndef __SKIP_MSISE90__
-         gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,&xap[0],&xmass,
-               &xden[0],&xtemp[0]);
+         #ifdef DEBUG_MSISE90_ATMOSPHERE
+            MessageInterface::ShowMessage("About to call gtd6_ ...\n");
+         #endif
+         #ifdef USE_64_BIT_LONGS
+            long int xydLong = (long int) xyd;
+            long int xmassLong = (long int) xmass;
+            gtd6_(&xydLong,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,&xap[0],&xmassLong,
+                  &xden[0],&xtemp[0]);
+         #else
+            gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,&xap[0],&xmass,
+                  &xden[0],&xtemp[0]);
+         #endif
+         #ifdef DEBUG_MSISE90_ATMOSPHERE
+            MessageInterface::ShowMessage("DONE calling gtd6_ ...\n");
+         #endif
       #endif
       
       #ifdef DEBUG_MSISE90_ATMOSPHERE
