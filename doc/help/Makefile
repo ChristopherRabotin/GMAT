@@ -44,6 +44,18 @@ validate:
 	$(JING) $(contribdir)/docbook/docbookxi.rng $(helpsrc) $(trainingsrc)
 
 dist: all
+	mkdir help
+	cp -pR \
+	    help-a4.pdf \
+	    help-letter.pdf \
+	    help.html \
+	    html \
+	    files \
+	    help.chm \
+	    training-a4.pdf \
+	    training-letter.pdf \
+	    help
+	zip help/help.chm.zip help/help.chm
 
 help: help-pdf \
     help-html-single \

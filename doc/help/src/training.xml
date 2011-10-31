@@ -13,17 +13,25 @@
 
     <xi:include href="Preface.xml"/>
 
-    <part>
+    <part xml:id="Introduction">
         <title>Introduction</title>
         <xi:include href="Intro_IntroductionToGMAT.xml"/>
+        <xi:include href="Intro_GettingStarted.xml"/>
     </part>
+
+    <part>
+        <title>Creating Your First Mission</title>
+        <xi:include href="Tut_SimulatingAnOrbit.xml"/>
+    </part>
+
     <!--
     <part>
         <title>How-tos</title>
     </part>
-
-    <part>
-        <title>Tutorials</title>
-    </part>
     -->
+
+    <part xml:id="Tutorials">
+        <title>Tutorials</title>
+	<xi:include href="Tut_SimpleOrbitTransfer.xml" />
+    </part>
 </book>

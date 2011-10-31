@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Getting Started</title>
+
+  <section>
+    <title>Installation</title>
+
+    <para>Installers and files for all platforms are located on the GMAT
+    SourceForge page at the following link:
+    https://sourceforge.net/projects/gmat/files/GMAT/. GMAT releases are
+    listed in chronological order with the most recent release at the top of
+    the list. As of this writing the latest release is 2011a.</para>
+
+    <section>
+      <title>Installing on Windows</title>
+
+      <para>The GMAT windows distribution contains an installer that will
+      install and configure GMAT for you automatically. After installation is
+      completed, if you have MATLAB®, add all folders under the "matlab"
+      folder in the GMAT root directory, to your MATLAB® path.</para>
+    </section>
+
+    <section>
+      <title>Installing on Mac</title>
+
+      <para>GMAT for Mac is released as a g-zipped tarball archive. The
+      tarball is uncompressed and installed by either double-clicking on it or
+      by opening a Terminal window and running the command:</para>
+
+      <programlisting>tar -xvf gmat-snowleopard-x86-R2011a-Alpha.tar.gz</programlisting>
+
+      <para>The command extracts the GMAT system into a folder named
+      GMAT-R2011a - this is the GMAT root directory. You may move this folder
+      in its entirety to your desired installation directory.</para>
+    </section>
+
+    <section>
+      <title>Installing on Linux</title>
+
+      <para>GMAT for Linux is released as a g-zipped tarball archive. The
+      tarball is installed by running the command:</para>
+
+      <programlisting>tar -zxf gmat-linux-x64-R2011a-Alpha.tar.gz</programlisting>
+
+      <para>This command extracts the GMAT system into a folder named
+      GMAT-R2011a. Inside of that folder you will find two application
+      launchers, RunGmat.sh and RunGmatLauncher.sh. The shell script
+      RunGmatLauncher.sh contains information about where GMAT is installed on
+      your system as part of a change directory (cd) command. The default
+      location is ~/GMAT-R2011a; update that location if you installed GMAT to
+      a different folder. The Linux application is launched by running one of
+      the RunGmat... shell scripts. Each script file sets GMAT's load library
+      path, and then launches the application. If you would like to create a
+      desktop shortcut to launch GMAT, set your launcher to run the
+      "RunGmatLauncher" shell script. You might want to set the icon for the
+      launcher as well; GMAT's icon images are located in the
+      GMAT-R2011a/data/graphics/icons folder.</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Starting and Quitting GMAT</title>
+
+    <section>
+      <title>Starting a GMAT Session</title>
+
+      <para>On Microsoft Windows platforms there are several ways to start a
+      GMAT session. If you used the GMAT installer to install GMAT then you
+      can double-click on the GMAT icon on the the desktop. If you installed
+      GMAT from a zip file, or by compiling the system, locate the bin folder
+      in the GMAT root directory and double-click on the icon for the file
+      named GMAT.exe</para>
+
+      <para>On the Mac, you may use the finder to find the bin folder located
+      in your installation directory, and double-click on the GMAT.app
+      application. Alternatively, use can open a Terminal window, cd to your
+      installation directory, then type the command ‘open GMAT.app”. Once GMAT
+      is open, you may set it up to remain in the dock by selecting its dock
+      icon with the mouse, selecting ‘Options’ , then ‘Keep in Dock’. This
+      allows you to open GMAT in the future simply by clicking on its dock
+      icon.</para>
+    </section>
+
+    <section>
+      <title>Quitting a GMAT Session</title>
+
+      <para>To end a GMAT session on Windows or Linux, in the Menu Bar, select
+      <guilabel>File-&gt;Exit</guilabel>. On Mac, select
+      <guilabel>GMAT-&gt;Quit GMAT</guilabel> or use command-Q.</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Running the GMAT Demos</title>
+
+    <para>We’ve included more than 30 sample missions in the GMAT
+    distribution. The sample missions show how to apply GMAT to problems
+    ranging from the Hohmann transfer, to Libration point station-keeping, to
+    trajectory optimization. To locate and run a sample mission:</para>
+
+    <orderedlist spacing="compact">
+      <listitem>
+        <para>Open GMAT.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click on the Open button in the Toolbar.</para>
+      </listitem>
+
+      <listitem>
+        <para>In the Choose a File browser, navigate to the Samples folder
+        located in the GMAT root directory.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click on a script file of your choice.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click OK.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click the Run button in the toolbar.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>To run optimization missions, you need MATLAB®, and the MATLAB®
+    optimization toolbox and/or the VF13ad plugin based on software in the
+    Harwell Subroutine Library. These are proprietary libraries and are not
+    distributed with GMAT. MATLAB® is not yet fully supported in the Mac and
+    Linux GMAT releases, and therefore you cannot run optimization missions
+    that use MATLAB’s fmincon optimizer in the current Mac and Linux
+    builds.</para>
+  </section>
+
+  <section>
+    <title>User Interfaces Overview</title>
+
+    <para>GMAT contains several user interfaces to design and execute your
+    mission. The two primary interfaces are the GUI interface and the Script
+    interface. Each of these interfaces supports most functionality available
+    in GMAT. When you work in the Script interface, you are modifying the core
+    files that GMAT reads and writes. To avoid issues such as circular
+    dependencies in the GUI, there are some basic rules you must follow when
+    writing scripts, or when working in the GUI. Below, we discuss these
+    interfaces and then discuss the basic rules and best practices for working
+    in each interface.</para>
+
+    <section>
+      <title>GUI Overview</title>
+
+      <para>When you start a GMAT session, the GMAT desktop is displayed and
+      the default mission is loaded. The GMAT desktop has a native look and
+      feel on each platform and most desktop components are supported on all
+      platforms. The components of the desktop are discussed in detail in the
+      Windows GUI section below and the differences for Mac and Linux
+      platforms are discussed in separate sections.</para>
+
+      <section>
+        <title>Windows GUI</title>
+
+        <para>When you open GMAT on Windows and click the Run button in the
+        Toolbar, GMAT executes the default mission as shown in the figure
+        below. The tools listed below the figure are managed by the GMAT
+        desktop.</para>
+
+        <figure>
+          <title>Windows GUI</title>
+
+          <screenshot>
+            <info>
+              <title></title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata contentdepth="100%"
+                           fileref="files/images/Intro_GettingStarted_WindowsGUI.png"
+                           scalefit="1" width="100%"></imagedata>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
+
+        <variablelist>
+          <varlistentry>
+            <term>Menu Bar</term>
+
+            <listitem>
+              <para>The menu bar contains File, Edit, Window and Help
+              functionality.</para>
+
+              <para>On Windows, the <guilabel>File</guilabel> menu contains
+              standard <guilabel>Open</guilabel>, <guilabel>Save</guilabel>,
+              <guilabel>Save As</guilabel>, and <guilabel>Exit</guilabel>
+              functionality as well as <guilabel>Open Recent</guilabel> and
+              <guilabel>New Mission</guilabel>. The <guilabel>Edit</guilabel>
+              menu contains functionality for script editing and is only
+              active when the <guilabel>Script Editor</guilabel> is selected
+              as the active window. The <guilabel>Window</guilabel> menu
+              contains tools for organizing graphics windows and the script
+              editor within the GMAT desktop. Examples include the ability to
+              <guilabel>Tile</guilabel> windows, <guilabel>Cascade</guilabel>
+              windows and <guilabel>Close</guilabel> windows. The Help menu
+              contains links to <guilabel>Online Help</guilabel>,
+              <guilabel>Tutorials</guilabel>, <guilabel>Forums</guilabel>, and
+              the <guilabel>Report An Issue</guilabel> option links to GMAT’s
+              defect reporting system, the <guilabel>Welcome Page</guilabel>,
+              and a <guilabel>Provide Feedback</guilabel> link.</para>
+
+              <para>On Mac, menus are nearly the same, with a few differences:
+              the <guilabel>File</guilabel> menu does not contain an
+              <guilabel>Exit</guilabel> option - instead, the <guilabel>Quit
+              GMAT</guilabel> menu option is on the GMAT menu, as discussed
+              before; tiling and cascading windows are not supported, so those
+              options do not appear under the <guilabel>Window</guilabel>
+              menu; currently, email is not supported, so <guilabel>Provide
+              Feedback</guilabel> is nonfunctional under the
+              <guilabel>Help</guilabel> menu.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Tool Bar</term>
+
+            <listitem>
+              <para>The <guilabel>Tool Bar</guilabel> provides easy access to
+              frequently used controls such as file controls,
+              <guilabel>Run</guilabel>, <guilabel>Pause</guilabel>, and
+              <guilabel>Stop</guilabel> for mission execution, and controls
+              for graphics animation. On Windows and Linux, the toolbar is
+              located at the top of the GMAT window; on Mac, currently it is
+              located on the left of the GMAT frame. Because the toolbar is
+              vertical, some toolbar options are abbreviated.</para>
+
+              <para>GMAT allows you to simultaneously edit the raw script file
+              representation of your mission and the GUI representation of
+              your mission. It is possible to make inconsistent changes in
+              these mission representations. The <guilabel>GUI/Script Sync
+              Status</guilabel> window located in the
+              <guilabel>Toolbar</guilabel> shows you the state of the two
+              mission representations. See further discussion under the
+              GUI/Script Interactions and Synchronization section
+              below.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Resources Tab</term>
+
+            <listitem>
+              <para>When you click on the <guilabel>Resources Tab</guilabel>
+              you bring the <guilabel>Resource Tree</guilabel> to the
+              foreground of the desktop.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Resources Tree</term>
+
+            <listitem>
+              <para>The <guilabel>Resources Tree</guilabel> is a tree
+              structure that organizes GMAT Resources into logical groups. All
+              objects created in a GMAT script using a <guilabel>Create
+              </guilabel>command are found in the <guilabel>Resources
+              Tree</guilabel> in the GMAT desktop.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Mission Tab</term>
+
+            <listitem>
+              <para>When you click the <guilabel>Mission Tab</guilabel> you
+              bring the Mission Tree to the foreground of the desktop.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Mission Tree</term>
+
+            <listitem>
+              <para>The <guilabel>Mission Tree</guilabel> is a tree structure
+              that displays GMAT commands that control the time-ordered
+              sequence of events in a mission. The <guilabel>Mission
+              Tree</guilabel> contains all script lines that occur after the
+              <guilabel>BeginMissionSequence</guilabel> command in a GMAT
+              script. You can undock the <guilabel>Mission Tree</guilabel> in
+              the desktop as shown in the figure below. To undock the
+              <guilabel>Mission Tree</guilabel>, you can right-click on the
+              Mission Tab and drag it into the graphics window. You can also
+              follow these steps:</para>
+
+              <orderedlist>
+                <listitem>
+                  <para>Click on the <guilabel>Mission Tab</guilabel> to bring
+                  the Mission Tree to the foreground.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Right-click on the <guilabel>Mission
+                  Sequence</guilabel> folder in the <guilabel>Mission
+                  Tree</guilabel> and select <guilabel>Undock Mission
+                  Tree</guilabel> in the menu.</para>
+                </listitem>
+              </orderedlist>
+
+              <informalfigure>
+                <screenshot>
+                  <info>
+                    <title></title>
+                  </info>
+
+                  <mediaobject>
+                    <imageobject>
+                      <imagedata contentdepth="100%"
+                                 fileref="files/images/Intro_GettingStarted_UndockedMissionTree.png"
+                                 scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+                  </mediaobject>
+                </screenshot>
+              </informalfigure>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Output Tab</term>
+
+            <listitem>
+              <para>When you click the <guilabel>Output Tab</guilabel> you
+              bring the <guilabel>Output Tree</guilabel> to the foreground of
+              the desktop.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Output Tree</term>
+
+            <listitem>
+              <para>The <guilabel>Output Tree</guilabel> is a tree structure
+              that contains GMAT output such as report files, event reports,
+              and ephemeris files.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>Message Window</term>
+
+            <listitem>
+              <para>When you run a mission in GMAT, information including
+              warnings, errors, and progress are written to the message
+              window. For example, If there is a syntax error in a script
+              file, a detailed error message is written to the Message Window
+              detailing the error.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <section>
+      <title>Script Interface Overview</title>
+
+      <para>The GMAT script editor is a textual interface that supports most
+      functionality in GMAT. In Fig. y below, the script editor is shown
+      maximized in the Desktop and the items relevant to script editing are
+      labeled and discussed in more detail below.</para>
+
+      <figure>
+        <title>GMAT Script Editor</title>
+
+        <screenshot>
+          <info>
+            <title></title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata contentdepth="100%"
+                         fileref="files/images/Intro_GettingStarted_ScriptEditor.png"
+                         scalefit="1" width="100%"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+
+      <variablelist>
+        <varlistentry>
+          <term>Script Folder</term>
+
+          <listitem>
+            <para>The GMAT desktop allows you to have multiple script files
+            open simultaneously. Open script files are displayed in the
+            <guilabel>Scripts Folder</guilabel> in the <guilabel>Resources
+            Tree</guilabel>. You can double click on a script in the
+            <guilabel>Scripts Folder</guilabel> to open it the
+            <guilabel>Script Editor</guilabel>. The GMAT desktop displays each
+            script that is open for view in a separate <guilabel>Script
+            Editor</guilabel>. GMAT uses bold face font to identify which, if
+            any, of the scripts in the <guilabel>Scripts Folder</guilabel> are
+            loaded into the GUI. Only one script can be loaded into the GUI at
+            a time.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Script Status Box</term>
+
+          <listitem>
+            <para>The <guilabel>Script Status</guilabel> box indicates whether
+            or not the script being edited is loaded in the GUI. If the
+            <guilabel>Script Status Box</guilabel> say "Active Script", then
+            the script is loaded into the GUI. If the <guilabel>Script Status
+            Box</guilabel> says "Inactive Script", the script is not currently
+            loaded into the GUI.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Save,Sync Button</term>
+
+          <listitem>
+            <para>When you click <guilabel>Save,Sync</guilabel>, GMAT saves
+            script file changes to disk, and synchronizes the GUI with the
+            script.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Save,Sync,Run Button</term>
+
+          <listitem>
+            <para>The you click <guilabel>Save,Sync,Run</guilabel>, GMAT saves
+            script file changes to disk, synchronizes the GUI with the script,
+            and executes the script.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Save As Button</term>
+
+          <listitem>
+            <para>When you click <guilabel>Save As</guilabel>, GMAT brings up
+            the <guilabel>Choose A File</guilabel> dialog box and allows you
+            to save the script using a new file name. After saving, GMAT loads
+            the script into the GUI, making the new file the active
+            script.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Close</term>
+
+          <listitem>
+            <para>The <guilabel>Close</guilabel> button closes the script
+            editor.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>GUI/Script Interface Interactions and Rules</title>
+
+      <para>The GMAT desktop supports a script interface and a GUI interface
+      and these interfaces are designed to be consistent with each other. You
+      can think of the Script and GUI as different "views" of the same data:
+      the Resources and Mission Command Sequence. GMAT allows you to switch
+      between views (Script and GUI) rapidly and even have the same view open
+      in an editable state simultaneously. Below we describe the behavior,
+      interactions, and rules of the script and GUI interfaces so you can
+      avoid confusion and potential loss of data.</para>
+
+      <section>
+        <title>GUI/Script Interactions and Synchronization</title>
+
+        <para>GMAT allows you to simultaneously edit the raw script file
+        representation of your mission and the GUI representation of your
+        mission. It is possible to make inconsistent changes in these mission
+        representations and the <guilabel>GUI/Script Sync Status</guilabel>
+        window located in the <guilabel>Toolbar</guilabel> shows you the state
+        of the two mission representations. [Mac: this is the bottom text
+        box.] <guilabel>Synchronized</guilabel> [Mac: green ‘S’] means the
+        script and GUI contain the same information. <guilabel>GUI
+        Modified</guilabel> [Mac: yellow ‘g’] means there are changes in the
+        GUI that have not been saved to the script. <guilabel>Script
+        Modified</guilabel> [Mac: yellow ‘s’] means there are changes in the
+        script that have not been loaded into the GUI.
+        <guilabel>Unsynchronized</guilabel> [Mac: red ‘U’] means there are
+        changes in both the script and the GUI.</para>
+
+        <caution>
+          <para>GMAT will NOT attempt to merge or resolve simultaneous changes
+          in the Script and GUI and you must choose which representation to
+          save if you have made changes in both interfaces.</para>
+        </caution>
+
+        <para>Pressing the <guilabel>Save</guilabel> button in the toolbar
+        saves the GUI representation over the script. Pressing the
+        <guilabel>Save/Sync</guilabel> button on the script editor saves the
+        script representation and loads it into the GUI.</para>
+      </section>
+
+      <section>
+        <title>How the GUI Maps to a Script</title>
+
+        <para>Clicking the <guilabel>Save</guilabel> button in the toolbar
+        saves the GUI representation to the script file - this is the same
+        file you edit when working in the <guilabel>Script Editor</guilabel>.
+        GUI items that appear in the Resources Tree appear before the
+        BeginMissionSequence in a script file and are written in a predefined
+        order. GUI items that appear in the Mission Tree appear after the
+        BeginMissionSequence command in a script file in the same order as
+        they appear in the GUI.</para>
+
+        <caution>
+          <para>If you have a script file that has custom formatting such as
+          spacing and data organization, you should work exclusively in the
+          script. If you load your script into the GUI, then click
+          <guilabel>Save</guilabel> in the toolbar, you will lose the
+          formatting of your script. (You will NOT, however, lose the
+          data.)</para>
+        </caution>
+      </section>
+
+      <section>
+        <title>How the Script Maps to the GUI</title>
+
+        <para>Clicking the <guilabel>Save/Sync</guilabel> button on the script
+        editor saves the script representation and loads it into the GUI. When
+        you work in a GMAT script, you work in the raw file that GMAT reads
+        and writes. Each script file must contain a command called
+        BeginMissionSequence. Script lines that appear before the
+        <guilabel>BeginMissionSequence</guilabel> command create and configure
+        models and this data will appear in the <guilabel>Resources
+        Tree</guilabel> in the GUI. Script lines that appear after the
+        <guilabel>BeginMissionSequence</guilabel> command define your mission
+        sequence and appear in the <guilabel>Mission Tree</guilabel> in the
+        GUI. Here is a brief script example to illustrate:</para>
+
+        <programlisting>Create Spacecraft Sat
+Sat.X = 3000
+BeginMissionSequence
+Sat.X = 1000</programlisting>
+
+        <para>The line <userinput>Sat.X = 3000</userinput> sets the
+        x-component of the Cartesian state to 3000 and this value would appear
+        on the <guilabel>Orbit</guilabel> Tab of the
+        <guilabel>Spacecraft</guilabel> dialog box. However, because the line
+        <userinput>Sat.X = 1000</userinput> appears after the
+        <guilabel>BeginMissionSequence</guilabel> command, the line
+        <userinput>Sat.X = 1000</userinput> will appear as an assignment
+        command in the <guilabel>Mission Tree</guilabel> in the GUI.</para>
+      </section>
+
+      <section>
+        <title>Basic GMAT Script/GUI Interface Rules</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>Each script file must contain one and only one
+            BeginMissionSequence command.</para>
+          </listitem>
+
+          <listitem>
+            <para>GMAT commands are not allowed before the
+            BeginMissionSequence command.</para>
+          </listitem>
+
+          <listitem>
+            <para>You cannot use inline math statements (equations) before the
+            BeginMissionSequence command in a script file. (GMAT considers
+            in-line math statements to be an Assignment Command). (You cannot
+            use equations in the <guilabel>Resources Tree</guilabel>, so you
+            can also not use equations before the
+            <guilabel>BeginMissionSequence</guilabel> command).</para>
+          </listitem>
+
+          <listitem>
+            <para>Similarly, you can only use in-line math statements in an
+            Assignment Command in the Mission Tree. So, you cannot type “3000
+            + 4000” or “Sat.Y - 8” in the text box for setting spacecraft
+            DryMass.</para>
+          </listitem>
+
+          <listitem>
+            <para>GMAT’s script language is case sensitive.</para>
+          </listitem>
+        </itemizedlist>
+      </section>
+    </section>
+  </section>
+
+  <section version="5.0" xml:id="DataAndConfiguration">
+    <title>Data and Configuration</title>
+
+    <para>Below we discuss the files and data distributed with GMAT and that
+    are required for GMAT execution. GMAT requires many data files such as
+    planetary ephemeris, Earth orientation data, leap second files and gravity
+    files to name just a few. Below we describe how those files are organized
+    and describe the controls provided so that you can customize the data
+    files GMAT uses at run time.</para>
+
+    <section>
+      <title>File Structure</title>
+
+      <para>The default directory structure for GMAT is shown below and is
+      broken down into eight main directories. These directories organize the
+      files and data used to run GMAT including binary libraries, data files,
+      texture maps, to 3-D models among many others. The only two files in the
+      GMAT root directory are the license.txt file and the README.txt file. A
+      summary of the contents of each folder is described in further detail in
+      the sections below.</para>
+
+      <para><screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Util_DirectoryStructure.png"
+                         scalefit="1" width="100%"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>GMAT Directory Structure</para>
+            </caption>
+          </mediaobject>
+        </screenshot></para>
+
+      <section>
+        <title>bin Folder</title>
+
+        <para>The bin filder contains all binary files required for the core
+        functionality in GMAT (third-party, alpha and beta libraries are
+        placed in the plugins folder). These libraries include the executable
+        file (GMAT.exe on Windows, GMAT.app on Mac, etc.) and libraries for
+        the GUI. The bin folder also contains two text files:
+        gmat_startup_file.txt, and gmat.ini. The startup file is discussed in
+        detail in a separate section below. The gmat.ini files is used to
+        configure some GUI panels, set paths to external web links, and define
+        "tool tip" messages.</para>
+      </section>
+
+      <section>
+        <title>data Folder</title>
+
+        <para>The data folder contains all data files required to run GMAT and
+        is organized according to data types as shown in the figure below. The
+        gravity folder contains a folder for each default central body modeled
+        in GMAT and in those folders are files containing gravitational
+        coefficients. The gui_config folder contains files for configuring
+        some of the dialog boxes for GMAT Resources and Commands. These files
+        allow you to custom configure a GUI for a user-provided plugin.
+        Furthermore, some of the built-in dialog box designs employ an ini
+        file for their configuration.</para>
+
+        <para><screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Util_DirectoryStructure_Data.png"
+                           scalefit="1" width="100%"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>data Folder Structure</para>
+              </caption>
+            </mediaobject>
+          </screenshot></para>
+
+        <para>The graphics folder contains four subfolders: splash, stars,
+        icons and texture. The splash folder contains the GMAT splash screen
+        that is displayed briefly while GMAT is initializing. The stars folder
+        contains a star catalogue used for displaying stars in 3D graphics.
+        The texture folder contains texture maps used for 3D graphics. The
+        icons folder contains graphics files for icons and images loaded at
+        run time. These include the GMAT logo, images used on the about panel
+        and welcome screen, and icons for the Toolbar, Resource Tree and
+        Mission Tree.</para>
+
+        <para>The planetary_coeff folder contains Earth Orientation Parameters
+        (EOP) provided by the International Earth Rotation Service (IERS) and
+        nutation coefficients for different nutation theories. The
+        planetary_ephem folder contains two folders: de and spk. The de folder
+        contains the binary Digital Ephemeris DE405 files for the 8 planets,
+        the Moon, and pluto developed and distributed by JPL. The spk folder
+        contains an spk kernel built from the DE421 file and kernels for
+        selected comets, asteroids and moons. All ephemeris files distributed
+        with GMAT are in the little-endian representation.</para>
+
+        <para>The last two sub-folders in the data folder are time and
+        vehicle. The time folder contains the JPL leap second kernel
+        naif0009.tls and the GMAT leap second file tai-utc.dat. The vehicle
+        folder contains two sub folders: ephem and models. The ephem subfolder
+        contains SPK ephemeris files - including orbit, attitude, frame, and
+        time kernels - for selected spacecraft. The models folder contains 3D
+        model files.</para>
+      </section>
+
+      <section>
+        <title>docs Folder</title>
+
+        <para>Documentation for GMAT is contained in the docs folder and
+        includes PDF versions of the User's Guide, Mathematical Specification,
+        Design Specification, and Requirements Specification to name a few.
+        There is also a subfolder named help that contains html help
+        files.</para>
+      </section>
+
+      <section>
+        <title>matlab Folder</title>
+
+        <para>The matlab folder contains m-files required for GMAT's MATLAB
+        interfaces including the interface to fmincon, and interfaces for
+        driving GMAT from MATLAB. All files in the matlab folder must be
+        included in your MATLAB path for the MATLAB interfaces to function
+        properly.</para>
+      </section>
+
+      <section>
+        <title>output Folder</title>
+
+        <para>The output folder is the default location for file output such
+        as ephemeris files and report files. If no path information is
+        provided for reports or ephemeris files created during a GMAT session,
+        then those files will be written to the output folder.</para>
+      </section>
+
+      <section>
+        <title>plugins Folder</title>
+
+        <para>The plugins folder is for third-party libraries and for
+        functionality that is still in alpha or beta status. A "proprietary"
+        sub folder within the plugins directory is for third-party libraries
+        that cannot be distributed as open source files and is an empty folder
+        in the open source distribution.</para>
+      </section>
+
+      <section>
+        <title>samples Folder</title>
+
+        <para>The samples folder contains many sample missions ranging from
+        Hohmann transfer to Libration point station-keeping, to Mars B-Plane
+        targetting. These files are intended to demonstrate GMAT's
+        capabilities and to provide you with potential staring points for
+        building common mission types for your application and flight
+        regime.</para>
+      </section>
+
+      <section>
+        <title>userfunctions Folder</title>
+
+        <para>The userfunctions folder contains two subfolders: gmat and
+        matlab. These folders are where gmat and matlab functions are stored
+        that are called in the GMAT command sequences for sample missions
+        distributed with GMAT. You can also store your own custom GMAT and
+        MATLAB functions in these folders.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Configuring GMAT Data Files</title>
+
+      <para>You can configure the data files GMAT loads at run time by editing
+      the file named gmat_startup_file.txt located in the bin directory. The
+      startup file contains path information to files such as ephemeris, earth
+      orientation data and graphics files among others. By editing the startup
+      file, you can customize which files are loaded and used during a GMAT
+      session. Below we describe the customization features available in the
+      startup file. The order of lines in the startup file does not
+      matter.</para>
+
+      <section>
+        <title>Leap Second and EOP files</title>
+
+        <para>GMAT reads several files that are used for high fidelity
+        modelling of time and coordinate systems. These files are the leap
+        second files and the Earth Orientation Parameters (EOP) provided by
+        the IERS. The EOP file is updated daily by the IERS. To update your
+        local file with the latest data, simply replace the data in file
+        eopc04.62-now, (located in the directory ./data/planetary_coeff/ )
+        with the data provided by the IERS in the link <link
+        xlink:href="http://data.iers.org/products/177/11221/orig/eopc04_05_IAU2000.62-now">here</link>.
+        There are two leap second files provided with GMAT. The file named
+        naif0009.tls located in the .\data\time folder is used by the JPL
+        SPICE libraries when computing ephemeredes. When a new leap seond is
+        added, you can replace your old SPICE leap second file with the new
+        file located here <link
+        xlink:href="ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/">here</link>.</para>
+
+        <para>GMAT reads the file tai-utc.dat in the .\data\time folder for
+        all time computations requiring leap seconds that are not performed by
+        the SPICE utilities. You can modify this file if a new leap second is
+        added by simply duplicating the last row and updating it with the
+        correct information for the new leap second. For example, if a new
+        leapsecond were added on 01 Jul 2013, then you would add the following
+        line to the tai-utc.dat file:</para>
+
+        <para><code>2013 JUL 1 =JD 2456474.5 TAI-UTC= 35.0 S + (MJD - 41317.)
+        X 0.0</code></para>
+      </section>
+
+      <section>
+        <title>Loading Custom Plugins</title>
+
+        <para>Custom plugins are loaded by adding a line to your startup file
+        describing the name and location of the plugin library. In order for a
+        plugin to work with GMAT, the plugin library must be placed in the
+        folder referenced in the startup file. You specify the path to a
+        plugin using the "PLUGIN" keyword and specify the file by providing
+        its name without the file extension (.dll on Windows). For example, to
+        load a Windows plugin named libVF13Optimizer.dll located in the
+        \bin\proprietary folder, you add this line to your startup
+        file:</para>
+
+        <para><code>PLUGIN = ./proprietary/libVF13Optimizer</code></para>
+      </section>
+
+      <section>
+        <title>User-defined Function Paths</title>
+
+        <para>If you create custom GMAT or MATLAB functions for your
+        application, you can provide the path to those files and GMAT will
+        locate them at run time. The default startup file is configured so you
+        can place GMAT files in the ./userfunctions/gmat folder and place
+        MATLAB functions in the /userfunctions/matlab folder GMAT
+        automatically searches those locatations at run time. You can change
+        the location of the search path to your GMAT or MATLAB functions by
+        changing these lines in your startup file to reflect the location of
+        your files with respect to the GMAT bin folder:</para>
+
+        <programlisting> 
+      GMAT_FUNCTION_PATH = ../userfunctions/gmat
+      MATLAB_FUNCTION_PATH = ../userfunctions/matlab
+</programlisting>
+
+        <para>If you wish to organize your custom functions in multiple
+        folders, you can add multiple search paths to the startup file. For
+        example,</para>
+
+        <programlisting> 
+      GMAT_FUNCTION_PATH = ../MyFunctions/utils
+      GMAT_FUNCTION_PATH = ../MyFunctions/StateConversion 
+      GMAT_FUNCTION_PATH = ../MyFunctions/TimeConversion
+</programlisting>
+      </section>
+    </section>
+
+    <section>
+      <title>Configuring the MATLAB Interfaces</title>
+
+      <para>GMAT supports several MATLAB interfaces and to use these
+      interfaces the following MATLAB folders must be added to your system
+      path:</para>
+
+      <programlisting> 
+      MATLAB/bin/win32 
+      MATLAB/bin 
+      MATLAB/runtime/win32
+    </programlisting>
+
+      <caution>
+        <para>The above folders are added to your system path during MATLAB
+        installation. However, for some versions of MATLAB (2010a for
+        example), MATLAB and Windows are distributed with libraries that have
+        the same name. This may cause the Windows libraries to load instead of
+        the MATLAB libraries. As a result, you may need to put the folders
+        above at the beginning of your system path.</para>
+      </caution>
+
+      <para>If you have multilple versions of MATLAB installed, GMAT will use
+      the version that appears first in your system path and that version must
+      be registered as a COM server using the MATLAB regserver command. To
+      register the desired version of MATLAB, using a command prompt change
+      directory to the bin folder of the desired MATLAB release and run the
+      following command.</para>
+
+      <programlisting> 
+      matlab.exe -regserver
+</programlisting>
+
+      <para>Finally you must add to your MATLAB path all files in the matlab
+      directory which is located in the GMAT root directory.</para>
+
+      <para>On Mac platform, to use MATLAB with GMAT, the user must set the
+      MATLABFORGMAT environment variable in his/her environment.plist, located
+      in the user's .MacOSX subdirectory. This environment variable should
+      point to the location of the MATLAB installation (application bundle) on
+      the user's machine. GMAT will not interface with MATLAB without this
+      environment variable being set.</para>
+
+      <para>The current Mac application (Alpha version) includes the ability
+      to make calls to MATLAB-based functions from GMAT scripts. Calls cannot
+      be made from MATLAB to GMAT with the current application.</para>
+
+      <para>Note that when GMAT opens MATLAB, it will open X11 first (as is
+      required for MATLAB execution). GMAT currently does not automatically
+      close X11 after quitting MATLAB, so the user will need to quit X11
+      manually.</para>
+
+      <para>To add the environment variable:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>if the environment.plist already exists in your .MacOSX
+          directory, edit the plist using the Property List Editor to add the
+          MATLABFORGMAT variable and set it to point to the location of your
+          MATLAB application (e.g.
+          /Applications/MATLAB_R2010a/MATLAB_R2010a.app)</para>
+        </listitem>
+
+        <listitem>
+          <para>if you do not have an environment.plist in your .MacOSX
+          directory, using a terminal window:</para>
+
+          <orderedlist>
+            <listitem>
+              <para>create the .MacOSX directory as a subdirectory in your
+              home folder (if it does not exist)</para>
+            </listitem>
+
+            <listitem>
+              <para>open the Property List Editor, create the MATLABFORGMAT
+              variable (it should point to your MATLAB application)</para>
+            </listitem>
+
+            <listitem>
+              <para>save the property list as environment.plist in your
+              .MacOSX subfolder</para>
+            </listitem>
+          </orderedlist>
+        </listitem>
+      </orderedlist>
+
+      <para>You must logout and log back in for this to take effect.</para>
+    </section>
+  </section>
+
+  <section version="5.0" xml:id="GettingStarted">
+    <title>Other Resources</title>
+
+    <para>If you have further questions or help for GMAT, or want to provide
+    feedback, here are some additional resources:</para>
+
+    <para><link xlink:href="gmat@gsfc.nasa.gov">Provide
+    Feedback</link>.</para>
+
+    <para><link xlink:href="http://gmat.ed-pages.com/forum/index.php?">Project
+    Forum</link>.</para>
+
+    <para><link
+    xlink:href="http://gmat.ed-pages.com/wiki/tiki-index.php?">Wiki</link>.</para>
+
+    <para><link xlink:href="http://gmat.gsfc.nasa.gov/">Web
+    Page</link>.</para>
+
+    <para><link xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/">Report an
+    Issue</link>.</para>
+  </section>
+</chapter>

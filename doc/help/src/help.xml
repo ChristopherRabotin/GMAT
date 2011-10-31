@@ -15,26 +15,16 @@
       <orgname>The GMAT Development Team</orgname>
     </author>
 
-    <releaseinfo>R2012a</releaseinfo>
+    <releaseinfo>Nightly</releaseinfo>
   </info>
     
   <xi:include href="Preface.xml"/>
 
-  <part>
+  <part xml:id="Introduction">
     <title>Introduction</title>
 
     <xi:include href="Intro_IntroductionToGMAT.xml" />
-    <!--
-    <xi:include href="Intro_GMATInterfaceDesignPhilosophy.xml" />
-
-    <xi:include href="Intro_SystemRequirements.xml" />
-
-    <xi:include href="Intro_Installation.xml" />
-
-    <xi:include href="Intro_DataAndConfiguration.xml" />
-
-    <xi:include href="Intro_SupportandResources.xml" />
-    -->
+    <xi:include href="Intro_GettingStarted.xml" />
   </part>
   <!--
   <xi:include href="ReleaseNotes.xml" />
@@ -55,14 +45,18 @@
 		<xi:include href="HowTo_RunningScriptsfromMATLAB.xml"/>
         <xi:include href="Tut_ForceModels.xml"/>
   </chapter>
+-->
 
-  <chapter>
-    <title>Samples and Tutorials</title>
+    <part xml:id="CreatingYourFirstMission">
+        <title>Creating Your First Mission</title>
+        <xi:include href="Tut_SimulatingAnOrbit.xml"/>
+    </part>
 
-    <xi:include href="Tut_PropSpacecraft.xml" />
+    <part xml:id="Tutorials">
+        <title>Tutorials</title>
 
-	<xi:include href="Tut_HohmannTransfer.xml" />
-
+        <xi:include href="Tut_SimpleOrbitTransfer.xml" />
+        <!--
 	<xi:include href="Tut_LEOStationKeeping.xml"/>
 	
 	<xi:include href="Tut_AlgebraicOptimization.xml"/>
@@ -76,19 +70,19 @@
 		<xi:include href="Resource_CoordinateSystems.xml"/>
 		<xi:include href="Tut_LunarTransfer.xml" />
         <xi:include href="Tut_MinFuelOrbitTransfer.xml" />
-		
-  </chapter>
-  
+        -->	
+  </part>
+  <!-- 
     <chapter>
         <title>Using the GMAT Interface</title>
         
         <xi:include href="Using_OrbitDesigner.xml" />
     </chapter>
-
+-->
     <part xml:id="RefGuide">
         <title>Reference Guide</title>
-      <reference>
-        <title>Resources</title>
+        <reference>
+            <title>Resources</title>
 
         <xi:include href="Resource_Array.xml" />
 
@@ -112,7 +106,7 @@
         
         <xi:include href="Resource_GroundStation.xml" />
 		
-		<xi:include href="Resource_GroundTrackPlot.xml" />
+        <xi:include href="Resource_GroundTrackPlot.xml" />
 
         <xi:include href="Resource_ImpulsiveBurn.xml" />
 
@@ -141,12 +135,12 @@
         <xi:include href="Resource_VF13adOptimizer.xml" />
 
         <xi:include href="Resource_XYPlot.xml" />
-        
+        <!-- 
         <xi:include href="Resource_SpacecraftOverview.xml"/>
         <xi:include href="Resource_SpacecraftOrbit.xml"/>
         <xi:include href="Resource_SpacecraftAttitude.xml"/>
         <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
-        
+        -->
       </reference>
 
       <reference>
@@ -201,6 +195,7 @@
         <xi:include href="Command_While.xml" />
         
       </reference>
+      <!--
       <chapter>
         <title>Reference: Miscellaneous</title>
 
@@ -212,7 +207,7 @@
 
         <xi:include href="Misc_GMATConsoleInstructions.xml" />
       </chapter>
+      -->
     </part>
-    -->
-    <index />
+    <index xml:id="Index" />
 </book>

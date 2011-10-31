@@ -11,7 +11,7 @@
   <para>The GMAT User’s Guide contains material for new and experienced users
   and is organized into the following sections:</para>
 
-  <itemizedlist>
+  <itemizedlist spacing="compact">
     <listitem>
       <para>Introduction to GMAT</para>
     </listitem>
