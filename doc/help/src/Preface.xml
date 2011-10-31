@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preface version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>User Guide Overview and Essential Reading</title>
+
+  <para>The GMAT User’s Guide contains material for new and experienced users
+  and is organized into the following sections:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>Introduction to GMAT</para>
+    </listitem>
+
+    <listitem>
+      <para>Getting Started</para>
+    </listitem>
+
+    <listitem>
+      <para>Create Your First Mission</para>
+    </listitem>
+
+    <listitem>
+      <para>How To</para>
+    </listitem>
+
+    <listitem>
+      <para>Tutorials</para>
+    </listitem>
+
+    <listitem>
+      <para>Reference</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>The Introduction to GMAT section contains a brief project and software
+  overview, and discusses project status, licensing, and contributors.</para>
+
+  <para>The Getting Started section of the GMAT User’s Guide describes how to
+  install and start GMAT, presents an overview of the user interfaces, and
+  provides information on configuring your system. We consider the user
+  interface overview essential reading. <emphasis>If you read nothing else in
+  the User’s Guide, at least read the “User Interfaces Overview section” as it
+  will explain the basic philosophy and rules of GMAT’s user
+  interfaces.</emphasis></para>
+
+  <para>The Creating Your First Mission section walks you through step-by-step
+  to create a spacecraft, a propagator, and an <guilabel>OrbitView</guilabel>
+  graphical display, and then propagate the spacecraft to orbit
+  perigee.</para>
+
+  <para>The How To section of the GMAT documentation contains many articles
+  that each describe a single area of functionality. The purpose is of the How
+  To documentation is to show you how to use a specific feature in an analysis
+  context, and these articles often start from the default mission. A How To
+  doc is designed to take about five minutes to teach you a feature
+  area.</para>
+
+  <para>The Tutorials section describes how to use GMAT for end-to-end
+  analysis, and tutorials start from a blank slate, rather than from a default
+  mission. We’ve included a number of tutorials including a Hohmann transfer,
+  Optimal Lunar Transfer, Optimal Mars Transfer, and low Earth orbit station
+  keeping. Individual tutorials are designed to take between 30 minutes and
+  one day to complete, and teach you how to build and configure all of the
+  models and commands required to perform real-world analysis.</para>
+
+  <para>The Reference section of the User’s Guide describes each GMAT
+  interface, model and command in detail, including syntax, variable ranges
+  and data types, defaults, and expected behavior.</para>
+</preface>
