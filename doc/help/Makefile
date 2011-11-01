@@ -101,6 +101,7 @@ training-a4.pdf: training-a4.fo $(fopconf)
 
 help-letter.fo: validate $(fostyle) $(srcfiles)
 	$(XALAN) \
+	    -PARAM img.src.path src/ \
 	    -PARAM paper.type USletter \
 	    -IN $(helpsrc) \
 	    -XSL $(fostyle) \
@@ -109,6 +110,7 @@ help-letter.fo: validate $(fostyle) $(srcfiles)
 
 training-letter.fo: validate $(fostyle) $(srcfiles)
 	$(XALAN) \
+	    -PARAM img.src.path src/ \
 	    -PARAM paper.type USletter \
 	    -IN $(trainingsrc) \
 	    -XSL $(fostyle) \
@@ -117,6 +119,7 @@ training-letter.fo: validate $(fostyle) $(srcfiles)
 
 help-a4.fo: validate $(fostyle) $(srcfiles)
 	$(XALAN) \
+	    -PARAM img.src.path src/ \
 	    -PARAM paper.type A4 \
 	    -IN $(helpsrc) \
 	    -XSL $(fostyle) \
@@ -125,6 +128,7 @@ help-a4.fo: validate $(fostyle) $(srcfiles)
 
 training-a4.fo : validate $(fostyle) $(srcfiles)
 	$(XALAN) \
+	    -PARAM img.src.path src/ \
 	    -PARAM paper.type A4 \
 	    -IN $(trainingsrc) \
 	    -XSL $(fostyle) \

@@ -71,15 +71,15 @@
     below.</para>
 
     <programlisting>Create ForceModel DefaultProp_ForceModel;
-GMAT DefaultProp_ForceModel.CentralBody = Earth;
-GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
-GMAT DefaultProp_ForceModel.PointMasses = {Jupiter, Luna};
-GMAT DefaultProp_ForceModel.Drag = MSISE90;
-GMAT DefaultProp_ForceModel.SRP = On;
-GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
-GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 21;
-GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 21;
-GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';</programlisting>
+DefaultProp_ForceModel.CentralBody = Earth;
+DefaultProp_ForceModel.PrimaryBodies = {Earth};
+DefaultProp_ForceModel.PointMasses = {Jupiter, Luna};
+DefaultProp_ForceModel.Drag = MSISE90;
+DefaultProp_ForceModel.SRP = On;
+DefaultProp_ForceModel.ErrorControl = RSSStep;
+DefaultProp_ForceModel.GravityField.Earth.Degree = 21;
+DefaultProp_ForceModel.GravityField.Earth.Order = 21;
+DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';</programlisting>
   </section>
 
   <section>

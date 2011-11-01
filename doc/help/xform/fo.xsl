@@ -71,6 +71,7 @@
     <xsl:param name="shade.verbatim" select="1"/>
     <xsl:attribute-set name="monospace.verbatim.properties">
         <xsl:attribute name="font-family">Consolas, monospace</xsl:attribute>
+        <xsl:attribute name="font-size">10</xsl:attribute>
     </xsl:attribute-set>
 
     <!-- Formatting for specific tags -->
