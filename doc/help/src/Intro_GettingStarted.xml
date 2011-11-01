@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="GettingStarted"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -942,7 +943,7 @@ Sat.X = 1000</programlisting>
     </section>
   </section>
 
-  <section version="5.0" xml:id="GettingStarted">
+  <section version="5.0">
     <title>Other Resources</title>
 
     <para>If you have further questions or help for GMAT, or want to provide

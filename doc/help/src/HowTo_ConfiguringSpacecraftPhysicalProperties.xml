@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="ConfiguringSpacecraftPhysicalParameters"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Configuring a Spacecraft's Physical Properties</title>
+
+  <para>To configure the physical properties of a spacecraft, start from the
+  default mission and perform the following steps.</para>
+
+  <procedure>
+    <step>
+      <para> In the <guilabel>Resources</guilabel> tree, double-click on
+      <guilabel>DefaultSC</guilabel> to open it.</para>
+    </step>
+
+    <step>
+      <para> Click on the <guilabel>Ballistic/Mass</guilabel> tab in the
+      <guilabel>Spacecraft</guilabel> dialog box.</para>
+    </step>
+
+    <step>
+      <para> Type <userinput>450</userinput> in the
+      <guilabel>DryMass</guilabel> text box.</para>
+    </step>
+
+    <step>
+      <para> Type <userinput>2.0</userinput> in the <guilabel>Coefficient of
+      Drag</guilabel> text box.</para>
+    </step>
+
+    <step>
+      <para> Type <userinput>1.7</userinput> in the <guilabel>Coefficient of
+      Reflectivity</guilabel> text box.</para>
+    </step>
+
+    <step>
+      <para> Type <userinput>10.5</userinput> in the <guilabel>Drag
+      Area</guilabel> text box.</para>
+    </step>
+
+    <step>
+      <para> Type <userinput>12.5</userinput> in the <guilabel>SRP
+      Area</guilabel> text box.</para>
+    </step>
+  </procedure>
+
+  <para>The script for the physical settings configured above is shown
+  below.</para>
+
+  <programlisting>Create Spacecraft DefaultSC
+DefaultSC.DryMass = 450
+DefaultSC.Cd = 2.0
+DefaultSC.Cr = 1.7
+DefaultSC.DragArea = 10.5
+DefaultSC.SRPArea = 12.5</programlisting>
+</chapter>

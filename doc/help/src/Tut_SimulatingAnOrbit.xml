@@ -171,7 +171,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="media/img/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"
+                         fileref="files/images/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
           </mediaobject>
@@ -281,7 +281,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="media/img/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"
+                         fileref="files/images/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
           </mediaobject>
@@ -331,7 +331,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="media/img/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.jpeg"
+                         fileref="files/images/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.jpeg"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
           </mediaobject>
@@ -395,7 +395,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="media/img/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.png"
+                       fileref="files/images/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.png"
                        scalefit="1" width="100%"></imagedata>
           </imageobject>
         </mediaobject>
@@ -409,7 +409,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="media/img/Tut_PropSpacecraft_PropagateCommandConfiguration.jpeg"
+                       fileref="files/images/Tut_PropSpacecraft_PropagateCommandConfiguration.jpeg"
                        scalefit="1" width="100%"></imagedata>
           </imageobject>
         </mediaobject>
@@ -477,7 +477,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="media/img/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.jpeg"
+                       fileref="files/images/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.jpeg"
                        scalefit="1" width="100%"></imagedata>
           </imageobject>
         </mediaobject>

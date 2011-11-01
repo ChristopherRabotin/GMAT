@@ -37,6 +37,7 @@ clean:
 	rm -rf *.chm *.fo *.html *.pdf chm files html
 
 distclean: clean
+	rm -rf help
 mostlyclean: clean
 maintainer-clean: clean
 

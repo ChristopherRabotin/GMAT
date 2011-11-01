@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="PropagatingSpacecraft"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Propagating a Spacecraft</title>
+
+  <section>
+    <title>Configuring a High-Fidelity Propagator</title>
+
+    <para>In the example below, you’ll learn how to configure a high fidelity
+    propagator for low Earth orbits. Starting from the default mission:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, double-click on
+        <guilabel>DefaultProp</guilabel> to open it.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Gravity</guilabel> section, type 21 in the
+        <guilabel>Degree</guilabel> box.</para>
+      </step>
+
+      <step>
+        <para>Type 21 in the <guilabel>Order</guilabel> box.</para>
+      </step>
+
+      <step>
+        <para>Click on the <guilabel>Atmosphere Model</guilabel> drop-down
+        list and select MSISE90 .</para>
+      </step>
+
+      <step>
+        <para>Click the <guilabel>Select</guilabel> button next to the
+        <guilabel>PointMasses</guilabel> box.</para>
+      </step>
+
+      <step>
+        <para>Click on <guilabel>Sun</guilabel> and then click the right arrow
+        <guilabel>-&gt;</guilabel> to add the <guilabel>Sun</guilabel> to your
+        force model.</para>
+      </step>
+
+      <step>
+        <para>Add <guilabel>Moon</guilabel>, and <guilabel>Jupiter</guilabel>
+        using the same steps as above.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>OK</guilabel> on the
+        <guilabel>CelestialBodySelect</guilabel> dialog box.</para>
+      </step>
+
+      <step>
+        <para>Click on the <guilabel>UseSolarRadiationPressure</guilabel>
+        check box. The box should be checked now.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>OK</guilabel> on the
+        <guilabel>PropSetup</guilabel> dialog box.</para>
+      </step>
+    </procedure>
+
+    <para>The script for the force model configured above is shown
+    below.</para>
+
+    <programlisting>Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
+GMAT DefaultProp_ForceModel.PointMasses = {Jupiter, Luna};
+GMAT DefaultProp_ForceModel.Drag = MSISE90;
+GMAT DefaultProp_ForceModel.SRP = On;
+GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 21;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 21;
+GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';</programlisting>
+  </section>
+
+  <section>
+    <title>Propagating to a Desired Orbit Condition</title>
+
+    <para></para>
+  </section>
+</chapter>

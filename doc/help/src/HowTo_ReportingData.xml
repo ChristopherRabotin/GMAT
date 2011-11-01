@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="ReportingData"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Reporting Data</title>
+
+  <para>GMAT provides several ways to report mission data (such as altitude or
+  delta-V values) to plain text files. GMAT can report data at each
+  integration time step in the mission or at specific mission events, such as
+  periapsis passage. The report functionality is controlled via the
+  <guilabel>ReportFile</guilabel> resource and the <guilabel
+  role="bold">Report</guilabel> and <guilabel role="bold">Toggle</guilabel>
+  commands.</para>
+
+  <section>
+    <title>Reporting Data During a Propagation Span</title>
+
+    <para>You can report data at each integration step in the mission sequence
+    by creating a <guilabel>ReportFile</guilabel> resource and adding data to
+    it. Starting from the default mission:</para>
+
+    <orderedlist spacing="compact">
+      <listitem>
+        <para>On the <guilabel>Resources</guilabel> tree, right-click the
+        <guilabel>Output</guilabel> folder, point to <guilabel>Add</guilabel>,
+        and click <guilabel>ReportFile</guilabel>.</para>
+      </listitem>
+
+      <listitem>
+        <para>Double-click the <guilabel>ReportFile1</guilabel>
+        resource.</para>
+      </listitem>
+
+      <listitem>
+        <para>In the <guilabel>Parameter List</guilabel> area, click
+        <guilabel>Edit</guilabel>.</para>
+      </listitem>
+
+      <listitem>
+        <para>In the <guilabel>Selected Value(s)</guilabel> list, click
+        <guilabel>DefaultSC.EarthMJ2000.X</guilabel> and click
+        <guilabel>&lt;-</guilabel> to remove it from the list.</para>
+      </listitem>
+
+      <listitem>
+        <para>In the <guilabel>Object Properties</guilabel> list, click
+        <guilabel>Altitude</guilabel> and click <guilabel>-&gt;</guilabel> to
+        add it to the <guilabel>Selected Value(s)</guilabel> list.</para>
+      </listitem>
+
+      <listitem>
+        <para>Add <guilabel>DefaultSC.A1ModJulian</guilabel> to the
+        <guilabel>Selected Value(s)</guilabel> list if it doesn’t already
+        exist.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click <guilabel>OK</guilabel>, then in the <guilabel>ReportFile
+        - ReportFile1</guilabel> dialog box, click <guilabel>OK</guilabel>
+        again.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click <guilabel>Run</guilabel>. To view the generated report, on
+        the <guilabel>Output</guilabel> tree, double-click
+        <guilabel>ReportFile1</guilabel>.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>The script for the report data configured above is shown
+    below.</para>
+
+    <programlisting>Create ReportFile ReportFile1;
+GMAT ReportFile1.Add = {DefaultSC.A1ModJulian, DefaultSC.Earth.Altitude};</programlisting>
+  </section>
+
+  <section>
+    <title>Reporting Data at a Specific Mission Event</title>
+
+    <para>You can report data to a <guilabel>ReportFile</guilabel> at a
+    desired location in the mission sequence using the
+    <guilabel>Report</guilabel> command. In this How To, you’ll learn how to
+    report spacecraft altitude at orbit apogee. Starting from the default
+    mission:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, right-click on the
+        <guilabel>Output</guilabel> folder, point to <guilabel>Add</guilabel>,
+        and click <guilabel>ReportFile</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Output</guilabel> folder, double-click on
+        <guilabel>ReportFile1</guilabel> to open it.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Parameter List</guilabel> area, click the
+        <guilabel>Edit</guilabel> button.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Selected Values</guilabel> list, click on
+        <guilabel>DefaultSC.EarthMJ2000Eq.X</guilabel> and click the left
+        arrow <guilabel>&lt;-</guilabel> to remove it from the list.</para>
+      </step>
+
+      <step>
+        <para>Remove <guilabel>DefaultSC.A1ModJulian</guilabel> from the
+        <guilabel>Selected Value(s)</guilabel> list using the step
+        above.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>OK</guilabel> to close the
+        <guilabel>ParameterSelectDialog</guilabel> box and then click
+        <guilabel>OK</guilabel> again to close the
+        <guilabel>ReportFile1</guilabel> dialog box.</para>
+      </step>
+    </procedure>
+
+    <para>Now you will configure the <guilabel>Propagate1</guilabel> command
+    to propagate to periapsis then issue a command to report to
+    <guilabel>ReportFile1</guilabel>.</para>
+
+    <procedure>
+      <step>
+        <para>Click on the <guilabel>Mission</guilabel> tab to bring the
+        mission tree to the foreground.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Mission</guilabel> tree, double-click on
+        <guilabel>Propagate1</guilabel> to open it.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Stopping Conditions</guilabel> list, click on
+        the ellipses <guilabel>...</guilabel> to the left of
+        <guilabel>DefaultSC.ElapsedSecs</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Object Properties</guilabel> list, click on
+        <guilabel>Apoapsis</guilabel> then click on the right arrow
+        <guilabel>-&gt;</guilabel> to add it to the <guilabel>Selected
+        Value(s)</guilabel> list.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>OK</guilabel> to close the
+        <guilabel>ParameterSelectDialog</guilabel> box and then click
+        <guilabel>OK</guilabel> again to close the
+        <guilabel>Propagate1</guilabel> dialog box.</para>
+      </step>
+
+      <step>
+        <para>Right-click on <guilabel>Propagate1</guilabel>, point to
+        <guilabel>Insert After</guilabel>, and then select
+        <guilabel>Report</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Double-click <guilabel>Report1</guilabel> and click on the
+        <guilabel>View</guilabel> button.</para>
+      </step>
+
+      <step>
+        <para>Click on the remove all button <guilabel>&lt;=</guilabel> to
+        remove all items from the <guilabel>Selected Value(s)</guilabel>
+        list.</para>
+      </step>
+
+      <step>
+        <para>Click on <guilabel>TA</guilabel> in the <guilabel>Object
+        Properties</guilabel> list then click the right arrow
+        <guilabel>-&gt;</guilabel> to add it to the <guilabel>Selected
+        Value(s)</guilabel> list.</para>
+      </step>
+
+      <step>
+        <para>Add <guilabel>Altitude</guilabel> to the <guilabel>Selected
+        Value(s)</guilabel> list using the same step as above.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>OK</guilabel> to close the
+        <guilabel>ParameterSelectDialog</guilabel> box and then click
+        <guilabel>OK</guilabel> again to close the
+        <guilabel>Report1</guilabel> dialog box.</para>
+      </step>
+
+      <step>
+        <para>In the Toolbar, click <guilabel>Run</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Click the <guilabel>Output</guilabel> tab.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Reports</guilabel> folder, click
+        <guilabel>ReportFile1</guilabel> to you will see the requested
+        data.</para>
+      </step>
+    </procedure>
+
+    <para>The script for the report data configured above is shown
+    below.</para>
+
+    <programlisting>Create ReportFile ReportFile1;
+BeginMissionSequence;
+Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis};
+Report ReportFile1 DefaultSC.Earth.TA DefaultSC.Earth.Altitude;</programlisting>
+  </section>
+</chapter>

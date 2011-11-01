@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <book version="5.0" xmlns="http://docbook.org/ns/docbook"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:xi="http://www.w3.org/2001/XInclude"
-      xmlns:svg="http://www.w3.org/2000/svg"
-      xmlns:m="http://www.w3.org/1998/Math/MathML"
-      xmlns:html="http://www.w3.org/1999/xhtml"
-      xmlns:db="http://docbook.org/ns/docbook">
-  <info>
-      <title>General Mission Analysis Tool (GMAT)</title>
-      <subtitle>Training Manual</subtitle>
-  </info>
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns:m="http://www.w3.org/1998/Math/MathML"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns:db="http://docbook.org/ns/docbook">
+    <info>
+        <title>General Mission Analysis Tool (GMAT)</title>
+        <subtitle>Training Manual</subtitle>
+    </info>
 
     <xi:include href="Preface.xml"/>
 
@@ -19,19 +19,25 @@
         <xi:include href="Intro_GettingStarted.xml"/>
     </part>
 
-    <part>
+    <part xml:id="CreatingYourFirstMission">
         <title>Creating Your First Mission</title>
         <xi:include href="Tut_SimulatingAnOrbit.xml"/>
     </part>
 
-    <!--
-    <part>
+    <part xml:id="HowTos">
         <title>How-tos</title>
+        <xi:include href="HowTo_SettingSpacecraftInitialEpoch.xml"/>
+        <xi:include href="HowTo_DefiningSpacecraftOrbit.xml"/>
+        <xi:include href="HowTo_ConfiguringSpacecraftPhysicalProperties.xml"/>
+        <xi:include href="HowTo_PropagatingSpacecraft.xml"/>
+        <xi:include href="HowTo_ReportingData.xml"/>
+        <xi:include href="HowTo_CreatingOrbitView.xml"/>
+        <xi:include href="HowTo_CreatingGroundTrackPlot.xml"/>
+        <xi:include href="HowTo_CreatingEphemerisFile.xml"/>
     </part>
-    -->
 
     <part xml:id="Tutorials">
         <title>Tutorials</title>
-	<xi:include href="Tut_SimpleOrbitTransfer.xml" />
+        <xi:include href="Tut_SimpleOrbitTransfer.xml" />
     </part>
 </book>

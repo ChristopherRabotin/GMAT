@@ -7,7 +7,7 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>Introduction to GMAT</title>
+  <title xml:id="IntroductionToGMAT">Introduction to GMAT</title>
 
   <para>GMAT is an open source trajectory design and optimization system
   developed by NASA and private industry. We use an open source process to
