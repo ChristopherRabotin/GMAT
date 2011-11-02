@@ -9,6 +9,7 @@
 
     <!-- Local variables -->
     <xsl:variable name="blue" select="'#0b3d91'"/>
+    <xsl:variable name="blue25" select="'#c2cee3'"/>
     <xsl:variable name="gray" select="'#79797c'"/>
 
     <!-- Page layout -->
@@ -240,4 +241,20 @@
             </xsl:choose>
         </fo:block>
     </xsl:template>
+
+    <!-- Lists -->
+    <xsl:attribute-set name="list.item.spacing">
+        <!-- defaults from compact.list.item.spacing -->
+        <xsl:attribute name="space-before.optimum">0em</xsl:attribute>
+        <xsl:attribute name="space-before.minimum">0em</xsl:attribute>
+        <xsl:attribute name="space-before.maximum">0.2em</xsl:attribute>
+    </xsl:attribute-set>
+
+    <!-- Admonitions -->
+    <xsl:param name="admon.graphics">0</xsl:param>
+    <xsl:attribute-set name="nongraphical.admonition.properties">
+        <xsl:attribute name="background-color">
+            <xsl:value-of select="$blue25"/>
+        </xsl:attribute>
+    </xsl:attribute-set>
 </xsl:stylesheet>

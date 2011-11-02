@@ -987,22 +987,22 @@
     <title>Examples</title>
 
     <programlisting><code>Create ForceModel DefaultProp_ForceModel;
-GMAT DefaultProp_ForceModel.CentralBody = Earth;
-GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
-GMAT DefaultProp_ForceModel.Drag = None;
-GMAT DefaultProp_ForceModel.SRP = Off;
-GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
-GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
-GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
-GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+DefaultProp_ForceModel.CentralBody = Earth;
+DefaultProp_ForceModel.PrimaryBodies = {Earth};
+DefaultProp_ForceModel.Drag = None;
+DefaultProp_ForceModel.SRP = Off;
+DefaultProp_ForceModel.ErrorControl = RSSStep;
+DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
+DefaultProp_ForceModel.GravityField.Earth.Order = 4;
+DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
 
 Create Propagator DefaultProp;
-GMAT DefaultProp.FM = DefaultProp_ForceModel;
-GMAT DefaultProp.Type = RungeKutta89;
-GMAT DefaultProp.InitialStepSize = 60;
-GMAT DefaultProp.Accuracy = 9.999999999999999e-012;
-GMAT DefaultProp.MinStep = 0.001;
-GMAT DefaultProp.MaxStep = 2700;
-GMAT DefaultProp.MaxStepAttempts = 50;</code></programlisting>
+DefaultProp.FM = DefaultProp_ForceModel;
+DefaultProp.Type = RungeKutta89;
+DefaultProp.InitialStepSize = 60;
+DefaultProp.Accuracy = 9.999999999999999e-012;
+DefaultProp.MinStep = 0.001;
+DefaultProp.MaxStep = 2700;
+DefaultProp.MaxStepAttempts = 50;</code></programlisting>
   </refsection>
 </refentry>

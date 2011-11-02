@@ -414,13 +414,13 @@
     <title>Examples</title>
 
     <programlisting><code>Create ReportFile ReportFile1;
-GMAT ReportFile1.SolverIterations = Current;
-GMAT ReportFile1.Filename = 'ReportFile1.txt';
-GMAT ReportFile1.Precision = 16;
-GMAT ReportFile1.Add = {DefaultSC.A1ModJulian, DefaultSC.EarthMJ2000Eq.X};
-GMAT ReportFile1.WriteHeaders = On;
-GMAT ReportFile1.LeftJustify = On;
-GMAT ReportFile1.ZeroFill = Off;
-GMAT ReportFile1.ColumnWidth = 20;</code></programlisting>
+ReportFile1.SolverIterations = Current;
+ReportFile1.Filename = 'ReportFile1.txt';
+ReportFile1.Precision = 16;
+ReportFile1.Add = {DefaultSC.A1ModJulian, DefaultSC.EarthMJ2000Eq.X};
+ReportFile1.WriteHeaders = On;
+ReportFile1.LeftJustify = On;
+ReportFile1.ZeroFill = Off;
+ReportFile1.ColumnWidth = 20;</code></programlisting>
   </refsection>
 </refentry>
