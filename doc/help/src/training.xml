@@ -15,6 +15,10 @@
 
     <part xml:id="Introduction">
         <title>Introduction</title>
+        <partintro>
+            <title>This is an intro</title>
+            <para>This is an introductory paragraph</para>
+        </partintro>
         <xi:include href="Intro_IntroductionToGMAT.xml"/>
         <xi:include href="Intro_GettingStarted.xml"/>
     </part>

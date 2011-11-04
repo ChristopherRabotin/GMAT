@@ -8,9 +8,13 @@
     <xsl:import href="../../build/contrib/docbook-xsl-ns/fo/docbook.xsl"/> 
 
     <!-- Local variables -->
+    <xsl:variable name="black" select="'#000000'"/>
     <xsl:variable name="blue" select="'#0b3d91'"/>
     <xsl:variable name="blue25" select="'#c2cee3'"/>
     <xsl:variable name="gray" select="'#79797c'"/>
+    <xsl:variable name="red" select="'#fc3d21'"/>
+    <xsl:variable name="red25" select="'#fecec7'"/>
+    <xsl:variable name="white" select="'#ffffff'"/>
 
     <!-- Page layout -->
     <xsl:param name="double.sided">1</xsl:param>
@@ -251,10 +255,33 @@
     </xsl:attribute-set>
 
     <!-- Admonitions -->
-    <xsl:param name="admon.graphics">0</xsl:param>
-    <xsl:attribute-set name="nongraphical.admonition.properties">
+    <xsl:param name="admon.graphics">1</xsl:param>
+    <xsl:param name="admon.graphics.extension">.svg</xsl:param>
+    <xsl:attribute-set name="graphical.admonition.properties">
         <xsl:attribute name="background-color">
-            <xsl:value-of select="$blue25"/>
+            <xsl:choose>
+                <xsl:when test="ancestor-or-self::d:tip">
+                    <xsl:value-of select="$white"/>
+                </xsl:when>
+                <xsl:when test="ancestor-or-self::d:note">
+                    <xsl:value-of select="$blue25"/>
+                </xsl:when>
+                <xsl:when test="ancestor-or-self::d:important">
+                    <xsl:value-of select="$white"/>
+                </xsl:when>
+                <xsl:when test="ancestor-or-self::d:caution">
+                    <xsl:value-of select="$red25"/>
+                </xsl:when>
+                <xsl:when test="ancestor-or-self::d:warning">
+                    <xsl:value-of select="$red25"/>
+                </xsl:when>
+            </xsl:choose>
         </xsl:attribute>
+        <xsl:attribute name="border-style">solid</xsl:attribute>
+        <xsl:attribute name="border-color">
+            <xsl:value-of select="$black"/>
+        </xsl:attribute>
+        <xsl:attribute name="padding-right">1em</xsl:attribute>
+        <xsl:attribute name="padding-bottom">1em</xsl:attribute>
     </xsl:attribute-set>
 </xsl:stylesheet>
