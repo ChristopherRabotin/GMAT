@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Configuring a Spacecraft</title>
+
+  <section>
+    <title>Setting the Initial Epoch</title>
+
+    <para>You can configure the initial epoch of a Spacecraft using several
+    time systems (TAI, TDB, UTC, etc) and in several formats (Gregorian Date,
+    Modified Julian Date). In this How To you’ll learn how to set a
+    spacecraft’s epoch in UTC Gregorian format. Starting from the default
+    mission:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, double-click on
+        <guilabel>DefaultSC</guilabel> to open it.</para>
+      </step>
+
+      <step>
+        <para>Make sure the <guilabel>Orbit</guilabel> tab is selected</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>EpochFormat</guilabel> list, select
+        <guilabel>UTCGregorian</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>04 July 2014 09:30:15.235</userinput> in the
+        <guilabel>Epoch</guilabel> text box.</para>
+      </step>
+    </procedure>
+
+    <para>The script for the epoch settings configured above is shown
+    below.</para>
+
+    <programlisting>Create Spacecraft DefaultSC;
+GMAT DefaultSC.DateFormat = UTCGregorian;
+GMAT DefaultSC.Epoch = '04 Jul 2014 09:30:15.235';</programlisting>
+  </section>
+
+  <section>
+    <title>Configuring the Orbit</title>
+
+    <para>To learn how to to define the initial state for a spacecraft orbit,
+    you’ll configure GMAT to propagate the International Space Station (ISS).
+    Starting from the default mission, first set the initial epoch:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, right-click on
+        <guilabel>DefaultSC</guilabel>, and click
+        <guilabel>Rename</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Type <guilabel>ISS</guilabel> in the <guilabel>Rename</guilabel>
+        Dialog Box and then click <guilabel>OK</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>On the <guilabel>Resources</guilabel> tree, double-click on
+        <guilabel>ISS</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Make sure the <guilabel>Orbit</guilabel> tab is selected.</para>
+      </step>
+
+      <step>
+        <para>Click on the <guilabel>Epoch Format</guilabel> drop-down menu
+        and select <guilabel>UTCGregorian</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>21 Oct 2011 14:01:29.130</userinput> in the
+        <guilabel>Epoch</guilabel> text box.</para>
+      </step>
+    </procedure>
+
+    <para>Now follow the steps below to set the orbital state for ISS:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, double-click on
+        <guilabel>DefaultSC</guilabel> to open it.</para>
+      </step>
+
+      <step>
+        <para>Make sure the <guilabel>Orbit</guilabel> tab is selected.</para>
+      </step>
+
+      <step>
+        <para>Click the <guilabel>State Type</guilabel> drop-down menu and
+        select <guilabel>Keplerian</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Elements</guilabel> parameter list on the
+        <guilabel>Spacecraft</guilabel> dialog box, type
+        <userinput>6771.907</userinput> in the <guilabel>SMA</guilabel> text
+        box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>0.00103</userinput> in the
+        <guilabel>ECC</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>51.597</userinput> in the
+        <guilabel>INC</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>244.300</userinput> in the
+        <guilabel>RAAN</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>353.735</userinput> in the
+        <guilabel>AOP</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>199.683</userinput> in the
+        <guilabel>TA</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>OK</guilabel>.</para>
+      </step>
+    </procedure>
+
+    <para>The script for the spacecraft state configured above is show
+    below.</para>
+
+    <programlisting>Create Spacecraft ISS
+ISS.DateFormat=UTCGregorian
+ISS.Epoch = 21 Oct 2011 14:01:29.130
+ISS.SMA = 6771.907
+ISS.ECC = 0.00103
+ISS.INC = 51.597
+ISS.RAAN = 244.300
+ISS.AOP = 353.735
+ISS.TA = 199.683</programlisting>
+
+    <para>Click <guilabel>Run</guilabel> in the Toolbar and you will see plots
+    like those shown below in the <guilabel>Graphics Window</guilabel>.</para>
+
+    <informalfigure>
+      <screenshot>
+        <info>
+          <title></title>
+        </info>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata contentdepth="100%"
+                       fileref="files/images/HowTo_DefiningSpacecraftOrbit_Plots.png"
+                       scalefit="1" width="100%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </informalfigure>
+  </section>
+
+  <section>
+    <title>Configuring Physical Properties</title>
+
+    <para>To configure the physical properties of a spacecraft, start from the
+    default mission and perform the following steps.</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, double-click on
+        <guilabel>DefaultSC</guilabel> to open it.</para>
+      </step>
+
+      <step>
+        <para>Click on the <guilabel>Ballistic/Mass</guilabel> tab in the
+        <guilabel>Spacecraft</guilabel> dialog box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>450</userinput> in the
+        <guilabel>DryMass</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>2.0</userinput> in the <guilabel>Coefficient of
+        Drag</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>1.7</userinput> in the <guilabel>Coefficient of
+        Reflectivity</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>10.5</userinput> in the <guilabel>Drag
+        Area</guilabel> text box.</para>
+      </step>
+
+      <step>
+        <para>Type <userinput>12.5</userinput> in the <guilabel>SRP
+        Area</guilabel> text box.</para>
+      </step>
+    </procedure>
+
+    <para>The script for the physical settings configured above is shown
+    below.</para>
+
+    <programlisting>Create Spacecraft DefaultSC
+DefaultSC.DryMass = 450
+DefaultSC.Cd = 2.0
+DefaultSC.Cr = 1.7
+DefaultSC.DragArea = 10.5
+DefaultSC.SRPArea = 12.5</programlisting>
+  </section>
+</chapter>

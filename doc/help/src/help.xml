@@ -37,15 +37,10 @@
 
     <part xml:id="HowTos">
         <title>How-tos</title>
-
-        <xi:include href="HowTo_SettingSpacecraftInitialEpoch.xml"/>
-        <xi:include href="HowTo_DefiningSpacecraftOrbit.xml"/>
-        <xi:include href="HowTo_ConfiguringSpacecraftPhysicalProperties.xml"/>
-        <xi:include href="HowTo_PropagatingSpacecraft.xml"/>
+        <xi:include href="HowTo_ConfiguringASpacecraft.xml"/>
+        <xi:include href="HowTo_PropagatingASpacecraft.xml"/>
         <xi:include href="HowTo_ReportingData.xml"/>
-        <xi:include href="HowTo_CreatingOrbitView.xml"/>
-        <xi:include href="HowTo_CreatingGroundTrackPlot.xml"/>
-        <xi:include href="HowTo_CreatingEphemerisFile.xml"/>
+        <xi:include href="HowTo_VisualizingData.xml"/>
     </part>
 
     <part xml:id="Tutorials">

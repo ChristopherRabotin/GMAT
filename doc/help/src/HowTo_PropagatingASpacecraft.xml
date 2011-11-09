@@ -10,7 +10,7 @@
   <title>Propagating a Spacecraft</title>
 
   <section>
-    <title>Configuring a High-Fidelity Propagator</title>
+    <title>Configuring the Force Model</title>
 
     <para>In the example below, you’ll learn how to configure a high fidelity
     propagator for low Earth orbits. Starting from the default mission:</para>
@@ -83,7 +83,19 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';</programli
   </section>
 
   <section>
-    <title>Propagating to a Desired Orbit Condition</title>
+    <title>Configuring the Integrator</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>Propagating for a Duration</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>Propagating to an Orbit Condition</title>
 
     <para></para>
   </section>

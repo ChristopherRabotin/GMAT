@@ -219,4 +219,86 @@ BeginMissionSequence;
 Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis};
 Report ReportFile1 DefaultSC.Earth.TA DefaultSC.Earth.Altitude;</programlisting>
   </section>
+
+  <section>
+    <title>Creating a CCSDS Ephemeris File</title>
+
+    <para>The CCSDS Orbit Ephemeris Message (OEM) is a standardized text-based
+    ephemeris format. In GMAT, you can easily create an OEM file with your
+    desired interpolation order and data frequency. Starting from the default
+    mission:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, right-click the
+        <guilabel>Output</guilabel> folder, point to <guimenu>Add</guimenu>,
+        and click <guimenuitem>EphemerisFile</guimenuitem>. A new resource
+        called <guilabel>EphemerisFile1</guilabel> appears in the tree.</para>
+      </step>
+
+      <step>
+        <para>Double-click <guilabel>EphemerisFile1</guilabel> to open
+        it.</para>
+      </step>
+
+      <step>
+        <para>Make sure that in the <guilabel>File Format</guilabel> list,
+        <guilabel>CCSDS-OEM</guilabel> is selected.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>Ok</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>Run</guilabel>. The OEM file will be written to
+        a file named <filename>EphemerisFile1.eph</filename> in GMAT's output
+        folder.</para>
+      </step>
+    </procedure>
+  </section>
+
+  <section>
+    <title>Creating an SPK Ephemeris File</title>
+
+    <para>An SPK ephemeris is a binary file format used by the SPICE Toolkit
+    created by NAIF. GMAT can write spacecraft state information to this
+    format using your desired interpolation order and data frequency. Starting
+    from the default mission:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, right-click the
+        <guilabel>Output</guilabel> folder, point to <guimenu>Add</guimenu>,
+        and click <guimenuitem>EphemerisFile</guimenuitem>. A new resource
+        called <guilabel>EphemerisFile1</guilabel> appears in the tree.</para>
+      </step>
+
+      <step>
+        <para>Double-click <guilabel>EphemerisFile1</guilabel> to open
+        it.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>File Format</guilabel> list, click
+        <guilabel>SPK</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>File Name</guilabel> box, replace the default
+        value with <userinput>EphemerisFile1.bsp</userinput>. An SPK ephemeris
+        requires the <filename>.bsp</filename> extension.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>Ok</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>Run</guilabel>. The SPK file will be written to
+        a file named <filename>EphemerisFile1.bsp</filename> in GMAT's output
+        folder.</para>
+      </step>
+    </procedure>
+  </section>
 </chapter>
