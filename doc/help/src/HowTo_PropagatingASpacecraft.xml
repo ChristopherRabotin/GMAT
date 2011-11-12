@@ -83,20 +83,107 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';</programli
   </section>
 
   <section>
-    <title>Configuring the Integrator</title>
-
-    <para></para>
-  </section>
-
-  <section>
     <title>Propagating for a Duration</title>
 
-    <para></para>
+    <para>GMAT can propagate a spacecraft for a duration of time, such as 60
+    seconds, 30 days, or one orbit period. Starting from the default
+    mission:</para>
+
+    <procedure>
+      <step>
+        <para>Click the <guilabel>Mission</guilabel> tab to show the
+        <guilabel>Mission</guilabel> tree.</para>
+      </step>
+
+      <step>
+        <para>Double-click <guilabel>Propagate1</guilabel>. The default
+        mission is configured to propagate the DefaultSC spacecraft for 12000
+        seconds.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Parameter</guilabel> column, to the left of
+        <guilabel>DefaultSC.ElapsedSecs</guilabel>, click
+        <guibutton>…</guibutton>. This will display a window allowing you to
+        choose a new type of duration parameter.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Object Properties</guilabel> list, click
+        <guilabel>ElapsedDays</guilabel>, then click
+        <guibutton>-&gt;</guibutton> to add it to the <guilabel>Selected
+        Value(s)</guilabel> list.</para>
+      </step>
+
+      <step>
+        <para>Click <guibutton>OK</guibutton>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Condition</guilabel> column, double-click the
+        value <userinput>0.0</userinput> and enter <userinput>30</userinput>
+        instead.</para>
+      </step>
+
+      <step>
+        <para>Click <guibutton>OK</guibutton>, then click
+        <guibutton>Run</guibutton>.</para>
+      </step>
+    </procedure>
+
+    <para>GMAT will propagate the spacecraft for 30 days.</para>
   </section>
 
   <section>
     <title>Propagating to an Orbit Condition</title>
 
-    <para></para>
+    <para>GMAT can propagate a spacecraft to a specific orbit condition, such
+    as periapsis, an altitude value, or a latitude value. Starting from the
+    default mission:</para>
+
+    <procedure>
+      <step>
+        <para>Click the <guilabel>Mission</guilabel> tab to show the
+        <guilabel>Mission</guilabel> tree.</para>
+      </step>
+
+      <step>
+        <para>Double-click <guilabel>Propagate1</guilabel>. The default
+        mission is configured to propagate the DefaultSC spacecraft for 12000
+        seconds.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Parameter</guilabel> column, to the left of
+        <guilabel>DefaultSC.ElapsedSecs</guilabel>, click
+        <guibutton>…</guibutton>. This will display a window allowing you to
+        choose a new type of duration parameter.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Object Properties</guilabel> list, click
+        <guilabel>Periapsis</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Central Body</guilabel> list, make sure
+        <guilabel>Earth</guilabel> is selected. Then click
+        <guibutton>-&gt;</guibutton> to add it to the <guilabel>Selected
+        Value(s)</guilabel> list.</para>
+      </step>
+
+      <step>
+        <para>Click <guibutton>OK</guibutton> to close the
+        <guilabel>ParameterSelectDialog</guilabel> window.</para>
+      </step>
+
+      <step>
+        <para>Click <guibutton>OK</guibutton>, then click
+        <guibutton>Run</guibutton>.</para>
+      </step>
+    </procedure>
+
+    <para>GMAT will propagate the spacecraft until it reaches
+    periapsis.</para>
   </section>
 </chapter>
