@@ -6,16 +6,19 @@
     xmlns:m="http://www.w3.org/1998/Math/MathML"
     xmlns:html="http://www.w3.org/1999/xhtml"
     xmlns:db="http://docbook.org/ns/docbook">
-    <title>General Mission Analysis Tool (GMAT)</title>
-
-    <subtitle>User Guide</subtitle>
-
     <info>
+        <title>General Mission Analysis Tool (GMAT)</title>
+
+        <subtitle>
+            <phrase condition="ug">User Guide</phrase>
+            <phrase condition="tm">Training Manual</phrase>
+        </subtitle>
+        <releaseinfo condition="tm">Korean Aerospace Research Institute</releaseinfo>
+        <date><?dbtimestamp format="d B Y"?></date>
         <author>
             <orgname>The GMAT Development Team</orgname>
+            <uri>gmat.gsfc.nasa.gov</uri>
         </author>
-
-        <releaseinfo>Nightly</releaseinfo>
     </info>
 
     <xi:include href="Preface.xml"/>
@@ -70,7 +73,7 @@
         <xi:include href="Using_OrbitDesigner.xml" />
     </chapter>
 -->
-    <part xml:id="RefGuide">
+    <part condition="ug" xml:id="RefGuide">
         <title>Reference Guide</title>
         <reference xml:id="Resources">
             <title>Resources</title>
@@ -149,5 +152,6 @@
       </chapter>
       -->
     </part>
-    <index xml:id="Index" />
+    <xi:include href="NOSA.xml"/>
+    <index condition="ug" xml:id="Index" />
 </book>

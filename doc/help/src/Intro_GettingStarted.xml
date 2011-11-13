@@ -141,7 +141,7 @@
     builds.</para>
   </section>
 
-  <section>
+  <section xml:id="UserInterfacesOverview">
     <title>User Interfaces Overview</title>
 
     <para>GMAT contains several user interfaces to design and execute your

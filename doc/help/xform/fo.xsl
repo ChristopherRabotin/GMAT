@@ -5,7 +5,10 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
     version="1.0"> 
 
-    <xsl:import href="../../build/contrib/docbook-xsl-ns/fo/docbook.xsl"/> 
+    <xsl:import href="../../build/contrib/docbook-xsl-ns/fo/docbook.xsl"/>
+    
+    <!-- Title page -->
+    <xsl:import href="../fo.titlepage.templates.xsl"/>
 
     <!-- Local variables -->
     <xsl:variable name="black" select="'#000000'"/>
@@ -103,6 +106,7 @@
         /section  toc
         set       toc,title
     </xsl:param>
+    <xsl:template match="d:section[@role = 'notintoc']" mode="toc"/>
 
     <!-- copied from http://sagehill.net/docbookxsl/PrintToc.html#PartToc -->
     <xsl:template name="part.titlepage.before.verso" priority="1">
@@ -283,5 +287,12 @@
         </xsl:attribute>
         <xsl:attribute name="padding-right">1em</xsl:attribute>
         <xsl:attribute name="padding-bottom">1em</xsl:attribute>
+    </xsl:attribute-set>
+    
+    <!-- Verbatim environments -->
+    <xsl:attribute-set name="verbatim.properties">
+        <xsl:attribute name="wrap-option">wrap</xsl:attribute>
+        <xsl:attribute name="keep-together.within-column">auto</xsl:attribute>
+        <xsl:attribute name="background-color">transparent</xsl:attribute>
     </xsl:attribute-set>
 </xsl:stylesheet>

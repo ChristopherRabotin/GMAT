@@ -26,7 +26,6 @@ ALL_XALANFLAGS = -PARAM use.extensions 1 \
 
 # source files
 helpsrc = $(srcdir)/help.xml
-trainingsrc = $(srcdir)/training.xml
 srcfiles = $(srcdir)/*.xml
 fostyle = ./xform/fo.xsl
 
@@ -34,15 +33,15 @@ fostyle = ./xform/fo.xsl
 all: help training
 
 clean:
-	rm -rf *.chm *.fo *.html *.pdf chm files html
+	rm -rf *.chm *.fo *.html *.pdf *.xml *.xsl chm files html
 
 distclean: clean
 	rm -rf help
 mostlyclean: clean
 maintainer-clean: clean
 
-validate:
-	$(JING) $(contribdir)/docbook/docbookxi.rng $(helpsrc) $(trainingsrc)
+validate-pre: $(helpsrc)
+	$(JING) $(contribdir)/docbook/docbookxi.rng $(helpsrc)
 
 dist: all
 	mkdir help
@@ -87,6 +86,22 @@ help-html-multiple: html/index.html
 
 help-chm: help.chm
 
+help-pre.xml: validate-pre $(helpsrc) $(srcfiles)
+	$(XALAN) \
+	    -PARAM profile.condition ug \
+	    -IN $(helpsrc) \
+	    -XSL $(contribdir)/docbook-xsl-ns/profiling/profile.xsl \
+	    -OUT $@
+	$(JING) $(contribdir)/docbook/docbookxi.rng $@
+
+training-pre.xml: validate-pre $(helpsrc) $(srcfiles)
+	$(XALAN) \
+	    -PARAM profile.condition tm \
+	    -IN $(helpsrc) \
+	    -XSL $(contribdir)/docbook-xsl-ns/profiling/profile.xsl \
+	    -OUT $@
+	$(JING) $(contribdir)/docbook/docbookxi.rng $@
+
 help-letter.pdf: help-letter.fo $(fopconf)
 	$(FOP) $< $@
 
@@ -99,57 +114,57 @@ help-a4.pdf: help-a4.fo $(fopconf)
 training-a4.pdf: training-a4.fo $(fopconf)
 	$(FOP) $< $@
 
-help-letter.fo: validate $(fostyle) $(srcfiles)
+help-letter.fo: help-pre.xml $(fostyle)
 	$(XALAN) \
 	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type USletter \
-	    -IN $(helpsrc) \
+	    -IN help-pre.xml \
 	    -XSL $(fostyle) \
 	    -OUT $@ \
 	    $(ALL_XALANFLAGS)
 
-training-letter.fo: validate $(fostyle) $(srcfiles)
+training-letter.fo: training-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	$(XALAN) \
 	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type USletter \
-	    -IN $(trainingsrc) \
+	    -IN training-pre.xml \
 	    -XSL $(fostyle) \
 	    -OUT $@ \
 	    $(ALL_XALANFLAGS)
 
-help-a4.fo: validate $(fostyle) $(srcfiles)
+help-a4.fo: help-pre.xml $(fostyle)
 	$(XALAN) \
 	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type A4 \
-	    -IN $(helpsrc) \
+	    -IN help-pre.xml \
 	    -XSL $(fostyle) \
 	    -OUT $@ \
 	    $(ALL_XALANFLAGS)
 
-training-a4.fo : validate $(fostyle) $(srcfiles)
+training-a4.fo: training-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	$(XALAN) \
 	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
 	    -PARAM img.src.path src/ \
 	    -PARAM paper.type A4 \
-	    -IN $(trainingsrc) \
+	    -IN training-pre.xml \
 	    -XSL $(fostyle) \
 	    -OUT $@ \
 	    $(ALL_XALANFLAGS)
 
-help.html : validate files/style.css $(srcfiles)
+help.html: help-pre.xml files/style.css
 	$(XALAN) \
 	    -PARAM html.stylesheet files/style.css \
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
-	    -IN $(helpsrc) \
+	    -IN help-pre.xml \
 	    -XSL $(contribdir)/docbook-xsl-ns/html/docbook.xsl \
 	    -OUT $@ \
 	    $(ALL_XALANFLAGS)
 
-html/index.html: validate files/style.css $(srcfiles)
+html/index.html: help-pre.xml files/style.css
 	$(XALAN) \
 	    -PARAM base.dir ../html/ \
 	    -PARAM img.src.path ../ \
@@ -157,14 +172,14 @@ html/index.html: validate files/style.css $(srcfiles)
 	    -PARAM chunk.quietly 1 \
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
-	    -IN $(helpsrc) \
+	    -IN help-pre.xml \
 	    -XSL $(contribdir)/docbook-xsl-ns/html/chunkfast.xsl \
 	    $(ALL_XALANFLAGS)
 
 files/style.css: $(srcdir)/files/style.css
 	svn export --force src/files files
 
-help.chm: validate files/style.css $(srcfiles)
+help.chm: help-pre.xml files/style.css
 	$(XALAN) \
 	    -PARAM base.dir ../chm/ \
 	    -PARAM manifest.in.base.dir 1 \
@@ -180,9 +195,15 @@ help.chm: validate files/style.css $(srcfiles)
 	    -PARAM htmlhelp.use.hhk 1 \
 	    -PARAM use.id.as.filename 1 \
 	    -PARAM variablelist.as.table 1 \
-	    -IN $(helpsrc) \
+	    -IN help-pre.xml \
 	    -XSL $(contribdir)/docbook-xsl-ns/htmlhelp/htmlhelp.xsl \
 	    $(ALL_XALANFLAGS)
 	cp -pR files chm/files
 	-hhc chm/htmlhelp.hhp
 	mv chm/htmlhelp.chm $@
+
+fo.titlepage.templates.xsl: xform/fo.titlepage.templates.xml
+	$(XALAN) \
+	-IN $< \
+	-XSL $(contribdir)/docbook-xsl-ns/template/titlepage.xsl \
+	-OUT $@
