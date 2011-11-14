@@ -61,47 +61,45 @@
     <title>Platforms</title>
 
     <para>GMAT is implemented to run on Windows, Linux and Macintosh
-    platforms, using the wxWidgets cross platform UI Framework, and can be
-    built using either commercial development tools such as Microsoft Visual
-    Studio or the GNU Compiler Collection (GCC) with your preferred IDE. The
-    system is implemented in ANSI standard C++ (approximately 380,000
-    non-comment source lines of code) using an Object Oriented methodology,
-    with a rich class structure designed to make new features simple to
-    incorporate. On Windows and Linux, GMAT does not call any operating system
-    unique functions or methods. Calls to the operating system are standard
-    calls for reading and writing data files and for writing data to the
-    screen. On the Mac, GMAT makes a call to the operating system to open X11,
-    which is required to run MATLAB on the Mac.</para>
+    platforms, using the wxWidgets cross platform UI toolkit, and can be built
+    using either Microsoft Visual Studio or the GNU Compiler Collection (GCC).
+    GMAT is written in ANSI standard C++ (approximately 380,000 non-comment
+    source lines of code) using an object-oriented methodology, with a rich
+    class structure designed to make new features simple to incorporate. On
+    Windows and Linux, GMAT does not call any operating-system-unique
+    functions or methods. Calls to the operating system are standard calls for
+    reading and writing data files and for writing data to the screen. On the
+    Mac, GMAT makes a call to the operating system to open X11, which is
+    required to run MATLAB on the Mac.</para>
   </section>
 
   <section>
     <title>User Interfaces</title>
 
-    <para>GMAT has several user interfaces. The graphical user interface is an
-    interactive GUI and is introduced in more detail in later sections. The
-    script interface is textual and also allows the user to set up and execute
-    all aspects of GMAT. The MATLAB interface is a secondary textual interface
-    for running the system via calls from MATLAB to GMAT and allows GMAT to
-    call MATLAB functions from within the GMAT command sequence. An interface
-    currently under development is a C language API for low level calls into
-    the GMAT engine.</para>
+    <para>GMAT has several user interfaces. The interactive graphical user
+    interface is introduced in more detail in later sections. The script
+    interface is textual and also allows the user to configure and execute all
+    aspects of GMAT. There also a secondary MATLAB interface that allows for
+    running the system via calls from MATLAB to GMAT and allows GMAT to call
+    MATLAB functions from within the GMAT command sequence. A low-level C API
+    is also currently under development.</para>
   </section>
 
   <section>
     <title>Status</title>
 
     <para>While GMAT has undergone extensive testing and is mature software,
-    at the present time we consider the software to be in Beta form on Windows
-    and Alpha on Linux and Mac. GMAT is not yet sufficiently verified to be
-    used as a primary operational analysis system. GMAT has been used to
+    at the present time we consider the software to be in beta form on Windows
+    and alpha on Linux and Mac. GMAT is not yet sufficiently verified to be
+    used as a primary operational analysis system. It has been used to
     optimize maneuvers for flight projects such as NASA’s LCROSS and ARTEMIS
     missions, and the Lunar Reconnaissance Orbiter, and for optimization and
     analysis for the OSIRIS and MMS missions. However, for flight planning, we
     independently verify solutions generated in GMAT in the primary
     operational system.</para>
 
-    <para>The GMAT Team is currently working on several activities including
-    maintenance, bug fixes, and testing along with selected new
+    <para>The GMAT team is currently working on several activities including
+    maintenance, bug fixes, and testing, along with selected new
     functionality.</para>
   </section>
 

@@ -29,6 +29,7 @@
     <xsl:param name="body.font.family">Garamond</xsl:param>
     <xsl:param name="body.font.master">11</xsl:param>
     <xsl:param name="title.font.family">Helvetica</xsl:param>
+    <xsl:param name="monospace.font.family">Consolas, monospace</xsl:param>
 
     <!-- Titles -->
     <xsl:attribute-set name="component.title.properties">
@@ -78,7 +79,6 @@
     <!-- Program listings -->
     <xsl:param name="shade.verbatim" select="1"/>
     <xsl:attribute-set name="monospace.verbatim.properties">
-        <xsl:attribute name="font-family">Consolas, monospace</xsl:attribute>
         <xsl:attribute name="font-size">10</xsl:attribute>
     </xsl:attribute-set>
 
