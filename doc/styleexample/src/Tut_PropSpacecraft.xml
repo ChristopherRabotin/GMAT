@@ -13,18 +13,18 @@
     <title>Objective and Overview</title>
 
     <para>The most fundamental capability of GMAT is to propagate spacecraft,
-    which said another way is to model/simulate the motion of spacecraft. The
-    ability to propagate spacecraft is used in nearly every practical aspect
-    of space mission analysis from simple orbital predictions--when will the
+    which said another way is to simulate the orbital motion. The ability to
+    propagate spacecraft is used in nearly every practical aspect of space
+    mission analysis from simple orbital predictions--when will the
     International Space Station be over my house?--to complex analyses that
-    determine the thurster firing sequence required to send a spacecraft to
+    determine the thirster firing sequence required to send a spacecraft to
     the Moon or Mars.</para>
 
     <para>This tutorial will teach you how to use GMAT to propagate a
     spacecraft. You will learn how to configure a
     <guilabel>Spacecraft</guilabel> and a <guilabel>Propagator</guilabel>, and
     then set up a <guilabel>Propagate</guilabel> command to propagate the
-    spacecraft to orbit perigee, which is the point of minumum distance
+    spacecraft to orbit perigee, which is the point of minimum distance
     between a spacecraft and Earth. The basic steps in this tutorial
     are:</para>
 
@@ -44,8 +44,8 @@
       </listitem>
 
       <listitem>
-        <para>Modify the <guilabel>Propagate</guilabel> command to to
-        propagate the spacecraft to the perigee.</para>
+        <para>Modify the <guilabel>Propagate</guilabel> command to propagate
+        the spacecraft to the perigee.</para>
       </listitem>
 
       <listitem>
@@ -96,8 +96,9 @@
 
         <listitem>
           <para>In the <guilabel>Epoch Format</guilabel> box, select
-          UTCGregorian. You'll see the value in the Epoch field change to the
-          UTC Gregorian epoch format.</para>
+          <guilabel>UTCGregorian</guilabel>. You'll see the value in the
+          <guilabel>Epoch</guilabel> field change to the UTC Gregorian epoch
+          format.</para>
         </listitem>
 
         <listitem>
@@ -117,9 +118,9 @@
       <orderedlist spacing="compact">
         <listitem>
           <para>In the <guilabel>StateType</guilabel> box select
-          <guilabel>Keplerian</guilabel> . In <guilabel>Elements</guilabel>
-          list you will see the GUI reconfigure to display to the Keplerian
-          representation.</para>
+          <guilabel>Keplerian</guilabel> . In the
+          <guilabel>Elements</guilabel> list, you will see the GUI reconfigure
+          to display the Keplerian state representation.</para>
         </listitem>
 
         <listitem>
@@ -128,41 +129,67 @@
         </listitem>
 
         <listitem>
-          <para>In the <guilabel>ECC</guilabel> box, type
-          <guilabel>0.89652</guilabel>.</para>
+          <para>Set the remaining orbital elements as shown in the table
+          below.</para>
+
+          <para><table colsep="0" frame="topbot">
+              <title><guilabel>Sat</guilabel> Orbit State Settings</title>
+
+              <tgroup cols="2">
+                <thead>
+                  <row>
+                    <entry>Field</entry>
+
+                    <entry>Value</entry>
+                  </row>
+                </thead>
+
+                <tbody>
+                  <row>
+                    <entry><guilabel>ECC</guilabel></entry>
+
+                    <entry><guilabel>0.89652</guilabel></entry>
+                  </row>
+
+                  <row>
+                    <entry><guilabel>INC</guilabel></entry>
+
+                    <entry><guilabel>12.4606</guilabel></entry>
+                  </row>
+
+                  <row>
+                    <entry><guilabel>RAAN</guilabel></entry>
+
+                    <entry><guilabel>292.8362</guilabel></entry>
+                  </row>
+
+                  <row>
+                    <entry><guilabel>AOP</guilabel></entry>
+
+                    <entry><guilabel>218.9805</guilabel></entry>
+                  </row>
+
+                  <row>
+                    <entry><guilabel>TA</guilabel></entry>
+
+                    <entry><guilabel>180</guilabel></entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </table></para>
         </listitem>
 
         <listitem>
-          <para>In the <guilabel>INC</guilabel> box, type
-          <guilabel>12.4606</guilabel>.</para>
+          <para>Click <guilabel>OK</guilabel>.</para>
         </listitem>
 
         <listitem>
-          <para>In the <guilabel>RAAN</guilabel> box, type
-          <guilabel>292.8362</guilabel>.</para>
-        </listitem>
-
-        <listitem>
-          <para>In the <guilabel>AOP</guilabel> box, type
-          <guilabel>218.9805</guilabel>.</para>
-        </listitem>
-
-        <listitem>
-          <para>In the <guilabel>TA</guilabel> box, type
-          <guilabel>180</guilabel>.</para>
-        </listitem>
-
-        <listitem>
-          <para>Compare your configuration with <xref
-          linkend="Tut_PropASpacecraft_OrbitDialog" /> below and fix any
-          differences, and click <guilabel>OK.</guilabel></para>
+          <para>In the <guilabel>Toolbar</guilabel>, Click the <guilabel> Save
+          </guilabel> button. If this is the first time you have saved the
+          mission, you'll be prompted to provide a name and location for the
+          file.</para>
         </listitem>
       </orderedlist>
-
-      <para>At this point, save your work to the disk: In the
-      <guilabel>Toolbar </guilabel>, click the <guilabel> Save </guilabel>
-      button. If this is the first time you have saved the mission, you'll be
-      prompted to provide a name and location for the file.</para>
 
       <figure xml:id="Tut_PropASpacecraft_OrbitDialog">
         <title>Spacecraft State Setup</title>
@@ -226,13 +253,13 @@
 
         <listitem>
           <para>In the <guilabel>Gravity</guilabel> list, type
-          <guilabel>10</guilabel> both the <guilabel>Degree</guilabel>
+          <guilabel>10</guilabel> in the <guilabel>Degree</guilabel>
           box.</para>
         </listitem>
 
         <listitem>
-          <para>Type <guilabel>10</guilabel> in the <guilabel>Order</guilabel>
-          box.</para>
+          <para>In the <guilabel>Order</guilabel> box, Type
+          <guilabel>10</guilabel>.</para>
         </listitem>
 
         <listitem>
@@ -249,28 +276,22 @@
         <listitem>
           <para>In the <guilabel>Available Bodies</guilabel> list, click
           <guilabel>Sun</guilabel>, then click <guilabel> -&gt; </guilabel> to
-          add <guilabel>Sun</guilabel>to the Selected Bodies list.</para>
+          add <guilabel>Sun </guilabel>to the <guilabel>Selected
+          Bodies</guilabel> list.</para>
         </listitem>
 
         <listitem>
-          <para>Add <guilabel>Moon</guilabel> (named Luna in GMAT) using the
-          same procedure above.</para>
+          <para>Add the moon (named Luna in GMAT) using the same procedure
+          above.</para>
         </listitem>
 
         <listitem>
-          <para>Compare your configuration with the figure below and fix any
-          differences.</para>
-        </listitem>
-
-        <listitem>
-          <para>Click <guilabel>Use SolarRadiation Pressure</guilabel> to
+          <para>Click <guilabel>Use Solar Radiation Pressure</guilabel> to
           toggle it on.</para>
         </listitem>
 
         <listitem>
-          <para>Compare your <guilabel>LowEarthProp</guilabel> configuration
-          with <xref linkend="Tut_PropASpacecraft_PropSetUp" /> below, fix any
-          discrepencies, and click <guilabel>OK</guilabel>.</para>
+          <para>Click <guilabel>OK</guilabel>.</para>
         </listitem>
       </orderedlist>
 
@@ -292,15 +313,15 @@
     <section>
       <title>Configuring the Orbit View Plot</title>
 
-      <para>Below you will configure an <guilabel>Orbit View</guilabel> plot
-      so you can visualize <guilabel>Sat</guilabel> and its trajectory. The
-      orbit of <guilabel>Sat</guilabel> is highly eccentric. To view the
-      entire orbit in the plot, we need to adjust the settings of
+      <para>Below you will configure an <guilabel>OrbitView</guilabel> plot so
+      you can visualize <guilabel>Sat</guilabel> and its trajectory. The orbit
+      of <guilabel>Sat</guilabel> is highly eccentric. To view the entire
+      orbit in the plot, we need to adjust the settings of
       <guilabel>DefaultOrbitView</guilabel>.</para>
 
       <orderedlist spacing="compact">
         <listitem>
-          <para>In the <guilabel>Resources Tree</guilabel>, click on
+          <para>In the <guilabel>Resources Tree</guilabel>, double-click on
           <guilabel>DefaultOrbitView</guilabel>.</para>
         </listitem>
 
@@ -312,15 +333,12 @@
         </listitem>
 
         <listitem>
-          <para>In the <guilabel>Drawing Options</guilabel> list, uncheck
+          <para>In the <guilabel>Drawing Options</guilabel> list, un-check
           <guilabel>DrawXY Plane</guilabel>.</para>
         </listitem>
 
         <listitem>
-          <para>Compare your <guilabel>DefaultOrbitView</guilabel>
-          configuration with <xref
-          linkend="Tut_PropASpacecraft_OrbitViewDialog" /> below, fix any
-          discrepencies, and click <guilabel>OK</guilabel>.</para>
+          <para>Click <guilabel>OK</guilabel>.</para>
         </listitem>
       </orderedlist>
 
@@ -375,32 +393,27 @@
         <guilabel>Periapsis</guilabel> to add it to the <guilabel>Selected
         Values</guilabel> list as shown in <xref
         linkend="Tut_PropASpacecraft_StopSetUp" />.</para>
+
+        <figure xml:id="Tut_PropASpacecraft_StopSetUp">
+          <title>Propagate Command Parameter Select Dialog
+          Configuration</title>
+
+          <screenshot>
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="media/img/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.png"
+                           scalefit="1" width="100%"></imagedata>
+              </imageobject>
+            </mediaobject>
+          </screenshot>
+        </figure>
       </listitem>
 
       <listitem>
         <para>Click <guilabel>OK</guilabel>.</para>
       </listitem>
-
-      <listitem>
-        <para>Compare your <guilabel>Propagate1</guilabel> configuration with
-        <xref linkend="Tut_PropASpacecraft_Propagate1Dialog" /> below, fix any
-        discrepencies, and click <guilabel>OK</guilabel>.</para>
-      </listitem>
     </orderedlist>
-
-    <figure xml:id="Tut_PropASpacecraft_StopSetUp">
-      <title>Propagate Command Parameter Select Dialog Configuration</title>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="media/img/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.png"
-                       scalefit="1" width="100%"></imagedata>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-    </figure>
 
     <figure xml:id="Tut_PropASpacecraft_Propagate1Dialog">
       <title>Propagate Command Configuration</title>
@@ -455,7 +468,7 @@
       <listitem>
         <para>Left-click on <guilabel>Propagate1</guilabel> and select
         <guilabel>Command Summary</guilabel> to see data on the final state of
-        Sat.</para>
+        <guilabel>Sat</guilabel>.</para>
       </listitem>
 
       <listitem>
@@ -467,6 +480,22 @@
         <para>Are the values for the final longitude and latitude of
         <guilabel>Sat</guilabel> consistent with the <guilabel>Ground
         Track</guilabel> plot <guilabel>Sat</guilabel>?</para>
+      </listitem>
+
+      <listitem>
+        <para>Close the <guilabel>Command Summary</guilabel> dialog
+        box.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click in the <guilabel>DefaultOrbitView</guilabel> graphics
+        window to bring the window to the foreground.</para>
+      </listitem>
+
+      <listitem>
+        <para>Click <guilabel>Start Animation</guilabel> in the
+        <guilabel>Toolbar</guilabel> to animate the mission and watch the
+        orbit propagate from apogee to perigee.</para>
       </listitem>
     </orderedlist>
 
