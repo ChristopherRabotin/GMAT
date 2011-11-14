@@ -20,7 +20,7 @@
       transfer from one circular orbit to another circular,coplanar orbit.
       Circular, coplanar transfers are used to raise low-Earth orbits that
       have degraded due to the effects of atmospheric drag. They are also used
-      to transfer from a low-Earth orbit to a Geosychronouse orbit and to send
+      to transfer from a low-Earth orbit to a Geosynchronous orbit and to send
       spacecraft to Mars. There is a well known sequence of maneuvers, called
       the Hohmann transfer, that performs a circular, coplanar transfer using
       the least possible amount of fuel. A Hohmann transfer employs two
@@ -38,7 +38,7 @@
     order to focus on the configuration of the <guilabel>Target</guilabel>
     sequence, you will make extensive use of the default configurations for
     spacecraft, propagators, and maneuvers. The <guilabel>Target</guilabel>
-    sequence employs two velocity-dirction maneuvers and two propagation
+    sequence employs two velocity-direction maneuvers and two propagation
     sequences. The purpose of the first maneuver is to raise orbit apogee to
     42165 km. The purpose of the second maneuver is to nearly circularize the
     orbit and yield a final eccentricity of 0.005. The basic steps of this
@@ -71,18 +71,18 @@
   </section>
 
   <section>
-    <title>Configure Manuever, Differential Corrector, and Graphics</title>
+    <title>Configure Maneuver, Differential Corrector, and Graphics</title>
 
     <para>For this tutorial, you'll need GMAT open, with the Default Mission
     loaded. To load the Default Mission click <guilabel>New Mission</guilabel>
     in the <guilabel>Toolbar</guilabel> or start a new GMAT session. We will
-    use the default configurations for a spaceraft
+    use the default configurations for a spacecraft
     (<guilabel>DefaultSC</guilabel>), a propagator
     (<guilabel>DefaultProp</guilabel>), and maneuvers.
     <guilabel>DefaultSC</guilabel> is configured to a near circular orbit and
     <guilabel>DefaultProp</guilabel> is configured to use Earth as the central
     body with a gravity model of degree and order 4. The default impulsive
-    burn model uses the Velocity Normal Binormal (VNB) coordinate system. You
+    burn model uses the Velocity Normal Bi-normal (VNB) coordinate system. You
     may want to open the dialog boxes for these objects and inspect them more
     closely as we will leave the settings of those objects at their default
     values.</para>
@@ -162,7 +162,7 @@
         </step>
 
         <step>
-          <para>Click <guilabel>Ok</guilabel>.</para>
+          <para>Click <guilabel>OK</guilabel>.</para>
         </step>
       </procedure>
     </section>
@@ -204,13 +204,13 @@
   </section>
 
   <section>
-    <title>Configure the Targeter</title>
+    <title>Configure the Target Sequence</title>
 
     <para>Now you will configure a <guilabel>Target</guilabel> sequence to
-    solve for the manuever values required to raise the orbit to
+    solve for the maneuver values required to raise the orbit to
     Geosynchronous altitude and circularize the orbit. We'll begin by creating
-    the <guilabel>Target</guilabel> sequence and then discuss the the function
-    of each command. Finally, we'll configure the commands for our problem. To
+    the <guilabel>Target</guilabel> sequence and then discuss the function of
+    each command. Finally, we'll configure the commands for our problem. To
     allow us to focus on the Target sequence, we'll assume you have learned
     how to propagate an orbit to a desire condition by taking the Create Your
     First Mission Tutorial.</para>
@@ -240,8 +240,8 @@
       <guilabel>Target</guilabel> sequence. <xref
       linkend="Tut_HohmannTransfer_TargetSequence" /> illustrates the
       configuration of the <guilabel>Mission Tree</guilabel> after you have
-      complete the steps in this section. We'll discuss the the Target
-      Sequence after it has been created.</para>
+      complete the steps in this section. We'll discuss the
+      <guilabel>Target</guilabel> Sequence after it has been created.</para>
 
       <figure xml:id="Tut_HohmannTransfer_TargetSequence">
         <title><guilabel>Target</guilabel> Sequence for the Hohmann
@@ -359,18 +359,18 @@
 
       <note>
         <para>Let's discuss what the <guilabel>Target</guilabel> sequence
-        does. We know that two maneuvers are required to peform the Hohmann
+        does. We know that two maneuvers are required to perform the Hohmann
         transfer. We also know that for our current mission, the final orbit
         radius must be 42165 and the final orbital eccentricity must be 0.005.
         However, we do NOT know the size (delta v magnitudes) of the maneuvers
         that precisely achieve the desired orbital conditions. You use the
-        <guilabel>Target</guilabel> seqeunce to solve for those precise
+        <guilabel>Target</guilabel> sequence to solve for those precise
         maneuver values. But, you must tell GMAT what controls are available,
         (in this case two maneuver values) and what conditions must be
         satisfied (in this case orbital radius and eccentricity). You
         accomplish this using the <guilabel>Vary</guilabel> and
         <guilabel>Achieve</guilabel> commands. Using the
-        <guilabel>Vary</guilabel> commmand, you tell GMAT what you would like
+        <guilabel>Vary</guilabel> command, you tell GMAT what you would like
         it to solve for -- in this case the Delta V values for
         <guilabel>TOI</guilabel> and <guilabel>GOI</guilabel>. You use the
         <guilabel>Achieve</guilabel> command to tell GMAT what conditions the
@@ -385,14 +385,14 @@
       <para>Let's configure the target sequence.</para>
 
       <section>
-        <title>Configure the <guilabel>Hohmman Transfer</guilabel>
+        <title>Configure the <guilabel>Hohmann Transfer</guilabel>
         Command</title>
 
         <procedure>
           <step>
-            <para>Double-click on <guilabel>Hohmann Transfer</guilabel> dialog
-            box.and change <guilabel>ExitMode</guilabel> to
-            <guilabel>SaveAndContinue</guilabel>.</para>
+            <para>Double-click <guilabel>Hohmann Transfer</guilabel> and
+            change <guilabel>ExitMode</guilabel> to
+            <guilabel>SaveAndContinue</guilabel>. </para>
           </step>
 
           <step>
@@ -463,7 +463,7 @@
       </section>
 
       <section>
-        <title>Cofigure the <guilabel>Apply TOI</guilabel> Command</title>
+        <title>Configure the <guilabel>Apply TOI</guilabel> Command</title>
 
         <procedure>
           <step>
@@ -767,8 +767,8 @@
     <guilabel>Toolbar</guilabel>. As the mission runs, you will see GMAT solve
     the targeting problem and the iterations and perturbations are shown in
     light blue in the <guilabel>DefaultOrbitView</guilabel> window. After the
-    mission is complete, the OrbitView should appear similar to the image
-    shown below.</para>
+    mission is complete, the <guilabel>OrbitView</guilabel> should appear
+    similar to the image shown below.</para>
 
     <screenshot>
       <mediaobject>
@@ -785,8 +785,8 @@
     </screenshot>
 
     <para>You can save the resulting solution so that if you make small
-    changes to the problem and retarget, the initial guess for subsequent runs
-    will use the solution from your work above.</para>
+    changes to the problem and re-target, the initial guess for subsequent
+    runs will use the solution from your work above.</para>
 
     <procedure>
       <step>
@@ -803,8 +803,8 @@
         button in the <guilabel>Toolbar</guilabel>. If you inspect the results
         in the message window, you will see that the
         <guilabel>Target</guilabel> sequence converges in one iteration
-        because you gave provided the solution as the new initial guess.
-        </para>
+        because you gave provided the solution as the new initial
+        guess.</para>
       </step>
     </procedure>
   </section>

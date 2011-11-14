@@ -11,6 +11,22 @@
 
   <section>
     <title>Objective and Overview</title>
+	
+	<note>
+      <para>One of the most common problems in space mission design is to
+      transfer from one circular orbit to another circular,coplanar orbit.
+      Circular, coplanar transfers are used to raise low-Earth orbits that
+      have degraded due to the effects of atmospheric drag. They are also used
+      to transfer from a low-Earth orbit to a Geosychronouse orbit and to send
+      spacecraft to Mars. There is a well known sequence of maneuvers, called
+      the Hohmann transfer, that performs a circular, coplanar transfer using
+      the least possible amount of fuel. A Hohmann transfer employs two
+      maneuvers. The first maneuver raises the orbital apogee (or lowers
+      orbital perigee) to the desired altitude and places the spacecraft in an
+      elliptical transfer orbit. At the apogee (or perigee) of the elliptical
+      transfer orbit, a second maneuver is applied to circularize the
+      orbit</para>
+    </note>
 
     <para>The primary goal of this mission is for you to learn how to create
     and propagate a transfer trajectory from a LEO (Low Earth Orbit) to a

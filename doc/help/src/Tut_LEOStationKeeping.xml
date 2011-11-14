@@ -12,8 +12,8 @@
   <section>
     <title>Objective and Overview</title>
 
-    <para><emphasis role="bold"></emphasis>In this tutorial, you will learn
-    how to use the GMAT's control flow and targeting mechanisms to maintain a
+    <para><emphasis role="bold"></emphasis>n this tutorial, you will learn how
+    to use the GMAT's control flow and targeting mechanisms to maintain a
     Low-Earth orbit in the presense of atmosphere drag. For the sake of
     simulation time, we will make the area-to-mass ratio of the spacecraft
     large, to make the drag cause a rapid lowering of the orbit semimajor
