@@ -66,6 +66,8 @@
 #    include <GL/glu.h>
 #  endif
 #  include "wx/glcanvas.h"
+   // Double buffer activation needed in Linux (Patch from Tristan Moody)
+   static int GmatGLCanvasAttribs[2] = {WX_GL_DOUBLEBUFFER, 0};
 #endif
 
 #ifdef __WXMSW__  // Windows
