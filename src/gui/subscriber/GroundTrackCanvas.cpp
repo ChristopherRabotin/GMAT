@@ -235,18 +235,26 @@ GroundTrackCanvas::~GroundTrackCanvas()
       ("GroundTrackCanvas::~GroundTrackCanvas() '%s' entered\n", mPlotName.c_str());
    #endif
    
-   // Note:
-   // deleting m_glContext is handled in wxGLCanvas
-   
-   #ifndef __WXMAC__
-      ModelManager *mm = ModelManager::Instance();
-      if (!mm->modelContext)
-      {
-         // delete modelContext since it was created in the constructor
-         delete mm->modelContext;
-         mm->modelContext = NULL;
-      }
-   #endif
+   // Patch from Tristan Moody
+   //   This patch moves the modelContext deletion to the ModelManager
+   //   destructor from the OrbitViewCanvas and GroundTrackCanvas destructors.
+   //   As long as the ModelManager destructor is called after all other
+   //   OpenGL-related code is finished (to be verified), this should fix the
+   //   problem reported in Bug 2591.
+   //
+   // Old code:
+//   // Note:
+//   // deleting m_glContext is handled in wxGLCanvas
+//
+//   #ifndef __WXMAC__
+//      ModelManager *mm = ModelManager::Instance();
+//      if (!mm->modelContext)
+//      {
+//         // delete modelContext since it was created in the constructor
+//         delete mm->modelContext;
+//         mm->modelContext = NULL;
+//      }
+//   #endif
    
    ClearObjectArrays();
    

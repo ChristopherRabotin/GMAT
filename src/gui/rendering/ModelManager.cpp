@@ -50,6 +50,17 @@ ModelManager::~ModelManager()
          delete pos->second;
       }
    }
+
+   // Patch from Tristan Moody
+   //   This patch moves the modelContext deletion to the ModelManager
+   //   destructor from the OrbitViewCanvas and GroundTrackCanvas destructors.
+   //   As long as the ModelManager destructor is called after all other
+   //   OpenGL-related code is finished (to be verified), this should fix the
+   //   problem reported in Bug 2591.
+   //
+   // New code (next 2 lines):
+   if (modelContext != NULL)
+      delete modelContext;
 }
 
 ModelObject* ModelManager::GetModel(int id){
