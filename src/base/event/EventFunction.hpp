@@ -64,7 +64,9 @@ protected:
    /// Event function descriptor
    std::string       instanceName;
    /// Current/most recently evaluated epoch, event value, derivative
-   Real              eventData[3];
+   Real              *eventData;
+   /// Size of the event data array
+   UnsignedInt       dataSize;
    /// SpaceObject that plays the role of “target” in the event computations.
    SpaceObject       *primary;
    /// Event boundary type; defaults to "Entry" or "Exit"

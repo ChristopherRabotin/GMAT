@@ -33,13 +33,12 @@
 EventFunction::EventFunction(const std::string &typeStr) :
    typeName          (typeStr),
    instanceName      ("Base EventFunction (Name not set)"),
+   eventData         (NULL),
+   dataSize          (3),
    primary           (NULL),
    boundaryType      ("Undetermined"),
    isStart           (false)
 {
-   eventData[0] = 0.0;
-   eventData[1] = 999.999;
-   eventData[2] = 999.999;
 }
 
 
@@ -52,6 +51,8 @@ EventFunction::EventFunction(const std::string &typeStr) :
 //------------------------------------------------------------------------------
 EventFunction::~EventFunction()
 {
+   if (eventData)
+      delete [] eventData;
 }
 
 
@@ -67,13 +68,12 @@ EventFunction::~EventFunction()
 EventFunction::EventFunction(const EventFunction& ef) :
    typeName          (ef.typeName),
    instanceName      (ef.instanceName),
+   eventData         (NULL),
+   dataSize          (ef.dataSize),
    primary           (ef.primary),
    boundaryType      (ef.boundaryType),
    isStart           (ef.isStart)
 {
-   eventData[0] = ef.eventData[0];
-   eventData[1] = ef.eventData[1];
-   eventData[2] = ef.eventData[2];
 }
 
 
@@ -94,9 +94,16 @@ EventFunction& EventFunction::operator=(const EventFunction& ef)
    {
       typeName     = ef.typeName;
       instanceName = ef.instanceName;
-      eventData[0] = ef.eventData[0];
-      eventData[1] = ef.eventData[1];
-      eventData[2] = ef.eventData[2];
+      dataSize     = ef.dataSize;
+
+      if (eventData != NULL)
+         delete [] eventData;
+      if (ef.eventData != NULL)
+      {
+         eventData = new Real[dataSize];
+         for (UnsignedInt i = 0; i < dataSize; ++i)
+            eventData[i] = ef.eventData[i];
+      }
       primary      = ef.primary;
       boundaryType = ef.boundaryType;
       isStart      = ef.isStart;
@@ -186,6 +193,11 @@ bool EventFunction::Initialize()
    if (primary == NULL)
       throw EventException("Unable to initialize the " + typeName +
             " EventFunction; the primary is not set.");
+
+   // (Re)allocate the data array
+   if (eventData != NULL)
+      delete [] eventData;
+   eventData = new Real[dataSize];
 
    return true;
 }
