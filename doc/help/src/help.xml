@@ -152,6 +152,5 @@
       </chapter>
       -->
     </part>
-    <xi:include href="NOSA.xml"/>
     <index condition="ug" xml:id="Index" />
 </book>

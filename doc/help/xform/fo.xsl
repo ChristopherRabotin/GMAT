@@ -83,7 +83,22 @@
     </xsl:attribute-set>
 
     <!-- Formatting for specific tags -->
+    <xsl:template match="d:guibutton">
+        <xsl:call-template name="inline.boldseq"/>
+    </xsl:template>
+    <xsl:template match="d:guiicon">
+        <xsl:call-template name="inline.boldseq"/>
+    </xsl:template>
     <xsl:template match="d:guilabel">
+        <xsl:call-template name="inline.boldseq"/>
+    </xsl:template>
+    <xsl:template match="d:guimenu">
+        <xsl:call-template name="inline.boldseq"/>
+    </xsl:template>
+    <xsl:template match="d:guimenuitem">
+        <xsl:call-template name="inline.boldseq"/>
+    </xsl:template>
+    <xsl:template match="d:guisubmenu">
         <xsl:call-template name="inline.boldseq"/>
     </xsl:template>
 
@@ -256,6 +271,9 @@
         <xsl:attribute name="space-before.optimum">0em</xsl:attribute>
         <xsl:attribute name="space-before.minimum">0em</xsl:attribute>
         <xsl:attribute name="space-before.maximum">0.2em</xsl:attribute>
+    </xsl:attribute-set>
+    <xsl:attribute-set name="variablelist.term.properties">
+        <xsl:attribute name="font-weight">bold</xsl:attribute>
     </xsl:attribute-set>
 
     <!-- Admonitions -->

@@ -9,44 +9,79 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Simulating an Orbit</title>
 
+  <variablelist>
+    <varlistentry>
+      <term>Audience</term>
+
+      <listitem>
+        <para>Beginner</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Length</term>
+
+      <listitem>
+        <para>30 minutes</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Prerequisites</term>
+
+      <listitem>
+        <para>None</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Script File</term>
+
+      <listitem>
+        <para><filename>Tut_SimulatingAnOrbit.script</filename></para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+
   <section>
     <title>Objective and Overview</title>
 
-	    <note>
-    <para>The most fundamental capability of GMAT is to propagate spacecraft,
-    which said another way is to simulate the orbital motion. The ability to
-    propagate spacecraft is used in nearly every practical aspect of space
-    mission analysis from simple orbital predictions--when will the
-    International Space Station be over my house?--to complex analyses that
-    determine the thirster firing sequence required to send a spacecraft to
-    the Moon or Mars.</para>    </note>
+    <note>
+      <para>The most fundamental capability of GMAT is to propagate, or
+      simulate the orbital motion of, spacecraft. The ability to propagate
+      spacecraft is used in nearly every practical aspect of space mission
+      analysis, from simple orbital predictions (e.g. When will the
+      International Space Station be over my house?) to complex analyses that
+      determine the thruster firing sequence required to send a spacecraft to
+      the Moon or Mars.</para>
+    </note>
 
     <para>This tutorial will teach you how to use GMAT to propagate a
-    spacecraft. You will learn how to configure a
-    <guilabel>Spacecraft</guilabel> and a <guilabel>Propagator</guilabel>, and
-    then set up a <guilabel>Propagate</guilabel> command to propagate the
-    spacecraft to orbit perigee, which is the point of minimum distance
-    between a spacecraft and Earth. The basic steps in this tutorial
-    are:</para>
+    spacecraft. You will learn how to configure
+    <classname>Spacecraft</classname> and <classname>Propagator</classname>
+    resources, and how to use the <function>Propagate</function> command to
+    propagate the spacecraft to orbit perigee, which is the point of minimum
+    distance between the spacecraft and Earth. The basic steps in this
+    tutorial are:</para>
 
     <orderedlist spacing="compact">
       <listitem>
-        <para>Configure the<guilabel>Spacecraft</guilabel> and define its
+        <para>Configure a <classname>Spacecraft</classname> and define its
         epoch and orbital elements.</para>
       </listitem>
 
       <listitem>
-        <para>Configure the <guilabel>Propagator</guilabel>.</para>
+        <para>Configure a <classname>Propagator</classname>.</para>
       </listitem>
 
       <listitem>
-        <para>Modify the default <guilabel>OrbitView</guilabel> to visualize
-        the spacecraft trajectory.</para>
+        <para>Modify the default <classname>OrbitView</classname> plot to
+        visualize the spacecraft trajectory.</para>
       </listitem>
 
       <listitem>
-        <para>Modify the <guilabel>Propagate</guilabel> command to propagate
-        the spacecraft to the perigee.</para>
+        <para>Modify the <function>Propagate</function> command to propagate
+        the spacecraft to perigee.</para>
       </listitem>
 
       <listitem>
@@ -58,11 +93,17 @@
   <section>
     <title>Configure the Spacecraft</title>
 
-    <para>In this section, you will rename a <guilabel>Spacecraft</guilabel>
-    and set the <guilabel>Spacecraft</guilabel>'s initial epoch and classical
-    orbital elements. You'll need GMAT open, with the Default Mission loaded.
-    To load the Default Mission click <guilabel>New Mission</guilabel> in the
-    <guilabel>Toolbar</guilabel> or start a new GMAT session.</para>
+    <para>In this section, you will rename the default
+    <classname>Spacecraft</classname> and set the
+    <classname>Spacecraft</classname>’s initial epoch and classical orbital
+    elements. You’ll need GMAT open, with the default mission loaded. To load
+    the default mission, click <guibutton>New Mission</guibutton>
+    (<subscript><inlinemediaobject>
+        <imageobject>
+          <imagedata contentdepth="8pt"
+                     fileref="files/images/icons/NewMission.png" width="1em"></imagedata>
+        </imageobject>
+      </inlinemediaobject></subscript>) or start a new GMAT session.</para>
 
     <section>
       <title>Rename the Spacecraft</title>
@@ -97,14 +138,15 @@
 
         <listitem>
           <para>In the <guilabel>Epoch Format</guilabel> box, select
-          <guilabel>UTCGregorian</guilabel>. You'll see the value in the
+          <guilabel>UTCGregorian</guilabel>. You’ll see the value in the
           <guilabel>Epoch</guilabel> field change to the UTC Gregorian epoch
           format.</para>
         </listitem>
 
         <listitem>
-          <para>In in the <guilabel>Epoch</guilabel> field, type <guilabel>22
-          Jul 2014 11:29:10.811</guilabel>.</para>
+          <para>In in the <guilabel>Epoch</guilabel> field, type <userinput>22
+          Jul 2014 11:29:10.811</userinput>. This field is
+          case-sensitive.</para>
         </listitem>
 
         <listitem>
@@ -187,7 +229,7 @@
         <listitem>
           <para>In the <guilabel>Toolbar</guilabel>, Click the <guilabel> Save
           </guilabel> button. If this is the first time you have saved the
-          mission, you'll be prompted to provide a name and location for the
+          mission, you’ll be prompted to provide a name and location for the
           file.</para>
         </listitem>
       </orderedlist>
@@ -211,20 +253,20 @@
   <section>
     <title>Configure the Propagator</title>
 
-    <para>In this section you'll rename the <guilabel>Propagator</guilabel>,
+    <para>In this section you’ll rename the <guilabel>Propagator</guilabel>,
     and configure the force model.</para>
 
     <section>
       <title>Rename the Propagator</title>
 
-      <para>Here you'll rename the propagator with a more descriptive
+      <para>Here you’ll rename the propagator with a more descriptive
       name:</para>
 
       <orderedlist spacing="compact">
         <listitem>
-          <para>In the <guilabel>Resources Tree</guilabel>, double-click
-          <guilabel>DefaultProp</guilabel>, and select
-          <guilabel>Rename</guilabel>.</para>
+          <para>In the <guilabel>Resources Tree</guilabel>, right-click
+          <guilabel>DefaultProp</guilabel> and click
+          <guimenuitem>Rename</guimenuitem>.</para>
         </listitem>
 
         <listitem>
@@ -377,9 +419,9 @@
       </listitem>
 
       <listitem>
-        <para>In the <guilabel>Stopping Conditions</guilabel> list, right
-        click the (<guilabel>...</guilabel>) button next to Sat.ElapsedSecs to
-        bring up the <guilabel>Parameter Select Dialog</guilabel></para>
+        <para>In the <guilabel>Stopping Conditions</guilabel> list, click the
+        (<guilabel>...</guilabel>) button next to Sat.ElapsedSecs to bring up
+        the <guilabel>Parameter Select Dialog</guilabel></para>
       </listitem>
 
       <listitem>
@@ -467,7 +509,7 @@
       </listitem>
 
       <listitem>
-        <para>Left-click on <guilabel>Propagate1</guilabel> and select
+        <para>Right-click <guilabel>Propagate1</guilabel> and select
         <guilabel>Command Summary</guilabel> to see data on the final state of
         <guilabel>Sat</guilabel>.</para>
       </listitem>

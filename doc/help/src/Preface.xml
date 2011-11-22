@@ -51,10 +51,10 @@
     provides information on configuring your system.</para>
 
     <note>
-      <para>We consider the <xref linkend="UserInterfacesOverview" />
-      essential reading. If you read nothing else, at least read this section
-      as it will explain the basic philosophy and rules of GMAT’s user
-      interfaces.</para>
+      <para>We consider the <xref linkend="UserInterfacesOverview"
+      xrefstyle="select:title" /> essential reading. If you read nothing else,
+      at least read this section as it will explain the basic philosophy and
+      rules of GMAT’s user interfaces.</para>
     </note>
   </section>
 
@@ -74,9 +74,9 @@
 
     <para>The <xref linkend="HowTos" xrefstyle="select:title" /> section
     contains many short articles that each describe a single area of
-    functionality. The purpose is of the how-to documentation is to show you
-    how to use a specific feature in an analysis context, and these articles
-    often start from the default mission that is loaded when you start GMAT. A
+    functionality. The purpose of the how-to documentation is to show you how
+    to use a specific feature in an analysis context, and these articles often
+    start from the default mission that is loaded when you start GMAT. A
     how-to article is designed to take about five minutes to teach you how to
     perform a specific task.</para>
   </section>
@@ -86,11 +86,10 @@
 
     <para>The <xref linkend="Tutorials" xrefstyle="select:title" /> section
     describes how to use GMAT for end-to-end analysis. Tutorials are designed
-    to teach you how to use GMAT in the context of performing a real-world
-    analysis, and are intended to take between 30 minutes and one day to
-    complete. Each tutorial as a difficulty level, an approximate duration,
-    and potentially a number of prerequisites, all of which are listed in its
-    introduction.</para>
+    to teach you how to use GMAT in the context of performing real-world
+    analysis and are intended to take between 30 minutes and several hours to
+    complete. Each tutorial has a difficulty level and an approximate duration
+    listed with any prerequisites in its introduction.</para>
   </section>
 
   <section condition="ug" role="notintoc">
@@ -100,5 +99,23 @@
     individual topics that describe each of GMAT's resources and commands in
     detail, including its syntax, options, variable ranges and data types,
     defaults, and expected behavior.</para>
+  </section>
+
+  <section role="notintoc">
+    <title>Typographical Conventions</title>
+
+    <para>This document uses two typographical conventions throughout:</para>
+
+    <itemizedlist spacing="compact">
+      <listitem>
+        <para>Graphical user interface (GUI) elements are presented in
+        <emphasis role="bold">bold</emphasis>.</para>
+      </listitem>
+
+      <listitem>
+        <para>Filenames, resource and command names, and script examples are
+        presented in <code>monospace</code>.</para>
+      </listitem>
+    </itemizedlist>
   </section>
 </preface>
