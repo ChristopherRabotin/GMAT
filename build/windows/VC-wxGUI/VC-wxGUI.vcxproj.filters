@@ -1,0 +1,3372 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\base">
+      <UniqueIdentifier>{e1d5266d-938a-400b-ba49-b210c370af91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\attitude">
+      <UniqueIdentifier>{ab44e420-240b-42c8-bcdd-b3ee4e0d2347}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\burn">
+      <UniqueIdentifier>{bcedd107-f400-4313-bdd5-9bd6b44a5225}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\command">
+      <UniqueIdentifier>{f87d774c-c228-4c81-a754-3c2408006ccd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\configs">
+      <UniqueIdentifier>{945dc20a-6ad3-4756-a9a7-4fa6e1ca5066}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\coordsystem">
+      <UniqueIdentifier>{05f37c89-bc72-447e-8f2f-d209dc00f1e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\executive">
+      <UniqueIdentifier>{f7235e2c-38b3-4d87-8939-7d6d5fc632df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\factory">
+      <UniqueIdentifier>{8fa946ec-098e-4c85-b7db-8502a79685e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\forcemodel">
+      <UniqueIdentifier>{d20a44a4-6c61-4457-8b7c-bb034af76fdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\foundation">
+      <UniqueIdentifier>{d0677bfa-bb03-4357-ac4d-f5c8da817565}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\function">
+      <UniqueIdentifier>{fb9ecada-a132-4027-b610-a587ccba39d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\interface">
+      <UniqueIdentifier>{e7838287-26b3-4939-8b1a-dfbc8b73d46e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\interpolator">
+      <UniqueIdentifier>{b5c8af45-c00b-4f6a-bc20-8b25212cf91e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\interpreter">
+      <UniqueIdentifier>{3620fbf6-136c-438e-ae4b-bf3cf2e400b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\math">
+      <UniqueIdentifier>{efcda555-3222-4ab9-b31f-3d532c7eead3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\solarsys">
+      <UniqueIdentifier>{3901bb99-67a0-48cd-978a-90f230d6a594}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\solver">
+      <UniqueIdentifier>{28e29b3c-1227-4b99-b946-fce930057b42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\propagator">
+      <UniqueIdentifier>{289ed3ca-998b-4fa5-8a21-752a4e5a0623}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\parameter">
+      <UniqueIdentifier>{b3ec8e38-4761-442e-8def-08a046bef552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\plugin">
+      <UniqueIdentifier>{7c953f73-ff03-410e-b233-acb420c879f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\spacecraft">
+      <UniqueIdentifier>{921deb9c-1abf-4c75-a9b3-6ae490f75694}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\stopcond">
+      <UniqueIdentifier>{60375dbb-4cdd-4512-a28e-7eccdf85c32b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\subscriber">
+      <UniqueIdentifier>{82f3344b-77c7-477c-96a4-5270e785c698}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\util">
+      <UniqueIdentifier>{2af3ec5f-923b-4ced-85bc-1931fb1c6775}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\asset">
+      <UniqueIdentifier>{08db4a58-5167-47cc-a422-a1903d13b73e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\hardware">
+      <UniqueIdentifier>{36622244-22f8-4fe0-b97f-401c590728a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui">
+      <UniqueIdentifier>{6ec57d6d-87c7-4dd9-9c5a-124ea4e4215b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\app">
+      <UniqueIdentifier>{3f35f3e7-b828-488f-97f9-cd8cd1b160d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\burn">
+      <UniqueIdentifier>{dd60731d-8635-447e-b29a-b399e6eda126}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\command">
+      <UniqueIdentifier>{6d7f81c9-2568-4019-9060-333ceda33b34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\controllogic">
+      <UniqueIdentifier>{dc891de1-662e-493c-ba6c-997d6f31c6e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\coordsystem">
+      <UniqueIdentifier>{ee935215-11f2-4dc5-bcb1-6987906aa837}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\forcemodel">
+      <UniqueIdentifier>{56c2e605-08dc-4bf0-9924-7661b57fd9e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\foundation">
+      <UniqueIdentifier>{cd483c13-4629-4cb6-9033-a84fe456b560}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\function">
+      <UniqueIdentifier>{98b7fec2-930c-496b-b8e9-414809d3af87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\hardware">
+      <UniqueIdentifier>{395a57c6-4922-4b61-a9b5-3fe0de5500e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\mission">
+      <UniqueIdentifier>{2103c198-e8bb-4119-bedc-8b93b2989eb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\output">
+      <UniqueIdentifier>{d2e5f68f-c712-446f-aabc-8ddeef3742e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\subscriber">
+      <UniqueIdentifier>{e212285f-069f-4a4a-96a8-a9c3de1cff7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\propagator">
+      <UniqueIdentifier>{2996afc5-dbde-4099-a5a8-53c64f41e05a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\solarsys">
+      <UniqueIdentifier>{179ac8ee-e9e3-47f6-a444-98bf46c4872e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\solver">
+      <UniqueIdentifier>{624503da-366e-4988-94a0-f64f8a3892a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\spacecraft">
+      <UniqueIdentifier>{8bb1179d-5b5b-4d75-8f8d-fe9eda3454cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\view">
+      <UniqueIdentifier>{4b3462bd-c8db-4f64-b74c-257dbceebb06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\asset">
+      <UniqueIdentifier>{dd111139-f847-4397-a919-38dd233e8202}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\rendering">
+      <UniqueIdentifier>{3939f5f6-bddf-4968-b4b3-d19871a1091b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Source Files\base\event">
+      <UniqueIdentifier>{05f0a602-e1cf-4d6b-9699-a67b27598445}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\forcemodel\harmonic">
+      <UniqueIdentifier>{a60f93e4-c4ec-4f65-be1f-6137abbfd775}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\Kinematic.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\Spinner.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\burn\Burn.cpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\burn\BurnException.cpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\burn\FiniteBurn.cpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\burn\ImpulsiveBurn.cpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\burn\InertialManeuverFrame.cpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\burn\ManeuverFrame.cpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\burn\ManeuverFrameManager.cpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\burn\VnbManeuverFrame.cpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Achieve.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Assignment.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\BeginFiniteBurn.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\BeginFunction.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\BeginMissionSequence.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\BeginScript.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\BranchCommand.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\CallFunction.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\CallGmatFunction.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\ClearPlot.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\CommandException.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\CommandUtil.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\ConditionalBranch.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Create.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Else.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\ElseIf.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\EndFiniteBurn.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\EndFor.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\EndFunction.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\EndIf.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\EndOptimize.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\EndScript.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\EndTarget.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\EndWhile.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\For.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Global.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\GmatCommand.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\If.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\ManageObject.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Maneuver.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\MarkPoint.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Minimize.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\NonlinearConstraint.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\NoOp.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Optimize.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\PenDown.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\PenUp.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Propagate.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\PropagationEnabledCommand.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Report.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\RunSolver.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Save.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\SaveMission.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\SolverBranchCommand.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Stop.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Target.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Toggle.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Vary.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\While.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\configs\ConfigManager.cpp">
+      <Filter>Source Files\base\configs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\configs\ConfigManagerException.cpp">
+      <Filter>Source Files\base\configs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\AxisSystem.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodyFixedAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodyInertialAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateBase.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateConverter.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateSystem.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateSystemException.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\DynamicAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\EquatorAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\GeocentricSolarEclipticAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\GeocentricSolarMagneticAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\InertialAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\MODEcAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\MODEqAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\MOEEcAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\MOEEqAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\ObjectReferencedAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\TODEcAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\TODEqAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\TOEEcAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\TOEEqAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\TopocentricAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\Moderator.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\PlotInterface.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\PlotReceiver.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\Publisher.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\PublisherException.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\Sandbox.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\SandboxException.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\AssetFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\AtmosphereFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\AttitudeFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\AxisSystemFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\BurnFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\CalculatedPointFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\CelestialBodyFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\CommandFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\CoordinateSystemFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\Factory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\FactoryException.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\FactoryManager.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\FunctionFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\HardwareFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\MathFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\ODEModelFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\ParameterFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\PhysicalModelFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\PropagatorFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\PropSetupFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\SolarSystemFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\SolverFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\SpacecraftFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\StopConditionFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\SubscriberFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\HarmonicField.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\ODEModel.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\ODEModelException.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\PhysicalModel.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\PointMassForce.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\SolarRadiationPressure.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\Covariance.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\ElementWrapper.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\GmatBase.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\GmatBaseException.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\GmatState.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\ObjectInitializer.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\SpacePoint.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\StateManager.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\function\Function.cpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\function\FunctionException.cpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\function\GmatFunction.cpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\function\MatlabFunction.cpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interface\InterfaceException.cpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpolator\CubicSplineInterpolator.cpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpolator\Interpolator.cpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpolator\InterpolatorException.cpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpolator\LagrangeInterpolator.cpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpolator\LinearInterpolator.cpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpolator\NotAKnotInterpolator.cpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpreter\Interpreter.cpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpreter\InterpreterException.cpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpreter\MathParser.cpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpreter\MathTree.cpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpreter\ScriptInterpreter.cpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpreter\ScriptReadWriter.cpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interpreter\Validator.cpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Abs.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Acos.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Acosh.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Add.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Asin.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Asinh.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Atan.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Atan2.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Cos.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Cosh.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\DegToRad.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Determinant.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Divide.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Exp.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\FunctionRunner.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Inverse.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Log.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Log10.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\MathElement.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\MathException.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\MathFunction.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\MathNode.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Multiply.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Negate.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Norm.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Power.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\RadToDeg.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Sin.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Sinh.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Sqrt.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Subtract.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Tan.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Tanh.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Transpose.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\Asteroid.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\AtmosphereModel.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\Barycenter.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\CalculatedPoint.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\CelestialBody.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\Comet.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\DeFile.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\LibrationPoint.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\Moon.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\Msise90Atmosphere.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\Planet.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphem.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphemException.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarSystem.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarSystemException.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\Star.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\DerivativeModel.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\DifferentialCorrector.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\ExternalOptimizer.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\Gradient.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\InternalOptimizer.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\Jacobian.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\LineSearch.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\Optimizer.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\Solver.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\SteepestDescent.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\BulirschStoer.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\EphemerisPropagator.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\Integrator.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\PredictorCorrector.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\PrinceDormand45.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\PrinceDormand78.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\PropagationStateManager.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\Propagator.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\PropSetup.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\RungeKutta.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\RungeKutta89.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\RungeKuttaFehlberg56.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\propagator\RungeKuttaNystrom.cpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AngularParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\Array.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ArrayElementWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ArrayWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BallisticMassParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BallisticMassReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BooleanWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BplaneData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BplaneParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BplaneReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BurnData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BurnParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BurnReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\CartesianParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\EnvData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\EnvParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\EnvReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\EquinoctialParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ExpressionParser.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\HardwareParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\HardwareReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\KeplerianParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\NumberWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ObjectPropertyWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ObjectWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OnOffWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitalParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitRmat33.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitRmat66.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitRvec6.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitStmParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\Parameter.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ParameterDatabase.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ParameterInfo.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\ParameterWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\RealVar.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\RefData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\Rmat33Var.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\Rmat66Var.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\Rvec6Var.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\SpacecraftData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\SphericalParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\StringObjectWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\StringVar.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\StringWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\TimeData.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\TimeParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\TimeReal.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\TimeString.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\Variable.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\VariableWrapper.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\plugin\DynamicLibrary.cpp">
+      <Filter>Source Files\base\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\Converter.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\Formation.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\Spacecraft.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\SpaceObject.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\StateConverter.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\StateVector.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\spacecraft\TimeConverter.cpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp">
+      <Filter>Source Files\base\stopcond</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\OrbitView.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\OwnedPlot.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\ReportFile.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\Subscriber.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\TextEphemFile.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\XyPlot.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\A1Date.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\A1Mjd.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\AngleUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Anomaly.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\AttitudeUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\BaseException.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Cartesian.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CoordUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Date.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\EopFile.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\FileManager.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\FileUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\GravityFile.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Keplerian.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Linear.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\MemoryTracker.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\MessageInterface.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\MessageReceiver.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\ModKeplerian.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\RealUtilities.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\RgbColor.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Rmatrix.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Rmatrix33.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Rmatrix66.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Rvector.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Rvector3.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Rvector6.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\StringUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\TextParser.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\TimeSystemConverter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\TimeTypes.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\UtcDate.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\asset\AssetException.cpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\asset\BodyFixedPoint.cpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\asset\GroundStation.cpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\FuelTank.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\Hardware.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\HardwareException.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\Thruster.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\AboutDialog.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\CompareFilesDialog.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\CompareTextDialog.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatApp.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatAppData.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatConnection.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatMainFrame.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatMenuBar.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatNotebook.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatServer.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatToolBar.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatTreeItemData.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GuiInterpreter.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GuiMessageReceiver.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GuiPlotReceiver.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\InteractiveMatlabDialog.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\MissionTreeItemData.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\ResourceTree.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\RunScriptFolderDialog.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\ScriptPanel.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\SetPathDialog.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\TextEphemFileDialog.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\WelcomePanel.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\burn\FiniteBurnSetupPanel.cpp">
+      <Filter>Source Files\gui\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\burn\ImpulsiveBurnSetupPanel.cpp">
+      <Filter>Source Files\gui\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\AchievePanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\AssignmentPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\BeginFiniteBurnPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\CallFunctionPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\EndFiniteBurnPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\GmatCommandPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ManeuverPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\MinimizePanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\NonlinearConstraintPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\OptimizePanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\PropagatePanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ReportPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\SavePanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ScriptEventPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\TargetPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\TogglePanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\VaryPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\controllogic\ConditionPanel.cpp">
+      <Filter>Source Files\gui\controllogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\controllogic\ForPanel.cpp">
+      <Filter>Source Files\gui\controllogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordPanel.cpp">
+      <Filter>Source Files\gui\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.cpp">
+      <Filter>Source Files\gui\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.cpp">
+      <Filter>Source Files\gui\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\forcemodel\DragInputsDialog.cpp">
+      <Filter>Source Files\gui\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupDialog.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatDialog.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatPanel.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatSavePanel.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatStaticBoxSizer.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GuiItemManager.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\MultiPathSetupPanel.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterCreateDialog.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterSelectDialog.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ShowScriptDialog.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ShowSummaryDialog.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\SinglePathSetupPanel.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\UserInputValidator.cpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\function\FunctionSetupPanel.cpp">
+      <Filter>Source Files\gui\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.cpp">
+      <Filter>Source Files\gui\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\TankConfigPanel.cpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.cpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\MissionTree.cpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\CompareReportPanel.cpp">
+      <Filter>Source Files\gui\output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp">
+      <Filter>Source Files\gui\output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp">
+      <Filter>Source Files\gui\output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiGlPlotData.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiTsPlotData.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewPanel.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\ReportFileSetupPanel.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotCanvas.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotCurve.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotOptionsDialog.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\ViewCanvas.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\propagator\PropagationConfigPanel.cpp">
+      <Filter>Source Files\gui\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\propagator\PropagatorSelectDialog.cpp">
+      <Filter>Source Files\gui\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\BarycenterPanel.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\LibrationPointPanel.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\SolarSystemWindow.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\UniversePanel.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\DCSetupPanel.cpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SolverCreatePanel.cpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SolverGoalsPanel.cpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SolverSetupPanel.cpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SolverVariablesPanel.cpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SQPSetupPanel.cpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\AttitudePanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\BallisticsMassPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\FormationSetupPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\TankPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\ThrusterPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\VisualModelCanvas.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\VisualModelPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ViewTextDialog.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ViewTextFrame.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\asset\GroundStationPanel.cpp">
+      <Filter>Source Files\gui\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Camera.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\GLStars.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Light.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Load3ds.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\LoadPOV.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\ModelManager.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\ModelObject.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Rendering.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\PlotCommand.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\MissionTreeToolBar.cpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\UndockedMissionPanel.cpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\TreeViewOptionDialog.cpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\OrbitPlot.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SunSync.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\RepeatGroundTrack.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\Frozen.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\RepeatSunSync.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\OrbitDesignerTime.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\Brent.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\EventException.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp">
+      <Filter>Source Files\base\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.cpp">
+      <Filter>Source Files\base\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.cpp">
+      <Filter>Source Files\base\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.cpp">
+      <Filter>Source Files\base\forcemodel\harmonic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\RelativisticCorrection.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\Kinematic.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\Spinner.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\burn\Burn.hpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\burn\BurnException.hpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\burn\FiniteBurn.hpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\burn\ImpulsiveBurn.hpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\burn\InertialManeuverFrame.hpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\burn\ManeuverFrame.hpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\burn\ManeuverFrameManager.hpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\burn\VnbManeuverFrame.hpp">
+      <Filter>Source Files\base\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Achieve.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Assignment.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\BeginFiniteBurn.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\BeginFunction.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\BeginMissionSequence.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\BeginScript.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\BranchCommand.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\CallFunction.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\CallGmatFunction.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\ClearPlot.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\CommandException.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\CommandUtil.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\ConditionalBranch.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Create.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Else.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\ElseIf.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\EndFiniteBurn.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\EndFor.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\EndFunction.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\EndIf.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\EndOptimize.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\EndScript.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\EndTarget.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\EndWhile.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\For.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Global.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\GmatCommand.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\If.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\ManageObject.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Maneuver.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\MarkPoint.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Minimize.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\NonlinearConstraint.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\NoOp.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Optimize.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\PenDown.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\PenUp.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Propagate.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\PropagationEnabledCommand.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Report.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\RunSolver.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Save.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\SaveMission.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\SolverBranchCommand.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Stop.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Target.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Toggle.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Vary.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\While.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\configs\ConfigManager.hpp">
+      <Filter>Source Files\base\configs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\configs\ConfigManagerException.hpp">
+      <Filter>Source Files\base\configs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\AxisSystem.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodyFixedAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodyInertialAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateBase.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateConverter.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateSystem.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateSystemException.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\DynamicAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\EquatorAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\GeocentricSolarEclipticAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\GeocentricSolarMagneticAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\InertialAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\MODEcAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\MODEqAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\MOEEcAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\MOEEqAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\ObjectReferencedAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\TODEcAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\TODEqAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\TOEEcAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\TOEEqAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\TopocentricAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\Moderator.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\PlotInterface.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\PlotReceiver.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\Publisher.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\PublisherException.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\Sandbox.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\SandboxException.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\AssetFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\AtmosphereFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\AttitudeFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\AxisSystemFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\BurnFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\CalculatedPointFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\CelestialBodyFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\CommandFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\CoordinateSystemFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\Factory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\FactoryException.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\FactoryManager.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\FunctionFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\HardwareFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\MathFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\ODEModelFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\ParameterFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\PhysicalModelFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\PropagatorFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\PropSetupFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\SolarSystemFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\SolverFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\SpacecraftFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\StopConditionFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\SubscriberFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\HarmonicField.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\ODEModel.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\ODEModelException.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\PhysicalModel.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\PointMassForce.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\SolarRadiationPressure.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\Covariance.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\ElementWrapper.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\GmatBase.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\GmatBaseException.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\GmatState.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\ObjectInitializer.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\SpacePoint.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\StateManager.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\function\Function.hpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\function\FunctionException.hpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\function\GmatFunction.hpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\function\MatlabFunction.hpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interface\InterfaceException.hpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpolator\CubicSplineInterpolator.hpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpolator\Interpolator.hpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpolator\InterpolatorException.hpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpolator\LagrangeInterpolator.hpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpolator\LinearInterpolator.hpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpolator\NotAKnotInterpolator.hpp">
+      <Filter>Source Files\base\interpolator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpreter\Interpreter.hpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpreter\InterpreterException.hpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpreter\MathParser.hpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpreter\MathTree.hpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpreter\ScriptInterpreter.hpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpreter\ScriptReadWriter.hpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interpreter\Validator.hpp">
+      <Filter>Source Files\base\interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Abs.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Acos.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Acosh.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Add.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Asin.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Asinh.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Atan.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Atan2.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Cos.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Cosh.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\DegToRad.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Determinant.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Divide.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Exp.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\FunctionRunner.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Inverse.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Log.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Log10.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\MathElement.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\MathException.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\MathFunction.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\MathNode.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Multiply.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Negate.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Norm.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Power.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\RadToDeg.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Sin.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Sinh.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Sqrt.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Subtract.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Tan.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Tanh.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Transpose.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\Asteroid.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereException.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereModel.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\Barycenter.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\CalculatedPoint.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\CelestialBody.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\Comet.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\DeFile.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\LibrationPoint.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\Moon.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\Msise90Atmosphere.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphem.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphemException.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarSystem.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarSystemException.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\Star.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\DerivativeModel.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\DifferentialCorrector.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\ExternalOptimizer.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\Gradient.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\InternalOptimizer.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\Jacobian.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\LineSearch.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\Optimizer.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\Solver.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\SolverException.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\SteepestDescent.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\BulirschStoer.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\EphemerisPropagator.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\Integrator.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\PredictorCorrector.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\PrinceDormand45.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\PrinceDormand78.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\PropagationStateManager.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\Propagator.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\PropagatorException.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\PropSetup.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\PropSetupException.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\RungeKutta.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\RungeKutta89.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\RungeKuttaFehlberg56.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\propagator\RungeKuttaNystrom.hpp">
+      <Filter>Source Files\base\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AngularParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\Array.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ArrayElementWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ArrayWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BallisticMassParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BallisticMassReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BooleanWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BplaneData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BplaneParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BplaneReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BurnData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BurnParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BurnReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\CartesianParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\EnvData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\EnvParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\EnvReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\EquinoctialParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ExpressionParser.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\HardwareParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\HardwareReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\KeplerianParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\NumberWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ObjectPropertyWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ObjectWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OnOffWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitalParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitRmat33.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitRmat66.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitRvec6.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitStmParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\paramdefs.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\Parameter.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterDatabase.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterDatabaseException.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterException.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterInfo.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\RealVar.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\RefData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\Rmat33Var.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\Rmat66Var.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\Rvec6Var.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\SpacecraftData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\SphericalParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\StringObjectWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\StringVar.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\StringWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\TimeData.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\TimeParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\TimeReal.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\TimeString.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\Variable.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\VariableWrapper.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\plugin\DynamicLibrary.hpp">
+      <Filter>Source Files\base\plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\Converter.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\Formation.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\Spacecraft.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObject.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObjectException.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\StateConverter.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\StateVector.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\StateVectorException.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\spacecraft\TimeConverter.hpp">
+      <Filter>Source Files\base\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\stopcond\StopCondition.hpp">
+      <Filter>Source Files\base\stopcond</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp">
+      <Filter>Source Files\base\stopcond</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\OrbitView.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\OwnedPlot.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\ReportFile.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\Subscriber.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\SubscriberException.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\TextEphemFile.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\XyPlot.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\A1Date.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\A1Mjd.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\AngleUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Anomaly.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\ArrayTemplate.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\AttitudeUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\BaseException.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Cartesian.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CoordUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Date.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\ElapsedTime.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\EopFile.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\FileManager.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\FileTypes.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\FileUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\GravityFile.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Keplerian.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Linear.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\MessageInterface.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\MessageReceiver.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\ModKeplerian.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\OrbitTypes.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\PhysicalConstants.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\RealTypes.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\RealUtilities.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\RgbColor.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Rmatrix.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Rmatrix33.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Rmatrix66.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Rvector.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Rvector3.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Rvector6.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\StringUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\TableTemplate.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\TextParser.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\TimeSystemConverter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\TimeTypes.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\UtcDate.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\UtilityException.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\asset\AssetException.hpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\asset\BodyFixedPoint.hpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\asset\GroundStation.hpp">
+      <Filter>Source Files\base\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\FuelTank.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\Hardware.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\HardwareException.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\Thruster.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\AboutDialog.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\CompareFilesDialog.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\CompareTextDialog.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatApp.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatAppData.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatConnection.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatMainFrame.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatMenuBar.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatNotebook.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatServer.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatTreeItemData.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GuiInterpreter.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GuiMessageReceiver.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GuiPlotReceiver.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\InteractiveMatlabDialog.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\MissionTreeItemData.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\ResourceTree.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\RunScriptFolderDialog.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\ScriptPanel.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\SetPathDialog.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\TextEphemFileDialog.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\WelcomePanel.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\burn\FiniteBurnSetupPanel.hpp">
+      <Filter>Source Files\gui\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\burn\ImpulsiveBurnSetupPanel.hpp">
+      <Filter>Source Files\gui\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\AchievePanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\AssignmentPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\BeginFiniteBurnPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\CallFunctionPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\EndFiniteBurnPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\GmatCommandPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ManeuverPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\MinimizePanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\NonlinearConstraintPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\OptimizePanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\PropagatePanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ReportPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\SavePanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ScriptEventPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\TargetPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\TogglePanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\VaryPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\controllogic\ConditionPanel.hpp">
+      <Filter>Source Files\gui\controllogic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\controllogic\ForPanel.hpp">
+      <Filter>Source Files\gui\controllogic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordPanel.hpp">
+      <Filter>Source Files\gui\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.hpp">
+      <Filter>Source Files\gui\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.hpp">
+      <Filter>Source Files\gui\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\forcemodel\DragInputsDialog.hpp">
+      <Filter>Source Files\gui\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupDialog.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatDialog.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatPanel.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatSavePanel.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatStaticBoxSizer.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GuiItemManager.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\MultiPathSetupPanel.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterCreateDialog.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterSelectDialog.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ShowScriptDialog.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ShowSummaryDialog.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\SinglePathSetupPanel.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\UserInputValidator.hpp">
+      <Filter>Source Files\gui\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\function\FunctionSetupPanel.hpp">
+      <Filter>Source Files\gui\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.hpp">
+      <Filter>Source Files\gui\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\TankConfigPanel.hpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.hpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.hpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\DecoratedTree.hpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\MissionTree.hpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\CompareReportPanel.hpp">
+      <Filter>Source Files\gui\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp">
+      <Filter>Source Files\gui\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp">
+      <Filter>Source Files\gui\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiGlPlotData.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiTsPlotData.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewPanel.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\PlotTypes.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\ReportFileSetupPanel.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotCanvas.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotCurve.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotDefs.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotOptionsDialog.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\ViewCanvas.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\propagator\PropagationConfigPanel.hpp">
+      <Filter>Source Files\gui\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\propagator\PropagatorSelectDialog.hpp">
+      <Filter>Source Files\gui\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\BarycenterPanel.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\LibrationPointPanel.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\SolarSystemWindow.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\UniversePanel.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\DCSetupPanel.hpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SolverCreatePanel.hpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SolverGoalsPanel.hpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SolverSetupPanel.hpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SolverVariablesPanel.hpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SQPSetupPanel.hpp">
+      <Filter>Source Files\gui\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\AttitudePanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\BallisticsMassPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\FormationSetupPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\TankPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\ThrusterPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\VisualModelCanvas.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\VisualModelPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ViewTextDialog.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ViewTextFrame.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Camera.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\GLStars.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Light.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Load3ds.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\LoadPOV.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\ModelManager.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\ModelObject.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Rendering.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\include\ddesetup.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\include\gmatdefs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\include\gmatwxdefs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\include\gmatwxrcs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\PlotCommand.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\MissionTreeToolBar.hpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\UndockedMissionPanel.hpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\TreeViewOptionDialog.hpp">
+      <Filter>Source Files\gui\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SunSync.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\RepeatGroundTrack.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\Frozen.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\RepeatSunSync.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\OrbitDesignerTime.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\Brent.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\EventException.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp">
+      <Filter>Source Files\base\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.hpp">
+      <Filter>Source Files\base\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.hpp">
+      <Filter>Source Files\base\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.hpp">
+      <Filter>Source Files\base\forcemodel\harmonic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\RelativisticCorrection.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
