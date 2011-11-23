@@ -8,7 +8,7 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Visualizing Data</title>
 
-  <section>
+  <section xml:id="HowTo_ManipulatingThe3DOrbitView">
     <title>Manipulating the 3D Orbit View</title>
 
     <para>GMAT's OrbitView resource offers a three-dimensional realistic view
