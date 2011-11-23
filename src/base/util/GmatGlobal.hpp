@@ -110,6 +110,9 @@ public:
    bool IsMissionTreeDebugOn();
    void SetMissionTreeDebug(bool flag);
 
+   void SetEventLocationAvailable(bool flag);
+   bool IsEventLocationAvailable();
+
    // IO formatting
    bool IsScientific();
    bool ShowPoint();
@@ -219,7 +222,9 @@ private:
    bool isMatlabAvailable;
    bool isMatlabDebugOn;
    bool isMissionTreeDebugOn;
-   
+
+   bool isEventLocationAvailable;
+
    Integer runMode;
    Integer guiMode;
    Integer plotMode;

@@ -315,6 +315,11 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
    MessageInterface::ShowMessage
       ("%s GMAT Moderator successfully created core engine\n", timestr);
    
+   // Check to see if there are any event locator factories
+   StringArray elList = theFactoryManager->GetListOfItems(Gmat::EVENT_LOCATOR);
+   if (elList.size() > 0)
+      GmatGlobal::Instance()->SetEventLocationAvailable(true);
+
    // Check if MatlabInterface is required
    if (GmatGlobal::Instance()->GetMatlabMode() == GmatGlobal::NO_MATLAB)
    {

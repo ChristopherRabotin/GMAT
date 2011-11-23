@@ -102,6 +102,9 @@ EventLocator::EventLocator(const std::string &typeStr,
 //------------------------------------------------------------------------------
 EventLocator::~EventLocator()
 {
+//   MessageInterface::ShowMessage("Deleting event locator %s <%p>\n",
+//         instanceName.c_str(), this);
+
    if (lastData != NULL)
       delete [] lastData;
 
@@ -374,7 +377,7 @@ Real EventLocator::GetRealParameter(const Integer id, const Integer index) const
    if (id == EVENT_FUNCTION)
    {
       Real retval = 0.0;
-      if (index < eventFunctions.size())
+      if (index < (Integer)eventFunctions.size())
       {
          Real *data = eventFunctions[index]->Evaluate();
          retval = data[1];

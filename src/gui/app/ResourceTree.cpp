@@ -122,6 +122,8 @@
 //#define DEBUG_ADD_SCRIPT
 //#define DEBUG_ADD_SOLVER
 //#define DEBUG_USER_GUI
+//#define DEBUG_ADD_LOCATOR
+
 
 // ID macros for plug-ins
 #define SOLVER_BEGIN 150
@@ -130,6 +132,8 @@
 #define HARDWARE_END 300
 #define PLUGIN_BEGIN 400
 #define PLUGIN_END 600
+#define LOCATOR_BEGIN 700
+#define LOCATOR_END 799
 
 #define SUBSCRIBER_BEGIN SOLVER_END + 1
 #define SUBSCRIBER_END SUBSCRIBER_BEGIN + 50
@@ -171,6 +175,8 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
                   POPUP_ADD_HARDWARE + HARDWARE_END, ResourceTree::OnAddHardware)
    EVT_MENU_RANGE(POPUP_ADD_SOLVER + SOLVER_BEGIN,        // Other Solvers
                   POPUP_ADD_SOLVER + SOLVER_END, ResourceTree::OnAddSolver)
+   EVT_MENU_RANGE(POPUP_ADD_LOCATOR + LOCATOR_BEGIN,        // Event Locators
+                  POPUP_ADD_LOCATOR + LOCATOR_END, ResourceTree::OnAddLocator)
    EVT_MENU(POPUP_ADD_REPORT_FILE, ResourceTree::OnAddReportFile)
    EVT_MENU(POPUP_ADD_XY_PLOT, ResourceTree::OnAddXyPlot)
    EVT_MENU(POPUP_ADD_ORBIT_VIEW, ResourceTree::OnAddOrbitView)
@@ -232,6 +238,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    theGuiManager = GuiItemManager::GetInstance();
    mScriptFolderRunning = false;
    mHasUserInterrupted = false;
+   mHasEventLocatorPlugin = GmatGlobal::Instance()->IsEventLocationAvailable();
    mScriptAdded = false;
    mMatlabServerStarted = false;
    
@@ -345,6 +352,7 @@ void ResourceTree::UpdateResource(bool restartCounter)
    AddDefaultHardware(mHardwareItem, restartCounter);
    AddDefaultFormations(mFormationItem, restartCounter);
    AddDefaultPropagators(mPropagatorItem, restartCounter);
+   AddDefaultLocators(mEventLocatorItem, restartCounter);
    AddDefaultBurns(mBurnItem, restartCounter);
    AddDefaultSolvers(mSolverItem, restartCounter);
    AddDefaultSubscribers(mSubscriberItem, restartCounter);
@@ -866,6 +874,17 @@ void ResourceTree::AddDefaultResources()
    SetItemImage(mCoordSysItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
+   //----- Event Locators
+   if (GmatGlobal::Instance()->IsEventLocationAvailable())
+   {
+      mEventLocatorItem =
+         AppendItem(resource, wxT("Event Locators"), GmatTree::ICON_FOLDER, -1,
+                    new GmatTreeItemData(wxT("Event Locators"),
+                                         GmatTree::EVENT_LOCATOR_FOLDER));
+
+      SetItemImage(mEventLocatorItem, GmatTree::ICON_OPENFOLDER,
+                   wxTreeItemIcon_Expanded);
+   }
    //----- Functions
    mFunctionItem =
       AppendItem(resource, wxT("Functions"), GmatTree::ICON_FOLDER,
@@ -1027,6 +1046,12 @@ GmatTree::ResourceIconType ResourceTree::GetIconId(GmatBase *obj)
    else if (obj->IsOfType(Gmat::MEASUREMENT_MODEL))
       iconToUse = GmatTree::RESOURCE_ICON_MEASUREMENT_MODEL;
    
+   // EventLocator -- We need an icon for this
+   else if (obj->IsOfType("EventLocator"))
+      iconToUse = GmatTree::RESOURCE_ICON_BOUNDARY_VALUE_SOLVER;
+   else if (obj->IsOfType(Gmat::EVENT_LOCATOR))
+      iconToUse = GmatTree::RESOURCE_ICON_BOUNDARY_VALUE_SOLVER;
+
    #ifdef DEBUG_RESOURCE_ICON
    MessageInterface::ShowMessage
       ("ResourceTree::GetIconId() returning, icon id to use %d\n", iconToUse);
@@ -1259,6 +1284,35 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId, bool restartCounte
 //                 new GmatTreeItemData(wxT(objName), GmatTree::SPK_PROPAGATOR));
 //   };
 //   #endif
+
+   if (size > 0) // || spkSize > 0)
+      Expand(itemId);
+}
+
+//------------------------------------------------------------------------------
+// void AddDefaultLocators(wxTreeItemId itemId, bool restartCounter = true)
+//------------------------------------------------------------------------------
+/**
+ * Add the event locators
+ *
+ * @param <itemId> tree item for the event locators folder
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultLocators(wxTreeItemId itemId, bool restartCounter)
+{
+   StringArray itemNames;
+   int size;
+   wxString objName;
+
+   itemNames = theGuiInterpreter->GetListOfObjects(Gmat::EVENT_LOCATOR);
+   size = itemNames.size();
+   for (int i = 0; i<size; i++)
+   {
+      objName = wxString(itemNames[i].c_str());
+      // todo Need event locator icon here
+      AppendItem(itemId, wxT(objName), GmatTree::ICON_PROPAGATOR, -1,
+                 new GmatTreeItemData(wxT(objName), GmatTree::EVENT_LOCATOR));
+   };
 
    if (size > 0) // || spkSize > 0)
       Expand(itemId);
@@ -2336,7 +2390,7 @@ void ResourceTree::AddIcons()
    theGuiManager->LoadIcon("rt_Default", bitmapType, &bitmaps[++index], rt_Default_xpm);
    
    
-   // Let's always recale all icons since size of icon look different on different platforms
+   // Let's always rescale all icons since size of icon look different on different platforms
    for ( size_t i = 0; i < WXSIZEOF(bitmaps); i++ )
       images->Add(bitmaps[i]->ConvertToImage().Rescale(sizeW, sizeH));
    
@@ -2828,6 +2882,52 @@ void ResourceTree::OnAddSolver(wxCommandEvent &event)
    
    #ifdef DEBUG_ADD_SOLVER
    MessageInterface::ShowMessage("ResourceTree::OnAddSolver() leaving\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ResourceTree::OnAddLocator(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add an event locator to the event locators folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddLocator(wxCommandEvent &event)
+{
+   #ifdef DEBUG_ADD_LOCATOR
+   MessageInterface::ShowMessage("ResourceTree::OnAddLocator() entered\n");
+   #endif
+
+   // Look up the plugin type based on the ID built with menu that selected it
+   std::string selected = pluginMap[event.GetId()];
+
+   // The rest is like the other tree additions
+   wxTreeItemId item = GetSelection();
+   std::string newName = theGuiInterpreter->GetNewName(selected, 1);
+
+   #ifdef DEBUG_ADD_LOCATOR
+      MessageInterface::ShowMessage("Creating a Locator of type %s named %s",
+            selected.c_str(), newName.c_str());
+   #endif
+
+   GmatBase *obj = theGuiInterpreter->CreateObject(selected, newName);
+
+   if (obj != NULL)
+   {
+      GmatTree::ResourceIconType iconToUse = GetIconId(obj);
+      wxString name = newName.c_str();
+      AppendItem(item, name, iconToUse, -1,
+                 new GmatTreeItemData(name, GmatTree::EVENT_LOCATOR));
+      Expand(item);
+
+      theGuiManager->UpdateLocator();
+   }
+
+   #ifdef DEBUG_ADD_LOCATOR
+   MessageInterface::ShowMessage("ResourceTree::OnAddLocator() leaving\n");
    #endif
 }
 
@@ -4240,6 +4340,10 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    case GmatTree::OPTIMIZER_FOLDER:
       menu.Append(POPUP_ADD_OPTIMIZER, wxT("Add"), CreatePopupMenu(itemType));
       break;
+   case GmatTree::EVENT_LOCATOR_FOLDER:
+      menu.Append(POPUP_ADD_LOCATOR, wxT("Add"), CreatePopupMenu(itemType));
+      break;
+
    case GmatTree::SOLAR_SYSTEM:
       //menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
       //menu.Enable(POPUP_ADD_BODY, false);
@@ -4463,6 +4567,19 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
          }
       }
       break;
+   case GmatTree::EVENT_LOCATOR_FOLDER:
+      listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::EVENT_LOCATOR);
+      newId = LOCATOR_BEGIN;
+      for (StringArray::iterator i = listOfObjects.begin();
+           i != listOfObjects.end(); ++i, ++newId)
+      {
+         // Drop the ones that are already there for now
+         std::string locatorType = (*i);
+         // Save the ID and type name for event handling
+         pluginMap[POPUP_ADD_LOCATOR + newId] = locatorType;
+         menu->Append(POPUP_ADD_LOCATOR + newId, wxT(locatorType.c_str()));
+      }
+      break;
    case GmatTree::SUBSCRIBER_FOLDER:
       menu->Append(POPUP_ADD_REPORT_FILE, wxT("ReportFile"));
       menu->Append(POPUP_ADD_XY_PLOT, wxT("XYPlot"));
@@ -4628,6 +4745,9 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::USER_COORD_SYSTEM:
       objType = Gmat::COORDINATE_SYSTEM;
       break;
+   case GmatTree::EVENT_LOCATOR:
+      objType = Gmat::EVENT_LOCATOR;
+      break;
 
    default:
       objType = Gmat::UNKNOWN_OBJECT;
@@ -4686,6 +4806,8 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    case GmatTree::COORD_SYSTEM:
    case GmatTree::USER_COORD_SYSTEM:
       return mCoordSysItem;
+   case GmatTree::EVENT_LOCATOR:
+      return mEventLocatorItem;
    default:
       MessageInterface::ShowMessage
          ("ResourceTree::GetObjectType() unknown object type.\n");

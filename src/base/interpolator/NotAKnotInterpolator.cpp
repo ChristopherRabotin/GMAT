@@ -190,9 +190,7 @@ bool NotAKnotInterpolator::Interpolate(const Real ind, Real *results)
             MessageInterface::ShowMessage("   %.12lf", y[i][j]);
          MessageInterface::ShowMessage("\n");
       }
-            
          
-   
       MessageInterface::ShowMessage("Cubic spline (not a knot) data points:\n");
       
       Real increment = (x[bufferSize - 1] - x[0]) / 100.0, xval;

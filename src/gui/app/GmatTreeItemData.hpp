@@ -188,6 +188,7 @@ namespace GmatTree
       PREDEFINED_FUNCTION_FOLDER,
       SCRIPT_FOLDER,
       CONSTELLATION_FOLDER,
+      EVENT_LOCATOR_FOLDER,
       // Added for user modules
       PLUGIN_FOLDER,
       END_OF_RESOURCE_FOLDER,
@@ -246,6 +247,8 @@ namespace GmatTree
       VARIABLE = 41600,
       ARRAY,
       STRING,
+
+      EVENT_LOCATOR = 41650,
 
       MATLAB_FUNCTION = 41700,
       GMAT_FUNCTION,
