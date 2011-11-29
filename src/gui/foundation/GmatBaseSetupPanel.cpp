@@ -723,6 +723,18 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
             wxArrayString emptyList;
             control = new wxCheckListBox(parent, ID_CHECKLISTBOX, wxDefaultPosition,
                                          wxSize(200,100), emptyList, wxLB_SINGLE|wxLB_SORT);
+            // Get the list of types needed
+            ObjectTypeArray types = theObject->GetTypesForList(index);
+            // Add the existing objects to the control
+            for (UnsignedInt i = 0; i < types.size(); ++i)
+            {
+               wxCheckListBox *clb = (wxCheckListBox*)control;
+               StringArray objs = theGuiInterpreter->GetListOfObjects(types[i]);
+               for (UnsignedInt j = 0; j < objs.size(); ++j)
+               {
+                  clb->Append(objs[j].c_str());
+               }
+            }
          }
       }
       break;
@@ -855,6 +867,19 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
             }
             break;
          }
+      case Gmat::STRINGARRAY_TYPE:
+         {
+            StringArray strings = theObject->GetStringArrayParameter(paramId);
+            wxString theList;
+            for (UnsignedInt i = 0; i < strings.size(); i++)
+            {
+               theList += wxT(strings[i].c_str());
+               if (i < strings.size() - 1)
+                  theList += wxT(", ");
+            }
+            ((wxTextCtrl*)theControl)->ChangeValue(theList);
+            break;
+         }
       case Gmat::ENUMERATION_TYPE:
          {
             valueString = (theObject->GetStringParameter(theObject->GetParameterID(label))).c_str();
@@ -961,7 +986,7 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
       
    case Gmat::OBJECTARRAY_TYPE:
       {
-         theObject->TakeAction("Clear");
+         theObject->TakeAction("Clear", label);
          wxCheckListBox *clb = (wxCheckListBox*)theControl;
          int count = clb->GetCount();
          for (int i = 0; i < count; i++)
@@ -978,6 +1003,21 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
          break;
       }
       
+   case Gmat::STRINGARRAY_TYPE:
+      {
+         StringArray strings = theObject->GetStringArrayParameter(paramId);
+         wxString theList;
+         for (UnsignedInt i = 0; i < strings.size(); i++)
+         {
+            theList += wxT(strings[i].c_str());
+            if (i < strings.size() - 1)
+               theList += wxT(", ");
+         }
+         ((wxTextCtrl*)theControl)->ChangeValue(theList);
+         break;
+      }
+
+
    default:
       break;
    }

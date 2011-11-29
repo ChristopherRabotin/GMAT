@@ -3284,6 +3284,9 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    case GmatTree::LIBRATION_POINT:
       sizer->Add(new LibrationPointPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::EVENT_LOCATOR:
+     sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+     break;
    case GmatTree::USER_DEFINED_OBJECT:
      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
      break;

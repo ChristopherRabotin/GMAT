@@ -3210,6 +3210,41 @@ bool GmatBase::TakeRequiredAction(const std::string &label)
 
 
 //------------------------------------------------------------------------------
+// const std::vector<Gmat::ObjectType>& GetTypesForList(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of types that need to be shown on a GUI for a parameter
+ *
+ * @param id The parameter ID
+ *
+ * @return The list of types
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& GmatBase::GetTypesForList(const Integer id)
+{
+   listedTypes.clear();
+   return listedTypes;
+}
+
+//------------------------------------------------------------------------------
+// const std::vector<Gmat::ObjectType>&
+//       GetTypesForList(const std::string &label)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of types that need to be shown on a GUI for a parameter
+ *
+ * @param label The parameter's identifying string
+ *
+ * @return The list of types
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& GmatBase::GetTypesForList(const std::string &label)
+{
+   return GetTypesForList(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
 // const std::string& GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
 //       const std::string &prefix = "", const std::string &useName = "")
 //------------------------------------------------------------------------------

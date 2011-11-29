@@ -51,7 +51,8 @@ EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
 {
-   Gmat::STRINGARRAY_TYPE,       // SATNAMES,
+//   Gmat::STRINGARRAY_TYPE,       // SATNAMES,
+   Gmat::OBJECTARRAY_TYPE,       // SATNAMES,
    Gmat::REAL_TYPE,              // TOLERANCE,
    Gmat::STRING_TYPE,            // EVENT_FILENAME,
    Gmat::BOOLEAN_TYPE,           // IS_ACTIVE
@@ -651,6 +652,16 @@ bool EventLocator::SetStringParameter(const Integer id,
       return false;
    }
 
+   if (id == SATNAMES)
+   {
+      if (find(satNames.begin(), satNames.end(), value) == satNames.end())
+      {
+         satNames.push_back(value);
+         targets.push_back(NULL);
+      }
+      return true;
+   }
+
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -1038,6 +1049,76 @@ bool EventLocator::SetBooleanParameter(const std::string &label,
       const bool value, const Integer index)
 {
    return SetBooleanParameter(GetParameterID(label), value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string &action, const std::string &actionData)
+//------------------------------------------------------------------------------
+/**
+ * Performs a custom action on the object.
+ *
+ * Event locators use this method to clear arrays in the locator.
+ *
+ * @param action The string specifying the action to be taken
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::TakeAction(const std::string &action,
+      const std::string &actionData)
+{
+   if (action == "Clear")
+   {
+      if ((actionData == "Spacecraft") || (actionData == ""))
+      {
+         satNames.clear();
+         targets.clear();
+      }
+      return true;
+   }
+
+   return GmatBase::TakeAction(action, actionData);
+}
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetTypesForList(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of types that need to be shown on a GUI for a parameter
+ *
+ * @param id The parameter ID
+ *
+ * @return The list of types
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& EventLocator::GetTypesForList(const Integer id)
+{
+   if (id == SATNAMES)
+   {
+      if (find(listedTypes.begin(), listedTypes.end(), Gmat::SPACECRAFT) ==
+            listedTypes.end())
+         listedTypes.push_back(Gmat::SPACECRAFT);
+      return listedTypes;
+   }
+
+   return GmatBase::GetTypesForList(id);
+}
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetTypesForList(const std::string &label)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of types that need to be shown on a GUI for a parameter
+ *
+ * @param label The parameter's identifying string
+ *
+ * @return The list of types
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& EventLocator::GetTypesForList(const std::string &label)
+{
+   return GetTypesForList(GetParameterID(label));
 }
 
 

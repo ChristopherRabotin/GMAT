@@ -137,6 +137,12 @@ public:
                                             const bool value,
                                             const Integer index);
 
+   virtual bool         TakeAction(const std::string &action,
+                                   const std::string &actionData = "");
+   virtual const ObjectTypeArray& GetTypesForList(const Integer id);
+   virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
+
+
 
    virtual void         SetSolarSystem(SolarSystem *ss);
 //   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);

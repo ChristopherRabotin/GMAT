@@ -628,6 +628,45 @@ bool GroundTrackPlot::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetTypesForList(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of types that need to be shown on a GUI for a parameter
+ *
+ * @param id The parameter ID
+ *
+ * @return The list of types
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& GroundTrackPlot::GetTypesForList(const Integer id)
+{
+   if (id == ADD)
+   {
+      listedTypes.clear();
+      listedTypes.push_back(Gmat::SPACECRAFT);
+      listedTypes.push_back(Gmat::GROUND_STATION);
+   }
+
+   return listedTypes;
+}
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetTypesForList(const std::string &label)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of types that need to be shown on a GUI for a parameter
+ *
+ * @param label The parameter's label
+ *
+ * @return The list of types
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray&
+      GroundTrackPlot::GetTypesForList(const std::string &label)
+{
+   return GetTypesForList(GetParameterID(label));
+}
 
 //------------------------------------------------------------------------------
 // virtual std::string GetRefObjectName(const Gmat::ObjectType type) const

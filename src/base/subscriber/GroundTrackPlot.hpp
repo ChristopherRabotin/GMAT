@@ -59,6 +59,8 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
+   virtual const ObjectTypeArray& GetTypesForList(const Integer id);
+   virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
    
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool         HasRefObjectTypeArray();

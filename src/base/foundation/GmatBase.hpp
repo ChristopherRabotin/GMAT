@@ -369,6 +369,9 @@ public:
    virtual bool         TakeRequiredAction(const Integer id);
    virtual bool         TakeRequiredAction(const std::string &label);
 
+   virtual const ObjectTypeArray& GetTypesForList(const Integer id);
+   virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
+
    virtual const std::string&
                         GetGeneratingString(
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -515,6 +518,8 @@ protected:
    bool                showInlineComment;
    /// flag indicating whether or not to omit the "Create" line when writing the script
    bool                cloaking;
+   /// Utility array used to return types for objects to be shown on a GUI
+   ObjectTypeArray     listedTypes;
 
    // Ordered list of parameters that have covariances
    StringArray         covarianceList;
