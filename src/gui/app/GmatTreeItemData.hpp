@@ -311,6 +311,7 @@ namespace GmatTree
       REPORTS_FOLDER,
       ORBIT_VIEWS_FOLDER,
       XY_PLOTS_FOLDER,
+      EVENTS_FOLDER,
 
       // for output
       BEGIN_OF_OUTPUT = 46000,
@@ -319,6 +320,7 @@ namespace GmatTree
       OUTPUT_GROUND_TRACK_PLOT,
       OUTPUT_XY_PLOT,
       COMPARE_REPORT,
+      EVENT_REPORT,
       END_OF_OUTPUT,
 
       //---------- NO panels will be created

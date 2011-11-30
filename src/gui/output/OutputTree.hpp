@@ -48,6 +48,7 @@ private:
    wxTreeItemId mReportItem;
    wxTreeItemId mOpenGlItem;
    wxTreeItemId mXyPlotItem;
+   wxTreeItemId mEventsItem;
    
    void AddDefaultResources();
    wxTreeItemId FindItem(wxTreeItemId parentId, const wxString &name);

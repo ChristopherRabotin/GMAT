@@ -516,7 +516,10 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    #endif
 
    if ((mItemType == GmatTree::OUTPUT_REPORT)  || (mItemType == GmatTree::OUTPUT_ORBIT_VIEW) ||
-       (mItemType == GmatTree::OUTPUT_XY_PLOT) || (mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT))
+       (mItemType == GmatTree::OUTPUT_XY_PLOT) || (mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT)
+       // We'll want to add the event reports eventually, but they are not subscriber based
+       //|| (mItemType == GmatTree::EVENT_REPORT)
+       )
    {
       GmatBase *obj =
          (Subscriber*)theGuiInterpreter->GetConfiguredObject(mPlotName.c_str());

@@ -241,6 +241,7 @@ OBJECTS = \
     output/CompareReportPanel.o \
     output/OutputTree.o \
     output/ReportFilePanel.o \
+    output/EventFilePanel.o \
     propagator/PropagationConfigPanel.o \
     propagator/PropagatorSelectDialog.o \
     rendering/Camera.o \

@@ -236,10 +236,25 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_XY_PLOT));
       }
    }
-   
+
+   // get list of Event Locators
+   StringArray listOfEls = theGuiInterpreter->GetListOfObjects(Gmat::EVENT_LOCATOR);
+   for (UnsignedInt i = 0; i < listOfEls.size(); ++i)
+   {
+      EventLocator *el =
+         (EventLocator*)theGuiInterpreter->GetConfiguredObject(listOfEls[i]);
+      if (el != NULL)
+      {
+         wxString objName = wxString(listOfEls[i].c_str());
+         AppendItem(mEventsItem, objName, GmatTree::OUTPUT_ICON_REPORTFILE, -1,
+               new GmatTreeItemData(objName, GmatTree::EVENT_REPORT));
+      }
+   }
+
    Expand(mReportItem);
    Expand(mOpenGlItem);
    Expand(mXyPlotItem);
+   Expand(mEventsItem);
 }
 
 //------------------------------------------------------------------------------
@@ -279,6 +294,15 @@ void OutputTree::AddDefaultResources()
                  new GmatTreeItemData(wxT("XY Plots"),
                                       GmatTree::XY_PLOTS_FOLDER));
     
+   SetItemImage(mXyPlotItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+
+   //----- Event Reports
+   mEventsItem =
+      AppendItem(output, wxT("Events"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
+                 new GmatTreeItemData(wxT("Events"),
+                                      GmatTree::EVENTS_FOLDER));
+
    SetItemImage(mXyPlotItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 }
