@@ -3238,6 +3238,9 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new EphemerisFilePanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::GROUND_TRACK_PLOT:
+		// Set reload values on ComboBox change to true here
+      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name, true), 0, wxGROW|wxALL, 0);
+      break;
    case GmatTree::SUBSCRIBER:
       // Switched to use GmatBaseSetupPanel (LOJ: 2011.06.02)
       //sizer->Add(new SubscriberSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);

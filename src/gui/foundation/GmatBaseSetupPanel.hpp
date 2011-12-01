@@ -38,7 +38,8 @@ typedef std::map<wxString, int> SizerSizeType;
 class GmatBaseSetupPanel : public GmatPanel
 {
 public:
-   GmatBaseSetupPanel(wxWindow *parent, const wxString &name);
+   GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
+							 bool reloadOnCBChange = false);
    virtual ~GmatBaseSetupPanel();
 protected:
    
@@ -81,6 +82,7 @@ protected:
    DECLARE_EVENT_TABLE();
    
    void OnBrowseButton(wxCommandEvent& event);
+	void OnCheckBoxChange(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    void OnComboBoxTextChange(wxCommandEvent& event);
    void OnTextChange(wxCommandEvent& event);
@@ -114,7 +116,8 @@ protected:
 
    /// local copy of object for verifying changes before commit/apply
    GmatBase *localObject;
-   
+   bool reloadOnComboBoxChange;
+	
 };
 
 #endif /* GmatBaseSetupPanel_hpp */

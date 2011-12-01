@@ -23,6 +23,7 @@
 #include "PlotInterface.hpp"       // for UpdateGlPlot()
 #include "SubscriberException.hpp" // for SubscriberException()
 #include "FileManager.hpp"         // for GetFullPathname()
+#include "StringUtil.hpp"          // for ToUpper()
 #include "MessageInterface.hpp"    // for ShowMessage()
 
 
@@ -522,6 +523,9 @@ std::string GroundTrackPlot::GetStringParameter(const Integer id) const
    case CENTRAL_BODY:
       return centralBodyName;
    case TEXTURE_MAP:
+      #if DBGLVL_PARAM_STRING
+		MessageInterface::ShowMessage("   returning '%s'\n", textureMapFileName.c_str());
+		#endif
       return textureMapFileName;
    case SHOW_FOOT_PRINTS:
       return footPrints;
@@ -563,9 +567,17 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
       // we want to create local body fixed coord system instead in Initialize()
       break;
    case CENTRAL_BODY:
-      centralBodyName = value;
-      // Since ground track data uses body fixed coordinates, name it here
-      mViewCoordSysName = value + "Fixed";
+		if (centralBodyName != value)
+		{
+			centralBodyName = value;
+			// Since ground track data uses body fixed coordinates, name it here
+			mViewCoordSysName = value + "Fixed";
+			
+			// Get default texture map file for the new body
+			FileManager *fm = FileManager::Instance();
+			std::string mapFile = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
+			textureMapFileName = fm->GetFullPathname(mapFile);
+		}
       return true;
    case TEXTURE_MAP:
       textureMapFileName = value;
