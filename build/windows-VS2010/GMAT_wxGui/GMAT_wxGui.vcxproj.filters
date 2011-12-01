@@ -531,6 +531,9 @@
     <ClCompile Include="..\..\..\src\gui\mission\UndockedMissionPanel.cpp">
       <Filter>Source Files\mission</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp">
+      <Filter>Source Files\output</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -1000,6 +1003,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\mission\UndockedMissionPanel.hpp">
       <Filter>Source Files\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp">
+      <Filter>Source Files\output</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
