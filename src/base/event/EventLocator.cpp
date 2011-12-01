@@ -54,7 +54,7 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
 //   Gmat::STRINGARRAY_TYPE,       // SATNAMES,
    Gmat::OBJECTARRAY_TYPE,       // SATNAMES,
    Gmat::REAL_TYPE,              // TOLERANCE,
-   Gmat::STRING_TYPE,            // EVENT_FILENAME,
+   Gmat::FILENAME_TYPE,          // EVENT_FILENAME,
    Gmat::BOOLEAN_TYPE,           // IS_ACTIVE
    Gmat::BOOLEAN_TYPE,           // SHOW_PLOT
    Gmat::REAL_TYPE,              // EPOCH (Read only)
