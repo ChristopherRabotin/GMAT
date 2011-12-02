@@ -121,6 +121,7 @@ private:
    
    void InitializeCounter();
    GmatCommand* CreateCommand(const wxString &cmdTypeName);
+	GmatCommand* CreateEndCommand(const wxString &cmdTypeName, GmatTree::ItemType &endType);
    void UpdateCommand();
    
    bool IsAnyViewCommandInBranch(GmatCommand *branch);

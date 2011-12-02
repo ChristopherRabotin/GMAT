@@ -616,6 +616,59 @@ GmatCommand* MissionTree::CreateCommand(const wxString &cmdTypeName)
 
 
 //------------------------------------------------------------------------------
+// GmatCommand* CreateEndCommand(const wxString &cmdTypeName, GmatTree::ItemType &endType)
+//------------------------------------------------------------------------------
+GmatCommand* MissionTree::CreateEndCommand(const wxString &cmdTypeName,
+														 GmatTree::ItemType &endType)
+{
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("MissionTree::CreateEndCommand() entered, cmdTypeName='%s'\n", cmdTypeName.c_str());
+   #endif
+	
+	GmatCommand *endCmd = NULL;
+	
+	if (cmdTypeName == "Target")
+	{
+		endCmd = CreateCommand("EndTarget");
+		endType = GmatTree::END_TARGET;
+	}
+	else if (cmdTypeName == "For")
+	{
+		endCmd = CreateCommand("EndFor");
+		endType = GmatTree::END_FOR_CONTROL;
+	}
+	else if (cmdTypeName == "While")
+	{
+		endCmd = CreateCommand("EndWhile");
+		endType = GmatTree::END_WHILE_CONTROL;
+	}
+	else if (cmdTypeName == "If")
+	{
+		endCmd = CreateCommand("EndIf");
+		endType = GmatTree::END_IF_CONTROL;
+	}
+	else if (cmdTypeName == "ScriptEvent")
+	{
+		endCmd = CreateCommand("EndScript");
+		endType = GmatTree::END_SCRIPT_EVENT;
+	}
+	else if (cmdTypeName == "Optimize")
+	{
+		endCmd = CreateCommand("EndOptimize");
+		endType = GmatTree::END_OPTIMIZE;
+	}
+	
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("MissionTree::CreateEndCommand() returning <%p>\n", endCmd);
+   #endif
+   
+   return endCmd;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsAnyViewCommandInBranch(GmatCommand *branch)
 //------------------------------------------------------------------------------
 /**
@@ -1033,7 +1086,7 @@ void MissionTree::ExpandNode(wxTreeItemId node, const wxString &cmdType)
          {
             MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parentId); 
             GmatCommand *parentCmd = parentItem->GetCommand();
-            if (parentCmd->IsOfType("BranchCommand") || parentCmd->IsOfType("Else"))
+            if (parentCmd->IsOfType("BranchCommand"))
                expand = true;
          }
       }
@@ -1100,13 +1153,7 @@ void MissionTree::ExpandChildCommand(wxTreeItemId parent, GmatCommand *cmd,
             node = BuildTreeItem(elseNode, nextInBranch, level, isLastItemHidden);
          else
             node = BuildTreeItem(parent, nextInBranch, level, isLastItemHidden);
-         
-         if (nextInBranch->IsOfType("Else"))
-         {
-            useElseAsParent = true;
-            elseNode = node;
-         }
-         
+			
          if (isLastItemHidden)
          {
             // If it is not a branch end, then show ellipsis
@@ -1230,8 +1277,8 @@ MissionTree::InsertNodeToBranch(wxTreeItemId parentId, wxTreeItemId currId,
    if (!insertBefore)
    {
       #if DEBUG_MISSION_TREE_INSERT
-      MessageInterface::ShowMessage("   111 inserting by realParentId and position 0\n");
-         #endif
+      MessageInterface::ShowMessage("   411 inserting by realParentId and position 0\n");
+      #endif
       node = InsertItem(realParentId, 0, nodeName, icon, -1,
                         new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
    }
@@ -1245,7 +1292,7 @@ MissionTree::InsertNodeToBranch(wxTreeItemId parentId, wxTreeItemId currId,
          if (prevCmd->IsOfType("BranchCommand"))
          {
             #if DEBUG_MISSION_TREE_INSERT
-            MessageInterface::ShowMessage("   121 inserting by parentId and position 0\n");
+            MessageInterface::ShowMessage("   421 inserting by parentId and position 0\n");
             #endif
             node = InsertItem(parentId, 0, nodeName, icon, -1,
                               new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
@@ -1253,7 +1300,7 @@ MissionTree::InsertNodeToBranch(wxTreeItemId parentId, wxTreeItemId currId,
          else
          {
             #if DEBUG_MISSION_TREE_INSERT
-            MessageInterface::ShowMessage("   122 inserting by parentId and prevId\n");
+            MessageInterface::ShowMessage("   422 inserting by parentId and prevId\n");
             #endif
             node = InsertItem(parentId, prevId, nodeName, icon, -1,
                               new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
@@ -1262,7 +1309,7 @@ MissionTree::InsertNodeToBranch(wxTreeItemId parentId, wxTreeItemId currId,
       else
       {
          #if DEBUG_MISSION_TREE_INSERT
-         MessageInterface::ShowMessage("   123 inserting by parentId and position 0\n");
+         MessageInterface::ShowMessage("   423 inserting by parentId and position 0\n");
          #endif
          node = InsertItem(parentId, 0, nodeName, icon, -1,
                            new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
@@ -1276,7 +1323,7 @@ MissionTree::InsertNodeToBranch(wxTreeItemId parentId, wxTreeItemId currId,
       if (!insertBefore)
       {
          #if DEBUG_MISSION_TREE_INSERT
-         MessageInterface::ShowMessage("   131 inserting by realParentId and position 0\n");
+         MessageInterface::ShowMessage("   431 inserting by realParentId and position 0\n");
          #endif
          node = InsertItem(realParentId, 0, nodeName, icon, -1,
                            new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
@@ -1286,7 +1333,7 @@ MissionTree::InsertNodeToBranch(wxTreeItemId parentId, wxTreeItemId currId,
          if (currCmd->IsOfType("BranchEnd"))
          {
             #if DEBUG_MISSION_TREE_INSERT
-            MessageInterface::ShowMessage("   132 inserting by realParentId and position 0\n");
+            MessageInterface::ShowMessage("   432 inserting by realParentId and position 0\n");
             #endif
             node = InsertItem(realParentId, 0, nodeName, icon, -1,
                               new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
@@ -1294,7 +1341,7 @@ MissionTree::InsertNodeToBranch(wxTreeItemId parentId, wxTreeItemId currId,
          else
          {
             #if DEBUG_MISSION_TREE_INSERT
-            MessageInterface::ShowMessage("   133 inserting by parentId and prevId\n");
+            MessageInterface::ShowMessage("   433 inserting by parentId and prevId\n");
             #endif
             node = InsertItem(parentId, prevId, nodeName, icon, -1,
                               new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
@@ -1457,6 +1504,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(currId);
    GmatCommand *currCmd = currItem->GetCommand();
+	wxString parentName = GetItemText(parentId);
 	wxString currItemName = GetItemText(currId);
    wxString currTypeName = currCmd->GetTypeName().c_str();
    wxString cmdTypeName = cmd->GetTypeName().c_str();   
@@ -1529,38 +1577,9 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       MessageInterface::ShowMessage
          ("   Creating End* for '%s'\n", cmdTypeName.c_str());
       #endif
-      
-      if (cmdTypeName == "Target")
-      {
-         endCmd = CreateCommand("EndTarget");
-         endType = GmatTree::END_TARGET;
-      }
-      else if (cmdTypeName == "For")
-      {
-         endCmd = CreateCommand("EndFor");
-         endType = GmatTree::END_FOR_CONTROL;
-      }
-      else if (cmdTypeName == "While")
-      {
-         endCmd = CreateCommand("EndWhile");
-         endType = GmatTree::END_WHILE_CONTROL;
-      }
-      else if (cmdTypeName == "If")
-      {
-         endCmd = CreateCommand("EndIf");
-         endType = GmatTree::END_IF_CONTROL;
-      }
-      else if (cmdTypeName == "ScriptEvent")
-      {
-         endCmd = CreateCommand("EndScript");
-         endType = GmatTree::END_SCRIPT_EVENT;
-      }
-      else if (cmdTypeName == "Optimize")
-      {
-         endCmd = CreateCommand("EndOptimize");
-         endType = GmatTree::END_OPTIMIZE;
-      }
-      
+
+		endCmd = CreateEndCommand(cmdTypeName, endType);
+		
       #if DEBUG_MISSION_TREE_INSERT
       if (endCmd != NULL)
          MessageInterface::ShowMessage
@@ -1668,10 +1687,20 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          node = AppendItem(currId, nodeName, icon, -1,
                            new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
       }
+		else if (currId == prevId && !insertBefore)
+		{
+         #if DEBUG_MISSION_TREE_INSERT
+			MessageInterface::ShowMessage
+				("   111 inserting '%s' after '%s' from parent '%s'\n", nodeName.c_str(),
+				 currItemName.c_str(), parentName.c_str());
+         #endif
+			node = InsertItem(parentId, currId, nodeName, icon, -1,
+									new MissionTreeItemData(nodeName, itemType, nodeName, cmd));
+		}
       else if (prevTypeName == "NoOp"     || prevTypeName == "BeginMissionSequence" ||
                prevTypeName == "Target"   || prevTypeName == "For"    ||
                prevTypeName == "While"    || prevTypeName == "If"     ||
-               prevTypeName == "Optimize" || prevTypeName == "Else")
+               prevTypeName == "Optimize")
       {
          node = InsertNodeToBranch(parentId, currId, prevId, icon, nodeName, itemType, cmd,
                                    currCmd, prevCmd, insertBefore);
@@ -1680,19 +1709,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                prevTypeName != "EndFiniteBurn")
       {
          wxTreeItemId realParentId = parentId;
-         wxTreeItemId realPrevId = prevId;
-			
-			if (prevCmd->IsOfType("BranchEnd"))
-			{
-				realPrevId = GetItemParent(prevId);
-				realParentId = GetItemParent(realPrevId);
-				
-				// We want indent children of Else in the tree eventhough actual command is not
-				// branch command
-				if (currTypeName == "Else")
-					realParentId = currId;
-			}
-			
+         wxTreeItemId realPrevId = prevId;			
          wxString realParentName = GetItemText(realParentId);
          wxString realPrevName = GetItemText(realPrevId);
 			
@@ -1709,7 +1726,6 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          MessageInterface::ShowMessage
             ("   ==> realPrevId=%u'%s'\n", realPrevId, realPrevName.c_str());
          #endif
-
 			
 			if (realParentId == realPrevId)
 			{
@@ -1724,17 +1740,16 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
 			}
 			else if (realParentName != "")
 			{
-
-				// Outdent items inserting after If-Else-EndIf
-				MissionTreeItemData *realParentItem = (MissionTreeItemData *)GetItemData(realParentId);
 				MissionTreeItemData *realPrevItem = (MissionTreeItemData *)GetItemData(realPrevId);
-				GmatCommand *realParentCmd = realParentItem->GetCommand();
 				GmatCommand *realPrevCmd = realPrevItem->GetCommand();
-				if (realParentCmd->IsOfType("If") && realPrevCmd->IsOfType("Else"))
+				
+				if (realPrevCmd->IsOfType("BranchEnd"))
 				{
-					MessageInterface::ShowMessage("Parent node is If, node to insert after is Else\n");
-					realPrevId = realParentId;
-					realParentId = GetItemParent(realParentId);
+               #if DEBUG_MISSION_TREE_INSERT
+					MessageInterface::ShowMessage
+						("===> Previous node is BranchEnd, so setting previous to its parent\n");
+					#endif
+					realPrevId = GetItemParent(realPrevId);					
 				}
 				
             #if DEBUG_MISSION_TREE_INSERT
@@ -1839,7 +1854,6 @@ void MissionTree::Append(const wxString &cmdTypeName)
    wxString itemText = GetItemText(itemId);
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
    GmatCommand *currCmd = currItem->GetCommand();
-   bool elseFound = false;
    
    #if DEBUG_MISSION_TREE_SHOW_CMD
    ShowCommands("Before Appending '" + cmdTypeName + "' to '" + itemText + "'");
@@ -1860,34 +1874,21 @@ void MissionTree::Append(const wxString &cmdTypeName)
        cmdTypeName.c_str(), GetItemText(itemId).c_str(), GetItemText(lastChildId).c_str());
    WriteCommand("   ", "currCmd = ", currCmd);
    #endif
-   
-   // If Else found in If command, use Else as last child id
-   if (GmatCommandUtil::IsElseFoundInIf(currCmd))
-   {
-      elseFound = true;
-      lastChildId = FindElse(itemId);
-   }
-   
-   
-   #if DEBUG_MISSION_TREE_APPEND
-   MessageInterface::ShowMessage
-      ("   after FindElse itemId=<%s>, lastChildId=<%s>, elseFound = %d\n",
-       GetItemText(itemId).c_str(), GetItemText(lastChildId).c_str(), elseFound);
-   #endif
-
+	
+	
+	// Now Else part is not indented (LOJ: 2011.12.02)
    //======================================================================
    // Note:
    // Previous command is the 2nd last visible command from the current node
    // For example:
    // Target
-   //    If          <-- if appending command, previous command should be Maneuver
+   //    If          <-- If appending command, previous command should be propagate
    //       Maneuver
-   //       Else     <-- if appending command, previous command should be Propagate
-   //          Propagate
+   //       Else     <-- There is no Append for Else
+   //       Propagate
    //       EndIf
    //    EndTarget
    //======================================================================
-   
    wxTreeItemId prevId;
    
    if (lastChildId.IsOk() && GetItemText(lastChildId) != "")
@@ -1922,27 +1923,16 @@ void MissionTree::Append(const wxString &cmdTypeName)
       currId = GetLastChild(itemId);
       
       GmatCommand *branchEnd = GmatCommandUtil::GetMatchingEnd(currCmd);
-      GmatCommand *realPrevCmd = branchEnd->GetPrevious();
+		GmatCommand *realPrevCmd = branchEnd->GetPrevious();
       std::string realPrevType = realPrevCmd->GetTypeName();
       
       #if DEBUG_MISSION_TREE_APPEND
       WriteCommand("   ", "branchEnd = ", branchEnd, ", realPrevCmd = ", realPrevCmd);
+		MessageInterface::ShowMessage("   ==> setting prevCmd to end->GetPrevious()\n");
       #endif
-      
-      // Here is tricky one.
-      // We don't want to reset prevCmd if currCmd is If and previous of EndIf is Else,
-      // since EndIf->GetPrevious() will return Else if there is Else
-      if (!elseFound &&
-          ((realPrevType != "Else") ||
-           (realPrevType == "Else" && currCmd->GetTypeName() == "Else")))
-      {
-         #if DEBUG_MISSION_TREE_APPEND
-         MessageInterface::ShowMessage("   ==> setting prevCmd to end->GetPrevious()\n");
-         #endif
-         
-         prevCmd = realPrevCmd;
-      }
-      
+		
+		prevCmd = realPrevCmd;
+		
       #if DEBUG_MISSION_TREE_APPEND
       WriteCommand("   ", "prevCmd = ", prevCmd);
       #endif
@@ -1976,56 +1966,6 @@ void MissionTree::Append(const wxString &cmdTypeName)
          if (GetItemParent(prevId) != itemId)
             prevId = GetItemParent(prevId);
       }
-   }
-   else if (currCmd->IsOfType("Else"))
-   {
-      #if DEBUG_MISSION_TREE_APPEND
-      MessageInterface::ShowMessage("   ==> current item is Else\n");
-      #endif
-      
-      parentId = itemId;
-      
-      wxTreeItemId ifId = GetItemParent(itemId);
-      wxTreeItemId realLastId = GetLastChild(ifId);
-      MissionTreeItemData *ifItem = (MissionTreeItemData *)GetItemData(ifId);
-      GmatCommand *ifCmd = ifItem->GetCommand();
-      GmatCommand *endIf = GmatCommandUtil::GetMatchingEnd(ifCmd);
-		
-      #if DEBUG_MISSION_TREE_APPEND
-      MessageInterface::ShowMessage
-			("   ==> realLast item is %s\n", GetItemText(realLastId).c_str());
-		#endif
-		
-      prevCmd = endIf->GetPrevious();
-		prevId = realLastId;
-		
-      // If previous command is BranchCommand, use End BranchCommand as previous command
-      if (prevCmd->IsOfType("BranchCommand"))
-      {
-         #if DEBUG_MISSION_TREE_APPEND
-         MessageInterface::ShowMessage("   previous command is BranchCommand\n");
-         #endif
-         prevCmd = GmatCommandUtil::GetMatchingEnd(prevCmd);
-      }
-		
-      #if DEBUG_MISSION_TREE_APPEND
-      WriteCommand("   ", "prevCmd = ", prevCmd);
-		#endif
-		
-      // If previous command is BranchEnd, previous item should be parent of BranchEnd
-      if (prevCmd->IsOfType("BranchEnd"))
-      {
-         if (GetItemParent(prevId) != itemId)
-            prevId = GetItemParent(prevId);
-      }
-      
-      #if DEBUG_MISSION_TREE_APPEND
-      WriteCommand("   ", "endIf = ", endIf, ", prevCmd = ", prevCmd);
-      MessageInterface::ShowMessage("   realLast item is %s\n", GetItemText(realLastId).c_str());
-      MessageInterface::ShowMessage("   previous item is %s\n", GetItemText(prevId).c_str());
-      MessageInterface::ShowMessage("   if       item is %s\n", GetItemText(ifId).c_str());
-      #endif
-      
    }
    else if (currId == mMissionSeqSubId)
    {
@@ -2152,20 +2092,16 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
       WriteActions(str);
    }
    #endif
-   
-#ifdef __WXMAC__
-   wxTreeItemId prevId = GetPrevSibling(itemId);
-
-   // Check if no previous item then get parent item
-   if (!prevId.IsOk())
-   {
-      if (parentId.IsOk())
-         prevId = parentId;
-   }
-#else
+	
    wxTreeItemId prevId = GetPrevVisible(itemId);
-#endif
-
+	
+	#if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage
+      ("MissionTree::InsertBefore('%s') parentId='%s', itemId='%s', "
+		 "prevId='%s'\n", cmdTypeName.c_str(), GetItemText(parentId).c_str(),
+		 GetItemText(itemId).c_str(), GetItemText(prevId).c_str());
+   #endif
+	
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
    
@@ -2238,7 +2174,8 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
    #if DEBUG_MISSION_TREE_INSERT
    WriteCommand("   ", "realPrevCmd = ", realPrevCmd);
    #endif
-   
+
+	
    if (realPrevCmd != NULL)
    {
       cmd = CreateCommand(cmdTypeName);      
@@ -2253,23 +2190,22 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
          #endif
          
          UpdateGuiManager(cmdTypeName);
-         
-			// Handle Else block in the tree, indent children of Else eventhough Else
-			// is not a branch command
-			wxTreeItemId elseId = GetItemParent(prevId);
-			MissionTreeItemData *elseItem = (MissionTreeItemData *)GetItemData(elseId);
-			GmatCommand *elseCmd = elseItem->GetCommand();
-			if (elseCmd->IsOfType("Else"))
-				 parentId = elseId;
+
+			bool insertBefore = true;
+			if (realPrevCmd->IsOfType("BranchEnd"))
+				insertBefore = false;
 			
          #if DEBUG_MISSION_TREE_INSERT
-         MessageInterface::ShowMessage("   ==> Calling InsertCommand(true)\n");
+			MessageInterface::ShowMessage
+				("   ==> Calling InsertCommand(%s), parent='%s', current='%s', previous='%s'\n",
+				 insertBefore ? "before" : "after", GetItemText(parentId).c_str(),
+				 GetItemText(itemId).c_str(), GetItemText(prevId).c_str());
          #endif
 			
          wxTreeItemId node =
             InsertCommand(parentId, itemId, prevId, GetIconId(cmdTypeName),
                           GetCommandId(cmdTypeName), cmdTypeName, realPrevCmd, cmd,
-                          GetCommandCounter(cmdTypeName), true);
+                          GetCommandCounter(cmdTypeName), insertBefore);
          
          ////Expand(parentId);
          ////Expand(prevId);
@@ -2315,20 +2251,8 @@ void MissionTree::InsertAfter(const wxString &cmdTypeName)
       WriteActions(str);
    }
    #endif
-   
-#ifdef __WXMAC__
-   wxTreeItemId prevId = GetPrevSibling(itemId);
 
-   // Check if no previous item then get parent item
-   if (!prevId.IsOk())
-   {
-      if (parentId.IsOk())
-         prevId = parentId;
-   }
-#else
-   wxTreeItemId prevId = GetPrevVisible(itemId);
-#endif
-   
+	wxTreeItemId prevId = itemId;
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
    GmatCommand *currCmd = currItem->GetCommand();
    
@@ -2358,36 +2282,37 @@ void MissionTree::InsertAfter(const wxString &cmdTypeName)
       
       // Set parentId, itemId, prevId properly to pass to InsertCommand()
       // If current node is BranchCommand, it inserts after BranchEnd (2011.09.27 new Requirement)
-      if (currCmd->IsOfType("BranchCommand") || currCmd->GetTypeName() == "Else")
+      if (currCmd->IsOfType("BranchCommand"))
       {
          GmatCommand *branchEnd = NULL;
-         if (currCmd->IsOfType("BranchCommand"))
-         {
-            branchEnd = GmatCommandUtil::GetMatchingEnd(currCmd);
-            #if DEBUG_MISSION_TREE_INSERT
-            MessageInterface::ShowMessage
-               ("   ==> Insert after BranchCommand, branchEnd=<%p><%s>\n",
-                branchEnd, branchEnd->GetTypeName().c_str());
-            #endif
-            cmd->ForceSetPrevious(branchEnd);
-            prevCmd = branchEnd;
-            prevId = itemId;
-            parentId = GetItemParent(itemId);
-         }
-         else // command type is Else
-         {
-            cmd->ForceSetPrevious(currCmd);
-            prevCmd = currCmd;
-            parentId = itemId;
-            prevId = itemId;
-         }
+			branchEnd = GmatCommandUtil::GetMatchingEnd(currCmd);
+         #if DEBUG_MISSION_TREE_INSERT
+			MessageInterface::ShowMessage
+				("   ==> Insert after BranchCommand, branchEnd=<%p><%s>\n",
+				 branchEnd, branchEnd->GetTypeName().c_str());
+         #endif
+			cmd->ForceSetPrevious(branchEnd);
+			prevCmd = branchEnd;
+			prevId = itemId;
+			parentId = GetItemParent(itemId);
       }
       else if (currCmd->IsOfType("BranchEnd"))
       {
          cmd->ForceSetPrevious(currCmd);
-         prevId = itemId;
-         //itemId = parentId;
-         parentId = GetItemParent(itemId);
+
+			// If inserting after BranchEnd, insert it after Branch command
+         #if DEBUG_MISSION_TREE_INSERT
+			MessageInterface::ShowMessage("   ==> Insert after BranchEnd\n");
+         #endif
+			
+			// If it is not a Else then reassign nodes, since Else is not a really
+			// BranchEnd in the tree(LOJ: 2011.12.02)
+			if (!currCmd->IsOfType("Else"))
+			{
+				itemId = parentId;
+				parentId = GetItemParent(itemId);
+				prevId = itemId;
+			}
       }
       else
       {
@@ -2399,17 +2324,12 @@ void MissionTree::InsertAfter(const wxString &cmdTypeName)
       if (cmd != NULL)
       {
          UpdateGuiManager(cmdTypeName);
-         
-			// Handle Else block in the tree, indent children of Else eventhough Else
-			// is not a branch command
-			wxTreeItemId elseId = GetItemParent(prevId);
-			MissionTreeItemData *elseItem = (MissionTreeItemData *)GetItemData(elseId);
-			GmatCommand *elseCmd = elseItem->GetCommand();
-			if (elseCmd->IsOfType("Else"))
-				 parentId = elseId;
 			
          #if DEBUG_MISSION_TREE_INSERT
-         MessageInterface::ShowMessage("   ==> Calling InsertCommand(false)\n");
+         MessageInterface::ShowMessage
+				("   ==> Calling InsertCommand(insertAfter), parent='%s', currItem='%s', "
+				 "prevItem='%s'\n", GetItemText(parentId).c_str(), GetItemText(itemId).c_str(),
+				 GetItemText(prevId).c_str());
          #endif
 
          wxTreeItemId node =
@@ -3026,7 +2946,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
          
          // Append is allowed for the control logic
          if ((itemType == GmatTree::IF_CONTROL) ||
-             (itemType == GmatTree::ELSE_CONTROL) ||
+				 // ELSE is not a BranchCommand so commented out (LOJ: 2011.12.01)
+             //(itemType == GmatTree::ELSE_CONTROL) ||
              (itemType == GmatTree::FOR_CONTROL) ||
              (itemType == GmatTree::WHILE_CONTROL))
          {
@@ -3609,7 +3530,6 @@ wxMenu* MissionTree::CreateControlLogicSubMenu(int type, ActionType action)
       // show only one Else
       // We should look for in the first level children only,
       // so use FindElse() (LOJ: 2011.09.28)
-      //wxTreeItemId elseId = FindChild(parentId, "Else");
       wxTreeItemId elseId = FindElse(parentId);
       if (elseId.IsOk() && GetItemText(elseId) != "")
          addElse = false;

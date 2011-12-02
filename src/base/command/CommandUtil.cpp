@@ -964,7 +964,12 @@ GetCommandSeqString(GmatCommand *cmd, bool showAddr, bool showGenStr,
          else
             genStr = " <" + current->GetGeneratingString(Gmat::NO_COMMENTS) + ">";
       }
-
+		else
+		{
+			// Show only summary name
+			genStr = "(" + current->GetSummaryName() + ")";
+		}
+		
       // if indentation string is not blank, use it from the first level
       if (indentStr.find(" ") == indentStr.npos)
          cmdstr = indentStr + " " + std::string(buf) + current->GetTypeName() + genStr + "\n";
@@ -1025,13 +1030,21 @@ GetSubCommandString(GmatCommand* brCmd, Integer level, std::string &cmdseq,
             sprintf(buf, "(%p)", nextInBranch);
          
          genStr = "";
-         if (nextInBranch->GetTypeName() == "BeginScript")
-            genStr = "<BeginScript>";
-         else if (nextInBranch->GetTypeName() == "EndScript")
-            genStr = "<EndScript>";
-         else
-            genStr = " <" + nextInBranch->GetGeneratingString(Gmat::NO_COMMENTS) + ">";
-         
+			if (showGenStr)
+			{
+				if (nextInBranch->GetTypeName() == "BeginScript")
+					genStr = "<BeginScript>";
+				else if (nextInBranch->GetTypeName() == "EndScript")
+					genStr = "<EndScript>";
+				else
+					genStr = " <" + nextInBranch->GetGeneratingString(Gmat::NO_COMMENTS) + ">";
+         }
+			else
+			{
+				// Show only summary name
+				genStr = "(" + nextInBranch->GetSummaryName() + ")";
+			}
+			
          // if indentation string is not blank, use it from the first sub level
          if (indentStr.find(" ") == indentStr.npos)
             cmdstr = indentStr + " " + std::string(buf) + nextInBranch->GetTypeName() + genStr + "\n";
