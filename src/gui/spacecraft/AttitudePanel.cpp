@@ -75,6 +75,9 @@ const std::string AttitudePanel::STATE_RATE_TEXT[attStateRateTypeCount] =
 const Integer AttitudePanel::STARTUP_STATE_TYPE_SELECTION      = EULER_ANGLES;
 const Integer AttitudePanel::STARTUP_RATE_STATE_TYPE_SELECTION = EULER_ANGLE_RATES;
 
+const Integer AttitudePanel::ATTITUDE_TEXT_CTRL_WIDTH          = 80;
+const Integer AttitudePanel::QUATERNION_TEXT_CTRL_WIDTH        = 148;
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -274,34 +277,34 @@ void AttitudePanel::Create()
                         wxDefaultPosition, wxDefaultSize, 0);
    st1TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st2TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st3TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st4TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st5TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st6TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st7TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st8TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st9TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    st10TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );  
+                      wxDefaultPosition, wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
 
    // Rate State Type
    stateTypeRate4StaticText =
@@ -331,13 +334,13 @@ void AttitudePanel::Create()
    
    str1TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE_RATE, wxT(""), wxDefaultPosition, 
-         wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+         wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    str2TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE_RATE, wxT(""), wxDefaultPosition, 
-         wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+         wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    str3TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_STATE_RATE, wxT(""), wxDefaultPosition, 
-         wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );                
+         wxSize(ATTITUDE_TEXT_CTRL_WIDTH,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
 
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage
@@ -383,7 +386,8 @@ void AttitudePanel::Create()
    attRateSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Rate Initial Conditions" );
    
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
-   wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
+   flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
+//   wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
    wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 3, 0, 0 );
    // Let's make TextCtrl growable, so we can see more numbers when expand
    // Commented out since it doesn't look good on Linux(LOJ: 2010.02.19)
@@ -1215,8 +1219,36 @@ void AttitudePanel::EnableAll()
    st1TextCtrl->Enable();
 }
 
+//------------------------------------------------------------------------------
+// void DisplaySpiceReminder()
+//------------------------------------------------------------------------------
 void AttitudePanel::DisplaySpiceReminder()
 {
+}
+
+//------------------------------------------------------------------------------
+// void ResizeTextCtrl1234(bool forQuaternion = false)
+//------------------------------------------------------------------------------
+void AttitudePanel::ResizeTextCtrl1234(bool forQuaternion)
+{
+   int width;
+   if (forQuaternion)
+      width = QUATERNION_TEXT_CTRL_WIDTH;
+   else
+      width = ATTITUDE_TEXT_CTRL_WIDTH;
+
+   // tell the grid sizer the new size of the text boxes
+   int w, h;
+   st1TextCtrl->GetSize(&w, &h);
+   flexGridSizer2->SetItemMinSize(st1TextCtrl, width, h);
+   st2TextCtrl->GetSize(&w, &h);
+   flexGridSizer2->SetItemMinSize(st2TextCtrl, width, h);
+   st3TextCtrl->GetSize(&w, &h);
+   flexGridSizer2->SetItemMinSize(st3TextCtrl, width, h);
+   st4TextCtrl->GetSize(&w, &h);
+   flexGridSizer2->SetItemMinSize(st4TextCtrl, width, h);
+
+   flexGridSizer2->Layout();
 }
 
 
@@ -1522,6 +1554,8 @@ bool AttitudePanel::DisplayEulerAngles()
       st3StaticText->Show(true);
       st4StaticText->Show(false);
 
+      ResizeTextCtrl1234();
+
       st1TextCtrl->Show(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("EulerAngle1Hint")));
       st2TextCtrl->Show(true);
@@ -1585,6 +1619,8 @@ bool AttitudePanel::DisplayQuaternion()
       st3StaticText->Show(true);
       st4StaticText->Show(true);
 
+      ResizeTextCtrl1234(true);
+
       st1TextCtrl->Show(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("Quaternion1Hint")));
       st2TextCtrl->Show(true);
@@ -1605,7 +1641,7 @@ bool AttitudePanel::DisplayQuaternion()
       st1StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"1"));
       st2StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"2"));
       st3StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"3"));
-      st4StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"c"));  // Dunn changed 4 to c
+      st4StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"4"));  // Dunn changed 4 to c
    
       st1TextCtrl->SetValue(*quaternion[0]);
       st2TextCtrl->SetValue(*quaternion[1]);
@@ -1650,6 +1686,8 @@ bool AttitudePanel::DisplayDCM()
       st2StaticText->Show(false);
       st3StaticText->Show(false);
       st4StaticText->Show(false);
+
+      ResizeTextCtrl1234();
 
       st1TextCtrl->Show(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("DCM1Hint")));
@@ -1726,6 +1764,8 @@ bool AttitudePanel::DisplayMRPs()
       st2StaticText->Show(true);
       st3StaticText->Show(true);
       st4StaticText->Show(false);
+
+      ResizeTextCtrl1234();
 
       st1TextCtrl->Show(true);
       st1TextCtrl->SetToolTip(pConfig->Read(_T("MRP1Hint")));
