@@ -58,7 +58,7 @@
 /**
  * Base class used for Attitude classes.
  * 
- * This class is the base class for classes repressenting spacecraft attitude 
+ * This class is the base class for classes representing spacecraft attitude
  * for GMAT.
  *  
  * @note The current builds of GMAT only contain kinematic attitude modeling.
@@ -104,7 +104,7 @@ public:
    // method to convert a cosine matrix to an euler axis and angle
    static void      DCMToEulerAxisAndAngle(const Rmatrix33 &cosMat,
                                             Rvector3 &eAxis, Real &eAngle);
-// END static methods for conversion
+   // END static methods for conversion
 
 
    // Constructor
