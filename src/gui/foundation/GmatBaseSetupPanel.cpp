@@ -726,21 +726,20 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
          }
          else
          {
-            wxArrayString emptyList;
-            control = new wxCheckListBox(parent, ID_CHECKLISTBOX, wxDefaultPosition,
-                                         wxSize(200,100), emptyList, wxLB_SINGLE|wxLB_SORT);
+            wxArrayString theList;
             // Get the list of types needed
             ObjectTypeArray types = theObject->GetTypesForList(index);
-            // Add the existing objects to the control
+            // Add the existing objects to the list
             for (UnsignedInt i = 0; i < types.size(); ++i)
             {
-               wxCheckListBox *clb = (wxCheckListBox*)control;
                StringArray objs = theGuiInterpreter->GetListOfObjects(types[i]);
                for (UnsignedInt j = 0; j < objs.size(); ++j)
                {
-                  clb->Append(objs[j].c_str());
+                  theList.Add(wxT(objs[j].c_str()));
                }
             }
+            control = new wxCheckListBox(parent, ID_CHECKLISTBOX, wxDefaultPosition,
+                                         wxSize(200,100), theList, wxLB_SINGLE|wxLB_SORT);
          }
       }
       break;
