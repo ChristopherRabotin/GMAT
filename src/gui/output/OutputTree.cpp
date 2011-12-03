@@ -193,13 +193,19 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
    #endif
    
    if (removeReports)
+   {
       Collapse(mReportItem);
+      Collapse(mEventsItem);
+   }
    Collapse(mOpenGlItem);
    Collapse(mXyPlotItem);
    
    // delete all old children
    if (removeReports)
+   {
       DeleteChildren(mReportItem);
+      DeleteChildren(mEventsItem);
+   }
    DeleteChildren(mOpenGlItem);
    DeleteChildren(mXyPlotItem);
    
