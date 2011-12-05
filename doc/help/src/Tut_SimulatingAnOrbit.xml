@@ -60,7 +60,7 @@
     spacecraft. You will learn how to configure
     <classname>Spacecraft</classname> and <classname>Propagator</classname>
     resources, and how to use the <function>Propagate</function> command to
-    propagate the spacecraft to orbit perigee, which is the point of minimum
+    propagate the spacecraft to orbit periapsis, which is the point of minimum
     distance between the spacecraft and Earth. The basic steps in this
     tutorial are:</para>
 
@@ -81,7 +81,7 @@
 
       <listitem>
         <para>Modify the <function>Propagate</function> command to propagate
-        the spacecraft to perigee.</para>
+        the spacecraft to periapsis.</para>
       </listitem>
 
       <listitem>
@@ -149,8 +149,8 @@
         </listitem>
 
         <listitem>
-          <para>Click <guibutton>Apply</guibutton> or press
-          <keycap>ENTER</keycap> to save these changes.</para>
+          <para>Click <guibutton>Apply</guibutton> or press the
+          <keycap>ENTER</keycap> key to save these changes.</para>
         </listitem>
       </orderedlist>
     </section>
@@ -413,7 +413,7 @@
 
     <para>This is the last step before running the mission. Below you will
     configure a Propagate command to propagate (or simulate the motion of)
-    <guilabel>Sat</guilabel> to orbit perigee.</para>
+    <guilabel>Sat</guilabel> to orbit periapsis.</para>
 
     <orderedlist spacing="compact">
       <listitem>
@@ -527,7 +527,7 @@
       <listitem>
         <para>Manipulate the <guilabel>DefaultOrbitView</guilabel> plot using
         your mouse to orient the trajectory so that you can to verify that at
-        the final location the spacecraft is at perigee. See <xref
+        the final location the spacecraft is at periapsis. See <xref
         linkend="HowTo_ManipulatingThe3DOrbitView" xrefstyle="select:title" />
         for details.</para>
       </listitem>
@@ -564,7 +564,7 @@
                          width="1em"></imagedata>
             </imageobject>
           </inlinemediaobject></subscript>) to animate the mission and watch
-        the orbit propagate from the initial state to perigee.</para>
+        the orbit propagate from the initial state to periapsis.</para>
       </listitem>
     </orderedlist>
 
