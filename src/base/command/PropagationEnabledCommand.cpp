@@ -1329,7 +1329,8 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
       Real zero = epochs[0] - bounds[0] * (epochs[1] - epochs[0]) /
             (bounds[1] - bounds[0]);
 
-      MessageInterface::ShowMessage("Zero at %12lf\n", zero);
+      MessageInterface::ShowMessage("Zero ~ at %12lf for locator %s function "
+         "index %d\n", zero, el->GetName().c_str(), index);
    #endif
 
    // Preserve the current state data
@@ -1429,7 +1430,7 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
 //         &&
 //          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
 
-   if ((GmatMathUtil::Abs(tempEventData[index*3+1]) < 1e-5) &&
+   if ((GmatMathUtil::Abs(tempEventData[index*3+1]) < locateTolerance) &&
        (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
       eventFound = true;
 
@@ -1437,8 +1438,21 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
 
    if (eventFound)
    {
+      #ifdef DEBUG_EVENTLOCATORS
+         MessageInterface::ShowMessage("Found an event for function "
+            "index %d\n", index);
+      #endif
       UpdateEventTable(el, index);
    }
+   #ifdef DEBUG_EVENTLOCATORS
+   else
+   {
+      // Linear interpolate to guess the epoch
+      MessageInterface::ShowMessage("No zero found for locator %s function "
+            "index %d; steps taken = %d\n", el->GetName().c_str(), index, 
+            stepsTaken);
+   }
+   #endif
 
    // Preserve the current state data
    BufferSatelliteStates(false);
@@ -1452,6 +1466,10 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
 
 void PropagationEnabledCommand::UpdateEventTable(EventLocator* el, Integer index)
 {
+   #ifdef DEBUG_EVENTLOCATORS
+      MessageInterface::ShowMessage("Adding event %d on locator %s to the "
+            "table\n", index, el->GetName().c_str());
+   #endif
    el->BufferEvent(index);
 }
 
