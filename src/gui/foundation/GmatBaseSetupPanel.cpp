@@ -55,7 +55,7 @@ BEGIN_EVENT_TABLE(GmatBaseSetupPanel, GmatPanel)
    EVT_TEXT(ID_TEXTCTRL, GmatBaseSetupPanel::OnTextChange)
    EVT_CHECKBOX(ID_CHECKBOX, GmatBaseSetupPanel::OnCheckBoxChange)
    EVT_BUTTON(ID_BUTTON_BROWSE, GmatBaseSetupPanel::OnBrowseButton)
-   EVT_CHECKLISTBOX(ID_CHECKLISTBOX, GmatBaseSetupPanel::OnCheckListBoxChange)
+   EVT_COMMAND_RANGE(ID_CHECKLISTBOX, ID_CHECKLISTBOX_LAST, wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, GmatBaseSetupPanel::OnCheckListBoxChange)
 END_EVENT_TABLE()
 
 
@@ -97,6 +97,8 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "The object named \"%s\" does not exist\n", name.c_str());
    }
+
+   clbNumber = 0;
 }
 
 
@@ -719,10 +721,11 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
             // listen for any SpacePoint updates, so need to unregister
             // in the destructor
             wxCheckListBox *clbControl =
-               theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX,
+               theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX+clbNumber,
                                                         wxSize(200,100));
             managedCheckListBoxMap.insert(std::make_pair("CelestialBody", clbControl));
             control = clbControl;
+            clbNumber++;
          }
          else
          {
@@ -738,8 +741,9 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
                   theList.Add(wxT(objs[j].c_str()));
                }
             }
-            control = new wxCheckListBox(parent, ID_CHECKLISTBOX, wxDefaultPosition,
+            control = new wxCheckListBox(parent, ID_CHECKLISTBOX+clbNumber, wxDefaultPosition,
                                          wxSize(200,100), theList, wxLB_SINGLE|wxLB_SORT);
+            clbNumber++;
          }
       }
       break;

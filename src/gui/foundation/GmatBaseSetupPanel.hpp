@@ -117,6 +117,8 @@ protected:
    std::map<wxString, wxComboBox*>  managedComboBoxMap;
    /// Managed wxCheckListBox map used by GuiItemManager
    std::map<wxString, wxCheckListBox*>  managedCheckListBoxMap;
+   /// Number assigned to constructed wxCheckListBoxes
+   Integer clbNumber;
    
    /// IDs used for event management
    enum
@@ -130,9 +132,11 @@ protected:
       /// ID for check boxes
       ID_CHECKBOX,               
       /// ID for a list containing check boxes
-      ID_CHECKLISTBOX,           
+      ID_CHECKLISTBOX,
+      /// wxCheckListBoxes require unique IDs; here is the last ID for them, so a panel can have up to 20
+      ID_CHECKLISTBOX_LAST = ID_CHECKLISTBOX + 19,
       /// File browser button ID
-      ID_BUTTON_BROWSE           
+      ID_BUTTON_BROWSE 
    };
    
    static const Integer border = 3;
