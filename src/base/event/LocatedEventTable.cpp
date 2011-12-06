@@ -31,6 +31,8 @@
 #include <iomanip>
 #include <algorithm>          // For find()
 
+//#define DEBUG_EVENTLOCATION
+
 
 //------------------------------------------------------------------------------
 // LocatedEventTable()
@@ -118,6 +120,12 @@ LocatedEventTable& LocatedEventTable::operator=(const LocatedEventTable& let)
 //------------------------------------------------------------------------------
 void LocatedEventTable::AddEvent(LocatedEvent *theEvent)
 {
+   #ifdef DEBUG_EVENTLOCATION
+      MessageInterface::ShowMessage("Adding event: %s %s %16.10lf %s\n",
+            theEvent->type.c_str(), theEvent->participants.c_str(),
+            theEvent->epoch, (theEvent->isEntry ? "starter" : "closer"));
+   #endif
+
    events.push_back(theEvent);
    associationsCurrent = false;
 }
