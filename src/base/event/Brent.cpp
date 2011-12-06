@@ -292,3 +292,8 @@ Real Brent::FindStep(const GmatEpoch currentEpoch)
 
    return step;
 }
+
+Real Brent::GetStepMeasure()
+{
+   return GmatMathUtil::Abs(epochBuffer[1]-epochBuffer[2]);
+}

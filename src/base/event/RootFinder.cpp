@@ -25,6 +25,7 @@
 #include "PropSetup.hpp"
 #include "Spacecraft.hpp"
 #include "Formation.hpp"
+#include "MessageInterface.hpp"
 
 
 
@@ -229,7 +230,7 @@ bool RootFinder::SetValue(GmatEpoch forEpoch, Real withValue)
 
 
 //------------------------------------------------------------------------------
-// void RootFinder::Swap(Integer i1, Integer i2)
+// void Swap(Integer i1, Integer i2)
 //------------------------------------------------------------------------------
 /**
  * Exchanges two members of the buffers
@@ -255,6 +256,27 @@ void RootFinder::Swap(Integer i1, Integer i2)
 }
 
 
+//------------------------------------------------------------------------------
+// Real GetStepMeasure()
+//------------------------------------------------------------------------------
+/**
+ * Returns the time difference, in seconds, used as a measure of convergence
+ *
+ * The default returns the difference between elements 0 an 1 in the epochBuffer
+ *
+ * @return The time measure, in seconds
+ */
+//------------------------------------------------------------------------------
+Real RootFinder::GetStepMeasure()
+{
+      MessageInterface::ShowMessage("Returning epoch measure %.12lf, from "
+            "epochs %.12lf and %.12lf\n", 
+            GmatMathUtil::Abs(epochBuffer[1] - epochBuffer[0]) * 
+            GmatTimeConstants::SECS_PER_DAY, epochBuffer[0], epochBuffer[1]);
+
+   return GmatMathUtil::Abs(epochBuffer[1] - epochBuffer[0]) * 
+      GmatTimeConstants::SECS_PER_DAY;
+}
 
 
 

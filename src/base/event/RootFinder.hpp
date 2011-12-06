@@ -46,6 +46,7 @@ public:
    virtual bool Initialize(GmatEpoch t0, Real f0, GmatEpoch t1, Real f1);
    virtual bool SetValue(GmatEpoch forEpoch, Real withValue);
    virtual Real GetStep(const GmatEpoch currentEpoch = -1.0);
+   virtual Real GetStepMeasure();
 
 protected:
    /// Type of the root finding algorithm
