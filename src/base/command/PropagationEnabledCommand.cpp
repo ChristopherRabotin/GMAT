@@ -1356,7 +1356,11 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
    // Loop until (1) the maximum number of steps is taken, (2) the step
    // tolerance is at the numerical precision of the data, or (3) the step
    // achieves the step tolerance
+//   Real locateTolerance = el->GetTolerance() * GmatTimeConstants::DAYS_PER_SEC;
    Real locateTolerance = el->GetTolerance();
+//   // Variable used to get the time step measure from the search algorithm
+//   Real stepDifference;
+
    do
    {
       // Get the step desired
@@ -1421,18 +1425,25 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
       #endif
 
       finder->SetValue(tempEventData[index*3], tempEventData[index*3+1]);
+//      stepDifference = finder->GetStepMeasure();
 
       lastEpoch = tempEventData[index*3];
       ++stepsTaken;
    }
-   while ((stepsTaken < maxStepsAllowed) &&
+   while ((stepsTaken < maxStepsAllowed) && 
           (GmatMathUtil::Abs(tempEventData[index*3+1]) > locateTolerance));
+//   while ((stepsTaken < maxStepsAllowed) && (stepDifference > locateTolerance));
+//
 //         &&
 //          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
 
    if ((GmatMathUtil::Abs(tempEventData[index*3+1]) < locateTolerance) &&
        (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
       eventFound = true;
+
+//   if ((stepDifference < locateTolerance) &&
+//       (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
+//      eventFound = true;
 
    // End of temporary section
 
