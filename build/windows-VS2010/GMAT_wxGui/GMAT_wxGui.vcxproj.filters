@@ -207,9 +207,6 @@
     <ClCompile Include="..\..\..\src\gui\burn\ImpulsiveBurnSetupPanel.cpp">
       <Filter>Source Files\burn</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\command\SavePanel.cpp">
-      <Filter>Source Files\command</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\command\ScriptEventPanel.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
@@ -534,6 +531,9 @@
     <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp">
       <Filter>Source Files\output</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ManageObjectPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -675,9 +675,6 @@
       <Filter>Source Files\burn</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\command\ReportPanel.hpp">
-      <Filter>Source Files\command</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\command\SavePanel.hpp">
       <Filter>Source Files\command</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\command\ScriptEventPanel.hpp">
@@ -1006,6 +1003,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp">
       <Filter>Source Files\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ManageObjectPanel.hpp">
+      <Filter>Source Files\command</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
