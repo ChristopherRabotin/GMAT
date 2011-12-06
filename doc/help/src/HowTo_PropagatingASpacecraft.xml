@@ -12,74 +12,79 @@
   <section>
     <title>Configuring the Force Model</title>
 
-    <para>In the example below, you’ll learn how to configure a high fidelity
-    propagator for low Earth orbits. Starting from the default mission:</para>
+    <para>Propagation in GMAT is governed by a force model and an integrator,
+    which together form a propagator. The force model component offers many
+    options that let you control the fidelity of the simulation, from a simple
+    two-body model with a single point mass to a full-featured model with
+    central body non-spherical gravity, external point masses, atmospheric
+    drag, and more. This example configures an Earth-centered model with some
+    commonly-used parameters. Starting from the default mission:</para>
 
     <procedure>
       <step>
-        <para>In the <guilabel>Resources</guilabel> tree, double-click on
-        <guilabel>DefaultProp</guilabel> to open it.</para>
+        <para>In the <guilabel>Resources</guilabel> tree, double-click
+        <guilabel>DefaultProp</guilabel> to open its properties window.</para>
       </step>
 
       <step>
-        <para>In the <guilabel>Gravity</guilabel> section, type 21 in the
-        <guilabel>Degree</guilabel> box.</para>
+        <para>Under <guilabel>Gravity</guilabel>, in the
+        <guilabel>Degree</guilabel> box, type
+        <userinput>21</userinput>.</para>
       </step>
 
       <step>
-        <para>Type 21 in the <guilabel>Order</guilabel> box.</para>
+        <para>In the <guilabel>Order</guilabel> box, type
+        <userinput>21</userinput>.</para>
       </step>
 
       <step>
-        <para>Click on the <guilabel>Atmosphere Model</guilabel> drop-down
-        list and select MSISE90 .</para>
+        <para>In the <guilabel>Atmosphere Model</guilabel> list, click
+        <guilabel>MSISE90</guilabel>.</para>
       </step>
 
       <step>
-        <para>Click the <guilabel>Select</guilabel> button next to the
-        <guilabel>PointMasses</guilabel> box.</para>
+        <para>Next to the <guilabel>PointMasses</guilabel> box, click the
+        <guibutton>Select</guibutton> button.</para>
       </step>
 
       <step>
-        <para>Click on <guilabel>Sun</guilabel> and then click the right arrow
-        <guilabel>-&gt;</guilabel> to add the <guilabel>Sun</guilabel> to your
+        <para>In the <guilabel>Available Bodies</guilabel> list on the left,
+        click <guilabel>Sun</guilabel>, then click
+        <guibutton>-&gt;</guibutton> to add <guilabel>Sun</guilabel> to your
         force model.</para>
       </step>
 
       <step>
-        <para>Add <guilabel>Moon</guilabel>, and <guilabel>Jupiter</guilabel>
+        <para>Add <guilabel>Moon</guilabel> and <guilabel>Jupiter</guilabel>
         using the same steps as above.</para>
       </step>
 
       <step>
-        <para>Click <guilabel>OK</guilabel> on the
-        <guilabel>CelestialBodySelect</guilabel> dialog box.</para>
+        <para>Click <guilabel>OK</guilabel> to accept your changes.</para>
       </step>
 
       <step>
-        <para>Click on the <guilabel>UseSolarRadiationPressure</guilabel>
-        check box. The box should be checked now.</para>
+        <para>Select <guilabel>UseSolarRadiationPressure</guilabel> to
+        activate the solar radiation pressure force.</para>
       </step>
 
       <step>
-        <para>Click <guilabel>OK</guilabel> on the
-        <guilabel>PropSetup</guilabel> dialog box.</para>
+        <para>Click <guilabel>OK</guilabel> to accept your changes.</para>
       </step>
     </procedure>
 
     <para>The script for the force model configured above is shown
     below.</para>
 
-    <programlisting>Create ForceModel DefaultProp_ForceModel;
-DefaultProp_ForceModel.CentralBody = Earth;
-DefaultProp_ForceModel.PrimaryBodies = {Earth};
-DefaultProp_ForceModel.PointMasses = {Jupiter, Luna};
-DefaultProp_ForceModel.Drag = MSISE90;
-DefaultProp_ForceModel.SRP = On;
-DefaultProp_ForceModel.ErrorControl = RSSStep;
-DefaultProp_ForceModel.GravityField.Earth.Degree = 21;
-DefaultProp_ForceModel.GravityField.Earth.Order = 21;
-DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';</programlisting>
+    <programlisting>Create ForceModel DefaultProp_ForceModel
+DefaultProp_ForceModel.CentralBody = Earth
+DefaultProp_ForceModel.PrimaryBodies = {Earth}
+DefaultProp_ForceModel.PointMasses = {Jupiter, Luna}
+DefaultProp_ForceModel.Drag.AtmosphereModel = 'MSISE90'
+DefaultProp_ForceModel.SRP = On
+DefaultProp_ForceModel.GravityField.Earth.Degree = 21
+DefaultProp_ForceModel.GravityField.Earth.Order = 21
+DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlisting>
   </section>
 
   <section>

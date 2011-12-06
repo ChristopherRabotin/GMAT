@@ -11,10 +11,10 @@
   <section xml:id="HowTo_ManipulatingThe3DOrbitView">
     <title>Manipulating the 3D Orbit View</title>
 
-    <para>GMAT's OrbitView resource offers a three-dimensional realistic view
-    of your mission trajectory in any coordinate system or viewpoint you
-    choose. The view itself can be manipulated using the mouse. Starting from
-    the default mission:</para>
+    <para>GMAT's <classname>OrbitView</classname> resource offers a
+    three-dimensional realistic view of your mission trajectory in any
+    coordinate system or viewpoint you choose. The view itself can be
+    manipulated using the mouse. Starting from the default mission:</para>
 
     <procedure>
       <step>
@@ -73,11 +73,12 @@
 
       <step>
         <para>In the <guilabel>Available SpaceObject</guilabel> list, click
-        <guilabel>Spacecraft1</guilabel> and click
-        <guibutton>-&gt;</guibutton> to move it to the <guilabel>SpaceObject
-        Selected</guilabel> list. Then click <guibutton>OK</guibutton>. This
-        adds <guilabel>Spacecraft1</guilabel> to the <guilabel>Spacecraft
-        List</guilabel> for <guilabel>Propagate1</guilabel>.</para>
+        <guilabel>Spacecraft1</guilabel> and click the
+        <guibutton>-&gt;</guibutton> button to move it to the
+        <guilabel>SpaceObject Selected</guilabel> list. Then click
+        <guibutton>OK</guibutton>. This adds <guilabel>Spacecraft1</guilabel>
+        to the <guilabel>Spacecraft List</guilabel> for
+        <guilabel>Propagate1</guilabel>.</para>
       </step>
 
       <step>
@@ -115,9 +116,10 @@
   <section>
     <title>Creating a 2D Plot</title>
 
-    <para>GMAT offers an XYPlot resource that allows you to visualize the
-    relationship between multiple parameters (for example, orbit altitude and
-    time). Starting from the default mission:</para>
+    <para>GMAT offers an <classname>XYPlot</classname> resource that allows
+    you to visualize the relationship between multiple parameters (for
+    example, orbit altitude and time). Starting from the default
+    mission:</para>
 
     <procedure>
       <step>
