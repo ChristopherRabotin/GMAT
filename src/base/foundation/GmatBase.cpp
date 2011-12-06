@@ -132,7 +132,7 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
 {
    false,     false,     false,     false,     false,
    false,     false,     false,     true ,     false,
-   false,     false,     false,     false,     false,
+   false,     false,     false,     true,      false,
    true,      true,      true,      true,      false,
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
@@ -215,6 +215,7 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    
    // Set the isGlobal flag appropriately
    isGlobal = AUTOMATIC_GLOBAL_FLAGS[type - Gmat::SPACECRAFT];
+	isAutomaticGlobal = isGlobal;
    isLocal = false;
    
    // one more instance - add to the instanceCount
@@ -256,6 +257,7 @@ GmatBase::GmatBase(const GmatBase &a) :
     objectTypes               (a.objectTypes),
     objectTypeNames           (a.objectTypeNames),
     isGlobal                  (a.isGlobal),
+	 isAutomaticGlobal         (a.isAutomaticGlobal),
     isLocal                   (a.isLocal),
     callbackExecuting         (false),
     errorMessageFormat        (a. errorMessageFormat),
@@ -305,6 +307,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    objectTypes               = a.objectTypes;
    objectTypeNames           = a.objectTypeNames;
    // don't want to modify isGlobal here
+	isAutomaticGlobal         = a.isAutomaticGlobal;
    isLocal                   = a.isLocal;
    callbackExecuting         = false;
    errorMessageFormat        = a. errorMessageFormat;
@@ -890,6 +893,21 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
 bool GmatBase::GetIsGlobal() const
 {
    return isGlobal;
+}
+
+//------------------------------------------------------------------------------
+//  bool IsAutomaticGlobal()
+//------------------------------------------------------------------------------
+/**
+ * Method to return the isAutomaticGlobal flag for an object.
+ *
+ * @return value of isAutomaticGlobal flag
+ *         (i.e. whether or not this object is automatically Global)
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::IsAutomaticGlobal() const
+{
+   return isAutomaticGlobal;
 }
 
 //------------------------------------------------------------------------------

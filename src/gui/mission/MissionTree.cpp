@@ -4251,6 +4251,8 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::VARY;
    if (cmd == "Save")
       return GmatTree::SAVE;
+   if (cmd == "Global")
+      return GmatTree::MANAGE_OBJECT;
    if (cmd == "Report")
       return GmatTree::REPORT;
    if (cmd == "For")

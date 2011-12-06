@@ -132,7 +132,8 @@ public:
    wxArrayString GetFiniteBurnList() { return theFiniteBurnList; }
    wxArrayString GetSolverList() { return theSolverList; }
    wxArrayString GetOptimizerList() { return theOptimizerList; }
-   
+   wxArrayString GetAutoGlobalObjectList() { return theAutoGlobalObjectList; }
+	
    wxArrayString GetPropertyList(const wxString &objType,
                                  int showOption = SHOW_PLOTTABLE);
    
@@ -223,6 +224,7 @@ public:
                                              wxArrayString *excList = NULL);      
    wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
                                             const wxSize &size,
+														  bool includeAutoGlobal = true,
                                             wxArrayString *excList = NULL);
    
    // ListBox
@@ -509,7 +511,8 @@ private:
    
    // All Objects
    wxArrayString theAllObjectList;
-   
+   wxArrayString theAutoGlobalObjectList;
+	
    // Propagator, ForceModel
    wxArrayString thePropagatorList;
    wxArrayString theForceModelList;

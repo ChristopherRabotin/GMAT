@@ -106,6 +106,9 @@ ManageObject& ManageObject::operator=(const ManageObject &mo)
 }
 
 // Parameter access methods - overridden from GmatBase
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ManageObject::GetParameterText(const Integer id) const
 {
    if (id >= GmatCommandParamCount && id < ManageObjectParamCount)
@@ -113,6 +116,9 @@ std::string ManageObject::GetParameterText(const Integer id) const
    return GmatCommand::GetParameterText(id);
 }
 
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
 Integer ManageObject::GetParameterID(const std::string &str) const
 {
    for (Integer i = GmatCommandParamCount; i < ManageObjectParamCount; i++)
@@ -124,6 +130,9 @@ Integer ManageObject::GetParameterID(const std::string &str) const
    return GmatCommand::GetParameterID(str);
 }
 
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
 Gmat::ParameterType ManageObject::GetParameterType(const Integer id) const
 {
    if (id >= GmatCommandParamCount && id < ManageObjectParamCount)
@@ -132,12 +141,17 @@ Gmat::ParameterType ManageObject::GetParameterType(const Integer id) const
    return GmatCommand::GetParameterType(id);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ManageObject::GetParameterTypeString(const Integer id) const
 {
    return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
-
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ManageObject::GetStringParameter(const Integer id) const
 {
    return GmatCommand::GetStringParameter(id);
@@ -249,6 +263,10 @@ bool ManageObject::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value,
+//                         const Integer index)
+//------------------------------------------------------------------------------
 bool ManageObject::SetStringParameter(const Integer id, 
                                       const std::string &value,
                                       const Integer index)
@@ -272,6 +290,10 @@ bool ManageObject::SetStringParameter(const Integer id,
    return GmatCommand::SetStringParameter(id, value, index);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value,
+//                         const Integer index)
+//------------------------------------------------------------------------------
 bool ManageObject::SetStringParameter(const std::string &label, 
                                       const std::string &value,
                                       const Integer index)
@@ -303,6 +325,59 @@ ManageObject::GetStringArrayParameter(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
+//  const std::string& GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatCommand
+ */
+//------------------------------------------------------------------------------
+const std::string& ManageObject::GetGeneratingString(Gmat::WriteMode mode,
+																	  const std::string &prefix,
+																	  const std::string &useName)
+{
+   // Build the local string
+   generatingString = prefix + "Global";
+   for (StringArray::iterator i = objectNames.begin(); i != objectNames.end(); ++i)
+      generatingString += " " + *i;
+   generatingString += ";";
+	
+   // Then call the base class method
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool ManageObject::TakeAction(const std::string &action, const std::string &actionData)
+{
+   #if DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("ManageObject::TakeAction() action=%s, actionData=%s\n",
+       action.c_str(), actionData.c_str());
+   #endif
+   
+   if (action == "Clear")
+   {
+      objectNames.clear();
+      return true;
+   }
+
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
@@ -321,13 +396,16 @@ bool ManageObject::Initialize()
    Integer numNames = (Integer) objectNames.size();
    if (numNames <= 0)
    {
-      std::string ex = "No objects listed for ManageObject command.\n";
+      std::string ex = "No objects listed for " + GetTypeName() + " command.\n";
       throw CommandException(ex);
    }
    return true;
 }
 
 
+//------------------------------------------------------------------------------
+// bool InsertIntoGOS(GmatBase *obj, const std::string &withName)
+//------------------------------------------------------------------------------
 bool ManageObject::InsertIntoGOS(GmatBase *obj, const std::string &withName)
 {
    #ifdef DEBUG_MANAGE_OBJECT

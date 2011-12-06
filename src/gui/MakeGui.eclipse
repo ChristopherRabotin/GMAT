@@ -200,7 +200,7 @@ OBJECTS = \
     command/OptimizePanel.o \
     command/PropagatePanel.o \
     command/ReportPanel.o \
-    command/SavePanel.o \
+    command/ManageObjectPanel.o \
     command/ScriptEventPanel.o \
     command/TargetPanel.o \
     command/TogglePanel.o \

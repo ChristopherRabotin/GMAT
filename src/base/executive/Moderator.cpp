@@ -5397,10 +5397,9 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          cmd->SetStringParameter("StartName", "1");
          cmd->SetStringParameter("EndName", "10");
       }
-      else if (type == "Save")
+      else if (type == "Save" || type == "Global")
       {
-         cmd->SetRefObjectName(Gmat::SPACECRAFT,
-                               GetDefaultSpacecraft()->GetName());
+         cmd->SetStringParameter("ObjectNames", GetDefaultSpacecraft()->GetName());
       }
       else if (type == "ClearPlot" || type == "MarkPoint" ||
                type == "PenUp" || type == "PenDown")

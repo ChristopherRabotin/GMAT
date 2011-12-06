@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                              SavePanel
+//                              ManageObjectPanel
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -16,8 +16,8 @@
  */
 //------------------------------------------------------------------------------
 
-#ifndef SavePanel_hpp
-#define SavePanel_hpp
+#ifndef ManageObjectPanel_hpp
+#define ManageObjectPanel_hpp
 
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
@@ -25,11 +25,11 @@
 #include "GmatCommand.hpp"
 #include "GuiItemManager.hpp"
 
-class SavePanel : public GmatPanel
+class ManageObjectPanel : public GmatPanel
 {
 public:
-   SavePanel(wxWindow *parent, GmatCommand *cmd);
-   ~SavePanel();
+   ManageObjectPanel(wxWindow *parent, GmatCommand *cmd);
+   ~ManageObjectPanel();
    
 protected:
    GmatCommand *theCommand;
@@ -55,4 +55,4 @@ protected:
    };
 };
 
-#endif // SavePanel_hpp
+#endif // ManageObjectPanel_hpp

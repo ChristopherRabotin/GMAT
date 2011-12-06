@@ -2260,12 +2260,15 @@ wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWi
 // wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,...)
 //------------------------------------------------------------------------------
 /**
- * @return Available All Object ListBox pointer.
+ *
+ * @param  includeAutoGlobal  If this flag is set, it adds automatic global objects
+ *                            to CheckListBox
+ * @return  All available objects wxCheckListBox pointer.
  */
 //------------------------------------------------------------------------------
 wxCheckListBox*
 GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
-                                         const wxSize &size,
+                                         const wxSize &size, bool includeAutoGlobal,
                                          wxArrayString *excList)
 {
    wxArrayString emptyList;
@@ -2279,19 +2282,49 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
    
    if (excList != NULL && excList->GetCount() > 0)
    {
-      for (int i=0; i<theNumAllObject; i++)
-      {
-         if (excList->Index(theAllObjectList[i]) == wxNOT_FOUND)
-            checkListBox->Append(theAllObjectList[i]);
-      }
+		if (includeAutoGlobal)
+		{
+			for (int i=0; i<theNumAllObject; i++)
+			{
+				if (excList->Index(theAllObjectList[i]) == wxNOT_FOUND)
+					checkListBox->Append(theAllObjectList[i]);
+			}
+		}
+		else
+		{
+			wxString objStr, objName;
+			for (int i=0; i<theNumAllObject; i++)
+			{
+				objStr = theAllObjectList[i];
+				objName = objStr.BeforeFirst(' ');
+				if (!theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
+					checkListBox->Append(theAllObjectList[i]);
+			}
+		}
    }
    else
    {
-      for (int i=0; i<theNumAllObject; i++)
-         checkListBox->Append(theAllObjectList[i]);
+		if (includeAutoGlobal)
+		{
+			for (int i=0; i<theNumAllObject; i++)
+				checkListBox->Append(theAllObjectList[i]);
+			checkListBox->SetName("AllObjectsIncludingAutoGlobal");
+		}
+		else
+		{
+			wxString objStr, objName;
+			for (int i=0; i<theNumAllObject; i++)
+			{
+				objStr = theAllObjectList[i];
+				objName = objStr.BeforeFirst(' ');
+				if (!theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
+					checkListBox->Append(theAllObjectList[i]);
+			}
+			checkListBox->SetName("AllObjectsExcludingAutoGlobal");
+		}
    }
    
-   
+	
    //---------------------------------------------
    // register to update list
    //---------------------------------------------
@@ -5394,7 +5427,8 @@ void GuiItemManager::AddToAllObjectArray()
    
    theNumAllObject = 0;
    theAllObjectList.Clear();
-   
+   theAutoGlobalObjectList.Clear();
+	
    // Add CoordinateSystem objects to the list
    #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
    MessageInterface::ShowMessage("   Adding %d CoordinateSystem\n", theNumCoordSys);
@@ -5549,7 +5583,16 @@ void GuiItemManager::AddToAllObjectArray()
       }
    }
    
-   
+   // Add automatic global objects to list
+	wxString objStr, objName;
+	for (int i=0; i<theNumAllObject; i++)
+	{
+		objStr = theAllObjectList[i];
+		objName = objStr.BeforeFirst(' ');
+		if (theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
+			theAutoGlobalObjectList.Add(objName);
+	}
+	
    //-------------------------------------------------------
    // update registered All Object CheckListBox
    //-------------------------------------------------------
@@ -5584,12 +5627,29 @@ void GuiItemManager::AddToAllObjectArray()
             guiCount--;
          }
       }
-      
+
+		bool includeAutoGlobal = true;
+		if ((*pos)->GetName() == "AllObjectsExcludingAutoGlobal")
+			includeAutoGlobal = false;
+		
       // if new item add to the list
       for (int i=0; i<theNumAllObject; i++)
+		{
          if ((*pos)->FindString(theAllObjectList[i]) == wxNOT_FOUND)
-            (*pos)->Append(theAllObjectList[i]);
-      
+			{
+				if (includeAutoGlobal)
+				{
+					(*pos)->Append(theAllObjectList[i]);
+				}
+				else
+				{
+					objStr = theAllObjectList[i];
+					objName = objStr.BeforeFirst(' ');
+					if (!theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
+						(*pos)->Append(theAllObjectList[i]);
+				}
+			}
+		}
    }
    
    #if DBGLVL_GUI_ITEM_ALL_OBJECT

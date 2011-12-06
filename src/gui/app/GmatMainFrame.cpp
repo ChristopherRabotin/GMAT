@@ -72,7 +72,7 @@
 #include "VaryPanel.hpp"
 #include "MinimizePanel.hpp"
 #include "NonlinearConstraintPanel.hpp"
-#include "SavePanel.hpp"
+#include "ManageObjectPanel.hpp"
 #include "ReportPanel.hpp"
 #include "TogglePanel.hpp"
 #include "ParameterCreateDialog.hpp"
@@ -3385,7 +3385,8 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
       sizer->Add(new VaryPanel(scrolledWin, cmd, true), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::SAVE:
-      sizer->Add(new SavePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+   case GmatTree::MANAGE_OBJECT:
+      sizer->Add(new ManageObjectPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::REPORT:
       sizer->Add(new ReportPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
@@ -3424,6 +3425,10 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
       sizer->Add(new AssignmentPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::OTHER_COMMAND:
+      #ifdef DEBUG_CREATE_CHILD
+      MessageInterface::ShowMessage
+         ("   It is other command, creating default GmatCommandPanel\n");
+      #endif
       sizer->Add(new GmatCommandPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
 

@@ -837,7 +837,7 @@ bool Sandbox::Execute()
          }
          
          #if DBGLVL_SANDBOX_RUN
-         if (current != prev)
+         if (current != NULL)
          {
             MessageInterface::ShowMessage
                ("Sandbox::Execution running %s\n", current->GetTypeName().c_str());

@@ -34,16 +34,16 @@ class GMAT_API ManageObject : public GmatCommand
 {
 public:
    ManageObject(const std::string &typeStr);
-   virtual          ~ManageObject();
+   virtual ~ManageObject();
    ManageObject(const ManageObject &mo);
    ManageObject&        operator=(const ManageObject &mo);
    
    // Parameter access methods - overridden from GmatBase
-   virtual std::string    GetParameterText(const Integer id) const;
-   virtual Integer        GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                          GetParameterType(const Integer id) const;
-   virtual std::string    GetParameterTypeString(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const Integer id,
@@ -63,7 +63,16 @@ public:
    virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const;
 
-   bool                 Initialize();
+   virtual const std::string&  
+                        GetGeneratingString(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
+	
+   virtual bool         TakeAction(const std::string &action,  
+                                   const std::string &actionData = "");
+	
+   virtual bool         Initialize();
 
 protected:
    enum

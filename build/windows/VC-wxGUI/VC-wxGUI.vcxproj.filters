@@ -1362,9 +1362,6 @@
     <ClCompile Include="..\..\..\src\gui\command\ReportPanel.cpp">
       <Filter>Source Files\gui\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\command\SavePanel.cpp">
-      <Filter>Source Files\gui\command</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\command\ScriptEventPanel.cpp">
       <Filter>Source Files\gui\command</Filter>
     </ClCompile>
@@ -1727,6 +1724,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp">
       <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp">
+      <Filter>Source Files\gui\output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ManageObjectPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2987,9 +2990,6 @@
     <ClInclude Include="..\..\..\src\gui\command\ReportPanel.hpp">
       <Filter>Source Files\gui\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\command\SavePanel.hpp">
-      <Filter>Source Files\gui\command</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\command\ScriptEventPanel.hpp">
       <Filter>Source Files\gui\command</Filter>
     </ClInclude>
@@ -3367,6 +3367,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp">
       <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp">
+      <Filter>Source Files\gui\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ManageObjectPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

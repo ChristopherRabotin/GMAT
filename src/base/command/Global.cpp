@@ -49,6 +49,7 @@
 Global::Global() :
    ManageObject("Global")
 {
+   objectTypeNames.push_back("Global");
 }
 
 
@@ -161,12 +162,22 @@ bool Global::Execute()
       // get it from the LOS, if it's there
       if (objectMap->find(objectNames.at(ii)) != objectMap->end())
       {
+         #ifdef DEBUG_GLOBAL
+			MessageInterface::ShowMessage
+				("   Found '%s' in objectMap, so moving to GOS\n",
+				 objectNames.at(ii).c_str());
+         #endif
          mapObj = (*objectMap)[objectNames.at(ii)];
          if (InsertIntoGOS(mapObj, objectNames.at(ii)))
             objectMap->erase(objectNames.at(ii));
       }
       else if (globalObjectMap->find(objectNames.at(ii)) != globalObjectMap->end())
       {
+         #ifdef DEBUG_GLOBAL
+			MessageInterface::ShowMessage
+				("   Found '%s' in globalObjctMap, make sure type's matching\n",
+				 objectNames.at(ii).c_str());
+         #endif
          mapObj = (*globalObjectMap)[objectNames.at(ii)];
          InsertIntoGOS(mapObj, objectNames.at(ii));
       }

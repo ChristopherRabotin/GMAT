@@ -510,13 +510,13 @@
     <ClCompile Include="..\..\..\src\gui\command\CallFunctionPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\EndFiniteBurnPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\GmatCommandPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\ManageObjectPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\ManeuverPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\MinimizePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\NonlinearConstraintPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\OptimizePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\PropagatePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\ReportPanel.cpp" />
-    <ClCompile Include="..\..\..\src\gui\command\SavePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\ScriptEventPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\TargetPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\TogglePanel.cpp" />
@@ -554,6 +554,7 @@
     <ClCompile Include="..\..\..\src\gui\mission\TreeViewOptionDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\UndockedMissionPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\CompareReportPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
@@ -1053,13 +1054,13 @@
     <ClInclude Include="..\..\..\src\gui\command\CallFunctionPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\EndFiniteBurnPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\GmatCommandPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\ManageObjectPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\ManeuverPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\MinimizePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\NonlinearConstraintPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\OptimizePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\PropagatePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\ReportPanel.hpp" />
-    <ClInclude Include="..\..\..\src\gui\command\SavePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\ScriptEventPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\TargetPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\TogglePanel.hpp" />
@@ -1097,6 +1098,7 @@
     <ClInclude Include="..\..\..\src\gui\mission\TreeViewOptionDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\mission\UndockedMissionPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\CompareReportPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />

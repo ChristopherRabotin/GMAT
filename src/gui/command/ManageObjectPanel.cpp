@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                              SavePanel
+//                              ManageObjectPanel
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -9,29 +9,30 @@
 // All Other Rights Reserved.
 //
 // Author: Linda Jun
-// Created: 2004/10/14
+// Created: 2011/12/05
 //
 /**
- * This class contains the Save Setup window.
+ * This class sets up input for ManageObject command 
  */
 //------------------------------------------------------------------------------
 
-#include "SavePanel.hpp"
+#include "ManageObjectPanel.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_SAVEPANEL_LOAD
-//#define DEBUG_SAVEPANEL_SAVE
+//#define DEBUG_MANAGEOBJECT_CREATE
+//#define DEBUG_MANAGEOBJECT_LOAD
+//#define DEBUG_MANAGEOBJECT_SAVE
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(SavePanel, GmatPanel)
+BEGIN_EVENT_TABLE(ManageObjectPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   EVT_CHECKLISTBOX(ID_CHECKLISTBOX, SavePanel::OnCheckListBoxChange)
+   EVT_CHECKLISTBOX(ID_CHECKLISTBOX, ManageObjectPanel::OnCheckListBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -39,15 +40,15 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// SavePanel(wxWindow *parent)
+// ManageObjectPanel(wxWindow *parent)
 //------------------------------------------------------------------------------
 /**
- * Constructs SavePanel object.
+ * Constructs ManageObjectPanel object.
  *
  * @param <parent> input parent.
  */
 //------------------------------------------------------------------------------
-SavePanel::SavePanel(wxWindow *parent, GmatCommand *cmd)
+ManageObjectPanel::ManageObjectPanel(wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 
 {
@@ -62,9 +63,9 @@ SavePanel::SavePanel(wxWindow *parent, GmatCommand *cmd)
 
 
 //------------------------------------------------------------------------------
-// ~SavePanel()
+// ~ManageObjectPanel()
 //------------------------------------------------------------------------------
-SavePanel::~SavePanel()
+ManageObjectPanel::~ManageObjectPanel()
 {
    theGuiManager->UnregisterCheckListBox("AllObject", mObjectCheckListBox);
 }
@@ -85,26 +86,65 @@ SavePanel::~SavePanel()
  * Creates the panel for the Maneuver Command
  */
 //------------------------------------------------------------------------------
-void SavePanel::Create()
+void ManageObjectPanel::Create()
 {
    StringArray items;
    int bsize = 3;
    
    // create object label
-   wxStaticText *objectLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Please Select Objects to Save"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   // list of object
-   mObjectCheckListBox = theGuiManager->
-      GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(300,200));
-   
+   wxStaticText *objectLabel = NULL;
+   wxStaticText *autoGlobalLabel = NULL;
+	
+	#ifdef DEBUG_MANAGEOBJECT_CREATE
+	MessageInterface::ShowMessage
+		("ManageObjectPanel::Create() The command is '%s'\n", theCommand->GetTypeName().c_str());
+	#endif
+	
+	if (theCommand->IsOfType("Save"))
+	{
+      objectLabel = new wxStaticText(this, ID_TEXT, wxT("Please Select Objects To Save"),
+												 wxDefaultPosition, wxDefaultSize, 0);
+		// list of object, include automatic global objects
+		mObjectCheckListBox = theGuiManager->
+			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(300,200), true);
+   }
+	else if (theCommand->IsOfType("Global"))
+	{
+      objectLabel = new wxStaticText(this, ID_TEXT, wxT("Please Select Objects To Make Global"),
+												 wxDefaultPosition, wxDefaultSize, 0);
+		// list of object, exclude automatic global objects
+		mObjectCheckListBox = theGuiManager->
+			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(300,200), false);
+		wxString autoGlobalText;
+		wxArrayString autoGlobalList = theGuiManager->GetAutoGlobalObjectList();
+		int numObjs = autoGlobalList.GetCount();
+		for (int i = 0; i < numObjs - 1; i++)
+			autoGlobalText += autoGlobalList[i] + ", ";
+		autoGlobalText += autoGlobalList[numObjs - 1];
+		autoGlobalText += " are Automatic Global Objects.";
+		int height = (autoGlobalText.Len() / 30  + 1) * 10;
+		autoGlobalLabel = new wxStaticText(this, ID_TEXT, autoGlobalText,
+													  wxDefaultPosition, wxSize(300, height),
+													  wxALIGN_LEFT|wxST_NO_AUTORESIZE);
+		autoGlobalLabel->SetForegroundColour(*wxRED);
+   }
+	else
+	{
+      objectLabel = new wxStaticText(this, ID_TEXT, wxT("Please Select Objects"),
+												 wxDefaultPosition, wxDefaultSize, 0);
+		// list of object, include automatic global objects
+		mObjectCheckListBox = theGuiManager->
+			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(300,200), true);
+	}
+	
    // create sizers
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    
    // add object label and combobox to sizer
    pageBoxSizer->Add(objectLabel, 0, wxALIGN_CENTER|wxALL, bsize);
    pageBoxSizer->Add(mObjectCheckListBox, 0, wxALIGN_CENTER|wxGROW|wxALL, bsize);
+	if (autoGlobalLabel != NULL)
+		pageBoxSizer->Add(autoGlobalLabel, 0, wxALIGN_CENTER|wxALL, bsize);
    
    // add to middle sizer
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);     
@@ -115,7 +155,7 @@ void SavePanel::Create()
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
-void SavePanel::LoadData()
+void ManageObjectPanel::LoadData()
 {
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
@@ -123,11 +163,11 @@ void SavePanel::LoadData()
    // Set objects
    
    // Get object list from the command. It can be any object type.
-   StringArray objNames = theCommand->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
-   
+   StringArray objNames = theCommand->GetStringArrayParameter("ObjectNames");
+
    for (UnsignedInt i=0; i<objNames.size(); i++)
    {
-      #ifdef DEBUG_SAVEPANEL_LOAD
+      #ifdef DEBUG_MANAGEOBJECT_LOAD
       MessageInterface::ShowMessage("   objName=<%s>\n", objNames[i].c_str());
       #endif
       
@@ -145,7 +185,7 @@ void SavePanel::LoadData()
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
-void SavePanel::SaveData()
+void ManageObjectPanel::SaveData()
 {
    int count = mObjectCheckListBox->GetCount();
    
@@ -167,9 +207,9 @@ void SavePanel::SaveData()
       return;
    }
    
-   #ifdef DEBUG_SAVEPANEL_SAVE
+   #ifdef DEBUG_MANAGEOBJECT_SAVE
    MessageInterface::ShowMessage
-      ("SavePanel::SaveData() number of checked object=%d\n", checkedCount);
+      ("ManageObjectPanel::SaveData() number of checked object=%d\n", checkedCount);
    #endif
    
    //-----------------------------------------------------------------
@@ -187,12 +227,12 @@ void SavePanel::SaveData()
          objStr = mObjectCheckListBox->GetString(i);
          objName = objStr.BeforeFirst(' ');
          
-         #ifdef DEBUG_SAVEPANEL_SAVE
+         #ifdef DEBUG_MANAGEOBJECT_SAVE
          MessageInterface::ShowMessage
             ("objStr=<%s>, objName=<%s>\n", objStr.c_str(), objName.c_str());
          #endif
          
-         theCommand->SetRefObjectName(Gmat::UNKNOWN_OBJECT, objName.c_str());         
+         theCommand->SetStringParameter("ObjectNames", objName.c_str());
       }
    }
 }
@@ -204,7 +244,7 @@ void SavePanel::SaveData()
 //------------------------------------------------------------------------------
 // void OnCheckListBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void SavePanel::OnCheckListBoxChange(wxCommandEvent& event)
+void ManageObjectPanel::OnCheckListBoxChange(wxCommandEvent& event)
 {
    EnableUpdate(true);
 }
