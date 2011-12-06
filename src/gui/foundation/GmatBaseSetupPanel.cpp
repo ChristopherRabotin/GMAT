@@ -86,6 +86,7 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
    #endif
    mObject = theGuiInterpreter->GetConfiguredObject(name.c_str());
 	reloadOnComboBoxChange = reloadOnCBChange;
+   clbNumber = 0;
 	
    if (mObject != NULL)
    {
@@ -98,7 +99,6 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
          (Gmat::WARNING_, "The object named \"%s\" does not exist\n", name.c_str());
    }
 
-   clbNumber = 0;
 }
 
 
@@ -712,9 +712,6 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
       break;
    case Gmat::OBJECTARRAY_TYPE:
       {
-         //@todo Create CheckListBox later
-         //control = new wxTextCtrl(parent, ID_TEXTCTRL,
-         //                         wxT(""), wxDefaultPosition, wxSize(200,-1));
          if (paramObjType== Gmat::SPACE_POINT)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
