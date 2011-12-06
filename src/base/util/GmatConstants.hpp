@@ -122,6 +122,7 @@ namespace GmatTimeConstants
 
    const Real DAYS_PER_YEAR            = 365.25;
    const Real DAYS_PER_JULIAN_CENTURY  = 36525.00;
+   const Real DAYS_PER_SEC             = 1.1574074074074074074074074074074e-5;
 
    const Real TIME_OF_J2000  = 883655990.850000; // 2000/01/01 43167.85
    const Real JD_OF_J2000    = 2451545.0;        // JD of J2000 epoch
