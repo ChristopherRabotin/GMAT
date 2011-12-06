@@ -29,6 +29,13 @@
 
 
 
+//------------------------------------------------------------------------------
+// RootFinder(std::string finderType) :
+//------------------------------------------------------------------------------
+/**
+ * Default constructor
+ */
+//------------------------------------------------------------------------------
 RootFinder::RootFinder(std::string finderType) :
    typeName             (finderType),
    tolerance            (1.0e-5),
@@ -41,6 +48,13 @@ RootFinder::RootFinder(std::string finderType) :
 {
 }
 
+//------------------------------------------------------------------------------
+// ~RootFinder()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 RootFinder::~RootFinder()
 {
    if (buffer != NULL)
@@ -49,6 +63,15 @@ RootFinder::~RootFinder()
       delete [] epochBuffer;
 }
 
+//------------------------------------------------------------------------------
+// RootFinder(const RootFinder & rf) :
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param rf The RootFinder being copied
+ */
+//------------------------------------------------------------------------------
 RootFinder::RootFinder(const RootFinder & rf) :
    typeName             (rf.typeName),
    tolerance            (rf.tolerance),
@@ -61,6 +84,13 @@ RootFinder::RootFinder(const RootFinder & rf) :
 {
 }
 
+//------------------------------------------------------------------------------
+// RootFinder & operator=(const RootFinder & rf)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ */
+//------------------------------------------------------------------------------
 RootFinder & RootFinder::operator=(const RootFinder & rf)
 {
    if (this != &rf)
@@ -279,6 +309,21 @@ Real RootFinder::GetStepMeasure()
 }
 
 
+//------------------------------------------------------------------------------
+// void GetBrackets(GmatEpoch &start, GmatEpoch &end)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the bracketing epochs from the epoch buffer.
+ *
+ * @param start The epoch earlier than the zero value
+ * @param end The epoch later than the zero value
+ */
+//------------------------------------------------------------------------------
+void RootFinder::GetBrackets(GmatEpoch &start, GmatEpoch &end)
+{
+   start = (epochBuffer[0] < epochBuffer[1] ? epochBuffer[0] : epochBuffer[1]);
+   end   = (epochBuffer[0] > epochBuffer[1] ? epochBuffer[0] : epochBuffer[1]);
+}
 
 //void RootFinder::SetEventVector(std::vector<Event*> *evs)
 //{

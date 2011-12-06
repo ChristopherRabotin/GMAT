@@ -44,6 +44,7 @@ public:
    virtual bool Initialize(GmatEpoch t0, Real f0, GmatEpoch t1, Real f1);
    virtual bool SetValue(GmatEpoch forEpoch, Real withValue);
    virtual Real GetStepMeasure();
+   virtual void GetBrackets(GmatEpoch &start, GmatEpoch &end);
 
 protected:
    /// Flag used to tell which method was used most recently

@@ -1258,13 +1258,19 @@ void PropagationEnabledCommand::CheckForEvents()
                   "locator %d\n", i, functionIndex, index);
          #endif
 
-         bool found = LocateEvent(events->at(index), functionIndex);
-         if (found)
-         {
-//            MessageInterface::ShowMessage("Found an event on locator %s "
-//                  "index %d",events->at(index)->GetTypeName().c_str(),
-//                  functionIndex);
-         }
+         #ifdef DEBUG_EVENT_LOCATORS
+            bool found =
+         #endif
+         LocateEvent(events->at(index), functionIndex);
+
+         #ifdef DEBUG_EVENT_LOCATORS
+            if (found)
+            {
+               MessageInterface::ShowMessage("Found an event on locator %s "
+                     "index %d\n",events->at(index)->GetTypeName().c_str(),
+                     functionIndex);
+            }
+         #endif
       }
    }
 
@@ -1454,6 +1460,9 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
             "index %d\n", index);
       #endif
       UpdateEventTable(el, index);
+      GmatEpoch start, end;
+      finder->GetBrackets(start, end);
+      el->SetFoundEventBrackets(index, start, end);
    }
    #ifdef DEBUG_EVENTLOCATORS
    else

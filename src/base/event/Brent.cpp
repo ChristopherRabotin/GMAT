@@ -28,7 +28,7 @@
 
 //#define DEBUG_BRENT
 //#define DEBUG_BRENT_BUFFER
-
+//#define DEBUG_BRACKETACCESS
 
 //------------------------------------------------------------------------------
 // Brent()
@@ -59,7 +59,7 @@ Brent::~Brent()
 }
 
 //------------------------------------------------------------------------------
-// Brent(const Brent & b) :
+// Brent(const Brent & b)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
@@ -293,7 +293,75 @@ Real Brent::FindStep(const GmatEpoch currentEpoch)
    return step;
 }
 
+//------------------------------------------------------------------------------
+// Real GetStepMeasure()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the size of the epoch brackets
+ *
+ * @return The difference, in seconds, between the two epochs bracketing the
+ *         zero
+ */
+//------------------------------------------------------------------------------
 Real Brent::GetStepMeasure()
 {
-   return GmatMathUtil::Abs(epochBuffer[1]-epochBuffer[2]);
+   GmatEpoch start, end;
+   GetBrackets(start, end);
+   return (end - start) * GmatTimeConstants::SECS_PER_DAY;
+}
+
+
+//------------------------------------------------------------------------------
+// void GetBrackets(GmatEpoch &start, GmatEpoch &end)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the bracketing epochs from the epoch buffer.
+ *
+ * @param start The epoch earlier than the zero value
+ * @param end The epoch later than the zero value
+ */
+//------------------------------------------------------------------------------
+void Brent::GetBrackets(GmatEpoch &start, GmatEpoch &end)
+{
+   Real      val   = GmatMathUtil::Abs(buffer[0]), temp;
+   GmatEpoch locT  = epochBuffer[0], t2, dt = 9.0e9;
+   Integer   found = 0;
+
+   // Find the index of the closest to zero function value
+   for (Integer i = 1; i < 3; ++i)
+   {
+      temp = GmatMathUtil::Abs(buffer[i]);
+      if (temp < val)
+      {
+         val = temp;
+         locT = epochBuffer[i];
+         found = i;
+      }
+   }
+
+   // Find the index of the other side
+   t2 = epochBuffer[0];
+   for (Integer i = 0; i < 3; ++i)
+   {
+      if (found != i)
+      {
+         if (buffer[found] * buffer[i] < 0.0)
+         {
+            if (GmatMathUtil::Abs(locT - epochBuffer[i]) < dt)
+               t2 = epochBuffer[i];
+         }
+      }
+   }
+
+   start = (locT < t2 ? locT : t2);
+   end   = (locT > t2 ? locT : t2);
+
+   #ifdef DEBUG_BRACKETACCESS
+      MessageInterface::ShowMessage("Buffer data:\n");
+      for (Integer i = 0; i < 3; ++i)
+         MessageInterface::ShowMessage("   %.12lf  %le\n", epochBuffer[i],
+               buffer[i]);
+      MessageInterface::ShowMessage("Bracketing epochs: [%.12lf  %.12lf]\n",
+            start, end);
+   #endif
 }

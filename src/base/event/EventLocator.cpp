@@ -1250,6 +1250,9 @@ bool EventLocator::Initialize()
    if (lastEpochs != NULL)
       delete [] lastEpochs;
 
+   earlyBound.clear();
+   lateBound.clear();
+
    if (efCount > 0)
    {
       lastData = new Real[efCount * 3];
@@ -1261,6 +1264,9 @@ bool EventLocator::Initialize()
          stateIndices.insert(stateIndices.begin(), efCount, -1);
       if (associateIndices.size() == 0)
          associateIndices.insert(associateIndices.begin(), efCount, -1);
+
+      earlyBound.push_back(0.0);
+      lateBound.push_back(0.0);
    }
 
    functionValues.SetSize(efCount);
@@ -1376,22 +1382,28 @@ void EventLocator::BufferEvent(Integer forEventFunction)
    LocatedEvent *theEvent = new LocatedEvent;
 
    Real *theData = eventFunctions[forEventFunction]->GetData();
-   theEvent->epoch = theData[0];
-   lastEpochs[forEventFunction] = theEvent->epoch;
-   theEvent->eventValue = theData[1];
-   theEvent->type = eventFunctions[forEventFunction]->GetTypeName();
-   theEvent->participants = eventFunctions[forEventFunction]->GetName();
-   theEvent->boundary = eventFunctions[forEventFunction]->GetBoundaryType();
-   theEvent->isEntry = eventFunctions[forEventFunction]->IsEventEntry();
 
-   #ifdef DEBUG_EVENTLOCATION
-      MessageInterface::ShowMessage("Adding event to event table:\n   "
-            "%-20s%-30s%-15s%15.9lf\n", theEvent->type.c_str(),
-            theEvent->participants.c_str(), theEvent->boundary.c_str(),
-            theEvent->epoch);
-   #endif
+   // Only add if it was not the last event bracketed
+   if ((theData[0] < earlyBound[forEventFunction]) ||
+       (theData[0] > lateBound[forEventFunction]))
+   {
+      theEvent->epoch = theData[0];
+      lastEpochs[forEventFunction] = theEvent->epoch;
+      theEvent->eventValue = theData[1];
+      theEvent->type = eventFunctions[forEventFunction]->GetTypeName();
+      theEvent->participants = eventFunctions[forEventFunction]->GetName();
+      theEvent->boundary = eventFunctions[forEventFunction]->GetBoundaryType();
+      theEvent->isEntry = eventFunctions[forEventFunction]->IsEventEntry();
 
-   eventTable.AddEvent(theEvent);
+      #ifdef DEBUG_EVENTLOCATION
+         MessageInterface::ShowMessage("Adding event to event table:\n   "
+               "%-20s%-30s%-15s%15.9lf\n", theEvent->type.c_str(),
+               theEvent->participants.c_str(), theEvent->boundary.c_str(),
+               theEvent->epoch);
+      #endif
+
+      eventTable.AddEvent(theEvent);
+   }
 }
 
 
@@ -1509,6 +1521,13 @@ void EventLocator::UpdateEventTable(SortStyle how)
 GmatEpoch EventLocator::GetLastEpoch(Integer index)
 {
    return lastEpochs[index];
+}
+
+void EventLocator::SetFoundEventBrackets(Integer index, GmatEpoch early,
+      GmatEpoch late)
+{
+   earlyBound[index] = early;
+   lateBound[index]  = late;
 }
 
 

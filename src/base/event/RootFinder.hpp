@@ -47,6 +47,7 @@ public:
    virtual bool SetValue(GmatEpoch forEpoch, Real withValue);
    virtual Real GetStep(const GmatEpoch currentEpoch = -1.0);
    virtual Real GetStepMeasure();
+   virtual void GetBrackets(GmatEpoch &start, GmatEpoch &end);
 
 protected:
    /// Type of the root finding algorithm

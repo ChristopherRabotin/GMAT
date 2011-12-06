@@ -166,6 +166,8 @@ public:
    Real *GetEventData(std::string type, Integer whichOne = 0);
    void UpdateEventTable(SortStyle how);
    virtual GmatEpoch GetLastEpoch(Integer index);
+   virtual void SetFoundEventBrackets(Integer index,
+         GmatEpoch early, GmatEpoch late);
 
    // Methods used in integration
    virtual bool HasAssociatedStateObjects();
@@ -180,6 +182,10 @@ public:
 protected:
    /// The collection of event functions used by the EventLocator.
    std::vector<EventFunction*> eventFunctions;
+   /// Earliest time bracket for last event boundary found
+   std::vector<Real> earlyBound;
+   /// Latest time bracket for last event boundary found
+   std::vector<Real> lateBound;
    /// The longest event duration encountered by the EventLocator.
    std::vector<Real> maxSpan;
    /// The most recent event duration encountered by the EventLocator.
