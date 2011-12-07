@@ -118,19 +118,8 @@ protected:
    // Added hardware of the ground station
    StringArray	         hardwareNames;       // made changes by Tuan Nguyen
    ObjectArray          hardwareList;        // made changes by Tuan Nguyen
-
-//   bool              	SetHardware(GmatBase *obj, StringArray &hwNames,
-//                                 ObjectArray &hwArray);		// made changes by Tuan Nguyen
-
-   // Override GetGenString to handle the changeable names for the parameters
-   virtual const std::string&
-                        GetGeneratingString(
-                           Gmat::WriteMode mode = Gmat::SCRIPTING,
-                           const std::string &prefix = "",
-                           const std::string &useName = "");
-   virtual void         WriteParameters(Gmat::WriteMode mode,
-                           std::string &prefix, std::stringstream &stream);
-
+	
+	
 public:
    /// Published parameters for ground stations
    enum

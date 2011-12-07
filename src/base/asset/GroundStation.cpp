@@ -349,8 +349,8 @@ bool GroundStation::SetStringParameter(const Integer id,
       else
       {
          AssetException ae;
-         ae.SetDetails(errorMessageFormat.c_str(),
-                       value.c_str(), "Id", "Must begin with a letter; may contain letters, integers, dashes, underscores");
+         ae.SetDetails(errorMessageFormat.c_str(), value.c_str(), "Id",
+							  "Must begin with a letter; may contain letters, integers, dashes, underscores");
          throw ae;
       }
    }
@@ -591,8 +591,6 @@ bool GroundStation::RenameRefObject(const Gmat::ObjectType type,
 
    return BodyFixedPoint::RenameRefObject(type, oldName, newName);
 }
-
-
 
 
 //------------------------------------------------------------------------------
@@ -849,7 +847,9 @@ bool GroundStation::VerifyAddHardware()
     		 bool check;
     		 if (primaryAntenna == NULL)
     		 {
-    			 MessageInterface::ShowMessage("***Error***:primary antenna of %s in %s's AddHardware list is NULL \n",obj->GetName().c_str(), this->GetName().c_str());
+    			 MessageInterface::ShowMessage
+					 ("***Error***:primary antenna of %s in %s's AddHardware list is NULL \n",
+					  obj->GetName().c_str(), this->GetName().c_str());
     			 check = false;
     		 }
     		 else
@@ -866,13 +866,17 @@ bool GroundStation::VerifyAddHardware()
     				 }
     				 else if (antenna->GetName() == primaryAntenna->GetName())
     				 {
-    					 MessageInterface::ShowMessage("Primary antenna %s of %s is a clone of an antenna in %s's AddHardware\n",primaryAntenna->GetName().c_str(), obj->GetName().c_str(), this->GetName().c_str());
+    					 MessageInterface::ShowMessage
+							 ("Primary antenna %s of %s is a clone of an antenna in %s's AddHardware\n",
+							  primaryAntenna->GetName().c_str(), obj->GetName().c_str(), this->GetName().c_str());
     				 }
     			 }
             	 if (check == false)
             	 {
             		 // Display error message:
-            		 MessageInterface::ShowMessage("***Error***:primary antenna of %s is not in %s's AddHardware\n", obj->GetName().c_str(), this->GetName().c_str());
+            		 MessageInterface::ShowMessage
+							 ("***Error***:primary antenna of %s is not in %s's AddHardware\n",
+							  obj->GetName().c_str(), this->GetName().c_str());
             	 }
 
         	 }
@@ -1010,118 +1014,3 @@ bool GroundStation::IsValidID(const std::string &id)
    return true;
 }
 
-//------------------------------------------------------------------------------
-// const std::string&  GetGeneratingString(Gmat::WriteMode mode,
-//                const std::string &prefix, const std::string &useName)
-//------------------------------------------------------------------------------
-/**
- * Produces a string, containing the text that produces a GroundStation object.
- *
- * This method overrides the base class method so that it can handle the
- * changable names for the GS location vector.
- *
- * @param mode Specifies the type of serialization requested.
- * @param prefix Optional prefix appended to the object's name
- * @param useName Name that replaces the object's name.
- *
- * @return A string containing the text.
- */
-//------------------------------------------------------------------------------
-const std::string& GroundStation::GetGeneratingString(Gmat::WriteMode mode,
-                        const std::string &prefix, const std::string &useName)
-{
-   std::stringstream data;
-
-   // Crank up data precision so we don't lose anything
-   data.precision(GetDataPrecision());
-   std::string preface = "", nomme;
-
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
-       (mode == Gmat::SHOW_SCRIPT))
-      inMatlabMode = false;
-   if (mode == Gmat::MATLAB_STRUCT || mode == Gmat::EPHEM_HEADER)
-      inMatlabMode = true;
-
-   if (useName != "")
-      nomme = useName;
-   else
-      nomme = instanceName;
-
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
-   {
-      std::string tname = typeName;
-      data << "Create " << tname << " " << nomme << ";\n";
-      preface = "GMAT ";
-   }
-   else if (mode == Gmat::EPHEM_HEADER)
-   {
-      data << typeName << " = " << "'" << nomme << "';\n";
-      preface = "";
-   }
-
-   nomme += ".";
-
-   if (mode == Gmat::OWNED_OBJECT)
-   {
-      preface = prefix;
-      nomme = "";
-   }
-
-   preface += nomme;
-   WriteParameters(mode, preface, data);
-
-   generatingString = data.str();
-
-   // Then call the parent class method for preface and inline comments
-   return BodyFixedPoint::GetGeneratingString(mode, prefix, useName);
-}
-
-
-//------------------------------------------------------------------------------
-// void WriteParameters(std::string &prefix, GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Code that writes the parameter details for an object.
- *
- * @param prefix Starting portion of the script string used for the parameter.
- * @param obj The object that is written.
- */
-//------------------------------------------------------------------------------
-void GroundStation::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
-                                 std::stringstream &stream)
-{
-   Integer i;
-   Gmat::ParameterType parmType;
-   std::stringstream value;
-   value.precision(GetDataPrecision());
-
-   for (i = 0; i < parameterCount; ++i)
-   {
-      if ((IsParameterReadOnly(i) == false))
-      {
-         parmType = GetParameterType(i);
-
-         // Skip unhandled types
-         if ((parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
-             (parmType != Gmat::RVECTOR_TYPE) &&
-             (parmType != Gmat::RMATRIX_TYPE) &&
-             (parmType != Gmat::UNKNOWN_PARAMETER_TYPE) )
-         {
-            // Fill in the l.h.s.
-            value.str("");
-            WriteParameterValue(i, value);
-            if (value.str() != "")
-            {
-               if ((i >= LOCATION_1) && (i <= LOCATION_3))
-               {
-                  stream << prefix << GetStringParameter(i+3)
-                         << " = " << value.str() << ";\n";
-               }
-               else
-                  stream << prefix << GetParameterText(i)
-                         << " = " << value.str() << ";\n";
-            }
-         }
-      }
-   }
-}

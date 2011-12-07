@@ -635,6 +635,9 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    case GmatTree::SPACECRAFT:
       theGuiManager->UpdateSpacecraft();
       break;
+   case GmatTree::GROUND_STATION:
+      theGuiManager->UpdateGroundStation();
+      break;
    case GmatTree::FUELTANK:
       theGuiManager->UpdateFuelTank();
       break;
@@ -1991,7 +1994,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    }
    
    #ifdef DEBUG_RENAME
-   MessageInterface::ShowMessage("ResourceTree::OnRename() rename leavinig\n");
+   MessageInterface::ShowMessage("ResourceTree::OnRename() rename leaving\n");
    #endif
 }
 
