@@ -4118,8 +4118,9 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 
    default:
       MessageInterface::ShowMessage
-         ("Writing of \"%s\" type is not handled yet.\n",
-          PARAM_TYPE_STRING[tid].c_str());
+         ("*** GmatBase::WriteParameterValue() Writing of \"%s\" type is not handled "
+			 "yet for object \"%s\" of type \"%s\"\n", PARAM_TYPE_STRING[tid].c_str(),
+			 GetName().c_str(), GetTypeName().c_str());
       break;
    }
 }
