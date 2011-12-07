@@ -37,6 +37,11 @@
         2014 09:30:15.235</userinput>. This field is case-sensitive, and must
         be entered in the exact format shown.</para>
       </step>
+
+      <step>
+        <para>Click <guibutton>OK</guibutton> or <guibutton>Apply</guibutton>
+        to save your changes.</para>
+      </step>
     </procedure>
 
     <para>The GMAT script for the epoch settings configured above is:</para>
@@ -205,7 +210,8 @@ ISS.TA = 199.683</programlisting>
       </step>
 
       <step>
-        <para>Click <guibutton>OK</guibutton>.</para>
+        <para>Click <guibutton>OK</guibutton> or <guibutton>Apply</guibutton>
+        to save your changes.</para>
       </step>
     </procedure>
 

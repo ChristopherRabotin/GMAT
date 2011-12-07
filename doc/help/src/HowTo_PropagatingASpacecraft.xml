@@ -55,8 +55,8 @@
       </step>
 
       <step>
-        <para>Add <guilabel>Moon</guilabel> and <guilabel>Jupiter</guilabel>
-        using the same steps as above.</para>
+        <para>Add <guilabel>Luna</guilabel> (Earth's moon) and
+        <guilabel>Jupiter</guilabel> using the same steps as above.</para>
       </step>
 
       <step>
@@ -64,7 +64,7 @@
       </step>
 
       <step>
-        <para>Select <guilabel>UseSolarRadiationPressure</guilabel> to
+        <para>Select <guilabel>Use Solar Radiation Pressure</guilabel> to
         activate the solar radiation pressure force.</para>
       </step>
 
@@ -91,7 +91,7 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
     <title>Propagating for a Duration</title>
 
     <para>GMAT can propagate a spacecraft for a duration of time, such as 60
-    seconds, 30 days, or one orbit period. Starting from the default
+    seconds, 10 days, or one orbit period. Starting from the default
     mission:</para>
 
     <procedure>
@@ -126,7 +126,7 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
 
       <step>
         <para>In the <guilabel>Condition</guilabel> column, double-click the
-        value <userinput>0.0</userinput> and enter <userinput>30</userinput>
+        value <userinput>0.0</userinput> and enter <userinput>10</userinput>
         instead.</para>
       </step>
 
@@ -136,7 +136,8 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
       </step>
     </procedure>
 
-    <para>GMAT will propagate the spacecraft for 30 days.</para>
+    <para>GMAT will propagate the spacecraft for 10 days. Observe the 2D and
+    3D plots showing the propagated orbit.</para>
   </section>
 
   <section>
@@ -188,7 +189,7 @@ DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof'</programlis
       </step>
     </procedure>
 
-    <para>GMAT will propagate the spacecraft until it reaches
+    <para>GMAT will propagate the spacecraft until it reaches orbit
     periapsis.</para>
   </section>
 </chapter>

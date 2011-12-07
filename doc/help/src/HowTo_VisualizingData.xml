@@ -19,8 +19,9 @@
     <procedure>
       <step>
         <para>Click <guibutton>Run</guibutton>. This will run the mission and
-        will result in a <guilabel>DefaultOrbitView</guilabel> window on the
-        GMAT desktop. The default view is centered at the Earth, in an
+        will result in a <guilabel>DefaultOrbitView</guilabel> window and a
+        <guilabel>DefaultGroundTrackPlot</guilabel> window on the GMAT
+        desktop. The default view is centered at the Earth, in an
         Earth-centered inertial reference frame.</para>
       </step>
 

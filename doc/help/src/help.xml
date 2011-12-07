@@ -16,8 +16,7 @@
         <releaseinfo condition="tm">Korean Aerospace Research Institute</releaseinfo>
         <date><?dbtimestamp format="d B Y"?></date>
         <author>
-            <orgname>The GMAT Development Team</orgname>
-            <uri>gmat.gsfc.nasa.gov</uri>
+            <personname>The GMAT Development Team</personname>
         </author>
     </info>
 

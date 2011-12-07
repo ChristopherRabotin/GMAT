@@ -175,12 +175,12 @@
           <para>Set the remaining orbital elements as shown in the table
           below.</para>
 
-          <para><table colsep="0" frame="topbot">
+          <para><table colsep="0" frame="topbot" rowsep="0">
               <title><guilabel>Sat</guilabel> Orbit State Settings</title>
 
               <tgroup cols="2">
                 <thead>
-                  <row>
+                  <row rowsep="1">
                     <entry>Field</entry>
 
                     <entry>Value</entry>
@@ -220,6 +220,10 @@
                 </tbody>
               </tgroup>
             </table></para>
+
+          <!--Empty paragraph to improve spacing (shouldn't be necessary)-->
+
+          <para></para>
         </listitem>
 
         <listitem>

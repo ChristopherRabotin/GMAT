@@ -101,6 +101,12 @@
     <xsl:template match="d:guisubmenu">
         <xsl:call-template name="inline.boldseq"/>
     </xsl:template>
+    <xsl:template match="d:classname">
+        <xsl:call-template name="inline.boldseq"/>
+    </xsl:template>
+    <xsl:template match="d:function">
+        <xsl:call-template name="inline.boldseq"/>
+    </xsl:template>
 
     <!-- Table of contents -->
     <xsl:param name="toc.section.depth">1</xsl:param>
@@ -241,6 +247,9 @@
     <!-- Tables -->
     <xsl:param name="table.frame.border.style">double</xsl:param>
     <xsl:param name="table.frame.border.thickness">thick</xsl:param>
+    <xsl:attribute-set name="table.properties">
+        <xsl:attribute name="keep-together.within-column">always</xsl:attribute>
+    </xsl:attribute-set>
 
     <!-- Cross-references -->
     <xsl:param name="xref.with.number.and.title">0</xsl:param>
@@ -344,6 +353,7 @@
         </xsl:attribute>
         <xsl:attribute name="padding-right">1em</xsl:attribute>
         <xsl:attribute name="padding-bottom">1em</xsl:attribute>
+        <xsl:attribute name="keep-together.within-column">always</xsl:attribute>
     </xsl:attribute-set>
     
     <!-- Verbatim environments -->
@@ -352,4 +362,5 @@
         <xsl:attribute name="keep-together.within-column">auto</xsl:attribute>
         <xsl:attribute name="background-color">transparent</xsl:attribute>
     </xsl:attribute-set>
+
 </xsl:stylesheet>

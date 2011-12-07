@@ -61,7 +61,7 @@
 
       <listitem>
         <para>Click <guilabel>OK</guilabel>, then in the <guilabel>ReportFile
-        - ReportFile1</guilabel> dialog box, click <guilabel>OK</guilabel>
+        - ReportFile1</guilabel> window, click <guilabel>OK</guilabel>
         again.</para>
       </listitem>
 
@@ -261,7 +261,10 @@ Report ReportFile1 DefaultSC.Earth.TA DefaultSC.Earth.Altitude</programlisting>
       <step>
         <para>Click <guilabel>Run</guilabel>. The OEM file will be written to
         a file named <filename>EphemerisFile1.eph</filename> in GMAT's output
-        folder.</para>
+        folder. By default, this folder is
+        <filename><replaceable>&lt;GMAT&gt;</replaceable>/output</filename>,
+        where <filename><replaceable>&lt;GMAT&gt;</replaceable></filename> is
+        the path to your GMAT installation.</para>
       </step>
     </procedure>
   </section>
