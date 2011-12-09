@@ -284,13 +284,23 @@ bool ViewCanvas::InitializePlot()
    #else
       SetCurrent();
    #endif
-   
+
+	// initialize opengl
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("   Calling InitOpenGL()\n");
+   #endif
    InitOpenGL();
    
    // load body textures
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("   Calling LoadBodyTextures()\n");
+   #endif
    LoadBodyTextures();
    
    // load spacecraft models
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("   Calling LoadSpacecraftModels()\n");
+   #endif
    LoadSpacecraftModels();
    
    #ifdef DEBUG_INIT
@@ -313,8 +323,8 @@ bool ViewCanvas::InitOpenGL()
 {   
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
-      ("ViewCanvas::InitOpenGL() '%s' entered, calling InitGL()\n",
-       mPlotName.c_str());
+      ("ViewCanvas::InitOpenGL() '%s' entered, mGlInitialized = %d\n",
+       mPlotName.c_str(), mGlInitialized);
    #endif
    
    #ifdef DEBUG_GL_INFO
@@ -334,29 +344,34 @@ bool ViewCanvas::InitOpenGL()
    MessageInterface::ShowMessage("   GL extensions = '%s'\n", GL_ext);
    MessageInterface::ShowMessage("   GLU extensions = '%s'\n", GLU_ext);
    #endif
-   
-   InitGL();
-   
+	
+	if (mGlInitialized)
+	{
+      #ifdef DEBUG_INIT
+		MessageInterface::ShowMessage
+			("ViewCanvas::InitOpenGL() '%s', GL already initialized so returning true\n",
+			 mPlotName.c_str());
+      #endif
+		return true;
+	}
+	
    #ifdef __USE_WX280_GL__
    SetCurrent(*theContext);
    #else
    SetCurrent();
    #endif
-   
-   // set pixel format
-   if (!SetPixelFormatDescriptor())
-   {
-      //throw SubscriberException("SetPixelFormatDescriptor failed\n");
-   }
-   
-   // set font
-   SetDefaultGLFont();
-      
+	
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("   Calling InitGL()\n");
+   #endif
+	
+   InitGL();
+	
    mShowMaxWarning = true;
    mIsAnimationRunning = false;
    mGlInitialized = true;
    
-   #ifdef DEBUG_INIT_OPENGL
+   #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
       ("ViewCanvas::InitOpenGL() '%s' returning true\n", mPlotName.c_str());
    #endif
@@ -394,15 +409,16 @@ void ViewCanvas::SetGlObject(const StringArray &objNames,
 {
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetGlObject() '%s' entered, objCount=%d, colorCount=%d.\n",
-       mPlotName.c_str(), objNames.size(), objOrbitColors.size());
+      ("ViewCanvas::SetGlObject() '%s' entered, objCount=%d, colorCount=%d, "
+		 "objArrayCount=%d\n", mPlotName.c_str(), objNames.size(), objOrbitColors.size(),
+		 objArray.size());
    #endif
    
    #if 0
    // Initialize objects used in view
    SetDefaultViewPoint();
    #endif
-   
+	
    mObjectArray = objArray;
    wxArrayString tempList;
    int scCount = 0;
@@ -897,7 +913,7 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
       {
          #if DEBUG_OBJECT
          MessageInterface::ShowMessage
-            ("ViewCanvas::AddObjectList() Bind new texture object=%s\n",
+            ("ViewCanvas::AddObjectList() Bind new texture object for '%s'\n",
              objNames[i].c_str());
          #endif
          
@@ -934,6 +950,9 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
    // if using 2.6.3 or later version
    // For 2.6.3 version initialize GL here
    #ifndef __USE_WX280_GL__
+      #ifdef DEBUG_INIT
+      MessageInterface::ShowMessage("   Not useing WX280, so calling InitGL()\n");
+      #endif
    InitGL();
    #endif
    
@@ -949,111 +968,6 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
 //-----------------------
 // protected methods
 //-----------------------
-
-//------------------------------------------------------------------------------
-// bool SetPixelFormatDescriptor()
-//------------------------------------------------------------------------------
-/**
- * Sets pixel format on Windows.
- */
-//------------------------------------------------------------------------------
-bool ViewCanvas::SetPixelFormatDescriptor()
-{
-#ifdef __WXMSW__
-   
-   #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage
-      ("ViewCanvas::SetPixelFormatDescriptor() entered\n");
-   #endif
-   
-   // On Windows, for OpenGL, you have to set the pixel format
-   // once before doing your drawing stuff. This function
-   // properly sets it up.
-   
-   HDC hdc = wglGetCurrentDC();
-   
-   PIXELFORMATDESCRIPTOR pfd =
-   {
-      sizeof(PIXELFORMATDESCRIPTOR),   // size of this pfd
-      1,                     // version number
-      PFD_DRAW_TO_WINDOW |   // support window
-      PFD_SUPPORT_OPENGL |   // support OpenGL
-      PFD_DOUBLEBUFFER,      // double buffered
-      PFD_TYPE_RGBA,         // RGBA type
-      24,                    // 24-bit color depth
-      0, 0, 0, 0, 0, 0,      // color bits ignored
-      0,                     // no alpha buffer
-      0,                     // shift bit ignored
-      0,                     // no accumulation buffer
-      0, 0, 0, 0,            // accum bits ignored
-      //32,                    // 32-bit z-buffer
-      16,                    // 32-bit z-buffer
-      0,                     // no stencil buffer
-      0,                     // no auxiliary buffer
-      PFD_MAIN_PLANE,        // main layer
-      0,                     // reserved
-      0, 0, 0                // layer masks ignored
-   };
-   
-   // get the device context's best-available-match pixel format
-   int pixelFormatId = ChoosePixelFormat(hdc, &pfd);
-   
-   #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage
-      ("ViewCanvas::SetPixelFormatDescriptor() pixelFormatId = %d \n",
-       pixelFormatId);
-   #endif
-   
-   if(pixelFormatId == 0)
-   {
-      MessageInterface::ShowMessage
-         ("**** ERROR **** Failed to find a matching pixel format\n");
-      return false;
-   }
-   
-   // set the pixel format of the device context
-   if (!SetPixelFormat(hdc, pixelFormatId, &pfd))
-   {
-      MessageInterface::ShowMessage
-         ("**** ERROR **** Failed to set pixel format id %d\n", pixelFormatId);
-      return false;
-   }
-   
-   #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage
-      ("ViewCanvas::SetPixelFormatDescriptor() returning true\n");
-   #endif
-   
-   return true;
-
-#else
-   // Should we return true for non-Window system?
-   //return false;
-   return true;
-#endif
-}
-
-
-//------------------------------------------------------------------------------
-//  void SetDefaultGLFont()
-//------------------------------------------------------------------------------
-/**
- * Sets default GL font.
- */
-//------------------------------------------------------------------------------
-void ViewCanvas::SetDefaultGLFont()
-{
-#ifdef __WXMSW__
-   // Set up font stuff for windows -
-   // Make the Current font the device context's selected font
-   //SelectObject(dc, Font->Handle);
-   HDC hdc = wglGetCurrentDC();
-   
-   wglUseFontBitmaps(hdc, 0, 255, 1000);
-   glListBase(1000); // base for displaying
-#endif
-}
-
 
 //------------------------------------------------------------------------------
 // virtual void SetDrawingMode()
@@ -1432,9 +1346,16 @@ bool ViewCanvas::LoadBodyTextures()
    //--------------------------------------------------
    for (int i=0; i<mObjectCount; i++)
    {
-      //if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
-      //   continue;
+		// We are not using texture for spacecraft so skip
+      if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
+         continue;
       
+      #if DEBUG_TEXTURE
+		MessageInterface::ShowMessage
+			("   object = '%s', map id = %d\n", mObjectNames[i].c_str(),
+			 mTextureIdMap[mObjectNames[i]]);
+      #endif
+		
       if (mTextureIdMap[mObjectNames[i]] == GmatPlot::UNINIT_TEXTURE)
       {
          #if DEBUG_TEXTURE > 1
@@ -1558,8 +1479,8 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::BindTexture() objName='%s', texId=%d\n", objName.c_str(),
-       texId);
+      ("ViewCanvas::BindTexture() leaving, objName='%s', texId=%d\n",
+		 objName.c_str(), texId);
    #endif
    
    return texId;
@@ -1801,38 +1722,75 @@ bool ViewCanvas::LoadSpacecraftModels()
       if (!modelsAreLoaded)
       {
          ModelManager *mm = ModelManager::Instance();
-         for (int sc = 0; sc < mScCount; sc++)
+			
+			int sc = 0;
+         for (sc;  sc < mScCount; sc++)
          {
-            int satId = GetObjectId(mScNameArray[sc].c_str());
-            if (satId != UNKNOWN_OBJ_ID)
+				std::string satName = mScNameArray[sc];
+            int satId = GetObjectId(satName.c_str());
+				
+            #ifdef DEBUG_LOAD_MODEL
+				MessageInterface::ShowMessage
+					("   satName = '%s', satId = %d\n", satName.c_str(), satId);
+				#endif
+				
+				if (satId == UNKNOWN_OBJ_ID)
+				{
+               #ifdef DEBUG_LOAD_MODEL
+					MessageInterface::ShowMessage("   sat id is UNKNOWN so skipping\n");
+				   #endif
+				}
+				else
             {
                Spacecraft *sat = (Spacecraft*)mObjectArray[satId];
-               if (sat->modelFile != "" && sat->modelID == -1)
-               {
-                  wxString modelPath(sat->modelFile.c_str());
-                  if (GmatFileUtil::DoesFileExist(modelPath.c_str()))
-                  {
-                     sat->modelID = mm->LoadModel(modelPath);
-                     #ifdef DEBUG_LOAD_MODEL
-                     MessageInterface::ShowMessage
-                        ("UpdateSpacecraftData() loaded model '%s'\n", modelPath.c_str());
-                     #endif
-                  }
-                  else
-                  {
-                     MessageInterface::ShowMessage
-                        ("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
-                         "The file '%s' does not exist.\n", sat->GetName().c_str(),
-                         modelPath.c_str());
-                  }
+					if (sat == NULL)
+					{
+                  #ifdef DEBUG_LOAD_MODEL
+						MessageInterface::ShowMessage("   spacecraft pointer is NULL so skipping\n");
+						#endif
+					}
+					else
+					{
+                  #ifdef DEBUG_LOAD_MODEL
+						MessageInterface::ShowMessage
+							("   Loading model file from the spacecraft <%p>'%s', modelFile='%s', "
+							 "modelID=%d\n",  sat, sat->GetName().c_str(), sat->modelFile.c_str(),
+							 sat->modelID);
+				      #endif
+						if (sat->modelFile != "" && sat->modelID == -1)
+						{
+							wxString modelPath(sat->modelFile.c_str());
+							if (GmatFileUtil::DoesFileExist(modelPath.c_str()))
+							{
+                        #ifdef DEBUG_LOAD_MODEL
+								MessageInterface::ShowMessage("   Calling mm->LoadModel(), mm=<%p>\n", mm);
+                        #endif
+								sat->modelID = mm->LoadModel(modelPath);
+                        #ifdef DEBUG_LOAD_MODEL
+								MessageInterface::ShowMessage
+									("   Successfully loaded model '%s'\n", modelPath.c_str());
+                        #endif
+							}
+							else
+							{
+								MessageInterface::ShowMessage
+									("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
+									 "The file '%s' does not exist.\n", sat->GetName().c_str(),
+									 modelPath.c_str());
+							}
+						}
                }
-               
-               // Set modelsAreLoaded to true if it went through all models
-               if (sc == mScCount-1)
-                  modelsAreLoaded = true;
-            }
-         }
-      }
+				}
+			}
+			
+         #ifdef DEBUG_LOAD_MODEL
+			MessageInterface::ShowMessage("   sc = %d, mScCount = %d\n", sc, mScCount);
+			#endif
+			
+			// Set modelsAreLoaded to true if it went through all models
+			if (sc == mScCount)
+				modelsAreLoaded = true;				
+		}
    }
    
    #if DEBUG_LOAD_MODEL

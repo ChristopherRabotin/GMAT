@@ -316,11 +316,7 @@ protected:
    virtual void OnSize(wxSizeEvent &event) = 0;
    virtual void OnMouse(wxMouseEvent &event) = 0;
    virtual void OnKeyDown(wxKeyEvent &event) = 0;
-   
-   // windows specific functions
-   virtual bool SetPixelFormatDescriptor();
-   virtual void SetDefaultGLFont();
-   
+	
    // initialization
    virtual void ResetPlotInfo();   
    virtual void InitializeViewPoint() = 0;
