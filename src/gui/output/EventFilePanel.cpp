@@ -166,6 +166,7 @@ void EventFilePanel::LoadData()
 
    wxFile *file = new wxFile();
    bool mFileExists = file->Exists(filename.c_str());
+   bool populated   = theLocator->FileWasWritten();
    
    #ifdef DEBUG_REPORT_FILE_PANEL
    MessageInterface::ShowMessage
@@ -173,7 +174,7 @@ void EventFilePanel::LoadData()
        theLocator, filename.c_str(), mFileExists);
    #endif
    
-   if (mFileExists)
+   if (mFileExists && populated)
       mFileContentsTextCtrl->LoadFile(filename.c_str());
    else
       mFileContentsTextCtrl->SetValue("");

@@ -86,6 +86,7 @@ EventLocator::EventLocator(const std::string &typeStr,
    lastEpochs     (NULL),
    isActive       (true),
    showPlot       (false),
+   fileWasWritten (false),
    eventTolerance (1.0e-3),
    solarSys       (NULL)
 {
@@ -133,6 +134,7 @@ EventLocator::EventLocator(const EventLocator& el) :
    lastEpochs        (NULL),
    isActive          (el.isActive),
    showPlot          (el.showPlot),
+   fileWasWritten    (false),
    satNames          (el.satNames),
    targets           (el.targets),
    eventTolerance    (el.eventTolerance),
@@ -168,6 +170,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       lastEpochs     = NULL;
       isActive       = el.isActive;
       showPlot       = el.showPlot;
+      fileWasWritten = false;
       satNames       = el.satNames;
       targets        = el.targets;
       eventTolerance = el.eventTolerance;
@@ -1273,6 +1276,8 @@ bool EventLocator::Initialize()
    for (UnsignedInt i = 0; i < efCount; ++i)
       functionValues[i] = 0.0;
 
+   fileWasWritten = false;
+
    return retval;
 }
 
@@ -1454,9 +1459,20 @@ void EventLocator::ReportEventData()
    else
       fullFileName = filename;
 
-   eventTable.WriteToFile(fullFileName);
+   fileWasWritten = eventTable.WriteToFile(fullFileName);
    if (showPlot)
-      eventTable.ShowPlot();
+   {
+      if (fileWasWritten)
+         eventTable.ShowPlot();
+      else
+         MessageInterface::ShowMessage("No events were found, so the event "
+               "plot is not displayed.\n");
+   }
+}
+
+bool EventLocator::FileWasWritten()
+{
+   return fileWasWritten;
 }
 
 

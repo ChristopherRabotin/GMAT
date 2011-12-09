@@ -162,6 +162,7 @@ public:
    void BufferEvent(Integer forEventFunction = 0);
    void BufferEvent(Real epoch, std::string type, bool isStart);
    void ReportEventData();
+   virtual bool FileWasWritten();
    void ReportEventStatistics();
    Real *GetEventData(std::string type, Integer whichOne = 0);
    void UpdateEventTable(SortStyle how);
@@ -204,6 +205,8 @@ protected:
    bool isActive;
    /// Flag used to show or hide plot of the data
    bool showPlot;
+   /// Flag set when a run writes data to the event report
+   bool fileWasWritten;
 
    /// Names of the "target" spacecraft in the location
    StringArray satNames;
