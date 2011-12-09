@@ -26,26 +26,26 @@
 
 #include <map>
 #include "gmatwxdefs.hpp"
-//#include "wx/wx.h"
 #include "ModelObject.hpp"
 
 typedef std::map<int, ModelObject*> ModelMap;
-typedef std::map<wxString, int> StringMap;
+typedef std::map<wxString, int> ModelIdMap;
 
 class ModelManager {
 public:
    static ModelManager* Instance();
    ModelManager();
    ~ModelManager();
-
+	
    wxGLContext *modelContext;
-
+	
    ModelObject* GetModel(int id);
    int LoadModel(wxString &modelPath);
+	
 private:
    int numElements;
    ModelMap modelMap;
-   StringMap stringMap;
+   ModelIdMap modelIdMap;
    static ModelManager *theInstance;
 };
 

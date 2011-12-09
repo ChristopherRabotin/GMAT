@@ -24,8 +24,13 @@
 #include "ModelManager.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_LOAD_MODEL
+
 ModelManager* ModelManager::theInstance = NULL;
 
+//------------------------------------------------------------------------------
+// static ModelManager* ModelManager::Instance()
+//------------------------------------------------------------------------------
 ModelManager* ModelManager::Instance()
 {
    if (theInstance == NULL)
@@ -33,22 +38,28 @@ ModelManager* ModelManager::Instance()
    return theInstance;
 }
 
+//------------------------------------------------------------------------------
+// ModelManager()
+//------------------------------------------------------------------------------
 ModelManager::ModelManager()
 {
    modelContext = NULL;
    numElements = 0;
+	modelMap.clear();
+	modelIdMap.clear();
+	// Why create new ModelObject here and set to [-1]? (LOJ: 2011.12.08)
    modelMap[-1] = new ModelObject();
 }
 
+//------------------------------------------------------------------------------
+// ModelManager()
+//------------------------------------------------------------------------------
 ModelManager::~ModelManager()
 {
-   for (ModelMap::iterator pos = modelMap.begin();
-        pos != modelMap.end(); ++pos)
+   for (ModelMap::iterator pos = modelMap.begin(); pos != modelMap.end(); ++pos)
    {
       if (pos->second)
-      {
          delete pos->second;
-      }
    }
 
    // Patch from Tristan Moody
@@ -63,21 +74,65 @@ ModelManager::~ModelManager()
       delete modelContext;
 }
 
-ModelObject* ModelManager::GetModel(int id){
+
+//------------------------------------------------------------------------------
+// ModelObject* GetModel(int id)
+//------------------------------------------------------------------------------
+ModelObject* ModelManager::GetModel(int id)
+{
    if (modelMap.find(id) != modelMap.end())
       return modelMap[id];
    return NULL;
 }
 
-int ModelManager::LoadModel(wxString &modelPath){
-	#ifdef __USE_WX280_GL__
-   if (stringMap.find(modelPath) != stringMap.end())
-      return stringMap[modelPath];
+
+//------------------------------------------------------------------------------
+// int LoadModel(wxString &modelPath)
+//------------------------------------------------------------------------------
+int ModelManager::LoadModel(wxString &modelPath)
+{
+	#ifdef DEBUG_LOAD_MODEL
+	MessageInterface::ShowMessage
+		("ModelManager::LoadModel() entered,  modelPath = '%s', "
+		 "modelIdMap.size() = %d\n", modelPath.c_str(), modelIdMap.size());
+	for (ModelIdMap::iterator pos = modelIdMap.begin(); pos != modelIdMap.end(); ++pos)
+   {
+		MessageInterface::ShowMessage
+			("    modelPath = '%s', id = %d\n", (pos->first).c_str(),  pos->second);
+   }
 	#endif
+	
+	// Do we need this flag here? Commented out (LOJ: 2011.12.08)
+	//#ifdef __USE_WX280_GL__
+   if (modelIdMap.find(modelPath) != modelIdMap.end())
+	{
+	   #ifdef DEBUG_LOAD_MODEL
+		MessageInterface::ShowMessage
+			("ModelManager::LoadModel() modelPath found, returning %d\n",
+			 modelIdMap[modelPath]);
+		#endif
+      return modelIdMap[modelPath];
+	}
+	//#endif
+	
    ModelObject *newModel = new ModelObject();
+	
+	#ifdef DEBUG_LOAD_MODEL	
+	MessageInterface::ShowMessage
+		("ModelManager::LoadModel() Created new ModelObject <%p>, numElements = %d\n",
+		 newModel, numElements);
+	#endif
+	
    newModel->Load(modelPath);
    modelMap[numElements] = newModel;
-   stringMap[modelPath] = numElements;
+   modelIdMap[modelPath] = numElements;
    numElements++;
+	
+	#ifdef DEBUG_LOAD_MODEL	
+	MessageInterface::ShowMessage
+		("ModelManager::LoadModel() returning %d\n", numElements-1);
+	#endif
+	
    return numElements-1;
 }
+
