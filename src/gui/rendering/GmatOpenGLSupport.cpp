@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun, refactored and extracted from TrajPlotCanvas.cpp by Gene Stillman
 //				Adjustments made by Phil Silvia
 // Created: 2003/11/25
@@ -19,11 +17,9 @@
 */
 //------------------------------------------------------------------------------
 #include "GmatOpenGLSupport.hpp"   // for OpenGL support
-#include "GmatAppData.hpp"         // for GetGuiInterpreter()
-#include "ColorTypes.hpp"          // for namespace GmatColor::
-#include "MdiGlPlotData.hpp"
+#include "gmatwxdefs.hpp"          // for WX and GL
 #include "MessageInterface.hpp"
-#include <string.h>                // for strlen()
+
 //------------------------------------------------------------------------------
 // bool SetPixelFormatDescriptor()
 //------------------------------------------------------------------------------
@@ -56,7 +52,7 @@ bool SetPixelFormatDescriptor()
       0,                     // no accumulation buffer
       0, 0, 0, 0,            // accum bits ignored
       //32,                    // 32-bit z-buffer
-      16,                    // 32-bit z-buffer
+      16,                    // 16-bit z-buffer
       0,                     // no stencil buffer
       0,                     // no auxiliary buffer
       PFD_MAIN_PLANE,        // main layer
@@ -67,12 +63,12 @@ bool SetPixelFormatDescriptor()
    // get the device context's best-available-match pixel format
    int pixelFormatId = ChoosePixelFormat(hdc, &pfd);
 
-#ifdef DEBUG_TRAJCANVAS_INIT
+   #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
       ("SetPixelFormatDescriptor() pixelFormatId = %d \n",
       pixelFormatId);
-#endif
-
+   #endif
+	
    if(pixelFormatId == 0)
    {
       MessageInterface::ShowMessage
@@ -124,10 +120,14 @@ void SetDefaultGLFont()
 //------------------------------------------------------------------------------
 void InitGL()
 {
+	#ifdef DEBUG_INIT_GL
+	MessageInterface::ShowMessage("InitGL() entered\n");
+	#endif
+	
    // remove back faces
    glEnable(GL_CULL_FACE);
    //glDisable(GL_CULL_FACE);
-
+	
    // enable depth testing, so that objects further away from the
    // viewer aren't drawn over closer objects
    glEnable(GL_DEPTH_TEST);
@@ -159,8 +159,16 @@ void InitGL()
 
    // font
    SetDefaultGLFont();
+	
+	#ifdef DEBUG_INIT_GL
+	MessageInterface::ShowMessage("InitGL() leaving\n");
+	#endif
 }
 
+
+//------------------------------------------------------------------------------
+// void ScreenShotSave(char* ImagePath)
+//------------------------------------------------------------------------------
 void ScreenShotSave(char* ImagePath)
 {
    GLint vp[4];
