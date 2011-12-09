@@ -918,7 +918,18 @@ void ObjectInitializer::InitializeCoordinateSystem(GmatBase *obj)
 //------------------------------------------------------------------------------
 void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
 {   
+   #ifdef DEBUG_INITIALIZE_OBJ
+   MessageInterface::ShowMessage
+		("--- Calling BuildReferences(), obj = <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+		 obj->GetName().c_str());
+	#endif
+	
    BuildReferences(obj);
+
+   #ifdef DEBUG_INITIALIZE_OBJ
+   MessageInterface::ShowMessage("--- Calling '%s'->Initialize()\n", obj->GetName().c_str());
+	#endif
+	
    obj->Initialize();
    
    #ifdef DEBUG_INITIALIZE_OBJ
@@ -1248,7 +1259,8 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
       #endif
    }
    #ifdef DEBUG_OBJECT_INITIALIZER
-      MessageInterface::ShowMessage("Exiting BuildReferences ...\n");
+	MessageInterface::ShowMessage
+		("Exiting BuildReferences for object type '%s'\n", obj->GetTypeName().c_str());
    #endif
 }
 

@@ -495,7 +495,7 @@ bool OrbitView::Initialize()
          
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
-            ("   calling PlotInterface::SetGlSolarSystem(%p)\n", theSolarSystem);
+            ("   Calling PlotInterface::SetGlSolarSystem(%p)\n", theSolarSystem);
          #endif
          
          // set SolarSystem
@@ -503,7 +503,7 @@ bool OrbitView::Initialize()
          
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
-            ("   calling PlotInterface::SetGlObject()\n");
+            ("   Calling PlotInterface::SetGlObject()\n");
          for (UnsignedInt i=0; i<mObjectArray.size(); i++)
             MessageInterface::ShowMessage
                ("      mObjectArray[%d]=<%p>'%s'\n", i, mObjectArray[i],
@@ -542,7 +542,7 @@ bool OrbitView::Initialize()
              mViewDirectionObj ? mViewDirectionObj->GetName().c_str() : "NULL");
          
          MessageInterface::ShowMessage
-            ("   calling PlotInterface::SetGlCoordSystem()\n");
+            ("   Calling PlotInterface::SetGlCoordSystem()\n");
          #endif
          
          PlotInterface::SetGlCoordSystem(instanceName, theInternalCoordSystem,
@@ -553,7 +553,7 @@ bool OrbitView::Initialize()
          //--------------------------------------------------------
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
-            ("   calling PlotInterface::SetGlDrawingOption()\n");
+            ("   Calling PlotInterface::SetGlDrawingOption()\n");
          #endif
          
          PlotInterface::SetGl3dDrawingOption
@@ -567,7 +567,7 @@ bool OrbitView::Initialize()
          //--------------------------------------------------------
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
-            ("   calling PlotInterface::SetGlViewOption()\n");
+            ("   Calling PlotInterface::SetGlViewOption()\n");
          #endif
          
          PlotInterface::SetGl3dViewOption
@@ -577,17 +577,34 @@ bool OrbitView::Initialize()
              (mViewPointRefType == "Vector"), (mViewPointVecType == "Vector"),
              (mViewDirectionType == "Vector"));
          
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   Calling PlotInterface::SetGlUpdateFrequency()\n");
+         #endif
          PlotInterface::SetGlUpdateFrequency(instanceName, mUpdatePlotFrequency);
          
          //--------------------------------------------------------
          // set drawing object flag
          //--------------------------------------------------------
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   Calling PlotInterface::SetGlDrawOrbitFlag()\n");
+         #endif
          PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
+			
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   Calling PlotInterface::SetGlShowObjectFlag()\n");
+         #endif
          PlotInterface::SetGlShowObjectFlag(instanceName, mDrawObjectArray);
          
          //--------------------------------------------------------
          // initialize GL
          //--------------------------------------------------------
+         #if DBGLVL_INIT
+         MessageInterface::ShowMessage
+            ("   Calling PlotInterface::InitializeGlPlot()\n");
+         #endif
          PlotInterface::InitializeGlPlot(instanceName);
          
          isInitialized = true;

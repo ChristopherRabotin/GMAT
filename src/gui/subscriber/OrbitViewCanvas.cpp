@@ -174,7 +174,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
 {
    // extra data need
    mNeedAttitude = true;
-      
+	
    // Linux specific
    #ifdef __WXGTK__
       hasBeenPainted = false;
@@ -182,7 +182,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    
    #if DEBUG_INIT
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas() name=%s, size.X=%d, size.Y=%d\n",
+      ("OrbitViewCanvas() name = '%s', size.X = %d, size.Y = %d\n",
        name.c_str(), size.GetWidth(), size.GetHeight());
    #endif
    

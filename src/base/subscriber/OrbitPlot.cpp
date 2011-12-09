@@ -1886,6 +1886,10 @@ void OrbitPlot::UpdateObjectList(SpacePoint *sp, bool show)
    // if name not found, add to arrays
    if (pos == mObjectNameArray.end())
    {
+      #if DBGLVL_INIT > 1
+		MessageInterface::ShowMessage
+			("   '%s' NOT found in the object list, so adding\n", name.c_str());
+		#endif
       mObjectNameArray.push_back(name);
       mOrbitColorArray.push_back(mOrbitColorMap[name]);
       mTargetColorArray.push_back(mTargetColorMap[name]);
@@ -1896,7 +1900,14 @@ void OrbitPlot::UpdateObjectList(SpacePoint *sp, bool show)
       mDrawObjectArray.push_back(show);
       mObjectCount = mObjectNameArray.size();
    }
-   
+   else
+	{
+      #if DBGLVL_INIT > 1
+		MessageInterface::ShowMessage
+			("   '%s' found in the object list, so skipping\n", name.c_str());
+		#endif
+	}
+	
    #if DBGLVL_INIT > 1
    Integer draw, showObj;
    MessageInterface::ShowMessage

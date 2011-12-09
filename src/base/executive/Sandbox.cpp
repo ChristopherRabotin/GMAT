@@ -44,7 +44,7 @@
 //#define DEBUG_SANDBOX_OBJ_INIT
 //#define DEBUG_SANDBOX_OBJ_ADD
 //#define DEBUG_SANDBOX_OBJECT_MAPS
-//#define DBGLVL_SANDBOX_RUN 1
+//#define DBGLVL_SANDBOX_RUN 2
 //#define DEBUG_SANDBOX_CLEAR
 //#define DEBUG_SANDBOX_CLONING
 //#define DEBUG_SS_CLONING
@@ -482,11 +482,13 @@ bool Sandbox::Initialize()
 {
    #ifdef DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage("Initializing the Sandbox\n");
-      MessageInterface::ShowMessage("At the start, the Sandbox Object Map contains:\n");
+      MessageInterface::ShowMessage
+			("At the start, the Sandbox Object Map contains %d objects:\n", objectMap.size());
       for (omIter = objectMap.begin(); omIter != objectMap.end(); ++omIter)
          MessageInterface::ShowMessage("   %s of type %s\n",
                (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage("At the start, the Global Object Map contains:\n");
+      MessageInterface::ShowMessage
+			("At the start, the Global Object Map contains %d objects:\n", globalObjectMap.size());
       for (omIter = globalObjectMap.begin(); omIter != globalObjectMap.end(); ++omIter)
          MessageInterface::ShowMessage("   %s of type %s\n",
                (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
@@ -798,7 +800,6 @@ bool Sandbox::Execute()
 
    state = RUNNING;
    Gmat::RunState runState = Gmat::IDLE, currentState = Gmat::RUNNING;
-//   GmatCommand *prev = NULL;
    
    current = sequence;
    if (!current)
@@ -844,7 +845,7 @@ bool Sandbox::Execute()
             
             #if DBGLVL_SANDBOX_RUN > 1
             MessageInterface::ShowMessage
-               ("command = \n<%s>\n", current->GetGeneratingString().c_str());
+               ("command = \n<%s>\n", current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
             #endif
          }
          #endif
@@ -871,7 +872,6 @@ bool Sandbox::Execute()
             throw SandboxException(str);
          }
          
-//         prev = current;
          current = current->GetNext();
       }
    }
