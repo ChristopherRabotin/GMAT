@@ -6255,9 +6255,11 @@ GmatBase* Moderator::GetInternalObject(const std::string &name, Integer sandboxN
  *
  * @return  1 if run was successful
  *         -1 if sandbox number is invalid
- *         -2 if execution interrupted by user
- *         -3 if exception thrown during the run
- *         -4 if unknown error occurred
+ *         -2 if exception thrown during sandbox initialization
+ *         -3 if unknown error occurred during sandbox initialization
+ *         -4 if execution interrupted by user
+ *         -5 if exception thrown during the sandbox execution
+ *         -6 if unknown error occurred during sandbox execution
  */
 //------------------------------------------------------------------------------
 Integer Moderator::RunMission(Integer sandboxNum)
@@ -6268,7 +6270,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    Integer status = 1;
    // Set to 1 to always run the mission and get the sandbox error message
    // Changed this code while looking at Bug 1532 (LOJ: 2009.11.13)
-   isRunReady = 1;
+   isRunReady = true;
    
    #if DEBUG_CONFIG
    MessageInterface::ShowMessage
@@ -6301,10 +6303,12 @@ Integer Moderator::RunMission(Integer sandboxNum)
                                         "Invalid Sandbox number" + sandboxNum);
          return status;
       }
-      
+		
+		//--------------------------------------------------------------
+		// Initialize sandbox
+		//--------------------------------------------------------------
       try
       {
-         
          // add objects to sandbox
          AddSolarSystemToSandbox(sandboxNum-1);
          AddTriggerManagersToSandbox(sandboxNum-1);
@@ -6323,8 +6327,31 @@ Integer Moderator::RunMission(Integer sandboxNum)
          
          // initialize Sandbox
          InitializeSandbox(sandboxNum-1);
-         
-
+		}
+      catch (BaseException &e)
+      {
+			status = -2;
+         std::string msg = e.GetFullMessage();
+			MessageInterface::PopupMessage(Gmat::ERROR_, msg + "\n");
+			isRunReady = false;
+		}
+		catch (...)
+		{
+			status = -3;
+         MessageInterface::ShowMessage
+            ("**** ERROR **** Moderator caught an unknown error during Sandbox "
+				 "Initialization.\n");
+			isRunReady = false;
+		}
+		
+		
+		//--------------------------------------------------------------
+		// Execute sandbox
+		//--------------------------------------------------------------
+		if (isRunReady)
+		{
+		try
+		{
          if (!loadSandboxAndPause)
          {
             #if DEBUG_RUN
@@ -6361,13 +6388,13 @@ Integer Moderator::RunMission(Integer sandboxNum)
          //if (msg.find("Execution interrupted") != msg.npos)
          if (msg.find("interrupted") != msg.npos)
          {
-            status = -2;
+            status = -4;
             MessageInterface::ShowMessage("GMAT execution stopped by user.\n");      
          }
          else
          {
-            status = -3;
-//            msg = "**** ERROR **** " + msg;
+            status = -5;
+            // msg = "**** ERROR **** " + msg;
             // Dunn would like to note that this is the popup message we were
             // getting that only said "ERROR" and did not provide a message.
             // We might want to debug that some day.
@@ -6377,16 +6404,17 @@ Integer Moderator::RunMission(Integer sandboxNum)
       catch (...)
       {
          MessageInterface::ShowMessage
-            ("Moderator::RunMission() Unknown error occurred.\n");
-         status = -4;
+            ("Moderator::RunMission() Unknown error occurred during Mission Run.\n");
+         status = -6;
          //throw; // LOJ: We want to finish up the clearing process below
       }
+		} // if (isRunReady)
    }
    else
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Cannot Run Mission. No mission sequence defined.\n");
-      status = -4;
+      status = -7;
    }
    
    runState = Gmat::IDLE;
@@ -6401,7 +6429,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    
    if (status == 1)
       MessageInterface::ShowMessage("Mission run completed.\n");
-   else if (status == -2)
+   else if (status == -4)
       MessageInterface::ShowMessage("*** Mission run interrupted.\n");
    else
       MessageInterface::ShowMessage("*** Mission run failed.\n");

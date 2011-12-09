@@ -2043,9 +2043,12 @@ void GmatMainFrame::BuildAndRunScript(const wxString &filename)
  * calls Moderator::RunMission()
  *
  * @return  1 if run was successful
- *         -2 if execution interrupted by user
- *         -3 if exception thrown during the run
- *         -4 if unknown error occurred during the run
+ *         -1 if sandbox number is invalid
+ *         -2 if exception thrown during sandbox initialization
+ *         -3 if unknown error occurred during sandbox initialization
+ *         -4 if execution interrupted by user
+ *         -5 if exception thrown during the sandbox execution
+ *         -6 if unknown error occurred during sandbox execution
  */
 //------------------------------------------------------------------------------
 Integer GmatMainFrame::RunCurrentMission()
