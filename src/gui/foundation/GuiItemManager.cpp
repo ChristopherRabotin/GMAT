@@ -5589,6 +5589,12 @@ void GuiItemManager::AddToAllObjectArray()
 	{
 		objStr = theAllObjectList[i];
 		objName = objStr.BeforeFirst(' ');
+      
+      #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+      MessageInterface::ShowMessage
+         ("   objStr = '%s', objName = '%s'\n", objStr.c_str(), objName.c_str());
+      #endif
+      
 		if (theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
 			theAutoGlobalObjectList.Add(objName);
 	}

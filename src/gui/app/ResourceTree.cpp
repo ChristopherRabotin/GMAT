@@ -628,6 +628,9 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    
    switch (itemType)
    {
+   case GmatTree::PROPAGATOR:
+      theGuiManager->UpdatePropagator();
+      break;
    case GmatTree::COORD_SYSTEM:
    case GmatTree::USER_COORD_SYSTEM:
       theGuiManager->UpdateCoordSystem();
