@@ -191,3 +191,31 @@ bool Global::Execute()
       
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * This method updates object names when the user changes them.
+ *
+ * @param type Type of object that is renamed.
+ * @param oldName Old name for the object.
+ * @param newName New name for the object.
+ *
+ * @return true on success.
+ */
+//------------------------------------------------------------------------------
+bool Global::RenameRefObject(const Gmat::ObjectType type,
+                             const std::string &oldName,
+                             const std::string &newName)
+{
+   for (Integer index = 0; index < (Integer)objectNames.size(); ++index)
+   {
+      if (objectNames[index] == oldName)
+         objectNames[index] = newName;
+   }
+   
+   return true;
+}

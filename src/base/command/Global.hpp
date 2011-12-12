@@ -41,7 +41,10 @@ public:
    
    bool                 Initialize();
    bool                 Execute();
-
+   
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
 protected:
    enum
    {
