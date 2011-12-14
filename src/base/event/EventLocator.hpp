@@ -152,6 +152,10 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name);
 
+   // Accessors for the owned subscribers
+   virtual Integer      GetOwnedObjectCount();
+   virtual GmatBase*    GetOwnedObject(Integer whichOne);
+
    virtual bool         Initialize();
    virtual Real         GetTolerance();
 

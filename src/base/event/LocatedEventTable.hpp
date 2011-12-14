@@ -24,6 +24,7 @@
 #define LocatedEventTable_hpp
 
 #include "LocatedEvent.hpp"
+#include "Subscriber.hpp"
 
 
 class OwnedPlot;
@@ -42,13 +43,22 @@ enum SortStyle
 /**
  * The table of events located during a run
  */
-class GMAT_API LocatedEventTable
+class GMAT_API LocatedEventTable : public Subscriber
 {
 public:
    LocatedEventTable();
    virtual ~LocatedEventTable();
    LocatedEventTable(const LocatedEventTable& let);
    LocatedEventTable& operator=(const LocatedEventTable& let);
+
+   virtual GmatBase* Clone() const;
+
+   virtual bool Initialize();
+
+   // Methods that react to actions in the MCS
+   virtual bool         FlushData(bool endOfDataBlock = true);
+   virtual bool         SetEndOfRun();
+   virtual void         SetRunState(Gmat::RunState rs);
 
    void AddEvent(LocatedEvent *theEvent);
    void AddEvent(GmatEpoch epoch, std::string boundaryType, std::string eventType);
@@ -63,7 +73,7 @@ public:
 
 protected:
    /// The table of located event boundaries
-   std::vector<LocatedEvent*>    events;
+   std::vector<LocatedEvent*> events;
    /// Main sort style
    SortStyle primarySortStyle;
    /// Secondary sort style
@@ -80,12 +90,25 @@ protected:
    std::map<std::string,RealArray> xData;
    /// Y Data for plotting
    std::map<std::string,RealArray> yData;
+   /// Solver state change boundary indices
+   IntegerArray runStateChanges;
+   /// Spacecraft state jumps
+   IntegerArray scStateChanges;
 
    void BuildAssociations();
    void SortEvents();
    std::string BuildEventSummary();
    void CollectData(const std::string &forCurve, RealArray &xv, RealArray &yv);
    void BuildPlot(const std::string &plotName);
+
+//   virtual void         HandleManeuvering(GmatBase *originator,
+//                                          bool maneuvering, Real epoch,
+//                                          const StringArray &satNames,
+//                                          const std::string &desc);
+   virtual void         HandleScPropertyChange(GmatBase *originator, Real epoch,
+                                               const std::string &satName,
+                                               const std::string &desc);
+
 };
 
 #endif /* LocatedEventTable_hpp */

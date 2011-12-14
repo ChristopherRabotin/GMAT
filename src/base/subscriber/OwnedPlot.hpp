@@ -22,6 +22,7 @@
 #define OwnedPlot_hpp
 
 #include "GmatBase.hpp"
+#include "Subscriber.hpp"
 
 
 /**
@@ -36,10 +37,11 @@
  * communication is the GuiPlotReceiver, which connects the plot messages to a
  * XyPlot object displayed on the GUI.
  *
- * In spite of their location in GMAT's directory structure, OwnedPlots are not
- * Subscribers.  They are derived directly from GmatBase.
+ * OwnedPlots are not Subscribers that show up on the Resource tree in GMAT.
+ * They exist inside of other objects that own them and control their
+ * allocation, processing, and deallocation.
  */
-class GMAT_API OwnedPlot : public GmatBase
+class GMAT_API OwnedPlot : public Subscriber
 {
 public:
    OwnedPlot(const std::string &name, const std::string &plotTitle = "",

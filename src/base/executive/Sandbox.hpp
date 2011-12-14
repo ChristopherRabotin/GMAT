@@ -128,6 +128,7 @@ private:
                                 std::map<std::string, GmatBase *> *usingMap);
    void      SetGlobalRefObject(GmatCommand *cmd);
    void      ShowObjectMap(ObjectMap &om, const std::string &title);
+   bool      AddOwnedSubscriber(Subscriber *sub);
    
    #ifdef DEBUG_SANDBOX_CLONING
       std::vector<Gmat::ObjectType>  clonable;

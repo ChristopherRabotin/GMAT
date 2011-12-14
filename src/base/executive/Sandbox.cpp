@@ -210,6 +210,18 @@ GmatBase* Sandbox::AddObject(GmatBase *obj)
                   "<%p>\n", ((PropSetup*)(obj))->GetPropagator(),
                   ((PropSetup*)(cloned))->GetPropagator());
       #endif
+
+      // Register owned Subscribers with the Publisher
+      Integer count = cloned->GetOwnedObjectCount();
+
+      for (Integer i = 0; i < count; ++i)
+      {
+         GmatBase* oo = cloned->GetOwnedObject(i);
+         if (oo->IsOfType(Gmat::SUBSCRIBER))
+         {
+            AddOwnedSubscriber((Subscriber*)oo);
+         }
+      }
    }
    else
    {
@@ -1001,6 +1013,15 @@ void Sandbox::Clear()
       if ((omi->second != NULL) && (omi->second)->GetType() == Gmat::SUBSCRIBER)
          publisher->Unsubscribe((Subscriber*)(omi->second));
       
+      // Unsubscribe owned Subscribers too
+      Integer count = (omi->second)->GetOwnedObjectCount();
+      for (Integer i = 0; i < count; ++i)
+      {
+         if ((omi->second)->GetOwnedObject(i)->IsOfType(Gmat::SUBSCRIBER))
+            publisher->Unsubscribe((Subscriber*)
+                  ((omi->second)->GetOwnedObject(i)));
+      }
+
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
          MessageInterface::ShowMessage("   Deleting <%p>'%s'\n", omi->second,
             (omi->second)->GetName().c_str());
@@ -1030,6 +1051,15 @@ void Sandbox::Clear()
       if ((omi->second != NULL) && (omi->second)->GetType() == Gmat::SUBSCRIBER)
          publisher->Unsubscribe((Subscriber*)(omi->second));
       
+      // Unsubscribe owned Subscribers too
+      Integer count = (omi->second)->GetOwnedObjectCount();
+      for (Integer i = 0; i < count; ++i)
+      {
+         if ((omi->second)->GetOwnedObject(i)->IsOfType(Gmat::SUBSCRIBER))
+            publisher->Unsubscribe((Subscriber*)
+                  ((omi->second)->GetOwnedObject(i)));
+      }
+
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
          MessageInterface::ShowMessage("   Deleting <%p>'%s'\n", omi->second,
             (omi->second)->GetName().c_str());
@@ -1165,6 +1195,24 @@ bool Sandbox::AddSubscriber(Subscriber *sub)
    }
    
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool AddOwnedSubscriber(Subscriber *sub)
+//------------------------------------------------------------------------------
+/**
+ *  Registers owned Subcribers with the Publisher.
+ *
+ *  @param <sub> The subscriber.
+ *
+ *  @return true if the Subscriber was registered.
+ */
+//------------------------------------------------------------------------------
+bool Sandbox::AddOwnedSubscriber(Subscriber *sub)
+{
+   publisher->Subscribe(sub);
+   return true;
 }
 
 

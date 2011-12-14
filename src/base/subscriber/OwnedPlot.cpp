@@ -100,7 +100,7 @@ OwnedPlot::PARAMETER_TYPE[OwnedPlotParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 OwnedPlot::OwnedPlot(const std::string &name, const std::string &plotTitle,
                const std::string &xAxisTitle, const std::string &yAxisTitle) :
-   GmatBase(Gmat::XY_PLOT, "OwnedPlot", name),
+   Subscriber              ("OwnedPlot", name),
    mOldName                (name),
    mPlotTitle              (plotTitle),
    mXAxisTitle             (xAxisTitle),
@@ -143,7 +143,7 @@ OwnedPlot::OwnedPlot(const std::string &name, const std::string &plotTitle,
  */
 //------------------------------------------------------------------------------
 OwnedPlot::OwnedPlot(const OwnedPlot &orig) :
-   GmatBase(orig),
+   Subscriber              (orig),
    mOldName                (orig.mOldName),
    mPlotTitle              (orig.mPlotTitle),
    mXAxisTitle             (orig.mXAxisTitle),
@@ -189,7 +189,7 @@ OwnedPlot& OwnedPlot::operator=(const OwnedPlot& orig)
    if (this == &orig)
       return *this;
    
-   GmatBase::operator=(orig);
+   Subscriber::operator=(orig);
    
    mOldName                = orig.mOldName;
    mPlotTitle              = orig.mPlotTitle;
@@ -253,7 +253,7 @@ bool OwnedPlot::Initialize()
              mNumYParams);
    #endif
    
-   GmatBase::Initialize();
+   Subscriber::Initialize();
    isEndOfReceive = false;
    isEndOfRun = false;
    
@@ -394,7 +394,7 @@ bool OwnedPlot::SetName(const std::string &who, const std::string &oldName)
    else
       mOldName = oldName;
    
-   return GmatBase::SetName(who);
+   return Subscriber::SetName(who);
 }
 
 
@@ -444,7 +444,7 @@ bool OwnedPlot::TakeAction(const std::string &action,
       return RescaleData();
    }
    
-   return false;
+   return Subscriber::TakeAction(action, actionData);
 }
 
 
@@ -503,7 +503,7 @@ std::string OwnedPlot::GetParameterText(const Integer id) const
    if (id >= GmatBaseParamCount && id < OwnedPlotParamCount)
       return PARAMETER_TEXT[id - GmatBaseParamCount];
    else
-      return GmatBase::GetParameterText(id);
+      return Subscriber::GetParameterText(id);
     
 }
 
@@ -527,7 +527,7 @@ Integer OwnedPlot::GetParameterID(const std::string &str) const
          return i;
    }
    
-   return GmatBase::GetParameterID(str);
+   return Subscriber::GetParameterID(str);
 }
 
 
@@ -547,7 +547,7 @@ Gmat::ParameterType OwnedPlot::GetParameterType(const Integer id) const
    if (id >= GmatBaseParamCount && id < OwnedPlotParamCount)
       return PARAMETER_TYPE[id - GmatBaseParamCount];
    else
-      return GmatBase::GetParameterType(id);
+      return Subscriber::GetParameterType(id);
 }
 
 
@@ -565,10 +565,10 @@ Gmat::ParameterType OwnedPlot::GetParameterType(const Integer id) const
 std::string OwnedPlot::GetParameterTypeString(const Integer id) const
 {
    if (id >= GmatBaseParamCount && id < OwnedPlotParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id -
+      return Subscriber::PARAM_TYPE_STRING[GetParameterType(id -
             GmatBaseParamCount)];
    else
-      return GmatBase::GetParameterTypeString(id);
+      return Subscriber::GetParameterTypeString(id);
 }
 
 
@@ -599,7 +599,7 @@ bool OwnedPlot::IsParameterReadOnly(const Integer id) const
       )
       return true;
    
-   return GmatBase::IsParameterReadOnly(id);
+   return Subscriber::IsParameterReadOnly(id);
 }
 
 
@@ -640,7 +640,7 @@ Integer OwnedPlot::GetIntegerParameter(const Integer id) const
       return markerStyle;
 
    default:
-      return GmatBase::GetIntegerParameter(id);
+      return Subscriber::GetIntegerParameter(id);
    }
 }
 
@@ -707,7 +707,7 @@ Integer OwnedPlot::SetIntegerParameter(const Integer id, const Integer value)
          return markerStyle;
 
       default:
-         return GmatBase::SetIntegerParameter(id, value);
+         return Subscriber::SetIntegerParameter(id, value);
    }
 }
 
@@ -750,7 +750,7 @@ std::string OwnedPlot::GetOnOffParameter(const Integer id) const
          return mDrawGrid;
 
       default:
-         return GmatBase::GetOnOffParameter(id);
+         return Subscriber::GetOnOffParameter(id);
    }
 }
 
@@ -793,7 +793,7 @@ bool OwnedPlot::SetOnOffParameter(const Integer id, const std::string &value)
          return true;
 
       default:
-         return GmatBase::SetOnOffParameter(id, value);
+         return Subscriber::SetOnOffParameter(id, value);
    }
 }
 
@@ -843,7 +843,7 @@ std::string OwnedPlot::GetStringParameter(const Integer id) const
          return mYAxisTitle;
 
       default:
-         return GmatBase::GetStringParameter(id);
+         return Subscriber::GetStringParameter(id);
    }
 }
 
@@ -923,7 +923,7 @@ bool OwnedPlot::SetStringParameter(const Integer id, const std::string &value)
          return true;
 
       default:
-         return GmatBase::SetStringParameter(id, value);
+         return Subscriber::SetStringParameter(id, value);
    }
 }
 
@@ -996,7 +996,7 @@ bool OwnedPlot::SetStringParameter(const Integer id, const std::string &value,
          return true;
 
       default:
-         return GmatBase::SetStringParameter(id, value, index);
+         return Subscriber::SetStringParameter(id, value, index);
    }
 }
 
@@ -1047,7 +1047,7 @@ const StringArray& OwnedPlot::GetStringArrayParameter(const Integer id) const
       case ADD:
          return curveNames;
       default:
-         return GmatBase::GetStringArrayParameter(id);
+         return Subscriber::GetStringArrayParameter(id);
    }
 }
 
@@ -1098,7 +1098,7 @@ bool OwnedPlot::GetBooleanParameter(const Integer id) const
    if (id == USE_HI_LOW)
       return useHiLow;
 
-   return GmatBase::GetBooleanParameter(id);
+   return Subscriber::GetBooleanParameter(id);
 }
 
 
@@ -1186,7 +1186,7 @@ bool OwnedPlot::SetBooleanParameter(const Integer id, const bool value)
       return useHiLow;
    }
 
-   return GmatBase::SetBooleanParameter(id, value);
+   return Subscriber::SetBooleanParameter(id, value);
 }
 
 

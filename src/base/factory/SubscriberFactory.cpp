@@ -31,6 +31,9 @@
 #include "OrbitView.hpp"
 #include "GroundTrackPlot.hpp"
 
+#include "OwnedPlot.hpp"
+//#include "LocatorView.hpp"
+
 //---------------------------------
 //  public methods
 //---------------------------------
@@ -88,6 +91,12 @@ Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
       return new OrbitView(withName);
    else if (ofType == "GroundTrackPlot")
       return new GroundTrackPlot(withName);
+
+   // These are "owned" Subscribers
+   else if (ofType == "OwnedPlot")
+      return new OwnedPlot(withName);
+//   else if (ofType == "LocatorView")
+//      return new LocatorView(withName);
    
    return NULL;
 }
@@ -117,6 +126,8 @@ Factory(Gmat::SUBSCRIBER)
       creatables.push_back("Enhanced3DView");
       creatables.push_back("OrbitView");
       creatables.push_back("GroundTrackPlot");
+      creatables.push_back("OwnedPlot");
+//      creatables.push_back("LocatorView");
    }
    
    // Now fill in unviewable subscribers
@@ -126,6 +137,10 @@ Factory(Gmat::SUBSCRIBER)
       // These commands do nothing
       unviewables.push_back("OpenGLPlot");
       unviewables.push_back("Enhanced3DView");
+
+      // These are managed by other objects rather than from the tree
+//      unviewables.push_back("LocatorView");
+      unviewables.push_back("OwnedPlot");
    }
 }
 

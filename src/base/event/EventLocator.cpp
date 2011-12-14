@@ -1214,6 +1214,23 @@ bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 
+Integer EventLocator::GetOwnedObjectCount()
+{
+   return 1 + eventTable.GetOwnedObjectCount();
+}
+
+GmatBase* EventLocator::GetOwnedObject(Integer whichOne)
+{
+   GmatBase *retval = NULL;
+   if (whichOne == 0)
+      retval = &eventTable;
+   else
+      retval = eventTable.GetOwnedObject(whichOne - 1);
+
+   return retval;
+}
+
+
 //------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
@@ -1238,7 +1255,7 @@ bool EventLocator::Initialize()
    }
 
    if (badInits.size() == 0)
-      retval = true;
+      retval = eventTable.Initialize();
    else
    {
       std::string errorList;

@@ -32,6 +32,8 @@
 #include <algorithm>          // For find()
 
 //#define DEBUG_EVENTLOCATION
+//#define DEBUG_COMPLETED_TABLE
+#define DEBUG_PUBLISHER_CALLS
 
 
 //------------------------------------------------------------------------------
@@ -42,6 +44,7 @@
  */
 //------------------------------------------------------------------------------
 LocatedEventTable::LocatedEventTable() :
+   Subscriber              ("LocatedEventTable", ""),
    primarySortStyle        (UNSORTED),
    secondarySortStyle      (UNSORTED),
    associationsCurrent     (false),
@@ -62,7 +65,7 @@ LocatedEventTable::~LocatedEventTable()
       delete events[i];
 
    // Here or elsewhere?
-//   delete thePlot;
+   delete thePlot;
 }
 
 //------------------------------------------------------------------------------
@@ -75,6 +78,7 @@ LocatedEventTable::~LocatedEventTable()
  */
 //------------------------------------------------------------------------------
 LocatedEventTable::LocatedEventTable(const LocatedEventTable& let) :
+   Subscriber              (let),
    events                  (let.events),
    primarySortStyle        (let.primarySortStyle),
    secondarySortStyle      (let.secondarySortStyle),
@@ -98,6 +102,8 @@ LocatedEventTable& LocatedEventTable::operator=(const LocatedEventTable& let)
 {
    if (this != &let)
    {
+      Subscriber::operator =(let);
+
       events              = let.events;
       primarySortStyle    = let.primarySortStyle;
       secondarySortStyle  = let.secondarySortStyle;
@@ -107,6 +113,54 @@ LocatedEventTable& LocatedEventTable::operator=(const LocatedEventTable& let)
    }
 
    return *this;
+}
+
+
+GmatBase* LocatedEventTable::Clone() const
+{
+   return new LocatedEventTable(*this);
+}
+
+
+bool LocatedEventTable::Initialize()
+{
+   bool retval = Subscriber::Initialize();
+
+   if (retval)
+   {
+      runStateChanges.clear();
+      scStateChanges.clear();
+   }
+
+   return retval;
+}
+
+
+bool LocatedEventTable::FlushData(bool endOfDataBlock)
+{
+   #ifdef DEBUG_PUBLISHER_CALLS
+      MessageInterface::ShowMessage("FlushData received\n");
+   #endif
+
+   return Subscriber::FlushData(endOfDataBlock);
+}
+
+bool LocatedEventTable::SetEndOfRun()
+{
+   #ifdef DEBUG_PUBLISHER_CALLS
+      MessageInterface::ShowMessage("EndOfRun received\n");
+   #endif
+
+   return Subscriber::SetEndOfRun();
+}
+
+void LocatedEventTable::SetRunState(Gmat::RunState rs)
+{
+   #ifdef DEBUG_PUBLISHER_CALLS
+      MessageInterface::ShowMessage("RunState %d received\n", rs);
+   #endif
+
+   return Subscriber::SetRunState(rs);
 }
 
 //------------------------------------------------------------------------------
@@ -335,6 +389,18 @@ bool LocatedEventTable::WriteToFile(std::string filename)
 
    if (events.size() > 0)
    {
+      #ifdef DEBUG_COMPLETED_TABLE
+         MessageInterface::ShowMessage("Data for the Event Table:\n");
+         for (UnsignedInt i = 0; i < events.size(); ++i)
+         {
+            MessageInterface::ShowMessage("  %04d: %20s %25s %8s %8s %.12lf "
+                  "-> %le\n", (i+1), events[i]->type.c_str(),
+                  events[i]->participants.c_str(), events[i]->dataName.c_str(),
+                  events[i]->boundary.c_str(), events[i]->epoch,
+                  events[i]->eventValue);
+         }
+      #endif
+
       std::ofstream theFile;
       theFile.open(filename.c_str());
       // Write the header labels
@@ -426,13 +492,6 @@ std::vector<LocatedEvent*> *LocatedEventTable::GetEvents()
 //------------------------------------------------------------------------------
 /**
  * Connects start and end events together
- *
- * @note: The current implementation is moderately crude.  It assumes the events
- *        vector is in chronological order, and that any start event followed by
- *        an end event match as long as the type and participant list match.  It
- *        does not account for toggle-off conditions, nor does it handle either
- *        backwards propagation nor loops that reset the epoch.  These are all
- *        affects that must be handled with a code update.
  */
 //------------------------------------------------------------------------------
 void LocatedEventTable::BuildAssociations()
@@ -447,17 +506,26 @@ void LocatedEventTable::BuildAssociations()
    xData.clear();
    yData.clear();
 
+   // Push the end index onto the scPropertyChange queue
+   scStateChanges.push_back(events.size());
+   UnsignedInt indexIndex = 0, index = scStateChanges[0];
+
    // Build the links
    for (UnsignedInt i = 0; i < events.size(); ++i)
    {
       events[i]->dataName = events[i]->type + "-" + events[i]->participants;
+
       if (events[i]->isEntry)
       {
+         if (i >= index)
+            ++indexIndex;
+         index = scStateChanges[indexIndex];
+
          Integer mate = -1;
          GmatEpoch currentEpoch = events[i]->epoch;
          GmatEpoch mateEpoch = 9e99;
 
-         for (UnsignedInt j = i+1; j < events.size(); ++j)
+         for (UnsignedInt j = i+1; j < index; ++j)
          {
             if ((!(events[j]->isEntry)) &&
                 (events[i]->type == events[j]->type) &&
@@ -616,10 +684,21 @@ std::string LocatedEventTable::BuildEventSummary()
 }
 
 
+//------------------------------------------------------------------------------
+// void ShowPlot()
+//------------------------------------------------------------------------------
+/**
+ * Displays the event data graphically
+ *
+ * @note The current implementation shows the event data at the end of run.
+ * This feature will be updated to show the data as it enters the system.
+ */
+//------------------------------------------------------------------------------
 void LocatedEventTable::ShowPlot()
 {
    BuildPlot("Event Data");
 }
+
 
 //------------------------------------------------------------------------------
 // void BuildPlot(const std::string &plotName,
@@ -636,9 +715,8 @@ void LocatedEventTable::ShowPlot()
 //------------------------------------------------------------------------------
 void LocatedEventTable::BuildPlot(const std::string &plotName)
 {
-   // Commented out for stability
-
-   thePlot = new OwnedPlot(plotName);
+   if (thePlot == NULL)
+      thePlot = new OwnedPlot(plotName);
 
    thePlot->SetStringParameter("PlotTitle", plotName);
    thePlot->SetStringParameter("XAxisTitle", "A.1 Epoch");
@@ -702,5 +780,48 @@ void LocatedEventTable::CollectData(const std::string &forCurve, RealArray &xv,
             yv.push_back(events[i]->duration);
          }
       }
+   }
+}
+
+
+//void LocatedEventTable::HandleManeuvering(GmatBase *originator,
+//      bool maneuvering, Real epoch, const StringArray &satNames,
+//      const std::string &desc)
+//{
+//
+//}
+
+
+//------------------------------------------------------------------------------
+// void HandleScPropertyChange(GmatBase *originator, Real epoch,
+//       const std::string &satName, const std::string &desc)
+//------------------------------------------------------------------------------
+/**
+ * Receives notification messages from the Publisher when an assignment is made
+ * to the Spacecraft state
+ *
+ * The parameters to this method are not used by the LocatedEventTable, and are
+ * provided to make the method consistent with the call made from the Publisher.
+ *
+ * @param originator Unused.
+ * @param epoch Unused.
+ * @param satName Unused.
+ * @param desc Unused.
+ */
+//------------------------------------------------------------------------------
+void LocatedEventTable::HandleScPropertyChange(GmatBase *originator, Real epoch,
+      const std::string &satName, const std::string &desc)
+{
+   #ifdef DEBUG_PUBLISHER_CALLS
+      MessageInterface::ShowMessage("Spacecraft state change detected\n");
+   #endif
+
+   UnsignedInt index = events.size();
+
+   if (index > 0)
+   {
+      if (find(scStateChanges.begin(), scStateChanges.end(), index) ==
+            scStateChanges.end())
+         scStateChanges.push_back(index);
    }
 }
