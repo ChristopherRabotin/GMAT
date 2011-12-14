@@ -320,8 +320,8 @@ GmatBase* Toggle::Clone(void) const
  *
  * @param <action> action to perform
  * @param <actionData> action data associated with action
- * @return true if action successfully performed
  *
+ * @return true if action successfully performed
  */
 //------------------------------------------------------------------------------
 bool Toggle::TakeAction(const std::string &action, const std::string &actionData)
@@ -345,17 +345,16 @@ bool Toggle::TakeAction(const std::string &action, const std::string &actionData
 // const ObjectTypeArray& GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 /**
- * Retrieves the list of ref object types used by the Achieve.
+ * Retrieves the list of ref object types used by the Toggle.
  *
  * @return the list of object types.
- * 
  */
 //------------------------------------------------------------------------------
 const ObjectTypeArray& Toggle::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::SUBSCRIBER);
-   //refObjectTypes.push_back(Gmat::PARAMETER);
+
    return refObjectTypes;
 }
 
