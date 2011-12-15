@@ -250,7 +250,7 @@ bool GmatApp::OnInit()
             if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
                theMainFrame->Iconize(true);
             
-            theMainFrame->BuildAndRunScript(scriptToRun);
+            theMainFrame->BuildAndRunScript(scriptToRun, true);
             
             if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::EXIT_AFTER_RUN)
             {
@@ -453,8 +453,31 @@ void GmatApp::ProcessCommandLineOptions()
          }
          else
          {
-            MessageInterface::ShowMessage("The option \"%s\" is not valid.\n", arg.c_str());
-            MessageInterface::ShowMessage(commandLineOptions.c_str());
+            bool isArgValid = false;
+            
+            // Check for file type association with GMAT on Windows
+            // since argv[0] contains the file name to run
+            #ifdef __WIN32__
+            if (GmatFileUtil::DoesFileExist(arg.c_str()))
+            {
+               // Set this as script to run
+               scriptToRun = arg.c_str();
+               // Replace single quotes
+               runScript = true;
+               isArgValid = true;
+               #ifdef DEBUG_CMD_LINE
+               MessageInterface::ShowMessage("%s\n", scriptToRun.c_str());
+               #endif
+            }
+            #endif
+            //@todo Implement this for Mac and Linux?
+            
+            if (!isArgValid)
+            {
+               MessageInterface::ShowMessage("The option \"%s\" is not valid.\n", arg.c_str());
+               MessageInterface::ShowMessage(commandLineOptions.c_str());
+            }
+            
             break;
          }
       }

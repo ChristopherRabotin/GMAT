@@ -2013,15 +2013,18 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
 
 
 //------------------------------------------------------------------------------
-// void BuildAndRunScript(const wxString &filename)
+// void BuildAndRunScript(const wxString &filename, bool addToResourceTree = false)
 //------------------------------------------------------------------------------
-void GmatMainFrame::BuildAndRunScript(const wxString &filename)
+void GmatMainFrame::BuildAndRunScript(const wxString &filename, bool addToResourceTree)
 {
    CloseCurrentProject();
    
    // Check if file exist first
    if (wxFileName::FileExists(filename))
    {
+      if (addToResourceTree)
+         GmatAppData::Instance()->GetResourceTree()->AddScriptItem(filename);
+      
       mScriptFilename = filename.c_str();
       
       if (InterpretScript(filename, GmatGui::DO_NOT_OPEN_SCRIPT))

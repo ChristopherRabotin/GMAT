@@ -102,7 +102,7 @@ public:
                         Integer scriptOpenOpt = GmatGui::OPEN_SCRIPT_ON_ERROR,
                         bool closeScript = false, bool readBack = false,
                         const wxString &savePath = "", bool multScripts = false);
-   void BuildAndRunScript(const wxString &filename);
+   void BuildAndRunScript(const wxString &filename, bool addToResourceTree = false);
    Integer RunCurrentMission();
    void StopRunningMission();
    void NotifyRunCompleted();

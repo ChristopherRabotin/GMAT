@@ -95,7 +95,7 @@ public:
    ~FileManager();
    
    std::string GetPathSeparator();
-   std::string GetCurrentPath();
+   std::string GetWorkingDirectory();
    bool DoesDirectoryExist(const std::string &dirPath);
    bool DoesFileExist(const std::string &filename);
    bool RenameFile(const std::string &oldName, const std::string &newName,

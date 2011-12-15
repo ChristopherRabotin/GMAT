@@ -152,53 +152,23 @@ FileManager::~FileManager()
 //------------------------------------------------------------------------------
 std::string FileManager::GetPathSeparator()
 {
-   std::string sep = "/";
-
    // Just return "/" for all operating system for consistency (LOJ: 2011.03.18)
-   #if 0
-   char *buffer;
-   buffer = getenv("OS");
-   if (buffer != NULL)
-   {
-      //MessageInterface::ShowMessage("Current OS is %s\n", buffer);
-      std::string osStr(buffer);
-
-      if (osStr.find("Windows") != osStr.npos)
-         sep = "\\";
-   }
-   #endif
+   // return GmatFileUtil::GetPathSeparator();
    
-   return sep;
+   return "/";
 }
 
 
 //------------------------------------------------------------------------------
-// std::string GetCurrentPath()
+// std::string GetWorkingDirectory()
 //------------------------------------------------------------------------------
-/*
- * Note: This function calls getcwd() which is defiend in <dirent>. There is a
- *       problem compling with VC++ compiler, so until it is resolved, it will
- *       always return blank if it is compiled with VC++ compiler.
- *
- * @return  The current working directory, generally the application path.
- *
+/**
+ * @return current working directory
  */
 //------------------------------------------------------------------------------
-std::string FileManager::GetCurrentPath()
+std::string FileManager::GetWorkingDirectory()
 {
-   std::string currPath;
-
-#ifdef _MSC_VER  // if Microsoft Visual C++
-   currPath = ".";
-#else
-   char buffer[GmatFile::MAX_PATH_LEN];
-   // This clears a warning message
-   if (getcwd(buffer, GmatFile::MAX_PATH_LEN) != buffer)
-      ;
-   currPath = buffer;
-#endif
-
-   return currPath;
+   return GmatFileUtil::GetWorkingDirectory();
 }
 
 
@@ -220,18 +190,7 @@ bool FileManager::DoesDirectoryExist(const std::string &dirPath)
 //------------------------------------------------------------------------------
 bool FileManager::DoesFileExist(const std::string &filename)
 {
-   FILE * pFile;
-   pFile = fopen (filename.c_str(), "rt+");
-
-   if (pFile!=NULL)
-   {
-      fclose (pFile);
-      return true;
-   }
-   else
-   {
-      return false;
-   }
+   return GmatFileUtil::DoesFileExist(filename);
 }
 
 
@@ -348,9 +307,18 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    MessageInterface::ShowMessage
       ("FileManager::ReadStartupFile() entered, fileName='%s'\n", fileName.c_str());
    #endif
-
+   
    RefreshFiles();
 
+   // get current path and application path
+   std::string currPath = GmatFileUtil::GetWorkingDirectory();
+   std::string appFullPath = GmatFileUtil::GetApplicationPath();
+
+   #ifdef DEBUG_READ_STARTUP_FILE
+   MessageInterface::ShowMessage("   currPath = '%s'\n", currPath.c_str());
+   MessageInterface::ShowMessage("   appFullPath = '%s'\n", appFullPath.c_str());
+   #endif
+   
    std::string line;
    mSavedComments.clear();
 
@@ -358,6 +326,50 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    std::string tmpStartupFile;
    std::string tmpStartupFilePath;
 
+   if (GmatFileUtil::DoesFileExist(fileName))
+   {
+      tmpStartupFilePath = fileName;
+   }
+   else
+   {
+      // Search application directory for startup file
+      std::string appPath = GmatFileUtil::ParsePathName(appFullPath);
+      std::string newPath = appPath + "gmat_startup_file.txt";
+      
+      #ifdef DEBUG_READ_STARTUP_FILE
+      MessageInterface::ShowMessage("   new satartup file path = '%s'\n", newPath.c_str());
+      #endif
+      
+      if (GmatFileUtil::DoesFileExist(newPath))
+      {
+         tmpStartupFilePath = newPath;
+         
+         // set current directory to new path
+         if (GmatFileUtil::SetWorkingDirectory(appPath))
+         {
+            MessageInterface::ShowMessage
+               ("GMAT working directory set to '%s'\n", appPath.c_str());
+         }
+         else
+         {
+            UtilityException ue;
+            ue.SetDetails("FileManager::ReadStartupFile() cannot set working "
+                          "directory to: \"%s\"", appPath.c_str());
+            throw ue;
+         }
+      }
+   }
+   
+   tmpStartupDir = GmatFileUtil::ParsePathName(tmpStartupFilePath);
+   tmpStartupFile = GmatFileUtil::ParseFileName(tmpStartupFilePath);
+   
+   if (tmpStartupDir == "")
+      tmpStartupFilePath = tmpStartupFile;
+   else
+      tmpStartupFilePath = tmpStartupDir + mPathSeparator + tmpStartupFile;
+   
+   // Reworked this part above so removed(LOJ: 2011.12.14)
+   #if 0
    if (fileName == "")
    {
       tmpStartupDir = "";
@@ -374,7 +386,9 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       else
          tmpStartupFilePath = tmpStartupDir + mPathSeparator + tmpStartupFile;
    }
+   #endif
 
+   
    #ifdef DEBUG_READ_STARTUP_FILE
    MessageInterface::ShowMessage
       ("FileManager::ReadStartupFile() reading '%s'\n", tmpStartupFilePath.c_str());
@@ -383,9 +397,15 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    std::ifstream mInStream(tmpStartupFilePath.c_str());
 
    if (!mInStream)
-      throw UtilityException
-         ("FileManager::ReadStartupFile() cannot open:" + tmpStartupFilePath);
+   {
+      UtilityException ue;
+      ue.SetDetails("FileManager::ReadStartupFile() cannot open GMAT startup "
+                    "file: \"%s\"", tmpStartupFilePath.c_str());
+      throw ue;
+   }
 
+   
+   // Read startup file
    while (!mInStream.eof())
    {
       // Use cross-platform GetLine
@@ -2196,7 +2216,7 @@ FileManager::FileManager()
    #endif
 
    mPathSeparator = GetPathSeparator();
-   mStartupFileDir = GetCurrentPath() + mPathSeparator;
+   mStartupFileDir = GmatFileUtil::GetWorkingDirectory() + mPathSeparator;
    mStartupFileName = "gmat_startup_file.txt";
 
    #ifdef DEBUG_STARTUP_FILE
