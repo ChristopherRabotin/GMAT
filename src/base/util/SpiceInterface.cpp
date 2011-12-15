@@ -466,12 +466,12 @@ void SpiceInterface::SetLeapSecondKernel(const std::string &lsk)
 }
 
 //------------------------------------------------------------------------------
-//  Integer GetNaifID(const std::string &forBody, bool popupMsg)
+//  Integer GetNaifID(const std::string &forObj, bool popupMsg)
 //------------------------------------------------------------------------------
 /**
  * This method returns the NAIF Id of an object, given its name.
  *
- * @param <forBody>  name of the object.
+ * @param <forObj>   name of the object.
  * @param <popupMsg> indicates whether or not to put up a Popup message if there
  *                   is an error
  *
@@ -479,25 +479,31 @@ void SpiceInterface::SetLeapSecondKernel(const std::string &lsk)
  *
  */
 //------------------------------------------------------------------------------
-Integer SpiceInterface::GetNaifID(const std::string &forBody, bool popupMsg)
+Integer SpiceInterface::GetNaifID(const std::string &forObj, bool popupMsg)
 {
    SpiceBoolean   found;
    SpiceInt       id;
-   ConstSpiceChar *bodyName = forBody.c_str();
+   std::string    nameToUse = forObj;
+   if (GmatStringUtil::ToUpper(forObj) == "LUNA")
+      nameToUse = "MOON";
+   else if (GmatStringUtil::ToUpper(forObj) == "SOLARSYSTEMBARYCENTER")
+      nameToUse = "SSB";
+
+   ConstSpiceChar *bodyName = nameToUse.c_str();
    bodn2c_c(bodyName, &id, &found);
    if (found == SPICEFALSE)
    {
       if (popupMsg)
       {
          std::string warnmsg = "Cannot find NAIF ID for object ";
-         warnmsg += forBody + ".  Insufficient data available.  Another SPICE Kernel may be necessary.";
+         warnmsg += forObj + ".  Insufficient data available.  Another SPICE Kernel may be necessary.";
          MessageInterface::PopupMessage(Gmat::WARNING_, warnmsg);
       }
       return 0;
    }
    #ifdef DEBUG_SPK_READING
       MessageInterface::ShowMessage("NAIF ID for body %s has been found: it is %d\n",
-                                    forBody.c_str(), (Integer) id);
+                                    forObj.c_str(), (Integer) id);
    #endif
    return (Integer) id;
 }
@@ -565,8 +571,6 @@ SpiceDouble SpiceInterface::A1ToSpiceTime(Real a1Time)
 /**
  * This method initializes the static data for the reader, and sets up
  * SPICE error handling.
- *
- * @param <forBody>  name of the object.
  *
  * @return corresponding NAIF id; or 0 if not found
  *

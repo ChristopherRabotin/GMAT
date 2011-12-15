@@ -321,6 +321,7 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
 //  Rvector6 GetTargetState(const std::string &targetName,
 //                          const A1Mjd       &atTime,
 //                          const std::string &observingBodyName,
+//                          const Integer     observingBodyNAIFId,
 //                          const std::string &referenceFrame,
 //                          const std::string &aberration)
 //------------------------------------------------------------------------------
@@ -329,8 +330,10 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
  * at the input time.
  *
  * @param <targetName>        name of the target object.
+ * @param <targetNAIFId>      NAIF ID of the target body
  * @param <atTime>            time at which the state is requested.
  * @param <observingBodyName> name of the observing body
+ * @param <observingBodyNAIFId> NAIF ID of the observing body
  * @param <referenceFrame>    frame in which state should be returned
  * @param <aberration>        flag indicating aberration corrections, if any
  *
@@ -342,17 +345,18 @@ Rvector6 SpiceOrbitKernelReader::GetTargetState(const std::string &targetName,
                                  const Integer     targetNAIFId,
                                  const A1Mjd       &atTime,
                                  const std::string &observingBodyName,
+                                 const Integer     observingBodyNAIFId,
                                  const std::string &referenceFrame,
                                  const std::string &aberration)
 {
    #ifdef DEBUG_SPK_READING
       MessageInterface::ShowMessage(
-            "Entering SPKReader::GetTargetState with target = %s, naifId = %d, time = %12.10f, observer = %s\n",
-            targetName.c_str(), targetNAIFId, atTime.Get(), observingBodyName.c_str());
-      Real start, end;
-      GetCoverageStartAndEnd(loadedKernels, targetNAIFId, start, end);
-      MessageInterface::ShowMessage("   coverage for object %s : %12.10f --> %12.10f\n",
-            targetName.c_str(), start, end);
+            "Entering SPKReader::GetTargetState with target = %s, naifId = %d, time = %12.10f, observer = %s, aberration = %s\n",
+            targetName.c_str(), targetNAIFId, atTime.Get(), observingBodyName.c_str(), aberration.c_str());
+//      Real start, end;
+//      GetCoverageStartAndEnd(loadedKernels, targetNAIFId, start, end);
+//      MessageInterface::ShowMessage("   coverage for object %s : %12.10f --> %12.10f\n",
+//            targetName.c_str(), start, end);
    #endif
    std::string targetNameToUse = GmatStringUtil::ToUpper(targetName);
    if (targetNameToUse == "LUNA")  // We use Luna, instead of Moon, for GMAT
@@ -366,11 +370,12 @@ Rvector6 SpiceOrbitKernelReader::GetTargetState(const std::string &targetName,
    // convert time to Ephemeris Time (TDB)
    etSPICE                   = A1ToSpiceTime(atTime.Get());
    naifIDSPICE               = targetNAIFId;
-   boddef_c(objectNameSPICE, naifIDSPICE);        // CSPICE method to set NAIF ID for an object
+   observerNaifIDSPICE       = observingBodyNAIFId;
+//   boddef_c(objectNameSPICE, naifIDSPICE);        // CSPICE method to set NAIF ID for an object
 
    #ifdef DEBUG_SPK_READING
-      MessageInterface::ShowMessage("SET NAIF Id for object %s to %d\n",
-            targetNameToUse.c_str(), targetNAIFId);
+//      MessageInterface::ShowMessage("SET NAIF Id for object %s to %d\n",
+//            targetNameToUse.c_str(), targetNAIFId);
 //      MessageInterface::ShowMessage(
 //            "In SPKReader::Converted (to TBD) time = %12.10f\n", etMjdAtTime);
 //      MessageInterface::ShowMessage("  then the full JD = %12.10f\n",
@@ -379,8 +384,26 @@ Rvector6 SpiceOrbitKernelReader::GetTargetState(const std::string &targetName,
    #endif
    SpiceDouble state[6];
    SpiceDouble oneWayLightTime;
-   spkezr_c(objectNameSPICE, etSPICE, referenceFrameSPICE, aberrationSPICE,
-            observingBodyNameSPICE, state, &oneWayLightTime);
+   if (aberration == "NONE")
+   {
+      spkgeo_c(naifIDSPICE, etSPICE, referenceFrameSPICE, observerNaifIDSPICE, state, &oneWayLightTime);
+      #ifdef DEBUG_SPK_READING
+         MessageInterface::ShowMessage(
+               "In SPKReader::Called spkgeo_c with ID = %d and time = %12.10f, and got state out: %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+               (Integer) naifIDSPICE, (double) etSPICE, state[0], state[1], state[2], state[3], state[4], state[5]);
+      #endif
+   }
+   else
+   {
+      spkezr_c(objectNameSPICE, etSPICE, referenceFrameSPICE, aberrationSPICE,
+               observingBodyNameSPICE, state, &oneWayLightTime);
+      #ifdef DEBUG_SPK_READING
+         MessageInterface::ShowMessage(
+               "In SPKReader::Called spkezr_c and got state out: %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+               state[0], state[1], state[2], state[3], state[4], state[5]);
+      #endif
+   }
+
 #ifdef DEBUG_SPK_PLANETS
    Real        ttMjdAtTime   = TimeConverterUtil::Convert(atTime.Get(), TimeConverterUtil::A1MJD,
                                TimeConverterUtil::TTMJD, GmatTimeConstants::JD_JAN_5_1941);
@@ -388,9 +411,12 @@ Rvector6 SpiceOrbitKernelReader::GetTargetState(const std::string &targetName,
    Real ttJd                 = ttMjdAtTime + GmatTimeConstants::JD_JAN_5_1941;
    MessageInterface::ShowMessage("Asking CSPICE for state of body %s, with observer %s, referenceFrame %s, and aberration correction %s\n",
          objectNameSPICE, observingBodyNameSPICE, referenceFrameSPICE, aberrationSPICE);
+//   MessageInterface::ShowMessage(
+//         "           Body: %s   TT Time:  %12.10f  TDB Time: %12.10f   state:  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+//         targetName.c_str(), ttJd, etJd, state[0], state[1], state[2], state[3], state[4], state[5]);
    MessageInterface::ShowMessage(
-         "           Body: %s   TT Time:  %12.10f  TDB Time: %12.10f   state:  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-         targetName.c_str(), ttJd, /*etJd,*/ state[0], state[1], state[2], state[3], state[4], state[5]);
+         "           Body: %s   TT Time:  %12.10f   state:  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+         targetName.c_str(), ttJd,  state[0], state[1], state[2], state[3], state[4], state[5]);
 #endif
    if (failed_c())
    {
@@ -410,12 +436,12 @@ Rvector6 SpiceOrbitKernelReader::GetTargetState(const std::string &targetName,
       delete [] err;
       throw UtilityException(errmsg);
    }
-   #ifdef DEBUG_SPK_READING
-      MessageInterface::ShowMessage(
-            "In SPKReader::Called spkezr_c and got state out\n");
-   #endif
 
 
    Rvector6 r6(state[0],state[1],state[2],state[3],state[4],state[5]);
+   #ifdef DEBUG_SPK_READING
+      MessageInterface::ShowMessage(
+            "In SPKReader:: returning state: %s\n", r6.ToString().c_str());
+   #endif
    return r6;
 }

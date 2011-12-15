@@ -56,6 +56,7 @@ public:
                             const Integer     targetNAIFId,
                             const A1Mjd       &atTime,
                             const std::string &observingBodyName,
+                            const Integer     observingBodyNAIFId,
                             const std::string &referenceFrame = "J2000",
                             const std::string &aberration = "NONE");
 

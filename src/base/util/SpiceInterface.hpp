@@ -74,7 +74,7 @@ public:
    virtual StringArray GetValidFrames();
    virtual void        SetLeapSecondKernel(const std::string &lsk);
    
-   virtual Integer     GetNaifID(const std::string &forBody, bool popupMsg = true);
+   virtual Integer     GetNaifID(const std::string &forObj, bool popupMsg = true);
    
    virtual Real        SpiceTimeToA1(SpiceDouble spiceTime);
    virtual SpiceDouble A1ToSpiceTime(Real a1Time);

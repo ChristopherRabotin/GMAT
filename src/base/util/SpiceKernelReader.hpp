@@ -88,6 +88,8 @@ protected:
    ConstSpiceChar  *objectNameSPICE;
    /// the NAIF ID
    SpiceInt        naifIDSPICE;
+   /// NAIF ID for the observing object
+   SpiceInt        observerNaifIDSPICE;
    /// the observer epoch time (SPICE) in Ephemeris (TDB) Time
    SpiceDouble     etSPICE;
    /// the reference frame (SPICE)
