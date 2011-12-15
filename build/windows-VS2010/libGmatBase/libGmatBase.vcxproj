@@ -133,6 +133,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\application\bin\</OutDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">
     <TargetExt>.dll</TargetExt>
@@ -644,15 +645,10 @@
     <ClCompile Include="..\..\..\src\base\solver\Optimizer.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\Solver.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\SteepestDescent.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\Converter.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\Epoch.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\Formation.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\Spacecraft.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\SpaceObject.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\StateConverter.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\StateVector.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\TimeConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp" />
@@ -667,15 +663,12 @@
     <ClCompile Include="..\..\..\src\base\util\A1Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\A1Mjd.cpp" />
     <ClCompile Include="..\..\..\src\base\util\AngleUtil.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\Anomaly.cpp" />
     <ClCompile Include="..\..\..\src\base\util\AttitudeUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BaseException.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\Cartesian.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\CoordUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
@@ -686,14 +679,12 @@
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GravityFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\Keplerian.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Linear.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MemoryTracker.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MessageInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MessageReceiver.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\ModKeplerian.cpp" />
     <ClCompile Include="..\..\..\src\base\util\OrbitDesignerTime.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RealUtilities.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RepeatGroundTrack.cpp" />
@@ -747,6 +738,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SunSync.cpp" />
@@ -1102,17 +1094,12 @@
     <ClInclude Include="..\..\..\src\base\solver\Solver.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\SolverException.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\SteepestDescent.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\Converter.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\Epoch.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\Formation.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\Spacecraft.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObject.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObjectException.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\StateConverter.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\StateVector.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\StateVectorException.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\TimeConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\stopcond\StopCondition.hpp" />
     <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp" />
@@ -1129,7 +1116,6 @@
     <ClInclude Include="..\..\..\src\base\util\A1Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\A1Mjd.hpp" />
     <ClInclude Include="..\..\..\src\base\util\AngleUtil.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\Anomaly.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ArrayTemplate.hpp" />
     <ClInclude Include="..\..\..\src\base\util\AttitudeUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BaseException.hpp" />
@@ -1137,9 +1123,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\Cartesian.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\CoordUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ElapsedTime.hpp" />
@@ -1152,14 +1136,12 @@
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GravityFile.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\Keplerian.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Linear.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MemoryTracker.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MessageInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MessageReceiver.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\ModKeplerian.hpp" />
     <ClInclude Include="..\..\..\src\base\util\OrbitDesignerTime.hpp" />
     <ClInclude Include="..\..\..\src\base\util\OrbitTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\RealTypes.hpp" />
@@ -1215,6 +1197,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SunSync.hpp" />

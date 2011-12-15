@@ -129,9 +129,6 @@
     <ClCompile Include="..\..\..\src\base\util\AngleUtil.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\Anomaly.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\AttitudeUtil.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -139,12 +136,6 @@
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\Cartesian.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\CoordUtil.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\Date.cpp">
@@ -174,9 +165,6 @@
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\Keplerian.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -193,9 +181,6 @@
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\MessageReceiver.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\ModKeplerian.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\RealUtilities.cpp">
@@ -453,12 +438,6 @@
     <ClCompile Include="..\..\..\src\base\hardware\Thruster.cpp">
       <Filter>Source Files\hardware</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\Converter.cpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\Epoch.cpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\spacecraft\Formation.cpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClCompile>
@@ -468,16 +447,7 @@
     <ClCompile Include="..\..\..\src\base\spacecraft\SpaceObject.cpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\StateConverter.cpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\StateVector.cpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\spacecraft\TimeConverter.cpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\burn\Burn.cpp">
@@ -1305,6 +1275,9 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
       <Filter>Source Files\forcemodel</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -1337,9 +1310,6 @@
     <ClInclude Include="..\..\..\src\base\util\AngleUtil.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\Anomaly.hpp">
-      <Filter>Source Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\AttitudeUtil.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
@@ -1349,13 +1319,7 @@
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\Cartesian.hpp">
-      <Filter>Source Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp">
-      <Filter>Source Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\CoordUtil.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\Date.hpp">
@@ -1391,9 +1355,6 @@
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\Keplerian.hpp">
-      <Filter>Source Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
@@ -1410,9 +1371,6 @@
       <Filter>Source Files\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\MessageReceiver.hpp">
-      <Filter>Source Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\ModKeplerian.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\OrbitTypes.hpp">
@@ -1688,12 +1646,6 @@
     <ClInclude Include="..\..\..\src\base\hardware\Thruster.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\Converter.hpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\Epoch.hpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\Formation.hpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClInclude>
@@ -1706,19 +1658,10 @@
     <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObjectException.hpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\StateConverter.hpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\StateVector.hpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\StateVectorException.hpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.hpp">
-      <Filter>Source Files\spacecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\spacecraft\TimeConverter.hpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\burn\Burn.hpp">
@@ -2566,6 +2509,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
       <Filter>Source Files\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
