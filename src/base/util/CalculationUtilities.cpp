@@ -22,7 +22,7 @@
 #include "CalculationUtilities.hpp"
 #include "GmatConstants.hpp"
 #include "Linear.hpp"
-#include "Keplerian.hpp"
+#include "StateConversionUtil.hpp"
 #include "Rvector3.hpp"
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
@@ -239,8 +239,8 @@ Real GmatCalcUtil::CalculateKeplerianData(const std::string &item, const Rvector
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);
 
-   Real sma = Keplerian::CartesianToSMA(originMu, pos, vel);
-   Real ecc = Keplerian::CartesianToECC(originMu, pos, vel);
+   Real sma = StateConversionUtil::CartesianToSMA(originMu, pos, vel);
+   Real ecc = StateConversionUtil::CartesianToECC(originMu, pos, vel);
 
    if (GmatMathUtil::Abs(1.0 - ecc) <= GmatOrbitConstants::KEP_ECC_TOL)
    {

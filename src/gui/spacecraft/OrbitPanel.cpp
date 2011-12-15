@@ -74,7 +74,8 @@
 //------------------------------------------------------------------------------
 #include "OrbitPanel.hpp"
 #include "MessageInterface.hpp"
-#include "Anomaly.hpp"
+//#include "Anomaly.hpp"
+#include "StateConversionUtil.hpp"
 #include <sstream>
 #include <wx/config.h>
 
@@ -163,7 +164,7 @@ void OrbitPanel::LoadData()
       MessageInterface::ShowMessage("OrbitPanel::LoadData() entered\n");
    #endif
       
-   mAnomaly = theSpacecraft->GetAnomaly();
+   mAnomaly     = theSpacecraft->GetAnomaly();
    mTrueAnomaly = mAnomaly;
    
    mInternalCoord = theGuiInterpreter->GetInternalCoordinateSystem();
@@ -301,16 +302,16 @@ void OrbitPanel::LoadData()
       #endif
       
       // Get anomaly type list from the base code (Anomaly)
-      const std::string *anomalyTypeList = Anomaly::GetLongTypeNameList();
-      typeCount = Anomaly::AnomalyTypeCount;
+      const std::string *anomalyTypeList = StateConversionUtil::GetLongTypeNameList();
+      typeCount = StateConversionUtil::AnomalyTypeCount;
       for (int i = 0; i<typeCount; i++)
       {
          mAnomalyTypeNames.push_back(anomalyTypeList[i]);
          anomalyComboBox->Append(wxString(anomalyTypeList[i].c_str()));
       }
       
-      if ( (mFromStateTypeStr == mStateTypeNames[StateConverter::KEPLERIAN]) || 
-           (mFromStateTypeStr == mStateTypeNames[StateConverter::MOD_KEPLERIAN]) )
+      if ( (mFromStateTypeStr == mStateTypeNames[StateConversionUtil::KEPLERIAN]) ||
+           (mFromStateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN]) )
          //if (mFromStateTypeStr == "Keplerian" || mFromStateTypeStr == "ModKeplerian")
       {
          anomalyComboBox->SetValue(wxT(mAnomalyType.c_str()));
@@ -319,7 +320,7 @@ void OrbitPanel::LoadData()
       
       #ifdef DEBUG_ORBIT_PANEL_LOAD
       MessageInterface::ShowMessage
-         ("   mAnomaly=\n   [%s]\n", mAnomaly.ToString(16).c_str());
+//         ("   mAnomaly=\n   [%s]\n", mAnomaly.ToString(16).c_str());
       #endif
       
       // Get Spacecraft initial state
@@ -894,15 +895,17 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          {
             try
             {
-               Rvector6 st = stateConverter.FromCartesian(mCartState, "Keplerian", "TA");
-               mTrueAnomaly.Set(st[0], st[1], st[5], Anomaly::TA);
+               Real mu = GetOriginMu(theSpacecraft->GetOrigin()); //  ********** OR get from coord system?
+               Rvector6 st = StateConversionUtil::Convert(mu, mCartState, "Keplerian", "TA");
+               mTrueAnomaly = st[5];
+//               mTrueAnomaly.Set(st[0], st[1], st[5], Anomaly::TA);
                mAnomaly = mTrueAnomaly;
-               mAnomalyType = mAnomalyTypeNames[Anomaly::TA];
+               mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
                mFromAnomalyTypeStr = mAnomalyType;
 
                #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
                MessageInterface::ShowMessage
-                  ("   Computed TrueAnomaly =\n   [%s]\n", mTrueAnomaly.ToString(16).c_str());
+                  ("   Computed TrueAnomaly =\n   [%12.10f]\n", mTrueAnomaly);
                #endif
             }
             catch (BaseException&)
@@ -1097,14 +1100,14 @@ void OrbitPanel::SetLabelsUnits(const std::string &stateType)
    textCtrl[5]->SetToolTip(pConfig->Read(_T(("Elements"+theSpacecraft->GetParameterText(baseLabel+5)+"Hint").c_str())));
    unit6->SetLabel(theSpacecraft->GetStringParameter(baseUnit+5).c_str());
    
-   if ( (stateType == mStateTypeNames[StateConverter::KEPLERIAN]) || 
-        (stateType == mStateTypeNames[StateConverter::MOD_KEPLERIAN]) )
+   if ( (stateType == mStateTypeNames[StateConversionUtil::KEPLERIAN]) ||
+        (stateType == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN]) )
    {
-      wxString label = Anomaly::GetTypeString(mAnomalyType).c_str();
+      wxString label = StateConversionUtil::GetAnomalyShortText(mAnomalyType).c_str();
       description6->SetLabel(label);
 //      anomalyStaticText->Show(true); // commented out for now - wcs - 2010.01.27 - per S. Hughes
 //      anomalyComboBox->Show(true);
-      anomalyComboBox->SetSelection(Anomaly::GetAnomalyType(mAnomalyType));
+      anomalyComboBox->SetSelection(StateConversionUtil::GetAnomalyType(mAnomalyType));
    }
    else
    {
@@ -1191,8 +1194,8 @@ void OrbitPanel::DisplayState()
       
       // compute current anomaly if Keplerian or ModKeplerian here
       // BuildState() does not compute mAnomaly
-      if ( ((stateTypeStr == mStateTypeNames[StateConverter::KEPLERIAN]) || 
-            (stateTypeStr == mStateTypeNames[StateConverter::MOD_KEPLERIAN])) &&
+      if ( ((stateTypeStr == mStateTypeNames[StateConversionUtil::KEPLERIAN]) ||
+            (stateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN])) &&
            (mIsStateModified[0] || mIsStateModified[1] || mIsStateModified[5]) )
       {
          #ifdef DEBUG_ORBIT_PANEL_STATE_CHANGE
@@ -1205,12 +1208,12 @@ void OrbitPanel::DisplayState()
          #endif
 //         Anomaly temp(midState[0], midState[1], midState[5], mFromAnomalyTypeStr);
 //         mAnomaly = temp;
-         mAnomaly.Set(midState[0], midState[1], midState[5], mFromAnomalyTypeStr);
+         mAnomalyType = mFromAnomalyTypeStr;  // is this right??
          #ifdef DEBUG_ORBIT_PANEL_STATE_CHANGE
          MessageInterface::ShowMessage("In DisplayState, about to print out anomaly type ...\n");
             MessageInterface::ShowMessage(
                   "In DisplayState, after operator = , mAnomalyType = %s\n",
-                  (mAnomaly.GetTypeString()).c_str());
+                  (mAnomalyType.c_str());
          #endif
       }
    }
@@ -1313,8 +1316,8 @@ void OrbitPanel::BuildValidStateTypes()
    stateTypeComboBox->Clear();
    
    // get state type list from the base code (StateConverter)
-   const std::string *stateTypeList = stateConverter.GetStateTypeList();
-   typeCount = stateConverter.GetTypeCount();
+   const std::string *stateTypeList = StateConversionUtil::GetStateTypeList();
+   typeCount = StateConversionUtil::GetTypeCount();
    for (int i = 0; i<typeCount; i++)
       mStateTypeNames.push_back(stateTypeList[i]);
    
@@ -1334,7 +1337,7 @@ void OrbitPanel::BuildValidStateTypes()
       // show Keplerian or ModKeplerian types
       for (Integer ii = 0; ii < typeCount; ii++)
       {
-         if (!(stateConverter.RequiresCelestialBodyOrigin(stateTypeList[ii])))
+         if (!(StateConversionUtil::RequiresCelestialBodyOrigin(stateTypeList[ii])))
             stateTypeComboBox->Append(wxString(stateTypeList[ii].c_str()));
       }
 //      wxString stateTypeList[] =
@@ -1349,12 +1352,12 @@ void OrbitPanel::BuildValidStateTypes()
       
       mShowFullStateTypeList = false;
       
-      if ( (mFromStateTypeStr == mStateTypeNames[StateConverter::KEPLERIAN]) || 
-           (mFromStateTypeStr == mStateTypeNames[StateConverter::MOD_KEPLERIAN]))
+      if ( (mFromStateTypeStr == mStateTypeNames[StateConversionUtil::KEPLERIAN]) ||
+           (mFromStateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN]))
       {
          // default to Cartesian
          stateTypeComboBox->
-            SetValue(wxT(mStateTypeNames[StateConverter::CARTESIAN]).c_str());
+            SetValue(wxT(mStateTypeNames[StateConversionUtil::CARTESIAN]).c_str());
       }
       else
       {
@@ -1374,7 +1377,7 @@ void OrbitPanel::BuildValidStateTypes()
 //------------------------------------------------------------------------------
 void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
 {
-   bool reqCBOnly = stateConverter.RequiresCelestialBodyOrigin(forStateType);
+   bool reqCBOnly = StateConversionUtil::RequiresCelestialBodyOrigin(forStateType);
    // don't rebuild, if ti's not necessary
    if (((coordSysCBOnly) && reqCBOnly) || ((!coordSysCBOnly) && (!reqCBOnly))) return;
 
@@ -1433,7 +1436,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
          (isInternal ? "Cartesian" : mFromStateTypeStr.c_str()),
          tempState.ToString(16).c_str());
       MessageInterface::ShowMessage(" ... and mAnomaly type is %s\n",
-            (mAnomaly.GetTypeString()).c_str());
+            (mAnomalyType.c_str());
    #endif
       
    Rvector6 midState;
@@ -1460,17 +1463,17 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
       else
       {
          #ifdef DEBUG_ORBIT_PANEL_CONVERT
-         MessageInterface::ShowMessage
-            ("   mAnomaly = [%s]\n", mAnomaly.ToString(16).c_str());
+//         MessageInterface::ShowMessage
+//            ("   mAnomaly = [%s]\n", mAnomaly.ToString(16).c_str());
          MessageInterface::ShowMessage("before Coordinate Conversion, mEpoch = %12.10f\n", mEpoch);
          MessageInterface::ShowMessage("  mFromCoord = %s, mInternalCoord = %s\n",
                mFromCoord->GetName().c_str(), mInternalCoord->GetName().c_str());
          #endif
          
          // Convert input state to the Cartesian representation
-         stateConverter.SetMu(mFromCoord);
-         midState = stateConverter.Convert(inputState, mFromStateTypeStr, 
-                                           "Cartesian", mAnomaly);
+         Real mu = GetOriginMu(mFromCoord);
+         midState = StateConversionUtil::Convert(mu, inputState, mFromStateTypeStr,
+                                           "Cartesian", mAnomalyType);
          
          // Transform to internal coordinates
          mCoordConverter.Convert(A1Mjd(mEpoch), midState, mFromCoord, mCartState, 
@@ -1499,8 +1502,8 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
       #endif
       
       // and convert to the desired representation
-      stateConverter.SetMu(mOutCoord);
-      mOutState = stateConverter.FromCartesian(midState, stateTypeStr, mAnomalyType);
+      Real mu = GetOriginMu(mOutCoord);
+      mOutState = StateConversionUtil::Convert(mu, midState, "Cartesian", stateTypeStr, mAnomalyType);
       
       #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage
@@ -1714,7 +1717,8 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
    // check Anomaly
    if (theScPanel->CheckReal(state[5], mElements[5], mAnomalyType, "Real Number"))
    {
-      mAnomaly.Set(state[0], state[1], state[5], mAnomalyType);
+//      mAnomaly.Set(state[0], state[1], state[5], mAnomalyType);
+      mAnomaly = state[5];
    }
    else
    {
@@ -1789,7 +1793,8 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
                "OrbitPanel::CheckModKeplerian, about to set anomaly with %12.10f  %12.10f  %12.10f  %s\n",
                state[0], state[1], state[5], mAnomalyType.c_str());
       #endif
-      mAnomaly.Set(state[0], state[1], state[5], mAnomalyType);
+//      mAnomaly.Set(state[0], state[1], state[5], mAnomalyType);
+         mAnomaly = state[5];
    }
    else
    {
@@ -1967,12 +1972,12 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
       ("   OrbitPanel::ComputeTrueAnomaly() stateTypeStr=%s\n", stateTypeStr.c_str());
    #endif
 
-   if (mAnomalyType == mAnomalyTypeNames[Anomaly::TA])
+   if (mAnomalyType == mAnomalyTypeNames[StateConversionUtil::TA])
       return true;
 
    Rvector6 midState, outState;
    
-   if (stateTypeStr == mStateTypeNames[StateConverter::CARTESIAN])
+   if (stateTypeStr == mStateTypeNames[StateConversionUtil::CARTESIAN])
    {
       #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage("before Coordinate Conversion in ComputeTrueAnomaly, mEpoch = %12.10f\n", mEpoch);
@@ -1982,11 +1987,11 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
                               mOutCoord);
       
       // and convert to the desired representation
-      stateConverter.SetMu(mOutCoord);
-      outState = stateConverter.FromCartesian(midState, stateTypeStr, "True Anomaly");
+      Real mu = GetOriginMu(mOutCoord);
+      outState = StateConversionUtil::Convert(mu, midState, "Cartesian", stateTypeStr, "True Anomaly");
    }
-   else if ((stateTypeStr == mStateTypeNames[StateConverter::KEPLERIAN]) || 
-            (stateTypeStr == mStateTypeNames[StateConverter::MOD_KEPLERIAN]))
+   else if ((stateTypeStr == mStateTypeNames[StateConversionUtil::KEPLERIAN]) ||
+            (stateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN]))
    {
       Real sma = mOutState[0];
       Real ecc = mOutState[1];
@@ -1999,10 +2004,11 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
       #endif
       
       // if state type is MOD_KEPLERIAN, compute sma and ecc
-      if (stateTypeStr == mStateTypeNames[StateConverter::MOD_KEPLERIAN])
+      if (stateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN])
       {
-         Rvector kepl = stateConverter.FromCartesian
-            (state, mStateTypeNames[StateConverter::KEPLERIAN], mAnomalyType);
+         Real mu = GetOriginMu(theSpacecraft->GetOrigin());   // is this right?
+         Rvector kepl = StateConversionUtil::Convert
+            (mu, state, "Cartesian", mStateTypeNames[StateConversionUtil::KEPLERIAN], mAnomalyType);
          sma = kepl[0];
          ecc = kepl[1];
          anomaly = kepl[5];         
@@ -2014,17 +2020,58 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
          #endif
       }
       
-      mAnomaly.Set(sma, ecc, anomaly, mAnomalyType);
-      mTrueAnomaly = mAnomaly.ConvertToAnomaly(Anomaly::TA);
+//      mAnomaly.Set(sma, ecc, anomaly, mAnomalyType);
+      mAnomaly = anomaly;
+//      mTrueAnomaly = mAnomaly.ConvertToAnomaly(StateConversionUtil::TA);
+      mTrueAnomaly = StateConversionUtil::ConvertToTrueAnomaly(mAnomalyType, anomaly, ecc);
       
       #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage
-         ("   mAnomaly     = [%s]\n   mTrueAnomaly = [%s]\n",
-          mAnomaly.ToString(16).c_str(), mTrueAnomaly.ToString(16).c_str());
+         ("   mAnomaly     = [%12.10f]\n   mTrueAnomaly = [%12.10f]\n",
+          mAnomaly, mTrueAnomaly);
       #endif
    }
    
    return true;
+}
+
+//------------------------------------------------------------------------------
+// Real GetOriginMu(GmatBase *fromObject)
+//------------------------------------------------------------------------------
+/*
+ * Gets the origin mu from the object.
+ *
+ * @return origin mu value
+ */
+//------------------------------------------------------------------------------
+Real OrbitPanel::GetOriginMu(GmatBase *fromObject)
+{
+   Real mu = 0.0;
+
+   if (fromObject != NULL)
+   {
+      if (fromObject->IsOfType("CoordinateSystem"))
+      {
+         // Get the coordinate system's origin
+         SpacePoint *origin = ((CoordinateSystem*) fromObject)->GetOrigin();
+         // Check if it is Celestial Body then get the mu;
+         // Otherwise, it sets mu to zero
+         if (origin->IsOfType("CelestialBody"))
+            mu = ((CelestialBody *)origin)->GetGravitationalConstant();
+         else
+            mu = 0.0;
+      }
+      else if (fromObject->IsOfType("CelestialBody"))
+      {
+         mu = ((CelestialBody *)fromObject)->GetGravitationalConstant();
+      }
+      else
+      {
+         mu = 0.0;
+      }
+
+   }
+   return mu;
 }
 
 
@@ -2091,7 +2138,8 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
       textCtrl[i]->SetValue(keplerianElements[i]);
 
    Rvector6 kepState = orbitDlg.GetElementsDouble();
-   mCartState = stateConverter.FromKeplerian(kepState, "Cartesian", "TA");
+   Real mu = GetOriginMu(theSpacecraft->GetOrigin());   // is this right?
+   mCartState = StateConversionUtil::Convert(mu, kepState, "Keplerian", "Cartesian", "TA");
    mOutState = mCartState;
 
    dataChanged = true;

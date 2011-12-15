@@ -22,15 +22,14 @@
 
 #include "GmatCommand.hpp"       // class's header file
 #include "CommandException.hpp"
-#include "StateConverter.hpp"
 #include "CoordinateConverter.hpp"
 #include "MessageInterface.hpp"  // MessageInterface
 #include "TimeSystemConverter.hpp"
 #include "GmatDefaults.hpp"
 #include "GmatConstants.hpp"
-#include "Keplerian.hpp"
 #include "RealUtilities.hpp"
 #include "CalculationUtilities.hpp"
+#include "StateConversionUtil.hpp"
 
 #include <algorithm>             // for find()
 #include <sstream>               // for command summary generation
@@ -60,6 +59,7 @@
 //#define DEBUG_COMMAND_SUMMARY_REF_DATA
 //#define DEBUG_COMMAND_SUMMARY_TYPE
 //#define DEBUG_MISSION_SUMMARY
+//#define DEBUG_SUMMARY_STRINGS
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -1057,6 +1057,9 @@ std::string GmatCommand::GetStringParameter(const Integer id) const
    {
       // This call is not const, so need to break const-ness here:
       ((GmatCommand*)this)->BuildCommandSummaryString();
+      #ifdef DEBUG_SUMMARY_STRINGS
+         MessageInterface::ShowMessage("Command Summary:\n%s\n", commandSummary.c_str());
+      #endif
       return commandSummary;
    }
    
@@ -1065,6 +1068,9 @@ std::string GmatCommand::GetStringParameter(const Integer id) const
       // This call is not const, so need to break const-ness here:
       std::string missionSummary =
          ((GmatCommand*)this)->BuildMissionSummaryString(this);
+      #ifdef DEBUG_SUMMARY_STRINGS
+         MessageInterface::ShowMessage("Mission Summary:\n%s\n", missionSummary.c_str());
+      #endif
       return missionSummary;
    }
          
@@ -2025,7 +2031,6 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             (physicsBasedCommand? "DEFINITELY" :"NOT"));
    #endif
    std::stringstream data;
-   StateConverter    stateConverter;
 
    /// if we're writing the entire mission summary for only physics-based commands, return if not a physics-based command
    if (summaryForEntireMission && ((missionPhysicsBasedOnly && (!physicsBasedCommand)) || !includeInSummary))
@@ -2100,21 +2105,30 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             if (!cmdOrigin)
                throw CommandException("Origin for summary coordinate system is NULL!!!!!\n");
 
-            if (!stateConverter.SetMu(summaryCoordSys))
+
+            if (cmdOrigin->IsOfType("CelestialBody")) // This is required to be true, for now
             {
-               std::string errmsg = "GmatCommand::BuildCommandSummaryString: Error setting mu for StateConverter.";
-               throw CommandException(errmsg);
+               originIsCelestialBody    = true;
+               originEqRad              = ((CelestialBody*)cmdOrigin)->GetEquatorialRadius();
+               originMu                 = ((CelestialBody*)cmdOrigin)->GetGravitationalConstant();
+               originFlattening         = ((CelestialBody*)cmdOrigin)->GetFlattening();
+               originHourAngle          = ((CelestialBody*)cmdOrigin)->GetHourAngle(a1);
             }
+            else
+            {
+               originIsCelestialBody    = false;
+            }
+
 
             rawState                 = &stateData[i*6];  // assumes in internalCoordSystem
             cartStateInternal        = rawState;;
             // First convert the cartesian state to the summaryCoordSys
             cc.Convert(a1, cartStateInternal, internalCoordSys, cartState, summaryCoordSys);
             // Need to convert state to all representations
-            kepState        = stateConverter.FromCartesian(cartState, "Keplerian");
-            modKepState     = stateConverter.FromCartesian(cartState, "ModifiedKeplerian");
-            sphStateAZFPA   = stateConverter.FromCartesian(cartState, "SphericalAZFPA");
-            sphStateRADEC   = stateConverter.FromCartesian(cartState, "SphericalRADEC");
+            kepState        = StateConversionUtil::CartesianToKeplerian(originMu, cartState);
+            modKepState     = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "ModifiedKeplerian");
+            sphStateAZFPA   = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "SphericalAZFPA");
+            sphStateRADEC   = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "SphericalRADEC");
 
             #ifdef DEBUG_COMMAND_SUMMARY_STATE
                MessageInterface::ShowMessage("Now converting from %s to %s coordinate system.\n",
@@ -2131,32 +2145,20 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             ha               = 0.0;
             if (kepState[1] < (1.0 - GmatOrbitConstants::KEP_ECC_TOL))
             {
-               ea                   = Keplerian::TrueToEccentricAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+               ea                   = StateConversionUtil::TrueToEccentricAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
                                       kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
                isEccentric          = true;
             }
             else if (kepState[1] > (1.0 + GmatOrbitConstants::KEP_TOL)) // *** or KEP_ECC_TOL or need new tolerance for this?  1.0e-10
             {
-               ha                   = Keplerian::TrueToHyperbolicAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+               ha                   = StateConversionUtil::TrueToHyperbolicAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
                                       kepState[1], true) * GmatMathConstants::DEG_PER_RAD;
                isHyperbolic         = true;
             }
-            ma               = Keplerian::TrueToMeanAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
+            ma               = StateConversionUtil::TrueToMeanAnomaly(kepState[5] * GmatMathConstants::RAD_PER_DEG,
                                kepState[1], !isHyperbolic) * GmatMathConstants::DEG_PER_RAD;
 
 
-            if (cmdOrigin->IsOfType("CelestialBody")) // This is required to be true, for now
-            {
-               originIsCelestialBody    = true;
-               originEqRad              = ((CelestialBody*)cmdOrigin)->GetEquatorialRadius();
-               originMu                 = ((CelestialBody*)cmdOrigin)->GetGravitationalConstant();
-               originFlattening         = ((CelestialBody*)cmdOrigin)->GetFlattening();
-               originHourAngle          = ((CelestialBody*)cmdOrigin)->GetHourAngle(a1);
-            }
-            else
-            {
-               originIsCelestialBody    = false;
-            }
             // Compute the origin-to-sun unit vector
             Rvector3 originToSun(0.0,0.0,0.0);
             if (cmdOrigin->GetName() != SolarSystem::SUN_NAME)

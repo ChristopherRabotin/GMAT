@@ -28,11 +28,10 @@
 #include "GmatState.hpp"
 #include "FuelTank.hpp"
 #include "Thruster.hpp"
-#include "Anomaly.hpp"
+//#include "Anomaly.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "TimeSystemConverter.hpp"
-#include "StateConverter.hpp"
 #include "Attitude.hpp"
 
 #include <map>
@@ -64,7 +63,8 @@ public:
    Rvector6             GetKeplerianState();
    Rvector6             GetModifiedKeplerianState();
 
-   Anomaly              GetAnomaly() const;
+   Real                 GetAnomaly() const;
+   std::string          GetAnomalyType() const;
    
    virtual bool         HasAttitude();
    virtual const Rmatrix33&
@@ -182,7 +182,7 @@ public:
    void SetEpoch(const std::string &ep);
    void SetEpoch(const std::string &type, const std::string &ep, Real a1mjd);
    void SetState(const std::string &type, const Rvector6 &cartState);
-   void SetAnomaly(const std::string &type, const Anomaly &ta);
+   void SetAnomaly(const std::string &type, Real ta);
 
    virtual Integer         GetPropItemID(const std::string &whichItem);
    virtual Integer         SetPropItem(const std::string &propItem);
@@ -349,7 +349,7 @@ protected:
    std::string       stateType;
    std::string       displayStateType;
    std::string       anomalyType;
-   Anomaly           trueAnomaly;
+   Real              trueAnomaly;
 
    
    // The Offset, Rotation, and Scale values for the model
@@ -370,6 +370,9 @@ protected:
 
    std::string       coordSysName;
 
+   /// gravitational constant for the central body (origin)
+   Real              originMu;
+
    /// coordinate system map to be used for Thrusters for now
    std::map<std::string, CoordinateSystem*> coordSysMap;
 
@@ -383,7 +386,6 @@ protected:
 //   StringArray       orbitSpiceKernelNames;
 
    // for non-internal spacecraft information
-   StateConverter      stateConverter;
    CoordinateConverter coordConverter;
 
    // Lists of hardware elements added 11/12/04, djc

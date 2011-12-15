@@ -28,14 +28,11 @@
 #include "CalculationUtilities.hpp"
 #include "GmatConstants.hpp"
 #include "Linear.hpp"
-#include "Keplerian.hpp"         // for Cartesian to Keplerian elements
 #include "AngleUtil.hpp"
-//#include "SphericalRADEC.hpp"    // for friend CartesianToSphericalRADEC/AZFPA()
-#include "ModKeplerian.hpp"      // for friend KeplerianToModKeplerian()
-//#include "Equinoctial.hpp"
 #include "CelestialBody.hpp"
 #include "StringUtil.hpp"        // for ToString()
 #include "MessageInterface.hpp"
+#include "StateConversionUtil.hpp"
 
 
 //#define DEBUG_ORBITDATA_INIT
@@ -440,7 +437,7 @@ Rvector6 OrbitData::GetKepState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   mKepState = Keplerian::CartesianToKeplerian(mGravConst, state);
+   mKepState = StateConversionUtil::CartesianToKeplerian(mGravConst, state);
 
    #ifdef DEBUG_ORBITDATA_KEP_STATE
    MessageInterface::ShowMessage("OrbitData::GetKepState() mKepState=%s\n",
@@ -461,9 +458,8 @@ Rvector6 OrbitData::GetModKepState()
       
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   Anomaly anomaly;
-   Rvector6 kepState = CoordUtil::CartesianToKeplerian(state, mGravConst, anomaly);
-   mModKepState = KeplerianToModKeplerian(kepState);
+   Rvector6 kepState = StateConversionUtil::CartesianToKeplerian(mGravConst, state, "TA");
+   mModKepState = StateConversionUtil::KeplerianToModKeplerian(kepState);
    
    return mModKepState;
 }
@@ -479,8 +475,7 @@ Rvector6 OrbitData::GetSphRaDecState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-//   mSphRaDecState = CartesianToSphericalRADEC(state);
-   mSphRaDecState = stateConverter.FromCartesian(state, "SphericalRADEC");
+   mSphRaDecState = StateConversionUtil::Convert(mGravConst, state, "Cartesian", "SphericalRADEC");
 
    #ifdef DEBUG_ORBITDATA_STATE
    MessageInterface::ShowMessage
@@ -502,8 +497,7 @@ Rvector6 OrbitData::GetSphAzFpaState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-   //   mSphAzFpaState = CartesianToSphericalAZFPA(state);
-   mSphAzFpaState = stateConverter.FromCartesian(state, "SphericalAZFPA");
+   mSphAzFpaState = StateConversionUtil::Convert(mGravConst, state, "Cartesian", "SphericalAZFPA");
 
    
    return mSphAzFpaState;
@@ -520,9 +514,7 @@ Rvector6 OrbitData::GetEquinState()
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
-//   Rvector6 mEquinState = CartesianToEquinoctial(state, mGravConst);
-   stateConverter.SetMu(mGravConst);
-   Rvector6 mEquinState = stateConverter.FromCartesian(state, "Equinoctial");
+   Rvector6 mEquinState = StateConversionUtil::Convert(mGravConst, state, "Cartesian", "Equinoctial");
    
    return mEquinState;
 }
@@ -583,38 +575,38 @@ Real OrbitData::GetKepReal(Integer item)
    switch (item)
    {
    case SMA:
-      return Keplerian::CartesianToSMA(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToSMA(mGravConst, pos, vel);
    case ECC:
-      return Keplerian::CartesianToECC(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToECC(mGravConst, pos, vel);
    case INC:
-      return Keplerian::CartesianToINC(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToINC(mGravConst, pos, vel);
    case TA:
-      return Keplerian::CartesianToTA(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToTA(mGravConst, pos, vel);
    case EA:
-      return Keplerian::CartesianToEA(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToEA(mGravConst, pos, vel);
    case MA:
    {
       #ifdef DEBUG_MA
       MessageInterface::ShowMessage("In OrbitData, computing MA -------\n");
       #endif
-      return Keplerian::CartesianToMA(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToMA(mGravConst, pos, vel);
    }
    case HA:
    {
       #ifdef DEBUG_HA
       MessageInterface::ShowMessage("In OrbitData, computing HA -------\n");
       #endif
-      return Keplerian::CartesianToHA(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToHA(mGravConst, pos, vel);
    }
    case RAAN:
-      return Keplerian::CartesianToRAAN(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToRAAN(mGravConst, pos, vel);
    case RADN:
       {
-         Real raanDeg = Keplerian::CartesianToRAAN(mGravConst, pos, vel);
+         Real raanDeg = StateConversionUtil::CartesianToRAAN(mGravConst, pos, vel);
          return AngleUtil::PutAngleInDegRange(raanDeg + 180, 0.0, 360.0);
       }
    case AOP:
-      return Keplerian::CartesianToAOP(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToAOP(mGravConst, pos, vel);
       
    default:
       throw ParameterException("OrbitData::GetKepReal() Unknown parameter id: " +
@@ -814,7 +806,7 @@ Real OrbitData::GetEquinReal(Integer item)
    switch (item)
    {
    case EQ_SMA:
-      return Keplerian::CartesianToSMA(mGravConst, pos, vel);
+      return StateConversionUtil::CartesianToSMA(mGravConst, pos, vel);
    case EY:
       {
          Rvector6 equiState = GetEquinState();

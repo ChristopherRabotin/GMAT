@@ -32,11 +32,10 @@
 
 #include "Spacecraft.hpp"
 #include "TimeSystemConverter.hpp"
-#include "StateConverter.hpp"
 #include "CoordinateConverter.hpp"
 #include "CoordinateSystem.hpp"
 #include "Rvector6.hpp"
-#include "Anomaly.hpp"
+//#include "Anomaly.hpp"
 #include "OrbitDesignerDialog.hpp"
 
 class OrbitPanel: public wxPanel
@@ -54,16 +53,17 @@ public:
    
 private:
 
-   /// valid state type in the StateConverter
+   /// valid state type in the StateConversionUtil
    StringArray mStateTypeNames;
    /// valid anomaly type in the Anomaly
    StringArray mAnomalyTypeNames;
    /// names of the available coordinate systems
    StringArray coordSystemNames;
    
-   Anomaly mAnomaly;
-   Anomaly mTrueAnomaly;
-   StateConverter stateConverter;
+   Real        mAnomaly;
+   Real        mTrueAnomaly;
+//   Anomaly mAnomaly;
+//   Anomaly mTrueAnomaly;
    
    bool dataChanged;
    bool canClose;
@@ -138,6 +138,8 @@ private:
    bool CheckAnomaly(Rvector6 &state);
    bool ComputeTrueAnomaly(Rvector6 &state, const std::string &stateType);
    
+   Real GetOriginMu(GmatBase *fromObject);
+
    GmatPanel *theScPanel;
    
    wxStaticText *description1;
@@ -174,7 +176,7 @@ private:
       ID_TEXT = 30200,
       ID_TEXTCTRL,
       ID_COMBOBOX,
-	  ID_BUTTON,
+	   ID_BUTTON,
         
       ID_STATIC_ELEMENT     
    };

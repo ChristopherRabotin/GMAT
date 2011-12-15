@@ -29,6 +29,7 @@
 #include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
 #include "SpaceObjectException.hpp"
+#include "StateConversionUtil.hpp"
 #include "StringUtil.hpp"
 #include "TimeTypes.hpp"
 #include "CSFixed.hpp"               // for default attitude creation
@@ -279,6 +280,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    internalCoordSystem  (NULL),
    coordinateSystem     (NULL),
    coordSysName         ("EarthMJ2000Eq"),
+   originMu             (0.0),
    spacecraftId         ("SatId"),
    attitude             (NULL),
    totalMass            (850.0),
@@ -453,10 +455,10 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    internalCoordSystem  (a.internalCoordSystem),   // need to copy
    coordinateSystem     (a.coordinateSystem),      // need to copy
    coordSysName         (a.coordSysName),
+   originMu             (a.originMu),
    coordSysMap          (a.coordSysMap),
    spacecraftId         (a.spacecraftId),
 //   orbitSpiceKernelNames(a.orbitSpiceKernelNames),
-   stateConverter       (a.stateConverter),
    coordConverter       (a.coordConverter),
    totalMass            (a.totalMass),
    initialDisplay       (false),
@@ -547,12 +549,12 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    displayStateType     = a.displayStateType;
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
+   originMu             = a.originMu;
    coordSysMap          = a.coordSysMap;
    spacecraftId         = a.spacecraftId;
    solarSystem          = a.solarSystem;         // need to copy
    internalCoordSystem  = a.internalCoordSystem; // need to copy
    coordinateSystem     = a.coordinateSystem;    // need to copy
-   stateConverter       = a.stateConverter;
    coordConverter       = a.coordConverter;
    totalMass            = a.totalMass;
    initialDisplay       = false;
@@ -570,9 +572,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    modelScale           = a.modelScale;
 
    #ifdef DEBUG_SPACECRAFT
-   MessageInterface::ShowMessage
-      ("Anomaly has type %s, copied from %s\n", trueAnomaly.GetTypeString().c_str(),
-       a.trueAnomaly.GetTypeString().c_str());
+//   MessageInterface::ShowMessage
+//      ("Anomaly has type %s, copied from %s\n", trueAnomaly.GetTypeString().c_str(),
+//       a.trueAnomaly.GetTypeString().c_str());
    #endif
 
    state.SetEpoch(a.state.GetEpoch());
@@ -718,9 +720,9 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
 
    if (elementType != "Cartesian")
    {
-      stateType = "Cartesian";  // why not use SetStateFromRepresentation here?? wcs
-      newState = stateConverter.Convert(instate, elementType,
-         stateType, trueAnomaly);
+      stateType = "Cartesian";
+      newState = StateConversionUtil::Convert(originMu, instate, elementType,
+         stateType, anomalyType);
    }
 
    SetState(newState.Get(0),newState.Get(1),newState.Get(2),
@@ -844,10 +846,6 @@ Rvector6 Spacecraft::GetCartesianState()
 //------------------------------------------------------------------------------
 Rvector6 Spacecraft::GetKeplerianState()
 {
-//   rvState = stateConverter.Convert(state.GetState(), stateType,
-//                "Keplerian",trueAnomaly);
-//
-//   return rvState;
    MessageInterface::ShowMessage("GetKeplerianState() is obsolete; "
       "use GetState(\"Keplerian\") or GetState(%d) instead.\n", KEPLERIAN_ID);
    return GetState("Keplerian");
@@ -865,9 +863,6 @@ Rvector6 Spacecraft::GetKeplerianState()
 //------------------------------------------------------------------------------
 Rvector6 Spacecraft::GetModifiedKeplerianState()
 {
-//   rvState = stateConverter.Convert(state.GetState(),stateType,
-//                "ModifiedKeplerian",trueAnomaly);
-//   return (rvState);
    MessageInterface::ShowMessage("GetModifiedKeplerianState() is obsolete; "
       "use GetState(\"ModifiedKeplerian\") or GetState(%d) instead.\n",
       MODIFIED_KEPLERIAN_ID);
@@ -878,10 +873,19 @@ Rvector6 Spacecraft::GetModifiedKeplerianState()
 //------------------------------------------------------------------------------
 // Anomaly GetAnomaly() const
 //------------------------------------------------------------------------------
-Anomaly Spacecraft::GetAnomaly() const
+Real Spacecraft::GetAnomaly() const
 {
    return trueAnomaly;
 }
+
+//------------------------------------------------------------------------------
+// std::string GetAnomalyType() const
+//------------------------------------------------------------------------------
+std::string Spacecraft::GetAnomalyType() const
+{
+   return anomalyType;
+}
+
 
 //------------------------------------------------------------------------------
 // virtual bool HasAttitude()
@@ -1353,7 +1357,9 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       if (obj->IsOfType(Gmat::SPACE_POINT))
       {
-         origin = (SpacePoint*)obj;
+         origin   = (SpacePoint*)obj;
+         if (origin->IsOfType("CelestialBody"))
+            originMu = ((CelestialBody*) origin)->GetGravitationalConstant();
       }
    }
 
@@ -1474,6 +1480,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
          originName = coordinateSystem->GetOriginName();
          origin     = coordinateSystem->GetOrigin();
+         if (origin->IsOfType("CelestialBody"))
+            originMu = ((CelestialBody*) origin)->GetGravitationalConstant();
 
          try
          {
@@ -1486,7 +1494,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             MessageInterface::ShowMessage("   %s\n", vec6.ToString().c_str());
             #endif
          }
-         catch (BaseException &)
+         catch (BaseException &e)
          {
             #ifdef DEBUG_SPACECRAFT_CS
             MessageInterface::ShowMessage
@@ -2447,7 +2455,7 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     }
 
     if (id == ANOMALY_ID)
-       return trueAnomaly.GetTypeString();
+       return anomalyType;
 
     if (id == COORD_SYS_ID)
        return coordSysName;
@@ -2689,9 +2697,10 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       {
          // Load trueAnomaly with the state data
          Rvector6 kep = GetStateInRepresentation("Keplerian");
-         trueAnomaly.SetSMA(kep[0]);
-         trueAnomaly.SetECC(kep[1]);
-         trueAnomaly.SetValue(kep[5]);
+//         trueAnomaly.SetSMA(kep[0]);
+//         trueAnomaly.SetECC(kep[1]);
+//         trueAnomaly.SetValue(kep[5]);
+         trueAnomaly = kep[5];
       }
 
       //stateType = value;
@@ -2701,15 +2710,15 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    else if (id == ANOMALY_ID)
    {
       // Check for invalid input then return unknown value from GmatBase
-      if (trueAnomaly.IsInvalid(value))
+      if (!StateConversionUtil::IsValidAnomalyType(value))
       {
          return GmatBase::SetStringParameter(id, value);
       }
       #ifdef DEBUG_SC_SET_STRING
-          MessageInterface::ShowMessage("\nSpacecraft::SetStringParamter()..."
-             "\n   Before change, Anomaly info -> a: %f, e: %f, %s: %f\n",
-             trueAnomaly.GetSMA(),trueAnomaly.GetECC(),trueAnomaly.GetTypeString().c_str(),
-             trueAnomaly.GetValue());
+//          MessageInterface::ShowMessage("\nSpacecraft::SetStringParamter()..."
+//             "\n   Before change, Anomaly info -> a: %f, e: %f, %s: %f\n",
+//             trueAnomaly.GetSMA(),trueAnomaly.GetECC(),trueAnomaly.GetTypeString().c_str(),
+//             trueAnomaly.GetValue());
       #endif
 
       //trueAnomaly.SetType(value);
@@ -2717,14 +2726,14 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       UpdateElementLabels();
 
       #ifdef DEBUG_SC_SET_STRING
-          MessageInterface::ShowMessage(
-             "\n   After change, Anomaly info -> a: %lf, e: %lf, %s: %lf\n",
-             trueAnomaly.GetSMA(), trueAnomaly.GetECC(), trueAnomaly.GetTypeString().c_str(),
-             trueAnomaly.GetValue());
+//          MessageInterface::ShowMessage(
+//             "\n   After change, Anomaly info -> a: %lf, e: %lf, %s: %lf\n",
+//             trueAnomaly.GetSMA(), trueAnomaly.GetECC(), trueAnomaly.GetTypeString().c_str(),
+//             trueAnomaly.GetValue());
       #endif
       if ((stateType == "Keplerian") ||
           (stateType == "ModifiedKeplerian"))
-         rvState[5] = trueAnomaly.GetValue();   // @todo: add state[5]?
+         rvState[5] = trueAnomaly;
    }
    else if (id == COORD_SYS_ID)
    {
@@ -3203,13 +3212,7 @@ bool Spacecraft::TakeAction(const std::string &action,
 
    if (action == "ApplyCoordinateSystem")
    {
-      #ifdef DEBUG_SPACECRAFT_CS
-      MessageInterface::ShowMessage
-         ("Spacecraft::TakeAction(ApplyCoordinateSystem) Calling StateConverter::SetMu(%p)\n",
-          coordinateSystem);
-      #endif
-
-      if (!stateConverter.SetMu(coordinateSystem))
+      if (!coordinateSystem)
       {
          throw SpaceObjectException(
             "\nError:  Spacecraft has empty coordinate system\n");
@@ -3383,7 +3386,7 @@ bool Spacecraft::Initialize()
 
    // Set the mu if CelestialBody is there through coordinate system's origin;
    // Otherwise, discontinue process and send the error message
-   if (!stateConverter.SetMu(coordinateSystem))
+   if (!coordinateSystem)
    {
       throw SpaceObjectException("Spacecraft has empty coordinate system");
    }
@@ -3624,19 +3627,19 @@ void Spacecraft::SetState(const std::string &type, const Rvector6 &cartState)
 
 
 //------------------------------------------------------------------------------
-// void Spacecraft::SetAnomaly(const std::string &type, const Anomaly &ta)
+// void Spacecraft::SetAnomaly(const std::string &type, Real ta)
 //------------------------------------------------------------------------------
 /*
- * Sets anomaly type and input true anomaly to internal true anomaly
+ * Sets anomaly type and input true anomaly value
  *
  * @param  type  Anomaly type ("TA", "MA", "EA, "HA" or full name like "True Anomaly")
  * @param  ta    True anomaly to set as internal true anomaly
  */
 //------------------------------------------------------------------------------
-void Spacecraft::SetAnomaly(const std::string &type, const Anomaly &ta)
+void Spacecraft::SetAnomaly(const std::string &type, Real ta)
 {
    trueAnomaly = ta;
-   anomalyType = Anomaly::GetTypeString(type); // why call a static here?? - wcs
+   anomalyType = StateConversionUtil::GetAnomalyShortText(type);
    // wcs 2007.05.18 - don't assume - only set the label if it's appropriate
    if (displayStateType == "Keplerian" || displayStateType == "ModifiedKeplerian")
    stateElementLabel[5] = anomalyType;     // this assumes current display type is Keplerian/ModKep??
@@ -4592,7 +4595,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 
    #ifdef DEBUG_WRITE_PARAMETERS
    MessageInterface::ShowMessage
-      ("   trueAnomaly=%s\n", trueAnomaly.ToString().c_str());
+      ("   anomalyType=%s\n", anomalyType.c_str());
    MessageInterface::ShowMessage
       ("   stateType=%s, repState=%s\n", stateType.c_str(),
        repState.ToString().c_str());
@@ -4937,11 +4940,10 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
    {
       #ifdef DEBUG_STATE_INTERFACE
          MessageInterface::ShowMessage(
-            "Spacecraft::GetStateInRepresentation(string): type is %s, so calling stateConverter to convert\n",
+            "Spacecraft::GetStateInRepresentation(string): type is %s, so calling StateConversionUtil to convert\n",
             rep.c_str());
       #endif
-      //finalState = stateConverter.Convert(csState, "Cartesian", rep, trueAnomaly);
-      finalState = stateConverter.Convert(csState, "Cartesian", rep, anomalyType);
+      finalState = StateConversionUtil::Convert(originMu, csState, "Cartesian", rep, anomalyType);
    }
 
    #ifdef DEBUG_STATE_INTERFACE
@@ -4991,8 +4993,8 @@ Rvector6 Spacecraft::GetStateInRepresentation(Integer rep)
       finalState = csState;
    else
    {
-      finalState = stateConverter.Convert(csState, "Cartesian",
-                   representations[rep], anomalyType); //trueAnomaly);
+      finalState = StateConversionUtil::Convert(originMu, csState, "Cartesian",
+                   representations[rep], anomalyType);
    }
 
    #ifdef DEBUG_STATE_INTERFACE
@@ -5032,9 +5034,9 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
    {
       #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage
-         ("   rep is not Cartesian, so calling stateConverter.Convert()\n");
+         ("   rep is not Cartesian, so calling StateConversionUtil::Convert()\n");
       #endif
-      csState = stateConverter.Convert(st, rep, "Cartesian", anomalyType);
+      csState = StateConversionUtil::Convert(originMu, st, rep, "Cartesian", anomalyType);
    }
 
    #ifdef DEBUG_STATE_INTERFACE
@@ -5115,11 +5117,13 @@ Real Spacecraft::GetElement(const std::string &label)
    if (label == "TA" || label == "EA" ||
        label == "MA" || label == "HA")
    {
-      Anomaly tmpAnomaly;
-      tmpAnomaly.SetSMA(stateInRep[0]);
-      tmpAnomaly.SetECC(stateInRep[1]);
-      tmpAnomaly.SetValue(stateInRep[5]);
-      return tmpAnomaly.GetValue(label);
+//      Anomaly tmpAnomaly;
+//      tmpAnomaly.SetSMA(stateInRep[0]);
+//      tmpAnomaly.SetECC(stateInRep[1]);
+//      tmpAnomaly.SetValue(stateInRep[5]);
+//      return tmpAnomaly.GetValue(label);
+      Real ta = StateConversionUtil::ConvertToTrueAnomaly(anomalyType, stateInRep[5], stateInRep[1]);
+      return StateConversionUtil::ConvertFromTrueAnomaly(label, ta, stateInRep[1]);
    }
    else
    {
@@ -5168,9 +5172,10 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
       {
          // Load trueAnomaly with the state data
          Rvector6 kep = GetStateInRepresentation("Keplerian");
-         trueAnomaly.SetSMA(kep[0]);
-         trueAnomaly.SetECC(kep[1]);
-         trueAnomaly.SetValue(kep[5]);
+//         trueAnomaly.SetSMA(kep[0]);
+//         trueAnomaly.SetECC(kep[1]);
+//         trueAnomaly.SetValue(kep[5]);
+         trueAnomaly = kep[5];
       }
       // 2007.05.24 - wcs - Bug 875 - because some elements are the same for
       // Keplerian and ModifiedKeplerian, make sure it only changes when it should
@@ -5250,8 +5255,9 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
       throw se;
    }
 
-   if ((id == 5) && (!trueAnomaly.IsInvalid(label)))
-      trueAnomaly.SetType(label);
+   if ((id == 5) && (StateConversionUtil::IsValidAnomalyType(label)))
+//      trueAnomaly.SetType(label);
+      anomalyType = label;  // is this right?
 
    if (id >= 0)
    {
@@ -5356,7 +5362,7 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
             label == "PNX" || label == "EquinoctialQ")
       retval = ELEMENT5_ID;
 
-   else if (label == "VZ" || !trueAnomaly.IsInvalid(label) ||
+   else if (label == "VZ" || StateConversionUtil::IsValidAnomalyType(label) ||
         label == "FPA" || label == "DECV" || label == "MLONG")
       retval = ELEMENT6_ID;
 

@@ -22,13 +22,13 @@
 #include "CelestialBody.hpp"
 #include "Rmatrix.hpp"
 #include "Planet.hpp"
-#include "CoordUtil.hpp"
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "RealUtilities.hpp"
 #include "SolarSystemException.hpp"
 #include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
+#include "StateConversionUtil.hpp"
 #include "AngleUtil.hpp"
 #include "StringUtil.hpp"
 
@@ -359,9 +359,8 @@ bool Planet::SetTwoBodyElements(const Rvector6 &kepl)
                                     + instanceName);
       Real     ma;
       Real     totalMu = mu + theCentralBody->GetGravitationalConstant();
-      Rvector6 cart    = - (CoordUtil::KeplerianToCartesian(kepl,
-                            totalMu, CoordUtil::TA)); 
-      Rvector6 sunKepl = CoordUtil::CartesianToKeplerian(cart, totalMu, &ma);
+      Rvector6 cart    = - (StateConversionUtil::KeplerianToCartesian(totalMu, kepl, "TA"));
+      Rvector6 sunKepl = StateConversionUtil::CartesianToKeplerian(totalMu, cart, &ma);
 
       #ifdef DEBUG_PLANET_TWO_BODY
          MessageInterface::ShowMessage(

@@ -35,11 +35,11 @@ ifeq ($(LINUX_MAC), 1)
 
 ifdef MAC_SPECIFIC
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) -lcspice -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
+SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared -Wl -L$(SPICE_LIB_DIR) -lcspice
+SHARED_LIB_FLAGS = -shared -Wl -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 endif
 
@@ -116,7 +116,7 @@ archclean :
 	rm -rf obj/*
 	rm -rf $(BASETARGET)
 	rm -rf ../matlab/gmat_mex/src/*.o
-#   rm -rf $(GMAT_BIN_DIR)/$(BASE_LIB_NAME) # make doesn't like this line
+	if [ -d ../../application/$(GMAT_BIN_DIR) ]; then rm -rf ../../application/$(GMAT_BIN_DIR)/$(BASE_LIB_NAME); fi;
 
 HEADERS = -Iinclude \
           -Ifoundation \
@@ -487,9 +487,7 @@ OBJECTS = \
     spacecraft/Formation.o \
     spacecraft/Spacecraft.o \
     spacecraft/SpaceObject.o \
-    spacecraft/StateConverter.o \
     spacecraft/TextTrajectoryFile.o \
-    spacecraft/TimeConverter.o \
     stopcond/StopCondition.o \
     subscriber/EphemerisFile.o \
     subscriber/MessageWindow.o \
@@ -504,13 +502,11 @@ OBJECTS = \
     util/A1Date.o \
     util/A1Mjd.o \
     util/AngleUtil.o \
-    util/Anomaly.o \
     util/AttitudeUtil.o \
     util/BaseException.o \
     util/BodyFixedStateConverter.o \
     util/Cartesian.o \
     util/CalculationUtilities.o \
-    util/CoordUtil.o \
     util/Date.o \
     util/DateUtil.o \
     util/ElapsedTime.o \
@@ -521,14 +517,12 @@ OBJECTS = \
     util/GmatGlobal.o \
     util/GravityFile.o \
     util/GregorianDate.o \
-    util/Keplerian.o \
     util/LatLonHgt.o \
     util/LeapSecsFileReader.o \
     util/Linear.o \
     util/MemoryTracker.o \
     util/MessageInterface.o \
     util/MessageReceiver.o \
-    util/ModKeplerian.o \
     util/OrbitDesignerTime.o \
     util/RealUtilities.o \
     util/RepeatGroundTrack.o \
@@ -540,6 +534,7 @@ OBJECTS = \
     util/Rvector3.o \
     util/Rvector6.o \
     util/Rvector.o \
+    util/StateConversionUtil.o \
     util/StringTokenizer.o \
     util/StringUtil.o \
     util/SunSync.o \
@@ -551,7 +546,13 @@ OBJECTS = \
     $(TCPIP_OBJECTS) \
     $(SPICE_OBJECTS)
 #    solarsys/BodyDataReader.o \
+#    spacecraft/TimeConverter.o \
 #    interface/SocketServer.o \
+#    util/Keplerian.o \
+#    util/CoordUtil.o \
+#    util/ModKeplerian.o \
+#    util/Anomaly.o \
+#    spacecraft/StateConverter.o \
 
 #    parameter/OrbitAMatrixParameters.o \
 #    forcemodel/harmonic/EarthTide.o \

@@ -31,7 +31,7 @@
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
-#include "StateConverter.hpp"
+//#include "StateConverter.hpp"
 
 class GMAT_API OrbitData : public RefData
 {
@@ -117,7 +117,7 @@ protected:
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mOutCoordSystem;
    
-   StateConverter   stateConverter;
+//   StateConverter   stateConverter;
 
    bool        firstTimeEpochWarning;
 
