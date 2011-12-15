@@ -1185,7 +1185,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    
    // Draw object orbit line based on points
    if ((mTime[i] > mTime[i-1]) ||
-       (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop
+       ((i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2])) //for backprop
    {
       index1 = objId * MAX_DATA * 3 + (i-1) * 3;
       index2 = objId * MAX_DATA * 3 + i * 3;
