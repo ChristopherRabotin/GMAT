@@ -95,6 +95,8 @@ protected:
 
    /// Central body string used by SPK (needed because of Luna/Moon names)
    std::string spkCentralBody;
+   /// NAIF ID for the central body
+   Integer     spkCentralBodyNaifId;
 
    SpiceOrbitKernelReader *skr;
 

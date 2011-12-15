@@ -28,7 +28,6 @@
 #include <iomanip>
 #include "gmatdefs.hpp"
 #include "SpacePoint.hpp"
-#include "CoordUtil.hpp"                // for conversion to/from Cartesian
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
 #include "SolarSystem.hpp"
@@ -50,7 +49,7 @@
 #include "TimeTypes.hpp"
 #include "AngleUtil.hpp"
 #include "TimeTypes.hpp"
-#include "TimeSystemConverter.hpp"
+#include "StateConversionUtil.hpp"
 #include "StringUtil.hpp"           // for ToString()
 #include "GravityFile.hpp"          // for GetFileInfo()
 
@@ -758,7 +757,7 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
       {
          #ifdef __USE_SPICE__
          if (!spiceSetupDone) SetUpSPICE();
-         Rvector6 spiceState = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName);
+         Rvector6 spiceState = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName, naifIdObserver);
          state.Set(spiceState[0], spiceState[1], spiceState[2],
                    spiceState[3], spiceState[4], spiceState[5]);
          #else
@@ -844,7 +843,6 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
          {
             throw PlanetaryEphemException(
                   "DE 405 file requested, but no file specified");
-//                 "SLP or DE file requested, but no file specified");
          }
          #ifdef DEBUG_GET_STATE
          MessageInterface::ShowMessage
@@ -857,8 +855,7 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
       case Gmat::SPICE :
       #ifdef __USE_SPICE__
          if (!spiceSetupDone) SetUpSPICE();
-//         state = kernelReader->GetTargetState(instanceName, naifId, atTime, j2000BodyName);
-         state = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName);
+         state = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName, naifIdObserver);
          for (Integer i=0;i<6;i++) outState[i] = state[i];
       #endif
          break;
@@ -3998,7 +3995,7 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    if ((!newTwoBody) && 
        (Abs(forTime.Subtract(prevTwoBodyEpoch) * GmatTimeConstants::SECS_PER_DAY) <= KEPLER_TOL))
       return prevTwoBodyState;
-   cart  = CoordUtil::KeplerianToCartesian(twoBodyKepler, cbMu, CoordUtil::TA);  // or MA???
+   cart  = StateConversionUtil::KeplerianToCartesian(cbMu, twoBodyKepler, "TA");  // or MA???
    dTime = forTime.Subtract(twoBodyEpoch) * GmatTimeConstants::SECS_PER_DAY;
    #ifdef DEBUG_TWO_BODY
       MessageInterface::ShowMessage("cbMu = %12.14f    dTime = %12.14f\n", cbMu, dTime);
@@ -4227,10 +4224,10 @@ bool CelestialBody::SetUpSPICE()
          }
       }
    }
-   #ifdef DEBUG_CB_SPICE
-      MessageInterface::ShowMessage("   now loading main SPK kernel ...\n");
-   #endif
-   // make sure the "main" Solar System Kernel(s) are loaded first
+//   #ifdef DEBUG_CB_SPICE
+//      MessageInterface::ShowMessage("   now loading main SPK kernel ...\n");
+//   #endif
+   // make sure the "main" Solar System Kernel(s) are loaded first - DONE in SolarSystem
    theSolarSystem->LoadSpiceKernels();
    // now load the spice kernels specified for this body
    for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
@@ -4327,6 +4324,7 @@ bool CelestialBody::SetUpSPICE()
          MessageInterface::PopupMessage(Gmat::WARNING_, ss.str());
       }
       naifId    = spiceNaifId;
+      naifIdObserver = kernelReader->GetNaifID(j2000BodyName, false);
       naifIdSet = true;
    }
    #ifdef DEBUG_CB_SPICE

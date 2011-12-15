@@ -215,6 +215,8 @@ protected:
    Integer         naifId;
    /// NAIF Id for the body/spacecraft reference frame
    Integer         naifIdRefFrame;
+   /// NAIF Id for the observer
+   Integer         naifIdObserver;
 
    // saved default values
    std::string     default_j2000BodyName;

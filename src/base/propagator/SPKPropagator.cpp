@@ -66,9 +66,10 @@ SPKPropagator::SPKPropagator(const std::string &name) :
 {
    // GmatBase data
   objectTypeNames.push_back("SPK");
-  parameterCount = SPKPropagatorParamCount;
+  parameterCount       = SPKPropagatorParamCount;
 
-  spkCentralBody = centralBody;
+  spkCentralBody       = centralBody;
+  spkCentralBodyNaifId = SpiceInterface::DEFAULT_NAIF_ID;
 }
 
 
@@ -103,6 +104,7 @@ SPKPropagator::~SPKPropagator()
 SPKPropagator::SPKPropagator(const SPKPropagator & spk) :
    EphemerisPropagator        (spk),
    spkCentralBody             (spk.spkCentralBody),
+   spkCentralBodyNaifId       (spk.spkCentralBodyNaifId),
    skr                        (NULL)
 {
 }
@@ -125,8 +127,9 @@ SPKPropagator & SPKPropagator::operator =(const SPKPropagator & spk)
    {
       EphemerisPropagator::operator=(spk);
 
-      skr = NULL;
-      spkCentralBody = spk.spkCentralBody;
+      skr                  = NULL;
+      spkCentralBody       = spk.spkCentralBody;
+      spkCentralBodyNaifId = spk.spkCentralBodyNaifId;
    }
 
    return *this;
@@ -578,6 +581,8 @@ bool SPKPropagator::Initialize()
       if (skr == NULL)
          skr = new SpiceOrbitKernelReader;
 
+      spkCentralBodyNaifId = skr->GetNaifID(spkCentralBody);
+
       stepTaken = 0.0;
       j2ET = j2000_c();   // CSPICE method to return Julian date of J2000 (TDB)
 
@@ -674,7 +679,7 @@ bool SPKPropagator::Initialize()
                            spkCentralBody.c_str());
                   #endif
                   outState = skr->GetTargetState(scName, id, currentEpoch,
-                        spkCentralBody);
+                        spkCentralBody, spkCentralBodyNaifId);
 
                   std::memcpy(state, outState.GetDataVector(),
                         dimension*sizeof(Real));
@@ -767,7 +772,7 @@ bool SPKPropagator::Step()
             }
 
             outState = skr->GetTargetState(scName, id, currentEpoch,
-                  spkCentralBody);
+                  spkCentralBody, spkCentralBodyNaifId);
 
             /**
              *  @todo: When SPKProp can evolve more than one spacecraft, these
@@ -892,7 +897,7 @@ void SPKPropagator::UpdateState()
             }
 
             outState = skr->GetTargetState(scName, id, currentEpoch,
-                  spkCentralBody);
+                  spkCentralBody, spkCentralBodyNaifId);
 
             /**
              *  @todo: When SPKProp can evolve more than one spacecraft, this
