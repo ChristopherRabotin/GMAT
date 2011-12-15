@@ -10,8 +10,9 @@
 # ------> FLAGS USED TO CONTROL THE BUILD
 # *** EDIT THIS *** - Flags used to control the build
 # 1 = 64-bit, 0 = 32-bit - BUT set this only if it is not set in the main project Makefile
+#                          OR you are building the GmatConsole separately
 ifndef BUILD_64BIT
-BUILD_64BIT = 1
+BUILD_64BIT = 0
 endif   
  
 USE_SPICE = 1
@@ -39,6 +40,8 @@ WX_VERSION = 2_8_12
 # *** EDIT THIS *** - this is where you installed the version of CSPICE that you're using ...
 ifeq ($(USE_SPICE), 1)
 SPICE_DIR = /Applications/CSPICE_N0064
+# 0 -> use cpspice.a, 1 -> use libcspice.dylib in bin directory
+SPICE_USE_DYLIB = 0
 else
 SPICE_DIR =
 endif
@@ -100,8 +103,11 @@ SHARED_BASE = 1
 ifeq ($(USE_SPICE), 1)
 SPICE_INCLUDE = -I$(SPICE_DIR)/$(CSPICE_VER)/include
 SPICE_LIB_DIR = $(SPICE_DIR)/$(CSPICE_VER)/lib
-#SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
+ifeq ($(SPICE_USE_DYLIB), 1)
 SPICE_LIBRARIES = -lcspice
+else
+SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
+endif
 SPICE_DIRECTIVE = -D__USE_SPICE__
 SPICE_STACKSIZE = ulimit -s 61440
 else
