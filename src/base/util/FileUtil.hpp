@@ -31,7 +31,9 @@ namespace GmatFileUtil
    static Real CompareAbsTol = 1.0e-4;
    
    std::string GMAT_API GetPathSeparator();
-   std::string GMAT_API GetCurrentPath();
+   std::string GMAT_API GetWorkingDirectory();
+   bool        GMAT_API SetWorkingDirectory(const std::string &newDir);
+   std::string GMAT_API GetApplicationPath();
    std::string GMAT_API ParseFirstPathName(const std::string &fullPath, bool appendSep = true);
    std::string GMAT_API ParsePathName(const std::string &fullPath, bool appendSep = true);
    std::string GMAT_API ParseFileName(const std::string &fullPath, bool removeExt = false);

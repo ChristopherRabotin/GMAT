@@ -22,7 +22,7 @@
 #include "GmatFunction.hpp"
 #include "Assignment.hpp"        // for Assignment::GetMathTree()
 #include "FileManager.hpp"       // for GetGmatFunctionPath()
-#include "FileUtil.hpp"          // for ParseFileName()
+#include "FileUtil.hpp"          // for ParseFileName(), GetWorkingDirectory()
 #include "StringUtil.hpp"        // for Trim()
 #include "CommandUtil.hpp"       // for ClearCommandSeq()
 #include "HardwareException.hpp" 
@@ -769,7 +769,7 @@ bool GmatFunction::SetStringParameter(const Integer id, const std::string &value
          std::string temp = GmatStringUtil::Trim(value);
          if (temp[0] == '.')
          {
-            std::string currPath = fm->GetCurrentPath();
+            std::string currPath = fm->GetWorkingDirectory();
             
             #ifdef DEBUG_FUNCTION_SET
             MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());

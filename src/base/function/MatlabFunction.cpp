@@ -20,8 +20,8 @@
 //------------------------------------------------------------------------------
 
 #include "MatlabFunction.hpp"
-#include "FileManager.hpp"       // for GetCurrentPath()
-#include "FileUtil.hpp"          // for ParseFileName()
+#include "FileManager.hpp"       // for GetMatlabFunctionPath()
+#include "FileUtil.hpp"          // for ParseFileName(), GetWorkingDirectory()
 #include "StringUtil.hpp"        // for Trim()
 #include "MessageInterface.hpp"
 
@@ -192,7 +192,7 @@ bool MatlabFunction::SetStringParameter(const Integer id, const std::string &val
          if (temp[0] == '.')
          {
             FileManager *fm = FileManager::Instance();
-            std::string currPath = fm->GetCurrentPath();
+            std::string currPath = fm->GetWorkingDirectory();
             
             #ifdef DEBUG_FUNCTION_SET
             MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());

@@ -35,6 +35,7 @@
 
 #ifdef __WIN32__
 #include <windows.h>
+#include <direct.h>
 #endif
 
 
@@ -74,7 +75,71 @@ std::string GmatFileUtil::GetPathSeparator()
 
 
 //------------------------------------------------------------------------------
-// std::string GetCurrentPath()
+// std::string GetWorkingDirectory()
+//------------------------------------------------------------------------------
+/*
+ * @return  The current working directory, generally the application path.
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetWorkingDirectory()
+{
+   std::string currDir;
+   
+#ifdef _MSC_VER  // if Microsoft Visual C++
+   char buffer[GmatFile::MAX_PATH_LEN];
+   
+   //if (_getcwd(buffer, sizeof(buffer) / sizeof(TCHAR)))
+   if (GetCurrentDirectory(GmatFile::MAX_PATH_LEN, buffer) > 0)
+      currDir = buffer;
+   else
+      MessageInterface::ShowMessage
+         ("*** WARNING *** GmatFileUtil::GetWorkingDirectory() \n"
+          "Cannot get current directory, so jsut returning empty directory\n");
+   
+#else
+   
+   char buffer[GmatFile::MAX_PATH_LEN];
+   // Intentionally get the return and then ignore it to move warning from
+   // system libraries to GMAT code base.  The "unused variable" warning
+   // here can be safely ignored.
+   // char *ch = getcwd(buffer, GmatFile::MAX_PATH_LEN);
+   // This clears a warning message
+   if (getcwd(buffer, GmatFile::MAX_PATH_LEN) != buffer)
+      ;
+   currDir = buffer;
+#endif
+   
+   return currDir;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetWorkingDirectory(const std::string &newDir)
+//------------------------------------------------------------------------------
+/*
+ * Sets current working directory to newDir
+ *
+ * @return  true if current working is successfully set to newDir, flase otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::SetWorkingDirectory(const std::string &newDir)
+{
+#ifdef _MSC_VER  // if Microsoft Visual C++
+   if (SetCurrentDirectory(newDir.c_str()) > 0)
+      return true;
+   else
+      return false;
+#else
+   if (chdir(newDir.c_str()) == -1)
+      return false;
+   else
+      return true;
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetApplicationPath()
 //------------------------------------------------------------------------------
 /*
  * Note: This function calls getcwd() which is defined in <dirent>. There is a
@@ -85,28 +150,37 @@ std::string GmatFileUtil::GetPathSeparator()
  *
  */
 //------------------------------------------------------------------------------
-std::string GmatFileUtil::GetCurrentPath()
+std::string GmatFileUtil::GetApplicationPath()
 {
-   std::string currPath;
+#ifdef __WIN32__
    
-#ifndef _MSC_VER  // if not Microsoft Visual C++
+   std::string appPath;
    char buffer[GmatFile::MAX_PATH_LEN];
-   // Intentionally get the return and then ignore it to move warning from
-   // system libraries to GMAT code base.  The "unused variable" warning
-   // here can be safely ignored.
-//   char *ch = getcwd(buffer, GmatFile::MAX_PATH_LEN);
-   // This clears a warning message
-   if (getcwd(buffer, GmatFile::MAX_PATH_LEN) != buffer)
-      ;
-   currPath = buffer;
+   int bytes = GetModuleFileName(NULL, buffer, GmatFile::MAX_PATH_LEN);
+   if (bytes > 0)
+      appPath = buffer;
+   
+   return appPath;
+   
+#elif __LINUX__
+
+   //@todo Test this on Linux
+   std::string appPath;
+   char buffer[GmatFile::MAX_PATH_LEN];
+   char szTmp[32];
+   sprintf(szTmp, "/proc/%d/exe", getpid());
+   int bytes = MIN(readlink(szTmp, buffer, GmatFile::MAX_PATH_LEN),
+                   GmatFile::MAX_PATH_LEN - 1);
+   if(bytes >= 0)
+   {
+      buffer[bytes] = '\0';
+      appPath = buffer;
+   }
+   return appPath;
+
 #else
-   MessageInterface::ShowMessage
-      ("*** WARNING *** GmatFileUtil::GetCurrentPath() \n"
-       "Cannot compile getcwd() with MSVC, so jsut returning empty path\n");
+   //@todo Implement this for Mac
 #endif
-   
-   return currPath;
-   
 }
 
 
@@ -396,7 +470,18 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool blankIsO
    MessageInterface::ShowMessage("   ==> dirName='%s'\n", dirName.c_str());
    #endif
    
-#ifndef _MSC_VER  // if not Microsoft Visual C++
+#ifdef _MSC_VER  // if Microsoft Visual C++
+
+   TCHAR currDir[GmatFile::MAX_PATH_LEN];
+   // Save current directory
+   DWORD ret = GetCurrentDirectory(GmatFile::MAX_PATH_LEN, currDir);
+   // Try setting to requested direcotry
+   dirExist = (SetCurrentDirectory(dirName.c_str()) == 0 ? false : true);
+   // Set back to current directory
+   SetCurrentDirectory(currDir);
+
+#else
+   
    DIR *dir = NULL;
    dir = opendir(dirName.c_str());
    
@@ -405,15 +490,6 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool blankIsO
       dirExist = true; 
       closedir(dir);
    }
-#else
-   TCHAR currDir[BUFFER_SIZE];
-   
-   // Save current directory
-   DWORD ret = GetCurrentDirectory(BUFFER_SIZE, currDir);
-   // Try setting to requested direcotry
-   dirExist = (SetCurrentDirectory(dirName.c_str()) == 0 ? false : true);
-   // Set back to current directory
-   SetCurrentDirectory(currDir);
 #endif
    
    #ifdef DEBUG_DIR_EXIST
