@@ -142,17 +142,13 @@ bool GmatFileUtil::SetWorkingDirectory(const std::string &newDir)
 // std::string GetApplicationPath()
 //------------------------------------------------------------------------------
 /*
- * Note: This function calls getcwd() which is defined in <dirent>. There is a
- *       problem compling with VC++ compiler, so until it is resolved, it will
- *       always return blank if it is compiled with VC++ compiler.
- *
- * @return  The current working directory, generally the application path.
+ * @return  The application full path.
  *
  */
 //------------------------------------------------------------------------------
 std::string GmatFileUtil::GetApplicationPath()
 {
-#ifdef __WIN32__
+#if defined (__WIN32__) || defined(_MSC_VER)
    
    std::string appPath;
    char buffer[GmatFile::MAX_PATH_LEN];
@@ -178,8 +174,19 @@ std::string GmatFileUtil::GetApplicationPath()
    }
    return appPath;
 
+#elif __MAC__
+   //@todo Implement this for Mac
+   MessageInterface::ShowMessage
+      ("**** GmatFileUtil::GetApplicationPath() needs implementation for Mac, "
+       "so just returing empty string\n");
+   return "";
+
 #else
    //@todo Implement this for Mac
+   MessageInterface::ShowMessage
+      ("**** GmatFileUtil::GetApplicationPath() reached for unknown platform, "
+       "so just returing empty string\n");
+   return "";
 #endif
 }
 
