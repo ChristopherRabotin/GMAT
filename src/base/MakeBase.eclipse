@@ -483,7 +483,6 @@ OBJECTS = \
     solver/Gradient.o \
     solver/Jacobian.o \
     solver/LineSearch.o \
-    spacecraft/Converter.o \
     spacecraft/Formation.o \
     spacecraft/Spacecraft.o \
     spacecraft/SpaceObject.o \
@@ -505,7 +504,6 @@ OBJECTS = \
     util/AttitudeUtil.o \
     util/BaseException.o \
     util/BodyFixedStateConverter.o \
-    util/Cartesian.o \
     util/CalculationUtilities.o \
     util/Date.o \
     util/DateUtil.o \
@@ -553,6 +551,8 @@ OBJECTS = \
 #    util/ModKeplerian.o \
 #    util/Anomaly.o \
 #    spacecraft/StateConverter.o \
+#    spacecraft/Converter.o \
+#    util/Cartesian.o \
 
 #    parameter/OrbitAMatrixParameters.o \
 #    forcemodel/harmonic/EarthTide.o \
