@@ -1123,7 +1123,7 @@ bool FminconOptimizer::OpenConnection()
    // Get current path and cd (LOJ: 2010.08.11)
    std::string evalStr;
    std::string resStr;
-   std::string currPath = FileManager::Instance()->GetCurrentPath();
+   std::string currPath = FileManager::Instance()->GetWorkingDirectory();
 
    // Shoud I cd to current path before adding relative path?
    RunCdCommand(currPath);
