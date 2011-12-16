@@ -183,7 +183,8 @@ bool Validator::StartMatlabServer(GmatCommand *cmd)
 
 
 //------------------------------------------------------------------------------
-// bool CheckUndefinedReference(GmatBase *obj, bool contOnError)
+// bool CheckUndefinedReference(GmatBase *obj, bool contOnError,
+//       bool includeOwnedObjects)
 //------------------------------------------------------------------------------
 /*
  * This method checks if reference objects of given object exist. First it
@@ -192,13 +193,25 @@ bool Validator::StartMatlabServer(GmatCommand *cmd)
  * If reference object type is Parameter, it checks if owner object of that
  * Parameter exist; otherwise, it only check for the reference object name exist.
  *
+ * The includeOwnedObjects flag is used to indicate that the reference object
+ * can be of a different type from the requested type as long as it has an
+ * owned object of the type needed.  This allows objects that interact with the
+ * owned members to be validated.
+ *
+ * An example of a command that uses this capability is the Toggle command,
+ * which can turn on and off owned plots and reports in objects that are not
+ * Subscribers as long as they have the needed Subscriber members.
+ *
  * @param  obj  input object of undefined reference object to be checked
- * @param <contOnError> flag indicating whether or not to continue on error (true)
+ * @param contOnError flag indicating whether or not to continue on error (true)
+ * @param includeOwnedObjects flag used to indicate that owned objects of a
+ *        desired type are acceptable substitutes
  *
  * @return true if no undefined references found, false otherwise
  */
 //------------------------------------------------------------------------------
-bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
+bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
+      bool includeOwnedObjects*/)
 {
    if (obj == NULL)
       return false;
@@ -214,12 +227,17 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
    theErrorList.clear();
    bool retval = true;
    ObjectTypeArray refTypes = obj->GetRefObjectTypeArray();
+   bool includeOwnedObjects = obj->IncludeOwnedObjectsInValidation();
    StringArray refNames;
    
    #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
       ("Validator::CheckUndefinedReference() type='%s', name='%s', refTypes.size()=%d\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str(), refTypes.size());
+   MessageInterface::ShowMessage
+      ("   %s %s owned objects as surrogates\n",
+       obj->GetTypeName().c_str(), (includeOwnedObjects ? "allows" :
+       "does not allow"));
    #endif
    
    // Save command can have any object type, so handle it first
@@ -325,9 +343,31 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
                       GmatBase::GetObjectTypeString(refTypes[i]).c_str());
                   #endif
                   
-                  theErrorMsg = "\"" + refNames[j] + "\" referenced in the " + objName +
-                     " is not an object of " + GmatBase::GetObjectTypeString(refTypes[i]);
-                  retval = HandleError() && retval;
+                  if (includeOwnedObjects)
+                  {
+                     bool passes = false;
+                     Integer count = refObj->GetOwnedObjectCount();
+                     for (Integer k = 0; k < count; ++k)
+                     {
+                        if (refObj->GetOwnedObject(k)->IsOfType(refTypes[i]))
+                           passes = true;
+                     }
+                     if (passes == false)
+                     {
+                        theErrorMsg = "\"" + refNames[j] +
+                           "\" referenced in the " + objName + " is not an "
+                           "object of type " +
+                           GmatBase::GetObjectTypeString(refTypes[i]) +
+                           " and does not reference such objects";
+                        retval = HandleError() && retval;
+                     }
+                  }
+                  else
+                  {
+                     theErrorMsg = "\"" + refNames[j] + "\" referenced in the " + objName +
+                        " is not an object of " + GmatBase::GetObjectTypeString(refTypes[i]);
+                     retval = HandleError() && retval;
+                  }
                }
                else
                {

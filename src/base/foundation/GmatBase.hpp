@@ -140,6 +140,7 @@ public:
    virtual bool         IsOwnedObject(Integer id) const;
    virtual Integer      GetOwnedObjectCount();
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
+   virtual bool         IncludeOwnedObjectsInValidation();
    virtual bool         SetIsGlobal(bool globalFlag);
    virtual bool         GetIsGlobal() const;
 	virtual bool         IsAutomaticGlobal() const;

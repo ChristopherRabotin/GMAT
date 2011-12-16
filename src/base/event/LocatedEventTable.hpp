@@ -59,6 +59,7 @@ public:
    virtual bool         FlushData(bool endOfDataBlock = true);
    virtual bool         SetEndOfRun();
    virtual void         SetRunState(Gmat::RunState rs);
+   virtual void         Activate(bool state = true);
 
    void AddEvent(LocatedEvent *theEvent);
    void AddEvent(GmatEpoch epoch, std::string boundaryType, std::string eventType);
@@ -84,16 +85,22 @@ protected:
    bool associationsCurrent;
    /// List of the types of events
    StringArray eventTypesWithNames;
+
+   // Plot structures
    /// Plot of the event data
    OwnedPlot *thePlot;
    /// X Data for plotting
    std::map<std::string,RealArray> xData;
    /// Y Data for plotting
    std::map<std::string,RealArray> yData;
+
+   // Span management structures
    /// Solver state change boundary indices
    IntegerArray runStateChanges;
    /// Spacecraft state jumps
    IntegerArray scStateChanges;
+   /// Toggles in the list
+   IntegerArray toggleIndices;
 
    void BuildAssociations();
    void SortEvents();

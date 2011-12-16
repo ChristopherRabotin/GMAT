@@ -1081,6 +1081,12 @@ bool EventLocator::TakeAction(const std::string &action,
       return true;
    }
 
+   if (action == "CheckSubscribers")
+   {
+      isActive = eventTable.IsActive();
+      return true;
+   }
+
    return GmatBase::TakeAction(action, actionData);
 }
 

@@ -145,6 +145,7 @@ bool LocatedEventTable::FlushData(bool endOfDataBlock)
    return Subscriber::FlushData(endOfDataBlock);
 }
 
+
 bool LocatedEventTable::SetEndOfRun()
 {
    #ifdef DEBUG_PUBLISHER_CALLS
@@ -154,6 +155,7 @@ bool LocatedEventTable::SetEndOfRun()
    return Subscriber::SetEndOfRun();
 }
 
+
 void LocatedEventTable::SetRunState(Gmat::RunState rs)
 {
    #ifdef DEBUG_PUBLISHER_CALLS
@@ -162,6 +164,22 @@ void LocatedEventTable::SetRunState(Gmat::RunState rs)
 
    return Subscriber::SetRunState(rs);
 }
+
+void LocatedEventTable::Activate(bool state)
+{
+   Subscriber::Activate(state);
+
+   // Set a marker for activation if the state changed
+   if (isDataStateChanged)
+   {
+      #ifdef DEBUG_PUBLISHER_CALLS
+         MessageInterface::ShowMessage("Toggling event table state at "
+               "index %d\n", events.size());
+      #endif
+      toggleIndices.push_back(events.size());
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void AddEvent(LocatedEvent *theEvent)
@@ -180,8 +198,11 @@ void LocatedEventTable::AddEvent(LocatedEvent *theEvent)
             theEvent->epoch, (theEvent->isEntry ? "starter" : "closer"));
    #endif
 
-   events.push_back(theEvent);
-   associationsCurrent = false;
+   if (active)
+   {
+      events.push_back(theEvent);
+      associationsCurrent = false;
+   }
 }
 
 

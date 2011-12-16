@@ -50,7 +50,8 @@ public:
    void SetFunction(Function *func);
    
    bool StartMatlabServer(GmatCommand *cmd);
-   bool CheckUndefinedReference(GmatBase *obj, bool contOnError = true);
+   bool CheckUndefinedReference(GmatBase *obj, bool contOnError = true/*,
+         bool includeOwnedObjects = false*/);
    bool ValidateCommand(GmatCommand *cmd, bool contOnError = true,
                         Integer manage = 1);
    

@@ -168,46 +168,7 @@ bool Toggle::Initialize()
    #endif
       
    GmatCommand::Initialize();
-   
-   Subscriber *sub;
-   subs.clear();
-   
-   GmatBase *mapObj = NULL;
-   
-   for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s) 
-   {
-      if ((mapObj = FindObject(*s)) != NULL) 
-      {
-         sub = (Subscriber *)mapObj;
-         if (sub)
-         {
-            subs.push_back(sub);
-         }
-      }
-      else
-      {
-         MessageInterface::ShowMessage
-            ("Toggle command cannot find subscriber %s; command has no effect for that object\n",
-             s->c_str());
-      }
-   }
-   
-   //@todo Do we need this code? Ccommented out for now (LOJ: 2009.06.01)
-   //if (publisher == NULL)
-   //   publisher = Publisher::Instance();
-   //streamID = publisher->RegisterPublishedData(this, subNames, subNames);
-   
-   #ifdef DEBUG_TOGGLE_INIT
-   MessageInterface::ShowMessage("There are %d subscriber(s)\n", subs.size());
-   for (std::list<Subscriber *>::iterator s = subs.begin(); s != subs.end(); ++s)
-   {
-      MessageInterface::ShowMessage
-         ("   subscriber = <%p><%s>'%s'\n", *s,
-          (*s)->GetTypeName().c_str(), (*s)->GetName().c_str());
-   }
-   MessageInterface::ShowMessage("Toggle::Initialize() leaving\n");
-   #endif
-   
+   BuildSubscriberList();
    return true;
 }
 
@@ -232,48 +193,19 @@ bool Toggle::Execute()
          ("   Inside a function, so about to refresh subscriber pointers...\n");
       #endif
       
-      Subscriber *sub;
-      GmatBase *mapObj = NULL;
-      
-      // We need to refresh subscriber pointers here, since the CcsdsEphemerisFile
-      // is created and replaces old EphemerisFile in the object map (LOJ: 2010.09.30)
-      subs.clear();
-      for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s) 
-      {
-         if ((mapObj = FindObject(*s)) != NULL) 
-         {
-            sub = (Subscriber *)mapObj;
-            if (sub)
-            {
-               subs.push_back(sub);
-            }
-         }
-         else
-         {
-            MessageInterface::ShowMessage
-               ("Toggle command cannot find subscriber %s; command has no effect for that object\n",
-                s->c_str());
-         }
-      }
+      // We need to refresh subscriber pointers here, since the
+      // CcsdsEphemerisFile is created and replaces old EphemerisFile in the
+      // object map
+      BuildSubscriberList();
    }
-   
-   #ifdef DEBUG_TOGGLE_EXE
-   MessageInterface::ShowMessage("There are %d subscriber(s)\n", subs.size());
-   for (std::list<Subscriber *>::iterator s = subs.begin(); s != subs.end(); ++s)
-   {
-      MessageInterface::ShowMessage
-         ("   subscriber = <%p><%s>'%s'\n", *s,
-          (*s)->GetTypeName().c_str(), (*s)->GetName().c_str());
-   }
-   #endif
    
    for (std::list<Subscriber *>::iterator s = subs.begin(); s != subs.end(); ++s)
    {
       
       #ifdef DEBUG_TOGGLE_EXE
-      MessageInterface::ShowMessage
-         ("Toggle::Execute() calling %s->Activate(%s)\n", (*s)->GetName().c_str(),
-          toggleState ? "true" : "false");
+         MessageInterface::ShowMessage("Toggle::Execute() calling "
+               "%s->Activate(%s)\n", (*s)->GetName().c_str(),
+               (toggleState ? "true" : "false"));
       #endif
       
       (*s)->Activate(toggleState);
@@ -375,6 +307,25 @@ const StringArray& Toggle::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    // There are only subscribers, so ignore object type
    return subNames;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IncludeOwnedObjectsInValidation()
+//------------------------------------------------------------------------------
+/**
+ * Indicates if owned objects are acceptable proxies during validation.
+ *
+ * This method is used to indicate that an object accepts referenced objects
+ * that own a specified object type in addition to objects of that type.
+ *
+ * @return true, since owned objects are included in the type validation of a
+ *         script line for the Toggle command.
+ */
+//------------------------------------------------------------------------------
+bool Toggle::IncludeOwnedObjectsInValidation()
+{
+   return true;
 }
 
 
@@ -590,3 +541,83 @@ bool Toggle::SetStringParameter(const Integer id,
    return GmatCommand::SetStringParameter(id, value, index);
 }
 
+
+//------------------------------------------------------------------------------
+// Protected methods
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// void Toggle::BuildSubscriberList()
+//------------------------------------------------------------------------------
+/**
+ * Fills in the object array of subscribers
+ */
+//------------------------------------------------------------------------------
+void Toggle::BuildSubscriberList()
+{
+   Subscriber *sub;
+   subs.clear();
+   GmatBase *mapObj = NULL;
+
+   for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s)
+   {
+      if ((mapObj = FindObject(*s)) != NULL)
+      {
+         if (mapObj->IsOfType(Gmat::SUBSCRIBER))
+         {
+            sub = (Subscriber *)mapObj;
+            if (sub)
+            {
+               subs.push_back(sub);
+            }
+         }
+         else // Handle owned Subscribers
+         {
+            Integer count = mapObj->GetOwnedObjectCount();
+
+            if (count > 0)
+            {
+               for (Integer i = 0; i < count; ++i)
+               {
+                  GmatBase *oo = mapObj->GetOwnedObject(i);
+                  if (oo->IsOfType(Gmat::SUBSCRIBER))
+                  {
+                     sub = (Subscriber *)oo;
+                     subs.push_back(sub);
+                  }
+               }
+               // Tell owning object that subscriber may have changed state
+               mapObj->TakeAction("CheckSubscribers");
+            }
+            else
+               MessageInterface::ShowMessage("Toggle command cannot find "
+                     "any subscriber services for object %s\n", s->c_str());
+         }
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("Toggle command cannot find subscriber %s; command has no effect "
+                  "for that object\n", s->c_str());
+      }
+   }
+
+   //@todo Do we need this code? Commented out for now (LOJ: 2009.06.01)
+   //if (publisher == NULL)
+   //   publisher = Publisher::Instance();
+   //streamID = publisher->RegisterPublishedData(this, subNames, subNames);
+
+   #ifdef DEBUG_TOGGLE_INIT
+      MessageInterface::ShowMessage("There are %d subscriber(s)\n",
+            subs.size());
+      for (std::list<Subscriber *>::iterator s = subs.begin();
+            s != subs.end(); ++s)
+      {
+         MessageInterface::ShowMessage
+            ("   subscriber = <%p><%s>'%s'\n", *s,
+             (*s)->GetTypeName().c_str(), (*s)->GetName().c_str());
+      }
+      MessageInterface::ShowMessage("Toggle::Initialize() leaving\n");
+   #endif
+}

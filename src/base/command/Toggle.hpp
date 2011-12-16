@@ -51,6 +51,7 @@ public:
                        GetRefObjectTypeArray();
    virtual const StringArray&
                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool        IncludeOwnedObjectsInValidation();
    const std::string&  GetGeneratingString(Gmat::WriteMode mode,
                                            const std::string &prefix,
                                            const std::string &useName);
@@ -90,7 +91,9 @@ protected:
    /// Parameter ID for the subscriber names
    const Integer       subscriberID;
    /// Parameter ID for the toggle state
-   const Integer       toggleStateID; //loj: 10/20/04 added
+   const Integer       toggleStateID;
+
+   void BuildSubscriberList();
 };
 
 

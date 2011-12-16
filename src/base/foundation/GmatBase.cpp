@@ -864,6 +864,29 @@ GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
        typeName + "\"");
 }
 
+
+//------------------------------------------------------------------------------
+// bool IncludeOwnedObjectsInValidation()
+//------------------------------------------------------------------------------
+/**
+ * Indicates if owned objects are acceptable proxies during validation.
+ *
+ * This method is used to indicate that an object accepts referenced objects
+ * that own a specified object type in addition to objects of that type.
+ *
+ * An example of an object that uses this capability is the Toggle command,
+ * which can turn on and off owned plots and reports in objects that are not
+ * Subscribers as long as they have the needed Subscriber members.
+ *
+ * @return true if owned objects are included in the type validation of a
+ *         script line, false (the default) if not.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::IncludeOwnedObjectsInValidation()
+{
+   return false;
+}
+
 //------------------------------------------------------------------------------
 //  bool SetIsGlobal(bool globalFlag)
 //------------------------------------------------------------------------------
