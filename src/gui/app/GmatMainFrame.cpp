@@ -545,10 +545,33 @@ GmatMainFrame::~GmatMainFrame()
       delete mMatlabServer;
    
    GmatAppData *gmatAppData = GmatAppData::Instance();
-
    wxConfigBase *pConfig = gmatAppData->GetPersonalizationConfig();
+   
+   #ifdef __WXMSW__
+   //=======================================================
+   // Save GMAT main frame position and size to config file
+   //=======================================================
+   Integer windowX = 0, windowY = 0;
+   Integer windowW = 0, windowH = 0;
+   GetScreenPosition(&windowX, &windowY);
+   GetSize(&windowW, &windowH);
+   #ifdef DEBUG_CONFIG_FILE
+   MessageInterface::ShowMessage
+      ("   Final screen pos,  X = %4d, Y = %4d\n", windowX, windowY);
+   MessageInterface::ShowMessage
+      ("   Final window size, W = %4d, H = %4d\n", windowW, windowH);
+   #endif
+   std::stringstream location("");
+   location << windowX << " " << windowY;
+   std::stringstream windowSize("");
+   windowSize << windowW << " " << windowH;
+   pConfig->Write("/MainFrame/UpperLeft", location.str().c_str());
+   pConfig->Write("/MainFrame/WindowSize", windowSize.str().c_str());
+   #endif
+   //=======================================================
+   
    pConfig->Flush(true);
-
+   
    if (gmatAppData->GetMessageWindow() != NULL)
       gmatAppData->GetMessageWindow()->Close();
    
@@ -606,6 +629,7 @@ bool GmatMainFrame::Show(bool show)
 void GmatMainFrame::GetActualClientSize(Integer *w, Integer *h, bool ignoreMissionTree)
 {
    Integer toolW, toolH;
+   Integer notebookW, notebookH;
    Integer msgSashWinW, msgSashWinH;
    Integer mainSashWinW, mainSashWinH;
    Integer mainClientWinW, mainClientWinH;
@@ -613,18 +637,23 @@ void GmatMainFrame::GetActualClientSize(Integer *w, Integer *h, bool ignoreMissi
    Integer actW, actH;
    
    theToolBar->GetSize(&toolW, &toolH);
+   theNotebook->GetSize(&notebookW, &notebookH);
    theMessageWin->GetSize(&msgSashWinW, &msgSashWinH);
    theMainWin->GetSize(&mainSashWinW, &mainSashWinH);
    GetClientSize(&mainClientWinW, &mainClientWinH);
    
    #ifdef DEBUG_ACTUAL_CLIENT_SIZE
    MessageInterface::ShowMessage("        ToolBar: w = %4d, h = %4d\n", toolW, toolH);
+   MessageInterface::ShowMessage("       Notebook: w = %4d, h = %4d\n", notebookW, notebookH);
    MessageInterface::ShowMessage("     MessageWin: w = %4d, h = %4d\n", msgSashWinW, msgSashWinH);
    MessageInterface::ShowMessage("    MainSashWin: w = %4d, h = %4d\n", mainSashWinW, mainSashWinH);
    MessageInterface::ShowMessage("MainFrameClient: w = %4d, h = %4d\n", mainClientWinW, mainClientWinH);
    #endif
    
-   actW = mainClientWinW;
+   // We want to set active client window width to be main client window
+   // minus main sash window (LOJ: 2011.12.19)
+   //actW = mainClientWinW;
+   actW = mainClientWinW - mainSashWinW;
    actH = mainSashWinH;
    
    if (!ignoreMissionTree)
@@ -3565,7 +3594,8 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
          GmatBase *obj = (Subscriber*) theGuiInterpreter->GetConfiguredObject(name.c_str());
          if ((!obj) || !(obj->IsOfType("Subscriber")))
          {
-            wxMessageBox(wxT("The object \"" + name + "\" cannot be found or is not a Subscriber - cannot obtain report file panel position and size.\n"),
+            wxMessageBox(wxT("The object \"" + name + "\" cannot be found or is not a "
+                             "Subscriber - cannot obtain report file panel position and size.\n"),
                          wxT("GMAT Error"));
          }
          Subscriber *sub = (Subscriber*) obj;
@@ -3575,14 +3605,31 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
          Real width     = sub->GetRealParameter(sub->GetParameterID("Size"),0);
          Real height    = sub->GetRealParameter(sub->GetParameterID("Size"),1);
 
+         #ifdef DEBUG_PERSISTENCE
+         MessageInterface::ShowMessage("   initial report pos  : x = %f, y = %f\n", positionX, positionY);
+         MessageInterface::ShowMessage("   initial report size : w = %f, h = %f\n", width, height);            
+         #endif
+         
          Integer x = 0.0;
          Integer y = 0.0;
          Integer w = 0.0;
          Integer h = 0.0;
          bool isUsingSaved = false;
+         Integer screenWidth = 0;
+         Integer screenHeight = 0;
+         
          // ********* replace this with cross-platform code *********
-         Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
-         Integer screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+         #ifdef __WXMAC__
+            screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+            screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+         #else
+            GetActualClientSize(&screenWidth, &screenHeight, true);
+         #endif
+         
+         #ifdef DEBUG_PERSISTENCE
+         MessageInterface::ShowMessage("   current screen size : w = %4d, h = %4d\n", screenWidth, screenHeight);
+         #endif
+         
          // if position and size were not saved from an earlier run, figure out the initial values
          if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
              GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
@@ -3593,8 +3640,8 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
                w = -1;
                h = -1;
             #else
-               w = (Integer)((Real)screenWidth / 3.0);
-               h = (Integer)((Real)screenHeight / 2.5);
+               w = (Integer)((Real)screenWidth * 0.6);
+               h = (Integer)((Real)screenHeight * 0.8);
                x = -1;
                y = -1;
             #endif
@@ -3605,22 +3652,15 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
             y = (Integer) (positionY * (Real) screenHeight);
             w = (Integer) (width     * (Real) screenWidth);
             h = (Integer) (height    * (Real) screenHeight);
+            
             isUsingSaved = true;
          }
-         #ifndef __WXMAC__
-            Real realW = (Real)screenWidth;
-            Real realH = (Real)screenHeight;
-            Integer xOffset = (Integer)((realW * 0.01) + (10000.0 / realW));
-            Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
-            if (x == -1) x = 0;
-            //else x -= xOffset;
-            y -= yOffset;
-            #ifdef DEBUG_CHILD_PERSISTENCY
-            MessageInterface::ShowMessage("   screen offset: x = %4d, y = %4d\n", xOffset, yOffset);
-            MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
-            #endif
+         
+         #ifdef DEBUG_PERSISTENCE
+         MessageInterface::ShowMessage("     final report pos  : x = %4d, y = %4d\n", x, y);
+         MessageInterface::ShowMessage("     final report size : w = %4d, h = %4d\n\n", w, h);
          #endif
-
+         
          newChild = new GmatMdiChildFrame(this, name, title, itemType, -1, wxPoint(x,y), wxSize(w,h));
          scrolledWin = new wxScrolledWindow(newChild);
          ReportFilePanel *reportPanel = new ReportFilePanel(scrolledWin, name);

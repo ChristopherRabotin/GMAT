@@ -42,6 +42,7 @@
 #include "GuiPlotReceiver.hpp"
 #include "GuiInterpreter.hpp"
 #include "FileUtil.hpp"
+#include "StringUtil.hpp"          // for ToIntegerArray()
 
 //#define DEBUG_GMATAPP
 //#define DEBUG_CMD_LINE
@@ -154,11 +155,65 @@ bool GmatApp::OnInit()
          
          // set default size
          wxSize size = wxSize(800, 600);
+         wxPoint position = wxDefaultPosition;
          
          // for Windows
          #ifdef __WXMSW__
-         size = wxSize(800, 600);
+         // Get MainFrame position and size from the config file
+         wxConfigBase *pConfig = GmatAppData::Instance()->GetPersonalizationConfig();         
+         wxString upperLeftStr, windowSizeStr;
+         Integer windowX = -99, windowY = -99;
+         Integer windowW = -99, windowH = -99;
+         IntegerArray intValues;
+         bool upperLeftOk = false;
+         bool windowSizeOk = false;
+         try
+         {
+            if (pConfig->Read("/MainFrame/UpperLeft", &upperLeftStr))
+            {
+               intValues = GmatStringUtil::ToIntegerArray(upperLeftStr.c_str());
+               if (intValues.size() == 2)
+               {
+                  windowX = intValues[0];
+                  windowY = intValues[1];
+                  upperLeftOk = true;
+               }
+            }
+            if (pConfig->Read("/MainFrame/WindowSize", &windowSizeStr))
+            {
+               intValues = GmatStringUtil::ToIntegerArray(windowSizeStr.c_str());
+               if (intValues.size() == 2)
+               {
+                  windowW = intValues[0];
+                  windowH = intValues[1];
+                  windowSizeOk = true;
+               }
+            }
+            #ifdef DEBUG_CONFIG_FILE
+            MessageInterface::ShowMessage
+               ("   Initial screen pos,  Y = %4d, Y = %4d\n", windowX, windowY);
+            MessageInterface::ShowMessage
+               ("   Initial window size, W = %4d, H = %4d\n", windowW, windowH);
+            #endif
+         }
+         catch (BaseException &be)
+         {
+            MessageInterface::ShowMessage("**** %s\n", be.GetFullMessage().c_str());
+         }
+         
+         if (upperLeftOk && windowSizeOk)
+         {
+            // if upper left is not negative (not maximized),
+            // then set new position and size
+            if (windowX > 0 && windowY > 0)
+            {
+               position = wxPoint(windowX, windowY);
+               size = wxSize(windowW, windowH);
+            }
+         }
+         
          #endif
+
          
          // The code above broke the Linux scaling.  This is a temporary hack to 
          // repair it.  PLEASE don't use UNIX macros to detect the Mac code!!!
@@ -207,7 +262,7 @@ bool GmatApp::OnInit()
          theMainFrame =
             new GmatMainFrame((wxFrame *)NULL, -1,
                               _T("GMAT - General Mission Analysis Tool"),
-                              wxDefaultPosition, size,
+                              position, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
          
          wxDateTime now = wxDateTime::Now();
@@ -229,11 +284,20 @@ bool GmatApp::OnInit()
          // Mac user rather smaller frame and top left corner and show it.
          // (the frames, unlike simple controls, are not shown when created
          // initially)
-#ifndef __WXMAC__
+         #ifndef __WXMAC__
+         #ifdef __WXMSW__
+         // if upper left is negative, then maximize
+         if (windowX < 0)
+         {
+            theMainFrame->Maximize();
+            theMainFrame->CenterOnScreen(wxBOTH);
+         }
+         #else
          theMainFrame->Maximize();
          theMainFrame->CenterOnScreen(wxBOTH);
-#endif
-
+         #endif
+         #endif
+         
          if (startMatlabServer)
             theMainFrame->StartMatlabServer();
          
