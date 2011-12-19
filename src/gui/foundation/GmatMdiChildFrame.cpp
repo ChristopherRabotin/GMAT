@@ -477,7 +477,6 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    #else
       Integer screenWidth;
       Integer screenHeight;
-      //theParent->GetClientSize(&screenWidth, &screenHeight);
       GmatAppData::Instance()->GetMainFrame()->GetActualClientSize(&screenWidth, &screenHeight, true);
    #endif
 
@@ -499,7 +498,7 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    GetSize(&tmpW, &tmpH);
    Rvector upperLeft(2, ((Real) tmpX /(Real)  screenWidth), ((Real) tmpY /(Real)  screenHeight));
    Rvector childSize(2,  ((Real) tmpW /(Real)  screenWidth), ((Real) tmpH /(Real)  screenHeight));
-
+   
    #ifdef DEBUG_PERSISTENCE
    // ======================= begin temporary ==============================
    MessageInterface::ShowMessage("*** Size of SCREEN %s is: width = %d, height = %d\n", mPlotName.c_str(), screenWidth, screenHeight);

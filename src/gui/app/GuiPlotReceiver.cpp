@@ -1993,7 +1993,6 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       Integer missionTreeX = 0;
       Integer missionTreeY = 0;
       Integer missionTreeW = 0;
-      //mainFrame->GetClientSize(&screenWidth, &screenHeight);
       mainFrame->GetActualClientSize(&screenWidth, &screenHeight, true);
    #endif
    
@@ -2008,10 +2007,13 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
    if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
        GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
    {
+      
+      #ifdef DEBUG_PLOT_PERSISTENCE
+      MessageInterface::ShowMessage("   ==> position and size are zero\n");
+      #endif
+      
       if (MdiGlPlot::usePresetSize || MdiTsPlot::usePresetSize)
          isPresetSizeUsed = true;
-      
-      //mainFrame->GetActualClientSize(&screenWidth, &screenHeight, false);
       
       usingSaved = false;
       #ifdef __WXMAC__
@@ -2030,6 +2032,9 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
          // Get active plot count
          Integer activePlotCount = mainFrame->GetNumberOfActivePlots();
          int newCount = plotCount + 1;
+         
+         // Why x = 0 and y = 0 does not position to top left of the client window?
+         // Make some position adjustments for non Mac
          Real realH = (Real)screenHeight;
          Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
          if (yOffset > 40) yOffset = 40;
@@ -2067,6 +2072,11 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
             x = missionTreeW + newCount * 20;               
             y = h + 5 + (newCount - 1) * 20;
          }
+         
+         #ifdef DEBUG_PLOT_PERSISTENCE
+         MessageInterface::ShowMessage("   before offset: x = %4d, y = %4d\n", x, y);
+         #endif
+         
          y -= yOffset;
          
          #ifdef DEBUG_PLOT_PERSISTENCE
@@ -2076,6 +2086,10 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
    }
    else
    {
+      #ifdef DEBUG_PLOT_PERSISTENCE
+      MessageInterface::ShowMessage("   ==> position and size are non-zero\n");
+      #endif
+      
       if (isGLPlot)
          MdiGlPlot::usePresetSize = true;
       else
@@ -2083,8 +2097,6 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       
       isPresetSizeUsed = true;
       usingSaved       = true;
-      
-      //mainFrame->GetActualClientSize(&screenWidth, &screenHeight, false);
       
       x = (Integer) (positionX * (Real) screenWidth);
       y = (Integer) (positionY * (Real) screenHeight);
@@ -2096,19 +2108,17 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       #endif
       
       // Why x = 0 and y = 0 does not position to top left of the client window?
-      // Make some position adjustments on non Mac
+      // Make some position adjustments for non Mac
       #ifndef __WXMAC__
-         Real realW = (Real)screenWidth;
          Real realH = (Real)screenHeight;
-         Integer xOffset = (Integer)((realW * 0.01) + (10000.0 / realW));
          Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
          if (yOffset > 40) yOffset = 40;
          // Since -1 is default position, change it to 0
          if (x == -1) x = 0;
-         //else x -= xOffset;
          y -= yOffset;
+         //@todo Why y position of plots keep going down?
          #ifdef DEBUG_PLOT_PERSISTENCE
-         MessageInterface::ShowMessage("   screen offset: x = %4d, y = %4d\n", xOffset, yOffset);
+         MessageInterface::ShowMessage("   screen offset: y = %4d\n", yOffset);
          MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
          #endif
       #endif
