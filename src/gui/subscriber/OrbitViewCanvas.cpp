@@ -1855,7 +1855,7 @@ void OrbitViewCanvas::DrawPlot()
       DrawEclipticPlane(mEcPlaneColor);
    
    // draw object orbit
-   DrawObjectOrbit(mNumData-1);
+   DrawObjectOrbit();
    
    if (mDrawSolverData)
       DrawSolverData();
@@ -1880,12 +1880,11 @@ void OrbitViewCanvas::DrawPlot()
  * @param  frame  Frame number to be used for drawing
  */
 //------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawObjectOrbit(int frame)
+void OrbitViewCanvas::DrawObjectOrbit()
 {
    #if DEBUG_DRAW
    MessageInterface::ShowMessage
-      ("==========> DrawObjectOrbit() entered, frame=%d, mLastIndex=%d\n", frame,
-       mLastIndex);
+      ("==========> DrawObjectOrbit() entered, mLastIndex=%d\n", mLastIndex);
    #endif
    
    int objId;
@@ -1923,7 +1922,7 @@ void OrbitViewCanvas::DrawObjectOrbit(int frame)
          
          // just draw object texture and continue
          if (mShowObjectMap[objName])
-            DrawObjectTexture(objName, obj, objId, frame);
+            DrawObjectTexture(objName, obj, objId);
          
          continue;
       }
@@ -1936,25 +1935,26 @@ void OrbitViewCanvas::DrawObjectOrbit(int frame)
       //---------------------------------------------------------      
       if (mShowObjectMap[objName])
       {            
-         DrawObjectTexture(objName, obj, objId, frame);
+         DrawObjectTexture(objName, obj, objId);
       }
    }
    
    #if DEBUG_DRAW
-   MessageInterface::ShowMessage("==========> DrawObjectOrbit() leaving, frame=%d\n", frame);
+   MessageInterface::ShowMessage("==========> DrawObjectOrbit() leaving\n");
    #endif
 } // end DrawObjectOrbit()
 
 
 //------------------------------------------------------------------------------
-// void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame)
+// void DrawObjectTexture(const wxString &objName, int obj, int objId)
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
-                                        int objId, int frame)
+                                        int objId)
 {
    if (mNumData < 1)
       return;
    
+   int frame = mObjLastFrame[objId];
    int index1 = objId * MAX_DATA * 3 + frame * 3;
    
    #if DEBUG_DRAW
@@ -2314,10 +2314,10 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       return;
    
    int index1 = 0, index2 = 0;
-      
+   
    // Draw object orbit line based on points
    if ((mTime[i] > mTime[i-1]) ||
-       (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop
+       ((i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2])) //for backprop
    {
       index1 = objId * MAX_DATA * 3 + (i-1) * 3;
       index2 = objId * MAX_DATA * 3 + i * 3;
@@ -2658,7 +2658,8 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    
    #ifdef DEBUG_SC_ATTITUDE
    MessageInterface::ShowMessage
-      ("===> '%s', EARad=%s\n", objName.c_str(),EARad.ToString().c_str());
+      ("DrawSpacecraft3dModel(), '%s', model=<%p>, modelId=%d, EARad=%s",
+       sc->GetName().c_str(), model, sc->modelID,  EARad.ToString().c_str());
    #endif
    
    float EAng1Deg = float(EARad(0)) * RTD;

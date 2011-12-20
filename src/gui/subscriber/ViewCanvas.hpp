@@ -348,8 +348,8 @@ protected:
    // drawing objects
    virtual void DrawFrame() = 0;
    virtual void DrawPlot() = 0;
-   virtual void DrawObjectOrbit(int frame) = 0;
-   virtual void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame) = 0;
+   virtual void DrawObjectOrbit() = 0;
+   virtual void DrawObjectTexture(const wxString &objName, int obj, int objId) = 0;
    virtual void DrawObject(const wxString &objName, int obj) = 0;
    virtual void DrawOrbit(const wxString &objName, int obj, int objId);
    virtual void DrawOrbitLines(int i, const wxString &objName, int obj, int objId) = 0;

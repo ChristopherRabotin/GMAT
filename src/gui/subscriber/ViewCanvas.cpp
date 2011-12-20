@@ -1236,9 +1236,14 @@ void ViewCanvas::ComputeBufferIndex(Real time)
       // Write buffer maxed out message only once
       if (mWriteWarning)
       {
+         Real toMjd = -999;
+         std::string utcGregorian;
+         TimeConverterUtil::Convert("A1ModJulian", mTime[mCurrIndex-1], "",
+                                    "UTCGregorian", toMjd, utcGregorian, 1);
          MessageInterface::ShowMessage
-            ("*** WARNING *** '%s' exceed the maximum data points, now "
-             "showing %d most recent data points.\n", mPlotName.c_str(), MAX_DATA);
+            ("*** WARNING *** %s: '%s' exceed the maximum data points, now "
+             "showing %d most recent data points.\n", utcGregorian.c_str(),
+             mPlotName.c_str(), MAX_DATA);
          mWriteWarning = false;
       }
       
@@ -1346,9 +1351,11 @@ bool ViewCanvas::LoadBodyTextures()
    //--------------------------------------------------
    for (int i=0; i<mObjectCount; i++)
    {
+      // Spacecraft is using icon for showing image on the plot
+      // so texture mapping is needed (LOJ: 2011.12.10)
 		// We are not using texture for spacecraft so skip
-      if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
-         continue;
+      //if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
+      //   continue;
       
       #if DEBUG_TEXTURE
 		MessageInterface::ShowMessage

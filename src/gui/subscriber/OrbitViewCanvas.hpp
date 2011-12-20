@@ -251,8 +251,8 @@ private:
    // drawing objects
    void DrawFrame();
    void DrawPlot();
-   void DrawObjectOrbit(int frame);
-   void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame);
+   void DrawObjectOrbit();
+   void DrawObjectTexture(const wxString &objName, int obj, int objId);
    void DrawObject(const wxString &objName, int obj);
    void DrawOrbitLines(int i, const wxString &objName, int obj, int objId);
    void DrawEquatorialPlane(UnsignedInt color);

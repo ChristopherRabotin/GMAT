@@ -80,7 +80,6 @@ using namespace FloatAttUtil;
 //#define DEBUG_DRAW 1
 //#define DEBUG_DRAW_LINE 2
 //#define DEBUG_OBJECT 2
-//#define DEBUG_TEXTURE 2
 //#define DEBUG_PROJECTION 3
 //#define DEBUG_CS 1
 //#define DEBUG_ANIMATION 1
@@ -90,6 +89,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_DATA_BUFFERRING
 //#define DEBUG_ORBIT_LINES
 //#define DEBUG_DRAW_DEBUG 1
+//#define DEBUG_DRAW_SPACECRAFT 1
 
 #define MODE_CENTERED_VIEW 0
 #define MODE_FREE_FLYING 1
@@ -867,7 +867,7 @@ void GroundTrackCanvas::DrawPlot()
    #endif
    
    // Set background color to grey
-   glClearColor(0.3, 0.3, 0.3, 1.0);
+   glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
    //glClearColor(0.20, 0.50, 0.50, 1.0); // green blue
    
    if (mRedrawLastPointsOnly || mNumPointsToRedraw == 0)
@@ -897,7 +897,7 @@ void GroundTrackCanvas::DrawPlot()
    DrawGridLines();
    
    // Draw object orbit
-   DrawObjectOrbit(mNumData-1);
+   DrawObjectOrbit();
    
    if (mDrawSolverData)
       DrawSolverData();
@@ -923,12 +923,12 @@ void GroundTrackCanvas::DrawPlot()
  * @param  frame  Frame number to be used for drawing
  */
 //------------------------------------------------------------------------------
-void GroundTrackCanvas::DrawObjectOrbit(int frame)
+void GroundTrackCanvas::DrawObjectOrbit()
 {
    #if DEBUG_DRAW
    MessageInterface::ShowMessage
-      ("==========> DrawObjectOrbit() entered, frame=%d, mLastIndex=%d, mObjectCount=%d\n",
-       frame, mLastIndex, mObjectCount);
+      ("==========> DrawObjectOrbit() entered, mLastIndex=%d, mObjectCount=%d\n",
+       mLastIndex, mObjectCount);
    #endif
    
    int objId;
@@ -973,12 +973,12 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
       if (mShowObjectMap[objName])
       {
          if (objName != mCentralBodyName.c_str())
-            DrawObjectTexture(objName, obj, objId, frame);
+            DrawObjectTexture(objName, obj, objId);
       }      
    }
    
    #if DEBUG_DRAW
-   MessageInterface::ShowMessage("==========> DrawObjectOrbit() leaving, frame=%d\n", frame);
+   MessageInterface::ShowMessage("==========> DrawObjectOrbit() leaving\n");
    #endif
 } // end DrawObjectOrbit()
 
@@ -987,11 +987,12 @@ void GroundTrackCanvas::DrawObjectOrbit(int frame)
 // void DrawObjectTexture(const wxString &objName, int obj, int objId, int frame)
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
-                                          int objId, int frame)
+                                          int objId)
 {
    if (mNumData < 1)
       return;
    
+   int frame = mObjLastFrame[objId];
    int index2 = objId * MAX_DATA * 3 + frame * 3;
    
    #if DEBUG_DRAW
@@ -1499,7 +1500,7 @@ void GroundTrackCanvas::DrawCircleAtCurrentPosition(int objId, int index,
    lon2 *= GmatMathConstants::DEG_PER_RAD;
    lat2 *= GmatMathConstants::DEG_PER_RAD;
    
-   #if DEBUG_DRAW_SPACECRAFT
+   #ifdef DEBUG_DRAW_SPACECRAFT
    MessageInterface::ShowMessage("   lon2 = %f, lat2 = %f\n", lon2, lat2);
    #endif
    
@@ -1559,11 +1560,15 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    float imagePos = 2.0 * (defaultCanvasAxis / mAxisLength);
    
    #if DEBUG_DRAW_SPACECRAFT
-   MessageInterface::ShowMessage("   lon = %f, lat = %f\n", lon, lat);
+   MessageInterface::ShowMessage("   lon2 = %f, lat2 = %f\n", lon2, lat2);
    #endif
    
    if (mTextureIdMap[objName.c_str()] != GmatPlot::UNINIT_TEXTURE)
    {
+      #if DEBUG_DRAW_SPACECRAFT
+      MessageInterface::ShowMessage("   drawing with texture map\n");
+      #endif
+      
       #if 1
       
       // This code block draws spacecraft image without blending
@@ -1623,6 +1628,10 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    }
    else
    {
+      #if DEBUG_DRAW_SPACECRAFT
+      MessageInterface::ShowMessage("   drawing with circle\n");
+      #endif
+      
       // Set color
       *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
       // Draw circle for now
