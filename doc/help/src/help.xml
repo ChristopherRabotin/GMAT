@@ -13,7 +13,6 @@
             <phrase condition="ug">User Guide</phrase>
             <phrase condition="tm">Training Manual</phrase>
         </subtitle>
-        <releaseinfo condition="tm">Korean Aerospace Research Institute</releaseinfo>
         <date><?dbtimestamp format="d B Y"?></date>
         <author>
             <personname>The GMAT Development Team</personname>
