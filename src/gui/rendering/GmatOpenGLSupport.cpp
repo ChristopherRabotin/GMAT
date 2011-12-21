@@ -20,6 +20,8 @@
 #include "gmatwxdefs.hpp"          // for WX and GL
 #include "MessageInterface.hpp"
 
+//#define DEBUG_INIT_GL
+
 //------------------------------------------------------------------------------
 // bool SetPixelFormatDescriptor()
 //------------------------------------------------------------------------------
@@ -31,6 +33,10 @@ bool SetPixelFormatDescriptor()
 {
 #ifdef __WXMSW__
 
+   #ifdef DEBUG_INIT_GL
+   MessageInterface::ShowMessage("SetPixelFormatDescriptor() entered\n");
+   #endif
+   
    // On Windows, for OpenGL, you have to set the pixel format
    // once before doing your drawing stuff. This function
    // properly sets it up.
@@ -45,14 +51,15 @@ bool SetPixelFormatDescriptor()
       PFD_SUPPORT_OPENGL |   // support OpenGL
       PFD_DOUBLEBUFFER,      // double buffered
       PFD_TYPE_RGBA,         // RGBA type
-      24,                    // 24-bit color depth
+      //24,                    // 24-bit color depth
+      32,                    // 32-bit color depth
       0, 0, 0, 0, 0, 0,      // color bits ignored
       0,                     // no alpha buffer
       0,                     // shift bit ignored
       0,                     // no accumulation buffer
       0, 0, 0, 0,            // accum bits ignored
-      //32,                    // 32-bit z-buffer
-      16,                    // 16-bit z-buffer
+      32,                    // 32-bit z-buffer
+      //16,                    // 16-bit z-buffer
       0,                     // no stencil buffer
       0,                     // no auxiliary buffer
       PFD_MAIN_PLANE,        // main layer
@@ -63,7 +70,7 @@ bool SetPixelFormatDescriptor()
    // get the device context's best-available-match pixel format
    int pixelFormatId = ChoosePixelFormat(hdc, &pfd);
 
-   #ifdef DEBUG_INIT
+   #ifdef DEBUG_INIT_GL
    MessageInterface::ShowMessage
       ("SetPixelFormatDescriptor() pixelFormatId = %d \n",
       pixelFormatId);
@@ -73,16 +80,26 @@ bool SetPixelFormatDescriptor()
    {
       MessageInterface::ShowMessage
          ("**** ERROR **** Failed to find a matching pixel format\n");
+      #ifdef DEBUG_INIT_GL
+      MessageInterface::ShowMessage("SetPixelFormatDescriptor() returning false\n");
+      #endif
       return false;
    }
-
+   
    // set the pixel format of the device context
    if (!SetPixelFormat(hdc, pixelFormatId, &pfd))
    {
       MessageInterface::ShowMessage
          ("**** ERROR **** Failed to set pixel format id %d\n", pixelFormatId);
+      #ifdef DEBUG_INIT_GL
+      MessageInterface::ShowMessage("SetPixelFormatDescriptor() returning false\n");
+      #endif
       return false;
    }
+   
+   #ifdef DEBUG_INIT_GL
+   MessageInterface::ShowMessage("SetPixelFormatDescriptor() returning true\n");
+   #endif
    return true;
 #else
    // Should we return true for non-Window system?
@@ -121,7 +138,7 @@ void SetDefaultGLFont()
 void InitGL()
 {
 	#ifdef DEBUG_INIT_GL
-	MessageInterface::ShowMessage("InitGL() entered\n");
+	MessageInterface::ShowMessage("\nInitGL() entered\n");
 	#endif
 	
    // remove back faces
@@ -161,7 +178,7 @@ void InitGL()
    SetDefaultGLFont();
 	
 	#ifdef DEBUG_INIT_GL
-	MessageInterface::ShowMessage("InitGL() leaving\n");
+	MessageInterface::ShowMessage("InitGL() leaving\n\n");
 	#endif
 }
 
