@@ -83,10 +83,14 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // Currently it repaints when I make window size larger, but not when I
    // reduce the size. (LOJ: 2011.07.01)
    #ifdef __USE_WX280_GL__
+   #ifdef __WXMSW__
+   // When __USE_WX280_GL__ is defined on Windows, I'm getting pixel format error
+   // with GmatGLCanvasAttribs. So using 0 for attribute list (*int) (LOJ: 2011.12.20)
+   : wxGLCanvas(parent, id, 0, pos, size, style, name)
+   #else
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
-   // Old code:
-   // : wxGLCanvas(parent, id, 0, pos, size, style, name)
    : wxGLCanvas(parent, id, GmatGLCanvasAttribs, pos, size, style, name)
+   #endif
    #else
    : wxGLCanvas(parent, id, pos, size, style, name)
    #endif
@@ -945,13 +949,14 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
           i, objNames[i].c_str());
       #endif
    }
-   
+
+   // Can we remove this? wx 2.6 is pretty old now.
    // Always initialize GL before run, InitGL() is called in OnPaint()
    // if using 2.6.3 or later version
    // For 2.6.3 version initialize GL here
    #ifndef __USE_WX280_GL__
       #ifdef DEBUG_INIT
-      MessageInterface::ShowMessage("   Not useing WX280, so calling InitGL()\n");
+      MessageInterface::ShowMessage("   Not using WX280, so calling InitGL()\n");
       #endif
    InitGL();
    #endif
