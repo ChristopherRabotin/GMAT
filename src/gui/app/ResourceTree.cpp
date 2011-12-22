@@ -2116,6 +2116,7 @@ void ResourceTree::OnClone(wxCommandEvent &event)
         (itemType == GmatTree::STRING) ||
         (itemType == GmatTree::LIBRATION_POINT) ||
         (itemType == GmatTree::MATLAB_FUNCTION) || 
+        (itemType == GmatTree::EVENT_LOCATOR) ||
         (itemType == GmatTree::GMAT_FUNCTION))
    {
       const std::string stdName = name.c_str();
