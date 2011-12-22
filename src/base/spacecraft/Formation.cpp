@@ -26,6 +26,7 @@
 
 #include "Formation.hpp"
 #include <algorithm>          // for find()
+#include <stdio.h>            // for sprintf()
 
 //#define DEBUG_FORMATION
 //#define DEBUG_FORMATION_ACTIONS

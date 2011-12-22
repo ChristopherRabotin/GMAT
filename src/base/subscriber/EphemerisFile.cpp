@@ -28,6 +28,7 @@
 #include "RealUtilities.hpp"         // for IsEven()
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
+#include <sstream>                   // for <<
 
 #ifdef __USE_SPICE__
 #include "SpiceOrbitKernelWriter.hpp"

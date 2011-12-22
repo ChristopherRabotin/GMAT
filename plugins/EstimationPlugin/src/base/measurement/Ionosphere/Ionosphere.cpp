@@ -18,11 +18,10 @@
 
 #include "Ionosphere.hpp"
 #include "GmatConstants.hpp"
+//#include "math.h"
+//#include "f2c.h"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
-#include "math.h"
-
-#include "f2c.h"
 
 //------------------------------------------------------------------------------
 // static data

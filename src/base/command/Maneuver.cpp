@@ -22,6 +22,7 @@
 
 #include "Maneuver.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>                 // for <<
 
 //#define DEBUG_MANEUVER 1
 //#define DEBUG_MANEUVER_PARSE

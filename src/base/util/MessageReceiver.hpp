@@ -24,10 +24,10 @@
 #define MESSAGERECEIVER_HPP_
 
 
-#include <iostream>                // for cout, endl
-#include <fstream>
-#include <sstream>
-#include <queue>                   // for queue
+//#include <iostream>                // for cout, endl
+//#include <fstream>
+//#include <sstream>
+//#include <queue>                   // for queue
 #include "BaseException.hpp"
 #include "GmatGlobal.hpp"          // for RunBachMode()
 #include "gmatdefs.hpp"            // for MessageTypes

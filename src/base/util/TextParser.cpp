@@ -27,6 +27,7 @@
 
 #include <algorithm>          // Required for GCC 4.3
 #include <iterator>           // For back_inserter() with VC++ 2010
+#include <stdio.h>            // for sprintf()
 
 //#define DEBUG_TP 1
 //#define DEBUG_TP_EVAL_BLOCK 2

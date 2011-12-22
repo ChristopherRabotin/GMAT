@@ -21,9 +21,9 @@
 
 
 #include "Minimize.hpp"
-/// @todo Rework command so it doesn't need the Moderator!!!
-#include "Moderator.hpp" 
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"          // for ToDouble()
+#include "MessageInterface.hpp"
+#include <sstream>                 // for stringstream
 
 //#define DEBUG_MINIMIZE_PARSE 1
 //#define DEBUG_MINIMIZE_INIT 1

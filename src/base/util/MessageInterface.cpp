@@ -17,9 +17,8 @@
 //------------------------------------------------------------------------------
 #include "MessageInterface.hpp"
 #include <stdarg.h>              // for va_start() and va_end()
-#include <cstdlib>
-
-#include <cstdlib>                      // Required for GCC 4.3
+#include <cstdlib>               // for malloc() and free() - Required for GCC 4.3
+#include <stdio.h>               // for vsprintf()
 
 //---------------------------------
 //  static data

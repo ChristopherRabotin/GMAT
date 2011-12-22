@@ -26,6 +26,7 @@
 #include "StopCondition.hpp"
 #include "ODEModel.hpp"
 #include "PropSetup.hpp"
+#include <iostream>                // for cout, endl
 
 #define DEBUG_OBJECT_MAPPING
 

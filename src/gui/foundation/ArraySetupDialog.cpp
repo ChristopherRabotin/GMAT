@@ -27,8 +27,8 @@
 
 #include "wx/colordlg.h"        // for wxColourDialog
 
-//#define DEBUG_ARRAY_LOAD 1
-//#define DEBUG_ARRAY_SAVE 1
+#define DEBUG_ARRAY_LOAD 1
+#define DEBUG_ARRAY_SAVE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows

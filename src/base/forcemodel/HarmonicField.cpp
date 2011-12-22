@@ -60,6 +60,7 @@
 #include "Rmatrix.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>                 // for <<
 
 /*
 #include <iostream>

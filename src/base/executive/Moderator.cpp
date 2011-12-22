@@ -67,6 +67,7 @@
 #include "StringTokenizer.hpp"      // for StringTokenizer
 #include "StringUtil.hpp"           // for GmatStringUtil::
 #include "FileUtil.hpp"             // for GmatFileUtil::
+#include <sstream>                  // for stringstream
 #include <algorithm>                // for sort(), set_difference()
 #include <ctime>                    // for clock()
 

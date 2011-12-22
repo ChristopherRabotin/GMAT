@@ -22,6 +22,7 @@
 
 #include "MemoryTracker.hpp"
 #include "MessageInterface.hpp"
+#include <stdio.h>                 // for sprintf()
 
 //--------------------------------------
 //  initialize static variables

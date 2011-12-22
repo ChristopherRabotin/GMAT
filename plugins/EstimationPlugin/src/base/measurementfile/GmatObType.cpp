@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "FileManager.hpp"
+#include <sstream>
 
 
 //#define DEBUG_OBTYPE_CREATION_INITIALIZATION

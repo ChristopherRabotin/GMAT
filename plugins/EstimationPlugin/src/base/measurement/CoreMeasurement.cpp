@@ -25,6 +25,7 @@
 #include "SpaceObject.hpp"
 #include "BodyFixedPoint.hpp"
 #include "MeasurementException.hpp"
+#include <sstream>                  // for stringstream
 
 //#define DEBUG_MEASUREMENT_INITIALIZATION
 //#define DEBUG_CALC_RANGE

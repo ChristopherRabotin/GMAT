@@ -769,9 +769,8 @@ Real SunSync::SolveI(Real a, Real e, bool flag, bool roaFlag, bool ropFlag,
    //if solutions out of range, give upper and lower input bounds 
    //to satisfy requirements
    if (((i < 90) || (i > 110) || 
-	   (a*(1-e) < (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]+100)))
-	   || (a > (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]+2000))
-	   && flag && !(i==-1))
+        (a*(1-e) < (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]+100))) ||
+       ((a > (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]+2000)) && flag && !(i==-1)))
    {
 	  eHigh = SolveE(a,90.000000000001*GmatMathConstants::PI/180,0);
       if (eHigh == -1) 
@@ -930,7 +929,7 @@ Real SunSync::SolveI(Real a, Real e, bool flag, bool roaFlag, bool ropFlag,
 			if (aLow<(GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]+100))
 			   aLow = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[2]+100;
 
-			if (((a>aLow)&&(a<aHigh))||((a*(1+e))<roaLow)&&(roaHigh<(a*(1+e))))
+			if (((a>aLow) && (a<aHigh)) || (((a*(1+e)) < roaLow) && (roaHigh<(a*(1+e)))))
 			   errormsg = 
 	              "No sun synchronous orbit can be found with those parameters";
 		    else if (altFlag)

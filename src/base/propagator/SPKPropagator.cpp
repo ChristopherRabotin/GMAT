@@ -23,6 +23,7 @@
 #include "SPKPropagator.hpp"
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
+#include <sstream>                 // for stringstream
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_PROPAGATION

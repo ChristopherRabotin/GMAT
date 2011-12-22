@@ -27,6 +27,7 @@
 #include "CoordinateSystem.hpp"
 #include "TimeTypes.hpp"
 
+#include <sstream>                 // for <<
 #include <cmath>
 
 // Uncomment to generate drag model data for debugging:

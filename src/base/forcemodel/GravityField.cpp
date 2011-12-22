@@ -75,6 +75,7 @@
 #include "FileManager.hpp"
 #include "HarmonicGravityCof.hpp"
 #include "HarmonicGravityGrv.hpp"
+#include <sstream>                 // for <<
 
 
 //#define DEBUG_GRAVITY_FIELD

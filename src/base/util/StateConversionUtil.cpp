@@ -1,4 +1,4 @@
-//$Id: $
+//$Id$
 //------------------------------------------------------------------------------
 //                         StateConversionUtil
 //------------------------------------------------------------------------------
@@ -29,6 +29,7 @@
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
 #include "UtilityException.hpp"
+#include <sstream>                 // for <<
 
 //#define DEBUG_EQUINOCTIAL
 //#define DEBUG_STATE_CONVERSION

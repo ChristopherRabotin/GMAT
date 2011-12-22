@@ -38,11 +38,11 @@
 #include <wx/config.h>
 #include <wx/variant.h>                 // for wxVariant()
 
-//#define DEBUG_PARAM_CREATE
-//#define DEBUG_PARAM_CREATE_VAR
-//#define DEBUG_PARAM_CREATE_LOAD
-//#define DEBUG_PARAM_CREATE_SAVE
-//#define DEBUG_PAGE_CHANGED
+#define DEBUG_PARAM_CREATE
+#define DEBUG_PARAM_CREATE_VAR
+#define DEBUG_PARAM_CREATE_LOAD
+#define DEBUG_PARAM_CREATE_SAVE
+#define DEBUG_PAGE_CHANGED
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -880,24 +880,35 @@ void ParameterCreateDialog::OnListboxClick(wxCommandEvent& event)
        "mArrayChanged=%d, mVariableChanged=%d, mStringChanged=%d\n", currObject.c_str(),
        nextObject.c_str(), mArrayChanged, mVariableChanged, mStringChanged);
    #endif
-   
+
+   #if 0
    bool objectChanged = false;
    
    if (event.GetEventObject() == mUserVarListBox)
       objectChanged = mVariableChanged;
    else if (event.GetEventObject() == mUserArrayListBox)
-      objectChanged = mVariableChanged;
+      objectChanged = mArrayChanged;
    else if (event.GetEventObject() == mUserStringListBox)
       objectChanged = mStringChanged;
+   #endif
    
    // Prompt user for saving current object before switching to other of the same type
-   if (objectChanged)
+   //if (objectChanged)
+   if (mVariableChanged || mArrayChanged || mStringChanged)
    {
       if (currObject != nextObject)
-      {      
+      {
+         wxString paramTypeName = "Variable";
+         if (mArrayChanged)
+            paramTypeName = "Array";
+         else if (mStringChanged)
+            paramTypeName = "String";
+
+         //wxString msg = "The value change made to will be lost, do you want to save it first?";
+         wxString msg = "Do you want to save the new value before switching to "
+            " other " + paramTypeName + "?";
          wxMessageDialog *msgDlg = new wxMessageDialog
-            (this, "The change will be lost, do you want to save it first?", "Save...",
-             wxYES_NO |wxICON_QUESTION, wxDefaultPosition);
+            (this, msg, "Save...", wxYES_NO |wxICON_QUESTION, wxDefaultPosition);
          
          int result = msgDlg->ShowModal();
          if (result == wxID_YES)
@@ -909,7 +920,12 @@ void ParameterCreateDialog::OnListboxClick(wxCommandEvent& event)
          }
          else if (result == wxID_NO)
          {
-            mVariableChanged = false;
+            if (mVariableChanged)
+               mVariableChanged = false;
+            else if (mArrayChanged)
+               mArrayChanged = false;
+            else if (mStringChanged)
+               mStringChanged = false;
          }
       }
    }

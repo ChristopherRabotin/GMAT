@@ -19,6 +19,7 @@
 
 #include "SolarFluxFileReader.hpp"
 #include "MessageInterface.hpp"
+#include <fstream>                   // for fseek(), fread()
 
 //------------------------------------------------------------------------------
 //  SolarFluxFileReader()

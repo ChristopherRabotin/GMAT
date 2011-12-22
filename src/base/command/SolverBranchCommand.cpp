@@ -27,6 +27,7 @@
 #include "Vary.hpp"                // For SetInitialValue() method
 #include "Subscriber.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>                 // for <<
 
 //#define DEBUG_PARSING
 //#define DEBUG_OPTIONS

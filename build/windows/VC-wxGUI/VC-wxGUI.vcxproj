@@ -24,7 +24,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -40,7 +40,7 @@
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
@@ -49,23 +49,23 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__USE_WX280__;__USE_WX280_GL__;SKIP_DEVIL;__SKIP_MSISE90__;__SHOW_HELP_BUTTON__;__SMART_APPLY_BUTTON__;DEBUG_MEMORY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__USE_WX280__;__USE_WX280_GL__;SKIP_DEVIL;__SKIP_MSISE90__;__SHOW_HELP_BUTTON__;__SMART_APPLY_BUTTON__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4267;4996;4101;4005;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wxbase28.lib;wxmsw28_core.lib;wxmsw28_adv.lib;wxmsw28_gl.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregex.lib;wxexpat.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;winspool.lib;winmm.lib;shell32.lib;comctl32.lib;ole32.lib;oleaut32.lib;uuid.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;odbc32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxbase28.lib;wxmsw28_core.lib;wxmsw28_adv.lib;wxmsw28_gl.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregex.lib;wxexpat.lib;winmm.lib;comctl32.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
@@ -407,14 +407,10 @@
     <ClCompile Include="..\..\..\src\base\parameter\Variable.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\VariableWrapper.cpp" />
     <ClCompile Include="..\..\..\src\base\plugin\DynamicLibrary.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\Converter.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\Formation.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\Spacecraft.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\SpaceObject.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\StateConverter.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\StateVector.cpp" />
     <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp" />
-    <ClCompile Include="..\..\..\src\base\spacecraft\TimeConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp" />
@@ -429,13 +425,10 @@
     <ClCompile Include="..\..\..\src\base\util\A1Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\A1Mjd.cpp" />
     <ClCompile Include="..\..\..\src\base\util\AngleUtil.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\Anomaly.cpp" />
     <ClCompile Include="..\..\..\src\base\util\AttitudeUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BaseException.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\Cartesian.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\CoordUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
@@ -446,14 +439,12 @@
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GravityFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\Keplerian.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Linear.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MemoryTracker.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MessageInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MessageReceiver.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\ModKeplerian.cpp" />
     <ClCompile Include="..\..\..\src\base\util\OrbitDesignerTime.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RealUtilities.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RepeatGroundTrack.cpp" />
@@ -465,6 +456,7 @@
     <ClCompile Include="..\..\..\src\base\util\Rvector.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector3.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector6.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SunSync.cpp" />
@@ -528,6 +520,7 @@
     <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\forcemodel\DragInputsDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.cpp" />
@@ -538,6 +531,7 @@
     <ClCompile Include="..\..\..\src\gui\foundation\MultiPathSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ParameterCreateDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ParameterSelectDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ShowScriptDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ShowSummaryDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\SinglePathSetupPanel.cpp" />
@@ -940,16 +934,12 @@
     <ClInclude Include="..\..\..\src\base\parameter\Variable.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\VariableWrapper.hpp" />
     <ClInclude Include="..\..\..\src\base\plugin\DynamicLibrary.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\Converter.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\Formation.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\Spacecraft.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObject.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObjectException.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\StateConverter.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\StateVector.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\StateVectorException.hpp" />
     <ClInclude Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.hpp" />
-    <ClInclude Include="..\..\..\src\base\spacecraft\TimeConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\stopcond\StopCondition.hpp" />
     <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp" />
@@ -966,15 +956,12 @@
     <ClInclude Include="..\..\..\src\base\util\A1Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\A1Mjd.hpp" />
     <ClInclude Include="..\..\..\src\base\util\AngleUtil.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\Anomaly.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ArrayTemplate.hpp" />
     <ClInclude Include="..\..\..\src\base\util\AttitudeUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BaseException.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\Cartesian.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\CoordUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ElapsedTime.hpp" />
@@ -986,13 +973,11 @@
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GravityFile.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\Keplerian.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Linear.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MessageInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MessageReceiver.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\ModKeplerian.hpp" />
     <ClInclude Include="..\..\..\src\base\util\OrbitDesignerTime.hpp" />
     <ClInclude Include="..\..\..\src\base\util\OrbitTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\PhysicalConstants.hpp" />
@@ -1007,6 +992,7 @@
     <ClInclude Include="..\..\..\src\base\util\Rvector.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector3.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector6.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SunSync.hpp" />
@@ -1072,6 +1058,7 @@
     <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\forcemodel\DragInputsDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.hpp" />
@@ -1082,6 +1069,7 @@
     <ClInclude Include="..\..\..\src\gui\foundation\MultiPathSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ParameterCreateDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ParameterSelectDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ShowScriptDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ShowSummaryDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\SinglePathSetupPanel.hpp" />

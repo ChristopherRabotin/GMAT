@@ -29,6 +29,7 @@
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
 #include "RealUtilities.hpp"       // for IsNaN() and IsInf()
+#include <sstream>                 // for <<
 
 //#define DEBUG_STATE_CONSTRUCTION
 //#define DUMP_STATE

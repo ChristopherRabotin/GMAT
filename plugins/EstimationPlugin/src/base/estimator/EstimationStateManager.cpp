@@ -23,8 +23,8 @@
 #include "EstimationStateManager.hpp"
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
-
 #include "Spacecraft.hpp"
+#include <sstream>                  // for stringstream
 
 
 //#define DEBUG_ESM_LOADING

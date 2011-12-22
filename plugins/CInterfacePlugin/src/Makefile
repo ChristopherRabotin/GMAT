@@ -87,7 +87,7 @@ endif
 else
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../$(GMAT_LIB_DIR)
-	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS)
+	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) -L$(BASE_LIB_LOCATION) -l$(BASE_LIBRARY)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)
 endif
 

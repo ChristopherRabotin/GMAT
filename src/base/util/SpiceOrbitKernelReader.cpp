@@ -1,4 +1,4 @@
-//$Id:$
+//$Id$
 //------------------------------------------------------------------------------
 //                              SpiceOrbitKernelReader
 //------------------------------------------------------------------------------
@@ -30,7 +30,7 @@
 #include "TimeTypes.hpp"
 #include "TimeSystemConverter.hpp"
 #include "UtilityException.hpp"
-
+#include <sstream>                 // for stringstream
 
 //#define DEBUG_SPK_READING
 //#define DEBUG_SPK_COVERAGE

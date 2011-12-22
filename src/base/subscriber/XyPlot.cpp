@@ -20,9 +20,10 @@
 //------------------------------------------------------------------------------
 
 #include "XyPlot.hpp"
-#include "PlotInterface.hpp"     // for XY plot
+#include "PlotInterface.hpp"         // for XY plot
 #include "SubscriberException.hpp"
-#include "MessageInterface.hpp"  // for ShowMessage()
+#include "MessageInterface.hpp"      // for ShowMessage()
+#include <sstream>                   // for <<
 
 //#define DEBUG_XYPLOT_INIT 1
 //#define DEBUG_XYPLOT_PARAM 1

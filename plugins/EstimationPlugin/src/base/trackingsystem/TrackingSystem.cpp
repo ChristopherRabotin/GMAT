@@ -22,6 +22,7 @@
 
 #include "TrackingSystem.hpp"
 #include "TrackingSystemException.hpp"
+#include <sstream>
 
 #include "MessageInterface.hpp"
 
