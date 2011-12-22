@@ -65,7 +65,8 @@ LocatedEventTable::~LocatedEventTable()
       delete events[i];
 
    // Here or elsewhere?
-   delete thePlot;
+   if (thePlot != NULL)
+      delete thePlot;
 }
 
 //------------------------------------------------------------------------------
@@ -108,6 +109,8 @@ LocatedEventTable& LocatedEventTable::operator=(const LocatedEventTable& let)
       primarySortStyle    = let.primarySortStyle;
       secondarySortStyle  = let.secondarySortStyle;
       associationsCurrent = false;
+      if (thePlot != NULL)
+         delete thePlot;
       thePlot             = NULL;
       sortOrder.clear();
    }
