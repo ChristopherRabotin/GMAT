@@ -350,7 +350,7 @@ Real EventLocator::SetRealParameter(const Integer id, const Real value)
          eventTolerance = value;
       else
          throw EventException(
-               "Located event tolerance value must be a real number >= 0.0");
+               "Located event tolerance value must be a real number > 0.0");
 
       return eventTolerance;
    }
