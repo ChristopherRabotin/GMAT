@@ -33,7 +33,7 @@
 
 //#define DEBUG_EVENTLOCATION
 //#define DEBUG_COMPLETED_TABLE
-#define DEBUG_PUBLISHER_CALLS
+//#define DEBUG_PUBLISHER_CALLS
 
 
 //------------------------------------------------------------------------------
