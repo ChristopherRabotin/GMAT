@@ -151,6 +151,9 @@ public:
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
 
    // Accessors for the owned subscribers
    virtual Integer      GetOwnedObjectCount();

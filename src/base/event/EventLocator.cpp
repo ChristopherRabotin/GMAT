@@ -1220,11 +1220,63 @@ bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 
+//------------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type, 
+//       const std::string &oldName, const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * Interface used to support user renames of object references.
+ *
+ * @param type reference object type.
+ * @param oldName object name to be renamed.
+ * @param newName new object name.
+ *
+ * @return true if object name changed, false if not.
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::RenameRefObject(const Gmat::ObjectType type, 
+   const std::string &oldName, const std::string &newName)
+{
+   bool retval = false;
+
+   switch (type)
+   {
+      case Gmat::SPACECRAFT:
+      case Gmat::FORMATION:
+      case Gmat::SPACEOBJECT:
+      case Gmat::UNKNOWN_OBJECT:
+         for (UnsignedInt i = 0; i < satNames.size(); ++i)
+         {
+            if (satNames[i] == oldName)
+            {
+               satNames[i] = newName;
+               retval = true;
+            }
+         }
+         break;
+
+      default:
+         ;        // Intentional drop-through
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetOwnedObjectCount()
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 Integer EventLocator::GetOwnedObjectCount()
 {
    return 1 + eventTable.GetOwnedObjectCount();
 }
 
+
+//------------------------------------------------------------------------------
+// GmatBase* GetOwnedObject(Integer whichOne)
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 GmatBase* EventLocator::GetOwnedObject(Integer whichOne)
 {
    GmatBase *retval = NULL;
