@@ -11,7 +11,7 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author: Allison Greene 
+// Author: Allison Greene
 // Created: 2003/08/29
 //    2010.03.23 Thomas Grubb 
 //      - Removed Clone menu item from the Formation popup menu
