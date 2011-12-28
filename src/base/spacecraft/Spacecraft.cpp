@@ -34,6 +34,7 @@
 #include "TimeTypes.hpp"
 #include "CSFixed.hpp"               // for default attitude creation
 #include "FileManager.hpp"           // for GetFullPathname()
+#include "AngleUtil.hpp"             // for PutAngleInDegRange()
 #ifdef __USE_SPICE__
 #include "SpiceAttitude.hpp"         // for SpiceAttitude - to set object name and ID
 #endif
@@ -2241,47 +2242,74 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
    {
       return ApplyTotalMass(value);
    }
-
-   if (id == MODEL_OFFSET_X)
+   
+   if (id == MODEL_OFFSET_X || id == MODEL_OFFSET_Y || id == MODEL_OFFSET_Z)
    {
-      modelOffsetX = value;
-      return modelOffsetX;
+      Real newVal = value;
+      if (value < -3.5 || value > 3.5)
+      {
+         newVal = value < -3.5 ? -3.5 : value > 3.5 ? 3.5 : value;
+         std::string valueStr = GmatStringUtil::ToStringNoZeros(value);
+         std::string newValStr = GmatStringUtil::ToStringNoZeros(newVal);
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The value of %s for field \"%s\" on object \"%s\" "
+             "is out of bounds so it is set to nearest boundary of %s.  "
+             "The allowed values are: [-3.5 <= Real <= 3.5].\n", valueStr.c_str(),
+             GetParameterText(id).c_str(), instanceName.c_str(), newValStr.c_str());
+      }
+      
+      if (id == MODEL_OFFSET_X)
+         modelOffsetX = newVal;
+      else if (id == MODEL_OFFSET_Y)
+         modelOffsetY = newVal;
+      else if (id == MODEL_OFFSET_Z)
+         modelOffsetZ = newVal;
+      
+      return newVal;
    }
-
-   if (id == MODEL_OFFSET_Y)
+   
+   if (id == MODEL_ROTATION_X || id == MODEL_ROTATION_Y || id == MODEL_ROTATION_Z)
    {
-      modelOffsetY = value;
-      return modelOffsetY;
+      Real newVal = value;
+      if (value < -180.0 || value > 180.0)
+      {
+         // Put angle in -180 and +180 range
+         newVal = AngleUtil::PutAngleInDegRange(value, -180.0, 180.0);
+         std::string valueStr = GmatStringUtil::ToStringNoZeros(value);
+         std::string newValStr = GmatStringUtil::ToStringNoZeros(newVal);
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The value of %s for field \"%s\" on object \"%s\" "
+             "is set to %s to fit the range of -180 and 180.\n", valueStr.c_str(),
+             GetParameterText(id).c_str(), instanceName.c_str(), newValStr.c_str());
+      }
+      
+      if (id == MODEL_ROTATION_X)
+         modelRotationX = newVal;
+      else if (id == MODEL_ROTATION_Y)
+         modelRotationY = newVal;
+      else if (id == MODEL_ROTATION_Z)
+         modelRotationZ = newVal;
+      
+      return newVal;
    }
-
-   if (id == MODEL_OFFSET_Z)
-   {
-      modelOffsetZ = value;
-      return modelOffsetZ;
-   }
-
-   if (id == MODEL_ROTATION_X)
-   {
-      modelRotationX = value;
-      return modelRotationX;
-   }
-
-   if (id == MODEL_ROTATION_Y)
-   {
-      modelRotationY = value;
-      return modelRotationY;
-   }
-
-   if (id == MODEL_ROTATION_Z)
-   {
-      modelRotationZ = value;
-      return modelRotationZ;
-   }
-
+   
    if (id == MODEL_SCALE)
    {
-      modelScale = value;
-      return modelScale;
+      Real newVal = value;
+      if (value < 0.001 || value > 1000)
+      {
+         newVal = value < 0.001 ? 0.001 : value > 1000.0 ? 1000.0 : value;
+         std::string valueStr = GmatStringUtil::ToStringNoZeros(value);
+         std::string newValStr = GmatStringUtil::ToStringNoZeros(newVal);
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The value of %s for field \"%s\" on object \"%s\" "
+             "is out of bounds so it is set to nearest boundary of %s.  "
+             "The allowed values are: [0.001 <= Real <= 1000].\n", valueStr.c_str(),
+             GetParameterText(id).c_str(), instanceName.c_str(), newValStr.c_str());
+      }
+      
+      modelScale = newVal;
+      return newVal;
    }
 
 
