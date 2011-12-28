@@ -24,7 +24,6 @@
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
 #include "LoadPOV.hpp"
-#include <sstream>
 
 //#define DEBUG_ORBIT_PANEL
 //#define DEBUG_ORBIT_PANEL_LOAD
@@ -214,9 +213,10 @@ void VisualModelPanel::Create()
    wxStaticText *xRotDegrees =
       new wxStaticText(this, ID_TEXT, wxT("Degrees"), wxDefaultPosition, wxDefaultSize, 0);
    xRotValueText =
-	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20), wxTE_PROCESS_ENTER);
-
-
+	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+                    wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   
+   
    // Labels and slider for y rotation
    wxStaticText *yRotText =
       new wxStaticText(this, ID_TEXT, wxT("Y"), wxDefaultPosition, wxDefaultSize, 0);
@@ -230,8 +230,9 @@ void VisualModelPanel::Create()
    wxStaticText *yRotDegrees =
       new wxStaticText(this, ID_TEXT, wxT("Degrees"), wxDefaultPosition, wxDefaultSize, 0);
    yRotValueText =
-	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20), wxTE_PROCESS_ENTER);
-
+	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+                    wxTE_PROCESS_ENTER ,wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   
    // Labels and slider for z rotation
    wxStaticText *zRotText =
       new wxStaticText(this, ID_TEXT, wxT("Z"), wxDefaultPosition, wxDefaultSize, 0);
@@ -245,7 +246,8 @@ void VisualModelPanel::Create()
    wxStaticText *zRotDegrees =
       new wxStaticText(this, ID_TEXT, wxT("Degrees"), wxDefaultPosition, wxDefaultSize, 0);
    zRotValueText =
-	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20), wxTE_PROCESS_ENTER);
+	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+                    wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Label and slider for x translation
    wxStaticText *xTranText =
@@ -258,7 +260,8 @@ void VisualModelPanel::Create()
    wxStaticText *xTranMax =
       new wxStaticText(this, ID_TEXT, wxT("3.5"), wxDefaultPosition, wxDefaultSize, 0);
    xTranValueText =
-	  new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20), wxTE_PROCESS_ENTER);
+	  new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+                    wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Label and slider for y translation
    wxStaticText *yTranMin =
@@ -271,7 +274,8 @@ void VisualModelPanel::Create()
    wxStaticText *yTranMax =
       new wxStaticText(this, ID_TEXT, wxT("3.5"), wxDefaultPosition, wxDefaultSize, 0);
    yTranValueText =
-	  new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20), wxTE_PROCESS_ENTER);
+	  new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+                    wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Label and slider for z translation
    wxStaticText *zTranMin =
@@ -284,7 +288,8 @@ void VisualModelPanel::Create()
    wxStaticText *zTranMax =
       new wxStaticText(this, ID_TEXT, wxT("3.5"), wxDefaultPosition, wxDefaultSize, 0);
    zTranValueText =
-		new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20), wxTE_PROCESS_ENTER);
+		new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+                     wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Slider for scale
    wxStaticText *scaleMinLabel =
@@ -295,7 +300,8 @@ void VisualModelPanel::Create()
    wxStaticText *scaleMaxLabel =
       new wxStaticText(this, ID_TEXT, wxT("1000.0"), wxDefaultPosition, wxDefaultSize, 0);
    scaleValueText =
-		new wxTextCtrl(this, ID_SCALE_TEXT, wxT("1.000000"), wxDefaultPosition, wxSize(70, 20), wxTE_PROCESS_ENTER);
+		new wxTextCtrl(this, ID_SCALE_TEXT, wxT("1.000000"), wxDefaultPosition, wxSize(70, 20),
+                     wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // The recentering button
    recenterButton =
@@ -591,7 +597,7 @@ void VisualModelPanel::OnSlide(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void VisualModelPanel::OnTextCtrlChange(wxCommandEvent& event)
 {
-    mTextChanged = true;
+   mTextChanged = true;
 	dataChanged = true;
 	theScPanel->EnableUpdate(true);
 }
@@ -620,66 +626,70 @@ void VisualModelPanel::OnTextCtrlEnter(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void VisualModelPanel::UpdateTextCtrl(int id)
 {
-	double x,y,z;
+	Real x, y, z, newx, newy, newz;
+   
 	switch (id)
 	{
-    case (ID_TEXTCTRL):
-            // Load the model indicated by the path
-            modelCanvas->LoadModel(modelTextCtrl->GetLabelText());
-            currentSpacecraft->modelFile = modelTextCtrl->GetLabelText();
-            break;
+   case (ID_TEXTCTRL):
+      // Load the model indicated by the path
+      modelCanvas->LoadModel(modelTextCtrl->GetLabelText());
+      currentSpacecraft->modelFile = modelTextCtrl->GetLabelText();
+      break;
+      
 	case (ID_ROT_TEXT):
-			xRotValueText->GetLabelText().ToDouble(&x);
-			yRotValueText->GetLabelText().ToDouble(&y);
-			zRotValueText->GetLabelText().ToDouble(&z);
-			x = x < -180? -180 : x > 180? 180 : x;
-			y = y < -180? -180 : y > 180? 180 : y;
-			z = z < -180? -180 : z > 180? 180 : z;
-			//modelCanvas->Rotate(true, x, y, z);
-			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"), x);
-			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"), y);
-			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"), z);
-			xRotValueText->SetLabel(wxString::Format(wxT("%f"), x));
-			yRotValueText->SetLabel(wxString::Format(wxT("%f"), y));
-			zRotValueText->SetLabel(wxString::Format(wxT("%f"), z));
-			xRotSlider->SetValue((int)x);
-			yRotSlider->SetValue((int)y);
-			zRotSlider->SetValue((int)z);
-			modelCanvas->Refresh(false);
-			break;
-		case (ID_TRAN_TEXT):
-			xTranValueText->GetLabelText().ToDouble(&x);
-			yTranValueText->GetLabelText().ToDouble(&y);
-			zTranValueText->GetLabelText().ToDouble(&z);
-			x = x < -3.5? -3.5 : x > 3.5? 3.5 : x;
-			y = y < -3.5? -3.5 : y > 3.5? 3.5 : y;
-			z = z < -3.5? -3.5 : z > 3.5? 3.5 : z;
-			//modelCanvas->Translate(x, y, z);
-			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), x);
-			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"), y);
-			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"), z);
-			xTranValueText->SetLabel(wxString::Format(wxT("%f"), x));
-			yTranValueText->SetLabel(wxString::Format(wxT("%f"), y));
-			zTranValueText->SetLabel(wxString::Format(wxT("%f"), z));
-			xTranSlider->SetValue((int)x*100);
-			yTranSlider->SetValue((int)y*100);
-			zTranSlider->SetValue((int)z*100);
-			modelCanvas->Refresh(false);
-			break;
-		case (ID_SCALE_TEXT):
-			scaleValueText->GetLabelText().ToDouble(&x);
-			x = x <= 0? 0.001 : x > 1000? 1000 : x;
-			//modelCanvas->Scale(x, x, x);
-			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), x);
-			scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
-			if (x < 1)
-			{
-				int m = scaleSlider->GetMax();
-				x = x*m-m;
-			}
-			scaleSlider->SetValue(x);
-			modelCanvas->Refresh(false);
-			break;
+   {
+      xRotValueText->GetLabelText().ToDouble(&x);
+      yRotValueText->GetLabelText().ToDouble(&y);
+      zRotValueText->GetLabelText().ToDouble(&z);
+      
+      // Range checking is done in the base code when setting the new value.
+      x = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"), x);
+      y = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"), y);
+      z = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"), z);
+      
+      // Update text and slider
+      xRotValueText->SetLabel(wxString::Format(wxT("%f"), x));
+      yRotValueText->SetLabel(wxString::Format(wxT("%f"), y));
+      zRotValueText->SetLabel(wxString::Format(wxT("%f"), z));
+      xRotSlider->SetValue((int)x);
+      yRotSlider->SetValue((int)y);
+      zRotSlider->SetValue((int)z);
+      modelCanvas->Refresh(false);
+      break;
+   }
+   
+   case (ID_TRAN_TEXT):
+      xTranValueText->GetLabelText().ToDouble(&x);
+      yTranValueText->GetLabelText().ToDouble(&y);
+      zTranValueText->GetLabelText().ToDouble(&z);
+      
+      // Range checking is done in the base code when setting the new value.
+      x = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), x);
+      y = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"), y);
+      z = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"), z);
+      
+      // Update text and slider
+      xTranValueText->SetLabel(wxString::Format(wxT("%f"), x));
+      yTranValueText->SetLabel(wxString::Format(wxT("%f"), y));
+      zTranValueText->SetLabel(wxString::Format(wxT("%f"), z));
+      xTranSlider->SetValue((int)(x*100));
+      yTranSlider->SetValue((int)(y*100));
+      zTranSlider->SetValue((int)(z*100));
+      modelCanvas->Refresh(false);
+      break;
+      
+   case (ID_SCALE_TEXT):
+      scaleValueText->GetLabelText().ToDouble(&x);
+      x = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), x);
+      scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
+      if (x < 1)
+      {
+         int m = scaleSlider->GetMax();
+         x = x*m-m;
+      }
+      scaleSlider->SetValue(x);
+      modelCanvas->Refresh(false);
+      break;
 	}
 }
 
