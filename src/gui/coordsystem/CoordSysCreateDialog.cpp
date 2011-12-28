@@ -22,6 +22,7 @@
 #include "MessageInterface.hpp"
 #include "CoordinateSystem.hpp"
 #include "AxisSystem.hpp"
+#include "DateUtil.hpp"
 #include <wx/config.h>
 
 //#define DEBUG_COORD_DIALOG 1
@@ -167,7 +168,7 @@ void CoordSysCreateDialog::SaveData()
 //      if (isValid && epoch < 0.0)
 //         CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
       if (isValid)
-         CheckRealRange(str, epoch, "Epoch", 6116.0, 0.0, true, false, true, false);
+         CheckRealRange(str, epoch, "Epoch", DateUtil::GetEarliestMJDValue(), DateUtil::GetLatestMJDValue(), true, true, true, true);
       
 //      str = mCoordPanel->GetIntervalTextCtrl()->GetValue();
 //      isValid = CheckReal(interval, str, "UpdateInterval", "Real Number >= 0");

@@ -34,6 +34,17 @@
 using namespace GmatMathUtil; // for Floor(), Mod()
 
 //---------------------------------
+// static data
+//---------------------------------
+const std::string DateUtil::earliestGregorian = "04 Oct 1957 12:00:00.000";
+const std::string DateUtil::latestGregorian   = "01 Jan 2100 00:00:00.000";
+const std::string DateUtil::earliestMJD       = "6116.00";
+const std::string DateUtil::latestMJD         = "58069.5";
+const Real        DateUtil::earliestMJDValue  = 6116.00;
+const Real        DateUtil::latestMJDValue    = 58069.5;
+
+
+//---------------------------------
 // static
 //---------------------------------
 
@@ -49,6 +60,148 @@ Integer DateUtil::JulianDay(YearNumber year, MonthOfYear month,
    return (day - 32075 + 1461 * (year + 4800 + L) / 4 + 367 *
            (month - 2 - L * 12) / 12 - 3 *
            ((year + 4900 + L) / 100) /4 );
+}
+
+//------------------------------------------------------------------------------
+// bool IsValidGregorian(const std::string &str, bool checkDate = false)
+//------------------------------------------------------------------------------
+/**
+ * Determines if input date string is valid Gregorian or not.
+ *   Valid format is dd mmm yyyy hh:mm:ss.mmm.
+ *   For example, 01 Jan 2000 12:00:00.000
+ *
+ * @param  greg  input gregorian string
+ * @param  checkDate check for valid date (i.e. occurs after Sputnik launch)
+ *
+ * @return true if time is in valid Gregorian format; otherwise, false
+ */
+//---------------------------------------------------------------------------
+bool DateUtil::IsValidGregorian(const std::string &str, bool checkDate)
+{
+   StringArray parts = GmatStringUtil::SeparateBy(str, " ");
+   if (parts.size() != 4)
+      return false;
+
+   #if DEBUG_DATE_VALIDATE
+   MessageInterface::ShowMessage
+      ("DateUtil::IsValidGregorian() parts=%s, %s, %s, %s\n", parts[0].c_str(),
+       parts[1].c_str(), parts[2].c_str(), parts[3].c_str());
+   #endif
+
+   StringArray timeParts = GmatStringUtil::SeparateBy(parts[3], ":");
+   if (timeParts.size() != 3)
+      return false;
+
+   #if DEBUG_DATE_VALIDATE
+   MessageInterface::ShowMessage
+      ("DateUtil::IsValidGregorian() timeParts=%s, %s, %s\n", timeParts[0].c_str(),
+       timeParts[1].c_str(), timeParts[2].c_str());
+   #endif
+
+   Integer year, month, day, hour, min;
+   Real sec;
+
+   // check for valid month name
+   if (!GmatTimeUtil::IsValidMonthName(parts[1]))
+      return false;
+
+   month = GmatTimeUtil::GetMonth(parts[1]);
+
+   if (!GmatStringUtil::ToInteger(parts[0], day))
+      return false;
+
+   if (!GmatStringUtil::ToInteger(parts[2], year))
+      return false;
+
+   if (!GmatStringUtil::ToInteger(timeParts[0], hour))
+      return false;
+
+   if (!GmatStringUtil::ToInteger(timeParts[1], min))
+      return false;
+
+   if (!GmatStringUtil::ToReal(timeParts[2], sec))
+      return false;
+
+   #if DEBUG_DATE_VALIDATE
+   MessageInterface::ShowMessage
+      ("DateUtil::IsValidGregorian() year=%d, month=%d, day=%d, hour=%d, "
+       "min=%d, sec=%f\n", year, month, day, hour, min, sec);
+   #endif
+
+   // check for date
+   if (!IsValidTime(year, month, day, hour, min, sec))
+      return false;
+   // Date must be equal to or later than Sputnik launch (04 Oct 1957 12:00:00.000)
+   // and less than or equal to 1 Jan 2100 00:00:00.000
+   if (checkDate)
+   {
+      if (year < 1957) return false;
+      else if (year == 1957)
+      {
+         if (month < 10) return false;
+         else if (month == 10)
+         {
+            if (day < 4) return false;
+            else if (day == 4)
+            {
+               if (hour < 12) return false;
+            }
+         }
+      }
+      if (year > 2100) return false;
+      else if (year == 2100)
+      {
+         if (month > 1) return false;
+         else if (month == 1)
+         {
+            if (day > 1) return false;
+            else if (day == 1)
+            {
+               if (hour > 0) return false;
+               else if (hour == 0)
+               {
+                  if (min > 0) return false;
+                  else if (min == 0)
+                  {
+                     if (sec > 00.000) return false;
+                  }
+               }
+            }
+         }
+      }
+   }
+   return true;
+//   return IsValidTime(year, month, day, hour, min, sec);
+}
+
+std::string DateUtil::GetEarliestGregorian()
+{
+   return earliestGregorian;
+}
+
+std::string DateUtil::GetLatestGregorian()
+{
+   return latestGregorian;
+}
+
+std::string DateUtil::GetEarliestMJD()
+{
+   return earliestMJD;
+}
+
+std::string DateUtil::GetLatestMJD()
+{
+   return latestMJD;
+}
+
+Real DateUtil::GetEarliestMJDValue()
+{
+   return earliestMJDValue;
+}
+
+Real DateUtil::GetLatestMJDValue()
+{
+   return latestMJDValue;
 }
 
 
@@ -395,96 +548,6 @@ bool IsValidTime (Integer year, Integer month, Integer day,
    return valid;
 }
 
-
-//------------------------------------------------------------------------------
-// bool IsValidGregorian(const std::string &str, bool checkDate = false)
-//------------------------------------------------------------------------------
-/**
- * Determines if input date string is valid Gregorian or not.
- *   Valid format is dd mmm yyyy hh:mm:ss.mmm.
- *   For example, 01 Jan 2000 12:00:00.000
- *
- * @param  greg  input gregorian string
- * @param  checkDate check for valid date (i.e. occurs after Sputnik launch)
- *
- * @return true if time is in valid Gregorian format; otherwise, false
- */
-//---------------------------------------------------------------------------
-bool DateUtil::IsValidGregorian(const std::string &str, bool checkDate)
-{
-   StringArray parts = GmatStringUtil::SeparateBy(str, " ");
-   if (parts.size() != 4)
-      return false;
-
-   #if DEBUG_DATE_VALIDATE
-   MessageInterface::ShowMessage
-      ("DateUtil::IsValidGregorian() parts=%s, %s, %s, %s\n", parts[0].c_str(),
-       parts[1].c_str(), parts[2].c_str(), parts[3].c_str());
-   #endif
-
-   StringArray timeParts = GmatStringUtil::SeparateBy(parts[3], ":");
-   if (timeParts.size() != 3)
-      return false;
-
-   #if DEBUG_DATE_VALIDATE
-   MessageInterface::ShowMessage
-      ("DateUtil::IsValidGregorian() timeParts=%s, %s, %s\n", timeParts[0].c_str(),
-       timeParts[1].c_str(), timeParts[2].c_str());
-   #endif
-
-   Integer year, month, day, hour, min;
-   Real sec;
-
-   // check for valid month name
-   if (!GmatTimeUtil::IsValidMonthName(parts[1]))
-      return false;
-
-   month = GmatTimeUtil::GetMonth(parts[1]);
-
-   if (!GmatStringUtil::ToInteger(parts[0], day))
-      return false;
-
-   if (!GmatStringUtil::ToInteger(parts[2], year))
-      return false;
-
-   if (!GmatStringUtil::ToInteger(timeParts[0], hour))
-      return false;
-
-   if (!GmatStringUtil::ToInteger(timeParts[1], min))
-      return false;
-
-   if (!GmatStringUtil::ToReal(timeParts[2], sec))
-      return false;
-
-   #if DEBUG_DATE_VALIDATE
-   MessageInterface::ShowMessage
-      ("DateUtil::IsValidGregorian() year=%d, month=%d, day=%d, hour=%d, "
-       "min=%d, sec=%f\n", year, month, day, hour, min, sec);
-   #endif
-
-   // check for date
-   if (!IsValidTime(year, month, day, hour, min, sec))
-      return false;
-   // Date must be equal to or later than Sputnik launch (04 Oct 1957 12:00:00.000)
-   if (checkDate)
-   {
-      if (year < 1957) return false;
-      else if (year == 1957)
-      {
-         if (month < 10) return false;
-         else if (month == 10)
-         {
-            if (day < 4) return false;
-            else if (day == 4)
-            {
-               if (hour < 12) return false;
-            }
-         }
-      }
-   }
-   return true;
-//   return IsValidTime(year, month, day, hour, min, sec);
-}
 
 
 //------------------------------------------------------------------------------

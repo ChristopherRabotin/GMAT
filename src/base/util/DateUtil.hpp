@@ -27,13 +27,21 @@
 class GMAT_API DateUtil
 {
 public:
-   static Integer JulianDay(YearNumber year, MonthOfYear month,
-                            DayOfMonth day);
+   static Integer       JulianDay(YearNumber year, MonthOfYear month,
+                                  DayOfMonth day);
    
-   static std::string FormatGregorian(YearNumber year, MonthOfYear month,
-                                      DayOfMonth day, Integer hour, Integer minute,
-                                      Real second);
-   
+   static std::string   FormatGregorian(YearNumber year, MonthOfYear month,
+                                        DayOfMonth day, Integer hour, Integer minute,
+                                        Real second);
+
+   static bool          IsValidGregorian(const std::string &str, bool checkDate = false);
+   static std::string   GetEarliestGregorian();
+   static std::string   GetLatestGregorian();
+   static std::string   GetEarliestMJD();
+   static std::string   GetLatestMJD();
+   static Real          GetEarliestMJDValue();
+   static Real          GetLatestMJDValue();
+
    friend Real GMAT_API JulianDate(YearNumber year, MonthOfYear month,
                           DayOfMonth day, Integer hour, Integer minute,
                           Real second);
@@ -63,8 +71,16 @@ public:
                                      Integer& minute, Real& second);
    friend bool GMAT_API IsValidTime(Integer year, Integer month, Integer day, 
                            Integer hour, Integer minute, Real second);
-   static bool IsValidGregorian(const std::string &str, bool checkDate = false);
+
    friend bool GMAT_API IsLeapYear(Integer year);
+
+   static const std::string earliestGregorian;
+   static const std::string latestGregorian;
+   static const std::string earliestMJD;
+   static const std::string latestMJD;
+
+   static const Real        earliestMJDValue;
+   static const Real        latestMJDValue;
   
 };
 

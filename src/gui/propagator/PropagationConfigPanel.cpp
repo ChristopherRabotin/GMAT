@@ -28,6 +28,7 @@
 #include "MessageInterface.hpp"
 #include "bitmaps/OpenFolder.xpm"
 #include "TimeSystemConverter.hpp"
+#include "DateUtil.hpp"
 #include "GmatDefaults.hpp"
 
 #include "wx/platform.h"
@@ -900,7 +901,8 @@ void PropagationConfigPanel::PopulateForces()
 //                     theFileMap[earthGravModelArray[eGravModelType]];
                   primaryBodyData->gravType =
                         earthGravModelArray[eGravModelType];
-                  primaryBodyData->potFilename =
+//                  if (eGravModelType != E_OTHER)
+                     primaryBodyData->potFilename =
                      theFileMap[earthGravModelArray[eGravModelType]];
                }
                else if (wxBodyName == "Luna")
@@ -917,8 +919,8 @@ void PropagationConfigPanel::PopulateForces()
 //                  primaryBodyList[currentBodyId]->potFilename =
 //                     theFileMap[lunaGravModelArray[lGravModelType]];
                   primaryBodyData->gravType = lunaGravModelArray[lGravModelType];
-                  primaryBodyData->potFilename =
-                     theFileMap[lunaGravModelArray[lGravModelType]];
+//                  if (lGravModelType != L_OTHER)
+                     primaryBodyData->potFilename = theFileMap[lunaGravModelArray[lGravModelType]];
                }
                else if (wxBodyName == "Venus")
                {
@@ -2610,22 +2612,21 @@ bool PropagationConfigPanel::SavePropagatorData()
       Real fromVal;
       Real toVal = -999.999;
       std::string newStr;
+
+      std::string prevFmt = spkEpFormat.c_str();
+      std::string prevVal = startEpochTextCtrl->GetValue().c_str();
+      TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+
       if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
       {
          fromVal = -999.999;
          TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal,
                startEpochTextCtrl->GetValue().c_str(), "A1ModJulian", toVal,
                newStr);
-         if (toVal < 6116.0)
-            throw GmatBaseException("Start epochs must be later than "
-                  "A.1 date 04 Oct 1957 12:00:00.000.");
       }
       else
       {
          startEpochTextCtrl->GetValue().ToDouble(&fromVal);
-         if (fromVal < 6116.0)
-            throw GmatBaseException("ModJulian epochs must be later than "
-                  "(or equal to) 6116, the date Sputnik launched.");
       }
 
       str = propagatorEpochFormatComboBox->GetValue().c_str();
@@ -3136,14 +3137,15 @@ void PropagationConfigPanel::OnPropEpochComboBox(wxCommandEvent &)
          Real fromVal;
          Real toVal = -999.999;
 
+         std::string prevFmt = spkEpFormat.c_str();
+         std::string prevVal = spkEpoch.c_str();
+         TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+
          if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
             fromVal = -999.999;
          else
          {
             spkEpoch.ToDouble(&fromVal);
-            if (fromVal < 6116.0)
-               throw GmatBaseException("ModJulian epochs must be later than "
-                     "(or equal to) 6116, the date Sputnik launched.");
          }
 
          TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal, spkEpoch.c_str(),

@@ -24,6 +24,7 @@
 #include "FileUtil.hpp"             // for GmatFileUtil::
 #include "RealUtilities.hpp"        // for GmatMathUtil::
 #include "TimeSystemConverter.hpp"
+#include "DateUtil.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_CHECK_REAL
@@ -605,14 +606,17 @@ bool UserInputValidator::CheckTimeFormatAndValue(const std::string &format, cons
       }
       catch (BaseException &)
       {
-         std::string expRange = "04 Oct 1957 12:00:00.000 or later";
+         std::string expRange = "";
          if (timeFormat == "Gregorian")
          {
-            expRange = "04 Oct 1957 12:00:00.000 or later";
+            expRange = "\"" + DateUtil::GetEarliestGregorian();
+            expRange += "\" to \"" + DateUtil::GetLatestGregorian();
+            expRange += "\"";
          }
          else
          {
-            expRange = "Real Number >= 6116.00";
+            expRange = DateUtil::GetEarliestMJD();
+            expRange += " <= Real Number <= " + DateUtil::GetLatestMJD();
          }
          MessageInterface::PopupMessage
             (Gmat::ERROR_, mMsgFormat.c_str(), value.c_str(), field.c_str(),

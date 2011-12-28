@@ -971,7 +971,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          #endif
          
          inputString = epochTextCtrl->GetValue();
-         if ((GmatStringUtil::ToReal(inputString, &epoch)) && (epoch >= 6116.0))
+         if ((GmatStringUtil::ToReal(inputString, &epoch)) && (epoch >= DateUtil::GetEarliestMJDValue()) && (epoch <= DateUtil::GetLatestMJDValue()))
          {
             epochValue = epochTextCtrl->GetValue();
             a1mjd      = epoch;
@@ -1005,8 +1005,10 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          else
          {
 //            epochTextCtrl->SetValue(epochValue);
+            std::string warnmsg = DateUtil::GetEarliestMJD();
+            warnmsg += " <= Real Number <= " + DateUtil::GetLatestMJD();
             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-               inputString.c_str(),"Epoch","Real Number >= 6116.0");
+               inputString.c_str(),"Epoch",warnmsg.c_str());
             canClose = false;
          }
       }

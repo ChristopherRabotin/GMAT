@@ -2271,10 +2271,21 @@ bool EphemerisFile::SetEpoch(Integer id, const std::string &value,
    catch (BaseException &)
    {
       if (epochFormat.find("Gregorian") != epochFormat.npos)
-         HandleError(id, value, allowedValues, " or value in " + epochFormat +
-                     " (" + GmatTimeUtil::GetGregorianFormat() + ")");
+      {
+         std::string rangeMsg = epochFormat;
+//         rangeMsg += " (" + GmatTimeUtil::GetGregorianFormat() + ")";
+         rangeMsg += " [" + DateUtil::GetEarliestGregorian();
+         rangeMsg += " to " + DateUtil::GetLatestGregorian();
+         rangeMsg += "]";
+         HandleError(id, value, allowedValues, " or value in " + rangeMsg);
+      }
       else
-         HandleError(id, value, allowedValues, " or value in " + epochFormat);
+      {
+         std::string rangeMsg = "[" + DateUtil::GetEarliestMJD();
+         rangeMsg += " <= " + epochFormat;
+         rangeMsg += " <= " + DateUtil::GetLatestMJD() + "]";
+         HandleError(id, value, allowedValues, " or value in " + rangeMsg);
+      }
       
    }
    

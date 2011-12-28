@@ -22,6 +22,7 @@
 #include "MessageInterface.hpp"
 #include "bitmaps/OpenFolder.xpm"
 #include "TimeSystemConverter.hpp"
+#include "DateUtil.hpp"
 #include <wx/config.h>
 
 /// wxWidget event mappings for the panel
@@ -721,7 +722,8 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
          return;
 
       wxString shownEpoch;
-      std::string oldEpoch, newEpoch, epFormat;
+      bool epochError = false;
+      std::string oldEpoch, newInitialEpoch, epFormat, newFinalEpoch;
       Real fromVal;
       Real toVal = -999.999;
       epFormat = epochFormatComboBox->GetValue().c_str();
@@ -742,20 +744,30 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
          // Not in the list, so must be an epoch string
          oldEpoch = shownEpoch.c_str();
 
-         if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
-            fromVal = -999.999;
-         else
+         try
          {
-            shownEpoch.ToDouble(&fromVal);
-            if (fromVal < 6116.0)
-               throw GmatBaseException("ModJulian epochs must be later than "
-                     "(or equal to) 6116, the date Sputnik launched.");
+            std::string prevFmt = previousEpochFormat.c_str();
+            TimeConverterUtil::ValidateTimeFormat(prevFmt,oldEpoch, true);
+
+            if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
+               fromVal = -999.999;
+            else
+            {
+               shownEpoch.ToDouble(&fromVal);
+            }
+
+            TimeConverterUtil::Convert(previousEpochFormat.c_str(), fromVal,
+                  oldEpoch, epFormat, toVal, newInitialEpoch);
+
          }
-
-         TimeConverterUtil::Convert(previousEpochFormat.c_str(), fromVal,
-               oldEpoch, epFormat, toVal, newEpoch);
-
-         initialEpochComboBox->SetValue(newEpoch.c_str());
+         catch (BaseException &be)
+         {
+            epochFormatComboBox->SetValue(previousEpochFormat.c_str());
+            epochError = true;
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, be.GetFullMessage() +
+                "\nPlease enter valid Initial Epoch before changing the Epoch Format\n");
+         }
       }
 
       // End epoch
@@ -774,23 +786,40 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
          // Not in the list, so must be an epoch string
          oldEpoch = shownEpoch.c_str();
 
-         if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
-            fromVal = -999.999;
-         else
+         try
          {
-            shownEpoch.ToDouble(&fromVal);
-            if (fromVal < 6116.0)
-               throw GmatBaseException("ModJulian epochs must be later than "
-                     "(or equal to) 6116, the date Sputnik launched.");
+            std::string prevFmt = previousEpochFormat.c_str();
+            TimeConverterUtil::ValidateTimeFormat(prevFmt,oldEpoch, true);
+
+            if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
+            {
+               fromVal = -999.999;
+            }
+            else
+            {
+               shownEpoch.ToDouble(&fromVal);
+            }
+
+            TimeConverterUtil::Convert(previousEpochFormat.c_str(), fromVal,
+                  oldEpoch, epFormat, toVal, newFinalEpoch);
+
          }
+         catch (BaseException &be)
+         {
+            epochFormatComboBox->SetValue(previousEpochFormat.c_str());
+            epochError = true;
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, be.GetFullMessage() +
+                "\nPlease enter valid Final Epoch before changing the Epoch Format\n");
+         }
+       }
 
-         TimeConverterUtil::Convert(previousEpochFormat.c_str(), fromVal,
-               oldEpoch, epFormat, toVal, newEpoch);
-
-         finalEpochComboBox->SetValue(newEpoch.c_str());
+      if (!epochError)
+      {
+         previousEpochFormat = epochFormatComboBox->GetValue();
+         initialEpochComboBox->SetValue(newInitialEpoch.c_str());
+         finalEpochComboBox->SetValue(newFinalEpoch.c_str());
       }
-
-      previousEpochFormat = epochFormatComboBox->GetValue();
    }
 
    if (theApplyButton != NULL)

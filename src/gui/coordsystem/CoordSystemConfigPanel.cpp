@@ -23,6 +23,7 @@
 // base includes
 #include "gmatdefs.hpp"
 #include "AxisSystem.hpp"
+#include "DateUtil.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_COORD_PANEL_LOAD 1
@@ -189,7 +190,7 @@ void CoordSystemConfigPanel::SaveData()
 //         if (isValid && epoch < 0.0)
 //            isValid = CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
          if (isValid)
-            isValid = CheckRealRange(str, epoch, "Epoch", 6116.0, 0.0, true, false, true, false);
+            isValid = CheckRealRange(str, epoch, "Epoch", DateUtil::GetEarliestMJDValue(), DateUtil::GetLatestMJDValue(), true, true, true, true);
          if (!isValid)
          {
             canClose = false;
