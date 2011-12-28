@@ -27,9 +27,9 @@
 #include "StringTokenizer.hpp"   // for StringTokenizer()
 #include <map>
 #include <algorithm>
-
-#include <cstdlib>                      // Required for GCC 4.3
-#include <algorithm>                    // Required for GCC 4.3
+#include <stdio.h>               // for sprintf()
+#include <cstdlib>               // Required for GCC 4.3
+#include <algorithm>             // Required for GCC 4.3
 
 //#define DEBUG_STRING_UTIL 1
 //#define DEBUG_ARRAY_INDEX 2
@@ -182,6 +182,62 @@ std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
       }
    }
 
+   return str1;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string RemoveTrailingZeros(Real val, const std::string &valStr)
+//------------------------------------------------------------------------------
+/**
+ * Removes trailing zeros from real number string. It goes through another
+ * iteration using less precisoin format for numbers ending .999999.
+ *
+ * @param val  Real number
+ * @param valStr String of real number to remove trailing zeros
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveTrailingZeros(Real val, const std::string &valStr,
+                                                Integer iterCount)
+{
+   #ifdef DEBUG_TRAILING_ZEROS
+   MessageInterface::ShowMessage
+      ("RemoveTrailingZeros() entered, val = %f, valStr = %s, iterCount = %d\n",
+       val, valStr.c_str(), iterCount);
+   #endif
+   
+   if (iterCount > 1)
+      return valStr;
+   
+   std::string str = valStr;
+   std::string str1;
+   std::string::size_type point = str.find_last_of(".");
+   std::string::size_type lastNonZero = str.find_last_not_of("0");
+   
+   if (point == lastNonZero)
+   {
+      str1 = str.substr(0, lastNonZero + 2);
+   }
+   else if (lastNonZero == str.size() - 1)
+   {
+      // use less precision format for case ending with .9999999
+      char buffer[50];
+      sprintf(buffer, "%.*f", 12 - iterCount, val);
+      str1 = buffer;
+      
+      #ifdef DEBUG_TRAILING_ZEROS
+      MessageInterface::ShowMessage
+         ("   Used .%df format, str1 = %s\n", 12-iterCount, str1.c_str());
+      #endif
+      
+      if (iterCount < 2)
+         str1 = RemoveTrailingZeros(val, str1, ++iterCount);
+   }
+   else
+   {
+      str1 = str.substr(0, lastNonZero + 1);
+   }
+   
    return str1;
 }
 
@@ -493,8 +549,8 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
          {
             // Check for the system Parameter name which should not not be replace,
             // such as SMA in sat.SMA Parameter or sat.EarthEqCS.X
-            if (pos == 0 || (pos > 0 && str1[pos-1] == '.') &&
-                (pos-1 != str1.find_last_of('.')))
+            if (pos == 0 || ((pos > 0 && str1[pos-1] == '.') &&
+                             (pos-1 != str1.find_last_of('.'))))
                str1.replace(pos, fromSize, to);
          }
          
@@ -676,6 +732,24 @@ std::string GmatStringUtil::ToString(const Integer &val, bool useCurrentFormat,
                                      Integer width)
 {
    return GmatRealUtil::ToString(val, useCurrentFormat, width);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ToStringNoZeros(const Real &val)
+//------------------------------------------------------------------------------
+/**
+ * Formats real number to string without trailing zeros.
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToStringNoZeros(const Real &val)
+{
+   std::string str, str1;
+   char buffer[50];
+   sprintf(buffer, "%.14f", val);
+   str = buffer;
+   
+   return RemoveTrailingZeros(val, str);
 }
 
 

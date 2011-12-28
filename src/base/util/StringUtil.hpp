@@ -37,9 +37,11 @@ namespace GmatStringUtil
    GMAT_API std::string RemoveLastNumber(const std::string &str, Integer &lastNumber);
    GMAT_API std::string RemoveLastString(const std::string &str, const std::string &lastStr,
                                 bool removeAll = false);
-   
    GMAT_API std::string RemoveSpaceInBrackets(const std::string &str,
                                      const std::string &bracketPair);
+   GMAT_API std::string RemoveTrailingZeros(Real val, const std::string &valStr,
+                                            Integer iterCount = 0);
+   
    GMAT_API std::string Trim(const std::string &str, StripType stype = BOTH,
                     bool removeSemicolon = false, bool removeEol = false);
    GMAT_API std::string Strip(const std::string &str, StripType stype = BOTH);
@@ -64,6 +66,7 @@ namespace GmatStringUtil
                         Integer width = GmatGlobal::DATA_WIDTH);
    GMAT_API std::string ToString(const Integer &val, bool useCurrentFormat = true,
                         Integer width = GmatGlobal::INTEGER_WIDTH);
+   GMAT_API std::string ToStringNoZeros(const Real &val);
    
    GMAT_API std::string RemoveExtraParen(const std::string &str);
    GMAT_API std::string RemoveOuterString(const std::string &str, const std::string &start,
