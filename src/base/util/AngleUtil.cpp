@@ -30,9 +30,6 @@ using namespace GmatMathUtil;
 // public static functions
 //---------------------------------
 
-const Real AngleUtil::TWO_PI_DEG = 360.0;
-const Real AngleUtil::PI_DEG = 180.0;
-
 //------------------------------------------------------------------------------
 // static Real AngleUtil::PutAngleInDegRange(Real angleInDeg, Real minAngleInDeg,
 //                                           Real maxAngleInDeg)
@@ -50,13 +47,16 @@ const Real AngleUtil::PI_DEG = 180.0;
 Real AngleUtil::PutAngleInDegRange(Real angleInDeg, Real minAngleInDeg,
                                    Real maxAngleInDeg)
 {
-   Real angle = Mod(angleInDeg, TWO_PI_DEG);
+   if (angleInDeg >= minAngleInDeg && angleInDeg <= maxAngleInDeg)
+      return angleInDeg;
+   
+   Real angle = Mod(angleInDeg, GmatMathConstants::TWO_PI_DEG);
    
    if (angle < minAngleInDeg)
-      angle += TWO_PI_DEG;
+      angle += GmatMathConstants::TWO_PI_DEG;
    
    else if (angle > maxAngleInDeg)
-      angle -= TWO_PI_DEG;
+      angle -= GmatMathConstants::TWO_PI_DEG;
    
    return angle;
 }
@@ -79,6 +79,9 @@ Real AngleUtil::PutAngleInDegRange(Real angleInDeg, Real minAngleInDeg,
 Real AngleUtil::PutAngleInRadRange(Real angleInRad, Real minAngleInRad,
                                    Real maxAngleInRad)
 {
+   if (angleInRad >= minAngleInRad && angleInRad <= maxAngleInRad)
+      return angleInRad;
+   
    Real angle = Mod(angleInRad, TWO_PI);
    
    if (angle < minAngleInRad)

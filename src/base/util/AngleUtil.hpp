@@ -28,9 +28,6 @@ class GMAT_API AngleUtil
 {
 public:
    
-   static const Real TWO_PI_DEG;
-   static const Real PI_DEG;
-   
    // static functions
    static Real PutAngleInDegRange(Real angleInDeg, Real minAngleInDeg,
                                   Real maxAngleInDeg);
