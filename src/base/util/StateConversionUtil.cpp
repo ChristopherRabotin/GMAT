@@ -682,11 +682,11 @@ Rvector6 StateConversionUtil::CartesianToEquinoctial(const Rvector6& cartesian, 
 
    if (r <= 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToEquinoctial - cannot convert state because position vector is zero vector.\n");
+      throw UtilityException("Cannot convert from Cartesian to Equinoctial - position vector is zero vector.\n");
    }
    if (mu <= 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToEquinoctial - cannot convert state because gravitational constant is zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to Equinoctial - gravitational constant is zero.\n");
    }
 
    Rvector3 eVec = ( ((v*v - mu/r) * pos) - ((pos * vel) * vel) ) / mu;
@@ -696,7 +696,7 @@ Rvector6 StateConversionUtil::CartesianToEquinoctial(const Rvector6& cartesian, 
    if ( e > 1.0 - GmatOrbitConstants::KEP_ECC_TOL)
    {
       std::string errmsg =
-            "StateConversionUtil::CartesianToEquinoctial - cannot convert to Equinoctial elements because the orbit is either parabolic or hyperbolic.\n";
+            "Cannot convert from Cartesian to Equinoctial - the orbit is either parabolic or hyperbolic.\n";
       throw UtilityException(errmsg);
    }
 
@@ -862,7 +862,7 @@ Rvector6 StateConversionUtil::CartesianToSphericalAZFPA(const Rvector6& cartesia
 
    if (rMag <= 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToSphericalAZFPA - cannot convert because position vector is a zero vector.\n");
+      throw UtilityException("Cannot convert from Cartesian to SphericalAZFPA - position vector is a zero vector.\n");
    }
 
    Real    lambda = ATan2(pos[1], pos[0]);
@@ -873,7 +873,7 @@ Rvector6 StateConversionUtil::CartesianToSphericalAZFPA(const Rvector6& cartesia
 
    if (vMag <= 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToSphericalAZFPA - cannot convert because velocity vector is a zero vector.\n");
+      throw UtilityException("Cannot convert from Cartesian to SphericalAZFPA - velocity vector is a zero vector.\n");
    }
 
    // Calculate the vertical flight path angle
@@ -954,7 +954,7 @@ Rvector6 StateConversionUtil::CartesianToSphericalRADEC(const Rvector6& cartesia
 
    if (rMag <= 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToSphericalAZFPA - cannot convert because position vector is a zero vector.\n");
+      throw UtilityException("Cannot convert from Cartesian to SphericalRADEC - position vector is a zero vector.\n");
    }
 
    Real    lambda = ATan2(pos[1], pos[0]);
@@ -965,7 +965,7 @@ Rvector6 StateConversionUtil::CartesianToSphericalRADEC(const Rvector6& cartesia
 
    if (vMag <= 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToSphericalAZFPA - cannot convert because velocity vector is a zero vector.\n");
+      throw UtilityException("Cannot convert from Cartesian to SphericalRADEC - velocity vector is a zero vector.\n");
    }
 
    // Compute right ascension of velocity
@@ -1421,7 +1421,7 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
 
    if (rMag == 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToTA - error - divide by zero (rMag).\n");
+      throw UtilityException("Cannot convert from Cartesian to TA - position vector is a zero vector\n");
    }
 
    #ifdef DEBUG_KEPLERIAN_TA
@@ -1479,7 +1479,7 @@ Real StateConversionUtil::CartesianToTA(Real mu, const Rvector3 &pos,
       Real nMag = nVec.GetMagnitude();
       if (nMag == 0.0)
       {
-         throw UtilityException("StateConversionUtil::CartesianToTA - error - divide by zero (nMag).\n");
+         throw UtilityException("Cannot convert from Cartesian to TA - n vector is a zero vector.\n");
       }
       //ta = ACos((nVec*pos) / (nMag*rMag));
       ta = ACos(((nVec*pos) / (nMag*rMag)), GmatOrbitConstants::KEP_TOL);
@@ -1614,14 +1614,14 @@ Real StateConversionUtil::CartesianToSMA(Real mu, const Rvector3 &pos,
 
    if (rMag == 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToSMA - error - divide by zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to SMA - position vector is a zero vector.\n");
    }
 
    Real zeta = 0.5*(vMag*vMag) - mu/rMag;
 
    if (zeta == 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToSMA - error - divide by zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to SMA - computed zeta is zero.\n");
    }
 
    // check if the orbit is near parabolic
@@ -1700,7 +1700,7 @@ Real StateConversionUtil::CartesianToINC(Real mu, const Rvector3 &pos,
 
    if (hMag == 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToINC - error - divide by zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to INC - angular momentum is a zero vector.\n");
    }
 
    //Real inc = ACos(hVec[2] / hMag);
@@ -1750,7 +1750,7 @@ Real StateConversionUtil::CartesianToRAAN(Real mu, const Rvector3 &pos,
       Real nMag = nVec.GetMagnitude();
       if (nMag == 0.0)
       {
-         throw UtilityException("StateConversionUtil::CartesianToRAAN - error - divide by zero.\n");
+         throw UtilityException("Cannot convert from Cartesian to RAAN - n vector is a zero vector.\n");
       }
       //raan = ACos(nVec[0] / nMag);
       raan = ACos((nVec[0] / nMag), GmatOrbitConstants::KEP_TOL);
@@ -1771,7 +1771,7 @@ Real StateConversionUtil::CartesianToRAAN(Real mu, const Rvector3 &pos,
       Real nMag = nVec.GetMagnitude();
       if (nMag == 0.0)
       {
-         throw UtilityException("StateConversionUtil::CartesianToSMA - error - divide by zero.\n");
+         throw UtilityException("Cannot convert from Cartesian to RAAN - n vector is a zero vector.\n");
       }
       //raan = ACos(nVec[0] / nMag);
       raan = ACos((nVec[0] / nMag), GmatOrbitConstants::KEP_TOL);
@@ -1830,7 +1830,7 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
       Real nMag = nVec.GetMagnitude();
       if ((nMag == 0.0) || (ecc == 0.0))
       {
-         throw UtilityException("StateConversionUtil::CartesianToAOP - error - divide by zero.\n");
+         throw UtilityException("Cannot convert from Cartesian to AOP - n vector is a zero vector or eccentricity is zero.\n");
       }
       //aop = ACos((nVec*eVec) / (nMag*ecc));
       aop = ACos(((nVec*eVec) / (nMag*ecc)), GmatOrbitConstants::KEP_TOL);
@@ -1844,7 +1844,7 @@ Real StateConversionUtil::CartesianToAOP(Real mu, const Rvector3 &pos,
    {
       if (ecc == 0.0)
       {
-         throw UtilityException("StateConversionUtil::CartesianToAOP - error - divide by zero.\n");
+         throw UtilityException("Cannot convert from Cartesian to AOP - eccentricity is zero.\n");
       }
       //aop = ACos(eVec[0] / ecc);
       aop = ACos((eVec[0] / ecc), GmatOrbitConstants::KEP_TOL);
@@ -1892,7 +1892,7 @@ Rvector3 StateConversionUtil::CartesianToEccVector(Real mu, const Rvector3 &pos,
    Real vMag = vel.GetMagnitude();
    if ((mu == 0.0) || (rMag == 0.0))
    {
-      throw UtilityException("StateConversionUtil::CartesianToEccVector - error - divide by zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to EccVector - position vector is a zero vector or mu is zero.\n");
    }
 
    Rvector3 eVec = ((vMag*vMag - mu/rMag)*pos - (pos*vel)*vel) / mu;
@@ -1944,7 +1944,7 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
    Real vMagSq = vMag*vMag;
    if (mu == 0.0)
    {
-      throw UtilityException("StateConversionUtil::CartesianToAngularMomentum - error - divide by zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to Angular Momentum - mu is zero.\n");
    }
 
    Rvector3 hVec = Cross(pos, vel);
@@ -2143,9 +2143,9 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
    Real h = angMomentum.GetMagnitude();
    #ifdef DEBUG_CART_TO_KEPL
       MessageInterface::ShowMessage(
-            "   in ComputeCartToKepl, pos = %12.10f  %12.10f  %12.10f \n", pos[0], pos[1], pos[2]);
+            "   in ComputeCartToKepl, pos = %12.14f  %12.14f  %12.14f \n", pos[0], pos[1], pos[2]);
       MessageInterface::ShowMessage(
-            "   in ComputeCartToKepl, vel = %12.10f  %12.10f  %12.10f \n", vel[0], vel[1], vel[2]);
+            "   in ComputeCartToKepl, vel = %12.14f  %12.14f  %12.14f \n", vel[0], vel[1], vel[2]);
       MessageInterface::ShowMessage(
             "   in ComputeCartToKepl, angMomentum = %12.10f  %12.10f  %12.10f\n",
             angMomentum[0], angMomentum[1], angMomentum[2]);
@@ -2159,7 +2159,8 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
 //   }
 
    // eqn 4.3
-   Rvector3 nodeVec = Cross(Rvector3(0,0,1), angMomentum);
+   Rvector3 v3(0.0,0.0,1.0);
+   Rvector3 nodeVec = Cross(v3, angMomentum);
 
    // eqn 4.4
    Real n = nodeVec.GetMagnitude();
@@ -2167,9 +2168,13 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
    // eqn 4.5 - 4.6
    Real posMag = pos.GetMagnitude();
    Real velMag = vel.GetMagnitude();
-   if ((posMag == 0.0) || (grav == 0.0))
+   if (posMag == 0.0)
    {
-      throw UtilityException("StateConversionUtil::ComputeCartToKepl - error - divide by zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to Keplerian - position vector is a zero vector.\n");
+   }
+   if (grav == 0.0)
+   {
+      throw UtilityException("Cannot convert from Cartesian to Keplerian - mu is zero.\n");
    }
 
    // eqn 4.7 - 4.8
@@ -2177,10 +2182,10 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
    Real e = eccVec.GetMagnitude();
 
    // eqn 4.9
-   Real zeta = 0.5*velMag*velMag - grav/posMag;
+   Real zeta = 0.5*velMag*velMag - (grav/posMag);
    if (zeta == 0.0)
    {
-      throw UtilityException("StateConversionUtil::ComputeCartToKepl - error - divide by zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to Keplerian - computed zeta is zero.\n");
    }
 
    #ifdef DEBUG_CART_TO_KEPL
@@ -2205,8 +2210,8 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
 
    if ((Abs(1.0 - e)) <= GmatOrbitConstants::KEP_ECC_TOL)
    {
-      std::string errmsg = "Error in conversion to Keplerian state: ";
-      errmsg += "The state results in an orbit that is nearly parabolic.\n";
+      std::string errmsg = "Warning: GMAT does not support parabolic orbits ";
+      errmsg += "in conversion from Cartesian to Keplerian state.\n";
       throw UtilityException(errmsg);
    }
 
@@ -2223,16 +2228,12 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
       throw UtilityException
       ("Error in conversion from Cartesian to Keplerian state: "
        "The state results in a singular conic section with radius of periapsis less than 1 m.\n");
-//         ("StateConversionUtil::CartesianToKeplerian() "
-//          "Warning: A nearly singular conic section was encountered while "
-//          "converting from the Cartesian state to the Keplerian elements.  The radius of "
-//          "periapsis must be greater than 1 meter.\n");
 
    }
    // eqn 4.11
    if (h == 0.0)
    {
-      throw UtilityException("StateConversionUtil::ComputeCartToKepl - error - divide by zero.\n");
+      throw UtilityException("Cannot convert from Cartesian to Keplerian - angular momentum is zero.\n");
    }
    Real i = ACos( angMomentum.Get(2)/h );
    if (i >= PI - GmatOrbitConstants::KEP_TOL)
@@ -2241,13 +2242,15 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
          ("Error in conversion to Keplerian state: "
           "GMAT does not currently support orbits with inclination of 180 degrees.\n");
    }
-   Real raan, argPeriapsis, trueAnom;
-   raan=argPeriapsis=trueAnom=0;
+   Real raan         = 0.0;
+   Real argPeriapsis = 0.0;
+   Real trueAnom     = 0.0;
+
    if ( e >= 1E-11 && i >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
    {
-      if ((n == 0.0) || (e == 0.0))
+      if (n == 0.0)
       {
-         throw UtilityException("StateConversionUtil::ComputeCartToKepl - error - divide by zero.\n");
+         throw UtilityException("Cannot convert from Cartesian to Keplerian - line-of-nodes vector is a zero vector.\n");
       }
       raan = ACos( nodeVec.Get(0)/n );
       if (nodeVec.Get(1) < 0)
@@ -2265,7 +2268,7 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
    {
       if (e == 0.0)
       {
-         throw UtilityException("StateConversionUtil::ComputeCartToKepl - error - divide by zero.\n");
+         throw UtilityException("Cannot convert from Cartesian to Keplerian - eccentricity is zero.\n");
       }
       raan = 0;
       argPeriapsis = ACos(eccVec.Get(0)/e);
@@ -2280,7 +2283,7 @@ Integer StateConversionUtil::ComputeCartToKepl(Real grav,    Real r[3], Real v[3
    {
       if (n == 0.0)
       {
-         throw UtilityException("StateConversionUtil::ComputeCartToKepl - error - divide by zero.\n");
+         throw UtilityException("Cannot convert from Cartesian to Keplerian - line-of-nodes vector is a zero vector.\n");
       }
       raan = ACos( nodeVec.Get(0)/n );
       if (nodeVec.Get(1) < 0)
@@ -2433,7 +2436,7 @@ Integer StateConversionUtil::ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, 
          temp = 1.0 - ecc * Cos(e2);
          if (temp == 0.0)
          {
-            throw UtilityException("StateConversionUtil::ComputeMeanToTrueAnomaly - error - divide by zero.\n");
+            throw UtilityException("Cannot convert Mean to True Anomaly - computed temp is zero.\n");
          }
 
          if (Abs(temp) < ztol)
