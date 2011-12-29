@@ -20,14 +20,16 @@
  */
 //------------------------------------------------------------------------------
 
+#include <algorithm>               // for set_difference()
+#include <iterator>                // For back_inserter() with VC++ 2010
+#include <stdlib.h>
 #include "FileUtil.hpp"
 #include "StringTokenizer.hpp"
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"       // for Abs()
 #include "StringUtil.hpp"          // for ToString()
 #include "FileTypes.hpp"           // for GmatFile::MAX_PATH_LEN
-#include <algorithm>               // for set_difference()
-#include <iterator>                // For back_inserter() with VC++ 2010
+#include "UtilityException.hpp"
 
 #ifndef _MSC_VER  // if not Microsoft Visual C++
 #include <dirent.h>
@@ -180,13 +182,20 @@ std::string GmatFileUtil::GetApplicationPath()
 
 #elif __MAC__
    std::string appPath = "./";
-   char path[1024];
+   char path[GmatFile::MAX_PATH_LEN];
+   char actualPath[GmatFile::MAX_PATH_LEN];
    uint32_t size = sizeof(path);
    if (_NSGetExecutablePath(path, &size) == 0)
    {
-      std::string thePath(path);
-      appPath = thePath;
-      // @todo - do I need to use realpath here too?
+      char *res = NULL;
+      res = realpath(path, actualPath);
+      if (!res)
+      {
+          UtilityException("ERROR getting actualPath using realpath\n");
+      }
+//      std::string thePath(actualPath);
+//      appPath = thePath;
+      appPath = actualPath;
    }
    return appPath;
 
