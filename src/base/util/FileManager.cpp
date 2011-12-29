@@ -337,7 +337,8 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       std::string newPath = appPath + "gmat_startup_file.txt";
       
       #ifdef DEBUG_READ_STARTUP_FILE
-      MessageInterface::ShowMessage("   new satartup file path = '%s'\n", newPath.c_str());
+      MessageInterface::ShowMessage("   appPath               = '%s'\n", appPath.c_str());
+      MessageInterface::ShowMessage("   new startup file path = '%s'\n", newPath.c_str());
       #endif
       
       if (GmatFileUtil::DoesFileExist(newPath))
@@ -362,6 +363,10 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    
    tmpStartupDir = GmatFileUtil::ParsePathName(tmpStartupFilePath);
    tmpStartupFile = GmatFileUtil::ParseFileName(tmpStartupFilePath);
+   #ifdef DEBUG_READ_STARTUP_FILE
+   MessageInterface::ShowMessage("   tmpStartupDir  = '%s'\n", tmpStartupDir.c_str());
+   MessageInterface::ShowMessage("   tmpStartupFile = '%s'\n", tmpStartupFile.c_str());
+   #endif
    
    if (tmpStartupDir == "")
       tmpStartupFilePath = tmpStartupFile;
