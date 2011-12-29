@@ -21,7 +21,7 @@
 #ifndef ConsoleMessageReceiver_hpp
 #define ConsoleMessageReceiver_hpp
 
-
+#include <queue>
 #include "MessageReceiver.hpp"
 
 /**
