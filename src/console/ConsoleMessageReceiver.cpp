@@ -330,9 +330,9 @@ void ConsoleMessageReceiver::OpenLogFile(const std::string &filename,
    
    if (!logFile)
    {
-      std::cout << "**** ERROR **** Error setting the log file to " 
+      std::cout << "**** ERROR **** Error setting the log file to \""
                 << logFileName
-                << "\nSo setting it to \"GmatLog.txt\" in the "
+                << "\"\nSo setting it to \"GmatLog.txt\" in the "
                 << "executable directory\n";
       
       logFileName = "GmatLog.txt";
@@ -346,7 +346,7 @@ void ConsoleMessageReceiver::OpenLogFile(const std::string &filename,
    if (logFile)
    {
       fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
-      fprintf(logFile, "GuiMessageReceiver::SetLogFile() Log file set to %s\n",
+      fprintf(logFile, "GuiMessageReceiver::SetLogFile() Log file set to \"%s\"\n",
               logFileName.c_str());
       
       if (append)
