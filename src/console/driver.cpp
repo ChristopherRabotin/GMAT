@@ -470,7 +470,7 @@ int main(int argc, char *argv[])
       #endif
 
       mod = Moderator::Instance();
-      if (mod == NULL || !(mod->Initialize()))
+      if (mod == NULL || !(mod->Initialize("gmat_startup_file.txt")))
       {
          std::cout << "Moderator failed to initialize!  Unable to run GmatConsole." << std::endl;
          return 1;
