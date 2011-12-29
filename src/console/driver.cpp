@@ -34,6 +34,11 @@
 #include "PointMassForce.hpp"
 #include "PrintUtility.hpp"
 
+//#define DEBUG_CONSOLE
+
+#ifdef DEBUG_CONSOLE
+#include <unistd.h>
+#endif
 
 static Moderator *mod = NULL;
 
@@ -449,12 +454,23 @@ int main(int argc, char *argv[])
       bool        batchRun = false;
       bool        settingVerbose = false;
       
+//      chdir("/Users/wshoan/Documents/workspace/trunk/application/bin64"); // ******* try this ***********
+
+
       // Set the message receiver and moderator pointers here
       ConsoleMessageReceiver *theMessageReceiver = ConsoleMessageReceiver::Instance();
       MessageInterface::SetMessageReceiver(theMessageReceiver);
 
+      #ifdef DEBUG_CONSOLE
+         char   *path = NULL;
+         size_t itsSize = 256;
+         path = getcwd(path, itsSize);
+         MessageInterface::ShowMessage(" --------> Running from directory %s\n", path);
+         MessageInterface::ShowMessage(" --------> and the application path is %s\n", argv[0]);
+      #endif
+
       mod = Moderator::Instance();
-      if (mod == NULL || !(mod->Initialize("gmat_startup_file.txt")))
+      if (mod == NULL || !(mod->Initialize()))
       {
          std::cout << "Moderator failed to initialize!  Unable to run GmatConsole." << std::endl;
          return 1;
@@ -484,6 +500,10 @@ int main(int argc, char *argv[])
                if ((!strcmp(scriptfile, "--help")) || (!strcmp(scriptfile, "-h")))
                {
                   ShowHelp();
+               }
+               else if (!strcmp(scriptfile, "--args"))
+               {
+                  ; // ignore this - it's used by the open statement hen opening the GUI version
                }
                else if ((!strcmp(scriptfile, "--run")) || (!strcmp(scriptfile, "-r")))
                {
@@ -572,6 +592,9 @@ int main(int argc, char *argv[])
             {
                // Replace single quotes
                GmatStringUtil::Replace(arg, "'", "");
+               #ifdef DEBUG_CONSOLE
+                  MessageInterface::ShowMessage(" --------> GmatConsole attempting to run script: %s\n", arg.c_str());
+               #endif
                RunScriptInterpreter(arg.c_str(), verbosity);
                runcomplete = true;
             }
@@ -584,6 +607,10 @@ int main(int argc, char *argv[])
                if (arg == "--start-server")
                {
                   std::cout << "\nGMAT server currently unavailable to GmatConsole\n ";
+               }
+               else if (arg =="--args")
+               {
+                  ; // ignore this - it's used by the open statement hen opening the GUI version
                }
                else if ((arg == "--minimize") || (arg == "-m"))
                {
@@ -638,6 +665,9 @@ int main(int argc, char *argv[])
                      // Replace single quotes
                      GmatStringUtil::Replace(scriptToRun, "'", "");
                      ++i;
+                     #ifdef DEBUG_CONSOLE
+                        MessageInterface::ShowMessage(" --------> GmatConsole attempting to run script: %s\n", scriptToRun.c_str());
+                     #endif
                      RunScriptInterpreter(scriptToRun.c_str(), verbosity);
                   }
                }
