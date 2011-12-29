@@ -38,6 +38,10 @@
 #include <direct.h>
 #endif
 
+#ifdef __MAC__
+#include <mach-o/dyld.h>
+#endif
+
 
 using namespace GmatStringUtil;
 
@@ -175,17 +179,21 @@ std::string GmatFileUtil::GetApplicationPath()
    return appPath;
 
 #elif __MAC__
-   //@todo Implement this for Mac
-   MessageInterface::ShowMessage
-      ("**** GmatFileUtil::GetApplicationPath() needs implementation for Mac, "
-       "so just returing empty string\n");
-   return "";
+   std::string appPath = "./";
+   char path[1024];
+   uint32_t size = sizeof(path);
+   if (_NSGetExecutablePath(path, &size) == 0)
+   {
+      std::string thePath(path);
+      appPath = thePath;
+      // @todo - do I need to use realpath here too?
+   }
+   return appPath;
 
 #else
-   //@todo Implement this for Mac
    MessageInterface::ShowMessage
       ("**** GmatFileUtil::GetApplicationPath() reached for unknown platform, "
-       "so just returing empty string\n");
+       "so just returning empty string\n");
    return "";
 #endif
 }
@@ -251,15 +259,25 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath,
       ("GmatFileUtil::ParsePathName() fullPath=<%s>\n", fullPath.c_str());
    #endif
    
-   std::string filePath;
-   std::string::size_type lastSlash = fullPath.find_last_of("/\\");
+   std::string filePath("");
+   std::string thePathToUse = fullPath;
+   #ifdef __MAC__
+      std::string appString = ".app";
+      std::string::size_type appLoc = fullPath.rfind(appString);
+      if (appLoc != fullPath.npos)
+      {
+         thePathToUse = fullPath.substr(0,appLoc);
+      }
+  #endif
    
-   if (lastSlash != filePath.npos)
+   std::string::size_type lastSlash = thePathToUse.find_last_of("/\\");
+
+   if (lastSlash != thePathToUse.npos)
    {
       if (appendSep)
-         filePath = fullPath.substr(0, lastSlash + 1);
+         filePath = thePathToUse.substr(0, lastSlash + 1);
       else
-         filePath = fullPath.substr(0, lastSlash);
+         filePath = thePathToUse.substr(0, lastSlash);
    }
    
    #ifdef DEBUG_PARSE_FILENAME
@@ -303,6 +321,10 @@ std::string GmatFileUtil::ParseFileName(const std::string &fullPath, bool remove
    
    if (removeExt)
    {
+   #ifdef DEBUG_PARSE_FILENAM
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParseFileName() removing extension\n");
+   #endif
       std::string::size_type index1 = fileName.find_first_of(".");
       if (index1 != fileName.npos)
          fileName = fileName.substr(0, index1);
