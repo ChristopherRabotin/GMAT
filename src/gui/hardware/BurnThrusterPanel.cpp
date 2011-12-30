@@ -282,7 +282,7 @@ void BurnThrusterPanel::Create()
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    gravityAccelTextCtrl->SetToolTip(pConfig->Read(_T("GravitationalAccelHint")));
    wxStaticText *gravityAccelUnit =
-      new wxStaticText(this, ID_TEXT, wxT(" m/s"));
+      new wxStaticText(this, ID_TEXT, wxT(" m/s^2"));
    
    // Coefficients for Thruster only
    if (theObject->IsOfType(Gmat::THRUSTER))
