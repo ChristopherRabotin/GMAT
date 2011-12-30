@@ -743,8 +743,8 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
          {
             std::string errmsg = "Gregorian date \"";
             errmsg += value + "\" is not an allowed value.  Allowed values are: [\"";
-            errmsg += DateUtil::GetEarliestGregorian() + "\" to \"";
-            errmsg += DateUtil::GetLatestGregorian() + "\"]\n";
+            errmsg += DateUtil::EARLIEST_VALID_GREGORIAN + "\" to \"";
+            errmsg += DateUtil::LATEST_VALID_GREGORIAN + "\"]\n";
             throw TimeFormatException(errmsg);
          }
       }
@@ -756,12 +756,12 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
       if (GmatStringUtil::ToReal(value, rval))
       {
          // Sputnik launched Oct 4, 1957 = 6116 MJ; don't accept earlier epochs.
-         if (checkValue && ((rval < DateUtil::GetEarliestMJDValue()) || (rval > DateUtil::GetLatestMJDValue())))
+         if (checkValue && ((rval < DateUtil::EARLIEST_VALID_MJD_VALUE) || (rval > DateUtil::LATEST_VALID_MJD_VALUE)))
          {
             std::string errmsg = "ModJulian Time \"";
             errmsg += value + "\" is not an allowed value.  Allowed values are: [";
-            errmsg += DateUtil::GetEarliestMJD() + " <= Real Number <= ";
-            errmsg += DateUtil::GetLatestMJD() + "]\n";
+            errmsg += DateUtil::EARLIEST_VALID_MJD + " <= Real Number <= ";
+            errmsg += DateUtil::LATEST_VALID_MJD + "]\n";
             throw InvalidTimeException(errmsg);
          }
       }

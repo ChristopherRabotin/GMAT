@@ -609,14 +609,14 @@ bool UserInputValidator::CheckTimeFormatAndValue(const std::string &format, cons
          std::string expRange = "";
          if (timeFormat == "Gregorian")
          {
-            expRange = "\"" + DateUtil::GetEarliestGregorian();
-            expRange += "\" to \"" + DateUtil::GetLatestGregorian();
+            expRange = "\"" + DateUtil::EARLIEST_VALID_GREGORIAN;
+            expRange += "\" to \"" + DateUtil::LATEST_VALID_GREGORIAN;
             expRange += "\"";
          }
          else
          {
-            expRange = DateUtil::GetEarliestMJD();
-            expRange += " <= Real Number <= " + DateUtil::GetLatestMJD();
+            expRange = DateUtil::EARLIEST_VALID_MJD;
+            expRange += " <= Real Number <= " + DateUtil::LATEST_VALID_MJD;
          }
          MessageInterface::PopupMessage
             (Gmat::ERROR_, mMsgFormat.c_str(), value.c_str(), field.c_str(),

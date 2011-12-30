@@ -190,7 +190,7 @@ void CoordSystemConfigPanel::SaveData()
 //         if (isValid && epoch < 0.0)
 //            isValid = CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
          if (isValid)
-            isValid = CheckRealRange(str, epoch, "Epoch", DateUtil::GetEarliestMJDValue(), DateUtil::GetLatestMJDValue(), true, true, true, true);
+            isValid = CheckRealRange(str, epoch, "Epoch", DateUtil::EARLIEST_VALID_MJD_VALUE, DateUtil::LATEST_VALID_MJD_VALUE, true, true, true, true);
          if (!isValid)
          {
             canClose = false;

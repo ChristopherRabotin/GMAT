@@ -2274,16 +2274,16 @@ bool EphemerisFile::SetEpoch(Integer id, const std::string &value,
       {
          std::string rangeMsg = epochFormat;
 //         rangeMsg += " (" + GmatTimeUtil::GetGregorianFormat() + ")";
-         rangeMsg += " [" + DateUtil::GetEarliestGregorian();
-         rangeMsg += " to " + DateUtil::GetLatestGregorian();
+         rangeMsg += " [" + DateUtil::EARLIEST_VALID_GREGORIAN;
+         rangeMsg += " to " + DateUtil::LATEST_VALID_GREGORIAN;
          rangeMsg += "]";
          HandleError(id, value, allowedValues, " or value in " + rangeMsg);
       }
       else
       {
-         std::string rangeMsg = "[" + DateUtil::GetEarliestMJD();
+         std::string rangeMsg = "[" + DateUtil::EARLIEST_VALID_MJD;
          rangeMsg += " <= " + epochFormat;
-         rangeMsg += " <= " + DateUtil::GetLatestMJD() + "]";
+         rangeMsg += " <= " + DateUtil::LATEST_VALID_MJD + "]";
          HandleError(id, value, allowedValues, " or value in " + rangeMsg);
       }
       

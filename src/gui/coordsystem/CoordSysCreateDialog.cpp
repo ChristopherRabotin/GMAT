@@ -168,7 +168,7 @@ void CoordSysCreateDialog::SaveData()
 //      if (isValid && epoch < 0.0)
 //         CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
       if (isValid)
-         CheckRealRange(str, epoch, "Epoch", DateUtil::GetEarliestMJDValue(), DateUtil::GetLatestMJDValue(), true, true, true, true);
+         CheckRealRange(str, epoch, "Epoch", DateUtil::EARLIEST_VALID_MJD_VALUE, DateUtil::LATEST_VALID_MJD_VALUE, true, true, true, true);
       
 //      str = mCoordPanel->GetIntervalTextCtrl()->GetValue();
 //      isValid = CheckReal(interval, str, "UpdateInterval", "Real Number >= 0");
