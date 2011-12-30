@@ -36,13 +36,34 @@ using namespace GmatMathUtil; // for Floor(), Mod()
 //---------------------------------
 // static data
 //---------------------------------
-const std::string DateUtil::earliestGregorian = "04 Oct 1957 12:00:00.000";
-const std::string DateUtil::latestGregorian   = "01 Jan 2100 00:00:00.000";
-const std::string DateUtil::earliestMJD       = "6116.00";
-const std::string DateUtil::latestMJD         = "58069.5";
-const Real        DateUtil::earliestMJDValue  = 6116.00;
-const Real        DateUtil::latestMJDValue    = 58069.5;
+// These are the lower and upper bounds for epoch.
+// GMAT's algorithms are only valid over this time range.
+//
+// Date must be equal to or later than Sputnik launch (04 Oct28 12:00:00.000)
+// and less than or equal to 1 Feb 2100 00:00:00.000
+const std::string DateUtil::EARLIEST_VALID_GREGORIAN  = "04 Oct 1957 12:00:00.000";
+const std::string DateUtil::LATEST_VALID_GREGORIAN    = "28 Feb 2100 00:00:00.000";
+const std::string DateUtil::EARLIEST_VALID_MJD        = "6116.00";
+const std::string DateUtil::LATEST_VALID_MJD          = "58127.5";
+const Real        DateUtil::EARLIEST_VALID_MJD_VALUE  = 6116.00;
+const Real        DateUtil::LATEST_VALID_MJD_VALUE    = 58127.5;
 
+// These must correspond to above dates, for code to properly check for
+// lower and upper epoch bounds
+
+const Integer     DateUtil::MIN_YEAR                  = 1957;
+const Integer     DateUtil::MIN_MONTH                 = 10;
+const Integer     DateUtil::MIN_DAY                   = 4;
+const Integer     DateUtil::MIN_HOUR                  = 12;
+const Integer     DateUtil::MIN_MINUTE                = 0;
+const Real        DateUtil::MIN_SEC                   = 0.000;
+
+const Integer     DateUtil::MAX_YEAR                  = 2100;
+const Integer     DateUtil::MAX_MONTH                 = 2;
+const Integer     DateUtil::MAX_DAY                   = 28;
+const Integer     DateUtil::MAX_HOUR                  = 0;
+const Integer     DateUtil::MAX_MINUTE                = 0;
+const Real        DateUtil::MAX_SEC                   = 0.000;
 
 //---------------------------------
 // static
@@ -131,39 +152,46 @@ bool DateUtil::IsValidGregorian(const std::string &str, bool checkDate)
    // check for date
    if (!IsValidTime(year, month, day, hour, min, sec))
       return false;
-   // Date must be equal to or later than Sputnik launch (04 Oct 1957 12:00:00.000)
-   // and less than or equal to 1 Jan 2100 00:00:00.000
+
    if (checkDate)
    {
-      if (year < 1957) return false;
-      else if (year == 1957)
+      if (year < MIN_YEAR) return false;
+      else if (year == MIN_YEAR)
       {
-         if (month < 10) return false;
-         else if (month == 10)
+         if (month < MIN_MONTH) return false;
+         else if (month == MIN_MONTH)
          {
-            if (day < 4) return false;
-            else if (day == 4)
+            if (day < MIN_DAY) return false;
+            else if (day == MIN_DAY)
             {
-               if (hour < 12) return false;
+               if (hour < MIN_HOUR) return false;
+               else if (hour == MIN_HOUR)
+               {
+                  if (min < MIN_MINUTE) return false;
+                  else if (min == MIN_MINUTE)
+                  {
+                     if (sec < MIN_SEC) return false;
+                  }
+               }
             }
          }
       }
-      if (year > 2100) return false;
-      else if (year == 2100)
+      if (year > MAX_YEAR) return false;
+      else if (year == MAX_YEAR)
       {
-         if (month > 1) return false;
-         else if (month == 1)
+         if (month > MAX_MONTH) return false;
+         else if (month == MAX_MONTH)
          {
-            if (day > 1) return false;
-            else if (day == 1)
+            if (day > MAX_DAY) return false;
+            else if (day == MAX_DAY)
             {
-               if (hour > 0) return false;
-               else if (hour == 0)
+               if (hour > MAX_HOUR) return false;
+               else if (hour == MAX_HOUR)
                {
-                  if (min > 0) return false;
-                  else if (min == 0)
+                  if (min > MAX_MINUTE) return false;
+                  else if (min == MAX_MINUTE)
                   {
-                     if (sec > 00.000) return false;
+                     if (sec > MAX_SEC) return false;
                   }
                }
             }
@@ -173,37 +201,6 @@ bool DateUtil::IsValidGregorian(const std::string &str, bool checkDate)
    return true;
 //   return IsValidTime(year, month, day, hour, min, sec);
 }
-
-std::string DateUtil::GetEarliestGregorian()
-{
-   return earliestGregorian;
-}
-
-std::string DateUtil::GetLatestGregorian()
-{
-   return latestGregorian;
-}
-
-std::string DateUtil::GetEarliestMJD()
-{
-   return earliestMJD;
-}
-
-std::string DateUtil::GetLatestMJD()
-{
-   return latestMJD;
-}
-
-Real DateUtil::GetEarliestMJDValue()
-{
-   return earliestMJDValue;
-}
-
-Real DateUtil::GetLatestMJDValue()
-{
-   return latestMJDValue;
-}
-
 
 
 //---------------------------------

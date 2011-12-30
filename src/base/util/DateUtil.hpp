@@ -27,6 +27,23 @@
 class GMAT_API DateUtil
 {
 public:
+   // --------------------------------------------------------------------------
+   // static data
+   // --------------------------------------------------------------------------
+   // These are the lower and upper bounds for epoch.
+   // GMAT's algorithms are only valid over this time range.
+   // --------------------------------------------------------------------------
+   static const std::string EARLIEST_VALID_GREGORIAN;
+   static const std::string LATEST_VALID_GREGORIAN;
+   static const std::string EARLIEST_VALID_MJD;
+   static const std::string LATEST_VALID_MJD;
+
+   static const Real        EARLIEST_VALID_MJD_VALUE;
+   static const Real        LATEST_VALID_MJD_VALUE;
+
+   // --------------------------------------------------------------------------
+   // static methods
+   // --------------------------------------------------------------------------
    static Integer       JulianDay(YearNumber year, MonthOfYear month,
                                   DayOfMonth day);
    
@@ -35,12 +52,6 @@ public:
                                         Real second);
 
    static bool          IsValidGregorian(const std::string &str, bool checkDate = false);
-   static std::string   GetEarliestGregorian();
-   static std::string   GetLatestGregorian();
-   static std::string   GetEarliestMJD();
-   static std::string   GetLatestMJD();
-   static Real          GetEarliestMJDValue();
-   static Real          GetLatestMJDValue();
 
    friend Real GMAT_API JulianDate(YearNumber year, MonthOfYear month,
                           DayOfMonth day, Integer hour, Integer minute,
@@ -74,13 +85,27 @@ public:
 
    friend bool GMAT_API IsLeapYear(Integer year);
 
-   static const std::string earliestGregorian;
-   static const std::string latestGregorian;
-   static const std::string earliestMJD;
-   static const std::string latestMJD;
 
-   static const Real        earliestMJDValue;
-   static const Real        latestMJDValue;
+protected:
+
+   // --------------------------------------------------------------------------
+   // static data
+   // --------------------------------------------------------------------------
+   // These must match the values of the static const strings/values above
+   // --------------------------------------------------------------------------
+   static const Integer     MIN_YEAR;
+   static const Integer     MIN_MONTH;
+   static const Integer     MIN_DAY;
+   static const Integer     MIN_HOUR;
+   static const Integer     MIN_MINUTE;
+   static const Real        MIN_SEC;
+
+   static const Integer     MAX_YEAR;
+   static const Integer     MAX_MONTH;
+   static const Integer     MAX_DAY;
+   static const Integer     MAX_HOUR;
+   static const Integer     MAX_MINUTE;
+   static const Real        MAX_SEC;
   
 };
 
