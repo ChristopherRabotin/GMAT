@@ -2121,7 +2121,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 
 
             rawState                 = &stateData[i*6];  // assumes in internalCoordSystem
-            cartStateInternal        = rawState;;
+            cartStateInternal        = rawState;
             // First convert the cartesian state to the summaryCoordSys
             cc.Convert(a1, cartStateInternal, internalCoordSys, cartState, summaryCoordSys);
             // Need to convert state to all representations
@@ -2396,10 +2396,10 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             if (tanks.size() > 0)
             {
                data << "\n        Tank masses:\n";
-               for (StringArray::iterator i = tanks.begin();
-                    i != tanks.end(); ++i)
-                  data << "           " << (*i) << ":   "
-                       << BuildNumber(obj->GetRefObject(Gmat::HARDWARE, (*i))->
+               for (StringArray::iterator ii = tanks.begin();
+                    ii != tanks.end(); ++ii)
+                  data << "           " << (*ii) << ":   "
+                       << BuildNumber(obj->GetRefObject(Gmat::HARDWARE, (*ii))->
                              GetRealParameter("FuelMass")) << " kg\n";
             }
             data << "\n";
