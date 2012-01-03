@@ -27,8 +27,8 @@
 
 #include "wx/colordlg.h"        // for wxColourDialog
 
-#define DEBUG_ARRAY_LOAD 1
-#define DEBUG_ARRAY_SAVE 1
+//#define DEBUG_ARRAY_LOAD 1
+//#define DEBUG_ARRAY_SAVE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -36,10 +36,7 @@
 
 BEGIN_EVENT_TABLE(ArraySetupDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
-   //EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
-   //EVT_BUTTON(ID_BUTTON_SCRIPT, GmatDialog::OnScript)
-   
    EVT_BUTTON(ID_BUTTON, ArraySetupDialog::OnButtonClick)
    EVT_COMBOBOX(ID_COMBO, ArraySetupDialog::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, ArraySetupDialog::OnTextUpdate)
@@ -72,7 +69,7 @@ ArraySetupDialog::ArraySetupDialog(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 void ArraySetupDialog::Create()
 {
-   int bsize = 3; // border size
+   int bsize = 2; // border size
    
    wxString arrValArray[] = { wxT("") };
    
