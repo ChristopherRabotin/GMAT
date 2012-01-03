@@ -38,11 +38,11 @@
 #include <wx/config.h>
 #include <wx/variant.h>                 // for wxVariant()
 
-#define DEBUG_PARAM_CREATE
-#define DEBUG_PARAM_CREATE_VAR
-#define DEBUG_PARAM_CREATE_LOAD
-#define DEBUG_PARAM_CREATE_SAVE
-#define DEBUG_PAGE_CHANGED
+//#define DEBUG_PARAM_CREATE
+//#define DEBUG_PARAM_CREATE_VAR
+//#define DEBUG_PARAM_CREATE_LOAD
+//#define DEBUG_PARAM_CREATE_SAVE
+//#define DEBUG_PAGE_CHANGED
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
