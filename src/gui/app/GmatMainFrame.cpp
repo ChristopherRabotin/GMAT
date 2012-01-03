@@ -75,7 +75,9 @@
 #include "ManageObjectPanel.hpp"
 #include "ReportPanel.hpp"
 #include "TogglePanel.hpp"
-#include "ParameterCreateDialog.hpp"
+//#include "ParameterCreateDialog.hpp"
+#include "ArraySetupPanel.hpp"
+#include "ParameterSetupPanel.hpp"
 #include "ConditionPanel.hpp"
 #include "ForPanel.hpp"
 #include "DoWhilePanel.hpp"
@@ -3180,21 +3182,24 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       ("GmatMainFrame::CreateNewResource() title='%s', name='%s', itemType=%d\n",
        title.c_str(), name.c_str(), itemType);
    #endif
-
+   
    // if variable, then display dialog, TGG 4/2010
-   switch (itemType)
-   {
-   case GmatTree::ARRAY:
-   case GmatTree::STRING:
-   case GmatTree::VARIABLE:
-      {
-         ParameterCreateDialog paramDlg(this, name);
-         paramDlg.ShowModal();
-         return NULL;
-      }
-   default:
-      break;
-   }
+   // Actually we don't want to use dialog here since it does not have standard
+   // Show Script, OK, Apply, and Cancel buttons. So changed to use ArraySetupPanel
+   // and ParameterSetupPanel below. (for Bug 2554 fix, LOJ 2012.01.03)
+   //switch (itemType)
+   //{
+   //case GmatTree::ARRAY:
+   //case GmatTree::STRING:
+   //case GmatTree::VARIABLE:
+   //   {
+   //      ParameterCreateDialog paramDlg(this, name);
+   //      paramDlg.ShowModal();
+   //      return NULL;
+   //   }
+   //default:
+   //   break;
+   //}
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    // if we are creating a script editor, we need to use saved configuration data, if it exists
@@ -3207,6 +3212,13 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    
    switch (itemType)
    {
+   case GmatTree::ARRAY:
+      sizer->Add(new ArraySetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::STRING:
+   case GmatTree::VARIABLE:
+      sizer->Add(new ParameterSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      break;
    case GmatTree::GROUND_STATION:
       sizer->Add(new GroundStationPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;

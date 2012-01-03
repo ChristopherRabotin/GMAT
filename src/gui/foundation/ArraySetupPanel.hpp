@@ -53,10 +53,6 @@ private:
    
    wxGrid *mArrGrid;
    
-   wxBoxSizer *mPageBoxSizer;
-   wxStaticBoxSizer *mArrStaticBoxSizer;
-   wxBoxSizer *mArrValBoxSizer;
-   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();

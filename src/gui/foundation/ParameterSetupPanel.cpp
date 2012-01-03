@@ -12,15 +12,13 @@
 // Created: 2004/02/25
 //
 /**
- * Implements ParameterSetupPanel class.
+ * Implements ParameterSetupPanel class. This panel is used for setting
+ * values for user Variables and Strings.
  */
 //------------------------------------------------------------------------------
 
 #include "ParameterSetupPanel.hpp"
-#include "RgbColor.hpp"
 #include "MessageInterface.hpp"
-#include "StringUtil.hpp"       // for GmatStringUtil::
-#include "wx/colordlg.h"        // for wxColourDialog
 
 //#define DEBUG_PARAM_PANEL 1
 
@@ -33,8 +31,6 @@ BEGIN_EVENT_TABLE(ParameterSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   
-   EVT_BUTTON(ID_COLOR_BUTTON, ParameterSetupPanel::OnColorButtonClick)
    EVT_TEXT(ID_TEXTCTRL, ParameterSetupPanel::OnTextUpdate)
 END_EVENT_TABLE()
 
@@ -50,8 +46,7 @@ ParameterSetupPanel::ParameterSetupPanel(wxWindow *parent, const wxString &name)
 {
    mVarName = name;
    mIsStringVar = false;
-   mIsColorChanged = false;
-   mIsExpChanged = false;
+   mIsValueChanged = false;
    
    mParam =
       (Parameter*)theGuiInterpreter->GetConfiguredObject(mVarName.c_str());
@@ -68,7 +63,7 @@ ParameterSetupPanel::ParameterSetupPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 void ParameterSetupPanel::Create()
 {
-   int bsize = 3; // border size
+   int bsize = 2; // border size
    
    //-------------------------------------------------------
    // for Variable Setup
@@ -83,25 +78,16 @@ void ParameterSetupPanel::Create()
    wxStaticText *equalSignStaticText =
       new wxStaticText(this, ID_TEXT, wxT("="),
                         wxDefaultPosition, wxDefaultSize, 0);
-   mExpStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Expression"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   mColorStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Color"),
+   wxStaticText *valueStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Value"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    // wxTextCtrl
    mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(150,20), 0);
-   mVarExpTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+   mValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(300,20), 0);
-   
-   // wxButton
-   mColorButton =
-      new wxButton(this, ID_COLOR_BUTTON, wxT(""),
-                   wxDefaultPosition, wxSize(25, 20), 0);
-   mColorButton->SetBackgroundColour(mColor);
-   
+      
    // wxSizers
    mPageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
@@ -121,30 +107,15 @@ void ParameterSetupPanel::Create()
    // 1st row
    top1FlexGridSizer->Add(nameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   top1FlexGridSizer->Add(mExpStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(valueStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    
    // 1st row
    top1FlexGridSizer->Add(mVarNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(equalSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   top1FlexGridSizer->Add(mVarExpTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(mValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   // detail
-   detailsBoxSizer->Add(mColorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(mColorButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-
    mVarStaticBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    mVarStaticBoxSizer->Add(detailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   // add note if Variable
-   if (!mIsStringVar)
-   {
-      wxStaticText *noteStaticText =
-         new wxStaticText(this, ID_TEXT,
-                          wxT("Only number is editable for expression for now."),
-                          wxDefaultPosition, wxDefaultSize, 0);
-      noteStaticText->SetForegroundColour(*wxRED);
-      mPageBoxSizer->Add(noteStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   }
    
    mPageBoxSizer->Add(mVarStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
@@ -180,28 +151,20 @@ void ParameterSetupPanel::LoadData()
       // show expression
       std::string varExp = mParam->GetStringParameter("Expression");
       mVarNameTextCtrl->SetValue(mVarName);
-      mVarExpTextCtrl->SetValue(varExp.c_str());
-      
-      UnsignedInt intColor = mParam->GetUnsignedIntParameter("Color");
-      RgbColor color(intColor);
-      mColor.Set(color.Red(), color.Green(), color.Blue());
-      mColorButton->SetBackgroundColour(mColor);
-      
+      mValueTextCtrl->SetValue(varExp.c_str());
+            
       if (!mIsStringVar)
       {
          // if expression is just a number, enable editing
          double realVal;
-         if (mVarExpTextCtrl->GetValue().ToDouble(&realVal))
-            mVarExpTextCtrl->Enable();
+         if (mValueTextCtrl->GetValue().ToDouble(&realVal))
+            mValueTextCtrl->Enable();
          else
-            mVarExpTextCtrl->Disable();
+            mValueTextCtrl->Disable();
       }
       else
       {
-         mVarExpTextCtrl->SetValue(mParam->GetStringParameter("Expression").c_str());
-         mExpStaticText->SetLabel("Value");
-         mColorStaticText->Hide();
-         mColorButton->Hide();
+         mValueTextCtrl->SetValue(mParam->GetStringParameter("Expression").c_str());
       }
       
       mVarNameTextCtrl->Disable();
@@ -224,9 +187,9 @@ void ParameterSetupPanel::SaveData()
    //-----------------------------------------------------------------
    // check values from text field if variable
    //-----------------------------------------------------------------
-   if (mIsExpChanged)
+   if (mIsValueChanged)
    {
-      expr = mVarExpTextCtrl->GetValue().c_str();
+      expr = mValueTextCtrl->GetValue().c_str();
       Real rval;
       if (mParam->GetTypeName() == "Variable")
          CheckReal(rval, expr, "Expression", "Real Number");
@@ -240,17 +203,10 @@ void ParameterSetupPanel::SaveData()
    //-----------------------------------------------------------------
    try
    {
-      if (mIsExpChanged)
+      if (mIsValueChanged)
       {
-         mIsExpChanged = false;
+         mIsValueChanged = false;
          mParam->SetStringParameter("Expression", expr);
-      }
-      
-      if (mIsColorChanged)
-      {
-         mIsColorChanged = false;
-         RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
-         mParam->SetUnsignedIntParameter("Color", color.GetIntColor());
       }
    }
    catch (BaseException &e)
@@ -266,34 +222,10 @@ void ParameterSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void ParameterSetupPanel::OnTextUpdate(wxCommandEvent& event)
 {
-   if (mVarExpTextCtrl->IsModified())
+   if (mValueTextCtrl->IsModified())
    {
-      mIsExpChanged = true;
+      mIsValueChanged = true;
       EnableUpdate(true);
    }
 }
-
-//------------------------------------------------------------------------------
-// void OnColorButtonClick(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void ParameterSetupPanel::OnColorButtonClick(wxCommandEvent& event)
-{    
-   wxColourData data;
-   data.SetColour(mColor);
-
-   wxColourDialog dialog(this, &data);
-   //dialog.CenterOnParent();
-   dialog.Center();
-   
-   if (dialog.ShowModal() == wxID_OK)
-   {
-      mColor = dialog.GetColourData().GetColour();
-      mColorButton->SetBackgroundColour(mColor);
-      mIsColorChanged = true;
-      EnableUpdate(true);
-   }
-}
-
-
-
 

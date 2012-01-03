@@ -12,7 +12,8 @@
 // Created: 2004/02/25
 //
 /**
- * Declares ParameterSetupPanel class.
+ * Declares ParameterSetupPanel class. This panel is used for setting
+ * values for user Variables and Strings.
  */
 //------------------------------------------------------------------------------
 
@@ -32,19 +33,12 @@ private:
 
    Parameter *mParam;
    bool mIsStringVar;
-   bool mIsColorChanged;
-   bool mIsExpChanged;
-  
-   wxColour mColor;
+   bool mIsValueChanged;
+   
    wxString mVarName;
 
-   wxStaticText *mExpStaticText;
-   wxStaticText *mColorStaticText;
-   
    wxTextCtrl *mVarNameTextCtrl;
-   wxTextCtrl *mVarExpTextCtrl;
-   
-   wxButton *mColorButton;
+   wxTextCtrl *mValueTextCtrl;
    
    wxBoxSizer *mPageBoxSizer;
    wxStaticBoxSizer *mVarStaticBoxSizer;
@@ -56,7 +50,6 @@ private:
     
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
-   void OnColorButtonClick(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();
 
@@ -66,7 +59,6 @@ private:
       ID_TEXT = 9000,
       ID_LISTBOX,
       ID_BUTTON,
-      ID_COLOR_BUTTON,
       ID_TEXTCTRL
    };
 };

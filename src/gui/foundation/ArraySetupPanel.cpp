@@ -18,12 +18,10 @@
 //------------------------------------------------------------------------------
 
 #include "ArraySetupPanel.hpp"
-#include "RgbColor.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include "Array.hpp"
-#include "StringUtil.hpp"       // for ToString()
+#include "StringUtil.hpp"          // for ToString()
 #include "MessageInterface.hpp"
-
-#include "wx/colordlg.h"        // for wxColourDialog
 
 //#define DEBUG_ARRAY_PANEL 1
 //#define DEBUG_ARRAY_SAVE 1
@@ -37,7 +35,6 @@ BEGIN_EVENT_TABLE(ArraySetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   
    EVT_BUTTON(ID_BUTTON, ArraySetupPanel::OnButtonClick)
    EVT_COMBOBOX(ID_COMBO, ArraySetupPanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, ArraySetupPanel::OnTextUpdate)
@@ -70,7 +67,7 @@ ArraySetupPanel::ArraySetupPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 void ArraySetupPanel::Create()
 {
-   int bsize = 3; // border size
+   int bsize = 2; // border size
    
    wxString arrValArray[] = { wxT("") };
    
@@ -82,30 +79,23 @@ void ArraySetupPanel::Create()
    // for Array Setup
    //-------------------------------------------------------
    wxStaticText *arrNameStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Name"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+      new wxStaticText(this, ID_TEXT, wxT("Name"), wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arr1RowStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Row"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+      new wxStaticText(this, ID_TEXT, wxT("Row"), wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arr1ColStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Column"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+      new wxStaticText(this, ID_TEXT, wxT("Column"), wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arrEqualSignStaticText =
-      new wxStaticText(this, ID_TEXT, wxT(" = "),
-                       wxDefaultPosition, wxDefaultSize, 0);
+      new wxStaticText(this, ID_TEXT, wxT(" = "), wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arrTimesStaticText =
-      new wxStaticText(this, ID_TEXT, wxT(" X "),
-                       wxDefaultPosition, wxDefaultSize, 0);
+      new wxStaticText(this, ID_TEXT, wxT(" X "), wxDefaultPosition, wxDefaultSize, 0);
    
-   mArrNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(120,20), 0);
-   mArrRowTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(35,20), 0);
-   mArrColTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(35,20), 0);
+   mArrNameTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,20), 0);
+   mArrRowTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,20), 0);
+   mArrColTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,20), 0);
    
-   wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array"));
-   mArrStaticBoxSizer = new wxStaticBoxSizer(arrayStaticBox, wxVERTICAL);
    wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    
    // 1st row
@@ -132,10 +122,10 @@ void ArraySetupPanel::Create()
    
    mRowComboBox = 
       new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(40,-1),
-         0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
+                     0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
    mColComboBox = 
       new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(40,-1), 
-         0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
+                     0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
    
    mArrValTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                      wxDefaultPosition, wxSize(100,20), 0);
@@ -144,7 +134,7 @@ void ArraySetupPanel::Create()
                    wxDefaultPosition, wxDefaultSize, 0);
    
    wxBoxSizer *singleValBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-
+   
    singleValBoxSizer->Add(mRowComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
    singleValBoxSizer->Add(commaStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    singleValBoxSizer->Add(mColComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -155,26 +145,27 @@ void ArraySetupPanel::Create()
    // use wxGrid show array values
    mArrGrid =
       new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(300,157), wxWANTS_CHARS);
-
+   
    mArrGrid->SetRowLabelSize(20);
    mArrGrid->SetColLabelSize(20);
    mArrGrid->SetScrollbars(5, 8, 15, 15);
    mArrGrid->EnableEditing(true);
    
-   mArrValBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mArrValBoxSizer->Add(singleValBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-   mArrValBoxSizer->Add(mArrGrid, 0, wxALIGN_CENTER|wxALL, bsize);
+   wxBoxSizer *arrValBoxSizer = new wxBoxSizer(wxVERTICAL);
+   arrValBoxSizer->Add(singleValBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   arrValBoxSizer->Add(mArrGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   mArrStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mArrStaticBoxSizer->Add(mArrValBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   GmatStaticBoxSizer *arrStaticBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Array");
+   arrStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   arrStaticBoxSizer->Add(arrValBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   mPageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mPageBoxSizer->Add(mArrStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
+   pageBoxSizer->Add(arrStaticBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(mPageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(pageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
 
 }
 
