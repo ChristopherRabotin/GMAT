@@ -3,7 +3,7 @@
 # location of GMAT base headers and libraries
 GMAT_CODE_LOCATION = ../../../src
 BASE_LIB_LOCATION =  ../../../application/bin
-GMAT_BIN_LOCATION =  ../../../application/plugins
+GMAT_BIN_LOCATION =  ../../../application/bin
 
 # Set to 0 for Windows, 1 for Linux or Mac
 LINUX_MAC = 0
