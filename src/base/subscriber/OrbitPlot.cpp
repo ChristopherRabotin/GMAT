@@ -34,6 +34,7 @@
 //#define DBGLVL_INIT 2
 //#define DBGLVL_DATA 2
 //#define DBGLVL_DATA_LABELS 1
+//#define DBGLVL_UPDATE 2
 //#define DBGLVL_ADD 1
 //#define DBGLVL_OBJ 2
 //#define DBGLVL_PARAM 2
@@ -1940,7 +1941,8 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
        mNumData, mDataCollectFrequency, currentProvider);
    #endif
    
-   if ((mNumData % mDataCollectFrequency) == 0)
+   // Buffer data if data collect frequecy is met or fist data
+   if ((mNumData % mDataCollectFrequency) == 0 || (mNumData == 1))
    {
       Integer status = BufferOrbitData(dat, len);
       
@@ -2084,7 +2086,6 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
        mViewCoordSystem ? mViewCoordSystem->GetName().c_str() : "NULL");
    #endif
    
-   mNumData = 0;
    mNumCollected++;
    
    #if DBGLVL_DATA > 1
