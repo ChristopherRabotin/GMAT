@@ -99,8 +99,8 @@ const std::string StateConversionUtil::ANOMALY_SHORT_TEXT[AnomalyTypeCount] =
 
 
 //---------------------------------------------------------------------------
-//  Rvector6 Convert(const Rvector6 &state,
-//                   Real mu,
+//  Rvector6 Convert(Real mu,
+//                   const Rvector6 &state,
 //                   const std::string &fromType,
 //                   const std::string &toType,
 //                   const std::string &anomalyType = "TA")
@@ -1139,12 +1139,12 @@ Real StateConversionUtil::TrueToMeanAnomaly(Real taRadians, Real ecc, bool modBy
 
    Real ma = 0.0;
 
-   if (ecc < (1.0 - GmatOrbitConstants::KEP_ANOMALY_TOL))
+   if (ecc < (1.0 - GmatOrbitConstants::KEP_TOL))
    {
       Real ea = TrueToEccentricAnomaly(taRadians, ecc);
       ma = ea - ecc * Sin(ea);
    }
-   else if (ecc > (1.0 + GmatOrbitConstants::KEP_ANOMALY_TOL))
+   else if (ecc > (1.0 + GmatOrbitConstants::KEP_TOL))
    {
       Real ha = TrueToHyperbolicAnomaly(taRadians, ecc);
       ma = ecc * Sinh(ha) - ha;
@@ -1221,13 +1221,12 @@ Real StateConversionUtil::TrueToEccentricAnomaly(Real taRadians, Real ecc, bool 
 Real StateConversionUtil::TrueToHyperbolicAnomaly(Real taRadians, Real ecc, bool modBy2Pi)
 {
    #ifdef DEBUG_ANOMALY
-   MessageInterface::ShowMessage
-      ("TrueToHyperbolicAnomaly() ta=%f, ecc=%f\n", taRadians, ecc);
+      MessageInterface::ShowMessage("TrueToHyperbolicAnomaly() ta=%f, ecc=%f\n", taRadians, ecc);
    #endif
 
    Real ha = 0.0;
 
-   if (ecc >= (1.0 + GmatOrbitConstants::KEP_ANOMALY_TOL))
+   if (ecc >= (1.0 + GmatOrbitConstants::KEP_TOL))
    {
       Real cosTa = Cos(taRadians);
       Real eccCosTa = ecc * cosTa;
@@ -1239,6 +1238,12 @@ Real StateConversionUtil::TrueToHyperbolicAnomaly(Real taRadians, Real ecc, bool
       Real coshHa = (ecc + cosTa) / (1.0 + eccCosTa);
       ha = ATanh(sinhHa / coshHa);
    }
+#ifdef DEBUG_ANOMALY
+   else
+   {
+      MessageInterface::ShowMessage("TrueToHyperbolicAnomaly() ecc < (1.0 + KEP_TOL), returning ha = 0.0\n");
+   }
+#endif
 
    #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage("TrueToHyperbolicAnomaly() returning %f\n", ha);
@@ -1247,6 +1252,8 @@ Real StateConversionUtil::TrueToHyperbolicAnomaly(Real taRadians, Real ecc, bool
    {
       while (ha > TWO_PI)
          ha -= TWO_PI;
+      while (ha < 0.0)
+         ha += TWO_PI;
    }
 
    return ha;
