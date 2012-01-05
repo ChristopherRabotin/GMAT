@@ -320,7 +320,7 @@ void OrbitPanel::LoadData()
       
       #ifdef DEBUG_ORBIT_PANEL_LOAD
       MessageInterface::ShowMessage
-//         ("   mAnomaly=\n   [%s]\n", mAnomaly.ToString(16).c_str());
+         ("   mAnomalyType=\n   [%s]\n", mAnomalyType.c_str());
       #endif
       
       // Get Spacecraft initial state
@@ -436,6 +436,10 @@ void OrbitPanel::SaveData()
    
    
    std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+   // save the current text values to re-display, to avoid floating point differences
+   Rvector6 savedState;
+   for (int ii = 0; ii < 6; ii++)
+      savedState[ii] = atof(textCtrl[ii]->GetValue());
    
    try
    {
@@ -458,9 +462,10 @@ void OrbitPanel::SaveData()
             
             // Since BuildState() recomputes internal state and compute back to
             // current state type, numbers will be different, so re display
-            // mOutState.
+            // mOutState. (savedState; mOutState is modified in BuildState - wcs 2011.12.20)
             for (int i=0; i<6; i++)
-               textCtrl[i]->SetValue(ToString(mOutState[i]));
+               textCtrl[i]->SetValue(ToString(savedState[i]));
+//               textCtrl[i]->SetValue(ToString(mOutState[i]));
             
             ResetStateFlags(true);
             
@@ -960,6 +965,8 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       mIsAnomalyTypeChanged = true;
       wxString description, stateValue;      
       mAnomalyType = anomalyComboBox->GetValue();
+      // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
+      mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
       
       #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
       MessageInterface::ShowMessage
@@ -1209,6 +1216,9 @@ void OrbitPanel::DisplayState()
 //         Anomaly temp(midState[0], midState[1], midState[5], mFromAnomalyTypeStr);
 //         mAnomaly = temp;
          mAnomalyType = mFromAnomalyTypeStr;  // is this right??
+         // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
+         mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
+
          #ifdef DEBUG_ORBIT_PANEL_STATE_CHANGE
          MessageInterface::ShowMessage("In DisplayState, about to print out anomaly type ...\n");
             MessageInterface::ShowMessage(
@@ -1436,7 +1446,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
          (isInternal ? "Cartesian" : mFromStateTypeStr.c_str()),
          tempState.ToString(16).c_str());
       MessageInterface::ShowMessage(" ... and mAnomaly type is %s\n",
-            (mAnomalyType.c_str());
+            (mAnomalyType.c_str()));
    #endif
       
    Rvector6 midState;
@@ -1468,12 +1478,12 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
          MessageInterface::ShowMessage("before Coordinate Conversion, mEpoch = %12.10f\n", mEpoch);
          MessageInterface::ShowMessage("  mFromCoord = %s, mInternalCoord = %s\n",
                mFromCoord->GetName().c_str(), mInternalCoord->GetName().c_str());
+         MessageInterface::ShowMessage("  and mAnomalyType = %s\n", mAnomalyType.c_str());
          #endif
          
          // Convert input state to the Cartesian representation
          Real mu = GetOriginMu(mFromCoord);
-         midState = StateConversionUtil::Convert(mu, inputState, mFromStateTypeStr,
-                                           "Cartesian", mAnomalyType);
+         midState = StateConversionUtil::Convert(mu, inputState, mFromStateTypeStr,"Cartesian", mAnomalyType);
          
          // Transform to internal coordinates
          mCoordConverter.Convert(A1Mjd(mEpoch), midState, mFromCoord, mCartState, 
@@ -1649,6 +1659,9 @@ bool OrbitPanel::CheckCartesian(Rvector6 &state)
 bool OrbitPanel::CheckKeplerian(Rvector6 &state)
 {
    mAnomalyType = anomalyComboBox->GetValue().c_str();
+   // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
+   mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
+
    bool retval = true;
    
    if (theScPanel->CheckReal(state[0], mElements[0], "SMA", "Real Number"))
@@ -1739,6 +1752,9 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
 bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
 {
    mAnomalyType = anomalyComboBox->GetValue().c_str();
+   // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
+   mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
+
    bool retval = true;
    
    #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
