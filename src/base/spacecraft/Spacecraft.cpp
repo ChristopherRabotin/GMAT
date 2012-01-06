@@ -114,10 +114,6 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // TotalMass
       Gmat::STRING_TYPE,      // Id
       Gmat::OBJECT_TYPE,      // Attitude
-//      Gmat::STRINGARRAY_TYPE, // OrbitSpiceKernelName
-//      Gmat::STRINGARRAY_TYPE, // AttitudeSpiceKernelName
-//      Gmat::STRINGARRAY_TYPE, // SCClockSpiceKernelName
-//      Gmat::STRINGARRAY_TYPE, // FrameSpiceKernelName
       Gmat::RMATRIX_TYPE,     // OrbitSTM
       Gmat::RMATRIX_TYPE,     // OrbitAMatrix
       Gmat::STRING_TYPE,      // UTCGregorian
@@ -170,10 +166,6 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "TotalMass",
       "Id",
       "Attitude",
-//      "OrbitSpiceKernelName",
-//      "AttitudeSpiceKernelName",
-//      "SCClockSpiceKernelName",
-//      "FrameSpiceKernelName",
       "OrbitSTM",
       "OrbitAMatrix",
       "UTCGregorian",
@@ -228,10 +220,6 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "RAV",
    "DECV",
    // Equinoctial
-//   "PEY",
-//   "PEX",
-//   "PNY",
-//   "PNX",
    "EquinoctialH",
    "EquinoctialK",
    "EquinoctialP",
@@ -240,6 +228,7 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
 };
 
 const Integer Spacecraft::ATTITUDE_ID_OFFSET = 20000;
+const Real    Spacecraft::UNSET_ELEMENT_VALUE = -999.999;
 
 //-------------------------------------
 // public methods
@@ -305,7 +294,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();
 
-   Real a1mjd = -999.999;
+   Real a1mjd = UNSET_ELEMENT_VALUE;
    std::string outStr;
    Real taimjd = GmatTimeConstants::MJD_OF_J2000;
 
@@ -316,12 +305,15 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    //state.SetEpoch(GmatTimeConstants::MJD_OF_J2000);
    state.SetEpoch(a1mjd);
 
-   state[0] = 7100.0;
-   state[1] = 0.0;
-   state[2] = 1300.0;
-   state[3] = 0.0;
-   state[4] = 7.35;
-   state[5] = 1.0;
+   for (Integer ii = 0; ii < state.GetSize(); ii++)
+      state[ii] = UNSET_ELEMENT_VALUE;
+
+   defaultCartesian[0] = 7100.0;
+   defaultCartesian[1] = 0.0;
+   defaultCartesian[2] = 1300.0;
+   defaultCartesian[3] = 0.0;
+   defaultCartesian[4] = 7.35;
+   defaultCartesian[5] = 1.0;
 
    stateElementLabel.push_back("X");
    stateElementLabel.push_back("Y");
@@ -343,6 +335,11 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    representations.push_back("SphericalAZFPA");
    representations.push_back("SphericalRADEC");
    representations.push_back("Equinoctial");
+
+   // initialize possible input state types to be any type
+   for (unsigned int ii = 0; ii < representations.size(); ii++)
+      possibleInputTypes.push_back(representations.at(ii));
+
 
    parameterCount = SpacecraftParamCount;
 
@@ -842,7 +839,7 @@ Rvector6 Spacecraft::GetCartesianState()
 /**
  * Get the converted Keplerian states from states in different coordinate type.
  *
- * @return converted Keplerain states
+ * @return converted Keplerian states
  */
 //------------------------------------------------------------------------------
 Rvector6 Spacecraft::GetKeplerianState()
@@ -1703,17 +1700,6 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 
       if (str == "AMatrix")
          return ORBIT_A_MATRIX;
-//      if (str == "OrbitSpiceKernelName")
-//         return ORBIT_SPICE_KERNEL_NAME;
-//
-//      if (str == "AttitudeSpiceKernelName")
-//         return ATTITUDE_SPICE_KERNEL_NAME;
-//
-//      if (str == "SCClockSpiceKernelName")
-//         return SC_CLOCK_SPICE_KERNEL_NAME;
-//
-//      if (str == "FrameSpiceKernelName")
-//         return FRAME_SPICE_KERNEL_NAME;
 
 
       if ((str == "CartesianState") || (str == "CartesianX")) return CARTESIAN_X;
@@ -2612,8 +2598,6 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
          #endif
          return attitude->GetStringArrayParameter(id - ATTITUDE_ID_OFFSET);
       }
-//   if (id == ORBIT_SPICE_KERNEL_NAME)
-//      return orbitSpiceKernelNames;
    return SpaceObject::GetStringArrayParameter(id);
 }
 
@@ -2725,9 +2709,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       {
          // Load trueAnomaly with the state data
          Rvector6 kep = GetStateInRepresentation("Keplerian");
-//         trueAnomaly.SetSMA(kep[0]);
-//         trueAnomaly.SetECC(kep[1]);
-//         trueAnomaly.SetValue(kep[5]);
          trueAnomaly = kep[5];
       }
 
@@ -2794,7 +2775,11 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          thrusterNames.push_back(value);
       }
    }
-// else if (id == ORBIT_SPICE_KERNEL_NAME)
+   else if (id == MODEL_FILE)
+   {
+        modelFile = value;
+   }
+//   else if (id == ORBIT_SPICE_KERNEL_NAME)  // why is this here?  The string arrays were all moved to SpacePoint ... wcs
 //   {
 //      // Only add the thruster if it is not in the list already
 //      if (find(orbitSpiceKernelNames.begin(), orbitSpiceKernelNames.end(),
@@ -2803,19 +2788,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 //         orbitSpiceKernelNames.push_back(value);
 //      }
 //   }
-        else if (id == MODEL_FILE)
-   {
-        modelFile = value;
-   }
-   else if (id == ORBIT_SPICE_KERNEL_NAME)
-   {
-      // Only add the thruster if it is not in the list already
-      if (find(orbitSpiceKernelNames.begin(), orbitSpiceKernelNames.end(),
-            value) == orbitSpiceKernelNames.end())
-      {
-         orbitSpiceKernelNames.push_back(value);
-      }
-   }
 
    #ifdef DEBUG_SC_SET_STRING
    MessageInterface::ShowMessage
@@ -2928,14 +2900,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
          return true;
       }
 
-//   case ORBIT_SPICE_KERNEL_NAME:
-//      if (index < (Integer)orbitSpiceKernelNames.size())
-//         orbitSpiceKernelNames[index] = value;
-//      // Only add the orbit spice kernel name if it is not in the list already
-//      else if (find(orbitSpiceKernelNames.begin(), orbitSpiceKernelNames.end(),
-//            value) == orbitSpiceKernelNames.end())
-//         orbitSpiceKernelNames.push_back(value);
-//      return true;
 
    default:
       return SpaceObject::SetStringParameter(id, value, index);
@@ -3248,17 +3212,27 @@ bool Spacecraft::TakeAction(const std::string &action,
 
       if (csSet == false)
       {
-         Rvector6 st(state.GetState());
-         #ifdef DEBUG_SPACECRAFT_CS
-         MessageInterface::ShowMessage
-            ("Spacecraft::TakeAction() Calling SetStateFromRepresentation(%s, cartesianstate), "
-             "since CS was not set()\n", stateType.c_str());
-         MessageInterface::ShowMessage
-            (" ... at this point, the state = %s\n", (st.ToString()).c_str());
-         #endif
          try
          {
-            SetStateFromRepresentation(stateType, st);
+            // We haven't done any state conversions on inputs up to this point (primarily because we
+            // don't have a mu to use for conversions until the coordinate system is set).
+            // first convert the default cartesian state to the input state type
+            Rvector6 convertedState = StateConversionUtil::Convert(originMu, defaultCartesian, "Cartesian", stateType);
+            #ifdef DEBUG_SPACECRAFT_CS
+               MessageInterface::ShowMessage("Spacecraft::TakeAction() Converting cartesian default to state type %s\n", stateType.c_str());
+               MessageInterface::ShowMessage("    default cartesian is: %s\n", (defaultCartesian.ToString()).c_str());
+               MessageInterface::ShowMessage("    state converted to %s is: %s\n", stateType.c_str(), (convertedState.ToString()).c_str());
+            #endif
+            // then assign the input values to the state
+            for (Integer ii = 0; ii < state.GetSize(); ii++)
+               if (state[ii] != UNSET_ELEMENT_VALUE) convertedState[ii] = state[ii];
+            #ifdef DEBUG_SPACECRAFT_CS
+               MessageInterface::ShowMessage("    state converted to %s with input values is: %s\n", stateType.c_str(), (convertedState.ToString()).c_str());
+               MessageInterface::ShowMessage
+                  ("Spacecraft::TakeAction() Calling SetStateFromRepresentation(%s, cartesianstate), "
+                   "since CS was not set()\n", stateType.c_str());
+            #endif
+            SetStateFromRepresentation(stateType, convertedState);
          }
          catch (BaseException &be)
          {
@@ -3670,7 +3644,7 @@ void Spacecraft::SetAnomaly(const std::string &type, Real ta)
    anomalyType = StateConversionUtil::GetAnomalyShortText(type);
    // wcs 2007.05.18 - don't assume - only set the label if it's appropriate
    if (displayStateType == "Keplerian" || displayStateType == "ModifiedKeplerian")
-   stateElementLabel[5] = anomalyType;     // this assumes current display type is Keplerian/ModKep??
+      stateElementLabel[5] = anomalyType;
 
    #ifdef DEBUG_SPACECRAFT_SET
    MessageInterface::ShowMessage
@@ -5188,6 +5162,8 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    #endif
    std::string rep = "";
    Integer id = LookUpLabel(label, rep) - ELEMENT1_ID;
+   std::string currentRep  = stateType;
+
    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
       MessageInterface::ShowMessage
          (" ************ In SC::SetElement, after LookUpLabel, ELEMENT1_ID = %d, id = %d, rep = %s\n",
@@ -5198,11 +5174,8 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    {
       if ((rep == "Keplerian") || (rep == "ModifiedKeplerian"))
       {
-         // Load trueAnomaly with the state data
+         // Grab trueAnomaly
          Rvector6 kep = GetStateInRepresentation("Keplerian");
-//         trueAnomaly.SetSMA(kep[0]);
-//         trueAnomaly.SetECC(kep[1]);
-//         trueAnomaly.SetValue(kep[5]);
          trueAnomaly = kep[5];
       }
       // 2007.05.24 - wcs - Bug 875 - because some elements are the same for
@@ -5228,7 +5201,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
       /// 2010.03.22 - wcs - SMA could also be Equinoctial
       else if ( (stateType == "Equinoctial") && (rep == "Keplerian") &&
                (label == "SMA") )
-//         (label != "SMA"))
+         // leave type as Equinoctial
       {
          #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
             MessageInterface::ShowMessage
@@ -5637,5 +5610,17 @@ bool Spacecraft::VerifyAddHardware()
    }
    
    return verify;
+}
+
+//-------------------------------------------------------------------------
+// Integer NumStateElementsSet()
+//-------------------------------------------------------------------------
+Integer Spacecraft::NumStateElementsSet()
+{
+   Integer stateSz = state.GetSize();
+   Integer numSet = stateSz;
+   for (Integer ii = 0; ii < stateSz; ii++)
+      if (state[ii] != UNSET_ELEMENT_VALUE) numSet--;
+   return numSet;
 }
 

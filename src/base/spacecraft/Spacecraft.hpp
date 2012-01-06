@@ -231,10 +231,6 @@ protected:
       TOTAL_MASS_ID,
       SPACECRAFT_ID,
       ATTITUDE,
-//      ORBIT_SPICE_KERNEL_NAME,
-//      ATTITUDE_SPICE_KERNEL_NAME,
-//      SC_CLOCK_SPICE_KERNEL_NAME,
-//      FRAME_SPICE_KERNEL_NAME,
       ORBIT_STM,
       ORBIT_A_MATRIX,
 //      ORBIT_COVARIANCE,
@@ -319,10 +315,12 @@ protected:
       KEPLERIAN_ID,
       MODIFIED_KEPLERIAN_ID,
       SPHERICAL_AZFPA_ID,
-      SPHERICAL_RADEC_ID
+      SPHERICAL_RADEC_ID,
+      EQUINOCTIAL_ID
    };
 
    static const Integer ATTITUDE_ID_OFFSET;
+   static const Real    UNSET_ELEMENT_VALUE;
 
    std::map <std::string, std::string> elementLabelMap;
 
@@ -370,20 +368,21 @@ protected:
 
    std::string       coordSysName;
 
-   /// gravitational constant for the central body (origin)
+   /// Gravitational constant for the central body (origin)
    Real              originMu;
+   /// Default cartesian state
+   Rvector6          defaultCartesian;
+   /// Current list of possible input state types
+   StringArray       possibleInputTypes;
 
    /// coordinate system map to be used for Thrusters for now
    std::map<std::string, CoordinateSystem*> coordSysMap;
 
-   /// Spacecraft ID Used in estimation, measuremetn data files, etc
+   /// Spacecraft ID Used in estimation, measurement data files, etc
    std::string       spacecraftId;
 
    /// Pointer to the object that manages the attitude of the spacecraft
    Attitude          *attitude;
-
-//   /// Orbit SPICE kernel name(s)
-//   StringArray       orbitSpiceKernelNames;
 
    // for non-internal spacecraft information
    CoordinateConverter coordConverter;
@@ -447,7 +446,8 @@ protected:
    void              RecomputeStateAtEpoch(const GmatEpoch &toEpoch);
 
 private:
-   bool                          VerifyAddHardware();                   // made changes by Tuan Nguyen
+   bool              VerifyAddHardware();                   // made changes by Tuan Nguyen
+   Integer           NumStateElementsSet();
 
 };
 
