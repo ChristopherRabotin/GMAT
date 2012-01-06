@@ -48,6 +48,8 @@
 //#define DEBUG_LOAD_MODEL 1
 //#define DEBUG_OBJECT 1
 //#define DEBUG_DATA_BUFFERRING 1
+//#define DEBUG_UPDATE 1
+//#define DEBUG_DRAW 1
 
 //---------------------------------
 // static data
@@ -695,8 +697,8 @@ void ViewCanvas::SetEndOfRun(bool flag)
 {
    #if DEBUG_UPDATE
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetEndOfRun() ViewCanvas::SetEndOfRun() flag=%d, "
-       "mNumData=%d\n",  flag, mNumData);
+      ("ViewCanvas::SetEndOfRun() '%s' entered, flag=%d, mNumData=%d\n",
+       mPlotName.c_str(), flag, mNumData);
    #endif
    
    mIsEndOfRun = flag;
@@ -705,28 +707,8 @@ void ViewCanvas::SetEndOfRun(bool flag)
    if (mNumData < 1)
    {
       Refresh(false);
+      Update();
       return;
-   }
-   
-   if (mIsEndOfRun)
-   {
-      #if DEBUG_LONGITUDE
-      MessageInterface::ShowMessage
-         ("ViewCanvas::SetEndOfRun() mIsEndOfRun=%d, mNumData=%d\n",
-          mIsEndOfRun, mNumData);
-      #endif
-      
-      //-------------------------------------------------------
-      // get first spacecraft id
-      //-------------------------------------------------------
-      int objId = UNKNOWN_OBJ_ID;
-      for (int sc=0; sc<mScCount; sc++)
-      {
-         objId = GetObjectId(mScNameArray[sc].c_str());
-         
-         if (objId != UNKNOWN_OBJ_ID)
-            break;
-      }
    }
 }
 

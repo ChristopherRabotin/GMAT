@@ -105,15 +105,11 @@ using namespace FloatAttUtil;
 
 // debug
 //#define DEBUG_INIT 1
-//#define DEBUG_UPDATE 1
-//#define DEBUG_SOLVER_DATA 1
-//#define DEBUG_UPDATE_OBJECT 2
 //#define DEBUG_ACTION 1
 //#define DEBUG_CONVERT 1
 //#define DEBUG_DRAW 1
 //#define DEBUG_ZOOM 1
 //#define DEBUG_OBJECT 2
-//#define DEBUG_TEXTURE 2
 //#define DEBUG_PERSPECTIVE 1
 //#define DEBUG_PROJECTION 1
 //#define DEBUG_CS 1
