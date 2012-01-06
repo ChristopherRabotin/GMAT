@@ -922,7 +922,7 @@ void GuiInterpreter::UpdateMissionTree()
 void GuiInterpreter::UpdateOutputTree()
 {
 #if !defined __CONSOLE_APP__
-   GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true);
+   GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true, true);
 #endif
 }
 

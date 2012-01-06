@@ -3900,7 +3900,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       if (textFrame == NULL)
       {
          GmatTreeItemData *compareItem =
-            new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
+            new GmatTreeItemData("CompareReport", GmatTree::OUTPUT_COMPARE_REPORT);
 
          textFrame = theMainFrame->CreateChild(compareItem);
       }
@@ -4298,16 +4298,17 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    GmatTreeItemData *selItemData = (GmatTreeItemData *)GetItemData(itemId);
    wxString title = selItemData->GetName();
    GmatTree::ItemType itemType = selItemData->GetItemType();
-   bool showRemoveDelete = true;
-
-   // We don't want to show Remove and Delete menu if any non-plot panel is open
-   // except MissionTree panel
+   bool showRenameDelete = true;
+   
+   // We don't want to show Remove and Delete menu if any panel is open
+   // except MissionTree panel (LOJ: 2012.01.06)
+   //@tbs Do we want to show any message? Gray out Remove and Delete?
    Integer x, y, w;
-   Integer numChildren = theMainFrame->GetNumberOfChildOpen();
+   Integer numChildren = theMainFrame->GetNumberOfChildOpen(false, true);
    if (numChildren == 1 && theMainFrame->IsMissionTreeUndocked(x, y, w))
-      showRemoveDelete = true;
+      showRenameDelete = true;
    else if (numChildren > 0)
-      showRemoveDelete = false;
+      showRenameDelete = false;
    
    #ifdef DEBUG_SHOW_MENU
    MessageInterface::ShowMessage
@@ -4478,7 +4479,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       default:
          menu.Append(POPUP_OPEN, wxT("Open"));
          menu.Append(POPUP_CLOSE, wxT("Close"));
-         if (showRemoveDelete)
+         if (showRenameDelete)
          {
             menu.AppendSeparator();
             menu.Append(POPUP_RENAME, wxT("Rename"));
