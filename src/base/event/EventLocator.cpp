@@ -1614,6 +1614,16 @@ GmatEpoch EventLocator::GetLastEpoch(Integer index)
    return lastEpochs[index];
 }
 
+//------------------------------------------------------------------------------
+// void SetFoundEventBrackets(Integer index, GmatEpoch early, GmatEpoch late)
+//------------------------------------------------------------------------------
+/**
+ * Sets the bracketing epochs in which an event may exist
+ *
+ * @param early The earliest epoch for the event
+ * @param late The latest epoch for the event
+ */
+//------------------------------------------------------------------------------
 void EventLocator::SetFoundEventBrackets(Integer index, GmatEpoch early,
       GmatEpoch late)
 {
@@ -1622,11 +1632,32 @@ void EventLocator::SetFoundEventBrackets(Integer index, GmatEpoch early,
 }
 
 
+//------------------------------------------------------------------------------
+// bool HasAssociatedStateObjects()
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if there are state associations in the class
+ *
+ * @return true if there are associations, false if not.
+ */
+//------------------------------------------------------------------------------
 bool EventLocator::HasAssociatedStateObjects()
 {
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetAssociateName(UnsignedInt val)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of an object associated with an event function
+ *
+ * @param val The index to the event function
+ *
+ * @return The name of the primary associated with that event.
+ */
+//------------------------------------------------------------------------------
 std::string EventLocator::GetAssociateName(UnsignedInt val)
 {
    std::string retval = "";
@@ -1656,6 +1687,16 @@ std::string EventLocator::GetTarget(UnsignedInt forFunction)
    return eventFunctions[forFunction]->GetPrimaryName();
 }
 
+
+//------------------------------------------------------------------------------
+// StringArray GetDefaultPropItems()
+//------------------------------------------------------------------------------
+/**
+ * Returns a list of the types of prop items this class includes
+ *
+ * @return The list
+ */
+//------------------------------------------------------------------------------
 StringArray EventLocator::GetDefaultPropItems()
 {
    StringArray propItems;
@@ -1663,6 +1704,20 @@ StringArray EventLocator::GetDefaultPropItems()
    return propItems;
 }
 
+
+//------------------------------------------------------------------------------
+// Integer SetPropItem(const std::string &propItem)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID of the input prop item type, as known in this class
+ *
+ * @note This method is poorly named.  We should change it to IdentifyPropItem.
+ *
+ * @param propItem The prop item that needs to be identified
+ *
+ * @return The type ID of the prop item
+ */
+//------------------------------------------------------------------------------
 Integer EventLocator::SetPropItem(const std::string &propItem)
 {
    if (propItem == "EventFunction")
@@ -1671,6 +1726,17 @@ Integer EventLocator::SetPropItem(const std::string &propItem)
    return Gmat::UNKNOWN_STATE;
 }
 
+//------------------------------------------------------------------------------
+// Integer EventLocator::GetPropItemSize(const Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Returns the size of the prop item vector needed by this class
+ *
+ * @param item The ID of the prop item
+ *
+ * @return The size of the associated prop item
+ */
+//------------------------------------------------------------------------------
 Integer EventLocator::GetPropItemSize(const Integer item)
 {
    if (item == Gmat::EVENT_FUNCTION_STATE)

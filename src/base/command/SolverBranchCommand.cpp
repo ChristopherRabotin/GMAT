@@ -27,6 +27,8 @@
 #include "Vary.hpp"                // For SetInitialValue() method
 #include "Subscriber.hpp"
 #include "MessageInterface.hpp"
+#include "EventLocator.hpp"
+
 #include <sstream>                 // for <<
 
 //#define DEBUG_PARSING
@@ -158,8 +160,7 @@ GmatCommand* SolverBranchCommand::GetNext()
       return this;
    
    // Set state back to RUNNING
-   if (publisher)
-      publisher->SetRunState(Gmat::RUNNING);
+   ChangeRunState(Gmat::RUNNING);
    
    if (((commandExecuting) && (commandComplete)) && (exitMode == STOP))
    {
@@ -239,6 +240,19 @@ void SolverBranchCommand::StoreLoopData()
          
          localStore.push_back(form);
       }
+      if (obj->GetType() == Gmat::EVENT_LOCATOR)
+      {
+         EventLocator *orig = (EventLocator*)(obj);
+         EventLocator *el  = (EventLocator*)orig->Clone();
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            ((GmatBase*)form, "cloned local eventLocator",
+             "SolverBranchCommand::StoreLoopData()",
+             "EventLocator *el  = new EventLocator(*orig)");
+         #endif
+
+         localStore.push_back(el);
+      }
       ++pair;
    }
    // Check the Global Object Store next
@@ -255,7 +269,8 @@ void SolverBranchCommand::StoreLoopData()
          Spacecraft *sc = new Spacecraft(*orig);
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
-            ((GmatBase*)sc, "cloned local sc", "SolverBranchCommand::StoreLoopData()",
+            ((GmatBase*)sc, "cloned local sc",
+             "SolverBranchCommand::StoreLoopData()",
              "Spacecraft *sc = new Spacecraft(*orig)");
          #endif
          // Handle CoordinateSystems
@@ -279,10 +294,24 @@ void SolverBranchCommand::StoreLoopData()
          Formation *form  = new Formation(*orig);
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
-            ((GmatBase*)form, "cloned local form", "SolverBranchCommand::StoreLoopData()",
+            ((GmatBase*)form, "cloned local form",
+             "SolverBranchCommand::StoreLoopData()",
              "Formation *form  = new Formation(*orig)");
          #endif
          localStore.push_back(form);
+      }
+      if (obj->GetType() == Gmat::EVENT_LOCATOR)
+      {
+         EventLocator *orig = (EventLocator*)(obj);
+         EventLocator *el  = (EventLocator*)orig->Clone();
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            ((GmatBase*)form, "cloned local eventLocator",
+             "SolverBranchCommand::StoreLoopData()",
+             "EventLocator *el  = new EventLocator(*orig)");
+         #endif
+
+         localStore.push_back(el);
       }
       ++globalPair;
    }
@@ -300,10 +329,12 @@ void SolverBranchCommand::ResetLoopData()
 {
    Spacecraft *sc;
    Formation  *fm;
+   EventLocator *el;
    std::string name;
     
    for (std::vector<GmatBase *>::iterator i = localStore.begin();
-        i != localStore.end(); ++i) {
+        i != localStore.end(); ++i)
+   {
       name = (*i)->GetName();
       //GmatBase *gb = (*objectMap)[name];
       GmatBase *gb = FindObject(name);
@@ -317,6 +348,11 @@ void SolverBranchCommand::ResetLoopData()
          {
             fm = (Formation*)gb;
             *fm = *((Formation*)(*i));
+         }
+         else if (gb->GetType() == Gmat::EVENT_LOCATOR)
+         {
+            el = (EventLocator*)gb;
+            *el = *((EventLocator*)(*i));
          }
       }
    }
@@ -345,13 +381,14 @@ void SolverBranchCommand::ResetLoopData()
 void SolverBranchCommand::FreeLoopData()
 {
    GmatBase *obj;
-   while (!localStore.empty()) {
+   while (!localStore.empty())
+   {
       obj = *(--localStore.end());
       localStore.pop_back();
       #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Remove
-         (obj, obj->GetName(), "SolverBranchCommand::FreeLoopData()",
-          "deleting local obj");
+         MemoryTracker::Instance()->Remove
+            (obj, obj->GetName(), "SolverBranchCommand::FreeLoopData()",
+             "deleting local obj");
       #endif
       delete obj;
    }
@@ -1015,6 +1052,15 @@ GmatBase* SolverBranchCommand::GetClone(Integer cloneIndex)
 }
 
 
+//------------------------------------------------------------------------------
+// void PrepareToPublish(bool publishAll)
+//------------------------------------------------------------------------------
+/**
+ * Prepares the command for data publishing
+ *
+ * @param publishAll Flag used to indicate if everything should be published
+ */
+//------------------------------------------------------------------------------
 void SolverBranchCommand::PrepareToPublish(bool publishAll)
 {
    StringArray owners, elements;
@@ -1030,7 +1076,42 @@ void SolverBranchCommand::PrepareToPublish(bool publishAll)
 }
 
 
+//------------------------------------------------------------------------------
+// void PublishData()
+//------------------------------------------------------------------------------
+/**
+ * Pushes provider data to the publisher
+ */
+//------------------------------------------------------------------------------
 void SolverBranchCommand::PublishData()
 {
    publisher->Publish(this, streamID, NULL, 0);
+}
+
+
+//------------------------------------------------------------------------------
+// void ChangeRunState(Gmat::RunState newState)
+//------------------------------------------------------------------------------
+/**
+ * Passes run state into all members of the Solver Control Sequence & Publisher
+ *
+ * @param newState The new run state
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::ChangeRunState(Gmat::RunState newState)
+{
+   currentRunState = newState;
+
+   if (publisher != NULL)
+      publisher->SetRunState(currentRunState);
+
+   GmatCommand *current;
+   std::vector<GmatCommand*>::iterator node;
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      current = *node;
+
+      if ((current != NULL) && (current != this))
+         current->SetRunState(currentRunState);
+   }
 }

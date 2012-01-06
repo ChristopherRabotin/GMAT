@@ -1323,162 +1323,167 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
       return false;
    }
 
-   #ifdef DEBUG_EVENTLOCATORS
-      // Linear interpolate to guess the epoch
-      Real bounds[2], epochs[2];
-      bounds[0] = previousEventData[index*3+1];
-      bounds[1] = currentEventData[index*3+1];
-
-      epochs[0] = previousEventData[index*3];
-      epochs[1] = currentEventData[index*3];
-
-      Real zero = epochs[0] - bounds[0] * (epochs[1] - epochs[0]) /
-            (bounds[1] - bounds[0]);
-
-      MessageInterface::ShowMessage("Zero ~ at %12lf for locator %s function "
-         "index %d\n", zero, el->GetName().c_str(), index);
-   #endif
-
-   // Preserve the current state data
-   Real propDir = direction;
-   BufferSatelliteStates(true);
-   bool wasPublishing = publishOnStep;
-   publishOnStep = false;
-
-   Integer stepsTaken = 0;
-   Integer maxStepsAllowed = 31;  // 2^31 = 2.14e10
-
-   // Build an estimate of machine precision for the independent variable
- //  Real machineEpochPrecision   = currentEventData[epochIndex];
-   Real lastEpoch = currentEventData[index*3], currentStep, desiredEpoch;
-
-   // Prepare the RootFinder
-   finder->Initialize(previousEventData[index*3],
-         previousEventData[index*3+1], currentEventData[index*3],
-         currentEventData[index*3+1]);
-
-   Real elapsedSeconds = 0.0;
-
-   // Loop until (1) the maximum number of steps is taken, (2) the step
-   // tolerance is at the numerical precision of the data, or (3) the step
-   // achieves the step tolerance
-//   Real locateTolerance = el->GetTolerance() * GmatTimeConstants::DAYS_PER_SEC;
-   Real locateTolerance = el->GetTolerance();
-//   // Variable used to get the time step measure from the search algorithm
-//   Real stepDifference;
-
-   do
+   if ((currentRunState == Gmat::RUNNING) ||
+       (currentRunState == Gmat::SOLVEDPASS))
    {
-      // Get the step desired
-      desiredEpoch = finder->GetStep();
-      currentStep = (desiredEpoch - lastEpoch) * GmatTimeConstants::SECS_PER_DAY;
 
-      // Take the step
-      std::vector<Propagator*>::iterator current = p.begin();
-      // Step all of the propagators by the input amount
-      while (current != p.end())
-      {
-         (*current)->SetAsFinalStep(true);
-         bool isForward = (*current)->PropagatesForward();
-         if (!(*current)->Step(currentStep))
-         {
-            char size[32];
-            std::sprintf(size, "%.12lf", currentStep);
-            throw CommandException("In LocateEvent, Propagator " + 
-               (*current)->GetName() +
-               " failed to take a good final step (size = " + size + ")\n");
-         }
-         (*current)->SetAsFinalStep(false);
-         (*current)->SetForwardPropagation(isForward);
-
-         ++current;
-      }
-
-      // todo: This loop will miss propagators that do not have force models
-      for (UnsignedInt i = 0; i < fm.size(); ++i)
-      {
-         // events and orbit related parameters use spacecraft for data
-         Real elapsedTime = fm[i]->GetTime();
-
-         GmatEpoch tempEpoch = baseEpoch[i] + elapsedTime /
-            GmatTimeConstants::SECS_PER_DAY;
-
-         // Update spacecraft epoch, without argument the spacecraft epoch
-         // won't get updated for consecutive Propagate command
-         if (fm[i])
-            fm[i]->UpdateSpaceObject(tempEpoch);
-         else
-            p[i]->UpdateSpaceObject(tempEpoch);
-      }
-
-      elapsedSeconds += currentStep;
-
-      // Evaluate the function and buffer it
-      // First evaluate the event functions
-      for (Integer i = 0; i < activeLocatorCount; ++i)
-      {
-         Real *data = events->at(activeEventIndices[i])->Evaluate();
-         Integer dataIndex = eventStartIndices[i];
-         UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
-         for (UnsignedInt j = 0; j < fc*3; ++j)
-            tempEventData[dataIndex + j] = data[j];
-      }
-
-      #ifdef DEBUG_EVENT_LOCATION
-         MessageInterface::ShowMessage("ElapsedSecs = %.12lf; Passing in new "
-               "data: %12lf %.12lf\n", elapsedSeconds, tempEventData[index*3],
-               tempEventData[index*3+1]);
-      #endif
-
-      finder->SetValue(tempEventData[index*3], tempEventData[index*3+1]);
-//      stepDifference = finder->GetStepMeasure();
-
-      lastEpoch = tempEventData[index*3];
-      ++stepsTaken;
-   }
-   while ((stepsTaken < maxStepsAllowed) && 
-          (GmatMathUtil::Abs(tempEventData[index*3+1]) > locateTolerance));
-//   while ((stepsTaken < maxStepsAllowed) && (stepDifference > locateTolerance));
-//
-//         &&
-//          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
-
-   if ((GmatMathUtil::Abs(tempEventData[index*3+1]) < locateTolerance) &&
-       (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
-      eventFound = true;
-
-//   if ((stepDifference < locateTolerance) &&
-//       (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
-//      eventFound = true;
-
-   // End of temporary section
-
-   if (eventFound)
-   {
       #ifdef DEBUG_EVENTLOCATORS
-         MessageInterface::ShowMessage("Found an event for function "
-            "index %d\n", index);
+         // Linear interpolate to guess the epoch
+         Real bounds[2], epochs[2];
+         bounds[0] = previousEventData[index*3+1];
+         bounds[1] = currentEventData[index*3+1];
+
+         epochs[0] = previousEventData[index*3];
+         epochs[1] = currentEventData[index*3];
+
+         Real zero = epochs[0] - bounds[0] * (epochs[1] - epochs[0]) /
+               (bounds[1] - bounds[0]);
+
+         MessageInterface::ShowMessage("Zero ~ at %12lf for locator %s function "
+            "index %d\n", zero, el->GetName().c_str(), index);
       #endif
-      UpdateEventTable(el, index);
-      GmatEpoch start, end;
-      finder->GetBrackets(start, end);
-      el->SetFoundEventBrackets(index, start, end);
-   }
-   #ifdef DEBUG_EVENTLOCATORS
-   else
-   {
-      // Linear interpolate to guess the epoch
-      MessageInterface::ShowMessage("No zero found for locator %s function "
-            "index %d; steps taken = %d\n", el->GetName().c_str(), index, 
-            stepsTaken);
-   }
-   #endif
 
-   // Preserve the current state data
-   BufferSatelliteStates(false);
-   publishOnStep = wasPublishing;
+      // Preserve the current state data
+      Real propDir = direction;
+      BufferSatelliteStates(true);
+      bool wasPublishing = publishOnStep;
+      publishOnStep = false;
 
-   direction = propDir;
+      Integer stepsTaken = 0;
+      Integer maxStepsAllowed = 31;  // 2^31 = 2.14e10
+
+      // Build an estimate of machine precision for the independent variable
+    //  Real machineEpochPrecision   = currentEventData[epochIndex];
+      Real lastEpoch = currentEventData[index*3], currentStep, desiredEpoch;
+
+      // Prepare the RootFinder
+      finder->Initialize(previousEventData[index*3],
+            previousEventData[index*3+1], currentEventData[index*3],
+            currentEventData[index*3+1]);
+
+      Real elapsedSeconds = 0.0;
+
+      // Loop until (1) the maximum number of steps is taken, (2) the step
+      // tolerance is at the numerical precision of the data, or (3) the step
+      // achieves the step tolerance
+   //   Real locateTolerance = el->GetTolerance() * GmatTimeConstants::DAYS_PER_SEC;
+      Real locateTolerance = el->GetTolerance();
+   //   // Variable used to get the time step measure from the search algorithm
+   //   Real stepDifference;
+
+      do
+      {
+         // Get the step desired
+         desiredEpoch = finder->GetStep();
+         currentStep = (desiredEpoch - lastEpoch) * GmatTimeConstants::SECS_PER_DAY;
+
+         // Take the step
+         std::vector<Propagator*>::iterator current = p.begin();
+         // Step all of the propagators by the input amount
+         while (current != p.end())
+         {
+            (*current)->SetAsFinalStep(true);
+            bool isForward = (*current)->PropagatesForward();
+            if (!(*current)->Step(currentStep))
+            {
+               char size[32];
+               std::sprintf(size, "%.12lf", currentStep);
+               throw CommandException("In LocateEvent, Propagator " +
+                  (*current)->GetName() +
+                  " failed to take a good final step (size = " + size + ")\n");
+            }
+            (*current)->SetAsFinalStep(false);
+            (*current)->SetForwardPropagation(isForward);
+
+            ++current;
+         }
+
+         // todo: This loop will miss propagators that do not have force models
+         for (UnsignedInt i = 0; i < fm.size(); ++i)
+         {
+            // events and orbit related parameters use spacecraft for data
+            Real elapsedTime = fm[i]->GetTime();
+
+            GmatEpoch tempEpoch = baseEpoch[i] + elapsedTime /
+               GmatTimeConstants::SECS_PER_DAY;
+
+            // Update spacecraft epoch, without argument the spacecraft epoch
+            // won't get updated for consecutive Propagate command
+            if (fm[i])
+               fm[i]->UpdateSpaceObject(tempEpoch);
+            else
+               p[i]->UpdateSpaceObject(tempEpoch);
+         }
+
+         elapsedSeconds += currentStep;
+
+         // Evaluate the function and buffer it
+         // First evaluate the event functions
+         for (Integer i = 0; i < activeLocatorCount; ++i)
+         {
+            Real *data = events->at(activeEventIndices[i])->Evaluate();
+            Integer dataIndex = eventStartIndices[i];
+            UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
+            for (UnsignedInt j = 0; j < fc*3; ++j)
+               tempEventData[dataIndex + j] = data[j];
+         }
+
+         #ifdef DEBUG_EVENT_LOCATION
+            MessageInterface::ShowMessage("ElapsedSecs = %.12lf; Passing in new "
+                  "data: %12lf %.12lf\n", elapsedSeconds, tempEventData[index*3],
+                  tempEventData[index*3+1]);
+         #endif
+
+         finder->SetValue(tempEventData[index*3], tempEventData[index*3+1]);
+   //      stepDifference = finder->GetStepMeasure();
+
+         lastEpoch = tempEventData[index*3];
+         ++stepsTaken;
+      }
+      while ((stepsTaken < maxStepsAllowed) &&
+             (GmatMathUtil::Abs(tempEventData[index*3+1]) > locateTolerance));
+   //   while ((stepsTaken < maxStepsAllowed) && (stepDifference > locateTolerance));
+   //
+   //         &&
+   //          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
+
+      if ((GmatMathUtil::Abs(tempEventData[index*3+1]) < locateTolerance) &&
+          (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
+         eventFound = true;
+
+   //   if ((stepDifference < locateTolerance) &&
+   //       (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
+   //      eventFound = true;
+
+      // End of temporary section
+
+      if (eventFound)
+      {
+         #ifdef DEBUG_EVENTLOCATORS
+            MessageInterface::ShowMessage("Found an event for function "
+               "index %d\n", index);
+         #endif
+         UpdateEventTable(el, index);
+         GmatEpoch start, end;
+         finder->GetBrackets(start, end);
+         el->SetFoundEventBrackets(index, start, end);
+      }
+      #ifdef DEBUG_EVENTLOCATORS
+      else
+      {
+         // Linear interpolate to guess the epoch
+         MessageInterface::ShowMessage("No zero found for locator %s function "
+               "index %d; steps taken = %d\n", el->GetName().c_str(), index,
+               stepsTaken);
+      }
+      #endif
+
+      // Preserve the current state data
+      BufferSatelliteStates(false);
+      publishOnStep = wasPublishing;
+
+      direction = propDir;
+   }
 
    return eventFound;
 }

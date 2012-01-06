@@ -677,7 +677,7 @@ bool Target::Execute()
    {
       GmatCommand *currentCmd;
    
-      publisher->SetRunState(Gmat::SOLVING);
+      ChangeRunState(Gmat::SOLVING);
       
       switch (startMode)
       {
@@ -721,7 +721,7 @@ bool Target::Execute()
                   {
                      ResetLoopData();
                      branchExecuting = true;
-                     publisher->SetRunState(Gmat::SOLVEDPASS);
+                     ChangeRunState(Gmat::SOLVEDPASS);
                   }
                   theSolver->Finalize();
                   specialState = Solver::FINISHED;
@@ -822,7 +822,7 @@ bool Target::Execute()
                      ApplySubscriberBreakpoint();
                      PenDownSubscribers();
                      LightenSubscribers(1);
-                     publisher->SetRunState(Gmat::SOLVEDPASS);
+                     ChangeRunState(Gmat::SOLVEDPASS);
                   }
                   break;
                      

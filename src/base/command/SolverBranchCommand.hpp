@@ -66,7 +66,7 @@ public:
    virtual GmatBase*   GetClone(Integer cloneIndex = 0);
 
 protected:
-   // Mode definitions for the state machine overrrides
+   // Mode definitions for the state machine overrides
    enum solverStartMode
    {
       RUN_INITIAL_GUESS,
@@ -120,6 +120,8 @@ protected:
    virtual void        ApplySubscriberBreakpoint(Integer bp = -1);
    virtual void        PrepareToPublish(bool publishAll = true);
    virtual void        PublishData();
+
+   virtual void        ChangeRunState(Gmat::RunState newState);
 
    enum
    {

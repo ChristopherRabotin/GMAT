@@ -201,6 +201,7 @@ public:
    virtual bool        Execute() = 0;
    virtual bool        SkipInterrupt();
    virtual void        RunComplete();
+   virtual void        SetRunState(Gmat::RunState newState);
    
    bool                HasConfigurationChanged();
    virtual void        ConfigurationChanged(bool tf, bool setAll = false);
@@ -304,6 +305,9 @@ protected:
    
    /// Count of owned objects created through cloning
    Integer              cloneCount;
+
+   /// Field used for processes that only function in certain run states
+   Gmat::RunState       currentRunState;
 
    virtual bool         AssignObjects();
    virtual bool         ClearObjects();

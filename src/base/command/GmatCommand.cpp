@@ -140,6 +140,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
 //   comment              (""),
    commandChanged       (false),
    cloneCount           (0),
+   currentRunState      (Gmat::RUNNING),  // RUNNING means just treat normally
    epochData            (NULL),
    stateData            (NULL),
    parmData             (NULL)
@@ -281,6 +282,7 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    commandChanged       (c.commandChanged),
    settables            (c.settables),
    cloneCount           (0),
+   currentRunState      (c.currentRunState),
    epochData            (NULL),
    stateData            (NULL),
    parmData             (NULL)
@@ -344,6 +346,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    summaryName         = c.summaryName;
    commandChanged      = c.commandChanged;
    cloneCount          = 0;
+   currentRunState     = c.currentRunState;
    settables           = c.settables;
    
    epochData           = NULL;
@@ -1844,6 +1847,26 @@ void GmatCommand::RunComplete()
       if (!next->IsOfType("BranchEnd"))
          next->RunComplete();
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void GmatCommand::SetRunState(Gmat::RunState newState)
+//------------------------------------------------------------------------------
+/**
+ * Toggle for the run state
+ *
+ * This method is used to set the current execution state for commands.  Some
+ * commands that need to know the state in order to determine how to manage
+ * internal processes.  For example, the PropagationEnabledComamnds use this
+ * setting to manage event location in a solver loop.
+ *
+ * @param newState The new run state
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetRunState(Gmat::RunState newState)
+{
+   currentRunState = newState;
 }
 
 
