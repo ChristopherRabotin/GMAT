@@ -210,7 +210,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
             ("**** ERROR **** Unknown view type %d\n", currentView);
          return false;
       }
-      
+
       frame->SetSavedConfigFlag(isUsingSaved);
 
       if (frame)
@@ -229,8 +229,10 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
          if (w != -1 && h != -1)
          {
             // Why not showing the plot without resetting the size?
+            // Used SetSize with wxSIZE_NO_ADJUSTMENTS (LOJ: 2012.01.05)
             frame->SetSize(w-1, h-1);
-            frame->SetSize(w+1, h+1);
+            //frame->SetSize(w+1, h+1);
+            frame->SetSize(x, y, w+1, h+1, wxSIZE_NO_ADJUSTMENTS);
          }
       #endif
          
@@ -243,9 +245,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       ++MdiGlPlot::numChildren;
       plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
       
-      // Do no tile at all (LOj: 2011.09.23)
-      //if (!isPresetSizeUsed && plotCount > 5)
-      //   GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      // Tile plots if TILED_PLOT mode is set from the startup file
       if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
          GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
       
@@ -650,13 +650,10 @@ bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
          if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_ORBIT_VIEW);
-            
-            // Tile vertically
-            ////GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
          }
       }
    }
-
+   
    return true;
 }
 
@@ -909,8 +906,10 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
          if (w != -1 && h != -1)
          {
             // Why not showing the plot without resetting the size?
+            // Used SetSize with wxSIZE_NO_ADJUSTMENTS (LOJ: 2012.01.05)
             frame->SetSize(w-1, h-1);
-            frame->SetSize(w+1, h+1);
+            //frame->SetSize(w+1, h+1);
+            frame->SetSize(x, y, w+1, h+1, wxSIZE_NO_ADJUSTMENTS);
          }
       #endif
          
@@ -966,14 +965,11 @@ bool GuiPlotReceiver::DeleteXyPlot(const std::string &plotName)
          {
             gmatAppData->GetMainFrame()->CloseChild(owner,
                   GmatTree::OUTPUT_XY_PLOT);
-            
-            // Tile vertically
-            ////GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
             break;
          }
       }
    }
-
+   
    return true;
 }
 
@@ -2033,17 +2029,6 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
          Integer activePlotCount = mainFrame->GetNumberOfActivePlots();
          int newCount = plotCount + 1;
          
-         // Why x = 0 and y = 0 does not position to top left of the client window?
-         // Make some position adjustments for non Mac
-         Real realH = (Real)screenHeight;
-         Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
-         if (yOffset > 40) yOffset = 40;
-         #ifdef DEBUG_PLOT_PERSISTENCE
-         MessageInterface::ShowMessage
-            ("   activePlotCount = %d, newCount = %d\n", activePlotCount, newCount);
-         MessageInterface::ShowMessage("   screen y offset = %4d\n", yOffset);
-         #endif
-         
          // compute plot size depends on number of active plots
          if (activePlotCount == 1)
          {
@@ -2073,15 +2058,6 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
             y = h + 5 + (newCount - 1) * 20;
          }
          
-         #ifdef DEBUG_PLOT_PERSISTENCE
-         MessageInterface::ShowMessage("   before offset: x = %4d, y = %4d\n", x, y);
-         #endif
-         
-         y -= yOffset;
-         
-         #ifdef DEBUG_PLOT_PERSISTENCE
-         MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
-         #endif
       #endif
    }
    else
@@ -2102,26 +2078,6 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       y = (Integer) (positionY * (Real) screenHeight);
       w = (Integer) (width     * (Real) screenWidth);
       h = (Integer) (height    * (Real) screenHeight);
-      
-      #ifdef DEBUG_PLOT_PERSISTENCE
-      MessageInterface::ShowMessage("   before offset: x = %4d, y = %4d, w = %4d, h = %4d\n", x, y, w,h);
-      #endif
-      
-      // Why x = 0 and y = 0 does not position to top left of the client window?
-      // Make some position adjustments for non Mac
-      #ifndef __WXMAC__
-         Real realH = (Real)screenHeight;
-         Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
-         if (yOffset > 40) yOffset = 40;
-         // Since -1 is default position, change it to 0
-         if (x == -1) x = 0;
-         y -= yOffset;
-         //@todo Why y position of plots keep going down?
-         #ifdef DEBUG_PLOT_PERSISTENCE
-         MessageInterface::ShowMessage("   screen offset: y = %4d\n", yOffset);
-         MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
-         #endif
-      #endif
    }
    
    #ifdef DEBUG_PLOT_PERSISTENCE

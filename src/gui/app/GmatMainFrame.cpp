@@ -135,6 +135,7 @@
 #include "bitmaps/animation_options.xpm"
 #endif
 
+// If we want to use child best size define this
 #define __USE_CHILD_BEST_SIZE__
 
 // If Sleep in not defined (on unix boxes)
@@ -164,6 +165,8 @@
 //#define DEBUG_PENDING_EVENTS
 //#define DEBUG_DOCK_UNDOCK
 //#define DEBUG_CONFIG_DATA
+//#define DEBUG_PERSISTENCE
+//#define DEBUG_REPOSITION_CHILDREN
 
 using namespace GmatMenu;
 
@@ -753,8 +756,8 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    {
       // Create panel if Report or Compare Report or Event Report
       if (itemType == GmatTree::OUTPUT_REPORT ||
-          itemType == GmatTree::COMPARE_REPORT ||
-          itemType == GmatTree::EVENT_REPORT)
+          itemType == GmatTree::OUTPUT_COMPARE_REPORT ||
+          itemType == GmatTree::OUTPUT_EVENT_REPORT)
          newChild = CreateNewOutput(item->GetTitle(), item->GetName(), itemType);
    }
    else if (itemType == GmatTree::MISSION_TREE_UNDOCKED)
@@ -782,7 +785,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
       #endif
       
       #ifdef __WXMAC__
-      // todo: Need to handle EVENT_REPORT here?
+      // todo: Need to handle OUTPUT_EVENT_REPORT here?
       if ((numChildren > 0) && !((newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED) && mUndockedMissionTreePresized) &&
           !((newChild->GetItemType() == GmatTree::OUTPUT_REPORT) && newChild->GetSavedConfigFlag()))
       #else
@@ -791,78 +794,14 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
       {
          #ifdef DEBUG_CHILD_WINDOW
          MessageInterface::ShowMessage
-            ("Now repositioning the Mdi child window(s) ...................\n");
+            ("   Now repositioning the Mdi child window(s) ...................\n");
          #endif
-         int toolW, toolH;
-         theToolBar->GetSize(&toolW, &toolH);         
-         int x = (numChildren - 1) * 20;         
          #ifdef __WXMAC__
             // reposition vertical position of first panel for Mac, so top button bar is visible
             int y = (numChildren) * 20;
             newChild->SetPosition(wxPoint(x, y));
          #else
-            int clientX, clientY, clientW = -1, clientH = -1;
-            GetActualClientSize(&clientW, &clientH, true);
-            #ifdef DEBUG_CHILD_WINDOW
-            MessageInterface::ShowMessage
-               ("client window: clientW=%d, clientH=%d\n", clientW, clientH);
-            #endif
-            
-            int y = x - toolH;
-            
-            // Why it doesn't position first child (0,0) to top left corner?
-            // Put UndockedMissionPanel always in the top left corner
-            if (newChild->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED)
-            {
-               int mtX, mtY, mtW, mtH;
-               newChild->GetPosition(&mtX, &mtY);
-               newChild->GetSize(&mtW, &mtH);
-               #ifdef DEBUG_CHILD_WINDOW
-               MessageInterface::ShowMessage
-                  ("MissionTree window: W = %d, H = %d\n", mtW, mtH);
-               #endif
-               
-               if (!mUndockedMissionTreePresized)
-               {
-                  // For default size, we need to resize this child depends on
-                  // the command length. Set to full mdi height for now.
-                  // We don't want to hide iconized script, so reduce the height.
-                  x = 0;
-                  y = -toolH;
-                  int height = clientH;
-                  // We don't want to hide iconized children at the bottom, so reduce the height by 40.
-                  height = clientH - 40;
-                  newChild->SetSize(-1, height);
-                  
-                  // Reposition other children
-                  if (numChildren > 1)
-                     RepositionChildren(mtW + mtX);
-               }
-               else
-               {
-                  // Reposition other children
-                  if (numChildren > 1)
-                     RepositionChildren(mtW + mtX);
-              }
-            }
-            else
-            {
-               // If Mission panel is opened and it is at the left,
-               // place child besides it
-               Integer mtX, mtY, mtW;
-               if (IsMissionTreeUndocked(mtX, mtY, mtW))
-               {
-                  if (mtX < 20)
-                  {
-                     if (numChildren > 1)
-                     {
-                        x = (numChildren - 2) * 20 + mtW + 20;
-                        y = (numChildren - 2) * 20 - toolH;
-                     }
-                     newChild->SetPosition(wxPoint(x, y));
-                  }
-               }
-            }
+            PositionNewChild(newChild, numChildren);
          #endif
       }
       if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
@@ -870,6 +809,12 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
       else
          newChild->Show(true);
    }
+   
+   #ifdef DEBUG_CREATE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CreateChild() name='%s', returning <%p>\n",
+       item->GetName().c_str(), newChild);
+   #endif
    
    return newChild;
 }
@@ -1425,8 +1370,8 @@ void GmatMainFrame::RemoveOutputIfOpened(const wxString &name)
       RemoveChild(name, GmatTree::OUTPUT_GROUND_TRACK_PLOT);
    else if (IsChildOpen(name, GmatTree::OUTPUT_REPORT, false))
       RemoveChild(name, GmatTree::OUTPUT_REPORT);
-   else if (IsChildOpen(name, GmatTree::EVENT_REPORT, false))
-      RemoveChild(name, GmatTree::EVENT_REPORT);
+   else if (IsChildOpen(name, GmatTree::OUTPUT_EVENT_REPORT, false))
+      RemoveChild(name, GmatTree::OUTPUT_EVENT_REPORT);
    
    #ifdef DEBUG_REMOVE_CHILD
    MessageInterface::ShowMessage
@@ -1602,7 +1547,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    while (node)
    {
       #ifdef DEBUG_MAINFRAME_CLOSE
-      MessageInterface::ShowMessage("   node = %p\n", node);
+      MessageInterface::ShowMessage("   =====> node = %p\n", node);
       #endif
 
       canDelete = false;
@@ -1619,6 +1564,9 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       // If name is in the ignore list, continue
       if (ignoreNames.Index(name) != wxNOT_FOUND)
       {
+         #ifdef DEBUG_MAINFRAME_CLOSE
+         MessageInterface::ShowMessage("   name is in ignore list so continue\n");
+         #endif
          node = node->GetNext();
          continue;
       }
@@ -1639,10 +1587,23 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       }
       else if (type >= GmatTree::BEGIN_OF_OUTPUT && type <= GmatTree::END_OF_OUTPUT)
       {
-         // delete output child except compare
-         if (closePlots && type != GmatTree::COMPARE_REPORT)
+         #ifdef DEBUG_MAINFRAME_CLOSE
+         MessageInterface::ShowMessage("   child is output\n");
+         #endif
+         
+         // delete output plots
+         if (closePlots && type > GmatTree::OUTPUT_BEGIN_PLOT && type < GmatTree::OUTPUT_END_PLOT)
          {
-            gmatAppData->GetOutputTree()->UpdateOutput(true, closeReports);
+            gmatAppData->GetOutputTree()->UpdateOutput(true, false, true);
+            canDelete = true;
+         }
+         
+         // delete output reports except compare report
+         if (closeReports && type > GmatTree::OUTPUT_BEGIN_REPORT && type < GmatTree::OUTPUT_END_REPORT)
+         {
+            // We want to leave report items in the output tree so that users can
+            // view them again
+            gmatAppData->GetOutputTree()->UpdateOutput(true, false, false);
             canDelete = true;
          }
       }
@@ -1683,6 +1644,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          // If it is output frame it is not needed to check for dirty
          if (type > GmatTree::BEGIN_OF_OUTPUT && type < GmatTree::END_OF_OUTPUT)
          {
+            child->Activate();
             child->OnClose(event);
             childDeleted = true;
          }
@@ -1771,6 +1733,9 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
 //------------------------------------------------------------------------------
 void GmatMainFrame::MinimizeChildren()
 {
+   // Close all opened output reports first
+   CloseAllChildren(false, false, true, false);
+   
    // do not need to check if script window is open
    wxNode *node = theMdiChildren->GetFirst();
    while (node)
@@ -1780,9 +1745,97 @@ void GmatMainFrame::MinimizeChildren()
           child->GetItemType() != GmatTree::OUTPUT_GROUND_TRACK_PLOT &&
           child->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
           child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED &&
-          child->GetItemType() != GmatTree::COMPARE_REPORT)
+          child->GetItemType() != GmatTree::OUTPUT_COMPARE_REPORT)
          child->Iconize(TRUE);
       node = node->GetNext();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void PositionNewChild(GmatMdiChildFrame *newChild, int numChildren)
+//------------------------------------------------------------------------------
+void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildren)
+{
+   int toolW, toolH, w = 0, h = 0;
+   theToolBar->GetSize(&toolW, &toolH);
+   newChild->GetSize(&w, &h);
+   GmatTree::ItemType itemType = newChild->GetItemType();
+   int x = (numChildren - 1) * 20;
+   int y = x;
+   int clientX, clientY, clientW = -1, clientH = -1;
+   GetActualClientSize(&clientW, &clientH, true);
+   
+   #ifdef DEBUG_CHILD_WINDOW
+   MessageInterface::ShowMessage
+      ("   client window: clientW=%d, clientH=%d, toolH=%d, x=%d, y=%d, "
+       "w=%d, h=%d\n", clientW, clientH, toolH, x, y, w, h);
+   #endif
+   
+   // Why it doesn't position first child (0,0) to top left corner?
+   // LOJ: 2012.01.04 found the solution: use wxSIZE_NO_ADJUSTMENTS with SetSize()
+   // Put UndockedMissionPanel always in the top left corner
+   if (itemType == GmatTree::MISSION_TREE_UNDOCKED)
+   {
+      int mtX, mtY, mtW, mtH;
+      newChild->GetPosition(&mtX, &mtY);
+      newChild->GetSize(&mtW, &mtH);
+      #ifdef DEBUG_CHILD_WINDOW
+      MessageInterface::ShowMessage("   MissionTree window: W = %d, H = %d\n", mtW, mtH);
+      #endif
+      if (!mUndockedMissionTreePresized)
+      {
+         // For default size, we need to resize this child depends on
+         // the command length. Set to full mdi height for now.
+         // We don't want to hide iconized script, so reduce the height.
+         x = 0;
+         y = -toolH;
+         int height = clientH;
+         // We don't want to hide iconized children at the bottom, so reduce the height by 40.
+         height = clientH - 40;
+         newChild->SetSize(-1, height);
+         
+         // Reposition other children
+         if (numChildren > 1)
+            RepositionChildren(mtW + mtX);
+      }
+      else
+      {
+         // Reposition other children
+         if (numChildren > 1)
+            RepositionChildren(mtW + mtX);
+      }
+   }
+   else // not MissionTree
+   {
+      // If Mission panel is opened and it is at the left,
+      // place child besides it
+      Integer mtX, mtY, mtW;
+      if (IsMissionTreeUndocked(mtX, mtY, mtW))
+      {
+         if (mtX < 20)
+         {
+            if (numChildren > 1)
+            {
+               //x = (numChildren - 2) * 20 + mtW + 20;
+               x = (numChildren - 2) * 20 + mtW;
+               y = (numChildren - 2) * 20 - toolH;
+            }
+            newChild->SetPosition(wxPoint(x, y));
+         }
+      }
+      else
+      {
+         // Get position of output report for persistency
+         // Output plot persistency is handled in GuiPlotReceiver
+         if (itemType > GmatTree::OUTPUT_BEGIN_REPORT && itemType < GmatTree::OUTPUT_END_REPORT)
+            newChild->GetPosition(&x, &y);
+         
+         newChild->SetSize(x, y, w, h, wxSIZE_NO_ADJUSTMENTS);
+      }
+      #ifdef DEBUG_CHILD_WINDOW
+      MessageInterface::ShowMessage
+         ("   child positioned to (%d, %d) with size of (%d, %d)\n", x, y, w, h);
+      #endif
    }
 }
 
@@ -1792,12 +1845,15 @@ void GmatMainFrame::MinimizeChildren()
 //------------------------------------------------------------------------------
 void GmatMainFrame::RepositionChildren(int xOffset)
 {
-   // do not need to check if script window is open
-   int toolW, toolH;
-   theToolBar->GetSize(&toolW, &toolH);         
-   wxNode *node = theMdiChildren->GetFirst();
+   #ifdef DEBUG_REPOSITION_CHILDREN
+   MessageInterface::ShowMessage
+      ("RepositionChildren() entered, xOffset=%d\n", xOffset);
+   #endif
+   
    int numChildren = 0;
-   int x = 0, y = 0;
+   int x = 0, y = 0, toolW = 0, toolH = 0;
+   theToolBar->GetSize(&toolW, &toolH);
+   wxNode *node = theMdiChildren->GetFirst();
    
    while (node)
    {
@@ -1810,14 +1866,14 @@ void GmatMainFrame::RepositionChildren(int xOffset)
       
       #ifdef DEBUG_REPOSITION_CHILDREN
       MessageInterface::ShowMessage
-         ("RepositionChildren() child='%s', isIconized=%d\n", child->GetName().c_str(), isIconized);
+         ("   child='%s', isIconized=%d\n", child->GetName().c_str(), isIconized);
       #endif
       
       if (itemType == GmatTree::OUTPUT_REPORT ||
           itemType == GmatTree::OUTPUT_ORBIT_VIEW ||
           itemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT ||
           itemType == GmatTree::OUTPUT_XY_PLOT ||
-          itemType == GmatTree::EVENT_REPORT)
+          itemType == GmatTree::OUTPUT_EVENT_REPORT)
       {
          // If plots or report, just move right
          if (!isIconized)
@@ -1827,10 +1883,10 @@ void GmatMainFrame::RepositionChildren(int xOffset)
             {
                // Why y = 0 does not position to top of the client window?
                // Make some y adjustments, need to subtract toolbar height
-               int toolW, toolH;
-               theToolBar->GetSize(&toolW, &toolH);
-               int screenW, screenH;
-               GetClientSize(&screenW, &screenH);
+               //int toolW, toolH;
+               //theToolBar->GetSize(&toolW, &toolH);
+               //int screenW, screenH;
+               //GetClientSize(&screenW, &screenH);
                child->Move(wxPoint(x + xOffset, y - toolH));
             }
          }
@@ -1838,16 +1894,25 @@ void GmatMainFrame::RepositionChildren(int xOffset)
       else if (itemType != GmatTree::MISSION_TREE_UNDOCKED && !isIconized)
       {
          numChildren++;
-         int x = (numChildren - 1) * 20 + xOffset;
-         int y = (numChildren - 1) * 20 - toolH;
+         x = (numChildren - 1) * 20 + xOffset;
+         y = (numChildren - 1) * 20 - toolH;
          child->Move(wxPoint(x,y));
       }
+      
+      #ifdef DEBUG_REPOSITION_CHILDREN
+      MessageInterface::ShowMessage("   child moved to (%d, %d)\n", x, y);
+      #endif
+      
       node = node->GetNext();
    }
    
    // Need this to refresh child windows
    Refresh(false);
    Update();
+   
+   #ifdef DEBUG_REPOSITION_CHILDREN
+   MessageInterface::ShowMessage("RepositionChildren() leaving\n");
+   #endif
 }
 
 
@@ -1907,7 +1972,7 @@ void GmatMainFrame::CloseCurrentProject()
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetResourceTree()->UpdateResource(true);
    gmatAppData->GetMissionTree()->UpdateMission(true);
-   gmatAppData->GetOutputTree()->UpdateOutput(true, true);
+   gmatAppData->GetOutputTree()->UpdateOutput(true, true, true);
 
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() exiting\n");
@@ -1956,7 +2021,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    CloseAllChildren(closeScript, true, true, false);
    gmatAppData->GetResourceTree()->ClearResource(true);
    gmatAppData->GetMissionTree()->ClearMission();
-   gmatAppData->GetOutputTree()->UpdateOutput(true, true);
+   gmatAppData->GetOutputTree()->UpdateOutput(true, true, true);
    
    // Indicate active script in bold face in the ResourceTree (LOJ: 2010.12.27)
    RefreshActiveScript(filename);
@@ -2148,7 +2213,7 @@ Integer GmatMainFrame::RunCurrentMission()
       SetStatusText("", 1);
 
       //put items in output tab
-      GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true);
+      GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true, true);
    }
 
    return retval;
@@ -2718,7 +2783,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetResourceTree()->UpdateResource(true);
    gmatAppData->GetMissionTree()->UpdateMission(true);
-   gmatAppData->GetOutputTree()->UpdateOutput(true, true);
+   gmatAppData->GetOutputTree()->UpdateOutput(true, true, true);
    RestoreUndockedMissionPanel();
    
    // Update GUI/Script sync status
@@ -2950,7 +3015,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
 {
-   CloseAllChildren(true, true, false, false);
+   CloseAllChildren(true, true, true, false);
    wxSafeYield();
 
    wxToolBar* toolBar = GetToolBar();
@@ -3591,7 +3656,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
 {
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CreateNewOutput() title=%s, name=%s, itemType=%d\n",
+      ("GmatMainFrame::CreateNewOutput() title='%s', name='%s', itemType=%d\n",
        title.c_str(), name.c_str(), itemType);
    #endif
    
@@ -3681,7 +3746,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
          newChild->SetSavedConfigFlag(isUsingSaved);
          break;
       }
-   case GmatTree::EVENT_REPORT:
+   case GmatTree::OUTPUT_EVENT_REPORT:
       {
          newChild = new GmatMdiChildFrame(this, name, title, itemType); // -1, wxPoint, wxSize
          scrolledWin = new wxScrolledWindow(newChild);
@@ -3692,7 +3757,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
          newChild->SetSavedConfigFlag(isUsingSaved);
          break;
       }
-   case GmatTree::COMPARE_REPORT:
+   case GmatTree::OUTPUT_COMPARE_REPORT:
       {
          newChild = new GmatMdiChildFrame(this, name, title, itemType); // -1, wxPoint, wxSize
          scrolledWin = new wxScrolledWindow(newChild);
@@ -4144,7 +4209,7 @@ void GmatMainFrame::OnFileCompareNumeric(wxCommandEvent& event)
    if (textFrame == NULL)
    {
       GmatTreeItemData *compareItem =
-         new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
+         new GmatTreeItemData("CompareReport", GmatTree::OUTPUT_COMPARE_REPORT);
 
       textFrame = CreateChild(compareItem);
    }
@@ -4338,7 +4403,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    if (textFrame == NULL)
    {
       GmatTreeItemData *compareItem =
-         new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
+         new GmatTreeItemData("CompareReport", GmatTree::OUTPUT_COMPARE_REPORT);
 
       textFrame = CreateChild(compareItem);
    }
@@ -5311,7 +5376,7 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
          GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
          if ((child->GetItemType() == GmatTree::SCRIPT_FILE)   ||
              (child->GetItemType() == GmatTree::OUTPUT_REPORT)  ||
-             (child->GetItemType() == GmatTree::EVENT_REPORT)  ||
+             (child->GetItemType() == GmatTree::OUTPUT_EVENT_REPORT)  ||
              (child->GetItemType() == GmatTree::SCRIPT_EVENT) ||
              (child->GetItemType() == GmatTree::GMAT_FUNCTION))
          {
