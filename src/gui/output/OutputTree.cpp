@@ -24,6 +24,7 @@
 #include "bitmaps/file.xpm"
 #include "bitmaps/report.xpm"
 #include "bitmaps/openglplot.xpm"
+#include "bitmaps/rt_GroundTrackPlot.xpm"
 #include "bitmaps/xyplot.xpm"
 #include "bitmaps/default.xpm"
 #include <wx/string.h>        // for wxArrayString
@@ -96,17 +97,37 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name)
 {
    #if DEBUG_OUTPUT_TREE
    MessageInterface::ShowMessage
-      ("OutputTree::RemoveItem() type=%d, name=%s\n", type, name.c_str());
+      ("OutputTree::RemoveItem() entered, type=%d, name=%s\n", type, name.c_str());
    #endif
    
    wxTreeItemId parentId;
-   
-   if (type == GmatTree::OUTPUT_ORBIT_VIEW)
-      parentId = mOpenGlItem;
-   else if (type == GmatTree::OUTPUT_XY_PLOT)
+
+   switch (type)
+   {
+   case GmatTree::OUTPUT_ORBIT_VIEW:
+      parentId = mOrbitViewItem;
+      break;
+   case GmatTree::OUTPUT_GROUND_TRACK_PLOT:
+      parentId = mGroundTrackItem;
+      break;
+   case GmatTree::OUTPUT_XY_PLOT:
       parentId = mXyPlotItem;
-   else
+      break;
+   case GmatTree::OUTPUT_REPORT:
+   case GmatTree::OUTPUT_EVENT_REPORT:
+      #if DEBUG_OUTPUT_TREE
+      MessageInterface::ShowMessage
+         ("*** OutputTree::RemoveItem() just returning, removing reports are disabled "
+          "to allow users to view the reports after mission run.\n");
+      #endif
       return;
+   default:
+      #if DEBUG_OUTPUT_TREE
+      MessageInterface::ShowMessage
+         ("*** OutputTree::RemoveItem() just returning, no matching type found\n");
+      #endif
+      return;
+   }
    
    wxTreeItemId itemId = FindItem(parentId, name);
    
@@ -130,6 +151,10 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name)
          ("   type=%d, name=%s NOT found\n", type, name.c_str());
       #endif
    }
+   
+   #if DEBUG_OUTPUT_TREE
+   MessageInterface::ShowMessage("OutputTree::RemoveItem() returning\n");
+   #endif
 }
 
 
@@ -176,20 +201,22 @@ wxTreeItemId OutputTree::FindItem(wxTreeItemId parentId, const wxString &name)
 
 
 //------------------------------------------------------------------------------
-// void UpdateOutput(bool resetTree, bool removeReports)
+// void UpdateOutput(bool resetTree, bool removeReports, bool removePlots)
 //------------------------------------------------------------------------------
 /**
  * Updates output tree.
  *
- * @param  resetTree  true if just clearing tree
- * @param  removeReports  true if reports are also removed from the tree
+ * @param  resetTree  Set this to true if just clearing tree
+ * @param  removeReports  Set this to true if reports should be removed from the tree
+ * @param  removePlots  Set this to true if plots should be removed from the tree
  */
 //------------------------------------------------------------------------------
-void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
+void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlots)
 {
    #if DEBUG_OUTPUT_TREE
    MessageInterface::ShowMessage
-      ("OutputTree::UpdateOutput() resetTree=%d\n", resetTree);
+      ("OutputTree::UpdateOutput() resetTree=%d, removeReports=%d, removePlots=%d\n",
+       resetTree, removeReports, removePlots);
    #endif
    
    if (removeReports)
@@ -197,8 +224,13 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
       Collapse(mReportItem);
       Collapse(mEventsItem);
    }
-   Collapse(mOpenGlItem);
-   Collapse(mXyPlotItem);
+   
+   if (removePlots)
+   {
+      Collapse(mOrbitViewItem);
+      Collapse(mGroundTrackItem);
+      Collapse(mXyPlotItem);
+   }
    
    // delete all old children
    if (removeReports)
@@ -206,8 +238,13 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
       DeleteChildren(mReportItem);
       DeleteChildren(mEventsItem);
    }
-   DeleteChildren(mOpenGlItem);
-   DeleteChildren(mXyPlotItem);
+   
+   if (removePlots)
+   {
+      DeleteChildren(mOrbitViewItem);
+      DeleteChildren(mGroundTrackItem);
+      DeleteChildren(mXyPlotItem);
+   }
    
    if (resetTree)    // do not load subscribers
       return;
@@ -232,8 +269,14 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
       else if (objTypeName.Trim() == "OrbitView" &&
                sub->GetBooleanParameter("ShowPlot"))
       {
-         AppendItem(mOpenGlItem, objName, GmatTree::OUTPUT_ICON_ORBITVIEW, -1,
+         AppendItem(mOrbitViewItem, objName, GmatTree::OUTPUT_ICON_ORBITVIEW, -1,
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_ORBIT_VIEW));
+      }
+      else if (objTypeName.Trim() == "GroundTrackPlot" &&
+               sub->GetBooleanParameter("ShowPlot"))
+      {
+         AppendItem(mGroundTrackItem, objName, GmatTree::OUTPUT_ICON_GROUNDTRACK, -1,
+                    new GmatTreeItemData(objName, GmatTree::OUTPUT_GROUND_TRACK_PLOT));
       }
       else if (objTypeName.Trim() == "XYPlot" &&
                sub->GetBooleanParameter("ShowPlot"))
@@ -253,12 +296,13 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
       {
          wxString objName = wxString(listOfEls[i].c_str());
          AppendItem(mEventsItem, objName, GmatTree::OUTPUT_ICON_REPORTFILE, -1,
-               new GmatTreeItemData(objName, GmatTree::EVENT_REPORT));
+               new GmatTreeItemData(objName, GmatTree::OUTPUT_EVENT_REPORT));
       }
    }
 
    Expand(mReportItem);
-   Expand(mOpenGlItem);
+   Expand(mOrbitViewItem);
+   Expand(mGroundTrackItem);
    Expand(mXyPlotItem);
    Expand(mEventsItem);
 }
@@ -286,12 +330,21 @@ void OutputTree::AddDefaultResources()
                 wxTreeItemIcon_Expanded);
    
    //----- Orbit Views
-   mOpenGlItem =
+   mOrbitViewItem =
       AppendItem(output, wxT("Orbit Views"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
                  new GmatTreeItemData(wxT("Orbit Views"),
                                       GmatTree::ORBIT_VIEWS_FOLDER));
    
-   SetItemImage(mOpenGlItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
+   SetItemImage(mOrbitViewItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+   
+   //----- Ground Track Plots
+   mGroundTrackItem =
+      AppendItem(output, wxT("Ground Track Plots"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
+                 new GmatTreeItemData(wxT("Ground Track Plots"),
+                                      GmatTree::GROUND_TRACK_FOLDER));
+   
+   SetItemImage(mGroundTrackItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
    
    //----- XY Plots
@@ -383,6 +436,7 @@ void OutputTree::OnItemActivated(wxTreeEvent &event)
    // get some info about this item
    wxTreeItemId itemId = event.GetItem();
    GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
+   item->SetTitle(GetItemText(itemId));
    GmatAppData::Instance()->GetMainFrame()->CreateChild(item);
 }
 
@@ -544,6 +598,7 @@ void OutputTree::AddIcons()
    icons[GmatTree::OUTPUT_ICON_OPENFOLDER] = wxIcon(OpenFolder_xpm);
    icons[GmatTree::OUTPUT_ICON_REPORTFILE] = wxIcon(report_xpm);
    icons[GmatTree::OUTPUT_ICON_ORBITVIEW] = wxIcon(openglplot_xpm);
+   icons[GmatTree::OUTPUT_ICON_GROUNDTRACK] = wxIcon(rt_GroundTrackPlot_xpm);
    icons[GmatTree::OUTPUT_ICON_XYPLOT] = wxIcon(xyplot_xpm);
    icons[GmatTree::OUTPUT_ICON_FILE] = wxIcon(file_xpm);
    icons[GmatTree::OUTPUT_ICON_DEFAULT] = wxIcon(default_xpm);

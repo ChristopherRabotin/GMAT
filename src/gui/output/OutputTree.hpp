@@ -37,16 +37,16 @@ public:
               const wxSize& size, long style);
    
    void RemoveItem(GmatTree::ItemType type, const wxString &name);
-   void UpdateOutput(bool resetTree, bool removeReports);
+   void UpdateOutput(bool resetTree, bool removeReports, bool removePlots);
    
 private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    wxString theSubscriberName;
    
-   //wxWindow *parent;
    wxTreeItemId mReportItem;
-   wxTreeItemId mOpenGlItem;
+   wxTreeItemId mOrbitViewItem;
+   wxTreeItemId mGroundTrackItem;
    wxTreeItemId mXyPlotItem;
    wxTreeItemId mEventsItem;
    
