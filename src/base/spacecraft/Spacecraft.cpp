@@ -227,8 +227,8 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "MLONG",
 };
 
-const Integer Spacecraft::ATTITUDE_ID_OFFSET = 20000;
-const Real    Spacecraft::UNSET_ELEMENT_VALUE = -999.999;
+const Integer  Spacecraft::ATTITUDE_ID_OFFSET = 20000;
+const Real     Spacecraft::UNSET_ELEMENT_VALUE = -999.999;
 
 //-------------------------------------
 // public methods
@@ -454,6 +454,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    coordinateSystem     (a.coordinateSystem),      // need to copy
    coordSysName         (a.coordSysName),
    originMu             (a.originMu),
+   defaultCartesian     (a.defaultCartesian),
    coordSysMap          (a.coordSysMap),
    spacecraftId         (a.spacecraftId),
 //   orbitSpiceKernelNames(a.orbitSpiceKernelNames),
@@ -548,6 +549,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
    originMu             = a.originMu;
+   defaultCartesian     = a.defaultCartesian;
    coordSysMap          = a.coordSysMap;
    spacecraftId         = a.spacecraftId;
    solarSystem          = a.solarSystem;         // need to copy
@@ -773,6 +775,7 @@ GmatState& Spacecraft::GetState()
       ("Spacecraft::GetState() '%s' returning\n   %s\n", GetName().c_str(),
        stateTmp.ToString().c_str());
    #endif
+   // need to return default Cartesian State if entire state has not been set??
    return SpaceObject::GetState();
 }
 
@@ -1457,15 +1460,15 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          return true;
 
       // Otherwise, convert initial state to to new CS
-      if (coordinateSystem == cs)
-      {
-         #ifdef DEBUG_SPACECRAFT_CS
-         MessageInterface::ShowMessage
-            ("   Input coordinateSystem is the same as current one, so ignoring\n");
-         #endif
-      }
-      else
-      {
+//      if (coordinateSystem == cs)
+//      {
+//         #ifdef DEBUG_SPACECRAFT_CS
+//         MessageInterface::ShowMessage
+//            ("   Input coordinateSystem is the same as current one, so ignoring\n");
+//         #endif
+//      }
+//      else
+//      {
          #ifdef DEBUG_SPACECRAFT_CS
          MessageInterface::ShowMessage
             ("   About to convert to new CS '%s'\n", coordSysName.c_str());
@@ -1483,6 +1486,10 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
          try
          {
+            #ifdef DEBUG_SPACECRAFT_CS
+            MessageInterface::ShowMessage
+               ("Spacecraft::SetRefObject() calling TakeAction - ApplyCoordinateSystem\n");
+            #endif
             TakeAction("ApplyCoordinateSystem");
 
             #ifdef DEBUG_SPACECRAFT_CS
@@ -1501,7 +1508,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             coordinateSystem = oldCS;
             throw;
          }
-      }
+//      }
 
       return true;
    }
@@ -3216,22 +3223,44 @@ bool Spacecraft::TakeAction(const std::string &action,
          {
             // We haven't done any state conversions on inputs up to this point (primarily because we
             // don't have a mu to use for conversions until the coordinate system is set).
-            // first convert the default cartesian state to the input state type
-            Rvector6 convertedState = StateConversionUtil::Convert(originMu, defaultCartesian, "Cartesian", stateType);
-            #ifdef DEBUG_SPACECRAFT_CS
-               MessageInterface::ShowMessage("Spacecraft::TakeAction() Converting cartesian default to state type %s\n", stateType.c_str());
-               MessageInterface::ShowMessage("    default cartesian is: %s\n", (defaultCartesian.ToString()).c_str());
-               MessageInterface::ShowMessage("    state converted to %s is: %s\n", stateType.c_str(), (convertedState.ToString()).c_str());
-            #endif
-            // then assign the input values to the state
-            for (Integer ii = 0; ii < state.GetSize(); ii++)
-               if (state[ii] != UNSET_ELEMENT_VALUE) convertedState[ii] = state[ii];
-            #ifdef DEBUG_SPACECRAFT_CS
-               MessageInterface::ShowMessage("    state converted to %s with input values is: %s\n", stateType.c_str(), (convertedState.ToString()).c_str());
-               MessageInterface::ShowMessage
-                  ("Spacecraft::TakeAction() Calling SetStateFromRepresentation(%s, cartesianstate), "
-                   "since CS was not set()\n", stateType.c_str());
-            #endif
+            // first convert the default cartesian state to the input state type OR if all of the elements have been set,
+            // use those values
+            Rvector6 convertedState;
+            if (NumStateElementsSet() == state.GetSize())
+            {
+               #ifdef DEBUG_SPACECRAFT_CS
+                  MessageInterface::ShowMessage("Spacecraft::TakeAction() all elements are set ------------\n");
+               #endif
+               for (Integer ii = 0; ii < state.GetSize(); ii++)
+                  convertedState[ii] = state[ii];
+               #ifdef DEBUG_SPACECRAFT_CS
+                  MessageInterface::ShowMessage("    state input in %s is: %s\n", stateType.c_str(), (convertedState.ToString()).c_str());
+               #endif
+            }
+            else
+            {
+               #ifdef DEBUG_SPACECRAFT_CS
+                  MessageInterface::ShowMessage("Spacecraft::TakeAction() Converting cartesian default to state type %s\n", stateType.c_str());
+                  MessageInterface::ShowMessage("    coordinateSystem = %s\n", coordinateSystem->GetName().c_str());
+                  MessageInterface::ShowMessage("    originMu = %12.10f\n", originMu);
+                  MessageInterface::ShowMessage("    ->default cartesian is: %s\n", (defaultCartesian.ToString()).c_str());
+                  MessageInterface::ShowMessage("    and current input state is: %12.10f   %12.10f      %12.10f   %12.10f   %12.10f   %12.10f\n",
+                        state[0], state[1], state[2], state[3], state[4], state[5]);
+               #endif
+               convertedState = StateConversionUtil::Convert(originMu, defaultCartesian, "Cartesian", stateType);
+               #ifdef DEBUG_SPACECRAFT_CS
+                  MessageInterface::ShowMessage("    state converted to %s is: %s\n", stateType.c_str(), (convertedState.ToString()).c_str());
+               #endif
+               // then assign the input values to the state
+               for (Integer ii = 0; ii < state.GetSize(); ii++)
+                  if (state[ii] != UNSET_ELEMENT_VALUE) convertedState[ii] = state[ii];
+               #ifdef DEBUG_SPACECRAFT_CS
+                  MessageInterface::ShowMessage("    state converted to %s with input values is: %s\n", stateType.c_str(), (convertedState.ToString()).c_str());
+                  MessageInterface::ShowMessage
+                     ("Spacecraft::TakeAction() Calling SetStateFromRepresentation(%s, cartesianstate), "
+                      "since CS was not set()\n", stateType.c_str());
+               #endif
+            }
             SetStateFromRepresentation(stateType, convertedState);
          }
          catch (BaseException &be)
@@ -4909,6 +4938,7 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
       MessageInterface::ShowMessage(
          "Spacecraft::GetStateInRepresentation(string): Constructing %s state\n",
          rep.c_str());
+      MessageInterface::ShowMessage("useDefaultCartesian = %s\n", (useDefaultCartesian? "true" : "false"));
    #endif
 
    Rvector6 csState;
@@ -4918,6 +4948,12 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
    if (internalCoordSystem != coordinateSystem)
    {
       Rvector6 inState(state.GetState());
+
+      #ifdef DEBUG_STATE_INTERFACE
+         MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Using inState  = %s\n", inState.ToString().c_str());
+         MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Using originMu = %12.10f\n", originMu);
+      #endif
+
       coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState,
          coordinateSystem);
    }
@@ -5618,9 +5654,15 @@ bool Spacecraft::VerifyAddHardware()
 Integer Spacecraft::NumStateElementsSet()
 {
    Integer stateSz = state.GetSize();
-   Integer numSet = stateSz;
+   Integer numSet  = stateSz;
+   #ifdef DEBUG_SPACECRAFT_CS
+      MessageInterface::ShowMessage("NumStateElementsSet() stateSz = %d, numSet = %d\n", stateSz, numSet);
+   #endif
    for (Integer ii = 0; ii < stateSz; ii++)
-      if (state[ii] != UNSET_ELEMENT_VALUE) numSet--;
+      if (state[ii] == UNSET_ELEMENT_VALUE) numSet--;
+   #ifdef DEBUG_SPACECRAFT_CS
+      MessageInterface::ShowMessage("after loop, numSet = %d\n", numSet);
+   #endif
    return numSet;
 }
 
