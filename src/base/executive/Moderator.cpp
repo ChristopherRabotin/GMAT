@@ -5576,6 +5576,30 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          id = cmd->GetParameterID("Tolerance");
          cmd->SetStringParameter(id, "0.1");
       }
+      else if (type == "NonlinearConstraint")
+      {
+         // Set default value: DefaultSC.SMA = 7000 (for bug 2045 fix)
+         
+         // Get default solver
+         Solver *solver = GetDefaultSolver();
+         
+         #if DEBUG_DEFAULT_COMMAND
+         MessageInterface::ShowMessage
+            ("Moderator::CreateDefaultCommand() cmd=%s, solver=%s\n",
+             cmd->GetTypeName().c_str(), solver->GetTypeName().c_str());
+         #endif
+         
+         id = cmd->GetParameterID("OptimizerName");
+         cmd->SetStringParameter(id, solver->GetName());
+         
+         // set constraint parameter
+         id = cmd->GetParameterID("ConstraintArg1");
+         cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".SMA");
+         id = cmd->GetParameterID("Operator");
+         cmd->SetStringParameter(id, "=");          
+         id = cmd->GetParameterID("ConstraintArg2");
+         cmd->SetStringParameter(id, "7000"); 
+      }
       else
       {
          // We need to set actual command string so that it can be saved to script
