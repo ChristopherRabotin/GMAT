@@ -798,6 +798,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
          #endif
          #ifdef __WXMAC__
             // reposition vertical position of first panel for Mac, so top button bar is visible
+            int x = (numChildren - 1) * 20;
             int y = (numChildren) * 20;
             newChild->SetPosition(wxPoint(x, y));
          #else
