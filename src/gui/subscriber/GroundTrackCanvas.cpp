@@ -593,19 +593,52 @@ void GroundTrackCanvas::OnMouse(wxMouseEvent& event)
    if (mIsEndOfData && mInFunction)
       return;
    
-   //#ifdef __WRITE_MOUSE_POS__
+   #ifndef __SKIP_WRITE_MOUSE_POS__
+   
+   if (event.Leaving())
+      theStatusBar->SetStatusText("", 2);
+   
    int width, height;
    int mouseX = event.GetX();
    int mouseY = event.GetY();
    GetClientSize(&width, &height);
+   
+   double left    = -180.0;
+   double right   =  180.0;
+   double bottom  = -90.0;
+   double top     =  90.0;
+   
+   double canvasAspect = (double)width / (double)height;
+   
+   // The aspect ratio of texture map for the ground track is always 2.0
+   if (canvasAspect >= 2.0)
+   {
+      left  = canvasAspect * bottom;
+      right = canvasAspect * top;
+   }
+   else
+   {
+      bottom = left  / canvasAspect;
+      top    = right / canvasAspect;
+   }
+   
    // Flip mouseY so it is oriented bottom left is 0,0
    mouseY = height - mouseY;
-   double lon = (mouseX * 360 / width) - 180.0;
-   double lat = (mouseY * 180 / height) - 90.0;
-   wxString mousePosStr;
-   mousePosStr.Printf("Latitude:%g  Longitude:%g", lat, lon);   
-   theStatusBar->SetStatusText(mousePosStr, 2);
-   //#endif
+   double lon = (mouseX * (right*2) / width) - right;
+   double lat = (mouseY * (top*2) / height) - top;
+   
+   // if the mouse is within the texture map, show the latitude and longitude
+   // in the status bar (LOJ: 2011.01.09 for bug 
+   if ((lon >= -180.0 && lon <= 180.0) && (lat >= -90.0 && lat <= 90.0))
+   {
+      wxString mousePosStr;
+      mousePosStr.Printf("Latitude:%g  Longitude:%g", lat, lon);
+      theStatusBar->SetStatusText(mousePosStr, 2);
+   }
+   else
+      theStatusBar->SetStatusText("", 2);
+   
+   #endif
    
    event.Skip();
 }
