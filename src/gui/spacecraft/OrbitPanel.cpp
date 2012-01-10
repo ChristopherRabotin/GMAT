@@ -425,10 +425,20 @@ void OrbitPanel::SaveData()
                mEpoch = a1mjd;
                mIsEpochChanged = false;
             }
+            else
+            {
+               #ifdef DEBUG_ORBIT_PANEL_SAVE
+                  MessageInterface::ShowMessage("OrbitPanel::SaveData() setting canClose to false inside (epoch) try\n");
+               #endif
+               canClose = false;
+            }
          }
          catch (BaseException &e)
          {
             MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+            #ifdef DEBUG_ORBIT_PANEL_SAVE
+            MessageInterface::ShowMessage("OrbitPanel::SaveData() setting canClose to false after epoch change part\n");
+            #endif
             canClose = false;
          }
       }
@@ -450,6 +460,9 @@ void OrbitPanel::SaveData()
       {
          Rvector6 state;
          bool retval = CheckState(state);
+         #ifdef DEBUG_ORBIT_PANEL_SAVE
+         MessageInterface::ShowMessage("OrbitPanel::SaveData() setting canClose to %s in state change part\n", retval? "true" : "false");
+         #endif
          canClose = retval;
          
          if (retval)
@@ -504,6 +517,9 @@ void OrbitPanel::SaveData()
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      #ifdef DEBUG_ORBIT_PANEL_SAVE
+      MessageInterface::ShowMessage("OrbitPanel::SaveData() setting canClose to false in final catch clause\n");
+      #endif
       canClose = false;
       return;
    }
@@ -513,6 +529,7 @@ void OrbitPanel::SaveData()
       ("OrbitPanel::SaveData() exiting\n   mCartState=%s\n"
        "   mTempCartState=%s\n   mOutState=%s\n", mCartState.ToString(16).c_str(),
        mTempCartState.ToString(16).c_str(), mOutState.ToString(16).c_str());
+   MessageInterface::ShowMessage("****** canClose = %d\n", canClose);
    #endif
 }
 
@@ -2163,7 +2180,7 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
 
    if (orbitDlg.isEpochChanged)
    {
-      mIsEpochChanged = true;
+     mIsEpochChanged = true;
 	  mIsEpochFormatChanged = true;
 	  
       std::string toEpochFormat = orbitDlg.GetEpochFormat();   
