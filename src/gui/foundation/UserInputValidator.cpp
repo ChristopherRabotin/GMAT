@@ -130,7 +130,7 @@ bool UserInputValidator::IsValidName(const wxString &name)
    if (name == "")
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The name is blank, please enter a valid name");
+         (Gmat::ERROR_, "The name is blank, please enter a valid name");
       
       SetErrorFlag();
       return false;
@@ -140,7 +140,7 @@ bool UserInputValidator::IsValidName(const wxString &name)
    {
       std::string format = GmatStringUtil::GetInvalidNameMessageFormat();
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, format.c_str(), name.c_str());
+         (Gmat::ERROR_, format.c_str(), name.c_str());
       
       SetErrorFlag();
       return false;

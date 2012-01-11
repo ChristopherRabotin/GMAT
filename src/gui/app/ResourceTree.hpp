@@ -111,6 +111,7 @@ protected:
    static const Integer MAX_SUN_ORBITERS;
 
    // objects
+   GmatBase* CreateObject(const std::string &objType, const std::string &objName);
    GmatBase* GetObject(const std::string &name);
    void UpdateGuiItem(GmatTree::ItemType itemType);
 
@@ -184,7 +185,7 @@ protected:
    void OnAddString(wxCommandEvent &event);
    void OnAddMatlabFunction(wxCommandEvent &event);
    void OnAddGmatFunction(wxCommandEvent &event);
-   void OnAddCoordSys(wxCommandEvent &event);
+   void OnAddCoordSystem(wxCommandEvent &event);
    void OnAddBarycenter(wxCommandEvent &event);
    void OnAddLibration(wxCommandEvent &event);
    void OnAddPlanet(wxCommandEvent &event);

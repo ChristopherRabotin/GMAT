@@ -107,7 +107,8 @@ public:
    GmatBase* GetConfiguredObject(const std::string &name);
    GmatBase* FindObject(const std::string &name, const std::string &ofType = "");
    GmatBase* CreateObject(const std::string &type, const std::string &name,
-                          Integer manage = 1, bool createDefault = false);
+                          Integer manage = 1, bool createDefault = false,
+                          bool includeLineOnError = true);
    
    void SetConfiguredObjectMap();
    void SetSolarSystemInUse(SolarSystem *ss);
@@ -122,6 +123,8 @@ public:
    void SetFooterComment(const std::string &comment){footerComment = comment;}
    
    bool IsObjectType(const std::string &type);
+   bool IsCommandType(const std::string &type);
+   
    Gmat::ObjectType GetObjectType(const std::string &type);
    
    // to check commands
@@ -216,7 +219,6 @@ protected:
    AxisSystem* CreateAxisSystem(std::string type, GmatBase *owner);
    
    // for commands
-   bool         IsCommandType(const std::string &type);
    void         ParseAndSetCommandName(GmatCommand *cmd, const std::string &cmdType,
                                        const std::string &desc, std::string &newDesc);
    GmatCommand* CreateCommand(const std::string &type, const std::string &desc,

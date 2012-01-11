@@ -1024,13 +1024,17 @@ void ParameterCreateDialog::CreateVariable()
    // Trim blank spaces
    varName = GmatStringUtil::Trim(varName);
    
-   // check if it has valid variable name
-   if (!GmatStringUtil::IsValidName(varName))
+   // Check if name starts with number or contains non-alphanumeric character
+   // Warning message is displayed from UserInputValidator::IsValidName()
+   if (!IsValidName(varName.c_str()))
+      return;
+   
+   // Check if name is any command type name
+   if (theGuiInterpreter->IsCommandType(varName.c_str()))
    {
+      std::string format = GmatStringUtil::GetInvalidNameMessageFormat();
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Invalid variable name: \"%s.\" Variable name must "
-          "follow GMAT variable name rules (start with an alphabetic character, "
-          "only alphanumerics and underscores, no reserved words)", varName.c_str());
+         (Gmat::ERROR_, format.c_str(), varName.c_str());
       canClose = false;
       return;
    }
@@ -1046,7 +1050,7 @@ void ParameterCreateDialog::CreateVariable()
    if (theGuiInterpreter->GetConfiguredObject(varName) != NULL)
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The variable: \"%s\" cannot be created. "
+         (Gmat::ERROR_, "The variable: \"%s\" cannot be created. "
           "The name already exists.", varName.c_str());
       canClose = false;
       return;
@@ -1172,7 +1176,7 @@ void ParameterCreateDialog::CreateString()
       else
       {
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "The string: \"%s\" cannot be created. "
+            (Gmat::ERROR_, "The string: \"%s\" cannot be created. "
              "The name already exists.", strName.c_str());
       }
       
@@ -1213,7 +1217,7 @@ void ParameterCreateDialog::CreateArray()
    if (row > 1000 || col > 1000)
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The array size %d x %d is too big. The maximum "
+         (Gmat::ERROR_, "The array size %d x %d is too big. The maximum "
           "allowed size is 1000 x 1000", row, col);
       canClose = false;
       return;
@@ -1280,7 +1284,7 @@ void ParameterCreateDialog::CreateArray()
       else
       {
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "The array: \"%s\" cannot be created. "
+            (Gmat::ERROR_, "The array: \"%s\" cannot be created. "
              "The name already exists.", arrName.c_str());
       }
       ResetControls();      
@@ -1354,7 +1358,7 @@ void ParameterCreateDialog::SetVariableToAnotherObject(const std::string &varNam
             else
             {
                MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "The variable \"%s\" does not exist. "
+                  (Gmat::ERROR_, "The variable \"%s\" does not exist. "
                    "It must be created first.", tokens[i].c_str());
                canClose = false;
                return;

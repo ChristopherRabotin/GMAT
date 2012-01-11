@@ -25,7 +25,9 @@
 #include <wx/config.h>
 #include <sstream>
 
-//#define DEBUG_COORD_PANEL 1
+//#define DEBUG_COORD_PANEL
+//#define DEBUG_COORD_PANEL_CREATE
+//#define DEBUG_COORD_PANEL_LOAD
 //#define DEBUG_COORD_PANEL_SAVE
 //#define DEBUG_COORD_EPOCH
 //#define DEBUG_COORD_PANEL_PRIMARY_SECONDARY
@@ -56,8 +58,9 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
 //   mjdStr << GmatTimeConstants::MJD_OF_J2000;
 //   epochValue = mjdStr.str();
 //   epochFormatValue = "A1ModJulian";
-      
+   
    Create();
+   LoadData();
 }
 
 
@@ -78,7 +81,7 @@ CoordPanel::~CoordPanel()
 //------------------------------------------------------------------------------
 void CoordPanel::EnableOptions(AxisSystem *axis)
 {
-   #if DEBUG_COORD_PANEL
+   #ifdef DEBUG_COORD_PANEL
    MessageInterface::ShowMessage
       ("CoordPanel::EnableOptions() axis=(%p)%s\n", axis,
        typeComboBox->GetStringSelection().c_str());
@@ -124,7 +127,7 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       epochValue = theGuiManager->ToWxString(epoch);
 //      epochFormatValue = wxString(tmpAxis->GetEpochFormat().c_str());
 
-      #if DEBUG_COORD_PANEL
+      #ifdef DEBUG_COORD_PANEL
       MessageInterface::ShowMessage
          ("CoordPanel::EnableOptions() about to set epoch value to %12.10f (string = %s)\n",
                epoch, epochValue.c_str());
@@ -278,7 +281,7 @@ void CoordPanel::SetDefaultObjectRefAxis()
 //------------------------------------------------------------------------------
 void CoordPanel::ShowAxisData(AxisSystem *axis)
 {
-   #if DEBUG_COORD_PANEL
+   #ifdef DEBUG_COORD_PANEL
    MessageInterface::ShowMessage
       ("CoordPanel::ShowAxisData() axis=(%p)%s\n", axis,
        axis->GetTypeName().c_str());
@@ -290,7 +293,7 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
       typeComboBox->SetSelection(sel);
       EnableOptions(axis);
       
-      #if DEBUG_COORD_PANEL
+      #ifdef DEBUG_COORD_PANEL
       MessageInterface::ShowMessage
          ("mShowPrimaryBody=%d, mShowSecondaryBody=%d, mShowEpoch=%d, "
           "mShowXyz=%d, mShowUpdate\n", mShowPrimaryBody, mShowSecondaryBody,
@@ -321,7 +324,7 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
 //         formatComboBox->SetStringSelection(epochFormat.c_str());
          
          Real epoch = axis->GetEpoch().Get();
-         #if DEBUG_COORD_PANEL
+         #ifdef DEBUG_COORD_PANEL
             MessageInterface::ShowMessage
                ("CoordPanel::ShowAxisData() about to set the value of epoch to %12.10f\n", epoch);
          #endif
@@ -437,7 +440,7 @@ AxisSystem* CoordPanel::CreateAxis()
    //               //    GmatTimeConstants::JD_JAN_5_1941);
    //            }
 
-               #if DEBUG_COORD_PANEL
+               #ifdef DEBUG_COORD_PANEL
                   MessageInterface::ShowMessage
                      ("CoordPanel::CreateAxis() about to set the value of epoch on axis to %12.10f\n",
                            a1mjd);
@@ -469,7 +472,7 @@ void CoordPanel::ChangeEpoch(wxString &oldFormat)
 {
 /*   wxString newFormat = formatComboBox->GetStringSelection().Trim();
 
-   #if DEBUG_COORD_PANEL
+   #ifdef DEBUG_COORD_PANEL
    MessageInterface::ShowMessage
       ("CoordPanel::ChangeEpoch() oldFormat=%s, newFormat=%s\n",
        oldFormat.c_str(), newFormat.c_str());
@@ -610,48 +613,42 @@ bool CoordPanel::IsValidXYZ(const wxString &xStr, const wxString &yStr,
 //-------------------------------
 
 //------------------------------------------------------------------------------
-// void Create()
+// void Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void CoordPanel::Create()
 {
-   Setup(this);
-   LoadData();
-}
-
-
-//------------------------------------------------------------------------------
-// void Setup( wxWindow *parent)
-//------------------------------------------------------------------------------
-void CoordPanel::Setup( wxWindow *parent)
-{
+   #ifdef DEBUG_COORD_PANEL_CREATE
+   MessageInterface::ShowMessage("CoordPanel::Create() entered\n");
+   #endif
+   
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
    pConfig->SetPath(wxT("/Coordinate System"));
 
     // wxStaticText
-   originStaticText = new wxStaticText( parent, ID_TEXT, wxT(GUI_ACCEL_KEY"Origin"),
+   originStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Origin"),
       wxDefaultPosition, wxDefaultSize, 0 );
-   typeStaticText = new wxStaticText( parent, ID_TEXT, wxT(GUI_ACCEL_KEY"Type"),
+   typeStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Type"),
       wxDefaultPosition, wxDefaultSize, 0 );
-   primaryStaticText = new wxStaticText( parent, ID_TEXT, wxT(GUI_ACCEL_KEY"Primary"),
+   primaryStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Primary"),
       wxDefaultPosition, wxDefaultSize, 0 );
-//   formatStaticText = new wxStaticText( parent, ID_TEXT, wxT("Epoch "GUI_ACCEL_KEY"Format"),
+//   formatStaticText = new wxStaticText( this, ID_TEXT, wxT("Epoch "GUI_ACCEL_KEY"Format"),
 //      wxDefaultPosition, wxDefaultSize, 0 );
-   secondaryStaticText = new wxStaticText( parent, ID_TEXT, wxT(GUI_ACCEL_KEY"Secondary"),
+   secondaryStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Secondary"),
       wxDefaultPosition, wxDefaultSize, 0 );
-   epochStaticText = new wxStaticText( parent, ID_TEXT, wxT("A1MJD "GUI_ACCEL_KEY"Epoch"),
+   epochStaticText = new wxStaticText( this, ID_TEXT, wxT("A1MJD "GUI_ACCEL_KEY"Epoch"),
       wxDefaultPosition, wxDefaultSize, 0 );
-//   updateStaticText = new wxStaticText( parent, ID_TEXT, wxT("Update "GUI_ACCEL_KEY"Interval"),
+//   updateStaticText = new wxStaticText( this, ID_TEXT, wxT("Update "GUI_ACCEL_KEY"Interval"),
 //      wxDefaultPosition, wxDefaultSize, 0 );
-//   secStaticText = new wxStaticText( parent, ID_TEXT, wxT("seconds"),
+//   secStaticText = new wxStaticText( this, ID_TEXT, wxT("seconds"),
 //      wxDefaultPosition, wxDefaultSize, 0 );
 
-   xStaticText = new wxStaticText( parent, ID_TEXT, wxT(GUI_ACCEL_KEY"X: "),
+   xStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"X: "),
       wxDefaultPosition, wxDefaultSize, 0 );
-   yStaticText = new wxStaticText( parent, ID_TEXT, wxT(GUI_ACCEL_KEY"Y: "),
+   yStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Y: "),
       wxDefaultPosition, wxDefaultSize, 0 );
-   zStaticText = new wxStaticText( parent, ID_TEXT, wxT(GUI_ACCEL_KEY"Z: "),
+   zStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Z: "),
       wxDefaultPosition, wxDefaultSize, 0 );
           
    #if __WXMAC__
@@ -671,29 +668,29 @@ void CoordPanel::Setup( wxWindow *parent)
       wxSize(120,-1), false);
    originComboBox->SetToolTip(pConfig->Read(_T("OriginHint")));
    typeComboBox = new wxComboBox
-      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
+      ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    typeComboBox->SetToolTip(pConfig->Read(_T("TypeHint")));
    primaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    primaryComboBox->SetToolTip(pConfig->Read(_T("PrimaryHint")));
 //   formatComboBox = new wxComboBox
-//      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(120,-1), //0,
+//      ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(120,-1), //0,
 //        emptyList, wxCB_DROPDOWN|wxCB_READONLY );
 //   formatComboBox->SetToolTip(pConfig->Read(_T("EpochFormatHint")));
    secondaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    secondaryComboBox->SetToolTip(pConfig->Read(_T("SecondaryHint")));
    xComboBox = new wxComboBox
-      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
+      ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    xComboBox->SetToolTip(pConfig->Read(_T("XHint")));
    yComboBox = new wxComboBox
-      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
+      ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    yComboBox->SetToolTip(pConfig->Read(_T("YHint")));
    zComboBox = new wxComboBox
-      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
+      ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    zComboBox->SetToolTip(pConfig->Read(_T("ZHint")));
 
@@ -710,7 +707,7 @@ void CoordPanel::Setup( wxWindow *parent)
    #if __WXMAC__
    wxBoxSizer *boxsizer4 = new wxBoxSizer( wxVERTICAL );
    #else
-   wxStaticBox *staticbox1 = new wxStaticBox( parent, -1, wxT("Axes") );
+   wxStaticBox *staticbox1 = new wxStaticBox( this, -1, wxT("Axes") );
    wxStaticBoxSizer *staticboxsizer1 = new wxStaticBoxSizer( staticbox1,
       wxVERTICAL );
    #endif
@@ -771,7 +768,7 @@ void CoordPanel::Setup( wxWindow *parent)
    if (!mEnableAll)
    {
       wxStaticText *msg =
-         new wxStaticText(parent, ID_TEXT,
+         new wxStaticText(this, ID_TEXT,
                           wxT("This is a default Coordinate "
                               "System and cannot be modified."),
                           wxDefaultPosition, wxDefaultSize, 0);
@@ -783,6 +780,10 @@ void CoordPanel::Setup( wxWindow *parent)
    this->SetSizer( theMainSizer );
    theMainSizer->Fit( this );
    theMainSizer->SetSizeHints( this );
+   
+   #ifdef DEBUG_COORD_PANEL_CREATE
+   MessageInterface::ShowMessage("CoordPanel::Create() leaving\n");
+   #endif
 }
 
 
@@ -791,6 +792,10 @@ void CoordPanel::Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void CoordPanel::LoadData()
 {
+   #ifdef DEBUG_COORD_PANEL_LOAD
+   MessageInterface::ShowMessage("CoordPanel::LoadData() entered\n");
+   #endif
+   
    try
    {
       // Load axes types
@@ -844,6 +849,9 @@ void CoordPanel::LoadData()
             e.GetFullMessage().c_str());
    }
    
+   #ifdef DEBUG_COORD_PANEL_LOAD
+   MessageInterface::ShowMessage("CoordPanel::LoadData() leaving\n");
+   #endif
 }
 
 
@@ -854,9 +862,9 @@ void CoordPanel::LoadData()
 bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
                           wxString &epochFormat)
 {
-   #if DEBUG_COORD_PANEL
+   #ifdef DEBUG_COORD_PANEL_SAVE
    MessageInterface::ShowMessage
-      ("oordPanel::SaveData() coordName=%s, epochFormat=%s, epoch = %s\n",
+      ("oordPanel::SaveData() entered, coordName=%s, epochFormat=%s, epoch = %s\n",
        coordName.c_str(), epochFormat.c_str(), epochValue.c_str());
    #endif
    
@@ -879,11 +887,19 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          coordSys = (CoordinateSystem*)
             theGuiInterpreter->CreateObject("CoordinateSystem", coordName);
          
-         #if DEBUG_COORD_PANEL
-         MessageInterface::ShowMessage
-            ("CoordPanel::SaveData() coordName=%s created.\n",
-             coordName.c_str());
-         #endif
+         if (coordSys)
+         {
+            #ifdef DEBUG_COORD_PANEL
+            MessageInterface::ShowMessage
+               ("CoordPanel::SaveData() coordName=%s created.\n",
+                coordName.c_str());
+            #endif
+         }
+         else
+         {
+            canClose = false;
+            return false;
+         }
       }
       
       //-------------------------------------------------------
@@ -906,7 +922,6 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       {
          j2000body->SetJ2000Body(j2000body);
          origin->SetJ2000Body(j2000body);
-
       }
 
       coordSys->SetJ2000Body(j2000body);
@@ -971,7 +986,8 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          #endif
          
          inputString = epochTextCtrl->GetValue();
-         if ((GmatStringUtil::ToReal(inputString, &epoch)) && (epoch >= DateUtil::EARLIEST_VALID_MJD_VALUE) && (epoch <= DateUtil::LATEST_VALID_MJD_VALUE))
+         if ((GmatStringUtil::ToReal(inputString, &epoch)) &&
+             (epoch >= DateUtil::EARLIEST_VALID_MJD_VALUE) && (epoch <= DateUtil::LATEST_VALID_MJD_VALUE))
          {
             epochValue = epochTextCtrl->GetValue();
             a1mjd      = epoch;
@@ -1044,6 +1060,11 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          ("*** Error *** %s\n", e.GetFullMessage().c_str());
       canClose = false;
    }
+
+   #ifdef DEBUG_COORD_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("CoordPanel::SaveData() returning canClose = %d\n", canClose);
+   #endif
    
    return canClose;
 }

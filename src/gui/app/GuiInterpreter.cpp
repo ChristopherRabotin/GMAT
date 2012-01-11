@@ -30,6 +30,7 @@
 #include "GuiInterpreter.hpp"
 #include "Moderator.hpp"
 
+#define DEBUG_SYNC_STATUS
 
 GuiInterpreter* GuiInterpreter::instance = NULL;
 
@@ -300,18 +301,28 @@ GmatBase* GuiInterpreter::CreateObject(const std::string &type,
 {
    #if !defined __CONSOLE_APP__
    
-   #ifdef DEBUG_SYNC_STATUS
-   MessageInterface::ShowMessage
-      ("GuiInterpreter::CreateObject() type='%s', name='%s', Setting GUI dirty\n",
-       type.c_str(), name.c_str());
-   #endif
-   
    GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
-   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault);
+   continueOnError = false;
+   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault, false);
+   
    if (obj == NULL)
+   {
+      #ifdef DEBUG_SYNC_STATUS
+      MessageInterface::ShowMessage
+         ("GuiInterpreter::CreateObject() type='%s', name='%s', Setting GUI error\n",
+          type.c_str(), name.c_str());
+      #endif
       mainFrame->UpdateGuiScriptSyncStatus(3, 0); // Set GUI error
-   else
+   }
+   else if (name != "")
+   {
+      #ifdef DEBUG_SYNC_STATUS
+      MessageInterface::ShowMessage
+         ("GuiInterpreter::CreateObject() type='%s', name='%s', Setting GUI dirty\n",
+          type.c_str(), name.c_str());
+      #endif
       mainFrame->UpdateGuiScriptSyncStatus(2, 0); // Set GUI dirty
+   }
    
    return obj;
    
@@ -414,7 +425,22 @@ Parameter* GuiInterpreter::CreateParameter(const std::string &type,
                                            const std::string &depName,
                                            bool manage)
 {
-   return theModerator->CreateParameter(type, name, ownerName, depName, manage);
+   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
+   Parameter *obj =
+      theModerator->CreateParameter(type, name, ownerName, depName, manage);
+   
+   #ifdef DEBUG_SYNC_STATUS
+   MessageInterface::ShowMessage
+      ("GuiInterpreter::CreateParameter() type='%s', name='%s', Setting GUI %s\n",
+       type.c_str(), name.c_str(), obj ? "dirty" : "error");
+   #endif
+   
+   if (obj == NULL)
+      mainFrame->UpdateGuiScriptSyncStatus(3, 0); // Set GUI error
+   else
+      mainFrame->UpdateGuiScriptSyncStatus(2, 0); // Set GUI dirty
+   
+   return obj;
 }
 
 
@@ -440,9 +466,23 @@ Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
                                              bool createDefault)
 {
    // Set object manage option to configuration object
+   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    theModerator->SetObjectManageOption(1);
-   return theModerator->
-      CreateSubscriber(type, name, filename, createDefault);
+   Subscriber *obj =
+      theModerator->CreateSubscriber(type, name, filename, createDefault);
+   
+   #ifdef DEBUG_SYNC_STATUS
+   MessageInterface::ShowMessage
+      ("GuiInterpreter::CreateSubscriber() type='%s', name='%s', Setting GUI %s\n",
+       type.c_str(), name.c_str(), obj ? "dirty" : "error");
+   #endif
+   
+   if (obj == NULL)
+      mainFrame->UpdateGuiScriptSyncStatus(3, 0); // Set GUI error
+   else
+      mainFrame->UpdateGuiScriptSyncStatus(2, 0); // Set GUI dirty
+   
+   return obj;
 }
 
 
@@ -468,9 +508,27 @@ Integer GuiInterpreter::GetNumberOfActivePlots()
 //------------------------------------------------------------------------------
 GmatBase* GuiInterpreter::CreateDefaultPropSetup(const std::string &name)
 {
-   return (GmatBase*)theModerator->CreateDefaultPropSetup(name);
+   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
+   theModerator->SetObjectManageOption(1);
+   GmatBase *obj = theModerator->CreateDefaultPropSetup(name);
+   
+   #ifdef DEBUG_SYNC_STATUS
+   MessageInterface::ShowMessage
+      ("GuiInterpreter::CreateDefaultPropSetup() type='PropSetup', name='%s', "
+       "Setting GUI %s\n", name.c_str(), obj ? "dirty" : "error");
+   #endif
+   
+   if (obj == NULL)
+      mainFrame->UpdateGuiScriptSyncStatus(3, 0); // Set GUI error
+   else
+      mainFrame->UpdateGuiScriptSyncStatus(2, 0); // Set GUI dirty
+   
+   return obj;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* CreateNewODEModel(const std::string &name)
+//------------------------------------------------------------------------------
 GmatBase* GuiInterpreter::CreateNewODEModel(const std::string &name)
 {
    return theModerator->CreateODEModel("ODEModel", name);
@@ -971,6 +1029,7 @@ GuiInterpreter::GuiInterpreter()
 //------------------------------------------------------------------------------
 GuiInterpreter::GuiInterpreter(const GuiInterpreter&)
 {
+   continueOnError = false;
 }
 
 

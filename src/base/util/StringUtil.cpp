@@ -3177,9 +3177,9 @@ std::string GmatStringUtil::AddEnclosingString(const std::string &str,
 std::string GmatStringUtil::GetInvalidNameMessageFormat()
 {
    return ("\"%s\" is not a valid name. Please reenter a valid name.\n\n"
-           "[Name cannot be a GMAT keyword, such as \"GMAT\", \"Create\", "
-           "\"function\" and \n must begin with a letter, which may be followed "
-           "by any combination of letters, \ndigits, and underscores.]");
+           "[Name cannot be a GMAT keyword or command type name, such as \"GMAT\", "
+           "\"Create\", \"Propagate\", \"function\" and must begin with a letter, "
+           "which may be followed by any combination of letters, digits, and underscores.]");
 }
 
 

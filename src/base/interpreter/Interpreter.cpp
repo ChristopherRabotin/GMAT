@@ -899,12 +899,14 @@ GmatBase* Interpreter::GetConfiguredObject(const std::string &name)
 //------------------------------------------------------------------------------
 GmatBase* Interpreter::CreateObject(const std::string &type,
                                     const std::string &name,
-                                    Integer manage, bool createDefault)
+                                    Integer manage, bool createDefault,
+                                    bool includeLineOnError)
 {
    #ifdef DEBUG_CREATE_OBJECT
    MessageInterface::ShowMessage
-      ("Interpreter::CreateObject() type=<%s>, name=<%s>, manage=%d, createDefault=%d\n",
-       type.c_str(), name.c_str(), manage, createDefault);
+      ("Interpreter::CreateObject() type=<%s>, name=<%s>, manage=%d, createDefault=%d, "
+       "includeLineOnError=%d, continueOnError=%d\n", type.c_str(), name.c_str(), manage,
+       createDefault, includeLineOnError, continueOnError);
    #endif
    
    debugMsg = "In CreateObject()";
@@ -929,7 +931,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          #endif
          InterpreterException ex
             (type + " object can not be named to \"" + name + "\"");
-         HandleError(ex);
+         HandleError(ex, includeLineOnError);
          return NULL;
       }
    }
@@ -941,8 +943,8 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       if (IsCommandType(name))
       {
          InterpreterException ex
-            (type + " object can not be named to Command \"" + name + "\"");
-         HandleError(ex);
+            (type + " object can not be named to a Command type \"" + name + "\"");
+         HandleError(ex, includeLineOnError);
          return NULL;
       }
       
@@ -951,8 +953,8 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       if (IsObjectType(name))
       {
          InterpreterException ex
-            (type + " object can not be named to Object Type \"" + name + "\"");
-         HandleError(ex);
+            (type + " object can not be named to an Object Type \"" + name + "\"");
+         HandleError(ex, includeLineOnError);
          return NULL;
       }
       #endif
@@ -1678,22 +1680,6 @@ GmatBase* Interpreter::FindObject(const std::string &name,
                                   const std::string &ofType)
 {
    return theValidator->FindObject(name, ofType);
-}
-
-
-//------------------------------------------------------------------------------
-// bool IsCommandType(const std::string &type)
-//------------------------------------------------------------------------------
-/*
- * Returns true if input string is one of Command type that can be created.
- */
-//------------------------------------------------------------------------------
-bool Interpreter::IsCommandType(const std::string &type)
-{
-   if (find(commandList.begin(), commandList.end(), type) == commandList.end())
-      return false;
-   
-   return true;
 }
 
 
@@ -8041,6 +8027,22 @@ bool Interpreter::IsObjectType(const std::string &type)
       return true;
    
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsCommandType(const std::string &type)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if input string is one of Command type that can be created.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::IsCommandType(const std::string &type)
+{
+   if (find(commandList.begin(), commandList.end(), type) == commandList.end())
+      return false;
+   
+   return true;
 }
 
 

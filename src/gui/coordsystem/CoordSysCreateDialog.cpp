@@ -23,10 +23,13 @@
 #include "CoordinateSystem.hpp"
 #include "AxisSystem.hpp"
 #include "DateUtil.hpp"
+#include "StringUtil.hpp"            // for GetInvalidNameMessageFormat()
 #include <wx/config.h>
 
-//#define DEBUG_COORD_DIALOG 1
-//#define DEBUG_COORD_DIALOG_SAVE 1
+//#define DEBUG_COORD_DIALOG
+//#define DEBUG_COORD_DIALOG_CREATE
+//#define DEBUG_COORD_DIALOG_LOAD
+//#define DEBUG_COORD_DIALOG_SAVE
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -55,30 +58,40 @@ CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::Create()
 {
-    // get the config object
-    wxConfigBase *pConfig = wxConfigBase::Get();
-    // SetPath() understands ".."
-    pConfig->SetPath(wxT("/Coordinate System"));
-
-    // wxStaticText
-    nameStaticText = new wxStaticText( this, ID_TEXT,
-         wxT("Coordinate System "GUI_ACCEL_KEY"Name"), wxDefaultPosition, wxDefaultSize, 0 );
-
-    // wxTextCtrl
-    nameTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-         wxDefaultPosition, wxSize(160,-1), 0 );
-    nameTextCtrl->SetToolTip(pConfig->Read(_T("NameHint")));
-
-    mCoordPanel = new CoordPanel(this, true);
-
-    // wx*Sizers
-    wxBoxSizer *boxsizer1 = new wxBoxSizer( wxVERTICAL );
-
-    boxsizer1->Add( nameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    boxsizer1->Add( nameTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    theMiddleSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
-    theMiddleSizer->Add( mCoordPanel, 0, wxALIGN_CENTRE|wxALL, 5);
+   #ifdef DEBUG_COORDDIALOG_CREATE
+   MessageInterface::ShowMessage("CoordSysCreateDialog::Create() entered\n");
+   #endif
+   
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Coordinate System"));
+   
+   // wxStaticText
+   nameStaticText =
+      new wxStaticText( this, ID_TEXT,
+                        wxT("Coordinate System "GUI_ACCEL_KEY"Name"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   
+   // wxTextCtrl
+   nameTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                                  wxDefaultPosition, wxSize(160,-1), 0 );
+   nameTextCtrl->SetToolTip(pConfig->Read(_T("NameHint")));
+   
+   mCoordPanel = new CoordPanel(this, true);
+   
+   // wx*Sizers
+   wxBoxSizer *boxsizer1 = new wxBoxSizer( wxVERTICAL );
+   
+   boxsizer1->Add( nameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+   boxsizer1->Add( nameTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+   
+   theMiddleSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
+   theMiddleSizer->Add( mCoordPanel, 0, wxALIGN_CENTRE|wxALL, 5);
+   
+   #ifdef DEBUG_COORDDIALOG_CREATE
+   MessageInterface::ShowMessage("CoordSysCreateDialog::Create() leaving\n");
+   #endif
 }
 
 
@@ -87,6 +100,10 @@ void CoordSysCreateDialog::Create()
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::LoadData()
 {
+   #ifdef DEBUG_COORDDIALOG_LOAD
+   MessageInterface::ShowMessage("CoordSysCreateDialog::LoadData() entered\n");
+   #endif
+   
    try
    {
       epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
@@ -115,6 +132,9 @@ void CoordSysCreateDialog::LoadData()
             e.GetFullMessage().c_str());
    }
    
+   #ifdef DEBUG_COORDDIALOG_LOAD
+   MessageInterface::ShowMessage("CoordSysCreateDialog::LoadData() leaving\n");
+   #endif
 }
 
 
@@ -123,9 +143,9 @@ void CoordSysCreateDialog::LoadData()
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::SaveData()
 {
-   #if DEBUG_COORD_DIALOG_SAVE
+   #ifdef DEBUG_COORD_DIALOG_SAVE
    MessageInterface::ShowMessage
-      ("CoordSysCreateDialog::SaveData() mIsTextModified=%d\n",
+      ("CoordSysCreateDialog::SaveData() entered, mIsTextModified=%d\n",
        mIsTextModified);
    #endif
    
@@ -140,8 +160,20 @@ void CoordSysCreateDialog::SaveData()
       return;
    }
    
+   // Check if name starts with number or contains non-alphanumeric character
+   // Warning message is displayed from UserInputValidator::IsValidName()
    if (!IsValidName(coordName.c_str()))
       return;
+   
+   // Check if name is any command type name
+   if (theGuiInterpreter->IsCommandType(coordName.c_str()))
+   {
+      std::string format = GmatStringUtil::GetInvalidNameMessageFormat();
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, format.c_str(), coordName.c_str());
+      canClose = false;
+      return;
+   }
    
    //-----------------------------------------------------------------
    // check values from text field
@@ -151,13 +183,13 @@ void CoordSysCreateDialog::SaveData()
       Real epoch;
 //      Real interval;
       std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().c_str();
-      #if DEBUG_COORD_DIALOG_SAVE
+      #ifdef DEBUG_COORD_DIALOG_SAVE
       MessageInterface::ShowMessage
          ("CoordSysCreateDialog::SaveData() epoch value = %s\n",
           str.c_str());
       #endif
       bool isValid = CheckReal(epoch, str, "Epoch", "Real Number >= 0");
-      #if DEBUG_COORD_DIALOG_SAVE
+      #ifdef DEBUG_COORD_DIALOG_SAVE
       MessageInterface::ShowMessage
          ("CoordSysCreateDialog::SaveData() isValid = %s, and epoch real value = %12.10f\n",
           (isValid? "true" : "false"), epoch);
@@ -168,7 +200,8 @@ void CoordSysCreateDialog::SaveData()
 //      if (isValid && epoch < 0.0)
 //         CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
       if (isValid)
-         CheckRealRange(str, epoch, "Epoch", DateUtil::EARLIEST_VALID_MJD_VALUE, DateUtil::LATEST_VALID_MJD_VALUE, true, true, true, true);
+         CheckRealRange(str, epoch, "Epoch", DateUtil::EARLIEST_VALID_MJD_VALUE,
+                        DateUtil::LATEST_VALID_MJD_VALUE, true, true, true, true);
       
 //      str = mCoordPanel->GetIntervalTextCtrl()->GetValue();
 //      isValid = CheckReal(interval, str, "UpdateInterval", "Real Number >= 0");
@@ -204,7 +237,6 @@ void CoordSysCreateDialog::SaveData()
          if (axis != NULL)
          {
             canClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
-            mIsCoordCreated = true;
             mCoordName = wxString(coordName.c_str());
             mIsCoordCreated = true;
          }
@@ -216,6 +248,9 @@ void CoordSysCreateDialog::SaveData()
          canClose = false;
       }
    }
+   #ifdef DEBUG_COORD_DIALOG_SAVE
+   MessageInterface::ShowMessage("CoordSysCreateDialog::SaveData() leaving\n");
+   #endif
 }
 
 

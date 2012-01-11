@@ -122,6 +122,7 @@
 //#define DEBUG_ADD_SCRIPT
 //#define DEBUG_ADD_SOLVER
 //#define DEBUG_USER_GUI
+//#define DEBUG_GMAT_FUNCTION
 //#define DEBUG_ADD_LOCATOR
 
 
@@ -190,7 +191,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_GMAT_FUNCTION, ResourceTree::OnAddGmatFunction)
    EVT_MENU(POPUP_NEW_GMAT_FUNCTION, ResourceTree::OnAddGmatFunction)
    EVT_MENU(POPUP_OPEN_GMAT_FUNCTION, ResourceTree::OnAddGmatFunction)
-   EVT_MENU(POPUP_ADD_COORD_SYS, ResourceTree::OnAddCoordSys)
+   EVT_MENU(POPUP_ADD_COORD_SYS, ResourceTree::OnAddCoordSystem)
    EVT_MENU(POPUP_ADD_BARYCENTER, ResourceTree::OnAddBarycenter)
    EVT_MENU(POPUP_ADD_LIBRATION, ResourceTree::OnAddLibration)
    EVT_MENU(POPUP_ADD_PLANET, ResourceTree::OnAddPlanet)
@@ -538,10 +539,10 @@ void ResourceTree::UpdateFormation()
 
 
 //------------------------------------------------------------------------------
-// void UpdateVariable()
+// void UpdateRecentFiles()
 //------------------------------------------------------------------------------
 /**
- * Updates Variable node.
+ * Updates recent files
  */
 //------------------------------------------------------------------------------
 void ResourceTree::UpdateRecentFiles(wxString filename)
@@ -604,6 +605,31 @@ void ResourceTree::UpdateVariable()
 {
    DeleteChildren(mVariableItem);
    AddDefaultVariables(mVariableItem);
+   SelectItem(GetLastChild(mVariableItem));
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string &objType, const std::string &objName)
+//------------------------------------------------------------------------------
+GmatBase* ResourceTree::CreateObject(const std::string &objType, const std::string &objName)
+{
+   #ifdef DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage
+      ("ResourceTree::CreateObject() entered, objType='%s', objName='%s'\n",
+       objType.c_str(), objName.c_str());
+   #endif
+   
+   try
+   {
+      GmatBase *obj = theGuiInterpreter->CreateObject(objType, objName);
+      return obj;
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+      return NULL;
+   }
 }
 
 
@@ -1586,7 +1612,7 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
                     new GmatTreeItemData(wxT(objName), GmatTree::STRING));
       }
    };
-
+   
    if (size > 0)
       Expand(itemId);
 }
@@ -2439,20 +2465,18 @@ void ResourceTree::OnAddBody(wxCommandEvent &event)
             {
                const std::string newName = name.c_str();
                const std::string newCentralBody = centralBody.c_str();
-               GmatBase *obj = theGuiInterpreter->CreateObject("Moon", newName); // ************
-               ((CelestialBody*) obj)->SetCentralBody(newCentralBody);
+               GmatBase *obj = CreateObject("Moon", newName); // ************
                
                if (obj != NULL)
                {
+                  ((CelestialBody*) obj)->SetCentralBody(newCentralBody);
                   // need to get teh sub-item for the appropriate central body here ...
                   AppendItem(item, name, GmatTree::ICON_MOON, -1,
                              new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY));
                   Expand(item);
-                  
+                  SelectItem(GetLastChild(item));
                   theGuiManager->UpdateCelestialPoint();
                }
-               
-               SelectItem(GetLastChild(item));
             }
          }
       }
@@ -2473,7 +2497,7 @@ void ResourceTree::OnAddGroundStation(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("GroundStation", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("GroundStation", newName);
+   GmatBase *obj = CreateObject("GroundStation", newName);
 
    if (obj != NULL)
    {
@@ -2481,7 +2505,7 @@ void ResourceTree::OnAddGroundStation(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_GROUND_STATION, -1,
                  new GmatTreeItemData(name, GmatTree::GROUND_STATION));
       Expand(item);
-
+      SelectItem(GetLastChild(item));            
       theGuiManager->UpdateGroundStation();
    }
 }
@@ -2500,7 +2524,7 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("Spacecraft", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("Spacecraft", newName);
+   GmatBase *obj = CreateObject("Spacecraft", newName);
 
    if (obj != NULL)
    {
@@ -2508,7 +2532,7 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_SPACECRAFT, -1,
                  new GmatTreeItemData(name, GmatTree::SPACECRAFT));
       Expand(item);
-      
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSpacecraft();
       // Update CoordindateSystem folder since Moderator creates default
       // coordinate systems if not created already when creating a spacecraft
@@ -2532,7 +2556,7 @@ void ResourceTree::OnAddFuelTank(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("FuelTank", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("FuelTank", newName);
+   GmatBase *obj = CreateObject("FuelTank", newName);
 
    if (obj != NULL)
    {
@@ -2540,7 +2564,7 @@ void ResourceTree::OnAddFuelTank(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_TANK, -1,
                  new GmatTreeItemData(name, GmatTree::FUELTANK));
       Expand(item);
-
+      SelectItem(GetLastChild(item));            
       theGuiManager->UpdateFuelTank();
    }
 }
@@ -2559,7 +2583,7 @@ void ResourceTree::OnAddThruster(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("Thruster", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("Thruster", newName);
+   GmatBase *obj = CreateObject("Thruster", newName);
 
    if (obj != NULL)
    {
@@ -2567,7 +2591,7 @@ void ResourceTree::OnAddThruster(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_THRUSTER, -1,
                  new GmatTreeItemData(name, GmatTree::THRUSTER));
       Expand(item);
-
+      SelectItem(GetLastChild(item));            
       theGuiManager->UpdateThruster();
    }
 }
@@ -2586,7 +2610,7 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("Formation", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("Formation", newName);
+   GmatBase *obj = CreateObject("Formation", newName);
 
    if (obj != NULL)
    {
@@ -2597,7 +2621,7 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
       SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateFormation();
    }
 }
@@ -2652,7 +2676,7 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_PROPAGATOR, -1,
                  new GmatTreeItemData(name, GmatTree::PROPAGATOR));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdatePropagator();
    }
    else
@@ -2708,15 +2732,15 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("ImpulsiveBurn", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("ImpulsiveBurn", newName, true);
-
+   GmatBase *obj = CreateObject("ImpulsiveBurn", newName);
+   
    if (obj != NULL)
    {
       wxString name = newName.c_str();
       AppendItem(item, name, GmatTree::ICON_IMPULSIVE_BURN, -1,
                  new GmatTreeItemData(name, GmatTree::IMPULSIVE_BURN));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateBurn();
    }
 }
@@ -2735,7 +2759,7 @@ void ResourceTree::OnAddFiniteBurn(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("FiniteBurn", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("FiniteBurn", newName);
+   GmatBase *obj = CreateObject("FiniteBurn", newName);
 
    if (obj != NULL)
    {
@@ -2743,7 +2767,7 @@ void ResourceTree::OnAddFiniteBurn(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_FINITE_BURN, -1,
                  new GmatTreeItemData(name, GmatTree::FINITE_BURN));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateBurn();
    }
 }
@@ -2766,7 +2790,7 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
 
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("DC", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("DifferentialCorrector", newName);
+   GmatBase *obj = CreateObject("DifferentialCorrector", newName);
 
    if (obj != NULL)
    {
@@ -2776,7 +2800,7 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
       AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, GmatTree::DIFF_CORR));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSolver();
    }
 }
@@ -2799,7 +2823,7 @@ void ResourceTree::OnAddSqp(wxCommandEvent &event)
 
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("SQP", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("FminconOptimizer", newName);
+   GmatBase *obj = CreateObject("FminconOptimizer", newName);
    
    if (obj != NULL)
    {
@@ -2808,7 +2832,7 @@ void ResourceTree::OnAddSqp(wxCommandEvent &event)
       AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, GmatTree::SQP));
       Expand(item);
-      
+      SelectItem(GetLastChild(item));      
       theGuiManager->UpdateSolver();
    }
 }
@@ -2834,7 +2858,7 @@ void ResourceTree::OnAddHardware(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName(selected, 1);
    
-   GmatBase *obj = theGuiInterpreter->CreateObject(selected, newName);
+   GmatBase *obj = CreateObject(selected, newName);
    
    if (obj != NULL)
    {
@@ -2844,7 +2868,7 @@ void ResourceTree::OnAddHardware(wxCommandEvent &event)
       AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, GmatTree::HARDWARE));
       Expand(item);
-      
+      SelectItem(GetLastChild(item));      
       theGuiManager->UpdateSensor();
    }
 }
@@ -2874,7 +2898,7 @@ void ResourceTree::OnAddSolver(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName(selected, 1);
 
-   GmatBase *obj = theGuiInterpreter->CreateObject(selected, newName);
+   GmatBase *obj = CreateObject(selected, newName);
 
    if (obj != NULL)
    {
@@ -2883,7 +2907,7 @@ void ResourceTree::OnAddSolver(wxCommandEvent &event)
       AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, GmatTree::SOLVER));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSolver();
    }
    
@@ -2920,7 +2944,7 @@ void ResourceTree::OnAddLocator(wxCommandEvent &event)
             selected.c_str(), newName.c_str());
    #endif
 
-   GmatBase *obj = theGuiInterpreter->CreateObject(selected, newName);
+   GmatBase *obj = CreateObject(selected, newName);
 
    if (obj != NULL)
    {
@@ -2929,7 +2953,7 @@ void ResourceTree::OnAddLocator(wxCommandEvent &event)
       AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, GmatTree::EVENT_LOCATOR));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateLocator();
    }
 
@@ -2960,7 +2984,7 @@ void ResourceTree::OnAddReportFile(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_REPORT_FILE, -1,
                  new GmatTreeItemData(name, GmatTree::REPORT_FILE));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
    }
 }
@@ -2986,7 +3010,7 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_XY_PLOT, -1,
                  new GmatTreeItemData(name, GmatTree::XY_PLOT));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
    }
 }
@@ -3013,7 +3037,7 @@ void ResourceTree::OnAddOrbitView(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_ORBIT_VIEW, -1,
                  new GmatTreeItemData(name, GmatTree::ORBIT_VIEW));
       Expand(item);
-      
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
    }
 }
@@ -3040,7 +3064,7 @@ void ResourceTree::OnAddEphemerisFile(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_REPORT_FILE, -1,
                  new GmatTreeItemData(name, GmatTree::EPHEMERIS_FILE));
       Expand(item);
-      
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
    }
 }
@@ -3058,7 +3082,7 @@ void ResourceTree::OnAddEphemerisFile(wxCommandEvent &event)
 void ResourceTree::OnAddSubscriber(wxCommandEvent &event)
 {
    std::string selected = pluginMap[event.GetId()];
-
+   
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName(selected, 1);
    GmatBase *obj = theGuiInterpreter->CreateSubscriber(selected, newName);
@@ -3077,7 +3101,7 @@ void ResourceTree::OnAddSubscriber(wxCommandEvent &event)
       AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, itemType));
       Expand(item);
-      
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
    }
 }
@@ -3160,22 +3184,18 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
       if (!name.IsEmpty())
       {
          const std::string newName = name.c_str();
-         GmatBase *obj = theGuiInterpreter->CreateObject("MatlabFunction", newName);
-         
+         GmatBase *obj = CreateObject("MatlabFunction", newName);
          if (obj != NULL)
          {
             AppendItem(item, name, GmatTree::ICON_MATLAB_FUNCTION, -1,
                        new GmatTreeItemData(name, GmatTree::MATLAB_FUNCTION));
             Expand(item);
-            
+            SelectItem(GetLastChild(item));
             theGuiManager->UpdateFunction();
          }
-         
-         SelectItem(GetLastChild(item));
       }
    }
 }
-
 
 //------------------------------------------------------------------------------
 // void OnAddGmatFunction(wxCommandEvent &event)
@@ -3205,8 +3225,9 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
       {
          if (!name.IsEmpty())
          {
-            obj = theGuiInterpreter->CreateObject("GmatFunction", name.c_str());
-            ((GmatFunction *)(obj))->SetNewFunction(true);
+            obj = CreateObject("GmatFunction", name.c_str());
+            if (obj)
+               ((GmatFunction *)(obj))->SetNewFunction(true);
          }
       }
    }
@@ -3236,7 +3257,7 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
          #endif
 
          // Create GmatFunction object
-         obj = theGuiInterpreter->CreateObject("GmatFunction", name.c_str());
+         obj = CreateObject("GmatFunction", name.c_str());
          // Set function path
          if (obj != NULL)
             obj->SetStringParameter("FunctionPath", path.c_str());
@@ -3251,7 +3272,7 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
       theGuiManager->UpdateFunction();
       SelectItem(GetLastChild(item));
    }
-
+   
    #ifdef DEBUG_GMAT_FUNCTION
    MessageInterface::ShowMessage("ResourceTree::OnAddGmatFunction() exiting\n");
    #endif
@@ -3260,7 +3281,7 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnAddCoordSys(wxCommandEvent &event)
+// void OnAddCoordSystem(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Add a coordinate system to the folder
@@ -3268,7 +3289,7 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
  * @param <event> command event
  */
 //------------------------------------------------------------------------------
-void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
+void ResourceTree::OnAddCoordSystem(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
 
@@ -3278,14 +3299,14 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
 
    if (coordDlg.IsCoordCreated())
    {
-      //wxString name = coordDlg.GetParamName();
+      MessageInterface::ShowMessage("===> CoordSystem created\n");
       wxString name = coordDlg.GetCoordName();
 
       AppendItem(item, name, GmatTree::ICON_COORDINATE_SYSTEM, -1,
                  new GmatTreeItemData(name, GmatTree::USER_COORD_SYSTEM));
-
+      
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateCoordSystem();
    }
 }
@@ -3304,7 +3325,7 @@ void ResourceTree::OnAddBarycenter(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("Barycenter", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("Barycenter", newName);
+   GmatBase *obj = CreateObject("Barycenter", newName);
 
    if (obj != NULL)
    {
@@ -3312,7 +3333,7 @@ void ResourceTree::OnAddBarycenter(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::RESOURCE_ICON_BARYCENTER, -1,
                  new GmatTreeItemData(name, GmatTree::BARYCENTER));
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateCelestialPoint();
    }
 }
@@ -3331,14 +3352,14 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("Libration", 1);
-   GmatBase *obj = theGuiInterpreter->CreateObject("LibrationPoint", newName);
+   GmatBase *obj = CreateObject("LibrationPoint", newName);
 
    if (obj != NULL)
    {
       DeleteChildren(mSpecialPointsItem);
       AddDefaultSpecialPoints(mSpecialPointsItem, true, false);
       Expand(item);
-
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateCelestialPoint();
    }
 }
@@ -3370,24 +3391,29 @@ void ResourceTree::OnAddPlanet(wxCommandEvent &event)
             MessageInterface::PopupMessage(Gmat::ERROR_, errmsg.c_str());
             return;
          }
-         GmatBase *obj = theGuiInterpreter->CreateObject("Planet", newName);
-         ((CelestialBody*)obj)->SetCentralBody(cBody);
-         // For now, we only have one solar system with one star ...
-         if (cBody == SolarSystem::SUN_NAME)
+         GmatBase *obj = CreateObject("Planet", newName);
+         if (obj)
          {
-            wxTreeItemId parent = GetItemParent(item);
-            AppendItem(parent, name, GmatTree::ICON_PLANET_GENERIC, -1,
-                       new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_PLANET));
-            Expand(parent);
+            ((CelestialBody*)obj)->SetCentralBody(cBody);
+            // For now, we only have one solar system with one star ...
+            if (cBody == SolarSystem::SUN_NAME)
+            {
+               wxTreeItemId parent = GetItemParent(item);
+               AppendItem(parent, name, GmatTree::ICON_PLANET_GENERIC, -1,
+                          new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_PLANET));
+               Expand(parent);
+               SelectItem(GetLastChild(parent));
+            }
+            else
+            {
+               AppendItem(item, name, GmatTree::ICON_PLANET_GENERIC, -1,
+                          new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_PLANET));
+               Expand(item);
+               SelectItem(GetLastChild(item));
+            }
+            
+            theGuiManager->UpdateSolarSystem();
          }
-         else
-         {
-            AppendItem(item, name, GmatTree::ICON_PLANET_GENERIC, -1,
-                       new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_PLANET));
-            Expand(item);
-         }
-         
-         theGuiManager->UpdateSolarSystem();
       }
    }
 }
@@ -3419,25 +3445,30 @@ void ResourceTree::OnAddMoon(wxCommandEvent &event)
             MessageInterface::PopupMessage(Gmat::ERROR_, errmsg.c_str());
             return;
          }
-         GmatBase *obj = theGuiInterpreter->CreateObject("Moon", newName);
-         ((CelestialBody*)obj)->SetCentralBody(cBody);
-         // For now, we only have one solar system with one star ...
-         // Of course, a moon around a star makes no sense ...
-         if (cBody == SolarSystem::SUN_NAME)
+         GmatBase *obj = CreateObject("Moon", newName);
+         if (obj)
          {
-            wxTreeItemId parent = GetItemParent(item);
-            AppendItem(parent, name, GmatTree::ICON_MOON_GENERIC, -1,
-                       new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_MOON));
-            Expand(parent);
+            ((CelestialBody*)obj)->SetCentralBody(cBody);
+            // For now, we only have one solar system with one star ...
+            // Of course, a moon around a star makes no sense ...
+            if (cBody == SolarSystem::SUN_NAME)
+            {
+               wxTreeItemId parent = GetItemParent(item);
+               AppendItem(parent, name, GmatTree::ICON_MOON_GENERIC, -1,
+                          new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_MOON));
+               Expand(parent);
+               SelectItem(GetLastChild(parent));
+            }
+            else
+            {
+               AppendItem(item, name, GmatTree::ICON_MOON_GENERIC, -1,
+                          new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_MOON));
+               Expand(item);
+               SelectItem(GetLastChild(item));
+            }
+            
+            theGuiManager->UpdateSolarSystem();
          }
-         else
-         {
-            AppendItem(item, name, GmatTree::ICON_MOON_GENERIC, -1,
-                       new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_MOON));
-            Expand(item);
-         }
-         
-         theGuiManager->UpdateSolarSystem();
       }
    }
 }
@@ -3469,30 +3500,35 @@ void ResourceTree::OnAddComet(wxCommandEvent &event)
             MessageInterface::PopupMessage(Gmat::ERROR_, errmsg.c_str());
             return;
          }
-         GmatBase *obj = theGuiInterpreter->CreateObject("Comet", newName);
+         GmatBase *obj = CreateObject("Comet", newName);
          #ifdef DEBUG_ADD_COMET
          if (obj == NULL)
             MessageInterface::ShowMessage("ERROR creating body!!\n");
          else
             MessageInterface::ShowMessage("Body %s created!!\n", name.c_str());
          #endif
-         ((CelestialBody*)obj)->SetCentralBody(cBody);
-         // For now, we only have one solar system with one star ...
-         if (cBody == SolarSystem::SUN_NAME)
+         if (obj)
          {
-            wxTreeItemId parent = GetItemParent(item);
-            AppendItem(parent, name, GmatTree::ICON_COMET, -1,
-                       new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_COMET));
-            Expand(parent);
+            ((CelestialBody*)obj)->SetCentralBody(cBody);
+            // For now, we only have one solar system with one star ...
+            if (cBody == SolarSystem::SUN_NAME)
+            {
+               wxTreeItemId parent = GetItemParent(item);
+               AppendItem(parent, name, GmatTree::ICON_COMET, -1,
+                          new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_COMET));
+               Expand(parent);
+               SelectItem(GetLastChild(parent));
+            }
+            else
+            {
+               AppendItem(item, name, GmatTree::ICON_COMET, -1,
+                          new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_COMET));
+               Expand(item);
+               SelectItem(GetLastChild(item));
+            }
+            
+            theGuiManager->UpdateSolarSystem();
          }
-         else
-         {
-            AppendItem(item, name, GmatTree::ICON_COMET, -1,
-                       new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_COMET));
-            Expand(item);
-         }
-         
-         theGuiManager->UpdateSolarSystem();
       }
    }
    
@@ -3525,24 +3561,29 @@ void ResourceTree::OnAddAsteroid(wxCommandEvent &event)
             MessageInterface::PopupMessage(Gmat::ERROR_, errmsg.c_str());
             return;
          }
-         GmatBase *obj = theGuiInterpreter->CreateObject("Asteroid", newName);
-         ((CelestialBody*)obj)->SetCentralBody(cBody);
-         // For now, we only have one solar system with one star ...
-         if (cBody == SolarSystem::SUN_NAME)
+         GmatBase *obj = CreateObject("Asteroid", newName);
+         if (obj)
          {
-            wxTreeItemId parent = GetItemParent(item);
-            AppendItem(parent, name, GmatTree::ICON_ASTEROID, -1,
-                       new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_ASTEROID));
-            Expand(parent);
+            ((CelestialBody*)obj)->SetCentralBody(cBody);
+            // For now, we only have one solar system with one star ...
+            if (cBody == SolarSystem::SUN_NAME)
+            {
+               wxTreeItemId parent = GetItemParent(item);
+               AppendItem(parent, name, GmatTree::ICON_ASTEROID, -1,
+                          new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_ASTEROID));
+               Expand(parent);
+               SelectItem(GetLastChild(parent));
+            }
+            else
+            {
+               AppendItem(item, name, GmatTree::ICON_ASTEROID, -1,
+                          new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_ASTEROID));
+               Expand(item);
+               SelectItem(GetLastChild(item));
+            }
+            
+            theGuiManager->UpdateSolarSystem();
          }
-         else
-         {
-            AppendItem(item, name, GmatTree::ICON_ASTEROID, -1,
-                       new GmatTreeItemData(name, GmatTree::CELESTIAL_BODY_ASTEROID));
-            Expand(item);
-         }
-         
-         theGuiManager->UpdateSolarSystem();
       }
    }
 }
@@ -3604,12 +3645,14 @@ void ResourceTree::OnAddUserObject(wxCommandEvent &event)
 {
    // Look up the plugin type based on the ID built with menu that selected it
    std::string selected = pluginMap[event.GetId()];
-
+   
    // The rest is like the other tree additions
    wxTreeItemId item = GetSelection();
+   GmatTreeItemData *selItemData = (GmatTreeItemData *) GetItemData(item);
+   GmatTree::ItemType itemType = selItemData->GetItemType();
    std::string newName = theGuiInterpreter->GetNewName(selected, 1);
-
-   GmatBase *obj = theGuiInterpreter->CreateObject(selected, newName);
+   
+   GmatBase *obj = CreateObject(selected, newName);
    
    if (obj != NULL)
    {
@@ -3619,6 +3662,8 @@ void ResourceTree::OnAddUserObject(wxCommandEvent &event)
       AppendItem(item, name, iconToUse, -1,
                  new GmatTreeItemData(name, GmatTree::USER_DEFINED_OBJECT));
       Expand(item);
+      SelectItem(GetLastChild(item));
+      UpdateGuiItem(itemType);
    }
 }
 
@@ -4966,7 +5011,8 @@ int ResourceTree::GetNameFromUser(wxString &newName, const wxString &oldName,
    
    // Remove leading and trailing white spaces
    newName = newName.Strip(wxString::both);
-   
+
+   // Check if name starts with number or contains non-alphanumeric character
    if (IsValidName(newName.c_str()))
    {
       // Now check for name already in use
@@ -4974,6 +5020,15 @@ int ResourceTree::GetNameFromUser(wxString &newName, const wxString &oldName,
       {
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "\"%s\" already exist. Please enter different name.", newName.c_str());
+         
+         return GetNameFromUser(newName, newName, msg, caption);
+      }
+      // Now check if name is any command type name
+      else if (theGuiInterpreter->IsCommandType(newName.c_str()))
+      {
+         std::string format = GmatStringUtil::GetInvalidNameMessageFormat();
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, format.c_str(), newName.c_str());
          
          return GetNameFromUser(newName, newName, msg, caption);
       }

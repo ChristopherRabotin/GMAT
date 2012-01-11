@@ -105,9 +105,6 @@ private:
    void Create();
    void LoadData();
    
-   // Layout & data handling methods
-   void Setup(wxWindow *parent);
-   
    bool IsValidAxis(const wxString &axisType, const wxString &priName,
                     const wxString &secName, const wxString &x,
                     const wxString &y, const wxString &z);
