@@ -65,6 +65,7 @@
 //#define DEBUG_MASS_FLOW
 //#define DEBUG_SPICE_KERNELS
 //#define DEBUG_HARDWARE
+//#define DEBUG_SC_INPUT_TYPES
 
 
 #ifdef DEBUG_SPACECRAFT
@@ -271,6 +272,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    coordinateSystem     (NULL),
    coordSysName         ("EarthMJ2000Eq"),
    originMu             (0.0),
+   coordSysSet          (false),
+   epochSet             (false),
    spacecraftId         ("SatId"),
    attitude             (NULL),
    totalMass            (850.0),
@@ -455,6 +458,9 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    coordSysName         (a.coordSysName),
    originMu             (a.originMu),
    defaultCartesian     (a.defaultCartesian),
+   possibleInputTypes   (a.possibleInputTypes),
+   coordSysSet          (a.coordSysSet),
+   epochSet             (a.epochSet),
    coordSysMap          (a.coordSysMap),
    spacecraftId         (a.spacecraftId),
 //   orbitSpiceKernelNames(a.orbitSpiceKernelNames),
@@ -550,6 +556,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    coordSysName         = a.coordSysName;
    originMu             = a.originMu;
    defaultCartesian     = a.defaultCartesian;
+   possibleInputTypes   = a.possibleInputTypes;
+   coordSysSet          = a.coordSysSet;
+   epochSet             = a.epochSet;
    coordSysMap          = a.coordSysMap;
    spacecraftId         = a.spacecraftId;
    solarSystem          = a.solarSystem;         // need to copy
@@ -1250,6 +1259,15 @@ bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string
          ("Spacecraft::SetRefObjectName() About to change CoordSysName "
           "'%s' to '%s'\n", coordSysName.c_str(), name.c_str());
       #endif
+//      if (coordSysSet && !csSet && (coordSysName != name))
+//      {
+//         std::string warnmsg = "*** WARNING *** You have set the coordinate system for Spacecraft ";
+//         warnmsg += instanceName + " more than once in assignment mode (i.e. before the BeginMissionSequence command).  ";
+//         warnmsg += "This may have unintended consequences and you should perform these ";
+//         warnmsg += "operations in command mode (i.e. after the BeginMissionSequence command).\n";
+//         MessageInterface::PopupMessage(Gmat::WARNING_,warnmsg);
+//      }
+//      coordSysSet  = true;
       coordSysName = name;
       return true;
    }
@@ -2349,6 +2367,15 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    if (label == "A1Epoch")
    {
       state.SetEpoch(value);
+      if (epochSet && !csSet)
+      {
+         std::string warnmsg = "*** WARNING *** You have set the epoch for Spacecraft ";
+         warnmsg += instanceName + " more than once in assignment mode (i.e. before the BeginMissionSequence command).  ";
+         warnmsg += "This may have unintended consequences and you should perform these ";
+         warnmsg += "operations in command mode (i.e. after the BeginMissionSequence command).\n";
+         MessageInterface::PopupMessage(Gmat::WARNING_,warnmsg);
+      }
+      epochSet  = true;
       return value;
    }
 
@@ -2758,8 +2785,17 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          ("Spacecraft::SetStringParameter() About to change CoordSysName "
           "'%s' to '%s'\n", coordSysName.c_str(), value.c_str());
       #endif
+      if (coordSysSet && !csSet && (coordSysName != value))
+      {
+         std::string warnmsg = "*** WARNING *** You have set the coordinate system for Spacecraft ";
+         warnmsg += instanceName + " more than once in assignment mode (i.e. before the BeginMissionSequence command).  ";
+         warnmsg += "This may have unintended consequences and you should perform these ";
+         warnmsg += "operations in command mode (i.e. after the BeginMissionSequence command).\n";
+         MessageInterface::PopupMessage(Gmat::WARNING_,warnmsg);
+      }
       parmsChanged = true;
       coordSysName = value;
+      coordSysSet  = true;
    }
    else if (id == SPACECRAFT_ID)
    {
@@ -3226,8 +3262,8 @@ bool Spacecraft::TakeAction(const std::string &action,
             // first convert the default cartesian state to the input state type OR if all of the elements have been set,
             // use those values
             Rvector6 convertedState;
-            if (NumStateElementsSet() == state.GetSize())
-            {
+           if (NumStateElementsSet() == state.GetSize())
+           {
                #ifdef DEBUG_SPACECRAFT_CS
                   MessageInterface::ShowMessage("Spacecraft::TakeAction() all elements are set ------------\n");
                #endif
@@ -3247,7 +3283,8 @@ bool Spacecraft::TakeAction(const std::string &action,
                   MessageInterface::ShowMessage("    and current input state is: %12.10f   %12.10f      %12.10f   %12.10f   %12.10f   %12.10f\n",
                         state[0], state[1], state[2], state[3], state[4], state[5]);
                #endif
-               convertedState = StateConversionUtil::Convert(originMu, defaultCartesian, "Cartesian", stateType);
+               convertedState = GetStateInRepresentation(stateType, true); // will use defaultCartesian for the state here
+//               convertedState = StateConversionUtil::Convert(originMu, defaultCartesian, "Cartesian", stateType);
                #ifdef DEBUG_SPACECRAFT_CS
                   MessageInterface::ShowMessage("    state converted to %s is: %s\n", stateType.c_str(), (convertedState.ToString()).c_str());
                #endif
@@ -3588,6 +3625,15 @@ void Spacecraft::SetEpoch(const std::string &ep)
    {
       RecomputeStateAtEpoch(outMjd);
       state.SetEpoch(outMjd);
+      if (epochSet && !csSet)
+      {
+         std::string warnmsg = "*** WARNING *** You have set the epoch for Spacecraft ";
+         warnmsg += instanceName + " more than once in assignment mode (i.e. before the BeginMissionSequence command).  ";
+         warnmsg += "This may have unintended consequences and you should perform these ";
+         warnmsg += "operations in command mode (i.e. after the BeginMissionSequence command).\n";
+         MessageInterface::PopupMessage(Gmat::WARNING_,warnmsg);
+      }
+      epochSet  = true;
       if (attitude) attitude->SetEpoch(outMjd);
    }
    else
@@ -3622,6 +3668,15 @@ void Spacecraft::SetEpoch(const std::string &type, const std::string &ep, Real a
    scEpochStr = ep;
    RecomputeStateAtEpoch(a1mjd);
    state.SetEpoch(a1mjd);
+   if (epochSet && !csSet)
+   {
+      std::string warnmsg = "*** WARNING *** You have set the epoch for Spacecraft ";
+      warnmsg += instanceName + " more than once in assignment mode (i.e. before the BeginMissionSequence command).  ";
+      warnmsg += "This may have unintended consequences and you should perform these ";
+      warnmsg += "operations in command mode (i.e. after the BeginMissionSequence command).\n";
+      MessageInterface::PopupMessage(Gmat::WARNING_,warnmsg);
+   }
+   epochSet  = true;
    if (attitude) attitude->SetEpoch(a1mjd);
    #ifdef DEBUG_SC_EPOCHSTR
    MessageInterface::ShowMessage("and in SC::SetEpoch, epochSystem = %s, epochFormat = %s\n",
@@ -3678,7 +3733,7 @@ void Spacecraft::SetAnomaly(const std::string &type, Real ta)
    #ifdef DEBUG_SPACECRAFT_SET
    MessageInterface::ShowMessage
       ("Spacecraft::SetAnomaly() anomalyType=%s, value=%f\n", anomalyType.c_str(),
-       trueAnomaly.GetValue());
+       trueAnomaly);
    MessageInterface::ShowMessage
       ("Spacecraft::SetAnomaly() stateElementLabel[5] = %s\n",
       stateElementLabel[5].c_str());
@@ -4926,19 +4981,18 @@ void Spacecraft::UpdateElementLabels()
 
 
 //------------------------------------------------------------------------------
-// Rvector6 GetStateInRepresentation(std::string rep)
+// Rvector6 GetStateInRepresentation(std::string rep, bool useDefaultCartesian = false)
 //------------------------------------------------------------------------------
 /**
  * Code used to obtain a state in a non-Cartesian representation.
  */
 //------------------------------------------------------------------------------
-Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
+Rvector6 Spacecraft::GetStateInRepresentation(std::string rep, bool useDefaultCartesian)
 {
    #ifdef DEBUG_STATE_INTERFACE
-      MessageInterface::ShowMessage(
-         "Spacecraft::GetStateInRepresentation(string): Constructing %s state\n",
-         rep.c_str());
-      MessageInterface::ShowMessage("useDefaultCartesian = %s\n", (useDefaultCartesian? "true" : "false"));
+      MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Constructing %s state\n", rep.c_str());
+      MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): using defaultCartesian = %s\n",
+            (useDefaultCartesian? "true" : "false"));
    #endif
 
    Rvector6 csState;
@@ -4948,14 +5002,24 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
    if (internalCoordSystem != coordinateSystem)
    {
       Rvector6 inState(state.GetState());
+      // if the whole state has not been set yet, we need to use the default coordinate system
+      if (useDefaultCartesian)
+         inState = defaultCartesian;
 
       #ifdef DEBUG_STATE_INTERFACE
          MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Using inState  = %s\n", inState.ToString().c_str());
-         MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Using originMu = %12.10f\n", originMu);
+         MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Now converting the inState from %s to %s\n", internalCoordSystem->GetName().c_str(),
+               coordinateSystem->GetName().c_str());
       #endif
 
       coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState,
          coordinateSystem);
+      #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage("inState successfully converted from %s to %s\n", internalCoordSystem->GetName().c_str(),
+            coordinateSystem->GetName().c_str());
+         MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): state in %s  = %s\n", coordinateSystem->GetName().c_str(),
+               csState.ToString().c_str());
+      #endif
    }
    else
    {
@@ -4977,9 +5041,9 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
    else
    {
       #ifdef DEBUG_STATE_INTERFACE
-         MessageInterface::ShowMessage(
-            "Spacecraft::GetStateInRepresentation(string): type is %s, so calling StateConversionUtil to convert\n",
+         MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): type is %s, so calling StateConversionUtil to convert\n",
             rep.c_str());
+         MessageInterface::ShowMessage("Spacecraft::GetStateInRepresentation(string): Using originMu = %12.10f\n", originMu);
       #endif
       finalState = StateConversionUtil::Convert(originMu, csState, "Cartesian", rep, anomalyType);
    }
@@ -4998,53 +5062,54 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
 
 
 //------------------------------------------------------------------------------
-// Rvector6 GetStateInRepresentation(Integer rep)
+// Rvector6 GetStateInRepresentation(Integer rep, bool useDefaultCartesian = false)
 //------------------------------------------------------------------------------
 /**
  * Code used to obtain a state in a non-Cartesian representation.
  */
 //------------------------------------------------------------------------------
-Rvector6 Spacecraft::GetStateInRepresentation(Integer rep)
+Rvector6 Spacecraft::GetStateInRepresentation(Integer rep, bool useDefaultCartesian)
 {
-   #ifdef DEBUG_STATE_INTERFACE
-      MessageInterface::ShowMessage(
-         "Spacecraft::GetStateInRepresentation(int): Constructing %s state\n",
-         representations[rep].c_str());
-   #endif
-   Rvector6 csState;
-   Rvector6 finalState;
+//   #ifdef DEBUG_STATE_INTERFACE
+//      MessageInterface::ShowMessage(
+//         "Spacecraft::GetStateInRepresentation(int): Constructing %s state\n",
+//         representations[rep].c_str());
+//   #endif
+//   Rvector6 csState;
+//   Rvector6 finalState;
+//
+//   // First convert from the internal CS to the state CS
+//   if (internalCoordSystem != coordinateSystem)
+//   {
+//      Rvector6 inState(state.GetState());
+//      coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState,
+//         coordinateSystem);
+//   }
+//   else
+//   {
+//      csState.Set(state.GetState());
+//   }
+//
+//   // Then convert to the desired representation
+//   if (rep == CARTESIAN_ID)
+//      finalState = csState;
+//   else
+//   {
+//      finalState = StateConversionUtil::Convert(originMu, csState, "Cartesian",
+//                   representations[rep], anomalyType);
+//   }
+//
+//   #ifdef DEBUG_STATE_INTERFACE
+//      MessageInterface::ShowMessage(
+//         "Spacecraft::GetStateInRepresentation(int): %s state is "
+//         "[%.9lf %.9lf %.9lf %.14lf %.14lf %.14lf]\n",
+//         representations[rep].c_str(), finalState[0], finalState[1],
+//         finalState[2], finalState[3], finalState[4],
+//         finalState[5]);
+//   #endif
 
-   // First convert from the internal CS to the state CS
-   if (internalCoordSystem != coordinateSystem)
-   {
-      Rvector6 inState(state.GetState());
-      coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState,
-         coordinateSystem);
-   }
-   else
-   {
-      csState.Set(state.GetState());
-   }
-
-   // Then convert to the desired representation
-   if (rep == CARTESIAN_ID)
-      finalState = csState;
-   else
-   {
-      finalState = StateConversionUtil::Convert(originMu, csState, "Cartesian",
-                   representations[rep], anomalyType);
-   }
-
-   #ifdef DEBUG_STATE_INTERFACE
-      MessageInterface::ShowMessage(
-         "Spacecraft::GetStateInRepresentation(int): %s state is "
-         "[%.9lf %.9lf %.9lf %.14lf %.14lf %.14lf]\n",
-         representations[rep].c_str(), finalState[0], finalState[1],
-         finalState[2], finalState[3], finalState[4],
-         finalState[5]);
-   #endif
-
-   return finalState;
+//   return finalState;
+   return GetStateInRepresentation(representations[rep], useDefaultCartesian);
 }
 
 
@@ -5198,7 +5263,6 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    #endif
    std::string rep = "";
    Integer id = LookUpLabel(label, rep) - ELEMENT1_ID;
-   std::string currentRep  = stateType;
 
    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
       MessageInterface::ShowMessage
@@ -5206,55 +5270,65 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
                ELEMENT1_ID, id, rep.c_str());
    #endif
 
-   if ((rep != "") && (stateType != rep))
+   // Determine if type really changed
+   if (rep != "")
    {
-      if ((rep == "Keplerian") || (rep == "ModifiedKeplerian"))
+      if (stateType != rep)
+      {
+         // 2007.05.24 - wcs - Bug 875 - because some elements are the same for
+         // Keplerian and ModifiedKeplerian, make sure it only changes when it should
+         if ( (stateType == "ModifiedKeplerian") && (rep == "Keplerian") &&
+            (label != "SMA") && (label != "ECC") )
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, leaving stateType as ModifiedKeplerian\n");
+            #endif
+            // leave stateType as ModifiedKeplerian
+         }
+         else if ( (stateType == "SphericalRADEC") && (rep == "SphericalAZFPA") &&
+                  (label != "AZI") && (label != "FPA") )
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, leaving stateType as SphericalRADEC\n");
+            #endif
+            // leave it as SphericalRADEC
+         }
+         /// 2010.03.22 - wcs - SMA could also be Equinoctial
+         else if ( (stateType == "Equinoctial") && (rep == "Keplerian") &&
+                  (label == "SMA") )
+            // leave type as Equinoctial
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, leaving stateType as Equinoctial\n");
+            #endif
+            // leave state as Equinoctial
+         }
+         else
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage
+                  (" ************ In SC::SetElement, MODIFYING stateType from %s to %s\n",
+                    stateType.c_str(), rep.c_str());
+            #endif
+            stateType = rep;
+         }
+      }
+      // Has the state type has been fully determined or not?  Only worry about this before the CS has been applied
+      if (!csSet)
+         SetPossibleInputTypes(label, stateType);
+
+      // Get the true anomaly if needed
+      if ((stateType == "Keplerian") || (stateType == "ModifiedKeplerian"))
       {
          // Grab trueAnomaly
          Rvector6 kep = GetStateInRepresentation("Keplerian");
          trueAnomaly = kep[5];
       }
-      // 2007.05.24 - wcs - Bug 875 - because some elements are the same for
-      // Keplerian and ModifiedKeplerian, make sure it only changes when it should
-      if ( (stateType == "ModifiedKeplerian") && (rep == "Keplerian") &&
-         (label != "SMA") && (label != "ECC") )
-      {
-         #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-            MessageInterface::ShowMessage
-               (" ************ In SC::SetElement, leaving stateType as ModifiedKeplerian\n");
-         #endif
-         // leave stateType as ModifiedKeplerian
-      }
-      else if ( (stateType == "SphericalRADEC") && (rep == "SphericalAZFPA") &&
-               (label != "AZI") && (label != "FPA") )
-      {
-         #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-            MessageInterface::ShowMessage
-               (" ************ In SC::SetElement, leaving stateType as SphericalRADEC\n");
-         #endif
-         // leave it as SphericalRADEC
-      }
-      /// 2010.03.22 - wcs - SMA could also be Equinoctial
-      else if ( (stateType == "Equinoctial") && (rep == "Keplerian") &&
-               (label == "SMA") )
-         // leave type as Equinoctial
-      {
-         #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-            MessageInterface::ShowMessage
-               (" ************ In SC::SetElement, leaving stateType as Equinoctial\n");
-         #endif
-         // leave state as Equinoctial
-      }
-      else
-      {
-         #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-            MessageInterface::ShowMessage
-               (" ************ In SC::SetElement, MODIFYING stateType from %s to %s\n",
-                 stateType.c_str(), rep.c_str());
-         #endif
-         stateType = rep;
-      }
    }
+
 
    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
    if (id >= 0)
@@ -5413,21 +5487,21 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
    return retval;
 }
 
-//------------------------------------------------------------------------------
-// Integer LookUpID(const Integer id, std::string &label, std::string &rep)
-//------------------------------------------------------------------------------
-Integer Spacecraft::LookUpID(const Integer id, std::string &label, std::string &rep)
-{
-   label = GetParameterText(id);
-   // if it's not one of the multiple reps IDs, just return the ID
-   if (id < CART_X)
-   {
-      rep   = stateType;
-      return id;
-   }
-   // otherwise, figure out the base ID to use for the state data
-   return LookUpLabel(label, rep);
-}
+////------------------------------------------------------------------------------
+//// Integer LookUpID(const Integer id, std::string &label, std::string &rep)
+////------------------------------------------------------------------------------
+//Integer Spacecraft::LookUpID(const Integer id, std::string &label, std::string &rep)
+//{
+//   label = GetParameterText(id);
+//   // if it's not one of the multiple reps IDs, just return the ID
+//   if (id < CART_X)
+//   {
+//      rep   = stateType;
+//      return id;
+//   }
+//   // otherwise, figure out the base ID to use for the state data
+//   return LookUpLabel(label, rep);
+//}
 
 //------------------------------------------------------------------------------
 // void BuildElementLabelMap()
@@ -5664,5 +5738,84 @@ Integer Spacecraft::NumStateElementsSet()
       MessageInterface::ShowMessage("after loop, numSet = %d\n", numSet);
    #endif
    return numSet;
+}
+
+//-------------------------------------------------------------------------
+// void SetPossibleInputTypes(const std::string& label, const std::string &rep)
+//-------------------------------------------------------------------------
+void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::string &rep)
+{
+   #ifdef DEBUG_SC_INPUT_TYPES
+      MessageInterface::ShowMessage("Entering SetPossibleInputTypes: spacecraft = %s, label = %s, rep = %s\n",
+            instanceName.c_str(), label.c_str(), rep.c_str());
+      MessageInterface::ShowMessage("possibleInputTypes are:\n");
+      for (unsigned int ii = 0; ii < possibleInputTypes.size(); ii++)
+         MessageInterface::ShowMessage("      %d    %s\n", ii, possibleInputTypes.at(ii).c_str());
+   #endif
+
+   if (std::find(possibleInputTypes.begin(), possibleInputTypes.end(), rep) ==
+         possibleInputTypes.end())
+   {
+      std::string errmsg = "Error: you have set orbital state elements not contained in the same state type.  ";
+      errmsg += "This is only allowed after the BeginMissionSequence command.\n";
+      throw SpaceObjectException(errmsg);
+   }
+
+   // determine the possible types
+
+   // When there is only one possible type, reset the array to that one
+   if ((label == "X")            || (label == "Y")            || (label == "Z")            ||
+       (label == "VX")           || (label == "VY")           || (label == "VZ")           ||
+       (label == "ECC")          || (label == "RadPer")       || (label == "RadApo")       ||
+       (label == "AZI")          || (label == "FPA")          ||
+       (label == "RAV")          || (label == "DECV") ||
+       (label == "EquinoctialH") || (label == "EquinoctialK") || (label == "EquinoctialP") ||
+       (label == "EquinoctialQ") || (label == "MLONG"))
+   {
+      possibleInputTypes.clear();
+      possibleInputTypes.push_back(rep);
+   }
+
+
+   // Remove impossible types from the array
+
+   // 1) It could be Keplerian or Eauinoctial
+   else if (label == "SMA")
+   {
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
+   }
+   // 2) It could be Keplerian or ModifiedKeplerian
+   else if ((label == "INC") || (label == "RAAN") || (label == "AOP") ||
+            (label == "TA")  || (label == "EA")   || (label == "MA")  ||
+            (label == "HA"))
+   {
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
+   }
+   // 3) It could be SphericalAZFPA or SphericalRADEC
+   else if ((label == "RMAG") || (label == "RA") || (label == "DEC") || (label == "VMAG"))
+   {
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
+      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
+   }
+
+   if (possibleInputTypes.size() < 1)
+   {
+      throw SpaceObjectException("Error determining input state type.\n");
+   }
+   #ifdef DEBUG_SC_INPUT_TYPES
+      MessageInterface::ShowMessage("----> and leaving SetPossibleInputTypes: spacecraft = %s, label = %s, rep = %s\n",
+            instanceName.c_str(), label.c_str(), rep.c_str());
+      MessageInterface::ShowMessage("----> possibleInputTypes are now:\n");
+      for (unsigned int ii = 0; ii < possibleInputTypes.size(); ii++)
+         MessageInterface::ShowMessage("---->       %d    %s\n", ii, possibleInputTypes.at(ii).c_str());
+   #endif
 }
 

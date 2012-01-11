@@ -374,6 +374,10 @@ protected:
    Rvector6          defaultCartesian;
    /// Current list of possible input state types
    StringArray       possibleInputTypes;
+   /// Flag indicating whether or not the coordinate system has been set by the user
+   bool              coordSysSet;
+   /// Flag indicating whether or not the epoch has been set by the user
+   bool              epochSet;
 
    /// coordinate system map to be used for Thrusters for now
    std::map<std::string, CoordinateSystem*> coordSysMap;
@@ -434,20 +438,21 @@ protected:
                         std::stringstream &stream);
 
    virtual void      UpdateElementLabels();
-   Rvector6          GetStateInRepresentation(std::string rep = "");
-   Rvector6          GetStateInRepresentation(Integer rep = CARTESIAN_ID);
+   Rvector6          GetStateInRepresentation(std::string rep = "", bool useDefaultCartesian = false);
+   Rvector6          GetStateInRepresentation(Integer rep = CARTESIAN_ID, bool useDefaultCartesian = false);
    void              SetStateFromRepresentation(std::string rep, Rvector6 &st);
 
    Real              GetElement(const std::string &label);
    bool              SetElement(const std::string &label, const Real &value);
    Integer           LookUpLabel(const std::string &label, std::string &rep);
-   Integer           LookUpID(const Integer id, std::string &label, std::string &rep);
+//   Integer           LookUpID(const Integer id, std::string &label, std::string &rep);
    void              BuildElementLabelMap();
    void              RecomputeStateAtEpoch(const GmatEpoch &toEpoch);
 
 private:
    bool              VerifyAddHardware();                   // made changes by Tuan Nguyen
    Integer           NumStateElementsSet();
+   void              SetPossibleInputTypes(const std::string& label, const std::string &rep);
 
 };
 
