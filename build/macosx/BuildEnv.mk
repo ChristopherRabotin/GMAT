@@ -19,7 +19,7 @@ USE_SPICE = 1
 # if this is 1, it will build the base library and the console app only
 CONSOLE_APP = 0
 USE_F2C_VERSION = 1
-# STC_EDITOR not yet available on Ma
+# STC_EDITOR not yet available on Mac
 USE_STC_EDITOR = 0
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
@@ -151,10 +151,6 @@ else
 USE_PROFILING = 0
 endif
 
-# we do not use DevIL
-IL_HEADERS = -DSKIP_DEVIL 
-IL_LIBRARIES = 
-
 #shared base settings
 ifeq ($(SHARED_BASE), 1)
 SHARED_BASE_FLAGS = -fno-common -dynamic
@@ -192,16 +188,16 @@ DEBUG_FLAGS =
 endif
 
 # Build the complete list of flags for the compilers - REMOVED $(CONSOLE_FLAGS)
-CPPFLAGS = $(OPTIMIZATIONS) -Wall $(SHARED_BASE_FLAGS) $(PROCFLAGS)\
-           $(SPICE_INCLUDE) $(SPICE_DIRECTIVE) $(IL_HEADERS) $(MAC_ARCHITECTURE_FLAGS)
-F77_FLAGS = $(OPTIMIZATIONS) -Wall $(IL_HEADERS)
+CPPFLAGS = $(OPTIMIZATIONS) -Wall $(SHARED_BASE_FLAGS) $(PROCFLAGS) -D__MAC__\
+           $(SPICE_INCLUDE) $(SPICE_DIRECTIVE) $(MAC_ARCHITECTURE_FLAGS)
+F77_FLAGS = $(OPTIMIZATIONS) -Wall
 
 
 # Link specific flags
 LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
                -framework OpenGL -framework AGL  -headerpad_max_install_names \
                -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
-             -l$(WX_LIB) $(DEBUG_FLAGS) $(IL_LIBRARIES) $(MAC_ARCHITECTURE_FLAGS)
+             -l$(WX_LIB) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
 
 GUI_CPP_FLAGS = $(WXCPPFLAGS)
 GUI_LINK_FLAGS = $(WXLINKFLAGS)
