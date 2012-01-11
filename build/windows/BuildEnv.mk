@@ -4,7 +4,6 @@
 # Flags used to control the build
 CONSOLE_APP = 0
 USE_SPICE = 1
-USE_DEVIL = 0
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
@@ -12,6 +11,9 @@ WX_SHARED = 1
 SHARED_BASE = 1
 USE_STC_EDITOR = 1
 USE_WX_EMAIL = 1
+USE_F2C_VERSION = 1
+
+# if USE_F2C_VERSION = 0, provide FORTRAN_LIB below
 
 # GMAT application icon for Windows only
 # location of GmatIcon
@@ -34,7 +36,7 @@ endif
 # SPICE data
 # location of CSPICE headers and libraries
 ifeq ($(USE_SPICE), 1)
-SPICE_DIR = C:/cspice
+SPICE_DIR = C:/projects/cspice
 SPICE_INCLUDE = -I$(SPICE_DIR)/include
 SPICE_CPP_FLAGS = -D__USE_SPICE__ $(SPICE_INCLUDE)
 SPICE_LIB_DIR = $(SPICE_DIR)/lib
@@ -46,21 +48,11 @@ SPICE_LIB_DIR =
 SPICE_LIBRARIES =
 endif
 
-# DevIL data
-# location of DevIL headers and libraries
-ifeq ($(USE_DEVIL), 1)
-IL_CPP_FLAGS = -IC:/DevIL/include/il -IC:/DevIL/include
-IL_LIBRARIES = -LC:/devIL/dlls -lilu -lilut -lDevIL
-else
-IL_CPP_FLAGS = -DSKIP_DEVIL
-IL_LIBRARIES =
-endif
-
 # STC editor (wxStyledTextCtrl) data
 # location of STC headers and libraries
 ifeq ($(USE_STC_EDITOR), 1)
-STC_CPP_FLAGS = -D__USE_STC_EDITOR__ -I/C:/wxWidgets-2.8.11/contrib/include
-STC_LIBRARIES = -LC:/wxWidgets-2.8.11/lib -lwx_msw_stc-2.8 
+STC_CPP_FLAGS = -D__USE_STC_EDITOR__ -I/C:/wxWidgets-2.8.12/contrib/include
+STC_LIBRARIES = -LC:/wxWidgets-2.8.12/lib -lwx_msw_stc-2.8 
 else
 STC_CPP_FLAGS =
 STC_LIBRARIES =
@@ -69,8 +61,8 @@ endif
 # wxEmail
 # location of wxEmail headers and libraries
 ifeq ($(USE_WX_EMAIL), 1)
-EMAIL_CPP_FLAGS = -D__ENABLE_EMAIL__ -I/C:/wxWidgets-2.8.11/contrib/include
-EMAIL_LIBRARIES = -LC:/wxWidgets-2.8.11/lib -lwx_msw_netutils-2.8 
+EMAIL_CPP_FLAGS = -D__ENABLE_EMAIL__ -I/C:/wxWidgets-2.8.12/contrib/include
+EMAIL_LIBRARIES = -LC:/wxWidgets-2.8.12/lib -lwx_msw_netutils-2.8 
 else
 EMAIL_CPP_FLAGS =
 EMAIL_LIBRARIES =
@@ -90,11 +82,11 @@ endif
 # Compiler options
 CPP = g++
 C = gcc
-FORTRAN = g77
-ifeq ($(USE_SPICE), 1)
+FORTRAN = gfortran
+ifeq ($(USE_F2C_VERSION), 1)
 FORTRAN_LIB =
 else
-FORTRAN_LIB = -LC:/MinGW/lib -lg2c
+FORTRAN_LIB = C:/f2c/lib/libf2c.a
 endif
 
 ifeq ($(PROFILE_BUILD), 1)
@@ -111,7 +103,7 @@ endif
 
 OPTIMIZATIONS =  -DwxUSE_UNIX=0 -D_X86_=1 -DWIN32 -DWINVER=0x0400 -D__WIN95__ \
                  -D__GNUWIN32__ -D__WIN32__ -mthreads -DSTRICT  -D__WXMSW__ \
-                 -D__WINDOWS__ -Wall -fno-pcc-struct-return -O2\
+                 -D__WINDOWS__ -fno-pcc-struct-return -O2\
                  -finline-functions -funroll-loops -fno-rtti -DNO_GCC_PRAGMA \
                  -malign-double -fexceptions -D__USE_WX280_GL__\
                  -fexpensive-optimizations -march=pentium4
@@ -136,10 +128,11 @@ DEBUG_FLAGS =
 endif
 
 # Build the complete list of flags for the compilers
-CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) $(BASE_CPP_FLAGS) -Wall \
+CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) $(BASE_CPP_FLAGS) -Wall -ffriend-injection \
            $(PROFILE_FLAGS) $(DEBUG_FLAGS)
 
 CPPFLAGS = $(CPP_BASE) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
+CFLAGS = -Wall
 
 F77_FLAGS = $(CPPFLAGS)
 
