@@ -626,7 +626,7 @@ void VisualModelPanel::OnTextCtrlEnter(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void VisualModelPanel::UpdateTextCtrl(int id)
 {
-	Real x, y, z, newx, newy, newz;
+	Real x, y, z;
    
 	switch (id)
 	{
