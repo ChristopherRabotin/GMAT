@@ -384,9 +384,6 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\subscriber\TrajPlotCanvas.cpp">
-      <Filter>Source Files\subscriber</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.cpp">
       <Filter>Source Files\spacecraft</Filter>
     </ClCompile>
@@ -855,9 +852,6 @@
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.hpp">
-      <Filter>Source Files\subscriber</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\subscriber\TrajPlotCanvas.hpp">
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitPanel.hpp">

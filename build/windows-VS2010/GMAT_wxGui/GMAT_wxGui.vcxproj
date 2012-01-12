@@ -545,16 +545,6 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\ReportFileSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.cpp" />
-    <ClCompile Include="..\..\..\src\gui\subscriber\TrajPlotCanvas.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotCurve.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotOptionsDialog.cpp" />
@@ -813,16 +803,6 @@
     <ClInclude Include="..\..\..\src\gui\subscriber\PlotTypes.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\ReportFileSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.hpp" />
-    <ClInclude Include="..\..\..\src\gui\subscriber\TrajPlotCanvas.hpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithSPICE|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotCurve.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotDefs.hpp" />
