@@ -30,7 +30,7 @@
 #include "GuiInterpreter.hpp"
 #include "Moderator.hpp"
 
-#define DEBUG_SYNC_STATUS
+//#define DEBUG_SYNC_STATUS
 
 GuiInterpreter* GuiInterpreter::instance = NULL;
 
