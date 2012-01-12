@@ -433,7 +433,7 @@ bool GroundTrackPlot::RenameRefObject(const Gmat::ObjectType type,
          centralBodyName = newName;
    }
    
-   return true;
+   return OrbitPlot::RenameRefObject(type, oldName, newName);
 }
 
 

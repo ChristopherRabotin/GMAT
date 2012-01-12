@@ -671,7 +671,8 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (type == Gmat::SPACECRAFT)
+   if (type == Gmat::SPACECRAFT || type == Gmat::GROUND_STATION ||
+       type == Gmat::CALCULATED_POINT)
    {
       // for spacecraft name
       for (int i=0; i<mAllSpCount; i++)
@@ -704,12 +705,12 @@ bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
          mShowObjectMap.erase(showObjectPos);
          
          #if DBGLVL_RENAME
-         MessageInterface::ShowMessage("---After rename\n");
+         MessageInterface::ShowMessage("--- After rename\n");
          for (orbColorPos = mOrbitColorMap.begin();
               orbColorPos != mOrbitColorMap.end(); ++orbColorPos)
          {
             MessageInterface::ShowMessage
-               ("sc=%s, color=%d\n", orbColorPos->first.c_str(), orbColorPos->second);
+               ("obj = %20s, color = %d\n", orbColorPos->first.c_str(), orbColorPos->second);
          }
          #endif
       }

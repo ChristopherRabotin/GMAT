@@ -704,26 +704,13 @@ bool OrbitView::RenameRefObject(const Gmat::ObjectType type,
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM)
-      return true;
-   
-   if (type == Gmat::SPACECRAFT)
+   if (type == Gmat::COORDINATE_SYSTEM)
    {
-      return OrbitPlot::RenameRefObject(type, oldName, newName);
-   }
-   else if (type == Gmat::COORDINATE_SYSTEM)
-   {
-//       if (mViewCoordSysName == oldName)
-//          mViewCoordSysName = newName;
-
       if (mViewUpCoordSysName == oldName)
          mViewUpCoordSysName = newName;
-      
-      return OrbitPlot::RenameRefObject(type, oldName, newName);
-      
    }
    
-   return true;
+   return OrbitPlot::RenameRefObject(type, oldName, newName);
 }
 
 
