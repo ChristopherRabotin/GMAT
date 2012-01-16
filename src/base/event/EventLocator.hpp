@@ -191,13 +191,13 @@ protected:
    /// The collection of event functions used by the EventLocator.
    std::vector<EventFunction*> eventFunctions;
    /// Earliest time bracket for last event boundary found
-   std::vector<Real> earlyBound;
+   Real *earlyBound;
    /// Latest time bracket for last event boundary found
-   std::vector<Real> lateBound;
-   /// The longest event duration encountered by the EventLocator.
-   std::vector<Real> maxSpan;
-   /// The most recent event duration encountered by the EventLocator.
-   std::vector<Real>lastSpan;
+   Real *lateBound;
+//   /// The longest event duration encountered by the EventLocator.
+//   std::vector<Real> maxSpan;
+//   /// The most recent event duration encountered by the EventLocator.
+//   std::vector<Real> lastSpan;
    /// The LocatedEventTable for the EventLocator.
    LocatedEventTable eventTable;
    /// Name of the event data file

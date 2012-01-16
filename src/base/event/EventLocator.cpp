@@ -80,6 +80,8 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
 EventLocator::EventLocator(const std::string &typeStr,
       const std::string &nomme) :
    GmatBase       (Gmat::EVENT_LOCATOR, typeStr, nomme),
+   earlyBound     (NULL),
+   lateBound      (NULL),
    filename       ("LocatedEvents.txt"),
    efCount        (0),
    lastData       (NULL),
@@ -113,7 +115,11 @@ EventLocator::~EventLocator()
    if (lastEpochs != NULL)
       delete [] lastEpochs;
 
-   // todo: Delete the member EventFunctions
+   if (earlyBound != NULL)
+      delete [] earlyBound;
+
+   if (lateBound != NULL)
+      delete [] lateBound;
 }
 
 
@@ -128,6 +134,8 @@ EventLocator::~EventLocator()
 //------------------------------------------------------------------------------
 EventLocator::EventLocator(const EventLocator& el) :
    GmatBase          (el),
+   earlyBound        (NULL),
+   lateBound         (NULL),
    filename          (el.filename),
    efCount           (0),
    lastData          (NULL),
@@ -162,10 +170,16 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
 
       filename       = el.filename;
       efCount        = 0;
+      if (earlyBound != NULL)
+         delete [] earlyBound;
+      if (lateBound != NULL)
+         delete [] lateBound;
       if (lastData != NULL)
          delete [] lastData;
       if (lastEpochs != NULL)
          delete [] lastEpochs;
+      earlyBound     = NULL;
+      lateBound      = NULL;
       lastData       = NULL;
       lastEpochs     = NULL;
       isActive       = el.isActive;
@@ -177,8 +191,8 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       solarSys       = el.solarSys;
 
       eventFunctions.clear();
-      maxSpan.clear();
-      lastSpan.clear();
+//      maxSpan.clear();
+//      lastSpan.clear();
       stateIndices.clear();
       associateIndices.clear();
    }
@@ -1327,24 +1341,44 @@ bool EventLocator::Initialize()
       delete [] lastData;
    if (lastEpochs != NULL)
       delete [] lastEpochs;
+   if (earlyBound != NULL)
+      delete [] earlyBound;
+   if (lateBound != NULL)
+      delete [] lateBound;
 
-   earlyBound.clear();
-   lateBound.clear();
+//   earlyBound.clear();
+//   lateBound.clear();
+//   maxSpan.clear();
+//   lastSpan.clear();
 
    if (efCount > 0)
    {
-      lastData = new Real[efCount * 3];
+      earlyBound = new Real[efCount];
+      lateBound  = new Real[efCount];
+      lastData   = new Real[efCount * 3];
       lastEpochs = new GmatEpoch[efCount];
+
       for (UnsignedInt i = 0; i < efCount; ++i)
+      {
          lastEpochs[i] = -1.0;
+         earlyBound[i] = 0.0;
+         lateBound [i] = 0.0;
+      }
 
       if (stateIndices.size() == 0)
          stateIndices.insert(stateIndices.begin(), efCount, -1);
       if (associateIndices.size() == 0)
          associateIndices.insert(associateIndices.begin(), efCount, -1);
 
-      earlyBound.push_back(0.0);
-      lateBound.push_back(0.0);
+//      earlyBound.push_back(0.0);
+//      lateBound.push_back(0.0);
+   }
+   else
+   {
+      lastData = NULL;
+      lastEpochs = NULL;
+      earlyBound = NULL;
+      lateBound = NULL;
    }
 
    functionValues.SetSize(efCount);
