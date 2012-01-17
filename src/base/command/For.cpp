@@ -94,6 +94,7 @@ For::For(void) :
    startWrapper    (NULL),
    endWrapper      (NULL),
    incrWrapper     (NULL),
+   incrPositive    (true),
    indexName       ("I"),
    startName       ("1"),
    endName         ("10"),
@@ -122,6 +123,7 @@ For::For(const For& f) :
    startWrapper    (NULL),
    endWrapper      (NULL),
    incrWrapper     (NULL),
+   incrPositive    (f.incrPositive),
    indexName       (f.indexName),
    startName       (f.startName),
    endName         (f.endName),
@@ -166,6 +168,7 @@ For& For::operator=(const For& f)
    startWrapper  = f.startWrapper;
    endWrapper    = f.endWrapper;
    incrWrapper   = f.incrWrapper;
+   incrPositive  = f.incrPositive;
    indexName     = f.indexName;
    startName     = f.startName;
    endName       = f.endName;
@@ -308,7 +311,12 @@ bool For::Execute()
          // want to set currentValue on the index variable if it will
          // not pass the endValue (ie. the value of the index variable
          // should never end up going past the endValue)
-         if (currentValue <= endValue)
+         bool pastEnd = false;
+         if (incrPositive)
+            pastEnd = (currentValue > endValue);
+         else
+            pastEnd = (currentValue < endValue);
+         if (!pastEnd)
          {
             indexWrapper->SetReal(currentValue);
             #ifdef DEBUG_FOR_EXE
@@ -1058,11 +1066,15 @@ bool For::StillLooping()
    // initialize the loop, if it's the first time through
    if (currentValue == UNINITIALIZED_VALUE)
    {
-      startValue = startWrapper->EvaluateReal();
-      endValue   = endWrapper->EvaluateReal();
-      stepSize   = incrWrapper->EvaluateReal();
-          numPasses  = (int)( floor((endValue - startValue)/stepSize)) + 1;
-          currentPass = 1;
+      startValue  = startWrapper->EvaluateReal();
+      endValue    = endWrapper->EvaluateReal();
+      stepSize    = incrWrapper->EvaluateReal();
+      if (stepSize >= 0.0)
+         incrPositive = true;
+      else
+         incrPositive = false;
+      numPasses   = (int)( floor((endValue - startValue)/stepSize)) + 1;
+      currentPass = 1;
       
       #if DEBUG_FOR_EXE
       MessageInterface::ShowMessage

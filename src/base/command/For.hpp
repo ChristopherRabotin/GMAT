@@ -142,6 +142,9 @@ protected:
    ElementWrapper *endWrapper;
    ElementWrapper *incrWrapper;
    
+   // Are we incrementing the loop variable in a positive direction? i.e. is the stepsize positive?
+   bool        incrPositive;
+
    std::string indexName;
    std::string startName;
    std::string endName;
