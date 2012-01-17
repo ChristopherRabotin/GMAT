@@ -5023,7 +5023,10 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep, bool useDefaultCa
    }
    else
    {
-      csState.Set(state.GetState());
+      if (useDefaultCartesian)
+         csState = defaultCartesian;
+      else
+         csState.Set(state.GetState());
    }
 
    // Then convert to the desired representation
