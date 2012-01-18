@@ -84,6 +84,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "TIME_COEFF_FILE",
    // specific file name
    "DE405_FILE",
+   "DE421_FILE",						// made change by TUAN NGUYEN
+   "DE424_FILE",						// made change by TUAN NGUYEN
    "PLANETARY_SPK_FILE",
    "JGM2_FILE",
    "JGM3_FILE",
