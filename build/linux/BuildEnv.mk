@@ -2,8 +2,7 @@
 # Build environment file for Linux
 
 # Flags used to control the build
-USE_SPICE = 0
-USE_DEVIL = 0
+USE_SPICE = 1
 CONSOLE_APP = 0
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
@@ -25,7 +24,7 @@ WX_CONFIG_PATH =
 ifeq ($(USE_SPICE), 1)
 # location of CSPICE headers and libraries
 # *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
-SPICE_DIR = /home/djc
+SPICE_DIR = /home/djc/TS_Code/Gmat3rdParty
 SPICE_INCLUDE = -I$(SPICE_DIR)/cspice/include
 SPICE_LIB_DIR = $(SPICE_DIR)/cspice/lib
 SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
@@ -39,10 +38,6 @@ SPICE_DIRECTIVE =
 SPICE_STACKSIZE = echo 'SPICE not included in this build ...'
 endif
 
-
-# DevIL data
-IL_HEADERS = -I/usr/local/include/IL
-IL_LIBRARIES = -lIL -lILU -lILUT
 
 # wxWidgets settings
 ifeq ($(CONSOLE_APP), 0)
@@ -95,7 +90,7 @@ LINUX_MAC = 1
 
 ifeq ($(CONSOLE_APP), 0)
 WXCPPFLAGS = `$(WX_CONFIG_PATH)wx-config --cppflags`
-WXLINKFLAGS = `$(WX_CONFIG_PATH)wx-config --libs --gl-libs --static=no`
+WXLINKFLAGS = `$(WX_CONFIG_PATH)wx-config --libs --gl-libs --static=no` -lGL -lGLU
 endif
 
 
@@ -121,12 +116,7 @@ CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall \
            $(WXCPPFLAGS) $(SPICE_INCLUDE) $(SPICE_DIRECTIVE) $(PROFILE_FLAGS) \
            $(DEBUG_FLAGS) $(PROCFLAGS)
 
-ifeq ($(USE_DEVIL), 0)
-CPPFLAGS = $(CPP_BASE) -DSKIP_DEVIL $(PROFILE_FLAGS) $(DEBUG_FLAGS) $(STC_CPP_FLAGS) -fPIC
-else
-CPPFLAGS = $(CPP_BASE) $(PROFILE_FLAGS) $(DEBUG_FLAGS) $(IL_HEADERS) $(STC_CPP_FLAGS) -fPIC
-endif
-
+CPPFLAGS = $(CPP_BASE) $(PROFILE_FLAGS) $(DEBUG_FLAGS) $(STC_CPP_FLAGS) -fPIC
 
 F77_FLAGS = $(CPPFLAGS)
 
@@ -134,19 +124,8 @@ F2C_FLAGS = -lgfortran -lm
 # F2C_FLAGS = -lf2c
 
 # Link specific flags
-ifeq ($(USE_DEVIL),1)
-
-LINK_FLAGS = $(WXLINKFLAGS) $(SPICE_LIBRARIES) \
-             $(DEBUG_FLAGS) \
-             $(IL_LIBRARIES) $(STC_LIBRARIES) $(PROFILE_FLAGS) $(F2C_FLAGS)
-
-else
-
 LINK_FLAGS = $(WXLINKFLAGS) $(SPICE_LIBRARIES) $(DEBUG_FLAGS) $(STC_LIBRARIES) \
              $(PROFILE_FLAGS) $(F2C_FLAGS)
-
-endif
-
 
 CONSOLE_LINK_FLAGS = -L../../base/lib -lgfortran -ldl $(DEBUG_FLAGS) \
                      $(PROFILE_FLAGS)
