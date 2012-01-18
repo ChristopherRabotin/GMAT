@@ -26,14 +26,25 @@
 
 
 //#define DEBUG_EXE
+//#define DEBUG_INIT
+//#define DEBUG_OBJECT_LIFE
 
 EventModel::EventModel(const std::string &nomme) :
    PhysicalModel        (Gmat::PHYSICAL_MODEL, "EventModel", nomme)
 {
+   objectTypeNames.push_back("EventModel");
+
+   #ifdef DEBUG_OBJECT_LIFE
+      MessageInterface::ShowMessage("Creating EventModel in default c'tor "
+            "at %p\n", this);
+   #endif
 }
 
 EventModel::~EventModel()
 {
+   #ifdef DEBUG_OBJECT_LIFE
+      MessageInterface::ShowMessage("Destroying EventModel %p\n", this);
+   #endif
 }
 
 EventModel::EventModel(const EventModel & em) :
@@ -43,6 +54,10 @@ EventModel::EventModel(const EventModel & em) :
    eventStarts          (em.eventStarts),
    eventAssociates      (em.eventAssociates)
 {
+   #ifdef DEBUG_OBJECT_LIFE
+      MessageInterface::ShowMessage("Creating EventModel in copy c'tor at %p\n",
+            this);
+   #endif
 }
 
 EventModel& EventModel::operator=(const EventModel & em)

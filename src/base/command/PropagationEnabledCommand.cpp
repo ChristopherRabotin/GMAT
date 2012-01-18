@@ -35,6 +35,7 @@
 //#define DEBUG_STATE_BUFFERING
 //#define DEBUG_PUBLISH_DATA
 //#define DEBUG_EVENTLOCATORS
+//#define DEBUG_EVENT_MODEL_FORCE
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -123,8 +124,8 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
    if (finder != NULL)
       delete finder;
 
-   if (em != NULL)
-      delete em;
+//   if (em != NULL)
+//      delete em;
 }
 
 
@@ -1164,6 +1165,8 @@ void PropagationEnabledCommand::InitializeForEventLocation()
       #ifdef DEBUG_EVENT_MODEL_FORCE
          MessageInterface::ShowMessage("***Building event model force***\n");
       #endif
+      if (em != NULL)
+         delete em;
       em = new EventModel();
       #ifdef DEBUG_EVENT_MODEL_FORCE
          MessageInterface::ShowMessage("   Created at %p\n", em);

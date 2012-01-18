@@ -486,9 +486,12 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
          instanceName);
 
    #ifdef DEBUG_ODEMODEL_INIT
+      // Break into 2 pieces in case pPhysicalModel is out of scope
       MessageInterface::ShowMessage(
-         "ODEModel::AddForce() <%p>'%s' entered, adding force = <%p><%s>'%s'\n", this,
-         GetName().c_str(), pPhysicalModel, pPhysicalModel->GetTypeName().c_str(),
+         "ODEModel::AddForce() <%p>'%s' entered, adding force = <%p> ", this,
+         GetName().c_str(), pPhysicalModel);
+      MessageInterface::ShowMessage(
+         "<%s>'%s'\n", pPhysicalModel->GetTypeName().c_str(),
          pPhysicalModel->GetName().c_str());
    #endif
    
@@ -1452,13 +1455,17 @@ void ODEModel::ClearForceList(bool deleteTransient)
 
       if (!pm->IsTransient() || (deleteTransient && pm->IsTransient()))
       {
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (pm, pm->GetName(), "ODEModel::~ODEModel()",
-             "deleting non-transient \"" + pm->GetTypeName() +
-             "\" PhysicalModel", this);
-         #endif
-         delete pm;
+         // Event models are handled in the PropagationEnabledCommand code
+         if (!pm->IsOfType("EventModel"))
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (pm, pm->GetName(), "ODEModel::~ODEModel()",
+                "deleting non-transient \"" + pm->GetTypeName() +
+                "\" PhysicalModel", this);
+            #endif
+            delete pm;
+         }
       }
       ppm = forceList.begin();
    }
