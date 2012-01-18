@@ -670,6 +670,13 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
    #endif
    CloneBodiesInUse(ss, true);
    SetJ2000Body();
+
+   #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
+   MessageInterface::ShowMessage("Copy constructor: ss.theCurrentPlanetarySource = '%s'\n", ss.theCurrentPlanetarySource.c_str());
+   #endif
+
+//   Initialize();							// made changes by TUAN NGUYEN
+   
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now DONE with the Solar System copy constructor ...\n");
    #endif
@@ -703,7 +710,9 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    theSPKFilename             = ss.theSPKFilename;
    lskKernelName              = ss.lskKernelName;
    parameterCount             = SolarSystemParamCount;
+
    theDefaultDeFile           = NULL;
+
    default_planetarySourceTypesInUse = ss.default_planetarySourceTypesInUse; // deprecated!!
    default_ephemerisSource           = ss.default_ephemerisSource;
    default_DEFilename                = ss.default_DEFilename;
@@ -734,6 +743,8 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    DeleteBodiesInUse(true);
    CloneBodiesInUse(ss, true);
    SetJ2000Body();
+
+//   Initialize();					// made changes by TUAN NGUYEN
 
    return *this;
 }
@@ -811,6 +822,26 @@ bool SolarSystem::Initialize()
    #endif
    #endif
 
+   // set source for bodies in use:													/ made change by TUAN NGUYEN
+   if (!bodiesInUse.empty())
+   {
+		#ifdef DEBUG_SS_INIT
+			MessageInterface::ShowMessage("SolarSystem::Initialize(): Setting source for bodies in use...\n");
+			if (theDefaultDeFile == NULL)
+				MessageInterface::ShowMessage(" theDefaultDeFile == NULL\n");
+			else
+				MessageInterface::ShowMessage(" theDefaultDeFile: <%p> name ='%s'\n",theDefaultDeFile, theDefaultDeFile->theFileName.c_str());
+		#endif
+       
+		for (std::vector<CelestialBody*>::const_iterator cbi = bodiesInUse.begin();
+			cbi != bodiesInUse.end(); ++cbi)
+		{
+			if (theDefaultDeFile != NULL)
+				(*cbi)->SetSourceFile((PlanetaryEphem*) theDefaultDeFile);
+		}
+   }
+
+
 #ifdef __USE_SPICE__
    try
    {
@@ -878,6 +909,28 @@ void SolarSystem::CreatePlanetarySource(bool setDefault)
       thePlanetarySourceNames.push_back("N/A");  // TwoBodyPropagation has no file associated with it
 
       thePlanetarySourceNames.push_back(fm->GetFullPathname("DE405_FILE"));
+	  try															// made change by TUAN NGUYEN
+	  {																// made change by TUAN NGUYEN
+		 std::string pathname = fm->GetFullPathname("DE421_FILE");	// made change by TUAN NGUYEN
+	     thePlanetarySourceNames.push_back(pathname);				// made change by TUAN NGUYEN
+	  }																// made change by TUAN NGUYEN
+	  catch (UtilityException e)									// made change by TUAN NGUYEN
+	  {																// made change by TUAN NGUYEN
+		  // skip the settting DE421 when it is not defined in gmat_startup file									// made change by TUAN NGUYEN
+		  MessageInterface::ShowMessage("skip the settting DE421 when it is not defined in gmat_startup file...");	// made change by TUAN NGUYEN
+	  }																// made change by TUAN NGUYEN
+
+	  try															// made change by TUAN NGUYEN
+	  {																// made change by TUAN NGUYEN
+		 std::string pathname = fm->GetFullPathname("DE424_FILE");	// made change by TUAN NGUYEN
+	     thePlanetarySourceNames.push_back(pathname);				// made change by TUAN NGUYEN
+	  }																// made change by TUAN NGUYEN
+	  catch (UtilityException e)									// made change by TUAN NGUYEN
+	  {																// made change by TUAN NGUYEN
+		  // skip the settting DE424 when it is not defined in gmat_startup file									// made change by TUAN NGUYEN
+		  MessageInterface::ShowMessage("skip the settting DE424 when it is not defined in gmat_startup file...");	// made change by TUAN NGUYEN
+	  }																// made change by TUAN NGUYEN
+
       if (spiceAvailable)
       {
          std::string spkFullPath = fm->GetFullPathname("PLANETARY_SPK_FILE");
@@ -982,6 +1035,24 @@ bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
             SetSourceFile(theDefaultDeFile);
          }
       }
+      else if (id == Gmat::DE421)							// made changes by TUAN NGUYEN
+      {														// made changes by TUAN NGUYEN
+         status = CreateDeFile(Gmat::DE421, fileName);		// made changes by TUAN NGUYEN
+         if (status)										// made changes by TUAN NGUYEN
+         {													// made changes by TUAN NGUYEN
+            thePlanetarySourceNames[id] = fileName;			// made changes by TUAN NGUYEN
+            SetSourceFile(theDefaultDeFile);				// made changes by TUAN NGUYEN
+         }													// made changes by TUAN NGUYEN
+      }														// made changes by TUAN NGUYEN
+      else if (id == Gmat::DE424)							// made changes by TUAN NGUYEN
+      {														// made changes by TUAN NGUYEN
+         status = CreateDeFile(Gmat::DE424, fileName);		// made changes by TUAN NGUYEN
+         if (status)										// made changes by TUAN NGUYEN
+         {													// made changes by TUAN NGUYEN
+            thePlanetarySourceNames[id] = fileName;			// made changes by TUAN NGUYEN
+            SetSourceFile(theDefaultDeFile);				// made changes by TUAN NGUYEN
+         }													// made changes by TUAN NGUYEN
+      }														// made changes by TUAN NGUYEN
    }
 
    return status;
@@ -1081,6 +1152,44 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             break;
          }
       }
+      // made changes by TUAN NGUYEN
+      else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421])
+      {
+         #ifdef DEBUG_SS_PLANETARY_FILE
+         MessageInterface::
+            ShowMessage("SolarSystem::SetPlanetarySourceTypesInUse() create DE421 (%s)\n",
+                  (thePlanetarySourceNames[Gmat::DE421]).c_str());
+         #endif
+
+         thePlanetarySourcePriority[Gmat::DE421] = 0;
+         status = CreateDeFile(Gmat::DE421, thePlanetarySourceNames[Gmat::DE421]);
+         if (status)
+         {
+            thePlanetarySourcePriority[Gmat::DE421] = HIGHEST_PRIORITY - i;
+            isPlanetarySourceInUse[Gmat::DE421] = true;
+            sourceTypeInUse = Gmat::DE421;
+            break;
+         }
+      }
+      // made changes by TUAN NGUYEN
+      else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424])
+      {
+         #ifdef DEBUG_SS_PLANETARY_FILE
+         MessageInterface::
+            ShowMessage("SolarSystem::SetPlanetarySourceTypesInUse() create DE424 (%s)\n",
+                  (thePlanetarySourceNames[Gmat::DE424]).c_str());
+         #endif
+
+         thePlanetarySourcePriority[Gmat::DE424] = 0;
+         status = CreateDeFile(Gmat::DE424, thePlanetarySourceNames[Gmat::DE424]);
+         if (status)
+         {
+            thePlanetarySourcePriority[Gmat::DE424] = HIGHEST_PRIORITY - i;
+            isPlanetarySourceInUse[Gmat::DE424] = true;
+            sourceTypeInUse = Gmat::DE424;
+            break;
+         }
+      }
       else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::SPICE])
       {
          #ifdef DEBUG_SS_PLANETARY_FILE
@@ -1132,6 +1241,16 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             if (SetSourceFile(theDefaultDeFile))
                retCode = 1;
          break;
+      case Gmat::DE421:								// made changes by TUAN NGUYEN
+         if (SetSource(Gmat::DE421))
+            if (SetSourceFile(theDefaultDeFile))	// Does it need to set to the default DE file?
+               retCode = 1;
+         break;
+      case Gmat::DE424:								// made changes by TUAN NGUYEN
+         if (SetSource(Gmat::DE424))
+            if (SetSourceFile(theDefaultDeFile))	// Does it need to set to the default DE file?
+               retCode = 1;
+         break;
       case Gmat::SPICE:
          if (SetSource(Gmat::SPICE))
             if (theSPKFilename != "")
@@ -1166,6 +1285,18 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
          {
             if (thePlanetarySourcePriority[Gmat::DE405] > 0)
                thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405]);
+         }
+         // made changes by TUAN NGUYEN
+         else if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421])
+         {
+            if (thePlanetarySourcePriority[Gmat::DE421] > 0)
+               thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421]);
+         }
+         // made changes by TUAN NGUYEN
+         else if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424])
+         {
+            if (thePlanetarySourcePriority[Gmat::DE424] > 0)
+               thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424]);
          }
       }
 
@@ -1447,7 +1578,7 @@ bool SolarSystem::AddBody(CelestialBody* cb)
    if (!userDef)
    {
       if (!cb->SetSource(pvSrcForAll))  return false;
-      if (pvSrcForAll == Gmat::DE405)
+      if ((pvSrcForAll == Gmat::DE405)||(pvSrcForAll == Gmat::DE421)||(pvSrcForAll == Gmat::DE424))		// made changes by TUAN NGUYEN
       {
          if (thePlanetaryEphem)
             if (!cb->SetSourceFile(thePlanetaryEphem))  return false;
@@ -1683,6 +1814,18 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
       throw SolarSystemException("Error setting source for Solar System - unknown source\n");
 
    theCurrentPlanetarySource = srcStr;
+
+   // store the current planetary source on the top of thePlanetarySourceTypesInUse:		// made change by TUAN NGUYEN
+   StringArray temp = thePlanetarySourceTypesInUse;											// made change by TUAN NGUYEN
+
+   thePlanetarySourceTypesInUse.clear();													// made change by TUAN NGUYEN
+   thePlanetarySourceTypesInUse.push_back(srcStr);											// made change by TUAN NGUYEN
+   for(int i= 0; i < temp.size(); ++i)														// made change by TUAN NGUYEN
+   {																						// made change by TUAN NGUYEN
+	   if (temp[i] != srcStr)																// made change by TUAN NGUYEN
+		   thePlanetarySourceTypesInUse.push_back(temp[i].c_str());							// made change by TUAN NGUYEN
+   }																						// made change by TUAN NGUYEN
+
    return true;
 }
 
@@ -2283,7 +2426,17 @@ std::string SolarSystem::GetStringParameter(const Integer id) const
 {
    if (id == EPHEMERIS)        return theCurrentPlanetarySource; // deprecated!!!!
    if (id == EPHEMERIS_SOURCE) return theCurrentPlanetarySource;    // pvSrcForAll (string of)?
-   if (id == DE_FILE_NAME)     return thePlanetarySourceNames[Gmat::DE405];
+//   if (id == DE_FILE_NAME)     return thePlanetarySourceNames[Gmat::DE405];		// made change by TUAN NGUYEN
+   if (id == DE_FILE_NAME)															// made change by TUAN NGUYEN
+   {																				// made change by TUAN NGUYEN 
+	   int index;																	// made change by TUAN NGUYEN
+	   for(index=0; index < Gmat::PosVelSourceCount; ++index)						// made change by TUAN NGUYEN 
+	   {																			// made change by TUAN NGUYEN 
+		   if (Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)	// made change by TUAN NGUYEN 
+			   break;																// made change by TUAN NGUYEN 
+	   }																			// made change by TUAN NGUYEN 
+	   return thePlanetarySourceNames[index];										// made change by TUAN NGUYEN
+   }																				// made change by TUAN NGUYEN
    if (id == SPK_FILE_NAME)    return theSPKFilename;
    if (id == LSK_FILE_NAME)    return lskKernelName;
 
@@ -2316,6 +2469,10 @@ std::string SolarSystem::GetStringParameter(const std::string &label) const
 bool SolarSystem::SetStringParameter(const Integer id,
                                      const std::string &value)
 {
+#ifdef DEBUG_SS_SET
+MessageInterface::ShowMessage
+   ("SolarSystem::SetStringParameter(%d, '%s')\n", id, value.c_str());
+#endif
    if (id == EPHEMERIS)
    {
       StringArray parts = GmatStringUtil::SeparateBy(value, "{}, ");
@@ -2363,17 +2520,55 @@ bool SolarSystem::SetStringParameter(const Integer id,
    }
    if (id == EPHEMERIS_SOURCE)
    {
-      SetSource(value);
+	  // set source:
+      SetSource(value);				// theCurrentPlanetarySource is set to the value
+      // Get the current source index:												// made change by TUAN NGUYEN
+      int sourceindex;																// made change by TUAN NGUYEN
+	  for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)						// made change by TUAN NGUYEN
+	  {																				// made change by TUAN NGUYEN
+		  if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == value)					// made change by TUAN NGUYEN
+			  break;																// made change by TUAN NGUYEN
+	  }																				// made change by TUAN NGUYEN
+
+	  // create DE file and set source file:
+	  if (sourceindex < Gmat::PosVelSourceCount)									// made change by TUAN NGUYEN
+	  {																				// made change by TUAN NGUYEN
+         // remove old DE file object, create new DE file object
+		 // and assign it to theDefaultDeFile
+         CreateDeFile(sourceindex, thePlanetarySourceNames[sourceindex]);			// made change by TUAN NGUYEN
+
+         // set source file
+         SetSourceFile(theDefaultDeFile);											// made change by TUAN NGUYEN
+	  }																				// made change by TUAN NGUYEN
+
       return true;
    }
    if (id == DE_FILE_NAME)
    {
-      if (value != thePlanetarySourceNames[Gmat::DE405])
-      {
-         CreateDeFile(Gmat::DE405, value);
-         thePlanetarySourceNames[Gmat::DE405] = value;
-         SetSourceFile(theDefaultDeFile);
-      }
+      // Get the current source index:													// made change by TUAN NGUYEN
+      int sourceindex;																	// made change by TUAN NGUYEN
+	  for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)		// made change by TUAN NGUYEN
+	  {																					// made change by TUAN NGUYEN
+		  if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == theCurrentPlanetarySource)	// made change by TUAN NGUYEN
+			  break;																	// made change by TUAN NGUYEN
+	  }																					// made change by TUAN NGUYEN
+
+	  // if the source file name was changed then set the change in
+	  // thePlanetarySourceNames, create new DE file, and set
+	  // the source file to the new DE file.
+	  if (value != thePlanetarySourceNames[sourceindex])								// made change by TUAN NGUYEN
+	  {																					// made change by TUAN NGUYEN
+         CreateDeFile(sourceindex, value);												// made change by TUAN NGUYEN
+         thePlanetarySourceNames[sourceindex] = value;									// made change by TUAN NGUYEN
+         SetSourceFile(theDefaultDeFile);												// made change by TUAN NGUYEN
+	  }																					// made change by TUAN NGUYEN
+
+//      if (value != thePlanetarySourceNames[Gmat::DE405])							// made change by TUAN NGUYEN
+//      {																			// made change by TUAN NGUYEN
+//         CreateDeFile(Gmat::DE405, value);										// made change by TUAN NGUYEN
+//         thePlanetarySourceNames[Gmat::DE405] = value;							// made change by TUAN NGUYEN
+//         SetSourceFile(theDefaultDeFile);											// made change by TUAN NGUYEN
+//      }																			// made change by TUAN NGUYEN
       return true;
    }
    if (id == SPK_FILE_NAME)
@@ -2551,7 +2746,14 @@ bool SolarSystem::IsParameterEqualToDefault(const Integer id) const
    }
    if (id == DE_FILE_NAME)
    {
-      return (default_DEFilename == thePlanetarySourceNames[Gmat::DE405]);
+	  int index;																	//made change by TUAN NGUYEN
+	  for(index=0; index < Gmat::PosVelSourceCount; ++index)						//made change by TUAN NGUYEN
+	  {																				//made change by TUAN NGUYEN
+		  if(Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)		//made change by TUAN NGUYEN
+			  break;																//made change by TUAN NGUYEN
+	  }																				//made change by TUAN NGUYEN
+	  return (default_DEFilename == thePlanetarySourceNames[index]);				//made change by TUAN NGUYEN
+//      return (default_DEFilename == thePlanetarySourceNames[Gmat::DE405]);		//made change by TUAN NGUYEN
    }
    if (id == SPK_FILE_NAME)
    {
@@ -2581,7 +2783,16 @@ bool SolarSystem::SaveAllAsDefault()
    #endif
    default_planetarySourceTypesInUse = thePlanetarySourceTypesInUse;  // deprecated!!!!
    default_ephemerisSource           = theCurrentPlanetarySource;
-   default_DEFilename                = thePlanetarySourceNames[Gmat::DE405];
+
+   int index;																	// made change by TUAN NGUYEN
+   for(index=0; index <Gmat::PosVelSourceCount; ++index)						// made change by TUAN NGUYEN
+   {																			// made change by TUAN NGUYEN
+	   if (Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)	// made change by TUAN NGUYEN
+		   break;																// made change by TUAN NGUYEN
+   }																			// made change by TUAN NGUYEN
+   default_DEFilename                = thePlanetarySourceNames[index];			// made change by TUAN NGUYEN
+//   default_DEFilename                = thePlanetarySourceNames[Gmat::DE405];	// made change by TUAN NGUYEN
+
    default_SPKFilename               = theSPKFilename;
    default_LSKFilename               = lskKernelName;
    default_overrideTimeForAll        = overrideTimeForAll;
@@ -2608,7 +2819,14 @@ bool SolarSystem::SaveParameterAsDefault(const Integer id)
    }
    if (id == DE_FILE_NAME)
    {
-      default_DEFilename = thePlanetarySourceNames[Gmat::DE405];
+      int index;																	// made change by TUAN NGUYEN
+	  for(index=0; index < Gmat::PosVelSourceCount; ++index)						// made change by TUAN NGUYEN
+	  {																				// made change by TUAN NGUYEN
+		  if (Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)		// made change by TUAN NGUYEN
+			  break;																// made change by TUAN NGUYEN
+	  }																				// made change by TUAN NGUYEN
+	  default_DEFilename = thePlanetarySourceNames[index];							// made change by TUAN NGUYEN
+//      default_DEFilename = thePlanetarySourceNames[Gmat::DE405];					// made change by TUAN NGUYEN
       return true;
    }
    if (id == SPK_FILE_NAME)
@@ -2847,6 +3065,11 @@ void SolarSystem::SetDefaultPlanetarySource()
    thePlanetarySourceTypesInUse.clear();
    // put DE405 first, so that it is the default
    thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405]);
+
+   // put other planetary sources defined in the setup file:
+   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421]);			// made change by TUAN NGUYEN
+   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424]);			// made change by TUAN NGUYEN
+
    thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION]);
    if (spiceAvailable) thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::SPICE]);
 
@@ -2920,6 +3143,12 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
    {
    case Gmat::DE405:
       deFileType = Gmat::DE_DE405;
+      break;
+   case Gmat::DE421:						// made change by TUAN NGUYEN
+      deFileType = Gmat::DE_DE421;
+      break;
+   case Gmat::DE424:						// made change by TUAN NGUYEN
+      deFileType = Gmat::DE_DE424;
       break;
    default:
       MessageInterface::PopupMessage

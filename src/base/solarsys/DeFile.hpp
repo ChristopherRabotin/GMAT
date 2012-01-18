@@ -114,6 +114,8 @@ public:
 
    static const Integer ARRAY_SIZE_200 = 826;
    static const Integer ARRAY_SIZE_405 = 1018;
+   static const Integer ARRAY_SIZE_421 = 1018;	// made changes by TUAN NGUYEN
+   static const Integer ARRAY_SIZE_424 = 1018;	// made changes by TUAN NGUYEN
    static const Integer MAX_ARRAY_SIZE = 1018;
 
    static const Integer FAILURE        = 1; // from JPL/JSC ephem_types.h
@@ -257,7 +259,6 @@ protected:
 
 
 private:
-
    std::string theFileName;
    Gmat::DeFileFormat theFileFormat;
    

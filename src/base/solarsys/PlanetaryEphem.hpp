@@ -36,7 +36,8 @@ namespace Gmat  // does this belong in DeFile.hpp???????????????
 //      DE403,
       DE_DE405,
 //      DE406.
-//      DE_421,
+      DE_DE421,		// made changes by TUAN NGUYEN
+	  DE_DE424,		// made changes by TUAN NGUYEN
    };
 
    // different types of DE files

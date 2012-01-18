@@ -232,6 +232,10 @@ void DeFile::Initialize()
    {
       throw PlanetaryEphemException(pe.GetFullMessage());
    }
+
+   #ifdef DEBUG_DEFILE_INIT												// made changes by TUAN NGUYEN
+   MessageInterface::ShowMessage("DeFile::Initialize() leaving\n");		// made changes by TUAN NGUYEN
+   #endif																// made changes by TUAN NGUYEN
 }
 
 //------------------------------------------------------------------------------
@@ -550,6 +554,16 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
       arraySize = DeFile::ARRAY_SIZE_405;
       EPHEMERIS = 405;
    }
+   else if (defType == Gmat::DE_DE421)		// made changes by TUAN NGUYEN
+   {										// made changes by TUAN NGUYEN
+      arraySize = DeFile::ARRAY_SIZE_421;	// made changes by TUAN NGUYEN
+      EPHEMERIS = 421;						// made changes by TUAN NGUYEN
+   }										// made changes by TUAN NGUYEN
+   else if (defType == Gmat::DE_DE424)		// made changes by TUAN NGUYEN
+   {										// made changes by TUAN NGUYEN
+      arraySize = DeFile::ARRAY_SIZE_424;	// made changes by TUAN NGUYEN
+      EPHEMERIS = 424;						// made changes by TUAN NGUYEN
+   }										// made changes by TUAN NGUYEN
    else
    {
       // ERROR!  Other formats not currently supported!!!
@@ -632,6 +646,7 @@ void DeFile::Read_Coefficients( double Time )
 {
    #ifdef DEBUG_DEFILE_READ
    MessageInterface::ShowMessage("DeFile::Read_Coefficients() Time=%.9f)\n", Time);
+   MessageInterface::ShowMessage(" DE filename = '%s'\n",theFileName.c_str());
    #endif
    
   double  T_delta = 0.0;

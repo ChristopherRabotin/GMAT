@@ -735,6 +735,9 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
          state = ComputeTwoBody(atTime);
          break;
       case Gmat::DE405 :
+      case Gmat::DE421 :	// made changes by TUAN NGUYEN
+	  case Gmat::DE424 :	// made changes by TUAN NGUYEN
+							// DE405, DE421, and DE424 read data from theSourceFile
       {
          if (!theSourceFile)
          {
@@ -852,6 +855,37 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
          #endif
          outState     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
          break;
+
+      case Gmat::DE421 : 					// made changes by TUAN NGUYEN
+          if (!theSourceFile)
+          {
+             throw PlanetaryEphemException(
+                   "DE 421 file requested, but no file specified");
+          }
+          #ifdef DEBUG_GET_STATE
+          MessageInterface::ShowMessage
+             ("   In <%p> '%s', Calling theSourceFile(%s)->GetPosVel(%d, %f, %s)\n",
+              this, GetName().c_str(), (theSourceFile->GetName()).c_str(), bodyNumber, atTime.GetReal(),
+              overrideTime ? "true" : "false");
+          #endif
+          outState     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
+          break;
+
+      case Gmat::DE424 : 					// made changes by TUAN NGUYEN
+          if (!theSourceFile)
+          {
+             throw PlanetaryEphemException(
+                   "DE 424 file requested, but no file specified");
+          }
+          #ifdef DEBUG_GET_STATE
+          MessageInterface::ShowMessage
+             ("   In <%p> '%s', Calling theSourceFile(%s)->GetPosVel(%d, %f, %s)\n",
+              this, GetName().c_str(), (theSourceFile->GetName()).c_str(), bodyNumber, atTime.GetReal(),
+              overrideTime ? "true" : "false");
+          #endif
+          outState     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
+          break;
+
       case Gmat::SPICE :
       #ifdef __USE_SPICE__
          if (!spiceSetupDone) SetUpSPICE();
@@ -1696,6 +1730,24 @@ bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
          throw SolarSystemException(errmsg);
       }
    }
+   if (pvSrc == Gmat::DE421)					// made changes by TUAN NGUYEN
+   {
+      if (userDefined)
+      {
+         std::string errmsg = "DE421 file option not available for user-defined body ";
+         errmsg += instanceName + "\n";
+         throw SolarSystemException(errmsg);
+      }
+   }
+   if (pvSrc == Gmat::DE424)					// made changes by TUAN NGUYEN
+   {
+      if (userDefined)
+      {
+         std::string errmsg = "DE424 file option not available for user-defined body ";
+         errmsg += instanceName + "\n";
+         throw SolarSystemException(errmsg);
+      }
+   }
    if (pvSrc == Gmat::SPICE)
    {
       if ((!userDefined) && (!allowSpice))
@@ -2144,8 +2196,24 @@ bool CelestialBody::SetRotationDataSource(Gmat::RotationDataSource src)
 bool CelestialBody::SetUserDefined(bool userDefinedBody)
 {
    // make sure source makes sense
-   if ((userDefinedBody) && (posVelSrc == Gmat::DE405)) posVelSrc = Gmat::TWO_BODY_PROPAGATION;
-   else if ((!userDefinedBody) && (!allowSpice) && (posVelSrc == Gmat::SPICE)) posVelSrc = Gmat::DE405;
+   if ((userDefinedBody) && ((posVelSrc == Gmat::DE405)									// made changes by TUAN NGUYEN
+	   ||(posVelSrc == Gmat::DE421)														// made changes by TUAN NGUYEN
+	   ||(posVelSrc == Gmat::DE424))) posVelSrc = Gmat::TWO_BODY_PROPAGATION;			// made changes by TUAN NGUYEN
+   else if ((!userDefinedBody) && (!allowSpice) && (posVelSrc == Gmat::SPICE))
+   {
+//	   posVelSrc = Gmat::DE405;															// made changes by TUAN NGUYEN
+	   int index;																		// made changes by TUAN NGUYEN
+	   for (index=0; index < Gmat::PosVelSourceCount; ++index)							// made changes by TUAN NGUYEN
+	   {																				// made changes by TUAN NGUYEN		
+		   if (Gmat::POS_VEL_SOURCE_STRINGS[index] == default_posVelSrc)				// made changes by TUAN NGUYEN
+			   break;																	// made changes by TUAN NGUYEN
+	   }																				// made changes by TUAN NGUYEN
+	   if (index == Gmat::PosVelSourceCount)											// made changes by TUAN NGUYEN
+		   posVelSrc = Gmat::DE405;														// made changes by TUAN NGUYEN
+	   else																				// made changes by TUAN NGUYEN
+		   posVelSrc = (Gmat::PosVelSource)index;										// made changes by TUAN NGUYEN
+   }
+
    userDefined         = userDefinedBody;
    if (userDefined) allowSpice = true;
    #ifdef DEBUG_CB_USER_DEFINED
@@ -2839,6 +2907,18 @@ bool CelestialBody::SetStringParameter(const Integer id,
       if (userDefined && (value == "DE405"))
       {
          std::string errmsg = "DE405 not allowed as ephemeris source for user-defined body \"";
+         errmsg += instanceName + "\"\n";
+         throw SolarSystemException(errmsg);
+      }
+      else if (userDefined && (value == "DE421"))
+      {
+         std::string errmsg = "DE421 not allowed as ephemeris source for user-defined body \"";
+         errmsg += instanceName + "\"\n";
+         throw SolarSystemException(errmsg);
+      }
+      else if (userDefined && (value == "DE424"))
+      {
+         std::string errmsg = "DE424 not allowed as ephemeris source for user-defined body \"";
          errmsg += instanceName + "\"\n";
          throw SolarSystemException(errmsg);
       }

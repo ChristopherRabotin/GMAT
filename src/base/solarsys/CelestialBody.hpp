@@ -48,8 +48,10 @@ namespace Gmat
    // possible sources of position and velocity data for celestial bodies
    enum PosVelSource
    {
-      TWO_BODY_PROPAGATION,
+      TWO_BODY_PROPAGATION = 0,	// made changes by TUAN NGUYEN
       DE405,
+      DE421,					// made changes by TUAN NGUYEN
+	  DE424,					// made changes by TUAN NGUYEN
       SPICE,
       PosVelSourceCount
    };
@@ -58,6 +60,8 @@ namespace Gmat
    {
       "TwoBodyPropagation",
       "DE405",
+      "DE421",					// made changes by TUAN NGUYEN
+	  "DE424",					// made changes by TUAN NGUYEN
       "SPICE"
    };
 
@@ -106,6 +110,8 @@ namespace Gmat
    enum RotationDataSource
    {
       DE_405_FILE = 0,
+      DE_421_FILE,				// made changes by TUAN NGUYEN
+	  DE_424_FILE,				// made changes by TUAN NGUYEN
       IAU_2002,
 //      IAU_FILE,   // TBD
       FK5_IAU_1980,
@@ -116,6 +122,8 @@ namespace Gmat
    const std::string ROTATION_DATA_SOURCE_STRINGS[RotationDataSrcCount] = 
    {
       "DE405File",
+      "DE421File",				// made changes by TUAN NGUYEN
+	  "DE424File",				// made changes by TUAN NGUYEN
       "IAU2002",
 //      "IAUFile",  // TBD
       "FK5IAU1980",
