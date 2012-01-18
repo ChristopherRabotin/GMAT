@@ -72,6 +72,8 @@ PLANETARY_SPK_FILE     = SPK_PATH/de421.bsp
 #-----------------------------------------------------------
 DE_PATH                = DATA_PATH/planetary_ephem/de/
 DE405_FILE             = DE_PATH/leDE1941.405
+DE421_FILE             = DE_PATH/leDE1900.421
+DE424_FILE             = DE_PATH/leDE18002100.424
 #-----------------------------------------------------------
 PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
 EOP_FILE               = PLANETARY_COEFF_PATH/eopc04_08.62-now
