@@ -1820,7 +1820,7 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
 
    thePlanetarySourceTypesInUse.clear();													// made change by TUAN NGUYEN
    thePlanetarySourceTypesInUse.push_back(srcStr);											// made change by TUAN NGUYEN
-   for(int i= 0; i < temp.size(); ++i)														// made change by TUAN NGUYEN
+   for(unsigned int i= 0; i < temp.size(); ++i)														// made change by TUAN NGUYEN
    {																						// made change by TUAN NGUYEN
 	   if (temp[i] != srcStr)																// made change by TUAN NGUYEN
 		   thePlanetarySourceTypesInUse.push_back(temp[i].c_str());							// made change by TUAN NGUYEN
@@ -2531,7 +2531,10 @@ MessageInterface::ShowMessage
 	  }																				// made change by TUAN NGUYEN
 
 	  // create DE file and set source file:
-	  if (sourceindex < Gmat::PosVelSourceCount)									// made change by TUAN NGUYEN
+	  if ((sourceindex < Gmat::PosVelSourceCount) &&
+	      ((sourceindex == Gmat::DE405)||
+          (sourceindex == Gmat::DE421)||
+          (sourceindex == Gmat::DE424)))									// made change by TUAN NGUYEN
 	  {																				// made change by TUAN NGUYEN
          // remove old DE file object, create new DE file object
 		 // and assign it to theDefaultDeFile
