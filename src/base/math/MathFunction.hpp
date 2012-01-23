@@ -46,6 +46,13 @@ protected:
    MathNode *leftNode;
    MathNode *rightNode;
    
+   void GetScalarOutputInfo(Integer &type, Integer &rowCount,
+                            Integer &colCount);
+   void GetMatrixOutputInfo(Integer &type, Integer &rowCount,
+                            Integer &colCount, bool allowScalarInput);
+   bool ValidateScalarInputs();
+   bool ValidateMatrixInputs(bool allowScalarInput);
+   
 //    /// Parameter IDs
 //    enum
 //    {

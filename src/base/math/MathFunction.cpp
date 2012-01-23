@@ -22,6 +22,9 @@
 #include "MathFunction.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_VALIDATE_INPUT
+//#define DEBUG_INPUT_OUTPUT
+
 //------------------------------------------------------------------------------
 //  MathFunction(std::string typeStr, std::string nomme)
 //------------------------------------------------------------------------------
@@ -104,6 +107,23 @@ MathFunction& MathFunction::operator=(const MathFunction &mf)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// Real Evaluate()
+//------------------------------------------------------------------------------
+Real MathFunction::Evaluate()
+{
+   throw MathException(GetTypeName() + " cannot return Real");
+}
+
+
+//------------------------------------------------------------------------------
+// Rmatrix MatrixEvaluate()
+//------------------------------------------------------------------------------
+Rmatrix MathFunction::MatrixEvaluate()
+{
+   throw MathException(GetTypeName() + " cannot return Matrix");
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetChildren(MathNode *leftChild, MathNode *rightChild)()
@@ -143,18 +163,182 @@ MathNode* MathFunction::GetRight()
 
 
 //------------------------------------------------------------------------------
-// Real Evaluate()
+// void GetScalarOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-Real MathFunction::Evaluate()
+void MathFunction::GetScalarOutputInfo(Integer &type, Integer &rowCount,
+                                       Integer &colCount)
 {
-   throw MathException(GetTypeName() + " cannot return Real");
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("MathFunction::GetScalarOutputInfo() <%p><%s><%s> entered\n", this,
+       GetTypeName().c_str(), GetName().c_str());
+   #endif
+   
+   ///@note It is OK to set type to REAL_TYPE for 1x1 matrix since
+   /// ArrayWrapper::EvaluateReal() returns 1x1 matrix as real number
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
+   
+   //===========================================================================
+   // Input validation is done in ValidateInputs() so this code is commented out
+   // LOJ: 2012.01.19
+   /*
+   if (leftNode == NULL)
+      throw MathException(GetTypeName() + "() - Missing input arguments");
+   
+   Integer type1, row1, col1; // Left node
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+   
+   if ((type1 == Gmat::REAL_TYPE) ||
+       (type1 == Gmat::RMATRIX_TYPE && row1 == 1 && col1 == 1))
+   {
+      type = type1;
+      rowCount = row1;
+      colCount = col1;
+   }
+   else
+   {
+      throw MathException("Input is not a scalar or 1x1 matrix, so cannot do " +
+                          GetTypeName() + "()");  
+   }
+   #endif
+   */
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("MathFunction::GetScalarOutputInfo() <%p><%s> leaving, type=%d, "
+       "rowCount=%d, colCount=%d\n", this, GetTypeName().c_str(), 
+       type, rowCount, colCount);
+   #endif
 }
 
 
 //------------------------------------------------------------------------------
-// Rmatrix MatrixEvaluate()
+// void GetMatrixOutputInfo(Integer &type, Integer &rowCount, Integer &colCount,
+//                          bool allowScalarInput)
 //------------------------------------------------------------------------------
-Rmatrix MathFunction::MatrixEvaluate()
+void MathFunction::GetMatrixOutputInfo(Integer &type, Integer &rowCount,
+                                       Integer &colCount, bool allowScalarInput)
 {
-   throw MathException(GetTypeName() + " cannot return Matrix");
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("MathFunction::GetMatrixOutputInfo() <%p><%s> entered, allowScalarInput=%d\n"
+       "   leftNode=<%p><%s>\n   rightNode=<%p><%s>\n", this, GetTypeName().c_str(),
+       allowScalarInput,
+       leftNode, leftNode ? leftNode->GetTypeName().c_str() : "NULL",
+       rightNode, rightNode ? rightNode->GetTypeName().c_str() : "NULL");
+   #endif
+   
+   if (!leftNode)
+      throw MathException(GetTypeName() + "() - Missing input arguments");
+   
+   Integer type1, row1, col1; // Left node
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+   
+   if (!allowScalarInput && type1 != Gmat::RMATRIX_TYPE)
+      throw MathException("Left is not a matrix, so cannot do " + GetTypeName() + "()");
+   
+   // output row and col is transpose of leftNode's row and col
+   type = type1;
+   rowCount = col1;
+   colCount = row1;
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("MathFunction::GetMatrixOutputInfo() <%p><%s> returning type=%d, rowCount=%d, "
+       "colCount=%d\n", this, GetTypeName().c_str(), type, rowCount, colCount);
+   #endif
 }
+
+
+//------------------------------------------------------------------------------
+// bool ValidateScalarInputs()
+//------------------------------------------------------------------------------
+/**
+ * This method calls its subnodes and checks to be sure that the subnodes return
+ * compatible data for the function.
+ */
+//------------------------------------------------------------------------------
+bool MathFunction::ValidateScalarInputs()
+{
+   if (!leftNode)
+      throw MathException(GetTypeName() + "() - Missing input arguments");
+   
+   Integer type1, row1, col1; // Left node
+   bool retval = false;
+   
+   #ifdef DEBUG_VALIDATE_INPUT
+   MessageInterface::ShowMessage
+      ("MathFunction::ValidateScalarInputs() <%p><%s> entered\n   left=%s, %s\n",
+       this, GetTypeName().c_str(), leftNode->GetTypeName().c_str(),
+       leftNode->GetName().c_str());
+   #endif
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+   
+   if (type1 == Gmat::REAL_TYPE)
+      retval = true;
+   else if (type1 == Gmat::RMATRIX_TYPE && row1 == 1 && col1 == 1)
+      retval = true;
+   else
+      throw MathException("Input to " + GetTypeName() + "() is not a scalar or "
+                          "1x1 matrix, so cannot do " +  GetTypeName() + "()");
+   
+   #ifdef DEBUG_VALIDATE_INPUT
+   MessageInterface::ShowMessage
+      ("MathFunction::ValidateScalarInputs() <%p><%s> returning %s, "
+       "type=%d, row=%d, col=%d\n", this, GetTypeName().c_str(),
+       retval ? "true" : "false", type1, row1, col1);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ValidateMatrixInputs(bool allowScalarInput)
+//------------------------------------------------------------------------------
+/**
+ * This method calls its subnodes and checks to be sure that the subnodes return
+ * compatible data for the function.
+ */
+//------------------------------------------------------------------------------
+bool MathFunction::ValidateMatrixInputs(bool allowScalarInput)
+{
+   Integer type1, row1, col1; // Left node
+   bool retval = false;
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("MathFunction::ValidateMatrixInputs() <%p><%s>'%s' entered, leftNode=%s, %s\n",
+       this, GetTypeName().c_str(), GetName().c_str(),
+       leftNode ? leftNode->GetTypeName().c_str() : "NULL",
+       leftNode ? leftNode->GetName().c_str() : "NULL");
+   #endif
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+   
+   if (type1 == Gmat::RMATRIX_TYPE)
+      retval = true;
+   else if (allowScalarInput && type1 == Gmat::REAL_TYPE)
+      retval = true;
+   else
+      throw MathException("Input is not a matrix and scalar is not allowd, "
+                          "so cannot do " + GetTypeName() + "()");
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("MathFunction::ValidateMatrixInputs() <%p><%s>'%s' returning %d\n",
+       this, GetTypeName().c_str(), GetName().c_str(), retval);
+   #endif
+   
+   return retval;
+}
+
