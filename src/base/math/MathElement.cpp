@@ -302,6 +302,12 @@ Real MathElement::Evaluate()
       
       if (elementType == Gmat::REAL_TYPE || elementType == Gmat::RMATRIX_TYPE)
       {
+         #ifdef DEBUG_EVALUATE
+         MessageInterface::ShowMessage
+            ("   wrapper type=%d, desc='%s'\n", wrapper->GetWrapperType(),
+             wrapper->GetDescription().c_str());
+         #endif
+         ///@note ArrayWrapper::EvaluateReal() returns 1x1 matrix as real number
          realValue = wrapper->EvaluateReal();
       }
       else
