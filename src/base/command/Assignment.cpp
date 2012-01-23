@@ -851,20 +851,26 @@ bool Assignment::Initialize()
       {
          if (mathTree->Initialize(objectMap, globalObjectMap))
          {
-            if (!topNode->ValidateInputs())
-               throw CommandException("Failed to validate equation inputs in\n   \"" +
-                                      generatingString + "\"" + fnMsg);
+            try
+            {
+               if (!topNode->ValidateInputs())
+                  throw CommandException("Failed to validate equation inputs");
+            }
+            catch (BaseException &be)
+            {
+               throw CommandException("Failed to validate equation inputs: " + be.GetFullMessage());
+            }
          }
          else
          {
-            throw CommandException("Failed to initialize equation in\n   \"" +
-                                   generatingString + "\"" + fnMsg);
+            throw CommandException("Failed to initialize equation");
          }
       }
       catch (BaseException &e)
       {
+         // Catch above exceptions here
          CommandException ce;
-         ce.SetDetails("%s in \n   \"%s\"%s\n", e.GetDetails().c_str(),
+         ce.SetDetails("%s in\n    \"%s\"%s\n", e.GetDetails().c_str(),
                       generatingString.c_str(), fnMsg.c_str());
          throw ce;
       }
