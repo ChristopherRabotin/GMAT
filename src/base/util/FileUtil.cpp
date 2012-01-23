@@ -20,9 +20,6 @@
  */
 //------------------------------------------------------------------------------
 
-#include <algorithm>               // for set_difference()
-#include <iterator>                // For back_inserter() with VC++ 2010
-#include <stdlib.h>
 #include "FileUtil.hpp"
 #include "StringTokenizer.hpp"
 #include "MessageInterface.hpp"
@@ -30,6 +27,10 @@
 #include "StringUtil.hpp"          // for ToString()
 #include "FileTypes.hpp"           // for GmatFile::MAX_PATH_LEN
 #include "UtilityException.hpp"
+#include <algorithm>               // for set_difference()
+#include <iterator>                // for back_inserter() with VC++ 2010
+#include <stdlib.h>
+#include <sstream>                 // for std::stringstream
 
 #ifndef _MSC_VER  // if not Microsoft Visual C++
 #include <dirent.h>
@@ -1803,7 +1804,9 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    file2DiffCount = 0;
    file3DiffCount = 0;
    int count = 1;
-   
+   std::stringstream diffLines1("");
+   std::stringstream diffLines2("");
+   std::stringstream diffLines3("");
    
    //------------------------------------------
    // now start compare
@@ -1843,9 +1846,12 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
       #if DBGLVL_COMPARE_REPORT > 2
       MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
       #endif
-
+      
       if (line0 != line1)
+      {
+         diffLines1 << " 0: " << line0 << "\n" << " 1: " << line1 << "\n";
          file1DiffCount++;
+      }
       
       //----------------------------------------------------
       // file 2
@@ -1858,9 +1864,12 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
          #if DBGLVL_COMPARE_REPORT > 2
          MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
          #endif
-
+         
          if (line0 != line2)
+         {
+            diffLines2 << " 0: " << line0 << "\n" << " 2: " << line2 << "\n";
             file2DiffCount++;
+         }
       }
       
       //----------------------------------------------------
@@ -1876,7 +1885,10 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
          #endif
          
          if (line0 != line3)
+         {
+            diffLines3 << " 0: " << line0 << "\n" << " 3: " << line3 << "\n";
             file3DiffCount++;
+         }
       }
    }
    
@@ -1891,6 +1903,8 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    
    outLine = "File1 - Number of Lines different: " + ToString(file1DiffCount) + "\n";
    textBuffer.push_back(outLine);
+   if (file1DiffCount > 0)
+      textBuffer.push_back(diffLines1.str());
    
    #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("%s", outLine.c_str());
@@ -1900,6 +1914,8 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    {
       outLine = "File2 - Number of Lines different: " + ToString(file2DiffCount) + "\n";
       textBuffer.push_back(outLine);
+      if (file2DiffCount > 0)
+         textBuffer.push_back(diffLines2.str());
       
       #if DBGLVL_COMPARE_REPORT
       MessageInterface::ShowMessage("%s", outLine.c_str());
@@ -1910,12 +1926,14 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    {
       outLine = "File3 - Number of Lines different: " + ToString(file3DiffCount) + "\n";
       textBuffer.push_back(outLine);
+      if (file3DiffCount > 0)
+         textBuffer.push_back(diffLines3.str());
       
       #if DBGLVL_COMPARE_REPORT
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
-      
+   
    textBuffer.push_back("\n");
    
    baseIn.close();
