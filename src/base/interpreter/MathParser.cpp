@@ -312,7 +312,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
-      ("FindLowestOperator() Find lowest operator before last close parenthesis");
+      ("FindLowestOperator() Find lowest operator before last close parenthesis\n");
    #endif
    //-----------------------------------------------------------------
    // find a lowest operator before last close paren
@@ -353,14 +353,11 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    //-----------------------------------------------------------------
    // find a lowest operator after last close paren
    //-----------------------------------------------------------------
-   #if DEBUG_FIND_OPERATOR
-   MessageInterface::ShowMessage
-      ("FindLowestOperator() Find lowest operator after last close parenthesis");
-   #endif
    if (close1 != length-1)
    {
       #if DEBUG_FIND_OPERATOR
-      MessageInterface::ShowMessage("   after last close parenthesis\n");
+      MessageInterface::ShowMessage
+         ("FindLowestOperator() Find lowest operator after last close parenthesis\n");
       #endif
       
       substr = str.substr(close1+1);
@@ -480,6 +477,8 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    MessageInterface::ShowMessage
       ("FindLowestOperator() returning opStr=%s, opIndex=%d\n",
        opStr.c_str(), opIndex);
+   MessageInterface::ShowMessage
+      ("=================================================================\n");
    #endif
    
    return opStr;
@@ -686,6 +685,9 @@ MathNode* MathParser::ParseNode(const std::string &str)
 /**
  * Creates MathNode through the Moderator.
  *
+ * @param type  Type of math node to create
+ * @param exp   Math expression (equation) to be used as name or passed to FunctionRunner
+ *
  * @return StringArray of elements
  */
 //------------------------------------------------------------------------------
@@ -693,7 +695,7 @@ MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp
 {
    #if DEBUG_CREATE_NODE
    MessageInterface::ShowMessage
-      ("MathParser::CreateNode() type=%s, exp=%s\n", type.c_str(),
+      ("MathParser::CreateNode() type=%s, expression=%s\n", type.c_str(),
        exp.c_str());
    #endif
    
@@ -1392,7 +1394,7 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
 {
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
-      ("MathParser::FindOperator() entered, str=[ %s ]\n", str.c_str());
+      ("========== MathParser::FindOperator() entered, str=<%s>\n", str.c_str());
    #endif
    
    std::string str1 = str;
@@ -1414,7 +1416,7 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
    
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
-      ("FindOperator() for +,- index1=%u, index2=%u, index3=%u\n", index1, index2, index3);
+      ("FindOperator() 1 for +,- index1=%u, index2=%u, index3=%u\n", index1, index2, index3);
    #endif
    
    if (index1 != str1.npos || index2 != str1.npos)
@@ -1424,9 +1426,49 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
    if (index3 != str1.npos)
    {
       #if DEBUG_FIND_OPERATOR
-      MessageInterface::ShowMessage("   Found unary minus operator\n");
+      MessageInterface::ShowMessage("   Found unary minus operator at %u\n", index3);
       #endif
       unaryMinusFound = true;
+      
+      #if 1
+      // LOJ:2012.01.19 (for bug 2493 fix)
+      // if unary - is at the first position and length is greator than 1,
+      // check for another + or - after 0
+      if (index3 == 0 && str1.size() > 1)
+      {
+         std::string str2 = str1.substr(1, str1.npos);
+         Integer opIndex;
+         #if DEBUG_FIND_OPERATOR
+         MessageInterface::ShowMessage
+            ("   Check if there are operators in <%s>\n", str2.c_str());
+         #endif
+         std::string opStr = FindOperator(str2, opIndex);
+         if (opStr != "")
+         {
+            index1 = str2.find_last_of("+");
+            index2 = str2.find_last_of("-");
+
+            if (index1 != str1.npos || index2 != str1.npos)
+            {
+               if (index1 != str1.npos)
+                  index1 = index1 + 1;
+               if (index2 != str.npos)
+                  index2 = index2 + 1;
+            }
+            else
+            {
+               // Need to check for * or /
+               checkNext = true;
+            }
+         }
+         #if DEBUG_FIND_OPERATOR
+         MessageInterface::ShowMessage
+            ("FindOperator() 2 for +,- index1=%u, index2=%u\n", index1, index2);
+         #endif
+      }
+      #endif
+      
+      // Figure out which operator + or - to assign or check for next operator
       if (index1 != str1.npos || index2 != str1.npos)
       {
          std::string::size_type index4;
@@ -1439,9 +1481,14 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
          MessageInterface::ShowMessage("   index4=%u\n", index4);
          #endif
          
-         if ((index4 > 0) &&
+         // Changed index4 > 0 to index4 != str1.npos since index1 and index2
+         // are recomputed above when unary - is found (LOJ: 2012.01.19)
+         //if ((index4 > 0) && 
+         if ((index4 != str1.npos) && (index4 > 0) &&
              (str[index4-1] == '*' || str[index4-1] == '/'))
+         {
             checkNext = true;
+         }
       }
    }
    
@@ -1563,7 +1610,7 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
    
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
-      ("FindOperator() returning op=%s, opIndex=%u\n", op.c_str(), opIndex);
+      ("========== FindOperator() returning op=%s, opIndex=%u\n", op.c_str(), opIndex);
    #endif
    
    return op;
@@ -1577,13 +1624,22 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
 //                         const IntegerMap &opIndexMap,
 //                         Integer &opIndex)
 //------------------------------------------------------------------------------
+/**
+ * Finds operator by comparing the position
+ *
+ * @param pos1  Position of + or * operator
+ * @param pos2  Position of - or / opearator
+ * @param opIndexMap  Map containing operator positions
+ * @param opIndex  Output operator index
+ */
+//------------------------------------------------------------------------------
 std::string MathParser::GetOperator(const IntegerMap::iterator &pos1,
                                     const IntegerMap::iterator &pos2,
                                     const IntegerMap &opIndexMap,
                                     Integer &opIndex)
 {
    #if DEBUG_FIND_OPERATOR
-   MessageInterface::ShowMessage("GetOperator() entered\n");
+   MessageInterface::ShowMessage("GetOperator() entered\n");   
    if (pos1 != opIndexMap.end())
       MessageInterface::ShowMessage
          ("   pos1=<%s><%d>\n", pos1->first.c_str(), pos1->second);
@@ -1614,18 +1670,27 @@ std::string MathParser::GetOperator(const IntegerMap::iterator &pos1,
       }
       else
       {
-         // if operators on the same level of precedence are evaluated
-         // from left to right
-         if (pos1->second > pos2->second)
-         {
-            opStr = pos1->first;
-            index = pos1->second;
-         }
-         else
-         {
-            opStr = pos2->first;
-            index = pos2->second;
-         }
+         // // if unary - found at 0 position and + found, then set operator to +
+         // if ((pos2->first == "-" && pos2->second == 0) && pos1 != opIndexMap.end())
+         // {
+         //    opStr = pos1->first;
+         //    index = pos1->second;
+         // }
+         // else
+         // {
+            // if operators on the same level of precedence are evaluated
+            // from left to right
+            if (pos1->second > pos2->second)
+            {
+               opStr = pos1->first;
+               index = pos1->second;
+            }
+            else
+            {
+               opStr = pos2->first;
+               index = pos2->second;
+            }
+         // }
       }
    }
    
@@ -2099,6 +2164,19 @@ StringArray MathParser::ParseUnary(const std::string &str)
       left = str.substr(index1+1, str.npos);
    }
    
+   #if 1
+   // For bug 2493 fix
+   // If there is no matching ), then remove it (LOJ: 2011.01.20)
+   //MessageInterface::ShowMessage("===> 1 left = <%s>\n", left.c_str());
+   if (left.find_first_of("(") == left.npos && (left.find_last_of(")") != left.npos))
+   {
+      //std::string::size_type index1 = left.find_first_of("(");
+      //if (FindMatchingParen(left, index1) == left.npos)
+         left = GmatStringUtil::RemoveLastString(left, ")");
+   }
+   //MessageInterface::ShowMessage("===> 2 left = <%s>\n", left.c_str());
+   #endif
+   
    FillItems(items, op, left, "");
    
    #if DEBUG_UNARY
@@ -2202,16 +2280,28 @@ StringArray MathParser::ParseMatrixOps(const std::string &str)
       }
       
       // Check for invalid operators after matrix ops
+      #if DEBUG_MATRIX_OPS
+      MessageInterface::ShowMessage
+         ("   now checking for invalid operators after matrix ops: '%s'\n", fnName.c_str());
+      #endif
       if (fnName != "")
       {
          std::string::size_type index2 = index1 + 1;
          
+         //index2 should be index1 + 5 since 1 is not added below (LOJ: 2012.01.19)
          if (fnName == "Inv")
-            index2 = index1 + 4;
+            //index2 = index1 + 4;
+            index2 = index1 + 5;
+         
+         #if DEBUG_MATRIX_OPS
+         MessageInterface::ShowMessage("   str.size()=%d, index2=%u\n", str.size(), index2);
+         #endif
          
          if (str.size() > index2)
          {
-            std::string nextOp = str.substr(index2+1, 1);
+            //nextOp should be at index2 not index2+1 (LOJ: 2012.01.19)
+            //std::string nextOp = str.substr(index2+1, 1);
+            std::string nextOp = str.substr(index2, 1);
             #if DEBUG_MATRIX_OPS
             MessageInterface::ShowMessage("   nextOp='%s'\n", nextOp.c_str());
             #endif
@@ -2601,6 +2691,26 @@ void MathParser::BuildFunction(const std::string &str, const StringArray &fnList
          ("MathParser::BuildFunction() matching ) found at %u\n", index2);
       #endif
       
+      // Check for invalid operators after function (LOJ: 2012.01.19)
+      if (index2 != str.npos)
+      {
+         #if DEBUG_FUNCTION
+         MessageInterface::ShowMessage
+         ("   now checking for invalid operators after function: '%s'\n", fnName.c_str());
+         #endif
+         // Remove blanks after matching parenthesis before checking.
+         // I thought blanks are already removed by the time it gets here.
+         // Anyway look into it later (LOJ: 2012.01.19)
+         std::string str1 = GmatStringUtil::RemoveAll(str, ' ', index2);
+         std::string nextOp = str1.substr(index2+1, 1);
+         #if DEBUG_FUNCTION
+         MessageInterface::ShowMessage
+            ("   str1='%s', nextOp='%s'\n", str1.c_str(), nextOp.c_str());
+         #endif
+         if (nextOp != "" && !IsValidOperator(nextOp))
+            throw MathException("Invalid math operator \"" + nextOp + "\" found");
+      }
+      
       left = str.substr(index1+1, index2-index1-1);
    }
    
@@ -2755,35 +2865,36 @@ void MathParser::WriteNode(MathNode *node, UnsignedInt level)
 //------------------------------------------------------------------------------
 void MathParser::BuildAllFunctionList()
 {
-   //@todo We should get this list from the MathFactory.
-   // Why power (^) is not here? (LOJ: 2010.11.04)
-   // Real Function List
-   realFuncList.push_back("asin");
-   realFuncList.push_back("sin");
-   realFuncList.push_back("acos");
-   realFuncList.push_back("cos");
-   realFuncList.push_back("atan2");
-   realFuncList.push_back("atan");
-   realFuncList.push_back("tan");
-   realFuncList.push_back("log10");
-   realFuncList.push_back("log");
-   realFuncList.push_back("exp");
-   realFuncList.push_back("sqrt");
-   realFuncList.push_back("abs");
+   // Why power (^) is not here? 
+   // It is not here since it is one of basic math operator such as +, -, *, / (LOJ: 2012.01.17)
    
-   // Matrix Function List
-   matrixFuncList.push_back("transpose");
+   // Functions for real number
+   realFuncList.push_back("abs");
+   realFuncList.push_back("acos");
+   realFuncList.push_back("asin");
+   realFuncList.push_back("atan");
+   realFuncList.push_back("atan2");
+   realFuncList.push_back("cos");
+   realFuncList.push_back("exp");
+   realFuncList.push_back("log");
+   realFuncList.push_back("log10");
+   realFuncList.push_back("sin");
+   realFuncList.push_back("tan");
+   realFuncList.push_back("sqrt");
+   
+   // Functions for matrix
    matrixFuncList.push_back("det");
    matrixFuncList.push_back("inv");
    matrixFuncList.push_back("norm");
+   matrixFuncList.push_back("transpose");
    
-   // Unit Conversion List
-   unitConvList.push_back("degToRad");
-   unitConvList.push_back("radToDeg");
+   // Unit Conversion functions
    unitConvList.push_back("deg2Rad");
+   unitConvList.push_back("degToRad");
    unitConvList.push_back("rad2Deg");
+   unitConvList.push_back("radToDeg");
    
-   // Matrix Operator List
+   // Matrix Operators
    matrixOpList.push_back("'");
    matrixOpList.push_back("^(-1)");
    
