@@ -87,10 +87,9 @@ GmatBase* RadToDeg::Clone() const
 //------------------------------------------------------------------------------
 void RadToDeg::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   type = Gmat::REAL_TYPE;
-   rowCount = 1;
-   colCount = 1;
+   GetScalarOutputInfo(type, rowCount, colCount);
 }
+
 
 //------------------------------------------------------------------------------
 // bool ValidateInputs()
@@ -102,34 +101,7 @@ void RadToDeg::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
 //------------------------------------------------------------------------------
 bool RadToDeg::ValidateInputs()
 {
-   if (leftNode == NULL)
-      throw MathException("RadToDeg() - Missing input arguments.\n");
-   
-   Integer type1, row1, col1; // Left node
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-   
-   // Only Real type is allowed
-   if (type1 == Gmat::REAL_TYPE)
-      return true;
-   else
-      return false;
-   
-//    if ( leftNode->ValidateInputs() )
-//    {
-//       try
-//       {
-//          leftNode->Evaluate();
-//          return true;
-//       }
-//       catch (MathException &e)
-//       {
-//          return false;
-//       } 
-//    }
-//    else
-//       return false;
+   return ValidateScalarInputs();
 }
 
 //------------------------------------------------------------------------------
@@ -137,19 +109,10 @@ bool RadToDeg::ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * @return the RadToDeg of left node
- *
  */
 //------------------------------------------------------------------------------
 Real RadToDeg::Evaluate()
 {
    return GmatMathUtil::RadToDeg(leftNode->Evaluate());
-}
-
-//------------------------------------------------------------------------------
-// Rmatrix *MatrixEvaluate()
-//------------------------------------------------------------------------------
-Rmatrix RadToDeg::MatrixEvaluate()
-{
-   throw MathException("MatrixEvaluate()::RadToDeg returns a real value.\n");    
 }
 

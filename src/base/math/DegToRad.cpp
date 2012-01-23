@@ -87,9 +87,7 @@ GmatBase* DegToRad::Clone() const
 //------------------------------------------------------------------------------
 void DegToRad::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   type = Gmat::REAL_TYPE;
-   rowCount = 1;
-   colCount = 1;
+   GetScalarOutputInfo(type, rowCount, colCount);
 }
 
 
@@ -103,34 +101,7 @@ void DegToRad::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
 //------------------------------------------------------------------------------
 bool DegToRad::ValidateInputs()
 {
-   if (leftNode == NULL)
-      throw MathException("DegToRad() - Missing input arguments.\n");
-   
-   Integer type1, row1, col1; // Left node
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-
-   // Only Real type is allowed
-   if (type1 == Gmat::REAL_TYPE)
-      return true;
-   else
-      return false;
-   
-//    if ( leftNode->ValidateInputs() )
-//    {
-//       try
-//       {
-//          leftNode->Evaluate();
-//          return true;
-//       }
-//       catch (MathException &e)
-//       {
-//          return false;
-//       } 
-//    }
-//    else
-//       return false;
+   return ValidateScalarInputs();
 }
 
 
@@ -147,11 +118,3 @@ Real DegToRad::Evaluate()
    return GmatMathUtil::DegToRad(leftNode->Evaluate());
 }
 
-
-//------------------------------------------------------------------------------
-// Rmatrix *MatrixEvaluate()
-//------------------------------------------------------------------------------
-Rmatrix DegToRad::MatrixEvaluate()
-{
-   throw MathException("MatrixEvaluate()::DegToRad returns a real value.\n");    
-}

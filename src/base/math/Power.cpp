@@ -87,23 +87,43 @@ GmatBase* Power::Clone() const
 //------------------------------------------------------------------------------
 void Power::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
+   GetScalarOutputInfo(type, rowCount, colCount);
+   
+   #if 0
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
+   bool retval = false;
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
    // Get the type(Real or Matrix), # rows and # columns of the right node
    rightNode->GetOutputInfo(type2, row2, col2);
-
-   if ((type1 != type2) || (row1 != row2) || (col1 != col2))
-      throw MathException("Matrixes are not the same can not add.\n");    
-   else
+   
+   if (type1 == Gmat::REAL_TYPE)
    {
-      type = type1;
-      rowCount = row1;
-      colCount = col1;
+      if (type2 == Gmat::REAL_TYPE || type2 == Gmat::RMATRIX_TYPE && row2 == 1 && col2 == 1)
+      {
+         type = type1;
+         rowCount = row1;
+         colCount = col1;
+         retval = true;
+      }
    }
+   else if (type1 == Gmat::RMATRIX_TYPE && row1 == 1 && col1 == 1)
+   {
+      if (type2 == Gmat::REAL_TYPE || (type2 == Gmat::RMATRIX_TYPE && row2 == 1 && col2 == 1))
+      {
+         type = type1;
+         rowCount = row1;
+         colCount = col1;
+         retval = true;
+      }
+   }
+   
+   if (!retval)
+      throw MathException("Input is not a scalar or 1x1 matrix, so can not do Power()");
+   #endif
 }
 
 
@@ -117,18 +137,33 @@ void Power::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 bool Power::ValidateInputs()
 {
-   if (leftNode == NULL)
+   if (leftNode == NULL || rightNode == NULL)
       throw MathException("Power() - Missing input arguments.\n");
    
-   Integer type1, row1, col1; // Left node
+   Integer type1, row1, col1; // left node
+   Integer type2, row2, col2; // right node
+   bool retval = false;
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
+   // Get the type(Real or Matrix), # rows and # columns of the right node
+   rightNode->GetOutputInfo(type2, row2, col2);
+   
    if (type1 == Gmat::REAL_TYPE)
-      return true;
+   {
+      if (type2 == Gmat::REAL_TYPE || type2 == Gmat::RMATRIX_TYPE && row2 == 1 && col2 == 1)
+         retval = true;
+   }
+   else if (type1 == Gmat::RMATRIX_TYPE && row1 == 1 && col1 == 1)
+   {
+      if (type2 == Gmat::REAL_TYPE || (type2 == Gmat::RMATRIX_TYPE && row2 == 1 && col2 == 1))
+         retval = true;
+   }
    else
-      return false;
+      throw MathException("Input is not a scalar or 1x1 matrix, so can not do Power()");
+   
+   return retval;
 }
 
 

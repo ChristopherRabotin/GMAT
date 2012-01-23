@@ -87,19 +87,7 @@ GmatBase* Sqrt::Clone() const
 //------------------------------------------------------------------------------
 void Sqrt::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   Integer type1, row1, col1; // Left node
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-   
-   if (type1 != Gmat::REAL_TYPE)
-      throw MathException("Left is not scalar, so cannot do Sqrt().\n");  
-   else
-   {
-      type = type1;
-      rowCount = row1;
-      colCount = col1;
-   }
+   GetScalarOutputInfo(type, rowCount, colCount);
 }
 
 
@@ -113,18 +101,7 @@ void Sqrt::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 bool Sqrt::ValidateInputs()
 {
-   if (leftNode == NULL)
-      throw MathException("Sqrt() - Missing input arguments.\n");
-   
-   Integer type1, row1, col1; // Left node
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-   
-   if (type1 == Gmat::REAL_TYPE)
-      return true;
-   else
-      return false;
+   return ValidateScalarInputs();
 }
 
 
@@ -133,12 +110,10 @@ bool Sqrt::ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * @return the sqaure root
- *
  */
 //------------------------------------------------------------------------------
 Real Sqrt::Evaluate()
 {
    return GmatMathUtil::Sqrt(leftNode->Evaluate());
 }
-
 

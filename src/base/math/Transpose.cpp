@@ -148,12 +148,18 @@ bool Transpose::ValidateInputs()
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
+   // Transpose of matrix or scalar is allowed, so set retval to true
+   // LOJ: 2012.01.19
+   retval = true;
+   
+   /*
    if (type1 == Gmat::RMATRIX_TYPE)
       retval = true;
    else if (type1 == Gmat::REAL_TYPE && row1 == 1 && col1 == 1)
       retval = true;
    else
       retval = false;
+   */
    
    #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage

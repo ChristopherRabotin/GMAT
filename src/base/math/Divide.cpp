@@ -91,8 +91,8 @@ void Divide::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
    #if DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
-      ("Divide::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
-       GetName().c_str());
+      ("Divide::GetOutputInfo() entered, this=<%p><%s><%s>\n", this,
+       GetTypeName().c_str(), GetName().c_str());
    #endif
    
    Integer type1, row1, col1; // Left node
@@ -144,6 +144,12 @@ void Divide::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
       rowCount = row2;
       colCount = col2;
    }
+   
+   #if DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Divide::GetOutputInfo() leaving, type=%d, rowCount=%d, colCount=%d\n",
+       type, rowCount, colCount);
+   #endif
 }
 
 
@@ -159,7 +165,7 @@ bool Divide::ValidateInputs()
 {
    #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
-      ("\Divide::ValidateInputs() '%s' entered\n", GetName().c_str());
+      ("\nDivide::ValidateInputs() '%s' entered\n", GetName().c_str());
    #endif
    
    if (leftNode == NULL)
@@ -231,7 +237,7 @@ Rmatrix Divide::MatrixEvaluate()
 {
    #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
-      ("\Divide::MatrixEvaluate() '%s' entered\n", GetName().c_str());
+      ("\nDivide::MatrixEvaluate() '%s' entered\n", GetName().c_str());
    #endif
    
    Integer type1, row1, col1; // Left node matrix

@@ -23,6 +23,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_NORM
+//#define DEBUG_INPUT_OUTPUT 1
 
 //---------------------------------
 // public methods
@@ -98,6 +99,7 @@ void Norm::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
       ("Norm::GetOutputInfo() type=%d, rowCount=%d, colCount=%d\n",
        type, rowCount, colCount);
    #endif
+   //GetMatrixOutputInfo(type, rowCount, colCount, true);
 }
 
 
@@ -111,28 +113,7 @@ void Norm::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 bool Norm::ValidateInputs()
 {
-   Integer type1, row1, col1; // Left node
-   
-   if (leftNode == NULL)
-      throw MathException("Norm() - Missing input arguments");
-   
-   #ifdef DEBUG_NORM
-   MessageInterface::ShowMessage
-      ("Norm::ValidateInputs() left=%s, %s\n",
-       leftNode->GetTypeName().c_str(), leftNode->GetName().c_str());
-   #endif
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   // Input can be a scalar or matrix, so just call leftNode (LOJ: 2010.07.28)
-   leftNode->GetOutputInfo(type1, row1, col1);
-   
-   #ifdef DEBUG_NORM
-   MessageInterface::ShowMessage
-      ("Norm::ValidateInputs() returning true, type=%d, row=%d, col=%d\n", 
-       type1, row1, col1);
-   #endif
-   
-   return true;
+   return ValidateMatrixInputs(true);
 }
 
 
@@ -160,9 +141,12 @@ Real Norm::Evaluate()
         return (leftNode->MatrixEvaluate()).GetColumn(0).Norm();
       }
       else
+         // Norm() function works for a vector or scalar.
+         // Norm() for matrix may be implemented in the future upon the
+         // user request
          throw MathException(
             "Norm::Evaluate():: Can only be done on a vector or a scalar.  "
-            "This is a matrix.\n");
+            "This is a matrix");
    }
    else
    {

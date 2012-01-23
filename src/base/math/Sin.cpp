@@ -87,20 +87,7 @@ GmatBase* Sin::Clone() const
 //------------------------------------------------------------------------------
 void Sin::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   Integer type1, row1, col1; // Left node
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-   
-
-   if (type1 != Gmat::REAL_TYPE)
-      throw MathException("Left is not scalar, so cannot do Sin().\n"); 
-   else
-   {
-      type = type1;
-      rowCount = row1;
-      colCount = col1;
-   }
+   GetScalarOutputInfo(type, rowCount, colCount);
 }
 
 
@@ -114,18 +101,7 @@ void Sin::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 bool Sin::ValidateInputs()
 {
-   if (leftNode == NULL)
-      throw MathException("Sin() - Missing input arguments.\n");
-   
-   Integer type1, row1, col1; // Left node
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-   
-   if (type1 == Gmat::REAL_TYPE)
-      return true;
-   else
-      return false;
+   return ValidateScalarInputs();
 }
 
 
@@ -134,10 +110,10 @@ bool Sin::ValidateInputs()
 //------------------------------------------------------------------------------
 /**
  * @return the sin of left node
- *
  */
 //------------------------------------------------------------------------------
 Real Sin::Evaluate()
 {
    return GmatMathUtil::Sin(leftNode->Evaluate());
 }
+
