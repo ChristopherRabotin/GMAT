@@ -48,67 +48,8 @@ public:
 
 private:
    
-   // Integrator types -- No longer hard coded
-//   enum IntegratorType
-//   {
-//      RKV89 = 0,
-//      RKN68,
-//      RKF56,
-//      PD45,
-//      PD78,
-//      BS,
-//      ABM,
-////      CW,
-//      IntegratorCount,
-//   };
    Integer IntegratorCount;
 
-   // Earth gravity field model
-   enum EarthGravModelType
-   {
-      E_NONE_GM = 0,
-      JGM2,
-      JGM3,
-      EGM96,
-      E_OTHER,
-      EarthGravModelCount,
-   };   
-   
-   // Luna gravity field model
-   enum LunaGravModelType
-   {
-      L_NONE_GM = 0,
-      LP165,
-      L_OTHER,
-      LunaGravModelCount,
-   };   
-   
-   // Venus gravity field model
-   enum VenusGravModelType
-   {
-      V_NONE_GM = 0,
-      MGNP180U,
-      V_OTHER,
-      VenusGravModelCount,
-   };   
-   
-   // Mars gravity field model
-   enum MarsGravModelType
-   {
-      M_NONE_GM = 0,
-      MARS50C,
-      M_OTHER,
-      MarsGravModelCount,
-   };   
-   
-   // Other gravity field model
-   enum OthersGravModelType
-   {
-      O_NONE_GM = 0,
-      O_OTHER,
-      OthersGravModelCount,
-   };
-   
    // Earth drag model
    enum EarthDragModelType
    {
@@ -325,8 +266,8 @@ private:
    CelestialBody                  *theCelestialBody;
    AtmosphereModel                *theAtmosphereModel;
    std::vector<PointMassForce *>  thePMForces;
-//   std::vector<ForceType*> primaryBodyList;
-   std::vector<ForceType*> pointMassBodyList;
+//   std::vector<ForceType*>        primaryBodyList;
+   std::vector<ForceType*>        pointMassBodyList;
    
    // Restricted to one primary, so using a single ForceType rather than array
    ForceType                      *primaryBodyData;
