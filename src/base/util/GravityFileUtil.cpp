@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                                  GravityFile
+//                                  GravityFileUtil
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
@@ -14,16 +14,17 @@
 // Created: 2007/08/15
 //
 /**
- * Implementation of the GravityFile class.  This is the code that reads the
+ * Implementation of the GravityFileUtil class.  This is the code that reads the
  * different types of gravity files, such as .cof, .dat, .grv files.
  *
  */
 //------------------------------------------------------------------------------
-#include "GravityFile.hpp"
+#include "GravityFileUtil.hpp"
 #include "StringUtil.hpp"       // for Trim()
 #include "FileTypes.hpp"        // for MAX_LINE_LEN
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
+#include "GmatDefaults.hpp"
 #include "UtilityException.hpp"
 #include "MessageInterface.hpp"
 
@@ -38,48 +39,38 @@
 //#define DEBUG_GRAVITY_DAT_FILE
 //#define DEBUG_GRAVITY_GRV_FILE
 
-
 //------------------------------------------------------------------------------
-// GravityFile()
+// static data
 //------------------------------------------------------------------------------
-GravityFile::GravityFile()
+const std::string GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::NumGravityModels] =
 {
-}
+      // Earth Model names
+      "EGM-96",
+      "JGM-2",
+      "JGM-3",
+      // Luna Model Names
+      "LP-165",
+      // Mars Model Names
+//      "GMM-1",
+//      "GMM-2B",
+      "Mars-50C",
+      // Venus Model Names
+//      "MGN75HSAAP",
+      "MGNP-180U",
+      "Other",
+      "None"
+};
 
-
-//------------------------------------------------------------------------------
-// GravityFile(const GravityFile &copy)
-//------------------------------------------------------------------------------
-GravityFile::GravityFile(const GravityFile &copy)
-{
-}
-
-
-//------------------------------------------------------------------------------
-// const GravityFile& operator=(const GravityFile &right)
-//------------------------------------------------------------------------------
-const GravityFile& GravityFile::operator=(const GravityFile &right)
-{
-   return *this;
-}
-
-
-//------------------------------------------------------------------------------
-// ~GravityFile()
-//------------------------------------------------------------------------------
-GravityFile::~GravityFile()
-{
-}
 
 
 //------------------------------------------------------------------------------
-// GmatFM::GravityFileType GetFileType(const std::string &filename)
+// GmatGrav::GravityFileType GetFileType(const std::string &filename)
 //------------------------------------------------------------------------------
 /*
- * Returns reconized gravity file type by reading first non-comment line.
+ * Returns recognized gravity file type by reading first non-comment line.
  *
  * Assumption:
- *    GFT_COF contains "POTFILED"
+ *    GFT_COF contains "POTFIELD"
  *    GFT_DAT contains valid Real number
  *    GFT_GRV contains "stk.v."
  *
@@ -88,11 +79,11 @@ GravityFile::~GravityFile()
  *
  */
 //------------------------------------------------------------------------------
-GmatFM::GravityFileType GravityFile::GetFileType(const std::string &filename)
+GmatGrav::GravityFileType GravityFileUtil::GetFileType(const std::string &filename)
 {
    #ifdef DEBUG_GRAVITY_FILE
    MessageInterface::ShowMessage
-      ("GravityFile::GetFileType() entered\n   filename = \"%s\"\n",
+      ("GravityFileUtil::GetFileType() entered\n   filename = \"%s\"\n",
        filename.c_str());
    #endif
 
@@ -101,7 +92,7 @@ GmatFM::GravityFileType GravityFile::GetFileType(const std::string &filename)
       throw GravityFileException("Cannot open gravity file \"" + filename + "\"");
 
    std::string line;
-   GmatFM::GravityFileType gft = GmatFM::GFT_UNKNOWN;
+   GmatGrav::GravityFileType gft = GmatGrav::GFT_UNKNOWN;
 
    while (!inStream.eof())
    {
@@ -119,19 +110,19 @@ GmatFM::GravityFileType GravityFile::GetFileType(const std::string &filename)
       {
          if (line.find("POTFIELD") != line.npos)
          {
-            gft = GmatFM::GFT_COF;
+            gft = GmatGrav::GFT_COF;
             break;
          }
          else if (line.find("STK.V.") != line.npos)
          {
-            gft = GmatFM::GFT_GRV;
+            gft = GmatGrav::GFT_GRV;
             break;
          }
          else
          {
             Real rval;
             if (GmatStringUtil::ToReal(line, rval))
-               gft = GmatFM::GFT_DAT;
+               gft = GmatGrav::GFT_DAT;
 
             break;
          }
@@ -141,14 +132,143 @@ GmatFM::GravityFileType GravityFile::GetFileType(const std::string &filename)
    inStream.close();
 
    #ifdef DEBUG_GRAVITY_FILE
-   MessageInterface::ShowMessage("GravityFile::GetFileType() returning %d\n", gft);
+   MessageInterface::ShowMessage("GravityFileUtil::GetFileType() returning %d\n", gft);
    #endif
 
-   if (gft == GmatFM::GFT_UNKNOWN)
+   if (gft == GmatGrav::GFT_UNKNOWN)
       throw GravityFileException
          ("Gravity file \"" + filename + " is of unknown format");
 
    return gft;
+}
+
+//------------------------------------------------------------------------------
+// GmatGrav::GravityModelType GetModelType(const std::string &filename, const std::string &forBody)
+//------------------------------------------------------------------------------
+/*
+ * Returns recognized gravity model type for input body name, by reading
+ * comment line(s).  NOTE - this will only work for COF format files.  Inputting
+ * the name of a file with another format (e.g. GRV) will result in a return value
+ * of GFM_OTHER.
+ *
+ * Assumptions:
+ *    GFM_EGM96       contains "egm96"
+ *    GFM_JGM2        contains "JGM-02"
+ *    GFM_JGM3        contains "JGM-03"
+ *    GFM_LP165P      contains "lp165p"
+ *    GFM_GMM1        contains "GMM-1"        [future?]
+ *    GFM_GMM2B       contains "GMM-2B"       [future?]
+ *    GFM_MARS50C     contains "Mars-50c"
+ *    GFM_MGN75HSAAP  contains "MGN75HSAAP"   [future?]
+ *    GFM_MGNP180U    contains "MGNP180U"
+ *
+ *
+ * @param   filename  Input file name
+ * @param   forBody   Body Name
+ * @return  Gravity model type
+ *
+ */
+//------------------------------------------------------------------------------
+GmatGrav::GravityModelType GravityFileUtil::GetModelType(const std::string &filename, const std::string &forBody)
+{
+   #ifdef DEBUG_GRAVITY_FILE
+      MessageInterface::ShowMessage("Entering GetModelType, filename = %s, forBody = %s\n",
+            filename.c_str(), forBody.c_str());
+   #endif
+   if (GmatStringUtil::IsBlank(filename, true))
+     return GmatGrav::GFM_NONE;
+
+   if (GetFileType(filename) != GmatGrav::GFT_COF) return GmatGrav::GFM_OTHER;
+
+   std::ifstream inStream(filename.c_str());
+   if (!inStream)
+      throw GravityFileException("Cannot open gravity file \"" + filename + "\"");
+
+   std::string line;
+   GmatGrav::GravityModelType gfm = GmatGrav::GFM_OTHER;
+
+   while (!inStream.eof())
+   {
+      getline(inStream, line);
+
+      // Make upper case, so we can check for certain keyword
+      line = GmatStringUtil::ToUpper(line);
+
+      #ifdef DEBUG_GRAVITY_FILE
+      MessageInterface::ShowMessage("   => line=<%s>\n", line.c_str());
+      #endif
+
+      // Read comment lines
+      if (line[0] == 'C' || line[0] == '#') // do we need
+      {
+         if (forBody == GmatSolarSystemDefaults::EARTH_NAME)
+         {
+            if (line.find("EGM96") != line.npos)
+            {
+               gfm = GmatGrav::GFM_EGM96;
+               break;
+            }
+            else if (line.find("JGM-02") != line.npos)
+            {
+               gfm = GmatGrav::GFM_JGM2;
+               break;
+            }
+            else if (line.find("JGM-03") != line.npos)
+            {
+               gfm = GmatGrav::GFM_JGM3;
+               break;
+            }
+         }
+         else if (forBody == GmatSolarSystemDefaults::MOON_NAME)
+         {
+            if (line.find("LP165P") != line.npos)
+            {
+               gfm = GmatGrav::GFM_LP165P;
+               break;
+            }
+         }
+         else if (forBody == GmatSolarSystemDefaults::MARS_NAME)
+         {
+            if (line.find("MARS-50C") != line.npos)
+            {
+               gfm = GmatGrav::GFM_MARS50C;
+               break;
+            }
+//            else if (line.find("GMM-1") != line.npos)
+//            {
+//               gfm = GmatGrav::GFM_GMM1;
+//               break;
+//            }
+//            else if (line.find("GMM-2B") != line.npos)
+//            {
+//               gfm = GmatGrav::GFM_GMM2B;
+//               break;
+//            }
+         }
+         else if (forBody == GmatSolarSystemDefaults::VENUS_NAME)
+         {
+            if (line.find("MGNP180U") != line.npos)
+            {
+               gfm = GmatGrav::GFM_MGNP180U;
+               break;
+            }
+//            else if (line.find("MGN75HSAAP") != line.npos)
+//            {
+//               gfm = GmatGrav::GFM_MGN75HSAAP;
+//               break;
+//            }
+         }
+      }
+   }
+
+   inStream.close();
+
+   #ifdef DEBUG_GRAVITY_FILE
+   MessageInterface::ShowMessage("GravityFileUtil::GetModelType() returning %d (%s)\n", gfm, GRAVITY_MODEL_NAMES[gfm].c_str());
+   #endif
+
+
+   return gfm;
 }
 
 
@@ -168,7 +288,7 @@ GmatFM::GravityFileType GravityFile::GetFileType(const std::string &filename)
  * @exception GravityFileException thrown if unrecognized file type found
  */
 //------------------------------------------------------------------------------
-bool GravityFile::GetFileInfo(const std::string &filename, Integer& degree,
+bool GravityFileUtil::GetFileInfo(const std::string &filename, Integer& degree,
                               Integer& order, Real &mu, Real &radius)
 {
    ReadFile(filename, degree, order, mu, radius, false);
@@ -183,23 +303,23 @@ bool GravityFile::GetFileInfo(const std::string &filename, Integer& degree,
 //               Real sbar[][DEG_DIM], Real dcbar[][DRF_DIM], Real dsbar[][DRF_DIM],
 //               Integer maxDegree, Integer maxOrder, Integer maxDriftDegree = 0)
 //------------------------------------------------------------------------------
-bool GravityFile::ReadFile(const std::string &filename, Integer& degree,
+bool GravityFileUtil::ReadFile(const std::string &filename, Integer& degree,
                            Integer& order, Real &mu, Real &radius,
                            bool readCoeff, Real cbar[][361], Real sbar[][DEG_DIM],
                            Real dcbar[][DRF_DIM], Real dsbar[][DRF_DIM],
                            Integer maxDegree, Integer maxOrder, Integer maxDriftDegree)
 {
-   GmatFM::GravityFileType gft = GetFileType(filename);
+   GmatGrav::GravityFileType gft = GetFileType(filename);
 
    switch (gft)
    {
-   case GmatFM::GFT_COF:
+   case GmatGrav::GFT_COF:
       return ReadCofFile(filename, degree, order, mu, radius, readCoeff, cbar, sbar,
                          maxDegree, maxOrder, maxDriftDegree);
-   case GmatFM::GFT_DAT:
+   case GmatGrav::GFT_DAT:
       return ReadDatFile(filename, degree, order, mu, radius, readCoeff, cbar, sbar,
                          dcbar, dsbar, maxDegree, maxOrder, maxDriftDegree);
-   case GmatFM::GFT_GRV:
+   case GmatGrav::GFT_GRV:
       return ReadGrvFile(filename, degree, order, mu, radius, readCoeff, cbar, sbar,
                          maxDegree, maxOrder, maxDriftDegree);
    default:
@@ -214,7 +334,7 @@ bool GravityFile::ReadFile(const std::string &filename, Integer& degree,
 //                  Real sbar[][DEG_DIM], Integer maxDegree, Integer maxOrder,
 //                  Integer maxDriftDegree)
 //------------------------------------------------------------------------------
-bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
+bool GravityFileUtil::ReadCofFile(const std::string &filename, Integer& degree,
                               Integer& order, Real &mu, Real &radius, bool readCoeff,
                               Real cbar[][361], Real sbar[][DEG_DIM], Integer maxDegree,
                               Integer maxOrder, Integer maxDriftDegree)
@@ -232,7 +352,7 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
    Real          tmpA;
 
    #ifdef DEBUG_GRAVITY_COF_FILE
-   MessageInterface::ShowMessage("Entered GravityFile::ReadCofFile\n");
+   MessageInterface::ShowMessage("Entered GravityFileUtil::ReadCofFile\n");
    #endif
 
    std::string line;
@@ -343,7 +463,7 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
 //                  Real sbar[][DEG_DIM], Integer maxDegree, Integer maxOrder,
 //                  Integer maxDriftDegree)
 //------------------------------------------------------------------------------
-bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
+bool GravityFileUtil::ReadDatFile(const std::string &filename, Integer& degree,
                               Integer& order, Real &mu, Real &radius, bool readCoeff,
                               Real cbar[][361], Real sbar[][DEG_DIM],
                               Real dcbar[][DRF_DIM], Real dsbar[][DRF_DIM],
@@ -351,7 +471,7 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
 {
    #ifdef DEBUG_GRAVITY_DAT_FILE
    MessageInterface::ShowMessage
-      ("GravityFile::ReadDatFile() filename=%s\n   maxDegree=%d, maxOrder=%d, "
+      ("GravityFileUtil::ReadDatFile() filename=%s\n   maxDegree=%d, maxOrder=%d, "
        "maxDriftDegree=%d, readCoeff=%d\n", filename.c_str(), maxDegree, maxOrder,
        maxDriftDegree, readCoeff);
    #endif
@@ -394,7 +514,7 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
 
       #ifdef DEBUG_GRAVITY_DAT_FILE
       MessageInterface::ShowMessage
-         ("GravityFile::ReadDatFile() returning degree=%d, order=%d, mu=%le, "
+         ("GravityFileUtil::ReadDatFile() returning degree=%d, order=%d, mu=%le, "
           "radius=%le\n", degree, order, mu, radius);
       #endif
 
@@ -528,7 +648,7 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
    order = fileOrder;
 
    #ifdef DEBUG_GRAVITY_DAT_FILE
-   MessageInterface::ShowMessage("Leaving GravityFile::ReadDatFile\n");
+   MessageInterface::ShowMessage("Leaving GravityFileUtil::ReadDatFile\n");
    MessageInterface::ShowMessage
       ("    degree = %d, order = %d, mu = %.4f, radius = %.4f\n", degree, order,
        mu, radius);
@@ -553,7 +673,7 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
 //                  Real sbar[][DEG_DIM], Integer maxDegree, Integer maxOrder,
 //                  Integer maxDriftDegree = 0)
 //------------------------------------------------------------------------------
-bool GravityFile::ReadGrvFile(const std::string &filename, Integer& degree,
+bool GravityFileUtil::ReadGrvFile(const std::string &filename, Integer& degree,
                               Integer& order, Real &mu, Real &radius, bool readCoeff,
                               Real cbar[][361], Real sbar[][DEG_DIM], Integer maxDegree,
                               Integer maxOrder, Integer maxDriftDegree)
@@ -570,7 +690,7 @@ bool GravityFile::ReadGrvFile(const std::string &filename, Integer& degree,
    std::string   isNormalized = "";
 
    #ifdef DEBUG_GRAVITY_GRV_FILE
-   MessageInterface::ShowMessage("Entered GravityFile::ReadGrvFile\n");
+   MessageInterface::ShowMessage("Entered GravityFileUtil::ReadGrvFile\n");
    #endif
 
    std::string line;
@@ -660,7 +780,7 @@ bool GravityFile::ReadGrvFile(const std::string &filename, Integer& degree,
    #ifdef DEBUG_GRAVITY_GRV_FILE
    if (readCoeff)
    {
-      MessageInterface::ShowMessage("Leaving GravityFile::ReadGrvFile\n");
+      MessageInterface::ShowMessage("Leaving GravityFileUtil::ReadGrvFile\n");
       MessageInterface::ShowMessage("   cbar[ 2][ 0] = %le   sbar[ 2][ 0] = %le   \n",
                                     cbar[2][0], sbar[2][0]);
       MessageInterface::ShowMessage("   cbar[20][20] = %le   sbar[20][20] = %le   \n",
@@ -671,4 +791,39 @@ bool GravityFile::ReadGrvFile(const std::string &filename, Integer& degree,
    return true;
 }
 
+//------------------------------------------------------------------------------
+// private methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// GravityFileUtil()
+//------------------------------------------------------------------------------
+GravityFileUtil::GravityFileUtil()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// GravityFileUtil(const GravityFileUtil &copy)
+//------------------------------------------------------------------------------
+GravityFileUtil::GravityFileUtil(const GravityFileUtil &copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const GravityFileUtil& operator=(const GravityFileUtil &right)
+//------------------------------------------------------------------------------
+const GravityFileUtil& GravityFileUtil::operator=(const GravityFileUtil &right)
+{
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~GravityFileUtil()
+//------------------------------------------------------------------------------
+GravityFileUtil::~GravityFileUtil()
+{
+}
 
