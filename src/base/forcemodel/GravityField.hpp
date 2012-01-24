@@ -78,7 +78,6 @@
 #include "CelestialBody.hpp"
 #include "HarmonicGravity.hpp"
 #include "ODEModelException.hpp"
-#include "GravityFile.hpp"
 
 
 class GMAT_API GravityField : public HarmonicField
@@ -139,7 +138,6 @@ protected:
    };
 
    static std::vector<HarmonicGravity*> cache;
-   static GravityFile                   *gravFile;
 
    static const std::string PARAMETER_TEXT[
       GravityFieldParamCount - HarmonicFieldParamCount];

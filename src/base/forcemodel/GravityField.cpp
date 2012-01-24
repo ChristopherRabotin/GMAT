@@ -71,7 +71,7 @@
 #include "StringUtil.hpp"
 #include "GmatConstants.hpp"
 #include "GmatDefaults.hpp"
-#include "GravityFile.hpp"
+#include "GravityFileUtil.hpp"
 #include "FileManager.hpp"
 #include "HarmonicGravityCof.hpp"
 #include "HarmonicGravityGrv.hpp"
@@ -102,7 +102,6 @@ static bool firstCallFired = false;
 #endif
 
 std::vector<HarmonicGravity*> GravityField::cache;
-GravityFile*                  GravityField::gravFile = NULL;
 
 const std::string
 GravityField::PARAMETER_TEXT[GravityFieldParamCount - HarmonicFieldParamCount] =
@@ -1131,8 +1130,6 @@ void GravityField::Calculate (Real dt, Real state[6],
 HarmonicGravity* GravityField::GetGravityFile(const std::string &filename,
                                               const Real &radius, const Real &mukm)
 {
-   if (!gravFile) gravFile = new GravityFile();
-
    for (std::vector<HarmonicGravity*>::iterator objptPos = cache.begin();
         objptPos != cache.end(); ++objptPos)
    {
@@ -1142,16 +1139,16 @@ HarmonicGravity* GravityField::GetGravityFile(const std::string &filename,
       }
    }
    HarmonicGravity         *newOne  = NULL;
-   GmatFM::GravityFileType fileType = gravFile->GetFileType(filename);
+   GmatGrav::GravityFileType fileType = GravityFileUtil::GetFileType(filename);
    switch (fileType)
    {
-      case GmatFM::GFT_COF:
+      case GmatGrav::GFT_COF:
          newOne = new HarmonicGravityCof(filename,radius,mukm);
          break;
-      case GmatFM::GFT_GRV:
+      case GmatGrav::GFT_GRV:
          newOne = new HarmonicGravityGrv(filename,radius,mukm);
          break;
-      case GmatFM::GFT_UNKNOWN:
+      case GmatGrav::GFT_UNKNOWN:
          throw ODEModelException
             ("GravityField::Create file not found or incorrect type\n");
       default:

@@ -51,7 +51,7 @@
 #include "TimeTypes.hpp"
 #include "StateConversionUtil.hpp"
 #include "StringUtil.hpp"           // for ToString()
-#include "GravityFile.hpp"          // for GetFileInfo()
+#include "GravityFileUtil.hpp"          // for GetFileInfo()
 
 //#define DEBUG_CELESTIAL_BODY 1
 //#define DEBUG_GET_STATE
@@ -611,7 +611,6 @@ CelestialBody::~CelestialBody()
          if (orbitSpiceKernelNames.at(kk) != "" && (kernelReader != NULL) &&
             (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk))))
             kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
-//      if ((kernelReader != NULL) && (lskKernelName != "")) kernelReader->UnloadKernel(lskKernelName);
    #endif
 }
 
@@ -3928,12 +3927,11 @@ bool CelestialBody::ReadPotentialFile()
    if (potentialFileRead) return true;
    if (potentialFileName == "") return false;
    
-   GravityFile gf;
    Integer fileDeg, fileOrd;
    try
    {
-      if (!gf.GetFileInfo(potentialFileName, fileDeg, fileOrd, mu,
-                          equatorialRadius))
+      if (!GravityFileUtil::GetFileInfo(potentialFileName, fileDeg, fileOrd, mu,
+                                    equatorialRadius))
       {
          throw SolarSystemException
             ("Error reading mu and equatorial radius of " + instanceName
@@ -4313,6 +4311,10 @@ bool CelestialBody::SetUpSPICE()
    for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
    {
       #ifdef DEBUG_CB_SPICE
+         char *path=NULL;
+         size_t size = 0;
+         path=getcwd(path,size);
+         MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
          MessageInterface::ShowMessage("   now checking %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
       #endif
       if (!(kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii))))
