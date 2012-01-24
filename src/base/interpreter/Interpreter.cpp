@@ -1006,7 +1006,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    
    // Handle Spacecraft
    else if (type == "Spacecraft" || type == "Formation")
-      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
+      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name, createDefault);
    
    // Handle AxisSystem
    else if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
@@ -1082,7 +1082,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    //======================================================================
    
    if (type == "Spacecraft") 
-      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);
+      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name, createDefault);
    
    else if (type == "Formation") 
       obj = (GmatBase*)theModerator->CreateSpacecraft(type, name);

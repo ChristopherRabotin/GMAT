@@ -111,7 +111,8 @@ protected:
    static const Integer MAX_SUN_ORBITERS;
 
    // objects
-   GmatBase* CreateObject(const std::string &objType, const std::string &objName);
+   GmatBase* CreateObject(const std::string &objType, const std::string &objName,
+                          bool createDefault = false);
    GmatBase* GetObject(const std::string &name);
    void UpdateGuiItem(GmatTree::ItemType itemType);
 

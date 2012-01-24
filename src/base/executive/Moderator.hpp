@@ -167,7 +167,8 @@ public:
 
    // Spacecraft
    SpaceObject* CreateSpacecraft(const std::string &type,
-                                 const std::string &name);
+                                 const std::string &name,
+                                 bool createDefault = false);
    SpaceObject* GetSpacecraft(const std::string &name);
    std::string GetSpacecraftNotInFormation();
    

@@ -2327,12 +2327,14 @@ CelestialBody* Moderator::GetCelestialBody(const std::string &name)
  *
  * @param <type> object type
  * @param <name> object name
+ * @param <createDefault> set this to true if default spacecraft to be created
  *
  * @return spacecraft object pointer
  */
 //------------------------------------------------------------------------------
 SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
-                                         const std::string &name)
+                                         const std::string &name,
+                                         bool createDefault)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
@@ -2372,6 +2374,12 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
          // Set internal and default CoordinateSystem
          obj->SetInternalCoordSystem(theInternalCoordSystem);
          obj->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+         // Set coordinate system pointer if creating default spacecraft probably
+         // from the GUI. We don't want to go through state conversion if creating
+         // from the script. This will fix bug 2526 (LOJ: 2012.01.24)
+         if (createDefault)
+            obj->SetRefObject(GetCoordinateSystem("EarthMJ2000Eq"),
+                              Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
       }
       
       // Manage it if it is a named Spacecraft

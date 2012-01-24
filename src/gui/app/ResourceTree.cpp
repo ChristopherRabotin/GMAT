@@ -610,19 +610,30 @@ void ResourceTree::UpdateVariable()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* CreateObject(const std::string &objType, const std::string &objName)
+// GmatBase* CreateObject(const std::string &objType, const std::string &objName, ...)
 //------------------------------------------------------------------------------
-GmatBase* ResourceTree::CreateObject(const std::string &objType, const std::string &objName)
+/**
+ * Calls GuiInterpreter to create an object
+ *
+ * @param objType  Type of the object to be created
+ * @param objName  Name of the object to be created
+ * @param createDefault  Set this flag to true if default object to be created [false]
+ */
+//------------------------------------------------------------------------------
+GmatBase* ResourceTree::CreateObject(const std::string &objType,
+                                     const std::string &objName,
+                                     bool createDefault)
 {
    #ifdef DEBUG_CREATE_OBJECT
    MessageInterface::ShowMessage
-      ("ResourceTree::CreateObject() entered, objType='%s', objName='%s'\n",
-       objType.c_str(), objName.c_str());
+      ("ResourceTree::CreateObject() entered, objType='%s', objName='%s', "
+       "createDefault=%d\n", objType.c_str(), objName.c_str(), createDefault);
    #endif
    
    try
    {
-      GmatBase *obj = theGuiInterpreter->CreateObject(objType, objName);
+      // Create default object
+      GmatBase *obj = theGuiInterpreter->CreateObject(objType, objName, 1, createDefault);
       return obj;
    }
    catch (BaseException &be)
@@ -2524,7 +2535,7 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("Spacecraft", 1);
-   GmatBase *obj = CreateObject("Spacecraft", newName);
+   GmatBase *obj = CreateObject("Spacecraft", newName, true);
 
    if (obj != NULL)
    {
