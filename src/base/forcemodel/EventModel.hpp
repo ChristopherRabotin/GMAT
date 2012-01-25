@@ -33,7 +33,9 @@ class EventLocator;
  * The EventModel class is a container class that takes a collection of
  * EventLocator objects, accesses the contained EventFunctions, and generates
  * derivative data for each EventFunction for use by GMAT's propagation
- * subsystem.
+ * subsystem.  The EventLocator objects are collected into a vector in the
+ * Sandbox and passed into the ODEModel that manages the EventModel.  The 
+ * ODEModel passes that vector into the EventModel during initialization.
  */
 class EventModel: public PhysicalModel
 {

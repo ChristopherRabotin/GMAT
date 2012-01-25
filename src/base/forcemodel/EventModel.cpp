@@ -29,6 +29,15 @@
 //#define DEBUG_INIT
 //#define DEBUG_OBJECT_LIFE
 
+//-----------------------------------------------------------------------------
+// EventModel(const std::string &nomme)
+//-----------------------------------------------------------------------------
+/**
+ *  Default constructor
+ *
+ *  @param nomme The name of the instance being created
+ */
+//-----------------------------------------------------------------------------
 EventModel::EventModel(const std::string &nomme) :
    PhysicalModel        (Gmat::PHYSICAL_MODEL, "EventModel", nomme)
 {
@@ -40,6 +49,13 @@ EventModel::EventModel(const std::string &nomme) :
    #endif
 }
 
+//-----------------------------------------------------------------------------
+// ~EventModel()
+//-----------------------------------------------------------------------------
+/**
+ *  Destructor
+ */
+//-----------------------------------------------------------------------------
 EventModel::~EventModel()
 {
    #ifdef DEBUG_OBJECT_LIFE
@@ -47,6 +63,15 @@ EventModel::~EventModel()
    #endif
 }
 
+//-----------------------------------------------------------------------------
+// EventModel(const EventModel & em)
+//-----------------------------------------------------------------------------
+/**
+ *  Copy constructor
+ *
+ *  @param em The EventModel being copied into this one.
+ */
+//-----------------------------------------------------------------------------
 EventModel::EventModel(const EventModel & em) :
    PhysicalModel        (em),
    events               (em.events),
@@ -60,38 +85,85 @@ EventModel::EventModel(const EventModel & em) :
    #endif
 }
 
+//-----------------------------------------------------------------------------
+// EventModel& operator=(const EventModel & em)
+//-----------------------------------------------------------------------------
+/**
+ *  Assignment operator
+ *
+ *  @param em The EventModel providing parameters for this one
+ *
+ *  @return This EventModel, configured to match the input model
+ */
+//-----------------------------------------------------------------------------
 EventModel& EventModel::operator=(const EventModel & em)
 {
    if (this != &em)
    {
       PhysicalModel::operator=(em);
 
-      events          = em.events;
-      functionCounts  = em.functionCounts;
-      eventStarts     = em.eventStarts;
-      eventAssociates = em.eventAssociates;
+      // Note that events is a pointer.  This should still be okay, because
+      // events points to the EventLocator buffer in the Sandbox; if the 
+      // pointer is set, we'll preserve it here, but clear the other buffers.
+      events = em.events;
+
+      functionCounts.clear();
+      eventStarts.clear();
+      eventAssociates.clear();
    }
 
    return *this;
 }
 
 
+//-----------------------------------------------------------------------------
+// GmatBase* Clone() const
+//-----------------------------------------------------------------------------
+/**
+ *  Creates a copy (via the copy constructor) of this instance
+ *
+ *  @return The copy of the current instance
+ */
+//-----------------------------------------------------------------------------
 GmatBase* EventModel::Clone() const
 {
    return new EventModel(*this);
 }
 
 
+//-----------------------------------------------------------------------------
+// void SetEventLocators(std::vector<EventLocator*> *els)
+//-----------------------------------------------------------------------------
+/**
+ *  Set the EventLocator array
+ *
+ *  This method is called from the Sandbox during initialization, and sets the 
+ *  pointers to the EventLocator objects that are part of the current run.
+ *
+ *  @param els The vector of pointers to the EventLocators
+ */
+//-----------------------------------------------------------------------------
 void EventModel::SetEventLocators(std::vector<EventLocator*> *els)
 {
    events = els;
 }
 
+//-----------------------------------------------------------------------------
+// bool Initialize()
+//-----------------------------------------------------------------------------
+/**
+ *  Prepares teh EventModel for use in propagation
+ *
+ *  @return true on success, false on failure
+ */
+//-----------------------------------------------------------------------------
 bool EventModel::Initialize()
 {
    bool retval = PhysicalModel::Initialize();
 
    functionCounts.clear();
+   eventStarts.clear();
+   eventAssociates.clear();
    for (UnsignedInt i = 0; i < events->size(); ++i)
    {
       Integer fc = events->at(i)->GetFunctionCount();
@@ -111,6 +183,20 @@ bool EventModel::Initialize()
    return retval;
 }
 
+//-----------------------------------------------------------------------------
+// bool GetDerivatives(Real *state, Real dt, Integer order, const Integer id)
+//-----------------------------------------------------------------------------
+/**
+ *  Retrieves the derivative data from the EventModel
+ *
+ *  @param state The state data for the derivative calculations
+ *  @param dt The time offset for the derivative data
+ *  @param order The derivative order needed (1 for first order, etc)
+ *  @param id ID for the type of derivative requested; unused here.
+ *
+ *  @return true on success, false on failure
+ */
+//-----------------------------------------------------------------------------
 bool EventModel::GetDerivatives(Real *state, Real dt, Integer order, const Integer id)
 {
    bool retval = false;
@@ -132,6 +218,7 @@ bool EventModel::GetDerivatives(Real *state, Real dt, Integer order, const Integ
       {
          deriv[eventStarts[i]+j] = data[j*3+2];
       }
+      retval = true;
    }
 
    retval = true;
@@ -146,6 +233,18 @@ bool EventModel::GetDerivatives(Real *state, Real dt, Integer order, const Integ
    return retval;
 }
 
+//-----------------------------------------------------------------------------
+// bool SupportsDerivative(Gmat::StateElementId id)
+//-----------------------------------------------------------------------------
+/**
+ *  Method used to determine the is a given derivative type is supported
+ *
+ *  @param id The (enumerated) type that is being checked
+ *
+ *  @return true for supported types (EVENT_FUNCTION_STATE here), false if not 
+ *               supported
+ */
+//-----------------------------------------------------------------------------
 bool EventModel::SupportsDerivative(Gmat::StateElementId id)
 {
    if (id == Gmat::EVENT_FUNCTION_STATE)
@@ -153,6 +252,19 @@ bool EventModel::SupportsDerivative(Gmat::StateElementId id)
    return false;
 }
 
+//-----------------------------------------------------------------------------
+// bool SetStart(Gmat::StateElementId id, Integer index, Integer quantity)
+//-----------------------------------------------------------------------------
+/**
+ *  Sets the index of the first event function for a given event locator
+ *
+ * @param id State Element ID for the derivative type
+ * @param index Starting index in the state vector for this type of derivative
+ * @param quantity Number of objects that supply this type of data
+ *
+ *  @return
+ */
+//-----------------------------------------------------------------------------
 bool EventModel::SetStart(Gmat::StateElementId id, Integer index,
       Integer quantity)
 {
@@ -167,6 +279,17 @@ bool EventModel::SetStart(Gmat::StateElementId id, Integer index,
    return retval;
 }
 
+//-----------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//-----------------------------------------------------------------------------
+/**
+ *  Retrieves the names of reference objects for the model
+ *
+ *  @param type The type of object requested
+ *
+ *  @return The list of references
+ */
+//-----------------------------------------------------------------------------
 const StringArray& EventModel::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
@@ -188,6 +311,20 @@ const StringArray& EventModel::GetRefObjectNameArray(
 }
 
 
+//-----------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+//       const std::string &name)
+//-----------------------------------------------------------------------------
+/**
+ *  Sets the reference object pointer
+ *
+ *  @param obj The potential reference
+ *  @param The object's type
+ *  @param The object's name
+ *
+ *  @return true if the reference was set, false if not
+ */
+//-----------------------------------------------------------------------------
 bool EventModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       const std::string &name)
 {
