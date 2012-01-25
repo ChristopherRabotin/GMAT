@@ -221,13 +221,13 @@ bool SpecialCelestialPoint::SetSource(Gmat::PosVelSource pvSrc)
 
    if (pvSrc == posVelSrc) return true;
 
-   if (pvSrc == Gmat::TWO_BODY_PROPAGATION)
-   {
-      MessageInterface::ShowMessage(
-            "Two-Body Propagation not available for built-in SolarSystemBarycenter.  Using DE405 as source.\n");
-      posVelSrc = Gmat::DE405;
-   }
-   else
+//   if (pvSrc == Gmat::TWO_BODY_PROPAGATION)   // 2012/01/24 - wcs - disallowed for now
+//   {
+//      MessageInterface::ShowMessage(
+//            "Two-Body Propagation not available for built-in SolarSystemBarycenter.  Using DE405 as source.\n");
+//      posVelSrc = Gmat::DE405;
+//   }
+//   else
       posVelSrc           = pvSrc;
    return true;
 }

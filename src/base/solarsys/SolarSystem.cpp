@@ -906,29 +906,29 @@ void SolarSystem::CreatePlanetarySource(bool setDefault)
       FileManager *fm = FileManager::Instance();
 
       //initialize file names
-      thePlanetarySourceNames.push_back("N/A");  // TwoBodyPropagation has no file associated with it
+//      thePlanetarySourceNames.push_back("N/A");  // TwoBodyPropagation has no file associated with it // 2012/01.14 - wcs - disallowed for now
 
-      thePlanetarySourceNames.push_back(fm->GetFullPathname("DE405_FILE"));
+     thePlanetarySourceNames.push_back(fm->GetFullPathname("DE405_FILE"));
 	  try															// made change by TUAN NGUYEN
 	  {																// made change by TUAN NGUYEN
-		 std::string pathname = fm->GetFullPathname("DE421_FILE");	// made change by TUAN NGUYEN
+		  std::string pathname = fm->GetFullPathname("DE421_FILE");	// made change by TUAN NGUYEN
 	     thePlanetarySourceNames.push_back(pathname);				// made change by TUAN NGUYEN
 	  }																// made change by TUAN NGUYEN
 	  catch (UtilityException e)									// made change by TUAN NGUYEN
 	  {																// made change by TUAN NGUYEN
 		  // skip the settting DE421 when it is not defined in gmat_startup file									// made change by TUAN NGUYEN
-		  MessageInterface::ShowMessage("skip the settting DE421 when it is not defined in gmat_startup file...");	// made change by TUAN NGUYEN
+		  MessageInterface::ShowMessage("DE421 file location is not defined in gmat_startup file\n");	// made change by TUAN NGUYEN
 	  }																// made change by TUAN NGUYEN
 
 	  try															// made change by TUAN NGUYEN
 	  {																// made change by TUAN NGUYEN
-		 std::string pathname = fm->GetFullPathname("DE424_FILE");	// made change by TUAN NGUYEN
+		  std::string pathname = fm->GetFullPathname("DE424_FILE");	// made change by TUAN NGUYEN
 	     thePlanetarySourceNames.push_back(pathname);				// made change by TUAN NGUYEN
 	  }																// made change by TUAN NGUYEN
 	  catch (UtilityException e)									// made change by TUAN NGUYEN
 	  {																// made change by TUAN NGUYEN
 		  // skip the settting DE424 when it is not defined in gmat_startup file									// made change by TUAN NGUYEN
-		  MessageInterface::ShowMessage("skip the settting DE424 when it is not defined in gmat_startup file...");	// made change by TUAN NGUYEN
+		  MessageInterface::ShowMessage("DE424 file location is not defined in gmat_startup file\n");	// made change by TUAN NGUYEN
 	  }																// made change by TUAN NGUYEN
 
       if (spiceAvailable)
@@ -1127,14 +1127,15 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
    // create planetary ephem file if non-analytic
    for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
    {
-      if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION])
-      {
-            thePlanetarySourcePriority[Gmat::TWO_BODY_PROPAGATION] = HIGHEST_PRIORITY - i;
-            isPlanetarySourceInUse[Gmat::TWO_BODY_PROPAGATION] = true;
-            sourceTypeInUse = Gmat::TWO_BODY_PROPAGATION;
-            break;
-      }
-      else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405])
+//      if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION])
+//      {
+//            thePlanetarySourcePriority[Gmat::TWO_BODY_PROPAGATION] = HIGHEST_PRIORITY - i;
+//            isPlanetarySourceInUse[Gmat::TWO_BODY_PROPAGATION] = true;
+//            sourceTypeInUse = Gmat::TWO_BODY_PROPAGATION;
+//            break;
+//      }                     // 2012.01.24 - wcs - disallow for now
+//      else
+         if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405])
       {
          #ifdef DEBUG_SS_PLANETARY_FILE
          MessageInterface::
@@ -1232,10 +1233,10 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
       #endif
       switch (sourceTypeInUse)
       {
-      case Gmat::TWO_BODY_PROPAGATION:
-         if (SetSource(Gmat::TWO_BODY_PROPAGATION))
-            retCode = 1;
-         break;
+//      case Gmat::TWO_BODY_PROPAGATION:  // 2012.01.24 - wcs - disallow for now
+//         if (SetSource(Gmat::TWO_BODY_PROPAGATION))
+//            retCode = 1;
+//         break;
       case Gmat::DE405:
          if (SetSource(Gmat::DE405))
             if (SetSourceFile(theDefaultDeFile))
@@ -1276,12 +1277,13 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
 
       for (unsigned int i=0; i<theTempFileList.size(); i++)
       {
-         if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION])
-         {
-            if (thePlanetarySourcePriority[Gmat::TWO_BODY_PROPAGATION] > 0)
-               thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION]);
-         }
-         else if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405])
+//         if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION]) // 2012.01.24 - wcs - disallow for now
+//         {
+//            if (thePlanetarySourcePriority[Gmat::TWO_BODY_PROPAGATION] > 0)
+//               thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION]);
+//         }
+//         else
+            if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405])
          {
             if (thePlanetarySourcePriority[Gmat::DE405] > 0)
                thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE405]);
@@ -1783,6 +1785,17 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
             (Integer) pvSrc, (Gmat::POS_VEL_SOURCE_STRINGS[pvSrc]).c_str());
    #endif
 
+   std::string srcStr = "";
+   for (Integer ii = 0; ii < Gmat::PosVelSourceCount; ii++)
+      if (pvSrc == ii)
+      {
+         srcStr = Gmat::POS_VEL_SOURCE_STRINGS[ii];
+         break;
+      }
+   if (srcStr == "")
+      throw SolarSystemException("Error setting source for Solar System - unknown source\n");
+
+   pvSrcForAll = pvSrc;
    // Set the source flag on all of the default bodies
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
@@ -1801,17 +1814,6 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
       if ((spi->second)->SetSource(pvSrc) == false)  return false;
       ++spi;
    }
-
-   pvSrcForAll = pvSrc;
-   std::string srcStr = "";
-   for (Integer ii = 0; ii < Gmat::PosVelSourceCount; ii++)
-      if (pvSrc == ii)
-      {
-         srcStr = Gmat::POS_VEL_SOURCE_STRINGS[ii];
-         break;
-      }
-   if (srcStr == "")
-      throw SolarSystemException("Error setting source for Solar System - unknown source\n");
 
    theCurrentPlanetarySource = srcStr;
 
@@ -2521,9 +2523,9 @@ MessageInterface::ShowMessage
    if (id == EPHEMERIS_SOURCE)
    {
 	  // set source:
-      SetSource(value);				// theCurrentPlanetarySource is set to the value
-      // Get the current source index:												// made change by TUAN NGUYEN
-      int sourceindex;																// made change by TUAN NGUYEN
+     SetSource(value);				// theCurrentPlanetarySource is set to the value
+     // Get the current source index:												// made change by TUAN NGUYEN
+     int sourceindex;																// made change by TUAN NGUYEN
 	  for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)						// made change by TUAN NGUYEN
 	  {																				// made change by TUAN NGUYEN
 		  if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == value)					// made change by TUAN NGUYEN
@@ -3073,7 +3075,7 @@ void SolarSystem::SetDefaultPlanetarySource()
    thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421]);			// made change by TUAN NGUYEN
    thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424]);			// made change by TUAN NGUYEN
 
-   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION]);
+//   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION]); // 2012.01.24 - wcs - disallowed for now
    if (spiceAvailable) thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::SPICE]);
 
    SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);

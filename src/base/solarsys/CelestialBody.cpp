@@ -730,9 +730,9 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
    Real*     posVel = NULL;
    switch (posVelSrc)
    {
-      case Gmat::TWO_BODY_PROPAGATION :
-         state = ComputeTwoBody(atTime);
-         break;
+//      case Gmat::TWO_BODY_PROPAGATION :   // 2012.01.24 - wcs - disallow for now
+//         state = ComputeTwoBody(atTime);
+//         break;
       case Gmat::DE405 :
       case Gmat::DE421 :	// made changes by TUAN NGUYEN
 	  case Gmat::DE424 :	// made changes by TUAN NGUYEN
@@ -833,13 +833,12 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
    Rvector6 state;
    switch (posVelSrc)
    {
-      case Gmat::TWO_BODY_PROPAGATION :
-      {
-//         Rvector6 state;
-         state = ComputeTwoBody(atTime);
-         for (Integer i=0;i<6;i++) outState[i] = state[i];
-         break;
-      }
+//      case Gmat::TWO_BODY_PROPAGATION :  // 2012.01.24 - wcs - disallow for now
+//      {
+//         state = ComputeTwoBody(atTime);
+//         for (Integer i=0;i<6;i++) outState[i] = state[i];
+//         break;
+//      }
       case Gmat::DE405 :
          if (!theSourceFile)
          {
@@ -2195,9 +2194,12 @@ bool CelestialBody::SetRotationDataSource(Gmat::RotationDataSource src)
 bool CelestialBody::SetUserDefined(bool userDefinedBody)
 {
    // make sure source makes sense
-   if ((userDefinedBody) && ((posVelSrc == Gmat::DE405)									// made changes by TUAN NGUYEN
-	   ||(posVelSrc == Gmat::DE421)														// made changes by TUAN NGUYEN
-	   ||(posVelSrc == Gmat::DE424))) posVelSrc = Gmat::TWO_BODY_PROPAGATION;			// made changes by TUAN NGUYEN
+   if ((userDefinedBody) && ((posVelSrc == Gmat::DE405) ||(posVelSrc == Gmat::DE421 ||													// made changes by TUAN NGUYEN
+	    (posVelSrc == Gmat::DE424))))
+	{
+      posVelSrc = Gmat::SPICE;
+//      posVelSrc = Gmat::TWO_BODY_PROPAGATION; // 2012.01.24 - wcs - disallowed for now
+	}
    else if ((!userDefinedBody) && (!allowSpice) && (posVelSrc == Gmat::SPICE))
    {
 //	   posVelSrc = Gmat::DE405;															// made changes by TUAN NGUYEN
@@ -2545,13 +2547,13 @@ Real        CelestialBody::GetRealParameter(const Integer id) const
    // issues are updated in the Spacecraft/SpaceObject code.
    if (id == STATE_TIME)              return stateTime.Get();
    
-   if (id == TWO_BODY_INITIAL_EPOCH)  return twoBodyEpoch.Get();
-   if (id == TWO_BODY_SMA)            return twoBodyKepler[0];
-   if (id == TWO_BODY_ECC)            return twoBodyKepler[1];
-   if (id == TWO_BODY_INC)            return twoBodyKepler[2];
-   if (id == TWO_BODY_RAAN)           return twoBodyKepler[3];
-   if (id == TWO_BODY_AOP)            return twoBodyKepler[4];
-   if (id == TWO_BODY_TA)             return twoBodyKepler[5];
+//   if (id == TWO_BODY_INITIAL_EPOCH)  return twoBodyEpoch.Get();  // 2012.01.24 - wcs - disallowed for now
+//   if (id == TWO_BODY_SMA)            return twoBodyKepler[0];
+//   if (id == TWO_BODY_ECC)            return twoBodyKepler[1];
+//   if (id == TWO_BODY_INC)            return twoBodyKepler[2];
+//   if (id == TWO_BODY_RAAN)           return twoBodyKepler[3];
+//   if (id == TWO_BODY_AOP)            return twoBodyKepler[4];
+//   if (id == TWO_BODY_TA)             return twoBodyKepler[5];
 
    if (id == ORIENTATION_EPOCH)       return orientationEpoch.Get();
    if (id == SPIN_AXIS_RA_CONSTANT)   return orientation[0];
@@ -2584,6 +2586,12 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       MessageInterface::ShowMessage("In CB::SetReal with id = %d, and value = %.14f\n",
       id, value);
    #endif
+
+
+   // 2012.01/24 - wcs - two body propagation disallowed for now
+   std::string noTwoBody = "TwoBody propagation not currently allowed in GMAT.\n";
+   // 2012.01/24 - wcs - two body propagation disallowed for now
+
       
    //if (id == MASS)              return (mass               = value); // make sense?
    if (id == EQUATORIAL_RADIUS)
@@ -2607,82 +2615,84 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       hourAngle           = value;
       return true;
    }
-   if (id == TWO_BODY_INITIAL_EPOCH)
+   // 2012.01/24 - wcs - two body propagation disallowed for now
+   if ((id == TWO_BODY_INITIAL_EPOCH) || (id == TWO_BODY_SMA)  || (id == TWO_BODY_ECC) ||
+       (id == TWO_BODY_INC)           || (id == TWO_BODY_RAAN) || (id == TWO_BODY_AOP) ||
+       (id == TWO_BODY_TA))
    {
-//      if (SetAnalyticEpoch(A1Mjd(value)))
-      if (SetTwoBodyEpoch(A1Mjd(value)))
-      {
-         newTwoBody          = true;
-         return true;
-      }
-      else return false;
+      throw SolarSystemException(noTwoBody);
    }
-   if (id == TWO_BODY_SMA)
-   {
-      tmpKepl[0] = value;
-//      if (SetAnalyticElements(tmpKepl)) 
-      if (SetTwoBodyElements(tmpKepl)) 
-      {
-         newTwoBody          = true;
-         return true;
-      }
-      else return false;
-   }
-   if (id == TWO_BODY_ECC)
-   {
-      tmpKepl[1] = value;
-//      if (SetAnalyticElements(tmpKepl)) 
-      if (SetTwoBodyElements(tmpKepl)) 
-      {
-         newTwoBody          = true;
-         return true;
-      }
-      else return false;
-   }
-   if (id == TWO_BODY_INC)
-   {
-      tmpKepl[2] = value;
-//      if (SetAnalyticElements(tmpKepl)) 
-      if (SetTwoBodyElements(tmpKepl)) 
-      {
-         newTwoBody          = true;
-         return true;
-      }
-      else return false;
-   }
-   if (id == TWO_BODY_RAAN)
-   {
-      tmpKepl[3] = value;
-//      if (SetAnalyticElements(tmpKepl)) 
-      if (SetTwoBodyElements(tmpKepl)) 
-      {
-         newTwoBody          = true;
-         return true;
-      }
-      else return false;
-   }
-   if (id == TWO_BODY_AOP)
-   {
-      tmpKepl[4] = value;
-//      if (SetAnalyticElements(tmpKepl)) 
-      if (SetTwoBodyElements(tmpKepl)) 
-      {
-         newTwoBody          = true;
-         return true;
-      }
-      else return false;
-   }
-   if (id == TWO_BODY_TA)
-   {
-      tmpKepl[5] = value;
-//      if (SetAnalyticElements(tmpKepl)) 
-      if (SetTwoBodyElements(tmpKepl)) 
-      {
-         newTwoBody          = true;
-         return true;
-      }
-      else return false;
-   }
+   // 2012.01/24 - wcs - two body propagation disallowed for now
+
+//   if (id == TWO_BODY_INITIAL_EPOCH)
+//   {
+//      if (SetTwoBodyEpoch(A1Mjd(value)))
+//      {
+//         newTwoBody          = true;
+//         return true;
+//      }
+//      else return false;
+//   }
+//   if (id == TWO_BODY_SMA)
+//   {
+//      tmpKepl[0] = value;
+//      if (SetTwoBodyElements(tmpKepl))
+//      {
+//         newTwoBody          = true;
+//         return true;
+//      }
+//      else return false;
+//   }
+//   if (id == TWO_BODY_ECC)
+//   {
+//      tmpKepl[1] = value;
+//      if (SetTwoBodyElements(tmpKepl))
+//      {
+//         newTwoBody          = true;
+//         return true;
+//      }
+//      else return false;
+//   }
+//   if (id == TWO_BODY_INC)
+//   {
+//      tmpKepl[2] = value;
+//      if (SetTwoBodyElements(tmpKepl))
+//      {
+//         newTwoBody          = true;
+//         return true;
+//      }
+//      else return false;
+//   }
+//   if (id == TWO_BODY_RAAN)
+//   {
+//      tmpKepl[3] = value;
+//      if (SetTwoBodyElements(tmpKepl))
+//      {
+//         newTwoBody          = true;
+//         return true;
+//      }
+//      else return false;
+//   }
+//   if (id == TWO_BODY_AOP)
+//   {
+//      tmpKepl[4] = value;
+//      if (SetTwoBodyElements(tmpKepl))
+//      {
+//         newTwoBody          = true;
+//         return true;
+//      }
+//      else return false;
+//   }
+//   if (id == TWO_BODY_TA)
+//   {
+//      tmpKepl[5] = value;
+//      if (SetTwoBodyElements(tmpKepl))
+//      {
+//         newTwoBody          = true;
+//         return true;
+//      }
+//      else return false;
+//   }
 
    // for now, don't allow user to modify orientation parameters for default bodies
    if (userDefined)
@@ -2836,7 +2846,6 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
 {
    if (id == BODY_TYPE)             return Gmat::BODY_TYPE_STRINGS[bodyType];
    if (id == POS_VEL_SOURCE)        return Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc];
-//   if (id == ANALYTIC_METHOD)       return Gmat::TWO_BODY_METHOD_STRINGS[analyticMethod];
    if (id == SOURCE_FILENAME)       return sourceFilename;
    if (id == SOURCE_FILE)           return sourceFilename;
 
@@ -2847,8 +2856,8 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
       return atmModel->GetTypeName();
    }
    if (id == CENTRAL_BODY)          return theCentralBodyName;
-   if (id == TWO_BODY_DATE_FORMAT)  return twoBodyFormat;
-   if (id == TWO_BODY_STATE_TYPE)   return twoBodyStateType;
+//   if (id == TWO_BODY_DATE_FORMAT)  return twoBodyFormat; // 2012.01.24 - wcs - two body propagation disallowed for now
+//   if (id == TWO_BODY_STATE_TYPE)   return twoBodyStateType;
    if (id == ROTATION_DATA_SRC)     return Gmat::ROTATION_DATA_SOURCE_STRINGS[rotationSrc];
 
    if (id == ORIENTATION_DATE_FORMAT)  return orientationDateFormat;
@@ -2890,6 +2899,11 @@ bool CelestialBody::SetStringParameter(const Integer id,
       ("CelestialBody::SetStringP:: id = %d (%s), value = %s\n",
        id, idString.c_str(), value.c_str());
    #endif
+
+   // 2012.01/24 - wcs - two body propagation disallowed for now
+   std::string noTwoBody = "TwoBody propagation not currently allowed in GMAT.\n";
+   // 2012.01/24 - wcs - two body propagation disallowed for now
+
    int i;
    if (id == BODY_TYPE)
    {
@@ -2969,43 +2983,51 @@ bool CelestialBody::SetStringParameter(const Integer id,
       theCentralBodyName = value;
       return true;
    }
-   if (id == TWO_BODY_DATE_FORMAT)
+
+   // 2012.01/24 - wcs - two body propagation disallowed for now
+   if ((id == TWO_BODY_DATE_FORMAT) || (id == TWO_BODY_STATE_TYPE))
    {
-      #ifdef DEBUG_TWO_BODY
-         MessageInterface::ShowMessage(
-         "In CB::SetString (TWO_BODY_DATE_FORMAT) with id = %d, and value = %s\n",
-         id, value.c_str());
-      #endif
-      if (value != "TAIModJulian")
-      {
-         SolarSystemException sse;
-         sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
-                        PARAMETER_TEXT[TWO_BODY_DATE_FORMAT - SpacePointParamCount].c_str(),
-                        "TAIModJulian");
-         throw sse;
-      }
-      twoBodyFormat = value;
-      return true;
+      throw SolarSystemException(noTwoBody);
    }
-   if (id == TWO_BODY_STATE_TYPE)
-   {
-      #ifdef DEBUG_TWO_BODY
-         MessageInterface::ShowMessage(
-         "In CB::SetString (TWO_BODY_STATE_TYPE) with id = %d, and value = %s\n",
-         id, value.c_str());
-      #endif
-      if (value != "Keplerian")
-      {
-         SolarSystemException sse;
-         sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
-                        PARAMETER_TEXT[TWO_BODY_STATE_TYPE - SpacePointParamCount].c_str(),
-                        "Keplerian");
-         
-         throw sse;
-      }
-      twoBodyStateType = value;
-      return true;
-   }
+   // 2012.01/24 - wcs - two body propagation disallowed for now
+
+   //   if (id == TWO_BODY_DATE_FORMAT)
+//   {
+//      #ifdef DEBUG_TWO_BODY
+//         MessageInterface::ShowMessage(
+//         "In CB::SetString (TWO_BODY_DATE_FORMAT) with id = %d, and value = %s\n",
+//         id, value.c_str());
+//      #endif
+//      if (value != "TAIModJulian")
+//      {
+//         SolarSystemException sse;
+//         sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+//                        PARAMETER_TEXT[TWO_BODY_DATE_FORMAT - SpacePointParamCount].c_str(),
+//                        "TAIModJulian");
+//         throw sse;
+//      }
+//      twoBodyFormat = value;
+//      return true;
+//   }
+//   if (id == TWO_BODY_STATE_TYPE)
+//   {
+//      #ifdef DEBUG_TWO_BODY
+//         MessageInterface::ShowMessage(
+//         "In CB::SetString (TWO_BODY_STATE_TYPE) with id = %d, and value = %s\n",
+//         id, value.c_str());
+//      #endif
+//      if (value != "Keplerian")
+//      {
+//         SolarSystemException sse;
+//         sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+//                        PARAMETER_TEXT[TWO_BODY_STATE_TYPE - SpacePointParamCount].c_str(),
+//                        "Keplerian");
+//
+//         throw sse;
+//      }
+//      twoBodyStateType = value;
+//      return true;
+//   }
    
    if (id == ROTATION_DATA_SRC)
    {
@@ -3535,6 +3557,17 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
    if (id == SC_CLOCK_SPICE_KERNEL_NAME)  return true;
    if (id == FRAME_SPICE_KERNEL_NAME)     return true;  // for now
 
+   // 2012.01.24 - wcs - disallow TWO_BODY_PROPAGATION for now
+   if ((id == TWO_BODY_DATE_FORMAT)   || (id == TWO_BODY_STATE_TYPE) ||
+       (id == TWO_BODY_INITIAL_EPOCH) || (id == TWO_BODY_SMA)        ||
+       (id == TWO_BODY_ECC)           || (id == TWO_BODY_INC)        ||
+       (id == TWO_BODY_RAAN)          || (id == TWO_BODY_AOP)        ||
+       (id == TWO_BODY_TA) )
+   {
+      return true;
+   }
+   // 2012.01.24 - wcs - disallow TWO_BODY_PROPAGATION for now
+
    // leap second file is set on the Solar System, not on each celestial body
 
    return SpacePoint::IsParameterReadOnly(id);
@@ -3638,22 +3671,22 @@ bool CelestialBody::IsParameterEqualToDefault(const Integer id) const
 //   {
 //      return (default_twoBodyStateType == twoBodyStateType);
 //   }
-   if (id == TWO_BODY_INITIAL_EPOCH)
-   {
-      #ifdef DEBUG_CB_CLOAKING_EPOCH
-            MessageInterface::ShowMessage(
-                  "In CB::IsParameterEqualToDefault (%s), twoBody epoch,  time %12.10f == time %12.10f ?  %s\n",
-                  instanceName.c_str(), default_twoBodyEpoch.Get(), twoBodyEpoch.Get(),
-                  (GmatMathUtil::IsEqual(default_twoBodyEpoch.Get(),twoBodyEpoch.Get())? "TRUE" : "FALSE"));
-      #endif
-      return (default_twoBodyEpoch == twoBodyEpoch);
-//      return GmatMathUtil::IsEqual(default_twoBodyEpoch.Get(),twoBodyEpoch.Get());
-   }
-   if ((id == TWO_BODY_SMA)  || (id == TWO_BODY_ECC) || (id == TWO_BODY_INC) ||
-       (id == TWO_BODY_RAAN) || (id == TWO_BODY_AOP) || (id == TWO_BODY_TA) )
-   {
-      return (default_twoBodyKepler == twoBodyKepler); // do we need an IsEqual for vectors?
-   }
+//   if (id == TWO_BODY_INITIAL_EPOCH)
+//   {
+//      #ifdef DEBUG_CB_CLOAKING_EPOCH
+//            MessageInterface::ShowMessage(
+//                  "In CB::IsParameterEqualToDefault (%s), twoBody epoch,  time %12.10f == time %12.10f ?  %s\n",
+//                  instanceName.c_str(), default_twoBodyEpoch.Get(), twoBodyEpoch.Get(),
+//                  (GmatMathUtil::IsEqual(default_twoBodyEpoch.Get(),twoBodyEpoch.Get())? "TRUE" : "FALSE"));
+//      #endif
+//      return (default_twoBodyEpoch == twoBodyEpoch);
+////      return GmatMathUtil::IsEqual(default_twoBodyEpoch.Get(),twoBodyEpoch.Get());
+//   }
+//   if ((id == TWO_BODY_SMA)  || (id == TWO_BODY_ECC) || (id == TWO_BODY_INC) ||
+//       (id == TWO_BODY_RAAN) || (id == TWO_BODY_AOP) || (id == TWO_BODY_TA) )
+//   {
+//      return (default_twoBodyKepler == twoBodyKepler); // do we need an IsEqual for vectors?
+//   }
 //   if (id == ORIENTATION_DATE_FORMAT)
 //   {
 //      return (default_orientationDateFormat == orientationDateFormat);
@@ -3789,17 +3822,17 @@ bool CelestialBody::SaveParameterAsDefault(const Integer id)
 //      default_twoBodyStateType = twoBodyStateType;
 //      return true;
 //   }
-   if (id == TWO_BODY_INITIAL_EPOCH)
-   {
-      default_twoBodyEpoch = twoBodyEpoch;
-      return true;
-   }
-   if ((id == TWO_BODY_SMA)  || (id == TWO_BODY_ECC) || (id == TWO_BODY_INC) ||
-       (id == TWO_BODY_RAAN) || (id == TWO_BODY_AOP) || (id == TWO_BODY_TA) )
-   {
-      default_twoBodyKepler = twoBodyKepler;
-      return true;
-   }
+//   if (id == TWO_BODY_INITIAL_EPOCH)
+//   {
+//      default_twoBodyEpoch = twoBodyEpoch;
+//      return true;
+//   }
+//   if ((id == TWO_BODY_SMA)  || (id == TWO_BODY_ECC) || (id == TWO_BODY_INC) ||
+//       (id == TWO_BODY_RAAN) || (id == TWO_BODY_AOP) || (id == TWO_BODY_TA) )
+//   {
+//      default_twoBodyKepler = twoBodyKepler;
+//      return true;
+//   }
 //   if (id == ORIENTATION_DATE_FORMAT)
 //   {
 //      default_orientationDateFormat = orientationDateFormat;

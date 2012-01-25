@@ -48,8 +48,9 @@ namespace Gmat
    // possible sources of position and velocity data for celestial bodies
    enum PosVelSource
    {
-      TWO_BODY_PROPAGATION = 0,	// made changes by TUAN NGUYEN
-      DE405,
+//      TWO_BODY_PROPAGATION = 0,	// made changes by TUAN NGUYEN
+//      DE405,
+      DE405 = 0,          // 2012.01.24 - wcs - disallowed for now
       DE421,					// made changes by TUAN NGUYEN
 	  DE424,					// made changes by TUAN NGUYEN
       SPICE,
@@ -58,7 +59,7 @@ namespace Gmat
 
    const std::string POS_VEL_SOURCE_STRINGS[PosVelSourceCount] =
    {
-      "TwoBodyPropagation",
+//      "TwoBodyPropagation",
       "DE405",
       "DE421",					// made changes by TUAN NGUYEN
 	  "DE424",					// made changes by TUAN NGUYEN
