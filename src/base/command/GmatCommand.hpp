@@ -109,7 +109,9 @@ public:
                                   const std::string objName = "");
    
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
-   virtual void         SetupSummary(const std::string &csName, bool entireMission = false, bool physicsOnly = false);
+   virtual void         SetupSummary(const std::string &csName,
+                                     bool entireMission = false,
+                                     bool physicsOnly = false);
    virtual void         SetSummaryName(const std::string &sumName);
    virtual std::string  GetSummaryName();
    virtual void         SetSolarSystem(SolarSystem *ss);

@@ -67,6 +67,8 @@ public:
    virtual GmatCommand*    GetNext();
    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
    virtual void            SetTransientForces(std::vector<PhysicalModel*> *tf);
+   virtual void            SetEventLocators(std::vector<EventLocator*> *els);
+
    virtual bool            Initialize();
    virtual bool            TakeAction(const std::string &action, 
                                       const std::string &actionData = "");

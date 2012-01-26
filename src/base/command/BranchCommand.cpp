@@ -268,6 +268,42 @@ void BranchCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
 
 
 //------------------------------------------------------------------------------
+// void SetEventLocators(std::vector<EventLocator*> *els)
+//------------------------------------------------------------------------------
+/**
+ * Sets up the event location vector for a run.
+ *
+ * @param els The vector of event locators in the current Sandbox
+ */
+//------------------------------------------------------------------------------
+void BranchCommand::SetEventLocators(std::vector<EventLocator*> *els)
+{
+   #ifdef DEBUG_EVENTLOCATION
+      MessageInterface::ShowMessage("Setting event locator pointer <%p> with "
+            "%d members: ", els, (els != NULL ? els->size() : 0));
+   #endif
+   GmatCommand *currentPtr;
+
+   std::vector<GmatCommand*>::iterator node;
+
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      currentPtr = *node;
+      while (currentPtr != this)
+      {
+         currentPtr->SetEventLocators(els);
+         currentPtr = currentPtr->GetNext();
+         if (currentPtr == NULL)
+            throw CommandException("Branch command \"" + generatingString +
+                                   "\" was not terminated!");
+      }
+   }
+
+   MessageInterface::ShowMessage("\n");
+}
+
+
+//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
