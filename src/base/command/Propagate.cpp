@@ -3809,6 +3809,7 @@ bool Propagate::Execute()
 //
 //            publisher->Publish(this, streamID, pubdata, dim+1);
 
+            CheckForEvents();
             break;
          }
 
