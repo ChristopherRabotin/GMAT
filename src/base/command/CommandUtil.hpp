@@ -30,7 +30,7 @@ namespace GmatCommandUtil
    GmatCommand GMAT_API *GetLastCommand(GmatCommand *cmd);
    GmatCommand GMAT_API *GetNextCommand(GmatCommand *cmd);
    GmatCommand GMAT_API *GetPreviousCommand(GmatCommand *from, GmatCommand *cmd);
-   GmatCommand GMAT_API *GetMatchingEnd(GmatCommand *cmd);
+   GmatCommand GMAT_API *GetMatchingEnd(GmatCommand *cmd, bool getMatchingElse = false);
    GmatCommand GMAT_API *GetParentCommand(GmatCommand *top, GmatCommand *cmd);
    GmatCommand GMAT_API *GetSubParent(GmatCommand *brCmd, GmatCommand *cmd);
    GmatCommand GMAT_API *RemoveCommand(GmatCommand *seq, GmatCommand *cmd);

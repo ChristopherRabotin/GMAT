@@ -192,7 +192,7 @@ GmatCommand* GmatCommandUtil::GetPreviousCommand(GmatCommand *from,
  * @return  Matching end command, NULL if matching end command not found
  */
 //------------------------------------------------------------------------------
-GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd)
+GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd, bool getMatchingElse)
 {
    if (cmd == NULL)
       return NULL;
@@ -258,6 +258,9 @@ GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd)
                if (child->GetTypeName() == "Else")
                {
                   elseFound = true;
+                  if (getMatchingElse)
+                     break;
+                  
                   branch++;
                }
                
