@@ -98,6 +98,7 @@
 //#define DEBUG_BUILD_TREE_ITEM 1
 //#define DEBUG_VIEW_COMMANDS 1
 //#define DEBUG_COMMAND_COUNTER
+#define DEBUG_RENAME
 
 //------------------------------
 // event tables for wxWindows
@@ -1135,18 +1136,24 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    
    wxString cmdTypeName = cmd->GetTypeName().c_str();
    wxString nodeName = cmd->GetName().c_str();
-   
    wxTreeItemId node;
+   MissionTreeItemData *parentItem = (MissionTreeItemData *) GetItemData(parent);
+   GmatCommand *parentCmd = parentItem->GetCommand();
+   wxString parentName = parentCmd->GetName();
    
    // compose node name
    if (cmdTypeName.Contains("End"))
    {
-      if (nodeName.Trim() == "")
+      if (parentName.Trim() != "")
+         nodeName.Printf("End %s", parentName.c_str());
+      else if (nodeName.Trim() == "")
          nodeName.Printf("%s%d", cmdTypeName.c_str(), cmdCount);
    }
    else if (cmdTypeName.Contains("Else"))
    {
-      if (nodeName.Trim() == "")
+      if (parentName.Trim() != "")
+         nodeName.Printf("Else %s", parentName.c_str());
+      else if (nodeName.Trim() == "")
          nodeName.Printf("%s%d", cmdTypeName.c_str(), cmdCount);
    }
    else
@@ -1173,7 +1180,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
       ("MissionTree::AppendCommand() cmdTypeName='%s', nodeName='%s'\n",
        cmdTypeName.c_str(), nodeName.c_str());
    #endif
-
+   
    node = AppendItem(parent, nodeName, icon, -1,
                      new MissionTreeItemData(nodeName, type, nodeName, cmd));
 
@@ -1738,7 +1745,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                           new MissionTreeItemData(elseName, GmatTree::ELSE_CONTROL,
                                                   elseName, elseCmd));
             
-            wxString endName = "End" + cmdTypeName;
+            wxString endName = "End " + cmdTypeName;
             wxString tmpName;
             tmpName.Printf("%s%d", endName.c_str(), cmdCount);
 				endCmd->SetSummaryName(tmpName.c_str());
@@ -1747,7 +1754,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          }
          else
          {
-            wxString endName = "End" + cmdTypeName;
+            wxString endName = "End " + cmdTypeName;
             wxString tmpName;
             tmpName.Printf("%s%d", endName.c_str(), cmdCount);
 				endCmd->SetSummaryName(tmpName.c_str());
@@ -3227,15 +3234,21 @@ void MissionTree::OnRename(wxCommandEvent &event)
        mLastClickPoint.x, mLastClickPoint.y);
    #endif
    
-   mLastClickPoint.y += 100;
-   ViewTextDialog renameDlg(this, wxT("Rename"), true, mLastClickPoint,
-                            wxSize(100, -1), wxDEFAULT_DIALOG_STYLE);
-   renameDlg.AppendText(cmdName);
-   renameDlg.ShowModal();
+   // LOJ: 2012.01.27
+   // Changed to use wxGetTextFromUser() to be consistent with ResoureTree rename
+   //mLastClickPoint.y += 100;
+   //ViewTextDialog renameDlg(this, wxT("Rename"), true, true, mLastClickPoint,
+   //                         wxSize(100, -1), wxDEFAULT_DIALOG_STYLE);
+   //renameDlg.AppendText(cmdName);
+   //renameDlg.ShowModal();
    
-   if (renameDlg.HasTextChanged())
+   wxString newName =
+      wxGetTextFromUser(wxT("Enter new command name:"), wxT("Rename"), cmdName, this);
+   
+   if (newName != "")
+   //if (renameDlg.HasTextChanged())
    {
-      wxString newName = renameDlg.GetText();
+      //wxString newName = renameDlg.GetText();
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
          ("  Setting command name to '%s'\n", newName.c_str());
@@ -3245,6 +3258,62 @@ void MissionTree::OnRename(wxCommandEvent &event)
       item->SetTitle(newName);
       cmd->SetName(newName.c_str());
       cmd->SetSummaryName(newName.c_str());
+      
+      // If renamed Branch command find matching EndBranch and rename it also
+      // (LOJ: 2010.01.26 for bug GMT-208 fix)
+      if (cmd->IsOfType("BranchCommand"))
+      {
+         GmatCommand *branchEnd = GmatCommandUtil::GetMatchingEnd(cmd);
+         if (branchEnd != NULL)
+         {
+            wxString endItemText =  branchEnd->GetSummaryName();
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("   branchEnd=<%p><%s>'%s'\n", branchEnd, branchEnd->GetName().c_str(),
+                endItemText);
+            #endif
+            
+            // Use summary name for finding the child
+            wxTreeItemId endId = FindChild(currId, endItemText, true);
+            if (endId.IsOk())
+            {
+               #ifdef DEBUG_RENAME
+               MessageInterface::ShowMessage("   endId='%s'\n", GetItemText(endId).c_str());
+               #endif
+               MissionTreeItemData *endItem = (MissionTreeItemData *) GetItemData(currId);
+               wxString newEndName = "End " + newName;
+               SetItemText(endId, newEndName);
+               endItem->SetName(newEndName);
+               endItem->SetTitle(newEndName);
+               //branchEnd->SetName(newEndName.c_str());
+               branchEnd->SetSummaryName(newEndName.c_str());
+               
+               // Handle Else node
+               wxTreeItemId elseId = FindElse(currId);
+               if (elseId.IsOk())
+               {
+                  #ifdef DEBUG_RENAME
+                  MessageInterface::ShowMessage("   elseId='%s'\n", GetItemText(elseId).c_str());
+                  #endif
+                  // Get matching Else command
+                  GmatCommand *branchElse = GmatCommandUtil::GetMatchingEnd(cmd, true);
+                  MissionTreeItemData *elseItem = (MissionTreeItemData *) GetItemData(currId);
+                  wxString newElseName = "Else " + newName;
+                  SetItemText(elseId, newElseName);
+                  elseItem->SetName(newElseName);
+                  elseItem->SetTitle(newElseName);
+                  //branchElse->SetName(newElseName.c_str());
+                  branchElse->SetSummaryName(newElseName.c_str());
+               }
+            }
+            else
+            {
+               MessageInterface::ShowMessage
+                  ("**** INTERNAL ERROR **** BranchEnd of '%s' not found\n",
+                   newName.c_str());
+            }
+         }
+      }
    }
    
    //=================================================================
@@ -4045,18 +4114,22 @@ int MissionTree::GetCommandCounter(const wxString &cmd)
 
 
 //------------------------------------------------------------------------------
-// wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd)
+// wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmdName,
+//                        bool useSummaryName)
 //------------------------------------------------------------------------------
 /*
  * Finds a item from the parent node of the tree. It compares item command name
- * and cmd for finding cmd.
+ * and cmdName for finding the item.
  *
- * @param <parentId> Parent item id
- * @param <cmd> Comand string to find
+ * @param  parentId  Parent item id
+ * @param  cmdName   Comand name to find
+ * @param  useSummaryName  If this flag is set it will use summary name to find
+ *                         the item [false]
  *
  */
 //------------------------------------------------------------------------------
-wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
+wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd,
+                                    bool useSummaryName)
 {
    #if DEBUG_MISSION_TREE_FIND
    MessageInterface::ShowMessage
@@ -4079,6 +4152,9 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
          GmatCommand *currCmd = currItem->GetCommand();
          wxString currCmdType = currCmd->GetTypeName().c_str();
          wxString currCmdName = currCmd->GetName().c_str();
+         if (useSummaryName)
+            currCmdName = currCmd->GetSummaryName().c_str();
+         
          childText = GetItemText(childId);
          
          #if DEBUG_MISSION_TREE_FIND > 1

@@ -192,7 +192,8 @@ private:
    int  GetMenuId(const wxString &cmd, ActionType action);
    
    GmatTree::MissionIconType GetIconId(const wxString &cmd);
-   wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd);
+   wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmdName,
+                          bool useSummaryName = false);
    wxTreeItemId FindElse(wxTreeItemId parentId);
    bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType);
    
