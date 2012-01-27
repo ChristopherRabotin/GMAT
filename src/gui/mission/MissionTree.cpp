@@ -98,7 +98,7 @@
 //#define DEBUG_BUILD_TREE_ITEM 1
 //#define DEBUG_VIEW_COMMANDS 1
 //#define DEBUG_COMMAND_COUNTER
-#define DEBUG_RENAME
+//#define DEBUG_RENAME
 
 //------------------------------
 // event tables for wxWindows
@@ -1142,6 +1142,8 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    wxString parentName = parentCmd->GetName();
    
    // compose node name
+   // Changed node name of End and Else to append parent's name
+   // (LOJ: 2010.01.26 for bug GMT-208 fix)
    if (cmdTypeName.Contains("End"))
    {
       if (parentName.Trim() != "")
@@ -3258,6 +3260,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
       item->SetTitle(newName);
       cmd->SetName(newName.c_str());
       cmd->SetSummaryName(newName.c_str());
+      theGuiInterpreter->ConfigurationChanged(cmd, true);
       
       // If renamed Branch command find matching EndBranch and rename it also
       // (LOJ: 2010.01.26 for bug GMT-208 fix)
