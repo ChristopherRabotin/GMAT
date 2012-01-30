@@ -1121,6 +1121,11 @@ bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens)
 {
+   #ifdef DEBUG_TOREAL
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ToReal() entered, str='%s'\n", str.c_str());
+   #endif
+   
    if (str == "")
       return false;
 
@@ -1135,7 +1140,21 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
 
    if (str2.length() == 0)
       return false;
-
+   
+   // Handle infinite number first, '1.#INF' for VC++ compiler,
+   // 'inf' for GCC compiler (LOJ: 2012.01.30)
+   if (str2 == "1.#INF" || str2 == "inf")
+   {
+      value = atof(str2.c_str());
+      
+      #ifdef DEBUG_TOREAL
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::ToReal() returning true, value=%f\n", value);
+      #endif
+      
+      return true;
+   }
+   
    // If first character is not '+', '-', '.' and digit, it's false
    if (str2[0] != '+' && str2[0] != '-' && !isdigit(str2[0]) && str2[0] != '.')
       return false;
@@ -1173,7 +1192,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
 
          continue;
       }
-
+      
       if (!isdigit(str2[i]))
       {
          // Handle scientific notation
@@ -1185,11 +1204,21 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
              (str2[i-1] == 'e' || str2[i-1] == 'E'))
             continue;
 
+         #ifdef DEBUG_TOREAL
+         MessageInterface::ShowMessage
+            ("   GmatStringUtil::ToReal(%s) return false\n", str2.c_str());
+         #endif
          return false;
       }
    }
-
+   
    value = atof(str2.c_str());
+   
+   #ifdef DEBUG_TOREAL
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ToReal() returning true, value=%f\n", value);
+   #endif
+   
    return true;
 }
 
