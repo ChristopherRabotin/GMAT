@@ -91,11 +91,15 @@ GmatBase* Subtract::Clone() const
 //------------------------------------------------------------------------------
 void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   #if DEBUG_SUBTRACT
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
-      ("Subtract::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
+      ("Subtract::GetOutputInfo() this=<%p><%s><%s> entered\n", this, GetTypeName().c_str(),
        GetName().c_str());
    #endif
+   
+   if (!leftNode || !rightNode)
+      throw MathException("Subtract() - Missing input arguments in \"" + 
+                          GetName() + "\"");
    
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
@@ -106,7 +110,7 @@ void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
    // Get the type(Real or Matrix), # rows and # columns of the right node
    rightNode->GetOutputInfo(type2, row2, col2);
    
-   #if DEBUG_SUBTRACT
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("Subtract::GetOutputInfo() type1=%d, row1=%d, col1=%d, type2=%d, "
        "row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
@@ -136,6 +140,12 @@ void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
       rowCount = row1;
       colCount = col1;
    }
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Subtract::GetOutputInfo() this=<%p><%s><%s> leaving\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
 }
 
 
@@ -158,8 +168,9 @@ bool Subtract::ValidateInputs()
    Integer type2, row2, col2; // Right node
    bool retval = false;
    
-   if (!leftNode)
-      throw MathException("Subtract() - Missing input arguments");
+   if (!leftNode || !rightNode)
+      throw MathException("Subtract() - Missing input arguments in \"" + 
+                          GetName() + "\"");
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
