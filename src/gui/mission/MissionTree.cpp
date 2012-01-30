@@ -1139,7 +1139,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    wxTreeItemId node;
    MissionTreeItemData *parentItem = (MissionTreeItemData *) GetItemData(parent);
    GmatCommand *parentCmd = parentItem->GetCommand();
-   wxString parentName = parentCmd->GetName();
+   wxString parentName = (parentCmd->GetName()).c_str();
    
    // compose node name
    // Changed node name of End and Else to append parent's name
@@ -3269,7 +3269,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
          GmatCommand *branchEnd = GmatCommandUtil::GetMatchingEnd(cmd);
          if (branchEnd != NULL)
          {
-            wxString endItemText =  branchEnd->GetSummaryName();
+            wxString endItemText =  (branchEnd->GetSummaryName()).c_str();
             #ifdef DEBUG_RENAME
             MessageInterface::ShowMessage
                ("   branchEnd=<%p><%s>'%s'\n", branchEnd, branchEnd->GetName().c_str(),
