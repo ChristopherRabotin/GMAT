@@ -132,8 +132,12 @@ protected:
    std::string currComments;
    
    /// for meta data
+   Real        metaDataStart;
+   Real        metaDataStop;
    std::string metaDataStartStr;
    std::string metaDataStopStr;
+   Integer     writeMetaDataOption;
+   std::ofstream::pos_type metaDataPosition;
    
    Integer     interpolationOrder;
    Integer     initialCount;
@@ -152,12 +156,16 @@ protected:
    Real        lastEpochWrote;
    Real        attEpoch;
    Real        maneuverEpochInDays;
+   Real        eventEpochInSecs;
    Real        currState[6];
    Real        attQuat[4];
    RealArray   epochsOnWaiting;
    
    bool        firstTimeWriting;
+   bool        firstTimeMetaData;
+   bool        saveMetaDataStart;
    bool        writingNewSegment;
+   bool        continuousSegment;
    bool        useStepSize;
    bool        writeOrbit;
    bool        writeAttitude;
@@ -207,14 +215,16 @@ protected:
    void         HandleSpkOrbitData(bool writeData);
    
    // Interpolation
-   void         RestartInterpolation(const std::string &comments = "", bool writeAfterData = true);
+   void         RestartInterpolation(const std::string &comments = "",
+                                     bool writeAfterData = true);
    bool         IsTimeToWrite(Real epochInSecs, const Real state[6]);
    void         WriteOrbit(Real reqEpochInSecs, const Real state[6]);
    void         WriteOrbitAt(Real reqEpochInSecs, const Real state[6]);
    void         GetAttitude();
    void         WriteAttitude();
-   void         FinishUpWriting();
-   void         ProcessEpochsOnWaiting(bool checkFinalEpoch = false);
+   void         FinishUpWriting(bool canFinalize = true);
+   void         ProcessEpochsOnWaiting(bool checkFinalEpoch = false,
+                                       bool checkEventEpoch = false);
    bool         SetEpoch(Integer id, const std::string &value,
                          const StringArray &allowedValues);
    bool         SetStepSize(Integer id, const std::string &value,

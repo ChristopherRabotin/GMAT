@@ -51,6 +51,7 @@
 //#define DEBUG_EPHEMFILE_WRITE
 //#define DEBUG_EPHEMFILE_RESTART
 //#define DEBUG_EPHEMFILE_COMMENTS
+//#define DEBUG_EPHEMFILE_METADATA
 //#define DEBUG_EPHEMFILE_FINISH
 //#define DEBUG_EPHEMFILE_SC_PROPERTY_CHANGE
 //#define DEBUG_EPHEMFILE_TEXT
@@ -143,8 +144,12 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    prevPropName        (""),
    currPropName        (""),
    currComments        (""),
+   metaDataStart       (-999.999),
+   metaDataStop        (-999.999),
    metaDataStartStr    (""),
    metaDataStopStr     (""),
+   writeMetaDataOption (0),
+   metaDataPosition    (0),
    interpolationOrder  (7),
    initialCount        (0),
    waitCount           (0),
@@ -160,8 +165,12 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    prevProcTime        (-999.999),
    lastEpochWrote      (-999.999),
    maneuverEpochInDays (-999.999),
+   eventEpochInSecs    (-999.999),
    firstTimeWriting    (true),
+   firstTimeMetaData   (true),
+   saveMetaDataStart   (true),
    writingNewSegment   (true),
+   continuousSegment   (false),
    useStepSize         (false),
    writeOrbit          (false),
    writeAttitude       (false),
@@ -308,8 +317,12 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    prevPropName        (ef.prevPropName),
    currPropName        (ef.currPropName),
    currComments        (ef.currComments),
+   metaDataStart       (ef.metaDataStart),
+   metaDataStop        (ef.metaDataStop),
    metaDataStartStr    (ef.metaDataStartStr),
    metaDataStopStr     (ef.metaDataStopStr),
+   writeMetaDataOption (0),
+   metaDataPosition    (0),
    interpolationOrder  (ef.interpolationOrder),
    initialCount        (ef.initialCount),
    waitCount           (ef.waitCount),
@@ -325,7 +338,12 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    prevProcTime        (ef.prevProcTime),
    lastEpochWrote      (ef.lastEpochWrote),
    maneuverEpochInDays (ef.maneuverEpochInDays),
+   eventEpochInSecs    (ef.eventEpochInSecs),
+   firstTimeWriting    (ef.firstTimeWriting),
+   firstTimeMetaData   (ef.firstTimeMetaData),
+   saveMetaDataStart   (ef.saveMetaDataStart),
    writingNewSegment   (ef.writingNewSegment),
+   continuousSegment   (ef.continuousSegment),
    useStepSize         (ef.useStepSize),
    writeOrbit          (ef.writeOrbit),
    writeAttitude       (ef.writeAttitude),
@@ -374,8 +392,12 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    prevPropName        = ef.prevPropName;
    currPropName        = ef.currPropName;
    currComments        = ef.currComments;
+   metaDataStart       = ef.metaDataStart;
+   metaDataStop        = ef.metaDataStop;
    metaDataStartStr    = ef.metaDataStartStr;
    metaDataStopStr     = ef.metaDataStopStr;
+   writeMetaDataOption = 0;
+   metaDataPosition    = 0;
    interpolationOrder  = ef.interpolationOrder;
    initialCount        = ef.initialCount;
    waitCount           = ef.waitCount;
@@ -391,7 +413,12 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    prevProcTime        = ef.prevProcTime;
    lastEpochWrote      = ef.lastEpochWrote;
    maneuverEpochInDays = ef.maneuverEpochInDays;
+   eventEpochInSecs    = ef.eventEpochInSecs;
+   firstTimeWriting    = ef.firstTimeWriting;
+   firstTimeMetaData   = ef.firstTimeMetaData;
+   saveMetaDataStart   = ef.saveMetaDataStart;
    writingNewSegment   = ef.writingNewSegment;
+   continuousSegment   = ef.continuousSegment;
    useStepSize         = ef.useStepSize;
    writeOrbit          = ef.writeOrbit;
    writeAttitude       = ef.writeAttitude;
@@ -586,7 +613,11 @@ bool EphemerisFile::Initialize()
          ("FileFormat \"" + fileFormat + "\" is not valid");
    
    // Initialize data
+   writeMetaDataOption = 0;
+   metaDataPosition = 0;
    firstTimeWriting = true;
+   firstTimeMetaData = true;
+   saveMetaDataStart = true;
    prevPropName = "";
    InitializeData();
    maneuversHandled.clear();
@@ -1318,7 +1349,10 @@ void EphemerisFile::InitializeData()
    prevEpochInSecs     = -999.999;
    prevProcTime        = -999.999;
    lastEpochWrote      = -999.999;
+   eventEpochInSecs    = -999.999;
    writingNewSegment   = true;
+   continuousSegment   = false;
+   saveMetaDataStart   = true;
    
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
@@ -1638,7 +1672,16 @@ void EphemerisFile::HandleCcsdsOrbitData(bool writeData)
          WriteHeader();
       
       if (writingNewSegment)
+      {
+         //WriteComments("********** NEW SEGMENT **********");
+         #ifdef DEBUG_EPHEMFILE_WRITE
+         DebugWriteTime("********** WRITING NEW SEGMENT AT ", currEpochInSecs, false, 2);
+         #endif
+         
+         writeMetaDataOption = 1;
+         saveMetaDataStart = true;
          WriteCcsdsOrbitDataSegment();
+      }
       
       if (fileType == CCSDS_AEM && (firstTimeWriting || writingNewSegment))
          WriteString("DATA_START\n");
@@ -1716,6 +1759,10 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
       ("===== EphemerisFile::RestartInterpolation() entered, comments='%s', "
        "writeAfterData=%d\n", comments.c_str(), writeAfterData);
    #endif
+   
+   // Write data for the rest of time on waiting, pass false to indicate that is not
+   // the end of data receive.
+   FinishUpWriting(false);
    
    // For CCSDS data, comments are written from
    // CcsdsEphemerisFile::WriteRealCcsdsOrbitDataSegment(), so just set comments here
@@ -2011,18 +2058,23 @@ void EphemerisFile::WriteAttitude()
 
 
 //------------------------------------------------------------------------------
-// void FinishUpWriting()
+// void FinishUpWriting(bool canFinalize)
 //------------------------------------------------------------------------------
 /*
- * Finishes up writing data at epochs on waiting
+ * Finishes up writing data at epochs on waiting.
+ *
+ * @param  canFinalize  If this flag is true it will process epochs on waiting
+ *                      and write or overwrite metadata depends on the metadata
+ *                      write option
  */
 //------------------------------------------------------------------------------
-void EphemerisFile::FinishUpWriting()
+void EphemerisFile::FinishUpWriting(bool canFinalize)
 {
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage
-      ("EphemerisFile::FinishUpWriting() entered, isFinalized=%d\n   lastEpochWrote= %.15f, "
-       "currEpochInSecs=%.15f\n", isFinalized, lastEpochWrote, currEpochInSecs);
+      ("EphemerisFile::FinishUpWriting() entered, canFinalize=%d, isFinalized=%d, "
+       "continuousSegment=%d\n   lastEpochWrote= %.15f, currEpochInSecs=%.15f\n",
+       canFinalize, isFinalized, continuousSegment, lastEpochWrote, currEpochInSecs);
    if (lastEpochWrote != -999.999)
       DebugWriteTime("   last    ", lastEpochWrote);
    if (currEpochInSecs != -999.999)
@@ -2045,7 +2097,7 @@ void EphemerisFile::FinishUpWriting()
          if (interpolator != NULL)
          {
             interpolator->SetForceInterpolation(true);
-            ProcessEpochsOnWaiting(true);
+            ProcessEpochsOnWaiting(true, !canFinalize);
             interpolator->SetForceInterpolation(false);
             
             // When running more than 5 days or so, the last epoch to process is a few
@@ -2072,21 +2124,46 @@ void EphemerisFile::FinishUpWriting()
             }
             
             // Write last data received if not written yet(Do attitude later)
-            if (fileType == CCSDS_OEM && useStepSize)
+            if (canFinalize)
             {
-               if (currEpochInSecs > lastEpochWrote + 1.0e-6)
+               if (fileType == CCSDS_OEM && useStepSize)
                {
-                  #ifdef DEBUG_EPHEMFILE_FINISH
-                  MessageInterface::ShowMessage
-                     ("===> %.15f > %.15f so writing final data\n", currEpochInSecs,
-                      lastEpochWrote);
-                  #endif
-                  WriteOrbit(currEpochInSecs, currState);
+                  if (currEpochInSecs > lastEpochWrote + 1.0e-6)
+                  {
+                     #ifdef DEBUG_EPHEMFILE_FINISH
+                     MessageInterface::ShowMessage
+                        ("===> %.15f > %.15f so writing final data\n", currEpochInSecs,
+                         lastEpochWrote);
+                     #endif
+                     WriteOrbit(currEpochInSecs, currState);
+                  }
                }
             }
          }
          
          writeCommentAfterData = false;
+         
+         //WriteComments("********** FINAL SEGMENT **********");
+         #ifdef DEBUG_EPHEMFILE_WRITE
+         DebugWriteTime("********** WRITING FINAL SEGMENT AT ", currEpochInSecs, false, 2);
+         #endif
+         if (canFinalize)
+         {
+            writeMetaDataOption = 2;
+            saveMetaDataStart = true;
+            if (continuousSegment)
+               saveMetaDataStart = false;
+         }
+         else
+         {
+            writeMetaDataOption = 0;
+            if (firstTimeMetaData)
+               writeMetaDataOption = 2; // Overwrite previous meta data
+            saveMetaDataStart = true;
+            if (continuousSegment)
+               saveMetaDataStart = false;
+         }
+         
          WriteCcsdsOrbitDataSegment();
          
          #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
@@ -2113,7 +2190,8 @@ void EphemerisFile::FinishUpWriting()
          }
       }
       
-      isFinalized = true;
+      if (canFinalize)
+         isFinalized = true;
    }
    
    #ifdef DEBUG_EPHEMFILE_FINISH
@@ -2133,12 +2211,12 @@ void EphemerisFile::FinishUpWriting()
  *
  */
 //------------------------------------------------------------------------------
-void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch)
+void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEventEpoch)
 {
    #ifdef DEBUG_EPHEMFILE_ORBIT
    MessageInterface::ShowMessage
-      ("EphemerisFile::ProcessEpochsOnWaiting() entered, checkFinalEpoch=%d\n",
-       checkFinalEpoch);
+      ("EphemerisFile::ProcessEpochsOnWaiting() entered, checkFinalEpoch=%d, "
+       "checkEventEpoch=%d\n", checkFinalEpoch, checkEventEpoch);
    DebugWriteTime("   currEpochInSecs, ", currEpochInSecs);
    DebugWriteEpochsOnWaiting("   ");
    #endif
@@ -2151,6 +2229,10 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch)
    {
       reqEpochInSecs = *iter;
       
+      #ifdef DEBUG_EPHEMFILE_ORBIT
+      DebugWriteTime("   reqEpochInSecs ", reqEpochInSecs);
+      #endif
+      
       // Do not write after the final epoch
       if (checkFinalEpoch)
       {
@@ -2159,6 +2241,22 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch)
             #ifdef DEBUG_EPHEMFILE_ORBIT
             MessageInterface::ShowMessage
                ("   =====> reqEpochInSecs %.15f > currEpochInSecs %.15f so exiting while "
+                "loop\n", reqEpochInSecs, currEpochInSecs);
+            #endif
+            
+            break;
+         }
+      }
+      
+      // We don't want write epoch that matches event epoch which the beginning epoch
+      // of the new segment
+      if (checkEventEpoch)
+      {
+         if (reqEpochInSecs >= eventEpochInSecs)
+         {
+            #ifdef DEBUG_EPHEMFILE_ORBIT
+            MessageInterface::ShowMessage
+               ("   =====> reqEpochInSecs %.15f >= eventEpochInSecs %.15f so exiting while "
                 "loop\n", reqEpochInSecs, currEpochInSecs);
             #endif
             
@@ -2200,7 +2298,8 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch)
                
                #ifdef DEBUG_EPHEMFILE_ORBIT
                MessageInterface::ShowMessage
-                  ("   =====> Forcing to interpolate at epoch %.15f\n", reqEpochInSecs);
+                  ("   =====> Forcing to interpolate at epoch %.15f, initialCount=%d\n",
+                   reqEpochInSecs, initialCount);
                #endif
                
                // Since time should be in order, force process epochs on waiting.
@@ -2455,11 +2554,21 @@ void EphemerisFile::BufferOrbitData(Real epochInDays, const Real state[6])
    #endif
    
    // if buffer is full, dump the data
-   if (a1MjdArray.size() > MAX_SEGMENT_SIZE)
+   if (a1MjdArray.size() >= MAX_SEGMENT_SIZE)
    {
       if (fileType == CCSDS_OEM)
       {
+         writeMetaDataOption = 0;
+         saveMetaDataStart = false;
+         continuousSegment = true;
+         if (firstTimeMetaData)
+            saveMetaDataStart = true;
+         ////WriteComments("********** CONTINUOUS SEGMENT **********");
+         #ifdef DEBUG_EPHEMFILE_WRITE
+         DebugWriteTime("********** WRITING CONTINUOUS SEGMENT AT ", epochInDays, true, 2);
+         #endif
          WriteCcsdsOrbitDataSegment();
+         firstTimeMetaData = false;
       }
       else if (fileType == SPK_ORBIT)
       {
@@ -2627,6 +2736,10 @@ bool EphemerisFile::OpenCcsdsEphemerisFile()
 //------------------------------------------------------------------------------
 void EphemerisFile::WriteCcsdsHeader()
 {
+   #ifdef DEBUG_EPHEMFILE_HEADER
+   MessageInterface::ShowMessage("EphemerisFile::WriteCcsdsHeader() entered\n");
+   #endif
+   
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
    std::string creationTime = GmatTimeUtil::FormatCurrentTime(2);
    std::string originator = "GMAT USER";
@@ -2645,16 +2758,41 @@ void EphemerisFile::WriteCcsdsHeader()
    #endif
    
    WriteRealCcsdsHeader();
+   
+   #ifdef DEBUG_EPHEMFILE_HEADER
+   MessageInterface::ShowMessage("EphemerisFile::WriteCcsdsHeader() leaving\n");
+   #endif
 }
 
 
 //------------------------------------------------------------------------------
 // void WriteCcsdsOrbitDataSegment()
 //------------------------------------------------------------------------------
+/**
+ * Writes CCSDS orbit data segment
+ */
+//------------------------------------------------------------------------------
 void EphemerisFile::WriteCcsdsOrbitDataSegment()
 {
+   #ifdef DEBUG_EPHEMFILE_CCSDS
+   MessageInterface::ShowMessage
+      ("=====> WriteCcsdsOrbitDataSegment() entered, writeMetaDataOption=%d, "
+       "saveMetaDataStart=%d, firstTimeMetaData=%d, continuousSegment=%d\n",
+       writeMetaDataOption, saveMetaDataStart, firstTimeMetaData, continuousSegment);
+   #endif
+   
    if (a1MjdArray.empty())
    {
+      if (writeMetaDataOption == 1)
+      {
+         #ifdef DEBUG_EPHEMFILE_CCSDS
+         MessageInterface::ShowMessage("***** array is empty so writing dummy meta data time\n");
+         #endif
+         metaDataStartStr = "YYYY-MM-DDTHH:MM:SS.SSS";
+         metaDataStopStr = "YYYY-MM-DDTHH:MM:SS.SSS";
+         WriteCcsdsOemMetaData();
+      }
+      
       #ifdef DEBUG_EPHEMFILE_CCSDS
       MessageInterface::ShowMessage
          ("=====> WriteCcsdsOrbitDataSegment() leaving, array is empty\n");
@@ -2662,17 +2800,38 @@ void EphemerisFile::WriteCcsdsOrbitDataSegment()
       return;
    }
    
-   Real metaDataStart = (a1MjdArray.front())->GetReal();
-   Real metaDataStop  = (a1MjdArray.back())->GetReal();
-   metaDataStartStr = ToUtcGregorian(metaDataStart, true, 2);
+   //LOJ: 2012.01.25
+   // Made metaDataStart and metaDataStop member data
+   //Real metaDataStart = (a1MjdArray.front())->GetReal();
+   //Real metaDataStop  = (a1MjdArray.back())->GetReal();
+   if (saveMetaDataStart)
+   {
+      metaDataStart = (a1MjdArray.front())->GetReal();
+      metaDataStartStr = ToUtcGregorian(metaDataStart, true, 2);
+   }
+   metaDataStop  = (a1MjdArray.back())->GetReal();
    metaDataStopStr = ToUtcGregorian(metaDataStop, true, 2);
    
-   WriteCcsdsOemMetaData();
+   if (writeMetaDataOption == 1)
+   {
+      WriteCcsdsOemMetaData();
+      firstTimeMetaData = false;
+   }
    
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
    for (UnsignedInt i = 0; i < a1MjdArray.size(); i++)
       DebugWriteOrbit("In WriteCcsdsOrbitDataSegment:", a1MjdArray[i], stateArray[i]);
    #endif
+   
+   if (writeMetaDataOption == 2)
+   {
+      //dstream.seekp(83);
+      dstream.seekp(metaDataPosition, std::ios_base::beg);
+      
+      WriteCcsdsOemMetaData();
+      firstTimeMetaData = false;
+      dstream.seekp(0, std::ios_base::end);
+   }
    
    #ifdef DEBUG_EPHEMFILE_CCSDS
    MessageInterface::ShowMessage
@@ -2695,8 +2854,22 @@ void EphemerisFile::WriteCcsdsOrbitDataSegment()
 //------------------------------------------------------------------------------
 void EphemerisFile::WriteCcsdsOemMetaData()
 {
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage
+      ("EphemerisFile::WriteCcsdsOemMetaData() entered, firstTimeMetaData=%d\n",
+       firstTimeMetaData);
+   #endif
+   
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
-
+   
+   // save meta data position
+   metaDataPosition = dstream.tellp();
+   
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage
+      ("===> Setting metaDataPosition=%ld\n", (long)metaDataPosition);
+   #endif
+   
    std::string origin = "UNKNOWN";
    std::string csType = "UNKNOWN";
    std::string objId  = spacecraft->GetStringParameter("Id");
@@ -2725,10 +2898,26 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    ss << "INTERPOLATION_DEGREE = " << interpolationOrder << std::endl;
    ss << "META_STOP" << std::endl << std::endl;
    
-   WriteString(ss.str());
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage("   ==> Writing following META data:\n%s\n", ss.str().c_str());
    #endif
    
+   WriteString(ss.str());
+   
+   #else
+   
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage("   ==> No META data is written out\n");
+   #endif
+   
+   #endif
+
+   //LOJ: Why calling WriteRealCcsdsOemMetaData() here and in WriteCcsdsOrbitDataSegment()?
    WriteRealCcsdsOemMetaData();
+   
+   #ifdef DEBUG_EPHEMFILE_METADATA
+   MessageInterface::ShowMessage("EphemerisFile::WriteCcsdsOemMetaData() leaving\n");
+   #endif
 }
 
 
@@ -3161,6 +3350,16 @@ void EphemerisFile::ConvertState(Real epochInDays, const Real inState[6],
 //------------------------------------------------------------------------------
 // std::string ToUtcGregorian(Real epoch, bool inDays = false, Integer format = 1)
 //------------------------------------------------------------------------------
+/**
+ * Formats epoch in either in days or seconds to desired format.
+ *
+ * @param  epoch  Epoch in days or seconds
+ * @param  inDays  Flag indicating epoch is in days
+ * @param  format  Desired output format [1]
+ *                 1 = "01 Jan 2000 11:59:28.000"
+ *                 2 = "2000-01-01T11:59:28.000"
+ */
+//------------------------------------------------------------------------------
 std::string EphemerisFile::ToUtcGregorian(Real epoch, bool inDays, Integer format)
 {
    Real toMjd;
@@ -3194,6 +3393,17 @@ std::string EphemerisFile::ToUtcGregorian(Real epoch, bool inDays, Integer forma
 //------------------------------------------------------------------------------
 // void DebugWriteTime(const std::string &msg, Real epoch, bool inDays = false,
 //                     Integer format = 1)
+//------------------------------------------------------------------------------
+/**
+ * Writes debug output of time
+ *
+ * @param  msg  Message to write
+ * @param  epoch  Epoch in days or seconds
+ * @param  inDays  Flag indicating epoch is in days
+ * @param  format  Format of the time to be written out
+ *                 1 = "01 Jan 2000 11:59:28.000"
+ *                 2 = "2000-01-01T11:59:28.000"
+ */
 //------------------------------------------------------------------------------
 void EphemerisFile::DebugWriteTime(const std::string &msg, Real epoch, bool inDays,
                                    Integer format)
@@ -3730,12 +3940,14 @@ void EphemerisFile::HandleScPropertyChange(GmatBase *originator, Real epoch,
       ("EphemerisFile::HandleScPropertyChange() entered, originator=<%p>, "
        "epoch=%.15f, satName='%s', desc='%s'\n", originator, epoch, satName.c_str(),
        desc.c_str());
+   DebugWriteTime("   event epoch ", epoch, true);
    #endif
    
+   eventEpochInSecs = epoch * GmatTimeConstants::SECS_PER_DAY;
    std::string epochStr = ToUtcGregorian(epoch, true, 2);
    
    if (spacecraftName == satName)
-   {      
+   {
       // Restart interpolation
       RestartInterpolation("This block begins after spacecraft setting " +
                            desc + " at " + epochStr + "\n", true);
