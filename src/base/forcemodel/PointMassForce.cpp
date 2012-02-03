@@ -70,7 +70,7 @@
 
 //#define DEBUG_PMF_BODY 0
 //#define DEBUG_PMF_DERV 0
-
+//
 //#define DEBUG_FORCE_MODEL
 //#define DEBUG_FORCE_ORIGIN
 //#define DUMP_PLANET_DATA
@@ -296,7 +296,7 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
    #ifdef DEBUG_PMF_DERV
       MessageInterface::ShowMessage("Evaluating PointMassForce; "
          "state pointer = %d, time offset = %le, order = %d, id = %d "
-         "satCount = %d\n", state, dt, order, id, satCount);
+         "satCount = %d, epoch = %le\n", state, dt, order, id, satCount, theState->GetEpoch());
    #endif
    
    Integer i6, a6;
@@ -446,14 +446,14 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
       #endif
    
       #ifdef DEBUG_FORCE_MODEL
-         MessageInterface::ShowMessage(
-            "%s%s%s%16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10lf, %16.10lf, "
-            "%16.10lf%s%16.10le, %16.10le, %16.10le]\n",
-            "Point mass force for ", body->GetName().c_str(), " at epoch ", 
-            now.Get(), "\n   Sat position:  [", state[0], state[1], state[2],
-            "]\n   Body position: [", rv[cartIndex + 0], rv[cartIndex + 1], 
-            rv[cartIndex + 2], "]\n   Acceleration:  [", deriv[cartIndex + 3], 
-            deriv[cartIndex + 4], deriv[cartIndex + 5]);
+//         MessageInterface::ShowMessage(
+//            "%s%s%s%16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10lf, %16.10lf, "
+//            "%16.10lf%s%16.10le, %16.10le, %16.10le]\n",
+//            "Point mass force for ", body->GetName().c_str(), " at epoch ",
+//            now.Get(), "\n   Sat position:  [", state[0], state[1], state[2],
+//            "]\n   Body position: [", rv[cartIndex + 0], rv[cartIndex + 1],
+//            rv[cartIndex + 2], "]\n   Acceleration:  [", deriv[cartIndex + 3],
+//            deriv[cartIndex + 4], deriv[cartIndex + 5]);
       #endif
       if (fillSTM || fillAMatrix)
       {
