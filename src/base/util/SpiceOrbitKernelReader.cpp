@@ -216,8 +216,8 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
          getmsg_c(option, numChar, err);
          std::string errStr(err);
          std::string errmsg = "Error determining type of kernel \"";
-         errmsg += kernels.at(ii) + "\".  Message received from CSPICE is: ";
-         errmsg += errStr + "\n";
+         errmsg += kernels.at(ii) + "\".  Message received from CSPICE is: [";
+         errmsg += errStr + "]\n";
          reset_c();
          delete [] err;
          throw UtilityException(errmsg);
@@ -263,8 +263,8 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
                getmsg_c(option, numChar, err);
                std::string errStr(err);
                std::string errmsg = "Error determining coverage for SPK kernel \"";
-               errmsg += kernels.at(ii) + "\".  Message received from CSPICE is: ";
-               errmsg += errStr + "\n";
+               errmsg += kernels.at(ii) + "\".  Message received from CSPICE is: [";
+               errmsg += errStr + "]\n";
                reset_c();
                delete [] err;
                throw UtilityException(errmsg);
@@ -286,8 +286,8 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
                   getmsg_c(option, numChar, err);
                   std::string errStr(err);
                   std::string errmsg = "Error getting interval times for SPK kernel \"";
-                  errmsg += kernels.at(ii) + "\".  Message received from CSPICE is: ";
-                  errmsg += errStr + "\n";
+                  errmsg += kernels.at(ii) + "\".  Message received from CSPICE is: [";
+                  errmsg += errStr + "]\n";
                   reset_c();
                   delete [] err;
                   throw UtilityException(errmsg);
@@ -314,6 +314,13 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
       errmsg << "Error - no data available for body with NAIF ID " << forNaifId << " on specified SPK kernels\n";
       throw UtilityException(errmsg.str());
    }
+   #ifdef DEBUG_SPK_COVERAGE
+      else
+      {
+         MessageInterface::ShowMessage("Number of intervals found for body with NAIF ID %d =  %d\n",
+               forNaifId, (Integer) numInt);
+      }
+   #endif
 }
 
 
@@ -420,21 +427,23 @@ Rvector6 SpiceOrbitKernelReader::GetTargetState(const std::string &targetName,
 #endif
    if (failed_c())
    {
-//      ConstSpiceChar option[] = "SHORT"; // retrieve short error message, for now
-//      SpiceInt       numChar  = MAX_SHORT_MESSAGE;
-//      SpiceChar      err[MAX_SHORT_MESSAGE];
-      ConstSpiceChar option[] = "LONG"; // retrieve long error message, for now
-      SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
-      //SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
-      SpiceChar      *err = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
+      // Get the long message for later reporting, if appropriate
+      ConstSpiceChar option[]        = "LONG"; // retrieve long error message, for now
+      SpiceInt       numChar         = MAX_LONG_MESSAGE_VALUE;
+      SpiceChar      *err            = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
+      bool           reportLongError = true;
       getmsg_c(option, numChar, err);
-      std::string errStr(err);
-      std::string errmsg = "Error getting state for body \"";
-      errmsg += targetName + "\".  Message received from CSPICE is: ";
-      errmsg += errStr + "\n";
-      reset_c();
-      delete [] err;
-      throw UtilityException(errmsg);
+
+      if (reportLongError)
+      {
+         std::string errStr(err);
+         std::string errmsg = "Error getting state for body \"";
+         errmsg += targetName + "\".  Message received from CSPICE is: [";
+         errmsg += errStr + "]\n";
+         reset_c();
+         delete [] err;
+         throw UtilityException(errmsg);
+      }
    }
 
 

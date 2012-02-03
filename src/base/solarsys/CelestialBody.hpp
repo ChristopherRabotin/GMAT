@@ -159,6 +159,7 @@ public:
    
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
+   virtual const Real           GetFirstStateTime();
    virtual const Rvector6&      GetState(A1Mjd atTime);
    virtual const Rvector6&      GetState(Real atTime); 
    virtual void                 GetState(const A1Mjd &atTime, Real *outState);
@@ -402,6 +403,7 @@ protected:
    static const Real    TDot;
    static const Real    KEPLER_TOL;
    static const Integer KEPLER_MAX_ITERATIONS;
+   static const Real    DEFAULT_INITIAL_STATE_TIME;
    
    // body type of the body
    Gmat::BodyType           bodyType;

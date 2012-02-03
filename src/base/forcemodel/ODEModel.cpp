@@ -62,6 +62,7 @@
 
 #include <string.h> 
 #include <algorithm>    // for find()
+#include <sstream>
 
 
 //#define DEBUG_ODEMODEL
@@ -83,6 +84,7 @@
 //#define DUMP_TOTAL_DERIVATIVE
 //#define DEBUG_STM_AMATRIX_DERIVS
 //#define DEBUG_MU_MAP
+//#define DEBUG_PM_EPOCH
 
 
 //#ifndef DEBUG_MEMORY
@@ -226,6 +228,7 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    normType          (L2_DIFFERENCES),
    parametersSetOnce (false),
    centralBodyName   ("Earth"),
+   coverageStartDetermined (false),
    forceMembersNotInitialized (true),
    satCount          (0),
    stateStart        (-1),
@@ -314,6 +317,7 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    normType                   (fdf.normType),
    parametersSetOnce          (false),
    centralBodyName            (fdf.centralBodyName),
+   coverageStartDetermined    (fdf.coverageStartDetermined),
    forceMembersNotInitialized (true),
    satCount                   (0),
    stateStart                 (fdf.stateStart),
@@ -421,6 +425,8 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    centralBodyName     = fdf.centralBodyName;
    j2kBodyName         = fdf.j2kBodyName;
    
+   coverageStartDetermined = fdf.coverageStartDetermined;
+
    /// @note: Since the next three are global objects or reset by the Sandbox, 
    ///assignment works
    j2kBody             = fdf.j2kBody;
@@ -923,6 +929,10 @@ void ODEModel::UpdateSpaceObject(Real newEpoch)
 //------------------------------------------------------------------------------
 void ODEModel::UpdateFromSpaceObject()
 {
+   #ifdef DEBUG_ODEMODEL_EXE
+      MessageInterface::ShowMessage
+         ("ODEModel::UpdateFromSpaceObject() \n");
+   #endif
    // Update elements for each Formation
    for (UnsignedInt i = 0; i < stateObjects.size(); ++i)
       if (stateObjects[i]->IsOfType(Gmat::FORMATION))
@@ -1280,11 +1290,11 @@ bool ODEModel::Initialize()
          return false;
    }
 
-      #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Configuring for state of dimension %d\n",
-            dimension);
-      #endif
-      
+   #ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Configuring for state of dimension %d\n",
+         dimension);
+   #endif
+
    // rawState deallocated in PhysicalModel::Initialize() method so reallocate
    rawState = new Real[dimension];
    #ifdef DEBUG_MEMORY
@@ -1292,9 +1302,31 @@ bool ODEModel::Initialize()
       (rawState, "rawState", "ODEModel::Initialize()",
        "rawState = new Real[dimension]", this);
    #endif
-   
+
    memcpy(rawState, state->GetState(), dimension * sizeof(Real));
 
+   // update the starting time to the first available time for the origin.
+   // This is necessary because there may not be data for the force origin body
+   // at the default initial epoch (esp. if the source is SPK).
+   if (!coverageStartDetermined)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Determining start of coverage for body %s\n",
+               forceOrigin->GetName().c_str());
+      #endif
+      Real coverageStart = forceOrigin->GetFirstStateTime();
+      if (coverageStart > epoch)
+      {
+//         std::stringstream warn;
+//         warn << "Warning: Data for force origin " << forceOrigin->GetName() << " at epoch ";
+//         warn << epoch << " is not available.  Setting initial epoch to earliest time of available data, " << coverageStart << ".\n";
+//         MessageInterface::PopupMessage(Gmat::WARNING_, warn.str());
+         epoch = coverageStart;
+         state->SetEpoch(epoch);
+      }
+      coverageStartDetermined = true;
+   }
+      
    MoveToOrigin();
 
    // Variables used to set spacecraft parameters
@@ -1312,6 +1344,7 @@ bool ODEModel::Initialize()
          MessageInterface::ShowMessage
             ("ODEModel::Initialize() initializing object %s of type %s\n",
              name.c_str(), type.c_str());
+         MessageInterface::ShowMessage(" and the state epoch = %le\n", state->GetEpoch());
       #endif
       
       (*current)->SetDimension(dimension);
@@ -1873,6 +1906,10 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
             // Update local value for epoch
             epoch = parm;
             pm->SetRealParameter(PhysicalModel::EPOCH, parm);
+            #ifdef DEBUG_PM_EPOCH
+               MessageInterface::ShowMessage("ODEModel '%s', Member %s: epoch being set to %le (from sc %s)\n",
+                   GetName().c_str(), pm->GetTypeName().c_str(), parm, sat->GetName().c_str());
+            #endif
             
             if (((SpaceObject*)sat)->ParametersHaveChanged() ||
                 !parametersSetOnce)
@@ -2073,6 +2110,8 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       for (Integer i = 0; i < dimension-1; ++i)
          MessageInterface::ShowMessage("%le, ", state[i]);
       MessageInterface::ShowMessage("%le]\n", state[dimension - 1]);
+      MessageInterface::ShowMessage(" and epoch = %le]\n", epoch);
+      MessageInterface::ShowMessage("   dynamicProperties: %s\n", (dynamicProperties? "true" : "false"));
    #endif
 
    if (order > 2)
@@ -2130,6 +2169,7 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       for (Integer i = 0; i < dimension-1; ++i)
          MessageInterface::ShowMessage("%le, ", state[i]);
       MessageInterface::ShowMessage("%le]\n", state[dimension-1]);
+      MessageInterface::ShowMessage("in GetDeriv, epoch = %le\n", epoch);
    #endif
   
    PrepareDerivativeArray();
@@ -2782,8 +2822,17 @@ void ODEModel::SetSolarSystem(SolarSystem *ss)
       for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
            i != forceList.end(); ++i)
          (*i)->SetForceOrigin(forceOrigin);
+
+      coverageStartDetermined = false;
    }
 }
+
+void ODEModel::SetForceOrigin(CelestialBody* toBody)
+{
+    PhysicalModel::SetForceOrigin(toBody);
+    coverageStartDetermined = false;
+}
+
 
 //------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -3515,7 +3564,8 @@ std::string ODEModel::BuildForceNameString(PhysicalModel *force)
 void ODEModel::MoveToOrigin(Real newEpoch)
 {
 #ifdef DEBUG_REORIGIN
-   MessageInterface::ShowMessage("ODEModel::MoveToOrigin entered\n");
+   MessageInterface::ShowMessage("ODEModel::MoveToOrigin entered with newEpoch = %le\n", newEpoch);
+   MessageInterface::ShowMessage("      and epoch = %le\n", epoch);
 #endif
    
 #ifdef DEBUG_REORIGIN
@@ -3698,8 +3748,8 @@ void ODEModel::SetState(GmatState *gms)
    state = gms;
 
    #ifdef DEBUG_STATE
-      MessageInterface::ShowMessage("Setting state with dimension %d to\n   [",
-               state->GetSize());
+      MessageInterface::ShowMessage("Setting state with epoch %le and dimension %d to\n   [",
+               state->GetEpoch(), state->GetSize());
       for (Integer i = 0; i < state->GetSize()-1; ++i)
          MessageInterface::ShowMessage("%le, ", (*state)[i]);
       MessageInterface::ShowMessage("%le]\n", (*state)[state->GetSize()-1]);

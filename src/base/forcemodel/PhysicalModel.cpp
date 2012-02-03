@@ -97,6 +97,7 @@
 
 //#define PHYSICAL_MODEL_DEBUG_INIT
 //#define DEBUG_INITIALIZATION
+//#define DEBUG_PM_CONSTRUCT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -289,6 +290,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    else
       deriv = NULL;
    
+
    parameterCount = PhysicalModelParamCount;
 }
 
@@ -305,6 +307,12 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
       return *this;
 
    GmatBase::operator=(pm);
+   #ifdef DEBUG_PM_CONSTRUCT
+      MessageInterface::ShowMessage("Entering copy constructor for PM:  object name is: %s\n",
+            pm.GetName().c_str());
+      MessageInterface::ShowMessage("   epoch = %le\n", pm.epoch);
+      MessageInterface::ShowMessage("   epoch from state = %le\n", (pm.theState)->GetEpoch());
+   #endif
    
    /// @note: Since the next two are global objects, assignment works
    body        = pm.body;
@@ -686,7 +694,14 @@ void PhysicalModel::SetState(const Real * st)
 
 void PhysicalModel::SetState(GmatState * st)
 {
+   #ifdef PHYSICAL_MODEL_DEBUG_INIT
+      MessageInterface::ShowMessage(
+         "PhysicalModel::SetState(GmatState) called for %s<%s>\n",
+         typeName.c_str(), instanceName.c_str());
+      MessageInterface::ShowMessage("   and epoch = %le\n", st->GetEpoch());
+   #endif
    theState = st;
+   epoch    = st->GetEpoch(); // ***
    if (dimension != st->GetSize())
       MessageInterface::ShowMessage("Dimension mismatch!!!\n");
    if (modelState != NULL)

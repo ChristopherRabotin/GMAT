@@ -175,12 +175,14 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::STRING_TYPE,   //"TextureMapFileName"
 };
 
-const Real    CelestialBody::JD_EPOCH_2000_TCB     = GmatTimeConstants::JD_OF_J2000;
-const Real    CelestialBody::JD_EPOCH_2000_TT      = GmatTimeConstants::JD_OF_J2000; // @ todo Figure out JD_EPOCH_2000_TT
-const Real    CelestialBody::dDot                  = 1.0;
-const Real    CelestialBody::TDot                  = 1.0;
-const Real    CelestialBody::KEPLER_TOL            = 1.0e-08;
-const Integer CelestialBody::KEPLER_MAX_ITERATIONS = 50;
+const Real    CelestialBody::JD_EPOCH_2000_TCB          = GmatTimeConstants::JD_OF_J2000;
+const Real    CelestialBody::JD_EPOCH_2000_TT           = GmatTimeConstants::JD_OF_J2000; // @ todo Figure out JD_EPOCH_2000_TT
+const Real    CelestialBody::dDot                       = 1.0;
+const Real    CelestialBody::TDot                       = 1.0;
+const Real    CelestialBody::KEPLER_TOL                 = 1.0e-08;
+const Integer CelestialBody::KEPLER_MAX_ITERATIONS      = 50;
+const Real    CelestialBody::DEFAULT_INITIAL_STATE_TIME = GmatTimeConstants::A1MJD_OF_J2000;
+
 
 //------------------------------------------------------------------------------
 // public methods
@@ -684,6 +686,32 @@ void CelestialBody::SetUpBody()
    }
    // add other set-up kinds of things later?
    return;
+}
+
+
+const Real CelestialBody::GetFirstStateTime()
+{
+   switch (posVelSrc)
+   {
+      case Gmat::SPICE :
+      {
+         #ifdef __USE_SPICE__
+            if (!spiceSetupDone) SetUpSPICE();
+            Real startCov = 0.0;
+            Real endCov   = 0.0;
+            kernelReader->GetCoverageStartAndEnd(orbitSpiceKernelNames, naifId, startCov, endCov);
+            return startCov;
+         #else
+            // Throw an error if GMAT was not build with __USE_SPICE__ (LOJ: 2010.05.18)
+            std::string errmsg = "Use of SPICE file was disabled";
+            throw SolarSystemException(errmsg);
+         #endif
+         break;
+      }
+      default:
+         return DEFAULT_INITIAL_STATE_TIME;
+         break;
+   }
 }
 
 

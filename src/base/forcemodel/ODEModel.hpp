@@ -108,6 +108,8 @@ public:
    
    // Methods needed to run an ODEModel 
    virtual void SetSolarSystem(SolarSystem *ss);
+   virtual void SetForceOrigin(CelestialBody* toBody);
+
    virtual bool BuildModelFromMap();
    virtual bool Initialize();
    virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1, 
@@ -250,6 +252,9 @@ protected:
    
    /// Name of the force model origin; actual body is the inherited forceOrigin
    std::string centralBodyName;
+   /// Flag indicating whether or not the first time of coverage has already been
+   /// determined for the force origin
+   bool        coverageStartDetermined;
    /// Flag used to prevent unnecessary initialization calls
    bool forceMembersNotInitialized;
    
