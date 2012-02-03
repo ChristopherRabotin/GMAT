@@ -507,6 +507,10 @@ Real GmatMathUtil::ACosh (Real x, Real cycleInRad)
 //------------------------------------------------------------------------------
 //  Real ATanh (Real x, Real cycleInRad)
 //------------------------------------------------------------------------------
+/**
+ * Computes inverse hyperbolic tangent of x.
+ */
+//------------------------------------------------------------------------------
 Real GmatMathUtil::ATanh (Real x, Real cycleInRad)
 {
    if (cycleInRad <= 0.0) 
@@ -514,9 +518,11 @@ Real GmatMathUtil::ATanh (Real x, Real cycleInRad)
    
    //VC++ error C3861: 'atanh': identifier not found
 #ifndef _MSC_VER  // if not Microsoft Visual C++
-   return (cycleInRad/TWO_PI)*atanh(x);
+   return (cycleInRad/TWO_PI) * atanh(x);
 #else
-   return 0.0;
+   //return 0.0;
+   Real atanh = (0.5) * Log((1.0+x)/(1.0-x));
+   return (cycleInRad/TWO_PI) * atanh;
 #endif
 }
 
