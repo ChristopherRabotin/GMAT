@@ -5166,7 +5166,7 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
    {
       #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage
-         ("   cs is not InteralCS, so calling coordConverter.Convert() at epoch %f\n",
+         ("   cs is not InternalCS, so calling coordConverter.Convert() at epoch %f\n",
           GetEpoch());
       #endif
       coordConverter.Convert(GetEpoch(), csState, coordinateSystem, finalState,
