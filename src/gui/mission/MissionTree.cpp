@@ -2393,7 +2393,9 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    MessageInterface::ShowMessage
       ("   Checking if the command counter needs to be reset\n");
    #endif
-   std::string seqString = theGuiInterpreter->GetScript();
+   GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
+   std::string seqString = GmatCommandUtil::GetCommandSeqString(cmd);
+   
    if (seqString.find(cmdType) == seqString.npos)
    {
       #if DEBUG_MISSION_TREE_DELETE
@@ -3959,6 +3961,13 @@ void MissionTree::CreateCommandCounterMap()
    cmdCounterMap.insert(std::make_pair("EndWhile", 0));
    cmdCounterMap.insert(std::make_pair("EndTarget", 0));
    cmdCounterMap.insert(std::make_pair("EndOptimize", 0));
+   
+   #ifdef DEBUG_COMMAND_COUNTER
+   MessageInterface::ShowMessage("===> cmdCounterMap = \n");
+   for (std::map<wxString, int>::iterator pos = cmdCounterMap.begin();
+        pos != cmdCounterMap.end(); ++pos)
+      MessageInterface::ShowMessage("   '%s'\n", (pos->first).c_str());
+   #endif
 }
 
 
@@ -4064,6 +4073,12 @@ int MissionTree::GetMenuId(const wxString &cmd, ActionType action)
 //------------------------------------------------------------------------------
 void MissionTree::ResetCommandCounter(const wxString &cmd, bool resetAll)
 {
+   #ifdef DEBUG_COMMAND_COUNTER
+   MessageInterface::ShowMessage
+      ("ResetCommandCounter() entered, cmd='%s', resetAll=%s\n", cmd.c_str(),
+       resetAll ? "true" : "false");
+   #endif
+   
    if (resetAll)
    {
       for (std::map<wxString, int>::iterator pos = cmdCounterMap.begin();
@@ -4077,7 +4092,13 @@ void MissionTree::ResetCommandCounter(const wxString &cmd, bool resetAll)
       // If command found in the map then reset the counter
       if (cmdCounterMap.find(cmd) != cmdCounterMap.end())
       {
+         #ifdef DEBUG_COMMAND_COUNTER
+         MessageInterface::ShowMessage
+            ("   Resetting command counter for cmd='%s'\n", cmd.c_str());
+         #endif
          cmdCounterMap[cmd] = 0;
+         if (cmd == "GMAT")
+            cmdCounterMap["Equation"] = 0;
       }
       else
       {
@@ -4088,6 +4109,10 @@ void MissionTree::ResetCommandCounter(const wxString &cmd, bool resetAll)
          #endif
       }
    }
+   
+   #ifdef DEBUG_COMMAND_COUNTER
+   MessageInterface::ShowMessage("ResetCommandCounter() leaving\n");
+   #endif
 }
 
 
