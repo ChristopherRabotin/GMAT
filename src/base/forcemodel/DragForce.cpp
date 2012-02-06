@@ -73,7 +73,7 @@ DragForce::PARAMETER_TEXT[DragForceParamCount - PhysicalModelParamCount] =
 const Gmat::ParameterType
 DragForce::PARAMETER_TYPE[DragForceParamCount - PhysicalModelParamCount] =
 {
-   Gmat::STRING_TYPE,   // "AtmosphereModel"
+   Gmat::OBJECT_TYPE,   // "AtmosphereModel"
    Gmat::STRING_TYPE,   // "AtmosphereBody",
    Gmat::STRING_TYPE,   // "InputSource", ("File" or "Constant" for now)
    Gmat::STRING_TYPE,   // "SolarFluxFile",

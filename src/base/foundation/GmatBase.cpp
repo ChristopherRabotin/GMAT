@@ -3403,8 +3403,14 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
 
    preface += nomme;
    WriteParameters(mode, preface, data);
-
+   
    generatingString = data.str();
+   
+   #ifdef DEBUG_GENERATING_STRING
+   MessageInterface::ShowMessage
+      ("GmatBase::GetGeneratingString() returning\n%s\n", generatingString.c_str());
+   #endif
+   
    return generatingString;
 }
 
@@ -3789,7 +3795,11 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    
    // Allow objects to muck with parameter counts, and use the mucked up value
    Integer paramCount = GetParameterCount();
-
+   
+   #ifdef DEBUG_WRITE_PARAM
+   MessageInterface::ShowMessage("   =====> There are %d parameters\n", paramCount);
+   #endif
+   
    // Create parameter write order if it is empty (LOJ: 2009.02.13)
    if (parameterWriteOrder.empty())
    {
@@ -3821,7 +3831,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       
       #ifdef DEBUG_WRITE_PARAM
       MessageInterface::ShowMessage
-         ("   %2d, checking %s, type=%s, %s    %s\n", i, GetParameterText(id).c_str(),
+         ("   %2d, checking %-30s, type=%-12s, %-10s, %-10s\n", i, GetParameterText(id).c_str(),
           PARAM_TYPE_STRING[GetParameterType(id)].c_str(),
           (IsParameterReadOnly(id) ? "ReadOnly" : "Writable"),
           (IsParameterCloaked(id) ? "Cloaked" : "Uncloaked"));
@@ -3929,7 +3939,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    Integer ownedObjCount = GetOwnedObjectCount();
    #ifdef DEBUG_OWNED_OBJECT_STRINGS
    MessageInterface::ShowMessage
-      ("<%p><%s>'%s' has %d owned objects\n", this, GetTypeName().c_str(),
+      ("   <%p><%s>'%s' has %d owned objects\n", this, GetTypeName().c_str(),
        instanceName.c_str(), ownedObjCount);
    #endif
    
@@ -3944,10 +3954,10 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 
       #ifdef DEBUG_OWNED_OBJECT_STRINGS
       MessageInterface::ShowMessage
-         ("   id %d has owned object of type %s and name \"%s\"\n", i,
+         ("   id %d has owned object of type name <%s> and name \"%s\"\n", i,
           ownedObject->GetTypeName().c_str(), ownedObject->GetName().c_str());
       #endif
-
+      
       // if owned object is a propagator, don't append the propagator name
       if (ownedObject->GetType() != Gmat::PROPAGATOR)
       {
@@ -3955,24 +3965,29 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          // name for owned object in general way. For example, additional "Earth" in
          // "FM.GravityField.Earth.Degree", (loj: 2008.01.25)
          std::string ownedPropName = BuildPropertyName(ownedObject);
-
+         
          #ifdef DEBUG_OWNED_OBJECT_STRINGS
          MessageInterface::ShowMessage
             ("   ownedPropName=<%s>, name=<%s>\n", ownedPropName.c_str(), nomme.c_str());
          #endif
-
+         
          if (ownedPropName != "")
             newprefix += ownedPropName + ".";
          else if (nomme != "")
-            newprefix += nomme + ".";
+         {
+            ///@note Scritpting for drag model does not require atmosphere model name
+            // so check it first (For bug 2555 fix) (LOJ: 2012.02.03)
+            if (!(ownedObject->IsOfType(Gmat::ATMOSPHERE)))
+               newprefix += nomme + ".";
+         }
       }
-
+      
       #ifdef DEBUG_OWNED_OBJECT_STRINGS
       MessageInterface::ShowMessage
-         ("   Calling ownedObject->GetGeneratingString() with newprefix='%s'\n",
+         ("   Calling ownedObject->GetGeneratingString() with newprefix='%s'\n\n",
           newprefix.c_str());
       #endif
-
+      
       stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
    }
 }
@@ -3992,13 +4007,32 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 {
    Gmat::ParameterType tid = GetParameterType(id);
    Integer precision = GmatGlobal::Instance()->GetDataPrecision();
-
+   
    #ifdef DEBUG_WRITE_PARAM
    MessageInterface::ShowMessage
-      ("   %2d, writing  %s, type=%s\n", id, GetParameterText(id).c_str(),
+      ("   ==> GmatBase::WriteParameterValue() entered, id=%d\n", id);
+   MessageInterface::ShowMessage
+      ("   %2d, writing  '%s', type=%s\n", id, GetParameterText(id).c_str(),
        PARAM_TYPE_STRING[tid].c_str());
    #endif
-
+   
+   // Special case for ForceModel (For bug 2555 fix - LOJ: 2012.02.03)
+   // If Drag is turned off we still want to write FM.Drag = None.
+   // If Drag has AtmosphereModel name, then skip writing FM.Drag.
+   // AtmosphereModel will write FM.Drag.AtmosphereModel = SomeModel.
+   if (IsOfType(Gmat::ODE_MODEL) && GetParameterText(id) == "Drag")
+   {
+      if (GetStringParameter(id) != "None")
+      {
+         #ifdef DEBUG_WRITE_PARAM
+         MessageInterface::ShowMessage
+            ("   ==> GmatBase::WriteParameterValue() leaving, it is OdeModel "
+             "and Drag is not None\n\n");
+         #endif
+         return;
+      }
+   }
+   
    switch (tid)
    {
    // Objects write out a string without quotes
@@ -4146,6 +4180,12 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 			 GetName().c_str(), GetTypeName().c_str());
       break;
    }
+   
+   #ifdef DEBUG_WRITE_PARAM
+   MessageInterface::ShowMessage
+      ("   ==> GmatBase::WriteParameterValue() leaving, value = '%s'\n\n",
+       stream.str().c_str());
+   #endif
 }
 
 //-------------------------------------

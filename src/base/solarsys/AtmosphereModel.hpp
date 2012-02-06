@@ -95,6 +95,9 @@ public:
 
 
    // Methods overridden from GmatBase
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+   
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
@@ -183,7 +186,8 @@ protected:
                                  GmatEpoch when = -1.0,
                                  bool includeLatLong = false);
 
-   enum {
+   enum
+   {
       NOMINAL_FLUX = GmatBaseParamCount,
       NOMINAL_AVERAGE_FLUX,
       NOMINAL_MAGNETIC_INDEX,

@@ -4628,8 +4628,8 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetPropertyToValue() objType=%s, objName=%s, toProp=%s, "
-       "value=%s\n", toOwner->GetTypeName().c_str(), toOwner->GetName().c_str(),
+      ("Interpreter::SetPropertyToValue() objType=<%s>, objName=<%s>, toProp=<%s>, "
+       "value=<%s>\n", toOwner->GetTypeName().c_str(), toOwner->GetName().c_str(),
        toProp.c_str(), value.c_str());
    #endif
    
@@ -5622,7 +5622,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
 {
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetProperty() obj=%s, id=%d, type=%d, value=%s\n",
+      ("Interpreter::SetProperty() obj=<%p>'%s', id=%d, type=%d, value=<%s>\n",
        obj->GetName().c_str(), id, type, value.c_str());
    #endif
    
@@ -5880,8 +5880,8 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
 {
    #ifdef DEBUG_SET_FORCE_MODEL
    MessageInterface::ShowMessage
-      ("Interpreter::SetForceModelProperty() entered, obj=<%p><%s>'%s', prop=%s, "
-       "value=%s, fromObj=<%p>\n", obj, obj->GetTypeName().c_str(), obj->GetName().c_str(),
+      ("Interpreter::SetForceModelProperty() entered, obj=<%p><%s>'%s', prop=<%s>, "
+       "value=<%s>, fromObj=<%p>\n", obj, obj->GetTypeName().c_str(), obj->GetName().c_str(),
        prop.c_str(), value.c_str(), fromObj);
    #endif
    
@@ -6182,11 +6182,12 @@ bool Interpreter::SetDragForceProperty(GmatBase *obj,
    ODEModel *forceModel = (ODEModel*)obj;
    std::string forceType = ODEModel::GetScriptAlias(pmType);
    std::string centralBodyName = forceModel->GetStringParameter("CentralBody");
+   std::string valueToUse = GmatStringUtil::RemoveEnclosingString(value, "'");
    
    #ifdef DEBUG_SET_FORCE_MODEL
    MessageInterface::ShowMessage
-      ("Interpreter::SetDragForceProperty() entered, forceType=%s, pmType=%s, "
-       "propName=%s, value=%s, centralBodyName=%s\n", forceType.c_str(), pmType.c_str(),
+      ("Interpreter::SetDragForceProperty() entered, forceType=<%s>, pmType=<%s>, "
+       "propName=<%s>, value=<%s>, centralBodyName=<%s>\n", forceType.c_str(), pmType.c_str(),
        propName.c_str(), value.c_str(), centralBodyName.c_str());
    #endif
    
@@ -6203,7 +6204,7 @@ bool Interpreter::SetDragForceProperty(GmatBase *obj,
        pm->GetName().c_str());
    #endif
    
-   if (!pm->SetStringParameter("AtmosphereModel", value))
+   if (!pm->SetStringParameter("AtmosphereModel", valueToUse))
    {
       InterpreterException ex
          ("Unable to set AtmosphereModel for drag force");
@@ -6213,10 +6214,8 @@ bool Interpreter::SetDragForceProperty(GmatBase *obj,
    }
    
    // Create AtmosphereModel for the primary body
-   if (value != "BodyDefault")
+   if (valueToUse != "BodyDefault")
    {
-      std::string valueToUse = GmatStringUtil::RemoveEnclosingString(value, "'");
-      
       #ifdef DEBUG_SET_FORCE_MODEL
       MessageInterface::ShowMessage
          ("   Creating AtmosphereModel of type '%s'\n", valueToUse.c_str());

@@ -747,6 +747,38 @@ void AtmosphereModel::SetCentralBody(CelestialBody *cb)
    }
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool AtmosphereModel::IsParameterReadOnly(const Integer id) const
+{
+   // Since these parameters are handled in the DragForce, make them
+   // read only 
+   if ((id == NOMINAL_FLUX) || (id == NOMINAL_AVERAGE_FLUX) ||
+       (id == NOMINAL_MAGNETIC_INDEX))
+      return true;
+   
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool AtmosphereModel::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
