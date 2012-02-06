@@ -2393,8 +2393,13 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    MessageInterface::ShowMessage
       ("   Checking if the command counter needs to be reset\n");
    #endif
+   
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
-   std::string seqString = GmatCommandUtil::GetCommandSeqString(cmd);
+   std::string seqString = GmatCommandUtil::GetCommandSeqString(cmd, false, false, false);
+   
+   #if DEBUG_MISSION_TREE_DELETE
+   MessageInterface::ShowMessage("seqString:%s\n", seqString.c_str());
+   #endif
    
    if (seqString.find(cmdType) == seqString.npos)
    {
@@ -3390,7 +3395,7 @@ void MissionTree::OnShowDetail(wxCommandEvent &event)
 void MissionTree::OnShowMissionSequence(wxCommandEvent &event)
 {
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
-   std::string str = GmatCommandUtil::GetCommandSeqString(cmd, false, false, "   ");
+   std::string str = GmatCommandUtil::GetCommandSeqString(cmd, false, false, true, "   ");
    
    if (str == "")
       return;
