@@ -54,6 +54,7 @@ BEGIN_EVENT_TABLE(CelestialBodyOrbitPanel, wxPanel)
    EVT_TEXT(ID_TEXT_CTRL_TA, CelestialBodyOrbitPanel::OnTATextCtrlChange)
 END_EVENT_TABLE()
 
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -88,6 +89,7 @@ CelestialBodyOrbitPanel::CelestialBodyOrbitPanel(GmatPanel *cbPanel,
    userDef          (false),
    allowSpiceForDefaultBodies (false),
    isSun            (false),
+   includeTwoBody   (false),  // ***** modify this to include InitialTwoBody epoch and elements (for non-Sun body)
    theCBPanel       (cbPanel)
 {
    guiManager     = GuiItemManager::GetInstance();
@@ -200,7 +202,7 @@ void CelestialBodyOrbitPanel::SaveData()
          theBody->SetStringParameter(theBody->GetParameterID("CentralBody"), strval);
       }
 
-      if (!isSun)
+      if (!isSun && includeTwoBody)
       {
          if (epochChanged)
          {
@@ -338,7 +340,7 @@ void CelestialBodyOrbitPanel::LoadData()
       }
       if (ephemSrc == "TwoBodyPropagation")
       {
-         if (!isSun)
+         if (!isSun && includeTwoBody)
          {
             initialEpochTextCtrl->Enable();
             SMATextCtrl->Enable();
@@ -352,7 +354,7 @@ void CelestialBodyOrbitPanel::LoadData()
       }
       else
       {
-         if (!isSun)
+         if (!isSun && includeTwoBody)
          {
             initialEpochTextCtrl->Disable();
             SMATextCtrl->Disable();
@@ -389,7 +391,7 @@ void CelestialBodyOrbitPanel::LoadData()
             mainBoxSizer->Layout();
          }
       }
-      if (!isSun)
+      if (!isSun && includeTwoBody)
       {
          initialEpoch = (theBody->GetTwoBodyEpoch()).Get();
          initialEpochStringWX = guiManager->ToWxString(initialEpoch);
@@ -531,7 +533,7 @@ void CelestialBodyOrbitPanel::Create()
                                                               wxSize(150,-1));
    centralBodyComboBox->SetToolTip(pConfig->Read(_T("CentralBodyHint")));
    
-   if (!isSun)
+   if (!isSun && includeTwoBody)
    {
       // initial epoch
       initialEpochStaticText = new wxStaticText(this, ID_TEXT, wxT("Initial A1 "GUI_ACCEL_KEY"Epoch"),
@@ -629,7 +631,7 @@ void CelestialBodyOrbitPanel::Create()
    }
    
    wxFlexGridSizer *initialStateFlexGridSizer = NULL;
-   if (!isSun)
+   if (!isSun && includeTwoBody)
    {
       initialStateFlexGridSizer = new wxFlexGridSizer(3,0,0);
       initialStateFlexGridSizer->Add(initialEpochStaticText,0, wxGROW|wxALIGN_LEFT|wxALL, bSize);
@@ -669,7 +671,7 @@ void CelestialBodyOrbitPanel::Create()
    GmatStaticBoxSizer  *boxSizer1 = new GmatStaticBoxSizer(wxVERTICAL, this, "Ephemeris Data");
    boxSizer1->Add(orbitDataFlexGridSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
    
-   if (isSun)
+   if (isSun || !includeTwoBody)
    {
       mainBoxSizer->Add(boxSizer1, 1, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
       mainBoxSizer->Add(0,0);
@@ -741,7 +743,7 @@ void CelestialBodyOrbitPanel::ResetChangeFlags(bool discardMods)
          naifIDTextCtrl->DiscardEdits();
       }
 //      centralBodyComboBox->DiscardEdits();
-      if (!isSun)
+      if (!isSun  && includeTwoBody)
       {
          initialEpochTextCtrl->DiscardEdits();
          SMATextCtrl->DiscardEdits();
@@ -783,7 +785,7 @@ void CelestialBodyOrbitPanel::OnEphemSourceComboBoxChange(wxCommandEvent &event)
    }
    if (newEphemSrc == "TwoBodyPropagation")
    {
-      if (!isSun)
+      if (!isSun  && includeTwoBody)
       {
          initialEpochTextCtrl->Enable();
          SMATextCtrl->Enable();
@@ -797,7 +799,7 @@ void CelestialBodyOrbitPanel::OnEphemSourceComboBoxChange(wxCommandEvent &event)
    }
    else
    {
-      if (!isSun)
+      if (!isSun  && includeTwoBody)
       {
          initialEpochTextCtrl->Disable();
          SMATextCtrl->Disable();

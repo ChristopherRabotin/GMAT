@@ -91,6 +91,7 @@ private:
    
    bool           isSun;
    bool           spiceAvailable;
+   bool           includeTwoBody;
    
    GmatPanel      *theCBPanel;
    
@@ -207,7 +208,6 @@ private:
       ID_TEXT_CTRL_AOP,
       ID_TEXT_CTRL_TA,
    };
-   
    
                                 
 };
