@@ -61,9 +61,10 @@ protected:
    virtual void Show();
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
-
-   void RefreshScriptActiveStatus(bool isActive);
+   
    bool FileExists(std::string scriptFilename);
+   void RefreshScriptActiveStatus(bool isActive);
+   void SaveAndBuildScript(wxCommandEvent &event);
    
    // member data
    GuiInterpreter *theGuiInterpreter;

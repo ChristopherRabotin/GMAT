@@ -33,7 +33,7 @@
 
 //#define DEBUG_SCRIPTPANEL_LOAD
 //#define DEBUG_SCRIPTPANEL_TEXT
-
+//#define DEBUG_SCRIPTPANEL_SAVE
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -182,6 +182,12 @@ void ScriptPanel::LoadData()
 //------------------------------------------------------------------------------
 void ScriptPanel::SaveData()
 {
+   #ifdef DEBUG_SCRIPTPANEL_SAVE
+   MessageInterface::ShowMessage
+      ("ScriptPanel::SaveData() entered\n   mScriptFilename = '%s'\n   "
+       "      mFilename = '%s'\n", mScriptFilename.c_str(), mFilename.c_str());
+   #endif
+   
    GmatAppData *gmatAppData = GmatAppData::Instance();
    
    if (mScriptFilename != mFilename)
@@ -197,6 +203,12 @@ void ScriptPanel::SaveData()
    mFileContentsTextCtrl->SaveFile(mScriptFilename);
    gmatAppData->GetMainFrame()->SetActiveChildDirty(false);
    mUserModified = false;
+   
+   #ifdef DEBUG_SCRIPTPANEL_SAVE
+   MessageInterface::ShowMessage
+      ("ScriptPanel::SaveData() leaving\n   mScriptFilename = '%s'\n   "
+       "      mFilename = '%s'\n", mScriptFilename.c_str(), mFilename.c_str());
+   #endif
 }
 
 

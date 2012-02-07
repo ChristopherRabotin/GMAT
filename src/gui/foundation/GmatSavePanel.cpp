@@ -25,6 +25,8 @@
 #include "ShowScriptDialog.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_SAVE
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -211,18 +213,7 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    
    
    if (saveScript)
-   {
-      SaveData();
-      mScriptDirtyLabel->SetLabel("");
-      
-      // If script is active, build the script 
-      if (mIsScriptActive)
-      {
-         GmatAppData *gmatAppData = GmatAppData::Instance();
-         if (gmatAppData->GetMainFrame()->SetScriptFileName(mFilename.c_str()))
-            gmatAppData->GetMainFrame()->OnScriptBuildObject(event);
-      }
-   }
+      SaveAndBuildScript(event);
 }
 
 
@@ -237,7 +228,8 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
 {
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::OnSaveAs() '%s' entered\n", mFilename.c_str());
+      ("GmatSavePanel::OnSaveAs() entered, script = '%s', mIsScriptActive = %d\n",
+       mFilename.c_str(), mIsScriptActive);
    #endif
    
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
@@ -274,11 +266,7 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
       // If script is active, build the script 
       if (mIsScriptActive)
       {
-         SaveData();
-         mScriptDirtyLabel->SetLabel("");
-         
-         if (gmatAppData->GetMainFrame()->SetScriptFileName(mFilename.c_str()))
-            gmatAppData->GetMainFrame()->OnScriptBuildObject(event);
+         SaveAndBuildScript(event);
       }
       else
       {
@@ -287,7 +275,7 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
          
          #ifdef DEBUG_SAVE
          MessageInterface::ShowMessage
-            ("   activeScriptName='%s'\n           mFilename='%s'\n",
+            ("   activeScriptName = '%s'\n            mFilename = '%s'\n",
              activeScriptName.c_str(), mFilename.c_str());
          #endif
          
@@ -302,19 +290,14 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
                #endif
                gmatAppData->GetMainFrame()->CloseChild(activeScriptName, GmatTree::SCRIPT_FILE);
             }
-            
-            SaveData();      
-            mScriptDirtyLabel->SetLabel("");
-            
-            // Now build the script 
-            if (gmatAppData->GetMainFrame()->SetScriptFileName(mFilename.c_str()))
-               gmatAppData->GetMainFrame()->OnScriptBuildObject(event);
          }
+         
+         SaveAndBuildScript(event);
       }
    }
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::OnSaveAs() '%s' leaving\n", mFilename.c_str());
+      ("GmatSavePanel::OnSaveAs() leaving, script = '%s'\n", mFilename.c_str());
    #endif
 }
 
@@ -483,5 +466,40 @@ void GmatSavePanel::RefreshScriptActiveStatus(bool isActive)
       mScriptActiveLabel->SetForegroundColour(*wxRED);
    }
 }
+
+
+//------------------------------------------------------------------------------
+// void SaveAndBuildScript(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void GmatSavePanel::SaveAndBuildScript(wxCommandEvent &event)
+{
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage
+      ("GmatSavePanel::SaveAndBuildScript() entered\n   mFilename = '%s'\n",
+       mFilename.c_str());
+   #endif
+   
+   SaveData();
+   
+   mScriptDirtyLabel->SetLabel("");
+   
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   SetEditorModified(false);
+   gmatAppData->GetMainFrame()->SetActiveChildDirty(false);
+   
+   // If script is active, build the script 
+   if (mIsScriptActive)
+   {
+      if (gmatAppData->GetMainFrame()->SetScriptFileName(mFilename.c_str()))
+         gmatAppData->GetMainFrame()->OnScriptBuildObject(event);
+   }
+   
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage
+      ("GmatSavePanel::SaveAndBuildScript() leaving\n   mFilename = '%s'\n",
+       mFilename.c_str());
+   #endif
+}
+
 
 
