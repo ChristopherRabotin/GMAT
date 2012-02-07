@@ -1284,20 +1284,29 @@ void OrbitPanel::DisplayState()
       }
    }
 
-   BuildState(midState, isInternal);
+   try
+   {
+      BuildState(midState, isInternal);
+
+      #ifdef DEBUG_ORBIT_PANEL_CONVERT
+      MessageInterface::ShowMessage
+         ("   DisplayState()--- after conversion, mOutState=\n   [%s]\n",
+          mOutState.ToString(16).c_str());
+      #endif
    
-   #ifdef DEBUG_ORBIT_PANEL_CONVERT
-   MessageInterface::ShowMessage
-      ("   DisplayState()--- after conversion, mOutState=\n   [%s]\n",
-       mOutState.ToString(16).c_str());
-   #endif
-   
-   for (int i=0; i<6; i++)
-      textCtrl[i]->SetValue(ToString(mOutState[i]));
-   
-   // labels for elements, anomaly and units
-   SetLabelsUnits(stateTypeStr);
-   ResetStateFlags(true);
+      for (int i=0; i<6; i++)
+         textCtrl[i]->SetValue(ToString(mOutState[i]));
+
+      // labels for elements, anomaly and units
+      SetLabelsUnits(stateTypeStr);
+      ResetStateFlags(true);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
+      throw;
+   }
 
    #ifdef DEBUG_ORBIT_PANEL_CONVERT
    MessageInterface::ShowMessage
@@ -1541,7 +1550,8 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("**** ERROR in BuildState()\n");
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      // wcs - 2012.02.07 commented out to avoid seeing it Popup twice
+//      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       throw;
    }
    
@@ -1797,12 +1807,12 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
    
    if (theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number"))
    {
-      if (state[1] < 0.0)
-      {
-         theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number >= 0.0", true);
-         retval = false;
-         canClose = false;
-      }
+//      if (state[1] < 0.0) // RadApo can be negative
+//      {
+//         theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number >= 0.0", true);
+//         retval = false;
+//         canClose = false;
+//      }
    }
    else
    {

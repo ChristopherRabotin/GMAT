@@ -21,6 +21,7 @@
  */
 //------------------------------------------------------------------------------
 
+#include <sstream>                 // for <<
 #include "gmatdefs.hpp"
 #include "StateConversionUtil.hpp"
 #include "GmatDefaults.hpp"
@@ -29,7 +30,6 @@
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
 #include "UtilityException.hpp"
-#include <sstream>                 // for <<
 
 //#define DEBUG_EQUINOCTIAL
 //#define DEBUG_STATE_CONVERSION
@@ -50,6 +50,7 @@
 //#define DEBUG_ANOMALY
 //#define DEBUG_ANOMALY_MA
 //#define DEBUG_MODKEP_TO_KEP
+//#define DEBUG_CONVERT_ERRORS
 
 using namespace GmatMathUtil;
 using namespace GmatMathConstants;
@@ -60,6 +61,10 @@ using namespace GmatMathConstants;
 
 const Real         StateConversionUtil::ORBIT_TOL      = 1.0E-10;
 const Real         StateConversionUtil::ORBIT_TOL_SQ   = 1.0E-20;
+const Real         StateConversionUtil::SINGULAR_TOL   = .001;
+const Real         StateConversionUtil::INFINITE_TOL   = 1.03-30;
+const Real         StateConversionUtil::PARABOLIC_TOL  = 1.0e-7;
+
 const Integer      StateConversionUtil::MAX_ITERATIONS = 75;
 
 const Real         StateConversionUtil::DEFAULT_MU =
@@ -559,7 +564,7 @@ Rvector6 StateConversionUtil::KeplerianToCartesian(Real mu, const Rvector6 &stat
 
    if (Abs(kepl[0]) <= ORBIT_TOL)
    {
-      // Degenerate conic...
+      // Degenerate conic...  do we need a message here??
       ret = 0;
    }
    else if (kepl[1] < 0.0)
@@ -605,7 +610,7 @@ Rvector6 StateConversionUtil::KeplerianToCartesian(Real mu, const Rvector6 &stat
       {
          throw UtilityException
             ("StateConversionUtil::KeplerianToCartesian() "
-             "Gravity constant too small for conversion to Keplerian elements\n");
+             "Gravity constant too small for conversion from Keplerian elements\n");
       }
       else if (kepl[1] == 1.0)
       {
@@ -623,13 +628,66 @@ Rvector6 StateConversionUtil::KeplerianToCartesian(Real mu, const Rvector6 &stat
                 "Probable loss of precision in conversion "
                 "of hyperbolic Keplerian elements to Cartesian.\n");
          }
-
-         // if the return code from a call to compute_kepl_to_cart is greater than zero
-         if (ComputeKeplToCart(mu, kepl, temp_r, temp_v, anomalyType) > 0)
+         Real absA1E = Abs(kepl[0] * (1.0 - kepl[1]));
+         if (absA1E < SINGULAR_TOL)
          {
-            throw UtilityException
-               ("StateConversionUtiltil::KeplerianToCartesian() "
-                "Unable to convert Keplerian elements to Cartesian\n");
+            std::string errmsg = "Warning: A nearly singular conic section was encountered while converting from ";
+            errmsg += "the Keplerian elements to the Cartesian state.  The radius of periapsis must be greater ";
+            errmsg += "than 1 meter.";
+            throw UtilityException(errmsg);
+         }
+         Real infCheck  = 1.0 + kepl[1] * Cos(kepl[5] * RAD_PER_DEG);
+         if (infCheck < INFINITE_TOL)
+         {
+            std::string errmsg = "Warning: A near infinite radius was encountered while converting from ";
+            errmsg += "the Keplerian elements to the Cartesian state.\n";
+            throw UtilityException(errmsg);
+         }
+         Real oneMinusE = Abs(1.0 - kepl[1]);
+         if (oneMinusE < PARABOLIC_TOL)
+         {
+            std::string errmsg = "Warning: A nearly parabolic orbit was encountered while converting from ";
+            errmsg += "the Keplerian elements to the Cartesian state.  The Keplerian elements are ";
+            errmsg += "undefined for a parabolic orbit.\n";
+            throw UtilityException(errmsg);
+         }
+         if (kepl[1] > 1.0)
+         {
+            #ifdef DEBUG_CONVERT_ERRORS
+               MessageInterface::ShowMessage("Attempting to test for impossible TA:  ecc = %12.10f\n", kepl[1]);
+            #endif
+            Real possible  = PI - ACos(1.0 / kepl[1]);
+            Real taM       = kepl[5]  * RAD_PER_DEG;
+            while (taM > PI)   taM -= TWO_PI;
+            while (taM < -PI)  taM += TWO_PI;
+            if (Abs(taM) >= possible)
+            {
+               possible *= DEG_PER_RAD;
+               std::stringstream errmsg;
+               errmsg.precision(12);
+               errmsg << "\nError: The TA value is not physically possible for a hyperbolic orbit ";
+               errmsg << "with the input values of SMA and ECC.\nThe allowed values are: ";
+               errmsg << "[" << -possible << " < TA < " << possible << " (degrees)]\nor equivalently: ";
+               errmsg << "[TA < " << possible << " or TA > " << (360.0 - possible) << " (degrees)]\n";
+               throw UtilityException(errmsg.str());
+            }
+         }
+         // if the return code from a call to compute_kepl_to_cart is greater than zero, there is an error
+         Integer errorCode = ComputeKeplToCart(mu, kepl, temp_r, temp_v, anomalyType);
+         if (errorCode > 0)
+         {
+            if (errorCode == 2)
+            {
+               std::string errmsg = "Warning: GMAT does not support parabolic orbits in conversion ";
+               errmsg += "from Keplerian elements to Cartesian state.\n";
+               throw UtilityException(errmsg);
+            }
+            else
+            {
+               throw UtilityException
+                  ("StateConversionUtiltil::KeplerianToCartesian() "
+                   "Unable to convert Keplerian elements to Cartesian\n");
+            }
          }
          else
          {
@@ -673,6 +731,11 @@ Rvector6 StateConversionUtil::KeplerianToCartesian(Real mu, const Rvector6 &stat
 //------------------------------------------------------------------------------
 Rvector6 StateConversionUtil::CartesianToEquinoctial(const Rvector6& cartesian, const Real& mu)
 {
+   #ifdef DEBUG_EQUINOCTIAL
+      MessageInterface::ShowMessage("Converting from Cartesian to Equinoctial: \n");
+      MessageInterface::ShowMessage("   input Cartesian is: %s\n", cartesian.ToString().c_str());
+      MessageInterface::ShowMessage("   mu is:              %12.10f\n", mu);
+   #endif
    Real sma, h, k, p, q, lambda; // equinoctial elements
 
    Rvector3 pos(cartesian[0], cartesian[1], cartesian[2]);
@@ -2336,12 +2399,13 @@ Integer StateConversionUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3
         per = elem[4]*RAD_PER_DEG,
        anom = elem[5]*RAD_PER_DEG;
 
-   if ((Abs(1.0 - ecc)) <= GmatOrbitConstants::KEP_ECC_TOL)
-   {
-      throw UtilityException
-         ("Error in conversion from Keplerian state: "
-          "The state results in an orbit that is nearly parabolic.\n");
-   }
+   // handled in the calling method
+//   if ((Abs(1.0 - ecc)) <= GmatOrbitConstants::KEP_ECC_TOL)
+//   {
+//      throw UtilityException
+//         ("Error in conversion from Keplerian state: "
+//          "The state results in an orbit that is nearly parabolic.\n");
+//   }
 
    // **************
    // taken from old code above; necessary to avoid crash, but not in spec
@@ -2364,42 +2428,62 @@ Integer StateConversionUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3
    // ***************
 
    // radius near infinite
-   //if (1-ecc*Cos(anom) < 1E-30) {
    #ifdef DEBUG_KEPL_TO_CART
       MessageInterface::ShowMessage("ecc = %12.10f, anom = %12.10f, Cos(anom) = %12.10f, 1+ecc*Cos(anom) = %12.10f\n",
             ecc, anom, Cos(anom), (1+ecc*Cos(anom)));
    #endif
-   if (Abs(1+ecc*Cos(anom)) < 1E-30)
-   {
-      MessageInterface::PopupMessage(Gmat::WARNING_,
-             "Warning::Radius is near infinite in keplerian to cartesian conversion.\n");
-      return 1;
-   }
+   // this is handled in the calling method
+//   if (Abs(1+ecc*Cos(anom)) < INFINITE_TOL)
+//   {
+//      MessageInterface::PopupMessage(Gmat::WARNING_,
+//             "Warning::Radius is near infinite in keplerian to cartesian conversion.\n");
+//      return 1;
+//   }
 
    // eqn 4.24; semilatus rectum
    Real p = sma*(1 - ecc*ecc);
 
    // orbit parabolic
-   if (Abs(p) < 1E-30)
+   if (Abs(p) < INFINITE_TOL)
    {
         return 2;
    }
 
+   Real onePlusECos = 1 + ecc*Cos(anom);
+   if (onePlusECos < ORBIT_TOL)
+   {
+      std::string warn = "Warning: The orbital radius is large in the conversion from ";
+      warn += "Keplerian elements to Cartesian state and the state may be near a singularity, ";
+      warn += "causing numerical errors in the conversion.\n";
+      MessageInterface::PopupMessage(Gmat::WARNING_, warn);
+   }
    // eqn 4.25; radius
-   Real rad = p/(1 + ecc*Cos(anom));
+   Real rad = p/onePlusECos;
 
    // eqn 4.26 - 4.28
-   r[0] = rad*(Cos(per + anom) * Cos(raan) - Cos(inc) * Sin(per + anom) * Sin(raan)),
-   r[1] = rad*(Cos(per + anom) * Sin(raan) + Cos(inc) * Sin(per + anom) * Cos(raan)),
-   r[2] = rad*Sin(per + anom)*Sin(inc);
+   Real cosPerAnom    = Cos(per + anom);
+   Real sinPerAnom    = Sin(per + anom);
+   Real cosInc        = Cos(inc);
+   Real sinInc        = Sin(inc);
+   Real cosRaan       = Cos(raan);
+   Real sinRaan       = Sin(raan);
+   Real sqrtGravP     = Sqrt(grav/p);
+   Real cosAnomPlusE  = Cos(anom) + ecc;
+   Real sinAnom       = Sin(anom);
+   Real cosPer        = Cos(per);
+   Real sinPer        = Sin(per);
 
-   v[0] = Sqrt(grav/p)*(Cos(anom)+ecc)*(-Sin(per)*Cos(raan)-Cos(inc)*Sin(raan)*Cos(per))
-                        - Sqrt(grav/p)*Sin(anom)*(Cos(per)*Cos(raan)-Cos(inc)*Sin(raan)*Sin(per));
+   r[0] = rad * (cosPerAnom * cosRaan - cosInc * sinPerAnom * sinRaan),
+   r[1] = rad * (cosPerAnom * sinRaan + cosInc * sinPerAnom * cosRaan),
+   r[2] = rad * sinPerAnom  * sinInc;
 
-   v[1] = Sqrt(grav/p)*(Cos(anom)+ecc)*(-Sin(per)*Sin(raan)+Cos(inc)*Cos(raan)*Cos(per))
-                        - Sqrt(grav/p)*Sin(anom)*(Cos(per)*Sin(raan)+Cos(inc)*Cos(raan)*Sin(per));
+   v[0] = sqrtGravP * cosAnomPlusE*(-sinPer*cosRaan-cosInc*sinRaan*cosPer)
+                    - sqrtGravP*sinAnom*(cosPer*cosRaan-cosInc*sinRaan*sinPer);
 
-   v[2] = Sqrt(grav/p)*((Cos(anom)+ecc)*Sin(inc)*Cos(per) - Sin(anom)*Sin(inc)*Sin(per));
+   v[1] = sqrtGravP * cosAnomPlusE*(-sinPer*sinRaan+cosInc*cosRaan*cosPer)
+                    - sqrtGravP*sinAnom*(cosPer*sinRaan+cosInc*cosRaan*sinPer);
+
+   v[2] = sqrtGravP * (cosAnomPlusE*sinInc*cosPer - sinAnom*sinInc*sinPer);
 
    return 0;
 }

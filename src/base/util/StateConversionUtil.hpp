@@ -180,6 +180,10 @@ static Integer ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, Real tol,
 //------------------------------------------------------------------------------
 static const Real         ORBIT_TOL;      // = 1.0E-10;
 static const Real         ORBIT_TOL_SQ;   // = 1.0E-20;
+static const Real         SINGULAR_TOL;   // = .001
+static const Real         INFINITE_TOL;   // = 1.03-30
+static const Real         PARABOLIC_TOL;  // = 1.0e-7;
+
 static const Integer      MAX_ITERATIONS; // 75
 
 static const Real         DEFAULT_MU;  // km^3/s^2
