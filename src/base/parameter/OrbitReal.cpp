@@ -25,6 +25,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_ORBITREAL 1
+//#define DEBUG_ORBITREAL_SET 1
 
 //---------------------------------
 // public methods
@@ -51,13 +52,19 @@
 OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr, 
                      GmatBase *obj, const std::string &desc,
                      const std::string &unit, GmatParam::DepObject depObj,
-                     bool isSettable)
+                     Integer itemId, bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
              depObj, Gmat::SPACECRAFT, false, isSettable),
      OrbitData(name)
 {
+   mItemId = itemId;
    mNeedCoordSystem = true;
    AddRefObject(obj);
+   
+   #ifdef DEBUG_ORBITREAL
+   MessageInterface::ShowMessage
+      ("OrbitReal() '%s' entered, mItemId = %d\n", name.c_str(), mItemId);
+   #endif
 }
 
 
@@ -78,6 +85,7 @@ OrbitReal::OrbitReal(const OrbitReal &copy)
       ("===> OrbitReal::OrbitReal() copy constructor called on %s\n",
        instanceName.c_str());
    #endif
+   mItemId = copy.mItemId;
 }
 
 
@@ -96,6 +104,7 @@ OrbitReal& OrbitReal::operator=(const OrbitReal &right)
    {
       RealVar::operator=(right);
       OrbitData::operator=(right);
+      mItemId = right.mItemId;
    }
    
    return *this;
@@ -144,6 +153,28 @@ Real OrbitReal::EvaluateReal()
 
 
 //------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+void OrbitReal::SetReal(Real val)
+{
+   #ifdef DEBUG_ORBITREAL_SET
+   MessageInterface::ShowMessage
+      ("OrbitReal::SetReal() <%p>'%s' entered, val = %f, mItemId = %d\n", this,
+       GetName().c_str(), val, mItemId);
+   #endif
+   
+   OrbitData::SetReal(mItemId, val);
+   RealVar::SetReal(val);
+   
+   #ifdef DEBUG_ORBITREAL_SET
+   MessageInterface::ShowMessage
+      ("OrbitReal::SetReal() <%p>'%s' leaving, val = %f, mItemId = %d\n", this,
+       GetName().c_str(), val, mItemId);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // virtual CoordinateSystem* GetInternalCoordSystem()
 //------------------------------------------------------------------------------
 CoordinateSystem* OrbitReal::GetInternalCoordSystem()
@@ -162,9 +193,9 @@ CoordinateSystem* OrbitReal::GetInternalCoordSystem()
 void OrbitReal::SetSolarSystem(SolarSystem *ss)
 {
    #if DEBUG_ORBITREAL
-      MessageInterface::ShowMessage
-         ("OrbitReal::SetSolarSystem() ss=%s to %s\n", ss->GetTypeName().c_str(),
-          this->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("OrbitReal::SetSolarSystem() ss=%s to %s\n", ss->GetTypeName().c_str(),
+       this->GetName().c_str());
    #endif
    
    if (OrbitData::GetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName()) == NULL)
@@ -186,9 +217,9 @@ void OrbitReal::SetSolarSystem(SolarSystem *ss)
 void OrbitReal::SetInternalCoordSystem(CoordinateSystem *cs)
 {
    #if DEBUG_ORBITREAL
-      MessageInterface::ShowMessage
-         ("OrbitReal::SetInternalCoordSystem() cs=%s to %s\n", cs->GetTypeName().c_str(),
-          this->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("OrbitReal::SetInternalCoordSystem() cs=%s to %s\n", cs->GetTypeName().c_str(),
+       this->GetName().c_str());
    #endif
    
    OrbitData::SetInternalCoordSys(cs);

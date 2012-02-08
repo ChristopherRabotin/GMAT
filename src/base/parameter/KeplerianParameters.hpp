@@ -43,10 +43,10 @@ public:
    KepSMA(const KepSMA &copy);
    const KepSMA& operator=(const KepSMA &right);
    virtual ~KepSMA();
-
+   
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
 

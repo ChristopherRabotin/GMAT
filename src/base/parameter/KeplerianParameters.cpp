@@ -42,7 +42,7 @@
  */
 //------------------------------------------------------------------------------
 KepSMA::KepSMA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "SMA", obj, "Semi-Major Axis", "Km", GmatParam::ORIGIN, true)
+   : OrbitReal(name, "SMA", obj, "Semi-Major Axis", "Km", GmatParam::ORIGIN, KEP_SMA, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -110,7 +110,7 @@ KepSMA::~KepSMA()
 //------------------------------------------------------------------------------
 bool KepSMA::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(SMA);    
+   mRealValue = OrbitData::GetKepReal(KEP_SMA);    
    
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -155,7 +155,7 @@ GmatBase* KepSMA::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepEcc::KepEcc(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "ECC", obj, "Eccentricity", " ", GmatParam::ORIGIN, true)
+   : OrbitReal(name, "ECC", obj, "Eccentricity", " ", GmatParam::ORIGIN, KEP_ECC, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -223,7 +223,7 @@ KepEcc::~KepEcc()
 //------------------------------------------------------------------------------
 bool KepEcc::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(ECC);
+   mRealValue = OrbitData::GetKepReal(KEP_ECC);
    
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -268,7 +268,7 @@ GmatBase* KepEcc::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepInc::KepInc(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "INC", obj, "Inclination", "Deg", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "INC", obj, "Inclination", "Deg", GmatParam::COORD_SYS, KEP_INC, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -337,7 +337,7 @@ KepInc::~KepInc()
 //------------------------------------------------------------------------------
 bool KepInc::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(INC);    
+   mRealValue = OrbitData::GetKepReal(KEP_INC);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -383,7 +383,7 @@ GmatBase* KepInc::Clone(void) const
 //------------------------------------------------------------------------------
 KepAOP::KepAOP(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "AOP", obj, "Argument of Periapsis", "Deg",
-               GmatParam::COORD_SYS, true)
+               GmatParam::COORD_SYS, KEP_AOP, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -452,7 +452,7 @@ KepAOP::~KepAOP()
 //------------------------------------------------------------------------------
 bool KepAOP::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(AOP);    
+   mRealValue = OrbitData::GetKepReal(KEP_AOP);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -498,7 +498,7 @@ GmatBase* KepAOP::Clone(void) const
 //------------------------------------------------------------------------------
 KepRAAN::KepRAAN(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RAAN", obj, "RA of Asscending Node", "Deg",
-               GmatParam::COORD_SYS, true)
+               GmatParam::COORD_SYS, KEP_RAAN, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -567,7 +567,7 @@ KepRAAN::~KepRAAN()
 //------------------------------------------------------------------------------
 bool KepRAAN::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(RAAN);    
+   mRealValue = OrbitData::GetKepReal(KEP_RAAN);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -612,7 +612,8 @@ GmatBase* KepRAAN::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepRADN::KepRADN(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RADN", obj, "RA of Asscending Node", "Deg", GmatParam::COORD_SYS)
+   : OrbitReal(name, "RADN", obj, "RA of Asscending Node", "Deg", GmatParam::COORD_SYS,
+               KEP_RADN, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -679,7 +680,7 @@ KepRADN::~KepRADN()
 //------------------------------------------------------------------------------
 bool KepRADN::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(RADN);    
+   mRealValue = OrbitData::GetKepReal(KEP_RADN);    
    
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -724,7 +725,7 @@ GmatBase* KepRADN::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepTA::KepTA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "TA", obj, "True Anomaly", "Deg", GmatParam::ORIGIN, true)
+   : OrbitReal(name, "TA", obj, "True Anomaly", "Deg", GmatParam::ORIGIN, KEP_TA, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -794,7 +795,7 @@ KepTA::~KepTA()
 //------------------------------------------------------------------------------
 bool KepTA::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(TA);    
+   mRealValue = OrbitData::GetKepReal(KEP_TA);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -839,7 +840,7 @@ GmatBase* KepTA::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepMA::KepMA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN, true)
+   : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN, KEP_MA, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -909,7 +910,7 @@ KepMA::~KepMA()
 //------------------------------------------------------------------------------
 bool KepMA::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(MA);    
+   mRealValue = OrbitData::GetKepReal(KEP_MA);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -954,7 +955,7 @@ GmatBase* KepMA::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepEA::KepEA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "EA", obj, "Eccentric Anomaly", "Deg", GmatParam::ORIGIN, true)
+   : OrbitReal(name, "EA", obj, "Eccentric Anomaly", "Deg", GmatParam::ORIGIN, KEP_EA, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -1024,7 +1025,7 @@ KepEA::~KepEA()
 //------------------------------------------------------------------------------
 bool KepEA::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(EA);    
+   mRealValue = OrbitData::GetKepReal(KEP_EA);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -1069,7 +1070,7 @@ GmatBase* KepEA::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepHA::KepHA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "HA", obj, "Hyperbolic Anomaly", "Deg", GmatParam::ORIGIN, true)
+   : OrbitReal(name, "HA", obj, "Hyperbolic Anomaly", "Deg", GmatParam::ORIGIN, KEP_HA, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -1139,7 +1140,7 @@ KepHA::~KepHA()
 //------------------------------------------------------------------------------
 bool KepHA::Evaluate()
 {
-   mRealValue = OrbitData::GetKepReal(HA);    
+   mRealValue = OrbitData::GetKepReal(KEP_HA);    
    
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;

@@ -47,7 +47,7 @@
  */
 //------------------------------------------------------------------------------
 CartX::CartX(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "X", obj, "Cartesian X", "Km", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "X", obj, "Cartesian X", "Km", GmatParam::COORD_SYS, CART_X, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -117,27 +117,12 @@ CartX::~CartX()
 //------------------------------------------------------------------------------
 bool CartX::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal(PX);
+   mRealValue = OrbitData::GetCartReal(CART_X);
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
-}
-
-
-//------------------------------------------------------------------------------
-// virtual void SetReal(Real val)
-//------------------------------------------------------------------------------
-/**
- * Sets value to the owner of the parameter.
- *
- */
-//------------------------------------------------------------------------------
-void CartX::SetReal(Real val)
-{
-   OrbitData::SetReal(PX, val);
-   RealVar::SetReal(val);
 }
 
 
@@ -177,7 +162,7 @@ GmatBase* CartX::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartY::CartY(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Y", obj, "Cartesian Y", "Km", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "Y", obj, "Cartesian Y", "Km", GmatParam::COORD_SYS, CART_Y, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -247,27 +232,12 @@ CartY::~CartY()
 //------------------------------------------------------------------------------
 bool CartY::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal(PY);
+   mRealValue = OrbitData::GetCartReal(CART_Y);
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
-}
-
-
-//------------------------------------------------------------------------------
-// virtual void SetReal(Real val)
-//------------------------------------------------------------------------------
-/**
- * Sets value to the owner of the parameter.
- *
- */
-//------------------------------------------------------------------------------
-void CartY::SetReal(Real val)
-{
-   OrbitData::SetReal(PY, val);
-   RealVar::SetReal(val);
 }
 
 
@@ -307,7 +277,7 @@ GmatBase* CartY::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartZ::CartZ(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Z", obj, "Cartesian Z", "Km", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "Z", obj, "Cartesian Z", "Km", GmatParam::COORD_SYS, CART_Z, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -376,27 +346,12 @@ CartZ::~CartZ()
 //------------------------------------------------------------------------------
 bool CartZ::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal(PZ);    
+   mRealValue = OrbitData::GetCartReal(CART_Z);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
-}
-
-
-//------------------------------------------------------------------------------
-// virtual void SetReal(Real val)
-//------------------------------------------------------------------------------
-/**
- * Sets value to the owner of the parameter.
- *
- */
-//------------------------------------------------------------------------------
-void CartZ::SetReal(Real val)
-{
-   OrbitData::SetReal(PZ, val);
-   RealVar::SetReal(val);
 }
 
 
@@ -436,7 +391,7 @@ GmatBase* CartZ::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartVx::CartVx(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VX", obj, "Cartesian VX", "Km/s", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "VX", obj, "Cartesian VX", "Km/s", GmatParam::COORD_SYS, CART_VX, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -506,27 +461,12 @@ CartVx::~CartVx()
 //------------------------------------------------------------------------------
 bool CartVx::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal(VX);    
+   mRealValue = OrbitData::GetCartReal(CART_VX);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
-}
-
-
-//------------------------------------------------------------------------------
-// virtual void SetReal(Real val)
-//------------------------------------------------------------------------------
-/**
- * Sets value to the owner of the parameter.
- *
- */
-//------------------------------------------------------------------------------
-void CartVx::SetReal(Real val)
-{
-   OrbitData::SetReal(VX, val);
-   RealVar::SetReal(val);
 }
 
 
@@ -566,7 +506,7 @@ GmatBase* CartVx::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartVy::CartVy(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VY", obj, "Cartesian Y", "Km/s", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "VY", obj, "Cartesian Y", "Km/s", GmatParam::COORD_SYS, CART_VY, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -636,27 +576,12 @@ CartVy::~CartVy()
 //------------------------------------------------------------------------------
 bool CartVy::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal(VY);    
+   mRealValue = OrbitData::GetCartReal(CART_VY);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
-}
-
-
-//------------------------------------------------------------------------------
-// virtual void SetReal(Real val)
-//------------------------------------------------------------------------------
-/**
- * Sets value to the owner of the parameter.
- *
- */
-//------------------------------------------------------------------------------
-void CartVy::SetReal(Real val)
-{
-   OrbitData::SetReal(VY, val);
-   RealVar::SetReal(val);
 }
 
 
@@ -696,7 +621,7 @@ GmatBase* CartVy::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartVz::CartVz(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VZ", obj, "Cartesian VZ", "Km/s", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "VZ", obj, "Cartesian VZ", "Km/s", GmatParam::COORD_SYS, CART_VZ, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -766,27 +691,12 @@ CartVz::~CartVz()
 //------------------------------------------------------------------------------
 bool CartVz::Evaluate()
 {
-   mRealValue = OrbitData::GetCartReal(VZ);    
+   mRealValue = OrbitData::GetCartReal(CART_VZ);    
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
-}
-
-
-//------------------------------------------------------------------------------
-// virtual void SetReal(Real val)
-//------------------------------------------------------------------------------
-/**
- * Sets value to the owner of the parameter.
- *
- */
-//------------------------------------------------------------------------------
-void CartVz::SetReal(Real val)
-{
-   OrbitData::SetReal(VZ, val);
-   RealVar::SetReal(val);
 }
 
 

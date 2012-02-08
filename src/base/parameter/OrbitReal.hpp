@@ -34,13 +34,14 @@ public:
    OrbitReal(const std::string &name, const std::string &typeStr, 
              GmatBase *obj, const std::string &desc,
              const std::string &unit,  GmatParam::DepObject depObj,
-             bool isSettable = false);
+             Integer itemId = -999, bool isSettable = false);
    OrbitReal(const OrbitReal &copy);
    OrbitReal& operator=(const OrbitReal &right);
    virtual ~OrbitReal();
-
+   
    // methods inherited from Parameter
    virtual Real EvaluateReal();
+   virtual void SetReal(Real val);
    
    virtual Integer GetNumRefObjects() const;
    virtual CoordinateSystem* GetInternalCoordSystem();
@@ -65,7 +66,8 @@ public:
                              const std::string &name = "");
 
 protected:
-
+   
+   Integer mItemId;
 };
 
 #endif // OrbitReal_hpp

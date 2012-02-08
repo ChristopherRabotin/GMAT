@@ -35,6 +35,7 @@
 #include "StateConversionUtil.hpp"
 
 
+//#define DEBUG_ORBITDATA_SET
 //#define DEBUG_ORBITDATA_INIT
 //#define DEBUG_ORBITDATA_CONVERT
 //#define DEBUG_ORBITDATA_RUN
@@ -217,9 +218,9 @@ OrbitData::~OrbitData()
 //------------------------------------------------------------------------------
 void OrbitData::SetReal(Integer item, Real rval)
 {
-   #if DEBUG_ORBITDATA_SET
+   #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("OrbitData::SetReal() item=%d, rval=%f\n", item, rval);
+      ("OrbitData::SetReal() entered, item=%d, rval=%f\n", item, rval);
    #endif
    
    if (mSpacecraft == NULL)
@@ -235,14 +236,16 @@ void OrbitData::SetReal(Integer item, Real rval)
    CoordinateSystem *satCS =
       (CoordinateSystem*)mSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "");
    
-   #if DEBUG_ORBITDATA_SET
+   #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("   Parameter CS Origin = '%s'\n", mOutCoordSystem->GetOriginName().c_str());
+      ("   Parameter CS Origin = <%p>'%s'\n", mOutCoordSystem,
+       mOutCoordSystem ? mOutCoordSystem->GetOriginName().c_str() : "NULL");
    MessageInterface::ShowMessage
-      ("   Sat       CS Origin = '%s'\n", satCS->GetOriginName().c_str());
+      ("   Sat       CS Origin = <%p>'%s'\n", satCS,
+       satCS ? satCS->GetOriginName().c_str() : "NULL");
    #endif
    
-   if (mOutCoordSystem != satCS)
+   if (mOutCoordSystem != NULL && mOutCoordSystem != satCS)
    {
       ParameterException pe;
       pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
@@ -253,31 +256,135 @@ void OrbitData::SetReal(Integer item, Real rval)
       throw pe;
    }
    
+   #ifdef DEBUG_ORBITDATA_SET
+   MessageInterface::ShowMessage("   Now calling Spacecraft::SetRealParameter()\n");
+   #endif
    
    switch (item)
    {
-   case PX:
+      // Cartesian
+   case CART_X:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("X"), rval);
       break;
-   case PY:
+   case CART_Y:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Y"), rval);
       break;
-   case PZ:
+   case CART_Z:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("Z"), rval);
       break;
-   case VX:
+   case CART_VX:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VX"), rval);
       break;
-   case VY:
+   case CART_VY:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VY"), rval);
       break;
-   case VZ:
+   case CART_VZ:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VZ"), rval);
       break;
+      
+      // Keplerian
+   case KEP_SMA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMA"), rval);
+      break;
+   case KEP_ECC:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("ECC"), rval);
+      break;
+   case KEP_INC:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("INC"), rval);
+      break;
+   case KEP_RAAN:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RAAN"), rval);
+      break;
+   case KEP_AOP:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AOP"), rval);
+      break;
+   case KEP_TA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("TA"), rval);
+      break;
+   case KEP_MA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MA"), rval);
+      break;
+   case KEP_EA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EA"), rval);
+      break;
+   case KEP_HA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HA"), rval);
+      break;
+      
+      // Spherical RADEC
+   case RADEC_RMAG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RMAG"), rval);
+      break;
+   case RADEC_RA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RA"), rval);
+      break;
+   case RADEC_DEC:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DEC"), rval);
+      break;
+   case RADEC_VMAG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VMAG"), rval);
+      break;
+   case RADEC_RAV:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RAV"), rval);
+      break;
+   case RADEC_DECV:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DECV"), rval);
+      break;
+      
+      // Spherical AZFPA
+   case AZIFPA_RMAG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RMAG"), rval);
+      break;
+   case AZIFPA_RA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RA"), rval);
+      break;
+   case AZIFPA_DEC:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("DEC"), rval);
+      break;
+   case AZIFPA_VMAG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("VMAG"), rval);
+      break;
+   case AZIFPA_AZI:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("AZI"), rval);
+      break;
+   case AZIFPA_FPA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("FPA"), rval);
+      break;
+      
+      // Equinoctial
+   case EQ_SMA:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("SMA"), rval);
+      break;
+   case EQ_H:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EquinoctialH"), rval);
+      break;
+   case EQ_K:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EquinoctialK"), rval);
+      break;
+   case EQ_P:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EquinoctialP"), rval);
+      break;
+   case EQ_Q:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("EquinoctialQ"), rval);
+      break;
+   case EQ_MLONG:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("MLONG"), rval);
+      break;
+      
+      
    default:
+      #ifdef DEBUG_ORBITDATA_SET
+      MessageInterface::ShowMessage
+         ("**** ERROR **** OrbitData::SetReal() Unknown item id: %d\n", item);
+      #endif
       throw ParameterException("OrbitData::SetReal() Unknown parameter id: " +
                                GmatRealUtil::ToString(item));
    }
+   
+   #ifdef DEBUG_ORBITDATA_SET
+   MessageInterface::ShowMessage
+      ("OrbitData::SetReal() leaving, item=%d, rval=%f\n", item, rval);
+   #endif
 }
 
 
@@ -286,9 +393,9 @@ void OrbitData::SetReal(Integer item, Real rval)
 //------------------------------------------------------------------------------
 void OrbitData::SetRvector6(const Rvector6 &val)
 {
-   #if DEBUG_ORBITDATA_SET
+   #ifdef DEBUG_ORBITDATA_SET
    MessageInterface::ShowMessage
-      ("OrbitData::SetRvector6() entered, rval=[%s]\n", rval.ToString().c_str());
+      ("OrbitData::SetRvector6() entered, rval=[%s]\n", val.ToString().c_str());
    #endif
    
    if (mSpacecraft == NULL)
@@ -302,6 +409,11 @@ void OrbitData::SetRvector6(const Rvector6 &val)
    }
    
    mSpacecraft->SetState(val);
+   
+   #ifdef DEBUG_ORBITDATA_SET
+   MessageInterface::ShowMessage
+      ("OrbitData::SetRvector6() leaving, rval=[%s]\n", val.ToString().c_str());
+   #endif
 }
 
 
@@ -534,7 +646,7 @@ Real OrbitData::GetCartReal(Integer item)
    #endif
    
    Rvector6 state = GetCartState();
-   if (item >= PX && item <= VZ)
+   if (item >= CART_X && item <= CART_VZ)
       return mCartState[item];
    else
       throw ParameterException("OrbitData::GetCartReal() Unknown parameter id: " +
@@ -574,38 +686,38 @@ Real OrbitData::GetKepReal(Integer item)
    
    switch (item)
    {
-   case SMA:
+   case KEP_SMA:
       return StateConversionUtil::CartesianToSMA(mGravConst, pos, vel);
-   case ECC:
+   case KEP_ECC:
       return StateConversionUtil::CartesianToECC(mGravConst, pos, vel);
-   case INC:
+   case KEP_INC:
       return StateConversionUtil::CartesianToINC(mGravConst, pos, vel);
-   case TA:
+   case KEP_TA:
       return StateConversionUtil::CartesianToTA(mGravConst, pos, vel);
-   case EA:
+   case KEP_EA:
       return StateConversionUtil::CartesianToEA(mGravConst, pos, vel);
-   case MA:
+   case KEP_MA:
    {
       #ifdef DEBUG_MA
       MessageInterface::ShowMessage("In OrbitData, computing MA -------\n");
       #endif
       return StateConversionUtil::CartesianToMA(mGravConst, pos, vel);
    }
-   case HA:
+   case KEP_HA:
    {
       #ifdef DEBUG_HA
       MessageInterface::ShowMessage("In OrbitData, computing HA -------\n");
       #endif
       return StateConversionUtil::CartesianToHA(mGravConst, pos, vel);
    }
-   case RAAN:
+   case KEP_RAAN:
       return StateConversionUtil::CartesianToRAAN(mGravConst, pos, vel);
-   case RADN:
+   case KEP_RADN:
       {
          Real raanDeg = StateConversionUtil::CartesianToRAAN(mGravConst, pos, vel);
          return AngleUtil::PutAngleInDegRange(raanDeg + 180, 0.0, 360.0);
       }
-   case AOP:
+   case KEP_AOP:
       return StateConversionUtil::CartesianToAOP(mGravConst, pos, vel);
       
    default:
@@ -625,7 +737,8 @@ Real OrbitData::GetKepReal(Integer item)
 Real OrbitData::GetOtherKepReal(Integer item)
 {
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetOtherKepReal() item=%d\n", item);
+   MessageInterface::ShowMessage
+      ("OrbitData::GetOtherKepReal() item=%d, idToUse=%d\n", item, item-MM);
    #endif
    
    Rvector6 state = GetCartState();
@@ -663,20 +776,22 @@ Real OrbitData::GetSphRaDecReal(Integer item)
    
    switch (item)
    {
-   case RD_RMAG:
+   case RADEC_RMAG:
       {
          // if orgin is "Earth" just return default
          if (mOrigin->GetName() == "Earth")
-            return mSphRaDecState[RD_RMAG];
+            //return mSphRaDecState[RADEC_RMAG];
+            return mSphRaDecState[RADEC_RMAG-Item2Count];
          else
             return GetPositionMagnitude(mOrigin);
       }
-   case RD_RRA:
-   case RD_RDEC:
-   case RD_VMAG:
-   case RD_RAV:
-   case RD_DECV:
-      return mSphRaDecState[item];
+   case RADEC_RA:
+   case RADEC_DEC:
+   case RADEC_VMAG:
+   case RADEC_RAV:
+   case RADEC_DECV:
+      //return mSphRaDecState[item];
+      return mSphRaDecState[item-Item2Count];
    default:
       throw ParameterException
          ("OrbitData::GetSphRaDecReal() Unknown parameter name: " +
@@ -705,12 +820,13 @@ Real OrbitData::GetSphAzFpaReal(Integer item)
       ("OrbitData::GetSphAzFpaReal() item=%s state=%s\n",
        item, state.ToString().c_str());
    #endif
-
-   if (item >= AF_RMAG && item <= AF_FPA)
-      return mSphAzFpaState[item];
+   
+   if (item >= AZIFPA_RMAG && item <= AZIFPA_FPA)
+      //return mSphAzFpaState[item];
+      return mSphAzFpaState[item-Item3Count];
    else
    {
-      throw ParameterException("OrbitData::GetSphAzFpaReal() Unknown parameter ID: " +
+      throw ParameterException("OrbitData::GetSphAzFpaReal() Unknown orbit item ID: " +
                                GmatRealUtil::ToString(item));
    }
 }
@@ -726,7 +842,8 @@ Real OrbitData::GetSphAzFpaReal(Integer item)
 Real OrbitData::GetAngularReal(Integer item)
 {
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetAngularReal() item=%d\n", item);
+   MessageInterface::ShowMessage
+      ("OrbitData::GetAngularReal() item=%d, idToUse=%d\n", item, item-SEMILATUS_RECTUM);
    #endif
    
    Rvector6 state = GetCartState();
@@ -753,7 +870,8 @@ Real OrbitData::GetAngularReal(Integer item)
 Real OrbitData::GetOtherAngleReal(Integer item)
 {
    #ifdef DEBUG_ORBITDATA_RUN
-   MessageInterface::ShowMessage("OrbitData::GetOtherAngleReal() item=%d\n", item);
+   MessageInterface::ShowMessage
+      ("OrbitData::GetOtherAngleReal() item=%d, idToUse=%d\n", item, item-SEMILATUS_RECTUM);
    #endif
    
    Rvector6 state;
@@ -807,27 +925,27 @@ Real OrbitData::GetEquinReal(Integer item)
    {
    case EQ_SMA:
       return StateConversionUtil::CartesianToSMA(mGravConst, pos, vel);
-   case EY:
+   case EQ_H:
       {
          Rvector6 equiState = GetEquinState();
          return equiState[1];
       }
-   case EX:
+   case EQ_K:
       {
          Rvector6 equiState = GetEquinState();
          return equiState[2];
       }
-   case NY:
+   case EQ_P:
       {
          Rvector6 equiState = GetEquinState();
          return equiState[3];
       }
-   case NX:
+   case EQ_Q:
       {
          Rvector6 equiState = GetEquinState();
          return equiState[4];
       }
-   case MLONG:
+   case EQ_MLONG:
       {
          Rvector6 equiState = GetEquinState();
          return equiState[5];

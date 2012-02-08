@@ -30,7 +30,7 @@
 //#define USE_PREDEFINED_COLORS
 
 EquinSma::EquinSma(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Sma", obj, "Equinoctial Sma", "?", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "Sma", obj, "Equinoctial Sma", "?", GmatParam::COORD_SYS, EQ_SMA, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -59,8 +59,10 @@ EquinSma::~EquinSma()
 bool EquinSma::Evaluate()
 {
    //mRealValue = OrbitData::GetEquinReal("EquinSma");
-   mRealValue = OrbitData::GetEquinReal(SMA);
-    
+   //why SMA? Changed to EQ_SMA (LOJ: 2012.02.08)
+   //mRealValue = OrbitData::GetEquinReal(SMA);
+   mRealValue = OrbitData::GetEquinReal(EQ_SMA);
+   
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
    else
@@ -75,7 +77,7 @@ GmatBase* EquinSma::Clone(void) const
 
 
 EquinEy::EquinEy(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Ey", obj, "Equinoctial Ey", "?", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "Ey", obj, "Equinoctial Ey", "?", GmatParam::COORD_SYS, EQ_H, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -104,7 +106,7 @@ EquinEy::~EquinEy()
 bool EquinEy::Evaluate()
 {
    //mRealValue = OrbitData::GetEquinReal("EquinEy");
-   mRealValue = OrbitData::GetEquinReal(EY);
+   mRealValue = OrbitData::GetEquinReal(EQ_H);
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -120,7 +122,7 @@ GmatBase* EquinEy::Clone(void) const
 
 
 EquinEx::EquinEx(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Ex", obj, "Equinoctial Ex", "?", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "Ex", obj, "Equinoctial Ex", "?", GmatParam::COORD_SYS, EQ_K, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -149,7 +151,7 @@ EquinEx::~EquinEx()
 bool EquinEx::Evaluate()
 {
    //mRealValue = OrbitData::GetEquinReal("EquinEx");
-   mRealValue = OrbitData::GetEquinReal(EX);
+   mRealValue = OrbitData::GetEquinReal(EQ_K);
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -165,7 +167,7 @@ GmatBase* EquinEx::Clone(void) const
 
 
 EquinNy::EquinNy(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Ny", obj, "Equinoctial Ny", "?", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "Ny", obj, "Equinoctial Ny", "?", GmatParam::COORD_SYS, EQ_P, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -194,7 +196,7 @@ EquinNy::~EquinNy()
 bool EquinNy::Evaluate()
 {
    //mRealValue = OrbitData::GetEquinReal("EquinNy");
-   mRealValue = OrbitData::GetEquinReal(NY);
+   mRealValue = OrbitData::GetEquinReal(EQ_P);
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -210,7 +212,7 @@ GmatBase* EquinNy::Clone(void) const
 
 
 EquinNx::EquinNx(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Nx", obj, "Equinoctial Nx", "?", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "Nx", obj, "Equinoctial Nx", "?", GmatParam::COORD_SYS, EQ_Q, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -239,7 +241,7 @@ EquinNx::~EquinNx()
 bool EquinNx::Evaluate()
 {
    //mRealValue = OrbitData::GetEquinReal("EquinNx");
-   mRealValue = OrbitData::GetEquinReal(NX);
+   mRealValue = OrbitData::GetEquinReal(EQ_Q);
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;
@@ -255,7 +257,7 @@ GmatBase* EquinNx::Clone(void) const
 
 
 EquinMlong::EquinMlong(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Mlong", obj, "Equinoctial Mlong", "?", GmatParam::COORD_SYS, true)
+   : OrbitReal(name, "Mlong", obj, "Equinoctial Mlong", "?", GmatParam::COORD_SYS, EQ_MLONG, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
@@ -284,7 +286,7 @@ EquinMlong::~EquinMlong()
 bool EquinMlong::Evaluate()
 {
    //mRealValue = OrbitData::GetEquinReal("EquinMlong");
-   mRealValue = OrbitData::GetEquinReal(MLONG);
+   mRealValue = OrbitData::GetEquinReal(EQ_MLONG);
     
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
       return false;

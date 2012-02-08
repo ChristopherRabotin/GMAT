@@ -123,16 +123,36 @@ protected:
 
    // only one CoordinateConverter needed
    static CoordinateConverter mCoordConverter;
+
+   // Assigne item ids
+   // Cartesian items
+   enum {CART_X = 0, CART_Y, CART_Z, CART_VX, CART_VY, CART_VZ, CART_STATE, Item1Count};
    
-   enum {PX, PY, PZ, VX, VY, VZ};
-   enum {SMA, ECC, INC, RAAN, AOP, TA, MA, EA, HA, RADN};
-   enum {RD_RMAG, RD_RRA, RD_RDEC, RD_VMAG, RD_RAV, RD_DECV};
-   enum {AF_RMAG, AF_RRA, AF_RDEC, AF_VMAG, AF_AZI, AF_FPA};
-   enum {MM, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, RAD_APOAPSIS,
-         RAD_PERIAPSIS, C3_ENERGY, ENERGY};
-   enum {SEMILATUS_RECTUM, HMAG, HX, HY, HZ, BETA_ANGLE, HYPERBOLIC_RLA, HYPERBOLIC_DLA};
-   enum {EQ_SMA, EY, EX, NY, NX, MLONG};
-   enum {ORBIT_STM, ORBIT_STM_A, ORBIT_STM_B, ORBIT_STM_C, ORBIT_STM_D};
+   // Keplerian items
+   enum {KEP_SMA = Item1Count, KEP_ECC, KEP_INC, KEP_RAAN, KEP_AOP, KEP_TA, KEP_MA,
+         KEP_EA, KEP_HA, KEP_RADN, KEP_STATE, Item2Count};
+   
+   // Spherical RADEC items
+   enum {RADEC_RMAG = Item2Count, RADEC_RA, RADEC_DEC, RADEC_VMAG, RADEC_RAV, RADEC_DECV,
+         Item3Count};
+   
+   // Spherical AZIFPA items
+   enum {AZIFPA_RMAG = Item3Count, AZIFPA_RA, AZIFPA_DEC, AZIFPA_VMAG, AZIFPA_AZI,
+         AZIFPA_FPA, Item4Count};
+   
+   // Other orbit items
+   enum {MM = Item4Count, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, RAD_APOAPSIS,
+         RAD_PERIAPSIS, C3_ENERGY, ENERGY, Item5Count};
+   
+   enum {SEMILATUS_RECTUM = Item5Count, HMAG, HX, HY, HZ, BETA_ANGLE, HYPERBOLIC_RLA,
+         HYPERBOLIC_DLA, Item6Count};
+   
+   // Equinoctial items
+   enum {EQ_SMA = Item6Count, EQ_H, EQ_K, EQ_P, EQ_Q, EQ_MLONG, Item7Count};
+   
+   // Orbit STM items
+   enum {ORBIT_STM = Item7Count, ORBIT_STM_A, ORBIT_STM_B, ORBIT_STM_C, ORBIT_STM_D,
+         Item8Count};
    
    enum
    {
