@@ -71,6 +71,7 @@
 //#define DEBUG_CB_EQ_RAD
 //#define DEBUG_CB_CARTOGRAPHIC
 
+
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
 //#endif
@@ -699,7 +700,18 @@ const Real CelestialBody::GetFirstStateTime()
             if (!spiceSetupDone) SetUpSPICE();
             Real startCov = 0.0;
             Real endCov   = 0.0;
-            kernelReader->GetCoverageStartAndEnd(orbitSpiceKernelNames, naifId, startCov, endCov);
+            // Make sure we are looking for coverage in the main SPK kernel as well
+            StringArray allKernels = orbitSpiceKernelNames;
+            std::string mainSPK    = theSolarSystem->GetStringParameter("SPKFilename");
+            if (mainSPK != "")  allKernels.push_back(mainSPK);
+            #ifdef DEBUG_CB_SPICE
+               MessageInterface::ShowMessage("Calling GetCoverage with naifId = %d\n", naifId);
+               MessageInterface::ShowMessage("   and allKernels are: \n");
+               for (unsigned int ii = 0; ii < allKernels.size(); ii++)
+                  MessageInterface::ShowMessage("   %d    %s\n", (Integer) ii,
+                        allKernels.at(ii).c_str());
+            #endif
+            kernelReader->GetCoverageStartAndEnd(allKernels, naifId, startCov, endCov);
             return startCov;
          #else
             // Throw an error if GMAT was not build with __USE_SPICE__ (LOJ: 2010.05.18)
