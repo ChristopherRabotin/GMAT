@@ -171,6 +171,17 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
                                                      Real              &start,
                                                      Real              &end)
 {
+   #ifdef DEBUG_SPK_COVERAGE
+      MessageInterface::ShowMessage("Entering GetCoverageStartAndEnd:\n");
+      MessageInterface::ShowMessage("   forNaifId = %d\n", forNaifId);
+      MessageInterface::ShowMessage("   kernels are:\n");
+      if (kernels.empty())  MessageInterface::ShowMessage("   EMPTY!!!!\n");
+      else
+      {
+         for (unsigned int ii = 0; ii < kernels.size(); ii++)
+            MessageInterface::ShowMessage("   %d    %s\n", (Integer) ii, kernels.at(ii).c_str());
+      }
+   #endif
    // first check to see if a kernel specified is not loaded; if not,
    // try to load it
    for (unsigned int ii = 0; ii < kernels.size(); ii++)
