@@ -111,9 +111,9 @@ void EditorPanel::Create()
    //------------------------------------------------------
    // for build and build & run
    //------------------------------------------------------
-   mBuildButton =
+   mSaveSyncButton =
       new wxButton(this, ID_BUTTON, "Save,Sync", wxDefaultPosition, wxDefaultSize, 0);
-   mBuildRunButton =
+   mSaveSyncRunButton =
       new wxButton(this, ID_BUTTON, "Save,Sync,Run", wxDefaultPosition, wxDefaultSize, 0);
 
    //------------------------------------------------------
@@ -123,13 +123,13 @@ void EditorPanel::Create()
    
    #ifdef __ADD_BUILD_AT_TOP__
    wxBoxSizer *topSizer = new wxBoxSizer( wxHORIZONTAL);
-   topSizer->Add(mBuildButton, 0, wxALIGN_CENTER | wxALL, bsize);
-   topSizer->Add(mBuildRunButton, 0, wxALIGN_CENTER | wxALL, bsize);
+   topSizer->Add(mSaveSyncButton, 0, wxALIGN_CENTER | wxALL, bsize);
+   topSizer->Add(mSaveSyncRunButton, 0, wxALIGN_CENTER | wxALL, bsize);
    wxGridSizer *bottomSizer = new wxGridSizer( 1, 0, 0 );
    bottomSizer->Add(mEditor, 0, wxGROW | wxALIGN_CENTER | wxALL, bsize);
    #else
-   theButtonSizer->Insert(0, mBuildButton, 0, wxALIGN_LEFT | wxALL, bsize);
-   theButtonSizer->Insert(1, mBuildRunButton, 0, wxALIGN_LEFT | wxALL, bsize);
+   theButtonSizer->Insert(0, mSaveSyncButton, 0, wxALIGN_LEFT | wxALL, bsize);
+   theButtonSizer->Insert(1, mSaveSyncRunButton, 0, wxALIGN_LEFT | wxALL, bsize);
    theButtonSizer->Insert(2, 50, 20);
    #endif
    
@@ -236,8 +236,8 @@ void EditorPanel::OnButton(wxCommandEvent& event)
    GmatAppData *gmatAppData = GmatAppData::Instance();
    bool continueBuild = true;
    
-   if (event.GetEventObject() == mBuildButton ||
-       event.GetEventObject() == mBuildRunButton)
+   if (event.GetEventObject() == mSaveSyncButton ||
+       event.GetEventObject() == mSaveSyncRunButton)
    {
       // If this is not an active script, prompt the user for setting active
       if (!mIsScriptActive)
@@ -283,16 +283,19 @@ void EditorPanel::OnButton(wxCommandEvent& event)
    // If continue building, set script file name and build script
    if (continueBuild)
    {
-      if (event.GetEventObject() == mBuildButton)
+      if (event.GetEventObject() == mSaveSyncButton)
       {
          if (gmatAppData->GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
             gmatAppData->GetMainFrame()->OnScriptBuildObject(event);
       }
-      else if (event.GetEventObject() == mBuildRunButton)
+      else if (event.GetEventObject() == mSaveSyncRunButton)
       {
          if (gmatAppData->GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
             gmatAppData->GetMainFrame()->OnScriptBuildAndRun(event);
       }
+      
+      // Make current script active script (Fix for GMT-206, LOJ: 2012.02.09)
+      UpdateScriptActiveStatus(true);
    }
 }
 

@@ -38,8 +38,8 @@ private:
    Editor   *mEditor;
    wxString mScriptFilename;
    
-   wxButton *mBuildButton;
-   wxButton *mBuildRunButton;
+   wxButton *mSaveSyncButton;
+   wxButton *mSaveSyncRunButton;
    
    // methods inherited from GmatSavePanel
    virtual void Create();

@@ -66,7 +66,7 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
    mFilename = filename;
    mShowScriptActiveStatus = showScriptActiveStatus;
    mIsScriptActive = isScriptActive;
-   
+   mFilename = GmatAppData::Instance()->GetTempScriptName().c_str();
    theParent = parent;
    
    int borderSize = 2;
@@ -184,6 +184,12 @@ void GmatSavePanel::Show()
 //------------------------------------------------------------------------------
 void GmatSavePanel::OnSave(wxCommandEvent &event)
 {
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage
+      ("GmatSavePanel::OnSave() entered, mFilename='%s', tempFileName='%s'\n",
+       mFilename.c_str(), GmatAppData::Instance()->GetTempScriptName().c_str());
+   #endif
+   
    // if it is temp script file, call OnSaveAs() to bring up file dialog to save
    if (mFilename == GmatAppData::Instance()->GetTempScriptName())
    {
@@ -211,9 +217,13 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
       delete msgDlg;
    }
    
-   
    if (saveScript)
       SaveAndBuildScript(event);
+   
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage
+      ("GmatSavePanel::OnSave() leaving, mFilename='%s'\n", mFilename.c_str());
+   #endif
 }
 
 
@@ -275,7 +285,7 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
          
          #ifdef DEBUG_SAVE
          MessageInterface::ShowMessage
-            ("   activeScriptName = '%s'\n            mFilename = '%s'\n",
+            ("   activeScriptName = '%s'\n          mFilename = '%s'\n",
              activeScriptName.c_str(), mFilename.c_str());
          #endif
          

@@ -43,8 +43,8 @@ private:
    
    wxTextCtrl *mLineNumberTextCtrl;
    
-   wxButton *mBuildButton;
-   wxButton *mBuildRunButton;
+   wxButton *mSaveSyncButton;
+   wxButton *mSaveSyncRunButton;
    
    // methods inherited from GmatSavePanel
    virtual void Create();
