@@ -124,8 +124,8 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
    if (finder != NULL)
       delete finder;
 
-//   if (em != NULL)
-//      delete em;
+   if (em != NULL)
+      delete em;
 }
 
 
@@ -222,6 +222,12 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
       transientForces = NULL;
       eventBufferSize = 0;
       publishOnStep   = true;
+
+      if (finder != NULL)
+      {
+         delete finder;
+         finder = NULL;
+      }
 
       if (em != NULL)
       {
@@ -1136,13 +1142,22 @@ void PropagationEnabledCommand::InitializeForEventLocation()
    #endif
 
    if (currentEventData != NULL)
+   {
       delete [] currentEventData;
+      currentEventData = NULL;
+   }
    if (previousEventData != NULL)
+   {
       delete [] previousEventData;
+      previousEventData = NULL;
+   }
    if (tempEventData != NULL)
+   {
       delete [] tempEventData;
+      tempEventData = NULL;
+   }
 
-   if (eventBufferSize != 0)
+   if ((eventBufferSize != 0) /*&& (propagators.size() > 0)*/)
    {
       currentEventData = new Real[eventBufferSize];
       previousEventData = new Real[eventBufferSize];
@@ -1159,6 +1174,8 @@ void PropagationEnabledCommand::InitializeForEventLocation()
             previousEventData[dataIndex + j] = data[j];
       }
 
+      if (finder != NULL)
+         delete finder;
       finder = new Brent;
 
       // Create the EventModel used for propagation stepsize control
@@ -1202,6 +1219,11 @@ void PropagationEnabledCommand::InitializeForEventLocation()
       previousEventData = NULL;
       tempEventData = NULL;
    }
+
+   #ifdef DEBUG_EVENT_MODEL_FORCE
+      MessageInterface::ShowMessage("PropagationEnabledCommand::"
+         "InitializeForEventLocation finished\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
