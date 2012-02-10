@@ -1186,9 +1186,9 @@ void PropagationEnabledCommand::InitializeForEventLocation()
             #ifdef DEBUG_EVENT_MODEL_FORCE
                MessageInterface::ShowMessage("   Building model from map\n");
             #endif
-            if (propagators[index]->GetODEModel()->BuildModelFromMap() == false)
-               throw CommandException("Unable to assemble the ODE "
-                     "model  after adding an Event Model");
+            //if (propagators[index]->GetODEModel()->BuildModelFromMap() == false)
+            //   throw CommandException("Unable to assemble the ODE "
+            //         "model  after adding an Event Model");
          }
       }
    }

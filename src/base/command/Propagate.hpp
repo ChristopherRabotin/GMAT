@@ -178,8 +178,8 @@ protected:
 //   /// Starting epoch for the propagation
 //   std::vector<Real>            baseEpoch;
    
-   /// The propagator(s) used by this command
-   std::vector<PropSetup*>      prop;
+//   /// The propagator(s) used by this command
+//   std::vector<PropSetup*>      prop;
    /// The spacecraft and formations that are propagated
    ObjectArray                  sats;
    /// The stopping conditions

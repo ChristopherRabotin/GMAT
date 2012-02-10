@@ -197,7 +197,7 @@ Propagate::~Propagate()
       delete [] pubdata;
    }
 
-   for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end();
+   for (std::vector<PropSetup*>::iterator ps = propagators.begin(); ps != propagators.end();
         ++ps)
    {
       PropSetup *oldPs = *ps;
@@ -271,7 +271,7 @@ Propagate::Propagate(const Propagate &prp) :
    parameterCount = prp.parameterCount;
    initialized = false;
    baseEpoch.clear();
-   prop.clear();
+   propagators.clear();
    sats.clear();
    stopWhen.clear();
    stopSats.clear();
@@ -330,7 +330,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
 
    baseEpoch.clear();
 
-   for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end();
+   for (std::vector<PropSetup*>::iterator ps = propagators.begin(); ps != propagators.end();
         ++ps)
    {
       PropSetup *oldPs = *ps;
@@ -342,7 +342,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
       #endif
       delete oldPs;
    }
-   prop.clear();
+   propagators.clear();
 
    sats.clear();
    stopWhen.clear();
@@ -719,9 +719,9 @@ GmatBase* Propagate::GetRefObject(const Gmat::ObjectType type,
    switch (type)
    {
    case Gmat::PROP_SETUP:
-      if (index < (Integer)prop.size())
+      if (index < (Integer)propagators.size())
       {
-         return prop[index];
+         return propagators[index];
       }
       else
       {
@@ -1368,8 +1368,8 @@ bool Propagate::TakeAction(const std::string &action,
 
          propName.clear();
 
-         for (std::vector<PropSetup*>::iterator ps = prop.begin();
-              ps != prop.end(); ++ps)
+         for (std::vector<PropSetup*>::iterator ps = propagators.begin();
+              ps != propagators.end(); ++ps)
          {
             PropSetup *oldPs = *ps;
             *ps = NULL;
@@ -1380,7 +1380,7 @@ bool Propagate::TakeAction(const std::string &action,
             #endif
             delete oldPs;
          }
-         prop.clear();
+         propagators.clear();
          p.clear();
          fm.clear();
 
@@ -2664,7 +2664,7 @@ bool Propagate::Initialize()
    cloneCount = 0;
 
    // Remove old PropSetups
-   for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end();
+   for (std::vector<PropSetup*>::iterator ps = propagators.begin(); ps != propagators.end();
         ++ps)
    {
       PropSetup *oldPs = *ps;
@@ -2676,13 +2676,14 @@ bool Propagate::Initialize()
       #endif
       delete oldPs;
    }
-   if (prop.size() > 0)
+
+   if (propagators.size() > 0)
    {
-      for (std::vector<PropSetup*>::iterator ps = prop.begin();
-            ps != prop.end(); ++ps)
+      for (std::vector<PropSetup*>::iterator ps = propagators.begin();
+            ps != propagators.end(); ++ps)
          delete (*ps);
 
-      prop.clear();
+      propagators.clear();
       p.clear();
       fm.clear();
    }
@@ -2721,22 +2722,22 @@ bool Propagate::Initialize()
           "(PropSetup *)(mapObj->Clone())");
       #endif
       //prop.push_back((PropSetup *)(mapObj->Clone()));
-      prop.push_back(clonedProp);
+      propagators.push_back(clonedProp);
       ++cloneCount;
-      if (!prop[index])
+      if (!propagators[index])
          return false;
 
-      Propagator *p = prop[index]->GetPropagator();
+      Propagator *p = propagators[index]->GetPropagator();
       if (!p)
          throw CommandException("Propagator not set in PropSetup\n");
       p->TakeAction("PrepareForRun");
 
       // Toss the spacecraft into the prop state manager
-      ODEModel *odem = prop[index]->GetODEModel();
+      ODEModel *odem = propagators[index]->GetODEModel();
       if ((!odem) && p->UsesODEModel())
          throw CommandException("ForceModel not set in PropSetup\n");
 
-      PropagationStateManager *psm = prop[index]->GetPropStateManager();
+      PropagationStateManager *psm = propagators[index]->GetPropStateManager();
       StringArray::iterator scName;
 //      StringArray owners, elements;
 
@@ -2886,7 +2887,7 @@ bool Propagate::Initialize()
    owners.push_back("All");
    elements.push_back("All.epoch");
 
-   for (UnsignedInt i = 0; i < prop.size(); ++i)
+   for (UnsignedInt i = 0; i < propagators.size(); ++i)
    {
       for (StringArray::iterator scName = satName[i]->begin();
            scName != satName[i]->end(); ++scName)
@@ -3153,9 +3154,9 @@ void Propagate::PrepareToPropagate()
             #endif
 
             // Add the force
-            for (UnsignedInt index = 0; index < prop.size(); ++index)
+            for (UnsignedInt index = 0; index < propagators.size(); ++index)
             {
-               if (prop[index]->GetPropagator()->UsesODEModel())
+               if (propagators[index]->GetPropagator()->UsesODEModel())
                {
                   for (std::vector<PhysicalModel*>::iterator
                         i = transientForces->begin();
@@ -3167,10 +3168,10 @@ void Propagate::PrepareToPropagate()
                               "transientForce<%p>'%s'\n", *i,
                               (*i)->GetName().c_str());
                      #endif
-                     prop[index]->GetODEModel()->AddForce(*i);
+                     propagators[index]->GetODEModel()->AddForce(*i);
 
                      // Refresh ODE model mapping, since a new force was added
-                     if (prop[index]->GetODEModel()->BuildModelFromMap()
+                     if (propagators[index]->GetODEModel()->BuildModelFromMap()
                            == false)
                         throw CommandException("Unable to assemble the ODE "
                               "model  after adding a finite burn for " +
@@ -3186,20 +3187,20 @@ void Propagate::PrepareToPropagate()
          #endif
       }
 
-      for (Integer n = 0; n < (Integer)prop.size(); ++n)
+      for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {
          elapsedTime[n] = 0.0;
          currEpoch[n]   = 0.0;
-         if (prop[n]->GetPropagator()->UsesODEModel())
+         if (propagators[n]->GetPropagator()->UsesODEModel())
          {
             fm[n]->SetTime(0.0);
-            fm[n]->SetPropStateManager(prop[n]->GetPropStateManager());
+            fm[n]->SetPropStateManager(propagators[n]->GetPropStateManager());
             fm[n]->UpdateInitialData();
             dim += fm[n]->GetDimension();
          }
          else
          {
-            p[n]->SetPropStateManager(prop[n]->GetPropStateManager());
+            p[n]->SetPropStateManager(propagators[n]->GetPropStateManager());
             dim = p[n]->GetDimension();
          }
 
@@ -3209,7 +3210,7 @@ void Propagate::PrepareToPropagate()
 
       baseEpoch.clear();
 
-      for (Integer n = 0; n < (Integer)prop.size(); ++n)
+      for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {
          #if DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage
@@ -3232,7 +3233,7 @@ void Propagate::PrepareToPropagate()
          GmatBase* sat1 = FindObject(*satName[n]->begin());
          baseEpoch.push_back(sat1->GetRealParameter(epochID));
 
-         if (prop[n]->GetPropagator()->UsesODEModel())
+         if (propagators[n]->GetPropagator()->UsesODEModel())
          {
             elapsedTime[n] = fm[n]->GetTime();
          }
@@ -3246,8 +3247,8 @@ void Propagate::PrepareToPropagate()
          #if DEBUG_PROPAGATE_DIRECTION
             MessageInterface::ShowMessage(
                "Propagate::PrepareToPropagate() running %s %s.\n",
-               prop[n]->GetName().c_str(),
-               (prop[n]->GetPropagator()->GetRealParameter("InitialStepSize") > 0.0
+               propagators[n]->GetName().c_str(),
+               (propagators[n]->GetPropagator()->GetRealParameter("InitialStepSize") > 0.0
                   ? "forwards" : "backwards"));
              MessageInterface::ShowMessage("   direction =  %lf.\n",
                direction);
@@ -3330,7 +3331,7 @@ void Propagate::PrepareToPropagate()
    else
    {
       // Set the prop state managers for the PropSetup ODEModels
-      for (std::vector<PropSetup*>::iterator i=prop.begin(); i != prop.end(); ++i)
+      for (std::vector<PropSetup*>::iterator i=propagators.begin(); i != propagators.end(); ++i)
       {
          ODEModel *ode = (*i)->GetODEModel();
          if (ode != NULL)    // Only do this for the PropSetups that integrate
@@ -3347,7 +3348,7 @@ void Propagate::PrepareToPropagate()
       Initialize();
 
       // Loop through the PropSetups and build the models
-      for (std::vector<PropSetup*>::iterator i=prop.begin(); i != prop.end(); ++i)
+      for (std::vector<PropSetup*>::iterator i=propagators.begin(); i != propagators.end(); ++i)
       {
          #ifdef DEBUG_PROPAGATE_INIT
             MessageInterface::ShowMessage("Building models for Setup %s\n",
@@ -3378,14 +3379,14 @@ void Propagate::PrepareToPropagate()
       #ifdef DEBUG_PROPAGATE_INIT
          MessageInterface::ShowMessage("Loading p and fm vectors\n");
       #endif
-      for (Integer n = 0; n < (Integer)prop.size(); ++n)
+      for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {
          elapsedTime.push_back(0.0);
 
-         p.push_back(prop[n]->GetPropagator());
-         if (prop[n]->GetPropagator()->UsesODEModel())
+         p.push_back(propagators[n]->GetPropagator());
+         if (propagators[n]->GetPropagator()->UsesODEModel())
          {
-            fm.push_back(prop[n]->GetODEModel());
+            fm.push_back(propagators[n]->GetODEModel());
             dim += fm[n]->GetDimension();
          }
          else
@@ -3394,7 +3395,7 @@ void Propagate::PrepareToPropagate()
             dim += p[n]->GetDimension();
          }
 
-         psm.push_back(prop[n]->GetPropStateManager());
+         psm.push_back(propagators[n]->GetPropStateManager());
          currEpoch.push_back(psm[n]->GetState()->GetEpoch());
 
          #ifdef DEBUG_PROPAGATE_INIT
@@ -3404,7 +3405,7 @@ void Propagate::PrepareToPropagate()
          psm[n]->MapObjectsToVector();
 
          p[n]->Update(direction > 0.0);
-         if (prop[n]->GetPropagator()->UsesODEModel())
+         if (propagators[n]->GetPropagator()->UsesODEModel())
          {
             state = fm[n]->GetState();
             j2kState = fm[n]->GetJ2KState();
@@ -3543,7 +3544,7 @@ void Propagate::PrepareToPropagate()
    // Walk the PropSetups to load the pubdata array
    Integer index = 1, size;
    Real *js;
-   for (UnsignedInt i = 0; i < prop.size(); ++i)
+   for (UnsignedInt i = 0; i < propagators.size(); ++i)
    {
       if (p[i]->UsesODEModel())
       {
@@ -3805,7 +3806,7 @@ bool Propagate::Execute()
             // For each PropSetup, fill the appropriate array elements
             Integer index = 1;
             Integer size = 0;
-            for (UnsignedInt i = 0; i < prop.size(); ++i)
+            for (UnsignedInt i = 0; i < propagators.size(); ++i)
             {
                j2kState = p[i]->GetJ2KState();
                size = p[i]->GetDimension();
@@ -4613,7 +4614,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       #endif
 
       Integer index = 1, size;
-      for (UnsignedInt i = 0; i < prop.size(); ++i)
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
       {
          j2kState = p[i]->GetJ2KState();
          size = p[i]->GetDimension();
@@ -5412,8 +5413,8 @@ GmatBase* Propagate::GetClone(Integer cloneIndex)
    GmatBase *retPtr = NULL;
 
    /// todo: Handle the ancestor classes
-   if ((cloneIndex >= 0) && (cloneIndex < (Integer)prop.size()))
-      retPtr = prop[cloneIndex];
+   if ((cloneIndex >= 0) && (cloneIndex < (Integer)propagators.size()))
+      retPtr = propagators[cloneIndex];
 
    return retPtr;
 }
@@ -5519,8 +5520,8 @@ void Propagate::ClearTransientForces()
    PhysicalModel *pm;
 
    // Loop through the forces in each force model, and remove transient ones
-   for (std::vector<PropSetup*>::iterator p = prop.begin();
-        p != prop.end(); ++p)
+   for (std::vector<PropSetup*>::iterator p = propagators.begin();
+        p != propagators.end(); ++p)
    {
       if ((*p)->GetPropagator()->UsesODEModel())
       {
