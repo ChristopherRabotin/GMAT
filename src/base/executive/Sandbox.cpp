@@ -1178,7 +1178,7 @@ void Sandbox::Clear()
 /**
  *  Add Subcribers to the Sandbox and registers them with the Publisher.
  *
- *  @param <sub> The subscriber.
+ *  @param sub The subscriber.
  *
  *  @return true if the Subscriber was registered.
  */

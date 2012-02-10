@@ -47,6 +47,9 @@
 
 class Moderator;        // Forward reference for the moderator pointer
 
+/**
+ * The GMAT workspace for running missions
+ */
 class GMAT_API Sandbox
 {
 public:
