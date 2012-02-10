@@ -2878,26 +2878,6 @@ bool Propagate::Initialize()
       ++index;
    } // End of loop through PropSetups
 
-
-   if (em != NULL)
-   {
-      for (UnsignedInt index = 0; index < prop.size(); ++index)
-      {
-         if (prop[index]->GetPropagator()->UsesODEModel())
-         {
-            prop[index]->GetODEModel()->AddForce(em);
-
-//            // Refresh ODE model mapping, since a new force was added
-//            MessageInterface::ShowMessage("   Building model from map\n");
-//            if (prop[index]->GetODEModel()->BuildModelFromMap() == false)
-//               throw CommandException("Unable to assemble the ODE "
-//                     "model after adding an Event Model");
-         }
-      }
-   }
-
-
-
    // Prepare the locator buffers and data structures
    InitializeForEventLocation();
 

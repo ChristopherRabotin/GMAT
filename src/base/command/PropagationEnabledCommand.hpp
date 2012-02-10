@@ -31,7 +31,6 @@
 #include "Formation.hpp"
 #include "RootFinder.hpp"
 
-class EventModel;
 
 /// A convenient typedef used in this code
 typedef std::vector<GmatBase*> PropObjectArray;
@@ -130,8 +129,6 @@ protected:
    UnsignedInt          eventBufferSize;
    /// Root finder used in event location
    RootFinder           *finder;
-   /// Event model added to the ODEModel if events are present and integrated
-   EventModel           *em;
    /// Flag used to turn off publishing during event location
    bool                 publishOnStep;
 

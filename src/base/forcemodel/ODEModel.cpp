@@ -85,6 +85,7 @@
 //#define DEBUG_STM_AMATRIX_DERIVS
 //#define DEBUG_MU_MAP
 //#define DEBUG_PM_EPOCH
+//#define DEBUG_EVENTLOCATION
 
 
 //#ifndef DEBUG_MEMORY
@@ -501,6 +502,15 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
          pPhysicalModel->GetName().c_str());
    #endif
    
+	#ifdef DEBUG_EVENTLOCATION
+      if (pPhysicalModel->IsOfType("EventModel"))
+      {
+         MessageInterface::ShowMessage("Adding an EventModel at \n");
+         MessageInterface::ShowMessage("                        <%p>\n",
+            pPhysicalModel);
+      }
+   #endif
+
    pPhysicalModel->SetDimension(dimension);
    initialized = false;
    
@@ -1064,7 +1074,8 @@ bool ODEModel::BuildModelFromMap()
             {
 //               throw ODEModelException(
                MessageInterface::ShowMessage(
-                     "Failed to build an element of the ODEModel.\n");
+                     "Failed to build an element (id:%d) of the ODEModel.\n",
+                     id);
                
                retval = true;
             }
@@ -1075,6 +1086,7 @@ bool ODEModel::BuildModelFromMap()
          start = index;
          currentObject = NULL;
       }
+
       // Increment the count for each new object
       if (currentObject != (*map)[index]->object)
       {
@@ -1099,7 +1111,8 @@ bool ODEModel::BuildModelFromMap()
       {
          // throw ODEModelException(
          MessageInterface::ShowMessage(
-            "Failed to build an element of the ODEModel.\n");
+            "Failed to build an element (id=%d) of the ODEModel.\n",
+            id);
          retval = true;
       }
    }
@@ -1488,17 +1501,13 @@ void ODEModel::ClearForceList(bool deleteTransient)
 
       if (!pm->IsTransient() || (deleteTransient && pm->IsTransient()))
       {
-         // Event models are handled in the PropagationEnabledCommand code
-         if (!pm->IsOfType("EventModel"))
-         {
-            #ifdef DEBUG_MEMORY
+         #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Remove
                (pm, pm->GetName(), "ODEModel::~ODEModel()",
                 "deleting non-transient \"" + pm->GetTypeName() +
                 "\" PhysicalModel", this);
-            #endif
-            delete pm;
-         }
+         #endif
+         delete pm;
       }
       ppm = forceList.begin();
    }

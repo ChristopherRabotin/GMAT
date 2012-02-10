@@ -1338,18 +1338,27 @@ bool EventLocator::Initialize()
    }
 
    if (lastData != NULL)
+   {
       delete [] lastData;
+      lastData = NULL;
+   }
    if (lastEpochs != NULL)
+   {
       delete [] lastEpochs;
-   if (earlyBound != NULL)
-      delete [] earlyBound;
-   if (lateBound != NULL)
-      delete [] lateBound;
+      lastEpochs = NULL;
+   }
 
-//   earlyBound.clear();
-//   lateBound.clear();
-//   maxSpan.clear();
-//   lastSpan.clear();
+   if (earlyBound != NULL)
+   {
+      delete [] earlyBound;
+      earlyBound = NULL;
+   }
+
+   if (lateBound != NULL)
+   {
+      delete [] lateBound;
+      lateBound = NULL;
+   }
 
    if (efCount > 0)
    {
@@ -1369,16 +1378,6 @@ bool EventLocator::Initialize()
          stateIndices.insert(stateIndices.begin(), efCount, -1);
       if (associateIndices.size() == 0)
          associateIndices.insert(associateIndices.begin(), efCount, -1);
-
-//      earlyBound.push_back(0.0);
-//      lateBound.push_back(0.0);
-   }
-   else
-   {
-      lastData = NULL;
-      lastEpochs = NULL;
-      earlyBound = NULL;
-      lateBound = NULL;
    }
 
    functionValues.SetSize(efCount);
@@ -1579,6 +1578,16 @@ void EventLocator::ReportEventData()
    }
 }
 
+
+//------------------------------------------------------------------------------
+// bool FileWasWritten()
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating if the EventLocation data was written to a file
+ *
+ * @return The fileWasWritten flag.
+ */
+//------------------------------------------------------------------------------
 bool EventLocator::FileWasWritten()
 {
    return fileWasWritten;

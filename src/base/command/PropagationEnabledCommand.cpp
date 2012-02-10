@@ -76,7 +76,6 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    tempEventData        (NULL),
    eventBufferSize      (0),
    finder               (NULL),
-   em                   (NULL),
    publishOnStep        (true)
 {
    objectTypeNames.push_back("PropagationEnabledCommand");
@@ -123,9 +122,6 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
 
    if (finder != NULL)
       delete finder;
-
-   if (em != NULL)
-      delete em;
 }
 
 
@@ -156,7 +152,6 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    tempEventData        (NULL),
    eventBufferSize      (0),
    finder               (NULL),
-   em                   (NULL),
    publishOnStep        (true)
 {
    initialized = false;
@@ -227,12 +222,6 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
       {
          delete finder;
          finder = NULL;
-      }
-
-      if (em != NULL)
-      {
-         delete em;
-         em = NULL;
       }
    }
 
@@ -1178,29 +1167,19 @@ void PropagationEnabledCommand::InitializeForEventLocation()
          delete finder;
       finder = new Brent;
 
-      // Create the EventModel used for propagation stepsize control
-      #ifdef DEBUG_EVENT_MODEL_FORCE
-         MessageInterface::ShowMessage("***Building event model force***\n");
-      #endif
-      if (em != NULL)
-         delete em;
-      em = new EventModel();
-      #ifdef DEBUG_EVENT_MODEL_FORCE
-         MessageInterface::ShowMessage("   Created at %p\n", em);
-      #endif
-      em->SetEventLocators(events);
-      #ifdef DEBUG_EVENT_MODEL_FORCE
-         MessageInterface::ShowMessage("   Events set\n   %d propagators\n",
-               propagators.size());
-      #endif
+      /// @todo: be sure the EM is added to force models 
       for (UnsignedInt index = 0; index < propagators.size(); ++index)
       {
          if (propagators[index]->GetPropagator()->UsesODEModel())
          {
             #ifdef DEBUG_EVENT_MODEL_FORCE
-               MessageInterface::ShowMessage("   Adding to %s\n",
+               MessageInterface::ShowMessage("   Adding event model to %s\n",
                      propagators[index]->GetName().c_str());
             #endif
+
+            // Changed paradigm here -- event model belongs to ODEModel
+            EventModel *em = new EventModel();
+            em->SetEventLocators(events);
             propagators[index]->GetODEModel()->AddForce(em);
 
             // Refresh ODE model mapping, since a new force was added
