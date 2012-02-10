@@ -246,7 +246,7 @@ void SolverBranchCommand::StoreLoopData()
          EventLocator *el  = (EventLocator*)orig->Clone();
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
-            ((GmatBase*)form, "cloned local eventLocator",
+            ((GmatBase*)el, "cloned local eventLocator",
              "SolverBranchCommand::StoreLoopData()",
              "EventLocator *el  = new EventLocator(*orig)");
          #endif
@@ -306,7 +306,7 @@ void SolverBranchCommand::StoreLoopData()
          EventLocator *el  = (EventLocator*)orig->Clone();
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
-            ((GmatBase*)form, "cloned local eventLocator",
+            ((GmatBase*)el, "cloned local eventLocator",
              "SolverBranchCommand::StoreLoopData()",
              "EventLocator *el  = new EventLocator(*orig)");
          #endif
