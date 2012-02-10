@@ -4424,7 +4424,7 @@ bool CelestialBody::SetUpSPICE()
                      spkName.c_str());
                   #endif
                }
-               catch (UtilityException &ue2)
+               catch (UtilityException &)
                {
                   MessageInterface::ShowMessage("ERROR loading kernel %s\n",
                      (spkName.c_str()));

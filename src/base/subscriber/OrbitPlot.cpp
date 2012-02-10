@@ -944,7 +944,7 @@ bool OrbitPlot::SetStringParameter(const Integer id, const std::string &value)
                   AddSpacePoint(spList[i], mAllSpCount);
                return true;
             }
-            catch (BaseException &e)
+            catch (BaseException &)
             {
                SubscriberException se;
                se.SetDetails(errorMessageFormat.c_str(), value.c_str(),

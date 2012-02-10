@@ -559,12 +559,12 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
             if (!(current->Execute()))
                return false;
          }
-         catch (HardwareException &he)
+         catch (HardwareException &)
          {
             // Ignore for hardware exception since spacecraft is associated with Thruster
             // but Thruster binds with Tank later in the fcs
          }
-         catch (BaseException &be)
+         catch (BaseException &)
          {
             throw FunctionException
                ("During initialization of local objects before \"" +
