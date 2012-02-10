@@ -5589,14 +5589,24 @@ void GuiItemManager::AddToAllObjectArray()
 	{
 		objStr = theAllObjectList[i];
 		objName = objStr.BeforeFirst(' ');
+            
+      GmatBase *obj = theGuiInterpreter->GetConfiguredObject(objName.c_str());
       
       #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
       MessageInterface::ShowMessage
-         ("   objStr = '%s', objName = '%s'\n", objStr.c_str(), objName.c_str());
+         ("   objStr = '%s', objName = '%s', obj = <%p>'%s'\n", objStr.c_str(),
+          objName.c_str(), obj, obj ? obj->GetName().c_str() : "NULL");
       #endif
       
-		if (theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
+		if (obj && obj->IsAutomaticGlobal())
+      {
+         #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+         MessageInterface::ShowMessage
+            ("   objName: '%s' is global object so adding to theAutoGlobalObjectList\n",
+             objName.c_str());
+         #endif
 			theAutoGlobalObjectList.Add(objName);
+      }
 	}
 	
    //-------------------------------------------------------
