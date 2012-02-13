@@ -64,9 +64,10 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
    hasFileLoaded = false;
    mShowScriptButton = showScriptButton;
    mFilename = filename;
+   if (mFilename == "")
+      mFilename = GmatAppData::Instance()->GetTempScriptName().c_str();
    mShowScriptActiveStatus = showScriptActiveStatus;
    mIsScriptActive = isScriptActive;
-   mFilename = GmatAppData::Instance()->GetTempScriptName().c_str();
    theParent = parent;
    
    int borderSize = 2;
