@@ -2839,7 +2839,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             menu.Append(MT_INSERT_BEFORE, wxT("Insert Before"),
                         CreateSubMenu(itemType, INSERT_BEFORE));
             menu.Append(MT_INSERT_AFTER, wxT("Insert After"),
-                        CreateTargetSubMenu(itemType, INSERT_AFTER));
+                        CreateSubMenu(itemType, INSERT_AFTER));
          }
          else if (itemType == GmatTree::OPTIMIZE)
          {
@@ -2848,7 +2848,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             menu.Append(MT_INSERT_BEFORE, wxT("Insert Before"),
                         CreateSubMenu(itemType, INSERT_BEFORE));
             menu.Append(MT_INSERT_AFTER, wxT("Insert After"),
-                        CreateOptimizeSubMenu(itemType, INSERT_AFTER));
+                        CreateSubMenu(itemType, INSERT_AFTER));
          }
          else if (itemType == GmatTree::END_TARGET)
          {
