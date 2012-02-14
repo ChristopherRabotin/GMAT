@@ -166,7 +166,7 @@ help.html: help-pre.xml files/style.css
 
 html/index.html: help-pre.xml files/style.css
 	$(XALAN) \
-	    -PARAM base.dir ../html/ \
+	    -PARAM base.dir html/ \
 	    -PARAM img.src.path ../ \
 	    -PARAM html.stylesheet ../files/style.css \
 	    -PARAM chunk.quietly 1 \
@@ -181,7 +181,7 @@ files/style.css: $(srcdir)/files/style.css
 
 help.chm: help-pre.xml files/style.css
 	$(XALAN) \
-	    -PARAM base.dir ../chm/ \
+	    -PARAM base.dir chm/ \
 	    -PARAM manifest.in.base.dir 1 \
 	    -PARAM chunk.quietly 1 \
 	    -PARAM chunk.section.depth 0 \
