@@ -26,7 +26,7 @@
 
 //#define DEBUG_PLOT_IA
 //#define DEBUG_PLOT_INIT
-
+//#define DEBUG_TAKE_ACTION
 
 //---------------------------------
 // static data
@@ -110,6 +110,43 @@ PlotCommand& PlotCommand::operator=(const PlotCommand &c)
    }
    
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ *
+ * @return true if action successfully performed
+ */
+//------------------------------------------------------------------------------
+bool PlotCommand::TakeAction(const std::string &action, const std::string &actionData)
+{
+   #ifdef DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("PlotCommand::TakeAction() entered, action=%s, actionData=%s, plotNameList.size=%d, "
+       "thePlotList.size=%d\n", action.c_str(), actionData.c_str(), plotNameList.size(),
+       thePlotList.size());
+   #endif
+   
+   if (action == "Clear")
+   {
+      plotNameList.clear();
+      thePlotList.clear();
+   }
+   
+   #ifdef DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("PlotCommand::TakeAction() returning GmatCommand::TakeAction()\n");
+   #endif
+   
+   return GmatCommand::TakeAction(action, actionData);
 }
 
 

@@ -34,6 +34,7 @@
 //#define DEBUG_TOGGLE_SET
 //#define DEBUG_TOGGLE_INIT
 //#define DEBUG_TOGGLE_EXE
+//#define DEBUG_TAKE_ACTION
 
 // class constructor
 //------------------------------------------------------------------------------
@@ -245,7 +246,7 @@ GmatBase* Toggle::Clone(void) const
 
 //------------------------------------------------------------------------------
 // virtual bool TakeAction(const std::string &action,  
-//                         const std::string &actionData = "");
+//                         const std::string &actionData = "")
 //------------------------------------------------------------------------------
 /**
  * This method performs action.
@@ -258,20 +259,26 @@ GmatBase* Toggle::Clone(void) const
 //------------------------------------------------------------------------------
 bool Toggle::TakeAction(const std::string &action, const std::string &actionData)
 {
-   #if DEBUG_TAKE_ACTION
+   #ifdef DEBUG_TAKE_ACTION
    MessageInterface::ShowMessage
-      ("Toggle::TakeAction() action=%s, actionData=%s\n",
-       action.c_str(), actionData.c_str());
+      ("Toggle::TakeAction() entered, action=%s, actionData=%s, subNames.size=%d, "
+       "subs.size=%d\n", action.c_str(), actionData.c_str(), subNames.size(), subs.size());
    #endif
    
    if (action == "Clear")
    {
       subNames.clear();
-      return true;
+      subs.clear();
    }
-
-   return false;
+   
+   #ifdef DEBUG_TAKE_ACTION
+   MessageInterface::ShowMessage
+      ("PlotCommand::TakeAction() returning GmatCommand::TakeAction()\n");
+   #endif
+   
+   return GmatCommand::TakeAction(action, actionData);
 }
+
 
 //------------------------------------------------------------------------------
 // const ObjectTypeArray& GetRefObjectTypeArray()

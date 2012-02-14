@@ -36,7 +36,9 @@ public:
    virtual          ~PlotCommand();
    PlotCommand(const PlotCommand &c);
    PlotCommand&      operator=(const PlotCommand &c);
-      
+   
+   virtual bool         TakeAction(const std::string &action,  
+                                   const std::string &actionData = "");
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
