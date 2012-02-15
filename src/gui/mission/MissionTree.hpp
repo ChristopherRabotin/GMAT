@@ -185,7 +185,8 @@ private:
    GmatTree::ItemType GetCommandId(const wxString &cmd);
    void ResetCommandCounter(const wxString &cmd, bool resetAll = false);
    int  GetCommandCounter(const wxString &cmd);
-   
+   int  GetNameFromUser(wxString &newName, const wxString &oldName = "",
+                        const wxString &msg = "", const wxString &caption = "");
    void CreateCommandIdMap();
    void CreateCommandCounterMap();
    void CreateMenuIds(const wxString &cmd, int index);

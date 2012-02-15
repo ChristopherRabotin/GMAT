@@ -1508,7 +1508,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    }
    
    
-   //@Note "BeginFiniteBurn" is not a branch command but need "EndFiniteBurn"
+   //@Note "BeginFiniteBurn" is not a branch command but it pairs with "EndFiniteBurn"
    
    //------------------------------------------------------------
    // Create End* command if branch command
@@ -3221,7 +3221,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(currId);
    MissionTreeItemData *item = (MissionTreeItemData *)selItem;
    GmatCommand *cmd = item->GetCommand();
-   wxString cmdName = GetItemText(currId);
+   wxString oldName = GetItemText(currId);
    
    // if panel is currently opened give warning and return
    // Bug 547 fix (loj: 2008.11.25)
@@ -3248,16 +3248,22 @@ void MissionTree::OnRename(wxCommandEvent &event)
    //mLastClickPoint.y += 100;
    //ViewTextDialog renameDlg(this, wxT("Rename"), true, true, mLastClickPoint,
    //                         wxSize(100, -1), wxDEFAULT_DIALOG_STYLE);
-   //renameDlg.AppendText(cmdName);
+   //renameDlg.AppendText(oldName);
    //renameDlg.ShowModal();
    
-   wxString newName =
-      wxGetTextFromUser(wxT("Enter new command name:"), wxT("Rename"), cmdName, this);
+   //LOJ: 2012.02.15
+   // Added a new method GetNameFromUser() and call this method
+   //wxString newName =
+   //   wxGetTextFromUser(wxT("Enter new command name:"), wxT("Rename"), oldName, this);
    
-   if (newName != "")
-   //if (renameDlg.HasTextChanged())
+   wxString newName = oldName;
+   wxString name;
+   if (GetNameFromUser(name, oldName, "Enter new command name:", "Rename") == 1)
+      newName = name;
+   
+   //if (newName != "")
+   if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
-      //wxString newName = renameDlg.GetText();
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
          ("  Setting command name to '%s'\n", newName.c_str());
@@ -4143,6 +4149,50 @@ int MissionTree::GetCommandCounter(const wxString &cmd)
    }
    
    return cmdCounter;
+}
+
+
+//------------------------------------------------------------------------------
+// int GetNameFromUser(wxString &newName, const wxString &oldName = "",
+//                     const wxString &msg = "", const wxString &caption = "")
+//------------------------------------------------------------------------------
+/**
+ * Gets command name from a user until valid name is entered or canceld
+ *
+ * @return  1  Valid name entered
+ *          2  User canceled or no changes made
+ */
+//------------------------------------------------------------------------------
+int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
+                                 const wxString &msg, const wxString &caption)
+{
+   newName = wxGetTextFromUser(wxT(msg), wxT(caption), oldName, this);
+   
+   // @note
+   // There is no way of kwowing whether user entered blank and clicked OK
+   // or just clicked Cancel, since wxGetTextFromUser() returns blank for
+   // both cases. So if blank is returned, no change is assumed. (loj: 2008.08.29)
+   if (newName == "")
+      return 2;
+   
+   // Remove leading and trailing white spaces
+   newName = newName.Strip(wxString::both);
+   std::string stdNewName = newName.c_str();
+   std::string::size_type index1 = stdNewName.find('\'', 0);
+   
+   // single quote is not allowd, so check it first
+   if (index1 != stdNewName.npos)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "\"%s\" - Single quotes within a command name is not allowed.\n"
+          "Please reenter without single quotes.", newName.c_str());
+      
+      return GetNameFromUser(newName, newName, msg, caption);
+   }
+   else
+   {
+      return 1;
+   }
 }
 
 

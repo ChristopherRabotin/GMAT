@@ -219,7 +219,7 @@ protected:
    AxisSystem* CreateAxisSystem(std::string type, GmatBase *owner);
    
    // for commands
-   void         ParseAndSetCommandName(GmatCommand *cmd, const std::string &cmdType,
+   bool         ParseAndSetCommandName(GmatCommand *cmd, const std::string &cmdType,
                                        const std::string &desc, std::string &newDesc);
    GmatCommand* CreateCommand(const std::string &type, const std::string &desc,
                               bool &retFlag, GmatCommand *inCmd = NULL);

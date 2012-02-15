@@ -79,6 +79,7 @@
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
+//#define DEBUG_CREATE_COMMAND 1
 //#define DEBUG_CREATE_CALC_POINT
 //#define DEBUG_CREATE_PARAMETER 1
 //#define DEBUG_CREATE_EPHEMFILE 1
@@ -5655,24 +5656,36 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
 //------------------------------------------------------------------------------
 bool Moderator::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 {
-   #if DEBUG_RESOURCE_COMMAND
+   #if DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("==========> Moderator::AppendCommand() cmd=(%p)%s\n",
-       cmd, cmd->GetTypeName().c_str());
+      ("==========> Moderator::AppendCommand(*cmd) entered, cmd=<%p><%s>'%s'\n",
+       cmd, cmd->GetTypeName().c_str(), cmd->GetName().c_str());
    #endif
    
    // Get last command and append
    GmatCommand *lastCmd = GmatCommandUtil::GetLastCommand(commands[sandboxNum-1]);
    
-   #if DEBUG_RESOURCE_COMMAND
+   #if DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("     lastCmd=(%p)%s\n", lastCmd, lastCmd->GetTypeName().c_str());
+      ("     lastCmd=<%p><%s>'%s'\n", lastCmd, lastCmd->GetTypeName().c_str(),
+       lastCmd->GetName().c_str());
    #endif
    
+   bool retflag = false;
+   
    if (lastCmd != NULL)
-      return lastCmd->Append(cmd);
+      retflag = lastCmd->Append(cmd);
    else
-      return commands[sandboxNum-1]->Append(cmd);
+      retflag = commands[sandboxNum-1]->Append(cmd);
+   
+   #if DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("==========> Moderator::AppendCommand(*cmd) returning %s, cmd=<%p><%s>'%s'\n",
+       retflag ? "true" : "false", cmd, cmd->GetTypeName().c_str(),
+       cmd->GetName().c_str());
+   #endif
+   
+   return retflag;
 }
 
 
@@ -5680,13 +5693,24 @@ bool Moderator::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 // GmatCommand* AppendCommand(const std::string &type, const std::string &name,
 //                           bool &retFlag, Integer sandboxNum)
 //------------------------------------------------------------------------------
+/**
+ * Creates a command of type and appends to the last command in the sequence.
+ *
+ * @param  type  The type of the command to be created
+ * @param  name  The name of the command to be created
+ * @param  retFlag  The return flag
+ * @param  sandboxNum  The sandbox number
+ *
+ * @ruturn  Returns the new command just created
+ */
+//------------------------------------------------------------------------------
 GmatCommand* Moderator::AppendCommand(const std::string &type,
                                       const std::string &name, bool &retFlag,
                                       Integer sandboxNum)
 {
-   #if DEBUG_RESOURCE_COMMAND
+   #if DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("==========> Moderator::AppendCommand() type='%s', name='%s'\n",
+      ("==========> Moderator::AppendCommand(type) entered, type='%s', name='%s'\n",
        type.c_str(), name.c_str());
    #endif
    
@@ -5712,10 +5736,10 @@ GmatCommand* Moderator::AppendCommand(const std::string &type,
          ("The Moderator cannot create a Command type \"" + type + "\"\n");
    }
    
-   #if DEBUG_RESOURCE_COMMAND
+   #if DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("==========> Moderator::AppendCommand() returning <%p>, retFlag=%d\n",
-       cmd, retFlag);
+      ("==========> Moderator::AppendCommand(type) returning <%p><%s>'%s', retFlag=%d\n",
+       cmd, cmd->GetTypeName().c_str(), cmd->GetName().c_str(), retFlag);
    #endif
    
    return cmd;
