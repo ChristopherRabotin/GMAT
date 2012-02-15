@@ -53,8 +53,10 @@ BeginFiniteBurn::BeginFiniteBurn() :
    transientForces    (NULL),
    firstTimeExecution (true)
 {
-   if (instanceName == "")
-      instanceName = "BeginFiniteBurn";
+   //LOJ: 2012.02.15 (For GMT-329 fix)
+   //Commented out  since we don't want give it a name in the constructor
+   //if (instanceName == "")
+   //   instanceName = "BeginFiniteBurn";
    physicsBasedCommand = true;
 }
 
