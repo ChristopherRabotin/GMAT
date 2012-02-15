@@ -5357,10 +5357,24 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
                {
                   ownedObj = CreateObject(valueToUse, ownedName, 0);
                   if (ownedObj == NULL)
-                     MessageInterface::ShowMessage
-                        ("*** WARNING *** Owned object %s was not created for "
-                         "'%s'; using default\n", ownedName.c_str(),
-                         obj->GetName().c_str());
+                  {
+                     // Special case for non-blank invalid axes types (though this should never be called if it's blank)
+                     if ((obj->IsOfType("CoordinateSystem")) && (obj->GetParameterText(id) == "Axes") &&
+                         (valueToUse != ""))
+                     {
+                        std::string errmsg = "\"" + valueToUse;
+                        errmsg += "\" is an invalid value for field \"Axes\" on coordinate system \"";
+                        errmsg += obj->GetName() + "\".\n";
+                        throw InterpreterException(errmsg);
+                     }
+                     else
+                     {
+                        MessageInterface::ShowMessage
+                           ("*** WARNING *** Owned object %s was not created for "
+                            "'%s'; using default\n", ownedName.c_str(),
+                            obj->GetName().c_str());
+                     }
+                  }
                }
             }
             
