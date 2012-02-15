@@ -5380,12 +5380,22 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
             MessageInterface::ShowMessage("In SC::SetElement, csSet = TRUE\n");
          #endif
+         StateConversionUtil::ValidateValue(label, value);
          Rvector6 tempState = GetStateInRepresentation(rep);
          tempState[id] = value;
          SetStateFromRepresentation(rep, tempState);
       }
       else
       {
+         // if we're setting RadApo, and RadPer has been set, also check for value relative to RadPer
+         if ((rep == "ModifiedKeplerian") && (label == "RadApo") && (state[0] != UNSET_ELEMENT_VALUE))
+         {
+            StateConversionUtil::ValidateValue(label, value, "RadPer", state[0]);
+         }
+         else
+         {
+            StateConversionUtil::ValidateValue(label, value);
+         }
          #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
             MessageInterface::ShowMessage("In SC::SetElement, csSet = FALSE\n");
          #endif

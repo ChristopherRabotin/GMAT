@@ -76,6 +76,7 @@
 #include "MessageInterface.hpp"
 //#include "Anomaly.hpp"
 #include "StateConversionUtil.hpp"
+#include "RealUtilities.hpp"
 #include <sstream>
 #include <wx/config.h>
 
@@ -1793,9 +1794,9 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
 
    if (theScPanel->CheckReal(state[0], mElements[0], "RadPer", "Real Number"))
    {
-      if (state[0] == 0.0)
+      if (state[0] <= 0.0)
       {
-         theScPanel->CheckReal(state[0], mElements[0], "RadPer", "Real Number != 0.0", true);
+         theScPanel->CheckReal(state[0], mElements[0], "RadPer", "Real Number > 0.0", true);
          retval = false;
          canClose = false;
       }
@@ -1807,12 +1808,18 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
    
    if (theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number"))
    {
-//      if (state[1] < 0.0) // RadApo can be negative
-//      {
-//         theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number >= 0.0", true);
-//         retval = false;
-//         canClose = false;
-//      }
+      if (GmatMathUtil::IsEqual(state[1], 0.0, 0.001))
+      {
+         theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number != 0.0", true);
+         retval = false;
+         canClose = false;
+      }
+      else if ((state[1] > 0.0) && (state[1] < state[0]))
+      {
+         theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number < 0.0 if RadApo < RadPer", true);
+         retval = false;
+         canClose = false;
+      }
    }
    else
    {

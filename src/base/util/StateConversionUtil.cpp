@@ -30,6 +30,7 @@
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
 #include "UtilityException.hpp"
+#include "StringUtil.hpp"
 
 //#define DEBUG_EQUINOCTIAL
 //#define DEBUG_STATE_CONVERSION
@@ -51,6 +52,7 @@
 //#define DEBUG_ANOMALY_MA
 //#define DEBUG_MODKEP_TO_KEP
 //#define DEBUG_CONVERT_ERRORS
+//#define DEBUG_SC_CONVERT_VALIDATE
 
 using namespace GmatMathUtil;
 using namespace GmatMathConstants;
@@ -666,7 +668,7 @@ Rvector6 StateConversionUtil::KeplerianToCartesian(Real mu, const Rvector6 &stat
                std::stringstream errmsg;
                errmsg.precision(12);
                errmsg << "\nError: The TA value is not physically possible for a hyperbolic orbit ";
-               errmsg << "with the input values of SMA and ECC.\nThe allowed values are: ";
+               errmsg << "with the input values of SMA and ECC (or RadPer and RadApo).\nThe allowed values are: ";
                errmsg << "[" << -possible << " < TA < " << possible << " (degrees)]\nor equivalently: ";
                errmsg << "[TA < " << possible << " or TA > " << (360.0 - possible) << " (degrees)]\n";
                throw UtilityException(errmsg.str());
@@ -970,6 +972,10 @@ Rvector6 StateConversionUtil::CartesianToSphericalAZFPA(const Rvector6& cartesia
 //------------------------------------------------------------------------------
 Rvector6 StateConversionUtil::SphericalAZFPAToCartesian(const Rvector6& spherical)
 {
+   #ifdef DEBUG_STATE_CONVERSION
+      MessageInterface::ShowMessage("Entering SphericalAZFPAToCartesian: spherical = %s\n",
+            spherical.ToString().c_str());
+   #endif
    Real     rMag    = spherical[0]; // magnitude of the position vector
    Real     lambda  = spherical[1] * RAD_PER_DEG; // right ascension
    Real     delta   = spherical[2] * RAD_PER_DEG; // declination
@@ -2031,8 +2037,61 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
    return h;
 }
 
+
 //------------------------------------------------------------------------------
-// static const std::string* GetStateTypeList()
+// bool ValidateValue(const std::string& label,          Real value,
+//                    const std::string &compareTo = "", Real compareValue = 0.0)
+//------------------------------------------------------------------------------
+bool StateConversionUtil::ValidateValue(const std::string &label,     Real value,
+                                        const std::string &compareTo, Real compareValue)
+{
+   #ifdef DEBUG_SC_CONVERT_VALIDATE
+      MessageInterface::ShowMessage(
+            "Entering SCU::ValidateValue with label = %s, value = %le, compareTo = %s, compareValue = %le\n",
+            label.c_str(), value, compareTo.c_str(), compareValue);
+   #endif
+
+   std::string labelUpper   = GmatStringUtil::ToUpper(label);
+   std::string compareUpper = GmatStringUtil::ToUpper(compareTo);
+
+   if ((labelUpper == "X")                     || (labelUpper == "Y")                  || (labelUpper == "Z")                        ||
+       (labelUpper == "VX")                    || (labelUpper == "VY")                 || (labelUpper == "VZ"))
+   {
+      return true;
+   }
+   else if (labelUpper == "RADAPO")
+   {
+      if (compareUpper == "RADPER")
+      {
+         if ((value > 0) && (value < compareValue))
+         {
+            throw UtilityException("If RadApo < RadPer then RadApo must be negative.  "
+                                   "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.");
+         }
+      }
+      else if (IsEqual(value, 0.0, .001))
+      {
+         throw UtilityException("Radius of Apoapsis must not be zero");
+      }
+   }
+   else if (labelUpper == "RADPER")
+   {
+      if (value < 0)
+      {
+         throw UtilityException("Radius of Periapsis must be greater than zero");
+      }
+      else if (IsEqual(value, 0.0, .001))
+      {
+         throw UtilityException("Parabolic orbits are not currently supported.  "
+                                "Radius of Periapsis must be greater than zero");
+      }
+   }
+
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// const std::string* GetStateTypeList()
 //------------------------------------------------------------------------------
 const std::string* StateConversionUtil::GetStateTypeList()
 {
