@@ -393,32 +393,44 @@ ItrfCoefficientsFile* CoordinateSystem::GetItrfCoefficientsFile()
 Rmatrix33 CoordinateSystem::GetLastRotationMatrix() const
 {
    if (!axes) 
-      throw CoordinateSystemException("No AxisSystem defined for " 
-            + instanceName);
+   {
+      std::string errmsg = "No AxisSystem defined for coordinate system \"";
+      errmsg += instanceName + "\".\n";
+      throw CoordinateSystemException(errmsg);
+   }
    return axes->GetLastRotationMatrix();
 }
 
 void CoordinateSystem::GetLastRotationMatrix(Real *mat) const
 {
    if (!axes) 
-      throw CoordinateSystemException("No AxisSystem defined for " 
-            + instanceName);
+   {
+      std::string errmsg = "No AxisSystem defined for coordinate system \"";
+      errmsg += instanceName + "\".\n";
+      throw CoordinateSystemException(errmsg);
+   }
    axes->GetLastRotationMatrix(mat);
 }
 
 Rmatrix33 CoordinateSystem::GetLastRotationDotMatrix() const
 {
    if (!axes) 
-      throw CoordinateSystemException("No AxisSystem defined for " 
-            + instanceName);
+   {
+      std::string errmsg = "No AxisSystem defined for coordinate system \"";
+      errmsg += instanceName + "\".\n";
+      throw CoordinateSystemException(errmsg);
+   }
    return axes->GetLastRotationDotMatrix();
 }
 
 void CoordinateSystem::GetLastRotationDotMatrix(Real *mat) const
 {
    if (!axes) 
-      throw CoordinateSystemException("No AxisSystem defined for " 
-            + instanceName);
+   {
+      std::string errmsg = "No AxisSystem defined for coordinate system \"";
+      errmsg += instanceName + "\".\n";
+      throw CoordinateSystemException(errmsg);
+   }
    axes->GetLastRotationDotMatrix(mat);
 }
 
