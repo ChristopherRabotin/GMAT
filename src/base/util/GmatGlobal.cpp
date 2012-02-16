@@ -630,6 +630,9 @@ GmatGlobal::GmatGlobal()
    plotMode = NORMAL_PLOT;
    matlabMode = SHARED;
    matlabExt = "__m__";
+   
+   SetDefaultFormat();
+   SetToDefaultFormat();
 }
 
 
