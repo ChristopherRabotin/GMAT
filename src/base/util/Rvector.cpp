@@ -688,6 +688,8 @@ std::string Rvector::ToString(bool useCurrentFormat, bool scientific,
    if (!useCurrentFormat)
       global->SetActualFormat(scientific, showPoint, precision, width, horizontal,
                               spacing, prefix, appendEol);
+   // Set append EOL flag
+   global->SetAppendEol(appendEol);
    
    std::stringstream ss("");
    ss << *this;
