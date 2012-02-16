@@ -77,15 +77,6 @@ using namespace FloatAttUtil;
 #endif
 #endif
 
-
-// if test Euler angle on mouse event
-//#define COMPUTE_EULER_ANGLE
-#ifdef COMPUTE_EULER_ANGLE
-#include "AttitudeUtil.hpp"
-//#define USE_MODELVIEW_MAT
-//#define DEBUG_TRAJCANVAS_EULER 1
-#endif
-
 // For the newer (wx 2.7.x+) method, create a wxGLCanvas window using the
 // constructor that does not create an implicit rendering context, create
 // an explicit instance of a wxGLContext that is initialized with the
@@ -107,16 +98,17 @@ using namespace FloatAttUtil;
 //#define DEBUG_INIT 1
 //#define DEBUG_ACTION 1
 //#define DEBUG_CONVERT 1
-//#define DEBUG_DRAW 1
+//#define DEBUG_DRAW 2
+//#define DEBUG_DRAW_STARS 1
 //#define DEBUG_ZOOM 1
 //#define DEBUG_OBJECT 2
-//#define DEBUG_PERSPECTIVE 1
-//#define DEBUG_PROJECTION 1
+//#define DEBUG_VIEW_OPTIONS 1
+//#define DEBUG_DRAWING_OPTIONS
 //#define DEBUG_CS 1
 //#define DEBUG_ANIMATION 1
 //#define DEBUG_LONGITUDE 1
 //#define DEBUG_SHOW_SKIP 1
-//#define DEBUG_ROTATE_BODY 2
+//#define DEBUG_ROTATE_BODY 1
 //#define DEBUG_DATA_BUFFERRING
 //#define DEBUG_ORBIT_LINES
 
@@ -178,7 +170,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    
    #if DEBUG_INIT
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas() name = '%s', size.X = %d, size.Y = %d\n",
+      ("OrbitViewCanvas() entered, name = '%s', size.X = %d, size.Y = %d\n",
        name.c_str(), size.GetWidth(), size.GetHeight());
    #endif
    
@@ -233,17 +225,12 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mDefaultRotZAngle = 0.0;
    mDefaultViewDist = DEFAULT_DIST;
    
-   // view model
-   mUseGluLookAt = true;
-      
-   //mAxisLength = mCurrViewDist;
    mAxisLength = DEFAULT_DIST;
    
    mOriginName = "";
    mOriginId = 0;
    
    //original value
-   
    mZoomAmount = 300.0;
    
    // projection
@@ -263,6 +250,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mDrawXyPlane = false;
    mDrawEcPlane = false;
    mDrawAxes = false;
+   mPolygonMode = GL_FILL;
    mNeedAttitude = true;
    
    mXyPlaneColor = GmatColor::NAVY32;
@@ -320,7 +308,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    if (pViewCoordSystem)
       MessageInterface::ShowMessage
          ("   pViewCoordSystem=%s\n", pViewCoordSystem->GetName().c_str());
-   MessageInterface::ShowMessage("OrbitViewCanvas() constructor exiting\n");
+   MessageInterface::ShowMessage("OrbitViewCanvas() constructor exiting\n\n");
    #endif
 }
 
@@ -649,9 +637,11 @@ void OrbitViewCanvas::SetGlObject(const StringArray &objNames,
 
    ViewCanvas::SetGlObject(objNames, objOrbitColors, objArray);
    
+   // We don't want do set default view here since SetDefaultViewPoint() resets
+   // mViewPointInitialized to false which makes mUseInitialViewPoint flag useless
    // Initialize objects used in view
-   SetDefaultViewPoint();
-      
+   //SetDefaultViewPoint();
+   
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
       ("OrbitViewCanvas::SetGlObject() '%s' leaving\n", mPlotName.c_str());
@@ -707,6 +697,15 @@ void OrbitViewCanvas::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
                                            bool drawConstellations,
                                            Integer starCount)
 {
+   #ifdef DEBUG_DRAWING_OPTIONS
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::SetGl3dDrawingOption() entered, drawEcPlane=%d, "
+       "drawXyPlane=%d, drawWireFrame=%d\n   drawAxes=%d, drawGrid=%d, drawSunLine=%d, "
+       "usevpInfo=%d, drawStars=%d, drawConstellations=%d, starCount=%d\n",
+       drawEcPlane, drawXyPlane, drawWireFrame, drawAxes, drawGrid, drawSunLine,
+       usevpInfo, drawStars, drawConstellations, starCount);
+   #endif
+   
    mDrawEcPlane = drawEcPlane;
    mDrawXyPlane = drawXyPlane;
    mDrawWireFrame = drawWireFrame;
@@ -717,7 +716,23 @@ void OrbitViewCanvas::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
    mDrawStars = drawStars;
    mDrawConstellations = drawConstellations;
    mStarCount = starCount;
-   Refresh(false);   
+   
+   if (mUseInitialViewPoint)
+      mViewPointInitialized = false;
+   
+   if (mDrawWireFrame)
+      mPolygonMode = GL_LINE;
+   else
+      mPolygonMode = GL_FILL;
+   
+   #ifdef DEBUG_DRAWING_OPTIONS
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::SetGl3dDrawingOption() mUseInitialViewPoint=%d, "
+       "mPolygonMode=%d, GL_LINE=%d, GL_FILL=%d\n", mUseInitialViewPoint,
+       mPolygonMode, GL_LINE, GL_FILL);
+   #endif
+   
+   Refresh(false);
 }
 
 
@@ -765,8 +780,8 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
    Rvector3 lvpRefVec(vpRefVec);
    Rvector3 lvpVec(vpVec);
    Rvector3 lvdVec(vdVec);
-      
-   #if DEBUG_PROJECTION
+   
+   #if DEBUG_VIEW_OPTIONS
    MessageInterface::ShowMessage
       ("OrbitViewCanvas::SetGlViewOption() pViewPointRefObj=%p, "
        "pViewPointVectorObj=%p\n   pViewDirectionObj=%p, mViewScaleFactor=%f   "
@@ -886,8 +901,8 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
 {
    #ifdef DEBUG_ON_PAINT
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::OnPaint() entered, mFatalErrorFound=%d, mGlInitialized=%d, mObjectCount=%d\n",
-       mFatalErrorFound, mGlInitialized, mObjectCount);
+      ("OrbitViewCanvas::OnPaint() entered, mFatalErrorFound=%d, mGlInitialized=%d, "
+       "mObjectCount=%d\n", mFatalErrorFound, mGlInitialized, mObjectCount);
    #endif
    
    // must always be here
@@ -928,7 +943,7 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
    // tell OpenGL to use glColor() to get material properties for..
    glEnable(GL_COLOR_MATERIAL);
    
-   // ..the front face's ambient and diffuse components
+   // set the front face's ambient and diffuse components
    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
    
    // Set the ambient lighting
@@ -938,21 +953,6 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
    int nWidth, nHeight;
    GetClientSize(&nWidth, &nHeight);
    glViewport(0, 0, nWidth, nHeight);
-   
-   GLUquadricObj *qobj = gluNewQuadric();
-   for (int i = 10; i < 110; i  += 10)
-      DrawCircle(qobj, i);
-   
-   if (mDrawWireFrame)
-   {
-      glPolygonMode(GL_FRONT, GL_LINE);
-      glPolygonMode(GL_BACK, GL_LINE);
-   }
-   else
-   {
-      glPolygonMode(GL_FRONT, GL_FILL);
-      glPolygonMode(GL_BACK, GL_FILL);
-   }
    
    // Linux specific
    #ifdef __WXGTK__
@@ -1316,6 +1316,10 @@ void OrbitViewCanvas::OnKeyDown(wxKeyEvent &event)
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::SetDefaultViewPoint()
 {
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("OrbitViewCanvas::SetDefaultViewPoint() entered\n");
+   #endif
+   
    mViewPointInitialized = false;
    mViewPointRefObjName = "UNKNOWN";
    
@@ -1336,6 +1340,10 @@ void OrbitViewCanvas::SetDefaultViewPoint()
    mVpRefObjId = UNKNOWN_OBJ_ID;
    mVpVecObjId = UNKNOWN_OBJ_ID;
    mVdirObjId = UNKNOWN_OBJ_ID;
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("OrbitViewCanvas::SetDefaultViewPoint() leavng\n");
+   #endif
 }
 
 
@@ -1344,6 +1352,10 @@ void OrbitViewCanvas::SetDefaultViewPoint()
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::InitializeViewPoint()
 {
+   #if DEBUG_INIT
+   MessageInterface::ShowMessage("==========> OrbitViewCanvas::InitializeViewPoint() entered\n");
+   #endif
+   
    // Dunn took out minus signs below to position vectors correctly in the 
    // ECI reference frame.
 
@@ -1395,6 +1407,8 @@ void OrbitViewCanvas::InitializeViewPoint()
    }
    
    mCamera.Reset();
+   
+   // Set the direction of up vector
    if (mViewUpAxisName == "X")
       mCamera.up = Rvector3(1.0, 0.0, 0.0);
    else if (mViewUpAxisName == "-X")
@@ -1407,27 +1421,33 @@ void OrbitViewCanvas::InitializeViewPoint()
       mCamera.up = Rvector3(0.0, 0.0, 1.0);
    else if (mViewUpAxisName == "-Z")
       mCamera.up = Rvector3(0.0, 0.0, -1.0);
-   
+
    Rvector3 viewPos = refVec + viewpoint;
    Rvector3 viewDiff = viewPos - direction;
    
    #if DEBUG_INIT
-   MessageInterface::ShowMessage("   refVec    = %s", refVec.ToString().c_str());
-   MessageInterface::ShowMessage("   viewpoint = %s", viewpoint.ToString().c_str());
-   MessageInterface::ShowMessage("   viewPos   = %s", viewPos.ToString().c_str());
-   MessageInterface::ShowMessage("   direction = %s", viewPos.ToString().c_str());
-   MessageInterface::ShowMessage("   viewDiff  = %s", viewDiff.ToString().c_str());
+   MessageInterface::ShowMessage("   mCamera.up = %s", mCamera.up.ToString().c_str());
+   MessageInterface::ShowMessage("   refVec     = %s", refVec.ToString().c_str());
+   MessageInterface::ShowMessage("   viewpoint  = %s", viewpoint.ToString().c_str());
+   MessageInterface::ShowMessage("   viewPos    = %s", viewPos.ToString().c_str());
+   MessageInterface::ShowMessage("   direction  = %s", viewPos.ToString().c_str());
+   MessageInterface::ShowMessage("   viewDiff   = %s", viewDiff.ToString().c_str());
    #endif
    
    // If view difference is not zero then relocate camera
    if (!viewDiff.IsZeroVector())
    {
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage
+         ("=====> relocating camera to\n    position = %s   direction = %s",
+          viewPos.ToString().c_str(), direction.ToString().c_str());
+      #endif
+      
       mCamera.Relocate(viewPos, direction);
-      // ReorthogonalizeVectors() is called from Camera::Relocate(), so commented out
-      //mCamera.ReorthogonalizeVectors();
    }
-   
-   mViewPointInitialized = true;
+
+   // Moved to ViewCanvas
+   //mViewPointInitialized = true;
    
    #if DEBUG_INIT
    MessageInterface::ShowMessage
@@ -1480,10 +1500,12 @@ void OrbitViewCanvas::SetupProjection()
 //  void SetupWorld()
 //------------------------------------------------------------------------------
 /**
- * Sets world view as orthographic projection. With an orthographic projection,
- * the viewing volume is a rectangular parallelepiped. Unlike perspective
- * projection, the size of the viewing volume doesn't change from one end to the
- * other, so distance from the camera doesn't affect how large a object appears.
+ * Sets world view as perspective projection. gluPerspective specifies a viewing
+ * frustum into the world coordinate system. In general, the aspect ratio in
+ * gluPerspective should match the aspect ratio of the associated viewport.
+ * For example, aspect = 2.0 means the viewer's angle of view is twice as wide
+ * in x as it is in y. If the viewport is twice as wide as it is tall, it displays
+ * the image without distortion.
  */
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::SetupWorld()
@@ -1497,6 +1519,17 @@ void OrbitViewCanvas::SetupWorld()
    if (500000000.0f > distance)
       distance = 500000000.0f;
    
+   //-----------------------------------------------------------------
+   // void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
+   // fovy   : Specifies the field of view angle, in degrees, in the y direction.
+   // aspect : Specifies the aspect ratio that determines the field of view in the x direction.
+   //          The aspect ratio is the ratio of x (width) to y (height).
+   // zNear  : Specifies the distance from the viewer to the near clipping plane
+   //          (always positive).
+   // zFar   : Specifies the distance from the viewer to the far clipping plane
+   //          (always positive).
+   //-----------------------------------------------------------------
+   
    gluPerspective(mCamera.fovDeg, aspect, 50.0f, distance);
    
    //-----------------------------------------------------------------
@@ -1506,7 +1539,6 @@ void OrbitViewCanvas::SetupWorld()
    //camera moves opposite direction to center on object
    //this is the point of rotation
    
-   //int index = mViewObjId * MAX_DATA * 3 + (mNumData-1) * 3;
    int index = mViewObjId * MAX_DATA * 3 + mLastIndex * 3;
    glTranslatef(mObjectViewPos[index+0], mObjectViewPos[index+1],
                 -mObjectViewPos[index+2]);
@@ -1574,24 +1606,14 @@ void OrbitViewCanvas::ChangeProjection(int width, int height, float axisLength)
    
    mfViewTop    =  axisLength/2;
    mfViewBottom = -axisLength/2;
-
-   //texture maps upside down
+   
+   // This makes texture maps upside down
    //mfViewTop    = -axisLength/2;
    //mfViewBottom =  axisLength/2;
-
-   if (mUseGluLookAt)
-   {
-      //loj: 1/10/06 changed *2 to * 10000 to fix near/far clipping
-      //mfViewNear = -axisLength * 10000.0;
-      //mfViewFar  =  axisLength * 10000.0;
-      mfViewNear = -axisLength * 100000.0;
-      mfViewFar  =  axisLength * 100000.0;
-   }
-   else
-   {
-      mfViewNear = -axisLength/2;
-      mfViewFar  =  axisLength/2;
-   }
+   
+   // Changed 100000 to fix near/far clipping
+   mfViewNear = -axisLength * 100000.0;
+   mfViewFar  =  axisLength * 100000.0;
    
    // save the size we are setting the projection for later use
    if (width <= height)
@@ -1616,29 +1638,38 @@ void OrbitViewCanvas::ChangeProjection(int width, int height, float axisLength)
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::TransformView()
 {
-   #if DEBUG_OrbitViewCanvas_DRAW
+   #if DEBUG_DRAW
    MessageInterface::ShowMessage
-      ("==> OrbitViewCanvas::TransformView() mUseGluLookAt=%d, mIsEndOfData=%d, "
-       "mIsEndOfRun=%d\n", mUseGluLookAt, mIsEndOfData, mIsEndOfRun);
+      ("==> OrbitViewCanvas::TransformView() mIsEndOfData=%d, mIsEndOfRun=%d\n",
+       mIsEndOfData, mIsEndOfRun);
+   #endif
+   #if DEBUG_DRAW > 1
+   MessageInterface::ShowMessage
+      ("   camera position    = %s   camera view_center = %s   camera up vector   = %s",
+       mCamera.position.ToString().c_str(), mCamera.view_center.ToString().c_str(),
+       mCamera.up.ToString().c_str());
    #endif
    
    glLoadIdentity();
-      
-   if (mUseGluLookAt)
-   {
-      gluLookAt(mCamera.position[0], mCamera.position[1], mCamera.position[2],
-                mCamera.view_center[0], mCamera.view_center[1], mCamera.view_center[2],
-                mCamera.up[0], mCamera.up[1], mCamera.up[2]);
-   }
-   else
-   {
-      glTranslatef(mfCamTransX, mfCamTransY, mfCamTransZ);
-      glRotatef(mfCamSingleRotAngle, mfCamRotXAxis, mfCamRotYAxis, mfCamRotZAxis);
-      
-      // DJC added for Up
-      glRotatef(-mfUpAngle, mfUpXAxis, mfUpYAxis, -mfUpZAxis);
-      
-   } //if (mUseGluLookAt)
+   
+   //-----------------------------------------------------------------
+   //gluLookAt(GLdouble eyex, GLdouble eyey, GLdouble eyez,
+   //          GLdouble centerx, GLdouble centery, GLdouble centerz,
+   //          GLdouble upx, GLdouble upy, GLdouble upz);
+   // eyex    : The position of the eye point.
+   // eyey    : The position of the eye point.
+   // eyez    : The position of the eye point.
+   // centerx : The position of the reference point.
+   // centery : The position of the reference point.
+   // centerz : The position of the reference point.
+   // upx     : The direction of the up vector.
+   // upy     : The direction of the up vector.
+   // upz     : The direction of the up vector.
+   //-----------------------------------------------------------------
+   
+   gluLookAt(mCamera.position[0], mCamera.position[1], mCamera.position[2],
+             mCamera.view_center[0], mCamera.view_center[1], mCamera.view_center[2],
+             mCamera.up[0], mCamera.up[1], mCamera.up[2]);
    
 } // end TransformView()
 
@@ -1687,7 +1718,7 @@ void OrbitViewCanvas::HandleLightSource()
 //  void DrawFrame()
 //------------------------------------------------------------------------------
 /**
- * Draws whole picture.
+ * Draws saved frames for viewing animation.
  */
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::DrawFrame()
@@ -1695,8 +1726,8 @@ void OrbitViewCanvas::DrawFrame()
    #if DEBUG_ANIMATION
    MessageInterface::ShowMessage
       ("OrbitViewCanvas::DrawFrame() mNumData=%d, mUsenitialViewPoint=%d\n"
-       "   mViewCoordSysName=%s\n", mNumData, mUseInitialViewPoint,
-       mViewCoordSysName.c_str());
+       "   mViewCoordSysName=%s, mFrameInc=%d\n", mNumData, mUseInitialViewPoint,
+       mViewCoordSysName.c_str(), mFrameInc);
    #endif
    
    if (mUseInitialViewPoint)
@@ -1722,7 +1753,7 @@ void OrbitViewCanvas::DrawFrame()
    mCurrIndex = 0;
    
    // refresh every 50 points (Allow user to set frame this increment?)
-   for (int frame=1; frame<numberOfData; frame+=mFrameInc)
+   for (int frame = 1; frame <= numberOfData; frame+=mFrameInc)
    {
       mIsAnimationRunning = true;
       
@@ -1762,8 +1793,6 @@ void OrbitViewCanvas::DrawFrame()
       if (mEndIndex2 != -1)
          mLastIndex = mEndIndex2;
       
-      ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
-      
       Refresh(false);
    }
    
@@ -1802,8 +1831,8 @@ void OrbitViewCanvas::DrawPlot()
        "mUseInitialViewPoint=%d, mAxisLength=%f\n", mRedrawLastPointsOnly, mNumPointsToRedraw,
        mViewCsIsInternalCs, mUseInitialViewPoint, mAxisLength);
    MessageInterface::ShowMessage
-      ("   mUseInitialViewPoint=%d, mIsEndOfData=%d, mIsEndOfRun=%d, mDrawSolverData=%d\n",
-       mUseInitialViewPoint, mIsEndOfData, mIsEndOfRun, mDrawSolverData);
+      ("   mIsEndOfData=%d, mIsEndOfRun=%d, mDrawSolverData=%d\n", mIsEndOfData,
+       mIsEndOfRun, mDrawSolverData);
    #endif
    
    // Set background color to black
@@ -1814,11 +1843,18 @@ void OrbitViewCanvas::DrawPlot()
    else
       glClear(GL_DEPTH_BUFFER_BIT);
    
+   #if DEBUG_SOLVER_STATUS
+   if (mIsSolving && !mIsEndOfRun)
+      DrawDebugMessage(" Solving", GmatColor::YELLOW32, 0, 100);
+   else
+      DrawDebugMessage("        ", GmatColor::YELLOW32, 0, 100);
+   #endif
+   
+   // Draw epoch at the bottom of the screen
    DrawStatus("", GmatColor::YELLOW32, "  Epoch: ", mTime[mLastIndex], 0, 5);
    
    // Plot is not refreshed when another panel is opened, so add glFlush()
-   // and SwapBuffers() (loj: 4/5/06)
-   //if (mNumData < 1) // to avoid 0.0 time
+   // and SwapBuffers() 
    if (mNumData < 1 && !mDrawSolverData) // to avoid 0.0 time
    {
       glFlush();
@@ -1965,14 +2001,6 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    
    glPushMatrix();
    
-   // put object at final position
-   // Dunn took out old minus signs to make attitude correct.  Even though this
-   // section was already commented out.  Just in case someone comments it back
-   // in!
-   //glTranslatef(mObjectViewPos[index1+0],
-   //             mObjectViewPos[index1+1],
-   //              mObjectViewPos[index1+2]);
-   
    // first disable GL_TEXTURE_2D to show lines clearly
    // without this, lines are drawn dim (loj: 2007.06.11)
    glDisable(GL_TEXTURE_2D);
@@ -1999,10 +2027,6 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       // Dunn is setting sunlight to be a little dimmer.
       mLight.SetColor(0.8f,0.8f,0.8f,1.0f);
       
-      // opposite direction with  sun earth line
-      //lightPos[0] = mObjectViewPos[index+0];
-      //lightPos[1] = mObjectViewPos[index+1];
-      //lightPos[2] = mObjectViewPos[index+2];
       // If 4th value is zero, the light source is directional one, and
       // (x,y,z) values describes its direction.
       // If 4th value is nonzero, the light is positional, and the (x,y,z) values
@@ -2058,8 +2082,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       MessageInterface::ShowMessage("==> Drawing body '%s'\n", objName.c_str());
       #endif
       
-      //put object at final position
-      //
+      // put object at final position
       // Dunn took out minus signs
       glTranslatef(mObjectViewPos[index1+0],mObjectViewPos[index1+1],mObjectViewPos[index1+2]);
       DrawObject(objName, obj);
@@ -2100,6 +2123,9 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
    //-------------------------------------------------------
    if (mEnableLightSource && mSunPresent)
    {
+      #if DEBUG_DRAW > 1
+      MessageInterface::ShowMessage("   Enabling Sun as light source\n");
+      #endif
       int sunId = GetObjectId("Sun");
       int index = sunId * MAX_DATA * 3 + frame * 3;
       
@@ -2113,9 +2139,10 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
          mLight.SetPosition(mObjectViewPos[index+0],mObjectViewPos[index+1],mObjectViewPos[index+2]);
       }
       mLight.SetDirectional(true);
-
+      
       // Dunn is setting sun level a little dimmer to avoid washing out the models.
-      mLight.SetColor(0.8f,0.8f,0.8f,1.0f);  
+      mLight.SetColor(0.8f,0.8f,0.8f,1.0f);
+      
       // If 4th value is zero, the light source is directional one, and
       // (x,y,z) values describes its direction.
       // If 4th value is nonzero, the light is positional, and the (x,y,z) values
@@ -2139,7 +2166,7 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
    
    // Rotate body before drawing texture
    if (mObjectArray[obj]->IsOfType(Gmat::CELESTIAL_BODY))
-      RotateBody(objName, frame, objId);
+      RotateBodyUsingAttitude(objName, objId);
    
    #if DEBUG_DRAW > 1
    MessageInterface::ShowMessage
@@ -2157,6 +2184,10 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
    if (mDrawAxes && objId == mOriginId && mCanRotateAxes)
    //if(true)
    {
+      #if DEBUG_DRAW > 1
+      MessageInterface::ShowMessage("   Now Drawing axes\n");
+      #endif
+      
       // Before debugging the Earth Rotation Angle, and getting the texture map
       // to be correctly oriented in ECI space, Dunn has noticed that the ECF
       // axes seem to be rotated 90 degrees to the east.  To fix this we will
@@ -2164,68 +2195,15 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
       // order to get them correctly oriented wrt the prime meridian.
       glRotatef(-90.0, 0.0, 0.0, 1.0);
       
-      // This next line is the NASA call that draws the ECF axes with ECI labels.
-      // Dunn has commented it out and added the code to draw with correct labels.
-      // This is a kludge that needs to be fixed.
+      // Draw axes
       DrawAxes();
       
-      //// Here is Dunn's temporary kludge.
-      //glDisable(GL_LIGHTING);
-      //glDisable(GL_LIGHT0);
-      //wxString axisLabel;
-      //GLfloat viewDist;
-      
-      //glLineWidth(2.5); // Thicker for ECF
-      
-      ////-----------------------------------
-      //// draw axes
-      ////-----------------------------------
-      
-      ////viewDist = mCurrViewDist/2; //zooms in and out
-      //viewDist = mAxisLength;///1.8; // stays the same
-      //Rvector3 axis;
-      //Rvector3 origin;
-      //origin.Set(0, 0, 0);
-      
-      //// PS - See Rendering.cpp
-      //axis.Set(viewDist, 0, 0);
-      //DrawLine(1, 0, 0, origin, axis);
-      
-      //axis.Set(0, viewDist, 0);
-      //DrawLine(0, 1, 0, origin, axis);
-      
-      //axis.Set(0, 0, viewDist);
-      //DrawLine(0, 0, 1, origin, axis);
-      
-      ////-----------------------------------
-      //// throw some text out...
-      ////-----------------------------------
-      //// Dunn took out old minus signs to get axis labels at the correct end of
-      //// each axis and thus make attitude correct.
-      //glColor3f(1, 0, 0);     // red
-      //axisLabel = "+X Earth Fixed";
-      //DrawStringAt(axisLabel, +viewDist, 0.0, 0.0, 1.0);
-
-      //glColor3f(0, 1, 0);     // green
-      //axisLabel = "+Y Earth Fixed";
-      //DrawStringAt(axisLabel, 0.0, +viewDist, 0.0, 1.0);
-
-      //glColor3f(0, 0, 1);     // blue
-      //axisLabel = "+Z Earth Fixed";
-      //// 0.82 multiplier below so this label doesn't sit on top of ECI
-      //DrawStringAt(axisLabel, 0.0, 0.0, +viewDist*0.82, 1.0); 
-
-      //glLineWidth(1.0);
-
-      //glEnable(GL_LIGHTING);
-      //glEnable(GL_LIGHT0);
-
       // After rotating -90 to get the axes lined up wrt the texture map, it is
       // time to rotate back +90.  This is from Dunn.
       glRotatef(90.0, 0.0, 0.0, 1.0);
    }
    
-   // Trying this, but why 90 degree offset ? (LOJ: 2010.11.19)
+   // Why do we need 90 degree offset? (LOJ: 2010.11.19)
    glRotatef(90.0, 0.0, 0.0, 1.0);
    
    //-------------------------------------------------------
@@ -2236,30 +2214,34 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
       //glColor4f(1.0, 1.0, 1.0, 1.0);
       glColor3f(1.0, 1.0, 1.0);
       
-      glMultMatrixd(mCoordMatrix.GetDataVector());
-      
-      /*Rmatrix coordMatrix = mCoordConverter.GetLastRotationMatrix();
-        Rmatrix dataMatrix = Rmatrix(4,4);
-        for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-        dataMatrix.SetElement(i, j, coordMatrix.GetElement(i,j));
-        dataMatrix.SetElement(3, 3, 1);
-        dataMatrix = dataMatrix.Transpose();
-        glMultMatrixd(dataMatrix.GetDataVector());*/
-      // Commented out to make body fixed to work (2010.11.19)
-      ////loj:glMultMatrixd(mCoordMatrix.GetDataVector());
+      // LOJ: 2012.02.23 (Fix for Bug 2465)
+      // Because the camera is moving and we are using gluLookAt(),
+      // we don't need to rotate the world system here, so commented out.
+      //glMultMatrixd(mCoordMatrix.GetDataVector());
       
       glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName]);
       glEnable(GL_TEXTURE_2D);
-
+      
       if (objName == "Sun")
       {
          glDisable(GL_LIGHTING);
-         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL, GLU_INSIDE);
+         // Why passing mPolygonMode doesn't work?
+         //DrawSphere(mObjectRadius[objId], 50, 50, mPolygonMode, GLU_INSIDE);     
+         if (mDrawWireFrame)
+            DrawSphere(mObjectRadius[objId], 50, 50, GLU_LINE, GLU_INSIDE);
+         else
+            DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL, GLU_INSIDE);
          glEnable(GL_LIGHTING);
       }
       else
-         DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL);     
+      {
+         // Why passing mPolygonMode doesn't work?
+         //DrawSphere(mObjectRadius[objId], 50, 50, mPolygonMode);     
+         if (mDrawWireFrame)
+            DrawSphere(mObjectRadius[objId], 50, 50, GLU_LINE);
+         else
+            DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL);
+      }
       
       glDisable(GL_TEXTURE_2D);
       
@@ -2302,7 +2284,7 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       ("OrbitViewCanvas::DrawOrbitLines() entered, i=%d, objName='%s', "
        "obj=%d, objId=%d, mTime[%3d]=%f, mTime[%3d]=%f, mIsDrawing[%3d]=%d, "
        "mIsDrawing[%3d]=%d\n", i, objName.c_str(), obj, objId, i, mTime[i],
-       i-1, mTime[i-1], i, mIsDrawing[i], i-1, mIsDrawing[i-1);
+       i-1, mTime[i-1], i, mIsDrawing[i], i-1, mIsDrawing[i-1]);
    #endif
    
    // If current or previous points are not drawing, just return
@@ -2390,7 +2372,6 @@ void OrbitViewCanvas::DrawEquatorialPlane(UnsignedInt color)
    glDisable(GL_LINE_SMOOTH);
    glLineWidth(1.0f);
    
-   //distance = (Real)mAxisLength;
    distance = (mCamera.position - mCamera.view_center).GetMagnitude();
    
    // set color
@@ -2722,6 +2703,10 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
 //---------------------------------------------------------------------------
 void OrbitViewCanvas::DrawStars()
 {
+   #if DEBUG_DRAW_STARS
+   MessageInterface::ShowMessage("OrbitViewCanvas::DrawStars() entered\n");
+   #endif
+   
    // drawing the stars at infinity requires them to have their own projection
    glMatrixMode(GL_PROJECTION); 
    glLoadIdentity();
@@ -2733,9 +2718,9 @@ void OrbitViewCanvas::DrawStars()
    Rvector3 starCenter = mCamera.view_center - starPosition;
    Rvector3 starUp = mCamera.up;
    
-   #if DEBUG_DRAW > 1
+   #if DEBUG_DRAW_STARS
    MessageInterface::ShowMessage
-      ("   starCenter  =%s   starPosition=%s\n", starCenter.ToString().c_str(),
+      ("   starCenter   = %s   starPosition = %s", starCenter.ToString().c_str(),
        starPosition.ToString().c_str());
    #endif
    
@@ -2748,11 +2733,38 @@ void OrbitViewCanvas::DrawStars()
              starCenter[0], starCenter[1], starCenter[2],
              starUp[0], starUp[1], starUp[2]);
    
+   //-----------------------------------------------------------------
+   // glMultMatrixd(const GLdouble *m)
+   // Multiplies the current matrix with the one specified using m, and
+   // replaces the current matrix with the product.
+   // m Points to 16 consecutive values that are used as the elements of a        
+   // 4x4 column-major matrix
+   //-----------------------------------------------------------------
+   
+   // Get view coordiante frame to internal frame rotation matrix
+   int coordIndex = mLastIndex*16;
+   mCoordMatrix = Rmatrix(4,4);
+   for (int i = 0; i < 4; i++)
+      for (int j = 0; j < 4; j++)
+         mCoordMatrix.SetElement(i, j, mCoordData[coordIndex + i*4 + j]);
+   mCoordMatrix = mCoordMatrix.Transpose();
+   
+   // Multiply rotation matrix to current matrix
    glMultMatrixd(mCoordMatrix.GetDataVector());
+   
+   #if DEBUG_COORD_MATRIX
+   MessageInterface::ShowMessage
+      ("\n===============> mLastIndex = %d, mCoordMatrix = \n%s\n", mLastIndex,
+       mCoordMatrix.ToString(12).c_str());
+   #endif
    
    // draw the stars
    mStars->DrawStarsVA(1.0f, mStarCount, mDrawConstellations);
-}
+   
+   #if DEBUG_DRAW_STARS
+   MessageInterface::ShowMessage("OrbitViewCanvas::DrawStars() leaving\n");
+   #endif
+ }
 
 
 //---------------------------------------------------------------------------
@@ -2760,7 +2772,7 @@ void OrbitViewCanvas::DrawStars()
 //---------------------------------------------------------------------------
 void OrbitViewCanvas::RotateBodyUsingAttitude(const wxString &objName, int objId)
 {
-   #if DEBUG_ROTATE_BODY > 1
+   #if DEBUG_ROTATE_BODY > 0
    MessageInterface::ShowMessage
       ("RotateBodyUsingAttitude() '%s' entered, objId=%d, mLastIndex=%d, time=%f\n",
        objName.c_str(), objId, mLastIndex, mTime[mLastIndex]);
@@ -2769,110 +2781,22 @@ void OrbitViewCanvas::RotateBodyUsingAttitude(const wxString &objName, int objId
    if (mTime[mLastIndex] == 0.0)
       return;
    
-   // Any object that has an attitude (spacecraft, celestial sphere, and celestial bodies)
-   // needs to be oriented correctly in the  coordinate system in which the Orbit View is drawn.    
-   //
-   // Define the following matrices:
-   // R_IP:  the rotation matrix from the coordinate system of the plot to the inertial coordinate system 
-   // R_IB:  the rotation matrix from celestial body fixed to inertial, for the body to be drawn in the Orbit View
-   //
-   // We can calculate the rotation matrix from celestial body fixed to the plot coordinate system, R_BP, using:
-   //
-   // R_BP = R_IB^T*R_IP;
-   //
-   // R_PB defines the rotation that must be applied to the celestial body before drawing in the Orbit View.
-   // I don't know what OpenGL method is being used for this so we can talk about that this afternoon.
-   // We may need to convert R_PB to quaternion or Euler angles  but the most efficient way would be to
-   // just pass in R_PB.
-   
-   // Rotate body
-   int attIndex = objId * MAX_DATA * 4 + mLastIndex * 4;
-   
-   Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
-                          mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
-   
-   #if DEBUG_ROTATE_BODY > 1
-   MessageInterface::ShowMessage("==================================\n");
-   MessageInterface::ShowMessage
-      ("==> attIndex=%d, quat=%s\n", attIndex, quat.ToString(16, 1).c_str());
-   #endif
-   
-   if (quat.IsZeroVector())
-      return;
-   
-   // the rotation matrix from celestial body fixed to inertial
-   Rmatrix33 matIB = Attitude::ToCosineMatrix(quat);
-   
-   #if DEBUG_ROTATE_BODY > 1
-   MessageInterface::ShowMessage("==> matIB=\n%s", matIB.ToString(16, 25).c_str());
-   #endif
-   
-   // Get the rotation matrix from the coordinate system of the plot to the inertial coordinate system
-   Rvector6 inState, outState;
-   int posIndex = objId * MAX_DATA * 3 + mLastIndex * 3;
-   inState.Set(mObjectGciPos[posIndex+0], mObjectGciPos[posIndex+1],
-               mObjectGciPos[posIndex+2], 0.0, 0.0, 0.0);
-   
-   #if DEBUG_ROTATE_BODY > 1
-   MessageInterface::ShowMessage
-      ("   posIndex=%d, inState=%s\n", posIndex, inState.ToString(16, 1).c_str());
-   MessageInterface::ShowMessage
-      ("   pViewCoordSystem=<%p>'%s', pInternalCoordSystem=<%p>'%s'\n",
-       pViewCoordSystem,
-       pViewCoordSystem ? pViewCoordSystem->GetName().c_str() : "NULL",
-       pInternalCoordSystem,
-       pInternalCoordSystem ? pInternalCoordSystem->GetName().c_str() : "NULL");
-   #endif
-
-   mCoordConverter.Convert(mTime[mLastIndex], inState, pViewCoordSystem,
-                           outState, pInternalCoordSystem);
-   
-   Rmatrix33 matIP = mCoordConverter.GetLastRotationMatrix();
-   
-   #if DEBUG_ROTATE_BODY > 1
-   MessageInterface::ShowMessage("==> matIP=\n%s", matIP.ToString(16, 25).c_str());
-   #endif
-   
-   Rmatrix33 matBP = matIB.Transpose() * matIP;
-   
-   #if DEBUG_ROTATE_BODY > 1
-   MessageInterface::ShowMessage("==> matPB=\n%s", matBP.ToString(16, 25).c_str());
-   #endif
-   
-   // Compute angle and axis
+   Real angInDeg = 0.0;
    Rvector3 eAxis;
-   Real eAngle;
-   Attitude::DCMToEulerAxisAndAngle(matBP, eAxis, eAngle);
    
-   // Convert to degree
-   Real angInDeg = GmatMathUtil::RadToDeg(eAngle, true);
-   
-   #if DEBUG_ROTATE_BODY > 1
-   MessageInterface::ShowMessage
-      ("RotateBodyUsingAttitude() '%s', epoch=%f, attIndex=%d, eAngle=%f, angInDeg=%f\n"
-       "   eAxis=%s\n", objName.c_str(), mTime[mLastIndex], attIndex, eAngle, angInDeg,
-       eAxis.ToString().c_str());
-   #endif
+   // Use saved rotation angle and axis
+   GetBodyRotationData(objId, angInDeg, eAxis);
    
    // Now rotate
-   glRotated(angInDeg, eAxis[0], eAxis[1], eAxis[2]);
-}
-
-
-//---------------------------------------------------------------------------
-// void RotateBody(const wxString &objName, int frame, int objId)
-//---------------------------------------------------------------------------
-void OrbitViewCanvas::RotateBody(const wxString &objName, int frame, int objId)
-{
-   #ifdef DEBUG_ROTATE_BODY
-   MessageInterface::ShowMessage
-      ("RotateBody() '%s' entered, objName='%s', objId=%d, mOriginId=%d, "
-       "mOriginName='%s'\n", mPlotName.c_str(), objName.c_str(),
-       objId, mOriginId, mOriginName.c_str());
-   #endif
+   if (angInDeg != 0.0)
+      glRotated(angInDeg, eAxis[0], eAxis[1], eAxis[2]);
    
-   // Rotate other body
-   RotateBodyUsingAttitude(objName, objId);
+   #if DEBUG_ROTATE_BODY > 0
+   MessageInterface::ShowMessage
+      ("RotateBodyUsingAttitude() '%s' leaving, objId=%d, mLastIndex=%d, time=%f, "
+       "angInDeg=%f, eAxis=%s\n", objName.c_str(), objId, mLastIndex, mTime[mLastIndex],
+       angInDeg, eAxis.ToString(12).c_str());
+   #endif
 }
 
 
@@ -2962,8 +2886,8 @@ bool OrbitViewCanvas::ConvertObjectData()
          
          #if DEBUG_CONVERT
          MessageInterface::ShowMessage
-            ("OrbitViewCanvas::ConvertObjectData() mObjectNames[%d]=%s\n", objId,
-             mObjectNames[i].c_str());
+            ("OrbitViewCanvas::ConvertObjectData() mObjectNames[%d]='%s'\n", objId,
+             mObjectNames[obj].c_str());
          #endif         
          
          // Draw first part from the ring buffer

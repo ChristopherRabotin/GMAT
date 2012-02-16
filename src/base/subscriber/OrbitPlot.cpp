@@ -2062,7 +2062,7 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
 {
    #if DBGLVL_DATA
    MessageInterface::ShowMessage
-      ("OrbitPlot::BufferOrbitData() '%s' entered\n"), GetName().c_str());
+      ("OrbitPlot::BufferOrbitData() '%s' entered\n", GetName().c_str());
    #endif
    
    //------------------------------------------------------------

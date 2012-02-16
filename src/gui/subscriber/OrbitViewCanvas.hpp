@@ -118,13 +118,13 @@ private:
    static const Real MAX_ZOOM_IN;// = 3700.0;
    static const Real RADIUS_ZOOM_RATIO;// = 2.2;
    static const Real DEFAULT_DIST;// = 30000.0;
-      
+   
    // stars and options
    GLStars *mStars;
    int mStarCount;
    bool mDrawStars;
    bool mDrawConstellations;
-      
+   
    // camera
    Camera mCamera;
    
@@ -147,15 +147,15 @@ private:
    // DJC added for "Up"   
    GLfloat mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis;
    
-   // view model
-   bool mUseGluLookAt;
-   
    // drawing options
    float mAxisLength;
    bool mDrawXyPlane;
    bool mDrawEcPlane;
    bool mDrawSunLine;
    bool mDrawAxes;
+
+   // polygon drawing mode
+   GLenum mPolygonMode;
    
    // color
    unsigned int mXyPlaneColor;
@@ -190,7 +190,6 @@ private:
    Rvector6 mUpState;
    Real mViewScaleFactor;
    
-   bool mUseInitialViewPoint;
    bool mUseViewPointRefVector;
    bool mUseViewPointVector;
    bool mUseViewDirectionVector;
@@ -267,18 +266,13 @@ private:
    // drawing stars
    void DrawStars();
    
-   // for rotation
+   // for rotation of body
    void RotateBodyUsingAttitude(const wxString &objName, int objId);
-   void RotateBody(const wxString &objName, int frame, int objId);
-      
+   
    // for coordinate system
    void UpdateRotateFlags();
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
-   
-   // for utility
-   void ComputeLongitudeLst(Real time, Real x, Real y, Real *meanHourAngle,
-                            Real *longitude, Real *localSiderealTime);
    
    // Linux specific fix
    #ifdef __WXGTK__

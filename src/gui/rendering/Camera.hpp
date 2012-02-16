@@ -1,3 +1,4 @@
+//$Id$
 //------------------------------------------------------------------------------
 //                              Camera
 //------------------------------------------------------------------------------
@@ -6,8 +7,6 @@
 // Copyright (c) 2002-2011 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
-//
-// ** Legal **
 //
 // Author: Phillip Silvia, Jr.
 // Created: 2009/07/02

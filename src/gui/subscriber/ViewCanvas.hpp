@@ -297,11 +297,16 @@ protected:
    // object attitude
    Real *mObjectQuat;              // [mObjectCount][MAX_DATA][4]
    
+   // object rotation angle and axis
+   Real *mBodyRotAngle;            // [mObjectCount][MAX_DATA]
+   Real *mBodyRotAxis;             // [mObjectCount][MAX_DATA[[3]
+   
    // Coordinate Transformation Matrices
    Real *mCoordData;               // [MAX_DATA][16]
    
    // solver data
    bool mDrawSolverData;
+   bool mIsSolving;
    std::vector<RealArray> mSolverAllPosX; // [numPoints][numSC]
    std::vector<RealArray> mSolverAllPosY; // [numPoints][numSC]
    std::vector<RealArray> mSolverAllPosZ; // [numPoints][numSC]
@@ -361,29 +366,32 @@ protected:
                         int ypos = 0, bool showCS = true, const wxString &label3 = "");
       
    // for object
-   virtual int  GetObjectId(const wxString &name);
-   virtual void ClearObjectArrays(bool deleteArrays = true);
-   virtual bool CreateObjectArrays();
+   int  GetObjectId(const wxString &name);
+   void ClearObjectArrays(bool deleteArrays = true);
+   bool CreateObjectArrays();
    
    // for data update
-   virtual void UpdateSolverData(const RealArray &posX, const RealArray &posY,
+   void UpdateSolverData(const RealArray &posX, const RealArray &posY,
                         const RealArray &posZ, const UnsignedIntArray &scColors,
                         bool solving);
-   virtual void UpdateSpacecraftData(const Real &time,
+   void UpdateSpacecraftData(const Real &time,
                         const RealArray &posX, const RealArray &posY,
                         const RealArray &posZ, const RealArray &velX,
                         const RealArray &velY, const RealArray &velZ,
                         const UnsignedIntArray &scColors, Integer solverOption);
-   virtual void UpdateOtherData(const Real &time);
-   virtual void UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId);   
-   virtual void UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId);
+   void UpdateOtherData(const Real &time);
+   void UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId);   
+   void UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId);
+   void UpdateBodyRotationData(const wxString &objName, int objId);
+   void GetBodyRotationData(int objId, Real &angInDeg, Rvector3 &eAxis);
+   void SaveBodyRotationData(int objId, Real angInDeg, const Rvector3 &eAxis);
    
    // for coordinate system
    virtual bool ConvertObjectData() = 0;
    virtual void ConvertObject(int objId, int index) = 0;
    
    // for copy
-   virtual void CopyVector3(Real to[3], Real from[3]);
+   void CopyVector3(Real to[3], Real from[3]);
    
    // for loading image
    virtual bool LoadImage(const std::string &fileName, bool isSpacecraft);

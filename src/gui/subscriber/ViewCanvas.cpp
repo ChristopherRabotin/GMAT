@@ -50,6 +50,7 @@
 //#define DEBUG_DATA_BUFFERRING 1
 //#define DEBUG_UPDATE 1
 //#define DEBUG_DRAW 1
+//#define DEBUG_SOLVER_DATA 1
 
 //---------------------------------
 // static data
@@ -97,6 +98,10 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    : wxGLCanvas(parent, id, pos, size, style, name)
    #endif
 {
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("ViewCanvas() constructor entered, name='%s'\n", name.c_str());
+   #endif
+   
    // initialize pointers
    mParent = parent;
    GmatAppData *gmatAppData = GmatAppData::Instance();
@@ -165,6 +170,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    
    // solver data
    mDrawSolverData = false;
+   mIsSolving = false;
    
    // error handling and function mode
    mFatalErrorFound = false;
@@ -192,6 +198,9 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // Initialize dynamic arrays to NULL
    ClearObjectArrays(false);
    
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("ViewCanvas() constructor leaving, name='%s'\n", name.c_str());
+   #endif
 }
 
 
@@ -420,11 +429,6 @@ void ViewCanvas::SetGlObject(const StringArray &objNames,
 		 objArray.size());
    #endif
    
-   #if 0
-   // Initialize objects used in view
-   SetDefaultViewPoint();
-   #endif
-	
    mObjectArray = objArray;
    wxArrayString tempList;
    int scCount = 0;
@@ -795,6 +799,19 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    mTotalPoints++;
    mInFunction = inFunction;   
    mDrawSolverData = false;
+   mIsSolving = solving;
+   mScCount = scNames.size();
+   mScNameArray = scNames;
+   
+   #if DEBUG_UPDATE
+   MessageInterface::ShowMessage
+      ("===========================================================================\n");
+   MessageInterface::ShowMessage
+      ("ViewCanvas::UpdatePlot() plot=%s, time=%f, posX=%f, mNumData=%d, "
+       "mScCount=%d, scColor=%u\n   solving=%d, solverOption=%d, drawing=%d, "
+       "inFunction=%d\n", GetName().c_str(), time, posX[0], mNumData, mScCount,
+       scColors[0], solving, solverOption, drawing, inFunction);
+   #endif
    
    //-----------------------------------------------------------------
    // If showing current iteration only, handle solver iteration data
@@ -809,26 +826,12 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    if (solverOption == 1 && solving && mNumData > 1)
       return;
    
-   mScCount = scNames.size();
-   mScNameArray = scNames;
-   
    if (mNumData < MAX_DATA)
       mNumData++;
    
    if (mScCount > GmatPlot::MAX_SCS)
       mScCount = GmatPlot::MAX_SCS;
-   
-   #if DEBUG_UPDATE
-   MessageInterface::ShowMessage
-      ("===========================================================================\n");
-   MessageInterface::ShowMessage
-      ("ViewCanvas::UpdatePlot() plot=%s, time=%f, posX=%f, mNumData=%d, "
-       "mScCount=%d, scColor=%u, solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n",
-       GetName().c_str(), time, posX[0], mNumData, mScCount, scColors[0], solving,
-       solverOption, drawing, inFunction);
-   #endif
-   
-   
+      
    //-----------------------------------------------------------------
    // Buffer data for plot
    //-----------------------------------------------------------------
@@ -843,6 +846,12 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    // update non-spacecraft objects position
    UpdateOtherData(time);
    
+   #if DEBUG_UPDATE
+   MessageInterface::ShowMessage
+      ("   mViewPointInitialized=%d, mGlInitialized=%d, mUseInitialViewPoint=%d\n",
+       mViewPointInitialized, mGlInitialized, mUseInitialViewPoint);
+   #endif
+   
    // Initialize view point if not already initialized
    // We want users to change the view point during the run,
    // so mUseInitialViewPoint is removed (LOJ: 2011.02.08)
@@ -853,7 +862,13 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       MessageInterface::ShowMessage
          ("ViewCanvas::UpdatePlot() Calling InitializeViewPoint()\n");
       #endif
-      InitializeViewPoint();
+      if (!mViewPointInitialized ||
+          mGlInitialized && mUseInitialViewPoint)
+         InitializeViewPoint();
+      else
+         ;//MessageInterface::ShowMessage("===> using current view\n");
+      
+      mViewPointInitialized = true;
    }
    
    #if DEBUG_UPDATE
@@ -1107,6 +1122,12 @@ void ViewCanvas::ClearObjectArrays(bool deleteArrays)
       if (mObjectQuat)
          delete [] mObjectQuat;
       
+      if (mBodyRotAngle)
+         delete [] mBodyRotAngle;
+
+      if (mBodyRotAxis)
+         delete [] mBodyRotAxis;
+      
       if (mCoordData)
          delete [] mCoordData;
    }
@@ -1122,6 +1143,8 @@ void ViewCanvas::ClearObjectArrays(bool deleteArrays)
    mObjectViewPos = NULL;
    mObjectViewVel = NULL;
    mObjectQuat = NULL;
+   mBodyRotAngle = NULL;
+   mBodyRotAxis = NULL;
    mCoordData = NULL;
    
    #if DEBUG_OBJECT
@@ -1183,8 +1206,16 @@ bool ViewCanvas::CreateObjectArrays()
          return false;
    
    if (mNeedAttitude)
+   {
       if ((mObjectQuat = new Real[mObjectCount*MAX_DATA*4]) == NULL)
          return false;
+      
+      if ((mBodyRotAngle = new Real[mObjectCount*MAX_DATA]) == NULL)
+         return false;
+      
+      if ((mBodyRotAxis = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+         return false;
+   }
    
    if ((mCoordData = new Real[MAX_DATA*16]) == NULL)
       return false;
@@ -1996,7 +2027,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          // Update spacecraft attitude
          #if DEBUG_UPDATE
          MessageInterface::ShowMessage
-            ("   Now updating spacecraft attitude of %d\n", satId);
+            ("   Now updating attitude of spacecraft id: %d\n", satId);
          #endif
          
          if (mNeedAttitude)
@@ -2016,6 +2047,11 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
 //------------------------------------------------------------------------------
 void ViewCanvas::UpdateOtherData(const Real &time)
 {
+   #if DEBUG_UPDATE_OBJECT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::UpdateOtherData() entered, time = %f\n", time);
+   #endif
+   
    for (int obj = 0; obj < mObjectCount; obj++)
    {
       SpacePoint *otherObj = mObjectArray[obj];
@@ -2086,7 +2122,7 @@ void ViewCanvas::UpdateOtherData(const Real &time)
                 mObjectViewPos[posIndex+2]);
             #endif
             
-            // Update object's attitude
+            // Update object's attitude and rotation data
             if (mNeedAttitude)
                UpdateOtherObjectAttitude(time, otherObj, objId);
          }
@@ -2112,7 +2148,9 @@ void ViewCanvas::UpdateOtherData(const Real &time)
       }
    }
    
-   int cIndex = mLastIndex*16;
+   // Save view coordiante frame to internal frame rotation matrix
+   // for drawing stars during animation
+   int cIndex = mLastIndex * 16;
    Rmatrix converterMatrix = mCoordConverter.GetLastRotationMatrix();
    for (int i = 0; i < 4; i++)
    {
@@ -2126,20 +2164,17 @@ void ViewCanvas::UpdateOtherData(const Real &time)
    }
    mCoordData[cIndex+15] = 1;
    
-   mCoordMatrix = Rmatrix(4,4);
-   for (int i = 0; i < 3; i++)
-      for (int j = 0; j < 3; j++)
-         mCoordMatrix.SetElement(i, j, converterMatrix.GetElement(i,j));
-   mCoordMatrix.SetElement(3, 3, 1);
-   mCoordMatrix = mCoordMatrix.Transpose();
+   #if DEBUG_UPDATE_OBJECT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::UpdateOtherData() leaving, time = %f\n", time);
+   #endif
 }
 
 
 //------------------------------------------------------------------------------
 // void UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId)
 //------------------------------------------------------------------------------
-void ViewCanvas::UpdateSpacecraftAttitude(Real time, Spacecraft *sat,
-                                                 int satId)
+void ViewCanvas::UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId)
 {
    if (sat == NULL)
       return;
@@ -2158,26 +2193,182 @@ void ViewCanvas::UpdateSpacecraftAttitude(Real time, Spacecraft *sat,
 //------------------------------------------------------------------------------
 // void UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId)
 //------------------------------------------------------------------------------
-void ViewCanvas::UpdateOtherObjectAttitude(Real time, SpacePoint *sp,
-                                                int objId)
+void ViewCanvas::UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId)
 {
    if (sp == NULL)
       return;
    
    int attIndex = objId * MAX_DATA * 4 + (mLastIndex*4);
+   wxString objName = sp->GetName().c_str();
    
    // Get attitude matrix   
    Rmatrix33 cosMat = sp->GetAttitude(time);
    Rvector quat = Attitude::ToQuaternion(cosMat);
    #ifdef DEBUG_ATTITUDE
    MessageInterface::ShowMessage
-      ("UpdateOtherObjectAttitude() '%s', attIndex=%d, quat=%s", sp->GetName().c_str(),
+      ("UpdateOtherObjectAttitude() '%s', attIndex=%d, quat=%s", objName.c_str(),
        attIndex, quat.ToString().c_str());
    #endif
    mObjectQuat[attIndex+0] = quat[0];
    mObjectQuat[attIndex+1] = quat[1];
    mObjectQuat[attIndex+2] = quat[2];
    mObjectQuat[attIndex+3] = quat[3];
+   
+   // Compute and save body rotation angle and axis
+   UpdateBodyRotationData(objName, objId);
+   
+}
+
+
+//---------------------------------------------------------------------------
+// void UpdateBodyRotationData(const wxString &objName, int objId)
+//---------------------------------------------------------------------------
+/**
+ * Computes and stores body rotation angle and axis using the following algorithm.
+ *
+ * @parameter  objName  The name of the body to rotate
+ * @parameter  objId    The id of the body to rotate
+ * @parameter  angInDeg  Computed rotation angle in degrees
+ * @parameter  eAxis  Computed rotation axis
+ *
+ * Any object that has an attitude (spacecraft, celestial sphere, and celestial bodies)
+ * needs to be oriented correctly in the  coordinate system in which the Orbit View is drawn.    
+ *
+ * Define the following matrices:
+ * R_IP:  the rotation matrix from the coordinate system of the plot to the inertial coordinate system 
+ * R_IB:  the rotation matrix from celestial body fixed to inertial, for the body to be drawn in the Orbit View
+ *
+ * We can calculate the rotation matrix from celestial body fixed to the plot coordinate system, R_BP, using:
+ *
+ * R_BP = R_IB^T*R_IP;
+ *
+ * R_PB defines the rotation that must be applied to the celestial body before drawing in the Orbit View.
+ * I don't know what OpenGL method is being used for this so we can talk about that this afternoon.
+ * We may need to convert R_PB to quaternion or Euler angles  but the most efficient way would be to
+ * just pass in R_PB.
+ */
+ //-----------------------------------------------------------------------------
+void ViewCanvas::UpdateBodyRotationData(const wxString &objName, int objId)
+{
+   #if DEBUG_ROTATE_BODY > 1
+   MessageInterface::ShowMessage
+      ("UpdateBodyRotationData() entered, '%s', objId=%d, mLastIndex=%d, epoch=%f\n",
+       objName.c_str(), objId, mLastIndex, mTime[mLastIndex]);
+   #endif
+   
+   // Rotate body
+   int attIndex = objId * MAX_DATA * 4 + mLastIndex * 4;
+   
+   Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
+                          mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
+   
+   #if DEBUG_ROTATE_BODY > 1
+   MessageInterface::ShowMessage("==================================\n");
+   MessageInterface::ShowMessage
+      ("==> attIndex=%d, quat=%s\n", attIndex, quat.ToString(16, 1).c_str());
+   #endif
+   
+   if (quat.IsZeroVector())
+      return;
+   
+   // the rotation matrix from celestial body fixed to inertial
+   Rmatrix33 matIB = Attitude::ToCosineMatrix(quat);
+   
+   #if DEBUG_ROTATE_BODY > 1
+   MessageInterface::ShowMessage("==> matIB=\n%s", matIB.ToString(16, 25).c_str());
+   #endif
+   
+   // Get the rotation matrix from the coordinate system of the plot to the inertial coordinate system
+   Rvector6 inState, outState;
+   int posIndex = objId * MAX_DATA * 3 + mLastIndex * 3;
+   inState.Set(mObjectGciPos[posIndex+0], mObjectGciPos[posIndex+1],
+               mObjectGciPos[posIndex+2], 0.0, 0.0, 0.0);
+   
+   #if DEBUG_ROTATE_BODY > 1
+   MessageInterface::ShowMessage
+      ("   posIndex=%d, inState=%s\n", posIndex, inState.ToString(16, 1).c_str());
+   MessageInterface::ShowMessage
+      ("   pViewCoordSystem=<%p>'%s', pInternalCoordSystem=<%p>'%s'\n",
+       pViewCoordSystem,
+       pViewCoordSystem ? pViewCoordSystem->GetName().c_str() : "NULL",
+       pInternalCoordSystem,
+       pInternalCoordSystem ? pInternalCoordSystem->GetName().c_str() : "NULL");
+   #endif
+   
+   mCoordConverter.Convert(mTime[mLastIndex], inState, pViewCoordSystem,
+                           outState, pInternalCoordSystem);
+   
+   Rmatrix33 matIP = mCoordConverter.GetLastRotationMatrix();
+   
+   #if DEBUG_ROTATE_BODY > 1
+   MessageInterface::ShowMessage("==> matIP=\n%s", matIP.ToString(16, 25).c_str());
+   #endif
+   
+   Rmatrix33 matBP = matIB.Transpose() * matIP;
+   
+   #if DEBUG_ROTATE_BODY > 1
+   MessageInterface::ShowMessage("==> matPB=\n%s", matBP.ToString(16, 25).c_str());
+   #endif
+   
+   // Compute angle and axis
+   Real eAngle;
+   Rvector3 eAxis;
+   Attitude::DCMToEulerAxisAndAngle(matBP, eAxis, eAngle);
+   
+   // Convert to degree
+   Real angInDeg = GmatMathUtil::RadToDeg(eAngle, true);
+   
+   // Now save rotation angle ans axis for use during animation
+   SaveBodyRotationData(objId, angInDeg, eAxis);
+   
+   #if DEBUG_ROTATE_BODY > 1
+   MessageInterface::ShowMessage
+      ("ComputeBodyRotationData() leaving, '%s', epoch=%f, attIndex=%d, eAngle=%f, "
+       "angInDeg=%f\n   eAxis=%s\n", objName.c_str(), mTime[mLastIndex],
+       attIndex, eAngle, angInDeg, eAxis.ToString(12).c_str());
+   #endif
+}
+
+//---------------------------------------------------------------------------
+// void GetBodyRotationData(Real angInDeg, const Rvector3 &eAxis)
+//---------------------------------------------------------------------------
+/**
+ * Saves body rotation angle and axis for use in animation
+ *
+ * @parameter  angInDeg  Rotation angle in degrees
+ * @parameter  eAxis  Rotation axis vector
+ */
+//---------------------------------------------------------------------------
+void ViewCanvas::GetBodyRotationData(int objId, Real &angInDeg, Rvector3 &eAxis)
+{
+   int angIndex = objId * MAX_DATA + mLastIndex;
+   int axisIndex = objId * MAX_DATA * 3 + (mLastIndex * 3);
+   angInDeg = mBodyRotAngle[angIndex];
+   eAxis(0) = mBodyRotAxis[axisIndex];
+   eAxis(1) = mBodyRotAxis[axisIndex + 1];
+   eAxis(2) = mBodyRotAxis[axisIndex + 2];
+}
+
+
+//---------------------------------------------------------------------------
+// void SaveBodyRotationData(int objId, Real angInDeg, const Rvector3 &eAxis)
+//---------------------------------------------------------------------------
+/**
+ * Saves body rotation angle and axis for use in animation
+ *
+ * @parameter  objId  Id of the body
+ * @parameter  angInDeg  Rotation angle in degrees
+ * @parameter  eAxis  Rotation axis vector
+ */
+//---------------------------------------------------------------------------
+void ViewCanvas::SaveBodyRotationData(int objId, Real angInDeg, const Rvector3 &eAxis)
+{
+   int angIndex = objId * MAX_DATA + mLastIndex;
+   int axisIndex = objId * MAX_DATA * 3 + (mLastIndex * 3);
+   mBodyRotAngle[angIndex] = angInDeg;
+   mBodyRotAxis[axisIndex] = eAxis(0);
+   mBodyRotAxis[axisIndex + 1] = eAxis(1);
+   mBodyRotAxis[axisIndex + 2] = eAxis(2);
 }
 
 
