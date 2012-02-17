@@ -9,6 +9,7 @@ GMAT_PLUGIN_BUILD_DIR = $(GMAT_HOME)/GmatPlugins/build/VS2010
 GMAT_BIN_DIR = $(GMAT_DIR)/application/bin
 GMAT_MATLAB_CINTF_DIR = $(GMAT_DIR)/application/matlab/libCInterface
 GMAT_PLUGIN_BIN_DIR = $(GMAT_DIR)/application/plugins
+GMAT_PROPRIETARY_BIN_DIR = $(GMAT_DIR)/application/plugins/proprietary
 GMAT_CAPI_PLUGIN_DIR = $(GMAT_DIR)/plugins/CInterfacePlugin
 GMAT_CAPI_PLUGIN_SRC_DIR = $(GMAT_CAPI_PLUGIN_DIR)/src
 GMAT_CAPI_PLUGIN_DOCS_DIR = $(GMAT_CAPI_PLUGIN_DIR)/doc
@@ -35,14 +36,16 @@ all:
 	cd $(GMAT_PLUGIN_BUILD_DIR); \
 	msbuild.exe GmatPlugins.sln //p:Configuration=Release //t:Rebuild //fl ;
 
-# cleans up the compiled source code
+# cleans up the compiled source code and docs files
 clean:
 	cd $(GMAT_BUILD_DIR); \
 	msbuild.exe GmatVS2010.sln //p:Configuration=ReleaseWithSPICE //fl //target:Clean;
 	cd $(GMAT_PLUGIN_BUILD_DIR); \
 	msbuild.exe GmatPlugins.sln //p:Configuration=Release //fl //target:Clean;
-	cd $(GMAT_BIN_DIR); rm -rf *.dll; 
-	cd $(GMAT_PLUGIN_BIN_DIR);	rm -rf *.dll; 
+	cd $(GMAT_BIN_DIR) && rm -rf *.dll
+	cd $(GMAT_PLUGIN_BIN_DIR) && rm -rf *.dll
+	cd $(GMAT_PROPRIETARY_BIN_DIR) && rm -rf *.dll
+	cd $(GMAT_HELP_BUILD_DIR) && $(MAKE) clean
 
 # checks out the repositories
 checkout:
@@ -66,13 +69,13 @@ dist:
 	cd $(GMAT_MATLAB_CINTF_DIR); \
 	cp interfacewrapper.m $(DAILY_MATLAB_CINTF_DEST_DIR); 
 	cd $(GMAT_PLUGIN_BIN_DIR); \
-	cp libMsise86.dll $(DAILY_PROPRIETARY_DEST_DIR); \
-	cp libNRLMsise00.dll $(DAILY_PROPRIETARY_DEST_DIR); \
-	cp libMarsGRAM.dll $(DAILY_PROPRIETARY_DEST_DIR); \
 	cp libMatlabInterface.dll $(DAILY_PLUGINS_DEST_DIR); \
 	cp libFminconOptimizer.dll $(DAILY_PLUGINS_DEST_DIR); \
 	cp libGmatEstimation.dll $(DAILY_PLUGINS_DEST_DIR); 
-	cd $(GMAT_PLUGIN_BIN_DIR)/proprietary; \
+	cd $(GMAT_PROPRIETARY_BIN_DIR); \
+	cp libMsise86.dll $(DAILY_PROPRIETARY_DEST_DIR); \
+	cp libNRLMsise00.dll $(DAILY_PROPRIETARY_DEST_DIR); \
+	cp libMarsGRAM.dll $(DAILY_PROPRIETARY_DEST_DIR); \
 	cp libEventLocator.dll $(DAILY_PROPRIETARY_DEST_DIR); \
 	cp libVF13Optimizer.dll $(DAILY_PROPRIETARY_DEST_DIR); 
 	cd $(GMAT_HELP_BUILD_DIR); \
@@ -84,15 +87,14 @@ dist:
 	cp help.chm $(DAILY_HELP_DEST_DIR); \
 	cp -r $(GMAT_HELP_BUILD_DIR)/html $(DAILY_HELP_DEST_DIR);  \
 	cp -r $(GMAT_HELP_BUILD_DIR)/files $(DAILY_HELP_DEST_DIR);  
+	./assemble.sh -d $(LATEST_BUILD_DIR) -j $(GMAT_PLUGIN_DIR)
 
 dist-devdocs:
-	rm -rf $(LATEST_DOCS_BUILD_DIR);  \
-	mkdir -p $(LATEST_DOCS_BUILD_DIR); \
-	cd $(GMAT_DOC_DIR); \
-	cp -r $(GMAT_DOC_DIR)/html/base $(LATEST_DOCS_BUILD_DIR);  \
-	cp -r $(GMAT_DOC_DIR)/html/gui $(LATEST_DOCS_BUILD_DIR);  \
-	cd $(GMAT_CAPI_PLUGIN_DOCS_DIR); \
-	cp -r $(GMAT_CAPI_PLUGIN_DOCS_DIR)/* $(LATEST_DOCS_BUILD_DIR);  \
+	rm -rf $(LATEST_DOCS_BUILD_DIR)
+	mkdir -p $(LATEST_DOCS_BUILD_DIR)
+	cp -r $(GMAT_DOC_DIR)/html/base $(LATEST_DOCS_BUILD_DIR)
+	cp -r $(GMAT_DOC_DIR)/html/gui $(LATEST_DOCS_BUILD_DIR)
+	cp -r $(GMAT_CAPI_PLUGIN_DOCS_DIR)/capi $(LATEST_DOCS_BUILD_DIR)
 
 check:
 
