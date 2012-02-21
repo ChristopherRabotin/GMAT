@@ -155,6 +155,7 @@ static Rvector6 CartesianToAngularMomentum(Real mu, const Rvector3 &pos,
 // other methods
 //------------------------------------------------------------------------------
 static bool               ValidateValue(const std::string &label,          Real value,
+                                        const std::string &errorMsgFmt,    Integer dataPrecision,
                                         const std::string &compareTo = "", Real compareValue = 0.0);
 
 static Integer            GetTypeCount() { return StateTypeCount; }

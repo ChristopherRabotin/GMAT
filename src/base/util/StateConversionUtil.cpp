@@ -1163,19 +1163,19 @@ Rvector6 StateConversionUtil::ModKeplerianToKeplerian(const Rvector6& modKepleri
    Real radApo = modKeplerian[1];     // Radius of Apoapsis
 
    // Check validity
-   if (radApo < radPer && radApo > 0)
-      throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: If RadApo < RadPer then RadApo must be negative.  "
-                             "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.");
-
-   if (radPer <= 0)
-      throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: "
-                             "Radius of Periapsis must be greater than zero");
-
-   if (radApo == 0)
+   if (IsEqual(radApo, 0.0, .001))
       throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: "
                              "Radius of Apoapsis must not be zero");
 
-   if (radPer == 0)
+   if (radApo < radPer && radApo > 0.0)
+      throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: If RadApo < RadPer then RadApo must be negative.  "
+                             "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.");
+
+   if (radPer <= 0.0)
+      throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: "
+                             "Radius of Periapsis must be greater than zero");
+
+   if (IsEqual(radPer, 0.0, .001))
       throw UtilityException("StateConversionUtil::ModKeplerianToKeplerian: "
                              "Parabolic orbits are not currently supported."
                              "RadPer must be greater than zero");
@@ -2042,17 +2042,22 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
 // bool ValidateValue(const std::string& label,          Real value,
 //                    const std::string &compareTo = "", Real compareValue = 0.0)
 //------------------------------------------------------------------------------
-bool StateConversionUtil::ValidateValue(const std::string &label,     Real value,
-                                        const std::string &compareTo, Real compareValue)
+bool StateConversionUtil::ValidateValue(const std::string &label,       Real value,
+                                        const std::string &errorMsgFmt, Integer dataPrecision,
+                                        const std::string &compareTo,   Real compareValue)
 {
    #ifdef DEBUG_SC_CONVERT_VALIDATE
       MessageInterface::ShowMessage(
-            "Entering SCU::ValidateValue with label = %s, value = %le, compareTo = %s, compareValue = %le\n",
-            label.c_str(), value, compareTo.c_str(), compareValue);
+            "Entering SCU::ValidateValue with label = %s, value = %le, errorMsgFmt = %s, dataPrecision = %d, compareTo = %s, compareValue = %le\n",
+            label.c_str(), value, errorMsgFmt.c_str(), dataPrecision, compareTo.c_str(), compareValue);
    #endif
 
    std::string labelUpper   = GmatStringUtil::ToUpper(label);
    std::string compareUpper = GmatStringUtil::ToUpper(compareTo);
+   #ifdef DEBUG_SC_CONVERT_VALIDATE
+      MessageInterface::ShowMessage(
+            "SCU::ValidateValue:  labelUpper = %s, compareUpper = %s\n", labelUpper.c_str(), compareUpper.c_str());
+   #endif
 
    if ((labelUpper == "X")                     || (labelUpper == "Y")                  || (labelUpper == "Z")                        ||
        (labelUpper == "VX")                    || (labelUpper == "VY")                 || (labelUpper == "VZ"))
@@ -2061,29 +2066,68 @@ bool StateConversionUtil::ValidateValue(const std::string &label,     Real value
    }
    else if (labelUpper == "RADAPO")
    {
+      if (IsEqual(value, 0.0, .001))
+      {
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "RadApo", "Real Number != 0.0");
+         throw ue;
+      }
       if (compareUpper == "RADPER")
       {
-         if ((value > 0) && (value < compareValue))
+         if ((value > 0.0) && (value < compareValue))
          {
-            throw UtilityException("If RadApo < RadPer then RadApo must be negative.  "
-                                   "If setting Modified Keplerian State, set RadApo before RadPer to avoid this issue.");
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "RadApo", "Real Number < 0.0 if RadApo < RadPer");
+            throw ue;
          }
-      }
-      else if (IsEqual(value, 0.0, .001))
-      {
-         throw UtilityException("Radius of Apoapsis must not be zero");
       }
    }
    else if (labelUpper == "RADPER")
    {
-      if (value < 0)
+      if (value < 0.0)
       {
-         throw UtilityException("Radius of Periapsis must be greater than zero");
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "RadPer", "Real Number > 0.0");
+         throw ue;
       }
       else if (IsEqual(value, 0.0, .001))
       {
-         throw UtilityException("Parabolic orbits are not currently supported.  "
-                                "Radius of Periapsis must be greater than zero");
+         UtilityException ue;
+         ue.SetDetails("Parabolic orbits are not currently supported.  Radius of Periapsis must be greater than zero");
+         throw ue;
+      }
+   }
+   else if (labelUpper == "RMAG")
+   {
+      if (value <= 0.0)
+      {
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "RMAG", "Real Number > 0.0");
+         throw ue;
+      }
+   }
+   else if (labelUpper == "VMAG")
+   {
+      if (value < 0.0)
+      {
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "VMAG", "Real Number >= 0.0");
+         throw ue;
+      }
+   }
+   else if (labelUpper == "EQUINOCTIALK")
+   {
+      if ((value < -1.0 + GmatOrbitConstants::KEP_ECC_TOL) || (value > 1.0 + GmatOrbitConstants::KEP_ECC_TOL))
+      {
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "EquinoctialK", "-1.0 < Real Number < 1.0");
+         throw ue;
       }
    }
 

@@ -5365,7 +5365,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
       SpaceObjectException se;
       se.SetDetails(errorMessageFormat.c_str(),
                     GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
-                    label.c_str(), "-1.0 <= Real Number <= 1.0");
+                    label.c_str(), "-1.0 < Real Number < 1.0");
       throw se;
    }
 
@@ -5380,27 +5380,33 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
             MessageInterface::ShowMessage("In SC::SetElement, csSet = TRUE\n");
          #endif
-         StateConversionUtil::ValidateValue(label, value);
+         StateConversionUtil::ValidateValue(label, value, errorMessageFormat, GetDataPrecision());
          Rvector6 tempState = GetStateInRepresentation(rep);
          tempState[id] = value;
          SetStateFromRepresentation(rep, tempState);
       }
       else
       {
-         // if we're setting RadApo, and RadPer has been set, also check for value relative to RadPer
-         if ((rep == "ModifiedKeplerian") && (label == "RadApo") && (state[0] != UNSET_ELEMENT_VALUE))
-         {
-            StateConversionUtil::ValidateValue(label, value, "RadPer", state[0]);
-         }
-         else
-         {
-            StateConversionUtil::ValidateValue(label, value);
-         }
          #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
             MessageInterface::ShowMessage("In SC::SetElement, csSet = FALSE\n");
          #endif
          Real *tempState = state.GetState();
          tempState[id] = value;
+         // if we're setting RadApo, and RadPer has been set, also check for value relative to RadPer
+         if ((rep == "ModifiedKeplerian") && (label == "RadApo") && (state[0] != UNSET_ELEMENT_VALUE))
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage("In SC::SetElement, about to validate %s with value %le when RadPer already set\n", label.c_str(), value);
+            #endif
+            StateConversionUtil::ValidateValue(label, value, errorMessageFormat, GetDataPrecision(), "RadPer", state[0]);
+         }
+         else
+         {
+            #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+               MessageInterface::ShowMessage("In SC::SetElement, about to validate %s with value %le\n", label.c_str(), value);
+            #endif
+            StateConversionUtil::ValidateValue(label, value, errorMessageFormat, GetDataPrecision());
+         }
       }
 
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
