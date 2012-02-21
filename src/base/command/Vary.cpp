@@ -485,6 +485,25 @@ const StringArray& Vary::GetRefObjectNameArray(const Gmat::ObjectType type)
    {
       refObjectNames.push_back(solverName);
    }
+   else if (type == Gmat::PARAMETER)
+   {
+      // For array element, remove parenthesis before adding
+      std::string objName;
+      objName = GmatStringUtil::GetArrayName(variableName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(initialValueName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(perturbationName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(variableLowerName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(variableUpperName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(variableMaximumStepName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(additiveScaleFactorName);
+      refObjectNames.push_back(objName);
+   }
    
    return refObjectNames;
 }

@@ -262,7 +262,18 @@ const StringArray& Achieve::GetRefObjectNameArray(const Gmat::ObjectType type)
    {
       refObjectNames.push_back(targeterName);
    }
-     
+   else if (type == Gmat::PARAMETER)
+   {
+      // For array element, remove parenthesis before adding
+      std::string objName;
+      objName = GmatStringUtil::GetArrayName(goalName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(achieveName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(toleranceName);
+      refObjectNames.push_back(objName);
+   }
+   
    return refObjectNames;
 }
 

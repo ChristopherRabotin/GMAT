@@ -558,7 +558,26 @@ const ObjectTypeArray& ConditionalBranch::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const StringArray& ConditionalBranch::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   refObjectNames.clear();  // no ref objects here   
+   refObjectNames.clear();
+   
+   if (type == Gmat::PARAMETER)
+   {
+      // For array element, remove parenthesis before adding
+      std::string objName;
+      // LHS object names
+      for (StringArray::iterator i = lhsList.begin(); i < lhsList.end(); i++)
+      {
+         objName = GmatStringUtil::GetArrayName((*i));
+         refObjectNames.push_back(objName);
+      }
+      // RHS object names
+      for (StringArray::iterator i = rhsList.begin(); i < rhsList.end(); i++)
+      {
+         objName = GmatStringUtil::GetArrayName((*i));
+         refObjectNames.push_back(objName);
+      }
+   }
+   
    return refObjectNames;
 }
 

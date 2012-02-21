@@ -563,6 +563,21 @@ const ObjectTypeArray& For::GetRefObjectTypeArray()
 const StringArray& For::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    refObjectNames.clear();
+   
+   if (type == Gmat::PARAMETER)
+   {
+      // For array element, remove parenthesis before adding
+      std::string objName;
+      objName = GmatStringUtil::GetArrayName(indexName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(startName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(endName);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(incrName);
+      refObjectNames.push_back(objName);
+   }
+   
    return refObjectNames;
 }
 
