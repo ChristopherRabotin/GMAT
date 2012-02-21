@@ -168,7 +168,7 @@ public:
    UnsignedInt GetFunctionCount();
    void BufferEvent(Integer forEventFunction = 0);
    void BufferEvent(Real epoch, std::string type, bool isStart);
-   void ReportEventData();
+   void ReportEventData(const std::string &reportNotice = "");
    virtual bool FileWasWritten();
    void ReportEventStatistics();
    Real *GetEventData(std::string type, Integer whichOne = 0);

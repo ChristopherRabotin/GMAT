@@ -62,14 +62,16 @@ public:
    virtual void         Activate(bool state = true);
 
    void AddEvent(LocatedEvent *theEvent);
-   void AddEvent(GmatEpoch epoch, std::string boundaryType, std::string eventType);
+   void AddEvent(GmatEpoch epoch, std::string boundaryType, 
+            std::string eventType);
    Real GetMaxSpan(std::string eventType, std::string parties);
    Real GetLastSpan(std::string eventType, std::string parties = "");
    Real GetAverageSpan(std::string eventType, std::string parties = "");
    void SortEvents(SortStyle how, SortStyle secondaryStyle = UNSORTED);
    std::vector<LocatedEvent*> *GetEvents();
 
-   bool WriteToFile(std::string filename);
+   bool WriteToFile(std::string filename, 
+            const std::string &reportNotice = "");
    void ShowPlot();
 
 protected:

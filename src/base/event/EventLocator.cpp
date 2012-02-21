@@ -1547,7 +1547,7 @@ void EventLocator::BufferEvent(Real epoch, std::string type, bool isStart)
  * Writes the event data to file and optionally displays the event data plot.
  */
 //------------------------------------------------------------------------------
-void EventLocator::ReportEventData()
+void EventLocator::ReportEventData(const std::string &reportNotice)
 {
    std::string fullFileName;
 
@@ -1567,7 +1567,7 @@ void EventLocator::ReportEventData()
    else
       fullFileName = filename;
 
-   fileWasWritten = eventTable.WriteToFile(fullFileName);
+   fileWasWritten = eventTable.WriteToFile(fullFileName, reportNotice);
    if (showPlot)
    {
       if (fileWasWritten)

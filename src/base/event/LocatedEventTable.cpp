@@ -397,7 +397,7 @@ void LocatedEventTable::SortEvents(SortStyle how, SortStyle secondaryStyle)
 
 
 //------------------------------------------------------------------------------
-// bool WriteToFile(std::string filename)
+// bool WriteToFile(std::string filename, const std::string &reportNotice)
 //------------------------------------------------------------------------------
 /**
  * Writes the event data to an event data file with the specified name.
@@ -407,7 +407,8 @@ void LocatedEventTable::SortEvents(SortStyle how, SortStyle secondaryStyle)
  * @return true if the file was written, false if not
  */
 //------------------------------------------------------------------------------
-bool LocatedEventTable::WriteToFile(std::string filename)
+bool LocatedEventTable::WriteToFile(std::string filename, 
+         const std::string &reportNotice)
 {
    bool retval = false;
 
@@ -427,6 +428,10 @@ bool LocatedEventTable::WriteToFile(std::string filename)
 
       std::ofstream theFile;
       theFile.open(filename.c_str());
+
+      if (reportNotice != "")
+         theFile << "*** NOTICE: " << reportNotice << " ***\n\n";
+
       // Write the header labels
       theFile << "Type        Participants              Duration (sec)   "
                  "UTC Start Time             UTC End Time\n"

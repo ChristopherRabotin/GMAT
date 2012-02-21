@@ -844,6 +844,11 @@ bool Sandbox::Execute()
                publisher->SetRunState(currentState);
                publisher->NotifyEndOfRun();
                
+               // Write out event data, if any
+               for (UnsignedInt i = 0; i < events.size(); ++i)
+                  events[i]->ReportEventData("Execution was interrupted; the "
+                     "event list may be incomplete");
+
                throw SandboxException("Execution interrupted");
                //return rv;
             }
