@@ -762,21 +762,23 @@ bool GmatCommandUtil::IsAfter(GmatCommand *cmd1, GmatCommand *cmd2)
 
 
 //------------------------------------------------------------------------------
-// bool FindObject(GmatCommand *cmd, Gmat::ObjectType type,
-//                 const std::string &objName, std::string &cmdName)
+// bool FindObject(GmatCommand *cmd, Gmat::ObjectType type, ... )
 //------------------------------------------------------------------------------
 /*
  * Finds if object name is referenced in anywhere in the command sequence.
  *
+ * @param  cmd  The starting command pointer to search for the object
  * @param  objType  The type of the named object
  * @param  objName  The object name to look for
  * @param  cmdName  The command name contains the object name if found
+ * @param  cmdUsing  The command pointer contains the object name if found
  *
  * @return  true  if object name found, false, otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
-                                 const std::string &objName, std::string &cmdName)
+                                 const std::string &objName, std::string &cmdName,
+                                 GmatCommand **cmdUsing)
 {
    if (cmd == NULL)
       return false;
@@ -812,6 +814,13 @@ bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
             if (names[i] == objName)
             {
                cmdName = current->GetTypeName();
+               *cmdUsing = current;
+               #ifdef DEBUG_COMMAND_FIND_OBJECT
+               MessageInterface::ShowMessage
+                  ("CommandUtil::FindObject() returning true, cmdName='%s', "
+                   "cmdUsing=<%p>'%s'\n", cmdName.c_str(), *cmdUsing,
+                   (*cmdUsing)->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+               #endif
                return true;
             }
          }
@@ -828,8 +837,17 @@ bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
       // go through sub commands
       if ((current->GetChildCommand(0)) != NULL)
       {
-         if (FindObjectFromSubCommands(current, 0, objType, objName, cmdName))
+         if (FindObjectFromSubCommands(current, 0, objType, objName, cmdName, cmdUsing))
+         {
+            #ifdef DEBUG_COMMAND_FIND_OBJECT
+            MessageInterface::ShowMessage
+               ("CommandUtil::FindObject() returning true, cmdName='%s', "
+                "cmdUsing=<%p>'%s'\n", cmdName.c_str(), *cmdUsing,
+                (*cmdUsing)->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+            #endif
+            
             return true;
+         }
       }
       
       current = current->GetNext();
@@ -843,26 +861,24 @@ bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
 }
 
 
-
 //------------------------------------------------------------------------------
-// bool FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
-//                                Gmat::ObjectType objType,
-//                                const std::string &objName, std::string &cmdName)
+// bool FindObjectFromSubCommands(GmatCommand *brCmd, Integer level, ...)
 //------------------------------------------------------------------------------
 /*
  * Finds if object name is referenced in anywhere in the command sequence.
  *
+ * @param  brCmd  The starting branch command pointer to search for the object
  * @param  objType  The type of the named object
  * @param  objName  The object name to look for
  * @param  cmdName  The command name contains the object name if found
+ * @param  cmdUsing  The command pointer contains the object name if found
  *
  * @return  true  if object name found, false, otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
-                                                Gmat::ObjectType objType, 
-                                                const std::string &objName,
-                                                std::string &cmdName)
+                         Gmat::ObjectType objType, const std::string &objName,
+                         std::string &cmdName, GmatCommand **cmdUsing)
 {
    GmatCommand* current = brCmd;
    Integer childNo = 0;
@@ -896,6 +912,13 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
                if (names[i] == objName)
                {
                   cmdName = nextInBranch->GetTypeName();
+                  *cmdUsing = nextInBranch;
+                  #ifdef DEBUG_COMMAND_FIND_OBJECT
+                  MessageInterface::ShowMessage
+                     ("CommandUtil::FindObjectFromSubCommands() returning true, "
+                      "cmdName='%s', cmdUsing=<%p>'%s'\n", cmdName.c_str(), *cmdUsing,
+                      (*cmdUsing)->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+                  #endif
                   return true;
                }
             }
@@ -910,15 +933,27 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
          }
          
          if (nextInBranch->GetChildCommand() != NULL)
-            if (FindObjectFromSubCommands(nextInBranch, level+1, objType, objName, cmdName))
+            if (FindObjectFromSubCommands(nextInBranch, level+1, objType, objName, cmdName,
+                                          cmdUsing))
+            {
+               #ifdef DEBUG_COMMAND_FIND_OBJECT
+               MessageInterface::ShowMessage
+                  ("CommandUtil::FindObjectFromSubCommands() returning true, "
+                   "cmdName='%s', cmdUsing=<%p>'%s'\n", cmdName.c_str(), cmdUsing,
+                   (*cmdUsing)->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+               #endif
                return true;
-         
+            }
          nextInBranch = nextInBranch->GetNext();
       }
       
       ++childNo;
    }
    
+   #ifdef DEBUG_COMMAND_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("===> GmatCommandUtil::FindObjectFromSubCommands() returning false\n");
+   #endif
    return false;
 }
 

@@ -95,6 +95,7 @@
 //#define DEBUG_LOOKUP_RESOURCE 1
 //#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
+//#define DEBUG_CONFIG_CHANGE 1
 //#define DEBUG_CREATE_VAR 1
 //#define DEBUG_GMAT_FUNCTION 2
 //#define DEBUG_OBJECT_MAP 1
@@ -1765,11 +1766,13 @@ bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
          #endif
          // remove if object is not used in the command sequence
          std::string cmdName;
-         if (GmatCommandUtil::FindObject(cmd, type, name, cmdName))
+         GmatCommand *cmdUsing = NULL;
+         if (GmatCommandUtil::FindObject(cmd, type, name, cmdName, &cmdUsing))
          {
             MessageInterface::ShowMessage
                ("*** WARNING *** Cannot remove \"%s.\"  It is used in the %s "
-                "command.\n",  name.c_str(), cmdName.c_str());
+                "command: '%s'\n",  name.c_str(), cmdName.c_str(),
+                cmdUsing ? cmdUsing->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "");
             return false;
          }
          else
@@ -1777,8 +1780,8 @@ bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
             bool retval = theConfigManager->RemoveItem(type, name);
             #if DEBUG_REMOVE
             MessageInterface::ShowMessage
-               ("Moderator::RemoveObject() returning %d from "
-                "theConfigManager->RemoveItem()\n", retval);
+               ("Moderator::RemoveObject() It is not used in the sequence, "
+                "returning %d from theConfigManager->RemoveItem()\n", retval);
             #endif
             return retval;
          }
@@ -1792,16 +1795,16 @@ bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
 //------------------------------------------------------------------------------
 bool Moderator::HasConfigurationChanged(Integer sandboxNum)
 {
-   bool rsrcChanged = theConfigManager->HasConfigurationChanged();
-   bool cmdsChanged = commands[sandboxNum-1]->HasConfigurationChanged();
+   bool resourceChanged = theConfigManager->HasConfigurationChanged();
+   bool commandsChanged = commands[sandboxNum-1]->HasConfigurationChanged();
    
-   #if DEBUG_CONFIG
+   #if DEBUG_CONFIG_CHANGE
    MessageInterface::ShowMessage
-      ("Moderator::HasConfigurationChanged() rsrcChanged=%d, "
-       "cmdsChanged=%d\n", rsrcChanged, cmdsChanged);
+      ("Moderator::HasConfigurationChanged() resourceChanged=%d, "
+       "commandsChanged=%d\n", resourceChanged, commandsChanged);
    #endif
    
-   return (rsrcChanged || cmdsChanged);
+   return (resourceChanged || commandsChanged);
 }
 
 
@@ -1810,7 +1813,7 @@ bool Moderator::HasConfigurationChanged(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ConfigurationChanged(GmatBase *obj, bool tf)
 {
-   #if DEBUG_CONFIG
+   #if DEBUG_CONFIG_CHANGE
    MessageInterface::ShowMessage
       ("Moderator::ConfigurationChanged() obj type=%s, name='%s', changed=%d\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str(), tf);
@@ -1834,7 +1837,7 @@ void Moderator::ConfigurationChanged(GmatBase *obj, bool tf)
 void Moderator::ResetConfigurationChanged(bool resetResource, bool resetCommands,
                                           Integer sandboxNum)
 {
-   #if DEBUG_CONFIG
+   #if DEBUG_CONFIG_CHANGE
    MessageInterface::ShowMessage
       ("Moderator::ResetConfigurationChanged() entered\n");
    #endif

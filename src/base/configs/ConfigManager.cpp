@@ -31,6 +31,7 @@
 //#define DEBUG_CONFIG_REMOVE
 //#define DEBUG_CONFIG_REMOVE_MORE
 //#define DEBUG_CONFIG_OBJ_USING
+//#define DEBUG_FIND_ITEMS 1
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -881,7 +882,7 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
    itemList.clear();
    Gmat::ObjectType objType;
    
-   #if DEBUG_RENAME
+   #if DEBUG_FIND_ITEMS
    MessageInterface::ShowMessage
       ("ConfigManager::GetListOfItemsHas() type=%d, name='%s', includeSysParam=%d\n",
        type, name.c_str(), includeSysParam);
@@ -894,7 +895,7 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
          obj = GetItem(items[itemIndex]);
          objType = obj->GetType();
          
-         #if DEBUG_RENAME
+         #if DEBUG_FIND_ITEMS
          MessageInterface::ShowMessage
             ("===> obj[%d]=%s, %s\n", itemIndex, obj->GetTypeName().c_str(),
              obj->GetName().c_str());
@@ -922,9 +923,9 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
          //objString = obj->GetGeneratingString();
          //pos = objString.find(name);
          
-         genStringArray = obj->GetGeneratingStringArray();
+         genStringArray = obj->GetGeneratingStringArray(Gmat::NO_COMMENTS);
          
-         #if DEBUG_RENAME
+         #if DEBUG_FIND_ITEMS
          MessageInterface::ShowMessage("   genStringArray.size()=%d\n", genStringArray.size());
          for (UnsignedInt ii = 0; ii < genStringArray.size(); ii++)
             MessageInterface::ShowMessage
@@ -937,16 +938,16 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
             if (obj->IsOfType(Gmat::PARAMETER))
             {
                objString = obj->GetGeneratingString();
-               #if DEBUG_RENAME
+               #if DEBUG_FIND_ITEMS
                MessageInterface::ShowMessage
                   ("   objString='%s'\n", objString.c_str());
                #endif
                pos = objString.find(name);
                if (pos != objString.npos)
                {
-                  #if DEBUG_RENAME
+                  #if DEBUG_FIND_ITEMS
                   MessageInterface::ShowMessage
-                     ("   '%s' found in Parameter, so adding '%s'\n", name.c_str(),
+                     ("   ==> '%s' found in Parameter, so adding '%s'\n", name.c_str(),
                       objName.c_str());
                   #endif
                   itemList.push_back(objName);
@@ -962,7 +963,7 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
                objString = *iter;
                StringArray parts = GmatStringUtil::SeparateBy(objString, "=");
                
-               #if DEBUG_RENAME
+               #if DEBUG_FIND_ITEMS
                MessageInterface::ShowMessage("   parts.size()=%d\n", parts.size());
                for (UnsignedInt j = 0; j < parts.size(); j++)
                   MessageInterface::ShowMessage
@@ -974,23 +975,34 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
                   rhsString = parts[1];
                   rhsString = GmatStringUtil::Trim(rhsString, GmatStringUtil::BOTH, true, true);
                   
-                  #if DEBUG_RENAME
+                  #if DEBUG_FIND_ITEMS
                   MessageInterface::ShowMessage
                      ("   objString='%s', rhsString='%s'\n", objString.c_str(),
                       rhsString.c_str());
                   #endif
                   
                   pos = rhsString.find(name);
+                  std::string nameDot = name + ".";
                   if (pos != rhsString.npos)
                   {
                      // Add to list if name not found in string enclosed with single quote
                      if (!GmatStringUtil::IsEnclosedWith(rhsString, "'"))
                      {
-                        #if DEBUG_RENAME
-                        MessageInterface::ShowMessage
-                           ("   '%s' found in RHS, so adding '%s'\n", name.c_str(), objName.c_str());
-                        #endif
-                        itemList.push_back(objName);
+                        // Check if it is a whole name or name with dot such as "Sat1." (LOJ: 2012.02.17)
+                        // Remove {} first and parse by comma
+                        std::string rhs = GmatStringUtil::RemoveOuterString(rhsString, "{", "}");
+                        StringArray parts = GmatStringUtil::SeparateByComma(rhs);
+                        for (UnsignedInt i = 0; i < parts.size(); i++)
+                        {
+                           if (parts[i] == name || parts[i].find(nameDot) != rhs.npos)
+                           {
+                              #if DEBUG_FIND_ITEMS
+                              MessageInterface::ShowMessage
+                                 ("   ==> '%s' found in RHS, so adding '%s'\n", name.c_str(), objName.c_str());
+                              #endif
+                              itemList.push_back(objName);
+                           }
+                        }
                      }
                   }
                }

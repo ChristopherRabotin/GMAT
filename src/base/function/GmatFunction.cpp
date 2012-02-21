@@ -959,13 +959,14 @@ void GmatFunction::BuildUnusedGlobalObjectList()
    unusedGlobalObjectList = new StringArray;
    
    // Check global object store
-   std::string cmdUsed;
+   std::string cmdName;
+   GmatCommand *cmdUsing = NULL;
    std::map<std::string, GmatBase *>::iterator omi;
    for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
    {
       GmatBase *obj = omi->second;
       if (!GmatCommandUtil::FindObject(fcs, (omi->second)->GetType(), omi->first,
-                                       cmdUsed))
+                                       cmdName, &cmdUsing))
       {
          // Add unused global CoordinateSystem with Spacecraft origin,  primary,
          // or secondary, since Spacecraft is not an automatic global object and
