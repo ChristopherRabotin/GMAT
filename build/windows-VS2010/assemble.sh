@@ -8,12 +8,14 @@
 # Options:
 #   -d dest       Place files in specified directory dest (default: ./gmat)
 #   -j jazzpath   Path to a working copy of <Jazz>/trunk/code
+#   -n netpath    Path to \\mesa-file\595\GMAT network mount
 #   -?            Print this usage message
 
 # Initializations
 cur=`dirname $0`
 dest=./gmat
 jazz=${cur}/../../../GmatPlugins
+netpath='//mesa-file/595/GMAT'
 
 usage() {
 cat <<END
@@ -21,16 +23,18 @@ Usage: $0 [option] ...
 Options:
   -d dest       Place files in specified directory dest (default: ./gmat)
   -j jazzpath   Path to a working copy of <Jazz>/trunk/code
+  -n netpath    Path to \\mesa-file\595\GMAT network mount
   -?            Print this usage message
 END
 }
 
 # Argument handling
-while getopts d:j: o
+while getopts d:j:n: o
 do
     case "$o" in
         d) dest="$OPTARG";;
         j) jazz="$OPTARG";;
+        n) netpath="$OPTARG";;
         ?) usage; exit 1;;
     esac
 done
@@ -49,12 +53,11 @@ find "$dest" -iname '*.exp' -delete
 find "$dest" -iname '*.lib' -delete
 
 # Copy support libraries
-winbuildspath='//mesa-file/595/GMAT/Builds/windows/VS2010_build'
 cp -av \
-    "$winbuildspath"/../vc_lib/wx2.8.12/*.dll \
+    "$netpath"/Builds/windows/vc_lib/wx2.8.12/*.dll \
     "$dest"/bin
 cp -av \
-    "$winbuildspath"/../vc_lib/*.dll \
+    "$netpath"/Builds/windows/vc_lib/*.dll \
     "$dest"/bin
 
 # Remove any Windows hidden files
