@@ -3326,9 +3326,9 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
 
    data.precision(GetDataPrecision()); // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
-
+   
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
-       (mode == Gmat::SHOW_SCRIPT))
+       (mode == Gmat::SHOW_SCRIPT) || (mode == Gmat::NO_COMMENTS))
       inMatlabMode = false;
    if (mode == Gmat::MATLAB_STRUCT || mode == Gmat::EPHEM_HEADER)
       inMatlabMode = true;
@@ -3444,8 +3444,10 @@ StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
    std::string text;
    Integer start = 0, end = 0, len = genstr.length();
 
-   while (end < len) {
-      if (genstr[end] == '\n') {
+   while (end < len)
+   {
+      if (genstr[end] == '\n')
+      {
          text = genstr.substr(start, end - start);
          sar.push_back(text);
          start = end+1;
@@ -3851,48 +3853,13 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          if (parmType == Gmat::STRINGARRAY_TYPE ||
              parmType == Gmat::OBJECTARRAY_TYPE)
          {
-            #ifdef DEBUG_ARRAY_TYPE_PARAMETER_WRITING
-               MessageInterface::ShowMessage("String array management for %s\n",
-                     GetParameterText(id).c_str());
+            #ifdef DEBUG_WRITE_PARAM
+            MessageInterface::ShowMessage
+               ("       writing string array for '%s'\n", GetParameterText(id).c_str());
             #endif
+            
             bool writeQuotes = inMatlabMode || parmType == Gmat::STRINGARRAY_TYPE;
-
-            StringArray sar = GetStringArrayParameter(id);
-            if (sar.size() > 0)
-            {
-               std::string attCmtLn = GetAttributeCommentLine(id);
-
-               if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
-                                        (mode == Gmat::OWNED_OBJECT) ||
-                                        (mode == Gmat::SHOW_SCRIPT)))
-               {
-                  stream << attCmtLn.c_str();
-               }
-
-               stream << prefix << GetParameterText(id) << " = {";
-
-               for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
-               {
-                  if (n != sar.begin())
-                     stream << ", ";
-                  if (writeQuotes) //(inMatlabMode)
-                     stream << "'";
-                  stream << (*n);
-                  if (writeQuotes)
-                     stream << "'";
-               }
-
-               attCmtLn  = GetInlineAttributeComment(id);
-
-               if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
-                                        (mode == Gmat::OWNED_OBJECT) ||
-                                        (mode == Gmat::SHOW_SCRIPT)))
-               {
-                  stream << "};" << attCmtLn << "\n";
-               }
-               else
-                  stream << "};\n";
-            }
+            WriteStringArrayValue(mode, prefix, id, writeQuotes, stream);
          }
          else
          {
@@ -3989,6 +3956,68 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       #endif
       
       stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteStringArrayValue(Gmat::WriteMode mode, Integer id, ...)
+//------------------------------------------------------------------------------
+/**
+ * Writes out parameters of StringArrayType or ObjectArrayType in the GMAT script syntax.
+ *
+ * @param obj Pointer to the object containing the parameter.
+ * @param id  ID for the parameter that gets written.
+ */
+//------------------------------------------------------------------------------
+void GmatBase::WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
+                                     Integer id, bool writeQuotes,
+                                     std::stringstream &stream)
+{   
+   StringArray sar = GetStringArrayParameter(id);
+   if (sar.size() > 0)
+   {
+      std::string attCmtLn = GetAttributeCommentLine(id);
+      
+      if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
+                               (mode == Gmat::OWNED_OBJECT) ||
+                               (mode == Gmat::SHOW_SCRIPT)))
+      {
+         stream << attCmtLn.c_str();
+      }
+      
+      stream << prefix << GetParameterText(id);
+      std::stringstream arrayStream;
+      arrayStream << "{";
+      
+      for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
+      {
+         if (n != sar.begin())
+            arrayStream << ", ";
+         if (writeQuotes) //(inMatlabMode)
+            arrayStream << "'";
+         arrayStream << (*n);
+         if (writeQuotes)
+            arrayStream << "'";
+      }
+      
+      attCmtLn  = GetInlineAttributeComment(id);
+      
+      if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
+                               (mode == Gmat::OWNED_OBJECT) ||
+                               (mode == Gmat::SHOW_SCRIPT)))
+      {
+         arrayStream << "};" << attCmtLn;
+      }
+      else
+         arrayStream << "};";
+      
+      #ifdef DEBUG_WRITE_PARAM
+      MessageInterface::ShowMessage
+         ("       value = '%s'\n\n", arrayStream.str().c_str());
+      #endif
+      
+      stream << " = " << arrayStream.str() << "\n";
    }
 }
 
@@ -4154,25 +4183,6 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
       }
       break;
       
-   case Gmat::STRINGARRAY_TYPE:
-      #ifdef DEBUG_ARRAY_TYPE_PARAMETER_WRITING
-         MessageInterface::ShowMessage("String array management:WriteParmValue "
-               "for %s\n", GetParameterText(id).c_str());
-      #endif
-
-//      {
-//         StringArray sa = GetStringArrayParameter(id);
-//         stream << "{ ";
-//         for (UnsignedInt i = 0; i < sa.size(); ++i)
-//         {
-//            stream << "'" << sa[i] << "'";
-//            if (i < sa.size() - 1)
-//               stream << ", ";
-//         }
-//         stream << " }";
-//      }
-//      break;
-
    default:
       MessageInterface::ShowMessage
          ("*** GmatBase::WriteParameterValue() Writing of \"%s\" type is not handled "

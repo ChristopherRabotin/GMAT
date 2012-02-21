@@ -539,6 +539,10 @@ protected:
    virtual void        WriteParameters(Gmat::WriteMode mode,
                                        std::string &prefix,
                                        std::stringstream &stream);
+   void                WriteStringArrayValue(Gmat::WriteMode mode,
+                                             std::string &prefix,
+                                             Integer id, bool writeQuotes,
+                                             std::stringstream &stream);
    void                WriteParameterValue(Integer id,
                                            std::stringstream &stream);
 
