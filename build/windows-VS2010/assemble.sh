@@ -11,8 +11,9 @@
 #   -?            Print this usage message
 
 # Initializations
+cur=`dirname $0`
 dest=./gmat
-jazz=../../../GmatPlugins
+jazz=${cur}/../../../GmatPlugins
 
 usage() {
 cat <<END
@@ -41,7 +42,7 @@ then
 fi
 
 # Copy application files
-cp -av ../../application/* "$dest"
+cp -av ${cur}/../../application/* "$dest"
 
 # Remove build files
 find "$dest" -iname '*.exp' -delete
@@ -61,8 +62,8 @@ find "$dest" -iname thumbs.db -delete
 
 # Mars-GRAM 2005 data
 mgpath="$jazz/MarsGRAMPlugin/data"
-cp -av "$mgpath/*" "$dest/data"
+cp -av "$mgpath/"* "$dest/data"
 
 # libCInterface MATLAB files
-cifacepath=../../plugins/CInterfacePlugin
+cifacepath=${cur}/../../plugins/CInterfacePlugin
 cp -av "$cifacepath/matlab" "$dest/matlab/libCInterface"
