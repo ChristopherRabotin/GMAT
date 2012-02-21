@@ -1872,6 +1872,38 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, std::string &rowStr,
 
 
 //------------------------------------------------------------------------------
+// std::string GetArrayName(const std::string &str, const std::string &bracketPair)
+//------------------------------------------------------------------------------
+/**
+ * Extracts array name form array elememnt string, ie, MyArray(1,2) returns
+ * MyArray.
+ *
+ * @parameter  str  Array element string to be parsed for array name
+ * @param  bracketPair  bracket pair used in the input array, such as [], () ["()"]
+ *
+ * @return  Return array name if input string is array element form;
+ *              input string if input string is not a form of array 
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::GetArrayName(const std::string &str,
+                                         const std::string &bracketPair)
+{
+   std::string rowStr, colStr, name;
+   
+   try
+   {
+      GetArrayIndexVar(str, rowStr, colStr, name, "()");
+   }
+   catch (UtilityException &e)
+   {
+      return str;
+   }
+   
+   return name;
+}
+
+
+//------------------------------------------------------------------------------
 // void FindFirstAndLast(const std::string &str, char ch, Integer &first,
 //                       Integer &last)
 //------------------------------------------------------------------------------
@@ -3052,8 +3084,8 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
  */
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::RemoveOuterString(const std::string &str,
-                                               const std::string &start,
-                                               const std::string &end)
+                                              const std::string &start,
+                                              const std::string &end)
 {
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
