@@ -36,10 +36,6 @@ public:
    
 private:
    Editor   *mEditor;
-   wxString mScriptFilename;
-   
-   wxButton *mSaveSyncButton;
-   wxButton *mSaveSyncRunButton;
    
    // methods inherited from GmatSavePanel
    virtual void Create();
@@ -56,7 +52,7 @@ private:
    enum
    {
       ID_TEXT = 9000,
-      ID_BUTTON,
+      ID_SYNC_BUTTON,
    };
 };
 

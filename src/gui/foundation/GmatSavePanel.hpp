@@ -62,7 +62,8 @@ protected:
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
    
-   bool FileExists(std::string scriptFilename);
+   bool DoesFileExist(std::string scriptFilename);
+   void MakeScriptActive(wxCommandEvent &event, bool isScriptModified);
    void RefreshScriptActiveStatus(bool isActive);
    void SaveAndBuildScript(wxCommandEvent &event);
    
@@ -76,6 +77,7 @@ protected:
    bool mIsScriptActive;
    
    wxString mFilename;
+   wxString mScriptFilename;
    
    wxWindow *theParent;
    
@@ -89,6 +91,8 @@ protected:
    wxButton *theSaveAsButton;
    wxButton *theCloseButton;
    wxButton *theScriptButton;
+   wxButton *mSaveSyncButton;
+   wxButton *mSaveSyncRunButton;
    
    wxStaticText *mScriptActiveLabel;
    wxStaticText *mScriptDirtyLabel;

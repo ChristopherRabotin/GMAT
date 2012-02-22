@@ -43,7 +43,7 @@ BEGIN_EVENT_TABLE(EditorPanel, GmatSavePanel)
    EVT_BUTTON(ID_BUTTON_SAVE, GmatSavePanel::OnSave)
    EVT_BUTTON(ID_BUTTON_SAVE_AS, GmatSavePanel::OnSaveAs)
    EVT_BUTTON(ID_BUTTON_CLOSE, GmatSavePanel::OnClosePanel)
-   EVT_BUTTON(ID_BUTTON, EditorPanel::OnButton)
+   EVT_BUTTON(ID_SYNC_BUTTON, EditorPanel::OnButton)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -112,10 +112,10 @@ void EditorPanel::Create()
    // for build and build & run
    //------------------------------------------------------
    mSaveSyncButton =
-      new wxButton(this, ID_BUTTON, "Save,Sync", wxDefaultPosition, wxDefaultSize, 0);
+      new wxButton(this, ID_SYNC_BUTTON, "Save,Sync", wxDefaultPosition, wxDefaultSize, 0);
    mSaveSyncRunButton =
-      new wxButton(this, ID_BUTTON, "Save,Sync,Run", wxDefaultPosition, wxDefaultSize, 0);
-
+      new wxButton(this, ID_SYNC_BUTTON, "Save,Sync,Run", wxDefaultPosition, wxDefaultSize, 0);
+   
    //------------------------------------------------------
    // add to sizer
    //------------------------------------------------------
@@ -232,70 +232,12 @@ void EditorPanel::OnButton(wxCommandEvent& event)
       delete msgDlg;
       return;
    }
-
-   GmatAppData *gmatAppData = GmatAppData::Instance();
-   bool continueBuild = true;
    
+   // Handle Save,Sync or Save,Sync,Run
    if (event.GetEventObject() == mSaveSyncButton ||
        event.GetEventObject() == mSaveSyncRunButton)
    {
-      // If this is not an active script, prompt the user for setting active
-      if (!mIsScriptActive)
-      {
-         wxMessageDialog *msgDlg = new wxMessageDialog
-            (this,"Are you sure you want to make this script active?", "Save active...",
-             wxYES_NO | wxICON_QUESTION, wxDefaultPosition);
-         int result = msgDlg->ShowModal();
-         
-         if (result == wxID_YES)
-            continueBuild = true;
-         else
-            continueBuild = false;
-      }
-      
-      if (mEditor->IsModified())
-      {
-         //=======================================
-         #ifdef __PROMPT_USER_ON_MODIFIED__
-         //=======================================
-         
-         // prompt user to save
-         wxMessageDialog *msgDlg = new wxMessageDialog(this,
-            "Would you like to save changes?", "Save...", wxYES_NO | wxICON_QUESTION ,
-            wxDefaultPosition);
-         int result = msgDlg->ShowModal();
-         
-         if (result == wxID_YES)
-            OnSave(event);
-         
-         //=======================================
-         #else
-         //=======================================
-         
-         OnSave(event);
-         
-         //=======================================
-         #endif
-         //=======================================
-      }
-   }
-   
-   // If continue building, set script file name and build script
-   if (continueBuild)
-   {
-      if (event.GetEventObject() == mSaveSyncButton)
-      {
-         if (gmatAppData->GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
-            gmatAppData->GetMainFrame()->OnScriptBuildObject(event);
-      }
-      else if (event.GetEventObject() == mSaveSyncRunButton)
-      {
-         if (gmatAppData->GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
-            gmatAppData->GetMainFrame()->OnScriptBuildAndRun(event);
-      }
-      
-      // Make current script active script (Fix for GMT-206, LOJ: 2012.02.09)
-      UpdateScriptActiveStatus(true);
+      MakeScriptActive(event, mEditor->IsModified());
    }
 }
 

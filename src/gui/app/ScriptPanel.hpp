@@ -37,15 +37,12 @@ private:
    int  mOldLastPos;
    bool mUserModified;
    
-   wxString mScriptFilename;
+   // wxString mScriptFilename;
    wxColour mDefBgColor;
    wxColour mBgColor;
    
    wxTextCtrl *mLineNumberTextCtrl;
-   
-   wxButton *mSaveSyncButton;
-   wxButton *mSaveSyncRunButton;
-   
+      
    // methods inherited from GmatSavePanel
    virtual void Create();
    virtual void LoadData();
@@ -64,7 +61,7 @@ private:
    {     
       ID_TEXT = 9000,
       ID_LISTBOX,
-      ID_BUTTON,
+      ID_SYNC_BUTTON,
       ID_COLOR_BUTTON,
       ID_COMBO,
       ID_TEXTCTRL

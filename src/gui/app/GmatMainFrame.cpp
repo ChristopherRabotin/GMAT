@@ -1763,7 +1763,7 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
    GmatTree::ItemType itemType = newChild->GetItemType();
    int x = (numChildren - 1) * 20;
    int y = x;
-   int clientX, clientY, clientW = -1, clientH = -1;
+   int clientW = -1, clientH = -1;
    GetActualClientSize(&clientW, &clientH, true);
    
    #ifdef DEBUG_CHILD_WINDOW
@@ -2465,8 +2465,9 @@ void GmatMainFrame::ManageMissionTree()
 bool GmatMainFrame::ShowScriptOverwriteMessage()
 {
    wxMessageDialog *msgDlg = new wxMessageDialog
-      (this, "You will lose changes made in the script, do you want to overwrite "
-       "the script?", "Save GUI...",
+      (this, "You will lose changes made in the script if the GUI is saved.  "
+       "Do you want to save the GUI, discard the script changes,  and reload "
+       "the script with the saved script?", "Save GUI...",
        wxYES_NO | wxCANCEL |wxICON_QUESTION, wxDefaultPosition);
    
    int result = msgDlg->ShowModal();
@@ -2812,6 +2813,7 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
    bool scriptSaved = false;
    GmatAppData *gmatAppData = GmatAppData::Instance();
 
+   // If script is opened as new file, call SaveScriptAs() first
    if (mScriptFilename == mTempScriptName)
    {
       scriptSaved = SaveScriptAs();
@@ -2833,6 +2835,7 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
       else
       {
          GuiItemManager *guiManager = GuiItemManager::GetInstance();
+         // GUI/ActiveScript status: 1 = clean, 2 = dirty, 3 = error
          if (guiManager->GetGuiStatus() == 2 && guiManager->GetActiveScriptStatus() == 2)
          {
             scriptSaved = ShowScriptOverwriteMessage();
@@ -5031,7 +5034,8 @@ void GmatMainFrame::RefreshActiveScript(const wxString &filename)
                   #endif
                   
                   // We don't wan't to reload the file, so commented out (LOJ: 2011.05.20)
-                  //((GmatSavePanel*)child->GetAssociatedWindow())->ReloadFile();
+                  // We decided to reload the file (See GMAT Software Specification) (LOJ: 2012.02.22)
+                  ((GmatSavePanel*)child->GetAssociatedWindow())->ReloadFile();
                   ((GmatSavePanel*)child->GetAssociatedWindow())->UpdateScriptActiveStatus(true);
                }
                else
@@ -5625,8 +5629,8 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
    #ifndef __WXMAC__
       Real realW = (Real)screenWidth;
       Real realH = (Real)screenHeight;
-      Integer xOffset = (Integer)((realW * 0.01) + (10000.0 / realW));
-      Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
+      //Integer xOffset = (Integer)((realW * 0.01) + (10000.0 / realW));
+      //Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
       if (x == -1) x = 0;
       //else x -= xOffset;
       //y -= yOffset;

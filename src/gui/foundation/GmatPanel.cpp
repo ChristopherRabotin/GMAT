@@ -295,7 +295,7 @@ void GmatPanel::OnApply(wxCommandEvent &event)
 {
    #ifdef DEBUG_GMATPANEL_SAVE
    MessageInterface::ShowMessage
-      ("GmatPanel::OnApply() mDataChanged=%d\n", mDataChanged);
+      ("GmatPanel::OnApply() entered, mDataChanged=%d\n", mDataChanged);
    #endif
 
    if (mDataChanged)
@@ -305,10 +305,18 @@ void GmatPanel::OnApply(wxCommandEvent &event)
       if (canClose)
       {
          mdichild->SetDirty(false);
+         #ifdef DEBUG_GMATPANEL_SAVE
+         MessageInterface::ShowMessage
+            ("   ==> Setting configuration changed to true for the object <%s>\n",
+             mObject->GetTypeName().c_str());
+         #endif
          theGuiInterpreter->ConfigurationChanged(mObject, true);
          EnableUpdate(false);
       }
    }
+   #ifdef DEBUG_GMATPANEL_SAVE
+   MessageInterface::ShowMessage("GmatPanel::OnApply() leaving\n");
+   #endif
 }
 
 
@@ -323,9 +331,9 @@ void GmatPanel::OnOK(wxCommandEvent &event)
 {
    #ifdef DEBUG_GMATPANEL_SAVE
    MessageInterface::ShowMessage
-      ("GmatPanel::OnOK() mDataChanged=%d\n", mDataChanged);
+      ("GmatPanel::OnOK() entered, mDataChanged=%d\n", mDataChanged);
    #endif
-
+   
    if (mDataChanged)
    {
       SaveData();
@@ -334,12 +342,21 @@ void GmatPanel::OnOK(wxCommandEvent &event)
       if (canClose)
       {
          mdichild->SetDirty(false);
+         #ifdef DEBUG_GMATPANEL_SAVE
+         MessageInterface::ShowMessage
+            ("   ==> Setting configuration changed to true for the object <%s>\n",
+             mObject->GetTypeName().c_str());
+         #endif
          theGuiInterpreter->ConfigurationChanged(mObject, true);
       }
    }
-
+   
    if (canClose)
       GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
+   
+   #ifdef DEBUG_GMATPANEL_SAVE
+   MessageInterface::ShowMessage("GmatPanel::OnOK() leaving\n");
+   #endif
 }
 
 
