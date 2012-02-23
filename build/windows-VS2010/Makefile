@@ -1,4 +1,4 @@
-GMAT_HOME = ../../..
+GMAT_HOME = J:/GMAT
 GMAT_CURRENT_DIR = $(GMAT_HOME)/DailyBuildScript/VS
 GMAT_DIR = $(GMAT_HOME)/GmatDevelopment
 GMAT_SRC_BASE_DIR = $(GMAT_DIR)/src/base
@@ -16,7 +16,8 @@ GMAT_CAPI_PLUGIN_DOCS_DIR = $(GMAT_CAPI_PLUGIN_DIR)/doc
 GMAT_DOC_DIR = $(GMAT_DIR)/doc
 GMAT_HELP_BUILD_DIR = $(GMAT_DOC_DIR)/help
 #DESTINATION_DIR  = $(GMAT_HOME)/GmatBuilds
-DESTINATION_DIR  = Y:/Builds/windows/VS2010_build
+NETWORK_DIR = Y:
+DESTINATION_DIR  = $(NETWORK_DIR)/Builds/windows/VS2010_build
 BUILD_DATE = ` date "+%Y-%m-%d" `
 DAILY_DESTINATION_DIR = $(DESTINATION_DIR)/$(BUILD_DATE)
 DAILY_MATLAB_DEST_DIR = $(DAILY_DESTINATION_DIR)/matlab
@@ -86,8 +87,9 @@ dist:
 	cp help.html $(DAILY_HELP_DEST_DIR); \
 	cp help.chm $(DAILY_HELP_DEST_DIR); \
 	cp -r $(GMAT_HELP_BUILD_DIR)/html $(DAILY_HELP_DEST_DIR);  \
-	cp -r $(GMAT_HELP_BUILD_DIR)/files $(DAILY_HELP_DEST_DIR);  
-	./assemble.sh -d $(LATEST_BUILD_DIR) -j $(GMAT_PLUGIN_DIR)
+	cp -r $(GMAT_HELP_BUILD_DIR)/files $(DAILY_HELP_DEST_DIR); 
+	rm -rf $(LATEST_BUILD_DIR);
+	$(GMAT_BUILD_DIR)/assemble.sh -d $(LATEST_BUILD_DIR) -j $(GMAT_PLUGIN_DIR) -n $(NETWORK_DIR)
 
 dist-devdocs:
 	rm -rf $(LATEST_DOCS_BUILD_DIR)
