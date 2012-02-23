@@ -10,6 +10,7 @@
 #   -j jazzpath   Path to a working copy of <Jazz>/trunk/code
 #   -n netpath    Path to \\mesa-file\595\GMAT network mount
 #   -?            Print this usage message
+echo "Assembling latest complete version"
 
 # Initializations
 cur=`dirname $0`
@@ -38,6 +39,10 @@ do
         ?) usage; exit 1;;
     esac
 done
+
+echo "dest="$dest
+echo "jazz="$jazz
+echo "netpath="$netpath
 
 # Create destination directory
 if [ ! -e "$dest" ]
@@ -70,3 +75,5 @@ cp -av "$mgpath/"* "$dest/data"
 # libCInterface MATLAB files
 cifacepath=${cur}/../../plugins/CInterfacePlugin
 cp -av "$cifacepath/matlab" "$dest/matlab/libCInterface"
+
+echo "Finished assembling latest complete version"
