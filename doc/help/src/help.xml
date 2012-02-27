@@ -150,5 +150,5 @@
       </chapter>
       -->
     </part>
-    <index condition="ug" xml:id="Index" />
+    <index condition="ug" xml:id="BookIndex" />
 </book>
