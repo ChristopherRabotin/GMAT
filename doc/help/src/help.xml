@@ -36,12 +36,12 @@
         <xi:include href="Tut_SimulatingAnOrbit.xml"/>
     </part>
 
-    <part xml:id="HowTos">
-        <title>How-tos</title>
-        <xi:include href="HowTo_ConfiguringASpacecraft.xml"/>
-        <xi:include href="HowTo_PropagatingASpacecraft.xml"/>
-        <xi:include href="HowTo_ReportingData.xml"/>
-        <xi:include href="HowTo_VisualizingData.xml"/>
+    <part xml:id="CommonTasks">
+        <title>Common Tasks</title>
+        <xi:include href="CommonTask_ConfiguringASpacecraft.xml"/>
+        <xi:include href="CommonTask_PropagatingASpacecraft.xml"/>
+        <xi:include href="CommonTask_ReportingData.xml"/>
+        <xi:include href="CommonTask_VisualizingData.xml"/>
     </part>
 
     <part xml:id="Tutorials">

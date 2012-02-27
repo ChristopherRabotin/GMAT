@@ -150,7 +150,7 @@ ISS.TA = 199.683</programlisting>
     <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
-                     fileref="files/images/icons/RunMission.png" width="1em"></imagedata>
+                     fileref="files/images/icons/RunMission.png" width="1em"/>
         </imageobject>
       </inlinemediaobject></subscript>) and you will see plots like those
     shown below.</para>
@@ -161,7 +161,7 @@ ISS.TA = 199.683</programlisting>
           <imageobject>
             <imagedata contentdepth="100%"
                        fileref="files/images/HowTo_DefiningSpacecraftOrbit_Plots.png"
-                       scalefit="1" width="100%"></imagedata>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
@@ -224,5 +224,71 @@ DefaultSC.Cd = 2.0
 DefaultSC.Cr = 1.7
 DefaultSC.DragArea = 10.5
 DefaultSC.SRPArea = 12.5</programlisting>
+  </section>
+
+  <section>
+    <title>Configuring the Attitude (Fixed)</title>
+
+    <para>GMAT can model a spacecraft with an attitude fixed in any defined
+    coordinate system, including user-defined systems. This can be used to
+    model nadir-pointing or inertially-pointed spacecraft.</para>
+
+    <para>For example, follow these instructions to set the attitude of the
+    default spacecraft using Euler angle rotations from the built-in
+    <guilabel>EarthMJ2000Eq</guilabel> inertial coordinate system. Starting
+    from the default mission:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, double-click
+        <guilabel>DefaultSC</guilabel> to open its properties window.</para>
+      </step>
+
+      <step>
+        <para>Click the <guilabel>Attitude</guilabel> tab.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Attitude Model</guilabel> list, select
+        <guilabel>CoordinateSystemFixed</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Coordinate System</guilabel> list, select
+        <guilabel>EarthMJ2000Eq</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Attitude Initial Conditions</guilabel> area, in
+        the <guilabel>Attitude State Type</guilabel> box, select
+        <guilabel>Euler Angles</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Euler Angle 1</guilabel> box, type
+        <userinput>123</userinput>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Euler Angle 2</guilabel> box, type
+        <userinput>45</userinput>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Euler Angle 3</guilabel> box, type
+        <userinput>157</userinput>.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"/>
+            </imageobject>
+          </inlinemediaobject></subscript>). The spacecraft should now be
+        inertially pointed in the graphics window.</para>
+      </step>
+    </procedure>
   </section>
 </chapter>
