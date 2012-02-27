@@ -1210,8 +1210,8 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    
    // compose node name
    // Changed node name of End and Else to append parent's name
-   // (LOJ: 2010.01.26 for bug GMT-208 fix)
-   if (cmdTypeName.Contains("End"))
+   // (LOJ: 2010.01.27 for bug GMT-209 fix)
+   if (cmd->IsOfType("BranchEnd"))
    {
       if (parentName.Trim() != "")
       {
@@ -1228,7 +1228,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
          nodeName.Printf("%s", label.c_str());
       }
    }
-   else if (cmdTypeName.Contains("Else"))
+   else if (cmdTypeName == "Else")
    {
       if (parentName.Trim() != "")
          nodeName.Printf("Else %s", parentName.c_str());
@@ -3360,7 +3360,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
       theGuiInterpreter->ConfigurationChanged(cmd, true);
       
       // If renamed Branch command find matching EndBranch and rename it also
-      // (LOJ: 2010.01.26 for bug GMT-208 fix)
+      // (LOJ: 2010.01.27 for bug GMT-209 fix)
       if (cmd->IsOfType("BranchCommand"))
       {
          GmatCommand *branchEnd = GmatCommandUtil::GetMatchingEnd(cmd);
