@@ -1958,14 +1958,14 @@ void MissionTree::Append(const wxString &cmdTypeName)
       wxTreeItemId elseId = FindElse(parentId);
       if (elseId.IsOk())
       {
-         #if DEBUG_MISSION_TREE_APPEND
-         MessageInterface::ShowMessage("   ==> Else found\n");
-         #endif
          MissionTreeItemData *elseItem = (MissionTreeItemData *) GetItemData(elseId);
          GmatCommand *elseCmd = elseItem->GetCommand();
          realPrevCmd = elseCmd->GetPrevious();
          insertBefore = true;
+         #if DEBUG_MISSION_TREE_APPEND
+         MessageInterface::ShowMessage("   ==> Else found\n");
          WriteCommand("   ", "elseCmd = ", elseCmd, ", realPrevCmd = ", realPrevCmd);
+         #endif
       }
       
       #if DEBUG_MISSION_TREE_APPEND
