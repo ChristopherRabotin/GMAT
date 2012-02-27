@@ -97,39 +97,50 @@ private:
    
    void InitializeCounter();
    GmatCommand* CreateCommand(const wxString &cmdTypeName);
-	GmatCommand* CreateEndCommand(const wxString &cmdTypeName, GmatTree::ItemType &endType);
+	GmatCommand* CreateEndCommand(const wxString &cmdTypeName,
+                                 GmatTree::ItemType &endType);
+   bool InsertCommandToSequence(GmatCommand *currCmd, GmatCommand *prevCmd,
+                                GmatCommand *cmdToInsert);
    void UpdateCommand();
    
    bool IsAnyViewCommandInBranch(GmatCommand *branch);
    void ShowEllipsisInPreviousNode(wxTreeItemId parent, wxTreeItemId node);
    wxTreeItemId BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
-                              Integer level, bool &isPrevItemHidden);
+                           Integer level, bool &isPrevItemHidden);
    wxTreeItemId BuildTreeItemInBranch(wxTreeItemId parent, GmatCommand *branch,
-                              Integer level, bool &isPrevItemHidden);
+                           Integer level, bool &isPrevItemHidden);
    
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd,
-                                   Integer level);
+                           Integer level);
    void ExpandNode(wxTreeItemId node, const wxString &cmdType);
    void ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
                            GmatCommand *cmd);
    void ExpandChildCommand(wxTreeItemId parent, GmatCommand *cmd, Integer level);
    wxTreeItemId AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
-                              GmatTree::ItemType type, GmatCommand *cmd,
-                              int cmdCount);
+                           GmatTree::ItemType type, GmatCommand *cmd, int cmdCount);
+   wxTreeItemId InsertNodeToTree(wxTreeItemId parentId, wxTreeItemId currId,
+                           wxTreeItemId prevId, GmatTree::MissionIconType icon,
+                           const wxString &nodeName, GmatTree::ItemType itemType,
+                           GmatCommand *cmd, GmatCommand *currCmd, GmatCommand *prevCmd,
+                           bool insertBefore);
    wxTreeItemId InsertNodeToBranch(wxTreeItemId parentId, wxTreeItemId currId,
-                              wxTreeItemId prevId, GmatTree::MissionIconType icon,
-                              const wxString &nodeName, GmatTree::ItemType itemType,
-                              GmatCommand *cmd, GmatCommand *currCmd, GmatCommand *prevCmd,
-                              bool insertBefore);
+                           wxTreeItemId prevId, GmatTree::MissionIconType icon,
+                           const wxString &nodeName, GmatTree::ItemType itemType,
+                           GmatCommand *cmd, GmatCommand *currCmd, GmatCommand *prevCmd,
+                           bool insertBefore);
+   void AppendEndToBranch(wxTreeItemId parentId, GmatTree::MissionIconType icon,
+                           const wxString &cmdTypeName, const wxString &cmdName,
+                           GmatCommand *elseCmd, GmatCommand *endCmd,
+                           GmatTree::ItemType endType, int cmdCount);
    wxTreeItemId InsertNodeAfter(wxTreeItemId parentId, wxTreeItemId currId,
-                              wxTreeItemId prevId, GmatTree::MissionIconType icon,
-                              const wxString &nodeName, GmatTree::ItemType itemType,
-                              GmatCommand *cmd, bool insertBefore);
+                           wxTreeItemId prevId, GmatTree::MissionIconType icon,
+                           const wxString &nodeName, GmatTree::ItemType itemType,
+                           GmatCommand *cmd, bool insertBefore);
    wxTreeItemId InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
-                              wxTreeItemId prevId, GmatTree::MissionIconType icon,
-                              GmatTree::ItemType type, const wxString &cmdName,
-                              GmatCommand *prevCmd, GmatCommand *cmd, int cmdCount,
-                              bool insertBefore);
+                           wxTreeItemId prevId, GmatTree::MissionIconType icon,
+                           GmatTree::ItemType type, const wxString &cmdName,
+                           GmatCommand *prevCmd, GmatCommand *cmd, int cmdCount,
+                           bool insertBefore);
    
    void Append(const wxString &cmdTypeName);
    void InsertBefore(const wxString &cmdTypeName);
@@ -181,10 +192,11 @@ private:
    wxMenu* CreateOptimizeSubMenu(GmatTree::ItemType type, ActionType action);
    wxMenu* CreateControlLogicSubMenu(GmatTree::ItemType type, ActionType action);
    
+   wxString ComposeNodeName(GmatCommand *cmd, int cmdCount);
    wxString GetCommandString(GmatCommand *cmd, const wxString &currStr);
    GmatTree::ItemType GetCommandId(const wxString &cmd);
    void ResetCommandCounter(const wxString &cmd, bool resetAll = false);
-   int  GetCommandCounter(const wxString &cmd);
+   int  GetCommandCounter(GmatCommand *cmd);
    int  GetNameFromUser(wxString &newName, const wxString &oldName = "",
                         const wxString &msg = "", const wxString &caption = "");
    void CreateCommandIdMap();
@@ -196,12 +208,14 @@ private:
    wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmdName,
                           bool useSummaryName = false);
    wxTreeItemId FindElse(wxTreeItemId parentId);
+   int  FindItemPosition(wxTreeItemId parentId, wxTreeItemId itemId);
+   bool IsElseNode(wxTreeItemId itemId);
    bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType);
    
    // for Debug
    void ShowCommands(const wxString &msg = "");
    void ShowSubCommands(GmatCommand* brCmd, Integer level);
-   void WriteNode(int count, const std::string &prefix,
+   void WriteNode(int itemCount, const std::string &prefix, bool appendEol,
                   const std::string &title1, wxTreeItemId itemId1,
                   const std::string &title2 = "", wxTreeItemId itemId2 = 0,
                   const std::string &title3 = "", wxTreeItemId itemId3 = 0);
