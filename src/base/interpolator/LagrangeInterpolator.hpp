@@ -51,6 +51,8 @@ protected:
    Integer actualSize;
    /// Starting index used in finding center point
    Integer beginIndex;
+   /// Ending index used in finding center point
+   Integer endIndex;
    /// Starting index of interpolation range
    Integer startPoint;
    /// Value of the last point, to determine if the data buffer need updating
@@ -66,7 +68,8 @@ protected:
    virtual void CopyArrays(const LagrangeInterpolator &i);
    
    void    BuildDataPoints(Real ind);
-   bool    IsDataNearCenter(Real ind);
+   void    UpdateBeginAndEndIndex(Real ind);
+   bool    IsDataNearCenter();
    Integer FindStartingPoint(Real ind);
 };
 

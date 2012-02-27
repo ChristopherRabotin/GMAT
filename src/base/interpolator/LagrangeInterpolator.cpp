@@ -26,6 +26,7 @@
 
 //#define DEBUG_LAGRANGE_FEASIBLE
 //#define DEBUG_LAGRANGE_BUILD
+//#define DEBUG_LAGRANGE_ADD
 //#define DEBUG_LAGRANGE_INTERPOLATE
 
 //---------------------------------
@@ -278,8 +279,8 @@ bool LagrangeInterpolator::AddPoint(const Real ind, const Real *data)
 {
    #ifdef DEBUG_LAGRANGE_ADD
    MessageInterface::ShowMessage
-      ("LagrangeInterpolator::AddPoint() entered, ind=%f, previousX=%f\n",
-       ind, previousX);
+      ("LagrangeInterpolator::AddPoint() entered, ind=%f, previousX=%f, data[0]=%f, "
+       "data[1]=%f, data[2]=%f\n", ind, previousX, data[0], data[1], data[2]);
    #endif
    
    if (ind < previousX)
@@ -290,6 +291,10 @@ bool LagrangeInterpolator::AddPoint(const Real ind, const Real *data)
       throw ie;
    }
    
+   #ifdef DEBUG_LAGRANGE_ADD
+   MessageInterface::ShowMessage
+      ("LagrangeInterpolator::AddPoint() returning Interpolator::AddPoint(ind, data)\n");
+   #endif
    return Interpolator::AddPoint(ind, data);
 }
 
@@ -330,11 +335,12 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
    
    // Build data points
    BuildDataPoints(ind);
+   UpdateBeginAndEndIndex(ind);
    
    // If not forcing interpolation, perfome more checking
    if (!forceInterpolation)
    {
-      if (!IsDataNearCenter(ind))
+      if (!IsDataNearCenter())
       {
          #ifdef DEBUG_LAGRANGE_INTERPOLATE
          MessageInterface::ShowMessage
@@ -357,6 +363,10 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
    
    for (Integer i = startPoint; i < startPoint + order; i++)
    {
+      #ifdef DEBUG_LAGRANGE_INTERPOLATE
+      MessageInterface::ShowMessage
+         ("***** x[%d] = %.15f, y[%d] = %.15f, %.15f, %.15f\n", i, x[i], i, y[i][0], y[i][1], y[i][2]);
+      #endif
       for (Integer dim = 0; dim < dimension; dim++)
       {
          products[dim] = y[i][dim];
@@ -366,7 +376,7 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
             ("  i=%d, products[%d]=%f\n", i, dim, products[dim]);
          #endif
       }
-
+      
       for (Integer j = startPoint; j < startPoint + order; j++)
       {
          if (i != j)
@@ -384,7 +394,10 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
             }
          }
       }
-      
+      #ifdef DEBUG_LAGRANGE_INTERPOLATE
+      MessageInterface::ShowMessage
+         ("***** products[%d] = %.15f, %.15f, %.15f\n", i, products[0], products[1], products[2]);
+      #endif
       for (Integer dim = 0; dim < dimension; dim++)
       {
          #ifdef DEBUG_LAGRANGE_INTERPOLATE_MORE
@@ -406,7 +419,8 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
    
    #ifdef DEBUG_LAGRANGE_INTERPOLATE
    MessageInterface::ShowMessage
-      ("Lagrange::Interpolate() returning true, first data = %f\n", results[0]);
+      ("Lagrange::Interpolate() returning true, results[0:2] = %f, %f, %f\n",
+       results[0], results[1], results[2]);
    #endif
    
    return true;
@@ -525,7 +539,9 @@ void LagrangeInterpolator::BuildDataPoints(Real ind)
       actualSize = pointCount;
    
    #ifdef DEBUG_LAGRANGE_BUILD
-   MessageInterface::ShowMessage("   indData = %f, actualSize=%d\n", indData, actualSize);
+   MessageInterface::ShowMessage
+      ("   indData=%f, bufferSize=%d, pointCount=%d, actualSize=%d\n",
+       indData, bufferSize, pointCount, actualSize);
    #endif
    
    for (i = 1; i < actualSize; ++i)
@@ -548,8 +564,8 @@ void LagrangeInterpolator::BuildDataPoints(Real ind)
       
       #ifdef DEBUG_LAGRANGE_BUILD
       MessageInterface::ShowMessage
-         ("   start = %2d, x[%2d] = %f, y[%2d][0] = %f\n", start, i, x[i],
-          i, y[i][0]);
+         ("   start = %2d, x[%2d] = %f, y[%2d][0] = %f, y[%2d][2] = %f\n",
+          start, i, x[i], i, y[i][0], i, y[i][2]);
       #endif
    }
    
@@ -561,14 +577,14 @@ void LagrangeInterpolator::BuildDataPoints(Real ind)
 
 
 //------------------------------------------------------------------------------
-// bool IsDataNearCenter(Real ind)
+// void UpdateBeginAndEndIndex(Real ind)
 //------------------------------------------------------------------------------
-bool LagrangeInterpolator::IsDataNearCenter(Real ind)
+void LagrangeInterpolator::UpdateBeginAndEndIndex(Real ind)
 {
    #ifdef DEBUG_LAGRANGE_BUILD
    MessageInterface::ShowMessage
-      ("Lagrange::IsDataNearCenter() entered, ind=%f, actualSize=%d\n",
-       ind, actualSize);
+      ("Lagrange::UpdateBeginAndEndIndex() entered, ind=%f, beginIndex=%d, "
+       "endIndex=%d, actualSize=%d\n", ind, beginIndex, endIndex, actualSize);
    #endif
    
    Integer dataIndex = 0;
@@ -587,20 +603,40 @@ bool LagrangeInterpolator::IsDataNearCenter(Real ind)
    Integer begin = dataIndex - (order/2);
    Integer end = dataIndex + (order/2);
    
+   // Update beginIndex here
    beginIndex = begin;
+   endIndex = end;
+   
    if ((beginIndex + order) > actualSize)
       beginIndex = actualSize - order;
-   
-   // Check if there are enough points before and after data requested
-   if (begin >= 0 && end < actualSize)
-   {
-      retval = true;
-   }
    
    #ifdef DEBUG_LAGRANGE_BUILD
    MessageInterface::ShowMessage
       ("   dataIndex=%d, begin=%d, end=%d, beginIndex=%d\n",
        dataIndex, begin, end, beginIndex);
+   MessageInterface::ShowMessage
+      ("Lagrange::UpdateBeginAndEndIndex() leaving\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsDataNearCenter()
+//------------------------------------------------------------------------------
+bool LagrangeInterpolator::IsDataNearCenter()
+{
+   #ifdef DEBUG_LAGRANGE_BUILD
+   MessageInterface::ShowMessage
+      ("Lagrange::IsDataNearCenter() entered, beginIndex=%d, endIndex=%d, actualSize=%d\n",
+       beginIndex, endIndex, actualSize);
+   #endif
+   
+   bool retval = false;
+   // Check if there are enough points before and after data requested
+   if (beginIndex >= 0 && endIndex < actualSize)
+      retval = true;
+   
+   #ifdef DEBUG_LAGRANGE_BUILD
    MessageInterface::ShowMessage
       ("Lagrange::IsDataNearCenter() returning %d\n", retval);
    #endif
@@ -655,8 +691,8 @@ Integer LagrangeInterpolator::FindStartingPoint(Real ind)
    
    #ifdef DEBUG_LAGRANGE_BUILD
    MessageInterface::ShowMessage
-      ("   beginIndex=%d, qEnd=%d, qMin=%d, startPoint=%d\n", beginIndex,
-       qEnd, qMin, startPoint);
+      ("   before adjusting startPoint, beginIndex=%d, qEnd=%d, qMin=%d, startPoint=%d\n",
+       beginIndex, qEnd, qMin, startPoint);
    #endif
    
    if (startPoint < 0)

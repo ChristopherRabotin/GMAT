@@ -56,6 +56,7 @@
 //#define DEBUG_EPHEMFILE_SC_PROPERTY_CHANGE
 //#define DEBUG_EPHEMFILE_TEXT
 //#define DEBUG_EPHEMFILE_SOLVER_DATA
+//#define DEBUG_INTERPOLATOR_TRACE
 //#define DBGLVL_EPHEMFILE_DATA 1
 //#define DBGLVL_EPHEMFILE_DATA_LABELS 1
 //#define DBGLVL_EPHEMFILE_MANEUVER 2
@@ -1393,7 +1394,10 @@ void EphemerisFile::CreateInterpolator()
    {
       interpolator = new LagrangeInterpolator(instanceName+"_Lagrange", 6,
                                               interpolationOrder);
-      
+      #ifdef DEBUG_INTERPOLATOR_TRACE
+      MessageInterface::ShowMessage
+         ("===> CreateInterpolator() calling interpolator->SetForceInterpolation(false)\n");
+      #endif
       // Set force interpolation to false to collect more data if needed
       interpolator->SetForceInterpolation(false);
       
@@ -1834,7 +1838,10 @@ bool EphemerisFile::IsTimeToWrite(Real epochInSecs, const Real state[6])
             #ifdef DEBUG_EPHEMFILE_TIME
             DebugWriteTime("   ===== Adding to interpolator ", epochInSecs);
             #endif
-            
+            #ifdef DEBUG_INTERPOLATOR_TRACE
+            MessageInterface::ShowMessage
+               ("===> IsTimeToWrite() calling interpolator->AddPoint(epochInSecs, state)\n");
+            #endif
             interpolator->AddPoint(epochInSecs, state);
             prevEpochInSecs = epochInSecs;
          }
@@ -1949,7 +1956,8 @@ void EphemerisFile::WriteOrbit(Real reqEpochInSecs, const Real state[6])
    DebugWriteTime("   currEpochInSecs, ", currEpochInSecs);
    DebugWriteTime("    reqEpochInSecs, ", reqEpochInSecs);
    MessageInterface::ShowMessage
-      ("   currState[0]=%.15f, state[0]=%.15f\n", currState[0], state[0]);
+      ("   currState[0:2]=%.15f, %.15f, %.15f\n       state[0:2]=%.15f, %.15f, %.15f\n",
+       currState[0], currState[1], currState[2], state[0], state[1], state[2]);
    #endif
    
    Real stateToWrite[6];
@@ -2096,8 +2104,15 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
       {
          if (interpolator != NULL)
          {
+            #ifdef DEBUG_INTERPOLATOR_TRACE
+            MessageInterface::ShowMessage
+               ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
+            #endif
             interpolator->SetForceInterpolation(true);
             ProcessEpochsOnWaiting(true, !canFinalize);
+            #ifdef DEBUG_INTERPOLATOR_TRACE
+            MessageInterface::ShowMessage("===> FinishUpWriting() calling interpolator->SetForceInterpolation(false)\n");
+            #endif
             interpolator->SetForceInterpolation(false);
             
             // When running more than 5 days or so, the last epoch to process is a few
@@ -2117,8 +2132,16 @@ void EphemerisFile::FinishUpWriting(bool canFinalize)
                   #endif
                   epochsOnWaiting.pop_back();
                   epochsOnWaiting.push_back(currEpochInSecs);
+                  #ifdef DEBUG_INTERPOLATOR_TRACE
+                  MessageInterface::ShowMessage
+                     ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(true)\n");
+                  #endif
                   interpolator->SetForceInterpolation(true);
                   ProcessEpochsOnWaiting(true);
+                  #ifdef DEBUG_INTERPOLATOR_TRACE
+                  MessageInterface::ShowMessage
+                     ("===> FinishUpWriting() calling interpolator->SetForceInterpolation(false)\n");
+                  #endif
                   interpolator->SetForceInterpolation(false);
                }
             }
@@ -2268,6 +2291,10 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
       DebugWriteTime("   Checking to see if it is feasible ", reqEpochInSecs);
       #endif
       
+      #ifdef DEBUG_INTERPOLATOR_TRACE
+      MessageInterface::ShowMessage
+         ("===> ProcessEpochsOnWaiting() calling interpolator->IsInterpolationFeasible(reqEpochInSecs)\n");
+      #endif
       Integer retval = interpolator->IsInterpolationFeasible(reqEpochInSecs);
       
       #ifdef DEBUG_EPHEMFILE_ORBIT
@@ -2282,6 +2309,10 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
          #ifdef DEBUG_EPHEMFILE_ORBIT
          MessageInterface::ShowMessage
             ("   =====> now try interpolating at epoch %.15f\n", reqEpochInSecs);
+         #endif
+         #ifdef DEBUG_INTERPOLATOR_TRACE
+         MessageInterface::ShowMessage
+            ("===> ProcessEpochsOnWaiting() calling interpolator->Interpolate(reqEpochInSecs, estimates)\n");
          #endif
          if (interpolator->Interpolate(reqEpochInSecs, estimates))
          {
@@ -2304,8 +2335,16 @@ void EphemerisFile::ProcessEpochsOnWaiting(bool checkFinalEpoch, bool checkEvent
                
                // Since time should be in order, force process epochs on waiting.
                // First few request time can not be placed in the middle of the buffer.
+               #ifdef DEBUG_INTERPOLATOR_TRACE
+               MessageInterface::ShowMessage
+                  ("===> ProcessEpochsOnWaiting() calling interpolator->SetForceInterpolation(true)\n");
+               #endif
                interpolator->SetForceInterpolation(true);
                ProcessEpochsOnWaiting(false);
+               #ifdef DEBUG_INTERPOLATOR_TRACE
+               MessageInterface::ShowMessage
+                  ("===> ProcessEpochsOnWaiting() calling interpolator->SetForceInterpolation(false)\n");
+               #endif
                interpolator->SetForceInterpolation(false);
             }
             else
@@ -2563,7 +2602,6 @@ void EphemerisFile::BufferOrbitData(Real epochInDays, const Real state[6])
          continuousSegment = true;
          if (firstTimeMetaData)
             saveMetaDataStart = true;
-         ////WriteComments("********** CONTINUOUS SEGMENT **********");
          #ifdef DEBUG_EPHEMFILE_WRITE
          DebugWriteTime("********** WRITING CONTINUOUS SEGMENT AT ", epochInDays, true, 2);
          #endif
@@ -2929,7 +2967,7 @@ void EphemerisFile::WriteCcsdsOemData(Real reqEpochInSecs, const Real state[6])
    #ifdef DEBUG_EPHEMFILE_CCSDS
    MessageInterface::ShowMessage
       ("EphemerisFile::WriteCcsdsOemData() entered, reqEpochInSecs=%.15f, "
-       "state[0]=%.15f\n", reqEpochInSecs, state[0]);
+       "state[0:2]=%.15f, %.15f, %.15f\n", reqEpochInSecs, state[0], state[1], state[2]);
    #endif
    
    Real outState[6];
@@ -2937,7 +2975,7 @@ void EphemerisFile::WriteCcsdsOemData(Real reqEpochInSecs, const Real state[6])
       outState[i] = state[i];
    
    // Since CCSDS utilities do no convert to desired CoordinateSystem,
-   // convert it here
+   // so convert it here
    if (!writeDataInDataCS)
       ConvertState(reqEpochInSecs/GmatTimeConstants::SECS_PER_DAY, state, outState);
    
