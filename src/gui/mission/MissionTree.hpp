@@ -210,7 +210,8 @@ private:
    wxTreeItemId FindElse(wxTreeItemId parentId);
    int  FindItemPosition(wxTreeItemId parentId, wxTreeItemId itemId);
    bool IsElseNode(wxTreeItemId itemId);
-   bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType);
+   bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType,
+                       GmatTree::ItemType &solverItemType);
    
    // for Debug
    void ShowCommands(const wxString &msg = "");

@@ -99,6 +99,7 @@
 //#define DEBUG_VIEW_COMMANDS 1
 //#define DEBUG_COMMAND_COUNTER
 //#define DEBUG_RENAME
+//#define DEBUG_NODE_NAME
 
 //------------------------------
 // event tables for wxWindows
@@ -713,7 +714,7 @@ bool MissionTree::IsAnyViewCommandInBranch(GmatCommand *branch)
                ("MissionTree::IsAnyViewCommandInBranch() returning true, found <%s>'%s' "
                 "in <%s>'%s'\n", typeName.c_str(), cmdName.c_str(), branchTypeName.c_str(),
                 branch->GetName().c_str());
-            MessageInterface::ShowMessage("***** Should I build tree item and return true?\n");
+            MessageInterface::ShowMessage("***** Should the tree item be built and return true?\n");
             #endif
             
             return true;
@@ -1211,6 +1212,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    // compose node name
    // Changed node name of End and Else to append parent's name
    // (LOJ: 2010.01.27 for bug GMT-209 fix)
+   // Note: Else is also BranchEnd so it will have If's counter if unnamed
    if (cmd->IsOfType("BranchEnd"))
    {
       if (parentName.Trim() != "")
@@ -1220,20 +1222,13 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
       else if (nodeName.Trim() == "")
       {
          // Use branch summary name for counter so that nested branch end command
-         // matches with its branch command. (GMT-209 fix)(LOJ: 2012.02.24)
+         // matches with its branch command. (GMT-209 fix)(LOJ: 2012.02.27)
          GmatCommand *branch = cmd->GetNext();
          wxString branchTypeName = branch->GetTypeName().c_str();
          wxString label = branch->GetSummaryName().c_str();
          label.Replace(branchTypeName, cmdTypeName);
          nodeName.Printf("%s", label.c_str());
       }
-   }
-   else if (cmdTypeName == "Else")
-   {
-      if (parentName.Trim() != "")
-         nodeName.Printf("Else %s", parentName.c_str());
-      else if (nodeName.Trim() == "")
-         nodeName.Printf("%s%d", cmdTypeName.c_str(), cmdCount);
    }
    else
    {
@@ -1961,6 +1956,9 @@ void MissionTree::Append(const wxString &cmdTypeName)
          MissionTreeItemData *elseItem = (MissionTreeItemData *) GetItemData(elseId);
          GmatCommand *elseCmd = elseItem->GetCommand();
          realPrevCmd = elseCmd->GetPrevious();
+         wxTreeItemId realPrevId = GetPrevSibling(elseId);
+         if (realPrevId.IsOk())
+            prevId = realPrevId;
          insertBefore = true;
          #if DEBUG_MISSION_TREE_APPEND
          MessageInterface::ShowMessage("   ==> Else found\n");
@@ -2950,17 +2948,20 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
          }
          else 
          {
-            //GmatTree::ItemType itemType;
-            if (IsInsideSolver(id, itemType))
+            GmatTree::ItemType solverItemType = itemType;
+            if (IsInsideSolver(id, itemType, solverItemType))
             {
-               if (itemType == GmatTree::TARGET)
+               #if DEBUG_MISSION_TREE_MENU
+               MessageInterface::ShowMessage("   ===> item is inside a Solver command\n");
+               #endif
+               if (solverItemType == GmatTree::TARGET)
                {
                   menu.Append(MT_INSERT_BEFORE, wxT("Insert Before"),
                               CreateTargetSubMenu(itemType, INSERT_BEFORE));
                   menu.Append(MT_INSERT_AFTER, wxT("Insert After"),
                               CreateTargetSubMenu(itemType, INSERT_AFTER));
                }
-               else if (itemType == GmatTree::OPTIMIZE)
+               else if (solverItemType == GmatTree::OPTIMIZE)
                {
                   menu.Append(MT_INSERT_BEFORE, wxT("Insert Before"),
                               CreateOptimizeSubMenu(itemType, INSERT_BEFORE));
@@ -2970,6 +2971,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             }
             else
             {
+               #if DEBUG_MISSION_TREE_MENU
+               MessageInterface::ShowMessage("   ===> item is outside a Solver command\n");
+               #endif
                menu.Append(MT_INSERT_BEFORE, wxT("Insert Before"),
                            CreateSubMenu(itemType, INSERT_BEFORE));
                menu.Append(MT_INSERT_AFTER, wxT("Insert After"),
@@ -2977,6 +2981,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             }
          }
          
+         #if DEBUG_MISSION_TREE_MENU
+         MessageInterface::ShowMessage("   Now add Append if control logic\n");
+         #endif
          // Append is allowed for the control logic
          if ((itemType == GmatTree::IF_CONTROL) ||
 				 // ELSE is not a BranchCommand so commented out (LOJ: 2011.12.01)
@@ -2987,19 +2994,22 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             // Use menu.Insert() to make Append appear before insert before/after
             // just like other branch command
             size_t insertPos = menu.GetMenuItemCount() - 2;
-            #ifdef DEBUG_MENU
+            #ifdef DEBUG_MISSION_TREE_MENU
             MessageInterface::ShowMessage("   ---> insertPos = %d\n", insertPos);
             #endif
             
-            GmatTree::ItemType itemType;
-            if (IsInsideSolver(id, itemType))
+            GmatTree::ItemType solverItemType = itemType;
+            if (IsInsideSolver(id, itemType, solverItemType))
             {
-               if (itemType == GmatTree::TARGET)
+               #ifdef DEBUG_MISSION_TREE_MENU
+               MessageInterface::ShowMessage("   ===> Inserting Append menu inside Solver command\n");
+               #endif
+               if (solverItemType == GmatTree::TARGET)
                {
                   menu.Insert(insertPos, MT_APPEND, wxT("Append"),
                               CreateTargetSubMenu(itemType, APPEND));   
                }
-               else if (itemType == GmatTree::OPTIMIZE)
+               else if (solverItemType == GmatTree::OPTIMIZE)
                {
                   menu.Insert(insertPos, MT_APPEND, wxT("Append"),
                               CreateOptimizeSubMenu(itemType, APPEND));   
@@ -3007,12 +3017,18 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             }
             else
             {
+               #ifdef DEBUG_MISSION_TREE_MENU
+               MessageInterface::ShowMessage("   ===> Inserting Append menu outside Solver command\n");
+               #endif
                menu.Insert(insertPos, MT_APPEND, wxT("Append"),
                            CreateSubMenu(itemType, APPEND));
             }
          }
       }
       
+      #if DEBUG_MISSION_TREE_MENU
+      MessageInterface::ShowMessage("   Now add Rename/Delete to all items\n");
+      #endif
       // Delete applies to all, except End branch
       if (itemType < GmatTree::BEGIN_NO_PANEL || itemType == GmatTree::STOP)
       {
@@ -3921,18 +3937,21 @@ wxString MissionTree::ComposeNodeName(GmatCommand *cmd, int cmdCount)
    wxString nodeName = cmd->GetName().c_str();
    wxString cmdTypeName = cmd->GetTypeName().c_str();
    
-   if (cmdTypeName == "Else")
-      nodeName.Printf("%s%d", cmdTypeName.c_str(), cmdCount);
+   if (cmdTypeName == "GMAT")
+      cmdTypeName = "Equation";
+   else if (cmdTypeName == "BeginScript")
+      cmdTypeName = "ScriptEvent";
    
-   // if command has name or command has the type name then append counter
+   // if command has NO name or command name is the type name then append counter
    if (nodeName.Trim() == "" || nodeName == cmdTypeName)
       nodeName.Printf("%s%d", cmdTypeName.c_str(), cmdCount);
    
-   // Show command string as node label(loj: 2007.11.13)
+   // Show command string as node label
    cmd->SetSummaryName(nodeName.c_str());
+   // Get long or short label
    nodeName = GetCommandString(cmd, nodeName);
    
-   #if DEBUG_NODE_NAME
+   #ifdef DEBUG_NODE_NAME
    MessageInterface::ShowMessage
       ("MissionTree::ComposeNodeName() returning '%s'\n", nodeName.c_str());
    #endif
@@ -3959,7 +3978,7 @@ wxString MissionTree::GetCommandString(GmatCommand *cmd, const wxString &currStr
    wxString cmdString;
    cmdString = cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str();
    
-   #ifdef DEBUG_CMD_STRING
+   #ifdef DEBUG_NODE_NAME
    MessageInterface::ShowMessage("GetCommandString() cmdString='%s'\n", cmdString.c_str());
    #endif
    
@@ -4104,7 +4123,7 @@ void MissionTree::CreateCommandCounterMap()
 //------------------------------------------------------------------------------
 void MissionTree::CreateMenuIds(const wxString &cmd, int index)
 {
-   #if DEBUG_MISSION_TREE_MENU
+   #if DEBUG_MISSION_TREE_MENU > 1
    MessageInterface::ShowMessage
       ("CreateMenuIds() entered, cmd='%s', index=%d\n", cmd.c_str(), index);
    #endif
@@ -4135,7 +4154,7 @@ void MissionTree::CreateMenuIds(const wxString &cmd, int index)
    cmdIdMap.insert(std::make_pair(str, id));
    idCmdMap.insert(std::make_pair(id, realCmd));
    
-   #if DEBUG_MISSION_TREE_MENU
+   #if DEBUG_MISSION_TREE_MENU > 1
    MessageInterface::ShowMessage
       ("CreateMenuIds() leaving, cmd='%s', index=%d\n", cmd.c_str(), index);
    #endif
@@ -4147,7 +4166,7 @@ void MissionTree::CreateMenuIds(const wxString &cmd, int index)
 //------------------------------------------------------------------------------
 int MissionTree::GetMenuId(const wxString &cmd, ActionType action)
 {
-   #if DEBUG_MISSION_TREE_MENU
+   #if DEBUG_MISSION_TREE_MENU > 1
    wxString actionString;
    if (action == 0)
       actionString = "Append";
@@ -4188,7 +4207,7 @@ int MissionTree::GetMenuId(const wxString &cmd, ActionType action)
       #endif
    }
    
-   #if DEBUG_MISSION_TREE_MENU
+   #if DEBUG_MISSION_TREE_MENU > 1
    MessageInterface::ShowMessage("MissionTree::GetMenuId() returning %d\n", id);
    #endif
    
@@ -4491,14 +4510,22 @@ bool MissionTree::IsElseNode(wxTreeItemId itemId)
 
 
 //------------------------------------------------------------------------------
-// bool IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemType)
+// bool IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemType, ...)
 //------------------------------------------------------------------------------
 /*
- * Checks if an item is inside of solver (Target, Optimize) branch.
+ * Checks if an item is inside of solver (Target, Optimize) branch and
+ * assigns solverItemType to solver branch item type if item is inside a
+ * solver branch.
  *
+ * @parameter  currId  Id of the current node
+ * @parameter  itemType  Item type of the current node
+ * @parameter  solverItemType  Item type of the solver branch
+ *
+ * @return  true if item is inside a solver branch
  */
 //------------------------------------------------------------------------------
-bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemType)
+bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemType,
+                                 GmatTree::ItemType &solverItemType)
 {
    #if DEBUG_FIND_ITEM_PARENT
    WriteNode(1, "MissionTree::IsInsideSolver() ", "currId", currId);
@@ -4507,6 +4534,7 @@ bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemTy
    wxTreeItemId parentId = GetItemParent(currId);
    MissionTreeItemData *parentItem;
    GmatTree::ItemType parentType;
+   solverItemType = itemType;
    
    // go through parents
    while (parentId.IsOk() && GetItemText(parentId) != "")
@@ -4525,7 +4553,7 @@ bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemTy
                    "parentId", parentId);
          #endif
          
-         itemType = parentType;
+         solverItemType = parentType;
          return true;
       }
       
