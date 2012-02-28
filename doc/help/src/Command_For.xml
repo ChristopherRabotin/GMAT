@@ -21,263 +21,266 @@
   </refmeta>
 
   <refnamediv>
-    <refname>For</refname>
+    <refname><guilabel>For</guilabel></refname>
 
-    <refpurpose>Perform a for loop</refpurpose>
+    <refpurpose>Can we remove this section or only disply the text in the
+    TOC?? It looks bad.</refpurpose>
   </refnamediv>
 
-  <refsynopsisdiv>
-    <synopsis></synopsis>
-  </refsynopsisdiv>
+  <refsection>
+    <title>For</title>
+
+    <para>The <guilabel>For</guilabel> command is a control logic statement
+    that executes a nested set of script statements a specified number of
+    times.</para>
+  </refsection>
+
+  <refsection>
+    <title>Script Syntax</title>
+
+    <programlisting><code>For <replaceable>Index = values</replaceable>
+   <replaceable>script statements</replaceable>
+         :
+EndFor</code></programlisting>
+  </refsection>
 
   <refsection>
     <title>Description</title>
 
-    <para>The for loop is a control flow statement that allows portions of
-    code to be executed iteratively using an explicit loop variable
-    (Wikipedia). GMAT for loops are three-expression loops that allow the user
-    to set the initial value of the loop variable, its increment, and the test
-    to exit the loop. A parameter must be defined explicitly using a Create
-    Variable statement or GUI equivalent before it can be used in a for loop
-    command statement. The parameters used to define Start, Increment, and End
-    can be any of the following GMAT parameters: numeric literal (real
-    number), variable, array element, object property.</para>
+    <para><replaceable>values</replaceable> must have one of the following
+    forms:</para>
+
+    <para><replaceable>Start:End</replaceable></para>
+
+    <para>Increments Index from Start to End in steps of 1, repeating the
+    script statements until index is greater than End. If Start is greater
+    than End, then the script statements do not execute.</para>
+
+    <para><replaceable>Start:Increment:End</replaceable></para>
+
+    <para>Increments Index from <guilabel>Start</guilabel> to
+    <guilabel>End</guilabel> in steps of Increment, repeating the script
+    statements until Index is greater than End if Increment is positive and
+    less than End if Increment is negative. If Start is less than End and
+    Increment is negative, then the script statements do not execute.</para>
   </refsection>
 
   <refsection>
-    <title>Interfaces</title>
-
-    <para>The GUI for the For Loop command is divided into four
-    sections.</para>
-
-    <itemizedlist>
-      <listitem>
-        <para>The first section, the index, is where the counter variable name
-        is displayed.</para>
-      </listitem>
-
-      <listitem>
-        <para>The second section, the start, is the number with which the
-        counter variable is first stored with.</para>
-      </listitem>
-
-      <listitem>
-        <para>The third section, the increment, is the value that the counter
-        variable will change by each time the program goes through the
-        loop.</para>
-      </listitem>
-
-      <listitem>
-        <para>The fourth section, the end, is the value of the counter
-        variable when the loop is exited.</para>
-      </listitem>
-    </itemizedlist>
+    <title>GUI</title>
 
     <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the For Loop command
-        Dialog Box</title>
-      </info>
-
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Command_For_Default.bmp"
                      scalefit="1" width="100%"></imagedata>
         </imageobject>
-
-        <caption>
-          <para>Figure: Default Name and Settings for the For Loop command
-          Dialog Box</para>
-        </caption>
       </mediaobject>
     </screenshot>
 
-    <refsection>
-      <title>Script Syntax</title>
-
-      <para>(Simple For Loop)</para>
-
-      <programlisting><code>For Variable = Start:End;
-
-EndFor; }</code></programlisting>
-
-      <para>(Expanded For Loop)</para>
-
-      <programlisting><code>For Variable = Start:Increment:End;
-
-EndFor;</code></programlisting>
-    </refsection>
-
-    <refsection>
-      <title>Script Examples</title>
-
-      <programlisting><code>% Output the value of the For loop Variable to a file
-For I = 1:1:10;
-GMAT testVar = I;
-Report DefaultReportFile I;
-EndFor;</code></programlisting>
-    </refsection>
+    <para>The <guilabel>For</guilabel> command dialog box allows you to set
+    the following <guilabel>For</guilabel> command parameters: Index, Start,
+    Increment, and End. You can click in any text box and type a value, for
+    example the number 1, or you can type any existing variable name, or an
+    array element such as myArray(1,1). If you right-click in any textbox, or
+    click the button next to any text box, then the ParameterSelectDialog box
+    will open and you can select from objects to set the For command
+    parameters.</para>
   </refsection>
 
   <refsection>
     <title>Options</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>Variable</term>
+    <para><table colsep="0" frame="topbot" >
+	
+        <title><guilabel>For</guilabel> Command settings</title>
 
-        <listitem>
-          <para>The Variable field allows the user to define the variable that
-          to be incremented during the loop process.</para>
+        <tgroup cols="2">
+		<colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="2" colwidth="3*"/>
+          <thead>
+            <row>
+              <entry>Field</entry>
 
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
+              <entry>Accepted Data Types</entry>
+            </row>
+          </thead>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
+          <tbody>
+            <row>
+              <entry><guilabel>Index</guilabel></entry>
 
-            <varlistentry>
-              <term>Limits</term>
+              <entry><para>Index is the independent variable in a for loop and
+              it is computed according to the arithmetic progression defined
+              by the values for Start, Increment, and End. </para>
+              <variablelist>
+                  <varlistentry>
+                    <term>Accepted Data Types</term>
 
-              <listitem>
-                <para>Variable</para>
-              </listitem>
-            </varlistentry>
+                    <listitem>
+                      <para>Variable</para>
+                    </listitem>
+                  </varlistentry>
 
-            <varlistentry>
-              <term>Units</term>
+                  <varlistentry>
+                    <term>Limits</term>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+                    <listitem>
+                      <para>-Inf &lt; Index &lt; Inf</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
 
-      <varlistentry>
-        <term>Start</term>
+            <row>
+              <entry><guilabel>Start</guilabel></entry>
 
-        <listitem>
-          <para>The Start option allows the user to set the starting value of
-          the For Loop.</para>
+              <entry><para>The Start parameter is the initial value for the
+              Index parameter. </para> <variablelist>
+                  <varlistentry>
+                    <term>Accepted Data Types</term>
 
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
+                    <listitem>
+                      <para>Real Number, Variable, Array Element, or Scalar
+                      Real Object Parameter</para>
+                    </listitem>
+                  </varlistentry>
 
-              <listitem>
-                <para>1</para>
-              </listitem>
-            </varlistentry>
+                  <varlistentry>
+                    <term>Limits</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                    <listitem>
+                      <para>-Inf &lt; Index &lt; Inf</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
 
-              <listitem>
-                <para>Real Number, Array element, Variable, or any user
-                defined parameter</para>
-              </listitem>
-            </varlistentry>
+            <row>
+              <entry><guilabel>Increment</guilabel></entry>
 
-            <varlistentry>
-              <term>Units</term>
+              <entry><para>The Increment parameter is used to compute the
+              arithmetic progression of the loop Index such that the Ith pass
+              through the loop is Start + I*Increment if the resulting value
+              satisfies the constraint defined by End. </para> <variablelist>
+                  <varlistentry>
+                    <term>Accepted Data Types</term>
 
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+                    <listitem>
+                      <para>Real Number, Variable, Array Element, or Scalar
+                      Real Object Parameter</para>
+                    </listitem>
+                  </varlistentry>
 
-      <varlistentry>
-        <term>Increment</term>
+                  <varlistentry>
+                    <term>Limits</term>
 
-        <listitem>
-          <para>The Increment option allows the user to set the increment
-          value of the For Loop. When the increment value is not included in a
-          for loop statement, the default value is used.</para>
+                    <listitem>
+                      <para>-Inf &lt; Index &lt; Inf</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
 
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
+            <row>
+              <entry><guilabel>End</guilabel></entry>
 
-              <listitem>
-                <para>1</para>
-              </listitem>
-            </varlistentry>
+              <entry><para>The End parameter is the upper (or lower if
+              Increment is negative) bound for the Index parameter . </para>
+              <variablelist>
+                  <varlistentry>
+                    <term>Accepted Data Types</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                    <listitem>
+                      <para>Real Number, Variable, Array Element, or Scalar
+                      Real Object Parameter</para>
+                    </listitem>
+                  </varlistentry>
 
-              <listitem>
-                <para>Real Number, Array element, Variable, or any user
-                defined parameter</para>
-              </listitem>
-            </varlistentry>
+                  <varlistentry>
+                    <term>Limits</term>
 
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>End</term>
-
-        <listitem>
-          <para>The End option allows the user to set the ending value of the
-          For Loop.</para>
-
-          <variablelist>
-            <varlistentry>
-              <term>Default</term>
-
-              <listitem>
-                <para>10</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Limits</term>
-
-              <listitem>
-                <para>Real Number, Array, Variable, or any user defined
-                parameter</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>None</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+                    <listitem>
+                      <para>-Inf &lt; Index &lt; Inf</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table></para>
   </refsection>
 
   <refsection>
-    <title>For Loop Behavior</title>
+    <title>Remarks</title>
 
-    <para>When the Increment option is left out of the script syntax the
-    default value is used. If an Increment value of 0 is used, the For Loop
-    should not execute but GMAT should continue to run. If End&gt;Start and
-    Increment&lt;0, then the For Loop should not execute. If Start&gt;End and
-    Increment&gt;0, then the For Loop should not execute. End can be equal to
-    Start, but the For Loop will not execute.</para>
+    <para>If the loop executes, after execution of the loop, the value of
+    Index remains the same as the last pass through the loop. If the loop does
+    not execute, the value of Index is equal to the value before the
+    loop.</para>
+
+    <para>Changes made to the index variable inside of a for loop are
+    overwritten by the for loop statement. For example, the output from the
+    following snippet</para>
+
+    <programlisting><code>For I = 1:1:3;
+  I = 100
+  Report DefaultReportFile I;
+EndFor;
+
+is
+
+100
+100
+100</code></programlisting>
+
+    <para>Changes made to the the Start, Increment, and End parameters made
+    inside of a loop do not effect the behavior of the loop. For example, the
+    output from the following snippet</para>
+
+    <programlisting><code>Start = 2;
+Increment = 2;
+End = 8;
+For I = Start:Increment:End
+  Start = 1;
+  Increment = 5;
+  End = 100;
+  Report rf I;
+EndFor
+
+is
+
+2                      
+4                      
+6                      
+8</code></programlisting>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <para>Propagate a spacecraft to apogee 3 times:</para>
+
+    <programlisting><code>Create Spacecraft aSat
+Create Propagator aPropagator
+Create Variable I
+
+BeginMissionSequence
+
+For I = 1:3
+  Propagate aPropagator(aSat,{aSat.Apoapsis})
+EndFor</code></programlisting>
+
+    <para>Index into an array:</para>
+
+    <programlisting><code>Create Variable I J
+Create Array myArray[10,5]
+BeginMissionSequence
+
+For I = 1:10
+  For J = 1:5
+      myArray(I,J) = I*J;
+  EndFor
+EndFor</code></programlisting>
   </refsection>
 </refentry>
