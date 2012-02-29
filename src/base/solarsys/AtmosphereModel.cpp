@@ -22,6 +22,7 @@
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
 #include "CelestialBody.hpp"        // To retrieve radius, flattening factor
+#include "SolarSystemException.hpp"
 #include "CoordinateSystem.hpp"
 #include "GmatConstants.hpp"
 #include "AngleUtil.hpp"            // For lat, long range setting
@@ -304,6 +305,8 @@ void AtmosphereModel::SetCbJ2000CoordinateSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetFixedCoordinateSystem(CoordinateSystem *cs)
 {
+   if (!cs->AreAxesOfType("BodyFixedAxes"))
+      throw SolarSystemException("AtmosphereModel: coordinate system is not of type BodyFixed.\n");
    cbFixed = cs;
 }
 
