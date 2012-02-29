@@ -124,7 +124,7 @@ protected:
    // only one CoordinateConverter needed
    static CoordinateConverter mCoordConverter;
 
-   // Assigne item ids
+   // Assign item ids
    // Cartesian items
    enum {CART_X = 0, CART_Y, CART_Z, CART_VX, CART_VY, CART_VZ, CART_STATE, Item1Count};
    
