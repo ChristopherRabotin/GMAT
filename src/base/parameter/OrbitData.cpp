@@ -849,6 +849,12 @@ Real OrbitData::GetAngularReal(Integer item)
    Rvector6 state = GetCartState();
    Rvector3 dummy;
 
+   // provide relative state if necessary
+   if ((item == SEMILATUS_RECTUM || (item == HMAG)) && mOrigin->GetName() != "Earth")
+   {
+      state = GetRelativeCartState(mOrigin);
+   }
+
    #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetAngularReal() item=%d state=%s\n",
@@ -879,7 +885,6 @@ Real OrbitData::GetOtherAngleReal(Integer item)
       state = GetRelativeCartState(mOrigin);
    else
       state = GetCartState();
-
    // compute sun unit vector from the origin
    Rvector3 sunPos = (mSolarSystem->GetBody(SolarSystem::SUN_NAME))->
       GetMJ2000Position(mCartEpoch);
@@ -887,7 +892,8 @@ Real OrbitData::GetOtherAngleReal(Integer item)
    Rvector3 originToSun = sunPos - originPos;
    originToSun.Normalize();
 
-   return GmatCalcUtil::CalculateAngularData(VALID_ANGLE_PARAM_NAMES[item-SEMILATUS_RECTUM], state, mGravConst, originToSun);
+   return GmatCalcUtil::CalculateAngularData(VALID_ANGLE_PARAM_NAMES[item-SEMILATUS_RECTUM],
+                                             state, mGravConst,originToSun);
 }
 
 
@@ -1231,7 +1237,14 @@ void OrbitData::InitializeRefObjects()
       
       // override gravity constant if origin is CelestialBody
       if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
+      {
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
+         #ifdef DEBUG_ORBITDATA_INIT
+         MessageInterface::ShowMessage
+            ("OrbitData::InitializeRefObjects() Setting grav constant to %le (for origin %s)\n",
+                  mGravConst, (mOrigin->GetName()).c_str());
+         #endif
+      }
 
       mOriginDep = true;
    }
@@ -1277,6 +1290,11 @@ void OrbitData::InitializeRefObjects()
       // get gravity constant if out coord system origin is CelestialBody
       if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
+         #ifdef DEBUG_ORBITDATA_INIT
+         MessageInterface::ShowMessage
+            ("OrbitData::InitializeRefObjects() Now setting grav constant to %le (for origin %s)\n",
+                  mGravConst, (mOrigin->GetName()).c_str());
+         #endif
    }
    
    #ifdef DEBUG_ORBITDATA_INIT

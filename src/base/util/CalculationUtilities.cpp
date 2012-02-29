@@ -139,10 +139,12 @@ Real GmatCalcUtil::CalculateBPlaneData(const std::string &item, const Rvector6 &
  * This method calculates the Angular (Orbit) Calculation Objects.
  *
  * @param item       string indicating which item to compute.
- * @param state      input state in the desired coordinate system
+ * @param state      input state in the desired coordinate system;
+ *                   for SemilatusRectum and HMag, is the relative Cartesian State
  * @param originMu   gravitational constant for the origin of the
  *                   coordinate system (assumes origin is a Celestial Body)
- * @param originToSunUnit origin-to-sun unit vector
+ * @param originToSunUnit
+ *                   for Beta Angle, is the origin-to-sun unit vector
  *
  * @return           Real value requested
  *
