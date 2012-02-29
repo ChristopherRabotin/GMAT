@@ -134,10 +134,6 @@ public:
    bool RemoveValidModelName(Gmat::ModelType m, const std::string &forBody,
                              const std::string &theModel);
    
-   // methods used by internal functions
-   Rvector6 GetCelestialBodyState(const std::string &bodyName, 
-                                  CoordinateSystem *cs, const A1Mjd &epoch);
-   
    
    // Parameter access methods
    virtual std::string  GetParameterText(const Integer id) const;
