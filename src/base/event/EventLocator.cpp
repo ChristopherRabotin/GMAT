@@ -27,6 +27,8 @@
 
 
 //#define DEBUG_DUMPEVENTDATA
+//#define DEBUG_EVENTLOCATION
+//#define DEBUG_EVENT_INITIALIZATION
 
 #ifdef DEBUG_DUMPEVENTDATA
    #include <fstream>
@@ -80,6 +82,7 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
 EventLocator::EventLocator(const std::string &typeStr,
       const std::string &nomme) :
    GmatBase       (Gmat::EVENT_LOCATOR, typeStr, nomme),
+   initialized    (false),
    earlyBound     (NULL),
    lateBound      (NULL),
    filename       ("LocatedEvents.txt"),
@@ -106,9 +109,10 @@ EventLocator::EventLocator(const std::string &typeStr,
 //------------------------------------------------------------------------------
 EventLocator::~EventLocator()
 {
-//   MessageInterface::ShowMessage("Deleting event locator %s <%p>\n",
-//         instanceName.c_str(), this);
-
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage("Deleting event locator %s <%p>\n",
+            instanceName.c_str(), this);
+   #endif
    if (lastData != NULL)
       delete [] lastData;
 
@@ -134,12 +138,8 @@ EventLocator::~EventLocator()
 //------------------------------------------------------------------------------
 EventLocator::EventLocator(const EventLocator& el) :
    GmatBase          (el),
-   earlyBound        (NULL),
-   lateBound         (NULL),
    filename          (el.filename),
-   efCount           (0),
-   lastData          (NULL),
-   lastEpochs        (NULL),
+   efCount           (el.efCount),
    isActive          (el.isActive),
    showPlot          (el.showPlot),
    fileWasWritten    (false),
@@ -148,6 +148,37 @@ EventLocator::EventLocator(const EventLocator& el) :
    eventTolerance    (el.eventTolerance),
    solarSys          (el.solarSys)
 {
+   if (efCount == 0)
+   {
+      lastData   = NULL;
+      lastEpochs = NULL;
+      earlyBound = NULL;
+      lateBound  = NULL;
+   }
+   else
+   {
+      lastData   = new Real[efCount];
+      lastEpochs = new Real[efCount];
+      earlyBound = new Real[efCount];
+      lateBound  = new Real[efCount];
+   }
+
+   for (UnsignedInt i = 0; i < efCount; ++i)
+   {
+      lastData[i]   = el.lastData[i];
+      lastEpochs[i] = el.lastEpochs[i];
+      earlyBound[i] = el.earlyBound[i];
+      lateBound[i]  = el.lateBound[i];
+   }
+
+   // Set unitialized, since the event functions are not yet built
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage("Event locator copy constructor: changing "
+         "from %s to uninitialized; efCount = %d\n   Original: <%p>, this "
+         "copy: <%p>\n", (initialized ? "initialized" : "uninitialized"), 
+         efCount, &el, this);
+   #endif
+   initialized    = false;
 }
 
 
@@ -169,32 +200,74 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       GmatBase::operator =(el);
 
       filename       = el.filename;
-      efCount        = 0;
-      if (earlyBound != NULL)
-         delete [] earlyBound;
-      if (lateBound != NULL)
-         delete [] lateBound;
-      if (lastData != NULL)
-         delete [] lastData;
-      if (lastEpochs != NULL)
-         delete [] lastEpochs;
-      earlyBound     = NULL;
-      lateBound      = NULL;
-      lastData       = NULL;
-      lastEpochs     = NULL;
       isActive       = el.isActive;
       showPlot       = el.showPlot;
-      fileWasWritten = false;
+      fileWasWritten = el.fileWasWritten;
       satNames       = el.satNames;
       targets        = el.targets;
       eventTolerance = el.eventTolerance;
       solarSys       = el.solarSys;
 
-      eventFunctions.clear();
-//      maxSpan.clear();
-//      lastSpan.clear();
-      stateIndices.clear();
-      associateIndices.clear();
+      #ifdef DEBUG_EVENT_INITIALIZATION
+         MessageInterface::ShowMessage("Event locator assignment entered with "
+            "efCount = %d, ef size = %d\n", efCount, eventFunctions.size());
+      #endif
+
+      if (efCount != el.efCount)
+      {
+         #ifdef DEBUG_EVENT_INITIALIZATION
+            MessageInterface::ShowMessage("Event locator assignment efCount "
+               "mismatch: this has %d, that has %d\n", efCount, el.efCount);
+         #endif
+
+         if (eventFunctions.size() != 0)
+         {
+            for (UnsignedInt i = 0; i < eventFunctions.size(); ++i)
+               delete eventFunctions[i];
+            eventFunctions.clear();
+            efCount = el.efCount;
+            #ifdef DEBUG_EVENT_INITIALIZATION
+               MessageInterface::ShowMessage("In event locator assignment "
+                  "operator, changing from %s to uninitialized\n   "
+                  "From: <%p>, to (this): <%p>\n", 
+                  (initialized ? "initialized" : "uninitialized"), &el, this);
+            #endif
+            initialized = false;
+         }
+
+         if (lastData != NULL)
+            delete [] lastData;
+         if (lastEpochs != NULL)
+            delete [] lastEpochs;
+         if (earlyBound != NULL)
+            delete [] earlyBound;
+         if (lateBound != NULL)
+            delete [] lateBound;
+
+         if (efCount == 0)
+         {
+            lastData   = NULL;
+            lastEpochs = NULL;
+            earlyBound = NULL;
+            lateBound  = NULL;
+         }
+         else
+         {
+            lastData   = new Real[efCount];
+            lastEpochs = new Real[efCount];
+            earlyBound = new Real[efCount];
+            lateBound  = new Real[efCount];
+         }
+      }
+
+      // Copy in the array data
+      for (UnsignedInt i = 0; i < efCount; ++i)
+      {
+         lastData[i]   = el.lastData[i];
+         lastEpochs[i] = el.lastEpochs[i];
+         earlyBound[i] = el.earlyBound[i];
+         lateBound[i]  = el.lateBound[i];
+      }
    }
 
    return *this;
@@ -590,6 +663,18 @@ Real EventLocator::SetRealParameter(const std::string &label,
    return SetRealParameter(GetParameterID(label), value, row, col);
 }
 
+
+//------------------------------------------------------------------------------
+// const Rvector& GetRvectorParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an Rvector parameter
+ *
+ * @param id The parameter's ID
+ *
+ * #retval The Rvector
+ */
+//------------------------------------------------------------------------------
 const Rvector& EventLocator::GetRvectorParameter(const Integer id) const
 {
    if (id == EVENT_FUNCTION)
@@ -598,6 +683,19 @@ const Rvector& EventLocator::GetRvectorParameter(const Integer id) const
    return GmatBase::GetRvectorParameter(id);
 }
 
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const Integer id, const Rvector &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets an Rvector parameter
+ *
+ * @param id The parameter's ID
+ * @param value The new value for the Rvector
+ *
+ * #retval The Rvector
+ */
+//------------------------------------------------------------------------------
 const Rvector& EventLocator::SetRvectorParameter(const Integer id,
       const Rvector &value)
 {
@@ -613,11 +711,37 @@ const Rvector& EventLocator::SetRvectorParameter(const Integer id,
    return GmatBase::SetRvectorParameter(id, value);
 }
 
+
+//------------------------------------------------------------------------------
+// const Rvector& GetRvectorParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an Rvector parameter
+ *
+ * @param label The parameter's script string
+ *
+ * #retval The Rvector
+ */
+//------------------------------------------------------------------------------
 const Rvector& EventLocator::GetRvectorParameter(const std::string &label) const
 {
    return GetRvectorParameter(GetParameterID(label));
 }
 
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const std::string &label,
+//             const Rvector &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets an Rvector parameter
+ *
+ * @param label The parameter's script string
+ * @param value The new value for the Rvector
+ *
+ * #retval The Rvector
+ */
+//------------------------------------------------------------------------------
 const Rvector& EventLocator::SetRvectorParameter(const std::string &label,
       const Rvector &value)
 {
@@ -1157,6 +1281,55 @@ const ObjectTypeArray& EventLocator::GetTypesForList(const std::string &label)
 void EventLocator::SetSolarSystem(SolarSystem *ss)
 {
    solarSys = ss;
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage("In event locator SetSolarSystem, changing "
+         "from %s to uninitialized\n", (initialized ? "initialized" : 
+         "uninitialized"));
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetOrigin(SpacePoint *bod, const std::string &forObject)
+//------------------------------------------------------------------------------
+/**
+ * Sets the origin body used for calculations
+ *
+ * @param bod The origin point
+ * @param forObject The (optional) target that uses that origin.  If the 
+ *                  default "" is used, the origin is set on all of the
+ *                  event functions
+ *
+ * @return If the origin was set on at least one event function, false if not
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::SetOrigin(SpacePoint *bod, const std::string &forObject)
+{
+   bool retval = false;
+
+   for (UnsignedInt i = 0; i < eventFunctions.size(); ++i)
+   {
+      EventFunction *theEventFunction = eventFunctions[i];
+
+      // Skip the rest on this pass through the loop if the EF is NULL
+      if (theEventFunction == NULL)
+         continue;
+
+      if (forObject != "")
+      {
+         // Check that the event function uses the passed in object as target
+         if (theEventFunction->GetPrimaryName() != forObject)
+            theEventFunction = NULL;
+      }
+
+      if (theEventFunction != NULL)
+      {
+         theEventFunction->SetOrigin(bod); //lastOrigin);
+         retval = true;
+      }
+   }
+
+   return retval;
 }
 
 
@@ -1280,6 +1453,11 @@ bool EventLocator::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 // Integer GetOwnedObjectCount()
 //------------------------------------------------------------------------------
+/** 
+ * Retrieves the number of owned objects in the event locator
+ *
+ * @return The owned object count
+ */
 //------------------------------------------------------------------------------
 Integer EventLocator::GetOwnedObjectCount()
 {
@@ -1290,6 +1468,13 @@ Integer EventLocator::GetOwnedObjectCount()
 //------------------------------------------------------------------------------
 // GmatBase* GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
+/** 
+ * Retrieves an owned objects by index
+ *
+ * @param whichOne The index of the owned object
+ *
+ * @return The owned object
+ */
 //------------------------------------------------------------------------------
 GmatBase* EventLocator::GetOwnedObject(Integer whichOne)
 {
@@ -1315,6 +1500,10 @@ GmatBase* EventLocator::GetOwnedObject(Integer whichOne)
 bool EventLocator::Initialize()
 {
    bool retval = false;
+
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage("Initializing event locator at <%p>\n", this);
+   #endif
 
    StringArray badInits;
    efCount = eventFunctions.size();
@@ -1385,6 +1574,12 @@ bool EventLocator::Initialize()
       functionValues[i] = 0.0;
 
    fileWasWritten = false;
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage("In event locator Initialize "
+         "method, changing from %s to initialized; efCount = %d\n", 
+         (initialized ? "initialized" : "uninitialized"), efCount);
+   #endif
+   initialized = true;
 
    return retval;
 }
@@ -1421,11 +1616,20 @@ Real EventLocator::GetTolerance()
 //------------------------------------------------------------------------------
 Real *EventLocator::Evaluate(GmatEpoch atEpoch, Real *forState)
 {
+   #ifdef DEBUG_EVENTLOCATION
+      MessageInterface::ShowMessage("Entered EventLocator::Evaluate for %s, "
+         "efCount = %d\n", instanceName.c_str(), efCount);
+   #endif
+
+   if (initialized == false)
+      throw EventException("The event locator " + instanceName + 
+               " is being evaluated in an unitialized state.");
+
    Real *vals;
 
    #ifdef DEBUG_EVENTLOCATION
-      MessageInterface::ShowMessage("Evaluating %d event functions; "
-            "locator %s\n", eventFunctions.size(), instanceName.c_str());
+      MessageInterface::ShowMessage("   Evaluating %d event functions\n", 
+         eventFunctions.size(), instanceName.c_str());
    #endif
 
    UnsignedInt i3;
@@ -1521,7 +1725,7 @@ void EventLocator::BufferEvent(Integer forEventFunction)
 
 
 //------------------------------------------------------------------------------
-// void EventLocator::BufferEvent(Real epoch, std::string type, bool isStart)
+// void BufferEvent(Real epoch, std::string type, bool isStart)
 //------------------------------------------------------------------------------
 /**
  * Saves data for an event boundary in the event table
@@ -1782,6 +1986,11 @@ Integer EventLocator::SetPropItem(const std::string &propItem)
 //------------------------------------------------------------------------------
 Integer EventLocator::GetPropItemSize(const Integer item)
 {
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage("Called GetPropItemSize(%d); "
+         "efCount = %d count = %d\n", item, efCount, eventFunctions.size());
+   #endif
+
    if (item == Gmat::EVENT_FUNCTION_STATE)
       return efCount;
 

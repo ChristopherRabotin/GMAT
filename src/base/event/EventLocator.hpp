@@ -145,6 +145,8 @@ public:
 
 
    virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual bool         SetOrigin(SpacePoint *bod, 
+                              const std::string &forObject = "");
 //   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
 //   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray&
@@ -188,6 +190,8 @@ public:
          Integer associate);
 
 protected:
+   /// Flag used to indicate taht the locator has been prepared for use
+   bool initialized;
    /// The collection of event functions used by the EventLocator.
    std::vector<EventFunction*> eventFunctions;
    /// Earliest time bracket for last event boundary found

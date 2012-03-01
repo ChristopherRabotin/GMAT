@@ -52,6 +52,7 @@ public:
    std::string GetPrimaryName();
 
    virtual bool SetPrimary(SpaceObject *so);
+   virtual bool SetOrigin(SpacePoint *bod);
    virtual bool Initialize();
    virtual Real* Evaluate(GmatEpoch atEpoch = -1.0, Real* forState = NULL) = 0;
    Real* GetData();
@@ -67,8 +68,10 @@ protected:
    Real              *eventData;
    /// Size of the event data array
    UnsignedInt       dataSize;
-   /// SpaceObject that plays the role of “target” in the event computations.
+   /// SpaceObject that plays the role of target in the event computations.
    SpaceObject       *primary;
+   /// The origin body for the state data.
+   SpacePoint        *origin;
    /// Event boundary type; defaults to "Entry" or "Exit"
    std::string       boundaryType;
    /// Boolean indicating is the boundary is an entry or exit

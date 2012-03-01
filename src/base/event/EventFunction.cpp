@@ -21,7 +21,11 @@
 
 #include "gmatdefs.hpp"
 #include "EventFunction.hpp"
+#include "MessageInterface.hpp"
 #include "EventException.hpp"
+
+
+//#define DEBUG_ORIGIN
 
 //------------------------------------------------------------------------------
 // EventFunction(const std::string &typeStr)
@@ -36,6 +40,7 @@ EventFunction::EventFunction(const std::string &typeStr) :
    eventData         (NULL),
    dataSize          (3),
    primary           (NULL),
+   origin            (NULL),
    boundaryType      ("Undetermined"),
    isStart           (false)
 {
@@ -71,6 +76,7 @@ EventFunction::EventFunction(const EventFunction& ef) :
    eventData         (NULL),
    dataSize          (ef.dataSize),
    primary           (ef.primary),
+   origin            (ef.origin),
    boundaryType      (ef.boundaryType),
    isStart           (ef.isStart)
 {
@@ -94,17 +100,29 @@ EventFunction& EventFunction::operator=(const EventFunction& ef)
    {
       typeName     = ef.typeName;
       instanceName = ef.instanceName;
-      dataSize     = ef.dataSize;
 
-      if (eventData != NULL)
-         delete [] eventData;
+      // Only rebuild the data buffer if needed
+      if (dataSize != ef.dataSize)
+      {
+         dataSize = ef.dataSize;
+         if (eventData != NULL)
+         {
+            delete [] eventData;
+            eventData = NULL;
+         }
+      }
+      if ((dataSize > 0) && (eventData == NULL) && (ef.eventData != NULL))
+         eventData = new Real[dataSize];
+
+      // Copy in the most recent event data
       if (ef.eventData != NULL)
       {
-         eventData = new Real[dataSize];
          for (UnsignedInt i = 0; i < dataSize; ++i)
             eventData[i] = ef.eventData[i];
       }
+
       primary      = ef.primary;
+      origin       = ef.origin;
       boundaryType = ef.boundaryType;
       isStart      = ef.isStart;
    }
@@ -147,6 +165,16 @@ std::string EventFunction::GetName()
    return instanceName;
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetPrimaryName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of the primary body (e.g. the target spacecraft)
+ *
+ * @return The name of the primary
+ */
+//------------------------------------------------------------------------------
 std::string EventFunction::GetPrimaryName()
 {
    std::string retval = "";
@@ -180,7 +208,28 @@ bool EventFunction::SetPrimary(SpaceObject *so)
 
 
 //------------------------------------------------------------------------------
-// bool EventFunction::Initialize()
+// bool SetOrigin(CelestialBody *bod)
+//------------------------------------------------------------------------------
+/**
+ * Sets the coordinate system origin body pointer
+ *
+ * @param bod The body of the state origin data
+ *
+ * @return true if an origin was set, false if the origin is NULL on return
+ */
+//------------------------------------------------------------------------------
+bool EventFunction::SetOrigin(SpacePoint *sp)
+{
+   origin = sp;
+   #ifdef DEBUG_ORIGIN
+      MessageInterface::ShowMessage("Origin: %s\n", origin->GetName().c_str());
+   #endif
+   return (origin != NULL);
+}
+
+
+//------------------------------------------------------------------------------
+// bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Prepares the event function for use
@@ -193,6 +242,10 @@ bool EventFunction::Initialize()
    if (primary == NULL)
       throw EventException("Unable to initialize the " + typeName +
             " EventFunction; the primary is not set.");
+
+   if (origin == NULL)
+      throw EventException("Unable to initialize the " + typeName +
+            " EventFunction; the origin is not set.");
 
    // (Re)allocate the data array
    if (eventData != NULL)
