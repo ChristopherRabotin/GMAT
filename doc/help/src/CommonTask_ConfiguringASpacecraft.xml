@@ -291,4 +291,99 @@ DefaultSC.SRPArea = 12.5</programlisting>
       </step>
     </procedure>
   </section>
+
+  <section>
+    <title>Configuring the Attitude (Spinner)</title>
+
+    <para>GMAT has a special attitude model that makes it easy to set up a
+    spacecraft that spins about the axes of any defined coordinate system. The
+    steps below define a spacecraft-centered coordinate system with axes
+    rotating with the Sun-Earth line, then define a spacecraft as spinning
+    about the X-axis of that system. Starting from the default mission:</para>
+
+    <para>First, define the <guilabel>Solar</guilabel> coordinate
+    system:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, right click
+        <guilabel>Coordinate Systems</guilabel> and click <guilabel>Add
+        Coordinate System</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Coordinate System Name</guilabel> box, type
+        <userinput>Solar</userinput>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Origin</guilabel> list, select
+        <guilabel>DefaultSC</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Type</guilabel> list, select
+        <guilabel>ObjectReferenced</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Set the <guilabel>Primary</guilabel> body to
+        <guilabel>Sun</guilabel>, and the <guilabel>Secondary</guilabel> body
+        to <guilabel>Earth</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Set the <guilabel>X</guilabel> axis to <guilabel>-R</guilabel>
+        and the <guilabel>Z</guilabel> axis to <guilabel>N</guilabel>. Leave
+        the <guilabel>Y</guilabel> axis at its default blank value.</para>
+      </step>
+    </procedure>
+
+    <para>Now set the default spacecraft to spin about the X-axis of the
+    <guilabel>Solar</guilabel> coordinate system:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, double-click
+        <guilabel>DefaultSC</guilabel> to open its properties window.</para>
+      </step>
+
+      <step>
+        <para>Click the <guilabel>Attitude</guilabel> tab.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Attitude Model</guilabel> list, select
+        <guilabel>Spinner</guilabel>. This enables the <guilabel>Attitude Rate
+        Initial Conditions</guilabel> properties.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Euler Angle Sequence</guilabel> box, select
+        <guilabel>123</guilabel>. This maps the first Euler angle rotation to
+        the X-axis of the coordinate system.</para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Attitude Rate State Type</guilabel> list,
+        select <guilabel>EulerAngleRates.</guilabel></para>
+      </step>
+
+      <step>
+        <para>In the <guilabel>Euler Angle Rate 1</guilabel> box, type
+        <userinput>180</userinput>.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>Run</guilabel> (<subscript><inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"/>
+            </imageobject>
+          </inlinemediaobject></subscript>). In the graphics window, you will
+        see the spacecraft spinning about the Sun-Earth line.</para>
+      </step>
+    </procedure>
+  </section>
 </chapter>
