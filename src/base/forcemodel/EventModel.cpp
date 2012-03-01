@@ -152,7 +152,7 @@ void EventModel::SetEventLocators(std::vector<EventLocator*> *els)
 // bool Initialize()
 //-----------------------------------------------------------------------------
 /**
- *  Prepares teh EventModel for use in propagation
+ *  Prepares the EventModel for use in propagation
  *
  *  @return true on success, false on failure
  */
