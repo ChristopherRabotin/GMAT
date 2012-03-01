@@ -1214,6 +1214,12 @@ void PropagationEnabledCommand::InitializeForEventLocation()
 //------------------------------------------------------------------------------
 void PropagationEnabledCommand::CheckForEvents()
 {
+   #ifdef DEBUG_EVENTLOCATORS
+      MessageInterface::ShowMessage("In CheckForEvents: events = <%p> "
+         "ActiveLocatorCount = %d Running = %d Solved = %d current = %d\n",
+         events, activeLocatorCount, Gmat::RUNNING, Gmat::SOLVEDPASS, 
+         currentRunState);
+   #endif
    if (events == NULL)
    {
       #ifdef DEBUG_EVENTLOCATORS
@@ -1263,7 +1269,7 @@ void PropagationEnabledCommand::CheckForEvents()
          #endif
 
          #ifdef DEBUG_EVENT_LOCATORS
-            bool found =
+            bool found = true; // for now; use to indicate refinements later
          #endif
          LocateEvent(events->at(index), functionIndex);
 
