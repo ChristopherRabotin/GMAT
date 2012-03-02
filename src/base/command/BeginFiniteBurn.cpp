@@ -83,6 +83,19 @@ BeginFiniteBurn::~BeginFiniteBurn()
          (burnForce, burnForce->GetName(), "BeginFiniteBurn::~BeginFiniteBurn()",
           "deleting burn force");
       #endif
+      if (transientForces != NULL)
+      {
+         std::vector<PhysicalModel *>::iterator transient = find(
+            transientForces->begin(), transientForces->end(), burnForce);
+         if (transient != transientForces->end())
+         {
+            #ifdef DEBUG_TRANSIENTFORCE_MANAGEMENT
+               MessageInterface::ShowMessage("Removing burn force <%p> from "
+                  "the transient force list\n", burnForce);
+            #endif
+            transientForces->erase(transient);
+         }
+      }
       delete burnForce;
    }
 }
@@ -131,7 +144,24 @@ BeginFiniteBurn& BeginFiniteBurn::operator=(const BeginFiniteBurn& begman)
    GmatCommand::operator=(begman);
    burnName = begman.burnName;
    maneuver = NULL;
-   burnForce = NULL;
+   if (burnForce != NULL)
+   {
+      if (transientForces != NULL)
+      {
+         std::vector<PhysicalModel *>::iterator transient = find(
+            transientForces->begin(), transientForces->end(), burnForce);
+         if (transient != transientForces->end())
+         {
+            #ifdef DEBUG_TRANSIENTFORCE_MANAGEMENT
+               MessageInterface::ShowMessage("Removing burn force <%p> from "
+                  "the transient force list\n", burnForce);
+            #endif
+            transientForces->erase(transient);
+         }
+      }
+      delete burnForce;
+      burnForce = NULL;
+   }
    transientForces = NULL;
    satNames = begman.satNames;
    firstTimeExecution = true;
@@ -520,7 +550,20 @@ bool BeginFiniteBurn::Initialize()
             (burnForce, burnForce->GetName(), "BeginFiniteBurn::Initialize()",
              "deleting burn force");
          #endif
+         if (transientForces != NULL)
+         {
+            std::vector<PhysicalModel *>::iterator transient = find(
+               transientForces->begin(), transientForces->end(), burnForce);
+            if (transient != transientForces->end())
+            {
+               #ifdef DEBUG_TRANSIENTFORCE_MANAGEMENT
+                  MessageInterface::ShowMessage("Removing burn force <%p> from the transient force list\n", burnForce);
+               #endif
+               transientForces->erase(transient);
+            }
+         }
          delete burnForce;
+         burnForce = NULL;
       }
       
       // If all is okay, create the FiniteThrust object and configure it.
