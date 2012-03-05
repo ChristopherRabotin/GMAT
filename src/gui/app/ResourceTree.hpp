@@ -38,6 +38,7 @@ public:
    ResourceTree(wxWindow *parent, const wxWindowID id,
                 const wxPoint& pos, const wxSize& size,
                 long style);
+   
    void SetMainFrame(GmatMainFrame *gmf);
    void ClearResource(bool leaveScripts);
    void UpdateResource(bool resetCounter);
@@ -97,31 +98,36 @@ protected:
    wxTreeItemId mUniverseItem;
    wxTreeItemId interfaceItem;
 
-   // Mapping for plug-in objects
+   /// Mapping for plug-in objects
    std::map<Integer, std::string> pluginMap;
-
    /// Plugin tree item IDs
    std::vector<wxTreeItemId> mPluginItems;
    /// node Id -> Type mapping
    std::map<std::string, Gmat::ObjectType> nodeTypeMap;
    /// nodeId -> subtype mapping
    std::map<std::string, std::string> nodeSubtypeMap;
-
+   
+   /// Tree item icon Mapping for all object type names (for future use)
+   //std::map<std::string, Integer> typeIconMap;
+   
    // MSVC compiler will not accept a non-constant size for std::vector
    static const Integer MAX_SUN_ORBITERS;
-
+   
+   // icon initialization (for future use)
+   //void InitializeIcons();
+   
    // objects
    GmatBase* CreateObject(const std::string &objType, const std::string &objName,
                           bool createDefault = false);
    GmatBase* GetObject(const std::string &name);
    void UpdateGuiItem(GmatTree::ItemType itemType);
-
+   
    // resource tree
    void AddItemFolder(wxTreeItemId parentItemId, wxTreeItemId &itemId,
                       const wxString &itemName, GmatTree::ItemType itemType);
    
-   void AddNode(GmatTree::ItemType, const wxString &name);
-
+   wxTreeItemId AddObjectToTree(GmatBase *obj, bool showDebug = false);
+   
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
    void AddDefaultGroundStation(wxTreeItemId itemId, bool resetCounter = true);
@@ -176,7 +182,7 @@ protected:
    void OnAddOrbitView(wxCommandEvent &event);
    void OnAddEphemerisFile(wxCommandEvent &event);
    void OnAddSubscriber(wxCommandEvent &event);
-   void OnAddDiffCorr(wxCommandEvent &event);
+   void OnAddDifferentialCorrector(wxCommandEvent &event);
    void OnAddSqp(wxCommandEvent &event);
    void OnAddHardware(wxCommandEvent &event);
    void OnAddSolver(wxCommandEvent &event);
@@ -219,14 +225,14 @@ protected:
          const std::string &subtype = "");
    Gmat::ObjectType GetObjectType(GmatTree::ItemType itemType);
    wxTreeItemId GetTreeItemId(GmatTree::ItemType type);
-   GmatTree::ResourceIconType GetTreeItemIcon(GmatTree::ItemType type);
    
    // icon
    void GetBodyTypeAndIcon(const std::string bodyName,
-                          GmatTree::ItemType &bodyItemType,
-                          GmatTree::ResourceIconType &iconType);
+                           GmatTree::ItemType &bodyItemType,
+                           GmatTree::ResourceIconType &iconType);
    
-   GmatTree::ResourceIconType GetIconId(GmatBase *obj);
+   void GetItemTypeAndIcon(GmatBase *obj, GmatTree::ItemType &itemType,
+                           GmatTree::ResourceIconType &itemIcon);
    
    // user text input
    int GetNameFromUser(wxString &newName, const wxString &oldName = "",
@@ -268,7 +274,7 @@ protected:
       POPUP_ADD_SOLVER,
       POPUP_ADD_BOUNDARY_SOLVER,
       POPUP_ADD_OPTIMIZER,
-      POPUP_ADD_DIFF_CORR,
+      POPUP_ADD_DIFFERENTIAL_CORRECTOR,
       POPUP_ADD_BROYDEN,
       POPUP_ADD_QUASI_NEWTON,
       POPUP_ADD_SQP,

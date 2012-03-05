@@ -31,7 +31,10 @@
 #include "bitmaps/varyevent.xpm"
 #include "bitmaps/achieveevent.xpm"
 #include "bitmaps/deltav.xpm"
-#include "bitmaps/callfunction.xpm"
+// Call Function
+#include "bitmaps/mt_CallGmatFunction.xpm"
+#include "bitmaps/mt_CallMatlabFunction.xpm"
+
 #include "bitmaps/nestreturn.xpm"
 #include "bitmaps/saveobject.xpm"
 #include "bitmaps/equalsign.xpm"
@@ -2681,7 +2684,8 @@ void MissionTree::AddIcons()
    
    theGuiManager->LoadIcon("achieveevent", bitmapType, &bitmaps[++index], achieveevent_xpm);
    theGuiManager->LoadIcon("deltav", bitmapType, &bitmaps[++index], deltav_xpm);
-   theGuiManager->LoadIcon("callfunction", bitmapType, &bitmaps[++index], callfunction_xpm);
+   theGuiManager->LoadIcon("mt_CallGmatFunction", bitmapType, &bitmaps[++index], mt_CallGmatFunction_xpm);
+   theGuiManager->LoadIcon("mt_CallMatlabFunction", bitmapType, &bitmaps[++index], mt_CallMatlabFunction_xpm);
    theGuiManager->LoadIcon("nestreturn", bitmapType, &bitmaps[++index], nestreturn_xpm);
    theGuiManager->LoadIcon("saveobject", bitmapType, &bitmaps[++index], saveobject_xpm);
    
@@ -2696,7 +2700,7 @@ void MissionTree::AddIcons()
    theGuiManager->LoadIcon("pendown", bitmapType, &bitmaps[++index], pendown_xpm);
    theGuiManager->LoadIcon("mt_MarkPoint", bitmapType, &bitmaps[++index], mt_MarkPoint_xpm);
    theGuiManager->LoadIcon("mt_ClearPlot", bitmapType, &bitmaps[++index], mt_ClearPlot_xpm);
-
+   
    theGuiManager->LoadIcon("mt_Global", bitmapType, &bitmaps[++index], mt_Global_xpm);   
    theGuiManager->LoadIcon("mt_SaveMission", bitmapType, &bitmaps[++index], mt_SaveMission_xpm);   
    theGuiManager->LoadIcon("optimize", bitmapType, &bitmaps[++index], optimize_xpm);
@@ -3864,7 +3868,7 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
    if (cmd == "Vary")
       return GmatTree::MISSION_ICON_VARY;
    if (cmd == "Save")
-      return GmatTree::MISSION_ICON_SAVE;
+      return GmatTree::MISSION_ICON_SAVE_OBJECT;
    if (cmd == "GMAT")
       return GmatTree::MISSION_ICON_ASSIGNMENT;
    if (cmd == "Equation")
@@ -3890,9 +3894,9 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
    if (cmd == "EndWhile")
       return GmatTree::MISSION_ICON_NEST_RETURN;
    if (cmd == "CallGmatFunction")
-      return GmatTree::MISSION_ICON_CALL_FUNCTION;
+      return GmatTree::MISSION_ICON_CALL_GMAT_FUNCTION;
    if (cmd == "CallMatlabFunction")
-      return GmatTree::MISSION_ICON_CALL_FUNCTION;
+      return GmatTree::MISSION_ICON_CALL_MATLAB_FUNCTION;
    if (cmd == "Stop")
       return GmatTree::MISSION_ICON_STOP;
    if (cmd == "BeginScript")
