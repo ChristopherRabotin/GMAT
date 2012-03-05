@@ -41,13 +41,14 @@ public:
    GmatBase* GetRunningObject(const std::string &name);
    
    //----- factory
-   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
    const StringArray& GetListOfAllFactoryItems();
+   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
+   const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    std::string GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    
    //----- configuration
    std::string GetNewName(const std::string &name, Integer startCount);
-   std::string AddClone(const std::string &name);
+   GmatBase* AddClone(const std::string &name, std::string &newName);
    bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
                      const std::string &newName);
    bool RemoveObject(Gmat::ObjectType type, const std::string &name);

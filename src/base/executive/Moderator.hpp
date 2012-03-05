@@ -133,9 +133,9 @@ public:
    const StringArray& GetListOfObjects(const std::string &typeName,
                                        bool excludeDefaultObjects = false);
    GmatBase* GetConfiguredObject(const std::string &name);
+   GmatBase* AddClone(const std::string &name, std::string &newName);
    bool ReconfigureItem(GmatBase *newobj, const std::string &name);
    std::string GetNewName(const std::string &name, Integer startCount);
-   std::string AddClone(const std::string &name);
    bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
                      const std::string &newName);
    bool RemoveObject(Gmat::ObjectType type, const std::string &name,

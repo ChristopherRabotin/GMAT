@@ -90,6 +90,21 @@ GmatBase* GuiInterpreter::GetRunningObject(const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// const StringArray& GetListOfAllFactoryItems()
+//------------------------------------------------------------------------------
+/**
+ * Return a list of all items that can be created.
+ *
+ * @return list of all creatable items.
+ */
+//------------------------------------------------------------------------------
+const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
+{
+   return theModerator->GetListOfAllFactoryItems();
+}
+
+
+//------------------------------------------------------------------------------
 // const StringArray& GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
@@ -107,17 +122,19 @@ const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfAllFactoryItems()
+// const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types)
 //------------------------------------------------------------------------------
 /**
- * Return a list of all items that can be created.
+ * Return a std::string of all items that can be created except input object types
+ *
+ * @param <type> object types to be excluded
  *
  * @return list of all creatable items.
  */
 //------------------------------------------------------------------------------
-const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
+const StringArray& GuiInterpreter::GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types)
 {
-   return theModerator->GetListOfAllFactoryItems();
+   return theModerator->GetListOfAllFactoryItemsExcept(types);
 }
 
 
@@ -129,7 +146,7 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
  *
  * @param <type> object types to be excluded
  *
- * @return list of all creatable items.
+ * @return list of all creatable items in string.
  */
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types)
@@ -162,18 +179,22 @@ std::string GuiInterpreter::GetNewName(const std::string &name, Integer startCou
 
 
 //------------------------------------------------------------------------------
-// std::string AddClone(const std::string &name)
+// GmatBase* AddClone(const std::string &name, std::string &cloneName)
 //------------------------------------------------------------------------------
 /*
  * Adds the clone of the named object to configuration.
  * It gives new name by adding counter to the name to be cloned.
  *
- * @return new name if object was cloned and added to configuration, blank otherwise
+ * @parameter  name  The name of the object to be cloned
+ * @parameter  cloneName  Name of the cloned object if object was cloned and
+ *                added to configuration, blank otherwise
+ *
+ * @return  Cloned object pointer, NULL if it was not cloned
  */
 //------------------------------------------------------------------------------
-std::string GuiInterpreter::AddClone(const std::string &name)
+GmatBase* GuiInterpreter::AddClone(const std::string &name, std::string &cloneName)
 {
-   return theModerator->AddClone(name);
+   return theModerator->AddClone(name, cloneName);
 }
 
 

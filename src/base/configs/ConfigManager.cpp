@@ -167,38 +167,6 @@ void ConfigManager::AddObject(Gmat::ObjectType objType, GmatBase *obj)
    AddObject(obj);
 }
 
-//------------------------------------------------------------------------------
-// std::string AddClone(const std::string &name)
-//------------------------------------------------------------------------------
-/*
- * Adds the clone of the named object to configuration.
- * It gives new name by adding counter to the name to be cloned.
- *
- * return new name if object was cloned and added to configuration,
- *        blank otherwise
- */
-//------------------------------------------------------------------------------
-std::string ConfigManager::AddClone(const std::string &name)
-{
-   if (name == "")
-      return "";
-   
-   GmatBase *obj1 = GetItem(name);
-   std::string newName = GetNewName(name, 2);
-   
-   GmatBase* obj2 = obj1->Clone();
-   obj2->SetName(newName, newName);
-   AddObject(obj2);
-   
-   #if DEBUG_CONFIG_ADD_CLONE
-   MessageInterface::ShowMessage
-      ("ConfigManager::AddClone() newName = %s, type = %s\n", obj2->GetName().c_str(),
-       obj2->GetTypeName().c_str());
-   #endif
-   
-   return newName;
-}
-
 
 //------------------------------------------------------------------------------
 // void AddPhysicalModel(PhysicalModel *pm)
@@ -1070,6 +1038,43 @@ const StringArray& ConfigManager::GetListOfItems(const std::string &typeName)
       ++current;
    }
    return listOfItems;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* AddClone(const std::string &name, std::string &cloneName)
+//------------------------------------------------------------------------------
+/*
+ * Adds the clone of the named object to configuration.
+ * It gives new name by adding counter to the name to be cloned.
+ *
+ * @parameter  name  The name of the object to be cloned
+ * @parameter  cloneName  Name of the cloned object if object was cloned and
+ *                added to configuration, blank otherwise
+ *
+ * @return  Cloned object pointer, NULL if it was not cloned
+ */
+//------------------------------------------------------------------------------
+GmatBase* ConfigManager::AddClone(const std::string &name, std::string &cloneName)
+{
+   if (name == "")
+      return NULL;
+   
+   GmatBase *obj1 = GetItem(name);
+   std::string newName = GetNewName(name, 2);
+   
+   GmatBase* obj2 = obj1->Clone();
+   obj2->SetName(newName, newName);
+   AddObject(obj2);
+   cloneName = newName;
+   
+   #if DEBUG_CONFIG_ADD_CLONE
+   MessageInterface::ShowMessage
+      ("ConfigManager::AddClone() cloneName = %s, type = %s\n", obj2->GetName().c_str(),
+       obj2->GetTypeName().c_str());
+   #endif
+   
+   return obj2;
 }
 
 

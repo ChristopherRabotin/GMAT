@@ -64,7 +64,6 @@ public:
    std::string         GetNewName(const std::string &name, Integer startCount);
    
    void                AddObject(Gmat::ObjectType objType, GmatBase *obj);
-   std::string         AddClone(const std::string &name);
    void                AddPhysicalModel(PhysicalModel *pm);
    void                AddPropagator(Propagator *prop);
    void                AddODEModel(ODEModel *fm);
@@ -101,6 +100,7 @@ public:
    const StringArray&  GetListOfItemsHas(Gmat::ObjectType type,
                                          const std::string &name,
                                          bool includeSysParam = true);
+   GmatBase*           AddClone(const std::string &name, std::string &cloneName);
    GmatBase*           GetFirstItemUsing(Gmat::ObjectType type,
                                          const std::string &name,
                                          bool includeSysParam = true);

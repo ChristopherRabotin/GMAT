@@ -1594,21 +1594,25 @@ std::string Moderator::GetNewName(const std::string &name, Integer startCount)
 
 
 //------------------------------------------------------------------------------
-// std::string AddClone(const std::string &name)
+// GmatBase* AddClone(const std::string &name, std::string &cloneName)
 //------------------------------------------------------------------------------
 /*
  * Adds the clone of the named object to configuration.
  * It gives new name by adding counter to the name to be cloned.
  *
- * return new name if object was cloned and added to configuration, blank otherwise
+ * @parameter  name  The name of the object to be cloned
+ * @parameter  cloneName  Name of the cloned object if object was cloned
+ *                and added to configuration, blank otherwise
+ *
+ * @return  Cloned object pointer, NULL if it was not cloned
  */
 //------------------------------------------------------------------------------
-std::string Moderator::AddClone(const std::string &name)
+GmatBase* Moderator::AddClone(const std::string &name, std::string &cloneName)
 {
    if (name == "")
-      return "";
-
-   return theConfigManager->AddClone(name);
+      return NULL;
+   
+   return theConfigManager->AddClone(name, cloneName);
 }
 
 
