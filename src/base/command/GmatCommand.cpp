@@ -148,6 +148,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    generatingString = "";
    parameterCount = GmatCommandParamCount;
    objectTypes.push_back(Gmat::COMMAND);
+   objectTypeNames.push_back("GmatCommand");
    objectTypeNames.push_back(typeStr);
    
    commandNameList.push_back(typeStr);

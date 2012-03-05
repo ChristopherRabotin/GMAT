@@ -44,7 +44,8 @@ MatlabFunction::MatlabFunction(const std::string &name) :
    // for initial function path, use FileManager
    FileManager *fm = FileManager::Instance();
    std::string pathname;
-   
+   objectTypeNames.push_back("MatlabFunction");
+
    try
    {
       // matlab uses directory path

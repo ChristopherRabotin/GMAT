@@ -105,6 +105,8 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    
    if (key == GmatParam::SYSTEM_PARAM)
       objectTypeNames.push_back("SystemParameter");
+   else
+      objectTypeNames.push_back("UserParameter");
    
    mKey = key;
    
