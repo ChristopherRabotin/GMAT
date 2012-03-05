@@ -1106,8 +1106,17 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType,
          // Add the name(s) to the list 
          StringArray objs = (*f)->GetListOfCreatableObjects(withQualifier);
          if (!objs.empty())
-            entireList.insert(entireList.end(), objs.begin(), objs.end());
-            
+         {
+            // Do not add the same name, some how we are getting
+            // multiple object types with plugins (LOJ: 2012.03.02)
+            //entireList.insert(entireList.end(), objs.begin(), objs.end());
+            for (UnsignedInt i = 0; i < objs.size(); i++)
+            {
+               if (find(entireList.begin(), entireList.end(), objs[i]) == entireList.end())
+                  entireList.push_back(objs[i]);
+            }
+         }
+         
          // There may be multiple factories of a given type, so keep looking
          //break;
       }
