@@ -24,77 +24,87 @@
 
 namespace GmatTree
 {
-   // ICON_FOLDER should start from 0 since ResourceTree::AddIcons()
+   // RESOURCE_ICON_FOLDER should start from 0 since ResourceTree::AddIcons()
    // creates icons by the order in ResourceIconType
    enum ResourceIconType
    {
-      ICON_FOLDER,
-      ICON_FILE,
-      ICON_OPENFOLDER,
-      ICON_GROUND_STATION,
-      ICON_SPACECRAFT,
-      ICON_PROPAGATOR,
-
-      ICON_TANK,
-      ICON_THRUSTER,
-      ICON_SOLARSYSTEM,
-      ICON_SUN,
-      ICON_MERCURY,
-      ICON_VENUS,
-
-      ICON_EARTH,
-      ICON_MARS,
-      ICON_JUPITER,
-      ICON_SATURN,
-      ICON_URANUS,
-
-      ICON_NEPTUNE,
-      ICON_PLUTO,
-      ICON_REPORT_FILE,
-      ICON_NETWORK,
-      ICON_IMPULSIVE_BURN,
-      ICON_FINITE_BURN,
-
-      ICON_MOON,
-      ICON_MOON_GENERIC,
-      ICON_PLANET_GENERIC,
-      ICON_COMET,
-      ICON_ASTEROID,
+      RESOURCE_ICON_FOLDER,
+      RESOURCE_ICON_FILE,
+      RESOURCE_ICON_OPEN_FOLDER,
       
-      RESOURCE_ICON_BARYCENTER,
-      RESOURCE_ICON_LIBRATION_POINT,
+      RESOURCE_ICON_SPACECRAFT,
+      RESOURCE_ICON_FORMATION,
+      RESOURCE_ICON_GROUND_STATION,
       
-      ICON_MATLAB_FUNCTION,
-      ICON_FUNCTION,
-      ICON_COORDINATE_SYSTEM,
-      
-      ICON_ORBIT_VIEW,
-      ICON_XY_PLOT,
-      RESOURCE_ICON_GROUND_TRACK_PLOT,
-      
-      ICON_VARIABLE,
-      ICON_ARRAY,
-      ICON_STRING,
-      
-      RESOURCE_ICON_BOUNDARY_VALUE_SOLVER,
-      RESOURCE_ICON_OPTIMIZER,
-      RESOURCE_ICON_SIMULATOR,
-      RESOURCE_ICON_ESTIMATOR,
-      
+      RESOURCE_ICON_HARDWARE,
+      RESOURCE_ICON_TANK,
+      RESOURCE_ICON_THRUSTER,
       RESOURCE_ICON_ANTENNA,
       RESOURCE_ICON_TRANSMITTER,
       RESOURCE_ICON_RECEIVER,
       RESOURCE_ICON_TRANSPONDER,
       
+      RESOURCE_ICON_IMPULSIVE_BURN,
+      RESOURCE_ICON_FINITE_BURN,
+      
+      RESOURCE_ICON_PROPAGATOR,
+      
+      RESOURCE_ICON_SOLARSYSTEM,
+      RESOURCE_ICON_SUN,
+      RESOURCE_ICON_MERCURY,
+      RESOURCE_ICON_VENUS,
+      RESOURCE_ICON_EARTH,
+      RESOURCE_ICON_MARS,
+      RESOURCE_ICON_JUPITER,
+      RESOURCE_ICON_SATURN,
+      RESOURCE_ICON_URANUS,
+      RESOURCE_ICON_NEPTUNE,
+      RESOURCE_ICON_PLUTO,
+      
+      RESOURCE_ICON_MOON,
+      RESOURCE_ICON_MOON_GENERIC,
+      RESOURCE_ICON_PLANET_GENERIC,
+      RESOURCE_ICON_COMET,
+      RESOURCE_ICON_ASTEROID,
+      RESOURCE_ICON_BARYCENTER,
+      RESOURCE_ICON_LIBRATION_POINT,
+      
+      RESOURCE_ICON_SOLVER,
+      RESOURCE_ICON_BOUNDARY_VALUE_SOLVER,
+      RESOURCE_ICON_DIFFERENTIAL_CORRECTOR,
+      RESOURCE_ICON_OPTIMIZER,
+      RESOURCE_ICON_SIMULATOR,
+      RESOURCE_ICON_ESTIMATOR,
+      
+      RESOURCE_ICON_SUBSCRIBER,
+      RESOURCE_ICON_REPORT_FILE,
+      RESOURCE_ICON_EPHEMERIS_FILE,
+      RESOURCE_ICON_ORBIT_VIEW,
+      RESOURCE_ICON_XY_PLOT,
+      RESOURCE_ICON_GROUND_TRACK_PLOT,
+      
       RESOURCE_ICON_MATLAB,
       RESOURCE_ICON_MATLAB_SERVER,
       
-      RESOURCE_ICON_MEASUREMENT_MODEL,
       RESOURCE_ICON_SCRIPT,
-      RESOURCE_ICON_DEFAULT,
       
-      // ICON_COUNT should be the last one, it is used in ResourceTree::AddIcons()
-      ICON_COUNT,
+      RESOURCE_ICON_VARIABLE,
+      RESOURCE_ICON_ARRAY,
+      RESOURCE_ICON_STRING,
+      
+      RESOURCE_ICON_COORDINATE_SYSTEM,
+      
+      RESOURCE_ICON_ECLIPSE_LOCATOR,
+      
+      RESOURCE_ICON_GMAT_FUNCTION,
+      RESOURCE_ICON_MATLAB_FUNCTION,
+      
+      RESOURCE_ICON_MEASUREMENT_MODEL,
+      RESOURCE_ICON_NETWORK,
+      
+      RESOURCE_ICON_DEFAULT,
+      // RESOURCE_ICON_COUNT should be the last one, it is used in ResourceTree::AddIcons()
+      RESOURCE_ICON_COUNT,
    };
 
    // MISSION_ICON_PROPAGATE should start from 0 since MissionTree::AddIcons()
@@ -115,9 +125,10 @@ namespace GmatTree
 
       MISSION_ICON_ACHIEVE,
       MISSION_ICON_DELTA_V,
-      MISSION_ICON_CALL_FUNCTION,
+      MISSION_ICON_CALL_GMAT_FUNCTION,
+      MISSION_ICON_CALL_MATLAB_FUNCTION,
       MISSION_ICON_NEST_RETURN,
-      MISSION_ICON_SAVE,
+      MISSION_ICON_SAVE_OBJECT,
 
       MISSION_ICON_ASSIGNMENT,
       MISSION_ICON_TOGGLE,
@@ -184,7 +195,7 @@ namespace GmatTree
       INTERFACE_FOLDER,
       VARIABLE_FOLDER,
       FUNCTION_FOLDER,
-      COORD_SYSTEM_FOLDER,
+      COORDINATE_SYSTEM_FOLDER,
       SPECIAL_POINT_FOLDER,
       PREDEFINED_FUNCTION_FOLDER,
       SCRIPT_FOLDER,
@@ -204,21 +215,21 @@ namespace GmatTree
 
       // openable resource
       BEGIN_OF_RESOURCE = 41000,
-      GROUND_STATION,
       SPACECRAFT,
+      GROUND_STATION,
       
+      HARDWARE,
       FUELTANK,
       THRUSTER,
       SENSOR,
-      HARDWARE,
       
       FORMATION,
       FORMATION_SPACECRAFT,
       CONSTELLATION_SATELLITE,
-
+      
       PROPAGATOR = 41100,
-//      SPK_PROPAGATOR,
-
+      //SPK_PROPAGATOR,
+      
       IMPULSIVE_BURN = 41200,
       FINITE_BURN,
 
@@ -231,13 +242,17 @@ namespace GmatTree
       CELESTIAL_BODY_ASTEROID,//
       BARYCENTER,
       LIBRATION_POINT,
-
+      
       SOLVER = 41400,
-      DIFF_CORR,
+      BOUNDARY_VALUE_SOLVER,
+      DIFFERENTIAL_CORRECTOR,
       BROYDEN,
+      OPTIMIZER,
       QUASI_NEWTON,
       SQP,
-
+      SIMULATOR,
+      ESTIMATOR,
+      
       SUBSCRIBER = 41500,
       REPORT_FILE,
       XY_PLOT,
@@ -250,11 +265,12 @@ namespace GmatTree
       STRING,
 
       EVENT_LOCATOR = 41650,
-
-      MATLAB_FUNCTION = 41700,
-      GMAT_FUNCTION,
-      COORD_SYSTEM,
-      USER_COORD_SYSTEM,
+      MEASUREMENT_MODEL,
+      
+      GMAT_FUNCTION = 41700,
+      MATLAB_FUNCTION,
+      PREDEFINED_COORDINATE_SYSTEM,
+      USER_COORDINATE_SYSTEM,
 
       USER_DEFINED_OBJECT = 41750,
 
@@ -353,22 +369,25 @@ class GmatTreeItemData : public wxTreeItemData
 {
 public:
    GmatTreeItemData(const wxString &name, GmatTree::ItemType type,
-                    const wxString &title = "");
-
+                    const wxString &title = "", bool isClonable = true);
+   
    wxString GetName();
    wxString GetTitle();
    GmatTree::ItemType GetItemType();
-
+   bool IsClonable();
+   
    void SetName(const wxString &objName);
    void SetTitle(const wxString &title);
    void SetItemType(GmatTree::ItemType type);
-
+   void SetClonable(bool clonable);
+   
    virtual GmatCommand* GetCommand();
 
 protected:
    wxString mItemTitle;
    wxString mItemName;
    GmatTree::ItemType mItemType;
+   bool mIsClonable;
 };
 
 #endif // GmatTreeItemData_hpp

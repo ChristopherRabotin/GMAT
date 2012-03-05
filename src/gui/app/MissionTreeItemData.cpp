@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2004/02/06
 /**
@@ -39,7 +37,7 @@
 //------------------------------------------------------------------------------
 MissionTreeItemData::MissionTreeItemData(const wxString &name, GmatTree::ItemType type,
                                          const wxString &title, GmatCommand *cmd)
-    : GmatTreeItemData(name, type, title)
+   : GmatTreeItemData(name, type, title, false)
 {
    // Set title as name for mission tree since they are the same
    mItemTitle = name;

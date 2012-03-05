@@ -24,7 +24,7 @@
 
 //------------------------------------------------------------------------------
 // GmatTreeItemData(const wxString &name, GmatTree::ItemType type,
-//                  const wxString &title)
+//                  const wxString &title, bool isClonable)
 //------------------------------------------------------------------------------
 /**
  * Constructs GmatTreeItemData object.
@@ -32,16 +32,18 @@
  * @param <name>  input string for name of node which is object name
  * @param <type>  input int for type of object.
  * @param <title> input string for title of node.
+ * @param <isClonable> input flag indicating that this name and type is clonable
  *
  * @note Creates the GmatTreeItemData object.
  */
 //------------------------------------------------------------------------------
 GmatTreeItemData::GmatTreeItemData(const wxString &name, GmatTree::ItemType type,
-                                   const wxString &title)
+                                   const wxString &title, bool isClonable)
 {
    mItemName = name;
    mItemType = type;
    mItemTitle = title;
+   mIsClonable = isClonable;
 }
 
 
@@ -73,6 +75,15 @@ GmatTree::ItemType GmatTreeItemData::GetItemType()
 
 
 //------------------------------------------------------------------------------
+// bool IsClonable()
+//------------------------------------------------------------------------------
+bool GmatTreeItemData::IsClonable()
+{
+   return mIsClonable;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetName(const wxString &name)
 //------------------------------------------------------------------------------
 void GmatTreeItemData::SetName(const wxString &name)
@@ -96,6 +107,15 @@ void GmatTreeItemData::SetTitle(const wxString &title)
 void GmatTreeItemData::SetItemType(GmatTree::ItemType type)
 {
    mItemType = type;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetClonable(bool clonable)
+//------------------------------------------------------------------------------
+void GmatTreeItemData::SetClonable(bool clonable)
+{
+   mIsClonable = clonable;
 }
 
 

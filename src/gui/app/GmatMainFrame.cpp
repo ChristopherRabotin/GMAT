@@ -3331,7 +3331,7 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
 //   case GmatTree::SPK_PROPAGATOR:
 //      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
 //      break;
-   case GmatTree::DIFF_CORR:
+   case GmatTree::DIFFERENTIAL_CORRECTOR:
       sizer->Add(new DCSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::SQP:
@@ -3399,8 +3399,8 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
          #endif
          break;
       }
-   case GmatTree::COORD_SYSTEM:
-   case GmatTree::USER_COORD_SYSTEM:
+   case GmatTree::PREDEFINED_COORDINATE_SYSTEM:
+   case GmatTree::USER_COORDINATE_SYSTEM:
       sizer->Add(new CoordSystemConfigPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::BARYCENTER:
@@ -5627,8 +5627,8 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
 
    // Since -1 is default position, change it to 0
    #ifndef __WXMAC__
-      Real realW = (Real)screenWidth;
-      Real realH = (Real)screenHeight;
+      //Real realW = (Real)screenWidth;
+      //Real realH = (Real)screenHeight;
       //Integer xOffset = (Integer)((realW * 0.01) + (10000.0 / realW));
       //Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
       if (x == -1) x = 0;
