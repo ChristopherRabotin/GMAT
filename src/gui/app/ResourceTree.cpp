@@ -1701,32 +1701,6 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool restartCounter)
    {
       GmatBase *obj = GetObject(itemNames[i]);
       AddObjectToTree(obj);
-      
-      #if 0
-      objName = wxString(itemNames[i].c_str());
-      objTypeName = wxString(burn->GetTypeName().c_str());
-      
-      if (objTypeName == "ImpulsiveBurn")
-      {
-         #ifdef DEBUG_DEFAULT_BURNS
-         MessageInterface::ShowMessage
-            ("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
-         #endif
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_IMPULSIVE_BURN, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::IMPULSIVE_BURN));
-      }
-      else if (objTypeName == "FiniteBurn")
-      {
-         #ifdef DEBUG_DEFAULT_BURNS
-         MessageInterface::ShowMessage
-            ("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
-         #endif
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_FINITE_BURN, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::FINITE_BURN));
-      }
-      #endif
    }
    
    if (size > 0)
@@ -1762,26 +1736,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter)
    {
       GmatBase *obj = GetObject(itemNames[i]);
       AddObjectToTree(obj);
-      
-      #if 0
-      GmatBase *solver = GetObject(itemNames[i]);
-      objName = wxString(itemNames[i].c_str());
-      objTypeName = wxString(solver->GetTypeName().c_str());
-      
-      #ifdef DEBUG_ADD_SOLVER
-      MessageInterface::ShowMessage
-         ("   solver[%d]=<%p><%s>'%s'\n", i, solver, solver->GetTypeName().c_str(),
-          solver->GetName().c_str());
-      #endif
-      
-      GmatTree::ItemType itemType;
-      GmatTree::ResourceIconType itemIcon;
-      GetItemTypeAndIcon(solver, itemType, itemIcon);
-      
-      AppendItem(mBoundarySolverItem, wxT(objName), itemIcon, -1,
-                 new GmatTreeItemData(wxT(objName), itemType));
-      #endif
-      
+            
       /*
       /// @todo:  need to create different types for the solvers and check strings
       if (objTypeName == "DifferentialCorrector")
@@ -1846,49 +1801,6 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool restartCounte
    {
       GmatBase *obj = GetObject(itemNames[i]);
       AddObjectToTree(obj);
-      
-      #if 0
-      objName = wxString(itemNames[i].c_str());
-      objTypeName = wxString(obj->GetTypeName().c_str());
-
-      if (objTypeName == "ReportFile")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_REPORT_FILE, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::REPORT_FILE));
-      }
-      else if (objTypeName == "XYPlot")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_XY_PLOT, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::XY_PLOT));
-      }
-      else if (objTypeName == "OrbitView")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_ORBIT_VIEW, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::ORBIT_VIEW));
-      }
-      else if (objTypeName == "GroundTrackPlot")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_GROUND_TRACK_PLOT, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::GROUND_TRACK_PLOT));
-      }
-      else if (objTypeName == "EphemerisFile")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_EPHEMERIS_FILE, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::EPHEMERIS_FILE));
-      }
-      else
-      {
-         // User subscribers
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_REPORT_FILE, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::SUBSCRIBER));
-      }
-      #endif
    }
 
    if (size > 0)
@@ -1932,15 +1844,14 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfObjects(Gmat::PARAMETER);
    int size = itemNames.size();
-   //wxString objName;
-   //Parameter *param;
+   wxString objName;
+   Parameter *param;
    
    for (int i = 0; i<size; i++)
    {
-      GmatBase *obj = GetObject(itemNames[i]);
-      AddObjectToTree(obj);
+      //GmatBase *obj = GetObject(itemNames[i]);
+      //AddObjectToTree(obj);
       
-      #if 0
       objName = wxString(itemNames[i].c_str());
       param = (Parameter*)GetObject(itemNames[i]);
       
@@ -1962,7 +1873,6 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
          AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_STRING, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::STRING));
       }
-      #endif
    };
    
    if (size > 0)
@@ -1990,30 +1900,6 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
    {
       GmatBase *obj = GetObject(itemNames[i]);
       AddObjectToTree(obj);
-      
-      #if 0
-      GmatBase *funct = GetObject(itemNames[i]);
-      objName = wxString(itemNames[i].c_str());
-      objTypeName = wxString(funct->GetTypeName().c_str());
-
-      if (objTypeName == "MatlabFunction")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_MATLAB_FUNCTION, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::MATLAB_FUNCTION));
-
-         if (!GmatGlobal::Instance()->IsMatlabAvailable())
-         {
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_, "MATLAB is not available.  GMAT will not run\n"
-                "if any CallFunction uses MATLAB function: %s\n", objName.c_str());
-         }
-      }
-      else if (objTypeName == "GmatFunction")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_GMAT_FUNCTION, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::GMAT_FUNCTION));
-      }
-      #endif
    }
    
    //----- Predefined functions
@@ -2090,23 +1976,6 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
    {
       GmatBase *obj = GetObject(itemNames[i]);
       AddObjectToTree(obj);
-
-      #if 0
-      GmatBase *cp = GetObject(itemNames[i]);
-      objName = wxString(itemNames[i].c_str());
-      objTypeName = wxString(cp->GetTypeName().c_str());
-
-      if (objTypeName == "Barycenter")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_BARYCENTER, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::BARYCENTER));
-      }
-      else if (objTypeName == "LibrationPoint")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_LIBRATION_POINT, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::LIBRATION_POINT));
-      }
-      #endif
    };
    
    if (size > 0)
