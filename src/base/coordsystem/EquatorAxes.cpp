@@ -131,11 +131,11 @@ EquatorAxes::~EquatorAxes()
 }
 
 //------------------------------------------------------------------------------
-// GmatCoordinate::ParameterUsage UsesEopFile() const
+// GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const
 //------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage EquatorAxes::UsesEopFile() const
+GmatCoordinate::ParameterUsage EquatorAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
-   if (originName == SolarSystem::EARTH_NAME) return GmatCoordinate::REQUIRED;
+   if ((originName == SolarSystem::EARTH_NAME) && (forBaseSystem == baseSystem)) return GmatCoordinate::REQUIRED;
    return GmatCoordinate::NOT_USED;
 }
 

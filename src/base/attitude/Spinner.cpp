@@ -130,7 +130,8 @@ bool Spinner::Initialize()
    {
       // Compute the rotation matrix from inertial to Fi at the epoch time, t0
       Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
-      Rvector bogus2 = refCS->FromMJ2000Eq(epoch, bogus, true);
+//      Rvector bogus2 = refCS->FromMJ2000Eq(epoch, bogus, true);
+      Rvector bogus2 = refCS->FromBaseSystem(epoch, bogus, true);  // @todo - do we need FromMJ2000Eq here?
       RiI  = (refCS->GetLastRotationMatrix()).Transpose();
    }
    catch (BaseException &)

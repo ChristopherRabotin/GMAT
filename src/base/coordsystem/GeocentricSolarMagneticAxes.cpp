@@ -146,9 +146,11 @@ GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesZAxis() const
 }
 
 
-GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesEopFile() const
+GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
-   return GmatCoordinate::REQUIRED;
+   if (forBaseSystem == baseSystem)
+      return GmatCoordinate::REQUIRED;
+   return GmatCoordinate::NOT_USED;
 }
 
 GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesItrfFile() const

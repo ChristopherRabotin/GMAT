@@ -71,7 +71,7 @@ public:
 
    // pure virtual methods to check to see how/if an AxisSystem uses 
    // a particular parameter
-   virtual GmatCoordinate::ParameterUsage UsesEopFile() const   = 0;
+   virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const   = 0;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const  = 0;
    virtual GmatCoordinate::ParameterUsage UsesEpoch() const     = 0;
    virtual GmatCoordinate::ParameterUsage UsesPrimary() const   = 0;

@@ -239,9 +239,9 @@ CoordinateSystem::~CoordinateSystem()
    #endif
 }
 
-GmatCoordinate::ParameterUsage CoordinateSystem::UsesEopFile() const
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesEopFile(const std::string &forBaseSystem) const
 {
-   if (axes) return axes->UsesEopFile();
+   if (axes) return axes->UsesEopFile(forBaseSystem);
    return GmatCoordinate::NOT_USED;
 }
 
@@ -440,6 +440,16 @@ bool CoordinateSystem::AreAxesOfType(const std::string &ofType) const
    return axes->IsOfType(ofType);
 }
 
+std::string CoordinateSystem::GetBaseSystem() const
+{
+   if (!axes)
+   {
+      std::string errmsg = "No AxisSystem defined for coordinate system \"";
+      errmsg += instanceName + "\".\n";
+      throw CoordinateSystemException(errmsg);
+   }
+   return axes->GetBaseSystem();
+}
 
 //---------------------------------------------------------------------------
 //  bool CoordinateSystem::Initialize()
@@ -482,29 +492,29 @@ bool CoordinateSystem::Initialize()
 
 
 //------------------------------------------------------------------------------
-//  Rvector  ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                      bool coincident, bool forceComputation)
+//  Rvector  ToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+//                        bool coincident, bool forceComputation)
 //------------------------------------------------------------------------------
 /**
- * This method converts the input state, in 'this' axisSystem, to MJ2000Eq.
+ * This method converts the input state, in 'this' axisSystem, to the base system.
  *
  * @param epoch      epoch for which to do the conversion.
  * @param inState    input state to convert.
  * @param coincident are the systems coincident?.
  *
- * @return input state converted to MJ2000Eq.
+ * @return input state converted to the base system.
  *
  */
 //------------------------------------------------------------------------------
-Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                     bool coincident, 
-                                     bool forceComputation)
+Rvector CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+                                       bool coincident,
+                                       bool forceComputation)
 {
    static Rvector internalState;
    static Rvector finalState;
    #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::ToMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      "In CS::ToBaseSystem, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
    #endif
    internalState.SetSize(inState.GetSize());
@@ -512,21 +522,21 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    
    if (axes)
    {
-      if (!axes->RotateToMJ2000Eq(epoch,inState,internalState, forceComputation))
-         throw CoordinateSystemException("Error rotating state to MJ2000Eq for "
+      if (!axes->RotateToBaseSystem(epoch,inState,internalState, forceComputation))
+         throw CoordinateSystemException("Error rotating state to the base system for "
                                          + instanceName);
    }
-   else // assume this is MJ2000Eq, so no rotation is necessary
+   else // assume this is the base system, so no rotation is necessary
       internalState = inState;
 
    if (!coincident)
    {
-      if (!TranslateToMJ2000Eq(epoch,internalState, finalState))
-         throw CoordinateSystemException("Error translating state to MJ2000Eq for "
+      if (!TranslateToBaseSystem(epoch,internalState, finalState))
+         throw CoordinateSystemException("Error translating state to the base system for "
                                          + instanceName);
       #ifdef DEBUG_INPUTS_OUTPUTS
          MessageInterface::ShowMessage(
-         "In CS::ToMJ2000Eq, translation happening\n");
+         "In CS::ToBaseSystem, translation happening\n");
       #endif
    }
    else
@@ -534,11 +544,11 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 
    #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::ToMJ2000Eq, internalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      "In CS::ToBaseSystem, internalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       internalState[0], internalState[1], internalState[2], 
       internalState[3],internalState[4], internalState[5]);
       MessageInterface::ShowMessage(
-      "In CS::ToMJ2000Eq, finalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      "In CS::ToBaseSystem, finalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       finalState[0], finalState[1], finalState[2], 
       finalState[3],finalState[4], finalState[5]);
    #endif
@@ -546,16 +556,16 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 }
 
 //------------------------------------------------------------------------------
-// void ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, Real *outState,
-//                 bool coincident, bool forceComputation)
+// void ToBaseSystem(const A1Mjd &epoch, const Real *inState, Real *outState,
+//                   bool coincident, bool forceComputation)
 //------------------------------------------------------------------------------
-void CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                                  Real *outState,     bool coincident,
-                                  bool forceComputation)
+void CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                    Real *outState,     bool coincident,
+                                    bool forceComputation)
 {
    #ifdef DEBUG_INPUTS_OUTPUTS
    MessageInterface::ShowMessage
-      ("In CS::ToMJ2000Eq, inState = \n   %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      ("In CS::ToBaseSystem, inState = \n   %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
        inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
    MessageInterface::ShowMessage
       ("   axes=<%p> '%s'\n", axes, axes ? axes->GetName().c_str() : "NULL");
@@ -563,32 +573,32 @@ void CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
    Real internalState[6];
    if (axes)
    {
-      if (!axes->RotateToMJ2000Eq(epoch, inState, internalState, forceComputation))
-         throw CoordinateSystemException("Error rotating state to MJ2000Eq for "
+      if (!axes->RotateToBaseSystem(epoch, inState, internalState, forceComputation))
+         throw CoordinateSystemException("Error rotating state to the base system for "
                                          + instanceName);
       #ifdef DEBUG_INPUTS_OUTPUTS
       Rvector6 rv(internalState);
       MessageInterface::ShowMessage
-         ("In CS::ToMJ2000Eq, Rotated to MJ2000Eq, internalState=\n   %s\n",
+         ("In CS::ToBaseSystem, Rotated to the base system, internalState=\n   %s\n",
           rv.ToString().c_str());
       #endif
    }
-   else // assume this is MJ2000Eq, so no rotation is necessary
+   else // assume this is the base system, so no rotation is necessary
       for (Integer i=0; i<6;i++) internalState[i] = inState[i];
    
    #ifdef DEBUG_TRANSLATION
-      MessageInterface::ShowMessage("In ToMJ2000Eq for %s, coincident = %s\n",
+      MessageInterface::ShowMessage("In ToBaseSystem for %s, coincident = %s\n",
             instanceName.c_str(), (coincident? "TRUE" : "FALSE"));
    #endif
    if (!coincident)
    {
-      if (!TranslateToMJ2000Eq(epoch, internalState, outState))
-         throw CoordinateSystemException("Error translating state to MJ2000Eq for "
+      if (!TranslateToBaseSystem(epoch, internalState, outState))
+         throw CoordinateSystemException("Error translating state to the base system for "
                                          + instanceName);
       #ifdef DEBUG_INPUTS_OUTPUTS
       Rvector6 rv(outState);
       MessageInterface::ShowMessage
-         ("In CS::ToMJ2000Eq, translated to MJ2000Eq, outState=\n   %s\n",
+         ("In CS::ToBaseSystem, translated to the base system, outState=\n   %s\n",
           rv.ToString().c_str());
       #endif
    }
@@ -597,42 +607,42 @@ void CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
 }
 
 //------------------------------------------------------------------------------
-//  Rvector  FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                        bool coincident, bool forceComputation)
+//  Rvector  FromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+//                          bool coincident, bool forceComputation)
 //------------------------------------------------------------------------------
 /**
- * This method converts the input state, in MJ2000Eq axisSystem, to "this"
+ * This method converts the input state, in the base axisSystem, to "this"
  * axisSystem.
  *
  * @param epoch      epoch for which to do the conversion.
  * @param inState    input state to convert.
  * @param coincident are the systems coincident?.
  *
- * @return input state converted from MJ2000Eq to 'this' axisSystem.
+ * @return input state converted from the base system to 'this' axisSystem.
  *
  */
 //------------------------------------------------------------------------------
-Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                       bool coincident,
-                                       bool forceComputation)
+Rvector CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+                                         bool coincident,
+                                         bool forceComputation)
 {
    static Rvector internalState;
    static Rvector finalState;
     #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::FromMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      "In CS::FromBaseSystem, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
     #endif
    internalState.SetSize(inState.GetSize());
    finalState.SetSize(inState.GetSize());
    if (!coincident)
    {
-      if (!TranslateFromMJ2000Eq(epoch,inState, internalState))//,j2000Body))
-         throw CoordinateSystemException("Error translating from MJ2000Eq for "
+      if (!TranslateFromBaseSystem(epoch,inState, internalState))//,j2000Body))
+         throw CoordinateSystemException("Error translating from the base system for "
                                          + instanceName);
     #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::FromMJ2000Eq (2), translation happening\n");
+      "In CS::FromBaseSystem (2), translation happening\n");
     #endif
    }
    else
@@ -641,9 +651,9 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
 
    if (axes)
    {
-      if (!axes->RotateFromMJ2000Eq(epoch,internalState,finalState,
+      if (!axes->RotateFromBaseSystem(epoch,internalState,finalState,
           forceComputation))//,j2000Body))
-         throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
+         throw CoordinateSystemException("Error rotating state from the base system for "
                                          + instanceName);
    }
    else
@@ -652,11 +662,11 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
 
    #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::FromMJ2000Eq, internalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      "In CS::FromBaseSystem, internalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       internalState[0], internalState[1], internalState[2], 
       internalState[3],internalState[4], internalState[5]);
       MessageInterface::ShowMessage(
-      "In CS::FromMJ2000Eq, finalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      "In CS::FromBaseSystem, finalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       finalState[0], finalState[1], finalState[2], 
       finalState[3], finalState[4], finalState[5]);
    #endif
@@ -664,19 +674,19 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
 }
 
 
-void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                                    Real *outState,  bool coincident,
-                                    bool forceComputation)
+void CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                      Real *outState,  bool coincident,
+                                      bool forceComputation)
 {
    Real internalState[6];
    if (!coincident)
    {
-      if (!TranslateFromMJ2000Eq(epoch,inState, internalState))//,j2000Body))
-         throw CoordinateSystemException("Error translating from MJ2000Eq for "
+      if (!TranslateFromBaseSystem(epoch,inState, internalState))//,j2000Body))
+         throw CoordinateSystemException("Error translating from the base system for "
                                          + instanceName);
     #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::FromMJ2000Eq (1), translation happening\n");
+      "In CS::FromBaseSystem (1), translation happening\n");
     #endif
    }
    else
@@ -686,18 +696,18 @@ void CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
    if (axes)
    {
       #ifdef DEBUG_INPUTS_OUTPUTS
-         MessageInterface::ShowMessage("About to call RotateFromMJ2000Eq for object %s\n",
+         MessageInterface::ShowMessage("About to call RotateFromBaseSystem for object %s\n",
                (GetName()).c_str());
       #endif
-      if (!axes->RotateFromMJ2000Eq(epoch,internalState,outState, 
+      if (!axes->RotateFromBaseSystem(epoch,internalState,outState,
           forceComputation))//,j2000Body))
-         throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
+         throw CoordinateSystemException("Error rotating state from the base system for "
                                          + instanceName);
    }
    else
    {
       #ifdef DEBUG_INPUTS_OUTPUTS
-         MessageInterface::ShowMessage("AXES are NULL in CS::FromMJ2000Eq (1) for c.s.of type %s\n",
+         MessageInterface::ShowMessage("AXES are NULL in CS::FromBaseSystem (1) for c.s.of type %s\n",
                (GetTypeName()).c_str());
       #endif
       for (Integer i=0; i<6; i++) outState[i]    = internalState[i];
@@ -1553,11 +1563,11 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
 // protected methods
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-//  bool  TranslateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                            Rvector &outState)
+//  bool  TranslateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+//                              Rvector &outState)
 //------------------------------------------------------------------------------
 /**
- * This method translates the input state, in "this" axisSystem to the MJ2000Eq
+ * This method translates the input state, in "this" axisSystem to the the base system
  * axisSystem.
  *
  * @param epoch      epoch for which to do the conversion.
@@ -1568,13 +1578,13 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
  *
  */
 //------------------------------------------------------------------------------
-bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
-                                           const Rvector &inState,
-                                           Rvector &outState)
+bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
+                                             const Rvector &inState,
+                                             Rvector &outState)
 {
    #ifdef DEBUG_TRANSLATION
       MessageInterface::ShowMessage(
-            "In TranslateToMJ2000Eq, coord. system is %s, origin is %s and j2000Body is %s\n",
+            "In TranslateToBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
             (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
    #endif
    if (origin == j2000Body)  
@@ -1582,7 +1592,7 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
    else
    {
       // currently assuming an Rvector6 - update needed later?!?!   - awaiting Darrel on this
-      // compute vector from origin of MJ2000Eq to origin of this system
+      // compute vector from origin of the base system to origin of this system
       Rvector6 rif =  origin->GetMJ2000State(epoch) - 
                       (j2000Body->GetMJ2000State(epoch));
       outState = inState + rif;
@@ -1613,21 +1623,21 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
 }
 
 //------------------------------------------------------------------------------
-// bool TranslateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
-//                          Real *outState)
+// bool TranslateToBaseSystem(const A1Mjd &epoch, const Real *inState,
+//                            Real *outState)
 //------------------------------------------------------------------------------
-bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
-                                           const Real *inState,
-                                           Real *outState)
+bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
+                                             const Real *inState,
+                                             Real *outState)
 {
    #ifdef DEBUG_TRANSLATION
       MessageInterface::ShowMessage(
-            "In TranslateToMJ2000Eq, coord. system is %s, origin is %s and j2000Body is %s\n",
+            "In TranslateToBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
             (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
    #endif
    #ifdef DEBUG_INPUTS_OUTPUTS
    MessageInterface::ShowMessage
-      ("In CS::TranslateToMJ2000Eq, inState = %.17f  %.17f  %.17f  %.17f  %.17f  "
+      ("In CS::TranslateToBaseSystem, inState = %.17f  %.17f  %.17f  %.17f  %.17f  "
        "%.17f\n", inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
    #endif
    if (origin == j2000Body)  
@@ -1656,11 +1666,11 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
 }
 
 //------------------------------------------------------------------------------
-//  bool  TranslateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                              Rvector &outState)
+//  bool  TranslateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+//                                Rvector &outState)
 //------------------------------------------------------------------------------
 /**
- * This method translates the input state, in MJ2000Eq axisSystem to 'this'
+ * This method translates the input state, in the base axisSystem to 'this'
  * axisSystem.
  *
  * @param epoch      epoch for which to do the conversion.
@@ -1671,13 +1681,13 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
  *
  */
 //------------------------------------------------------------------------------
-bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
-                                             const Rvector &inState,
-                                             Rvector &outState)
+bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
+                                               const Rvector &inState,
+                                               Rvector &outState)
 {
    #ifdef DEBUG_TRANSLATION
       MessageInterface::ShowMessage(
-            "In TranslateFromMJ2000Eq, coord. system is %s, origin is %s and j2000Body is %s\n",
+            "In TranslateFromBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
             (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
    #endif
    if (origin == j2000Body)  
@@ -1685,7 +1695,7 @@ bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
    else
    {
       // currently assuming an Rvector6 - update needed later?!?!    - awaiting Darrel on this
-      // compute vector from origin of of this system to origin of MJ2000Eq
+      // compute vector from origin of of this system to origin of the base system
       Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
                       (origin->GetMJ2000State(epoch));
       outState = inState + rif;
@@ -1694,16 +1704,16 @@ bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
 }
 
 //------------------------------------------------------------------------------
-// bool TranslateFromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
-//                            Real *outState)
+// bool TranslateFromBaseSystem(const A1Mjd &epoch, const Real *inState,
+//                              Real *outState)
 //------------------------------------------------------------------------------
-bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
-                                             const Real *inState,
-                                             Real *outState)
+bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
+                                               const Real *inState,
+                                               Real *outState)
 {
    #ifdef DEBUG_TRANSLATION
       MessageInterface::ShowMessage(
-            "In TranslateFromMJ2000Eq, coord. system is %s, origin is %s and j2000Body is %s\n",
+            "In TranslateFromBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
             (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
    #endif
    if (origin == j2000Body)  

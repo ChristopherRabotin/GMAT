@@ -48,7 +48,7 @@ public:
 
    // virtual methods to check to see how/if an AxisSystem uses 
    // a particular parameter (calls through to its AxisSystem)
-   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
    virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
    virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
@@ -83,27 +83,28 @@ public:
    virtual Rmatrix33             GetLastRotationDotMatrix() const;
    virtual void                  GetLastRotationDotMatrix(Real *mat) const;
    virtual bool                  AreAxesOfType(const std::string &ofType) const;
+   virtual std::string           GetBaseSystem() const;
    
    
    // initializes the CoordinateSystem
    virtual bool Initialize();
    
    // methods to convert between this CoordinateSystem and MJ2000Eq
-   virtual Rvector ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                              bool coincident = false,
-                              bool forceComputation = false); 
-
-   virtual void    ToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                              Real *outState, bool coincident = false,
-                              bool forceComputation = false); 
-   
-   virtual Rvector FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
+   virtual Rvector ToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
                                 bool coincident = false,
                                 bool forceComputation = false); 
-   virtual void    FromMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
+
+   virtual void    ToBaseSystem(const A1Mjd &epoch, const Real *inState,
                                 Real *outState, bool coincident = false,
                                 bool forceComputation = false); 
    
+   virtual Rvector FromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+                                  bool coincident = false,
+                                  bool forceComputation = false);
+   virtual void    FromBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                  Real *outState, bool coincident = false,
+                                  bool forceComputation = false);
+
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
    virtual GmatBase*    Clone() const;
@@ -178,16 +179,16 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[
       CoordinateSystemParamCount - CoordinateBaseParamCount];
    
-   virtual bool TranslateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                    Rvector &outState);
-   virtual bool TranslateToMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                                    Real *outState);
+   virtual bool TranslateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+                                      Rvector &outState);
+   virtual bool TranslateToBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                      Real *outState);
    // Rvector &outState, SpacePoint *j2000Body);
    
-   virtual bool TranslateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                      Rvector &outState);
-   virtual bool TranslateFromMJ2000Eq(const A1Mjd &epoch, const Real *inState, 
-                                      Real *outState);
+   virtual bool TranslateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+                                        Rvector &outState);
+   virtual bool TranslateFromBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                        Real *outState);
    // Rvector &outState, SpacePoint *j2000Body);
    
    /// axis system

@@ -50,11 +50,11 @@ public:
    
    // methods to set files for reading
    // 3 are needed:
-   //    leap second file (NOTE - this should be done in the utiltities!!)
+   //    leap second file (NOTE - this should be done in the utilities!!)
    //    EOP file containing polar motion (x,y) and UT1-UTC offset
-   //    coefficient file containing nutation and planetary coeffifients
+   //    coefficient file containing nutation and planetary coefficients
    
-   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
    virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
    

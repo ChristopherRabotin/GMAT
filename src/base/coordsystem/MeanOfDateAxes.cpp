@@ -116,9 +116,11 @@ bool MeanOfDateAxes::Initialize()
    return DynamicAxes::Initialize();
 }
 
-//GmatCoordinate::ParameterUsage MeanOfDateAxes::UsesEopFile() const
+//GmatCoordinate::ParameterUsage MeanOfDateAxes::UsesEopFile(const std::string &forBaseSystem) const
 //{
-//   return GmatCoordinate::REQUIRED;
+//   if (forBaseSystem == baseSystem)
+//      return GmatCoordinate::REQUIRED;
+//   return GmatCoordinate::NOT_USED;
 //}
 
 //GmatCoordinate::ParameterUsage MeanOfDateAxes::UsesItrfFile() const

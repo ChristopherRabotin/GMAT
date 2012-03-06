@@ -45,7 +45,7 @@ public:
    virtual bool Initialize();
 
    virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
-   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
    virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
    

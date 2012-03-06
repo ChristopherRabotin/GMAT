@@ -1093,9 +1093,12 @@ void Burn::ConvertDeltaVToInertial(Real *dv, Real *dvInertial, Real epoch)
    // if not using local CS, use ref CoordinateSystem
    if (!usingLocalCoordSys)
    {     
+//      // Now rotate to MJ2000Eq axes, we don't want to translate so
+//      // set coincident to true
+//      coordSystem->ToMJ2000Eq(epoch, inDeltaV, outDeltaV, true);
       // Now rotate to MJ2000Eq axes, we don't want to translate so
       // set coincident to true
-      coordSystem->ToMJ2000Eq(epoch, inDeltaV, outDeltaV, true);
+      coordSystem->ToBaseSystem(epoch, inDeltaV, outDeltaV, true);  // @todo - need ToMJ2000Eq here?
       
       #ifdef DEBUG_BURN_CONVERT_ROTMAT
       Rmatrix33 rotMat = coordSystem->GetLastRotationMatrix();
@@ -1131,8 +1134,10 @@ void Burn::ConvertDeltaVToInertial(Real *dv, Real *dvInertial, Real epoch)
       }
       else
       {         
-         // Now rotate to MJ2000Eq axes
-         localCoordSystem->ToMJ2000Eq(epoch, inDeltaV, outDeltaV, true);
+//         // Now rotate to MJ2000Eq axes
+//         localCoordSystem->ToMJ2000Eq(epoch, inDeltaV, outDeltaV, true);
+         // Now rotate to base system axes
+         localCoordSystem->ToBaseSystem(epoch, inDeltaV, outDeltaV, true);   // @todo - need ToMJ2000Eq here?
 
          dvInertial[0] = outDeltaV[0];
          dvInertial[1] = outDeltaV[1];

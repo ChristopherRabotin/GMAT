@@ -66,6 +66,12 @@ public:
 protected:
    Rmatrix33 lastRotMatrix;
    Rmatrix33 lastRotDotMatrix;
+
+   bool         ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
+                                      const Rvector &inBaseState, Rvector &outBaseState);
+   bool         ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
+                                      const Real *inBaseState,    Real *outBaseState);
+
    /*
    Rvector internalState;
    Rmatrix33 toMJ2000RotMatrix;

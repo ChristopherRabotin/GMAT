@@ -228,9 +228,11 @@ GmatCoordinate::ParameterUsage TOEEqAxes::UsesEpoch() const
    return GmatCoordinate::REQUIRED;
 }
 
-GmatCoordinate::ParameterUsage TOEEqAxes::UsesEopFile() const
+GmatCoordinate::ParameterUsage TOEEqAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
-   return GmatCoordinate::REQUIRED;
+   if (forBaseSystem == baseSystem)
+      return GmatCoordinate::REQUIRED;
+   return GmatCoordinate::NOT_USED;
 }
 
 GmatCoordinate::ParameterUsage TOEEqAxes::UsesItrfFile() const

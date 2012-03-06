@@ -267,7 +267,8 @@ void TopocentricAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #endif
    // Determine rotation matrix from body-fixed to inertial
    Rvector bogusIn(6,7000.0,1000.0,6000.0, 0.0, 0.0, 0.0);
-   Rvector bogusOut = bfcs->ToMJ2000Eq(atEpoch, bogusIn);
+//   Rvector bogusOut = bfcs->ToMJ2000Eq(atEpoch, bogusIn);
+   Rvector bogusOut = bfcs->ToBaseSystem(atEpoch, bogusIn); // @todo - need ToMJ2000Eq here?
    #ifdef DEBUG_TOPOCENTRIC_AXES
       MessageInterface::ShowMessage("bogusIn:\n");
       MessageInterface::ShowMessage("%12.17f\n", bogusIn[0]);

@@ -46,7 +46,7 @@ public:
    // destructor
    virtual ~AxisSystem();
 
-   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
    virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
    virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
@@ -76,6 +76,7 @@ public:
    virtual std::string           GetYAxis() const;
    virtual std::string           GetZAxis() const;
    virtual EopFile*              GetEopFile() const;
+   virtual std::string           GetBaseSystem() const;
    virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
    virtual std::string           GetEpochFormat() const; // for GUI
    virtual Rmatrix33             GetLastRotationMatrix() const;
@@ -89,18 +90,18 @@ public:
    virtual bool Initialize();
    
    // methods to convert to/from the MJ2000 Equatorial axis system
-   virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                 Rvector &outState, 
-                                 bool forceComputation = false); 
-   virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
-                                 Real *outState,
-                                 bool forceComputation = false); 
-   virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+   virtual bool RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
                                    Rvector &outState,
                                    bool forceComputation = false); 
-   virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Real *inState,
+   virtual bool RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
                                    Real *outState,
                                    bool forceComputation = false); 
+   virtual bool RotateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+                                     Rvector &outState,
+                                     bool forceComputation = false);
+   virtual bool RotateFromBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                     Real *outState,
+                                     bool forceComputation = false);
    
    
    // all classes derived from GmatBase must supply this Clone method;
@@ -168,6 +169,10 @@ protected:
    /// Name of the coordinate system
    std::string coordName;
    
+   /// specifies the base inertial system for this AxisSystem
+   /// valid values are: "FK5" and "ICRF" - must be set on each leaf AxisSystem-derived class
+   std::string baseSystem;
+
    
    const Real *rotData;
    const Real *rotDotData;

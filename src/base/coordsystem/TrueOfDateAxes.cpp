@@ -119,9 +119,11 @@ bool TrueOfDateAxes::Initialize()
    return true;
 }
 
-GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesEopFile() const
+GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
-   return GmatCoordinate::REQUIRED;
+   if (forBaseSystem == baseSystem)
+      return GmatCoordinate::REQUIRED;
+   return GmatCoordinate::NOT_USED;
 }
 
 GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesItrfFile() const

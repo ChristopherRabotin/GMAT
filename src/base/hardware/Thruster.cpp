@@ -2005,9 +2005,12 @@ void Thruster::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epo
    // if not using local CS, use ref CoordinateSystem
    if (!usingLocalCoordSys)
    {     
-      // Now rotate to MJ2000Eq axes, we don't want to translate so
+//      // Now rotate to MJ2000Eq axes, we don't want to translate so
+//      // set coincident to true
+//      coordSystem->ToMJ2000Eq(epoch, inDir, outDir, true);
+      // Now rotate to base system axes, we don't want to translate so
       // set coincident to true
-      coordSystem->ToMJ2000Eq(epoch, inDir, outDir, true);
+      coordSystem->ToBaseSystem(epoch, inDir, outDir, true); // @todo - need ToMJ2000Eq here?
       
       #ifdef DEBUG_BURN_CONVERT_ROTMAT
       Rmatrix33 rotMat = coordSystem->GetLastRotationMatrix();
@@ -2044,8 +2047,10 @@ void Thruster::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epo
       }
       else
       {         
-         // Now rotate to MJ2000Eq axes
-         localCoordSystem->ToMJ2000Eq(epoch, inDir, outDir, true);
+//         // Now rotate to MJ2000Eq axes
+//         localCoordSystem->ToMJ2000Eq(epoch, inDir, outDir, true);
+         // Now rotate to base system axes
+         localCoordSystem->ToBaseSystem(epoch, inDir, outDir, true);  // @todo - do we need ToMJ2000Eq here?
          
          dirInertial[0] = outDir[0];
          dirInertial[1] = outDir[1];

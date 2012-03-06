@@ -163,9 +163,11 @@ GmatCoordinate::ParameterUsage MOEEqAxes::UsesEpoch() const
    return GmatCoordinate::REQUIRED;
 }
 
-//GmatCoordinate::ParameterUsage MOEEqAxes::UsesEopFile() const
+//GmatCoordinate::ParameterUsage MOEEqAxes::UsesEopFile(const std::string &forBaseSystem) const
 //{
-//   return GmatCoordinate::REQUIRED;
+//   if (forBaseSystem == baseSystem)
+//      return GmatCoordinate::REQUIRED;
+//   return GmatCoordinate::NOT_USED;
 //}
 
 //GmatCoordinate::ParameterUsage MOEEqAxes::UsesItrfFile() const

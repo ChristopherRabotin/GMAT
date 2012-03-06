@@ -29,9 +29,11 @@
 #include "CoordinateSystemException.hpp"
 #include "Rvector.hpp"
 #include "TimeTypes.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_TO_FROM
+//#define DEBUG_BASE_SYSTEM
 
 #ifdef DEBUG_TO_FROM
    #include "MessageInterface.hpp"
@@ -317,7 +319,7 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
        sameOrigin, omitTranslation, coincident);
    #endif
    
-   inCoord->ToMJ2000Eq(epoch, inState, intState, coincident, forceComputation);
+   inCoord->ToBaseSystem(epoch, inState, intState, coincident, forceComputation);
    #ifdef DEBUG_TO_FROM
       MessageInterface::ShowMessage
          ("In Convert, sameOrigin is %s,and coincident is %s\n",
@@ -332,8 +334,34 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
       MessageInterface::ShowMessage("          %12.4f   %12.4f   %12.4f\n",
             intState[3], intState[4], intState[5]);
    #endif
-   outCoord->FromMJ2000Eq(epoch, intState, outState, coincident,
-                          forceComputation);
+
+   std::string inBaseName  = inCoord->GetBaseSystem();
+   std::string outBaseName = outCoord->GetBaseSystem();
+   #ifdef DEBUG_BASE_SYSTEM
+      MessageInterface::ShowMessage("inBase system  = %s\n", inBaseName.c_str());
+      MessageInterface::ShowMessage("outBase system = %s\n", outBaseName.c_str());
+   #endif
+   Real baseState[6];
+
+   if (inBaseName != outBaseName)
+   {
+      ConvertFromBaseToBase(inBaseName, outBaseName, intState, baseState); // need Real* version of this method
+      MessageInterface::ShowMessage("Conversion from base system %s to base system %s = this should not happen yet\n",
+            inBaseName.c_str(), outBaseName.c_str());
+   }
+   else
+   {
+      for (unsigned int ii = 0; ii < 6; ii++)
+         baseState[ii] = intState[ii];
+   }
+   #ifdef DEBUG_BASE_SYSTEM
+      MessageInterface::ShowMessage("baseState = %12.4f   %12.4f   %12.4f\n",
+            baseState[0], baseState[1], baseState[2]);
+      MessageInterface::ShowMessage("          %12.4f   %12.4f   %12.4f\n",
+            baseState[3], baseState[4], baseState[5]);
+   #endif
+
+   outCoord->FromBaseSystem(epoch, baseState, outState, coincident, forceComputation);
    #ifdef DEBUG_TO_FROM
       MessageInterface::ShowMessage("outState = %12.4f   %12.4f   %12.4f\n",
             outState[0], outState[1], outState[2]);
@@ -421,5 +449,98 @@ Rmatrix33 CoordinateConverter::GetLastRotationMatrix() const
 Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
 {
    return lastRotDotMatrix;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
+//                                                 const Rvector &inBaseState, Rvector &outBaseState)
+//------------------------------------------------------------------------------
+bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
+                                                const Rvector &inBaseState, Rvector &outBaseState)
+{
+   // if the base types are the same, just set the output state to the input state
+   if (inBase == outBase)
+   {
+      if (inBaseState.GetSize() != outBaseState.GetSize())
+      {
+         std::string errmsg = "Cannot convert from coordinate system base type ";
+         errmsg += inBase + " to base type ";
+         errmsg += outBase + " - state vectors passed in are of differing sizes.\n";
+         throw CoordinateSystemException(errmsg);
+      }
+      for (Integer ii = 0; ii < inBaseState.GetSize(); ii++)
+      {
+         outBaseState[ii] = inBaseState[ii];
+      }
+      return true;
+   }
+   const Real *in  = inBaseState.GetDataVector();
+   Real       *out = new Real[outBaseState.GetSize()];
+
+   if (ConvertFromBaseToBase(inBase, outBase, in, out))
+   {
+      outBaseState.Set(out);
+      delete [] out;
+      return true;
+   }
+
+   delete [] out;
+   return false;
+}
+
+
+bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
+                                                const Real *inBaseState,    Real *outBaseState)
+{
+   // if the base types are the same, just set the output state to the input state
+   if (inBase == outBase)
+   {
+      for (Integer i=0;i<6;i++) outBaseState[i] = inBaseState[i];
+      return true;
+   }
+
+   // Use the matrix from ICRF to FK5
+   Real iToF[9];  // @todo - this must be computed or set- specs TBD ********************** TBD *********************
+   iToF[0] = 1.0;
+   iToF[1] = 0.0;
+   iToF[2] = 0.0;
+   iToF[3] = 0.0;
+   iToF[4] = 1.0;
+   iToF[5] = 0.0;
+   iToF[6] = 0.0;
+   iToF[7] = 0.0;
+   iToF[8] = 1.0;
+
+   if ((inBase == "ICRF") && (outBase == "FK5"))
+   {
+      outBaseState[0] = iToF[0]*inBaseState[0] + iToF[1]*inBaseState[1] + iToF[2]*inBaseState[2];
+      outBaseState[1] = iToF[3]*inBaseState[0] + iToF[4]*inBaseState[1] + iToF[5]*inBaseState[2];
+      outBaseState[2] = iToF[6]*inBaseState[0] + iToF[7]*inBaseState[1] + iToF[8]*inBaseState[2];
+
+      outBaseState[3] = iToF[0]*inBaseState[3] + iToF[1]*inBaseState[4] + iToF[2]*inBaseState[5];
+      outBaseState[4] = iToF[3]*inBaseState[3] + iToF[4]*inBaseState[4] + iToF[5]*inBaseState[5];
+      outBaseState[5] = iToF[6]*inBaseState[3] + iToF[7]*inBaseState[4] + iToF[8]*inBaseState[5];
+   }
+   else if ((inBase == "FK5") && (outBase == "ICRF"))
+   {
+      // Transpose the conversion matrix and multiply
+      outBaseState[0] = iToF[0]*inBaseState[0] + iToF[3]*inBaseState[1] + iToF[6]*inBaseState[2];
+      outBaseState[1] = iToF[1]*inBaseState[0] + iToF[4]*inBaseState[1] + iToF[7]*inBaseState[2];
+      outBaseState[2] = iToF[2]*inBaseState[0] + iToF[5]*inBaseState[1] + iToF[8]*inBaseState[2];
+
+      outBaseState[3] = iToF[0]*inBaseState[3] + iToF[3]*inBaseState[4] + iToF[6]*inBaseState[5];
+      outBaseState[4] = iToF[1]*inBaseState[3] + iToF[4]*inBaseState[4] + iToF[7]*inBaseState[5];
+      outBaseState[5] = iToF[2]*inBaseState[3] + iToF[5]*inBaseState[4] + iToF[8]*inBaseState[5];
+   }
+   else
+   {
+      std::string errmsg = "Cannot convert from coordinate system base type ";
+      errmsg += inBase + " to base type ";
+      errmsg += outBase + " - unknown base type.\n";
+      throw CoordinateSystemException(errmsg);
+   }
+
+   return true;
 }
 

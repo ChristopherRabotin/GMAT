@@ -159,9 +159,11 @@ BodyFixedAxes::~BodyFixedAxes()
 {
 }
 
-GmatCoordinate::ParameterUsage BodyFixedAxes::UsesEopFile() const
+GmatCoordinate::ParameterUsage BodyFixedAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
-   return GmatCoordinate::REQUIRED;
+   if (forBaseSystem == baseSystem)
+      return GmatCoordinate::REQUIRED;
+   return GmatCoordinate::NOT_USED;
 }
 
 GmatCoordinate::ParameterUsage BodyFixedAxes::UsesItrfFile() const

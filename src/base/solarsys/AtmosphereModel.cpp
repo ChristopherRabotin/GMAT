@@ -418,7 +418,8 @@ void AtmosphereModel::UpdateAngularVelocity(const GmatEpoch when)
             throw AtmosphereException("The body-fixed coordinate system is "
                   "not set");
          Real in[3], out[3];
-         cbFixed->ToMJ2000Eq(when, in, out, true, true);
+//         cbFixed->ToMJ2000Eq(when, in, out, true, true);
+         cbFixed->ToBaseSystem(when, in, out, true, true);  // @todo - do we need ToMJ2000Eq here?
          BuildAngularVelocity(when);
       }
    }

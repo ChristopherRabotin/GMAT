@@ -114,6 +114,7 @@ AxisSystem::AxisSystem(const std::string &itsType,
                        const std::string &itsName) :
 CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
 coordName        (""),
+baseSystem       ("FK5"),  // ******** this should be set in each axisSystem class ********
 eop              (NULL),
 itrf             (NULL),
 epochFormat      ("A1ModJulian"),
@@ -169,6 +170,7 @@ rotMatrix         (axisSys.rotMatrix),
 rotDotMatrix      (axisSys.rotDotMatrix),
 epoch             (axisSys.epoch),
 coordName         (axisSys.coordName),
+baseSystem        (axisSys.baseSystem),
 eop               (axisSys.eop),
 itrf              (axisSys.itrf),
 epochFormat       (axisSys.epochFormat),
@@ -219,6 +221,7 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
       return *this;
    CoordinateBase::operator=(axisSys);
    coordName      = axisSys.coordName;
+   baseSystem     = axisSys.baseSystem;
    rotMatrix      = axisSys.rotMatrix;
    rotDotMatrix   = axisSys.rotDotMatrix;
    epoch          = axisSys.epoch;
@@ -299,7 +302,7 @@ AxisSystem::~AxisSystem()
    #endif
 }
 
-GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile() const
+GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile(const std::string &forBaseSystem) const
 {
    return GmatCoordinate::NOT_USED;
 }
@@ -486,6 +489,11 @@ EopFile* AxisSystem::GetEopFile() const
    return eop;
 }
 
+std::string AxisSystem::GetBaseSystem() const
+{
+   return baseSystem;
+}
+
 ItrfCoefficientsFile* AxisSystem::GetItrfCoefficientsFile()
 {
    return itrf;
@@ -555,21 +563,21 @@ bool AxisSystem::Initialize()
 }
 
 //------------------------------------------------------------------------------
-//  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+//  bool RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
 //                        Rvector &outState, bool forceComputation)
 //------------------------------------------------------------------------------
 /**
- * This method will rotate the input inState into the MJ2000Eq frame.
+ * This method will rotate the input inState into the BaseSystem frame.
  *
  * @param epoch     the epoch at which to perform the rotation.
  * @param inState   the input state (in this AxisSystem) to be rotated.
- * @param iutState  the output state, in the MJ2000Eq AxisSystem, the result 
+ * @param iutState  the output state, in the BaseSystem AxisSystem, the result
  *                  of rotating the input inState.
  *
  * @return success or failure of the operation.
  */
 //------------------------------------------------------------------------------
-bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
                                   Rvector &outState, 
                                   bool forceComputation)
 {
@@ -634,7 +642,7 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
       if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
-            "AxisSystem::RotateToMJ2000Eq check for %s\n", typeName.c_str());
+            "AxisSystem::RotateToBaseSystem check for %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
             "                     |%20.10lf %20.10lf %20.10lf|\n"
@@ -658,7 +666,7 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    return true;
 }
 
-bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
+bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
                                   Real *outState,
                                   bool forceComputation)
 {
@@ -719,7 +727,7 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
       if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
-            "RotateToMJ2000Eq check for %s\n", typeName.c_str());
+            "RotateToBaseSystem check for %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
             "                     |%20.10lf %20.10lf %20.10lf|\n"
@@ -743,15 +751,15 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
    return true;
 }
 //------------------------------------------------------------------------------
-//  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+//  bool RotateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
 //                          Rvector &outState, bool forceComputation)
 //------------------------------------------------------------------------------
 /**
- * This method will rotate the input inState from the MJ2000Eq frame into
+ * This method will rotate the input inState from the BaseSystem frame into
  * this AxisSystem.
  *
  * @param epoch     the epoch at which to perform the rotation.
- * @param inState   the input state (in MJ2000Eq AxisSystem) to be rotated.
+ * @param inState   the input state (in BaseSystem AxisSystem) to be rotated.
  * @param iutState  the output state, in this AxisSystem, the result 
  *                  of rotating the input inState.
  * @param j2000Body the origin of the input EquatorAxes frame.
@@ -759,13 +767,13 @@ bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Real *inState,
  * @return success or failure of the operation.
  */
 //------------------------------------------------------------------------------
-bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch, 
+bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
                                     const Rvector &inState,
                                     Rvector &outState,
                                     bool forceComputation)
 {
    #ifdef DEBUG_ROT_MATRIX
-      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromMJ2000Eq on object of type %s\n",
+      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromBaseSystem on object of type %s\n",
             (GetTypeName()).c_str());
    #endif
    static Rvector3 tmpPosVec;
@@ -774,7 +782,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    static const Real  *tmpVel = tmpVelVec.GetDataVector();
    CalculateRotationMatrix(epoch, forceComputation);
    #ifdef DEBUG_ROT_MATRIX
-      MessageInterface::ShowMessage("In AxisSystem::rotateFromMJ2000Eq, DONE computing rotation matrix\n");
+      MessageInterface::ShowMessage("In AxisSystem::rotateFromBaseSystem, DONE computing rotation matrix\n");
    #endif
    
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
@@ -829,7 +837,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
       if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
-            "AxisSystem::RotateFromMJ2000Eq check for %s\n", typeName.c_str());
+            "AxisSystem::RotateFromBaseSystem check for %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
             "                     |%20.10lf %20.10lf %20.10lf|\n"
@@ -854,7 +862,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
    return true;
 }
 
-bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch, 
+bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
                                     const Real *inState,
                                     Real *outState,
                                     bool forceComputation)
@@ -907,7 +915,7 @@ bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch,
       if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
-            "AxisSystem::RotateFromMJ2000Eq check for %s\n", typeName.c_str());
+            "AxisSystem::RotateFromBaseSystem check for %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
             "                     |%20.10lf %20.10lf %20.10lf|\n"
