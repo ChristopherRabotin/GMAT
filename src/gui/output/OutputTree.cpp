@@ -25,8 +25,8 @@
 #include "bitmaps/report.xpm"
 #include "bitmaps/openglplot.xpm"
 #include "bitmaps/rt_GroundTrackPlot.xpm"
-#include "bitmaps/xyplot.xpm"
-#include "bitmaps/default.xpm"
+#include "bitmaps/rt_XYPlot.xpm"
+#include "bitmaps/rt_Default.xpm"
 #include <wx/string.h>        // for wxArrayString
 
 #include "GmatAppData.hpp"
@@ -599,9 +599,9 @@ void OutputTree::AddIcons()
    icons[GmatTree::OUTPUT_ICON_REPORTFILE] = wxIcon(report_xpm);
    icons[GmatTree::OUTPUT_ICON_ORBITVIEW] = wxIcon(openglplot_xpm);
    icons[GmatTree::OUTPUT_ICON_GROUNDTRACK] = wxIcon(rt_GroundTrackPlot_xpm);
-   icons[GmatTree::OUTPUT_ICON_XYPLOT] = wxIcon(xyplot_xpm);
+   icons[GmatTree::OUTPUT_ICON_XYPLOT] = wxIcon(rt_XYPlot_xpm);
    icons[GmatTree::OUTPUT_ICON_FILE] = wxIcon(file_xpm);
-   icons[GmatTree::OUTPUT_ICON_DEFAULT] = wxIcon(default_xpm);
+   icons[GmatTree::OUTPUT_ICON_DEFAULT] = wxIcon(rt_Default_xpm);
    
    int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )

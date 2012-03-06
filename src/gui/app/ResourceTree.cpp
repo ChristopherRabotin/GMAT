@@ -1284,17 +1284,17 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       itemIcon = GmatTree::RESOURCE_ICON_DIFFERENTIAL_CORRECTOR;
    }
    // Variable/Array/String
-   else if (obj->IsOfType("UserVariable"))
+   else if (obj->IsOfType("UserVariable") && obj->IsOfType("UserParameter"))
    {
       itemType = GmatTree::VARIABLE;
       itemIcon = GmatTree::RESOURCE_ICON_VARIABLE;
    }
-   else if (obj->IsOfType("UserArray"))
+   else if (obj->IsOfType("Array") && obj->IsOfType("UserParameter"))
    {
       itemType = GmatTree::ARRAY;
       itemIcon = GmatTree::RESOURCE_ICON_ARRAY;
    }
-   else if (obj->IsOfType("UserString"))
+   else if (obj->IsOfType("String") && obj->IsOfType("UserParameter"))
    {
       itemType = GmatTree::STRING;
       itemIcon = GmatTree::RESOURCE_ICON_STRING;
@@ -1393,7 +1393,7 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    
    #ifdef DEBUG_RESOURCE_ICON
    MessageInterface::ShowMessage
-      ("ResourceTree::GetItemTypeAndIcon() type to use = %d, icon id to use %d\n",
+      ("ResourceTree::GetItemTypeAndIcon() returning type to use = %d, icon id to use %d\n",
        itemType, itemIcon);
    #endif
 }
@@ -1694,8 +1694,6 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool restartCounter)
 
    StringArray itemNames = theGuiInterpreter->GetListOfObjects(Gmat::BURN);
    int size = itemNames.size();
-   wxString objName;
-   wxString objTypeName;
    
    for (int i = 0; i<size; i++)
    {
@@ -1725,8 +1723,6 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter)
    
    StringArray itemNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
    int size = itemNames.size();
-   wxString objName;
-   wxString objTypeName;
    
    #ifdef DEBUG_ADD_SOLVER
    MessageInterface::ShowMessage("   There are %d configured Solvers\n", size);
@@ -1736,36 +1732,6 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter)
    {
       GmatBase *obj = GetObject(itemNames[i]);
       AddObjectToTree(obj);
-            
-      /*
-      /// @todo:  need to create different types for the solvers and check strings
-      if (objTypeName == "DifferentialCorrector")
-      {
-         AppendItem(mBoundarySolverItem, wxT(objName), iconToUse, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::DIFFERENTIAL_CORRECTOR));
-      }
-      else if (objTypeName == "Broyden")
-      {
-         //AppendItem(mBoundarySolverItem, wxT(objName), iconToUse, -1,
-         //           new GmatTreeItemData(wxT(objName), GmatTree::BROYDEN));
-      }
-      else if (objTypeName == "Quasi-Newton")
-      {
-         //AppendItem(mOptimizerItem, wxT(objName), iconToUse, -1,
-         //           new GmatTreeItemData(wxT(objName), GmatTree::QUASI_NEWTON));
-      }
-      else if (objTypeName == "FminconOptimizer")
-      {
-         AppendItem(mOptimizerItem, wxT(objName), iconToUse, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::SQP));
-      }
-      else if (solver->IsOfType("Optimizer"))
-      {
-         // Set generic optimizer stuff here!
-         AppendItem(mOptimizerItem, wxT(objName), iconToUse, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::SOLVER));
-      }
-      */
    };
    
    if (size > 0)
@@ -1794,8 +1760,6 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool restartCounte
 {
    StringArray itemNames = theGuiInterpreter->GetListOfObjects(Gmat::SUBSCRIBER);
    int size = itemNames.size();
-   //wxString objName;
-   //wxString objTypeName;
    
    for (int i = 0; i<size; i++)
    {
@@ -1844,35 +1808,11 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
 {
    StringArray itemNames = theGuiInterpreter->GetListOfObjects(Gmat::PARAMETER);
    int size = itemNames.size();
-   wxString objName;
-   Parameter *param;
    
    for (int i = 0; i<size; i++)
    {
-      //GmatBase *obj = GetObject(itemNames[i]);
-      //AddObjectToTree(obj);
-      
-      objName = wxString(itemNames[i].c_str());
-      param = (Parameter*)GetObject(itemNames[i]);
-      
-      // append only user parameters
-      // all system parameters works as Object.Property
-      //if (param->GetKey() == GmatParam::USER_PARAM)
-      if (param->GetTypeName() == "Variable")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_VARIABLE, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::VARIABLE));
-      }
-      else if (param->GetTypeName() == "Array")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_ARRAY, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::ARRAY));
-      }
-      else if (param->GetTypeName() == "String")
-      {
-         AppendItem(itemId, wxT(objName), GmatTree::RESOURCE_ICON_STRING, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::STRING));
-      }
+      GmatBase *obj = GetObject(itemNames[i]);
+      AddObjectToTree(obj);
    };
    
    if (size > 0)
@@ -1893,8 +1833,6 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
    StringArray itemNames =
       GmatAppData::Instance()->GetGuiInterpreter()->GetListOfObjects(Gmat::FUNCTION);
    int size = itemNames.size();
-   //wxString objName;
-   //wxString objTypeName;
    
    for (int i = 0; i<size; i++)
    {
@@ -1969,8 +1907,6 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
    StringArray itemNames =
       GmatAppData::Instance()->GetGuiInterpreter()->GetListOfObjects(Gmat::CALCULATED_POINT);
    int size = itemNames.size();
-   //wxString objName;
-   //wxString objTypeName;
    
    for (int i = 0; i<size; i++)
    {
@@ -1994,8 +1930,7 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
 void ResourceTree::AddUserObjects()
 {
    #ifdef DEBUG_USER_GUI
-   MessageInterface::ShowMessage
-      ("ResourceTree::AddUserObjects() entered\n");
+   MessageInterface::ShowMessage("ResourceTree::AddUserObjects() entered\n");
    #endif
    
    StringArray itemNames;
@@ -2006,7 +1941,7 @@ void ResourceTree::AddUserObjects()
    wxTreeItemId itemId;
 
    #ifdef DEBUG_USER_GUI
-      MessageInterface::ShowMessage("Found %d user nodes\n",
+      MessageInterface::ShowMessage("   Found %d user nodes\n",
             mPluginItems.size());
    #endif
    for (UnsignedInt j = 0; j < mPluginItems.size(); ++j)
@@ -2020,7 +1955,7 @@ void ResourceTree::AddUserObjects()
       int size = itemNames.size();
 
       #ifdef DEBUG_USER_GUI
-         MessageInterface::ShowMessage("Adding %d type %d subtype \"%s\" "
+         MessageInterface::ShowMessage("   Adding %d type %d subtype \"%s\" "
                "objects\n", size, type, subtype.c_str());
       #endif
 
@@ -2031,15 +1966,19 @@ void ResourceTree::AddUserObjects()
                   itemNames[i].c_str());
          #endif
          GmatBase *cp = GetObject(itemNames[i]);
-         GmatTree::ItemType itemType;
+         GmatTree::ItemType dummyType;
          GmatTree::ResourceIconType itemIcon;
-         GetItemTypeAndIcon(cp, itemType, itemIcon);
+         GetItemTypeAndIcon(cp, dummyType, itemIcon);
          
          if (subtype == "")
          {
             objName = wxString(itemNames[i].c_str());
             objTypeName = wxString(cp->GetTypeName().c_str());
-            
+
+            #ifdef DEBUG_USER_GUI
+            MessageInterface::ShowMessage
+               ("   => Adding '%s' of type '%s'\n", objName.c_str(), objTypeName.c_str());
+            #endif
             AppendItem(itemId, wxT(objName), itemIcon, -1,
                   new GmatTreeItemData(wxT(objName),
                         GmatTree::USER_DEFINED_OBJECT));
@@ -2049,6 +1988,10 @@ void ResourceTree::AddUserObjects()
             objName = wxString(itemNames[i].c_str());
             objTypeName = wxString(cp->GetTypeName().c_str());
             
+            #ifdef DEBUG_USER_GUI
+            MessageInterface::ShowMessage
+               ("   => Adding '%s' of type '%s'\n", objName.c_str(), objTypeName.c_str());
+            #endif
             AppendItem(itemId, wxT(objName), itemIcon, -1,
                   new GmatTreeItemData(wxT(objName),
                         GmatTree::USER_DEFINED_OBJECT));
@@ -2058,6 +2001,9 @@ void ResourceTree::AddUserObjects()
       if (size > 0)
          Expand(itemId);
    }
+   #ifdef DEBUG_USER_GUI
+   MessageInterface::ShowMessage("ResourceTree::AddUserObjects() leaving\n");
+   #endif
 }
 
 //==============================================================================
@@ -5063,11 +5009,12 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    //case GmatTree::SPK_PROPAGATOR:
       return mPropagatorItem;
       
+   case GmatTree::SOLVER:
+      return mSolverItem;
    case GmatTree::DIFFERENTIAL_CORRECTOR:
       return mBoundarySolverItem;
-      
+   case GmatTree::OPTIMIZER:
    case GmatTree::SQP:
-   case GmatTree::SOLVER:
       return mOptimizerItem;
       
    case GmatTree::REPORT_FILE:
