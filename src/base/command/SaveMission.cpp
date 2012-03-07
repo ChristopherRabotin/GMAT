@@ -37,13 +37,13 @@
 const std::string
 SaveMission::PARAMETER_TEXT[SaveMissionParamCount - GmatCommandParamCount] = 
 {
-   "FileName",
+   "Filename",
 };
 
 const Gmat::ParameterType
 SaveMission::PARAMETER_TYPE[SaveMissionParamCount - GmatCommandParamCount] =
 {
-   Gmat::STRING_TYPE,   // "FileName",
+   Gmat::FILENAME_TYPE,   // "Filename",
 };
 
 
@@ -57,6 +57,7 @@ SaveMission::PARAMETER_TYPE[SaveMissionParamCount - GmatCommandParamCount] =
 SaveMission::SaveMission() :
     GmatCommand("SaveMission")
 {
+   parameterCount = SaveMissionParamCount;
 }
 
 
@@ -180,6 +181,11 @@ bool SaveMission::InterpretAction()
    
    StringArray chunks = InterpretPreface();
    
+   #ifdef DEBUG_SAVEMISSION_IA
+   for (UnsignedInt i=0; i<chunks.size(); i++)
+      MessageInterface::ShowMessage("   %d: '%s'\n", i, chunks[i].c_str());
+   #endif
+   
    if (chunks.size() < 2)
       throw CommandException("Missing information for MissionSave command.\n");
    
@@ -187,6 +193,12 @@ bool SaveMission::InterpretAction()
    
    // Remove single quotes
    fileName = GmatStringUtil::RemoveEnclosingString(chunks[1], "'");
+   
+   #ifdef DEBUG_SAVEMISSION_IA
+   MessageInterface::ShowMessage("   fileName = '%s'\n", fileName.c_str());
+   MessageInterface::ShowMessage
+      ("SaveMission::InterpretAction() returning true\n");
+   #endif
    
    return true;
 }

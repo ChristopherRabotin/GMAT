@@ -1703,14 +1703,20 @@ bool Interpreter::ParseAndSetCommandName(GmatCommand *cmd, const std::string &cm
 {
    #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("ParseAndSetCommandName() entered, cmd=<%s>'%s', cmdType='%s', desc=<%s>\n",
-       cmd->GetTypeName().c_str(), cmd->GetName().c_str(), cmdType.c_str(),
-       desc.c_str());
+      ("ParseAndSetCommandName() entered, cmd=<%s>'%s', cmdType='%s'\n      desc = <%s>"
+       "\n   newDesc = <%s>\n", cmd->GetTypeName().c_str(), cmd->GetName().c_str(),
+       cmdType.c_str(), desc.c_str(), newDesc.c_str());
    #endif
    
    if (desc[0] == '\'')
    {
+      Integer paramCount = cmd->GetParameterCount();
+      bool fileTypeParamFound = HasFilenameTypeParameter(cmd);
+      
       #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("   ==> There are %d parameters and file type parameter %S\n",
+          paramCount, fileTypeParamFound ? "FOUND" : "NOT FOUND");
       MessageInterface::ShowMessage
          ("   ==> First char is a single quote, it might be a command name\n");
       #endif
@@ -1719,14 +1725,26 @@ bool Interpreter::ParseAndSetCommandName(GmatCommand *cmd, const std::string &cm
       // if matching quote found, continue
       if (index1 != desc.npos)
       {
-         // Check for valid command name where single quotes whithin the command name is not allowd
-         if (desc.find('\'', index1+1) != desc.npos)
+         // Check for more single quotes where another single quotes whithin the
+         // command name is not allowd (eg. 'Someone's Propagate')
+         Integer numQuotes = GmatStringUtil::NumberOfOccurrences(desc, '\'');
+         // If number of ' is greator 2, then it may be an error
+         if (numQuotes > 2)
          {
-            InterpreterException ex
-               ("Found invalid syntax for \"" + cmdType +
-                "\" command, single quotes within the command name is not allowed");
-            HandleError(ex);
-            return false;
+            // Currently only SaveMission allows 4 single quotes including command name.
+            // SaveMission 'save mission' 'mymissionfile.txt'
+            bool error = true;
+            if (fileTypeParamFound && numQuotes == 4)
+               error = false;
+            
+            if (error)
+            {
+               InterpreterException ex
+                  ("Found invalid syntax for \"" + cmdType +
+                   "\" command, single quotes within the command name is not allowed");
+               HandleError(ex);
+               return false;
+            }
          }
          
          StringArray parts = GmatStringUtil::SeparateBy(newDesc, "'");
@@ -1738,12 +1756,24 @@ bool Interpreter::ParseAndSetCommandName(GmatCommand *cmd, const std::string &cm
          // Set command name
          if (parts.size() == 1)
          {
-            cmd->SetName(cmdName);
-            newDesc = "";
+            //@todo Until we figure out the way to get own class paramter count
+            // use 4 here which is GmatCommand paramter counter.
+            // If new paramters are added to GmatBase or GmatCommand, this number
+            // needs to be changed also.
+            // We need to add a new virtual method GetOwnParameterCount() to
+            // GmatBase later in a future.
+            if (paramCount == 4)
+            {
+               cmd->SetName(cmdName);
+               newDesc = "";
+            }
          }
          else if (parts.size() >= 2)
          {
-            newDesc = parts[1];
+            if (fileTypeParamFound && parts.size() == 3)
+               newDesc = parts[2];
+            else
+               newDesc = parts[1];
             cmd->SetName(cmdName);
          }
       }
@@ -1759,8 +1789,8 @@ bool Interpreter::ParseAndSetCommandName(GmatCommand *cmd, const std::string &cm
    
    #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("ParseAndSetCommandName() returning true, cmd=<%s>'%s', desc=<%s>, "
-       "newDesc=<%s>\n", cmd->GetTypeName().c_str(), cmd->GetName().c_str(),
+      ("ParseAndSetCommandName() returning true, cmd=<%s>'%s'\n      desc = <%s>"
+       "\n   newDesc = <%s>\n", cmd->GetTypeName().c_str(), cmd->GetName().c_str(),
        desc.c_str(), newDesc.c_str());
    #endif
    return true;
@@ -1996,7 +2026,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          ("   => <%s>'%s' created and appended to '%s'.\n",
           cmd->GetTypeName().c_str(), cmd->GetName().c_str(), inCmd->GetTypeName().c_str());
    MessageInterface::ShowMessage
-      ("   desc     = <%s>\n     desc1    = <%s>\n     realDesc = <%s>\n",
+      ("     desc     = <%s>\n     desc1    = <%s>\n     realDesc = <%s>\n",
        desc.c_str(), desc1.c_str(), realDesc.c_str());
    #endif
    
@@ -2023,12 +2053,49 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          #endif
          retFlag  = ValidateCommand(cmd);
          
+         // For Optimize command make sure Solver type is Optimizer
+         if (cmd->IsOfType("Optimize") || cmd->IsOfType("Target"))
+         {
+            std::string expSolverType = "DifferentialCorrector";
+            if (cmd->IsOfType("Optimize")) expSolverType = "Optimizer";
+            std::string solverName = cmd->GetRefObjectName(Gmat::SOLVER);
+            GmatBase *obj = FindObject(solverName);
+            
+            #ifdef DEBUG_CREATE_COMMAND
+            MessageInterface::ShowMessage
+               ("   solver=<%p><%s>'%s'\n", obj,
+                obj ? obj->GetTypeName().c_str() : "NULL",
+                obj ? obj->GetName().c_str() : "NULL");
+            #endif
+            
+            // If solver object can be found, check solver type
+            // (There will be no solver available inside a function until execution)
+            if (obj != NULL)
+            {
+               bool wrongSolver = false;
+               
+               if (cmd->IsOfType("Optimize") && !obj->IsOfType(expSolverType))
+                  wrongSolver = true;
+               else if (cmd->IsOfType("Target") && !obj->IsOfType(expSolverType))
+                  wrongSolver = true;
+               
+               if (wrongSolver)
+               {
+                  InterpreterException ex
+                     ("The Solver \"" + solverName + "\" is not a(n) " + expSolverType);
+                  HandleError(ex);
+                  retFlag = false;
+               }
+            }
+         }
+         
          #ifdef DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage("   ===> %s has own InterpretAction()\n", type1.c_str());
          MessageInterface::ShowMessage
             ("CreateCommand() leaving creating '%s', cmd=<%p>, retFlag=%d\n", type1.c_str(),
              cmd, retFlag);
          #endif
+         
          return cmd;
       }
       else
@@ -2737,17 +2804,16 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       ("AssembleGeneralCommand() cmd=<%s>'%s', desc=<%s>\n", cmd->GetTypeName().c_str(),
        cmd->GetName().c_str(), desc.c_str());
    #endif
-   
-   if (type == "Target" || type == "Report" || type == "BeginFiniteBurn" ||
-       type == "EndFiniteBurn" || type == "Optimize")
+
+   // Target, Optimize has own InterpretAction() in the parent SolverBranchCommand
+   // so those are removed (LOJ: 2012.03.07)
+   if (type == "Report" || type == "BeginFiniteBurn" || type == "EndFiniteBurn")
    {
-      // first item is ref. object name
-      
-      if (type == "Target")
-         retval = AssembleTargetCommand(cmd, desc);
-      else if (type == "Optimize")
-         retval = AssembleOptimizeCommand(cmd, desc);
-      else if (type == "Report")
+      //if (type == "Target")
+      //   retval = AssembleTargetCommand(cmd, desc);
+      //else if (type == "Optimize")
+      //   retval = AssembleOptimizeCommand(cmd, desc);
+      if (type == "Report")
          retval = AssembleReportCommand(cmd, desc);
       else
          retval = AssembleFiniteBurnCommand(cmd, desc);
@@ -2772,8 +2838,15 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
 //------------------------------------------------------------------------------
 // bool AssembleTargetCommand(GmatCommand *cmd, const std::string &desc)
 //------------------------------------------------------------------------------
+//@note We need to update this if we decided to use this one.
+// See SolverBranchCommand::InterpretAction()
 bool Interpreter::AssembleTargetCommand(GmatCommand *cmd, const std::string &desc)
 {
+   #ifdef DEBUG_ASSEMBLE_SOLVER_COMMAND
+   MessageInterface::ShowMessage
+      ("AssembleTargetCommand() entered, cmd=<%p><%s>'%s', desc=<%s>\n",
+       cmd, cmd->GetTypeName().c_str(), cmd->GetName().c_str(), desc.c_str());
+   #endif
    debugMsg = "In AssembleTargetCommand()";
    
    // This command, for compatability with MATLAB, should not have
@@ -2812,17 +2885,38 @@ bool Interpreter::AssembleTargetCommand(GmatCommand *cmd, const std::string &des
          HandleError(ex);
          retval = false;
       }
+      else
+      {
+         // Check if Solver type is a DifferentialCorrector
+         if (!obj->IsOfType("DifferentialCorrector"))
+         {
+            InterpreterException ex
+               ("The Solver \"" + parts[0] + "\" is not a DifferentialCorrector");
+            HandleError(ex);
+            retval = false;
+         }
+      }
    }
    
+   #ifdef DEBUG_ASSEMBLE_SOLVER_COMMAND
+   MessageInterface::ShowMessage
+      ("AssembleTargetCommand() returning %d\n", retval);
+   #endif
    return retval;
 }
-
 
 //------------------------------------------------------------------------------
 // bool AssembleOptimizeCommand(GmatCommand *cmd, const std::string &desc)
 //------------------------------------------------------------------------------
+//@note We need to update this if we decided to use this one
+// See SolverBranchCommand::InterpretAction()
 bool Interpreter::AssembleOptimizeCommand(GmatCommand *cmd, const std::string &desc)
 {
+   #ifdef DEBUG_ASSEMBLE_SOLVER_COMMAND
+   MessageInterface::ShowMessage
+      ("AssembleOptimizeCommand() entered, cmd=<%p><%s>'%s', desc=<%s>\n",
+       cmd, cmd->GetTypeName().c_str(), cmd->GetName().c_str(), desc.c_str());
+   #endif
    debugMsg = "In AssembleOptimizeCommand()";
    
    // This command, for compatability with MATLAB, should not have
@@ -2861,8 +2955,23 @@ bool Interpreter::AssembleOptimizeCommand(GmatCommand *cmd, const std::string &d
          HandleError(ex);
          retval = false;
       }
+      else
+      {
+         // Check if Solver type is an Optimizer
+         if (!obj->IsOfType("Optimizer"))
+         {
+            InterpreterException ex
+               ("The Solver \"" + parts[0] + "\" is not an Optimizer");
+            HandleError(ex);
+            retval = false;
+         }
+      }
    }
    
+   #ifdef DEBUG_ASSEMBLE_SOLVER_COMMAND
+   MessageInterface::ShowMessage
+      ("AssembleOptimizeCommand() returning %d\n", retval);
+   #endif
    return retval;
 }
 
@@ -8718,6 +8827,21 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// void ClearTempObjectNames()
+//------------------------------------------------------------------------------
+/*
+ * Clears temporary object name array.
+ * tempObjectNames is used for finding MatlabFunction names.
+ * This method is called from the ScriptInterpreter::InterpretGmatFunction()
+ */
+//------------------------------------------------------------------------------
+void Interpreter::ClearTempObjectNames()
+{
+   tempObjectNames.clear();
+}
+
+
+//------------------------------------------------------------------------------
 // bool Interpreter::HandleMathTree(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool Interpreter::HandleMathTree(GmatCommand *cmd)
@@ -8769,16 +8893,29 @@ bool Interpreter::HandleMathTree(GmatCommand *cmd)
 
 
 //------------------------------------------------------------------------------
-// void Interpreter::ClearTempObjectNames()
+// bool HasFilenameTypeParameter(GmatCommand *cmd)
 //------------------------------------------------------------------------------
-/*
- * Clears temporary object name array.
- * tempObjectNames is used for finding MatlabFunction names.
- * This method is called from the ScriptInterpreter::InterpretGmatFunction()
+/**
+ * Checks if the command has parameters with Gmat::FILENAME_TYPE.
  */
 //------------------------------------------------------------------------------
-void Interpreter::ClearTempObjectNames()
+bool Interpreter::HasFilenameTypeParameter(GmatCommand *cmd)
 {
-   tempObjectNames.clear();
+   Integer paramCount = cmd->GetParameterCount();
+   bool fileTypeFound = false;
+   for (Integer id = 0; id < paramCount; ++id)
+   {
+      if (!cmd->IsParameterReadOnly(id))
+      {
+         if (cmd->GetParameterType(id) == Gmat::FILENAME_TYPE)
+         {
+            fileTypeFound = true;
+            break;
+         }
+      }
+   }
+   
+   return fileTypeFound;
 }
+
 
