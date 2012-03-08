@@ -86,7 +86,9 @@ protected:
    /// ID for the spacecraft epoch parameter
    Integer                      epochID;
    /// Starting epoch for the propagation
-   std::vector<Real>            baseEpoch;
+   std::vector<GmatEpoch>       baseEpoch;
+   /// Epoch where a derivative zero was located
+   GmatEpoch                    derivativeEpoch;
 
    /// Time elapsed during this Propagate
    RealArray                    elapsedTime;
@@ -149,7 +151,8 @@ protected:
                               ObjectArray &els);
    virtual void         InitializeForEventLocation();
    virtual void         CheckForEvents();
-   virtual bool         LocateEvent(EventLocator* el, Integer index = 0);
+   virtual bool         LocateEvent(EventLocator* el, Integer index = 0,
+                              bool forDerivative = false);
    virtual void         UpdateEventTable(EventLocator* el, Integer index);
 };
 

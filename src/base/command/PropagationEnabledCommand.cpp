@@ -772,7 +772,8 @@ bool PropagationEnabledCommand::Step(Real dt)
       {
          char size[32];
          std::sprintf(size, "%.12lf", dt);
-         throw CommandException("Propagator " + (*current)->GetName() +
+         throw CommandException("In PropagationEnabledCommand::Step(), "
+            "Propagator " + (*current)->GetName() +
             " failed to take a good final step (size = " + size + ")\n");
       }
 
@@ -1251,6 +1252,12 @@ void PropagationEnabledCommand::CheckForEvents()
                   "detected\n   Transition from %lf to %lf at index %d, epoch "
                   "[%12lf %12lf]\n", previousEventData[i], currentEventData[i],
                   i, previousEventData[i-1], currentEventData[i-1]);
+            MessageInterface::ShowMessage("Relevant data:\n   Epochs:  "
+               "%16.10lf %16.10lf\n   Values:  %16.12lf %16.12lf\n   Derivs:  "
+               "%16.12lf, %16.12lf\n", currentEventData[i-1], 
+               previousEventData[i-1], currentEventData[i], 
+               previousEventData[i], currentEventData[i+1], 
+               previousEventData[i+1]);
          #endif
 
          Integer index;
@@ -1287,6 +1294,15 @@ void PropagationEnabledCommand::CheckForEvents()
    // Check derivative values
    for (UnsignedInt i = 2; i < eventBufferSize; i += 3)
    {
+      // For now, skip derivative checks.  Remove this line when code is ready
+      continue;
+      
+      // Sanity check: if fn value signs differ, the value locator should have 
+      // caught the current case and the derivative check is irrelevant
+      if (currentEventData[i-1] * previousEventData[i-1] <= 0.0)
+         continue;
+
+      // Proceed if derivative sign change was found
       if (currentEventData[i] * previousEventData[i] <= 0.0)
       {
          #ifdef DEBUG_EVENTLOCATORS
@@ -1294,7 +1310,69 @@ void PropagationEnabledCommand::CheckForEvents()
                   "change detected\n   Transition from %lf to %lf at index %d, "
                   "epoch %12lf\n", currentEventData[i], previousEventData[i], i,
                   currentEventData[i-2]);
+            MessageInterface::ShowMessage("Relevant data:\n   Epochs:  "
+               "%16.10lf %16.10lf\n   Values:  %16.12lf %16.12lf\n   Derivs:  "
+               "%16.12lf, %16.12lf\n", currentEventData[i-2], 
+               previousEventData[i-2], currentEventData[i-1], 
+               previousEventData[i-1], currentEventData[i], 
+               previousEventData[i]);
          #endif
+
+         // Apply the filtering logic
+         bool findDerivativeZero = true;
+         Real functionValue, earliestDeriv;
+
+         // Set decision data based on time flow direction
+         if (currentEventData[i-2] > previousEventData[i-2])
+         {
+            functionValue = previousEventData[i-1];
+            earliestDeriv = previousEventData[i];
+         }
+         else
+         {
+            functionValue = currentEventData[i-1];
+            earliestDeriv = currentEventData[i];
+         }
+
+         if ((earliestDeriv > 0.0) && (functionValue > 0.0))
+            findDerivativeZero = false;
+         if ((earliestDeriv < 0.0) && (functionValue < 0.0))
+            findDerivativeZero = false;
+
+         // Only proceed if a function zero might exist
+         if (findDerivativeZero)
+         {
+            Integer index;
+            for (index = 0; index < (Integer)(events->size()) - 1; ++index)
+            {
+               if (index + 1 < (Integer)events->size())
+                  if ((Integer)i < activeEventIndices[index+1])
+                     break;
+            }
+
+            Integer functionIndex = (Integer)(i/3) - activeEventIndices[index];
+
+            #ifdef DEBUG_EVENTLOCATORS
+               MessageInterface::ShowMessage("i = %d gives function %d on "
+                     "locator %d\n", i, functionIndex, index);
+            #endif
+
+            #ifdef DEBUG_EVENT_LOCATORS
+               bool found = true; // for now; use to indicate refinements later
+            #endif
+
+            // Find the derivative zero
+            LocateEvent(events->at(index), functionIndex, true);
+
+            #ifdef DEBUG_EVENT_LOCATORS
+               if (found)
+               {
+                  MessageInterface::ShowMessage("Found an event on locator %s "
+                        "index %d\n",events->at(index)->GetTypeName().c_str(),
+                        functionIndex);
+               }
+            #endif
+         }
       }
    }
 
@@ -1315,9 +1393,11 @@ void PropagationEnabledCommand::CheckForEvents()
  * @return true if an event zero was found
  */
 //------------------------------------------------------------------------------
-bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
+bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index,
+         bool forDerivative)
 {
    bool eventFound = false;
+   Integer valueOffset = (forDerivative ? 2 : 1);
 
    if (events == NULL)
    {
@@ -1367,9 +1447,12 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
       Real lastEpoch = currentEventData[index*3], currentStep, desiredEpoch;
 
       // Prepare the RootFinder
+      Real brackets[2];
+      brackets[0] = previousEventData[index*3];
+      brackets[1] = currentEventData[index*3];
       finder->Initialize(previousEventData[index*3],
-            previousEventData[index*3+1], currentEventData[index*3],
-            currentEventData[index*3+1]);
+            previousEventData[index*3+valueOffset], currentEventData[index*3],
+            currentEventData[index*3+valueOffset]);
 
       Real elapsedSeconds = 0.0;
 
@@ -1396,11 +1479,17 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
             bool isForward = (*current)->PropagatesForward();
             if (!(*current)->Step(currentStep))
             {
-               char size[32];
+               char size[32], lbound[32], ubound[32];
                std::sprintf(size, "%.12lf", currentStep);
-               throw CommandException("In LocateEvent, Propagator " +
-                  (*current)->GetName() +
-                  " failed to take a good final step (size = " + size + ")\n");
+               std::sprintf(lbound, "%.12lf", (brackets[0] < brackets[1] ? 
+                  brackets[0] : brackets[1]));
+               std::sprintf(ubound, "%.12lf",  (brackets[0] > brackets[1] ? 
+                  brackets[0] : brackets[1]));
+               throw CommandException("In PropagationEnabledCommand::"
+                  "LocateEvent, Propagator " + (*current)->GetName() +
+                  " failed to take a good final step (size = " + size + 
+                  "); Epoch bounds: [" + lbound + ", " + ubound + "]\n");
+
             }
             (*current)->SetAsFinalStep(false);
             (*current)->SetForwardPropagation(isForward);
@@ -1444,20 +1533,20 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
                   tempEventData[index*3+1]);
          #endif
 
-         finder->SetValue(tempEventData[index*3], tempEventData[index*3+1]);
+         finder->SetValue(tempEventData[index*3], tempEventData[index*3+valueOffset]);
    //      stepDifference = finder->GetStepMeasure();
 
          lastEpoch = tempEventData[index*3];
          ++stepsTaken;
       }
       while ((stepsTaken < maxStepsAllowed) &&
-             (GmatMathUtil::Abs(tempEventData[index*3+1]) > locateTolerance));
+             (GmatMathUtil::Abs(tempEventData[index*3+valueOffset]) > locateTolerance));
    //   while ((stepsTaken < maxStepsAllowed) && (stepDifference > locateTolerance));
    //
    //         &&
    //          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
 
-      if ((GmatMathUtil::Abs(tempEventData[index*3+1]) < locateTolerance) &&
+      if ((GmatMathUtil::Abs(tempEventData[index*3+valueOffset]) < locateTolerance) &&
           (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
          eventFound = true;
 
@@ -1466,6 +1555,16 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index)
    //      eventFound = true;
 
       // End of temporary section
+
+      if (forDerivative && eventFound)
+      {
+         #ifdef DEBUG_EVENTLOCATORS
+            MessageInterface::ShowMessage("Zero of derivative located at "
+               "%.12lf\n", tempEventData[index*3]);
+         #endif
+         derivativeEpoch = tempEventData[index*3];
+         return true;
+      }
 
       if (eventFound)
       {
