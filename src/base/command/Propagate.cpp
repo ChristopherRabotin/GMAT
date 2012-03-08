@@ -4080,7 +4080,8 @@ bool Propagate::TakeAStep(Real propStep)
          {
             char size[32];
             std::sprintf(size, "%.12lf", propStep);
-            throw CommandException("Propagator " + (*current)->GetName() +
+            throw CommandException("In Propagate::TakeAStep, Propagator " + 
+               (*current)->GetName() +
                " failed to take a good final step (size = " + size + ")\n");
          }
 
