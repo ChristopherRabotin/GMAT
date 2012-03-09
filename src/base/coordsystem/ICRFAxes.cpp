@@ -69,6 +69,7 @@ ICRFAxes::ICRFAxes(const std::string &itsName) :
 InertialAxes("ICRF",itsName)
 {
    objectTypeNames.push_back("ICRFAxes");
+   baseSystem     = "ICRF";
    parameterCount = ICRFAxesParamCount;
    #ifdef DEBUG_CONSTRUCTION
       MessageInterface::ShowMessage("Now constructing ICRFAxes with name %s\n",
