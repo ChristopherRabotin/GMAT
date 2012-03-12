@@ -39,6 +39,7 @@
 //#define DEBUG_BALANCED_BRACKETS
 //#define DEBUG_MATH_EQ 1
 //#define DEBUG_STRING_UTIL_SEP_COMMA
+//#define DEBUG_STRING_UTIL_STRING_ARRAY
 
 
 //------------------------------------------------------------------------------
@@ -1442,6 +1443,9 @@ UnsignedIntArray GmatStringUtil::ToUnsignedIntArray(const std::string &str)
 //------------------------------------------------------------------------------
 StringArray GmatStringUtil::ToStringArray(const std::string &str)
 {
+   #ifdef DEBUG_STRING_UTIL_STRING_ARRAY
+      MessageInterface::ShowMessage("Entering GmatStringUtil::ToStringArray with str = %s\n", str.c_str());
+   #endif
    StringArray strArray;
 
    if (!IsBracketBalanced(str, "{}"))
@@ -1453,15 +1457,21 @@ StringArray GmatStringUtil::ToStringArray(const std::string &str)
 
    std::string str1 = RemoveOuterString(str, "{", "}");
    str1 = Trim(str1);
+   #ifdef DEBUG_STRING_UTIL_STRING_ARRAY
+      MessageInterface::ShowMessage("      after Trim, str1 = %s\n", str1.c_str());
+   #endif
 
    if (str1 == "")
       return strArray;
 
-   StringArray strVals = SeparateByComma(str1); // <<<<<<<<<<<<<<
+   StringArray strVals = SeparateByComma(str1);
    for (UnsignedInt i=0; i<strVals.size(); i++)
    {
       std::string str2 = Trim(strVals.at(i));
       strArray.push_back(str2);
+      #ifdef DEBUG_STRING_UTIL_STRING_ARRAY
+         MessageInterface::ShowMessage("      extracted string = %s\n", str2.c_str());
+      #endif
    }
 
    return strArray;
@@ -3108,7 +3118,7 @@ std::string GmatStringUtil::RemoveOuterString(const std::string &str,
 /*
  * Removes enclosing string if actually enclosed with the string.
  *
- * @param  str  Input string to remove given enclosnig string
+ * @param  str  Input string to remove given enclosing string
  * @param  enStr The enclosing string to check and remove
  *
  * @return string with enclosing string removed if found, original string otherwise
