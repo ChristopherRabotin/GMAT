@@ -194,7 +194,9 @@ void  SpiceAttitudeKernelReader::GetCoverageStartAndEnd(StringArray       &kerne
          MessageInterface::ShowMessage("Checking coverage for ID %d on kernel %s\n",
                forNaifId, (kernels.at(ii)).c_str());
       #endif
-      kernelName = kernels[ii].c_str();
+      // SPICE expects forward slashes for directory separators
+      std::string kName = GmatStringUtil::Replace(kernels.at(ii), "\\", "/");
+      kernelName = kName.c_str();
       // check the type of kernel
       arch        = aStr;
       kernelType  = kStr;

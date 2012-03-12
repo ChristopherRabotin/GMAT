@@ -190,18 +190,25 @@ SpiceInterface::~SpiceInterface()
 bool SpiceInterface::LoadKernel(const std::string &fileName)
 {
    #ifdef DEBUG_SPK_LOADING
-         MessageInterface::ShowMessage("SpiceInterface: Attempting to load kernel %s <---------\n",
-               fileName.c_str());
+      char *path=NULL;
+      size_t size = 0;
+      path=getcwd(path,size);
+      MessageInterface::ShowMessage("SpiceInterface: Attempting to load kernel %s <---------\n",
+                  fileName.c_str());
+      MessageInterface::ShowMessage( "   and CURRENT PATH = %s\n", path);
    #endif
+   // SPICE expects forward slashes for directory separators
+   std::string fName = GmatStringUtil::Replace(fileName, "\\", "/");
+
    for (StringArray::iterator jj = loadedKernels.begin();
         jj != loadedKernels.end(); ++jj)
-      if ((*jj) == fileName)
+      if ((*jj) == fName)
       {
 //         MessageInterface::ShowMessage("Spice kernel %s has already been loaded.\n",
 //               (*jj).c_str());
          return false;
       }
-   kernelNameSPICE = fileName.c_str();
+   kernelNameSPICE = fName.c_str();
    furnsh_c(kernelNameSPICE);
    if (failed_c() == SPICETRUE)
    {
@@ -209,8 +216,8 @@ bool SpiceInterface::LoadKernel(const std::string &fileName)
 //      SpiceInt       numChar  = MAX_SHORT_MESSAGE;
 //      SpiceChar      err[MAX_SHORT_MESSAGE];
       #ifdef DEBUG_SPK_LOADING
-            MessageInterface::ShowMessage("SpiceInterface: Error loading kernel %s <---------\n",
-                  fileName.c_str());
+            MessageInterface::ShowMessage("SpiceInterface: Error loading kernel %s (%s) <---------\n",
+                  fileName.c_str(), fName.c_str());
       #endif
       ConstSpiceChar option[] = "LONG"; // retrieve long error message, for now
       SpiceInt       numChar  = MAX_LONG_MESSAGE;
@@ -272,9 +279,11 @@ bool SpiceInterface::LoadKernels(const StringArray &fileNames)
 bool SpiceInterface::UnloadKernel(const std::string &fileName)
 {
    bool found = false;
+   // SPICE expects forward slashes for directory separators
+   std::string fName = GmatStringUtil::Replace(fileName, "\\", "/");
    for (StringArray::iterator jj = loadedKernels.begin();
         jj != loadedKernels.end(); ++jj)
-      if ((*jj) == fileName)
+      if ((*jj) == fName)
       {
          found = true;
          loadedKernels.erase(jj);
@@ -288,10 +297,10 @@ bool SpiceInterface::UnloadKernel(const std::string &fileName)
       return false;
    }
    #ifdef DEBUG_SPK_LOADING
-      MessageInterface::ShowMessage("Now attempting to unload kernel %s\n",
-            fileName.c_str());
+      MessageInterface::ShowMessage("Now attempting to unload kernel %s (%s)\n",
+            fileName.c_str(), fName.c_str());
    #endif
-   kernelNameSPICE = fileName.c_str();
+   kernelNameSPICE = fName.c_str();
    unload_c(kernelNameSPICE);
    if (failed_c())
    {
@@ -350,11 +359,13 @@ bool SpiceInterface::UnloadAllKernels()
    for (StringArray::iterator jj = loadedKernels.begin();
         jj != loadedKernels.end(); ++jj)
    {
+      // SPICE expects forward slashes for directory separators
+      std::string kName = GmatStringUtil::Replace((*jj), "\\", "/");
       #ifdef DEBUG_SPK_LOADING
          MessageInterface::ShowMessage("Now attempting to unload kernel %s\n",
                (*jj).c_str());
       #endif
-      kernelNameSPICE = (*jj).c_str();
+      kernelNameSPICE = kName.c_str();
       unload_c(kernelNameSPICE);
       if (failed_c())
       {
@@ -396,10 +407,18 @@ bool SpiceInterface::IsLoaded(const std::string &fileName)
    #ifdef DEBUG_SPK_LOADING
       MessageInterface::ShowMessage("IsLoaded::Now attempting to find kernel name %s\n", fileName.c_str());
    #endif
+   // SPICE expects forward slashes for directory separators
+   std::string kName = GmatStringUtil::Replace(fileName, "\\", "/");
    for (StringArray::iterator jj = loadedKernels.begin();
         jj != loadedKernels.end(); ++jj)
    {
-      if ((*jj) == fileName) return true;
+      if ((*jj) == kName)
+      {
+         #ifdef DEBUG_SPK_LOADING
+            MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
+         #endif
+         return true;
+      }
    }
    #ifdef DEBUG_SPK_LOADING
       MessageInterface::ShowMessage("IsLoaded::kernel name %s NOT ALREADY LOADED\n", fileName.c_str());

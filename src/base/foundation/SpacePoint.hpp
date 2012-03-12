@@ -240,5 +240,8 @@ protected:
    /// Current rotation matrix (from inertial to body)
    bool      hasAttitude;
    Rmatrix33 cosineMat;
+
+   std::string ParseKernelName(const std::string &kernel);
+
 };
 #endif // SpacePoint_hpp

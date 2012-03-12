@@ -802,19 +802,25 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
       if (GmatStringUtil::IsEnclosedWithBraces(value1))
       {
          orbitSpiceKernelNames.clear();
-         orbitSpiceKernelNames = GmatStringUtil::ToStringArray(value1);
+         StringArray kernels = GmatStringUtil::ToStringArray(value1);
          #ifdef DEBUG_SPACE_POINT_ORBIT_KERNELS
              MessageInterface::ShowMessage("In SP::SetString value IS enclosed with braces and values are:\n");
-             for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
-                MessageInterface::ShowMessage("   (%d)   %s\n", (Integer) ii,
-                      (orbitSpiceKernelNames.at(ii)).c_str());
+             for (unsigned int ii = 0; ii < kernels.size(); ii++)
+                MessageInterface::ShowMessage("   (%d)   %s\n", (Integer) ii, (kernels.at(ii)).c_str());
          #endif
+         for (unsigned int ii = 0; ii < kernels.size(); ii++)
+            orbitSpiceKernelNames.push_back(ParseKernelName(kernels.at(ii)));
       }
       else
       {
-         if (find(orbitSpiceKernelNames.begin(), orbitSpiceKernelNames.end(),
-             value) == orbitSpiceKernelNames.end())
-            orbitSpiceKernelNames.push_back(value);
+         // trim leading and trailing blanks and change back slashes to forward slashes
+         std::string trimmed = ParseKernelName(value);
+         #ifdef DEBUG_SPACE_POINT_ORBIT_KERNELS
+             MessageInterface::ShowMessage("In SP::SetString, value = %s, quotes removed = %s, trimmed = %s\n",
+                   value.c_str(), str1.c_str(), trimmed.c_str());
+         #endif
+         if (find(orbitSpiceKernelNames.begin(), orbitSpiceKernelNames.end(), trimmed) == orbitSpiceKernelNames.end())
+            orbitSpiceKernelNames.push_back(trimmed);
       }
       spiceSetupDone = false;
       return true;
@@ -827,13 +833,15 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
       if (GmatStringUtil::IsEnclosedWithBraces(value1))
       {
          attitudeSpiceKernelNames.clear();
-         attitudeSpiceKernelNames = GmatStringUtil::ToStringArray(value1);
+         StringArray kernels = GmatStringUtil::ToStringArray(value1);
+         for (unsigned int ii = 0; ii < kernels.size(); ii++)
+            attitudeSpiceKernelNames.push_back(ParseKernelName(kernels.at(ii)));
       }
       else
       {
-         if (find(attitudeSpiceKernelNames.begin(), attitudeSpiceKernelNames.end(),
-             value) == attitudeSpiceKernelNames.end())
-            attitudeSpiceKernelNames.push_back(value);
+         std::string trimmed = ParseKernelName(value);
+         if (find(attitudeSpiceKernelNames.begin(), attitudeSpiceKernelNames.end(),trimmed) == attitudeSpiceKernelNames.end())
+            attitudeSpiceKernelNames.push_back(trimmed);
      }
       spiceSetupDone = false;
       return true;
@@ -846,13 +854,15 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
       if (GmatStringUtil::IsEnclosedWithBraces(value1))
       {
          scClockSpiceKernelNames.clear();
-         scClockSpiceKernelNames = GmatStringUtil::ToStringArray(value1);
+         StringArray kernels = GmatStringUtil::ToStringArray(value1);
+         for (unsigned int ii = 0; ii < kernels.size(); ii++)
+            scClockSpiceKernelNames.push_back(ParseKernelName(kernels.at(ii)));
       }
       else
       {
-         if (find(scClockSpiceKernelNames.begin(), scClockSpiceKernelNames.end(),
-             value) == scClockSpiceKernelNames.end())
-            scClockSpiceKernelNames.push_back(value);
+         std::string trimmed = ParseKernelName(value);
+         if (find(scClockSpiceKernelNames.begin(), scClockSpiceKernelNames.end(),trimmed) == scClockSpiceKernelNames.end())
+            scClockSpiceKernelNames.push_back(trimmed);
       }
       spiceSetupDone = false;
       return true;
@@ -865,13 +875,15 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
       if (GmatStringUtil::IsEnclosedWithBraces(value1))
       {
          frameSpiceKernelNames.clear();
-         frameSpiceKernelNames = GmatStringUtil::ToStringArray(value1);
+         StringArray kernels = GmatStringUtil::ToStringArray(value1);
+         for (unsigned int ii = 0; ii < kernels.size(); ii++)
+            frameSpiceKernelNames.push_back(ParseKernelName(kernels.at(ii)));
       }
       else
       {
-         if (find(frameSpiceKernelNames.begin(), frameSpiceKernelNames.end(),
-             value) == frameSpiceKernelNames.end())
-            frameSpiceKernelNames.push_back(value);
+         std::string trimmed = ParseKernelName(value);
+         if (find(frameSpiceKernelNames.begin(), frameSpiceKernelNames.end(),trimmed) == frameSpiceKernelNames.end())
+            frameSpiceKernelNames.push_back(trimmed);
       }
       spiceSetupDone = false;
       return true;
@@ -1249,3 +1261,23 @@ bool SpacePoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    return GmatBase::SetRefObject(obj, type, name, index);
 }
+
+
+//------------------------------------------------------------------------------
+// std::string ParseKernelName(const std::string &kernel)
+//------------------------------------------------------------------------------
+/**
+ * This method parses the input kernel name to trim blanks and enclosing
+ * single quotes.
+ *
+ * @param kernel The input kernel name
+ *
+ * @return the kernel name without leading or trailing blanks and without
+ *         enclosing single quotes
+ */
+//------------------------------------------------------------------------------
+std::string SpacePoint::ParseKernelName(const std::string &kernel)
+{
+   return GmatStringUtil::Trim(GmatStringUtil::RemoveEnclosingString(GmatStringUtil::Trim(kernel), "\'"));
+}
+
