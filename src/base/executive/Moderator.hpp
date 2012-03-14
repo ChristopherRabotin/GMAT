@@ -447,7 +447,8 @@ private:
    PropSetup*  GetDefaultPropSetup();
    Burn*       GetDefaultBurn(const std::string &type);
    Hardware*   GetDefaultHardware(const std::string &type);
-   Solver*     GetDefaultSolver();
+   Solver*     GetDefaultBoundaryValueSolver();
+   Solver*     GetDefaultOptimizer();
    Subscriber* GetDefaultSubscriber(const std::string &type,
                                     bool addObjects = true,
                                     bool createIfNoneFound = true);

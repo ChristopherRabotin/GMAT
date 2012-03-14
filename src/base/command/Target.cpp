@@ -236,7 +236,6 @@ const std::string& Target::GetGeneratingString(Gmat::WriteMode mode,
    return SolverBranchCommand::GetGeneratingString(mode, prefix, useName);
 }
 
-
 //---------------------------------------------------------------------------
 // bool RenameRefObject(const Gmat::ObjectType type,
 //                      const std::string &oldName, const std::string &newName)
@@ -254,13 +253,7 @@ const std::string& Target::GetGeneratingString(Gmat::WriteMode mode,
 bool Target::RenameRefObject(const Gmat::ObjectType type,
                              const std::string &oldName,
                              const std::string &newName)
-{
-   if (type == Gmat::SOLVER)
-   {
-      if (solverName == oldName)
-         solverName = newName;
-   }
-
+{   
    SolverBranchCommand::RenameRefObject(type, oldName, newName);
    
    return true;

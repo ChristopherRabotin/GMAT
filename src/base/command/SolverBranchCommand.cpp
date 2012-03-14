@@ -471,7 +471,83 @@ bool SolverBranchCommand::InterpretAction()
    return true;
 }
 
+//---------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type,
+//                      const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Renames referenced objects.
+ *
+ * @param type Type of the object that is renamed.
+ * @param oldName The current name for the object.
+ * @param newName The name the object has when this operation is complete.
+ *
+ * @return true on success.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::RenameRefObject(const Gmat::ObjectType type,
+                                          const std::string &oldName,
+                                          const std::string &newName)
+{
+   if (type == Gmat::SOLVER)
+   {
+      if (solverName == oldName)
+         solverName = newName;
+   }
+   
+   BranchCommand::RenameRefObject(type, oldName, newName);
+   
+   return true;
+}
 
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the Vary.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& SolverBranchCommand::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   ObjectTypeArray parentRefTypes = BranchCommand::GetRefObjectTypeArray();
+   copy(parentRefTypes.begin(), parentRefTypes.end(), back_inserter(refObjectTypes));
+   refObjectTypes.push_back(Gmat::SOLVER);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref objects used by the Vary.
+ *
+ * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *               full list.
+ * 
+ * @return the list of object names.
+ * 
+ */
+//------------------------------------------------------------------------------
+const StringArray& SolverBranchCommand::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   StringArray parentRefNames = BranchCommand::GetRefObjectNameArray(type);
+   copy(parentRefNames.begin(), parentRefNames.end(), back_inserter(refObjectNames));
+   
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SOLVER)
+      refObjectNames.push_back(solverName);
+   
+   return refObjectNames;
+}
+
+//------------------------------------------------------------------------------
+// void CheckForOptions(std::string &opts)
+//------------------------------------------------------------------------------
 void SolverBranchCommand::CheckForOptions(std::string &opts)
 {
    StringArray chunks = parser.SeparateBrackets(opts, "{}", ", ", true);

@@ -5522,17 +5522,15 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       }
       else if (type == "Target")
       {
-         // set solver
-         Solver *solver = CreateSolver("DifferentialCorrector",
-                                       GetDefaultSolver()->GetName());
+         // set DifferentCorrector
+         Solver *solver = GetDefaultBoundaryValueSolver();
          id = cmd->GetParameterID("Targeter");
          cmd->SetStringParameter(id, solver->GetName());
       }
       else if (type == "Optimize")
       {
-         // set solver
-         Solver *solver = CreateSolver("DifferentialCorrector",
-                                       GetDefaultSolver()->GetName());
+         // set Optimizer
+         Solver *solver = GetDefaultOptimizer();
          id = cmd->GetParameterID("OptimizerName");
          cmd->SetStringParameter(id, solver->GetName());
       }
@@ -5540,7 +5538,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       {
          // set solver
          Solver *solver = CreateSolver("DifferentialCorrector",
-                                       GetDefaultSolver()->GetName());
+                                       GetDefaultBoundaryValueSolver()->GetName());
          id = cmd->GetParameterID("SolverName");
          cmd->SetStringParameter(id, solver->GetName());
          
@@ -5572,7 +5570,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       else if (type == "Achieve")
       {
          // Get default solver
-         Solver *solver = GetDefaultSolver();
+         Solver *solver = GetDefaultBoundaryValueSolver();
 
          #if DEBUG_DEFAULT_COMMAND
          MessageInterface::ShowMessage
@@ -5598,7 +5596,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          // Set default value: DefaultSC.SMA = 7000 (for bug 2045 fix)
          
          // Get default solver
-         Solver *solver = GetDefaultSolver();
+         Solver *solver = GetDefaultBoundaryValueSolver();
          
          #if DEBUG_DEFAULT_COMMAND
          MessageInterface::ShowMessage
@@ -8565,22 +8563,59 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
 }
 
 //------------------------------------------------------------------------------
-// Solver* GetDefaultSolver()
+// Solver* GetDefaultBoundaryValueSolver()
 //------------------------------------------------------------------------------
-Solver* Moderator::GetDefaultSolver()
+/**
+ * Retrives configured boundary value solver object. If none exist, it creates 
+ * a DifferentialCorrector as a default.
+ */
+//------------------------------------------------------------------------------
+Solver* Moderator::GetDefaultBoundaryValueSolver()
 {
    StringArray configList = GetListOfObjects(Gmat::SOLVER);
+   Integer numSolver = configList.size();
+   GmatBase *obj = NULL;
    
-   if (configList.size() > 0)
+   if (numSolver > 0)
    {
-      // return 1st Burn from the list
-      return GetSolver(configList[0]);
+      for (Integer i = 0; i < numSolver; i++)
+      {
+         obj = GetConfiguredObject(configList[i]);
+         if (obj->IsOfType("BoundaryValueSolver"))
+            return (Solver*)obj;
+      }
    }
-   else
+   
+   // create default boundary value Solver
+   return CreateSolver("DifferentialCorrector", "DefaultDC");
+}
+
+//------------------------------------------------------------------------------
+// Solver* GetDefaultOptimizer()
+//------------------------------------------------------------------------------
+/**
+ * Retrives configured Optimizer object. If none exist, it creates FminconOptimizer
+ * as a default.
+ */
+//------------------------------------------------------------------------------
+Solver* Moderator::GetDefaultOptimizer()
+{
+   StringArray configList = GetListOfObjects(Gmat::SOLVER);
+   Integer numSolver = configList.size();
+   GmatBase *obj = NULL;
+   
+   if (numSolver > 0)
    {
-      // create Solver
-      return CreateSolver("DifferentialCorrector", "DefaultDC");
+      for (Integer i = 0; i < numSolver; i++)
+      {
+         obj = GetConfiguredObject(configList[i]);
+         if (obj->IsOfType("Optimizer"))
+            return (Solver*)obj;
+      }
    }
+   
+   // Create default Optimizer
+   return CreateSolver("FminconOptimizer", "DefaultSQP");
 }
 
 //------------------------------------------------------------------------------

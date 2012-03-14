@@ -90,6 +90,7 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
    MessageInterface::ShowMessage
       ("DifferentialCorrector::DC(constructor) entered\n");
    #endif
+   objectTypeNames.push_back("BoundaryValueSolver");
    objectTypeNames.push_back("DifferentialCorrector");
    parameterCount = DifferentialCorrectorParamCount;
    

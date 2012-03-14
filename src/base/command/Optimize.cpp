@@ -235,11 +235,7 @@ bool Optimize::RenameRefObject(const Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
-   if (type == Gmat::SOLVER)
-   {
-      if (solverName == oldName)
-         solverName = newName;
-   }
+   SolverBranchCommand::RenameRefObject(type, oldName, newName);
    
    return true;
 }
