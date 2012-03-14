@@ -48,10 +48,7 @@ RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// RealVar(const std::string &name, const std::string &valStr,
-//         const std::string &typeStr, GmatParam::ParameterKey key, GmatBase *obj,
-//         const std::string &desc, const std::string &unit, GmatParam::DepObject depObj,
-//         Gmat::ObjectType, bool isTimeParam)
+// RealVar(const std::string &name, const std::string &valStr, ...)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -66,15 +63,16 @@ RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
  * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
  * @param <ownerType> object type who owns this parameter as property
  * @param <isTimeParam> true if parameter is time related, false otherwise
+ * @param <isSettable> true if parameter is settable
  */
 //------------------------------------------------------------------------------
 RealVar::RealVar(const std::string &name, const std::string &valStr,
                  const std::string &typeStr, GmatParam::ParameterKey key,
                  GmatBase *obj, const std::string &desc, const std::string &unit,
                  GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
-                 bool isTimeParam, bool isSettable)
+                 bool isTimeParam, bool isSettable, Gmat::ObjectType ownedObjType)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
-               isSettable, true, true)
+               isSettable, true, true, ownedObjType)
 {
    mValueSet = false;
    mIsNumber = true;

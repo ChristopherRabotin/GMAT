@@ -117,7 +117,6 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::OBJECT_TYPE,      // Attitude
       Gmat::RMATRIX_TYPE,     // OrbitSTM
       Gmat::RMATRIX_TYPE,     // OrbitAMatrix
-      Gmat::STRING_TYPE,      // UTCGregorian
       Gmat::REAL_TYPE,        // CartesianX
       Gmat::REAL_TYPE,        // CartesianY
       Gmat::REAL_TYPE,        // CartesianZ
@@ -169,7 +168,6 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "Attitude",
       "OrbitSTM",
       "OrbitAMatrix",
-      "UTCGregorian",
       "CartesianX",
       "CartesianY",
       "CartesianZ",
@@ -1651,10 +1649,6 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       if (str == "AddHardware") // made changes by Tuan Nguyen
          return ADD_HARDWARE;
 
-      // handle special parameter to work in GmatFunction (loj: 2008.06.27)
-      if (str == "UTCGregorian")
-         return UTC_GREGORIAN;
-
       // first check the multiple reps
       Integer sz = EndMultipleReps - CART_X;
       for (Integer ii = 0; ii < sz; ii++)
@@ -1812,12 +1806,6 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       return true;
    }
 
-   // This is fix for using Epoch.UTCGregorian in GmatFunction
-   if (id == UTC_GREGORIAN)
-   {
-      return true;
-   }
-
    if (id == ORBIT_STM)
    {
       return true;
@@ -1965,10 +1953,6 @@ std::string Spacecraft::GetParameterText(const Integer id) const
    MessageInterface::ShowMessage("SC::GetParameterText - called with id = %d\n",
    id);
    #endif
-
-   // handle special parameter to work in GmatFunction (loj: 2008.06.27)
-   if (id == UTC_GREGORIAN)
-      return PARAMETER_LABEL[id - SpaceObjectParamCount];
 
    if ((id >= CART_X) && (id < EndMultipleReps))
    {
@@ -2711,12 +2695,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    else if (id == DATE_FORMAT_ID)
    {
       SetDateFormat(value);
-   }
-   // To handle Epoch.UTCGregorian in GmatFunction Assignment wrapper (loj: 2008.06.27)
-   else if (id == UTC_GREGORIAN)
-   {
-      SetDateFormat("UTCGregorian");
-      SetEpoch(value);
    }
    else if ((id == STATE_TYPE_ID) || (id == DISPLAY_STATE_TYPE_ID))
    {

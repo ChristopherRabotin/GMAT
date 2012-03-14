@@ -443,6 +443,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    }
    
    theCommand = cmd;
+   theDescription = theCommand->GetGeneratingString(Gmat::NO_COMMENTS);
    continueOnError = contOnError;
    std::string typeName = cmd->GetTypeName();
    
@@ -921,19 +922,49 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          }
       }
       
-      bool isLhsSettable = ParameterInfo::Instance()->IsSettable(newType);
+      ParameterInfo *paramInfo = ParameterInfo::Instance();
+      bool isLhsSettableParam = paramInfo->IsSettable(newType);
       #if DBGLVL_WRAPPERS > 1
       MessageInterface::ShowMessage
-         ("   ==> '%s' is%ssettable\n", newType.c_str(), isLhsSettable ? " " : " NOT ");
+         ("   ==> '%s' is%ssettable Parameter\n", newType.c_str(), isLhsSettableParam ? " " : " NOT ");
       #endif
       
       if (lhs == "" || lhs == "Not_Set")
          createDefaultStringWrapper = true;
       
-      if (lhs.find_first_of(".") != lhs.find_last_of(".") && isLhsSettable)
+      #if 1
+      bool paramFirst = false;
+      if (isLhsSettableParam)
+      {
+         paramFirst = true;
+         // @note (LOJ: 2012.03.13)
+         // Owned object dependent Parameters have two dots, so if it is a
+         // Parameter with one dot, it should create ObjectPropertyWrapper.
+         // Thruster1.C1 -> should create ObjectPropertyWrapper
+         // Sat1.Thruster1.C1 -> should create ParamterWrapper
+         if (lhs.find_first_of(".") == lhs.find_last_of("."))
+         {
+            paramFirst = false;
+            // Since there is no matching Spacecraft property field for
+            // all time types, such as Sat1.UTCModJulian or Sat1.UTCGregorian,
+            // create ParameterWrapper for time related settable Parameters.
+            if (paramInfo->IsTimeParameter(newType))
+               paramFirst = true;
+         }
+      }
+      
+      leftEw = CreateElementWrapper(lhs, paramFirst, manage);
+      #endif
+      
+      #if 0
+      // Hardware Parameters are settable but associated object is the owner object
+      // rather than field owner, ex) sat.thruster1.C1.
+      // So create ParameterWrapper if ther are two dots, otherwise create ObjectPropertyWrapper
+      if (lhs.find_first_of(".") != lhs.find_last_of(".") && isLhsSettableParam)
          leftEw = CreateElementWrapper(lhs, true, manage);
       else
          leftEw = CreateElementWrapper(lhs, false, manage);
+      #endif
       
       if (leftEw == NULL)
          return false;
@@ -2189,6 +2220,10 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
             paramFirst = false;
       }
       
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage("   after few checking, paramFirst=%d\n", paramFirst);
+      #endif
+      
       if (paramFirst)
       {
          bool paramCreated = false;
@@ -2318,8 +2353,9 @@ ElementWrapper* Validator::CreateParameterWrapper(Parameter *param,
    // Since GmatFunction can have such as "GMAT XYPlot.Add = {sat.X};",
    // we want to set Parameter name to description. (loj: 2008.06.19)
    
-   if (param->IsOfType(Gmat::STRING))
-   {
+   //if (param->IsOfType(Gmat::STRING))
+   if (param->IsOfType(Gmat::STRING) && param->IsOfType("UserParameter"))
+  {
       ew = new StringObjectWrapper();
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add

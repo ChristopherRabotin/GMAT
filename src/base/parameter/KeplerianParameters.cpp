@@ -42,7 +42,7 @@
  */
 //------------------------------------------------------------------------------
 KepSMA::KepSMA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "SMA", obj, "Semi-Major Axis", "Km", GmatParam::ORIGIN, KEP_SMA, true)
+   : OrbitReal(name, "SMA", obj, "Orbit Semi-Major Axis", "Km", GmatParam::ORIGIN, KEP_SMA, true)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
@@ -268,7 +268,7 @@ GmatBase* KepEcc::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepInc::KepInc(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "INC", obj, "Inclination", "Deg", GmatParam::COORD_SYS, KEP_INC, true)
+   : OrbitReal(name, "INC", obj, "Orbit Inclination", "Deg", GmatParam::COORD_SYS, KEP_INC, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);

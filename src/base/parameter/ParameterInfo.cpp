@@ -153,7 +153,7 @@ GmatParam::DepObject ParameterInfo::GetDepObjectType(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// bool ParameterInfo::IsPlottable(const std::string &name)
+// bool IsPlottable(const std::string &name)
 //------------------------------------------------------------------------------
 bool ParameterInfo::IsPlottable(const std::string &name)
 {
@@ -165,7 +165,7 @@ bool ParameterInfo::IsPlottable(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// bool ParameterInfo::IsReportable(const std::string &name)
+// bool IsReportable(const std::string &name)
 //------------------------------------------------------------------------------
 bool ParameterInfo::IsReportable(const std::string &name)
 {
@@ -177,7 +177,7 @@ bool ParameterInfo::IsReportable(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// bool ParameterInfo::IsSettable(const std::string &name)
+// bool IsSettable(const std::string &name)
 //------------------------------------------------------------------------------
 bool ParameterInfo::IsSettable(const std::string &name)
 {
@@ -189,19 +189,45 @@ bool ParameterInfo::IsSettable(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// void Add(const std::string &type, Gmat::ObjectType objectType,
-//          const std::string &name, GmatParam::DepObject depType,
-//          bool isPlottable, bool isReportable, bool isSettable)
+// bool IsTimeParameter(const std::string &name)
+//------------------------------------------------------------------------------
+bool ParameterInfo::IsTimeParameter(const std::string &name)
+{
+   if (mParamTimeMap.find(name) != mParamTimeMap.end())
+      return mParamTimeMap[name];
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsOwnedObjectDependable(const std::string &name)
+//------------------------------------------------------------------------------
+bool ParameterInfo::IsOwnedObjectDependent(const std::string &name)
+{
+   if (mParamOwnedObjDepMap.find(name) != mParamOwnedObjDepMap.end())
+      return mParamOwnedObjDepMap[name];
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
+// void Add(const std::string &type, Gmat::ObjectType objectType, ...)
 //------------------------------------------------------------------------------
 void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
-                        const std::string &name, GmatParam::DepObject depType,
-                        bool isPlottable, bool isReportable, bool isSettable)
+                        Gmat::ObjectType ownedObjType, const std::string &name,
+                        GmatParam::DepObject depType, bool isPlottable,
+                        bool isReportable, bool isSettable, bool isTimeParam,
+                        const std::string &desc)
 {
    #ifdef DEBUG_PARAM_INFO
    MessageInterface::ShowMessage
-      ("ParameterInfo::Add() entered, type='%s', objectType=%d\n   name='%s', "
-       "depType=%d, isPlottable=%d, isReportable=%d, isSettable=%d\n", type.c_str(),
-       objectType, name.c_str(), depType, isPlottable, isReportable, isSettable);
+      ("ParameterInfo::Add() entered, type='%s', objectType=%d, ownedObjType=%d"
+       "\n   name='%s', depType=%d, isPlottable=%d, isReportable=%d, isSettable=%d, "
+       "isTimeParam=%d, desc='%s'\n", type.c_str(), objectType, ownedObjType,
+       name.c_str(), depType, isPlottable, isReportable, isSettable, isTimeParam,
+       desc.c_str());
    #endif
    
    // Check for dot first
@@ -227,22 +253,66 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
       return;
    }
    
-   // add property objectType
+   
+   if (GmatGlobal::Instance()->IsWritingParameterInfo())
+   {
+      std::string objTypeStr = GmatBase::GetObjectTypeString(objectType);
+      std::string depTypeStr = Parameter::GetDependentTypeString(depType);
+      std::string ownedObjTypeStr = "          ";
+      std::string plottableStr = "N";
+      std::string reportableStr = "N";
+      std::string settableStr = "N";
+      if (isPlottable)  plottableStr  = "Y";
+      if (isReportable) reportableStr = "Y";
+      if (isSettable)   settableStr   = "Y";
+      if (depTypeStr == "OwnedObject")
+         ownedObjTypeStr = "(" + GmatBase::GetObjectTypeString(ownedObjType) + ")";
+      if (mNumParams == 0)
+      {
+         MessageInterface::ShowMessage
+            ("\n==========================================================================================\n"
+             "=================================== GMAT Parameter List ==================================\n"
+             "==========================================================================================\n"
+             "(R = Reportable, P = Plottable, S = Settable)\n"
+             "No   ParameterType       ObjectType     DependencyType              R  P  S  Description\n"
+             "---  ----------------    -------------  ----------------------      -  -  -  -----------\n");
+      }
+      MessageInterface::ShowMessage
+         ("%3d  %-18s  %-13s  %-16s%10s  %s  %s  %s  %s\n", mNumParams+1, type.c_str(),
+          objTypeStr.c_str(), depTypeStr.c_str(), ownedObjTypeStr.c_str(), reportableStr.c_str(),
+          plottableStr.c_str(), settableStr.c_str(), desc.c_str());
+   }
+   
+   // Add property objectType
    mParamObjectTypeMap[type] = objectType;
    
-   // add property name
+   // Add property name
    std::string propertyName = name.substr(pos+1, name.npos-pos);
    
    mParamDepObjMap[propertyName] = depType;
    
-   // add plottable
-   mParamPlottableMap[type] = isPlottable;
+   // Add plottable Parameters
+   if (isPlottable)
+      mParamPlottableMap[type] = isPlottable;
    
-   // add reportable
-   mParamReportableMap[type] = isReportable;
+   // Add reportable Parameters
+   if (isReportable)
+      mParamReportableMap[type] = isReportable;
    
-   // add settable
-   mParamSettableMap[type] = isSettable;
+   // Add settable Parameters
+   if (isSettable)
+      mParamSettableMap[type] = isSettable;
+   
+   // Add time Parameters
+   if (isTimeParam)
+      mParamTimeMap[type] = isTimeParam;
+   
+   // Add owned object dep paramters
+   if (depType == GmatParam::OWNED_OBJ)
+   {
+      mParamOwnedObjDepMap[type] = true;
+      mParamOwnedObjTypeMap[type] = ownedObjType;
+   }
    
    mNumParams = mParamDepObjMap.size();
    

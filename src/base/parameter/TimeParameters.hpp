@@ -41,10 +41,11 @@ public:
    CurrA1MJD(const CurrA1MJD &copy);
    CurrA1MJD& operator= (const CurrA1MJD &right); 
    virtual ~CurrA1MJD();
-
+   
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetReal(Real val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -69,7 +70,8 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetReal(Real val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -94,7 +96,8 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetString(const std::string &val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -119,7 +122,8 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetReal(Real val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -144,7 +148,8 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetString(const std::string &val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -169,7 +174,8 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetReal(Real val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -194,7 +200,8 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetString(const std::string &val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -216,10 +223,11 @@ public:
    TDBModJulian(const TDBModJulian &copy);
    TDBModJulian& operator= (const TDBModJulian &right); 
    virtual ~TDBModJulian();
-
+   
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetReal(Real val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -244,7 +252,8 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetString(const std::string &val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -266,10 +275,11 @@ public:
    TCBModJulian(const TCBModJulian &copy);
    TCBModJulian& operator= (const TCBModJulian &right); 
    virtual ~TCBModJulian();
-
+   
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetReal(Real val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -291,10 +301,11 @@ public:
    TCBGregorian(const TCBGregorian &copy);
    TCBGregorian& operator= (const TCBGregorian &right); 
    virtual ~TCBGregorian();
-
+   
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetString(const std::string &val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -316,10 +327,11 @@ public:
    UTCModJulian(const UTCModJulian &copy);
    UTCModJulian& operator= (const UTCModJulian &right); 
    virtual ~UTCModJulian();
-
+   
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetReal(Real val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -341,10 +353,11 @@ public:
    UTCGregorian(const UTCGregorian &copy);
    UTCGregorian& operator= (const UTCGregorian &right); 
    virtual ~UTCGregorian();
-
+   
    // methods inherited from Parameter
    virtual bool Evaluate();
-
+   virtual void SetString(const std::string &val);
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    

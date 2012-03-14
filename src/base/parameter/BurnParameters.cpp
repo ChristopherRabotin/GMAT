@@ -51,8 +51,8 @@
 //------------------------------------------------------------------------------
 ImpBurnElements::ImpBurnElements(const std::string &type, const std::string &name,
                                  GmatBase *obj)
-   : BurnReal(name, type, Gmat::IMPULSIVE_BURN, obj,
-              "ImpulsiveBurn Element", "Km/s", GmatParam::NO_DEP, false)
+   : BurnReal(name, type, Gmat::IMPULSIVE_BURN, obj, "Impulsive Burn " + type,
+              "Km/s", GmatParam::NO_DEP, true)
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;

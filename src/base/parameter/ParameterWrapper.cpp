@@ -215,7 +215,7 @@ Real ParameterWrapper::EvaluateReal() const
       "Cannot return value of Parameter - pointer is NULL\n");
    #ifdef DEBUG_PW
       MessageInterface::ShowMessage(
-      "In ParameterWrapper::EvalReal, value is %.12f\n", param->EvaluateReal());
+      "In ParameterWrapper::EvaluateReal, value is %.12f\n", param->EvaluateReal());
    #endif
    return param->EvaluateReal();
 }
@@ -235,6 +235,48 @@ bool ParameterWrapper::SetReal(const Real toValue)
       throw ParameterException(
       "Cannot set value of Parameter - pointer is NULL\n");
    param->SetReal(toValue);
+   return true;
+}
+
+
+//---------------------------------------------------------------------------
+// virtual std::string EvaluateString() const;
+//---------------------------------------------------------------------------
+/**
+ * Method to return the String value of the wrapped object.
+ *
+ * @return Real value of the wrapped number object.
+ * 
+ */
+//---------------------------------------------------------------------------
+std::string ParameterWrapper::EvaluateString() const
+{
+   if (param == NULL)
+      throw ParameterException(
+      "Cannot return value of Parameter - pointer is NULL\n");
+   #ifdef DEBUG_PW
+      MessageInterface::ShowMessage(
+      "In ParameterWrapper::EvaluateString, value is '%s'\n", param->EvaluateString());
+   #endif
+   return param->EvaluateString();
+}
+
+
+//---------------------------------------------------------------------------
+// virtual bool SetString(const std::string &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Method to set the String value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ParameterWrapper::SetString(const std::string &toValue)
+{
+   if (param == NULL)
+      throw ParameterException(
+      "Cannot set value of Parameter - pointer is NULL\n");
+   param->SetString(toValue);
    return true;
 }
 

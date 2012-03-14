@@ -32,7 +32,8 @@ class GMAT_API TimeString : public StringVar, public TimeData
 public:
 
    TimeString(const std::string &name, const std::string &typeStr, 
-            GmatBase *obj, const std::string &desc, const std::string &unit);
+              GmatBase *obj, const std::string &desc, const std::string &unit,
+              bool isSettable = false);
    TimeString(const TimeString &copy);
    TimeString& operator=(const TimeString &right);
    virtual ~TimeString();

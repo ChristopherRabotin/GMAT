@@ -65,13 +65,14 @@ END_EVENT_TABLE()
  * @param allowArray       true if selection of Array is allowed (true)
  * @param &objectType      default object type to show ("Spacecraft")
  * @param createParam      true if to create non-existant system parameter (true)
+ * @param skipDependency   true if skipping dependency object when creating Parameter name (false)
  */
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog
      (wxWindow *parent, const wxArrayString &objectTypeList, int showOption,
       bool allowMultiSelect, bool allowString, bool allowWholeObject, 
       bool allowSysParam, bool allowVariable, bool allowArray, 
-      const wxString &objectType, bool createParam)
+      const wxString &objectType, bool createParam, bool skipDependency)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
    mHasSelectionChanged = false;
@@ -88,6 +89,7 @@ ParameterSelectDialog::ParameterSelectDialog
    mAllowArray = allowArray;
    mAllowSysParam = allowSysParam;
    mCreateParam = createParam;
+   mSkipDependency = skipDependency;
    mObjectType = objectType;
    
    mNumRow = -1;
@@ -606,8 +608,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
          
          // Set Spacecraft property
          mPropertyListBox->
-            Set(theGuiManager->GetPropertyList("Spacecraft",
-                                               GuiItemManager::SHOW_PLOTTABLE));
+            Set(theGuiManager->GetPropertyList("Spacecraft", mShowOption));
          
          if (!mAllowMultiSelect)
             mPropertyListBox->SetSelection(0);
@@ -621,8 +622,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
          
          // Set ImpulsiveBurn property
          mPropertyListBox->
-            Set(theGuiManager->GetPropertyList("ImpulsiveBurn",
-                                               GuiItemManager::SHOW_PLOTTABLE));
+            Set(theGuiManager->GetPropertyList("ImpulsiveBurn", mShowOption));
          
          if (!mAllowMultiSelect)
             mPropertyListBox->SetSelection(0);
@@ -1534,7 +1534,8 @@ wxString ParameterSelectDialog::FormParameterName()
    MessageInterface::ShowMessage("   property=<%s>\n", propertyName.c_str());
    #endif
    
-   if (depObjName == "")
+   // If dependency is blank or skipping dependency
+   if (depObjName == "" || mSkipDependency)
       paramName = objectName + "." + propertyName;
    else
       paramName = objectName + "." + depObjName + "." + propertyName;

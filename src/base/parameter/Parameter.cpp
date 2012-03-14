@@ -67,29 +67,26 @@ Parameter::PARAMETER_TYPE[ParameterParamCount - GmatBaseParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Parameter(const std::string &name, const std::string &typeStr,
-//           GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
-//           const std::string &unit, GmatParam::DepObject depObj,
-//           Gmat::ObjectType ownerType, bool isTimeParam, bool isSettable,
-//           bool isPlottable, bool isReportable)
+// Parameter(const std::string &name, const std::string &typeStr, ...)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
- * @param <name> parameter name
- * @param <typeStr>  parameter type string
- * @param <key>  parameter key (SYSTEM_PARAM, USER_PARAM, etc)
+ * @param <name> Parameter name
+ * @param <typeStr>  Parameter type string
+ * @param <key>  Parameter key (SYSTEM_PARAM, USER_PARAM, etc)
  * @param <obj>  reference object pointer
- * @param <desc> parameter description
- * @param <unit> parameter unit
- * @param <ownerType> object type who owns this parameter as property
- * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
- * @param <isTimeParam> true if parameter is time related, false otherwise
- * @param <isSettable> true if parameter is settable, false otherwise
- * @param <isPlottable> true if parameter is plottable (Real), false otherwise
- * @param <isReportable> true if parameter is reportable (Real, String), false otherwise
+ * @param <desc> Parameter description
+ * @param <unit> Parameter unit
+ * @param <ownerType> object type who owns this Parameter as property
+ * @param <depObj> object which Parameter is dependent on (COORD_SYS, ORIGIN, NONE)
+ * @param <isTimeParam> true if Parameter is time related, false otherwise
+ * @param <isSettable> true if Parameter is settable, false otherwise
+ * @param <isPlottable> true if Parameter is plottable (Real), false otherwise
+ * @param <isReportable> true if Parameter is reportable (Real, String), false otherwise
+ * @param <ownedObjType> owned object type of this Parameter [Gmat::UNKNOWN_OBJECT]
  *
- * @exception <ParameterException> thrown if parameter name has blank spaces
+ * @exception <ParameterException> thrown if Parameter name has blank spaces
  */
 //------------------------------------------------------------------------------
 Parameter::Parameter(const std::string &name, const std::string &typeStr,
@@ -97,7 +94,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
                      const std::string &desc, const std::string &unit,
                      GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
                      bool isTimeParam, bool isSettable, bool isPlottable,
-                     bool isReportable)
+                     bool isReportable, Gmat::ObjectType ownedObjType)
    : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
    objectTypes.push_back(Gmat::PARAMETER);
@@ -141,17 +138,21 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mInitialValue = "";
    mIsCommentFromCreate = true;
    mOwnerType = ownerType;
+   mOwnedObjectType = ownedObjType;
    mDepObj = depObj;
    mCycleType = GmatParam::NOT_CYCLIC;
    mColor = 0; // black
    mNeedCoordSystem = false;
    mIsCoordSysDependent = false;
    mIsOriginDependent = false;
+   mIsOwnedObjDependent = false;
    
    if (depObj == GmatParam::COORD_SYS)
       mIsCoordSysDependent = true;
    else if (depObj == GmatParam::ORIGIN)
       mIsOriginDependent = true;
+   else if (depObj == GmatParam::OWNED_OBJ)
+      mIsOwnedObjDependent = true;
    
    mIsAngleParam = false;
    mIsTimeParam = isTimeParam;
@@ -160,8 +161,9 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mIsReportable = isReportable;
    
    // register parameter names with info
-   ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj,
-                                  isPlottable, isReportable, isSettable);
+   ParameterInfo::Instance()->
+      Add(typeName, mOwnerType, mOwnedObjectType, instanceName,
+          mDepObj, isPlottable, isReportable, isSettable, isTimeParam, mDesc);
    
    // set parameter count
    parameterCount = ParameterParamCount;
@@ -202,6 +204,7 @@ Parameter::Parameter(const Parameter &copy)
    mIsReportable = copy.mIsReportable;
    mIsCoordSysDependent = copy.mIsCoordSysDependent;
    mIsOriginDependent = copy.mIsOriginDependent;
+   mIsOwnedObjDependent = copy.mIsOwnedObjDependent;
    mNeedCoordSystem = copy.mNeedCoordSystem;
    
 }
@@ -245,6 +248,7 @@ Parameter& Parameter::operator= (const Parameter& right)
    mIsReportable = right.mIsReportable;
    mIsCoordSysDependent = right.mIsCoordSysDependent;
    mIsOriginDependent = right.mIsOriginDependent;
+   mIsOwnedObjDependent = right.mIsOwnedObjDependent;
    mNeedCoordSystem = right.mNeedCoordSystem;
 
    return *this;
@@ -401,6 +405,18 @@ bool Parameter::IsCoordSysDependent() const
 bool Parameter::IsOriginDependent() const
 {
    return mIsOriginDependent;
+}
+
+//------------------------------------------------------------------------------
+// bool IsOwnedObjectDependent() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter is origin dependent.
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsOwnedObjectDependent() const
+{
+   return mIsOwnedObjDependent;
 }
 
 //------------------------------------------------------------------------------
@@ -1254,3 +1270,31 @@ void Parameter::SetCommentLine(const std::string &comment, Integer which)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// static std::string Parameter::GetDependentTypeString(const DepObject depObj)
+//------------------------------------------------------------------------------
+std::string Parameter::GetDependentTypeString(const GmatParam::DepObject depObj)
+{
+   std::string depObjStr;
+   switch (depObj)
+   {
+   case GmatParam::COORD_SYS:
+      depObjStr = "CoordinateSystem";
+      break;
+   case GmatParam::ORIGIN:
+      depObjStr = "Origin";
+      break;
+   case GmatParam::NO_DEP:
+      depObjStr = "None";
+      break;
+   case GmatParam::OWNED_OBJ:
+      depObjStr = "OwnedObject";
+      break;
+   default:
+      depObjStr = "Unknown";
+      break;
+   }
+   
+   return depObjStr;
+}

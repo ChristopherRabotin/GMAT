@@ -235,9 +235,6 @@ protected:
       ORBIT_A_MATRIX,
 //      ORBIT_COVARIANCE,
 
-      // special parameter to handle in GmatFunction
-      UTC_GREGORIAN,
-
       // Hidden parameters used by the PSM
       CARTESIAN_X,
       CARTESIAN_Y,

@@ -107,12 +107,18 @@ public:
    void SetMatlabAvailable(bool flag);
    bool IsMatlabDebugOn();
    void SetMatlabDebug(bool flag);
+   
+   // Debug MissionTree
    bool IsMissionTreeDebugOn();
    void SetMissionTreeDebug(bool flag);
-
+   
+   // Debug Parameters
+   bool IsWritingParameterInfo();
+   void SetWriteParameterInfo(bool flag);
+   
    void SetEventLocationAvailable(bool flag);
    bool IsEventLocationAvailable();
-
+   
    // IO formatting
    bool IsScientific();
    bool ShowPoint();
@@ -222,7 +228,8 @@ private:
    bool isMatlabAvailable;
    bool isMatlabDebugOn;
    bool isMissionTreeDebugOn;
-
+   bool isWritingParameterInfo;
+   
    bool isEventLocationAvailable;
 
    Integer runMode;

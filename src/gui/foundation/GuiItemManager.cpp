@@ -1340,6 +1340,14 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objType,
       ParameterInfo *theParamInfo = ParameterInfo::Instance();
       for (int i=0; i<theNumScProperty; i++)
       {
+         // Owned object dependent Parameters for Spacecraft are not
+         // ready to show in the ParameterSelectDialog, so skipping it for now.
+         // @todo For owned object dependent Parameters, we need to show
+         // owned object name in the dependency ComboBox. (LOJ: 2012.03.09)
+         // eg) Sat1.Tank1.Temperature
+         //if (theParamInfo->IsOwnedObjectDependent(theScPropertyList[i].c_str()))
+         //   continue;
+         
          if (showOption == SHOW_REPORTABLE)
          {
             if (theParamInfo->IsReportable(theScPropertyList[i].c_str()))
@@ -1415,33 +1423,6 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
    else
       return 0;
 }
-
-
-// //------------------------------------------------------------------------------
-// // wxString* GetPropertyList(const wxString &objType)
-// //------------------------------------------------------------------------------
-// /*
-//  * @return propertie string array associated with objType
-//  */
-// //------------------------------------------------------------------------------
-// wxString* GuiItemManager::GetPropertyList(const wxString &objType)
-// {
-//    if (objType == "Spacecraft")
-//       return theScPropertyList;
-//    else if (objType == "ImpulsiveBurn")
-//       return theImpBurnPropertyList;
-//    else if (objType == "FiniteBurn")
-//       return theFiniteBurnPropertyList;
-//    else
-//       throw GmatBaseException("There are no properties associated with " +
-//                               std::string(objType.c_str()));
-
-// //    if (objType != "Spacecraft")
-// //       throw GmatBaseException("There are no properties associated with " +
-// //                               std::string(objType.c_str()));
-   
-// //    return theScPropertyList;
-// }
 
 
 //------------------------------------------------------------------------------
@@ -2692,8 +2673,8 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
 {
    #ifdef DEBUG_PROPERTY_LISTBOX
    MessageInterface::ShowMessage
-      ("GuiItemManager::GetPropertyListBox() showOption=%d, multiSelect=%d\n",
-       showOption, multiSelect);
+      ("GuiItemManager::GetPropertyListBox() objType='%s', showOption=%d, multiSelect=%d\n",
+       objType.c_str(), showOption, multiSelect);
    #endif
    
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
@@ -2714,7 +2695,21 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
    // now append properties
    if (objType == "Spacecraft")
    {
-      if (showOption == SHOW_PLOTTABLE)
+      // Check in the order of settable, plottable, and reportable 
+      // since settable is subset of plottable or reportable and
+      // plottable is subset of reportable
+      if (showOption == SHOW_SETTABLE)
+      {
+         for (int i=0; i<theNumScProperty; i++)
+         {
+            if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
+            {
+               MessageInterface::ShowMessage("==> Adding settable %s\n", theScPropertyList[i].c_str());
+               propertyListBox->Append(theScPropertyList[i]);
+            }
+         }
+      }
+      else if (showOption == SHOW_PLOTTABLE)
       {
          for (int i=0; i<theNumScProperty; i++)
          {
@@ -2730,19 +2725,21 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                propertyListBox->Append(theScPropertyList[i]);
          }
       }
-      else if (showOption == SHOW_SETTABLE)
-      {
-         for (int i=0; i<theNumScProperty; i++)
-         {
-            if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
-               propertyListBox->Append(theScPropertyList[i]);
-         }
-      }
    }
    else if (objType == "ImpulsiveBurn")
    {
-      for (int i=0; i<theNumImpBurnProperty; i++)
-         propertyListBox->Append(theImpBurnPropertyList[i]);
+      if (showOption == SHOW_SETTABLE)
+         for (int i=0; i<theNumImpBurnProperty; i++)
+            if (theParamInfo->IsSettable(theImpBurnPropertyList[i].c_str()))
+               propertyListBox->Append(theImpBurnPropertyList[i]);
+      else if (showOption == SHOW_PLOTTABLE)
+         for (int i=0; i<theNumImpBurnProperty; i++)
+            if (theParamInfo->IsPlottable(theImpBurnPropertyList[i].c_str()))
+               propertyListBox->Append(theImpBurnPropertyList[i]);
+      else if (showOption == SHOW_REPORTABLE)
+         for (int i=0; i<theNumImpBurnProperty; i++)
+            if (theParamInfo->IsReportable(theImpBurnPropertyList[i].c_str()))
+               propertyListBox->Append(theImpBurnPropertyList[i]);
    }
    else if (objType == "FiniteBurn")
    {
@@ -3756,8 +3753,15 @@ void GuiItemManager::UpdatePropertyList()
    
    for (int i=0; i<numParams; i++)
    {
-      // skip CurrA1Mjd from the GUI - The parameter CurrA1MJD will be removed (loj: 5/3/06)
+      // Skip CurrA1Mjd from the GUI. (loj: 5/3/06)
+      // CurrA1MJD will be removed in a future since it still used in some scripts.
       if (items[i] == "CurrA1MJD")
+         continue;
+      
+      // Do not include owned object dependent Paramters such as Sat1.Tank1.Temperature.
+      // ParameterSelectDialog is not ready to handle this kind of Parameters
+      // since it needs to show dependent object in the ComboBox. (LOJ: 2012.03.09)
+      if (theParamInfo->IsOwnedObjectDependent(items[i].c_str()))
          continue;
       
       // add only reportable parameters (Real, String for now) to list
@@ -3836,6 +3840,12 @@ void GuiItemManager::UpdateParameterList()
          ("GuiItemManager::UpdateParameterList() items[%d]=%s, type=%s\n", i, 
           items[i].c_str(), param->GetTypeName().c_str());
       #endif
+      
+      // Do not include owned object dependent Paramters such as Sat1.Tank1.Temperature.
+      // ParameterSelectDialog is not ready to handle this kind of Parameters
+      // since it needs to show dependent object in the ComboBox. (LOJ: 2012.03.09)
+      if (param->IsOwnedObjectDependent())
+         continue;
       
       // add if parameter plottable (returning single value)
       if (param->IsPlottable())

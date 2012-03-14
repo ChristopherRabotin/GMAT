@@ -32,7 +32,8 @@ class GMAT_API TimeReal : public RealVar, public TimeData
 public:
 
    TimeReal(const std::string &name, const std::string &typeStr, 
-            GmatBase *obj, const std::string &desc, const std::string &unit);
+            GmatBase *obj, const std::string &desc, const std::string &unit,
+            bool isSettable = false);
    TimeReal(const TimeReal &copy);
    TimeReal& operator=(const TimeReal &right);
    virtual ~TimeReal();

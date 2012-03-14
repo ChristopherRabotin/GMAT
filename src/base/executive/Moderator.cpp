@@ -126,6 +126,7 @@
 // @note If this is enabled, Bug1430-Func_GFuncInsideCFlow.script leaves
 // no memory tracks but AssigningWholeObjects.script crashes when exiting
 //#define __ENABLE_CLEAR_UNMANAGED_FUNCTIONS__
+
 //#define __CREATE_DEFAULT_BC__
 //#define __SHOW_FINAL_STATE__
 //#define __DISABLE_SOLAR_SYSTEM_CLONING__
@@ -7470,6 +7471,290 @@ void Moderator::CreateDefaultBarycenter()
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void CreateDefaultParameters()
+//------------------------------------------------------------------------------
+void Moderator::CreateDefaultParameters()
+{
+   // ImpulsiveBurn parameters
+   CreateParameter("Element1", "DefaultIB.Element1");
+   CreateParameter("Element2", "DefaultIB.Element2");
+   CreateParameter("Element3", "DefaultIB.Element3");
+   CreateParameter("V", "DefaultIB.V");
+   CreateParameter("N", "DefaultIB.N");
+   CreateParameter("B", "DefaultIB.B");
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default impulsive burn parameters created\n");
+   #endif
+   
+   // Time parameters
+   CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
+   CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");      
+   CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove
+   CreateParameter("A1ModJulian", "DefaultSC.A1ModJulian");
+   CreateParameter("A1Gregorian", "DefaultSC.A1Gregorian");
+   CreateParameter("TAIModJulian", "DefaultSC.TAIModJulian");
+   CreateParameter("TAIGregorian", "DefaultSC.TAIGregorian");
+   CreateParameter("TTModJulian", "DefaultSC.TTModJulian");
+   CreateParameter("TTGregorian", "DefaultSC.TTGregorian");
+   CreateParameter("TDBModJulian", "DefaultSC.TDBModJulian");
+   CreateParameter("TDBGregorian", "DefaultSC.TDBGregorian");
+   CreateParameter("TCBModJulian", "DefaultSC.TCBModJulian");
+   CreateParameter("TCBGregorian", "DefaultSC.TCBGregorian");
+   CreateParameter("UTCModJulian", "DefaultSC.UTCModJulian");
+   CreateParameter("UTCGregorian", "DefaultSC.UTCGregorian");      
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default time parameters  created\n");
+   #endif
+   
+   // Cartesian parameters
+   CreateParameter("X", "DefaultSC.EarthMJ2000Eq.X");
+   CreateParameter("Y", "DefaultSC.EarthMJ2000Eq.Y");
+   CreateParameter("Z", "DefaultSC.EarthMJ2000Eq.Z");
+   CreateParameter("VX", "DefaultSC.EarthMJ2000Eq.VX");
+   CreateParameter("VY", "DefaultSC.EarthMJ2000Eq.VY");
+   CreateParameter("VZ", "DefaultSC.EarthMJ2000Eq.VZ");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default cartesian parameters created\n");
+   #endif
+   
+   // Keplerian parameters
+   CreateParameter("SMA", "DefaultSC.Earth.SMA");
+   CreateParameter("ECC", "DefaultSC.Earth.ECC");
+   CreateParameter("INC", "DefaultSC.Earth.INC");
+   CreateParameter("RAAN", "DefaultSC.Earth.RAAN");
+   CreateParameter("AOP", "DefaultSC.EarthMJ2000Eq.AOP");
+   CreateParameter("TA", "DefaultSC.Earth.TA");
+   CreateParameter("MA", "DefaultSC.Earth.MA");
+   CreateParameter("EA", "DefaultSC.Earth.EA");
+   CreateParameter("HA", "DefaultSC.Earth.HA");
+   CreateParameter("MM", "DefaultSC.Earth.MM");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default keplerian parameters created\n");
+   #endif
+   
+   // Orbital parameters
+   CreateParameter("VelApoapsis", "DefaultSC.Earth.VelApoapsis");
+   CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");
+   CreateParameter("Apoapsis", "DefaultSC.Earth.Apoapsis");
+   CreateParameter("Periapsis", "DefaultSC.Earth.Periapsis");
+   CreateParameter("OrbitPeriod", "DefaultSC.Earth.OrbitPeriod");
+   CreateParameter("RadApo", "DefaultSC.Earth.RadApo");
+   CreateParameter("RadPer", "DefaultSC.Earth.RadPer");
+   CreateParameter("C3Energy", "DefaultSC.Earth.C3Energy");
+   CreateParameter("Energy", "DefaultSC.Earth.Energy");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default orbital parameters created\n");
+   #endif
+   
+   // Spherical parameters
+   CreateParameter("RMAG", "DefaultSC.Earth.RMAG");
+   CreateParameter("RA", "DefaultSC.Earth.RA");
+   CreateParameter("DEC", "DefaultSC.EarthMJ2000Eq.DEC");
+   CreateParameter("VMAG", "DefaultSC.EarthMJ2000Eq.VMAG");
+   CreateParameter("RAV", "DefaultSC.EarthMJ2000Eq.RAV");
+   CreateParameter("DECV", "DefaultSC.EarthMJ2000Eq.DECV");
+   CreateParameter("AZI", "DefaultSC.EarthMJ2000Eq.AZI");
+   CreateParameter("FPA", "DefaultSC.EarthMJ2000Eq.FPA");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default spherical parameters created\n");
+   #endif
+   
+   // Angular parameters
+   CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
+   CreateParameter("HMAG", "DefaultSC.HMAG");
+   CreateParameter("HX", "DefaultSC.EarthMJ2000Eq.HX");
+   CreateParameter("HY", "DefaultSC.EarthMJ2000Eq.HY");
+   CreateParameter("HZ", "DefaultSC.EarthMJ2000Eq.HZ");
+   CreateParameter("DLA", "DefaultSC.EarthMJ2000Eq.DLA");
+   CreateParameter("RLA", "DefaultSC.EarthMJ2000Eq.RLA");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default angular parameters created\n");
+   #endif
+   
+   #ifdef __ENABLE_ATMOS_DENSITY__
+   // Environmental parameters
+   CreateParameter("AtmosDensity", "DefaultSC.Earth.AtmosDensity");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default env parameters created\n");
+   #endif
+   #endif
+   
+   // Planet parameters
+   CreateParameter("Altitude", "DefaultSC.Earth.Altitude");
+   CreateParameter("MHA", "DefaultSC.Earth.MHA");
+   CreateParameter("Longitude", "DefaultSC.Earth.Longitude");
+   CreateParameter("Latitude", "DefaultSC.Earth.Latitude");
+   CreateParameter("LST", "DefaultSC.Earth.LST");
+   CreateParameter("BetaAngle", "DefaultSC.Earth.BetaAngle");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default planet parameters created\n");
+   #endif
+   
+   // B-Plane parameters
+   CreateParameter("BdotT", "DefaultSC.Earth.BdotT");
+   CreateParameter("BdotR", "DefaultSC.Earth.BdotR");
+   CreateParameter("BVectorMag", "DefaultSC.Earth.BVectorMag");
+   CreateParameter("BVectorAngle", "DefaultSC.Earth.BVectorAngle");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default b-plane parameters created\n");
+   #endif
+   
+   // Attitude parameters
+   CreateParameter("DCM11", "DefaultSC.DCM11");
+   CreateParameter("DCM12", "DefaultSC.DCM12");
+   CreateParameter("DCM13", "DefaultSC.DCM13");
+   CreateParameter("DCM21", "DefaultSC.DCM21");
+   CreateParameter("DCM22", "DefaultSC.DCM22");
+   CreateParameter("DCM23", "DefaultSC.DCM23");
+   CreateParameter("DCM31", "DefaultSC.DCM31");
+   CreateParameter("DCM32", "DefaultSC.DCM32");
+   CreateParameter("DCM33", "DefaultSC.DCM33");
+   CreateParameter("EulerAngle1", "DefaultSC.EulerAngle1");
+   CreateParameter("EulerAngle2", "DefaultSC.EulerAngle2");
+   CreateParameter("EulerAngle3", "DefaultSC.EulerAngle3");
+   CreateParameter("MRP1", "DefaultSC.MRP1");  // Dunn Added
+   CreateParameter("MRP2", "DefaultSC.MRP2");  // Dunn Added
+   CreateParameter("MRP3", "DefaultSC.MRP3");  // Dunn Added
+   CreateParameter("Q1", "DefaultSC.Q1");
+   CreateParameter("Q2", "DefaultSC.Q2");
+   CreateParameter("Q3", "DefaultSC.Q3");
+   CreateParameter("Q4", "DefaultSC.Q4");
+   CreateParameter("AngularVelocityX", "DefaultSC.AngularVelocityX");
+   CreateParameter("AngularVelocityY", "DefaultSC.AngularVelocityY");
+   CreateParameter("AngularVelocityZ", "DefaultSC.AngularVelocityZ");
+   CreateParameter("EulerAngleRate1", "DefaultSC.EulerAngleRate1");
+   CreateParameter("EulerAngleRate2", "DefaultSC.EulerAngleRate2");
+   CreateParameter("EulerAngleRate3", "DefaultSC.EulerAngleRate3");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default attitude parameters created\n");
+   #endif
+   
+   // Ballistic/Mass parameters
+   CreateParameter("DryMass", "DefaultSC.DryMass");
+   CreateParameter("Cd", "DefaultSC.Cd");
+   CreateParameter("Cr", "DefaultSC.Cr");
+   CreateParameter("DragArea", "DefaultSC.DragArea");
+   CreateParameter("SRPArea", "DefaultSC.SRPArea");
+   CreateParameter("TotalMass", "DefaultSC.TotalMass");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default ballistic/mass parameters created\n");
+   #endif
+   
+   // STM and A-Matrix parameters
+   CreateParameter("OrbitSTM", "DefaultSC.OrbitSTM");
+   CreateParameter("OrbitSTMA", "DefaultSC.OrbitSTMA");
+   CreateParameter("OrbitSTMB", "DefaultSC.OrbitSTMB");
+   CreateParameter("OrbitSTMC", "DefaultSC.OrbitSTMC");
+   CreateParameter("OrbitSTMD", "DefaultSC.OrbitSTMD");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default STM parameters created\n");
+   #endif
+   
+   // If DEBUG_PARAMETERS was turned on from the startup file,
+   // create hardware Parameters. (LOJ: 2012.03.09)
+   if (GmatGlobal::Instance()->IsWritingParameterInfo())
+   {
+      // FuelTank Parameters
+      CreateParameter("FuelMass", "DefaultSC.DefaultFuelTank.FuelMass");
+      CreateParameter("Volume", "DefaultSC.DefaultFuelTank.Volume");
+      CreateParameter("FuelDensity", "DefaultSC.DefaultFuelTank.FuelDensity");
+      CreateParameter("Pressure", "DefaultSC.DefaultFuelTank.Pressure");
+      CreateParameter("Temperature", "DefaultSC.DefaultFuelTank.Temperature");
+      CreateParameter("RefTemperature", "DefaultSC.DefaultFuelTank.RefTemperature");
+      // Thruster Parameters
+      CreateParameter("DutyCycle", "DefaultSC.DefaultThruster.DutyCycle");
+      CreateParameter("ThrustScaleFactor", "DefaultSC.DefaultThruster.ThrustScaleFactor");
+      CreateParameter("GravitationalAccel", "DefaultSC.DefaultThruster.GravitationalAccel");
+      CreateParameter("C1", "DefaultSC.DefaultThruster.C1");
+      CreateParameter("C2", "DefaultSC.DefaultThruster.C2");
+      CreateParameter("C3", "DefaultSC.DefaultThruster.C3");
+      CreateParameter("C4", "DefaultSC.DefaultThruster.C4");
+      CreateParameter("C5", "DefaultSC.DefaultThruster.C5");
+      CreateParameter("C6", "DefaultSC.DefaultThruster.C6");
+      CreateParameter("C7", "DefaultSC.DefaultThruster.C7");
+      CreateParameter("C8", "DefaultSC.DefaultThruster.C8");
+      CreateParameter("C9", "DefaultSC.DefaultThruster.C9");
+      CreateParameter("C10", "DefaultSC.DefaultThruster.C10");
+      CreateParameter("C11", "DefaultSC.DefaultThruster.C11");
+      CreateParameter("C12", "DefaultSC.DefaultThruster.C12");
+      CreateParameter("C13", "DefaultSC.DefaultThruster.C13");
+      CreateParameter("C14", "DefaultSC.DefaultThruster.C14");
+      CreateParameter("C15", "DefaultSC.DefaultThruster.C15");
+      CreateParameter("C16", "DefaultSC.DefaultThruster.C16");
+      CreateParameter("K1", "DefaultSC.DefaultThruster.K1");
+      CreateParameter("K2", "DefaultSC.DefaultThruster.K2");
+      CreateParameter("K3", "DefaultSC.DefaultThruster.K3");
+      CreateParameter("K4", "DefaultSC.DefaultThruster.K4");
+      CreateParameter("K5", "DefaultSC.DefaultThruster.K5");
+      CreateParameter("K6", "DefaultSC.DefaultThruster.K6");
+      CreateParameter("K7", "DefaultSC.DefaultThruster.K7");
+      CreateParameter("K8", "DefaultSC.DefaultThruster.K8");
+      CreateParameter("K9", "DefaultSC.DefaultThruster.K9");
+      CreateParameter("K10", "DefaultSC.DefaultThruster.K10");
+      CreateParameter("K11", "DefaultSC.DefaultThruster.K11");
+      CreateParameter("K12", "DefaultSC.DefaultThruster.K12");
+      CreateParameter("K13", "DefaultSC.DefaultThruster.K13");
+      CreateParameter("K14", "DefaultSC.DefaultThruster.K14");
+      CreateParameter("K15", "DefaultSC.DefaultThruster.K15");
+      CreateParameter("K16", "DefaultSC.DefaultThruster.K16");
+      CreateParameter("ThrustDirection1", "DefaultSC.DefaultThruster.ThrustDirection1");
+      CreateParameter("ThrustDirection2", "DefaultSC.DefaultThruster.ThrustDirection2");
+      CreateParameter("ThrustDirection3", "DefaultSC.DefaultThruster.ThrustDirection3");
+   }
+   
+   #ifdef DEBUG_CREATE_VAR
+   // User variable
+   Parameter *var = CreateParameter("Variable", "DefaultSC_EarthMJ2000Eq_Xx2");
+   var->SetStringParameter("Expression", "DefaultSC.EarthMJ2000Eq.X * 2.0");
+   var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.EarthMJ2000Eq.X");
+   #endif
+   
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default parameters created\n");
+   #endif
+   
+   // Set Parameter object and dependency object
+   StringArray params = GetListOfObjects(Gmat::PARAMETER);
+   Parameter *param;
+   
+   for (unsigned int i=0; i<params.size(); i++)
+   {
+      param = GetParameter(params[i]);
+      
+      // need spacecraft if system parameter
+      if (param->GetKey() == GmatParam::SYSTEM_PARAM)
+      {
+         if (param->GetOwnerType() == Gmat::SPACECRAFT)
+         {
+            //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
+            //param->SetStringParameter("Expression", param->GetName());
+            param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
+            
+            if (param->NeedCoordSystem())
+            {
+               param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+               if (param->IsOriginDependent())
+                  param->SetStringParameter("DepObject", "Earth");
+               else if (param->IsCoordSysDependent())
+                  param->SetStringParameter("DepObject", "EarthMJ2000Eq");
+            }
+         }
+         else if (param->GetOwnerType() == Gmat::IMPULSIVE_BURN)
+         {
+            //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
+            param->SetRefObjectName(Gmat::IMPULSIVE_BURN, "DefaultIB");
+         }
+      }
+   }
+   
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->ref. object to parameters are set\n");
+   #endif
+}
+
+
 //------------------------------------------------------------------------------
 // void CreateDefaultMission()
 //------------------------------------------------------------------------------
@@ -7511,22 +7796,21 @@ void Moderator::CreateDefaultMission()
       MessageInterface::ShowMessage("-->default PropSetup created\n");
       #endif
       
-      //--------------------------------------------------------------
-      // test Burn Parameter
-      //--------------------------------------------------------------
-      
-      #ifdef __CREATE_HARDWARE__
+      // If DEBUG_PARAMETERS was turned on from the startup file,
+      // create tank and thruster. (LOJ: 2012.03.09)
       // Hardware 
-      CreateHardware("FuelTank", "DefaultFuelTank");
-      CreateHardware("Thruster", "DefaultThruster");
+      if (GmatGlobal::Instance()->IsWritingParameterInfo())
+      {
+         CreateHardware("FuelTank", "DefaultFuelTank");
+         CreateHardware("Thruster", "DefaultThruster");
+         
+         #if DEBUG_DEFAULT_MISSION > 0
+         MessageInterface::ShowMessage("-->default hardware created\n");
+         #endif
+      }
       
-      #if DEBUG_DEFAULT_MISSION > 0
-      MessageInterface::ShowMessage("-->default hardware created\n");
-      #endif
-      #endif
-      
-      #ifdef __CREATE_VNB_COORD__
       // Create VNB CoordinateSystem
+      #ifdef __CREATE_VNB_COORD__
       CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
       ObjectReferencedAxes *orAxis =
          (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced",
@@ -7559,230 +7843,8 @@ void Moderator::CreateDefaultMission()
       MessageInterface::ShowMessage("-->default impulsive burn created\n");
       #endif
       
-      // ImpulsiveBurn parameters
-      CreateParameter("Element1", "DefaultIB.Element1");
-      CreateParameter("Element2", "DefaultIB.Element2");
-      CreateParameter("Element3", "DefaultIB.Element3");
-      CreateParameter("V", "DefaultIB.V");
-      CreateParameter("N", "DefaultIB.N");
-      CreateParameter("B", "DefaultIB.B");
-      #if DEBUG_DEFAULT_MISSION
-      MessageInterface::ShowMessage("-->default impulsive burn parameters created\n");
-      #endif
-      //--------------------------------------------------------------
-      
-      // Time parameters
-      CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
-      CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");      
-      CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
-      CreateParameter("A1ModJulian", "DefaultSC.A1ModJulian");
-      CreateParameter("A1Gregorian", "DefaultSC.A1Gregorian");
-      CreateParameter("TAIModJulian", "DefaultSC.TAIModJulian");
-      CreateParameter("TAIGregorian", "DefaultSC.TAIGregorian");
-      CreateParameter("TTModJulian", "DefaultSC.TTModJulian");
-      CreateParameter("TTGregorian", "DefaultSC.TTGregorian");
-      CreateParameter("TDBModJulian", "DefaultSC.TDBModJulian");
-      CreateParameter("TDBGregorian", "DefaultSC.TDBGregorian");
-      CreateParameter("TCBModJulian", "DefaultSC.TCBModJulian");
-      CreateParameter("TCBGregorian", "DefaultSC.TCBGregorian");
-      CreateParameter("UTCModJulian", "DefaultSC.UTCModJulian");
-      CreateParameter("UTCGregorian", "DefaultSC.UTCGregorian");      
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default time parameters  created\n");
-      #endif
-      
-      // Cartesian parameters
-      CreateParameter("X", "DefaultSC.EarthMJ2000Eq.X");
-      CreateParameter("Y", "DefaultSC.EarthMJ2000Eq.Y");
-      CreateParameter("Z", "DefaultSC.EarthMJ2000Eq.Z");
-      CreateParameter("VX", "DefaultSC.EarthMJ2000Eq.VX");
-      CreateParameter("VY", "DefaultSC.EarthMJ2000Eq.VY");
-      CreateParameter("VZ", "DefaultSC.EarthMJ2000Eq.VZ");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default cartesian parameters created\n");
-      #endif
-      
-      // Keplerian parameters
-      CreateParameter("SMA", "DefaultSC.Earth.SMA");
-      CreateParameter("ECC", "DefaultSC.Earth.ECC");
-      CreateParameter("INC", "DefaultSC.Earth.INC");
-      CreateParameter("RAAN", "DefaultSC.Earth.RAAN");
-      CreateParameter("AOP", "DefaultSC.EarthMJ2000Eq.AOP");
-      CreateParameter("TA", "DefaultSC.Earth.TA");
-      CreateParameter("MA", "DefaultSC.Earth.MA");
-      CreateParameter("EA", "DefaultSC.Earth.EA");
-      CreateParameter("HA", "DefaultSC.Earth.HA");
-      CreateParameter("MM", "DefaultSC.Earth.MM");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default keplerian parameters created\n");
-      #endif
-      
-      // Orbital parameters
-      CreateParameter("VelApoapsis", "DefaultSC.Earth.VelApoapsis");
-      CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");
-      CreateParameter("Apoapsis", "DefaultSC.Earth.Apoapsis");
-      CreateParameter("Periapsis", "DefaultSC.Earth.Periapsis");
-      CreateParameter("OrbitPeriod", "DefaultSC.Earth.OrbitPeriod");
-      CreateParameter("RadApo", "DefaultSC.Earth.RadApo");
-      CreateParameter("RadPer", "DefaultSC.Earth.RadPer");
-      CreateParameter("C3Energy", "DefaultSC.Earth.C3Energy");
-      CreateParameter("Energy", "DefaultSC.Earth.Energy");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default orbital parameters created\n");
-      #endif
-      
-      // Spherical parameters
-      CreateParameter("RMAG", "DefaultSC.Earth.RMAG");
-      CreateParameter("RA", "DefaultSC.Earth.RA");
-      CreateParameter("DEC", "DefaultSC.EarthMJ2000Eq.DEC");
-      CreateParameter("VMAG", "DefaultSC.EarthMJ2000Eq.VMAG");
-      CreateParameter("RAV", "DefaultSC.EarthMJ2000Eq.RAV");
-      CreateParameter("DECV", "DefaultSC.EarthMJ2000Eq.DECV");
-      CreateParameter("AZI", "DefaultSC.EarthMJ2000Eq.AZI");
-      CreateParameter("FPA", "DefaultSC.EarthMJ2000Eq.FPA");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default spherical parameters created\n");
-      #endif
-      
-      // Angular parameters
-      CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
-      CreateParameter("HMAG", "DefaultSC.HMAG");
-      CreateParameter("HX", "DefaultSC.EarthMJ2000Eq.HX");
-      CreateParameter("HY", "DefaultSC.EarthMJ2000Eq.HY");
-      CreateParameter("HZ", "DefaultSC.EarthMJ2000Eq.HZ");
-      CreateParameter("DLA", "DefaultSC.EarthMJ2000Eq.DLA");
-      CreateParameter("RLA", "DefaultSC.EarthMJ2000Eq.RLA");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default angular parameters created\n");
-      #endif
-
-      #ifdef __ENABLE_ATMOS_DENSITY__
-      // Environmental parameters
-      CreateParameter("AtmosDensity", "DefaultSC.Earth.AtmosDensity");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default env parameters created\n");
-      #endif
-      #endif
-      
-      // Planet parameters
-      CreateParameter("Altitude", "DefaultSC.Earth.Altitude");
-      CreateParameter("MHA", "DefaultSC.Earth.MHA");
-      CreateParameter("Longitude", "DefaultSC.Earth.Longitude");
-      CreateParameter("Latitude", "DefaultSC.Earth.Latitude");
-      CreateParameter("LST", "DefaultSC.Earth.LST");
-      CreateParameter("BetaAngle", "DefaultSC.Earth.BetaAngle");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default planet parameters created\n");
-      #endif
-      
-      // B-Plane parameters
-      CreateParameter("BdotT", "DefaultSC.Earth.BdotT");
-      CreateParameter("BdotR", "DefaultSC.Earth.BdotR");
-      CreateParameter("BVectorMag", "DefaultSC.Earth.BVectorMag");
-      CreateParameter("BVectorAngle", "DefaultSC.Earth.BVectorAngle");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default b-plane parameters created\n");
-      #endif
-      
-      // Attitude parameters
-      CreateParameter("DCM11", "DefaultSC.DCM11");
-      CreateParameter("DCM12", "DefaultSC.DCM12");
-      CreateParameter("DCM13", "DefaultSC.DCM13");
-      CreateParameter("DCM21", "DefaultSC.DCM21");
-      CreateParameter("DCM22", "DefaultSC.DCM22");
-      CreateParameter("DCM23", "DefaultSC.DCM23");
-      CreateParameter("DCM31", "DefaultSC.DCM31");
-      CreateParameter("DCM32", "DefaultSC.DCM32");
-      CreateParameter("DCM33", "DefaultSC.DCM33");
-      CreateParameter("EulerAngle1", "DefaultSC.EulerAngle1");
-      CreateParameter("EulerAngle2", "DefaultSC.EulerAngle2");
-      CreateParameter("EulerAngle3", "DefaultSC.EulerAngle3");
-      CreateParameter("MRP1", "DefaultSC.MRP1");  // Dunn Added
-      CreateParameter("MRP2", "DefaultSC.MRP2");  // Dunn Added
-      CreateParameter("MRP3", "DefaultSC.MRP3");  // Dunn Added
-      CreateParameter("Q1", "DefaultSC.Q1");
-      CreateParameter("Q2", "DefaultSC.Q2");
-      CreateParameter("Q3", "DefaultSC.Q3");
-      CreateParameter("Q4", "DefaultSC.Q4");
-      CreateParameter("AngularVelocityX", "DefaultSC.AngularVelocityX");
-      CreateParameter("AngularVelocityY", "DefaultSC.AngularVelocityY");
-      CreateParameter("AngularVelocityZ", "DefaultSC.AngularVelocityZ");
-      CreateParameter("EulerAngleRate1", "DefaultSC.EulerAngleRate1");
-      CreateParameter("EulerAngleRate2", "DefaultSC.EulerAngleRate2");
-      CreateParameter("EulerAngleRate3", "DefaultSC.EulerAngleRate3");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default attitude parameters created\n");
-      #endif
-      
-      // Ballistic/Mass parameters
-      CreateParameter("DryMass", "DefaultSC.DryMass");
-      CreateParameter("Cd", "DefaultSC.Cd");
-      CreateParameter("Cr", "DefaultSC.Cr");
-      CreateParameter("DragArea", "DefaultSC.DragArea");
-      CreateParameter("SRPArea", "DefaultSC.SRPArea");
-      CreateParameter("TotalMass", "DefaultSC.TotalMass");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default ballistic/mass parameters created\n");
-      #endif
-      
-      // STM and A-Matrix parameters
-      CreateParameter("OrbitSTM", "DefaultSC.OrbitSTM");
-      CreateParameter("OrbitSTMA", "DefaultSC.OrbitSTMA");
-      CreateParameter("OrbitSTMB", "DefaultSC.OrbitSTMB");
-      CreateParameter("OrbitSTMC", "DefaultSC.OrbitSTMC");
-      CreateParameter("OrbitSTMD", "DefaultSC.OrbitSTMD");
-      #if DEBUG_DEFAULT_MISSION > 1
-      MessageInterface::ShowMessage("-->default STM parameters created\n");
-      #endif
-      
-      #ifdef DEBUG_CREATE_VAR
-      // User variable
-      Parameter *var = CreateParameter("Variable", "DefaultSC_EarthMJ2000Eq_Xx2");
-      var->SetStringParameter("Expression", "DefaultSC.EarthMJ2000Eq.X * 2.0");
-      var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.EarthMJ2000Eq.X");
-      #endif
-      
-      #if DEBUG_DEFAULT_MISSION
-      MessageInterface::ShowMessage("-->default parameters created\n");
-      #endif
-      
-      // Set parameter description and object name
-      StringArray params = GetListOfObjects(Gmat::PARAMETER);
-      Parameter *param;
-      
-      for (unsigned int i=0; i<params.size(); i++)
-      {
-         param = GetParameter(params[i]);
-
-         // need spacecraft if system parameter
-         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
-         {
-            if (param->GetOwnerType() == Gmat::SPACECRAFT)
-            {
-               //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
-               //param->SetStringParameter("Expression", param->GetName());
-               param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
-               
-               if (param->NeedCoordSystem())
-               {
-                  param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-                  if (param->IsOriginDependent())
-                     param->SetStringParameter("DepObject", "Earth");
-                  else if (param->IsCoordSysDependent())
-                     param->SetStringParameter("DepObject", "EarthMJ2000Eq");
-               }
-            }
-            else if (param->GetOwnerType() == Gmat::IMPULSIVE_BURN)
-            {
-               //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
-               param->SetRefObjectName(Gmat::IMPULSIVE_BURN, "DefaultIB");
-            }
-         }
-      }
-      
-      #if DEBUG_DEFAULT_MISSION
-      MessageInterface::ShowMessage("-->ref. object to parameters are set\n");
-      #endif
+      // Default Parameters
+      CreateDefaultParameters();
       
       // StopCondition
       StopCondition *stopOnElapsedSecs =

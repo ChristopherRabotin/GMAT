@@ -40,7 +40,7 @@
  */
 //------------------------------------------------------------------------------
 CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days", "day")
+   : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days", "day", true)
 {
 }
 
@@ -98,12 +98,27 @@ CurrA1MJD::~CurrA1MJD()
 //------------------------------------------------------------------------------
 bool CurrA1MJD::Evaluate()
 {
-   mRealValue = GetCurrentTimeReal(A1_MJD);
+   mRealValue = TimeData::GetTimeReal(A1);
    
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void CurrA1MJD::SetReal(Real val)
+{
+   TimeData::SetTimeReal(A1, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -135,7 +150,7 @@ GmatBase* CurrA1MJD::Clone(void) const
  */
 //------------------------------------------------------------------------------
 A1ModJulian::A1ModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "A1ModJulian", obj, "A1 Mod. Julian Days", "day")
+   : TimeReal(name, "A1ModJulian", obj, "A1 Mod. Julian Days", "day", true)
 {
 }
 
@@ -193,7 +208,7 @@ A1ModJulian::~A1ModJulian()
 //------------------------------------------------------------------------------
 bool A1ModJulian::Evaluate()
 {
-   mRealValue = GetCurrentTimeReal(A1_MJD);
+   mRealValue = TimeData::GetTimeReal(A1);
 
    #ifdef DEBUG_TIMEPARAM_EVAL
    MessageInterface::ShowMessage
@@ -206,6 +221,21 @@ bool A1ModJulian::Evaluate()
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void A1ModJulian::SetReal(Real val)
+{
+   TimeData::SetTimeReal(A1, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -237,7 +267,7 @@ GmatBase* A1ModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 A1Gregorian::A1Gregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "A1Gregorian", obj, "A1 Gregorian Date", "")
+   : TimeString(name, "A1Gregorian", obj, "A1 Gregorian Date", "", true)
 {
 }
 
@@ -295,12 +325,27 @@ A1Gregorian::~A1Gregorian()
 //------------------------------------------------------------------------------
 bool A1Gregorian::Evaluate()
 {
-   mStringValue = GetCurrentTimeString(A1_MJD);
+   mStringValue = TimeData::GetTimeString(A1);
    
    if (mStringValue == TIME_STRING_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetString(const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void A1Gregorian::SetString(const std::string &val)
+{
+   TimeData::SetTimeString(A1, val);
+   StringVar::SetString(val);
 }
 
 
@@ -332,7 +377,7 @@ GmatBase* A1Gregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TAIModJulian::TAIModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "TAIModJulian", obj, "TA1 Mod. Julian Days", "day")
+   : TimeReal(name, "TAIModJulian", obj, "TAI Mod. Julian Days", "day", true)
 {
 }
 
@@ -390,12 +435,27 @@ TAIModJulian::~TAIModJulian()
 //------------------------------------------------------------------------------
 bool TAIModJulian::Evaluate()
 {
-   mRealValue = GetCurrentTimeReal(TAI_MJD);
+   mRealValue = TimeData::GetTimeReal(TAI);
    
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TAIModJulian::SetReal(Real val)
+{
+   TimeData::SetTimeReal(TAI, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -427,7 +487,7 @@ GmatBase* TAIModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TAIGregorian::TAIGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "TAIGregorian", obj, "TA1 Gregorian Date", "")
+   : TimeString(name, "TAIGregorian", obj, "TAI Gregorian Date", "", true)
 {
 }
 
@@ -485,12 +545,27 @@ TAIGregorian::~TAIGregorian()
 //------------------------------------------------------------------------------
 bool TAIGregorian::Evaluate()
 {
-   mStringValue = GetCurrentTimeString(TAI_MJD);
+   mStringValue = TimeData::GetTimeString(TAI);
    
    if (mStringValue == TIME_STRING_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetString(const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TAIGregorian::SetString(const std::string &val)
+{
+   TimeData::SetTimeString(TAI, val);
+   StringVar::SetString(val);
 }
 
 
@@ -522,7 +597,7 @@ GmatBase* TAIGregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TTModJulian::TTModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "TTModJulian", obj, "TT Mod. Julian Days", "day")
+   : TimeReal(name, "TTModJulian", obj, "TT Mod. Julian Days", "day", true)
 {
 }
 
@@ -580,12 +655,27 @@ TTModJulian::~TTModJulian()
 //------------------------------------------------------------------------------
 bool TTModJulian::Evaluate()
 {
-   mRealValue = GetCurrentTimeReal(TT_MJD);
+   mRealValue = TimeData::GetTimeReal(TT);
    
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TTModJulian::SetReal(Real val)
+{
+   TimeData::SetTimeReal(TT, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -617,7 +707,7 @@ GmatBase* TTModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TTGregorian::TTGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "TTGregorian", obj, "TT Gregorian Date", "")
+   : TimeString(name, "TTGregorian", obj, "TT Gregorian Date", "", true)
 {
 }
 
@@ -675,12 +765,27 @@ TTGregorian::~TTGregorian()
 //------------------------------------------------------------------------------
 bool TTGregorian::Evaluate()
 {
-   mStringValue = GetCurrentTimeString(TT_MJD);
+   mStringValue = TimeData::GetTimeString(TT);
    
    if (mStringValue == TIME_STRING_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetString(const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TTGregorian::SetString(const std::string &val)
+{
+   TimeData::SetTimeString(TT, val);
+   StringVar::SetString(val);
 }
 
 
@@ -712,7 +817,7 @@ GmatBase* TTGregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TDBModJulian::TDBModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "TDBModJulian", obj, "TDB Mod. Julian Days", "day")
+   : TimeReal(name, "TDBModJulian", obj, "TDB Mod. Julian Days", "day", true)
 {
 }
 
@@ -772,12 +877,27 @@ TDBModJulian::~TDBModJulian()
 //------------------------------------------------------------------------------
 bool TDBModJulian::Evaluate()
 {
-   mRealValue = GetCurrentTimeReal(TDB_MJD);
+   mRealValue = TimeData::GetTimeReal(TDB);
    
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TDBModJulian::SetReal(Real val)
+{
+   TimeData::SetTimeReal(TDB, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -809,7 +929,7 @@ GmatBase* TDBModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TDBGregorian::TDBGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "TDBGregorian", obj, "TDB Gregorian Date", "")
+   : TimeString(name, "TDBGregorian", obj, "TDB Gregorian Date", "", true)
 {
 }
 
@@ -869,12 +989,27 @@ TDBGregorian::~TDBGregorian()
 //------------------------------------------------------------------------------
 bool TDBGregorian::Evaluate()
 {
-   mStringValue = GetCurrentTimeString(TDB_MJD);
+   mStringValue = TimeData::GetTimeString(TDB);
    
    if (mStringValue == TIME_STRING_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetString(const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TDBGregorian::SetString(const std::string &val)
+{
+   TimeData::SetTimeString(TDB, val);
+   StringVar::SetString(val);
 }
 
 
@@ -906,7 +1041,7 @@ GmatBase* TDBGregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TCBModJulian::TCBModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "TCBModJulian", obj, "TCB Mod. Julian Days", "day")
+   : TimeReal(name, "TCBModJulian", obj, "TCB Mod. Julian Days", "day", true)
 {
 }
 
@@ -967,12 +1102,27 @@ TCBModJulian::~TCBModJulian()
 //------------------------------------------------------------------------------
 bool TCBModJulian::Evaluate()
 {
-   mRealValue = GetCurrentTimeReal(TCB_MJD);
+   mRealValue = TimeData::GetTimeReal(TCB);
    
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TCBModJulian::SetReal(Real val)
+{
+   TimeData::SetTimeReal(TCB, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -1004,7 +1154,7 @@ GmatBase* TCBModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TCBGregorian::TCBGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "TCBGregorian", obj, "TCB Gregorian Date", "")
+   : TimeString(name, "TCBGregorian", obj, "TCB Gregorian Date", "", true)
 {
 }
 
@@ -1064,12 +1214,27 @@ TCBGregorian::~TCBGregorian()
 //------------------------------------------------------------------------------
 bool TCBGregorian::Evaluate()
 {
-   mStringValue = GetCurrentTimeString(TCB_MJD);
+   mStringValue = TimeData::GetTimeString(TCB);
    
    if (mStringValue == TIME_STRING_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetString(const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TCBGregorian::SetString(const std::string &val)
+{
+   TimeData::SetTimeString(TCB, val);
+   StringVar::SetString(val);
 }
 
 
@@ -1101,7 +1266,7 @@ GmatBase* TCBGregorian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 UTCModJulian::UTCModJulian(const std::string &name, GmatBase *obj)
-   : TimeReal(name, "UTCModJulian", obj, "UTC Mod. Julian Days", "day")
+   : TimeReal(name, "UTCModJulian", obj, "UTC Mod. Julian Days", "day", true)
 {
 }
 
@@ -1159,12 +1324,27 @@ UTCModJulian::~UTCModJulian()
 //------------------------------------------------------------------------------
 bool UTCModJulian::Evaluate()
 {
-   mRealValue = GetCurrentTimeReal(UTC_MJD);
+   mRealValue = TimeData::GetTimeReal(UTC);
    
    if (mRealValue == TIME_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void UTCModJulian::SetReal(Real val)
+{
+   TimeData::SetTimeReal(UTC, val);
+   RealVar::SetReal(val);
 }
 
 
@@ -1196,7 +1376,7 @@ GmatBase* UTCModJulian::Clone(void) const
  */
 //------------------------------------------------------------------------------
 UTCGregorian::UTCGregorian(const std::string &name, GmatBase *obj)
-   : TimeString(name, "UTCGregorian", obj, "UTC Gregorian Date", "")
+   : TimeString(name, "UTCGregorian", obj, "UTC Gregorian Date", "", true)
 {
 }
 
@@ -1254,12 +1434,27 @@ UTCGregorian::~UTCGregorian()
 //------------------------------------------------------------------------------
 bool UTCGregorian::Evaluate()
 {
-   mStringValue = GetCurrentTimeString(UTC_MJD);
+   mStringValue = TimeData::GetTimeString(UTC);
    
    if (mStringValue == TIME_STRING_UNDEFINED)
       return false;
    else
       return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetString(const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void UTCGregorian::SetString(const std::string &val)
+{
+   TimeData::SetTimeString(UTC, val);
+   StringVar::SetString(val);
 }
 
 

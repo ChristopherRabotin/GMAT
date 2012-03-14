@@ -170,6 +170,7 @@ private:
    std::string mMatlabMode;
    std::string mDebugMatlab;
    std::string mDebugMissionTree;
+   std::string mWriteParameterInfo;
    std::ifstream mInStream;
    std::map<std::string, std::string> mPathMap;
    std::map<std::string, FileInfo*> mFileMap;

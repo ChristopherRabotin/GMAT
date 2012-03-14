@@ -30,8 +30,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// TimeString(const std::string &name, const std::string &typeStr, 
-//          GmatBase *obj, const std::string &desc, const std::string &unit)
+// TimeString(const std::string &name, const std::string &typeStr, ...)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -41,13 +40,14 @@
  * @param <obj> reference object pointer
  * @param <desc> description of the parameter
  * @param <unit> unit of the parameter
+ * @param <isSettable> true if parameter is settable
  */
 //------------------------------------------------------------------------------
 TimeString::TimeString(const std::string &name, const std::string &typeStr, 
                        GmatBase *obj, const std::string &desc,
-                       const std::string &unit)
+                       const std::string &unit, bool isSettable)
    : StringVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-               GmatParam::NO_DEP, Gmat::SPACECRAFT, true),
+               GmatParam::NO_DEP, Gmat::SPACECRAFT, true, isSettable),
      TimeData(name)
 {
    std::string type, ownerName, depObj;

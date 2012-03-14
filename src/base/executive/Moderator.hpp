@@ -423,6 +423,7 @@ private:
    void CreateInternalCoordSystem();
    void CreateDefaultCoordSystems();
    void CreateDefaultBarycenter();
+   void CreateDefaultParameters();
    void CreateDefaultMission();
    
    // Parameter reference object setting

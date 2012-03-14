@@ -337,6 +337,22 @@ void GmatGlobal::SetMissionTreeDebug(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// bool IsWritingParameterInfo()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsWritingParameterInfo()
+{
+   return isWritingParameterInfo;
+}
+
+//------------------------------------------------------------------------------
+// void SetWriteParameterInfo(bool flag)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetWriteParameterInfo(bool flag)
+{
+   isWritingParameterInfo = flag;
+}
+
+//------------------------------------------------------------------------------
 // bool IsScientific()
 //------------------------------------------------------------------------------
 bool GmatGlobal::IsScientific()
@@ -625,6 +641,7 @@ GmatGlobal::GmatGlobal()
    isMatlabDebugOn = false;
    isEventLocationAvailable = false;
    isMissionTreeDebugOn = false;
+   isWritingParameterInfo = false;
    runMode = NORMAL;
    guiMode = NORMAL_GUI;
    plotMode = NORMAL_PLOT;

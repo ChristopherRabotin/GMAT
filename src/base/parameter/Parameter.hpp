@@ -61,13 +61,15 @@ public:
              const std::string &desc, const std::string &unit,
              GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
              bool isTimeParam, bool isSettable, bool isPlottable,
-             bool isReportable);
+             bool isReportable,
+             Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT);
    Parameter(const Parameter &copy);
    Parameter& operator= (const Parameter& right);
    virtual ~Parameter();
    
    GmatParam::ParameterKey  GetKey() const;
    Gmat::ObjectType         GetOwnerType() const;
+   Gmat::ObjectType         GetOwnedObjectType() const;
    Gmat::ParameterType      GetReturnType() const;
    GmatParam::CycleType     GetCycleType() const;
    
@@ -80,6 +82,7 @@ public:
    bool  IsSettable() const;
    bool  IsCoordSysDependent() const;
    bool  IsOriginDependent() const;
+   bool  IsOwnedObjectDependent() const;
    bool  NeedCoordSystem() const;
    
    bool operator==(const Parameter &right) const;
@@ -150,9 +153,12 @@ public:
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    
-   virtual const std::string   GetCommentLine(Integer which = 1);
-   virtual void                SetCommentLine(const std::string &comment,
+   virtual const std::string
+                        GetCommentLine(Integer which = 1);
+   virtual void         SetCommentLine(const std::string &comment,
                                               Integer which = 0);
+   
+   static std::string   GetDependentTypeString(const GmatParam::DepObject depObj);
    
 protected:
    
@@ -168,6 +174,7 @@ protected:
    std::string   mInitialValue;
    
    Gmat::ObjectType     mOwnerType;
+   Gmat::ObjectType     mOwnedObjectType;
    Gmat::ParameterType  mReturnType;
    GmatParam::DepObject mDepObj;
    GmatParam::CycleType mCycleType;
@@ -180,6 +187,7 @@ protected:
    bool mIsSettable;
    bool mIsCoordSysDependent;
    bool mIsOriginDependent;
+   bool mIsOwnedObjDependent;
    bool mNeedCoordSystem;
    bool mIsCommentFromCreate;
    

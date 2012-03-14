@@ -15,15 +15,16 @@
 //
 /**
  * Implements Hardware related parameter classes.
- *    FuelTak : FuelMass, Pressure, Temperature, FuelVolume, FuelDensity
- *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel
+ *    FuelTak : FuelMass, Pressure, Temperature, RefTemperature, Volume,
+ *              FuelDensity
+ *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
+ *              K1-K16, ThrustDirections
  */
 //------------------------------------------------------------------------------
 
 #include "HardwareParameters.hpp"
 #include "ColorTypes.hpp"
-#include "ParameterInfo.hpp"
-
+#include "MessageInterface.hpp"
 
 // To use preset colors, uncomment this line:
 //#define USE_PREDEFINED_COLORS
@@ -40,7 +41,8 @@
 // FuelMass(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 FuelMass::FuelMass(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "FuelMass", obj, "Fuel Mass", "")
+   : HardwareReal(name, "FuelMass", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Fuel Mass", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
@@ -126,7 +128,8 @@ GmatBase* FuelMass::Clone(void) const
 // Pressure(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Pressure::Pressure(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "Pressure", obj, "Pressure", "")
+   : HardwareReal(name, "Pressure", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Pressure", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::YELLOW32;
@@ -212,7 +215,8 @@ GmatBase* Pressure::Clone(void) const
 // Temperature(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Temperature::Temperature(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "Temperature", obj, "Temperature", "")
+   : HardwareReal(name, "Temperature", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Temperature", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
@@ -298,7 +302,8 @@ GmatBase* Temperature::Clone(void) const
 // RefTemperature(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 RefTemperature::RefTemperature(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "RefTemperature", obj, "RefTemperature", "")
+   : HardwareReal(name, "RefTemperature", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Ref. Temperature", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
@@ -384,7 +389,8 @@ GmatBase* RefTemperature::Clone(void) const
 // Volume(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Volume::Volume(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "Volume", obj, "Volume", "")
+   : HardwareReal(name, "Volume", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Fuel Volume", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
@@ -470,7 +476,8 @@ GmatBase* Volume::Clone(void) const
 // FuelDensity(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 FuelDensity::FuelDensity(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "FuelDensity", obj, "FuelDensity", "")
+   : HardwareReal(name, "FuelDensity", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Fuel Density", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::ORANGE32;
@@ -556,7 +563,8 @@ GmatBase* FuelDensity::Clone(void) const
 // DutyCycle(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 DutyCycle::DutyCycle(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "DutyCycle", obj, "DutyCycle", "")
+   : HardwareReal(name, "DutyCycle", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Duty Cycle", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;
@@ -642,7 +650,8 @@ GmatBase* DutyCycle::Clone(void) const
 // ThrustScaleFactor(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 ThrustScaleFactor::ThrustScaleFactor(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "ThrustScaleFactor", obj, "ThrustScaleFactor", "")
+   : HardwareReal(name, "ThrustScaleFactor", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Thrust Scale Factor", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;
@@ -728,7 +737,8 @@ GmatBase* ThrustScaleFactor::Clone(void) const
 // GravitationalAccel(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 GravitationalAccel::GravitationalAccel(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "GravitationalAccel", obj, "GravitationalAccel", "")
+   : HardwareReal(name, "GravitationalAccel", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+                  "Gravitational Acceleration", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;
@@ -815,16 +825,13 @@ GmatBase* GravitationalAccel::Clone(void) const
 //------------------------------------------------------------------------------
 ThrustCoefficients::ThrustCoefficients(const std::string &type,
                                        const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "ThrustCoefficients", obj, "ThrustCoefficients", "")
+   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
+                  "Thrust Coefficient " + type, "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;
    #endif
-
-   // Add type to ParameterInfo so that we can get information without an instance
-   ParameterInfo::Instance()->Add(type, mOwnerType, instanceName, mDepObj,
-                                  mIsPlottable, mIsReportable, mIsSettable);
-   
+         
    if      (type == "C1" )  mThrustCoeffId = C1;
    else if (type == "C2" )  mThrustCoeffId = C2;
    else if (type == "C3" )  mThrustCoeffId = C3;
@@ -847,7 +854,8 @@ ThrustCoefficients::ThrustCoefficients(const std::string &type,
    #ifdef DEBUG_THRUST_COEFF
    MessageInterface::ShowMessage
       ("ThrustCoefficients::ThrustCoefficients() type='%s', name='%s', "
-       "mThrustCoeffId=%d\n", type.c_str(), name.c_str(), mThrustCoeffId);
+       "mThrustCoeffId=%d, mDesc='%s'\n", type.c_str(), name.c_str(),
+       mThrustCoeffId, mDesc.c_str());
    #endif
 }
 
@@ -935,15 +943,12 @@ GmatBase* ThrustCoefficients::Clone(void) const
 //------------------------------------------------------------------------------
 ImpulseCoefficients::ImpulseCoefficients(const std::string &type,
                                          const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "ImpulseCoefficients", obj, "ImpulseCoefficients", "")
+   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
+                  "Impulse Coefficient " + type, "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;
    #endif
-
-   // Add type to ParameterInfo so that we can get information without an instance
-   ParameterInfo::Instance()->Add(type, mOwnerType, instanceName, mDepObj,
-                                  mIsPlottable, mIsReportable, mIsSettable);
    
    if      (type == "K1" )  mImpulseCoeffId = K1;
    else if (type == "K2" )  mImpulseCoeffId = K2;
@@ -1055,15 +1060,11 @@ GmatBase* ImpulseCoefficients::Clone(void) const
 //------------------------------------------------------------------------------
 ThrustDirections::ThrustDirections(const std::string &type,
                                    const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "ThrustDirection", obj, "ThrustDirection", "")
+   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::THRUSTER, obj, type, "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;
    #endif
-
-   // Add type to ParameterInfo so that we can get information without an instance
-   ParameterInfo::Instance()->Add(type, mOwnerType, instanceName, mDepObj,
-                                  mIsPlottable, mIsReportable, mIsSettable);
    
    if (type == "ThrustDirection1" )
       mThrustDirectionId = THRUST_DIRECTION1;

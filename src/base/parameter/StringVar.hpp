@@ -36,7 +36,7 @@ public:
              const std::string &unit = "",
              GmatParam::DepObject depObj = GmatParam::NO_DEP,
              Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
-             bool isTimeParam = false);
+             bool isTimeParam = false, bool isSettable = false);
    StringVar(const StringVar &copy);
    StringVar& operator= (const StringVar& right);
    virtual ~StringVar();
@@ -47,6 +47,7 @@ public:
    // methods inherited from Parameter
    virtual std::string ToString();
    virtual const std::string& GetString() const;
+   virtual void               SetString(const std::string &val);
    virtual const std::string& EvaluateString();
    
    // methods inherited from GmatBase

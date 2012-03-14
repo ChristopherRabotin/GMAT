@@ -506,6 +506,14 @@ void FileManager::ReadStartupFile(const std::string &fileName)
             GmatGlobal::Instance()->SetMissionTreeDebug(true);
          }
       }
+      else if (type == "DEBUG_PARAMETERS")
+      {
+         if (name == "ON")
+         {
+            mWriteParameterInfo = name;
+            GmatGlobal::Instance()->SetWriteParameterInfo(true);
+         }
+      }
       else
       {
          // Ignore old VERSION specification (2011.03.18)
@@ -659,6 +667,21 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    
    if (mRunMode != "" || mPlotMode != "" || mMatlabMode != "" ||
        mDebugMatlab != "" || mDebugMissionTree != "")
+      outStream << "#-----------------------------------------------------------\n";
+   
+   //---------------------------------------------
+   // write DEBUG_PARAMETERS if not blank
+   //---------------------------------------------
+   if (mWriteParameterInfo != "")
+   {
+      #ifdef DEBUG_WRITE_STARTUP_FILE
+      MessageInterface::ShowMessage("   .....Writing PARAMETER_INFO\n");
+      #endif
+      outStream << std::setw(22) << "DEBUG_PARAMETERS" << " = " << mWriteParameterInfo << "\n";
+   }
+   
+   if (mRunMode != "" || mPlotMode != "" || mMatlabMode != "" ||
+       mDebugMatlab != "" || mDebugMissionTree != "" || mWriteParameterInfo != "")
       outStream << "#-----------------------------------------------------------\n";
    
    //---------------------------------------------
@@ -2052,6 +2075,7 @@ void FileManager::RefreshFiles()
    mMatlabMode = "";
    mDebugMatlab = "";
    mDebugMissionTree = "";
+   mWriteParameterInfo = "";
    mPathMap.clear();
    mGmatFunctionPaths.clear();
    mMatlabFunctionPaths.clear();

@@ -1037,7 +1037,7 @@ GmatBase* C3Energy::Clone(void) const
  */
 //------------------------------------------------------------------------------
 Energy::Energy(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "Energy", obj, "Energy", "Km^2/s^2", GmatParam::ORIGIN)
+   : OrbitReal(name, "Energy", obj, "Orbit Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");

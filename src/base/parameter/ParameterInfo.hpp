@@ -40,10 +40,14 @@ public:
    bool IsPlottable(const std::string &type);
    bool IsReportable(const std::string &type);
    bool IsSettable(const std::string &type);
+   bool IsTimeParameter(const std::string &type);
+   bool IsOwnedObjectDependent(const std::string &type);
    
    void Add(const std::string &type, Gmat::ObjectType objectType,
-            const std::string &name, GmatParam::DepObject depType,
-            bool isPlottable, bool isReportable, bool isSettable);
+            Gmat::ObjectType ownedObjType, const std::string &name,
+            GmatParam::DepObject depType, bool isPlottable,
+            bool isReportable, bool isSettable, bool isTimeParam,
+            const std::string &desc);
    void Remove(const std::string &name);
    
 protected:
@@ -53,9 +57,12 @@ private:
    
    std::map<std::string, GmatParam::DepObject> mParamDepObjMap;
    std::map<std::string, Gmat::ObjectType> mParamObjectTypeMap;
+   std::map<std::string, Gmat::ObjectType> mParamOwnedObjTypeMap;
    std::map<std::string, bool> mParamPlottableMap;
    std::map<std::string, bool> mParamReportableMap;
    std::map<std::string, bool> mParamSettableMap;
+   std::map<std::string, bool> mParamTimeMap;
+   std::map<std::string, bool> mParamOwnedObjDepMap;
    StringArray mParamTypes;
    StringArray mParamNames;
    Integer mNumParams;

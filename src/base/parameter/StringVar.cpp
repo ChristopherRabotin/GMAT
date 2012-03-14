@@ -51,7 +51,7 @@ StringVar::PARAMETER_TYPE[StringVarParamCount - ParameterParamCount] =
 // StringVar(const std::string &name, const std::string &typeStr, 
 //         GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
 //         const std::string &unit, GmatParam::DepObject depObj, Gmat::ObjectType,
-//         bool isTimeParam)
+//         bool isTimeParam, bool isSettable)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -65,14 +65,15 @@ StringVar::PARAMETER_TYPE[StringVarParamCount - ParameterParamCount] =
  * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
  * @param <ownerType> object type who owns this parameter as property
  * @param <isTimeParam> true if parameter is time related, false otherwise
+ * @param <isSettable> true if parameter is settable, false otherwise
  */
 //------------------------------------------------------------------------------
 StringVar::StringVar(const std::string &name, const std::string &typeStr, 
                      GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
                      const std::string &unit, GmatParam::DepObject depObj,
-                     Gmat::ObjectType ownerType, bool isTimeParam)
+                     Gmat::ObjectType ownerType, bool isTimeParam, bool isSettable)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
-               false, false, true)
+               isSettable, false, true)
 {  
    objectTypes.push_back(Gmat::STRING);
    objectTypeNames.push_back("String");
@@ -209,6 +210,19 @@ std::string StringVar::ToString()
 const std::string& StringVar::GetString() const
 {
    return mStringValue;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetString(const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets string value of parameter.
+ */
+//------------------------------------------------------------------------------
+void StringVar::SetString(const std::string &val)
+{
+   mStringValue = val;
 }
 
 

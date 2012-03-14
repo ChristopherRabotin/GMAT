@@ -15,9 +15,10 @@
 //
 /**
  * Declares Hardware related Parameter classes.
- *    FuelTank: FuelMass, Pressure, Temperature, RefTemperature, FuelVolume,
- *    FuelDensity, Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel,
- *    C1-C16, K1-K16, ThrustDirections
+ *    FuelTank: FuelMass, Pressure, Temperature, RefTemperature, Volume,
+ *              FuelDensity,
+ *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
+ *              K1-K16, ThrustDirections
  */
 //------------------------------------------------------------------------------
 #ifndef HardwareParameters_hpp

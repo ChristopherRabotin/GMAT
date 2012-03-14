@@ -28,10 +28,10 @@
 //              GmatBase *obj, const std::string &desc, const std::string &unit)
 //------------------------------------------------------------------------------
 HardwareReal::HardwareReal(const std::string &name, const std::string &typeStr, 
-                           GmatBase *obj, const std::string &desc,
-                           const std::string &unit)
+                           Gmat::ObjectType ownerType, Gmat::ObjectType ownedObjType,
+                           GmatBase *obj, const std::string &desc, const std::string &unit)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             GmatParam::OWNED_OBJ, Gmat::SPACECRAFT, false, true),
+             GmatParam::OWNED_OBJ, ownerType, false, true, ownedObjType),
      SpacecraftData(name)
 {
    AddRefObject(obj);

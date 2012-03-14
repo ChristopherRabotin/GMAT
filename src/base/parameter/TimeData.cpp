@@ -172,70 +172,67 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
 
 
 //------------------------------------------------------------------------------
-// Real GetCurrentTimeReal(Integer id)
+// Real GetTimeReal(Integer id)
 //------------------------------------------------------------------------------
 /**
  * Retrives current time.
  */
 //------------------------------------------------------------------------------
-Real TimeData::GetCurrentTimeReal(Integer id)
+Real TimeData::GetTimeReal(Integer id)
 {
    // Get current time from Spacecraft
    if (mSpacecraft == NULL)
       InitializeRefObjects();
    
-   Real a1mjd = mSpacecraft->GetEpoch();
+   Real a1Mjd = mSpacecraft->GetEpoch();
 
    #ifdef DEBUG_TIMEDATA_GET
    MessageInterface::ShowMessage
-      ("TimeData::GetCurrentTimeReal() mSpacecraft=<%p>'%s', a1mjd=%f\n",
+      ("TimeData::GetTimeReal() mSpacecraft=<%p>'%s', a1mjd=%f\n",
        mSpacecraft, mSpacecraft->GetName().c_str(), a1mjd);
    #endif
    
-   Real time = -9999.999;
+   Real time = -999.999;
    
    switch (id)
    {
-   case A1_MJD:
-      time = a1mjd;
+   case A1:
+      time = a1Mjd;
       break;
-   case TAI_MJD:
-      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+   case TAI:
+      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::TAIMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
-   case TT_MJD:
-      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+   case TT:
+      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::TTMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
-   case TDB_MJD:
-      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+   case TDB:
+      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::TDBMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
-   case TCB_MJD:
-      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+   case TCB:
+      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::TCBMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
-   case UTC_MJD:
-      time = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD,
+   case UTC:
+      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::UTCMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
-   case JD:
-      time = a1mjd + GmatTimeConstants::JD_JAN_5_1941;
-      break;
    default:
-      throw ParameterException("TimeData::GetCurrentTimeReal() Unknown parameter id: " +
+      throw ParameterException("TimeData::GetTimeReal() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
    }
    
    #ifdef DEBUG_TIMEDATA_GET
    MessageInterface::ShowMessage
-      ("TimeData::GetCurrentTimeReal() id=%d, a1mjd=%.10f, return time=%.10f\n",
-       id, a1mjd, time);
+      ("TimeData::GetTimeReal() id=%d, a1Mjd=%.10f, return time=%.10f\n",
+       id, a1Mjd, time);
    #endif
 
    return time;
@@ -243,34 +240,174 @@ Real TimeData::GetCurrentTimeReal(Integer id)
 
 
 //------------------------------------------------------------------------------
-// std::string GetCurrentTimeString(Integer id)
+// void SetTimeReal(Integer id, Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets time of real value to Spacecraft
+ */
+//------------------------------------------------------------------------------
+void TimeData::SetTimeReal(Integer id, Real value)
+{
+   // Set input time to Spacecraft
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   #ifdef DEBUG_TIMEDATA_SET
+   MessageInterface::ShowMessage
+      ("TimeData::SetTimeReal() entered, mSpacecraft=<%p>'%s', value=%f\n",
+       mSpacecraft, mSpacecraft->GetName().c_str(), value);
+   #endif
+   
+   Real a1Mjd = -9999.999;
+   Integer epochId = mSpacecraft->GetParameterID("A1Epoch");
+   
+   switch (id)
+   {
+   case A1:
+      mSpacecraft->SetRealParameter(epochId, value);
+      break;
+   case TAI:
+      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TAIMJD,
+                                         TimeConverterUtil::A1MJD,
+                                         GmatTimeConstants::JD_JAN_5_1941);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case TT:
+      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TTMJD,
+                                         TimeConverterUtil::A1MJD,
+                                         GmatTimeConstants::JD_JAN_5_1941);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case TDB:
+      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TDBMJD,
+                                         TimeConverterUtil::A1MJD,
+                                         GmatTimeConstants::JD_JAN_5_1941);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case TCB:
+      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TCBMJD,
+                                         TimeConverterUtil::A1MJD,
+                                         GmatTimeConstants::JD_JAN_5_1941);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case UTC:
+      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::UTCMJD,
+                                         TimeConverterUtil::A1MJD,
+                                         GmatTimeConstants::JD_JAN_5_1941);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+     break;
+   default:
+      throw ParameterException("TimeData::GetTimeReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(id));
+   }
+   
+   #ifdef DEBUG_TIMEDATA_GET
+   MessageInterface::ShowMessage
+      ("TimeData::SetTimeReal() leaving, id=%d, a1Mjd=%f.10\n", id, a1Mjd);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetTimeString(Integer id)
 //------------------------------------------------------------------------------
 /**
  * Retrives current time string.
  */
 //------------------------------------------------------------------------------
-std::string TimeData::GetCurrentTimeString(Integer id)
+std::string TimeData::GetTimeString(Integer id)
 {
-   Real time = GetCurrentTimeReal(id);
+   // Get current time from Spacecraft
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   Real time = GetTimeReal(id);
    
    switch (id)
    {
-   case A1_MJD:
-   case TAI_MJD:
-   case TT_MJD:
-   case TDB_MJD:
-   case TCB_MJD:
-   case UTC_MJD:
+   case A1:
+   case TAI:
+   case TT:
+   case TDB:
+   case TCB:
+   case UTC:
       #ifdef DEBUG_TIMEDATA
       MessageInterface::ShowMessage
-         ("TimeData::GetCurrentTimeString() id=%d, timeStr = %s\n", id,
+         ("TimeData::GetTimeString() id=%d, timeStr = %s\n", id,
           TimeConverterUtil::ConvertMjdToGregorian(time).c_str());
       #endif
       return TimeConverterUtil::ConvertMjdToGregorian(time);
    default:
-      throw ParameterException("TimeData::GetCurrentTimeString() Unknown parameter id: " +
+      throw ParameterException("TimeData::GetTimeString() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetTimeString(Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets time of string value in gregorian to Spacecraft
+ */
+//------------------------------------------------------------------------------
+void TimeData::SetTimeString(Integer id, const std::string &value)
+{
+   // Set input time to Spacecraft
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   #ifdef DEBUG_TIMEDATA_SET
+   MessageInterface::ShowMessage
+      ("TimeData::SetTimeString() entered, mSpacecraft=<%p>'%s', value=%s\n",
+       mSpacecraft, mSpacecraft->GetName().c_str(), value.c_str());
+   #endif
+   
+   Integer epochId = mSpacecraft->GetParameterID("A1Epoch");
+   Real fromMjd = -999.999;
+   Real a1Mjd = -999.999;
+   std::string a1MjdString;
+   switch (id)
+   {
+   case A1:
+      TimeConverterUtil::Convert("A1Gregorian", fromMjd, value, 
+                                 "A1ModJulian", a1Mjd, a1MjdString);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case TAI:
+      TimeConverterUtil::Convert("TAIGregorian", fromMjd, value, 
+                                 "A1ModJulian", a1Mjd, a1MjdString);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case TT:
+      TimeConverterUtil::Convert("TTGregorian", fromMjd, value, 
+                                 "A1ModJulian", a1Mjd, a1MjdString);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case TDB:
+      TimeConverterUtil::Convert("TDBGregorian", fromMjd, value, 
+                                 "A1ModJulian", a1Mjd, a1MjdString);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case TCB:
+      TimeConverterUtil::Convert("TCBGregorian", fromMjd, value, 
+                                 "A1ModJulian", a1Mjd, a1MjdString);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+      break;
+   case UTC:
+      TimeConverterUtil::Convert("UTCGregorian", fromMjd, value, 
+                                 "A1ModJulian", a1Mjd, a1MjdString);
+      mSpacecraft->SetRealParameter(epochId, a1Mjd);
+     break;
+   default:
+      throw ParameterException("TimeData::GetTimeReal() Unknown parameter id: " +
+                               GmatRealUtil::ToString(id));
+   }
+   
+   #ifdef DEBUG_TIMEDATA_GET
+   MessageInterface::ShowMessage
+      ("TimeData::SetTimeString() leaving, id=%d, a1Mjd=%f.10\n", id, a1Mjd);
+   #endif
 }
 
 
@@ -283,7 +420,7 @@ std::string TimeData::GetCurrentTimeString(Integer id)
 //------------------------------------------------------------------------------
 Real TimeData::GetElapsedTimeReal(Integer id)
 {
-   Real a1mjd = GetCurrentTimeReal(A1_MJD);
+   Real a1mjd = GetTimeReal(A1);
    
    switch (id)
    {

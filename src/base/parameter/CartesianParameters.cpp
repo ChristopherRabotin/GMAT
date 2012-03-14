@@ -506,7 +506,7 @@ GmatBase* CartVx::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartVy::CartVy(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VY", obj, "Cartesian Y", "Km/s", GmatParam::COORD_SYS, CART_VY, true)
+   : OrbitReal(name, "VY", obj, "Cartesian VY", "Km/s", GmatParam::COORD_SYS, CART_VY, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);

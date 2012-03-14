@@ -612,8 +612,8 @@ void VaryPanel::OnButton(wxCommandEvent& event)
           objType = "Spacecraft";
       
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_SETTABLE, false,
-                                     false, false, true, true, true, objType);
+                                     GuiItemManager::SHOW_SETTABLE, false, false,
+                                     false, true, true, true, objType, true, true);
       
       paramDlg.ShowModal();
       

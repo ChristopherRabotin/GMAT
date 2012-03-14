@@ -40,8 +40,11 @@ public:
    Real GetInitialEpoch() const;
    void SetInitialEpoch(const Real &initialEpoch);
    
-   Real GetCurrentTimeReal(Integer id);
-   std::string GetCurrentTimeString(Integer id);
+   Real GetTimeReal(Integer id);
+   void SetTimeReal(Integer id, Real value);
+   
+   std::string GetTimeString(Integer id);
+   void        SetTimeString(Integer id, const std::string &value);
    
    Real GetElapsedTimeReal(Integer id);
    
@@ -64,8 +67,8 @@ protected:
    
    enum TimeDataID
    {
-      A1_MJD, TAI_MJD, TT_MJD, TDB_MJD, TCB_MJD, UTC_MJD,
-      JD, YEARS, MONTHS, DAYS, HOURS, MINS, SECS
+      A1, TAI, TT, TDB, TCB, UTC, 
+      YEARS, MONTHS, DAYS, HOURS, MINS, SECS
    };
    
    enum

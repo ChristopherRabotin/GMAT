@@ -34,8 +34,9 @@ public:
            GmatBase *obj = NULL, const std::string &desc = "",
            const std::string &unit = "",
            GmatParam::DepObject depObj = GmatParam::NO_DEP,
-           Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
-           bool isTimeParam = false, bool isSettable = false);
+           Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT,
+           bool isTimeParam = false, bool isSettable = false,
+           Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT);
    RealVar(const RealVar &copy);
    RealVar& operator= (const RealVar& right);
    virtual ~RealVar();

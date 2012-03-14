@@ -30,8 +30,8 @@ class GMAT_API HardwareReal : public RealVar, public SpacecraftData
 public:
    
    HardwareReal(const std::string &name, const std::string &typeStr, 
-                GmatBase *obj, const std::string &desc,
-                const std::string &unit);
+                Gmat::ObjectType ownerType, Gmat::ObjectType ownedObjType,
+                GmatBase *obj, const std::string &desc, const std::string &unit);
    HardwareReal(const HardwareReal &copy);
    HardwareReal& operator=(const HardwareReal &right);
    virtual ~HardwareReal();
