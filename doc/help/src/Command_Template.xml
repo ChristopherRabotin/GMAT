@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="For" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>CommandName</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>CommandName</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>CommandName</refname>
+
+    <refpurpose>A one-sentence description of the command</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <title>Script Syntax</title>
+
+    <synopsis><code>A code snippet that shows the syntax of the command.
+Use <replaceable>replaceable</replaceable> for italic parts.</code></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>The text description of the command. Use special formatting for
+    <guilabel>command names</guilabel> and <guilabel>field
+    names</guilabel>.</para>
+  </refsection>
+
+  <refsection>
+    <title>Options</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Accepted Data Types</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>FieldName</guilabel></entry>
+
+            <entry><para>Description of the field. Use special formatting for
+            <guilabel>command names</guilabel> and <guilabel>field
+            names</guilabel>. See the next cell for an
+            example.</para><variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>a list of data types from the Field Spec</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Limits</term>
+
+                  <listitem>
+                    <para>an equation form of the limits of the field</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Start</guilabel></entry>
+
+            <entry><para>The <guilabel>Start</guilabel> parameter is the
+            initial value for the <guilabel>Index</guilabel>
+            parameter.</para><variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>Real Number, Variable, Array Element, or Scalar Real
+                    Object Parameter</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Limits</term>
+
+                  <listitem>
+                    <para>-∞ &lt; <guilabel>Index</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>GUI</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_For_Default.bmp"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>A screenshot of the GUI (above) along with a text
+    description.</para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <para>A more detailed text description of the command.</para>
+
+    <para>Use this syntax for code snippets:</para>
+
+    <programlisting>For I = 1:1:3
+    I = 100
+    Report aReport I
+EndFor</programlisting>
+
+    <para>and this syntax for output examples:</para>
+
+    <programlisting><computeroutput>100
+100
+100</computeroutput></programlisting>
+
+    <para>This is a warning:</para>
+
+    <warning>
+      <para>Text of the warning.</para>
+    </warning>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>A text introduction to the example:</para>
+
+      <programlisting><code>The example script snippet.</code></programlisting>
+    </informalexample>
+  </refsection>
+</refentry>
