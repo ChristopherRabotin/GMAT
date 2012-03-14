@@ -44,6 +44,9 @@ public:
                            GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &prefix,
                                                const std::string &useName);
+   virtual bool            RenameRefObject(const Gmat::ObjectType type,
+                                           const std::string &oldName,
+                                           const std::string &newName);
 protected:
 
    enum

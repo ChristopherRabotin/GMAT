@@ -162,6 +162,21 @@ const std::string& EndOptimize::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 //------------------------------------------------------------------------------
+// bool RenameRefObject()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool EndOptimize::RenameRefObject(const Gmat::ObjectType type,
+                                  const std::string &oldName,
+                                  const std::string &newName)
+{
+   // There are no renamealbe objects
+   return true;
+}
+
+//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 // none at this time
