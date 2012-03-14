@@ -932,7 +932,6 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       if (lhs == "" || lhs == "Not_Set")
          createDefaultStringWrapper = true;
       
-      #if 1
       bool paramFirst = false;
       if (isLhsSettableParam)
       {
@@ -954,17 +953,6 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       }
       
       leftEw = CreateElementWrapper(lhs, paramFirst, manage);
-      #endif
-      
-      #if 0
-      // Hardware Parameters are settable but associated object is the owner object
-      // rather than field owner, ex) sat.thruster1.C1.
-      // So create ParameterWrapper if ther are two dots, otherwise create ObjectPropertyWrapper
-      if (lhs.find_first_of(".") != lhs.find_last_of(".") && isLhsSettableParam)
-         leftEw = CreateElementWrapper(lhs, true, manage);
-      else
-         leftEw = CreateElementWrapper(lhs, false, manage);
-      #endif
       
       if (leftEw == NULL)
          return false;
