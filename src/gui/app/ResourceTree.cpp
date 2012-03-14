@@ -3001,7 +3001,7 @@ void ResourceTree::OnAddSqp(wxCommandEvent &event)
    #ifdef DEBUG_ADD_SOLVER
    MessageInterface::ShowMessage("Solver event ID = %d\n", event.GetId());
    #endif
-
+   
    wxTreeItemId item = GetSelection();
    std::string newName = theGuiInterpreter->GetNewName("SQP", 1);
    GmatBase *obj = CreateObject("FminconOptimizer", newName);
@@ -3010,8 +3010,8 @@ void ResourceTree::OnAddSqp(wxCommandEvent &event)
    {
       AddObjectToTree(obj);
       
-      //Expand(item);
-      //SelectItem(GetLastChild(item));
+      Expand(item);
+      SelectItem(GetLastChild(item));
       theGuiManager->UpdateSolver();
    }
 }
@@ -3805,7 +3805,9 @@ void ResourceTree::OnAddScript(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddUserObject(wxCommandEvent &event)
 {
-   MessageInterface::ShowMessage("===> OnAddUserObject() Entered\n");
+   #ifdef DEBUG_USER_OBJECT
+   MessageInterface::ShowMessage("OnAddUserObject() entered\n");
+   #endif
    
    // Look up the plugin type based on the ID built with menu that selected it
    std::string selected = pluginMap[event.GetId()];
@@ -3832,6 +3834,10 @@ void ResourceTree::OnAddUserObject(wxCommandEvent &event)
       SelectItem(GetLastChild(item));
       UpdateGuiItem(itemType);
    }
+   
+   #ifdef DEBUG_USER_OBJECT
+   MessageInterface::ShowMessage("OnAddUserObject() leaving\n");
+   #endif
 }
 
 
