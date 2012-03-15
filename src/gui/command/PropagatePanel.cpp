@@ -1156,11 +1156,10 @@ void PropagatePanel::SaveData()
          {
             #ifdef DEBUG_PROPAGATE_PANEL_SAVE
             MessageInterface::ShowMessage
-               ("PropagatePanel::SaveData() propagator name[%d]=%s\n",
-                i,propGrid->GetCellValue(i, PROP_NAME_COL).c_str());
-            MessageInterface::ShowMessage
-               ("PropagatePanel::SaveData() spacecraft name[%d]=%s\n",
-                i,propGrid->GetCellValue(i, PROP_SOS_COL).c_str());
+               ("PropagatePanel::SaveData() "
+                "propagator name[%2d] = '%s', spacecraft name[%2d] = '%s'\n",
+                i, propGrid->GetCellValue(i, PROP_NAME_COL).c_str(),
+                i, propGrid->GetCellValue(i, PROP_SOS_COL).c_str());
             #endif
             
             
@@ -1172,8 +1171,8 @@ void PropagatePanel::SaveData()
             
                #ifdef DEBUG_PROPAGATE_PANEL_SAVE
                MessageInterface::ShowMessage
-                  ("PropagatePanel::SaveData() propName[%d]=%s\n",
-                   mPropCount,mTempProp[mPropCount].propName.c_str());
+                  ("   propName[%d] = '%s'\n", mPropCount,
+                   mTempProp[mPropCount].propName.c_str());
                #endif
                
                // saving propagator
@@ -1191,7 +1190,7 @@ void PropagatePanel::SaveData()
                {
                   #ifdef DEBUG_PROPAGATE_PANEL_SAVE
                   MessageInterface::ShowMessage
-                     ("parts[%d] = '%s'\n", j, parts[j].c_str());
+                     ("     scList[%d] = '%s'\n", j, parts[j].c_str());
                   #endif
                   
                   thePropCmd->SetStringParameter
@@ -1266,7 +1265,7 @@ void PropagatePanel::SaveData()
                
                thePropCmd->
                   SetRefObject(mTempStopCond[mStopCondCount].stopCondPtr, 
-                               Gmat::STOP_CONDITION,"", mStopCondCount);
+                               Gmat::STOP_CONDITION, "", mStopCondCount);
                
                mStopCondCount++;
                

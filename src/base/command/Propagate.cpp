@@ -784,20 +784,25 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
             #if DEBUG_PROPAGATE_OBJ
             MessageInterface::ShowMessage
-               ("satName='%s', stopStr='%s', goalStr='%s', stopWhen.size()=%d, "
+               ("   satName='%s', stopStr='%s', goalStr='%s', stopWhen.size()=%d, "
                 "stopNames.size()=%d, goalNames.size()=%d\n",
                 satName.c_str(), stopStr.c_str(), goalStr.c_str(), stopWhen.size(),
                 stopNames.size(), goalNames.size());
+            MessageInterface::ShowMessage
+               ("   stopWrappers.size() = %d, goalWrappers.size() = %d\n",
+                stopWrappers.size(), goalWrappers.size());
             #endif
-
+            
             if ((stopWhen.empty() && index == 0) || (index == size))
             {
                stopWhen.push_back((StopCondition *)obj);
                stopSatNames.push_back(satName);
                stopNames.push_back(stopStr);
                goalNames.push_back(goalStr);
-               stopWrappers.push_back(NULL);
-               goalWrappers.push_back(NULL);
+               if (stopWrappers.size() == index)
+                  stopWrappers.push_back(NULL);
+               if (goalWrappers.size() == index)
+                  goalWrappers.push_back(NULL);
             }
             else if (index < size)
             {
@@ -812,14 +817,16 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                    obj->GetTypeName().c_str(), obj->GetName().c_str());
                return false;
             }
-
+            
             #if DEBUG_PROPAGATE_OBJ
-               for (UnsignedInt  j=0; j<stopSatNames.size(); j++)
-                  MessageInterface::ShowMessage(
-                     "Propagate::SetRefObject() stopSatNames=%s\n",
-                     stopSatNames[j].c_str());
+            MessageInterface::ShowMessage
+               ("   stopWrappers.size() = %d, goalWrappers.size() = %d\n",
+                stopWrappers.size(), goalWrappers.size());
+            for (UnsignedInt  j=0; j<stopSatNames.size(); j++)
+               MessageInterface::ShowMessage
+                  ("   stopSatNames=%s\n", stopSatNames[j].c_str());
             #endif
-
+            
             #ifdef DEBUG_STOPPING_CONDITIONS
                MessageInterface::ShowMessage(
                   "Adding stopping condition named %s\n",
@@ -1846,7 +1853,8 @@ bool Propagate::SetElementWrapper(ElementWrapper *toWrapper,
 
             // Delete old wrapper if wrapper name not found in the goalNames
             if (find(goalNames.begin(), goalNames.end(), withName) == goalNames.end())
-               wrappersToDelete.push_back(ew);
+               if (find(wrappersToDelete.begin(), wrappersToDelete.end(), ew) == wrappersToDelete.end())
+                  wrappersToDelete.push_back(ew);
          }
          else
          {
@@ -1906,10 +1914,11 @@ bool Propagate::SetElementWrapper(ElementWrapper *toWrapper,
                ("   Replacing goalWrapper[%d] <%p> with <%p>\n", i, ew, toWrapper);
             #endif
             goalWrappers.at(i) = toWrapper;
-
+            
             // Delete old wrapper if wrapper name not found in the stopNames
             if (find(stopNames.begin(), stopNames.end(), withName) == stopNames.end())
-               wrappersToDelete.push_back(ew);
+               if (find(wrappersToDelete.begin(), wrappersToDelete.end(), ew) == wrappersToDelete.end())
+                  wrappersToDelete.push_back(ew);
          }
          else
          {
@@ -1922,7 +1931,16 @@ bool Propagate::SetElementWrapper(ElementWrapper *toWrapper,
          retval = true;
       }
    }
-
+   
+   #ifdef DEBUG_WRAPPERS
+   MessageInterface::ShowMessage
+      ("   There are %d wrappers to delete\n", wrappersToDelete.size());
+   for (UnsignedInt i=0; i<wrappersToDelete.size(); i++)
+      MessageInterface::ShowMessage
+         ("      <%p>'%s'\n", wrappersToDelete[i], wrappersToDelete[i] ?
+          wrappersToDelete[i]->GetDescription().c_str() : "NULL");
+   #endif
+   
    // delete old wrappers (loj: 2008.12.15)
    for (WrapperArray::iterator ewi = wrappersToDelete.begin();
         ewi < wrappersToDelete.end(); ewi++)
@@ -1962,37 +1980,60 @@ void Propagate::ClearWrappers()
 
    WrapperArray wrappersToDelete;
    ElementWrapper *ew;
-
+   
    Integer sz = stopWrappers.size();
    for (Integer i = 0; i < sz; i++)
    {
+      ew = stopWrappers.at(i);
+      #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage
+         ("   stopWrapper[%d] = <%p>'%s'\n", i, ew, ew ? ew->GetDescription().c_str() : "NULL");
+      #endif
       if (stopWrappers.at(i) != NULL)
       {
-         ew = stopWrappers.at(i);
          stopWrappers.at(i) = NULL;
          if (find(wrappersToDelete.begin(), wrappersToDelete.end(), ew) ==
              wrappersToDelete.end())
          {
+            #ifdef DEBUG_WRAPPERS
+            MessageInterface::ShowMessage
+               ("   Adding stopWrapper: <%p>'%s' to delete\n", ew, ew->GetDescription().c_str());
+            #endif
             wrappersToDelete.push_back(ew);
          }
       }
    }
-
+   
+   
    sz = goalWrappers.size();
    for (Integer i = 0; i < sz; i++)
    {
+      ew = goalWrappers.at(i);
+      #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage
+         ("   goalWrapper[%d] = <%p>'%s'\n", i, ew, ew ? ew->GetDescription().c_str() : "NULL");
+      #endif
       if (goalWrappers.at(i) != NULL)
       {
-         ew = goalWrappers.at(i);
          goalWrappers.at(i) = NULL;
          if (find(wrappersToDelete.begin(), wrappersToDelete.end(), ew) ==
              wrappersToDelete.end())
          {
+            #ifdef DEBUG_WRAPPERS
+            MessageInterface::ShowMessage
+               ("   Adding goalWrapper: <%p>'%s' to delete\n", ew, ew->GetDescription().c_str());
+            #endif
             wrappersToDelete.push_back(ew);
          }
       }
    }
-
+   
+   
+   #ifdef DEBUG_WRAPPERS
+   MessageInterface::ShowMessage
+      ("There are %d wrappers to delete\n", wrappersToDelete.size());
+   #endif
+   
    // delete old wrappers
    for (WrapperArray::iterator ewi = wrappersToDelete.begin();
         ewi < wrappersToDelete.end(); ewi++)
