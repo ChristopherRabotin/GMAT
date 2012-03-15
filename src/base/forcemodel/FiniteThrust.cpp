@@ -132,7 +132,7 @@ FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
 // GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * AOverridden Clone method used to make copies from a GmatBase pointer.
+ * Overridden Clone method used to make copies from a GmatBase pointer.
  * 
  * @return New instance, set to look like this one.
  */
