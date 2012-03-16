@@ -2541,8 +2541,8 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
 //------------------------------------------------------------------------------
 void MissionTree::UpdateGuiManager(const wxString &cmdName)
 {
-   if (cmdName == "Maneuver" || cmdName == "BeginFiniteBurn" ||
-       cmdName == "Vary")
+   if (cmdName == "BeginFiniteBurn" || cmdName == "EndFiniteBurn" ||
+       cmdName == "Maneuver" || cmdName == "Vary")
       theGuiManager->UpdateBurn();
    
    if (cmdName == "Target" || cmdName == "Optimize" || cmdName == "Vary" ||
