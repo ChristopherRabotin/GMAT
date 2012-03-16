@@ -3370,7 +3370,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
    {
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
-         ("  Setting command name to '%s'\n", newName.c_str());
+         ("   Setting command name to '%s'\n", newName.c_str());
       #endif
       SetItemText(currId, newName);
       item->SetName(newName);
@@ -3378,6 +3378,9 @@ void MissionTree::OnRename(wxCommandEvent &event)
       cmd->SetName(newName.c_str());
       cmd->SetSummaryName(newName.c_str());
       theGuiInterpreter->ConfigurationChanged(cmd, true);
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage("   cmd=<%p>'%s'\n", cmd, cmd->GetName().c_str());
+      #endif
       
       // If renamed Branch command find matching EndBranch and rename it also
       // (LOJ: 2010.01.27 for bug GMT-209 fix)
@@ -3400,7 +3403,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
                #ifdef DEBUG_RENAME
                MessageInterface::ShowMessage("   endId='%s'\n", GetItemText(endId).c_str());
                #endif
-               MissionTreeItemData *endItem = (MissionTreeItemData *) GetItemData(currId);
+               MissionTreeItemData *endItem = (MissionTreeItemData *) GetItemData(endId);
                wxString newEndName = "End " + newName;
                SetItemText(endId, newEndName);
                endItem->SetName(newEndName);
@@ -3417,7 +3420,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
                   #endif
                   // Get matching Else command
                   GmatCommand *branchElse = GmatCommandUtil::GetMatchingEnd(cmd, true);
-                  MissionTreeItemData *elseItem = (MissionTreeItemData *) GetItemData(currId);
+                  MissionTreeItemData *elseItem = (MissionTreeItemData *) GetItemData(elseId);
                   wxString newElseName = "Else " + newName;
                   SetItemText(elseId, newElseName);
                   elseItem->SetName(newElseName);
