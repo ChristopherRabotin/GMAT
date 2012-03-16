@@ -122,6 +122,8 @@ void ConditionPanel::Create()
       conditionGrid->SetCellBackgroundColour(i, RHS_SEL_COL, *wxLIGHT_GREY);
       conditionGrid->SetCellValue(i, LHS_SEL_COL, _T("  ... "));
       conditionGrid->SetCellValue(i, RHS_SEL_COL, _T("  ... "));
+      conditionGrid->SetReadOnly(i, LHS_SEL_COL, true);
+      conditionGrid->SetReadOnly(i, RHS_SEL_COL, true);
    }
    
    item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 0 );

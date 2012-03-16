@@ -134,6 +134,10 @@ void ForPanel::Create()
    conditionGrid->SetCellValue(0, START_SEL_COL, _T("  ... "));
    conditionGrid->SetCellValue(0, INCR_SEL_COL, _T("  ... "));
    conditionGrid->SetCellValue(0, END_SEL_COL, _T("  ... "));
+   conditionGrid->SetReadOnly(0, INDEX_SEL_COL, true);
+   conditionGrid->SetReadOnly(0, START_SEL_COL, true);
+   conditionGrid->SetReadOnly(0, INCR_SEL_COL, true);
+   conditionGrid->SetReadOnly(0, END_SEL_COL, true);
    
    // wx*Sizers
    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
