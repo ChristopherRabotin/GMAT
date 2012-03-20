@@ -298,6 +298,8 @@ protected:
    Integer              plotCount;
    /// Plot subscriber used for graphical progress elements
    OwnedPlot               *plotter;
+
+   bool hasFired;
       
    /// Generic solver parameters.
    enum

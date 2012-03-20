@@ -1117,6 +1117,7 @@ void DifferentialCorrector::CheckCompletion()
 void DifferentialCorrector::RunComplete()
 {
     WriteToTextFile();
+    hasFired = true;
 }
 
 

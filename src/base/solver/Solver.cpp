@@ -130,7 +130,8 @@ Solver::Solver(const std::string &type, const std::string &name) :
    exitMode                (DISCARD),
    status                  (CREATED),
    plotCount               (0),
-   plotter                 (NULL)
+   plotter                 (NULL),
+   hasFired                (false)
 {
    objectTypes.push_back(Gmat::SOLVER);
    objectTypeNames.push_back("Solver");
@@ -198,7 +199,8 @@ Solver::Solver(const Solver &sol) :
    exitMode                (sol.exitMode),
    status                  (CREATED),
    plotCount               (sol.plotCount),
-   plotter                 (NULL)
+   plotter                 (NULL),
+   hasFired                (false)
 {
    #ifdef DEBUG_SOLVER_INIT
       MessageInterface::ShowMessage(
@@ -258,6 +260,7 @@ Solver& Solver::operator=(const Solver &sol)
    status                = COPIED;
    plotCount             = sol.plotCount;
    plotter               = NULL;
+   hasFired              = false;
    
    AllowScaleFactors     = sol. AllowScaleFactors;
    AllowRangeLimits      = sol.AllowRangeLimits;
@@ -436,6 +439,9 @@ Integer Solver::SetSolverVariables(Real *data, const std::string &name)
 bool Solver::RefreshSolverVariables(Real *data, const std::string &name)
 {
    bool retval = false;
+
+   if (hasFired && (exitMode == RETAIN))
+      return true;
 
    // Find index of the variable
    for (UnsignedInt n = 0; n < variableNames.size(); ++n)
@@ -1319,6 +1325,7 @@ void Solver::RunExternal()
 {
    //currentState = FINISHED;  // what to do here?
    currentState = (SolverState)(currentState+1);
+   hasFired = true;
 }
 
 
