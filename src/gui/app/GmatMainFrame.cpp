@@ -709,8 +709,8 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    // Note: Do not change the order of ItemType in GmatTreeItemData.hpp.
    // The wrong order of itemType will not work properly.
    //----------------------------------------------------------------------
-   if (itemType >= GmatTree::BEGIN_OF_RESOURCE &&
-       itemType <= GmatTree::END_OF_RESOURCE)
+   if (itemType > GmatTree::BEGIN_OF_RESOURCE &&
+       itemType < GmatTree::END_OF_RESOURCE)
    {
       // Added check for SCRIPT_FILE when showing error message(LOJ: 2009.03.04)
       if (item->GetTitle() == "")
@@ -740,19 +740,19 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
       
       newChild = CreateNewResource(item->GetTitle(), item->GetName(), itemType);
    }
-   else if (itemType >= GmatTree::BEGIN_OF_COMMAND &&
-            itemType <= GmatTree::END_OF_COMMAND)
+   else if (itemType > GmatTree::BEGIN_OF_COMMAND &&
+            itemType < GmatTree::END_OF_COMMAND)
    {
       newChild = CreateNewCommand(itemType, item);
    }
-   else if (itemType >= GmatTree::BEGIN_OF_CONTROL &&
-            itemType <= GmatTree::END_OF_CONTROL)
+   else if (itemType > GmatTree::BEGIN_OF_CONTROL &&
+            itemType < GmatTree::END_OF_CONTROL)
    {
       newChild = CreateNewControl(item->GetTitle(), item->GetName(), itemType,
                                   item->GetCommand());
    }
-   else if (itemType >= GmatTree::BEGIN_OF_OUTPUT &&
-            itemType <= GmatTree::END_OF_OUTPUT)
+   else if (itemType > GmatTree::BEGIN_OF_OUTPUT &&
+            itemType < GmatTree::END_OF_OUTPUT)
    {
       // Create panel if Report or Compare Report or Event Report
       if (itemType == GmatTree::OUTPUT_REPORT ||
@@ -3338,6 +3338,7 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new SQPSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::SOLVER:
+   case GmatTree::OPTIMIZER:
       sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
 //     sizer->Add(new SolverSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
@@ -3416,7 +3417,11 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
      break;
    default:
-      return NULL;
+      // Create generic setup panel for default since all user defined types
+      // are not convered. (LOJ: 2012.03.20)
+      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      break;
+      //return NULL;
    }
 
    scrolledWin->SetScrollRate(5, 5);

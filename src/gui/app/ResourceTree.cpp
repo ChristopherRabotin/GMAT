@@ -1393,7 +1393,7 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    
    #ifdef DEBUG_RESOURCE_ICON
    MessageInterface::ShowMessage
-      ("ResourceTree::GetItemTypeAndIcon() returning type to use = %d, icon id to use %d\n",
+      ("ResourceTree::GetItemTypeAndIcon() returning type to use: %d, icon id to use: %d\n",
        itemType, itemIcon);
    #endif
 }
@@ -1966,10 +1966,13 @@ void ResourceTree::AddUserObjects()
                   itemNames[i].c_str());
          #endif
          GmatBase *cp = GetObject(itemNames[i]);
-         GmatTree::ItemType dummyType;
+         GmatTree::ItemType itemType;
          GmatTree::ResourceIconType itemIcon;
-         GetItemTypeAndIcon(cp, dummyType, itemIcon);
-         
+         GetItemTypeAndIcon(cp, itemType, itemIcon);
+         #ifdef DEBUG_USER_GUI
+         MessageInterface::ShowMessage
+            ("   itemType = %d, itemIcon = %d\n", itemType, itemIcon);
+         #endif
          if (subtype == "")
          {
             objName = wxString(itemNames[i].c_str());
@@ -1979,9 +1982,11 @@ void ResourceTree::AddUserObjects()
             MessageInterface::ShowMessage
                ("   => Adding '%s' of type '%s'\n", objName.c_str(), objTypeName.c_str());
             #endif
+            // Changed to use itemType since Rename() will not work on USER_DEFINED_OBJECT tree item
+            // which will assign to UNKNOWN_OBJECT (LOJ: 2012.03.20)
             AppendItem(itemId, wxT(objName), itemIcon, -1,
-                  new GmatTreeItemData(wxT(objName),
-                        GmatTree::USER_DEFINED_OBJECT));
+                       new GmatTreeItemData(wxT(objName), itemType));
+            //GmatTree::USER_DEFINED_OBJECT));
          }
          else if(cp->IsOfType(subtype))
          {
@@ -1992,9 +1997,11 @@ void ResourceTree::AddUserObjects()
             MessageInterface::ShowMessage
                ("   => Adding '%s' of type '%s'\n", objName.c_str(), objTypeName.c_str());
             #endif
+            // Changed to use itemType since Rename() will not work on USER_DEFINED_OBJECT tree item
+            // which will assign to UNKNOWN_OBJECT (LOJ: 2012.03.20)
             AppendItem(itemId, wxT(objName), itemIcon, -1,
-                  new GmatTreeItemData(wxT(objName),
-                        GmatTree::USER_DEFINED_OBJECT));
+                       new GmatTreeItemData(wxT(objName), itemType));
+            //GmatTree::USER_DEFINED_OBJECT));
          }
       }
       
@@ -4938,6 +4945,9 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::DIFFERENTIAL_CORRECTOR:
    case GmatTree::SQP:
    case GmatTree::SOLVER:
+   case GmatTree::OPTIMIZER:
+   case GmatTree::SIMULATOR:
+   case GmatTree::ESTIMATOR:
       objType = Gmat::SOLVER;
       break;
    case GmatTree::REPORT_FILE:
@@ -4973,14 +4983,17 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::EVENT_LOCATOR:
       objType = Gmat::EVENT_LOCATOR;
       break;
-
+   case GmatTree::MEASUREMENT_MODEL:
+      objType = Gmat::MEASUREMENT_MODEL;
+      break;
    default:
       objType = Gmat::UNKNOWN_OBJECT;
       MessageInterface::ShowMessage
-         ("**** ERROR **** ResourceTree::GetObjectType() unknown object type.\n");
+         ("**** INTERNAL ERROR **** ResourceTree::GetObjectType() unknown item type: %d\n",
+          itemType);
       break;
    }
-
+   
    return objType;
 
 }
