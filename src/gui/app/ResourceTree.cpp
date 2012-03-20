@@ -1284,7 +1284,7 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       itemIcon = GmatTree::RESOURCE_ICON_DIFFERENTIAL_CORRECTOR;
    }
    // Variable/Array/String
-   else if (obj->IsOfType("UserVariable") && obj->IsOfType("UserParameter"))
+   else if (obj->IsOfType("Variable") && obj->IsOfType("UserParameter"))
    {
       itemType = GmatTree::VARIABLE;
       itemIcon = GmatTree::RESOURCE_ICON_VARIABLE;
