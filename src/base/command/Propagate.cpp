@@ -4573,72 +4573,85 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
                secsToStep, stopper->GetStopParameter()->EvaluateReal());
          #endif
 
-         // The interpolated step was not close enough, so back it out
-         BufferSatelliteStates(false);
-         for (UnsignedInt i = 0; i < fm.size(); ++i)
+         if (stopper->IsTimeCondition())
          {
-            // Back out the steps taken to build the ring buffer
-            if (fm[i])
-            {
-               fm[i]->UpdateFromSpaceObject();
-               fm[i]->SetTime(fm[i]->GetTime() - secsToStep);
-            }
-            else
-            {
-               p[i]->UpdateFromSpaceObject();
-               p[i]->SetTime(p[i]->GetTime() - secsToStep);
-            }
-         }
-
-         #ifdef DEBUG_FINAL_STEP
-            MessageInterface::ShowMessage("   Finished backing out the spline generated step\n");
-            MessageInterface::ShowMessage("      State data:\n");
-            MessageInterface::ShowMessage("         time: %.12lf\n", p[0]->GetTime());
-            MessageInterface::ShowMessage("         r:    [%.12lf %.12lf %.12lf]\n",
-                  p[0]->GetState()[0], p[0]->GetState()[1], p[0]->GetState()[2]);
-         #endif
-
-         // Generate a better time step
-         secsToStep = RefineFinalStep(secsToStep, stopper);
-
-         // Perform stepsize rounding.  Note that the rounding precision can be
-         // set by redefining the macro TIME_ROUNDOFF at the top of
-         // PropagationEnabledCommand.hpp.  Set it to 0.0 to prevent rounding.
-         //
-         // Note that this code makes the final propagated state match the
-         // granularity given by other software (aka STK)
-         if (TIME_ROUNDOFF != 0.0)
-            secsToStep = std::floor(secsToStep / TIME_ROUNDOFF + 0.5) *
-                  TIME_ROUNDOFF;
-
-         // If a refined step was needed, we still need to take it;
-         // RefineFinalStep returns with the interpolated step backed out
-         if (!TakeAStep(secsToStep))
-            throw CommandException(
-               "Propagator Failed to Step fixed interval\n");
-
-         for (UnsignedInt i = 0; i < psm.size(); ++i)
-         {
-            if (fm[i])
-               fm[i]->UpdateSpaceObject(
-                  baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
-            else
-               p[i]->UpdateSpaceObject(
-                  baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
-         }
-
-         #ifdef DEBUG_STOPPING_CONDITIONS
-            MessageInterface::ShowMessage(
-               "   Refined timestep of %15.10lf secs gives %.9le\n",
-               secsToStep, stopper->GetStopParameter()->EvaluateReal());
-         #endif
-
-         if (fabs(stopper->GetStopDifference()) > accuracy)
             MessageInterface::ShowMessage("**** WARNING **** For the line \""
                   "%s\" the achieved stop is outside of the stopping "
-                  "tolerance (%le); the difference from the desired value is "
-                  "%le\n", GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
-                  accuracy, fabs(stopper->GetStopDifference()));
+                  "tolerance (%le) for time based stops; the difference from "
+                  "the desired value is %le\n", 
+                  GetGeneratingString(Gmat::NO_COMMENTS).c_str(), accuracy, 
+                  fabs(stopper->GetStopDifference()));
+         }
+         else
+         {
+            // The interpolated step was not close enough, so back it out
+            BufferSatelliteStates(false);
+            for (UnsignedInt i = 0; i < fm.size(); ++i)
+            {
+               // Back out the steps taken to build the ring buffer
+               if (fm[i])
+               {
+                  fm[i]->UpdateFromSpaceObject();
+                  fm[i]->SetTime(fm[i]->GetTime() - secsToStep);
+               }
+               else
+               {
+                  p[i]->UpdateFromSpaceObject();
+                  p[i]->SetTime(p[i]->GetTime() - secsToStep);
+               }
+            }
+
+            #ifdef DEBUG_FINAL_STEP
+               MessageInterface::ShowMessage("   Finished backing out the spline generated step\n");
+               MessageInterface::ShowMessage("      State data:\n");
+               MessageInterface::ShowMessage("         time: %.12lf\n", p[0]->GetTime());
+               MessageInterface::ShowMessage("         r:    [%.12lf %.12lf %.12lf]\n",
+                     p[0]->GetState()[0], p[0]->GetState()[1], p[0]->GetState()[2]);
+            #endif
+
+            // Generate a better time step
+            secsToStep = RefineFinalStep(secsToStep, stopper);
+
+            // Perform stepsize rounding.  Note that the rounding precision can be
+            // set by redefining the macro TIME_ROUNDOFF at the top of
+            // PropagationEnabledCommand.hpp.  Set it to 0.0 to prevent rounding.
+            //
+            // Note that this code makes the final propagated state match the
+            // granularity given by other software (aka STK)
+            if (TIME_ROUNDOFF != 0.0)
+               secsToStep = std::floor(secsToStep / TIME_ROUNDOFF + 0.5) *
+                     TIME_ROUNDOFF;
+
+            // If a refined step was needed, we still need to take it;
+            // RefineFinalStep returns with the interpolated step backed out
+            if (!TakeAStep(secsToStep))
+               throw CommandException(
+                  "Propagator Failed to Step fixed interval\n");
+
+            for (UnsignedInt i = 0; i < psm.size(); ++i)
+            {
+               if (fm[i])
+                  fm[i]->UpdateSpaceObject(
+                     baseEpoch[i] + fm[i]->GetTime() / 
+                     GmatTimeConstants::SECS_PER_DAY);
+               else
+                  p[i]->UpdateSpaceObject(
+                     baseEpoch[i] + p[i]->GetTime() / 
+                     GmatTimeConstants::SECS_PER_DAY);
+            }
+            #ifdef DEBUG_STOPPING_CONDITIONS
+               MessageInterface::ShowMessage(
+                  "   Refined timestep of %15.10lf secs gives %.9le\n",
+                  secsToStep, stopper->GetStopParameter()->EvaluateReal());
+            #endif
+
+            if (fabs(stopper->GetStopDifference()) > accuracy)
+               MessageInterface::ShowMessage("**** WARNING **** For the line "
+                     "\"%s\" the achieved stop is outside of the stopping "
+                     "tolerance (%le); the difference from the desired value "
+                     "is %le\n", GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+                     accuracy, fabs(stopper->GetStopDifference()));
+         }
       }
 
       // Publish the final data point here
