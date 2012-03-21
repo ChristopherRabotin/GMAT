@@ -2793,6 +2793,26 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
 //------------------------------------------------------------------------------
 //bool AssembleGeneralCommand(GmatCommand *cmd, const std::string &desc)
 //------------------------------------------------------------------------------
+/**
+ * @todo: GMAT by design accepts commands of the form
+ *
+ *    CommandName <ListOfParameters>
+ *
+ * Commands that follow this process are required to accept the listed
+ * parameters, one by one, in order, and then store them for initialization or
+ * process them when they are passed in to the command.
+ *
+ * The implementation provided here prevents this design from working, because
+ * the code here is NOT GENERIC, and requires knowledge before the fact of every
+ * command that GMAT will contain.  That means not just that the code here
+ * seriously violates the design, but also that ANY plugin containing a new
+ * command is required to implement parsing for the command.
+ *
+ * This code needs to be fixed to match the design so that individual commands
+ * that conform to the list of arguments protocol can be added to GMAT without
+ * forcing the programmer to either hack base code or implement their own
+ * parsing.
+ */
 bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
                                          const std::string &desc)
 {
@@ -2827,7 +2847,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    
    #ifdef DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
-      ("AssembleGeneralCommand() leaving assemblilng %s, retval=%d\n",
+      ("AssembleGeneralCommand() leaving assembling %s, retval=%d\n",
        type.c_str(), retval);
    #endif
    
