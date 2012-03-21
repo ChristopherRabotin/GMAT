@@ -26,6 +26,7 @@
 #include "GuiInterpreter.hpp"
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
+#include "CommandUtil.hpp"         // for GetParentCommand()
 
 //#define DEBUG_VARYPANEL_LOAD
 //#define DEBUG_VARYPANEL_SAVE
@@ -100,9 +101,25 @@ void VaryPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Solver"),
                        wxDefaultPosition, wxSize(40, -1), 0);
    
+   GmatCommand *parent =
+      GmatCommandUtil::GetParentCommand(theGuiInterpreter->GetFirstCommand(), mVaryCommand);
+   #ifdef DEBUG_VARYPANEL_CREATE
+   MessageInterface::ShowMessage
+      ("VaryPanel::Create() parent=<%p><%s>\n", parent,
+       parent ? parent->GetTypeName().c_str() : "NULL");
+   #endif
+   
+   bool isOptimizeBranch = false;
+   if (parent && parent->IsOfType("Optimize"))
+      isOptimizeBranch = true;
+   
    // Show all user-defined Solvers
-   mSolverComboBox =
-      theGuiManager->GetSolverComboBox(this, ID_COMBO, wxSize(180,-1));
+   if (isOptimizeBranch)
+      mSolverComboBox =
+         theGuiManager->GetOptimizerComboBox(this, ID_COMBO, wxSize(180,-1));
+   else
+      mSolverComboBox =
+         theGuiManager->GetSolverComboBox(this, ID_COMBO, wxSize(180,-1));
    
    // Variable
    wxStaticText *varStaticText =
@@ -612,8 +629,8 @@ void VaryPanel::OnButton(wxCommandEvent& event)
           objType = "Spacecraft";
       
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_SETTABLE, false, false,
-                                     false, true, true, true, objType, true, true);
+                                     GuiItemManager::SHOW_PLOTTABLE, false, false,
+                                     false, true, true, true, objType, true, true, true);
       
       paramDlg.ShowModal();
       

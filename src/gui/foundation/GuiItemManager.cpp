@@ -59,7 +59,6 @@
 //#define DBGLVL_GUI_ITEM_ALL_OBJECT 2
 //#define DEBUG_LOAD_ICON
 
-
 //------------------------------
 // static data
 //------------------------------
@@ -1323,65 +1322,75 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
 
 //------------------------------------------------------------------------------
 // wxArrayString GetPropertyList(const wxString &objType,
-//                               int showOption = SHOW_PLOTTABLE))
+//               int showOption = SHOW_PLOTTABLE, bool showSettableOnly = false)
 //------------------------------------------------------------------------------
 wxArrayString GuiItemManager::GetPropertyList(const wxString &objType,
-                                              int showOption)
+                                              int showOption, bool showSettableOnly)
 {
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
-      ("GuiItemManager::GetPropertyList() objType=%s\n", objType.c_str());
+      ("GuiItemManager::GetPropertyList() objType=%s, showOption=%d, "
+       "showSettableOnly=%d\n", objType.c_str(), showOption, showSettableOnly);
    #endif
    
    wxArrayString array;
+   std::string paramName;
+   bool add = false;
    
    if (objType == "Spacecraft")
    {
       ParameterInfo *theParamInfo = ParameterInfo::Instance();
       for (int i=0; i<theNumScProperty; i++)
       {
+         paramName = theScPropertyList[i].c_str();
+         add = false;
+         
          // Owned object dependent Parameters for Spacecraft are not
          // ready to show in the ParameterSelectDialog, so skipping it for now.
          // @todo For owned object dependent Parameters, we need to show
          // owned object name in the dependency ComboBox. (LOJ: 2012.03.09)
          // eg) Sat1.Tank1.Temperature
-         //if (theParamInfo->IsOwnedObjectDependent(theScPropertyList[i].c_str()))
+         //if (theParamInfo->IsOwnedObjectDependent(paramName))
          //   continue;
          
          if (showOption == SHOW_REPORTABLE)
          {
-            if (theParamInfo->IsReportable(theScPropertyList[i].c_str()))
+            if (theParamInfo->IsReportable(paramName))
             {
-               #if DBGLVL_GUI_ITEM_PROPERTY > 1
-               MessageInterface::ShowMessage
-                  ("GetPropertyList() Adding %s\n", theScPropertyList[i].c_str());
-               #endif
+               if (!showSettableOnly)
+                  add = true;
+               else if (theParamInfo->IsSettable(paramName))
+                  add = true;
                
-               array.Add(theScPropertyList[i]);
+               if (add)
+               {
+                  #if DBGLVL_GUI_ITEM_PROPERTY > 1
+                  MessageInterface::ShowMessage
+                     ("GetPropertyList() Adding %s\n", paramName.c_str());
+                  #endif
+                  
+                  array.Add(theScPropertyList[i]);
+               }
             }
          }
          else if (showOption == SHOW_PLOTTABLE)
          {
-            if (theParamInfo->IsPlottable(theScPropertyList[i].c_str()))
+            if (theParamInfo->IsPlottable(paramName))
             {
-               #if DBGLVL_GUI_ITEM_PROPERTY > 1
-               MessageInterface::ShowMessage
-                  ("GetPropertyList() Adding %s\n", theScPropertyList[i].c_str());
-               #endif
+               if (!showSettableOnly)
+                  add = true;
+               else if (theParamInfo->IsSettable(paramName))
+                  add = true;
                
-               array.Add(theScPropertyList[i]);
-            }
-         }
-         else if (showOption == SHOW_SETTABLE)
-         {
-            if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
-            {
-               #if DBGLVL_GUI_ITEM_PROPERTY > 1
-               MessageInterface::ShowMessage
-                  ("GetPropertyList() Adding %s\n", theScPropertyList[i].c_str());
-               #endif
-               
-               array.Add(theScPropertyList[i]);
+               if (add)
+               {
+                  #if DBGLVL_GUI_ITEM_PROPERTY > 1
+                  MessageInterface::ShowMessage
+                     ("GetPropertyList() Adding %s\n", paramName);
+                  #endif
+                  
+                  array.Add(theScPropertyList[i]);
+               }
             }
          }
       }
@@ -2659,8 +2668,8 @@ wxListBox* GuiItemManager::GetImpBurnListBox(wxWindow *parent, wxWindowID id,
 
 //------------------------------------------------------------------------------
 // wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
-//                               const wxString &objType, int showOption,
-//                               bool multiSelect = false)
+//            const wxString &objType, int showOption, bool showSettableOnly = false,
+//            bool multiSelect = false)
 //------------------------------------------------------------------------------
 /**
  * @return Available Parameter ListBox pointer
@@ -2669,17 +2678,21 @@ wxListBox* GuiItemManager::GetImpBurnListBox(wxWindow *parent, wxWindowID id,
 wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                               const wxSize &size,
                                               const wxString &objType,
-                                              int showOption, bool multiSelect)
+                                              int showOption, bool showSettableOnly,
+                                              bool multiSelect)
 {
    #ifdef DEBUG_PROPERTY_LISTBOX
    MessageInterface::ShowMessage
-      ("GuiItemManager::GetPropertyListBox() objType='%s', showOption=%d, multiSelect=%d\n",
-       objType.c_str(), showOption, multiSelect);
+      ("GuiItemManager::GetPropertyListBox() objType='%s', showOption=%d, "
+       "showSettableOnly=%d, multiSelect=%d\n", objType.c_str(), showOption,
+       showSettableOnly, multiSelect);
    #endif
    
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    wxArrayString emptyList;
    wxListBox *propertyListBox = NULL;
+   bool add = false;
+   std::string paramName;
    
    if (multiSelect)
    {
@@ -2695,17 +2708,24 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
    // now append properties
    if (objType == "Spacecraft")
    {
-      // Check in the order of settable, plottable, and reportable 
-      // since settable is subset of plottable or reportable and
-      // plottable is subset of reportable
-      if (showOption == SHOW_SETTABLE)
+      if (showOption == SHOW_REPORTABLE)
       {
          for (int i=0; i<theNumScProperty; i++)
          {
-            if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
+            std::string paramName = theScPropertyList[i].c_str();
+            add = false;
+            if (theParamInfo->IsReportable(paramName))
             {
-               MessageInterface::ShowMessage("==> Adding settable %s\n", theScPropertyList[i].c_str());
-               propertyListBox->Append(theScPropertyList[i]);
+               if (!showSettableOnly)
+                  add = true;
+               else if (theParamInfo->IsSettable(paramName))
+                  add = true;
+               
+               if (add)
+               {
+                  MessageInterface::ShowMessage("   ===> Adding '%s' to propertyListBox\n", paramName.c_str());
+                  propertyListBox->Append(theScPropertyList[i]);
+               }
             }
          }
       }
@@ -2713,33 +2733,47 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
       {
          for (int i=0; i<theNumScProperty; i++)
          {
-            if (theParamInfo->IsPlottable(theScPropertyList[i].c_str()))
-               propertyListBox->Append(theScPropertyList[i]);
-         }
-      }
-      else if (showOption == SHOW_REPORTABLE)
-      {
-         for (int i=0; i<theNumScProperty; i++)
-         {
-            if (theParamInfo->IsReportable(theScPropertyList[i].c_str()))
-               propertyListBox->Append(theScPropertyList[i]);
+            std::string paramName = theScPropertyList[i].c_str();
+            add = false;
+            if (theParamInfo->IsPlottable(paramName))
+            {
+               if (!showSettableOnly)
+                  add = true;
+               else if (theParamInfo->IsSettable(paramName))
+                  add = true;
+               
+               if (add)
+               {
+                  #ifdef DEBUG_PROPERTY_LISTBOX
+                  MessageInterface::ShowMessage("   Adding '%s' to propertyListBox\n", paramName.c_str());
+                  #endif
+                  propertyListBox->Append(theScPropertyList[i]);
+               }
+            }
          }
       }
    }
    else if (objType == "ImpulsiveBurn")
    {
-      if (showOption == SHOW_SETTABLE)
+      // Currently all ImpulsiveBurn Parameters are settable
+      if (showOption == SHOW_REPORTABLE)
+      {
          for (int i=0; i<theNumImpBurnProperty; i++)
-            if (theParamInfo->IsSettable(theImpBurnPropertyList[i].c_str()))
+         {
+            paramName = theImpBurnPropertyList[i].c_str();
+            if (theParamInfo->IsReportable(paramName))
                propertyListBox->Append(theImpBurnPropertyList[i]);
+         }
+      }
       else if (showOption == SHOW_PLOTTABLE)
+      {
          for (int i=0; i<theNumImpBurnProperty; i++)
-            if (theParamInfo->IsPlottable(theImpBurnPropertyList[i].c_str()))
+         {
+            paramName = theImpBurnPropertyList[i].c_str();
+            if (theParamInfo->IsPlottable(paramName))
                propertyListBox->Append(theImpBurnPropertyList[i]);
-      else if (showOption == SHOW_REPORTABLE)
-         for (int i=0; i<theNumImpBurnProperty; i++)
-            if (theParamInfo->IsReportable(theImpBurnPropertyList[i].c_str()))
-               propertyListBox->Append(theImpBurnPropertyList[i]);
+         }
+      }
    }
    else if (objType == "FiniteBurn")
    {
@@ -3179,201 +3213,13 @@ wxListBox* GuiItemManager::GetSensorListBox(wxWindow *parent, wxWindowID id,
 
 
 //------------------------------------------------------------------------------
-// wxBoxSizer* CreateParameterSizer(...)
-//------------------------------------------------------------------------------
-/**
- * Creates parameter sizer.
- */
-//------------------------------------------------------------------------------
-wxBoxSizer* GuiItemManager::
-CreateParameterSizer(wxWindow *parent,
-                     wxListBox **userParamListBox, wxWindowID userParamListBoxId,
-                     wxButton **createVarButton, wxWindowID createVarButtonId,
-                     wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId, 
-                     wxComboBox **spacecraftComboBox, wxWindowID spacecraftComboBoxId,
-                     wxComboBox **impBurnComboBox, wxWindowID impBurnComboBoxId,
-                     wxListBox **propertyListBox, wxWindowID propertyListBoxId,
-                     wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
-                     wxComboBox **originComboBox, wxWindowID originComboBoxId,
-                     wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-                     const wxArrayString &objectTypeList, int showOption,
-                     bool showVariable, bool showArray, const wxString &objectType)
-{
-   #if DBGLVL_GUI_ITEM
-   MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
-   #endif
-   
-   int bsize = 1;
-   
-   //wxStaticText
-   wxStaticText *userVarStaticText = NULL;
-   
-   if (showVariable || showArray)
-   {
-      userVarStaticText =
-         new wxStaticText(parent, -1, wxT("Variables"),
-                          wxDefaultPosition, wxDefaultSize, 0);
-   }
-   
-   wxStaticText *objectTypeStaticText =
-      new wxStaticText(parent, -1, wxT("Object Type"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   wxStaticText *objectStaticText =
-      new wxStaticText(parent, -1, wxT("Object"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   wxStaticText *propertyStaticText =
-      new wxStaticText(parent, -1, wxT("Property"),
-                       wxDefaultPosition, wxDefaultSize, 0);   
-   
-   *coordSysLabel =
-      new wxStaticText(parent, -1, wxT("Coordinate System"),
-                       wxDefaultPosition, wxDefaultSize, 0);   
-   
-   // wxButton
-   if (showVariable || showArray)
-   {
-      *createVarButton =
-         new wxButton(parent, createVarButtonId, wxT("Create"),
-                      wxDefaultPosition, wxSize(-1,-1), 0 );
-   }
-   
-   // Object type ComboBox
-   *objectTypeComboBox =
-      GetObjectTypeComboBox(parent, objectTypeComboBoxId, wxSize(170, 20),
-                            objectTypeList);
-   (*objectTypeComboBox)->SetValue(objectType);
-   
-   // Spacecraft ComboBox
-   *spacecraftComboBox =
-      GetSpacecraftComboBox(parent, spacecraftComboBoxId, wxSize(170, 20));
-   
-   // ImpulsiveBurn ComboBox
-   *impBurnComboBox =
-      GetImpBurnComboBox(parent, impBurnComboBoxId, wxSize(170, 20));
-   
-   // Coordinate System ComboBox
-   *coordSysComboBox =
-      GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(170, 20));
-   
-   // Origin ComboBox
-   *originComboBox =
-      GetCelestialBodyComboBox(parent, originComboBoxId, wxSize(170, 20));
-   
-   //-----------------------------------------------------------------
-   // user parameter
-   //-----------------------------------------------------------------
-   *userParamListBox = NULL;
-   
-   if (showVariable || showArray)
-   {
-      if (showOption == SHOW_REPORTABLE)
-      {
-         *userParamListBox =
-            GetAllUserParameterListBox(parent, userParamListBoxId, 
-                                       wxSize(170, 50), showArray);
-      }
-      else if (showOption == SHOW_PLOTTABLE)
-      {
-         *userParamListBox =
-            GetUserVariableListBox(parent, userParamListBoxId,
-                                   wxSize(170, 50), "");
-      }
-   }
-   
-   //-----------------------------------------------------------------
-   // property
-   //-----------------------------------------------------------------
-   *propertyListBox = 
-      GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 80), objectType,
-                         showOption);
-   
-   #ifdef __WXMAC__
-   //-------------------------------------------------------
-   wxBoxSizer *userParamBoxSizer = NULL;
-   if (showVariable || showArray)
-      userParamBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *systemParamBoxSizer = new wxBoxSizer(wxVERTICAL);
-   #else
-   //-------------------------------------------------------
-   wxStaticBoxSizer *userParamBoxSizer = NULL;
-   if (showVariable || showArray)
-      userParamBoxSizer = new wxStaticBoxSizer(wxVERTICAL, parent, "");
-   wxStaticBoxSizer *systemParamBoxSizer =
-      new wxStaticBoxSizer(wxVERTICAL, parent, "");
-   #endif
-   //-------------------------------------------------------
-   
-   wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
-   *coordSysBoxSizer = new wxBoxSizer(wxVERTICAL);
-   
-   (*coordSysBoxSizer)->Add(*coordSysLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   if (showVariable || showArray)
-   {
-      userParamBoxSizer->Add
-         (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-      userParamBoxSizer->Add
-         (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-      userParamBoxSizer->Add
-         (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-   }
-   
-   systemParamBoxSizer->Add
-      (objectTypeStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-   systemParamBoxSizer->Add
-        (*objectTypeComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, bsize);
-   systemParamBoxSizer->Add
-      (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-   
-   #ifdef __WXMAC__
-   systemParamBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   #endif
-   
-   systemParamBoxSizer->Add
-      (*spacecraftComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, bsize);
-   systemParamBoxSizer->Add
-      (*impBurnComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, bsize);
-   
-   // Show desired object type   
-   if (objectType == "ImpulsiveBurn")
-      systemParamBoxSizer->Hide(*spacecraftComboBox);
-   else
-      systemParamBoxSizer->Hide(*impBurnComboBox);
-   
-   systemParamBoxSizer->Add
-      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-   systemParamBoxSizer->Add
-      (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-   systemParamBoxSizer->Add
-      (*coordSysBoxSizer, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-   
-   if (showVariable || showArray)
-   {
-      paramBoxSizer->Add(userParamBoxSizer, 0,
-                         wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-   }
-   
-   #ifdef __WXMAC__
-   paramBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   #endif
-   
-   paramBoxSizer->Add(systemParamBoxSizer, 0,
-                      wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, bsize);
-   
-   return paramBoxSizer;
-}
-
-
-//------------------------------------------------------------------------------
-// Wxboxsizer* Create3ColParameterSizer(...)
+// Wxboxsizer* CreateParameterSizer(...)
 //------------------------------------------------------------------------------
 /**
  * Creates new parameter sizer.
  */
 //------------------------------------------------------------------------------
-wxSizer* GuiItemManager::Create3ColParameterSizer
+wxSizer* GuiItemManager::CreateParameterSizer
    (wxWindow *parent,
     wxCheckBox **entireObjCheckBox, wxWindowID entireObjCheckBoxId,
     wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId, 
@@ -3394,6 +3240,7 @@ wxSizer* GuiItemManager::Create3ColParameterSizer
     wxButton **removeAllButton, wxWindowID removeAllButtonId,
     wxListBox **selectedListBox, wxWindowID selectedListBoxId,
     const wxArrayString &objectTypeList, int showOption,
+    bool showSettableOnly,
     bool allowMultiSelect, bool showString, bool allowWholeObject,
     bool showSysParam, bool showVariable, bool showArray,
     const wxString &objectType,
@@ -3401,7 +3248,7 @@ wxSizer* GuiItemManager::Create3ColParameterSizer
 {
    #if DEBUG_PARAM_SIZER
    MessageInterface::ShowMessage
-      ("GuiItemManager::Create3ColParameterSizer() entered\n"
+      ("GuiItemManager::CreateParameterSizer() entered\n"
        "   showOption=%d, allowMultiSelect=%d, showString=%d, allowWholeObject=%d, "
        "showSysParam=%d\n   showVariable=%d, showArray=%d, objectType=%s\n",
        showOption, allowMultiSelect, showString, allowWholeObject, showSysParam,
@@ -3541,7 +3388,7 @@ wxSizer* GuiItemManager::Create3ColParameterSizer
       
       *propertyListBox = 
          GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 230), objectType,
-                            showOption, allowMultiSelect);
+                            showOption, showSettableOnly, allowMultiSelect);
       (*propertyListBox)->SetToolTip(pConfig->Read(_T("ObjectPropertiesHint")));
       
       *coordSysLabel =
@@ -3783,7 +3630,9 @@ void GuiItemManager::UpdatePropertyList()
          else if (objectType == Gmat::IMPULSIVE_BURN)
          {
             // update ImpulsiveBurn property list
-            theImpBurnPropertyList.Add(items[i].c_str());
+            // Do no add depreciated Parameters
+            if (items[i] != "V" && items[i] != "N" && items[i] != "B")
+               theImpBurnPropertyList.Add(items[i].c_str());
          }
       }
    }

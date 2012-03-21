@@ -72,7 +72,8 @@ ParameterSelectDialog::ParameterSelectDialog
      (wxWindow *parent, const wxArrayString &objectTypeList, int showOption,
       bool allowMultiSelect, bool allowString, bool allowWholeObject, 
       bool allowSysParam, bool allowVariable, bool allowArray, 
-      const wxString &objectType, bool createParam, bool skipDependency)
+      const wxString &objectType, bool createParam, bool showSettableOnly,
+      bool skipDependency)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
    mHasSelectionChanged = false;
@@ -89,6 +90,7 @@ ParameterSelectDialog::ParameterSelectDialog
    mAllowArray = allowArray;
    mAllowSysParam = allowSysParam;
    mCreateParam = createParam;
+   mShowSettableOnly = showSettableOnly;
    mSkipDependency = skipDependency;
    mObjectType = objectType;
    
@@ -211,29 +213,30 @@ void ParameterSelectDialog::Create()
    //------------------------------------------------------
    
    mParameterSizer = theGuiManager->
-      Create3ColParameterSizer(this, &mEntireObjectCheckBox, CHECKBOX_ID,
-                               &mObjectTypeComboBox, COMBOBOX_ID,
-                               &mObjectListBox, LISTBOX_ID,
-                               &mRowStaticText, TEXT_ID,
-                               &mColStaticText, TEXT_ID,
-                               &mRowTextCtrl, TEXTCTRL_ID,
-                               &mColTextCtrl, TEXTCTRL_ID,
-                               &mPropertyListBox, LISTBOX_ID,
-                               &mCoordSysComboBox, COMBOBOX_ID,
-                               &mCentralBodyComboBox, COMBOBOX_ID,
-                               &mCoordSysLabel, &mCoordSysSizer,
-                               &mUpButton, BUTTON_ID,
-                               &mDownButton, BUTTON_ID,
-                               &mAddButton, BUTTON_ID,
-                               &mRemoveButton, BUTTON_ID,
-                               &mAddAllButton, BUTTON_ID,
-                               &mRemoveAllButton, BUTTON_ID,
-                               &mSelectedListBox, LISTBOX_ID,
-                               mObjectTypeList, mShowOption,
-                               mAllowMultiSelect, mAllowString,
-                               mAllowWholeObject, mAllowSysParam,
-                               mAllowVariable, mAllowArray, mObjectType,
-                               "Parameter Select");
+      CreateParameterSizer(this, &mEntireObjectCheckBox, CHECKBOX_ID,
+                           &mObjectTypeComboBox, COMBOBOX_ID,
+                           &mObjectListBox, LISTBOX_ID,
+                           &mRowStaticText, TEXT_ID,
+                           &mColStaticText, TEXT_ID,
+                           &mRowTextCtrl, TEXTCTRL_ID,
+                           &mColTextCtrl, TEXTCTRL_ID,
+                           &mPropertyListBox, LISTBOX_ID,
+                           &mCoordSysComboBox, COMBOBOX_ID,
+                           &mCentralBodyComboBox, COMBOBOX_ID,
+                           &mCoordSysLabel, &mCoordSysSizer,
+                           &mUpButton, BUTTON_ID,
+                           &mDownButton, BUTTON_ID,
+                           &mAddButton, BUTTON_ID,
+                           &mRemoveButton, BUTTON_ID,
+                           &mAddAllButton, BUTTON_ID,
+                           &mRemoveAllButton, BUTTON_ID,
+                           &mSelectedListBox, LISTBOX_ID,
+                           mObjectTypeList, mShowOption,
+                           mShowSettableOnly,
+                           mAllowMultiSelect, mAllowString,
+                           mAllowWholeObject, mAllowSysParam,
+                           mAllowVariable, mAllowArray, mObjectType,
+                           "Parameter Select");
    
    //------------------------------------------------------
    // add to parent sizer
@@ -608,7 +611,8 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
          
          // Set Spacecraft property
          mPropertyListBox->
-            Set(theGuiManager->GetPropertyList("Spacecraft", mShowOption));
+            Set(theGuiManager->GetPropertyList("Spacecraft", mShowOption,
+                                               mShowSettableOnly));
          
          if (!mAllowMultiSelect)
             mPropertyListBox->SetSelection(0);
@@ -622,7 +626,8 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
          
          // Set ImpulsiveBurn property
          mPropertyListBox->
-            Set(theGuiManager->GetPropertyList("ImpulsiveBurn", mShowOption));
+            Set(theGuiManager->GetPropertyList("ImpulsiveBurn", mShowOption,
+                                               mShowSettableOnly));
          
          if (!mAllowMultiSelect)
             mPropertyListBox->SetSelection(0);

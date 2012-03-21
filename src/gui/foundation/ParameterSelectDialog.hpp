@@ -39,6 +39,7 @@ public:
                          bool allowArray = true,
                          const wxString &objectType = "Spacecraft",
                          bool createParam = true,
+                         bool showSettableOnly = false,
                          bool skipDependency = false);
    ~ParameterSelectDialog();
 
@@ -69,6 +70,7 @@ protected:
    bool mAllowMultiSelect;
    bool mAllowWholeObject;
    bool mCreateParam;
+   bool mShowSettableOnly;
    bool mSkipDependency;
    
    int  mShowOption;

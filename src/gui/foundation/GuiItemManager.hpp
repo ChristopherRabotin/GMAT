@@ -44,7 +44,6 @@ public:
    {
       SHOW_REPORTABLE,         // Real, Array, String
       SHOW_PLOTTABLE,          // Real
-      SHOW_SETTABLE,           // for Vary command
       SHOW_WHOLE_OBJECT_ONLY,
    };
    
@@ -135,7 +134,8 @@ public:
    wxArrayString GetAutoGlobalObjectList() { return theAutoGlobalObjectList; }
 	
    wxArrayString GetPropertyList(const wxString &objType,
-                                 int showOption = SHOW_PLOTTABLE);
+                                 int showOption = SHOW_PLOTTABLE,
+                                 bool showSettableOnly = false);
    
    int GetNumProperty(const wxString &objType);
    
@@ -262,6 +262,7 @@ public:
                                  const wxSize &size,
                                  const wxString &objType,
                                  int showOption = SHOW_PLOTTABLE,
+                                 bool showSettableOnly = false,
                                  bool multiSelect = false);
    
    wxListBox* GetPlottableParameterListBox(wxWindow *parent, wxWindowID id,
@@ -299,22 +300,7 @@ public:
                                const wxSize &size,
                                wxArrayString *excList = NULL);
    
-   wxBoxSizer* CreateParameterSizer
-         (wxWindow *parent,
-          wxListBox **userParamListBox, wxWindowID userParamListBoxId,
-          wxButton **createVarButton, wxWindowID createVarButtonId,
-          wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId,
-          wxComboBox **spacecraftComboBox, wxWindowID spacecraftComboBoxId,
-          wxComboBox **impBurnComboBox, wxWindowID impBurnComboBoxId,
-          wxListBox **propertyListBox, wxWindowID propertyListBoxId,
-          wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
-          wxComboBox **originComboBox, wxWindowID originComboBoxId,
-          wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-          const wxArrayString &objectTypeList,
-          int showOption = SHOW_PLOTTABLE, bool showVariable = true,
-          bool showArray = false, const wxString &onwer = "Spacecraft");
-   
-   wxSizer* Create3ColParameterSizer
+   wxSizer* CreateParameterSizer
          (wxWindow *parent,
           wxCheckBox **entireObjCheckBox, wxWindowID entireObjCheckBoxId,
           wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId,
@@ -335,6 +321,7 @@ public:
           wxButton **removeAllButton, wxWindowID removeAllButtonId,
           wxListBox **selectedListBox, wxWindowID selectedListBoxId,
           const wxArrayString &objectTypeList, int showOption = SHOW_PLOTTABLE,
+          bool showSettableOnly = false,
           bool allowMultiSelect = false, bool showString = false,
           bool allowWholeObject = false, bool showSysParam = true,
           bool showVariable = false, bool showArray = false,
