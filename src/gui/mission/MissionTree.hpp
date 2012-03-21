@@ -96,7 +96,7 @@ private:
    int  mNumMissionSeq;
    
    void InitializeCounter();
-   GmatCommand* CreateCommand(const wxString &cmdTypeName);
+   GmatCommand* CreateCommand(const wxString &cmdTypeName, GmatCommand *refCmd = NULL);
 	GmatCommand* CreateEndCommand(const wxString &cmdTypeName,
                                  GmatTree::ItemType &endType);
    bool InsertCommandToSequence(GmatCommand *currCmd, GmatCommand *prevCmd,
@@ -211,7 +211,8 @@ private:
    int  FindItemPosition(wxTreeItemId parentId, wxTreeItemId itemId);
    bool IsElseNode(wxTreeItemId itemId);
    bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType,
-                       GmatTree::ItemType &solverItemType);
+                       GmatTree::ItemType &solverItemType,
+                       GmatCommand **branchCmd);
    
    // for Debug
    void ShowCommands(const wxString &msg = "");

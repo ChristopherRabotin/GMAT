@@ -1965,8 +1965,6 @@ wxComboBox* GuiItemManager::GetSolverComboBox(wxWindow *parent, wxWindowID id,
                                               const wxSize &size)
 {
    wxComboBox *solverComboBox =
-      //new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-      //               theNumSolver, theSolverList, wxCB_READONLY);
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theSolverList, wxCB_READONLY);
    
@@ -5036,7 +5034,7 @@ void GuiItemManager::UpdateSolverList()
    
    #if DBGLVL_GUI_ITEM_SOLVER
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateSolverList() theNumSolver=%d\n", theNumSolver);
+      ("GuiItemManager::UpdateSolverList() entered, theNumSolver=%d\n", theNumSolver);
    #endif
    
    GmatBase *obj;
@@ -5047,58 +5045,51 @@ void GuiItemManager::UpdateSolverList()
    //-------------------------------------------------------
    for (int i=0; i<theNumSolver; i++)
    {
-      theSolverList.Add(items[i].c_str());
-      
       #if DBGLVL_GUI_ITEM_SOLVER > 1
       MessageInterface::ShowMessage
-         ("     %s added to theSolverList\n", theSolverList[i].c_str());
+         ("   Adding '%s' to theSolverList\n", items[i].c_str());
       #endif
+      
+      theSolverList.Add(items[i].c_str());
    }
    
    //-------------------------------------------------------
-   // Update Boundary Value Solver list
+   // Update Boundary Value Solver and Optimizer list
    //-------------------------------------------------------
    theBoundarySolverList.Clear();
-   
-   for (int i=0; i<theNumSolver; i++)
-   {
-      // check for Boundary Solver
-      obj = theGuiInterpreter->GetConfiguredObject(items[i]);
-      if (obj->GetTypeName() == "DifferentialCorrector")
-      {
-         #if DBGLVL_GUI_ITEM_SOLVER
-         MessageInterface::ShowMessage
-            ("   %s added to theBoundarySolverList\n", items[i].c_str());
-         #endif
-         
-         theBoundarySolverList.Add(items[i].c_str());
-         theNumBoundarySolver++;
-      }
-   }
-   
-   theNumBoundarySolver = theBoundarySolverList.GetCount();
-      
-   //-------------------------------------------------------
-   // Update Optimizer list
-   //-------------------------------------------------------
    theOptimizerList.Clear();
    
    for (int i=0; i<theNumSolver; i++)
    {
-      // check for Optimizer
       obj = theGuiInterpreter->GetConfiguredObject(items[i]);
-      if (obj->IsOfType("Optimizer"))
+      // check for Boundary Solver
+      if (obj->IsOfType("DifferentialCorrector"))
       {
-         theOptimizerList.Add(items[i].c_str());
-         
          #if DBGLVL_GUI_ITEM_SOLVER
          MessageInterface::ShowMessage
-            ("   %s added to theOptimizerList\n", theOptimizerList[i].c_str());
+            ("   Adding '%s' to theBoundarySolverList\n", items[i].c_str());
          #endif
+         
+         theBoundarySolverList.Add(items[i].c_str());
+      }
+      else if (obj->IsOfType("Optimizer"))
+      {
+         #if DBGLVL_GUI_ITEM_SOLVER
+         MessageInterface::ShowMessage
+            ("   Adding '%s' to theOptimizerList\n", items[i].c_str());
+         #endif
+         
+         theOptimizerList.Add(items[i].c_str());
       }
    }
    
+   theNumBoundarySolver = theBoundarySolverList.GetCount();
    theNumOptimizer = theOptimizerList.GetCount();
+   #if DBGLVL_GUI_ITEM_SOLVER
+   MessageInterface::ShowMessage
+      ("   theNumBoundarySolver=%d\n   theNumOptimizer=%d\n",
+       theNumBoundarySolver, theNumOptimizer);
+   #endif
    
    //-------------------------------------------------------
    // update registered Solver ComboBox
@@ -5139,7 +5130,12 @@ void GuiItemManager::UpdateSolverList()
       (*pos)->Append(theOptimizerList);      
       (*pos)->SetSelection(sel);
    }
-      
+   
+   #if DBGLVL_GUI_ITEM_SOLVER
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateSolverList() leaving\n");
+   #endif
+   
 } //UpdateSolverList()
 
 

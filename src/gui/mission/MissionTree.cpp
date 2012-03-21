@@ -525,13 +525,14 @@ void MissionTree::InitializeCounter()
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* CreateCommand(const wxString &cmdTypeName)
+// GmatCommand* CreateCommand(const wxString &cmdTypeName, GmatCommand *refCmd)
 //------------------------------------------------------------------------------
-GmatCommand* MissionTree::CreateCommand(const wxString &cmdTypeName)
+GmatCommand* MissionTree::CreateCommand(const wxString &cmdTypeName, GmatCommand *refCmd)
 {
    #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("MissionTree::CreateCommand() entered, cmdTypeName='%s'\n", cmdTypeName.c_str());
+      ("MissionTree::CreateCommand() entered, cmdTypeName='%s', refCmd=<%p><%s>\n",
+       cmdTypeName.c_str(), refCmd, refCmd ? refCmd->GetTypeName().c_str() : "NULL");
    #endif
    
    GmatCommand *cmd = NULL;
@@ -542,7 +543,7 @@ GmatCommand* MissionTree::CreateCommand(const wxString &cmdTypeName)
       else if (cmdTypeName == "Equation")
          cmd = theGuiInterpreter->CreateDefaultCommand("GMAT");
       else
-         cmd = theGuiInterpreter->CreateDefaultCommand(cmdTypeName.c_str());
+         cmd = theGuiInterpreter->CreateDefaultCommand(cmdTypeName.c_str(), "", refCmd);
    }
    catch (BaseException &be)
    {
@@ -2041,7 +2042,7 @@ void MissionTree::Append(const wxString &cmdTypeName)
    #endif
    
    // Create a new command
-   cmd = CreateCommand(cmdTypeName);
+   cmd = CreateCommand(cmdTypeName, currCmd);
    
    // Insert a node to tree
    if (cmd != NULL)
@@ -2177,7 +2178,7 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
       ("   currCmd='%s'(%p)\n", currCmd->GetTypeName().c_str(), currCmd);
    WriteCommand("   ", "prevCmd = ", prevCmd, ", realPrevCmd = ", realPrevCmd);
    #endif
-      
+   
    if (prevCmd == NULL)
    {
       MessageInterface::PopupMessage
@@ -2206,11 +2207,16 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
    #if DEBUG_MISSION_TREE_INSERT
    WriteCommand("   ", "realPrevCmd = ", realPrevCmd);
    #endif
-
+   
 	
    if (realPrevCmd != NULL)
    {
-      cmd = CreateCommand(cmdTypeName);      
+      GmatTree::ItemType itemType = currItem->GetItemType();
+      GmatTree::ItemType solverItemType = itemType;
+      GmatCommand *branchCmd = NULL;
+      // Get parent branch command if exist
+      IsInsideSolver(currId, itemType, solverItemType, &branchCmd);
+      cmd = CreateCommand(cmdTypeName, branchCmd);
       
       if (cmd != NULL)
       {
@@ -2308,10 +2314,12 @@ void MissionTree::InsertAfter(const wxString &cmdTypeName)
    
    if (currCmd != NULL)
    {
-      cmd = CreateCommand(cmdTypeName);
-      
-      // Need to set previous command
-      //cmd->ForceSetPrevious(currCmd);
+      GmatTree::ItemType itemType = currItem->GetItemType();
+      GmatTree::ItemType solverItemType = itemType;
+      GmatCommand *branchCmd = NULL;
+      // Get parent branch command if exist
+      IsInsideSolver(currId, itemType, solverItemType, &branchCmd);
+      cmd = CreateCommand(cmdTypeName, branchCmd);
       
       // Set parentId, currId, prevId properly to pass to InsertCommand()
       // If current node is BranchCommand, it inserts after BranchEnd (2011.09.27 new Requirement)
@@ -2541,12 +2549,14 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
 //------------------------------------------------------------------------------
 void MissionTree::UpdateGuiManager(const wxString &cmdName)
 {
+   // Update GuiItemManger since default commands were created wich created
+   // default resource
    if (cmdName == "BeginFiniteBurn" || cmdName == "EndFiniteBurn" ||
        cmdName == "Maneuver" || cmdName == "Vary")
       theGuiManager->UpdateBurn();
    
    if (cmdName == "Target" || cmdName == "Optimize" || cmdName == "Vary" ||
-       cmdName == "Achieve" || cmdName == "Minimize")
+       cmdName == "Achieve" || cmdName == "Minimize" || cmdName == "NonlinearConstraint")
       theGuiManager->UpdateSolver();
    
    if (cmdName == "Report")
@@ -2953,7 +2963,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
          else 
          {
             GmatTree::ItemType solverItemType = itemType;
-            if (IsInsideSolver(id, itemType, solverItemType))
+            GmatCommand *branchCmd = NULL;
+            if (IsInsideSolver(id, itemType, solverItemType, &branchCmd))
             {
                #if DEBUG_MISSION_TREE_MENU
                MessageInterface::ShowMessage("   ===> item is inside a Solver command\n");
@@ -3003,7 +3014,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             #endif
             
             GmatTree::ItemType solverItemType = itemType;
-            if (IsInsideSolver(id, itemType, solverItemType))
+            GmatCommand *branchCmd = NULL;
+            if (IsInsideSolver(id, itemType, solverItemType, &branchCmd))
             {
                #ifdef DEBUG_MISSION_TREE_MENU
                MessageInterface::ShowMessage("   ===> Inserting Append menu inside Solver command\n");
@@ -4526,13 +4538,15 @@ bool MissionTree::IsElseNode(wxTreeItemId itemId)
  *
  * @parameter  currId  Id of the current node
  * @parameter  itemType  Item type of the current node
- * @parameter  solverItemType  Item type of the solver branch
+ * @parameter  solverItemType  Item type of the solver branch returned
+ * @parameter  branchCmd  Pointer of the solver branch command pointer returned
  *
  * @return  true if item is inside a solver branch
  */
 //------------------------------------------------------------------------------
 bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemType,
-                                 GmatTree::ItemType &solverItemType)
+                                 GmatTree::ItemType &solverItemType,
+                                 GmatCommand **branchCmd)
 {
    #if DEBUG_FIND_ITEM_PARENT
    WriteNode(1, "MissionTree::IsInsideSolver() ", "currId", currId);
@@ -4542,6 +4556,7 @@ bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemTy
    MissionTreeItemData *parentItem;
    GmatTree::ItemType parentType;
    solverItemType = itemType;
+   *branchCmd = NULL;
    
    // go through parents
    while (parentId.IsOk() && GetItemText(parentId) != "")
@@ -4561,6 +4576,7 @@ bool MissionTree::IsInsideSolver(wxTreeItemId currId, GmatTree::ItemType &itemTy
          #endif
          
          solverItemType = parentType;
+         *branchCmd = parentItem->GetCommand();
          return true;
       }
       

@@ -31,6 +31,7 @@
 //#define DEBUG_VARYPANEL_LOAD
 //#define DEBUG_VARYPANEL_SAVE
 //#define DEBUG_VARYPANEL_SOLVER
+//#define DEBUG_SET_CONTROL
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -82,7 +83,10 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
 VaryPanel::~VaryPanel()
 {
    mObjectTypeList.Clear();
-   theGuiManager->UnregisterComboBox("Solver", mSolverComboBox);
+   if (inOptimizeCmd)
+      theGuiManager->UnregisterComboBox("Optimizer", mSolverComboBox);
+   else
+      theGuiManager->UnregisterComboBox("BoundarySolver", mSolverComboBox);
 }
 
 //-------------------------------
@@ -101,25 +105,13 @@ void VaryPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Solver"),
                        wxDefaultPosition, wxSize(40, -1), 0);
    
-   GmatCommand *parent =
-      GmatCommandUtil::GetParentCommand(theGuiInterpreter->GetFirstCommand(), mVaryCommand);
-   #ifdef DEBUG_VARYPANEL_CREATE
-   MessageInterface::ShowMessage
-      ("VaryPanel::Create() parent=<%p><%s>\n", parent,
-       parent ? parent->GetTypeName().c_str() : "NULL");
-   #endif
-   
-   bool isOptimizeBranch = false;
-   if (parent && parent->IsOfType("Optimize"))
-      isOptimizeBranch = true;
-   
    // Show all user-defined Solvers
-   if (isOptimizeBranch)
+   if (inOptimizeCmd)
       mSolverComboBox =
          theGuiManager->GetOptimizerComboBox(this, ID_COMBO, wxSize(180,-1));
    else
       mSolverComboBox =
-         theGuiManager->GetSolverComboBox(this, ID_COMBO, wxSize(180,-1));
+         theGuiManager->GetBoundarySolverComboBox(this, ID_COMBO, wxSize(180,-1));
    
    // Variable
    wxStaticText *varStaticText =

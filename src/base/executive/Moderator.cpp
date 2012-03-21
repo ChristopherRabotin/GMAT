@@ -5379,8 +5379,9 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
 {
    #if DEBUG_DEFAULT_COMMAND
    MessageInterface::ShowMessage
-      ("Moderator::CreateDefaultCommand() entered: type = " +
-       type + ", name = " + name + "\n");
+      ("Moderator::CreateDefaultCommand() entered: type = '%s', name = '%s'\n",
+       type.c_str(), name.c_str());
+   ShowCommand("   refCmd = ", refCmd);
    #endif
    
    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
@@ -5536,9 +5537,11 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       }
       else if (type == "Vary")
       {
-         // set solver
-         Solver *solver = CreateSolver("DifferentialCorrector",
-                                       GetDefaultBoundaryValueSolver()->GetName());
+         Solver *solver = GetDefaultBoundaryValueSolver();
+         // if refCmd is Optimize, set Optimizer, leave DifferentialCorrect otherwise
+         if (refCmd && refCmd->IsOfType("Optimize"))
+            solver = GetDefaultOptimizer();
+         
          id = cmd->GetParameterID("SolverName");
          cmd->SetStringParameter(id, solver->GetName());
          
@@ -5569,9 +5572,9 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       }
       else if (type == "Achieve")
       {
-         // Get default solver
+         // Get BoundaryValueSolver as default solver
          Solver *solver = GetDefaultBoundaryValueSolver();
-
+         
          #if DEBUG_DEFAULT_COMMAND
          MessageInterface::ShowMessage
             ("Moderator::CreateDefaultCommand() cmd=%s, solver=%s\n",
@@ -5595,8 +5598,8 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       {
          // Set default value: DefaultSC.SMA = 7000 (for bug 2045 fix)
          
-         // Get default solver
-         Solver *solver = GetDefaultBoundaryValueSolver();
+         // Get Optimizer as default solver
+         Solver *solver = GetDefaultOptimizer();
          
          #if DEBUG_DEFAULT_COMMAND
          MessageInterface::ShowMessage
