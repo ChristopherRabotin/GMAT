@@ -88,7 +88,6 @@ TARGET = $(BASETARGET)
 ifeq ($(USE_SPICE),1)
 SPICE_OBJECTS = \
 	 attitude/SpiceAttitude.o \
-    propagator/SPKPropagator.o \
     util/SpiceAttitudeKernelReader.o \
 	 util/SpiceInterface.o \
     util/SpiceOrbitKernelReader.o \
@@ -452,7 +451,6 @@ OBJECTS = \
     propagator/RungeKuttaFehlberg56.o \
     propagator/RungeKuttaNystrom.o \
     propagator/RungeKutta.o \
-    propagator/EphemerisPropagator.o \
     solarsys/Asteroid.o \
     solarsys/AtmosphereModel.o \
     solarsys/Barycenter.o \
