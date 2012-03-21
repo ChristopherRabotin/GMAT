@@ -586,7 +586,6 @@
     <ClCompile Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.cpp" />
     <ClCompile Include="..\..\..\src\base\propagator\BulirschStoer.cpp" />
     <ClCompile Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.cpp" />
-    <ClCompile Include="..\..\..\src\base\propagator\EphemerisPropagator.cpp" />
     <ClCompile Include="..\..\..\src\base\propagator\Integrator.cpp" />
     <ClCompile Include="..\..\..\src\base\propagator\PredictorCorrector.cpp" />
     <ClCompile Include="..\..\..\src\base\propagator\PrinceDormand45.cpp" />
@@ -598,13 +597,6 @@
     <ClCompile Include="..\..\..\src\base\propagator\RungeKutta89.cpp" />
     <ClCompile Include="..\..\..\src\base\propagator\RungeKuttaFehlberg56.cpp" />
     <ClCompile Include="..\..\..\src\base\propagator\RungeKuttaNystrom.cpp" />
-    <ClCompile Include="..\..\..\src\base\propagator\SPKPropagator.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\Asteroid.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\AtmosphereModel.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Barycenter.cpp" />
@@ -1040,7 +1032,6 @@
     <ClInclude Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.hpp" />
     <ClInclude Include="..\..\..\src\base\propagator\BulirschStoer.hpp" />
     <ClInclude Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.hpp" />
-    <ClInclude Include="..\..\..\src\base\propagator\EphemerisPropagator.hpp" />
     <ClInclude Include="..\..\..\src\base\propagator\Integrator.hpp" />
     <ClInclude Include="..\..\..\src\base\propagator\PredictorCorrector.hpp" />
     <ClInclude Include="..\..\..\src\base\propagator\PrinceDormand45.hpp" />
@@ -1054,13 +1045,6 @@
     <ClInclude Include="..\..\..\src\base\propagator\RungeKutta89.hpp" />
     <ClInclude Include="..\..\..\src\base\propagator\RungeKuttaFehlberg56.hpp" />
     <ClInclude Include="..\..\..\src\base\propagator\RungeKuttaNystrom.hpp" />
-    <ClInclude Include="..\..\..\src\base\propagator\SPKPropagator.hpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWithoutF2C|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\Asteroid.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereException.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereModel.hpp" />

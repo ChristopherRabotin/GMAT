@@ -31,9 +31,9 @@
 #include "BulirschStoer.hpp"
 
 // Ephemeris propagators
-#ifdef __USE_SPICE__
-#include "SPKPropagator.hpp"
-#endif
+//#ifdef __USE_SPICE__
+//#include "SPKPropagator.hpp"
+//#endif
 
 // Not yet implemented:
 //#include "Cowell.hpp"
@@ -94,12 +94,6 @@ Propagator* PropagatorFactory::CreatePropagator(const std::string &ofType,
       return new AdamsBashforthMoulton(withName);
 //   if (ofType == "Cowell")
 //      return new Cowell(withName);
-   // EphemerisPropagators
-   #ifdef __USE_SPICE__
-      if (ofType == "SPK")
-         return new SPKPropagator(withName);
-   #endif
-
    /// @todo add others here as needed
    else
       return NULL;
@@ -132,10 +126,6 @@ PropagatorFactory::PropagatorFactory()
       creatables.push_back("BulirschStoer");
       creatables.push_back("AdamsBashforthMoulton");
 //      creatables.push_back("Cowell");
-      
-      #ifdef __USE_SPICE__
-         creatables.push_back("SPK");
-      #endif
    }
 }
 

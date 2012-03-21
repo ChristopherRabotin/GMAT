@@ -46,6 +46,7 @@ PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
 PLUGIN                 = ../plugins/libGmatEstimation
 PLUGIN                 = ../plugins/libMatlabInterface
 PLUGIN                 = ../plugins/libFminconOptimizer
+PLUGIN                 = ../plugins/libEphemPropagator
 PLUGIN                 = ../plugins/proprietary/libMarsGRAM
 PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                 = ../plugins/proprietary/libMsise86

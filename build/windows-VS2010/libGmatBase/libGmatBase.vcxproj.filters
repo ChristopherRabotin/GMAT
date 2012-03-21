@@ -507,9 +507,6 @@
     <ClCompile Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.cpp">
       <Filter>Source Files\propagator</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\propagator\EphemerisPropagator.cpp">
-      <Filter>Source Files\propagator</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\propagator\Integrator.cpp">
       <Filter>Source Files\propagator</Filter>
     </ClCompile>
@@ -538,9 +535,6 @@
       <Filter>Source Files\propagator</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\propagator\RungeKuttaNystrom.cpp">
-      <Filter>Source Files\propagator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\propagator\SPKPropagator.cpp">
       <Filter>Source Files\propagator</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.cpp">
@@ -1721,9 +1715,6 @@
     <ClInclude Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.hpp">
       <Filter>Source Files\propagator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\propagator\EphemerisPropagator.hpp">
-      <Filter>Source Files\propagator</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\Integrator.hpp">
       <Filter>Source Files\propagator</Filter>
     </ClInclude>
@@ -1758,9 +1749,6 @@
       <Filter>Source Files\propagator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\RungeKuttaNystrom.hpp">
-      <Filter>Source Files\propagator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\propagator\SPKPropagator.hpp">
       <Filter>Source Files\propagator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.hpp">
