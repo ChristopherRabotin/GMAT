@@ -281,7 +281,7 @@ bool ArrayElementWrapper::RenameObject(const std::string &oldName,
    arrayName   = refObjectNames[0];
    description = arrayName + "(";
    description += rowName + ",";
-   description += columnName + ");";
+   description += columnName + ")";
    return true;
 }
 
