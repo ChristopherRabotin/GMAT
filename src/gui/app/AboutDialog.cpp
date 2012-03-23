@@ -149,7 +149,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    wxString use;
    use = use + " - Uses " + wxVERSION_STRING + "\n";
    use = use + " - Uses TSPlot\n";
-   use = use + " - Uses Pearl Compatible Regular Expressions\n";
+   use = use + " - Uses Perl Compatible Regular Expressions\n";
    use = use + " - Uses JPL SPICE Library\n";
    use = use + " - Planetary images courtesy of JPL/Caltech/USGS, Celestia \n";
    use = use + "   Motherlode, Bjorn Jonsson, and NASA World Wind";
