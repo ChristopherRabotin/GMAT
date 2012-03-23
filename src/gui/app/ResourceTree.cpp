@@ -2196,6 +2196,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          Collapse(mVariableItem);
          DeleteChildren(mVariableItem);
          AddDefaultVariables(mVariableItem);
+         SelectItem(FindIdOfNode(newName, mVariableItem));
          
          // update MissionTree for resource rename
          GmatAppData::Instance()->GetMissionTree()->UpdateMissionForRename();
