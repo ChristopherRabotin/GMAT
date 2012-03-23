@@ -308,7 +308,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
-      ("FindLowestOperator() Find lowest operator before last close parenthesis\n");
+      ("FindLowestOperator() Find lowest operator before the last close parenthesis\n");
    #endif
    //-----------------------------------------------------------------
    // find a lowest operator before last close paren
@@ -345,7 +345,8 @@ std::string MathParser::FindLowestOperator(const std::string &str,
          ("   substr=%s from %u and length of %u\n", substr.c_str(), close1+1, start1-close1-1);
       #endif
       
-      opStr = FindOperator(substr, index);
+      bool isAfterCloseParen = (close1 != substr.npos ? true : false);
+      opStr = FindOperator(substr, index, isAfterCloseParen);
       
       if (opStr != "")
          opIndexMap[opStr] = close1 + index + 1;
@@ -359,7 +360,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
    {
       #if DEBUG_FIND_OPERATOR
       MessageInterface::ShowMessage
-         ("FindLowestOperator() Find lowest operator after last close parenthesis\n");
+         ("FindLowestOperator() Find lowest operator after the last close parenthesis\n");
       #endif
       
       substr = str.substr(close1+1);
@@ -1377,11 +1378,13 @@ std::string MathParser::GetOperatorName(const std::string &op, bool &opFound)
  *          "", if operator not found
  */
 //------------------------------------------------------------------------------
-std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
+std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
+                                     bool isAfterCloseParen)
 {
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
-      ("========== MathParser::FindOperator() entered, str=<%s>\n", str.c_str());
+      ("========== MathParser::FindOperator() entered, str=<%s>, isAfterCloseParen\n",
+       str.c_str(), isAfterCloseParen);
    #endif
    
    std::string str1 = str;
@@ -1424,7 +1427,9 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
          
          if (str1.size() > 1)
          {
-            std::string str2 = str1.substr(1, str1.npos);
+            // If minus sign found after close parenthesis, then it is not an
+            // unary minus, so send whole string to FindOperator() (LOJ: 2012.03.23)
+            std::string str2 = (isAfterCloseParen ? str1 : str1.substr(1, str1.npos));
             Integer opIndex;
             #if DEBUG_FIND_OPERATOR
             MessageInterface::ShowMessage

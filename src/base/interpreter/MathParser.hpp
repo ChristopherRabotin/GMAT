@@ -90,7 +90,8 @@ private:
                             const IntegerMap::iterator &pos2,
                             const IntegerMap &opIndexMap,
                             Integer &opIndex);
-   std::string  FindOperator(const std::string &str, Integer &opIndex);
+   std::string  FindOperator(const std::string &str, Integer &opIndex,
+                             bool isAfterCloseParen = false);
    std::string  GetOperatorName(const std::string &op, bool &opFound);
    void         BuildAllFunctionList();
    void         BuildGmatFunctionList(const std::string &str);
