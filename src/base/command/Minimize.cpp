@@ -194,12 +194,18 @@ bool Minimize::RenameRefObject(const Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Minimize::RenameRefObject() entered, type=%d, oldName='%s', newName='%s', "
+       "objective=<%p>\n", type, oldName.c_str(), newName.c_str(), objective);
+   #endif
+   
    if (type == Gmat::SOLVER)
    {
       if (optimizerName == oldName)
          optimizerName = newName;
    }
-   else if (type == Gmat::PARAMETER) // do I need this here now????
+   else if (type == Gmat::PARAMETER)
    {
       if (objectiveName == oldName)
          objectiveName = newName;
@@ -208,9 +214,14 @@ bool Minimize::RenameRefObject(const Gmat::ObjectType type,
    if (objective)
    {
       objective->RenameObject(oldName, newName);
-      objectiveName           = objective->GetDescription();
+      objectiveName = objective->GetDescription();
    }
    
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Minimize::RenameRefObject() returning true, objectiveName='%s'\n",
+       objectiveName.c_str());
+   #endif
    return true;
 }
 
@@ -256,7 +267,14 @@ const StringArray& Minimize::GetRefObjectNameArray(const Gmat::ObjectType type)
    {
       refObjectNames.push_back(optimizerName);
    }
-
+   else if (type == Gmat::PARAMETER)
+   {
+      // For array element, remove parenthesis before adding
+      std::string objName;
+      objName = GmatStringUtil::GetArrayName(objectiveName);
+      refObjectNames.push_back(objName);
+   }
+   
    return refObjectNames;
 }
 

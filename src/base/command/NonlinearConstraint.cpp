@@ -271,7 +271,16 @@ const StringArray& NonlinearConstraint::GetRefObjectNameArray(const Gmat::Object
    {
       refObjectNames.push_back(optimizerName);
    }
- 
+   else if (type == Gmat::PARAMETER)
+   {
+      // For array element, remove parenthesis before adding
+      std::string objName;
+      objName = GmatStringUtil::GetArrayName(arg1Name);
+      refObjectNames.push_back(objName);
+      objName = GmatStringUtil::GetArrayName(arg2Name);
+      refObjectNames.push_back(objName);
+   }
+   
    return refObjectNames;
 }
 
