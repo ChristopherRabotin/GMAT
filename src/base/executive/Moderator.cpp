@@ -1801,7 +1801,7 @@ bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
 bool Moderator::HasConfigurationChanged(Integer sandboxNum)
 {
    bool resourceChanged = theConfigManager->HasConfigurationChanged();
-   bool commandsChanged = commands[sandboxNum-1]->HasConfigurationChanged();
+   bool commandsChanged = GmatCommandUtil::HasCommandSequenceChanged(commands[sandboxNum-1]);
    
    #if DEBUG_CONFIG_CHANGE
    MessageInterface::ShowMessage
