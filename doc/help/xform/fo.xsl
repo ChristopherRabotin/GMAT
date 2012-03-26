@@ -55,7 +55,14 @@
             <xsl:value-of select="$body.font.master * 1.2"/>
         </xsl:attribute>
         <xsl:attribute name="color">
-            <xsl:value-of select="$gray"/>
+            <xsl:choose>
+                <xsl:when test="ancestor-or-self::d:refentry">
+                    <xsl:value-of select="$blue"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$gray"/>
+                </xsl:otherwise>
+            </xsl:choose>
         </xsl:attribute>
         <xsl:attribute name="start-indent">
             <xsl:value-of select="$body.start.indent"/>
@@ -250,6 +257,110 @@
     <xsl:attribute-set name="table.properties">
         <xsl:attribute name="keep-together.within-column">always</xsl:attribute>
     </xsl:attribute-set>
+    
+    <!-- copied from DocBook XSL Stylesheets 1.76.1 -->
+    <xsl:template name="table.cell.properties">
+        <xsl:param name="bgcolor.pi" select="''"/>
+        <xsl:param name="rowsep.inherit" select="1"/>
+        <xsl:param name="colsep.inherit" select="1"/>
+        <xsl:param name="col" select="1"/>
+        <xsl:param name="valign.inherit" select="''"/>
+        <xsl:param name="align.inherit" select="''"/>
+        <xsl:param name="char.inherit" select="''"/>
+
+        <xsl:attribute name="keep-together.within-column">always</xsl:attribute>
+
+        <xsl:choose>
+            <xsl:when test="ancestor::d:tgroup">
+                <xsl:if test="$bgcolor.pi != ''">
+                    <xsl:attribute name="background-color">
+                        <xsl:value-of select="$bgcolor.pi"/>
+                    </xsl:attribute>
+                </xsl:if>
+
+                <xsl:if test="$rowsep.inherit &gt; 0">
+                    <xsl:call-template name="border">
+                        <xsl:with-param name="side" select="'bottom'"/>
+                    </xsl:call-template>
+                </xsl:if>
+
+      <xsl:if test="$colsep.inherit &gt; 0 and 
+                      $col &lt; (ancestor::d:tgroup/@cols|ancestor::d:entrytbl/@cols)[last()]">
+        <xsl:call-template name="border">
+          <xsl:with-param name="side" select="'end'"/>
+        </xsl:call-template>
+      </xsl:if>
+
+      <xsl:if test="$valign.inherit != ''">
+        <xsl:attribute name="display-align">
+          <xsl:choose>
+            <xsl:when test="$valign.inherit='top'">before</xsl:when>
+            <xsl:when test="$valign.inherit='middle'">center</xsl:when>
+            <xsl:when test="$valign.inherit='bottom'">after</xsl:when>
+            <xsl:otherwise>
+              <xsl:message>
+                <xsl:text>Unexpected valign value: </xsl:text>
+                <xsl:value-of select="$valign.inherit"/>
+                <xsl:text>, center used.</xsl:text>
+              </xsl:message>
+              <xsl:text>center</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
+      </xsl:if>
+
+      <xsl:choose>
+        <xsl:when test="$align.inherit = 'char' and $char.inherit != ''">
+          <xsl:attribute name="text-align">
+            <xsl:value-of select="$char.inherit"/>
+          </xsl:attribute>
+        </xsl:when>
+        <xsl:when test="$align.inherit != ''">
+          <xsl:attribute name="text-align">
+            <xsl:value-of select="$align.inherit"/>
+          </xsl:attribute>
+        </xsl:when>
+      </xsl:choose>
+
+    </xsl:when>
+    <xsl:otherwise>
+      <!-- HTML table -->
+      <xsl:if test="$bgcolor.pi != ''">
+        <xsl:attribute name="background-color">
+          <xsl:value-of select="$bgcolor.pi"/>
+        </xsl:attribute>
+      </xsl:if>
+
+      <xsl:if test="$align.inherit != ''">
+        <xsl:attribute name="text-align">
+          <xsl:value-of select="$align.inherit"/>
+        </xsl:attribute>
+      </xsl:if>
+
+      <xsl:if test="$valign.inherit != ''">
+        <xsl:attribute name="display-align">
+          <xsl:choose>
+            <xsl:when test="$valign.inherit='top'">before</xsl:when>
+            <xsl:when test="$valign.inherit='middle'">center</xsl:when>
+            <xsl:when test="$valign.inherit='bottom'">after</xsl:when>
+            <xsl:otherwise>
+              <xsl:message>
+                <xsl:text>Unexpected valign value: </xsl:text>
+                <xsl:value-of select="$valign.inherit"/>
+                <xsl:text>, center used.</xsl:text>
+              </xsl:message>
+              <xsl:text>center</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
+      </xsl:if>
+
+      <xsl:call-template name="html.table.cell.rules"/>
+
+    </xsl:otherwise>
+  </xsl:choose>
+
+</xsl:template>
 
     <!-- Cross-references -->
     <xsl:param name="xref.with.number.and.title">0</xsl:param>
@@ -363,4 +474,27 @@
         <xsl:attribute name="background-color">transparent</xsl:attribute>
     </xsl:attribute-set>
 
+    <!-- Reference pages -->
+    <xsl:param name="refentry.generate.name">0</xsl:param>
+    <xsl:param name="refentry.generate.title">1</xsl:param>
+
+    <xsl:template match="d:refname"></xsl:template>
+    <xsl:template match="d:refpurpose">
+        <xsl:if test="node()">
+            <xsl:apply-templates/>
+        </xsl:if>
+    </xsl:template>
+    
+    <xsl:attribute-set name="refentry.title.properties">
+        <xsl:attribute>
+            <xsl:value-of select="$body.font.master * 1.3"/>
+        </xsl:attribute>
+        <xsl:attribute name="color">
+            <xsl:value-of select="$blue"/>
+        </xsl:attribute>
+        <xsl:attribute name="start-indent">
+            <xsl:value-of select="$body.start.indent"/>
+        </xsl:attribute>
+    </xsl:attribute-set>
+   
 </xsl:stylesheet>
