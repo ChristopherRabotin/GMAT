@@ -203,7 +203,7 @@ EndFor</code></synopsis>
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Command_For_Default.bmp"
+                     fileref="files/images/Command_For_Default.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
@@ -216,7 +216,7 @@ EndFor</code></synopsis>
     click in any text box and type a value, for example the number 1, or you
     can type any existing variable name, or an array element such as
     <userinput>myArray(1,1)</userinput>. If you right-click in any textbox, or
-    click the button next to any text box, then the
+    click the button to the left of any text box, then the
     <guilabel>ParameterSelectDialog</guilabel> box will open and you can
     select from objects to set the <guilabel>For</guilabel> command
     parameters.</para>
