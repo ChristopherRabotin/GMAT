@@ -2548,27 +2548,31 @@ const std::string GmatCommand::BuildNumber(Real value, bool useExp, Integer leng
 //}
 
 
+//------------------------------------------------------------------------------
+// bool HasConfigurationChanged()
+//------------------------------------------------------------------------------
 bool GmatCommand::HasConfigurationChanged()
 {
-   bool changed = commandChanged;
-   if (!changed)
-   {
-      if (next != NULL)
-         changed = next->HasConfigurationChanged();
-   }
-   
-   return changed;
+   return commandChanged;
 }
 
 
-void GmatCommand::ConfigurationChanged(bool tf, bool setAll)
+//------------------------------------------------------------------------------
+// void ConfigurationChanged(bool tf)
+//------------------------------------------------------------------------------
+void GmatCommand::ConfigurationChanged(bool tf)
 {
+   #ifdef DEBUG_CONFIG_CHANGED
+   MessageInterface::ShowMessage
+      ("GmatCommand::ConfigurationChanged() entered, tf = %d\n", tf);
+   #endif
+   
    commandChanged = tf;
-   if (setAll)
-      if (next)
-         next->ConfigurationChanged(tf, setAll);
 }
 
+//------------------------------------------------------------------------------
+// bool HasAFunction()
+//------------------------------------------------------------------------------
 bool GmatCommand::HasAFunction()
 {
    // this default implementation just returns false

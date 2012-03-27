@@ -29,6 +29,7 @@
 //#define DEBUG_COMMAND_FIND_OBJECT
 //#define DEBUG_COMMAND_DELETE
 //#define DEBUG_SEQUENCE_CLEARING
+//#define DEBUG_COMMAND_CHANGED
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -762,6 +763,89 @@ bool GmatCommandUtil::IsAfter(GmatCommand *cmd1, GmatCommand *cmd2)
 
 
 //------------------------------------------------------------------------------
+// void ResetCommandSequenceChanged(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+void GmatCommandUtil::ResetCommandSequenceChanged(GmatCommand *cmd)
+{
+   if (cmd == NULL)
+      return;
+   
+   GmatCommand *current = cmd;
+   std::string cmdstr = cmd->GetTypeName();
+   
+   #ifdef DEBUG_COMMAND_CHANGED
+   MessageInterface::ShowMessage
+      ("===> GmatCommandUtil::ResetCommandSequenceChanged() entered, "
+       "cmd=<%p><%s>\n", cmd, cmdstr.c_str());
+   #endif
+   
+   while (current != NULL)
+   {
+      cmdstr = "--- " + current->GetTypeName() + "\n";
+      
+      #ifdef DEBUG_COMMAND_CHANGED
+      MessageInterface::ShowMessage(cmdstr);
+      #endif
+      
+      current->ConfigurationChanged(false);
+      
+      // go through sub commands
+      if ((current->GetChildCommand(0)) != NULL)
+         ResetBranchCommandChanged(current, 0);
+      
+      current = current->GetNext();
+   }
+   
+   #ifdef DEBUG_COMMAND_CHANGED
+   MessageInterface::ShowMessage
+      ("===> GmatCommandUtil::ResetCommandSequenceChanged() leaving\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ResetBranchCommandChanged(GmatCommand *brCmd, Integer level)
+//------------------------------------------------------------------------------
+void GmatCommandUtil::ResetBranchCommandChanged(GmatCommand *brCmd, Integer level)
+{
+   GmatCommand* current = brCmd;
+   Integer childNo = 0;
+   GmatCommand* nextInBranch = NULL;
+   GmatCommand* child;
+   std::string cmdstr;
+   
+   while((child = current->GetChildCommand(childNo)) != NULL)
+   {
+      nextInBranch = child;
+      
+      while ((nextInBranch != NULL) && (nextInBranch != current))
+      {         
+         #ifdef DEBUG_COMMAND_CHANGED
+         for (int i=0; i<=level; i++)
+            cmdstr = "---" + cmdstr;         
+         cmdstr = "--- " + nextInBranch->GetTypeName() + "\n";        
+         MessageInterface::ShowMessage("%s", cmdstr.c_str());
+         #endif
+         
+         nextInBranch->ConfigurationChanged(false);
+         
+         if (nextInBranch->GetChildCommand() != NULL)
+            ResetBranchCommandChanged(nextInBranch, level+1);
+         
+         nextInBranch = nextInBranch->GetNext();
+      }
+      
+      ++childNo;
+   }
+   
+   #ifdef DEBUG_COMMAND_CHANGED
+   MessageInterface::ShowMessage
+      ("===> GmatCommandUtil::ResetBranchCommandChanged() leaving\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // bool HasCommandSequenceChanged(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /*
@@ -853,7 +937,13 @@ bool GmatCommandUtil::HasBranchCommandChanged(GmatCommand *brCmd, Integer level)
          #endif
          
          if (nextInBranch->HasConfigurationChanged())
+         {
+            #ifdef DEBUG_COMMAND_CHANGED
+            MessageInterface::ShowMessage
+               ("CommandUtil::HasBranchCommandChanged() returning true\n");
+            #endif
             return true;
+         }
          
          if (nextInBranch->GetChildCommand() != NULL)
             if (HasBranchCommandChanged(nextInBranch, level+1))

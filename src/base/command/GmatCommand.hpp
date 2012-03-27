@@ -206,7 +206,7 @@ public:
    virtual void        SetRunState(Gmat::RunState newState);
    
    bool                HasConfigurationChanged();
-   virtual void        ConfigurationChanged(bool tf, bool setAll = false);
+   virtual void        ConfigurationChanged(bool tf);
    virtual bool        HasAFunction();
    virtual bool        NeedsServerStartup();
    virtual bool        IsExecuting();

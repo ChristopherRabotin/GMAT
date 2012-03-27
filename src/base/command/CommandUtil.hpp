@@ -38,6 +38,8 @@ namespace GmatCommandUtil
    bool GMAT_API ClearCommandSeq(GmatCommand *seq, bool leaveFirstCmd = true,
                      bool callRunComplete = true);
    bool GMAT_API IsAfter(GmatCommand *cmd1, GmatCommand *cmd2);
+   void GMAT_API ResetCommandSequenceChanged(GmatCommand *cmd);
+   void GMAT_API ResetBranchCommandChanged(GmatCommand *brCmd, Integer level);
    bool GMAT_API HasCommandSequenceChanged(GmatCommand *cmd);
    bool GMAT_API HasBranchCommandChanged(GmatCommand *brCmd, Integer level);
    bool GMAT_API FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
