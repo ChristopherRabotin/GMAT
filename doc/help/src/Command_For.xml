@@ -280,7 +280,7 @@ Create Variable I
 
 BeginMissionSequence
 
-For I = 1:3
+For I = 1:1:3
   Propagate aPropagator(aSat, {aSat.Apoapsis})
 EndFor</code></programlisting>
     </informalexample>
