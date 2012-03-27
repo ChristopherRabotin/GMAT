@@ -29,8 +29,8 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis><code>A code snippet that shows the syntax of the command.
-Use <replaceable>replaceable</replaceable> for italic parts.</code></synopsis>
+    <synopsis>A code snippet that shows the syntax of the command.
+Use replaceable for italic parts and <literal>literal</literal> for bold parts.</synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -39,6 +39,9 @@ Use <replaceable>replaceable</replaceable> for italic parts.</code></synopsis>
     <para>The text description of the command. Use special formatting for
     <guilabel>command names</guilabel> and <guilabel>field
     names</guilabel>.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="LinkId"/>, <xref linkend="LinkId"/></para>
   </refsection>
 
   <refsection>

@@ -10,6 +10,10 @@
     <primary>For</primary>
   </indexterm>
 
+  <indexterm>
+    <primary>EndFor</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>For</refentrytitle>
 
@@ -29,10 +33,10 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis><code>For <replaceable>Index = values</replaceable>
-   <replaceable>script statements</replaceable>
-         :
-EndFor</code></synopsis>
+    <synopsis><literal>For </literal><replaceable>Index</replaceable><literal> = </literal><replaceable>Start</replaceable><literal>:</literal>[<replaceable>Increment</replaceable><literal>:</literal>]<replaceable>End</replaceable>
+    [<replaceable>script statement</replaceable>]
+    …
+<literal>EndFor</literal></synopsis>
   </refsynopsisdiv>
 
   <refsection>
@@ -42,10 +46,10 @@ EndFor</code></synopsis>
     that executes a nested set of script statements a specified number of
     times.</para>
 
-    <para><code><replaceable>values</replaceable></code> must have one of the
-    following forms:</para>
+    <para>The command argument must have one of the following forms:</para>
 
-    <para><code><replaceable>Start:End</replaceable></code></para>
+    <para><code><replaceable>Index</replaceable> =
+    <replaceable>Start</replaceable>:<replaceable>End</replaceable></code></para>
 
     <para>Increments <guilabel>Index</guilabel> from
     <guilabel>Start</guilabel> to <guilabel>End</guilabel> in steps of 1,
@@ -54,7 +58,8 @@ EndFor</code></synopsis>
     greater than <guilabel>End</guilabel>, then the script statements do not
     execute.</para>
 
-    <para><code><replaceable>Start:Increment:End</replaceable></code></para>
+    <para><code><replaceable>Index</replaceable> =
+    <replaceable>Start</replaceable>:<replaceable>Increment</replaceable>:<replaceable>End</replaceable></code></para>
 
     <para>Increments <guilabel>Index</guilabel> from
     <guilabel>Start</guilabel> to <guilabel>End</guilabel> in steps of
@@ -65,6 +70,9 @@ EndFor</code></synopsis>
     <guilabel>Start</guilabel> is less than <guilabel>End</guilabel> and
     <guilabel>Increment</guilabel> is negative, then the script statements do
     not execute.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref linkend="If"/>,
+    <xref linkend="While"/></para>
   </refsection>
 
   <refsection>

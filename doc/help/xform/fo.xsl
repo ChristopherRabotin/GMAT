@@ -496,5 +496,13 @@
             <xsl:value-of select="$body.start.indent"/>
         </xsl:attribute>
     </xsl:attribute-set>
-   
+
+    <xsl:template match="d:phrase[@role='ref_seealso']">
+        <xsl:call-template name="inline.italicseq"/>
+    </xsl:template>
+
+    <xsl:template match="d:refsynopsisdiv//d:literal">
+        <xsl:call-template name="inline.boldseq"/>
+    </xsl:template>
+
 </xsl:stylesheet>
