@@ -114,7 +114,7 @@ help-a4.pdf: help-a4.fo $(fopconf)
 training-a4.pdf: training-a4.fo $(fopconf)
 	$(FOP) $< $@
 
-help-letter.fo: help-pre.xml $(fostyle)
+help-letter.fo: help-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	$(XALAN) \
 	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
 	    -PARAM img.src.path src/ \
@@ -134,7 +134,7 @@ training-letter.fo: training-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	    -OUT $@ \
 	    $(ALL_XALANFLAGS)
 
-help-a4.fo: help-pre.xml $(fostyle)
+help-a4.fo: help-pre.xml fo.titlepage.templates.xsl $(fostyle)
 	$(XALAN) \
 	    -PARAM admon.graphics.path $(contribdir)/docbook-xsl-ns/images/ \
 	    -PARAM img.src.path src/ \
