@@ -26,6 +26,7 @@
 #include "ColorTypes.hpp"          // for namespace GmatColor::
 #include "MessageInterface.hpp"
 #include "Rendering.hpp"           // for DrawStringAt(), DrawSquare()
+#include "MdiChildGroundTrackFrame.hpp"
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -597,6 +598,10 @@ void GroundTrackCanvas::OnMouse(wxMouseEvent& event)
    
    if (event.Leaving())
       theStatusBar->SetStatusText("", 2);
+
+   
+   if (!((MdiChildGroundTrackFrame*)mParent)->IsActiveChild())
+      return;
    
    int width, height;
    int mouseX = event.GetX();
@@ -626,7 +631,7 @@ void GroundTrackCanvas::OnMouse(wxMouseEvent& event)
    mouseY = height - mouseY;
    double lon = (mouseX * (right*2) / width) - right;
    double lat = (mouseY * (top*2) / height) - top;
-   
+
    // if the mouse is within the texture map, show the latitude and longitude
    // in the status bar (LOJ: 2011.01.09 for bug 
    if ((lon >= -180.0 && lon <= 180.0) && (lat >= -90.0 && lat <= 90.0))
@@ -638,7 +643,7 @@ void GroundTrackCanvas::OnMouse(wxMouseEvent& event)
    else
       theStatusBar->SetStatusText("", 2);
    
-   #endif
+   #endif // #ifndef __SKIP_WRITE_MOUSE_POS__
    
    event.Skip();
 }

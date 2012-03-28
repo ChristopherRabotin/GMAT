@@ -17,7 +17,6 @@
 #include "GmatNotebook.hpp"
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"
-#include "TreeViewOptionDialog.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "UndockedMissionPanel.hpp"
 #include "MessageInterface.hpp"

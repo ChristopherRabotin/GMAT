@@ -57,7 +57,10 @@ public:
    void               SetDataType(GmatTree::ItemType type);
    wxTextCtrl*        GetScriptTextCtrl();
    void               SetScriptTextCtrl(wxTextCtrl *textCtrl);
+   void               SetActiveChild(bool active);
+   bool               IsActiveChild();
    void               UpdateGuiItem(int updateEdit, int updateAnimation);
+   void               UpdateActiveChild();
    
 #ifdef __USE_STC_EDITOR__
    Editor* GetEditor();
@@ -68,6 +71,8 @@ public:
    void OverrideDirty(bool flag);
    bool IsDirty();
    bool CanClose();
+   
+   wxWindow* GetMdiParent();
    
    virtual wxWindow* GetAssociatedWindow();
    virtual void SetAssociatedWindow(wxWindow *win);
@@ -89,12 +94,13 @@ protected:
    Integer        relativeZOrder;
    bool           usingSavedConfiguration;
 
-   wxString mPlotName;
+   wxString mChildName;
 
    bool mDirty;
    bool mOverrideDirty;
    bool mCanClose;
    bool mCanSaveLocation;
+   bool mIsActiveChild;
    GmatTree::ItemType mItemType;
    wxTextCtrl *theScriptTextCtrl;
    GmatMenuBar *theMenuBar;

@@ -858,6 +858,15 @@ GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
 
 
 //------------------------------------------------------------------------------
+// wxList* GetListOfMdiChildren()
+//------------------------------------------------------------------------------
+wxList* GmatMainFrame::GetListOfMdiChildren()
+{
+   return theMdiChildren;
+}
+
+
+//------------------------------------------------------------------------------
 // Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
 //            bool incScripts = false)
 //------------------------------------------------------------------------------
@@ -3005,6 +3014,7 @@ void GmatMainFrame::OnPause(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 {
    StopRunningMission();
+   theNotebook->Enable(true);
 }
 
 

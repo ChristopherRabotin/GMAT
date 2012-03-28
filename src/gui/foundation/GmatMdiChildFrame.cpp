@@ -79,12 +79,13 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    
    relativeZOrder          = maxZOrder++;
    usingSavedConfiguration = false;
-   mPlotName = name;
+   mChildName = name;
    theParent = parent;
    mDirty = false;
    mOverrideDirty = false;
    mCanClose = true;
    mCanSaveLocation = true;
+   mIsActiveChild = false;
    mItemType = type;
    theScriptTextCtrl = NULL;
    theMenuBar = NULL;
@@ -185,7 +186,7 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
 //------------------------------------------------------------------------------
 wxString GmatMdiChildFrame::GetPlotName()
 {
-   return mPlotName;
+   return mChildName;
 }
 
 //------------------------------------------------------------------------------
@@ -193,7 +194,7 @@ wxString GmatMdiChildFrame::GetPlotName()
 //------------------------------------------------------------------------------
 void GmatMdiChildFrame::SetPlotName(const wxString &name)
 {
-   mPlotName = name;
+   mChildName = name;
 }
 
 //------------------------------------------------------------------------------
@@ -257,6 +258,32 @@ void GmatMdiChildFrame::SetScriptTextCtrl(wxTextCtrl *textCtrl)
 }
 
 
+//------------------------------------------------------------------------------
+// void SetActiveChild(bool active)
+//------------------------------------------------------------------------------
+/**
+ * Sets isActiveChild flag for the current mdi child frame.
+ */
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::SetActiveChild(bool active)
+{
+   mIsActiveChild = active;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsActiveChild()
+//------------------------------------------------------------------------------
+/**
+ * Returns isActiveChild flag for the current mdi child frame.
+ */
+//------------------------------------------------------------------------------
+bool GmatMdiChildFrame::IsActiveChild()
+{
+   return mIsActiveChild;
+}
+
+
 #ifdef __USE_STC_EDITOR__
 //------------------------------------------------------------------------------
 // Editor* GetEditor()
@@ -314,6 +341,19 @@ bool GmatMdiChildFrame::CanClose()
 
 
 //------------------------------------------------------------------------------
+// wxWindow* GetMdiParent()
+//------------------------------------------------------------------------------
+/**
+ * Returns MdiParent frame of this MdiChild frame.
+ */
+//------------------------------------------------------------------------------
+wxWindow* GmatMdiChildFrame::GetMdiParent()
+{
+   return theParent;
+}
+
+
+//------------------------------------------------------------------------------
 // wxWindow* GetAssociatedWindow()
 //------------------------------------------------------------------------------
 wxWindow* GmatMdiChildFrame::GetAssociatedWindow()
@@ -348,6 +388,7 @@ void GmatMdiChildFrame::OnActivate(wxActivateEvent &event)
       ("GmatMdiChildFrame()::OnActivate calling UpdateGuiItem()\n");
    #endif
    UpdateGuiItem(1, 1);
+   UpdateActiveChild();
    
    relativeZOrder = maxZOrder++;
    #ifdef DEBUG_ACTIVATE
@@ -501,16 +542,16 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    
    #ifdef DEBUG_PERSISTENCE
    // ======================= begin temporary ==============================
-   MessageInterface::ShowMessage("*** Size of SCREEN %s is: width = %d, height = %d\n", mPlotName.c_str(), screenWidth, screenHeight);
-   MessageInterface::ShowMessage("Position of View plot %s is: x = %d, y = %d\n", mPlotName.c_str(), tmpX, tmpY);
-   MessageInterface::ShowMessage("Size of View plot %s is: width = %d, height = %d\n", mPlotName.c_str(), tmpW, tmpH);
+   MessageInterface::ShowMessage("*** Size of SCREEN %s is: width = %d, height = %d\n", mChildName.c_str(), screenWidth, screenHeight);
+   MessageInterface::ShowMessage("Position of View plot %s is: x = %d, y = %d\n", mChildName.c_str(), tmpX, tmpY);
+   MessageInterface::ShowMessage("Size of View plot %s is: width = %d, height = %d\n", mChildName.c_str(), tmpW, tmpH);
 //   MessageInterface::ShowMessage("Position of View plot %s in pixels rel. to parent window is: x = %d, y = %d\n",
-//                                 mPlotName.c_str(), (Integer) tmpX, (Integer) tmpY);
+//                                 mChildName.c_str(), (Integer) tmpX, (Integer) tmpY);
 //   MessageInterface::ShowMessage("Size of View plot %s in pixels rel. to parent window is: x = %d, y = %d\n",
-//                                 mPlotName.c_str(), (Integer) tmpW, (Integer) tmpH);
+//                                 mChildName.c_str(), (Integer) tmpW, (Integer) tmpH);
 //   wxPoint tmpPt = ScreenToClient(wxP);
 //   MessageInterface::ShowMessage("--- Position of View plot %s in client coords is: x = %d, y = %d\n",
-//                                 mPlotName.c_str(), (Integer) tmpPt.x, (Integer) tmpPt.y);
+//                                 mChildName.c_str(), (Integer) tmpPt.x, (Integer) tmpPt.y);
    // ======================= end temporary ==============================
    #endif
 
@@ -521,12 +562,12 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
        )
    {
       GmatBase *obj =
-         (Subscriber*)theGuiInterpreter->GetConfiguredObject(mPlotName.c_str());
+         (Subscriber*)theGuiInterpreter->GetConfiguredObject(mChildName.c_str());
 
       if (!obj || !obj->IsOfType("Subscriber"))
       {
          std::string errmsg = "Cannot find subscriber ";
-         errmsg += mPlotName + "\n";
+         errmsg += mChildName + "\n";
          throw SubscriberException(errmsg);
       }
       Subscriber *sub = (Subscriber*) obj;
@@ -667,4 +708,35 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::UpdateGuiItem() exiting\n");
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateActiveChild()
+//------------------------------------------------------------------------------
+/**
+ * Updates mdi child active flag by going through all the children.
+ */
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::UpdateActiveChild()
+{
+   wxList *mdiChildren = ((GmatMainFrame*)theParent)->GetListOfMdiChildren();
+   GmatMdiChildFrame *theChild = NULL;
+   wxNode *node = mdiChildren->GetFirst();
+   while (node)
+   {
+      theChild = (GmatMdiChildFrame *)node->GetData();
+      
+      #ifdef DEBUG_UPDATE_ACTIVE_CHILD
+      MessageInterface::ShowMessage
+         ("   theChild=%s\n", theChild->GetName().c_str());
+      #endif
+      
+      if (theChild->GetName().IsSameAs(mChildName))
+         theChild->SetActiveChild(true);
+      else
+         theChild->SetActiveChild(false);
+      
+      node = node->GetNext();
+   }
 }

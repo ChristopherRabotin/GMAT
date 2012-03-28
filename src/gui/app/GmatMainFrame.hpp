@@ -71,6 +71,7 @@ public:
    void GetActualClientSize(Integer *w, Integer *h, bool ignoreMissionTree);
    GmatMdiChildFrame* CreateChild(GmatTreeItemData *item, bool restore = true);
    GmatMdiChildFrame* GetChild(const wxString &name);
+   wxList* GetListOfMdiChildren();
    
    Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
                                 bool incScripts = false);
