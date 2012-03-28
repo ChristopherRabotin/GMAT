@@ -55,9 +55,9 @@ Use replaceable for italic parts and <literal>literal</literal> for bold parts.<
 
         <thead>
           <row>
-            <entry>Field</entry>
+            <entry>Option</entry>
 
-            <entry>Accepted Data Types</entry>
+            <entry>Description</entry>
           </row>
         </thead>
 
@@ -73,15 +73,43 @@ Use replaceable for italic parts and <literal>literal</literal> for bold parts.<
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>a list of data types from the Field Spec</para>
+                    <para>a list of data types from the Data Type column of
+                    the Field Spec</para>
                   </listitem>
                 </varlistentry>
 
                 <varlistentry>
-                  <term>Limits</term>
+                  <term>Allowed Values</term>
 
                   <listitem>
-                    <para>an equation form of the limits of the field</para>
+                    <para>a range spec of list of allowed values from the
+                    Range column of the Field Spec</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get, or only one (from the Access column of the
+                    Field Spec)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>value from the Default Value column of the Field
+                    Spec</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script, or only one</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -103,10 +131,34 @@ Use replaceable for italic parts and <literal>literal</literal> for bold parts.<
                 </varlistentry>
 
                 <varlistentry>
-                  <term>Limits</term>
+                  <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <guilabel>Index</guilabel> &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>Start</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>

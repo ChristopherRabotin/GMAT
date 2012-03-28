@@ -96,11 +96,12 @@
           <row>
             <entry><guilabel>Index</guilabel></entry>
 
-            <entry><para><guilabel>Index</guilabel> is the independent
-            variable in a <guilabel>For</guilabel> loop and it is computed
-            according to the arithmetic progression defined by the values for
-            <guilabel>Start</guilabel>, <guilabel>Increment</guilabel>, and
-            <guilabel>End</guilabel>. </para><variablelist>
+            <entry><para>The independent variable in a
+            <guilabel>For</guilabel> loop. <guilabel>Index</guilabel> is
+            computed according to the arithmetic progression defined by the
+            values for <guilabel>Start</guilabel>,
+            <guilabel>Increment</guilabel>, and <guilabel>End</guilabel>.
+            </para><variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -110,10 +111,34 @@
                 </varlistentry>
 
                 <varlistentry>
-                  <term>Limits</term>
+                  <term>Allowed Values</term>
 
                   <listitem>
                     <para>-∞ &lt; <guilabel>Index</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Variable I</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -135,10 +160,34 @@
                 </varlistentry>
 
                 <varlistentry>
-                  <term>Limits</term>
+                  <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <guilabel>Index</guilabel> &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>Start</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -166,10 +215,34 @@
                 </varlistentry>
 
                 <varlistentry>
-                  <term>Limits</term>
+                  <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <guilabel>Index</guilabel> &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>Increment</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>no</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -191,10 +264,34 @@
                 </varlistentry>
 
                 <varlistentry>
-                  <term>Limits</term>
+                  <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <guilabel>Index</guilabel> &lt; ∞</para>
+                    <para>-∞ &lt; <guilabel>End</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>10</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>no</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
