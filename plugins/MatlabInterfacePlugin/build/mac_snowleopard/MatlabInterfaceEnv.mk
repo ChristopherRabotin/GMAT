@@ -46,8 +46,9 @@ DEBUG_BUILD = 0
 
 # Select the base library - base library now built without MATLAB
 BASE_LIBRARY = GmatBase
-BASE_LIB_LOCATION = ../bin/
 BUNDLE_LIB_LOCATION = ../bin/GMAT.app/Contents/Frameworks/
+# BASE_LIB_LOCATION is only used on Mac - must point to libGmatBase outside of bundle for Console GMAT
+BASE_LIB_LOCATION = $(BUNDLE_LIB_LOCATION)
 
 # Compiler options
 CPP = g++

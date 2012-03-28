@@ -47,6 +47,8 @@ DEBUG_BUILD = 0
 
 # Select the base library
 BASE_LIBRARY = GmatBase
+# BASE_LIB_LOCATION is only used on Mac - must point to libGmatBase outside of bundle for Console GMAT
+BASE_LIB_LOCATION = ../$(GMAT_BIN_DIR)/GMAT.app/Contents/Frameworks/
 
 # Compiler options
 CPP = g++

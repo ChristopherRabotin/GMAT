@@ -30,7 +30,7 @@ USE_SPICE = 1
 ifeq ($(USE_SPICE), 1)
 # location of CSPICE headers and libraries
 # *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
-SPICE_DIR = /Users/djc/TS_Code/Gmat3rdParty
+SPICE_DIR = /Applications/CSPICE_N0064
 SPICE_INCLUDE = -I$(SPICE_DIR)/$(CSPICE_VER)/include
 SPICE_LIB_DIR = $(SPICE_DIR)/$(CSPICE_VER)/lib
 SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
@@ -46,6 +46,8 @@ endif
 
 # Select the base library
 BASE_LIBRARY = GmatBase
+# BASE_LIB_LOCATION is only used on Mac - must point to libGmatBase outside of bundle for Console GMAT
+BASE_LIB_LOCATION = ../$(GMAT_BIN_DIR)/GMAT.app/Contents/Frameworks/
 
 # Compiler options
 CPP = g++
