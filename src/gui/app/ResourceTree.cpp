@@ -867,7 +867,7 @@ wxTreeItemId ResourceTree::AddObjectToTree(GmatBase *obj, bool showDebug)
    {
       #ifdef DEBUG_ADD_OBJECT
       MessageInterface::ShowMessage
-         ("   Now appending '%s' to node %d\n", name.c_str(), itemId);
+         ("   Now appending '%s' to node %s\n", name.c_str(), itemId.IsOk() ? "OK" : "Item Not Found");
       #endif
       
       AppendItem(itemId, name, itemIcon, -1, new GmatTreeItemData(name, itemType));
@@ -875,8 +875,8 @@ wxTreeItemId ResourceTree::AddObjectToTree(GmatBase *obj, bool showDebug)
    
    if (showDebug)
       MessageInterface::ShowMessage
-         ("ResourceTree::AddObjectToTree() returning itemId = %d\n\n", itemId);
-   
+               ("ResourceTree::AddObjectToTree() returning itemId = '%s'\n\n",
+                itemId.IsOk() ? "OK" : "Item Not Found");
    return itemId;
 }
 
