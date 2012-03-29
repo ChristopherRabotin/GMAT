@@ -369,6 +369,7 @@ void HarmonicGravity::SetTide (const Real& jday,      const bool& removepermtide
             STide[4][m] += k_plus[m]/(2*n+1) * (FMoon*Sin(m*MoonPolar[2]) + FSun*Sin(m*SunPolar[2]));
          }
       }
+
    //------------------------------------------------------------------------------
    // TechNote32 Step 2, p.60
    // compute GMST (or add it as a function input)
@@ -404,7 +405,10 @@ void HarmonicGravity::SetTide (const Real& jday,      const bool& removepermtide
 
    // compute (2,0) freq dependent terms, IERS eqn 5a, p.60, (n=2,m=0)
    Real freq_dep_C20 = 0;
-   for (Integer f=0;  f<=Table63bDim1;  ++f)
+   
+   // This overflows the array:
+   //for (Integer f=0;  f<=Table63bDim1;  ++f)
+   for (Integer f=0;  f<Table63bDim1;  ++f)
    {
       Real theta_f = 0;
       for (Integer j=0;  j<=4;  ++j)
@@ -419,7 +423,9 @@ void HarmonicGravity::SetTide (const Real& jday,      const bool& removepermtide
    Real freq_dep_S21 = 0;
    Integer m = 1;
 
-   for (Integer f=0;  f<=Table63aDim1;  ++f)
+   // This overflows the array:
+   //for (Integer f=0;  f<=Table63aDim1;  ++f)
+   for (Integer f=0;  f<Table63aDim1;  ++f)
    {
       Real theta_f = 0;
       for (Integer j=0;  j<=4;  ++j)
@@ -435,7 +441,10 @@ void HarmonicGravity::SetTide (const Real& jday,      const bool& removepermtide
    Real freq_dep_C22 = 0;
    Real freq_dep_S22 = 0;
    m = 2;
-   for (Integer f=0;  f<=Table63cDim1;  ++f)
+
+   // This overflows the array:
+   //for (Integer f=0;  f<=Table63cDim1;  ++f)
+   for (Integer f=0;  f<Table63cDim1;  ++f)
    {
       Real theta_f = 0;
       for (Integer j=0;  j<=4;  ++j)
@@ -444,6 +453,7 @@ void HarmonicGravity::SetTide (const Real& jday,      const bool& removepermtide
       freq_dep_C22 += ( Table63c[f][5]*Cos(theta_f));
       freq_dep_S22 += (-Table63c[f][5]*Sin(theta_f));
    }
+
    CTide[2][2] += freq_dep_C22 * 1e-12;
    STide[2][2] += freq_dep_S22 * 1e-12;
 
@@ -468,6 +478,16 @@ void HarmonicGravity::SetTide (const Real& jday,      const bool& removepermtide
    // IERS Step 3 (correct for permanent tide if needed, IERS p.66)
    if (removepermtide)  // if input C20 includes permanent tide then remove it
       CTide[2][0] -= (4.4228E-08)*(-0.31460)*k[2][0];
+   
+   #ifdef DEBUG_TIDE
+      MessageInterface::ShowMessage("Tide coefficients:\n");
+      for (Integer n=0;  n<5;  ++n)   // wcs < instead of <=
+         for (Integer m=0;  m<=n;  ++m)
+         {
+            MessageInterface::ShowMessage("   C[%d][%d] = %le, S[%d][%d] = %le\n", n, m,
+               CTide[n][m], n, m, STide[n][m]);
+         }
+   #endif      
 }
 
 //------------------------------------------------------------------------------
