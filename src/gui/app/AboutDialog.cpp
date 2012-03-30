@@ -151,6 +151,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    use = use + " - Uses TSPlot\n";
    use = use + " - Uses Perl Compatible Regular Expressions\n";
    use = use + " - Uses JPL SPICE Library\n";
+   use = use + " - Uses IAU SOFA Library\n";
    use = use + " - Planetary images courtesy of JPL/Caltech/USGS, Celestia \n";
    use = use + "   Motherlode, Bjorn Jonsson, and NASA World Wind";
    wxStaticText *useText = new wxStaticText(this, -1, use);
