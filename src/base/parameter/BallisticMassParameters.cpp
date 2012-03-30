@@ -399,7 +399,7 @@ GmatBase* SRPArea::Clone(void) const
 // TotalMass(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 TotalMass::TotalMass(const std::string &name, GmatBase *obj)
-   : BallisticMassReal(name, "TotalMass", obj, "Total Mass", "")
+   : BallisticMassReal(name, "TotalMass", obj, "Total Mass", "", false)
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;

@@ -76,14 +76,12 @@ const std::string OrbitData::VALID_ANGLE_PARAM_NAMES[HYPERBOLIC_DLA - SEMILATUS_
    "DLA"
 };
 
-const std::string OrbitData::VALID_OTHER_KEPLERIAN_PARAM_NAMES[ENERGY - MM + 1] =
+const std::string OrbitData::VALID_OTHER_ORBIT_PARAM_NAMES[ENERGY - MM + 1] =
 {
    "MeanMotion",
    "VelApoapsis",
    "VelPeriapsis",
    "OrbitPeriod",
-   "RadApoapsis",
-   "RadPeriapsis",
    "C3Energy",
    "Energy"
 };
@@ -309,6 +307,14 @@ void OrbitData::SetReal(Integer item, Real rval)
       break;
    case KEP_HA:
       mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("HA"), rval);
+      break;
+      
+      // ModifiedKeplerian
+   case MODKEP_RADAPO:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadApo"), rval);
+      break;
+   case MODKEP_RADPER:
+      mSpacecraft->SetRealParameter(mSpacecraft->GetParameterID("RadPer"), rval);
       break;
       
       // Spherical RADEC
@@ -728,6 +734,41 @@ Real OrbitData::GetKepReal(Integer item)
 
 
 //------------------------------------------------------------------------------
+// Real GetModKepReal(Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Modified Keplerian element
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetModKepReal(Integer item)
+{
+   #ifdef DEBUG_ORBITDATA_RUN
+   MessageInterface::ShowMessage("OrbitData::GetModKepReal() item=%d\n", item);
+   #endif
+      
+   Rvector6 state = GetCartState();
+   
+   if (mOriginDep && mOrigin->GetName() != "Earth")
+   {
+      state = state - mOrigin->GetMJ2000State(mCartEpoch);
+   }
+   
+   switch (item)
+   {
+   case MODKEP_RADAPO:
+      return GmatCalcUtil::CalculateKeplerianData("RadApoapsis", state, mGravConst);
+   case MODKEP_RADPER:
+      return GmatCalcUtil::CalculateKeplerianData("RadPeriapsis", state, mGravConst);
+      
+   default:
+      throw ParameterException
+         ("OrbitData::GetModKepReal() Not readable or unknown item id: " +
+          GmatRealUtil::ToString(item));
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // Real GetOtherKepReal(Integer item)
 //------------------------------------------------------------------------------
 /**
@@ -748,7 +789,7 @@ Real OrbitData::GetOtherKepReal(Integer item)
       state = state - mOrigin->GetMJ2000State(mCartEpoch);
    }
    
-   return GmatCalcUtil::CalculateKeplerianData(VALID_OTHER_KEPLERIAN_PARAM_NAMES[item-MM], state, mGravConst);
+   return GmatCalcUtil::CalculateKeplerianData(VALID_OTHER_ORBIT_PARAM_NAMES[item-MM], state, mGravConst);
    
 }
 

@@ -32,12 +32,19 @@ namespace GmatParam
 {
    enum ParameterKey
    {
-      SYSTEM_PARAM, USER_PARAM, KeyCount
+      SYSTEM_PARAM,
+      USER_PARAM,
+      KeyCount
    };
    
    enum DepObject
    {
-      COORD_SYS, ORIGIN, NO_DEP, OWNED_OBJ, DepObjectCount
+      COORD_SYS,
+      ORIGIN,
+      NO_DEP,
+      OWNED_OBJ,
+      ATTACHED_OBJ,
+      DepObjectCount
    };
    
    enum CycleType

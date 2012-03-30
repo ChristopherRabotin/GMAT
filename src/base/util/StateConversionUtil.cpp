@@ -1287,6 +1287,18 @@ Real StateConversionUtil::TrueToEccentricAnomaly(Real taRadians, Real ecc, bool 
 //------------------------------------------------------------------------------
 // static Real TrueToHyperbolicAnomaly(Real taRadians, Real ecc, bool modBy2Pi = false)
 //------------------------------------------------------------------------------
+/**
+ * Converts true anomaly to hyperbolic anomaly.
+ *
+ * @param  taRadians  True anomaly in radians
+ * @param  ecc        Eccentricity
+ * @param  modBy2Pi  If true it makes output mod by 2 pi
+ *
+ * @return  Hyperbolic anomaly in radians, 0.0 if eccentricity is less than 1.0 + KEP_TOL
+ *
+ * @exception  UtilityException is throw if "eccentricity * cos(trueAnomaly)" is -1.
+ */
+//------------------------------------------------------------------------------
 Real StateConversionUtil::TrueToHyperbolicAnomaly(Real taRadians, Real ecc, bool modBy2Pi)
 {
    #ifdef DEBUG_ANOMALY
@@ -1304,8 +1316,10 @@ Real StateConversionUtil::TrueToHyperbolicAnomaly(Real taRadians, Real ecc, bool
          throw UtilityException("StateConversionUtil::TrueToEccentricAnomaly - error converting - divide by zero.\n");
       }
       Real sinhHa = (Sin(taRadians) * Sqrt(ecc*ecc - 1.0)) / (1.0 + eccCosTa);
-      Real coshHa = (ecc + cosTa) / (1.0 + eccCosTa);
-      ha = ATanh(sinhHa / coshHa);
+      // Updated to follow Spec Mod. 1.2.19 HA (LOJ: 2012.02.22) - Clean up later
+      //Real coshHa = (ecc + cosTa) / (1.0 + eccCosTa);
+      //ha = ATanh(sinhHa / coshHa);
+      ha = ASinh(sinhHa);
    }
 #ifdef DEBUG_ANOMALY
    else

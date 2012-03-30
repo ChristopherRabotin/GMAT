@@ -58,6 +58,9 @@ public:
    Real GetKepReal(Integer item);
    Real GetKepReal(const std::string &str);
    
+   Real GetModKepReal(Integer item);
+   Real GetModKepReal(const std::string &str);
+   
    Real GetOtherKepReal(Integer item);
    Real GetOtherKepReal(const std::string &str);
    
@@ -130,7 +133,7 @@ protected:
    
    // Keplerian items
    enum {KEP_SMA = Item1Count, KEP_ECC, KEP_INC, KEP_RAAN, KEP_AOP, KEP_TA, KEP_MA,
-         KEP_EA, KEP_HA, KEP_RADN, KEP_STATE, Item2Count};
+         KEP_EA, KEP_HA, KEP_RADN, KEP_STATE, MODKEP_RADAPO, MODKEP_RADPER, Item2Count};
    
    // Spherical RADEC items
    enum {RADEC_RMAG = Item2Count, RADEC_RA, RADEC_DEC, RADEC_VMAG, RADEC_RAV, RADEC_DECV,
@@ -141,8 +144,7 @@ protected:
          AZIFPA_FPA, Item4Count};
    
    // Other orbit items
-   enum {MM = Item4Count, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, RAD_APOAPSIS,
-         RAD_PERIAPSIS, C3_ENERGY, ENERGY, Item5Count};
+   enum {MM = Item4Count, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, C3_ENERGY, ENERGY, Item5Count};
    
    enum {SEMILATUS_RECTUM = Item5Count, HMAG, HX, HY, HZ, BETA_ANGLE, HYPERBOLIC_RLA,
          HYPERBOLIC_DLA, Item6Count};
@@ -166,7 +168,7 @@ protected:
    static const std::string VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount];
    static const Real        ORBIT_DATA_TOLERANCE;
    static const std::string VALID_ANGLE_PARAM_NAMES[HYPERBOLIC_DLA - SEMILATUS_RECTUM + 1];
-   static const std::string VALID_OTHER_KEPLERIAN_PARAM_NAMES[ENERGY - MM + 1];
+   static const std::string VALID_OTHER_ORBIT_PARAM_NAMES[ENERGY - MM + 1];
 };
 #endif // OrbitData_hpp
 

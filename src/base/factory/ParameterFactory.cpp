@@ -199,9 +199,9 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    if (ofType == "OrbitPeriod")
       return new OrbitPeriod(withName);
    if (ofType == "RadApo")
-      return new RadApoapsis(withName);
+      return new ModKepRadApo(withName);
    if (ofType == "RadPer")
-      return new RadPeriapsis(withName);
+      return new ModKepRadPer(withName);
    if (ofType == "C3Energy")
       return new C3Energy(withName);
    if (ofType == "Energy")
@@ -294,13 +294,15 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new Quat3(withName);
    if (ofType == "Q4" || ofType == "q4")
       return new Quat4(withName);
-      
-   if (ofType == "AngularVelocityX" || ofType == "AngVelX")
-      return new AngVelX(withName);
-   if (ofType == "AngularVelocityY" || ofType == "AngVelY")
-      return new AngVelY(withName);
-   if (ofType == "AngularVelocityZ" || ofType == "AngVelZ")
-      return new AngVelZ(withName);
+   if (ofType == "Quaternion")
+      return new Quaternion(withName);
+   
+   if (ofType == "AngularVelocityX")
+      return new AngularVelocityX(withName);
+   if (ofType == "AngularVelocityY")
+      return new AngularVelocityY(withName);
+   if (ofType == "AngularVelocityZ")
+      return new AngularVelocityZ(withName);
    if (ofType == "EulerAngleRate1")
       return new EulerAngleRate1(withName);
    if (ofType == "EulerAngleRate2")
@@ -441,6 +443,8 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("HA");
       creatables.push_back("MM");
       creatables.push_back("Keplerian");
+      creatables.push_back("RadApo");
+      creatables.push_back("RadPer");
       creatables.push_back("ModKeplerian");
 
       // Spherical parameters
@@ -474,8 +478,6 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Apoapsis");
       creatables.push_back("Periapsis");
       creatables.push_back("OrbitPeriod");
-      creatables.push_back("RadApo");
-      creatables.push_back("RadPer");
       creatables.push_back("C3Energy");
       creatables.push_back("Energy");
 
@@ -534,6 +536,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Q2");
       creatables.push_back("Q3");
       creatables.push_back("Q4");
+      creatables.push_back("Quaternion");
       creatables.push_back("AngularVelocityX");
       creatables.push_back("AngularVelocityY");
       creatables.push_back("AngularVelocityZ");

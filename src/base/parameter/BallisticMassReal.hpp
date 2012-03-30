@@ -31,7 +31,7 @@ public:
 
    BallisticMassReal(const std::string &name, const std::string &typeStr, 
                      GmatBase *obj, const std::string &desc,
-                     const std::string &unit);
+                     const std::string &unit, bool isSettable = true);
    BallisticMassReal(const BallisticMassReal &copy);
    BallisticMassReal& operator=(const BallisticMassReal &right);
    virtual ~BallisticMassReal();

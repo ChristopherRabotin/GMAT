@@ -36,6 +36,7 @@ public:
    const StringArray& GetTypesOfParameters();
    const StringArray& GetNamesOfParameters();
    Gmat::ObjectType GetObjectType(const std::string &type);
+   Gmat::ObjectType GetOwnedObjectType(const std::string &type);
    GmatParam::DepObject GetDepObjectType(const std::string &name);
    bool IsPlottable(const std::string &type);
    bool IsReportable(const std::string &type);

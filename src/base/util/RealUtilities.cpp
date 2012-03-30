@@ -483,7 +483,13 @@ Real GmatMathUtil::ASinh (Real x, Real cycleInRad)
 #ifndef _MSC_VER  // if not Microsoft Visual C++
    return (cycleInRad/TWO_PI)*asinh(x);
 #else
-   return 0.0;
+   Real asinh = 0.0;
+	if (x > 0)
+		asinh =  log(x + sqrt(x * x + 1));
+	else
+		asinh = -log(-x + sqrt(x * x + 1));
+   
+   return (cycleInRad/TWO_PI) * asinh;
 #endif
 }
 
@@ -499,7 +505,13 @@ Real GmatMathUtil::ACosh (Real x, Real cycleInRad)
 #ifndef _MSC_VER  // if not Microsoft Visual C++
    return (cycleInRad/TWO_PI)*acosh(x);
 #else
-   return 0.0;
+   Real acosh = 0.0;
+	if (x > 0.0)
+		acosh =  log(x + sqrt(x * x - 1));
+	else
+		acosh = -log(-x + sqrt(x * x - 1));
+   
+   return (cycleInRad/TWO_PI) * acosh;
 #endif
 }
 
@@ -520,7 +532,6 @@ Real GmatMathUtil::ATanh (Real x, Real cycleInRad)
 #ifndef _MSC_VER  // if not Microsoft Visual C++
    return (cycleInRad/TWO_PI) * atanh(x);
 #else
-   //return 0.0;
    Real atanh = (0.5) * Log((1.0+x)/(1.0-x));
    return (cycleInRad/TWO_PI) * atanh;
 #endif

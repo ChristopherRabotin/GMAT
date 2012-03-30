@@ -17,7 +17,7 @@
 /**
  * Implements Keplerian related parameter classes.
  *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepEA, KepHA,
- *   KepMM, KepElem, ModKepElem
+ *   KepMM, KepElem, ModKepRadApo, ModKepRadPer, ModKepElem
  */
 //------------------------------------------------------------------------------
 
@@ -1391,11 +1391,247 @@ GmatBase* KepElem::Clone(void) const
 
 
 //==============================================================================
+//                              ModKepRadApo
+//==============================================================================
+/**
+ * Implements radius of apoapsis.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// ModKepRadApo(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+ModKepRadApo::ModKepRadApo(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RadApo", obj, "Radius at Apoapsis", "Km",
+               GmatParam::ORIGIN, MODKEP_RADAPO, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+}
+
+
+//------------------------------------------------------------------------------
+// ModKepRadApo(const ModKepRadApo &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+ModKepRadApo::ModKepRadApo(const ModKepRadApo &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const ModKepRadApo& operator=(const ModKepRadApo &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const ModKepRadApo&
+ModKepRadApo::operator=(const ModKepRadApo &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~ModKepRadApo()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+ModKepRadApo::~ModKepRadApo()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool ModKepRadApo::Evaluate()
+{
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
+   mRealValue = OrbitData::GetModKepReal(MODKEP_RADAPO);    
+   
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* ModKepRadApo::Clone(void) const
+{
+   return new ModKepRadApo(*this);
+}
+
+
+//==============================================================================
+//                              ModKepRadPer
+//==============================================================================
+/**
+ * Implements radius of periapsis.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// ModKepRadPer(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+ModKepRadPer::ModKepRadPer(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RadPer", obj, "Radius at Periapsis", "Km",
+               GmatParam::ORIGIN, MODKEP_RADPER, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+}
+
+
+//------------------------------------------------------------------------------
+// ModKepRadPer(const ModKepRadPer &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+ModKepRadPer::ModKepRadPer(const ModKepRadPer &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const ModKepRadPer& operator=(const ModKepRadPer &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const ModKepRadPer&
+ModKepRadPer::operator=(const ModKepRadPer &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~ModKepRadPer()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+ModKepRadPer::~ModKepRadPer()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool ModKepRadPer::Evaluate()
+{
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
+   mRealValue = OrbitData::GetModKepReal(MODKEP_RADPER);    
+   
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* ModKepRadPer::Clone(void) const
+{
+   return new ModKepRadPer(*this);
+}
+
+
+//==============================================================================
 //                              ModKepElem
 //==============================================================================
 /**
  * Implements Keplerian Elements class.
- *   6 elements: RadPeriapais, RadApoapsis, KepInc, KepRAAN, KepAOP, KepTA
+ *   6 elements: ModKepRadPer, ModKepRadApo, KepInc, KepRAAN, KepAOP, KepTA
  */
 //------------------------------------------------------------------------------
 

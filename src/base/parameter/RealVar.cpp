@@ -64,6 +64,7 @@ RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
  * @param <ownerType> object type who owns this parameter as property
  * @param <isTimeParam> true if parameter is time related, false otherwise
  * @param <isSettable> true if parameter is settable
+ * @param <ownedObjType> Type of the object which owned by owner or attached to owner
  */
 //------------------------------------------------------------------------------
 RealVar::RealVar(const std::string &name, const std::string &valStr,

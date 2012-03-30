@@ -7622,6 +7622,7 @@ void Moderator::CreateDefaultParameters()
    CreateParameter("Q2", "DefaultSC.Q2");
    CreateParameter("Q3", "DefaultSC.Q3");
    CreateParameter("Q4", "DefaultSC.Q4");
+   CreateParameter("Quaternion", "DefaultSC.Quaternion");
    CreateParameter("AngularVelocityX", "DefaultSC.AngularVelocityX");
    CreateParameter("AngularVelocityY", "DefaultSC.AngularVelocityY");
    CreateParameter("AngularVelocityZ", "DefaultSC.AngularVelocityZ");

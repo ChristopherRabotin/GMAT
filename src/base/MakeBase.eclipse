@@ -384,6 +384,7 @@ OBJECTS = \
     parameter/AttitudeData.o \
     parameter/AttitudeParameters.o \
     parameter/AttitudeReal.o \
+    parameter/AttitudeString.o \
     parameter/BallisticMassParameters.o \
     parameter/BallisticMassReal.o \
     parameter/BooleanWrapper.o \

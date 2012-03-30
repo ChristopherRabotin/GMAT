@@ -36,7 +36,8 @@ public:
              const std::string &unit = "",
              GmatParam::DepObject depObj = GmatParam::NO_DEP,
              Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
-             bool isTimeParam = false, bool isSettable = false);
+             bool isTimeParam = false, bool isSettable = false,
+             Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT);
    StringVar(const StringVar &copy);
    StringVar& operator= (const StringVar& right);
    virtual ~StringVar();

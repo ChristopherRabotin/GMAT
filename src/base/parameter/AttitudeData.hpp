@@ -35,12 +35,15 @@ class GMAT_API AttitudeData : public RefData
 {
 public:
 
-   AttitudeData();
+   AttitudeData(const std::string name = "");
    AttitudeData(const AttitudeData &data);
    AttitudeData& operator= (const AttitudeData& right);
    virtual ~AttitudeData();
    
-   Real GetAttitudeReal(Integer item);
+   Real GetReal(Integer item);
+   void SetReal(Integer item, Real value);
+   std::string GetString(Integer item);
+   void        SetString(Integer item, const std::string &value);
    
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
@@ -59,31 +62,32 @@ protected:
    
    enum 
    {
-      DCM1_1,
-      DCM1_2,
-      DCM1_3,
-      DCM2_1,
-      DCM2_2,
-      DCM2_3,
-      DCM3_1,
-      DCM3_2,
-      DCM3_3,
-      QUAT1, 
-      QUAT2, 
-      QUAT3, 
-      QUAT4, 
-      EULERANGLE1,
-      EULERANGLE2,
-      EULERANGLE3,
+      DCM_11,
+      DCM_12,
+      DCM_13,
+      DCM_21,
+      DCM_22,
+      DCM_23,
+      DCM_31,
+      DCM_32,
+      DCM_33,
+      QUAT_1, 
+      QUAT_2, 
+      QUAT_3, 
+      QUAT_4,
+      QUATERNION,
+      EULER_ANGLE_1,
+      EULER_ANGLE_2,
+      EULER_ANGLE_3,
       MRP_1,  // Dunn Added
       MRP_2,  // Dunn Added
       MRP_3,  // Dunn Added
-      ANGVELX, 
-      ANGVELY, 
-      ANGVELZ,
-      EULERANGLERATE1,
-      EULERANGLERATE2,
-      EULERANGLERATE3,
+      ANGULAR_VELOCITY_X, 
+      ANGULAR_VELOCITY_Y, 
+      ANGULAR_VELOCITY_Z,
+      EULER_ANGLE_RATE_1,
+      EULER_ANGLE_RATE_2,
+      EULER_ANGLE_RATE_3,
    };
    
    enum

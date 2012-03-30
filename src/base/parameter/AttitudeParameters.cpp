@@ -24,7 +24,7 @@
  * Implements Attitude related parameter classes.
  *    DCM11, DCM12, DCM13, DCM21, DCM22, DCM23, DCM31, DCM32, DCM33,
  *    Quat1, Quat2, Quat3, Quat4, EulerAngle1, EulerAngle2, EulerAngle3,
- *    MRP1 , MRP2 , MRP3 , AngVelX, AngVelY, AngVelZ, 
+ *    MRP1 , MRP2 , MRP3 , AngularVelocityX, AngularVelocityY, AngularVelocityZ, 
  *    EulerAngleRate1, EulerAngleRate2, EulerAngleRate3
  */
 //------------------------------------------------------------------------------
@@ -83,13 +83,25 @@ DCM11::~DCM11()
 //------------------------------------------------------------------------------
 bool DCM11::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM1_1);
+   mRealValue = AttitudeData::GetReal(DCM_11);
    
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM11::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_11, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM11::Clone(void) const
@@ -140,12 +152,24 @@ DCM12::~DCM12()
 //------------------------------------------------------------------------------
 bool DCM12::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM1_2);
+   mRealValue = AttitudeData::GetReal(DCM_12);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM12::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_12, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM12::Clone(void) const
@@ -196,12 +220,24 @@ DCM13::~DCM13()
 //------------------------------------------------------------------------------
 bool DCM13::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM1_3);
+   mRealValue = AttitudeData::GetReal(DCM_13);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM13::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_13, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM13::Clone(void) const
@@ -252,12 +288,24 @@ DCM21::~DCM21()
 //------------------------------------------------------------------------------
 bool DCM21::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM2_1);
+   mRealValue = AttitudeData::GetReal(DCM_21);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM21::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_21, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM21::Clone(void) const
@@ -308,12 +356,24 @@ DCM22::~DCM22()
 //------------------------------------------------------------------------------
 bool DCM22::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM2_2);
+   mRealValue = AttitudeData::GetReal(DCM_22);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM22::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_22, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM22::Clone(void) const
@@ -364,12 +424,24 @@ DCM23::~DCM23()
 //------------------------------------------------------------------------------
 bool DCM23::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM2_3);
+   mRealValue = AttitudeData::GetReal(DCM_23);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM23::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_23, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM23::Clone(void) const
@@ -420,12 +492,24 @@ DCM31::~DCM31()
 //------------------------------------------------------------------------------
 bool DCM31::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM3_1);
+   mRealValue = AttitudeData::GetReal(DCM_31);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM31::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_31, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM31::Clone(void) const
@@ -476,12 +560,24 @@ DCM32::~DCM32()
 //------------------------------------------------------------------------------
 bool DCM32::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM3_2);
+   mRealValue = AttitudeData::GetReal(DCM_32);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM32::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_32, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM32::Clone(void) const
@@ -532,12 +628,24 @@ DCM33::~DCM33()
 //------------------------------------------------------------------------------
 bool DCM33::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(DCM3_3);
+   mRealValue = AttitudeData::GetReal(DCM_33);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void DCM33::SetReal(Real val)
+{
+   AttitudeData::SetReal(DCM_33, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* DCM33::Clone(void) const
@@ -595,12 +703,24 @@ EulerAngle1::~EulerAngle1()
 //------------------------------------------------------------------------------
 bool EulerAngle1::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(EULERANGLE1);
+   mRealValue = AttitudeData::GetReal(EULER_ANGLE_1);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void EulerAngle1::SetReal(Real val)
+{
+   AttitudeData::SetReal(EULER_ANGLE_1, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
@@ -653,12 +773,24 @@ EulerAngle2::~EulerAngle2()
 //------------------------------------------------------------------------------
 bool EulerAngle2::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(EULERANGLE2);
+   mRealValue = AttitudeData::GetReal(EULER_ANGLE_2);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void EulerAngle2::SetReal(Real val)
+{
+   AttitudeData::SetReal(EULER_ANGLE_2, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
@@ -711,12 +843,24 @@ EulerAngle3::~EulerAngle3()
 //------------------------------------------------------------------------------
 bool EulerAngle3::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(EULERANGLE3);
+   mRealValue = AttitudeData::GetReal(EULER_ANGLE_3);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void EulerAngle3::SetReal(Real val)
+{
+   AttitudeData::SetReal(EULER_ANGLE_3, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
@@ -739,7 +883,7 @@ GmatBase* EulerAngle3::Clone(void) const
 // MRP1::MRP1(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 MRP1::MRP1(const std::string &name, GmatBase *obj)
-: AttitudeReal(name, "MRP1", obj, "Mod Rod Param 1", "")
+   : AttitudeReal(name, "MRP1", obj, "Mod Rod Param 1", "")
 {
    mColor = GmatColor::RED32;
 }
@@ -771,12 +915,24 @@ MRP1::~MRP1()
 //------------------------------------------------------------------------------
 bool MRP1::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(MRP_1);
+   mRealValue = AttitudeData::GetReal(MRP_1);
 
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void MRP1::SetReal(Real val)
+{
+   AttitudeData::SetReal(MRP_1, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
@@ -794,7 +950,7 @@ GmatBase* MRP1::Clone(void) const
 // MRP2::MRP2(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 MRP2::MRP2(const std::string &name, GmatBase *obj)
-: AttitudeReal(name, "MRP2", obj, "Mod Rod Param 2", "")
+  : AttitudeReal(name, "MRP2", obj, "Mod Rod Param 2", "")
 {
    mColor = GmatColor::GREEN32;
 }
@@ -826,12 +982,24 @@ MRP2::~MRP2()
 //------------------------------------------------------------------------------
 bool MRP2::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(MRP_2);
+   mRealValue = AttitudeData::GetReal(MRP_2);
 
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void MRP2::SetReal(Real val)
+{
+   AttitudeData::SetReal(MRP_2, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
@@ -849,7 +1017,7 @@ GmatBase* MRP2::Clone(void) const
 // MRP3::MRP3(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 MRP3::MRP3(const std::string &name, GmatBase *obj)
-: AttitudeReal(name, "MRP3", obj, "Mod Rod Param 3", "")
+   : AttitudeReal(name, "MRP3", obj, "Mod Rod Param 3", "")
 {
    mColor = GmatColor::BLUE32;
 }
@@ -881,12 +1049,24 @@ MRP3::~MRP3()
 //------------------------------------------------------------------------------
 bool MRP3::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(MRP_3);
+   mRealValue = AttitudeData::GetReal(MRP_3);
 
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void MRP3::SetReal(Real val)
+{
+   AttitudeData::SetReal(MRP_3, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
@@ -911,7 +1091,7 @@ GmatBase* MRP3::Clone(void) const
 // Quat1(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Quat1::Quat1(const std::string &name, GmatBase *obj)
-   : AttitudeReal(name, "Q1", obj, "Quaternion 1", "")
+   : AttitudeReal(name, "Q1", obj, "Quaternion 1", "", false)
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
@@ -945,7 +1125,7 @@ Quat1::~Quat1()
 //------------------------------------------------------------------------------
 bool Quat1::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(QUAT1);
+   mRealValue = AttitudeData::GetReal(QUAT_1);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
@@ -967,7 +1147,7 @@ GmatBase* Quat1::Clone(void) const
 // Quat2(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Quat2::Quat2(const std::string &name, GmatBase *obj)
-   : AttitudeReal(name, "Q2", obj, "Quaternion 2", "")
+   : AttitudeReal(name, "Q2", obj, "Quaternion 2", "", false)
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::YELLOW32;
@@ -1001,7 +1181,7 @@ Quat2::~Quat2()
 //------------------------------------------------------------------------------
 bool Quat2::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(QUAT2);
+   mRealValue = AttitudeData::GetReal(QUAT_2);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
@@ -1023,7 +1203,7 @@ GmatBase* Quat2::Clone(void) const
 // Quat3(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Quat3::Quat3(const std::string &name, GmatBase *obj)
-   : AttitudeReal(name, "Q3", obj, "Quaternion 3", "")
+   : AttitudeReal(name, "Q3", obj, "Quaternion 3", "", false)
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
@@ -1057,7 +1237,7 @@ Quat3::~Quat3()
 //------------------------------------------------------------------------------
 bool Quat3::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(QUAT3);
+   mRealValue = AttitudeData::GetReal(QUAT_3);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
@@ -1079,7 +1259,7 @@ GmatBase* Quat3::Clone(void) const
 // Quat4::Quat4(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Quat4::Quat4(const std::string &name, GmatBase *obj)
-   : AttitudeReal(name, "Q4", obj, "Quaternion 4", "")
+   : AttitudeReal(name, "Q4", obj, "Quaternion 4", "", false)
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
@@ -1113,7 +1293,7 @@ Quat4::~Quat4()
 //------------------------------------------------------------------------------
 bool Quat4::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(QUAT4);
+   mRealValue = AttitudeData::GetReal(QUAT_4);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
@@ -1127,6 +1307,60 @@ GmatBase* Quat4::Clone(void) const
 {
    return new Quat4(*this);
 }
+//------------------------------------------------------------------------------
+// Quaternion(const std::string &name = "", GmatBase *obj = NULL)
+//------------------------------------------------------------------------------
+Quaternion::Quaternion(const std::string &name, GmatBase *obj)
+   : AttitudeString(name, "Quaternion", obj, "Quaternion", "", true)
+{
+}
+//------------------------------------------------------------------------------
+// Quaternion(const Quaternion &copy)
+//------------------------------------------------------------------------------
+Quaternion::Quaternion(const Quaternion &copy)
+   : AttitudeString(copy)
+{
+}
+//------------------------------------------------------------------------------
+// Quaternion& operator=(const Quaternion &right)
+//------------------------------------------------------------------------------
+Quaternion& Quaternion::operator=(const Quaternion &right)
+{
+   if (this != &right)
+      AttitudeString::operator=(right);
+   
+   return *this;
+}
+//------------------------------------------------------------------------------
+// ~Quaternion()
+//------------------------------------------------------------------------------
+Quaternion::~Quaternion()
+{
+}
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool Quaternion::Evaluate()
+{
+   mStringValue = AttitudeData::GetString(QUATERNION);
+   return true;
+}
+//------------------------------------------------------------------------------
+// void SetString(const Rvector6 &val)
+//------------------------------------------------------------------------------
+void Quaternion::SetString(const std::string &val)
+{
+   AttitudeData::SetString(QUATERNION, val);
+   StringVar::SetString(val);
+}
+//------------------------------------------------------------------------------
+// GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* Quaternion::Clone(void) const
+{
+   return new Quaternion(*this);
+}
+
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -1135,12 +1369,12 @@ GmatBase* Quat4::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  AngVelX
+//  AngularVelocityX
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-// AngVelX::AngVelX(const std::string &name, GmatBase *obj)
+// AngularVelocityX::AngularVelocityX(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
-AngVelX::AngVelX(const std::string &name, GmatBase *obj)
+AngularVelocityX::AngularVelocityX(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "AngularVelocityX", obj, "Angular Velocity X", "deg/sec")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -1148,16 +1382,16 @@ AngVelX::AngVelX(const std::string &name, GmatBase *obj)
    #endif
 }
 //------------------------------------------------------------------------------
-// AngVelX(const AngVelX &copy)
+// AngularVelocityX(const AngularVelocityX &copy)
 //------------------------------------------------------------------------------
-AngVelX::AngVelX(const AngVelX &copy)
+AngularVelocityX::AngularVelocityX(const AngularVelocityX &copy)
    : AttitudeReal(copy)
 {
 }
 //------------------------------------------------------------------------------
-// AngVelX& operator=(const AngVelX &right)
+// AngularVelocityX& operator=(const AngularVelocityX &right)
 //------------------------------------------------------------------------------
-AngVelX& AngVelX::operator=(const AngVelX &right)
+AngularVelocityX& AngularVelocityX::operator=(const AngularVelocityX &right)
 {
    if (this != &right)
       AttitudeReal::operator=(right);
@@ -1165,17 +1399,17 @@ AngVelX& AngVelX::operator=(const AngVelX &right)
    return *this;
 }
 //------------------------------------------------------------------------------
-// ~AngVelX()
+// ~AngularVelocityX()
 //------------------------------------------------------------------------------
-AngVelX::~AngVelX()
+AngularVelocityX::~AngularVelocityX()
 {
 }
 //------------------------------------------------------------------------------
 // bool Evaluate()
 //------------------------------------------------------------------------------
-bool AngVelX::Evaluate()
+bool AngularVelocityX::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(ANGVELX);
+   mRealValue = AttitudeData::GetReal(ANGULAR_VELOCITY_X);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
@@ -1183,20 +1417,32 @@ bool AngVelX::Evaluate()
       return true;
 }
 //------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void AngularVelocityX::SetReal(Real val)
+{
+   AttitudeData::SetReal(ANGULAR_VELOCITY_X, val);
+   RealVar::SetReal(val);
+}
+//------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
-GmatBase* AngVelX::Clone(void) const
+GmatBase* AngularVelocityX::Clone(void) const
 {
-   return new AngVelX(*this);
+   return new AngularVelocityX(*this);
 }
 
 //------------------------------------------------------------------------------
-//  AngVelY
+//  AngularVelocityY
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-// AngVelY::AngVelY(const std::string &name, GmatBase *obj)
+// AngularVelocityY::AngularVelocityY(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
-AngVelY::AngVelY(const std::string &name, GmatBase *obj)
+AngularVelocityY::AngularVelocityY(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "AngularVelocityY", obj, "Angular Velocity Y", "deg/sec")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -1204,16 +1450,16 @@ AngVelY::AngVelY(const std::string &name, GmatBase *obj)
    #endif
 }
 //------------------------------------------------------------------------------
-// AngVelY(const AngVelY &copy)
+// AngularVelocityY(const AngularVelocityY &copy)
 //------------------------------------------------------------------------------
-AngVelY::AngVelY(const AngVelY &copy)
+AngularVelocityY::AngularVelocityY(const AngularVelocityY &copy)
    : AttitudeReal(copy)
 {
 }
 //------------------------------------------------------------------------------
-// AngVelY& operator=(const AngVelY &right)
+// AngularVelocityY& operator=(const AngularVelocityY &right)
 //------------------------------------------------------------------------------
-AngVelY& AngVelY::operator=(const AngVelY &right)
+AngularVelocityY& AngularVelocityY::operator=(const AngularVelocityY &right)
 {
    if (this != &right)
       AttitudeReal::operator=(right);
@@ -1221,17 +1467,17 @@ AngVelY& AngVelY::operator=(const AngVelY &right)
    return *this;
 }
 //------------------------------------------------------------------------------
-// ~AngVelY()
+// ~AngularVelocityY()
 //------------------------------------------------------------------------------
-AngVelY::~AngVelY()
+AngularVelocityY::~AngularVelocityY()
 {
 }
 //------------------------------------------------------------------------------
 // bool Evaluate()
 //------------------------------------------------------------------------------
-bool AngVelY::Evaluate()
+bool AngularVelocityY::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(ANGVELY);
+   mRealValue = AttitudeData::GetReal(ANGULAR_VELOCITY_Y);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
@@ -1239,20 +1485,32 @@ bool AngVelY::Evaluate()
       return true;
 }
 //------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void AngularVelocityY::SetReal(Real val)
+{
+   AttitudeData::SetReal(ANGULAR_VELOCITY_Y, val);
+   RealVar::SetReal(val);
+}
+//------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
-GmatBase* AngVelY::Clone(void) const
+GmatBase* AngularVelocityY::Clone(void) const
 {
-   return new AngVelY(*this);
+   return new AngularVelocityY(*this);
 }
 
 //------------------------------------------------------------------------------
-//  AngVelZ
+//  AngularVelocityZ
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-// AngVelZ::AngVelZ(const std::string &name, GmatBase *obj)
+// AngularVelocityZ::AngularVelocityZ(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
-AngVelZ::AngVelZ(const std::string &name, GmatBase *obj)
+AngularVelocityZ::AngularVelocityZ(const std::string &name, GmatBase *obj)
    : AttitudeReal(name, "AngularVelocityZ", obj, "Angular Velocity Z", "deg/sec")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -1260,16 +1518,16 @@ AngVelZ::AngVelZ(const std::string &name, GmatBase *obj)
    #endif
 }
 //------------------------------------------------------------------------------
-// AngVelZ(const AngVelZ &copy)
+// AngularVelocityZ(const AngularVelocityZ &copy)
 //------------------------------------------------------------------------------
-AngVelZ::AngVelZ(const AngVelZ &copy)
+AngularVelocityZ::AngularVelocityZ(const AngularVelocityZ &copy)
    : AttitudeReal(copy)
 {
 }
 //------------------------------------------------------------------------------
-// AngVelZ& operator=(const AngVelZ &right)
+// AngularVelocityZ& operator=(const AngularVelocityZ &right)
 //------------------------------------------------------------------------------
-AngVelZ& AngVelZ::operator=(const AngVelZ &right)
+AngularVelocityZ& AngularVelocityZ::operator=(const AngularVelocityZ &right)
 {
    if (this != &right)
       AttitudeReal::operator=(right);
@@ -1277,17 +1535,17 @@ AngVelZ& AngVelZ::operator=(const AngVelZ &right)
    return *this;
 }
 //------------------------------------------------------------------------------
-// ~AngVelZ()
+// ~AngularVelocityZ()
 //------------------------------------------------------------------------------
-AngVelZ::~AngVelZ()
+AngularVelocityZ::~AngularVelocityZ()
 {
 }
 //------------------------------------------------------------------------------
 // bool Evaluate()
 //------------------------------------------------------------------------------
-bool AngVelZ::Evaluate()
+bool AngularVelocityZ::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(ANGVELZ);
+   mRealValue = AttitudeData::GetReal(ANGULAR_VELOCITY_Z);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
@@ -1295,11 +1553,23 @@ bool AngVelZ::Evaluate()
       return true;
 }
 //------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void AngularVelocityZ::SetReal(Real val)
+{
+   AttitudeData::SetReal(ANGULAR_VELOCITY_Z, val);
+   RealVar::SetReal(val);
+}
+//------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
-GmatBase* AngVelZ::Clone(void) const
+GmatBase* AngularVelocityZ::Clone(void) const
 {
-   return new AngVelZ(*this);
+   return new AngularVelocityZ(*this);
 }
 
 //------------------------------------------------------------------------------
@@ -1348,12 +1618,24 @@ EulerAngleRate1::~EulerAngleRate1()
 //------------------------------------------------------------------------------
 bool EulerAngleRate1::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(EULERANGLERATE1);
+   mRealValue = AttitudeData::GetReal(EULER_ANGLE_RATE_1);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void EulerAngleRate1::SetReal(Real val)
+{
+   AttitudeData::SetReal(EULER_ANGLE_RATE_1, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
@@ -1404,12 +1686,24 @@ EulerAngleRate2::~EulerAngleRate2()
 //------------------------------------------------------------------------------
 bool EulerAngleRate2::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(EULERANGLERATE2);
+   mRealValue = AttitudeData::GetReal(EULER_ANGLE_RATE_2);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void EulerAngleRate2::SetReal(Real val)
+{
+   AttitudeData::SetReal(EULER_ANGLE_RATE_2, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const
@@ -1460,12 +1754,24 @@ EulerAngleRate3::~EulerAngleRate3()
 //------------------------------------------------------------------------------
 bool EulerAngleRate3::Evaluate()
 {
-   mRealValue = AttitudeData::GetAttitudeReal(EULERANGLERATE3);
+   mRealValue = AttitudeData::GetReal(EULER_ANGLE_RATE_3);
     
    if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
       return false;
    else
       return true;
+}
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void EulerAngleRate3::SetReal(Real val)
+{
+   AttitudeData::SetReal(EULER_ANGLE_RATE_3, val);
+   RealVar::SetReal(val);
 }
 //------------------------------------------------------------------------------
 // GmatBase* Clone(void) const

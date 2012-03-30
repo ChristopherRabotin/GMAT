@@ -209,7 +209,7 @@ Real SpacecraftData::GetReal(Integer item)
    default:
       // otherwise, there is an error   
       throw ParameterException
-         ("SpacecraftData::GetReal() Unknown parameter id: " +
+         ("SpacecraftData::GetReal() Not readable or unknown item id: " +
           GmatStringUtil::ToString(item));
    }
 }
@@ -239,8 +239,6 @@ Real SpacecraftData::SetReal(Integer item, Real val)
       return mSpacecraft->SetRealParameter("DragArea", val);
    case SRP_AREA:      
       return mSpacecraft->SetRealParameter("SRPArea", val);
-   case TOTAL_MASS:
-      return mSpacecraft->SetRealParameter("TotalMass", val);
       
    // for Spacecraft owned FuelTank
    case FUEL_MASS:
@@ -343,7 +341,7 @@ Real SpacecraftData::SetReal(Integer item, Real val)
    default:
       // otherwise, there is an error   
       throw ParameterException
-         ("SpacecraftData::SetReal() Unknown parameter id: " +
+         ("SpacecraftData::SetReal() Not settable or unknown item id: " +
           GmatStringUtil::ToString(item));
    }
 }

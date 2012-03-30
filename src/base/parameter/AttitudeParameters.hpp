@@ -23,8 +23,8 @@
 /**
  * Declares Attitude related parameter classes.
  *    DCM11, DCM12, DCM13, DCM21, DCM22, DCM23, DCM31, DCM32, DCM33,
- *    Quat1, Quat2, Quat3, Quat4, EulerAngle1, EulerAngle2, EulerAngle3,
- *    MRP1 , MRP2 , MRP3 , AngVelX, AngVelY, AngVelZ, 
+ *    Quat1, Quat2, Quat3, Quat4, Quaternion, EulerAngle1, EulerAngle2, EulerAngle3,
+ *    MRP1 , MRP2 , MRP3 , AngularVelocityX, AngularVelocityY, AngularVelocityZ, 
  *    EulerAngleRate1, EulerAngleRate2, EulerAngleRate3
  */
 //------------------------------------------------------------------------------
@@ -33,6 +33,7 @@
 
 #include "gmatdefs.hpp"
 #include "AttitudeReal.hpp"
+#include "AttitudeString.hpp"
 
 //------------------------------------------------------------------------------
 //  Direction Cosine Matrix
@@ -48,6 +49,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -67,6 +69,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -86,6 +89,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -105,6 +109,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -124,6 +129,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -143,6 +149,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -162,6 +169,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -181,6 +189,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -200,6 +209,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -292,6 +302,26 @@ protected:
 
 };
 
+class GMAT_API Quaternion : public AttitudeString
+{
+public:
+
+   Quaternion(const std::string &name = "", GmatBase *obj = NULL);
+   Quaternion(const Quaternion &copy);
+   Quaternion& operator=(const Quaternion &right);
+   virtual ~Quaternion();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetString(const std::string &val);
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
 //------------------------------------------------------------------------------
 //  Euler Angles
 //------------------------------------------------------------------------------
@@ -306,6 +336,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -325,6 +356,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -344,6 +376,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -367,6 +400,7 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
 
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -386,6 +420,7 @@ public:
 
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
 
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -405,6 +440,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -417,17 +453,18 @@ protected:
 //  Angular Velocity
 //------------------------------------------------------------------------------
 
-class GMAT_API AngVelX : public AttitudeReal
+class GMAT_API AngularVelocityX : public AttitudeReal
 {
 public:
 
-   AngVelX(const std::string &name = "", GmatBase *obj = NULL);
-   AngVelX(const AngVelX &copy);
-   AngVelX& operator=(const AngVelX &right);
-   virtual ~AngVelX();
+   AngularVelocityX(const std::string &name = "", GmatBase *obj = NULL);
+   AngularVelocityX(const AngularVelocityX &copy);
+   AngularVelocityX& operator=(const AngularVelocityX &right);
+   virtual ~AngularVelocityX();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -436,17 +473,18 @@ protected:
 
 };
 
-class GMAT_API AngVelY : public AttitudeReal
+class GMAT_API AngularVelocityY : public AttitudeReal
 {
 public:
 
-   AngVelY(const std::string &name = "", GmatBase *obj = NULL);
-   AngVelY(const AngVelY &copy);
-   AngVelY& operator=(const AngVelY &right);
-   virtual ~AngVelY();
+   AngularVelocityY(const std::string &name = "", GmatBase *obj = NULL);
+   AngularVelocityY(const AngularVelocityY &copy);
+   AngularVelocityY& operator=(const AngularVelocityY &right);
+   virtual ~AngularVelocityY();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -455,17 +493,18 @@ protected:
 
 };
 
-class GMAT_API AngVelZ : public AttitudeReal
+class GMAT_API AngularVelocityZ : public AttitudeReal
 {
 public:
 
-   AngVelZ(const std::string &name = "", GmatBase *obj = NULL);
-   AngVelZ(const AngVelZ &copy);
-   AngVelZ& operator=(const AngVelZ &right);
-   virtual ~AngVelZ();
+   AngularVelocityZ(const std::string &name = "", GmatBase *obj = NULL);
+   AngularVelocityZ(const AngularVelocityZ &copy);
+   AngularVelocityZ& operator=(const AngularVelocityZ &right);
+   virtual ~AngularVelocityZ();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -489,6 +528,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -508,6 +548,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -527,6 +568,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
+   virtual void SetReal(Real val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;

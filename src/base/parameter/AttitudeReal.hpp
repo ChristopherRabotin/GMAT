@@ -31,11 +31,12 @@ class GMAT_API AttitudeReal : public RealVar, public AttitudeData
 public:
 
    AttitudeReal(const std::string &name, const std::string &typeStr, 
-                GmatBase *obj, const std::string &desc, const std::string &unit);
+                GmatBase *obj, const std::string &desc, const std::string &unit,
+                bool isSettable = true);
    AttitudeReal(const AttitudeReal &copy);
    AttitudeReal& operator=(const AttitudeReal &right);
    virtual ~AttitudeReal();
-
+   
    // methods inherited from Parameter
    virtual Real EvaluateReal();
    

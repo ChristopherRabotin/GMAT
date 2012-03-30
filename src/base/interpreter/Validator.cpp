@@ -949,6 +949,12 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
             // create ParameterWrapper for time related settable Parameters.
             if (paramInfo->IsTimeParameter(newType))
                paramFirst = true;
+            // Why Quaternion does
+            //LOJ: just testing Quaternion here (2012.03.30)
+            #if 1
+            if (newType == "Quaternion")
+               paramFirst = true;
+            #endif
          }
       }
       

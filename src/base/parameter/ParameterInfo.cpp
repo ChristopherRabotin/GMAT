@@ -141,6 +141,18 @@ Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// Gmat::ObjectType GetOwnedObjectType(const std::string &name)
+//------------------------------------------------------------------------------
+Gmat::ObjectType ParameterInfo::GetOwnedObjectType(const std::string &name)
+{
+   if (mParamOwnedObjTypeMap.find(name) != mParamOwnedObjTypeMap.end())
+      return mParamOwnedObjTypeMap[name];
+   else
+      return Gmat::UNKNOWN_OBJECT;
+}
+
+
+//------------------------------------------------------------------------------
 // GmatParam::DepObject GetDepObjectType(const std::string &name)
 //------------------------------------------------------------------------------
 GmatParam::DepObject ParameterInfo::GetDepObjectType(const std::string &name)
@@ -265,7 +277,7 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
       if (isPlottable)  plottableStr  = "Y";
       if (isReportable) reportableStr = "Y";
       if (isSettable)   settableStr   = "Y";
-      if (depTypeStr == "OwnedObject")
+      if (depTypeStr == "OwnedObject" || depTypeStr == "AttachedObject")
          ownedObjTypeStr = "(" + GmatBase::GetObjectTypeString(ownedObjType) + ")";
       if (mNumParams == 0)
       {

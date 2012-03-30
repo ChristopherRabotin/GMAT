@@ -17,7 +17,7 @@
 // Author: Daniel Hunter
 // Created: 2006/6/26
 // Modified:  Dunn Idle (added MRPs)
-// Date:      2010/08/24
+// Date:    2010/08/24
 //
 /**
  * Implements Attitude related data class.
@@ -30,6 +30,7 @@
 #include "GmatConstants.hpp"
 #include "RealUtilities.hpp"
 #include "ParameterException.hpp"
+#include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
 
@@ -42,10 +43,10 @@ AttitudeData::VALID_OBJECT_TYPE_LIST[AttitudeDataObjectCount] =
 const Real AttitudeData::ATTITUDE_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 
 //------------------------------------------------------------------------------
-// AttitudeData()
+// AttitudeData(const std::string name = "")
 //------------------------------------------------------------------------------
-AttitudeData::AttitudeData()
-   : RefData()
+AttitudeData::AttitudeData(const std::string name)
+   : RefData(name)
 {
    mSpacecraft = NULL;
 }
@@ -86,13 +87,13 @@ AttitudeData::~AttitudeData()
 
 
 //------------------------------------------------------------------------------
-// Real GetAttitudeReal(Integer item)
+// Real GetReal(Integer item)
 //------------------------------------------------------------------------------
 /**
  * Retrieves Attitude element.
  */
 //------------------------------------------------------------------------------
-Real AttitudeData::GetAttitudeReal(Integer item)
+Real AttitudeData::GetReal(Integer item)
 {
    if (mSpacecraft == NULL)
       InitializeRefObjects();
@@ -106,32 +107,32 @@ Real AttitudeData::GetAttitudeReal(Integer item)
    UnsignedIntArray seq           = mSpacecraft->GetEulerAngleSequence();
    Rvector3         euler;
    
-   if (item == DCM1_1)   return cosMat(0,0);
-   if (item == DCM1_2)   return cosMat(0,1);
-   if (item == DCM1_3)   return cosMat(0,2);
-   if (item == DCM2_1)   return cosMat(1,0);
-   if (item == DCM2_2)   return cosMat(1,1);
-   if (item == DCM2_3)   return cosMat(1,2);
-   if (item == DCM3_1)   return cosMat(2,0);
-   if (item == DCM3_2)   return cosMat(2,1);
-   if (item == DCM3_3)   return cosMat(2,2);
-   if (item == ANGVELX) return angVel[0];
-   if (item == ANGVELY) return angVel[1];
-   if (item == ANGVELZ) return angVel[2];
+   if (item == DCM_11)   return cosMat(0,0);
+   if (item == DCM_12)   return cosMat(0,1);
+   if (item == DCM_13)   return cosMat(0,2);
+   if (item == DCM_21)   return cosMat(1,0);
+   if (item == DCM_22)   return cosMat(1,1);
+   if (item == DCM_23)   return cosMat(1,2);
+   if (item == DCM_31)   return cosMat(2,0);
+   if (item == DCM_32)   return cosMat(2,1);
+   if (item == DCM_33)   return cosMat(2,2);
+   if (item == ANGULAR_VELOCITY_X) return angVel[0];
+   if (item == ANGULAR_VELOCITY_Y) return angVel[1];
+   if (item == ANGULAR_VELOCITY_Z) return angVel[2];
    
    // do conversions if necessary
-   if ((item >= QUAT1) && (item <= QUAT4))
+   if ((item >= QUAT_1) && (item <= QUAT_4))
    {
       Rvector quat = Attitude::ToQuaternion(cosMat);
-      return quat[item - QUAT1];
+      return quat[item - QUAT_1];
    }    
-   if ((item >= EULERANGLE1) && (item <= EULERANGLE3))
+   if ((item >= EULER_ANGLE_1) && (item <= EULER_ANGLE_3))
    {
       euler = Attitude::ToEulerAngles(cosMat, 
               (Integer) seq[0], 
               (Integer) seq[1], 
               (Integer) seq[2]) * GmatMathConstants::DEG_PER_RAD;
-      return euler[item - EULERANGLE1];
+      return euler[item - EULER_ANGLE_1];
    }
    // Dunn added conversion below with the comment that this
    // is slightly hacked!  We might want to change to a more
@@ -142,7 +143,7 @@ Real AttitudeData::GetAttitudeReal(Integer item)
       Rvector3 mrp  = Attitude::ToMRPs(quat);
       return mrp[item - MRP_1];
    }           
-   if ((item >= EULERANGLERATE1) && (item <= EULERANGLERATE3))
+   if ((item >= EULER_ANGLE_RATE_1) && (item <= EULER_ANGLE_RATE_3))
    {
       euler = Attitude::ToEulerAngles(cosMat, 
               (Integer) seq[0], 
@@ -154,14 +155,171 @@ Real AttitudeData::GetAttitudeReal(Integer item)
                             (Integer) seq[0], 
                             (Integer) seq[1], 
                             (Integer) seq[2]) * GmatMathConstants::DEG_PER_RAD;
-      return eulerRates[item - EULERANGLERATE1];
+      return eulerRates[item - EULER_ANGLE_RATE_1];
    }        
    
    // otherwise, there is an error   
    throw ParameterException
-      ("AttitudeData::GetAttitudeReal() Unknown parameter id: " +
-       GmatRealUtil::ToString(item));
+      ("AttitudeData::GetReal() Not readable or unknown item id: " +
+       GmatRealUtil::ToString(item));   
+}
 
+//------------------------------------------------------------------------------
+// void SetReal(Integer item, Real value)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves Attitude element.
+ */
+//------------------------------------------------------------------------------
+void AttitudeData::SetReal(Integer item, Real value)
+{
+   #ifdef DEBUG_SET_REAL
+   MessageInterface::ShowMessage
+      ("AttitudeData::SetReal() entered, item = %d, value = %f\n", item, value);
+   #endif
+   
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   Attitude *attitude = (Attitude*)mSpacecraft->GetRefObject(Gmat::ATTITUDE, "");
+   if (attitude == NULL)
+      throw ParameterException
+         ("AttitudeData::SetReal() Attitude of the Spacecraft \"" +
+          mSpacecraft->GetName() + "\" is NULL\n");
+   
+   switch (item)
+   {
+   case DCM_11:
+      attitude->SetRealParameter("DCM11", value);
+      break;
+   case DCM_12:
+      attitude->SetRealParameter("DCM12", value);
+      break;
+   case DCM_13:
+      attitude->SetRealParameter("DCM13", value);
+      break;
+   case DCM_21:
+      attitude->SetRealParameter("DCM21", value);
+      break;
+   case DCM_22:
+      attitude->SetRealParameter("DCM22", value);
+      break;
+   case DCM_23:
+      attitude->SetRealParameter("DCM23", value);
+      break;
+   case DCM_31:
+      attitude->SetRealParameter("DCM31", value);
+      break;
+   case DCM_32:
+      attitude->SetRealParameter("DCM32", value);
+      break;
+   case DCM_33:
+      attitude->SetRealParameter("DCM33", value);
+      break;
+   case EULER_ANGLE_1:
+      attitude->SetRealParameter("EulerAngle1", value);
+      break;
+   case EULER_ANGLE_2:
+      attitude->SetRealParameter("EulerAngle2", value);
+      break;
+   case EULER_ANGLE_3:
+      attitude->SetRealParameter("EulerAngle3", value);
+      break;
+   case ANGULAR_VELOCITY_X:
+      attitude->SetRealParameter("AngularVelocityX", value);
+      break;
+   case ANGULAR_VELOCITY_Y:
+      attitude->SetRealParameter("AngularVelocityY", value);
+      break;
+   case ANGULAR_VELOCITY_Z:
+      attitude->SetRealParameter("AngularVelocityZ", value);
+      break;
+   case EULER_ANGLE_RATE_1:
+      attitude->SetRealParameter("EulerAngleRate1", value);
+      break;
+   case EULER_ANGLE_RATE_2:
+      attitude->SetRealParameter("EulerAngleRate2", value);
+      break;
+   case EULER_ANGLE_RATE_3:
+      attitude->SetRealParameter("EulerAngleRate3", value);
+      break;
+      
+   default:
+      // otherwise, there is an error   
+      throw ParameterException
+         ("AttitudeData::SetReal() Not settable or unknown item id: " + 
+          GmatRealUtil::ToString(item));
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetString(Integer item)
+//------------------------------------------------------------------------------
+std::string AttitudeData::GetString(Integer item)
+{
+   #ifdef DEBUG_GET_STRING
+   MessageInterface::ShowMessage
+      ("AttitudeData::GetString() entered, item = %d\n", item);
+   #endif
+   
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   Real epoch = mSpacecraft->GetEpoch();
+   
+   // Get cosine matrix which is internal representation and always gets updated
+   Rmatrix33 cosMat = mSpacecraft->GetAttitude(epoch);
+   Rvector quat = Attitude::ToQuaternion(cosMat);
+   
+   switch (item)
+   {
+   case QUATERNION:
+   {
+      std::string str = "[ " + GmatStringUtil::ToString(quat[0], 15) + " " +
+         GmatStringUtil::ToString(quat[1], 15) + " " + GmatStringUtil::ToString(quat[2], 15) + 
+         " " + GmatStringUtil::ToString(quat[3], 15) + "]";
+      return str;
+   }
+   default:
+      // otherwise, there is an error   
+      throw ParameterException
+         ("AttitudeData::SetString() Not redable or unknown item id: " +
+          GmatRealUtil::ToString(item));
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetString(Integer item, const std::string &value)
+//------------------------------------------------------------------------------
+void AttitudeData::SetString(Integer item, const std::string &value)
+{
+   #ifdef DEBUG_SET_STRING
+   MessageInterface::ShowMessage
+      ("AttitudeData::SetString() entered, item = %d, value = '%s'\n",
+       item, value.c_str());
+   #endif
+   
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+   
+   Attitude *attitude = (Attitude*)mSpacecraft->GetRefObject(Gmat::ATTITUDE, "");
+   if (attitude == NULL)
+      throw ParameterException
+         ("AttitudeData::SetString() Attitude of the Spacecraft \"" +
+          mSpacecraft->GetName() + "\" is NULL\n");
+   
+   switch (item)
+   {
+   case QUATERNION:
+      attitude->SetStringParameter("Quaternion", value);
+      break;
+   default:
+      // otherwise, there is an error   
+      throw ParameterException
+         ("AttitudeData::SetString() Unknown item id: " +
+          GmatRealUtil::ToString(item));
+   }
 }
 
 //-------------------------------------

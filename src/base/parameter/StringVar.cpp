@@ -66,14 +66,16 @@ StringVar::PARAMETER_TYPE[StringVarParamCount - ParameterParamCount] =
  * @param <ownerType> object type who owns this parameter as property
  * @param <isTimeParam> true if parameter is time related, false otherwise
  * @param <isSettable> true if parameter is settable, false otherwise
+ * @param <ownedObjType> Type of the object which owned by owner or attached to owner
  */
 //------------------------------------------------------------------------------
 StringVar::StringVar(const std::string &name, const std::string &typeStr, 
                      GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
                      const std::string &unit, GmatParam::DepObject depObj,
-                     Gmat::ObjectType ownerType, bool isTimeParam, bool isSettable)
+                     Gmat::ObjectType ownerType, bool isTimeParam, bool isSettable,
+                     Gmat::ObjectType ownedObjType)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
-               isSettable, false, true)
+               isSettable, false, true, ownedObjType)
 {  
    objectTypes.push_back(Gmat::STRING);
    objectTypeNames.push_back("String");

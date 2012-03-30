@@ -163,61 +163,6 @@ protected:
 };
 
 //==============================================================================
-//                              RadApoapsis
-//==============================================================================
-/**
- * Declares RadApoapsis class.
- */
-//------------------------------------------------------------------------------
-
-class GMAT_API RadApoapsis : public OrbitReal
-{
-public:
-
-   RadApoapsis(const std::string &name = "", GmatBase *obj = NULL);
-   RadApoapsis(const RadApoapsis &copy);
-   const RadApoapsis& operator=(const RadApoapsis &right);
-   virtual ~RadApoapsis();
-
-   // The inherited methods from Parameter
-   virtual bool Evaluate();
-
-   // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-   
-protected:
-
-};
-
-//==============================================================================
-//                              RadPeriapsis
-//==============================================================================
-/**
- * Declares RadPeriapsis class.
- */
-//------------------------------------------------------------------------------
-
-class GMAT_API RadPeriapsis : public OrbitReal
-{
-public:
-
-   RadPeriapsis(const std::string &name = "", GmatBase *obj = NULL);
-   RadPeriapsis(const RadPeriapsis &copy);
-   const RadPeriapsis& operator=(const RadPeriapsis &right);
-   virtual ~RadPeriapsis();
-
-   // The inherited methods from Parameter
-   virtual bool Evaluate();
-
-   // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-   
-protected:
-
-};
-
-
-//==============================================================================
 //                              C3Energy
 //==============================================================================
 /**

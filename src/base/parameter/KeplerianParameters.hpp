@@ -16,8 +16,8 @@
 //
 /**
  * Declares Keplerian related parameter classes.
- *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepMM, KepElem,
- *   ModKepElem
+ *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepEA, KepHA,
+ *   KepMM, KepElem, ModKepRadApo, ModKepRadPer, ModKepElem
  */
 //------------------------------------------------------------------------------
 #ifndef KeplerianParameters_hpp
@@ -361,13 +361,68 @@ protected:
 };
 
 
+//==============================================================================
+//                              ModKepRadApo
+//==============================================================================
+/**
+ * Declares ModKepRadApo class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API ModKepRadApo : public OrbitReal
+{
+public:
+
+   ModKepRadApo(const std::string &name = "", GmatBase *obj = NULL);
+   ModKepRadApo(const ModKepRadApo &copy);
+   const ModKepRadApo& operator=(const ModKepRadApo &right);
+   virtual ~ModKepRadApo();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+//==============================================================================
+//                              ModKepRadPer
+//==============================================================================
+/**
+ * Declares ModKepRadPer class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API ModKepRadPer : public OrbitReal
+{
+public:
+
+   ModKepRadPer(const std::string &name = "", GmatBase *obj = NULL);
+   ModKepRadPer(const ModKepRadPer &copy);
+   const ModKepRadPer& operator=(const ModKepRadPer &right);
+   virtual ~ModKepRadPer();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
 //loj: 2/16/05 Added
 //==============================================================================
 //                              ModKepElem
 //==============================================================================
 /**
  * Declares Keplerian Elements class.
- *   6 elements: RadPeriapais, RadApoapsis, KepInc, KepRAAN, KepAOP, KepTA
+ *   6 elements: RadPeriapais, ModKepRadApo, KepInc, KepRAAN, KepAOP, KepTA
  */
 //------------------------------------------------------------------------------
 
