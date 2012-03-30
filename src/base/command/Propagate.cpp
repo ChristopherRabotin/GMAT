@@ -4372,6 +4372,12 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    // safety factor.
    stepBrackets[1] = stopInterval * 1.1;
 
+   #ifdef DEBUG_FINAL_STEP
+      MessageInterface::ShowMessage("Propagate::TakeFinalStep stopping "
+            "condition step brackets: [%.12lf <--> %.12lf]\n", stepBrackets[0],
+            stepBrackets[1]);
+   #endif
+
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage(
          "Propagate::TakeFinalStep currEpoch = %f, stopEpoch = %f, "
@@ -4780,6 +4786,10 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 //------------------------------------------------------------------------------
 Real Propagate::InterpolateToStop(StopCondition *sc)
 {
+   #ifdef DEBUG_STOPPING_CONDITIONS
+         MessageInterface::ShowMessage("Entered Propagate::"
+               "InterpolateToStop\n");
+   #endif
    // Now fill in the ring buffer
    Real ringStep = stopInterval / 4.0;
    Integer ringStepsTaken = 0;
