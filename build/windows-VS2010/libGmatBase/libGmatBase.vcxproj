@@ -530,6 +530,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeData.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BallisticMassParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BallisticMassReal.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BooleanWrapper.cpp" />
@@ -973,6 +974,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeData.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BallisticMassParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BallisticMassReal.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BooleanWrapper.hpp" />
