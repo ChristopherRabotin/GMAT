@@ -30,8 +30,10 @@
 #include "TimeSystemConverter.hpp"
 #include "DateUtil.hpp"
 #include "GmatDefaults.hpp"
+#include "GmatGlobal.hpp"
 #include "GravityFileUtil.hpp"
 #include "FileManager.hpp"
+#include "EopFile.hpp"
 
 #include "wx/platform.h"
 #include <wx/config.h>
@@ -69,6 +71,7 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravityModelComboBox)
    EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereModelComboBox)
    EVT_CHECKBOX(ID_SRP_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
+   EVT_CHECKBOX(ID_REL_CORRECTION_CHECKBOX, PropagationConfigPanel::OnRelativisticCorrectionCheckBoxChange)
    EVT_CHECKBOX(ID_STOP_CHECKBOX, PropagationConfigPanel::OnStopCheckBoxChange)
    EVT_COMBOBOX(ID_CB_ERROR, PropagationConfigPanel::OnErrorControlComboBox)
    EVT_COMBOBOX(ID_CB_PROP_ORIGIN, PropagationConfigPanel::OnPropOriginComboBox)
@@ -597,6 +600,14 @@ void PropagationConfigPanel::Create()
    theSrpCheckBox->SetToolTip(pConfig->Read(_T("ForceModelUseSolarRadiationPressureHint")));
 
    //-----------------------------------------------------------------
+   // Relativistic Correction
+   //-----------------------------------------------------------------
+   theRelativisticCorrectionCheckBox =
+      new wxCheckBox( this, ID_REL_CORRECTION_CHECKBOX, wxT(GUI_ACCEL_KEY"Relativistic Correction"),
+                      wxDefaultPosition, wxDefaultSize, 0 );
+   theRelativisticCorrectionCheckBox->SetToolTip(pConfig->Read(_T("ForceModelUseRelativisticCorrectionHint")));
+
+   //-----------------------------------------------------------------
    // Primary Bodies
    //-----------------------------------------------------------------
    primaryStaticSizer->Add( bodySizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
@@ -615,6 +626,7 @@ void PropagationConfigPanel::Create()
    fmStaticSizer->Add( primaryStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    fmStaticSizer->Add( pointMassSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    fmStaticSizer->Add( theSrpCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   fmStaticSizer->Add( theRelativisticCorrectionCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
 
    //-----------------------------------------------------------------
    // Add panelSizer
@@ -801,10 +813,15 @@ void PropagationConfigPanel::PopulateForces()
          wxString wxForceType;
          wxString tempStr;
          wxString useSRP;
+         wxString useRC;
 
          paramId = theForceModel->GetParameterID("SRP");
          useSRP = theForceModel->GetOnOffParameter(paramId).c_str();
          usePropOriginForSrp = (useSRP == "On") ? true : false;
+
+         paramId = theForceModel->GetParameterID("RelativisticCorrection");
+         useRC = theForceModel->GetOnOffParameter(paramId).c_str();
+         addRelativisticCorrection = (useRC == "On") ? true : false;
 
          for (Integer i = 0; i < numOfForces; i++)
          {
@@ -1326,10 +1343,27 @@ void PropagationConfigPanel::SaveData()
          }
 
          //----------------------------------------------------
-         // save SRP data
+         // save RelativisticCorrection and SRP data
          //----------------------------------------------------
          try
          {
+            #ifdef DEBUG_PROP_PANEL_SAVE
+               MessageInterface::ShowMessage("SaveData() saving RelativisticCorrection: addRC = %s\n", (addRelativisticCorrection? "true" : "false"));
+            #endif
+            paramId = newFm->GetParameterID("RelativisticCorrection");
+            if (addRelativisticCorrection)
+            {
+               theRC = new RelativisticCorrection();
+               bodyName = propOriginName;
+               theRC->SetStringParameter("BodyName", bodyName);
+               GmatGlobal *gg = GmatGlobal::Instance();
+               theRC->SetEopFile(gg->GetEopFile());
+               newFm->AddForce(theRC);
+               newFm->SetOnOffParameter(paramId, "On");
+            }
+            else
+               newFm->SetOnOffParameter(paramId, "Off");
+
             paramId= newFm->GetParameterID("SRP");
 
             if (usePropOriginForSrp)
@@ -1623,6 +1657,7 @@ void PropagationConfigPanel::Initialize()
    theDragForce       = NULL;
    theGravForce       = NULL;
    theSRP             = NULL;
+   theRC              = NULL;
    theSolarSystem     = NULL;
    theCelestialBody   = NULL;
    theAtmosphereModel = NULL;
@@ -1634,6 +1669,7 @@ void PropagationConfigPanel::Initialize()
    // Default force model values
    useDragForce        = false;
    usePropOriginForSrp = false;
+   addRelativisticCorrection = false;
    numOfForces         = 0;
 
    // Changed flags
@@ -1951,6 +1987,8 @@ void PropagationConfigPanel::DisplayForceData()
 {
    DisplayErrorControlData();
    DisplaySRPData();
+   theRelativisticCorrectionCheckBox->SetValue(addRelativisticCorrection);
+
 
    if (!pointMassBodyList.empty())
       DisplayPointMassData();
@@ -3446,6 +3484,16 @@ void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
    EnableUpdate(true);
 }
 
+//------------------------------------------------------------------------------
+// void OnRelativisticCorrectionCheckBoxChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnRelativisticCorrectionCheckBoxChange(wxCommandEvent &event)
+{
+   addRelativisticCorrection = theRelativisticCorrectionCheckBox->GetValue();
+   isForceModelChanged       = true;
+   EnableUpdate(true);
+}
+
 
 //------------------------------------------------------------------------------
 // void OnSRPCheckBoxChange(wxCommandEvent &event)
@@ -3509,6 +3557,10 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
       // srp force
       MessageInterface::ShowMessage
          ("   usePropOriginForSrp=%d\n", usePropOriginForSrp);
+
+      // relativistic correction
+      MessageInterface::ShowMessage
+         ("   addRelativisticCorrection=%d\n", addRelativisticCorrection);
 
       // primary body list
 //      for (unsigned int i=0; i<primaryBodyList.size(); i++)

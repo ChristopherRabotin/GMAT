@@ -32,6 +32,7 @@
 #include "HarmonicField.hpp"
 #include "PointMassForce.hpp"
 #include "SolarRadiationPressure.hpp"
+#include "RelativisticCorrection.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "AtmosphereModel.hpp"
@@ -94,6 +95,7 @@ private:
       DragForce *dragf;
       SolarRadiationPressure *srpf;
       bool useSrp; // for future use (SRP on individual body is future implementation)
+      bool relativisticCorrection;
       
       ForceType(const wxString &body, const wxString &grav = "None",
                 const wxString &drag = "None", const wxString &mag = "None",
@@ -103,7 +105,7 @@ private:
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
             gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; 
             magfOrder = "0"; potFilename = ""; pmf = pf; gravf = gf; 
-            dragf = df; srpf = NULL; useSrp = false;
+            dragf = df; srpf = NULL; useSrp = false; relativisticCorrection = false;
          }
       
       ForceType& operator= (const ForceType& right)
@@ -117,7 +119,7 @@ private:
             magfDegree = right.magfDegree; magfOrder = right.magfOrder;
             potFilename = right.potFilename; pmf = right.pmf;
             gravf = right.gravf; dragf = right.dragf; srpf = right.srpf;
-            useSrp = right.useSrp;
+            useSrp = right.useSrp; relativisticCorrection = right.relativisticCorrection;
             return *this;
          }
    };
@@ -180,6 +182,7 @@ private:
    wxButton *theMagModelSearchButton;
    
    wxCheckBox *theSrpCheckBox;
+   wxCheckBox *theRelativisticCorrectionCheckBox;
    wxCheckBox *theStopCheckBox;
    
    // Controls used by Propagators that aren't Integrators (SPK for now)
@@ -244,6 +247,7 @@ private:
    
    bool useDragForce;
    bool usePropOriginForSrp;
+   bool addRelativisticCorrection;
    bool stopOnAccViolation;
    bool isForceModelChanged;
    bool isAtmosChanged;
@@ -262,6 +266,7 @@ private:
    DragForce                      *theDragForce;
    GravityField                   *theGravForce;
    SolarRadiationPressure         *theSRP;
+   RelativisticCorrection         *theRC;
    SolarSystem                    *theSolarSystem;
    CelestialBody                  *theCelestialBody;
    AtmosphereModel                *theAtmosphereModel;
@@ -317,6 +322,7 @@ private:
    // Checkbox event method
    void OnSRPCheckBoxChange(wxCommandEvent &event);
    void OnStopCheckBoxChange(wxCommandEvent &event);
+   void OnRelativisticCorrectionCheckBoxChange(wxCommandEvent &event);
    
    // Combobox event method
    void OnIntegratorComboBox(wxCommandEvent &event);
@@ -367,6 +373,7 @@ private:
       ID_TEXTCTRL_GRAV,
       ID_TEXTCTRL_MAGF,
       ID_SRP_CHECKBOX,
+      ID_REL_CORRECTION_CHECKBOX,
       ID_STOP_CHECKBOX,
       ID_CB_INTGR,
       ID_CB_BODY,
