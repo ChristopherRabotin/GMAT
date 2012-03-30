@@ -3807,8 +3807,13 @@ void Attitude::SetRealArrayFromString(Integer id, const std::string &sval)
          errmsg += sval + "\"\n";
          throw AttitudeException(errmsg);
       }
+      //Changed to call SetRvectorParameter() - LOJ: 2012.03.30
+      //for (UnsignedInt i=0; i<vals.size(); i++)
+      //   SetRealParameter(id, vals[i], i);
+      Rvector rvec = Rvector(vals.size());
       for (UnsignedInt i=0; i<vals.size(); i++)
-         SetRealParameter(id, vals[i], i);
+         rvec[i] = vals[i];
+      SetRvectorParameter(id, rvec);
    }
    catch (BaseException &)
    {
