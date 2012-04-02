@@ -37,7 +37,9 @@
 #include "GmatStaticBoxSizer.hpp"
 #include <wx/config.h>
 
+//#define DEBUG_LOAD_ICON
 //#define DEBUG_GUI_ITEM_VALIDATE
+//#define DEBUG_PROPERTY_LISTBOX
 //#define DBGLVL_GUI_ITEM 1
 //#define DBGLVL_GUI_ITEM_UPDATE 1
 //#define DBGLVL_GUI_ITEM_REG 1
@@ -57,7 +59,6 @@
 //#define DBGLVL_GUI_ITEM_PROP 2
 //#define DBGLVL_GUI_ITEM_FM 2
 //#define DBGLVL_GUI_ITEM_ALL_OBJECT 2
-//#define DEBUG_LOAD_ICON
 
 //------------------------------
 // static data
@@ -1329,7 +1330,7 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objType,
 {
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
-      ("GuiItemManager::GetPropertyList() objType=%s, showOption=%d, "
+      ("GuiItemManager::GetPropertyList() entered, objType=%s, showOption=%d, "
        "showSettableOnly=%d\n", objType.c_str(), showOption, showSettableOnly);
    #endif
    
@@ -1345,13 +1346,14 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objType,
          paramName = theScPropertyList[i].c_str();
          add = false;
          
-         // Owned object dependent Parameters for Spacecraft are not
+         // Attached object dependent Parameters for Spacecraft are not
          // ready to show in the ParameterSelectDialog, so skipping it for now.
-         // @todo For owned object dependent Parameters, we need to show
+         // @todo For attached object dependent Parameters, we need to show
          // owned object name in the dependency ComboBox. (LOJ: 2012.03.09)
          // eg) Sat1.Tank1.Temperature
-         //if (theParamInfo->IsOwnedObjectDependent(paramName))
-         //   continue;
+         // Changed to call ParameterInfo::IsForAttachedObject() (LOJ: 2012.04.02)
+         if (theParamInfo->IsForAttachedObject(paramName))
+            continue;
          
          if (showOption == SHOW_REPORTABLE)
          {
@@ -1386,7 +1388,7 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objType,
                {
                   #if DBGLVL_GUI_ITEM_PROPERTY > 1
                   MessageInterface::ShowMessage
-                     ("GetPropertyList() Adding %s\n", paramName);
+                     ("GetPropertyList() Adding %s\n", paramName.c_str());
                   #endif
                   
                   array.Add(theScPropertyList[i]);
@@ -2712,8 +2714,16 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
          {
             std::string paramName = theScPropertyList[i].c_str();
             add = false;
+            #ifdef DEBUG_PROPERTY_LISTBOX
+            MessageInterface::ShowMessage
+               ("   Checking if '%s' is reportable\n", paramName.c_str());
+            #endif
             if (theParamInfo->IsReportable(paramName))
             {
+               #ifdef DEBUG_PROPERTY_LISTBOX
+               MessageInterface::ShowMessage
+                  ("   '%s' is reportable\n", paramName.c_str());
+               #endif
                if (!showSettableOnly)
                   add = true;
                else if (theParamInfo->IsSettable(paramName))
@@ -2721,7 +2731,10 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
                
                if (add)
                {
-                  MessageInterface::ShowMessage("   ===> Adding '%s' to propertyListBox\n", paramName.c_str());
+                  #ifdef DEBUG_PROPERTY_LISTBOX
+                  MessageInterface::ShowMessage
+                     ("   Adding '%s' to propertyListBox\n", paramName.c_str());
+                  #endif
                   propertyListBox->Append(theScPropertyList[i]);
                }
             }
@@ -3575,7 +3588,6 @@ wxSizer* GuiItemManager::CreateUserVarSizer
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdatePropertyList()
 {
-   
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage("GuiItemManager::UpdatePropertyList()\n");
    #endif
@@ -3603,10 +3615,11 @@ void GuiItemManager::UpdatePropertyList()
       if (items[i] == "CurrA1MJD")
          continue;
       
-      // Do not include owned object dependent Paramters such as Sat1.Tank1.Temperature.
+      // Do not include attached object dependent Paramters such as Sat1.Tank1.Temperature.
       // ParameterSelectDialog is not ready to handle this kind of Parameters
       // since it needs to show dependent object in the ComboBox. (LOJ: 2012.03.09)
-      if (theParamInfo->IsOwnedObjectDependent(items[i].c_str()))
+      // Changed to call ParameterInfo::IsForAttachedObject() (LOJ: 2012.04.02)
+      if (theParamInfo->IsForAttachedObject(items[i]))
          continue;
       
       // add only reportable parameters (Real, String for now) to list

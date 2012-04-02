@@ -42,7 +42,8 @@ public:
    bool IsReportable(const std::string &type);
    bool IsSettable(const std::string &type);
    bool IsTimeParameter(const std::string &type);
-   bool IsOwnedObjectDependent(const std::string &type);
+   bool IsForOwnedObject(const std::string &type);
+   bool IsForAttachedObject(const std::string &type);
    
    void Add(const std::string &type, Gmat::ObjectType objectType,
             Gmat::ObjectType ownedObjType, const std::string &name,
@@ -56,14 +57,15 @@ private:
    
    static ParameterInfo *theInstance;
    
-   std::map<std::string, GmatParam::DepObject> mParamDepObjMap;
-   std::map<std::string, Gmat::ObjectType> mParamObjectTypeMap;
-   std::map<std::string, Gmat::ObjectType> mParamOwnedObjTypeMap;
-   std::map<std::string, bool> mParamPlottableMap;
-   std::map<std::string, bool> mParamReportableMap;
-   std::map<std::string, bool> mParamSettableMap;
-   std::map<std::string, bool> mParamTimeMap;
-   std::map<std::string, bool> mParamOwnedObjDepMap;
+   std::map<std::string, GmatParam::DepObject> mDepObjMap;
+   std::map<std::string, Gmat::ObjectType> mOwnerTypeMap;
+   std::map<std::string, Gmat::ObjectType> mOwnedObjTypeMap;
+   std::map<std::string, bool> mIsPlottableMap;
+   std::map<std::string, bool> mIsReportableMap;
+   std::map<std::string, bool> mIsSettableMap;
+   std::map<std::string, bool> mIsTimeParamMap;
+   std::map<std::string, bool> mIsForOwnedObjMap;
+   std::map<std::string, bool> mIsForAttachedObjMap;
    StringArray mParamTypes;
    StringArray mParamNames;
    Integer mNumParams;

@@ -98,7 +98,7 @@ const StringArray& ParameterInfo::GetTypesOfParameters()
    mParamTypes.clear();
    std::map<std::string, Gmat::ObjectType>::iterator pos;
    
-   for (pos = mParamObjectTypeMap.begin(); pos != mParamObjectTypeMap.end(); ++pos)
+   for (pos = mOwnerTypeMap.begin(); pos != mOwnerTypeMap.end(); ++pos)
    {
       mParamTypes.push_back(pos->first);
    }
@@ -119,7 +119,7 @@ const StringArray& ParameterInfo::GetNamesOfParameters()
    mParamNames.clear();
    std::map<std::string, GmatParam::DepObject>::iterator pos;
 
-   for (pos = mParamDepObjMap.begin(); pos != mParamDepObjMap.end(); ++pos)
+   for (pos = mDepObjMap.begin(); pos != mDepObjMap.end(); ++pos)
    {
       mParamNames.push_back(pos->first);
    }
@@ -133,8 +133,8 @@ const StringArray& ParameterInfo::GetNamesOfParameters()
 //------------------------------------------------------------------------------
 Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &name)
 {
-   if (mParamObjectTypeMap.find(name) != mParamObjectTypeMap.end())
-      return mParamObjectTypeMap[name];
+   if (mOwnerTypeMap.find(name) != mOwnerTypeMap.end())
+      return mOwnerTypeMap[name];
    else
       return Gmat::UNKNOWN_OBJECT;
 }
@@ -145,8 +145,11 @@ Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &name)
 //------------------------------------------------------------------------------
 Gmat::ObjectType ParameterInfo::GetOwnedObjectType(const std::string &name)
 {
-   if (mParamOwnedObjTypeMap.find(name) != mParamOwnedObjTypeMap.end())
-      return mParamOwnedObjTypeMap[name];
+   if (mOwnedObjTypeMap.find(name) != mOwnedObjTypeMap.end())
+   {
+      MessageInterface::ShowMessage("==> GetOwnedObjectType() Returning %d\n", mOwnedObjTypeMap[name]);
+      return mOwnedObjTypeMap[name];
+   }
    else
       return Gmat::UNKNOWN_OBJECT;
 }
@@ -157,8 +160,8 @@ Gmat::ObjectType ParameterInfo::GetOwnedObjectType(const std::string &name)
 //------------------------------------------------------------------------------
 GmatParam::DepObject ParameterInfo::GetDepObjectType(const std::string &name)
 {
-   if (mParamDepObjMap.find(name) != mParamDepObjMap.end())
-      return mParamDepObjMap[name];
+   if (mDepObjMap.find(name) != mDepObjMap.end())
+      return mDepObjMap[name];
    else
       return GmatParam::NO_DEP;
 }
@@ -169,8 +172,8 @@ GmatParam::DepObject ParameterInfo::GetDepObjectType(const std::string &name)
 //------------------------------------------------------------------------------
 bool ParameterInfo::IsPlottable(const std::string &name)
 {
-   if (mParamPlottableMap.find(name) != mParamPlottableMap.end())
-      return mParamPlottableMap[name];
+   if (mIsPlottableMap.find(name) != mIsPlottableMap.end())
+      return mIsPlottableMap[name];
    else
       return false;
 }
@@ -181,8 +184,8 @@ bool ParameterInfo::IsPlottable(const std::string &name)
 //------------------------------------------------------------------------------
 bool ParameterInfo::IsReportable(const std::string &name)
 {
-   if (mParamReportableMap.find(name) != mParamReportableMap.end())
-      return mParamReportableMap[name];
+   if (mIsReportableMap.find(name) != mIsReportableMap.end())
+      return mIsReportableMap[name];
    else
       return false;
 }
@@ -193,8 +196,8 @@ bool ParameterInfo::IsReportable(const std::string &name)
 //------------------------------------------------------------------------------
 bool ParameterInfo::IsSettable(const std::string &name)
 {
-   if (mParamSettableMap.find(name) != mParamSettableMap.end())
-      return mParamSettableMap[name];
+   if (mIsSettableMap.find(name) != mIsSettableMap.end())
+      return mIsSettableMap[name];
    else
       return false;
 }
@@ -205,20 +208,32 @@ bool ParameterInfo::IsSettable(const std::string &name)
 //------------------------------------------------------------------------------
 bool ParameterInfo::IsTimeParameter(const std::string &name)
 {
-   if (mParamTimeMap.find(name) != mParamTimeMap.end())
-      return mParamTimeMap[name];
+   if (mIsTimeParamMap.find(name) != mIsTimeParamMap.end())
+      return mIsTimeParamMap[name];
    else
       return false;
 }
 
 
 //------------------------------------------------------------------------------
-// bool IsOwnedObjectDependable(const std::string &name)
+// bool IsForOwnedObject(const std::string &name)
 //------------------------------------------------------------------------------
-bool ParameterInfo::IsOwnedObjectDependent(const std::string &name)
+bool ParameterInfo::IsForOwnedObject(const std::string &name)
 {
-   if (mParamOwnedObjDepMap.find(name) != mParamOwnedObjDepMap.end())
-      return mParamOwnedObjDepMap[name];
+   if (mIsForOwnedObjMap.find(name) != mIsForOwnedObjMap.end())
+      return true;
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsForAttachedObject(const std::string &name)
+//------------------------------------------------------------------------------
+bool ParameterInfo::IsForAttachedObject(const std::string &name)
+{
+   if (mIsForAttachedObjMap.find(name) != mIsForAttachedObjMap.end())
+      return true;
    else
       return false;
 }
@@ -255,7 +270,7 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
    }
    
    // Check for the same property
-   if (mParamObjectTypeMap.find(type) != mParamObjectTypeMap.end())
+   if (mOwnerTypeMap.find(type) != mOwnerTypeMap.end())
    {
       #ifdef DEBUG_PARAM_INFO
       MessageInterface::ShowMessage
@@ -265,11 +280,10 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
       return;
    }
    
-   
+   std::string depTypeStr = Parameter::GetDependentTypeString(depType);
    if (GmatGlobal::Instance()->IsWritingParameterInfo())
    {
       std::string objTypeStr = GmatBase::GetObjectTypeString(objectType);
-      std::string depTypeStr = Parameter::GetDependentTypeString(depType);
       std::string ownedObjTypeStr = "          ";
       std::string plottableStr = "N";
       std::string reportableStr = "N";
@@ -296,37 +310,44 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
    }
    
    // Add property objectType
-   mParamObjectTypeMap[type] = objectType;
+   mOwnerTypeMap[type] = objectType;
    
    // Add property name
    std::string propertyName = name.substr(pos+1, name.npos-pos);
    
-   mParamDepObjMap[propertyName] = depType;
+   mDepObjMap[propertyName] = depType;
    
    // Add plottable Parameters
    if (isPlottable)
-      mParamPlottableMap[type] = isPlottable;
+      mIsPlottableMap[type] = isPlottable;
    
    // Add reportable Parameters
    if (isReportable)
-      mParamReportableMap[type] = isReportable;
+      mIsReportableMap[type] = isReportable;
    
    // Add settable Parameters
    if (isSettable)
-      mParamSettableMap[type] = isSettable;
+      mIsSettableMap[type] = isSettable;
    
    // Add time Parameters
    if (isTimeParam)
-      mParamTimeMap[type] = isTimeParam;
+      mIsTimeParamMap[type] = isTimeParam;
    
    // Add owned object dep paramters
    if (depType == GmatParam::OWNED_OBJ)
    {
-      mParamOwnedObjDepMap[type] = true;
-      mParamOwnedObjTypeMap[type] = ownedObjType;
+      mIsForOwnedObjMap[type] = true;
+      mOwnedObjTypeMap[type] = ownedObjType;
    }
    
-   mNumParams = mParamDepObjMap.size();
+   // Add attached object dep paramters
+   if (depType == GmatParam::ATTACHED_OBJ)
+   {
+      mIsForAttachedObjMap[type] = true;
+      mOwnedObjTypeMap[type] = ownedObjType;
+   }
+   
+   mNumParams = mDepObjMap.size();
    
    #ifdef DEBUG_PARAM_INFO
    MessageInterface::ShowMessage
@@ -341,7 +362,7 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
 //------------------------------------------------------------------------------
 void ParameterInfo::Remove(const std::string &name)
 {
-   mParamDepObjMap.erase(name);
-   mNumParams = mParamDepObjMap.size();
+   mDepObjMap.erase(name);
+   mNumParams = mDepObjMap.size();
 }
 
