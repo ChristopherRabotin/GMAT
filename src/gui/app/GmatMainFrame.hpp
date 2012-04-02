@@ -197,6 +197,7 @@ public:
    void UpdateMenus(bool openOn);
    void EnableMenuAndToolBar(bool enable, bool missionRunning = false,
                              bool forAnimation = false);
+   void EnableNotebookAndMissionTree(bool enable);
    
    void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
    void OnScriptBuildAndRun(wxCommandEvent& event);

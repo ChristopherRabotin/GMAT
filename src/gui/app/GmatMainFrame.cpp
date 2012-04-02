@@ -1756,7 +1756,13 @@ void GmatMainFrame::MinimizeChildren()
           child->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
           child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED &&
           child->GetItemType() != GmatTree::OUTPUT_COMPARE_REPORT)
-         child->Iconize(TRUE);
+         child->Iconize(true);
+
+      // If mission tree is undocked and plot mode is tile, then iconize it
+      if (child->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED &&
+          GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
+         child->Iconize(true);
+      
       node = node->GetNext();
    }
 }
@@ -2187,7 +2193,8 @@ Integer GmatMainFrame::RunCurrentMission()
    #endif
    
    EnableMenuAndToolBar(false, true);
-
+   EnableNotebookAndMissionTree(false);
+   
    wxYield();
    SetFocus();
 
@@ -2200,6 +2207,7 @@ Integer GmatMainFrame::RunCurrentMission()
       MessageInterface::ShowMessage("Execution resumed.\n");
       theGuiInterpreter->ChangeRunState("Resume");
       SetStatusText("Busy", 1);
+      EnableNotebookAndMissionTree(false);
    }
    else
    {
@@ -2220,8 +2228,9 @@ Integer GmatMainFrame::RunCurrentMission()
                              // when run stopped by user
 
       EnableMenuAndToolBar(true, true);
+      EnableNotebookAndMissionTree(true);
       SetStatusText("", 1);
-
+      
       //put items in output tab
       GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true, true);
    }
@@ -2999,6 +3008,7 @@ void GmatMainFrame::OnPause(wxCommandEvent& WXUNUSED(event))
    toolBar->EnableTool(TOOL_RUN, TRUE);
    SetStatusText("Paused", 1);
    mRunPaused = true;
+   theNotebook->Enable(false);
 }
 
 
@@ -4880,6 +4890,25 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
    int editIndex = theMenuBar->FindMenu("Edit");
    theMenuBar->EnableTop(editIndex, false);
 }
+
+
+//------------------------------------------------------------------------------
+// void EnableNotebookAndMissionTree(bool enable)
+//------------------------------------------------------------------------------
+/**
+ * Enables or disables the notebook and undocked mission tree.
+ *
+ * @param <enable> true to enable, false to disable
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::EnableNotebookAndMissionTree(bool enable)
+{
+   theNotebook->Enable(enable);
+   GmatMdiChildFrame *child = GetChild("Mission");
+   if (child != NULL)
+      child->Enable(enable);
+}
+
 
 //------------------------------------------------------------------------------
 // void OnScreenShot(wxCommandEvent& WXUNUSED(event))
