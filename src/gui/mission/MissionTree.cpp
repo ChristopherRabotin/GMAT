@@ -100,6 +100,7 @@
 //#define DEBUG_ADD_ICONS
 //#define DEBUG_BUILD_TREE_ITEM 1
 //#define DEBUG_VIEW_COMMANDS 1
+//#define DEBUG_VIEW_LEVEL
 //#define DEBUG_COMMAND_COUNTER
 //#define DEBUG_RENAME
 //#define DEBUG_NODE_NAME
@@ -344,15 +345,17 @@ void MissionTree::UpdateMission(bool resetCounter, bool viewAll, bool collapse)
    #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
       ("MissionTree::UpdateMission() entered, resetCounter=%d, viewAll=%d, "
-       "collapse=%d, mUsingViewLevel=%d\n", resetCounter, viewAll, collapse,
-       mUsingViewLevel);
+       "collapse=%d, mViewAll=%d, mUsingViewLevel=%d, mViewLevel=%d\n",
+       resetCounter, viewAll, collapse, mViewAll, mUsingViewLevel, mViewLevel);
    #endif
    
    if (resetCounter)
       InitializeCounter();
    
-   //if (mUsingViewLevel)
-   //   mViewAll = viewAll;
+   // if (mUsingViewLevel)
+   // {
+   //    mViewAll = viewAll;
+   // }
    
    ClearMission();
    UpdateCommand();
@@ -444,13 +447,16 @@ void MissionTree::SetViewLevel(int level)
 {
    #ifdef DEBUG_VIEW_LEVEL
    MessageInterface::ShowMessage
-      ("MissionTree::SetViewLevel() entered, level = %d\n", level);
+      ("MissionTree::SetViewLevel() entered, level = %d, mViewAll = %d, "
+       "mUsingViewLevel = %d, mViewLevel = %d\n", level, mViewAll, mUsingViewLevel,
+       mViewLevel);
    #endif
    
    mUsingViewLevel = true;
    mViewLevel = level;
    if (level == 0) // Set level to 10 for showing all levels
       mViewLevel = 10;
+   mViewAll = false;
    if (mViewLevel == 10)
       mViewAll = true;
    
@@ -458,7 +464,8 @@ void MissionTree::SetViewLevel(int level)
    
    #ifdef DEBUG_VIEW_LEVEL
    MessageInterface::ShowMessage
-      ("MissionTree::SetViewLevel() leaving, mViewAll = %d\n", mViewAll);
+      ("MissionTree::SetViewLevel() leaving, mViewAll = %d, mUsingViewLevel = %d, "
+       "mViewLevel = %d\n", mViewAll, mUsingViewLevel, mViewLevel);
    #endif
 }
 
@@ -943,7 +950,9 @@ wxTreeItemId MissionTree::BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
 void MissionTree::UpdateCommand()
 {
    #if DEBUG_MISSION_TREE_SHOW_CMD
-   MessageInterface::ShowMessage("MissionTree::UpdateCommand() entered\n");
+   MessageInterface::ShowMessage
+      ("MissionTree::UpdateCommand() entered, mViewAll=%d, mUsingViewLevel=%d, "
+       "mViewLevel=%d\n", mViewAll, mUsingViewLevel, mViewLevel);
    #endif
    
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
@@ -2864,7 +2873,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    
    #if DEBUG_MISSION_TREE_MENU
    MessageInterface::ShowMessage
-      ("MissionTree::ShowMenu() itemType=%d, itemTitle='%s'\n", itemType, title.c_str());
+      ("MissionTree::ShowMenu() itemType=%d, itemTitle='%s', mViewAll=%d, "
+       "mUsingViewLevel=%d, mViewLevel=%d\n", itemType, title.c_str(), mViewAll,
+       mUsingViewLevel, mViewLevel);
    #endif
    
 #if wxUSE_MENUS
@@ -2879,12 +2890,12 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    {
       menu.Append(MT_COLLAPSE, wxT("Collapse All"));
       menu.Append(MT_EXPAND, wxT("Expand All"));
-
-      if (mViewAll)
-      {
+      
+      //if (mViewAll)
+      //{
          menu.AppendSeparator();
          menu.Append(MT_APPEND, wxT("Append"), CreateSubMenu(itemType, APPEND));
-      }
+         //}
       
       // If multiple sequence is enabled
       #ifdef __ENABLE_MULTIPLE_SEQUENCE__
@@ -2925,8 +2936,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
          menu.Append(MT_CLOSE, wxT("Close"));
       }
       
-      if (mViewAll)
-      {
+      // if (mViewAll)
+      // {
          menu.AppendSeparator();
          if (itemType == GmatTree::TARGET)
          {
@@ -2994,7 +3005,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
                menu.Append(MT_INSERT_AFTER, wxT("Insert After"),
                            CreateSubMenu(itemType, INSERT_AFTER));
             }
-         }
+         // }
          
          #if DEBUG_MISSION_TREE_MENU
          MessageInterface::ShowMessage("   Now add Append if control logic\n");
@@ -3195,11 +3206,22 @@ wxMenu* MissionTree::CreateSubMenu(GmatTree::ItemType type, ActionType action)
    unsigned int i;
    wxMenu *menu = new wxMenu;
    
-   for (i=0; i<mCommandList.GetCount(); i++)
-      menu->Append(GetMenuId(mCommandList[i], action), mCommandList[i]);
-   
-   menu->Append(MT_CONTROL_LOGIC, "Control Logic",
-                CreateControlLogicSubMenu(type, action));
+   if (!mUsingViewLevel)
+   {
+      wxString actionStr = "inserted";
+      if (action == APPEND) actionStr = "appended";
+      wxString menuText = "New command cannot be " + actionStr + " unless Category Filter is Off";
+      menu->Append(-99, menuText);
+      menu->Enable(-99, false);
+   }
+   else
+   {
+      for (i=0; i<mCommandList.GetCount(); i++)
+         menu->Append(GetMenuId(mCommandList[i], action), mCommandList[i]);
+      
+      menu->Append(MT_CONTROL_LOGIC, "Control Logic",
+                   CreateControlLogicSubMenu(type, action));
+   }
    
    return menu;
 }
@@ -3213,8 +3235,12 @@ wxMenu* MissionTree::CreateTargetSubMenu(GmatTree::ItemType type, ActionType act
    wxMenu *menu;
    
    menu = CreateSubMenu(type, action);
-   menu->Append(GetMenuId("Vary", action), "Vary");
-   menu->Append(GetMenuId("Achieve", action), "Achieve");
+   
+   if (mUsingViewLevel)
+   {
+      menu->Append(GetMenuId("Vary", action), "Vary");
+      menu->Append(GetMenuId("Achieve", action), "Achieve");
+   }
    
    return menu;
 }
@@ -3228,10 +3254,14 @@ wxMenu* MissionTree::CreateOptimizeSubMenu(GmatTree::ItemType type, ActionType a
    wxMenu *menu;
    
    menu = CreateSubMenu(type, action);
-   menu->Append(GetMenuId("Vary", action), "Vary");
-   menu->Append(GetMenuId("Minimize", action), "Minimize");
-   menu->Append(GetMenuId("NonlinearConstraint", action), "NonlinearConstraint");
-      
+   
+   if (mUsingViewLevel)
+   {
+      menu->Append(GetMenuId("Vary", action), "Vary");
+      menu->Append(GetMenuId("Minimize", action), "Minimize");
+      menu->Append(GetMenuId("NonlinearConstraint", action), "NonlinearConstraint");
+   }
+   
    return menu;
 }
 
