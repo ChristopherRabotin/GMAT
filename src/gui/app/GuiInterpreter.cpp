@@ -721,7 +721,23 @@ GmatCommand* GuiInterpreter::CreateDefaultCommand(const std::string &type,
                                                   const std::string &name,
                                                   GmatCommand *refCmd)
 {
-   return theModerator->CreateDefaultCommand(type, name, refCmd);
+   GmatCommand *cmd = theModerator->CreateDefaultCommand(type, name, refCmd);
+   
+   #ifdef DEBUG_SYNC_STATUS
+   MessageInterface::ShowMessage
+      ("GuiInterpreter::CreateDefaultCommand() type='%s', name='%s', Setting GUI dirty\n",
+       type.c_str(), name.c_str());
+   #endif
+   
+   #if !defined __CONSOLE_APP__
+   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
+   if (cmd == NULL)
+      mainFrame->UpdateGuiScriptSyncStatus(3, 0); // Set GUI error
+   else
+      mainFrame->UpdateGuiScriptSyncStatus(2, 0); // Set GUI dirty
+   #endif
+   
+   return cmd;
 }
 
 
