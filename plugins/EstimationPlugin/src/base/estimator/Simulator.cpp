@@ -246,7 +246,7 @@ void Simulator::WriteToTextFile(SolverState stateToUse)
 
    StringArray::iterator current;
 
-   if (initialized)
+   if (isInitialized)
    {
       switch (currentState)
       {
@@ -1108,7 +1108,7 @@ bool Simulator::TakeAction(const std::string &action,
    if (action == "Reset")
    {
       currentState = INITIALIZING;
-      initialized = false;
+      isInitialized = false;
       return true;
    }
 
@@ -1277,7 +1277,7 @@ void Simulator::CompleteInitialization()
                (currentState == CALCULATING ? "Calculating" : "Propagating"));
    #endif
 
-   initialized = true;
+   isInitialized = true;
 }
 
 
@@ -1478,7 +1478,7 @@ std::string Simulator::GetProgressString()
    progress.str("");
    progress.precision(12);
 
-   if (initialized)
+   if (isInitialized)
    {
       switch (currentState)
       {

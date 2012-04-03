@@ -515,7 +515,7 @@ bool BatchEstimator::TakeAction(const std::string &action,
    if (action == "Reset")
    {
       currentState = INITIALIZING;
-      initialized = false;
+      isInitialized = false;
       converged   = false;
 
       return true;
@@ -795,7 +795,7 @@ void BatchEstimator::CompleteInitialization()
    esm.MapObjectsToVector();
 
    converged   = false;
-   initialized = true;
+   isInitialized = true;
 
    WriteToTextFile();
    ReportProgress();
@@ -1128,7 +1128,7 @@ std::string BatchEstimator::GetProgressString()
    progress.precision(12);
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
-   if (initialized)
+   if (isInitialized)
    {
       switch (currentState)
       {

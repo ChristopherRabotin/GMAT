@@ -1176,7 +1176,7 @@ bool EphemerisPropagator::Step(Real dt)
 
    bool retval = false;
 
-   if (initialized)
+   if (isInitialized)
    {
       Real tempStep = ephemStep;
       ephemStep = dt;

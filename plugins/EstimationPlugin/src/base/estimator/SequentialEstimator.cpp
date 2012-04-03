@@ -313,7 +313,7 @@ void SequentialEstimator::CompleteInitialization()
    esm.MapObjectsToVector();
 
    measurementResiduals.clear();
-   initialized = true;
+   isInitialized = true;
    ReportProgress();
 
    if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
@@ -564,7 +564,7 @@ std::string SequentialEstimator::GetProgressString()
    progress.precision(12);
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
-   if (initialized)
+   if (isInitialized)
    {
       switch (currentState)
       {

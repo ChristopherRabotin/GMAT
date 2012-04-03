@@ -943,7 +943,7 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
    if (!textFile.is_open())
       OpenSolverTextFile();
 
-   if (initialized)
+   if (isInitialized)
    {
       std::stringstream message;
 
