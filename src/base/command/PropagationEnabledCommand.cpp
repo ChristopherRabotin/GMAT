@@ -154,7 +154,7 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    finder               (NULL),
    publishOnStep        (true)
 {
-   initialized = false;
+   isInitialized = false;
    propagatorNames = pec.propagatorNames;
    for (UnsignedInt i = 0; i < pec.propObjectNames.size(); ++i)
       propObjectNames.push_back(pec.propObjectNames[i]);
@@ -186,7 +186,7 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
       inProgress          = false;
       dim                 = pec.dim;
       epochID             = pec.epochID;
-      initialized         = false;
+      isInitialized         = false;
 
       j2kState            = NULL;
       if (pubdata)
@@ -430,7 +430,7 @@ bool PropagationEnabledCommand::Initialize()
 
       // Now we have everything we need to init the prop subsystem
       retval = true;
-      initialized = true;
+      isInitialized = true;
       // retval = AssemblePropagators();
 
       #ifdef DEBUG_INITIALIZATION

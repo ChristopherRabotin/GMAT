@@ -88,6 +88,8 @@ public:
    bool                 IsOfType(Gmat::ObjectType ofType) const;
    bool                 IsOfType(std::string typeDescription) const;
 
+   virtual bool         IsInitialized();
+
    void                 SetShowPrefaceComment(bool show = true);
    void                 SetShowInlineComment(bool show = true);
    bool                 GetShowPrefaceComment();
@@ -481,6 +483,9 @@ protected:
    ObjectTypeArray     objectTypes;
    /// The list types that this class extends, by name
    StringArray         objectTypeNames;
+
+   /// Flag used to determine if associations have been made
+   bool                 isInitialized;
 
    /// The list of object types referenced by this class
    ObjectTypeArray     refObjectTypes;

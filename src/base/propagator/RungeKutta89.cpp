@@ -143,7 +143,7 @@ GmatBase* RungeKutta89::Clone() const
 void RungeKutta89::SetCoefficients()
 {
     if ((ai == NULL) || (bij == NULL) || (cj == NULL) || (ee == NULL)) {
-        initialized = false;
+        isInitialized = false;
         return;
     }
 

@@ -84,8 +84,7 @@ FuelTank::FuelTank(std::string nomme) :
    volume               (0.75),
    density              (1260.0),      // Hydrazine/H2O2 mixture
    allowNegativeFuelMass(false),
-   pressureModel        (TPM_PRESSURE_REGULATED),
-   initialized          (false)
+   pressureModel        (TPM_PRESSURE_REGULATED)
 {
    objectTypes.push_back(Gmat::FUEL_TANK);
    objectTypeNames.push_back("FuelTank");
@@ -134,10 +133,10 @@ FuelTank::FuelTank(const FuelTank& ft) :
    allowNegativeFuelMass(ft.allowNegativeFuelMass),
    pressureModel        (ft.pressureModel),
    gasVolume            (ft.gasVolume),
-   pvBase               (ft.pvBase),
-   initialized          (false)
+   pvBase               (ft.pvBase)
 {
    parameterCount = ft.parameterCount;
+   isInitialized  = false;
 }
 
 
@@ -169,7 +168,7 @@ FuelTank& FuelTank::operator=(const FuelTank& ft)
    pressureModel         = ft.pressureModel;
    gasVolume             = ft.gasVolume;
    pvBase                = ft.pvBase;
-   initialized           = false;
+   isInitialized         = false;
    
    Initialize();
    
@@ -409,7 +408,7 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
                            "Pressure", "Real Number >= 0.0");
             throw hwe;
          }
-         initialized = false;
+         isInitialized = false;
          return pressure;
          
       case TEMPERATURE:
@@ -425,7 +424,7 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
                            "Temperature", (ss.str()).c_str());
             throw hwe;
          }
-         initialized = false;
+         isInitialized = false;
          return temperature;
          
       case REFERENCE_TEMPERATURE:
@@ -441,7 +440,7 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
                            "RefTemperature", (ss.str()).c_str());
             throw hwe;
          }
-         initialized = false;
+         isInitialized = false;
          return refTemperature;
          
       case VOLUME:
@@ -456,7 +455,7 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
                            "Volume", "Real Number >= 0.0");
             throw hwe;
          }
-         initialized = false;
+         isInitialized = false;
          return volume;
 
       case FUEL_DENSITY:
@@ -471,7 +470,7 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
                            "FuelDensity", "Real Number > 0.0");
             throw hwe;
          }
-         initialized = false;
+         isInitialized = false;
          return density;
 
       default:
@@ -712,7 +711,7 @@ bool FuelTank::Initialize()
    gasVolume = volume - fuelMass / density;
    pvBase = pressure * gasVolume;
    
-   initialized = true;   
+   isInitialized = true;
    return true;
 }
 
@@ -754,7 +753,7 @@ void FuelTank::UpdateTank()
                "density = %.12lf, P0 = %.12lf, PV = %.12lf", volume, fuelMass,
                density, pressure, pvBase);
       #endif
-      if (!initialized)
+      if (!isInitialized)
          Initialize();
 
       gasVolume = volume - fuelMass / density;

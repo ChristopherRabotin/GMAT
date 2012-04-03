@@ -162,7 +162,7 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
    parameterCount = PointMassParamCount;
    dimension = pmf.dimension;
    epoch = pmf.epoch;
-   initialized = false;
+   isInitialized = false;
 }
 
 //------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
    epoch            = pmf.epoch;
    mu               = pmf.mu;
    dimension        = pmf.dimension;
-   initialized      = false;
+   isInitialized    = false;
    elapsedTime      = pmf.elapsedTime;
    estimationMethod = pmf.estimationMethod;
    isPrimaryBody    = pmf.isPrimaryBody;
@@ -240,7 +240,7 @@ bool PointMassForce::Initialize()
          MessageInterface::ShowMessage(
             "PointMassForce::Initialize() body \"%s\" is not in the solar "
             "system\n", bodyName.c_str());
-         initialized = false;
+         isInitialized = false;
          throw ODEModelException("PointMassForce::Initialize() body \"" +
             bodyName + "\" is not in the solar system\n");
       }
@@ -249,7 +249,7 @@ bool PointMassForce::Initialize()
    {
       MessageInterface::ShowMessage(
          "PointMassForce::Initialize() solarSystem is NULL\n");
-      initialized = false;
+      isInitialized = false;
       throw ODEModelException(
          "PointMassForce::Initialize() solarSystem is NULL\n");
    }

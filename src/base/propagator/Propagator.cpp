@@ -123,7 +123,6 @@ Propagator::Propagator(const std::string &typeStr,
     : GmatBase(Gmat::PROPAGATOR, typeStr, nomme),
       stepSize            (60.0),
       stepSizeBuffer      (60.0),
-      initialized         (false),
       resetInitialData    (true),
       alwaysUpdateStepsize(false),
       inState             (NULL),
@@ -167,7 +166,7 @@ Propagator::Propagator(const Propagator& p)
     : GmatBase            (p),
       stepSize            (p.stepSize),
       stepSizeBuffer      (p.stepSizeBuffer),
-      initialized         (false),
+//      initialized         (false),
       resetInitialData    (true),
       alwaysUpdateStepsize(p.alwaysUpdateStepsize),
       inState             (NULL),
@@ -180,6 +179,7 @@ Propagator::Propagator(const Propagator& p)
       centralBody         (p.centralBody),
       propOrigin          (NULL)
 {
+   isInitialized = false;
 }
 
 //------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ Propagator& Propagator::operator=(const Propagator& p)
     inState = outState = NULL;
     physicalModel = NULL;
 
-    initialized = false;
+    isInitialized = false;
     resetInitialData = true;
     alwaysUpdateStepsize = p.alwaysUpdateStepsize;
     finalStep = false;    
@@ -666,7 +666,7 @@ bool Propagator::Initialize()
          #endif
 
          if ( physicalModel->Initialize() )
-            initialized = true;
+            isInitialized = true;
 
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage(
@@ -687,10 +687,10 @@ bool Propagator::Initialize()
                "not defined");
    }
    else
-      initialized = true;
+      isInitialized = true;
 
     
-    if (!initialized)
+    if (!isInitialized)
        throw PropagatorException("Propagator failed to initialize");
 
     return true;
@@ -1040,7 +1040,7 @@ bool Propagator::Step(Real dt)
     #ifdef DEBUG_PROPAGATOR_FLOW
        MessageInterface::ShowMessage("^");
     #endif
-    if (initialized)
+    if (isInitialized)
     {
         stepSize = dt;
         return Step();

@@ -148,8 +148,7 @@ Thruster::Thruster(std::string nomme) :
    simpleExpressions    (true),
    usingLocalCoordSys   (true),
    isMJ2000EqAxes       (false),
-   isSpacecraftBodyAxes (false),
-   initialized          (false)
+   isSpacecraftBodyAxes (false)
 {
    objectTypes.push_back(Gmat::THRUSTER);
    objectTypeNames.push_back("Thruster");
@@ -292,7 +291,6 @@ Thruster::Thruster(const Thruster& th) :
    usingLocalCoordSys   (th.usingLocalCoordSys),
    isMJ2000EqAxes       (th.isMJ2000EqAxes),
    isSpacecraftBodyAxes (th.isSpacecraftBodyAxes),
-   initialized          (false),
    tankNames            (th.tankNames)
 {
    #ifdef DEBUG_THRUSTER_CONSTRUCTOR
@@ -322,6 +320,8 @@ Thruster::Thruster(const Thruster& th) :
    // copy tanks
    tanks = th.tanks;
    
+   isInitialized = false;
+
    #ifdef DEBUG_THRUSTER_CONSTRUCTOR
    MessageInterface::ShowMessage("Thruster::Thruster(copy) exiting\n");
    #endif
@@ -390,7 +390,7 @@ Thruster& Thruster::operator=(const Thruster& th)
    usingLocalCoordSys  = th.usingLocalCoordSys;
    usingLocalCoordSys  = th.usingLocalCoordSys;
    localAxesLabels     = th.localAxesLabels;
-   initialized         = false;
+   isInitialized       = false;
    
    localAxesLabels     = th.localAxesLabels;
    tankNames           = th.tankNames;

@@ -230,8 +230,6 @@ protected:
    std::string bodyName;
    /// Number of parameters being modeled
    Integer dimension;
-   /// Flag used to tell the readiness of the model for use
-   bool initialized;
    /// Flag that is set when SetState() or SetTime() is called
    bool stateChanged;
    

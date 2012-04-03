@@ -152,7 +152,7 @@ RungeKutta& RungeKutta::operator=(const RungeKutta& rk)
     stageState = NULL;
     candidateState = NULL;
 
-    initialized = false;
+    isInitialized = false;
 
     return *this;
 }
@@ -171,7 +171,7 @@ RungeKutta& RungeKutta::operator=(const RungeKutta& rk)
 void RungeKutta::SetPhysicalModel(PhysicalModel *pPhysicalModel)
 {
     Integrator::SetPhysicalModel(pPhysicalModel);
-    if (initialized)
+    if (isInitialized)
        SetupAccumulator();
 }
 
@@ -193,37 +193,37 @@ bool RungeKutta::Initialize()
     Propagator::Initialize();
     if (stages <= 0)
     {
-        initialized = false;
-        return initialized;
+        isInitialized = false;
+        return isInitialized;
     }
 
     ClearArrays();
 
     if ((ai = new Real [stages]) == NULL)
     {
-        initialized = false;
-        return initialized;
+        isInitialized = false;
+        return isInitialized;
     }
     if ((bij = new Real*[stages]) == NULL)
     {
         delete [] ai;
-        initialized = false;
-        return initialized;
+        isInitialized = false;
+        return isInitialized;
     }
     if ((cj = new Real [stages]) == NULL)
     {
         delete [] ai;
         delete [] bij;
-        initialized = false;
-        return initialized;
+        isInitialized = false;
+        return isInitialized;
     }
     if ((ki = new Real*[stages]) == NULL)
     {
         delete [] ai;
         delete [] bij;
         delete [] cj;
-        initialized = false;
-        return initialized;
+        isInitialized = false;
+        return isInitialized;
     }
     if ((ee = new Real [stages]) == NULL)
     {
@@ -231,8 +231,8 @@ bool RungeKutta::Initialize()
         delete [] bij;
         delete [] cj;
         delete [] ki;
-        initialized = false;
-        return initialized;
+        isInitialized = false;
+        return isInitialized;
     }
 
     for (int i = 0; i < stages; i++)
@@ -246,8 +246,8 @@ bool RungeKutta::Initialize()
             delete [] bij;
             delete [] cj;
             delete [] ki;
-            initialized = false;
-            return initialized;
+            isInitialized = false;
+            return isInitialized;
         }
     }
 
@@ -284,7 +284,7 @@ bool RungeKutta::Step()
     // it's needed later -- DJC
     // ((ForceModel*)physicalModel)->UpdateInitialData();
 
-    if (!initialized)
+    if (!isInitialized)
     {
        MessageInterface::ShowMessage("RK not initialized\n");
        return false;
@@ -638,7 +638,7 @@ bool RungeKutta::SetupAccumulator()
 {
     if (physicalModel)
     {
-        initialized = true;
+        isInitialized = true;
         dimension = physicalModel->GetDimension();
 
         if (stageState)
@@ -646,7 +646,7 @@ bool RungeKutta::SetupAccumulator()
 
         if ((stageState = new Real[dimension]) == NULL)
         {
-            initialized = false;
+            isInitialized = false;
             return false;
         }
 
@@ -655,7 +655,7 @@ bool RungeKutta::SetupAccumulator()
 
         if ((candidateState = new Real[dimension]) == NULL)
         {
-            initialized = false;
+            isInitialized = false;
             delete [] stageState;
             stageState = NULL;
             return false;
@@ -668,7 +668,7 @@ bool RungeKutta::SetupAccumulator()
 
         if ((errorEstimates = new Real[dimension]) == NULL)
         {
-            initialized = false;
+            isInitialized = false;
             delete [] stageState;
             stageState = NULL;
             delete [] candidateState;
@@ -684,7 +684,7 @@ bool RungeKutta::SetupAccumulator()
                     delete [] ki[i];
                 if ((ki[i] = new Real[dimension]) == NULL)
                 {
-                    initialized = false;
+                    isInitialized = false;
                     delete [] stageState;
                     stageState = NULL;
                     delete [] candidateState;

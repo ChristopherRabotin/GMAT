@@ -129,7 +129,7 @@ RelativisticCorrection::RelativisticCorrection(const RelativisticCorrection &rc)
    parameterCount = RelativisticCorrectionParamCount;
    dimension      = rc.dimension;
    epoch          = rc.epoch;
-   initialized    = false;
+   isInitialized    = false;
 
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    derivativeIds.push_back(Gmat::ORBIT_STATE_TRANSITION_MATRIX);
@@ -202,14 +202,14 @@ bool RelativisticCorrection::Initialize()
       }
       else
       {
-         initialized = false;
+         isInitialized = false;
          throw ODEModelException("RelativisticCorrection::Initialize() body \"" +
             bodyName + "\" is not in the solar system\n");
       }
    }
    else
    {
-      initialized = false;
+      isInitialized = false;
       throw ODEModelException(
          "RelativisticCorrection::Initialize() solarSystem is NULL\n");
    }

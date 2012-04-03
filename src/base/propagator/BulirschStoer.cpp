@@ -73,7 +73,7 @@ BulirschStoer::PARAMETER_TYPE[BulirschStoerParamCount - IntegratorParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// BulirschStoer(void)
+// BulirschStoer()
 //------------------------------------------------------------------------------
 /**
  * The Bulirsch-Stoer constructor
@@ -103,6 +103,7 @@ BulirschStoer::BulirschStoer(const std::string &nomme) :
    scale_dt                        (0.1)
 {
    parameterCount = BulirschStoerParamCount;
+   isInitialized = false;
 }
 
 //------------------------------------------------------------------------------
@@ -112,7 +113,7 @@ BulirschStoer::BulirschStoer(const std::string &nomme) :
  * The Bulirsch-Stoer destructor
  */
 //------------------------------------------------------------------------------
-BulirschStoer::~BulirschStoer(void)
+BulirschStoer::~BulirschStoer()
 {
    if (subinterval)
       delete [] subinterval;
@@ -185,6 +186,7 @@ BulirschStoer::BulirschStoer(const BulirschStoer& bs) :
    first                           (bs.first)
 {
    parameterCount = BulirschStoerParamCount;
+   isInitialized  = false;
 }
 
 //------------------------------------------------------------------------------
@@ -225,7 +227,7 @@ BulirschStoer& BulirschStoer::operator=(const BulirschStoer& bs)
    kused              = bs.kused;
    first              = bs.first;
     
-   initialized = false;
+   isInitialized = false;
 
    return *this;
 }
@@ -275,11 +277,12 @@ bool BulirschStoer::Initialize(void)
       stepSizeBuffer = maximumStep * stepSign;
 
    Propagator::Initialize();
-   initialized = false;
+
+   isInitialized = false;
     
    if (!depthInitialized)
       if (!SetMaximumDepth(depth))
-         return initialized;
+         return isInitialized;
 
    if (physicalModel)
    {
@@ -338,7 +341,7 @@ bool BulirschStoer::Initialize(void)
       errorEstimates = new Real[dimension];
       if (!errorEstimates)
       {
-         return initialized;
+         return isInitialized;
       }
 
       coeffC = new Real[dimension];
@@ -346,7 +349,7 @@ bool BulirschStoer::Initialize(void)
       {
          delete [] errorEstimates;
          errorEstimates = NULL;
-         return initialized;
+         return isInitialized;
       }
         
       estimatedState = new Real[dimension];
@@ -356,7 +359,7 @@ bool BulirschStoer::Initialize(void)
          errorEstimates = NULL;
          delete [] coeffC;
          coeffC = NULL;
-         return initialized;
+         return isInitialized;
       }
 
       mstate = new Real[dimension];
@@ -368,7 +371,7 @@ bool BulirschStoer::Initialize(void)
          errorEstimates = NULL;
          delete [] coeffC;
          coeffC = NULL;
-         return initialized;
+         return isInitialized;
       }
 
       nstate = new Real[dimension];
@@ -382,7 +385,7 @@ bool BulirschStoer::Initialize(void)
          errorEstimates = NULL;
          delete [] coeffC;
          coeffC = NULL;
-         return initialized;
+         return isInitialized;
       }
 
       // Now do the 2-dimensional arrays
@@ -407,7 +410,7 @@ bool BulirschStoer::Initialize(void)
                delete [] intermediates[j];
             delete [] intermediates;
             intermediates = NULL;
-            return initialized;
+            return isInitialized;
          }
       }
 
@@ -438,7 +441,7 @@ bool BulirschStoer::Initialize(void)
                delete [] estimates[j];
                estimates[j] = NULL;
             }
-            return initialized;
+            return isInitialized;
          }
       }
       ddt = physicalModel->GetDerivativeArray();
@@ -448,9 +451,9 @@ bool BulirschStoer::Initialize(void)
    accuracyWarningTriggered = false;
 
    first = true;
-   initialized = true;
+   isInitialized = true;
     
-   return initialized;
+   return isInitialized;
 }
 
 //------------------------------------------------------------------------------
@@ -676,7 +679,7 @@ bool BulirschStoer::SetMaximumDepth(Integer d)
 
    kmax = kopt;
 
-   initialized = false;
+   isInitialized = false;
    depthInitialized = true;
    return true;
 }
@@ -693,7 +696,7 @@ bool BulirschStoer::SetMaximumDepth(Integer d)
 //------------------------------------------------------------------------------
 bool BulirschStoer::Step(Real dt)
 {
-   if (!initialized)
+   if (!isInitialized)
       return false;
 
    Real stepleft = dt;
@@ -745,7 +748,7 @@ bool BulirschStoer::Step(Real dt)
 //------------------------------------------------------------------------------
 bool BulirschStoer::Step(void)
 {
-    if (!initialized)
+    if (!isInitialized)
         return false;
         
     //  waw: 06/28/04 Unused variable    

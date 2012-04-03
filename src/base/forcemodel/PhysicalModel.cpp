@@ -152,7 +152,6 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    forceOrigin                 (NULL),
    bodyName                    ("Earth"),
    dimension                   (1),
-   initialized                 (false),
    stateChanged                (false),
    theState                    (NULL),
    modelState                  (NULL),
@@ -234,7 +233,6 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    forceOrigin                 (pm.forceOrigin),
    bodyName                    (pm.bodyName),
    dimension                   (pm.dimension),
-   initialized                 (false),
    stateChanged                (pm.stateChanged),
    theState                    (NULL),
    modelState                  (NULL),
@@ -268,7 +266,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       if (modelState != NULL) 
          memcpy(modelState, pm.modelState, dimension * sizeof(Real));
       else
-         initialized = false;
+         isInitialized = false;
    }
    else
       modelState = NULL;
@@ -285,11 +283,10 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       if (deriv != NULL) 
          memcpy(deriv, pm.deriv, dimension * sizeof(Real));
       else
-         initialized = false;
+         isInitialized = false;
    }
    else
       deriv = NULL;
-   
 
    parameterCount = PhysicalModelParamCount;
 }
@@ -318,14 +315,14 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    body        = pm.body;
    forceOrigin = pm.forceOrigin;
 
-   bodyName    = pm.bodyName;
-   dimension   = pm.dimension;
-   initialized = false; //pm.initialized;
-   epoch       = pm.epoch;
-   elapsedTime = pm.elapsedTime;
+   bodyName        = pm.bodyName;
+   dimension       = pm.dimension;
+   isInitialized   = false; //pm.initialized;
+   epoch           = pm.epoch;
+   elapsedTime     = pm.elapsedTime;
    prevElapsedTime = pm.prevElapsedTime;
    relativeErrorThreshold = pm.relativeErrorThreshold;
-   solarSystem = pm.solarSystem;
+   solarSystem     = pm.solarSystem;
    
    fillCartesian  = pm.fillCartesian;
    cartesianStart = pm.cartesianStart;
@@ -362,7 +359,7 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
       if (modelState != NULL) 
          memcpy(modelState, pm.modelState, dimension * sizeof(Real));
       else
-         initialized = false;
+         isInitialized = false;
    
       stateChanged = pm.stateChanged;
    }
@@ -392,7 +389,7 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
       if (deriv != NULL) 
          memcpy(deriv, pm.deriv, dimension * sizeof(Real));
       else
-         initialized = false;
+         isInitialized = false;
    }
    
    return *this;
@@ -498,7 +495,7 @@ bool PhysicalModel::Initialize()
       modelState = NULL;
       rawState = NULL;
       
-      initialized = false;
+      isInitialized = false;
    }
    
    if (deriv)
@@ -534,13 +531,13 @@ bool PhysicalModel::Initialize()
           "deriv = new Real[dimension]", this);
       #endif
       if (deriv)
-         initialized = true;
+         isInitialized = true;
       else
-         initialized = false;
+         isInitialized = false;
    }
    rawState = modelState;
    
-   return initialized;
+   return isInitialized;
 }
 
 //------------------------------------------------------------------------------
@@ -633,7 +630,7 @@ Integer PhysicalModel::GetDimension()
 void PhysicalModel::SetDimension(Integer n)
 {
    dimension = n;
-   initialized = false;
+   isInitialized = false;
 }
 
 //------------------------------------------------------------------------------

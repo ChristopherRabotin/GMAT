@@ -185,7 +185,7 @@ PredictorCorrector::PredictorCorrector(const PredictorCorrector& pc) :
 {
     parameterCount = PredictorCorrectorParamCount;
     tolerance = pc.tolerance;
-    initialized = false;
+    isInitialized = false;
 }
 
 
@@ -210,7 +210,7 @@ PredictorCorrector& PredictorCorrector::operator=(const PredictorCorrector& pc)
     startupComplete = false;
     startupCount = 0;
     invOrder = pc.invOrder;
-    initialized = false;
+    isInitialized = false;
     
     ddt = NULL;
     history = NULL;
@@ -252,9 +252,9 @@ bool PredictorCorrector::Initialize()
 {
 //    Propagator::Initialize();
 
-    initialized = false;
+    isInitialized = false;
     if (stepCount <= 0)
-        return initialized;
+        return isInitialized;
 
     // Check the P-C error control tolerances
     if ((lowerError >= targetError) || (targetError >= tolerance))
@@ -311,7 +311,7 @@ bool PredictorCorrector::Initialize()
         predictorState = new Real[dimension];
         if (!predictorState)
         {
-            return initialized;
+            return isInitialized;
         }
 
         correctorState = new Real[dimension];
@@ -319,7 +319,7 @@ bool PredictorCorrector::Initialize()
         {
             delete [] predictorState;
             predictorState = NULL;
-            return initialized;
+            return isInitialized;
         }
 
         errorEstimates = new Real[dimension];
@@ -329,7 +329,7 @@ bool PredictorCorrector::Initialize()
             predictorState = NULL;
             delete [] correctorState;
             correctorState = NULL;
-            return initialized;
+            return isInitialized;
         }
 
         pweights = new Real[stepCount];
@@ -341,7 +341,7 @@ bool PredictorCorrector::Initialize()
             correctorState = NULL;
             delete [] errorEstimates;
             errorEstimates = NULL;
-            return initialized;
+            return isInitialized;
         }
 
         cweights = new Real[stepCount];
@@ -355,7 +355,7 @@ bool PredictorCorrector::Initialize()
             correctorState = NULL;
             delete [] errorEstimates;
             errorEstimates = NULL;
-            return initialized;
+            return isInitialized;
         }
 
         history = new Real*[stepCount];
@@ -382,12 +382,12 @@ bool PredictorCorrector::Initialize()
                     correctorState = NULL;
                     delete [] errorEstimates;
                     errorEstimates = NULL;
-                    return initialized;
+                    return isInitialized;
                 }
                 if (SetWeights())
                 {
                     ddt = physicalModel->GetDerivativeArray();
-                    initialized = true;
+                    isInitialized = true;
                 }
             }
         }
@@ -432,7 +432,7 @@ bool PredictorCorrector::Initialize()
     
     accuracyWarningTriggered = false;
 
-    return initialized;
+    return isInitialized;
 }
 
 //------------------------------------------------------------------------------
@@ -489,7 +489,7 @@ bool PredictorCorrector::Step(Real dt)
 //------------------------------------------------------------------------------
 bool PredictorCorrector::Step()
 {
-    if (!initialized)
+    if (!isInitialized)
         return false;
 
     if (physicalModel->StateChanged())

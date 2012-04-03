@@ -112,7 +112,6 @@ Integer GmatCommand::satTotalMassID;
 //------------------------------------------------------------------------------
 GmatCommand::GmatCommand(const std::string &typeStr) :
    GmatBase             (Gmat::COMMAND, typeStr),
-   initialized          (false),
    currentFunction      (NULL),
    callingFunction      (NULL),
    next                 (NULL),
@@ -254,7 +253,6 @@ GmatCommand::~GmatCommand()
 //------------------------------------------------------------------------------
 GmatCommand::GmatCommand(const GmatCommand &c) :
    GmatBase             (c),
-   initialized          (false),
    association          (c.association),
    objects              (c.objects),
    currentFunction      (c.currentFunction),
@@ -316,7 +314,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
       return *this;
 
    GmatBase::operator=(c);
-   initialized         = false;
+   isInitialized         = false;
    currentFunction     = c.currentFunction;
    callingFunction     = c.callingFunction;
    objects.clear();
@@ -354,6 +352,8 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    stateData           = NULL;
    parmData            = NULL;
    
+   isInitialized         = false;
+
    return *this;
 }
 
@@ -1377,7 +1377,7 @@ bool GmatCommand::Initialize()
       throw CommandException(errorstr);
    }
    
-   initialized = AssignObjects();
+   isInitialized = AssignObjects();
    if (publisher == NULL)
       publisher = Publisher::Instance();
    
@@ -1421,7 +1421,7 @@ bool GmatCommand::Initialize()
        stateData, parmData, satVector.size());
    #endif
    
-   return initialized;
+   return isInitialized;
 }
 
 
@@ -1827,7 +1827,7 @@ void GmatCommand::RunComplete()
    
    // Reset stream ID and initialized flag
    streamID = -1;
-   initialized = false;
+   isInitialized = false;
    
    if (this->IsOfType("BranchEnd"))
       return;

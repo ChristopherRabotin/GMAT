@@ -207,8 +207,6 @@ protected:
    Real stepSize;
    /// Buffer for the stepsize.
    Real stepSizeBuffer;
-   /// Flag used to determine if the propagator has been initialized
-   bool initialized;
    /// Flag used to determine if the propagator need to reset the initial step
    bool resetInitialData;
    /// Flag to force stepsize initialization whenever the propagator initializes

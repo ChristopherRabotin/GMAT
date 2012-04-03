@@ -166,8 +166,6 @@ protected:
    bool                       isMJ2000EqAxes;
    /// Flag indicating if axes is SpacecrftBody
    bool                       isSpacecraftBodyAxes;
-   /// Flag used to determine if the configuration needs updating
-   bool                       initialized;
    /// Tank names
    StringArray                tankNames;
    /// The tanks

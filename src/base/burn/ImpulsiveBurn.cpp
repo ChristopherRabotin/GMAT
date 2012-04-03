@@ -221,10 +221,10 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
          ("Unable to initialize the ImpulsiveBurn object " + 
           instanceName + " " + satName + " was not set for the burn.");
    
-   if (!initialized  || localCoordSystem == NULL)
+   if (!isInitialized  || localCoordSystem == NULL)
    {
       if (Initialize())
-         initialized = true;
+         isInitialized = true;
    }
    
    if (epoch == GmatTimeConstants::MJD_OF_J2000)
@@ -644,7 +644,7 @@ bool ImpulsiveBurn::SetStringParameter(const Integer id, const std::string &valu
          #endif
          
          tankNames.push_back(value);
-         initialized = false;
+         isInitialized = false;
       }
       return true;
    default:

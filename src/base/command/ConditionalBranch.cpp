@@ -129,7 +129,7 @@ numberOfLogicalOps (cb.numberOfLogicalOps)
       logicalOpList.push_back((cb.logicalOpList).at(i));
    }
    
-   initialized = false;
+   isInitialized = false;
 }
 
 
@@ -171,7 +171,7 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
       logicalOpList.push_back((cb.logicalOpList).at(i));
    }
    
-   initialized = false;
+   isInitialized = false;
    return *this;
 }
 

@@ -269,7 +269,7 @@ Propagate::Propagate(const Propagate &prp) :
    stopCondStopVarID           (prp.stopCondStopVarID)
 {
    parameterCount = prp.parameterCount;
-   initialized = false;
+   isInitialized = false;
    baseEpoch.clear();
    propagators.clear();
    sats.clear();
@@ -326,7 +326,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
    stopCondEpochID         = prp.stopCondEpochID;
    stopCondBaseEpochID     = prp.stopCondBaseEpochID;
    stopCondStopVarID       = prp.stopCondStopVarID;
-   initialized             = false;
+   isInitialized             = false;
 
    baseEpoch.clear();
 
@@ -641,6 +641,7 @@ std::string Propagate::GetRefObjectName(const Gmat::ObjectType type) const
       case Gmat::FORMATION:
          if (satName.size() > 0)
             return (*satName[0])[0];
+         break;
 
       default:
          break;
@@ -799,9 +800,9 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                stopSatNames.push_back(satName);
                stopNames.push_back(stopStr);
                goalNames.push_back(goalStr);
-               if (stopWrappers.size() == index)
+               if ((Integer)stopWrappers.size() == index)
                   stopWrappers.push_back(NULL);
-               if (goalWrappers.size() == index)
+               if ((Integer)goalWrappers.size() == index)
                   goalWrappers.push_back(NULL);
             }
             else if (index < size)
@@ -2950,7 +2951,7 @@ bool Propagate::Initialize()
    streamID = publisher->RegisterPublishedData(this, streamID, owners,
          elements);
 
-   initialized = true;
+   isInitialized = true;
 
    stopSats.clear();
    // Setup spacecraft array used for stopping conditions
@@ -3008,7 +3009,7 @@ bool Propagate::Initialize()
 
             if (!stopWhen[i]->IsInitialized())
             {
-               initialized = false;
+               isInitialized = false;
                MessageInterface::ShowMessage(
                   "Propagate::Initialize() StopCondition %s is not initialized.\n",
                   stopWhen[i]->GetName().c_str());
@@ -3026,7 +3027,7 @@ bool Propagate::Initialize()
    }
    else
    {
-      initialized = false;
+      isInitialized = false;
       MessageInterface::ShowMessage
          ("Propagate::Initialize() SolarSystem not set in StopCondition");
    }
@@ -3083,7 +3084,7 @@ bool Propagate::Initialize()
          ("Propagate::Initialize() <%p> returning initialized=%d\n", this, initialized);
    #endif
 
-   return initialized;
+   return isInitialized;
 }
 
 //------------------------------------------------------------------------------
@@ -3666,7 +3667,7 @@ bool Propagate::Execute()
           GetGeneratingString().c_str(), initialized, inProgress);
    #endif
 
-   if (initialized == false)
+   if (isInitialized == false)
       throw CommandException("Propagate Command was not Initialized\n");
 
    // Parm used to check for interrupt in the propagation

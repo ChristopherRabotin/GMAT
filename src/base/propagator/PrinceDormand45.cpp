@@ -133,7 +133,7 @@ Propagator* PrinceDormand45::Clone() const
 void PrinceDormand45::SetCoefficients()
 {
     if ((ai == NULL) || (bij == NULL) || (cj == NULL) || (ee == NULL)) {
-        initialized = false;
+        isInitialized = false;
         return;
     }
 

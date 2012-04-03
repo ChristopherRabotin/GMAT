@@ -597,7 +597,7 @@ bool BeginFiniteBurn::Initialize()
       ("BeginFiniteBurn::Initialize() returning %d\n", initialized);
    #endif
    
-   return initialized;
+   return isInitialized;
 }
 
 

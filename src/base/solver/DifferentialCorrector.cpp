@@ -1309,7 +1309,7 @@ std::string DifferentialCorrector::GetProgressString()
    progress.str("");
    progress.precision(12);
 
-   if (initialized)
+   if (isInitialized)
    {
       switch (currentState)
       {
@@ -1487,7 +1487,7 @@ void DifferentialCorrector::WriteToTextFile(SolverState stateToUse)
 
    StringArray::iterator current;
    Integer i, j;
-   if (initialized)
+   if (isInitialized)
    {
       switch (currentState)
       {

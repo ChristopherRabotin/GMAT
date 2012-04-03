@@ -107,8 +107,6 @@ protected:
    Real                 gasVolume;
    /// Baseline product of the pressure and temperature
    Real                 pvBase;
-   /// Flag used to force an update to the pressure and temperature calculations
-   bool                 initialized;
    
    virtual void         UpdateTank();
    virtual void         DepleteFuel(Real dm);

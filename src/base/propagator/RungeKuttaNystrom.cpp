@@ -109,7 +109,7 @@ RungeKuttaNystrom::RungeKuttaNystrom(const RungeKuttaNystrom& rk) :
     derivativeError     (rk.derivativeError),
     eeDeriv             (NULL)
 {
-    initialized = false;
+   isInitialized = false;
 }
 
 //------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
         return *this;
 
     RungeKutta::operator=(rk);
-    initialized = false;
+    isInitialized = false;
     derivativeError = rk.derivativeError;
 
     return *this;
@@ -159,7 +159,7 @@ RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
 bool RungeKuttaNystrom::Initialize()
 {
     RungeKutta::Initialize();
-    initialized = true;
+    isInitialized = true;
     
     // DJC: 06/18/04 Dimension needs to be set early in the initialization
     if (physicalModel) 
@@ -173,13 +173,13 @@ bool RungeKuttaNystrom::Initialize()
     // Set the Nystrom-specific structures
     if ((cdotj = new double [stages]) == NULL) {
         RungeKutta::ClearArrays();
-        initialized = false;
+        isInitialized = false;
         throw PropagatorException("Could not allocate cdotj");
     }
 
     /// \todo: Make this consistent with SetupAccumulator in the RK code
     if (physicalModel == NULL) {
-        initialized = false;
+        isInitialized = false;
         throw PropagatorException("PhysicalModel was not set");
     }
 
@@ -202,7 +202,7 @@ bool RungeKuttaNystrom::Initialize()
         RungeKutta::ClearArrays();
         delete [] cdotj;
         cdotj = NULL;
-        initialized = false;
+        isInitialized = false;
         throw PropagatorException("Could not allocate derivativeMap");
     }
 
@@ -212,7 +212,7 @@ bool RungeKuttaNystrom::Initialize()
         cdotj = NULL;
         delete [] derivativeMap;
         derivativeMap = NULL;
-        initialized = false;
+        isInitialized = false;
         throw PropagatorException("Could not allocate inverseMap");
     }
 
@@ -222,7 +222,7 @@ bool RungeKuttaNystrom::Initialize()
         cdotj = NULL;
         delete [] derivativeMap;
         derivativeMap = NULL;
-        initialized = false;
+        isInitialized = false;
         throw PropagatorException("Could not set the component map");
     }
 
@@ -235,12 +235,12 @@ bool RungeKuttaNystrom::Initialize()
             derivativeMap = NULL;
             delete [] inverseMap;
             inverseMap = NULL;
-            initialized = false;
+            isInitialized = false;
             throw PropagatorException("Encountered derivative error");
         }
     }
 
-    if (initialized == false) {
+    if (isInitialized == false) {
         throw PropagatorException("RungeKutta base did not initialize for the RKN class");
     }
 
@@ -255,15 +255,15 @@ bool RungeKuttaNystrom::Initialize()
     SetCoefficients();
     SetupAccumulator();
     
-    return initialized;
+    return isInitialized;
 }
 
 
 bool RungeKuttaNystrom::Step()
 {
-    if (!initialized) {
+    if (!isInitialized) {
         Initialize();
-        if (!initialized)
+        if (!isInitialized)
             throw PropagatorException("Cannot Step: RKN is not initialized");
     }
     

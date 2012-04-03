@@ -576,14 +576,14 @@ bool SolarRadiationPressure::Initialize()
       
       cbSunVector = new Real[3];
       
-      initialized = true;
+      isInitialized = true;
    }
    
    #ifdef DEBUG_SRP_ORIGIN
       shadowModel = 0;  // CONICAL_MODEL
    #endif
    
-   return initialized;
+   return isInitialized;
 }
 
 //------------------------------------------------------------------------------
@@ -645,7 +645,7 @@ bool SolarRadiationPressure::SetCentralBody()
 bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order, 
       const Integer id)
 {
-   if (!initialized)
+   if (!isInitialized)
       return false;
         
    if (!theSun)

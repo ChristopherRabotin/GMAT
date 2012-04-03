@@ -230,8 +230,6 @@ protected:
    static const Gmat::ParameterType 
                      PARAMETER_TYPE[GmatCommandParamCount - GmatBaseParamCount];
    
-   /// Flag used to determine if associations have been made
-   bool                 initialized;
    /// Map containing names and associated types
    ObjectTypeMap        association;
    /// List of the associated objects

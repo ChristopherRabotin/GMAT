@@ -288,7 +288,7 @@ std::string Optimizer::GetProgressString()
    progress.str("");
    progress.precision(12);
 
-   if (initialized)
+   if (isInitialized)
    {
       switch (currentState)
       {

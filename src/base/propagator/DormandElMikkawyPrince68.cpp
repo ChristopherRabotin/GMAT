@@ -87,9 +87,9 @@ GmatBase* DormandElMikkawyPrince68::Clone() const
 /** \brief Sets coefficients for Dormand-ElMikkawy-Prince 6(8) Integrator */
 void DormandElMikkawyPrince68::SetCoefficients()
 {
-    if (!initialized || (ai == NULL) || (bij == NULL) || (cj == NULL) ||
+    if (!isInitialized || (ai == NULL) || (bij == NULL) || (cj == NULL) ||
         (ee == NULL) || (eeDeriv == NULL) || (cdotj == NULL) || (ki == NULL)) {
-        initialized = false;
+       isInitialized = false;
         throw PropagatorException("DormandElMikkawyPrince68 cannot set coefficients");
     }
 

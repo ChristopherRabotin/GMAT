@@ -256,9 +256,6 @@ protected:
    /// Used to keep Jacobian calculations tracking when we bump into a limit
    std::vector<Real>    pertDirection;
 
-   /// Flag used to ensure the targeter is ready to go
-   bool                 initialized;
-
    // Reporting parameters
    /// Name of the targeter text file.  An empty string turns the file off.
    std::string          solverTextFile;

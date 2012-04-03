@@ -204,7 +204,7 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
           spacecraft ? spacecraft->GetName().c_str() : "NULL");
    #endif
    
-   if (initialized == false)
+   if (isInitialized == false)
       Initialize();
    
    if (!spacecraft)
@@ -510,7 +510,7 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
    {
       if (find(thrusterNames.begin(), thrusterNames.end(), value) == thrusterNames.end())
          thrusterNames.push_back(value);
-      initialized = false;
+      isInitialized = false;
       return true;
    }
    
@@ -558,7 +558,7 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value,
       else
          thrusterNames[index] = value;
 
-      initialized = false;
+      isInitialized = false;
       return true;
    }
    
@@ -876,7 +876,7 @@ bool FiniteBurn::Initialize()
          return false;
       
       SetThrustersFromSpacecraft();      
-      initialized = true;
+      isInitialized = true;
    }
    
    #ifdef DEBUG_FINITEBURN_INIT
@@ -885,7 +885,7 @@ bool FiniteBurn::Initialize()
        initialized);
    #endif
    
-   return initialized;
+   return isInitialized;
 }
 
 

@@ -512,7 +512,7 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
    #endif
 
    pPhysicalModel->SetDimension(dimension);
-   initialized = false;
+   isInitialized = false;
    
    // Handle the name issues
    std::string pmType = pPhysicalModel->GetTypeName();
@@ -1458,7 +1458,7 @@ bool ODEModel::Initialize()
       throw ODEModelException("The ODE model " + instanceName +
             " is empty, so it cannot be used for propagation.");
 
-   initialized = true;
+   isInitialized = true;
 
    #ifdef DEBUG_MU_MAP
       std::map<std::string, Real>::iterator pos;
@@ -2127,7 +2127,7 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
    {
       return false;
    }
-   if (!initialized)
+   if (!isInitialized)
    {
       return false;
    }

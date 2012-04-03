@@ -92,7 +92,7 @@ GmatBase* RungeKuttaFehlberg56::Clone() const
 void RungeKuttaFehlberg56::SetCoefficients()
 {
     if ((ai == NULL) || (bij == NULL) || (cj == NULL) || (ee == NULL)) {
-        initialized = false;
+        isInitialized = false;
         return;
     }
 

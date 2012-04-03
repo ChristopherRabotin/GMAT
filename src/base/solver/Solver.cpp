@@ -117,7 +117,6 @@ Solver::Solver(const std::string &type, const std::string &name) :
    //variableMaximum         (NULL),
    //variableMaximumStep     (NULL),
    pertNumber              (-999), // is this right?
-   initialized             (false),
    instanceNumber          (0),    // 0 indicates 1st instance w/ this name
    registeredVariableCount (0),
    registeredComponentCount(0),
@@ -185,7 +184,6 @@ Solver::Solver(const Solver &sol) :
    //variableMaximum         (NULL),
    //variableMaximumStep     (NULL),
    pertNumber              (sol.pertNumber),
-   initialized             (false),
    solverTextFile          (sol.solverTextFile),
    instanceNumber          (sol.instanceNumber),
    registeredVariableCount (sol.registeredVariableCount),
@@ -212,6 +210,8 @@ Solver::Solver(const Solver &sol) :
    //variableMinimum.clear();
    //variableMaximum.clear();
    //variableMaximumStep.clear();
+
+   isInitialized = false;
 }
 
 
@@ -236,7 +236,7 @@ Solver& Solver::operator=(const Solver &sol)
    variableCount            = sol.variableCount;
    iterationsTaken          = 0;
    maxIterations            = sol.maxIterations;
-   initialized              = false;
+   isInitialized            = false;
    solverTextFile           = sol.solverTextFile;
    
    variableNames.clear();
@@ -315,7 +315,7 @@ bool Solver::Initialize()
             instanceName.c_str());
    }
    
-   initialized = true; 
+   isInitialized = true;
    iterationsTaken = 0;
    #ifdef DEBUG_SOLVER_INIT
       MessageInterface::ShowMessage(

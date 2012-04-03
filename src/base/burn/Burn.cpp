@@ -113,8 +113,7 @@ Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
    satName              (""),
    usingLocalCoordSys   (true),
    isMJ2000EqAxes       (false),
-   isSpacecraftBodyAxes (false),
-   initialized          (false)
+   isSpacecraftBodyAxes (false)
 {
    objectTypes.push_back(Gmat::BURN);
    objectTypeNames.push_back("Burn");
@@ -189,8 +188,7 @@ Burn::Burn(const Burn &b) :
    vectorFormat         (b.vectorFormat),
    usingLocalCoordSys   (b.usingLocalCoordSys),
    isMJ2000EqAxes       (b.isMJ2000EqAxes),
-   isSpacecraftBodyAxes (b.isSpacecraftBodyAxes),
-   initialized          (false)
+   isSpacecraftBodyAxes (b.isSpacecraftBodyAxes)
 {
    deltaV[0] = b.deltaV[0];
    deltaV[1] = b.deltaV[1];
@@ -203,6 +201,8 @@ Burn::Burn(const Burn &b) :
    for (Integer i = 0; i < 3; i++)
       for (Integer j = 0; j < 3; j++)
          frameBasis[i][j]  = b.frameBasis[i][j];
+
+   isInitialized = false;
 }
 
 
@@ -243,7 +243,9 @@ Burn& Burn::operator=(const Burn &b)
    vectorFormat       = b.vectorFormat;
    usingLocalCoordSys = b.usingLocalCoordSys;
    localAxesLabels    = b.localAxesLabels;
-   initialized        = false;
+
+   // Override the copied init flag
+   isInitialized      = false;
    
    deltaV[0] = b.deltaV[0];
    deltaV[1] = b.deltaV[1];

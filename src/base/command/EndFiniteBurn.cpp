@@ -449,7 +449,7 @@ bool EndFiniteBurn::Initialize()
           thrustName.c_str());
    #endif
    
-   return initialized;
+   return isInitialized;
 }
 
 

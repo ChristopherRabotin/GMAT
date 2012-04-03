@@ -172,6 +172,7 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    typeName          (typeStr),
    instanceName      (nomme),
    type              (typeId),
+   isInitialized       (false),
    ownedObjectCount  (0),
    callbackExecuting (false),
    commentLine       (""),
@@ -256,6 +257,7 @@ GmatBase::GmatBase(const GmatBase &a) :
     generatingString          (a.generatingString),
     objectTypes               (a.objectTypes),
     objectTypeNames           (a.objectTypeNames),
+    isInitialized             (a.isInitialized),
     isGlobal                  (a.isGlobal),
 	 isAutomaticGlobal         (a.isAutomaticGlobal),
     isLocal                   (a.isLocal),
@@ -306,6 +308,9 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    generatingString          = a.generatingString;
    objectTypes               = a.objectTypes;
    objectTypeNames           = a.objectTypeNames;
+
+   isInitialized             = a.isInitialized;
+
    // don't want to modify isGlobal here
 	isAutomaticGlobal         = a.isAutomaticGlobal;
    isLocal                   = a.isLocal;
@@ -468,6 +473,22 @@ bool GmatBase::IsOfType(std::string typeDescription) const
 
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// bool GmatBase::IsInitialized()
+//------------------------------------------------------------------------------
+/**
+ * Returns the initialization flag
+ *
+ * @return true if the object thinks it is initialized, false if not
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::IsInitialized()
+{
+   return isInitialized;
+}
+
 
 //---------------------------------------------------------------------------
 // void GmatBase::SetShowPrefaceComment(bool show = true)

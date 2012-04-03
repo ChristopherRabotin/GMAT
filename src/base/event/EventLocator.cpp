@@ -82,7 +82,6 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
 EventLocator::EventLocator(const std::string &typeStr,
       const std::string &nomme) :
    GmatBase       (Gmat::EVENT_LOCATOR, typeStr, nomme),
-   initialized    (false),
    earlyBound     (NULL),
    lateBound      (NULL),
    filename       ("LocatedEvents.txt"),
@@ -178,7 +177,7 @@ EventLocator::EventLocator(const EventLocator& el) :
          "copy: <%p>\n", (initialized ? "initialized" : "uninitialized"), 
          efCount, &el, this);
    #endif
-   initialized    = false;
+   isInitialized    = false;
 }
 
 
@@ -232,7 +231,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
                   "From: <%p>, to (this): <%p>\n", 
                   (initialized ? "initialized" : "uninitialized"), &el, this);
             #endif
-            initialized = false;
+            isInitialized = false;
          }
 
          if (lastData != NULL)
@@ -1579,7 +1578,7 @@ bool EventLocator::Initialize()
          "method, changing from %s to initialized; efCount = %d\n", 
          (initialized ? "initialized" : "uninitialized"), efCount);
    #endif
-   initialized = true;
+   isInitialized = true;
 
    return retval;
 }
@@ -1621,7 +1620,7 @@ Real *EventLocator::Evaluate(GmatEpoch atEpoch, Real *forState)
          "efCount = %d\n", instanceName.c_str(), efCount);
    #endif
 
-   if (initialized == false)
+   if (isInitialized == false)
       throw EventException("The event locator " + instanceName + 
                " is being evaluated in an unitialized state.");
 
