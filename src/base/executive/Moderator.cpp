@@ -5501,7 +5501,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       else if (type == "EndFiniteBurn")
       {
          // get burn name of BeginFiniteBurn
-         if (refCmd)
+         if (refCmd && refCmd->IsOfType("BeginFiniteBurn"))
          {
             // set burn
             cmd->SetRefObjectName(Gmat::FINITE_BURN,
@@ -5516,7 +5516,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          {
             // set burn
             cmd->SetRefObjectName(Gmat::FINITE_BURN, GetDefaultBurn("FiniteBurn")->GetName());
-         
+            
             // set spacecraft
             cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
          }
