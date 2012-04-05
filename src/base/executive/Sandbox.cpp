@@ -84,8 +84,8 @@ Sandbox::Sandbox() :
    interruptCount    (45),
    pollFrequency     (50),
    objInit           (NULL),
-//   cloneUpdateStyle  (SKIP_UPDATES)
-   cloneUpdateStyle  (PASS_TO_ALL)
+   cloneUpdateStyle  (SKIP_UPDATES)
+//   cloneUpdateStyle  (PASS_TO_ALL)
 {
 }
 
