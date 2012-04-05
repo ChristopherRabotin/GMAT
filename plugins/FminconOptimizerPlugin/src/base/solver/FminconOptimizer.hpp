@@ -76,6 +76,9 @@ public:
    virtual void         WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
                                         std::stringstream &stream);
    
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    StringArray  options;
    StringArray  optionValues;

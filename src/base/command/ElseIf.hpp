@@ -70,6 +70,7 @@ public:
     virtual GmatBase* Clone() const;
     
     DEFAULT_TO_NO_CLONES
+    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
     
