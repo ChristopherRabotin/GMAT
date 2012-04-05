@@ -81,6 +81,8 @@ public:
    virtual bool         Initialize();
    virtual bool         Validate();
    
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    /// Mass of the fuel in the tank
    Real                 fuelMass;

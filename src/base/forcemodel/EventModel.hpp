@@ -62,9 +62,14 @@ public:
          const Gmat::ObjectType type);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          const std::string &name = "");
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+         const std::string &oldName, const std::string &newName);
+
 
    virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1,
          const Integer id = -1);
+
+   DEFAULT_TO_NO_CLONES
 
 private:
    /// The list of active EventLocators

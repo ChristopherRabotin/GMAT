@@ -167,6 +167,8 @@ public:
    
    static std::string   GetDependentTypeString(const GmatParam::DepObject depObj);
    
+   DEFAULT_TO_NO_CLONES
+
 protected:
    
    static const std::string PARAMETER_KEY_STRING[GmatParam::KeyCount];

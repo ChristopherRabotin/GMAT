@@ -66,6 +66,9 @@ public:
    //---------------------------------------------------------------------------
    virtual bool    Interpolate(const Real ind, Real *results) = 0;
    
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    /// Data array used for the independent variable
    Real *independent;

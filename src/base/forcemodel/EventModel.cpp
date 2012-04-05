@@ -338,3 +338,38 @@ bool EventModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    return retval;
 }
+
+
+//------------------------------------------------------------------------------
+// bool EventModel::RenameRefObject(const Gmat::ObjectType type,
+//       const std::string &oldName, const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * Describe the method here
+ *
+ * @param type The type of the object being renamed
+ * @param oldName The object name before the rename happens
+ * @param newName The object name before the rename happens
+ *
+ * @return true is an object was renamed, false if not
+ *
+ * @note This method may be redundant here, since the locators are not clones
+ */
+//------------------------------------------------------------------------------
+bool EventModel::RenameRefObject(const Gmat::ObjectType type,
+      const std::string &oldName, const std::string &newName)
+{
+   bool retval = false;
+
+   for (UnsignedInt i = 0; i < events->size(); ++i)
+   {
+      StringArray temp = events->at(i)->GetRefObjectNameArray(type);
+      for (UnsignedInt j = 0; j < temp.size(); ++j)
+      {
+         if (temp[j] == oldName)
+            retval = events->at(i)->RenameRefObject(type, oldName, newName);
+      }
+   }
+
+   return retval;
+}

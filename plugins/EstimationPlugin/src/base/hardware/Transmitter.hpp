@@ -99,6 +99,8 @@ public:
 
    Real 						GetOutPutFrequency();
 
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    std::string	frequencyModel;
    Real			frequency;

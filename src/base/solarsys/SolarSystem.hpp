@@ -259,7 +259,9 @@ public:
    
    // add other moons, asteroids, comets, as needed
    // what do we do about libration points??
-   
+
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    enum

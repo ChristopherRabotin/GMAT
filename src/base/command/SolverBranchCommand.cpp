@@ -173,6 +173,9 @@ GmatCommand* SolverBranchCommand::GetNext()
 }
 
 
+
+
+
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
@@ -1125,6 +1128,43 @@ GmatBase* SolverBranchCommand::GetClone(Integer cloneIndex)
       retPtr = BranchCommand::GetClone(cloneIndex - 1);
 
    return retPtr;
+}
+
+
+//------------------------------------------------------------------------------
+// bool HasLocalClones()
+//------------------------------------------------------------------------------
+/**
+ * Method used to check for the (possible) existence of local clones
+ *
+ * @return true if this object can have local clones of configured objects
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::HasLocalClones()
+{
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Passes updated parameter data in to an owned clone object
+ *
+ * @param obj The configured object that was cloned
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::UpdateClonedObject(GmatBase *obj)
+{
+   if (obj->GetName() == solverName)
+   {
+      if (obj->GetTypeName() == theSolver->GetTypeName())
+         theSolver = (Solver*)obj;
+      else
+         throw CommandException("Object type mismatch (clone is a " +
+               theSolver->GetTypeName() + ", original is a " +
+               obj->GetTypeName() + ") when updating cloned solvers");
+   }
 }
 
 

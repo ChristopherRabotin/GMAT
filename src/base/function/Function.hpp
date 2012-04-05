@@ -100,6 +100,9 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    /// Fully-qualified path for function script
    std::string          functionPath;

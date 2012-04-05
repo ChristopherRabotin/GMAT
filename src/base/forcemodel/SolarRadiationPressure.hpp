@@ -111,6 +111,10 @@ public:
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
                          Integer quantity);
 
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
+
 protected:
    // Parameter IDs
    enum

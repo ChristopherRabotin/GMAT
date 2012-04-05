@@ -2648,11 +2648,43 @@ GmatBase* GmatCommand::GetClone(Integer cloneIndex)
    return NULL;
 }
 
+
+//------------------------------------------------------------------------------
+// bool AffectsClones()
+//------------------------------------------------------------------------------
+/**
+ * Identifies commands that update objects that could be cloned in other objects
+ *
+ * @return true if a potential clone update is possible, false (the default) if
+ *         not
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::AffectsClones()
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetUpdatedObject()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves object that has updates so it can be passed to owned clones
+ *
+ * @return The object pointer, or NULL (the default) if there is no such object
+ */
+//------------------------------------------------------------------------------
+GmatBase* GmatCommand::GetUpdatedObject()
+{
+   return NULL;
+}
+
+
 //------------------------------------------------------------------------------
 // virtual void InsertCommandName(std::string &genString)
 //------------------------------------------------------------------------------
 /**
- * Inserts command name in quotes to generatin string. It puts single quotes
+ * Inserts command name in quotes to generating string. It puts single quotes
  * aroud the instanceName and inserts right after command type. If instanceName
  * is blank or command type is not found, it does nothing.
  *

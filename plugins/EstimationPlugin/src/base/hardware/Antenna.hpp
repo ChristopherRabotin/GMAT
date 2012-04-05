@@ -67,6 +67,8 @@ public:
 //                                      const Real value, const Integer row,
 //                                      const Integer col);
 
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    Real        antennaDelay;
    Integer 		phaseCenterLocation1;

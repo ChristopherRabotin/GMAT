@@ -58,6 +58,10 @@ public:
    virtual Solver::SolverState
                         AdvanceState();
    virtual bool         Optimize();
+
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    std::string          objectiveName;
    Real                 objectiveValue;

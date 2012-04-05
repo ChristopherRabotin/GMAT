@@ -85,7 +85,15 @@ private:
       RUNNING,
       PAUSED,
       STOPPED,
+      REFRESH,
       RESET
+   };
+
+   enum updateMethod
+   {
+      PASS_TO_ALL,            // The "brute force" clone update method
+      PASS_TO_REGISTERED,     // Use this method when all clones are registered
+      SKIP_UPDATES            // Set this method to revert to pre-clone updates
    };
     
    /// Object store for this run
@@ -114,6 +122,8 @@ private:
    Integer                           pollFrequency;
    /// The object initializer
    ObjectInitializer                 *objInit;
+   /// Update method used for owned clones
+   updateMethod                      cloneUpdateStyle;
    
    /// List of FiniteThrust objects that are currently available
    std::vector<PhysicalModel *>      transientForces;
@@ -133,6 +143,10 @@ private:
    void      ShowObjectMap(ObjectMap &om, const std::string &title);
    bool      AddOwnedSubscriber(Subscriber *sub);
    
+   void      UpdateClones(GmatBase *obj);
+   void      PassToAll(GmatBase *obj);
+   void      PassToRegisteredClones(GmatBase *obj);
+
    #ifdef DEBUG_SANDBOX_CLONING
       std::vector<Gmat::ObjectType>  clonable;
    #endif

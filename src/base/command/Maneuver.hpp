@@ -92,6 +92,8 @@ public:
    virtual bool         Initialize();
    virtual bool         Execute();
    
+   DEFAULT_TO_NO_CLONES
+
 protected:
    /// The burn object used for the maneuver
    std::string              burnName;

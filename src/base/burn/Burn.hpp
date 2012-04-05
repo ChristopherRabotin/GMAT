@@ -101,6 +101,8 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual bool         Fire(Real *burnData = NULL, Real epoch = GmatTimeConstants::MJD_OF_J2000) = 0;
+
+   DEFAULT_TO_NO_CLONES
     
 protected:
 

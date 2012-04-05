@@ -3199,6 +3199,41 @@ std::string ODEModel::GetOnOffParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// bool HasLocalClones()
+//------------------------------------------------------------------------------
+/**
+ * Method to check for the presence of local clones
+ *
+ * @return true if there are local clones, false if not
+ */
+//------------------------------------------------------------------------------
+bool ODEModel::HasLocalClones()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Updates cloned objects that are copies of the object passed in
+ *
+ * @param obj The object with setting updates
+ */
+//------------------------------------------------------------------------------
+void ODEModel::UpdateClonedObject(GmatBase *obj)
+{
+   if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+   {
+      MessageInterface::ShowMessage("ODEModel::UpdateClonedObject: Potential "
+            "cloning issue: Check cloned coordinate systems passed into the "
+            "ODE model for local clones in the member forces\n");
+   }
+}
+
+
 //---------------------------------------------------------------------------
 //  bool SetOnOffParameter(const Integer id, const std::string &value)
 //---------------------------------------------------------------------------

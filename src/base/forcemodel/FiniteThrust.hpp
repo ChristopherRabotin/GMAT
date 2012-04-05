@@ -74,6 +74,8 @@ public:
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
                          Integer quantity);
 
+   DEFAULT_TO_NO_CLONES
+
 protected:
    // Pieces needed for bookkeeping
    /// The finite burn objects this model uses

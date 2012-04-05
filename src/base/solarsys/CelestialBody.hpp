@@ -345,6 +345,9 @@ public:
    //static const Integer MAX_ORDER             = 360;
    //static const Integer GRAV_MAX_DRIFT_DEGREE = 2;
 
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
 
    enum

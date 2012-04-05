@@ -43,6 +43,10 @@ public:
 
 	virtual RealArray Correction();
 
+   /// @todo: Check this
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
 	Integer model;
 	std::string modelName;

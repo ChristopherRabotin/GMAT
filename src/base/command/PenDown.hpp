@@ -43,6 +43,8 @@ public:
    bool              Initialize();
    bool              Execute();
 
+   DEFAULT_TO_NO_CLONES
+
 protected:
 
 };

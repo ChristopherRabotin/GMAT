@@ -119,12 +119,30 @@ LocatedEventTable& LocatedEventTable::operator=(const LocatedEventTable& let)
 }
 
 
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Method for making a copy of this object
+ *
+ * @return The copy
+ */
+//------------------------------------------------------------------------------
 GmatBase* LocatedEventTable::Clone() const
 {
    return new LocatedEventTable(*this);
 }
 
 
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Prepares the located event table for use
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool LocatedEventTable::Initialize()
 {
    bool retval = Subscriber::Initialize();
@@ -139,6 +157,18 @@ bool LocatedEventTable::Initialize()
 }
 
 
+//------------------------------------------------------------------------------
+// bool FlushData(bool endOfDataBlock)
+//------------------------------------------------------------------------------
+/**
+ * Forces a table update
+ *
+ * @param endOfDataBock Flag indicating if the flush is happening at a natural
+ *                      break in the data
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool LocatedEventTable::FlushData(bool endOfDataBlock)
 {
    #ifdef DEBUG_PUBLISHER_CALLS
@@ -149,6 +179,15 @@ bool LocatedEventTable::FlushData(bool endOfDataBlock)
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetEndOfRun()
+//------------------------------------------------------------------------------
+/**
+ * Toggles the end of run flag
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool LocatedEventTable::SetEndOfRun()
 {
    #ifdef DEBUG_PUBLISHER_CALLS
@@ -159,6 +198,15 @@ bool LocatedEventTable::SetEndOfRun()
 }
 
 
+//------------------------------------------------------------------------------
+// void SetRunState(Gmat::RunState rs)
+//------------------------------------------------------------------------------
+/**
+ * Sets the run state to a specific value
+ *
+ * @param rs The run state
+ */
+//------------------------------------------------------------------------------
 void LocatedEventTable::SetRunState(Gmat::RunState rs)
 {
    #ifdef DEBUG_PUBLISHER_CALLS
@@ -168,6 +216,15 @@ void LocatedEventTable::SetRunState(Gmat::RunState rs)
    return Subscriber::SetRunState(rs);
 }
 
+//------------------------------------------------------------------------------
+// void Activate(bool state)
+//------------------------------------------------------------------------------
+/**
+ * Turns the table data collection on or off
+ *
+ * @param state true to turn on data collection, false to turn it off
+ */
+//------------------------------------------------------------------------------
 void LocatedEventTable::Activate(bool state)
 {
    Subscriber::Activate(state);

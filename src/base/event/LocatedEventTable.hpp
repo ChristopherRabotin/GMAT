@@ -74,6 +74,9 @@ public:
             const std::string &reportNotice = "");
    void ShowPlot();
 
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    /// The table of located event boundaries
    std::vector<LocatedEvent*> events;

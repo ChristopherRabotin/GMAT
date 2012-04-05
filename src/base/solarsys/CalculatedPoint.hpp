@@ -116,6 +116,8 @@ public:
    virtual const StringArray&
                         GetDefaultBodies() const;
 
+   DEFAULT_TO_NO_CLONES
+
 protected:
    
    enum

@@ -229,7 +229,7 @@ bool Toggle::Execute()
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Toggle.
@@ -238,7 +238,7 @@ bool Toggle::Execute()
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Toggle::Clone(void) const
+GmatBase* Toggle::Clone() const
 {
    return (new Toggle(*this));
 }

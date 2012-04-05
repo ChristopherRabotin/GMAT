@@ -100,6 +100,8 @@ public:
                                          const std::string &withName);
    virtual void        ClearWrappers();
     
+   DEFAULT_TO_NO_CLONES
+
 protected:
    enum
    {

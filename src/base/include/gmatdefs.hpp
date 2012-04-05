@@ -115,6 +115,13 @@ typedef Real GmatEpoch;
 typedef Real Radians;
 
 
+// Macros defining default NULL behavior for RenameRefObject and HasLocalClones
+#define DEFAULT_TO_NO_CLONES virtual bool HasLocalClones() { return false; }
+#define DEFAULT_TO_NO_REFOBJECTS virtual bool RenameRefObject( \
+      const Gmat::ObjectType type, const std::string &oldName, \
+      const std::string &newName) { return false; }
+
+
 namespace Gmat
 {
    /**

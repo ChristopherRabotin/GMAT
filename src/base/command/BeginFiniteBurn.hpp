@@ -69,6 +69,8 @@ public:
    virtual bool         Initialize();
    virtual bool         Execute();
    
+   DEFAULT_TO_NO_CLONES
+
 protected:
    /// Name of the FiniteBurn object used to set the maneuver details
    std::string          burnName;

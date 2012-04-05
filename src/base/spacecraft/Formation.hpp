@@ -105,6 +105,8 @@ public:
    virtual Real*           GetPropItem(const Integer item);
    virtual Integer         GetPropItemSize(const Integer item);
    
+   DEFAULT_TO_NO_CLONES
+
 protected:
    /// List of the object names used in the formation
    StringArray                      componentNames;

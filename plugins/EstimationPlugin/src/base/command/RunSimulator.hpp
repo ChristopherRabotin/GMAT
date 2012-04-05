@@ -66,6 +66,9 @@ public:
 
    virtual GmatCommand* GetNext();
 
+   virtual bool HasLocalClones();
+   virtual void UpdateClonedObject(GmatBase *obj);
+
 protected:
    /// The simulator that drives this process
    Simulator      *theSimulator;

@@ -72,6 +72,8 @@ public:
    
    virtual bool         Initialize();
    
+   DEFAULT_TO_NO_CLONES    // Check this when the command is implemented
+
    enum
    {
       SUBSCRIBER = GmatCommandParamCount,

@@ -582,6 +582,37 @@ GmatCommand* RunSimulator::GetNext()
 
 
 //------------------------------------------------------------------------------
+// bool HasLocalClones()
+//------------------------------------------------------------------------------
+/**
+ * Method to check for the presence of local clones
+ *
+ * @return true if there are local clones, false if not
+ */
+//------------------------------------------------------------------------------
+bool RunSimulator::HasLocalClones()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Updates cloned objects that are copies of the object passed in
+ *
+ * @param obj The object with setting updates
+ */
+//------------------------------------------------------------------------------
+void RunSimulator::UpdateClonedObject(GmatBase *obj)
+{
+   throw CommandException("To do: implement Propagate::UpdateClonedObject");
+}
+
+
+
+//------------------------------------------------------------------------------
 // Methods triggered by the finite state machine
 //------------------------------------------------------------------------------
 

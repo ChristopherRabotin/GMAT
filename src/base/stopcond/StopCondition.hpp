@@ -133,6 +133,8 @@ public:
    virtual void SkipEvaluation(bool shouldSkip);
    virtual void UpdateBuffer();
    
+   DEFAULT_TO_NO_CLONES
+
 protected:
    
    StringArray mAllRefObjectNames;

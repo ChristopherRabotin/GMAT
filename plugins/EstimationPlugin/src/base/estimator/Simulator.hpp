@@ -114,6 +114,9 @@ public:
 
    virtual void         UpdateCurrentEpoch(GmatEpoch newEpoch);
 
+   virtual bool         HasLocalClones();
+   virtual void         UpdateClonedObject(GmatBase *obj);
+
 protected:
    /// Enumeration for the scripted parameters on the Simulator
    enum

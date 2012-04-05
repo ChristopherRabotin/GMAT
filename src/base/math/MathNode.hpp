@@ -67,6 +67,9 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+
+   DEFAULT_TO_NO_CLONES
+
 protected:
    
    bool isNumber;

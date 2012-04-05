@@ -3939,6 +3939,83 @@ Real* Spacecraft::GetEstimationParameterValue(const Integer item)
 }
 
 
+//------------------------------------------------------------------------------
+// bool HasLocalClones()
+//------------------------------------------------------------------------------
+/**
+ * Method to check for the presence of local clones
+ *
+ * @return true if there are local clones, false if not
+ */
+//------------------------------------------------------------------------------
+bool Spacecraft::HasLocalClones()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Updates cloned objects that are copies of the object passed in
+ *
+ * @param obj The object with setting updates
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::UpdateClonedObject(GmatBase *obj)
+{
+   if (obj->IsOfType(Gmat::HARDWARE))
+   {
+      Gmat::ObjectType objType = obj->GetType();
+
+      // update fueltank?
+      if (objType == Gmat::FUEL_TANK)
+      {
+         for (UnsignedInt i = 0; i < tanks.size(); ++i)
+         {
+            if (obj->GetName() == tanks[i]->GetName())
+            {
+               ((FuelTank*)tanks[i])->operator=(*((FuelTank*)obj));
+            }
+         }
+      }
+
+      // update thruster?
+      if (objType == Gmat::THRUSTER)
+      {
+         {
+            for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+               if (obj->GetName() == thrusters[i]->GetName())
+                  ((Thruster*)thrusters[i])->operator=(*((Thruster*)obj));
+         }
+      }
+
+      // update other hardware?
+      if (obj->GetType() == Gmat::HARDWARE)
+      {
+         // Needs to be watched to be sure hardware uses operator= correctly
+         for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+            if (obj->GetName() == hardwareList[i]->GetName())
+               ((Hardware*)hardwareList[i])->operator =(*((Hardware*)obj));
+      }
+   }
+
+   if (obj->IsOfType(Gmat::ATTITUDE))
+   {
+      if (attitude != NULL)
+      {
+         delete attitude;
+         --ownedObjectCount;
+      }
+      attitude = (Attitude*)(obj->Clone());
+      ++ownedObjectCount;
+      attitude->SetEpoch(state.GetEpoch());
+      isInitialized = false;
+   }
+}
+
+
 //-------------------------------------
 // protected methods
 //-------------------------------------

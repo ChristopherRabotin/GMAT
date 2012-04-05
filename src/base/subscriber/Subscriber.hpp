@@ -150,6 +150,8 @@ public:
    virtual const Rvector& SetRvectorParameter(const std::string &label,
                                               const Rvector &value);
    
+   DEFAULT_TO_NO_CLONES
+
    enum SolverIterOption
    {
       SI_ALL,

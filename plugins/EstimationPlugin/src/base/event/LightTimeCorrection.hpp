@@ -43,6 +43,8 @@ public:
    virtual void FixState(GmatBase* obj, bool LockState = false);
    virtual void FixState();
 
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    /// Storage element used to manage calculated position data

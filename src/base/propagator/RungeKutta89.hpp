@@ -56,7 +56,8 @@ public:
     RungeKutta89(const RungeKutta89&);
     RungeKutta89 & operator=(const RungeKutta89&);
 
-    virtual GmatBase* Clone() const; // wcs 2004.06.04 return GmatBase*
+    virtual GmatBase* Clone() const;
+
 protected:
     void SetCoefficients();
 };

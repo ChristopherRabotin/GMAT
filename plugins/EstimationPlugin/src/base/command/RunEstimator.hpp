@@ -64,6 +64,10 @@ public:
 
    virtual GmatCommand* GetNext();
 
+   virtual bool HasLocalClones();
+   virtual void UpdateClonedObject(GmatBase *obj);
+
+
 protected:
    /// The estimator that drives this process
    Estimator      *theEstimator;

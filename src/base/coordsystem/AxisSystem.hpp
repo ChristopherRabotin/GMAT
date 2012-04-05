@@ -130,6 +130,9 @@ public:
    
    // currently, no access to RotMatrix and RotDotMatrix allowed
    
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
 
    enum

@@ -74,6 +74,9 @@ public:
    virtual Integer     GetCloneCount();
    virtual GmatBase*   GetClone(Integer cloneIndex = 0);
 
+   virtual bool        HasLocalClones();
+   virtual void        UpdateClonedObject(GmatBase *obj);
+
 protected:
    // Mode definitions for the state machine overrides
    enum solverStartMode

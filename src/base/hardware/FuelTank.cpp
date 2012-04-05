@@ -153,24 +153,24 @@ FuelTank::FuelTank(const FuelTank& ft) :
 //------------------------------------------------------------------------------
 FuelTank& FuelTank::operator=(const FuelTank& ft)
 {
-   if (&ft == this)
-      return *this;
-      
-   GmatBase::operator=(ft);
-
-   fuelMass              = ft.fuelMass;
-   pressure              = ft.pressure;
-   temperature           = ft.temperature;
-   refTemperature        = ft.refTemperature;
-   volume                = ft.volume;
-   density               = ft.density;
-   allowNegativeFuelMass = ft.allowNegativeFuelMass;
-   pressureModel         = ft.pressureModel;
-   gasVolume             = ft.gasVolume;
-   pvBase                = ft.pvBase;
-   isInitialized         = false;
+   if (&ft != this)
+   {
+      GmatBase::operator=(ft);
    
-   Initialize();
+      fuelMass              = ft.fuelMass;
+      pressure              = ft.pressure;
+      temperature           = ft.temperature;
+      refTemperature        = ft.refTemperature;
+      volume                = ft.volume;
+      density               = ft.density;
+      allowNegativeFuelMass = ft.allowNegativeFuelMass;
+      pressureModel         = ft.pressureModel;
+      gasVolume             = ft.gasVolume;
+      pvBase                = ft.pvBase;
+      isInitialized         = false;
+
+      Initialize();
+   }
    
    return *this;
 }

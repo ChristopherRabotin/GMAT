@@ -1157,6 +1157,38 @@ bool Estimator::ResetState()
 }
 
 
+
+
+//------------------------------------------------------------------------------
+// bool HasLocalClones()
+//------------------------------------------------------------------------------
+/**
+ * Method to check for the presence of local clones
+ *
+ * @return true if there are local clones, false if not
+ */
+//------------------------------------------------------------------------------
+bool Estimator::HasLocalClones()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Updates cloned objects that are copies of the object passed in
+ *
+ * @param obj The object with setting updates
+ */
+//------------------------------------------------------------------------------
+void Estimator::UpdateClonedObject(GmatBase *obj)
+{
+   throw SolverException("To do: implement Estimator::UpdateClonedObject");
+}
+
+
 //------------------------------------------------------------------------------
 // bool TestForConvergence(std::string &reason)
 //------------------------------------------------------------------------------

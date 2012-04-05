@@ -86,6 +86,10 @@ public:
                         ReadObservation();
    virtual bool         CloseStream();
 
+   /// @todo: Check this
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    /// The stream for this DataFile
    ObType         *theDatastream;

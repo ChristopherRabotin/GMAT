@@ -218,7 +218,7 @@ const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
  * @param oldName The current name for the object.
  * @param newName The new name for the object.
  *
- * @return clone of the Maneuver.
+ * @return true.  Always.  Is this the expected return for all calls?
  */
 //------------------------------------------------------------------------------
 bool Maneuver::RenameRefObject(const Gmat::ObjectType type,

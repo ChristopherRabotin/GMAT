@@ -46,6 +46,7 @@ public:
                                        const std::string &oldName,
                                        const std::string &newName);
 
+   DEFAULT_TO_NO_CLONES
 };
 
 #endif // EndScript_hpp

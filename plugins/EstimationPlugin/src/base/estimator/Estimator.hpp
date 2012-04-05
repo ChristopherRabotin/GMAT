@@ -114,6 +114,8 @@ public:
 
    bool                 ResetState();
 
+   virtual bool HasLocalClones();
+   virtual void UpdateClonedObject(GmatBase *obj);
 
 protected:
    /// Names of the measurement objects used in the estimation

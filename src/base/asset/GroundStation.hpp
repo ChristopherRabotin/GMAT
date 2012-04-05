@@ -111,6 +111,8 @@ public:
 
    virtual bool            IsValidID(const std::string &id);
 
+   DEFAULT_TO_NO_CLONES
+
 protected:
    /// Ground station ID
    std::string          stationId;

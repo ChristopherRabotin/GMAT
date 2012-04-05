@@ -100,6 +100,9 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
 
+   // Current assumption: Owned clones in functions are handled separately
+   DEFAULT_TO_NO_CLONES
+
 protected:
 
    ObjectArray objectArray;

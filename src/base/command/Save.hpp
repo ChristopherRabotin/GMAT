@@ -79,6 +79,8 @@ public:
                                         const std::string &oldName,
                                         const std::string &newName);
    
+   DEFAULT_TO_NO_CLONES
+
 protected:
    // Parameter IDs
    enum  

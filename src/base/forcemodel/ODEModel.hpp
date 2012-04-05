@@ -211,6 +211,9 @@ public:
    void                 SetPropStateManager(PropagationStateManager *sm);
    void                 SetState(GmatState *gms);
 
+   virtual bool         HasLocalClones();
+   virtual void         UpdateClonedObject(GmatBase *obj);
+
 protected:
    /// Count of the number of forces in the model
    Integer numForces;

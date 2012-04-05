@@ -125,7 +125,7 @@ public:
                                          const std::string &name);
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
-                                        const std::string &newName);
+                                        const std::string &newName) = 0;
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name);
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
@@ -449,6 +449,10 @@ public:
    virtual Integer         HasParameterCovariances(Integer parameterId);
    virtual Rmatrix*        GetParameterCovariances(Integer parameterId = -1);
    virtual Covariance*     GetCovariance();
+
+   // Cloned object update management
+   virtual bool HasLocalClones() = 0;
+   virtual void UpdateClonedObject(GmatBase *obj);
 
 protected:
    /// Parameter IDs

@@ -1618,6 +1618,47 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
+
+//------------------------------------------------------------------------------
+// bool AffectsClones()
+//------------------------------------------------------------------------------
+/**
+ * Identifies commands that update objects that could be cloned in other objects
+ *
+ * @return true, since Assignment may make updates that affect clones
+ */
+//------------------------------------------------------------------------------
+bool Assignment::AffectsClones()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetUpdatedObject()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves object that has updates so it can be passed to owned clones
+ *
+ * @return The object pointer to the LHS object is it might have an owned clone
+ */
+//------------------------------------------------------------------------------
+GmatBase* Assignment::GetUpdatedObject()
+{
+   GmatBase *retval = NULL;
+
+   if (lhsOwner != NULL)
+   {
+      // Add handlers for types known not to be affected by owned clones
+      if ( !lhsOwner->IsOfType(Gmat::VARIABLE) &&
+            !lhsOwner->IsOfType(Gmat::STRING) &&
+            !lhsOwner->IsOfType(Gmat::ARRAY) )
+         retval = lhsOwner;
+   }
+
+   return retval;
+}
+
 //---------------------------------
 // protected
 //---------------------------------

@@ -81,6 +81,9 @@ public:
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
    
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
    // Parameter IDs
    enum
    {

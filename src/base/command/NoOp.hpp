@@ -38,10 +38,13 @@ public:
    NoOp(const NoOp& noop);
    NoOp&                   operator=(const NoOp &noop);
 
-   bool                    Execute(void);
+   bool                    Execute();
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
+
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
 };
 
 

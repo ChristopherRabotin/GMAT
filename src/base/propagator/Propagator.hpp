@@ -193,6 +193,8 @@ public:
       PropagatorParamCount                    /// Count of the parameters for this class
    };
 
+   DEFAULT_TO_NO_CLONES
+
 protected:
 
    // Start with the parameter IDs and associated strings

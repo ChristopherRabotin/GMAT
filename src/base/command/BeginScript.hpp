@@ -55,6 +55,8 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+
+   DEFAULT_TO_NO_CLONES
 protected:
    
    void IndentChildString(std::stringstream &gen, GmatCommand* cmd, 

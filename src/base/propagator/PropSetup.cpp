@@ -1468,6 +1468,43 @@ const std::string& PropSetup::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 
+//------------------------------------------------------------------------------
+// bool HasLocalClones()
+//------------------------------------------------------------------------------
+/**
+ * Method to check for the presence of local clones
+ *
+ * @return true if there are local clones, false if not
+ */
+//------------------------------------------------------------------------------
+bool PropSetup::HasLocalClones()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Updates cloned objects that are copies of the object passed in
+ *
+ * @param obj The object with setting updates
+ */
+//------------------------------------------------------------------------------
+void PropSetup::UpdateClonedObject(GmatBase *obj)
+{
+   if (obj->IsOfType(Gmat::ODE_MODEL) && (mODEModel != NULL))
+   {
+      if (obj->GetName() == mODEModel->GetAssociateName())
+      {
+         mODEModel->operator=(*((ODEModel*)obj));
+         isInitialized = false;
+      }
+   }
+}
+
+
 //---------------------------------
 // private methods
 //---------------------------------

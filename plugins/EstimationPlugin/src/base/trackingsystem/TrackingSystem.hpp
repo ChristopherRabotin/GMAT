@@ -110,6 +110,9 @@ public:
    virtual MeasurementModel*
                         GetMeasurement(Integer i);
 
+   /// @todo: Check this
+   DEFAULT_TO_NO_CLONES
+
 protected:
    /// Owned reference objects for this TrackingSystem
    StringArray                      trackingDataNames;

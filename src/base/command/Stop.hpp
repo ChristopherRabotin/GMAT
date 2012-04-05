@@ -38,14 +38,17 @@ public:
    Stop(const Stop& noop);
    Stop&                   operator=(const Stop &noop);
 
-   bool                    Execute(void);
+   bool                    Execute();
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    virtual const std::string&
                      GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
                                          const std::string &prefix = "",
                                          const std::string &useName = "");
+
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
 };
 
 

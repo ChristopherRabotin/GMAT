@@ -200,6 +200,11 @@ public:
    virtual Integer         HasParameterCovariances(Integer parameterId);
 //   virtual Rmatrix*        GetParameterCovariances(Integer parameterId);
 
+   // Cloned object update management
+   virtual bool HasLocalClones();
+   virtual void UpdateClonedObject(GmatBase *obj);
+
+
 protected:
    enum SC_Param_ID
    {

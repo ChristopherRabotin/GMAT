@@ -172,8 +172,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    typeName          (typeStr),
    instanceName      (nomme),
    type              (typeId),
-   isInitialized       (false),
    ownedObjectCount  (0),
+   isInitialized     (false),
    callbackExecuting (false),
    commentLine       (""),
    inlineComment     (""),
@@ -4265,4 +4265,11 @@ Rmatrix* GmatBase::GetParameterCovariances(Integer parameterId)
 Covariance* GmatBase::GetCovariance()
 {
    return &covariance;
+}
+
+
+void GmatBase::UpdateClonedObject(GmatBase *obj)
+{
+   MessageInterface::ShowMessage("UpdateClonedObject called in GmatBase; does "
+         "the override exist in the %s class?\n", typeName.c_str());
 }

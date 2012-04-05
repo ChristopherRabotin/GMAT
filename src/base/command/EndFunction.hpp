@@ -45,6 +45,8 @@ public:
    
    virtual bool         Execute();
    
+   DEFAULT_TO_NO_CLONES
+
 protected:   
    /// Name of the function
    std::string          functionName;

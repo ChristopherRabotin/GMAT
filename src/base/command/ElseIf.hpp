@@ -68,8 +68,9 @@ public:
 
     // inherited from GmatBase
     virtual GmatBase* Clone() const;
-
     
+    DEFAULT_TO_NO_CLONES
+
 protected:
     
 };

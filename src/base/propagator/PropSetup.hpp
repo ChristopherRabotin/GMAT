@@ -177,6 +177,9 @@ public:
                                             const std::string &prefix = "",
                                             const std::string &useName = "");
    
+   virtual bool HasLocalClones();
+   virtual void UpdateClonedObject(GmatBase *obj);
+
 private:
    
    bool mInitialized;

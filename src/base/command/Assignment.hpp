@@ -88,6 +88,11 @@ public:
                            const std::string &prefix = "",
                            const std::string &useName = "");
 
+   virtual bool         AffectsClones();
+   virtual GmatBase*    GetUpdatedObject();
+
+   DEFAULT_TO_NO_CLONES
+
 protected:
    
    /// string on the left side of the equals sign

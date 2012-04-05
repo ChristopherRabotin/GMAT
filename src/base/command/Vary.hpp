@@ -110,6 +110,8 @@ public:
    // Used to apply corrections to the command
    virtual void         SetInitialValue(Solver *theSolver);
    
+   DEFAULT_TO_NO_CLONES
+
 protected:
    // Parameter IDs
    enum  

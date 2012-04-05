@@ -86,7 +86,8 @@ public:
                        GetGeneratingString(Gmat::WriteMode mode,
                                            const std::string &prefix = "",
                                            const std::string &useName = "");
-    
+   DEFAULT_TO_NO_CLONES
+
 protected:
    /// The name of the targeter
    std::string         targeterName;

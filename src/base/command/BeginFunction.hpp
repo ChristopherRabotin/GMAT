@@ -94,6 +94,7 @@ public:
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    void                 ClearInputMap();
 
+   DEFAULT_TO_NO_CLONES
 
 protected:
    /// Name of the function

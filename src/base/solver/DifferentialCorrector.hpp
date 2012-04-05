@@ -81,6 +81,9 @@ public:
    virtual void        SetResultValue(Integer id, Real value,
                                       const std::string &resultType = "");
 
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    // Core data members used for the targeter numerics
    /// The number of goals in the targeting problem

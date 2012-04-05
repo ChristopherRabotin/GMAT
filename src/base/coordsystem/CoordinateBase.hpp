@@ -133,6 +133,7 @@ public:
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name = "");
    
+   DEFAULT_TO_NO_CLONES
    
 protected:
 

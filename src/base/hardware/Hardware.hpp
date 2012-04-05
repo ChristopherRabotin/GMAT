@@ -62,6 +62,8 @@ public:
 
 //   virtual bool	 VerifyRefObject(std::string subTypeName, GmatBase* obj); // made changes by Tuan Nguyen
 
+   DEFAULT_TO_NO_CLONES
+
 protected:
    /// Location of center of the hardware element on the spacecraft, in meters.
    Real                    location[3];

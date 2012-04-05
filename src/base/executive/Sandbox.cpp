@@ -49,6 +49,9 @@
 //#define DEBUG_SANDBOX_CLONING
 //#define DEBUG_SS_CLONING
 //#define DEBUG_EVENTLOCATION
+//#define DEBUG_CLONE_UPDATES
+
+//#define REPORT_CLONE_UPDATE_STATUS
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -80,7 +83,9 @@ Sandbox::Sandbox() :
    state             (IDLE),
    interruptCount    (45),
    pollFrequency     (50),
-   objInit           (NULL)
+   objInit           (NULL),
+//   cloneUpdateStyle  (SKIP_UPDATES)
+   cloneUpdateStyle  (PASS_TO_ALL)
 {
 }
 
@@ -889,6 +894,19 @@ bool Sandbox::Execute()
             throw SandboxException(str);
          }
          
+         if (current->AffectsClones())
+         {
+            // Manage owned clones
+            GmatBase *obj = current->GetUpdatedObject();
+            if (obj != NULL)
+            {
+               runMode retState = state;
+               state = REFRESH;
+               UpdateClones(obj);
+               state = retState;
+            }
+         }
+
          current = current->GetNext();
       }
    }
@@ -900,8 +918,8 @@ bool Sandbox::Execute()
       state = STOPPED;
       
       #if DBGLVL_SANDBOX_RUN
-      MessageInterface::ShowMessage
-         ("   Sandbox rethrowing %s\n", e.GetFullMessage().c_str());
+         MessageInterface::ShowMessage
+            ("   Sandbox rethrowing %s\n", e.GetFullMessage().c_str());
       #endif
       
       throw;
@@ -1524,3 +1542,138 @@ void Sandbox::ShowObjectMap(ObjectMap &om, const std::string &title)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void UpdateClones(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Entry method for updates to owned clone objects
+ *
+ * @param obj The updates object that needs to pass parameters to owned clones,
+ *            if there are any
+ */
+//------------------------------------------------------------------------------
+void Sandbox::UpdateClones(GmatBase *obj)
+{
+   switch (cloneUpdateStyle)
+   {
+      case PASS_TO_ALL:
+         PassToAll(obj);
+         break;
+
+      case PASS_TO_REGISTERED:
+         PassToRegisteredClones(obj);
+         break;
+
+      case SKIP_UPDATES:
+         #ifdef REPORT_CLONE_UPDATE_STATUS
+            MessageInterface::ShowMessage("Clone update requested for %s; "
+                  "skipping because the update method is set to "
+                  "SKIP_UPDATES.\n", obj->GetName().c_str());
+         #endif
+         break;
+
+      default:
+         throw SandboxException("The requested clone update method is not "
+               "recognized");
+         break;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void PassToAll(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Brute force method for updating owned clones
+ *
+ * @param obj The updates object that needs to pass parameters to owned clones,
+ *            if there are any
+ */
+//------------------------------------------------------------------------------
+void Sandbox::PassToAll(GmatBase *obj)
+{
+   #ifdef REPORT_CLONE_UPDATE_STATUS
+      MessageInterface::ShowMessage("Clone update requested for %s; "
+            "the update method is set to PASS_TO_ALL.\n",
+            obj->GetName().c_str());
+   #endif
+
+   // Walk the global object store
+   GmatBase *listObj;
+   std::map<std::string, GmatBase *>::iterator current = globalObjectMap.begin();
+
+   #ifdef DEBUG_CLONE_UPDATES
+      MessageInterface::ShowMessage("PassToAll updates: Walking the global "
+            "object store\n");
+   #endif
+
+   while (current != globalObjectMap.end())
+   {
+      listObj = current->second;
+
+      #ifdef DEBUG_CLONE_UPDATES
+         MessageInterface::ShowMessage("   %s %s\n",
+               listObj->GetName().c_str(), (listObj->HasLocalClones() ?
+               "has local clones" : "has no local clones"));
+      #endif
+
+      if (listObj->HasLocalClones())
+         listObj->UpdateClonedObject(obj);
+
+      ++current;
+   }
+
+   // Walk the local object store
+   current = objectMap.begin();
+
+   #ifdef DEBUG_CLONE_UPDATES
+      MessageInterface::ShowMessage("PassToAll updates: Walking the local "
+            "object store\n");
+   #endif
+
+   while (current != objectMap.end())
+   {
+      listObj = current->second;
+
+      #ifdef DEBUG_CLONE_UPDATES
+         MessageInterface::ShowMessage("   %s %s\n",
+               listObj->GetName().c_str(), (listObj->HasLocalClones() ?
+               "has local clones" : "has no local clones"));
+      #endif
+
+      if (listObj->HasLocalClones())
+         listObj->UpdateClonedObject(obj);
+
+      ++current;
+   }
+
+
+   // Walk the command list
+   #ifdef DEBUG_CLONE_UPDATES
+      MessageInterface::ShowMessage("PassToAll updates: TODO: Walking the "
+            "command list\n");
+   #endif
+
+}
+
+
+//------------------------------------------------------------------------------
+// void PassToRegisteredClones(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Owned clone update method that only updates registered clones
+ *
+ * @param obj The updates object that needs to pass parameters to owned clones,
+ *            if there are any
+ */
+//------------------------------------------------------------------------------
+void Sandbox::PassToRegisteredClones(GmatBase *obj)
+{
+   #ifdef REPORT_CLONE_UPDATE_STATUS
+      MessageInterface::ShowMessage("Clone update requested for %s; "
+            "the update method is set to PASS_TO_REGISTERED.\n",
+            obj->GetName().c_str());
+   #endif
+
+}

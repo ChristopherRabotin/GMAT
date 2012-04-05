@@ -214,6 +214,9 @@ public:
    virtual Integer     GetCloneCount();
    virtual GmatBase*   GetClone(Integer cloneIndex = 0);
 
+   virtual bool        AffectsClones();
+   virtual GmatBase*   GetUpdatedObject();
+
 protected:
    enum
    {

@@ -59,6 +59,9 @@ public:
    bool                 Execute();
    virtual void         RunComplete();
 
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    enum
    {

@@ -81,6 +81,9 @@ public:
 
    bool Initialize();
 
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    /// Owned reference objects for this TrackingSystem
    std::string          trackingType;

@@ -80,6 +80,9 @@ public:
                                         const std::string &newName);
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
+
+   DEFAULT_TO_NO_CLONES
+
 protected:
    
    /// Top node of the math tree

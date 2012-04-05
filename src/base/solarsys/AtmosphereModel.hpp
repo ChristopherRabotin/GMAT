@@ -114,6 +114,9 @@ public:
    void SetOpenFileFlag(bool flag);
    void CloseFile();
 
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    /// Solar flux binary file reader
    SolarFluxFileReader     *fileReader;

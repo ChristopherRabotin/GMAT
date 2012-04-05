@@ -50,6 +50,8 @@ public:
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
                            const std::string &prefix = "",
                            const std::string &useName = "");
+
+   DEFAULT_TO_NO_CLONES
 };
 
 

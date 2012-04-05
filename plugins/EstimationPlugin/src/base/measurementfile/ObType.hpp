@@ -64,6 +64,10 @@ public:
    virtual ObservationData *
                      ReadObservation() = 0;
 
+   /// @todo: Check this
+   DEFAULT_TO_NO_CLONES
+   DEFAULT_TO_NO_REFOBJECTS
+
 protected:
    /// Name of the stream contining the data
    std::string       streamName;

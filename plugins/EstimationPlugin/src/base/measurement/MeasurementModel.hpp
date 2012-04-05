@@ -176,6 +176,10 @@ public:
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
 
+   /// @todo: Check this
+   DEFAULT_TO_NO_CLONES
+
+
 protected:
    /// Name of the observation stream that supplied or receives data
    StringArray          observationStreamName;

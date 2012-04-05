@@ -160,6 +160,9 @@ public:
    virtual void         RunComplete();
    virtual GmatBase*    GetClone(Integer cloneIndex = 0);
    
+   virtual bool HasLocalClones();
+   virtual void UpdateClonedObject(GmatBase *obj);
+
 protected:
    /// Name of the propagator setup(s) used in this command
    StringArray                  propName;
