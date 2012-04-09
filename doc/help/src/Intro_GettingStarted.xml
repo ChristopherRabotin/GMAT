@@ -27,7 +27,7 @@
     </section>
 
     <section>
-      <title>Installing on Mac</title>
+      <title>Installing on the Mac</title>
 
       <para>GMAT for Mac is released as a compressed archive. The archive can
       be uncompressed and installed by either double-clicking on it, or by
@@ -79,7 +79,7 @@
       in the GMAT root directory and double-click
       <filename>GMAT.exe</filename>.</para>
 
-      <para>On Mac, use Finder to open the <filename>bin</filename> folder
+      <para>On the Mac, use Finder to open the <filename>bin</filename> folder
       located in the GMAT root directory and open the
       <filename>GMAT</filename> application. Alternatively, open a Terminal
       window, change to your installation directory, then type the command
@@ -95,7 +95,7 @@
 
       <para>To end a GMAT session on Windows or Linux, in the menu bar, click
       <guimenu>File</guimenu>, then click <guimenuitem>Exit</guimenuitem>. On
-      Mac, in the menu bar, click <guilabel>GMAT</guilabel>, then click
+      the Mac, in the menu bar, click <guilabel>GMAT</guilabel>, then click
       <guimenuitem>Quit GMAT</guimenuitem>, or type <keycombo action="simul">
           <keycap>Command</keycap>
 
@@ -177,14 +177,14 @@
 
           <screenshot>
             <info>
-              <title></title>
+              <title/>
             </info>
 
             <mediaobject>
               <imageobject>
                 <imagedata contentdepth="100%"
                            fileref="files/images/Intro_GettingStarted_WindowsGUI.png"
-                           scalefit="1" width="100%"></imagedata>
+                           scalefit="1" width="100%"/>
               </imageobject>
             </mediaobject>
           </screenshot>
@@ -216,15 +216,15 @@
               defect reporting system, the <guilabel>Welcome Page</guilabel>,
               and a <guilabel>Provide Feedback</guilabel> link.</para>
 
-              <para>On Mac, menus are nearly the same, with a few differences:
-              the <guilabel>File</guilabel> menu does not contain an
-              <guilabel>Exit</guilabel> option - instead, the <guilabel>Quit
-              GMAT</guilabel> menu option is on the GMAT menu, as discussed
-              before; tiling and cascading windows are not supported, so those
-              options do not appear under the <guilabel>Window</guilabel>
-              menu; currently, email is not supported, so <guilabel>Provide
-              Feedback</guilabel> is nonfunctional under the
-              <guilabel>Help</guilabel> menu.</para>
+              <para>On the Mac, menus are nearly the same, with a few
+              differences: the <guilabel>File</guilabel> menu does not contain
+              an <guilabel>Exit</guilabel> option - instead, the
+              <guilabel>Quit GMAT</guilabel> menu option is on the GMAT menu,
+              as discussed before; tiling and cascading windows are not
+              supported, so those options do not appear under the
+              <guilabel>Window</guilabel> menu; currently, email is not
+              supported, so <guilabel>Provide Feedback</guilabel> is
+              nonfunctional under the <guilabel>Help</guilabel> menu.</para>
             </listitem>
           </varlistentry>
 
@@ -237,9 +237,9 @@
               <guilabel>Pause</guilabel>, and <guilabel>Stop</guilabel> for
               mission execution, and controls for graphics animation. On
               Windows and Linux, the toolbar is located at the top of the GMAT
-              window; on Mac, it is located on the left of the GMAT frame.
-              Because the toolbar is vertical on Mac, some toolbar options are
-              abbreviated.</para>
+              window; on the Mac, it is located on the left of the GMAT frame.
+              Because the toolbar is vertical on the Mac, some toolbar options
+              are abbreviated.</para>
 
               <para>GMAT allows you to simultaneously edit the raw script file
               representation of your mission and the GUI representation of
@@ -247,7 +247,7 @@
               these mission representations. The <guilabel>GUI/Script Sync
               Status</guilabel> indicator located in the toolbar shows you the
               state of the two mission representations. See the <xref
-              linkend="GuiScriptInteractionsAndSynchronization" /> section for
+              linkend="GuiScriptInteractionsAndSynchronization"/> section for
               further discussion.</para>
             </listitem>
           </varlistentry>
@@ -319,7 +319,7 @@
                     <imageobject>
                       <imagedata contentdepth="100%"
                                  fileref="files/images/Intro_GettingStarted_UndockedMissionTree.png"
-                                 scalefit="1" width="100%"></imagedata>
+                                 scalefit="1" width="100%"/>
                     </imageobject>
                   </mediaobject>
                 </screenshot>
@@ -377,7 +377,7 @@
 
       <para>The GMAT script editor is a textual interface that lets you
       directly edit your mission in GMAT's built-in scripting language. In
-      <xref linkend="Fig_ScriptEditor" /> below, the script editor is shown
+      <xref linkend="Fig_ScriptEditor"/> below, the script editor is shown
       maximized in the GMAT desktop and the items relevant to script editing
       are labeled.</para>
 
@@ -386,14 +386,14 @@
 
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
               <imagedata contentdepth="100%"
                          fileref="files/images/Intro_GettingStarted_ScriptEditor.png"
-                         scalefit="1" width="100%"></imagedata>
+                         scalefit="1" width="100%"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -490,8 +490,8 @@
         representation and the GUI representation of your mission. It is
         possible to make inconsistent changes in these representations. The
         <guilabel>GUI/Script Sync Status</guilabel> window located in the
-        toolbar indicates the state of the two representations. On Mac, the
-        status is indicated in abbreviated form in the left-hand toolbar.
+        toolbar indicates the state of the two representations. On the Mac,
+        the status is indicated in abbreviated form in the left-hand toolbar.
         <guilabel>Synchronized</guilabel> (green) indicates that the script
         and GUI contain the same information. <guilabel>GUI
         Modified</guilabel> (yellow) indicates that there are changes in the
@@ -619,7 +619,7 @@ Sat.X = 1000</programlisting>
 
       <para>The default directory structure for GMAT is broken into eight main
       subdirectories, as shown in <xref
-      linkend="GmatRootDirectoryStructure" />. These directories organize the
+      linkend="GmatRootDirectoryStructure"/>. These directories organize the
       files and data used to run GMAT, including binary libraries, data files,
       texture maps, and 3D models. The only two files in the GMAT root
       directory are <filename>license.txt</filename>, which contains the text
@@ -633,14 +633,14 @@ Sat.X = 1000</programlisting>
 
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
                          fileref="files/images/Util_DirectoryStructure.png"
-                         scalefit="1" width="100%"></imagedata>
+                         scalefit="1" width="100%"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -652,10 +652,10 @@ Sat.X = 1000</programlisting>
         <para>The <filename>bin</filename> directory contains all binary files
         required for the core functionality of GMAT. These libraries include
         the executable file (<filename>GMAT.exe</filename> on Windows,
-        <filename>GMAT.app</filename> on Mac, and <filename>GMAT</filename> on
-        Linux) and platform-specific support libraries. The
-        <filename>bin</filename> directory also contains two text files:
-        <filename>gmat_startup_file.txt</filename> and
+        <filename>GMAT.app</filename> on the Mac, and
+        <filename>GMAT</filename> on Linux) and platform-specific support
+        libraries. The <filename>bin</filename> directory also contains two
+        text files: <filename>gmat_startup_file.txt</filename> and
         <filename>gmat.ini</filename>. The startup file is discussed in detail
         in a separate section below. The <filename>gmat.ini</filename> file is
         used to configure some GUI panels, set paths to external web links,
@@ -667,7 +667,7 @@ Sat.X = 1000</programlisting>
 
         <para>The <filename>data</filename> directory contains all required
         data files to run GMAT and is organized according to data type, as
-        shown in <xref linkend="GmatDataDirectoryStructure" /> and described
+        shown in <xref linkend="GmatDataDirectoryStructure"/> and described
         below.</para>
 
         <figure xml:id="GmatDataDirectoryStructure">
@@ -675,14 +675,14 @@ Sat.X = 1000</programlisting>
 
           <screenshot>
             <info>
-              <title></title>
+              <title/>
             </info>
 
             <mediaobject>
               <imageobject>
                 <imagedata align="center" contentdepth="100%"
                            fileref="files/images/Util_DirectoryStructure_Data.png"
-                           scalefit="1" width="100%"></imagedata>
+                           scalefit="1" width="100%"/>
               </imageobject>
             </mediaobject>
           </screenshot>
@@ -944,7 +944,7 @@ GMAT_FUNCTION_PATH = ../MyFunctions/TimeConversion</programlisting>
 
             <!--Blank paragraph to add space between these list items; shouldn't be necessary-->
 
-            <para></para>
+            <para/>
           </listitem>
 
           <listitem>
@@ -959,7 +959,7 @@ GMAT_FUNCTION_PATH = ../MyFunctions/TimeConversion</programlisting>
 
             <!--Blank paragraph to add space between these list items; shouldn't be necessary-->
 
-            <para></para>
+            <para/>
           </listitem>
 
           <listitem>
