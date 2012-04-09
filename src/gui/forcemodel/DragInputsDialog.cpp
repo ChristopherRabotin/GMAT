@@ -111,9 +111,9 @@ void DragInputsDialog::Update()
 {
    if (useFile)  
    {
-      fileNameStaticText->Enable(true);
-      fileNameTextCtrl->Enable(true);
-      browseButton->Enable(true);
+//      fileNameStaticText->Enable(true);
+//      fileNameTextCtrl->Enable(true);
+//      browseButton->Enable(true);
       
       solarFluxStaticText->Enable(false);
       avgSolarFluxStaticText->Enable(false);
@@ -125,9 +125,9 @@ void DragInputsDialog::Update()
    }
    else
    {
-      fileNameStaticText->Enable(false);
-      fileNameTextCtrl->Enable(false);
-      browseButton->Enable(false);
+//      fileNameStaticText->Enable(false);
+//      fileNameTextCtrl->Enable(false);
+//      browseButton->Enable(false);
       
       solarFluxStaticText->Enable(true);
       avgSolarFluxStaticText->Enable(true);
@@ -174,21 +174,21 @@ void DragInputsDialog::Create()
    //-----------------------------------------------------------------
    // file input
    //-----------------------------------------------------------------
-   fileInputRadioButton =
-      new wxRadioButton(this, ID_RADIOBUTTON, wxT("File Input (To be implemented)"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   //@todo Reading flux file has not been implemented in the base code
-   // so disable it for now
-   fileInputRadioButton->Disable();
-   fileNameStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("File Name"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   fileNameTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(200,-1), 0);
-   browseButton =
-      new wxButton(this, ID_BUTTON, wxT("Browse"),
-                   wxDefaultPosition, wxDefaultSize, 0);
+//   fileInputRadioButton =
+//      new wxRadioButton(this, ID_RADIOBUTTON, wxT("File Input (To be implemented)"),
+//                        wxDefaultPosition, wxDefaultSize, 0);
+//   //@todo Reading flux file has not been implemented in the base code
+//   // so disable it for now
+//   fileInputRadioButton->Disable();
+//   fileNameStaticText =
+//      new wxStaticText(this, ID_TEXT, wxT("File Name"),
+//                       wxDefaultPosition, wxDefaultSize, 0);
+//   fileNameTextCtrl =
+//      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+//                     wxDefaultPosition, wxSize(200,-1), 0);
+//   browseButton =
+//      new wxButton(this, ID_BUTTON, wxT("Browse"),
+//                   wxDefaultPosition, wxDefaultSize, 0);
    
    //-----------------------------------------------------------------
    // add to sizer
@@ -204,18 +204,18 @@ void DragInputsDialog::Create()
    userInputFlexGridSizer->Add(geomagneticIndexStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    userInputFlexGridSizer->Add(geomagneticIndexTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   wxBoxSizer *fileInputSizer = new wxBoxSizer(wxHORIZONTAL);
-   
-   fileInputSizer->Add(fileNameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   fileInputSizer->Add(fileNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   fileInputSizer->Add(browseButton, 0, wxALIGN_LEFT|wxALL, bsize);
+//   wxBoxSizer *fileInputSizer = new wxBoxSizer(wxHORIZONTAL);
+//
+//   fileInputSizer->Add(fileNameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+//   fileInputSizer->Add(fileNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+//   fileInputSizer->Add(browseButton, 0, wxALIGN_LEFT|wxALL, bsize);
    
    GmatStaticBoxSizer *userInputGroup = new GmatStaticBoxSizer(wxVERTICAL, this, "");
    GmatStaticBoxSizer *fileInputGroup = new GmatStaticBoxSizer(wxVERTICAL, this, "");
    
    userInputGroup->Add(userInputFlexGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   fileInputGroup->Add(fileInputRadioButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   fileInputGroup->Add(fileInputSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+//   fileInputGroup->Add(fileInputRadioButton, 0, wxALIGN_LEFT|wxALL, bsize);
+//   fileInputGroup->Add(fileInputSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxBoxSizer *mainPageSizer = new wxBoxSizer(wxVERTICAL);
    mainPageSizer->Add(userInputGroup, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
@@ -275,8 +275,8 @@ void DragInputsDialog::LoadData()
       solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
       wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
 
-      if (!filename.IsNull())
-         fileNameTextCtrl->SetValue(filename);
+//      if (!filename.IsNull())
+//         fileNameTextCtrl->SetValue(filename);
    }
    catch (BaseException &e)
    {
@@ -299,13 +299,13 @@ void DragInputsDialog::LoadData()
    {
       useFile = false;
       userInputRadioButton->SetValue(true);
-      fileInputRadioButton->SetValue(false); 
+//      fileInputRadioButton->SetValue(false);
    }
    else if (inputSourceString.CmpNoCase("File") == 0)
    {
       useFile = true;
       userInputRadioButton->SetValue(false);
-      fileInputRadioButton->SetValue(true);
+//      fileInputRadioButton->SetValue(true);
    }
    
    Update();
@@ -356,23 +356,23 @@ void DragInputsDialog::SaveData()
    {
       if (useFile)
       {
-         std::string fileName = fileNameTextCtrl->GetValue().c_str();
-         if (fileName == "")
-         {
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, "The flux file name is empty, please enter file name or "
-                "switch to user input");
-            canClose = false;
-            return;
-         }
-         
-         inputSourceString = wxT("File");
-         theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
-         theForce->SetStringParameter(solarFluxFileID,
-                                      fileNameTextCtrl->GetValue().c_str());
+//         std::string fileName = fileNameTextCtrl->GetValue().c_str();
+//         if (fileName == "")
+//         {
+//            MessageInterface::PopupMessage
+//               (Gmat::ERROR_, "The flux file name is empty, please enter file name or "
+//                "switch to user input");
+//            canClose = false;
+//            return;
+//         }
+//
+//         inputSourceString = wxT("File");
+//         theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
+//         theForce->SetStringParameter(solarFluxFileID,
+//                                      fileNameTextCtrl->GetValue().c_str());
          #ifdef DEBUG_DRAG_SAVE
-         MessageInterface::ShowMessage
-            ("   ==> Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
+//         MessageInterface::ShowMessage
+//            ("   ==> Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
          #endif
       }
       else
@@ -434,12 +434,12 @@ void DragInputsDialog::OnRadioButtonChange(wxCommandEvent& event)
       Update();
       EnableUpdate(true);
    }
-   else if (event.GetEventObject() == fileInputRadioButton)
-   {       
-      useFile = true;
-      Update();
-      EnableUpdate(true);
-   }
+//   else if (event.GetEventObject() == fileInputRadioButton)
+//   {
+//      useFile = true;
+//      Update();
+//      EnableUpdate(true);
+//   }
 }
 
 //------------------------------------------------------------------------------
@@ -455,7 +455,7 @@ void DragInputsDialog::OnBrowse(wxCommandEvent &event)
         
       filename = dialog.GetPath().c_str();
         
-      fileNameTextCtrl->SetValue(filename); 
+//      fileNameTextCtrl->SetValue(filename);
    }
    
    EnableUpdate(true);
