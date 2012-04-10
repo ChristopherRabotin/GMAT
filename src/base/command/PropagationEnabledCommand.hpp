@@ -55,8 +55,11 @@ public:
    PropagationEnabledCommand(const PropagationEnabledCommand& pec);
    PropagationEnabledCommand& operator=(const PropagationEnabledCommand& pec);
 
-   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
-   virtual bool         Initialize();
+   virtual void SetTransientForces(std::vector<PhysicalModel*> *tf);
+   virtual bool Initialize();
+
+   virtual bool HasLocalClones();
+   virtual void UpdateClonedObject(GmatBase *obj);
 
 protected:
    // todo: Merge the propagator objects in the Propagate command into this code

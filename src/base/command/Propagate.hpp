@@ -160,9 +160,6 @@ public:
    virtual void         RunComplete();
    virtual GmatBase*    GetClone(Integer cloneIndex = 0);
    
-   virtual bool HasLocalClones();
-   virtual void UpdateClonedObject(GmatBase *obj);
-
 protected:
    /// Name of the propagator setup(s) used in this command
    StringArray                  propName;
@@ -178,11 +175,7 @@ protected:
    bool                         hasFired;
    /// ID for the spacecraft epoch parameter
    Integer                      epochID;
-//   /// Starting epoch for the propagation
-//   std::vector<Real>            baseEpoch;
    
-//   /// The propagator(s) used by this command
-//   std::vector<PropSetup*>      prop;
    /// The spacecraft and formations that are propagated
    ObjectArray                  sats;
    /// The stopping conditions
@@ -206,11 +199,6 @@ protected:
    
    /// The spacecraft used by the stopping conditions
    std::vector<SpaceObject *>   stopSats;
-//   /// Stopping condition evaluation requires propagation; the satBuffer lets us
-//   /// restore the Spacecraft and Formations to the state needed for the last
-//   /// step
-//   std::vector<Spacecraft *>    satBuffer;
-//   std::vector<Formation *>     formBuffer;
    /// The object array used in GetRefObjectArray()
    ObjectArray                  objectArray;
    
@@ -219,10 +207,6 @@ protected:
    RealArray                    elapsedTime;
    /// Start epoch for the step
    RealArray                    currEpoch;
-//   /// The Propagator
-//   std::vector<Propagator*>     p;
-//   /// The ForceModel
-//   std::vector<ODEModel*>       fm;
    /// The Propagation State Managers
    std::vector<PropagationStateManager*>  psm;
    
@@ -325,9 +309,6 @@ protected:
                                  PropagationStateManager *propMan);
    void                    ClearTransientForces();
    
-//   void                    AddToBuffer(SpaceObject *so);
-//   void                    EmptyBuffer();
-//   void                    BufferSatelliteStates(bool fillingBuffer = true);
    bool                    CheckFirstStepStop(Integer i);
    
    Real                    InterpolateToStop(StopCondition *sc);
