@@ -732,7 +732,7 @@ bool GravityField::IsParameterReadOnly(const Integer id) const
    if (id < HarmonicFieldParamCount)
       return HarmonicField::IsParameterReadOnly(id);
 
-   if (id == EARTH_TIDE_MODEL)  return false;
+   if ((id == EARTH_TIDE_MODEL) && (bodyName == GmatSolarSystemDefaults::EARTH_NAME)) return false;
 
    return true;
 }
@@ -837,15 +837,24 @@ bool GravityField::SetStringParameter(const Integer id,
 {
    if (id == EARTH_TIDE_MODEL)
    {
-      if ((GmatStringUtil::ToUpper(value) != "NONE") &&      // Currently, these are the only valid strings ...
-          (GmatStringUtil::ToUpper(value) != "SOLIDANDPOLE"))
+      if (bodyName == GmatSolarSystemDefaults::EARTH_NAME)
       {
-         ODEModelException ome;
-         ome.SetDetails(errorMessageFormat.c_str(),
-                        value.c_str(), "EarthTideModel", "\'None\' or \'SolidAndPole\'");
-         throw ome;
+         if ((GmatStringUtil::ToUpper(value) != "NONE") &&      // Currently, these are the only valid strings ...
+             (GmatStringUtil::ToUpper(value) != "SOLIDANDPOLE"))
+         {
+            ODEModelException ome;
+            ome.SetDetails(errorMessageFormat.c_str(),
+                           value.c_str(), "EarthTideModel", "\'None\' or \'SolidAndPole\'");
+            throw ome;
+         }
+         earthTideModel = value;
       }
-      earthTideModel = value;
+      else
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"EarthTideModel\" is deprecated for non-Earth primary bodies and will be "
+             "removed from a future build.\n");
+      }
       return true;
    }
    return HarmonicField::SetStringParameter(id, value);
