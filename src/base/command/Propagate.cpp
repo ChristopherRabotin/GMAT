@@ -59,6 +59,7 @@
 //#define DEBUG_TRANSIENT_FORCES
 //#define DEBUG_FINAL_STEP
 //#define DEBUG_EVENTLOCATORS
+//#define DEBUG_CLONES
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -2764,6 +2765,14 @@ bool Propagate::Initialize()
           "(PropSetup *)(mapObj->Clone())");
       #endif
       //prop.push_back((PropSetup *)(mapObj->Clone()));
+
+      #ifdef DEBUG_CLONES
+         MessageInterface::ShowMessage("In Propagate::Initialize(), "
+               "cloned PS <%p>, a clone of <%p>:\n%s", clonedProp, mapObj,
+               clonedProp->GetGeneratingString(
+                     Gmat::NO_COMMENTS, "      ").c_str());
+      #endif
+
       propagators.push_back(clonedProp);
       ++cloneCount;
       if (!propagators[index])
@@ -5512,7 +5521,44 @@ bool Propagate::HasLocalClones()
 //------------------------------------------------------------------------------
 void Propagate::UpdateClonedObject(GmatBase *obj)
 {
-   throw CommandException("To do: implement Propagate::UpdateClonedObject");
+   if (obj->IsOfType(Gmat::PROP_SETUP))
+   {
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
+         if (obj->GetName() == propagators[i]->GetName())
+            propagators[i]->operator=(*((PropSetup*)obj));
+   }
+
+   if (obj->IsOfType(Gmat::ODE_MODEL))
+   {
+      for (UnsignedInt j = 0; j < fm.size(); ++j)
+         if (obj->GetName() == fm[j]->GetName())
+         {
+            fm[j]->operator=(*((ODEModel*)obj));
+            #ifdef DEBUG_CLONES
+               MessageInterface::ShowMessage("--------%p\n%s\nshould match %p"
+                     "\n%s\n--------\n", fm[j],
+                     fm[j]->GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+                     obj, obj->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+            #endif
+         }
+
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
+      {
+         ODEModel *odem = propagators[i]->GetODEModel();
+         if (obj->GetName() == odem->GetName())
+         {
+            odem->operator=(*((ODEModel*)obj));
+
+            #ifdef DEBUG_CLONES
+               MessageInterface::ShowMessage("--------[%d] %p\n%s\nshould "
+                     "match %p\n%s\n--------\n", i, odem,
+                     odem->GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+                     obj, obj->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+            #endif
+         }
+      }
+   }
+
 }
 
 //------------------------------------------------------------------------------

@@ -84,8 +84,8 @@ Sandbox::Sandbox() :
    interruptCount    (45),
    pollFrequency     (50),
    objInit           (NULL),
-   cloneUpdateStyle  (SKIP_UPDATES)
-//   cloneUpdateStyle  (PASS_TO_ALL)
+//   cloneUpdateStyle  (SKIP_UPDATES)
+   cloneUpdateStyle  (PASS_TO_ALL)
 {
 }
 
@@ -1613,7 +1613,7 @@ void Sandbox::PassToAll(GmatBase *obj)
       listObj = current->second;
 
       #ifdef DEBUG_CLONE_UPDATES
-         MessageInterface::ShowMessage("   %s %s\n",
+         MessageInterface::ShowMessage("   <%p> %s %s\n", listObj,
                listObj->GetName().c_str(), (listObj->HasLocalClones() ?
                "has local clones" : "has no local clones"));
       #endif
@@ -1637,7 +1637,7 @@ void Sandbox::PassToAll(GmatBase *obj)
       listObj = current->second;
 
       #ifdef DEBUG_CLONE_UPDATES
-         MessageInterface::ShowMessage("   %s %s\n",
+         MessageInterface::ShowMessage("   <%p> %s %s\n", listObj,
                listObj->GetName().c_str(), (listObj->HasLocalClones() ?
                "has local clones" : "has no local clones"));
       #endif
@@ -1651,10 +1651,25 @@ void Sandbox::PassToAll(GmatBase *obj)
 
    // Walk the command list
    #ifdef DEBUG_CLONE_UPDATES
-      MessageInterface::ShowMessage("PassToAll updates: TODO: Walking the "
+      MessageInterface::ShowMessage("PassToAll updates: Walking the "
             "command list\n");
    #endif
+   GmatCommand *currentCmd = sequence;
+   while (currentCmd != NULL)
+   {
+      #ifdef DEBUG_CLONE_UPDATES
+         MessageInterface::ShowMessage("   %s %s\n",
+               currentCmd->GetTypeName().c_str(),
+               (currentCmd->HasLocalClones() ?
+               "has local clones" : "has no local clones"));
+      #endif
+      if (currentCmd->HasLocalClones())
+      {
+         currentCmd->UpdateClonedObject(obj);
+      }
 
+      currentCmd = currentCmd->GetNext();
+   }
 }
 
 

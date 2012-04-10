@@ -391,6 +391,11 @@ ODEModel::ODEModel(const ODEModel& fdf) :
 //------------------------------------------------------------------------------
 ODEModel& ODEModel::operator=(const ODEModel& fdf)
 {
+   #ifdef DEBUG_ODEMODEL
+      MessageInterface::ShowMessage("ODEModel <%p> Assignment Operator "
+            "entered\n", this);
+   #endif
+
    if (&fdf == this)
         return *this;
 
@@ -3227,9 +3232,10 @@ void ODEModel::UpdateClonedObject(GmatBase *obj)
 {
    if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
    {
-      MessageInterface::ShowMessage("ODEModel::UpdateClonedObject: Potential "
-            "cloning issue: Check cloned coordinate systems passed into the "
-            "ODE model for local clones in the member forces\n");
+      /// @note Potential issue
+//      MessageInterface::ShowMessage("ODEModel::UpdateClonedObject: Potential "
+//            "cloning issue: Check cloned coordinate systems passed into the "
+//            "ODE model for local clones in the member forces\n");
    }
 }
 

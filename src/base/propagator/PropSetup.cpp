@@ -38,6 +38,8 @@
 //#define DEBUG_PROPSETUP_DELETE
 //#define DEBUG_PROPSETUP_GEN_STRING
 //#define DEBUG_FUNCTION_CREATION
+//#define DEBUG_CLONES
+
 
 
 //#ifndef DEBUG_MEMORY 
@@ -1494,12 +1496,39 @@ bool PropSetup::HasLocalClones()
 //------------------------------------------------------------------------------
 void PropSetup::UpdateClonedObject(GmatBase *obj)
 {
+   #ifdef DEBUG_CLONES
+      MessageInterface::ShowMessage("PropSetup::UpdateClonedObject(%s) "
+            "called\n", obj->GetName().c_str());
+   #endif
+
    if (obj->IsOfType(Gmat::ODE_MODEL) && (mODEModel != NULL))
    {
-      if (obj->GetName() == mODEModel->GetAssociateName())
+      #ifdef DEBUG_CLONES
+         MessageInterface::ShowMessage("Setting ODEModel on Propsetup %s\n",
+               instanceName.c_str());
+      #endif
+      if (obj->GetName() == mODEModel->GetName())
       {
          mODEModel->operator=(*((ODEModel*)obj));
          isInitialized = false;
+      }
+   }
+
+   if (obj->IsOfType(Gmat::PROP_SETUP))
+   {
+      #ifdef DEBUG_CLONES
+         MessageInterface::ShowMessage("Setting ODEModel on Propsetup %s to "
+               "match %s\n", instanceName.c_str(), obj->GetName().c_str());
+      #endif
+
+      ODEModel *odem = ((PropSetup*)obj)->GetODEModel();
+      if (odem != NULL)
+      {
+         if (odem->GetName() == mODEModel->GetName())
+         {
+            mODEModel->operator=(*odem);
+            isInitialized = false;
+         }
       }
    }
 }
