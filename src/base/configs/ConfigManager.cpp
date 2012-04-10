@@ -79,7 +79,7 @@ ConfigManager* ConfigManager::Instance()
  */
 //------------------------------------------------------------------------------
 ConfigManager::ConfigManager() :
-   objectChanged     (false)
+   configChanged(false)
 {
 }
 
@@ -148,6 +148,7 @@ std::string ConfigManager::GetNewName(const std::string &name, Integer startCoun
 /**
  * Adds an object to the configuration.
  *
+ * @param objType Type of the object
  * @param obj Pointer to the object instance.
  */
 //------------------------------------------------------------------------------
@@ -157,6 +158,10 @@ void ConfigManager::AddObject(Gmat::ObjectType objType, GmatBase *obj)
    MessageInterface::ShowMessage
       ("ConfigManager::AddObject() entered, objType=%d, obj=<%p>\n", objType, obj);
    #endif
+   
+   if (obj == NULL)
+      throw ConfigManagerException("Cannot add NULL object");
+   
    std::string name = obj->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -179,10 +184,13 @@ void ConfigManager::AddObject(Gmat::ObjectType objType, GmatBase *obj)
 //------------------------------------------------------------------------------
 void ConfigManager::AddPhysicalModel(PhysicalModel *pm)
 {
+   if (pm == NULL)
+      throw ConfigManagerException("Cannnot add NULL PhysicalModel object");
+   
    std::string name = pm->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
-
+   
    if (!pm->IsOfType(Gmat::PHYSICAL_MODEL))
       throw ConfigManagerException(name + " is not a PhysicalModel");
 
@@ -200,6 +208,9 @@ void ConfigManager::AddPhysicalModel(PhysicalModel *pm)
 //------------------------------------------------------------------------------
 void ConfigManager::AddPropagator(Propagator *prop)
 {
+   if (prop == NULL)
+      throw ConfigManagerException("Cannot add NULL Propagator object");
+
    std::string name = prop->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -212,16 +223,19 @@ void ConfigManager::AddPropagator(Propagator *prop)
 
 
 //------------------------------------------------------------------------------
-// void AddForceModel(ForceModel *fm)
+// void AddODEModel(ForceModel *fm)
 //------------------------------------------------------------------------------
 /**
- * Adds a ForceModel to the configuration.
+ * Adds a ODEModel to the configuration.
  *
  * @param fm Pointer to the ForceModel instance.
  */
 //------------------------------------------------------------------------------
 void ConfigManager::AddODEModel(ODEModel *fm)
 {
+   if (fm == NULL)
+      throw ConfigManagerException("Cannot add NULL ODEModel object");
+
    std::string name = fm->GetName();
 
    if (name == "")
@@ -245,6 +259,9 @@ void ConfigManager::AddODEModel(ODEModel *fm)
 //------------------------------------------------------------------------------
 void ConfigManager::AddSubscriber(Subscriber *subs)
 {
+   if (subs == NULL)
+      throw ConfigManagerException("Cannot add NULL Subscriber object");
+
    std::string name = subs->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -284,6 +301,9 @@ void ConfigManager::AddSolarSystem(SolarSystem *solarSys)
 //------------------------------------------------------------------------------
 void ConfigManager::AddPropSetup(PropSetup* propSetup)
 {
+   if (propSetup == NULL)
+      throw ConfigManagerException("Cannot add NULL PropSetup object");
+
    std::string name = propSetup->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -306,6 +326,9 @@ void ConfigManager::AddPropSetup(PropSetup* propSetup)
 //------------------------------------------------------------------------------
 void ConfigManager::AddSpacecraft(SpaceObject *sc)
 {
+   if (sc == NULL)
+      throw ConfigManagerException("Cannot add NULL Spacecraft object");
+
    std::string name = sc->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -330,6 +353,9 @@ void ConfigManager::AddSpacecraft(SpaceObject *sc)
 //------------------------------------------------------------------------------
 void ConfigManager::AddSpacePoint(SpacePoint *sp)
 {
+   if (sp == NULL)
+      throw ConfigManagerException("Cannot add NULL SpacePoint object");
+
    std::string name = sp->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -352,6 +378,9 @@ void ConfigManager::AddSpacePoint(SpacePoint *sp)
 //------------------------------------------------------------------------------
 void ConfigManager::AddHardware(Hardware *hw)
 {
+   if (hw == NULL)
+      throw ConfigManagerException("Cannot add NULL Hardware object");
+
    std::string name = hw->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -374,6 +403,9 @@ void ConfigManager::AddHardware(Hardware *hw)
 //------------------------------------------------------------------------------
 void ConfigManager::AddStopCondition(StopCondition* stopCond)
 {
+   if (stopCond == NULL)
+      throw ConfigManagerException("Cannot add NULL StopCondition object");
+
    std::string name = stopCond->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -396,6 +428,9 @@ void ConfigManager::AddStopCondition(StopCondition* stopCond)
 //------------------------------------------------------------------------------
 void ConfigManager::AddParameter(Parameter* parameter)
 {
+   if (parameter == NULL)
+      throw ConfigManagerException("Cannot add NULL Parameter object");
+
    std::string name = parameter->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -418,6 +453,9 @@ void ConfigManager::AddParameter(Parameter* parameter)
 //------------------------------------------------------------------------------
 void ConfigManager::AddBurn(Burn* burn)
 {
+   if (burn == NULL)
+      throw ConfigManagerException("Cannot add Burn object");
+
    std::string name = burn->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -439,6 +477,9 @@ void ConfigManager::AddBurn(Burn* burn)
 //------------------------------------------------------------------------------
 void ConfigManager::AddSolver(Solver* solver)
 {
+   if (solver == NULL)
+      throw ConfigManagerException("Cannot add NULL Solver object");
+
    std::string name = solver->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -460,6 +501,9 @@ void ConfigManager::AddSolver(Solver* solver)
 //------------------------------------------------------------------------------
 void ConfigManager::AddAtmosphereModel(AtmosphereModel* atmosModel)
 {
+   if (atmosModel == NULL)
+      throw ConfigManagerException("Cannot add NULL AtmosphereModel object");
+
    std::string name = atmosModel->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -481,6 +525,9 @@ void ConfigManager::AddAtmosphereModel(AtmosphereModel* atmosModel)
 //------------------------------------------------------------------------------
 void ConfigManager::AddFunction(Function* function)
 {
+   if (function == NULL)
+      throw ConfigManagerException("Cannot add NULL Function object");
+
    std::string name = function->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
@@ -502,6 +549,9 @@ void ConfigManager::AddFunction(Function* function)
 //------------------------------------------------------------------------------
 void ConfigManager::AddCoordinateSystem(CoordinateSystem *cs)
 {
+   if (cs == NULL)
+      throw ConfigManagerException("Cannot add NULL CoordinateSystem object");
+
    std::string name = cs->GetName();
 
    if (name == "")
@@ -514,25 +564,28 @@ void ConfigManager::AddCoordinateSystem(CoordinateSystem *cs)
 }
 
 //------------------------------------------------------------------------------
-// void AddCalculatedPoint(CalculatedPoint *cs)
+// void AddCalculatedPoint(CalculatedPoint *cp)
 //------------------------------------------------------------------------------
 /**
  * Adds a CalculatedPoint to the configuration.
  *
- * @param cs Pointer to the CalculatedPoint instance.
+ * @param cp Pointer to the CalculatedPoint instance.
  */
 //------------------------------------------------------------------------------
-void ConfigManager::AddCalculatedPoint(CalculatedPoint *cs)
+void ConfigManager::AddCalculatedPoint(CalculatedPoint *cp)
 {
-   std::string name = cs->GetName();
+   if (cp == NULL)
+      throw ConfigManagerException("Cannot add NULL CalculatedPoint object");
+
+   std::string name = cp->GetName();
 
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
 
-   if (!cs->IsOfType(Gmat::CALCULATED_POINT))
+   if (!cp->IsOfType(Gmat::CALCULATED_POINT))
       throw ConfigManagerException(name + " is not a CalculatedPoint");
 
-   AddObject(cs);
+   AddObject(cp);
 }
 
 //------------------------------------------------------------------------------
@@ -546,6 +599,9 @@ void ConfigManager::AddCalculatedPoint(CalculatedPoint *cs)
 //------------------------------------------------------------------------------
 void ConfigManager::AddMeasurementModel(MeasurementModel *mModel)
 {
+   if (mModel == NULL)
+      throw ConfigManagerException("Cannot add NULL MeasurementModel object");
+
    GmatBase *obj = (GmatBase*)mModel;
 
    std::string name = obj->GetName();
@@ -569,6 +625,9 @@ void ConfigManager::AddMeasurementModel(MeasurementModel *mModel)
 //------------------------------------------------------------------------------
 void ConfigManager::AddTrackingSystem(TrackingSystem *ts)
 {
+   if (ts == NULL)
+      throw ConfigManagerException("Cannot add NULL TrackingSystem object");
+
    GmatBase *obj = (GmatBase*)ts;
 
    std::string name = obj->GetName();
@@ -592,6 +651,9 @@ void ConfigManager::AddTrackingSystem(TrackingSystem *ts)
 //------------------------------------------------------------------------------
 void ConfigManager::AddTrackingData(TrackingData *td)
 {
+   if (td == NULL)
+      throw ConfigManagerException("Cannot add NULL TrackingData object");
+
    GmatBase *obj = (GmatBase*)td;
 
    std::string name = obj->GetName();
@@ -616,6 +678,9 @@ void ConfigManager::AddTrackingData(TrackingData *td)
 //------------------------------------------------------------------------------
 void ConfigManager::AddMeasurement(CoreMeasurement *meas)
 {
+   if (meas == NULL)
+      throw ConfigManagerException("Cannot add NULL Measurement object");
+
    GmatBase *obj = (GmatBase*)meas;
    std::string name = obj->GetName();
    if (name == "")
@@ -641,6 +706,9 @@ void ConfigManager::AddMeasurement(CoreMeasurement *meas)
 //------------------------------------------------------------------------------
 void ConfigManager::AddDataFile(DataFile *df)
 {
+   if (df == NULL)
+      throw ConfigManagerException("Cannot add NULL DataFile object");
+
    GmatBase *obj = (GmatBase*)df;
 
    std::string name = obj->GetName();
@@ -665,6 +733,9 @@ void ConfigManager::AddDataFile(DataFile *df)
 //------------------------------------------------------------------------------
 void ConfigManager::AddObType(ObType *ot)
 {
+   if (ot == NULL)
+      throw ConfigManagerException("Cannot add NULL ObType object");
+
    GmatBase *obj = (GmatBase*)ot;
 
    std::string name = obj->GetName();
@@ -691,6 +762,9 @@ void ConfigManager::AddObType(ObType *ot)
 //------------------------------------------------------------------------------
 void ConfigManager::AddEventLocator(EventLocator *el)
 {
+   if (el == NULL)
+      throw ConfigManagerException("Cannot add NULL EventLocator object");
+
    GmatBase *obj = (GmatBase*)el;
 
    std::string name = obj->GetName();
@@ -708,13 +782,16 @@ void ConfigManager::AddEventLocator(EventLocator *el)
 // void AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
- * Adds a CoordinateSystem to the configuration.
+ * Adds an object to the configuration.
  *
- * @param cs Pointer to the CoordinateSystem instance.
+ * @param obj Pointer to the object instance
  */
 //------------------------------------------------------------------------------
 void ConfigManager::AddObject(GmatBase *obj)
 {
+   if (obj == NULL)
+      throw ConfigManagerException("Cannot add NULL Object");
+
    std::string name = obj->GetName();
    
    #ifdef DEBUG_CONFIG_ADD
@@ -734,12 +811,13 @@ void ConfigManager::AddObject(GmatBase *obj)
       mapping[name] = obj;
    }
    
+   // Object was added, so set configuration changed to true.
    // Until we can add TextEphemFile to resource tree, we don't want to
    // write to script file on save script. (loj: 2007.04.07)
-   
    if (obj->GetTypeName() != "TextEphemFile")
-      objectChanged = true;
-}
+      configChanged = true;
+   
+} // AddObject(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
@@ -1377,8 +1455,9 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    for (UnsignedInt i=0; i<allItems.size(); i++)
       MessageInterface::ShowMessage("   item[%d] = %s\n", i, allItems[i].c_str());
    #endif
-   
-   objectChanged = true;
+
+   // Item was removed, so set configuration changed flag to true
+   configChanged = true;
    
    return renamed;
 } // RenameItem()
@@ -1403,8 +1482,6 @@ bool ConfigManager::RemoveAllItems()
    
    for (unsigned int i=0; i<objects.size(); i++)
    {
-      std::string objName = objects[i]->GetName();
-      
       #ifdef DEBUG_CONFIG_REMOVE_MORE
       MessageInterface::ShowMessage
          ("   deleting <%p><%s>'%s'\n", objects[i], objects[i]->GetTypeName().c_str(),
@@ -1427,8 +1504,6 @@ bool ConfigManager::RemoveAllItems()
    // delete objects that were reconfigured, ie, just object pointer reset in the map
    for (unsigned int i=0; i<newObjects.size(); i++)
    {
-      std::string objName = newObjects[i]->GetName();
-      
       #ifdef DEBUG_CONFIG_REMOVE_MORE
       MessageInterface::ShowMessage
          ("   deleting <%p><%s>'%s'\n", newObjects[i], newObjects[i]->GetTypeName().c_str(),
@@ -1527,7 +1602,6 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
             #endif
             
             delete obj;
-            obj = NULL;
             status = true;
          }
       }
@@ -1539,8 +1613,9 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
          #endif
       }
    }
-   
-   objectChanged = true;
+
+   // Item was removed, so set conguration changed flag to true
+   configChanged = true;
    
    #ifdef DEBUG_CONFIG_REMOVE
    MessageInterface::ShowMessage
@@ -2166,26 +2241,46 @@ EventLocator* ConfigManager::GetEventLocator(const std::string &name)
    }
    return el;
 }
+
 //------------------------------------------------------------------------------
 // bool HasConfigurationChanged()
 //------------------------------------------------------------------------------
+/**
+ * Returns configuration changed flag. This flag is changed when objects are
+ * added or removed from the configuration.
+ *
+ * @return  Returns configuation changed flag.
+ */
+//------------------------------------------------------------------------------
 bool ConfigManager::HasConfigurationChanged()
 {
-   return objectChanged;
+   return configChanged;
 }
 
 
 //------------------------------------------------------------------------------
 // void ConfigurationChanged(bool tf)
 //------------------------------------------------------------------------------
+/**
+ * Sets configuration changed flag to true or false.
+ *
+ * @param tf Value to set configuration changed flag
+ */
+//------------------------------------------------------------------------------
 void ConfigManager::ConfigurationChanged(bool tf)
 {
-   objectChanged = tf;
+   configChanged = tf;
 }
 
 
 //------------------------------------------------------------------------------
 // ObjectMap* GetObjectMap()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves configuration object map.
+ *
+ * @return object map
+ */
 //------------------------------------------------------------------------------
 ObjectMap* ConfigManager::GetObjectMap()
 {

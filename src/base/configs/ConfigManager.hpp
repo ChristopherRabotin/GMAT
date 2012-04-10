@@ -157,8 +157,8 @@ private:
    StringArray                         listOfItems;
    /// Mapping between the object names and their pointers
    std::map<std::string, GmatBase *>   mapping;
-   /// Flag indicating that a managed object has been changed by a user
-   bool                                objectChanged;
+   /// Flag indicating that managed object has been added or removed by the user
+   bool                                configChanged;
    
    // Treat default and in use solar system separately until we can manage solar 
    // system by name.  All solar system names are "SolarSystem" for now.
