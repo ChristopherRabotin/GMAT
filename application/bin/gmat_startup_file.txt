@@ -83,7 +83,7 @@ NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
 #-----------------------------------------------------------
 TIME_PATH              = DATA_PATH/time/
 LEAP_SECS_FILE         = TIME_PATH/tai-utc.dat
-LSK_FILE               = TIME_PATH/naif0009.tls
+LSK_FILE               = TIME_PATH/naif0010.tls
 #-----------------------------------------------------------
 EARTH_POT_PATH         = DATA_PATH/gravity/earth/
 LUNA_POT_PATH          = DATA_PATH/gravity/luna/
