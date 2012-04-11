@@ -1320,17 +1320,17 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    }
    else if (obj->IsOfType("Transmitter"))
    {
-      itemType = GmatTree::SENSOR;
+      itemType = GmatTree::HARDWARE;
       itemIcon = GmatTree::RESOURCE_ICON_TRANSMITTER;
    }
    else if (obj->IsOfType("Receiver"))
    {
-      itemType = GmatTree::SENSOR;
+      itemType = GmatTree::HARDWARE;
       itemIcon = GmatTree::RESOURCE_ICON_RECEIVER;
    }
    else if (obj->IsOfType("Transponder"))
    {
-      itemType = GmatTree::SENSOR;
+      itemType = GmatTree::HARDWARE;
       itemIcon = GmatTree::RESOURCE_ICON_TRANSPONDER;
    }
    
@@ -1498,10 +1498,17 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool restartCounter)
    wxString objName;
    wxString objTypeName;
    
+   bool debugAdd = false;
+   #ifdef DEBUG_ADD_DEFAULT_OBJECTS
+   MessageInterface::ShowMessage
+      ("ResourceTree::AddDefaultHardware() size=%d\n", size);
+   debugHardware = true;
+   #endif
+   
    for (int i = 0; i < size; i++)
    {
       GmatBase *obj = GetObject(itemNames[i]);
-      AddObjectToTree(obj);
+      AddObjectToTree(obj, debugHardware);
    };
    
    if (size > 0)

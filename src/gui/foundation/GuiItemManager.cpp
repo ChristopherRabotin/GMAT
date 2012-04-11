@@ -1882,6 +1882,8 @@ wxComboBox* GuiItemManager::GetAntennaComboBox(wxWindow *parent, wxWindowID id,
    
    if (theNumAntenna == 0)
       antennaComboBox->Append("No Antennas Available");
+   else
+      antennaComboBox->Insert("No Antenna Selected", 0);
    
    // show first Antenna
    antennaComboBox->SetSelection(0);
