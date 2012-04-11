@@ -2391,24 +2391,28 @@ void PropagationConfigPanel::UpdatePrimaryBodyItems()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::UpdatePrimaryBodyComboBoxList()
 {
-   wxArrayString cBodies = theGuiManager->GetConfigBodyList();
+//   wxArrayString cBodies = theGuiManager->GetConfigBodyList();
    thePrimaryBodyComboBox->Clear();
    thePrimaryBodyComboBox->Append("None");
+
+   // wcs 2012.04.11 - display only None and current central body name (if not on point mass list) for now
+   if (FindPointMassBody(propOriginName) == -1)
+      thePrimaryBodyComboBox->Append(propOriginName);
 
    #ifdef DEBUG_PROP_PANEL_GRAV
       MessageInterface::ShowMessage("Celestial bodies:\n");
    #endif
 
-   for (UnsignedInt i = 0; i < cBodies.GetCount(); ++i)
-   {
-      if (secondaryBodiesArray.Index(cBodies[i]) == wxNOT_FOUND)
-      {
-         #ifdef DEBUG_PROP_PANEL_GRAV
-            MessageInterface::ShowMessage("   %s\n", cBodies[i].c_str());
-         #endif
-         thePrimaryBodyComboBox->Append(cBodies[i].c_str());
-      }
-   }
+//   for (UnsignedInt i = 0; i < cBodies.GetCount(); ++i)
+//   {
+//      if (secondaryBodiesArray.Index(cBodies[i]) == wxNOT_FOUND)
+//      {
+//         #ifdef DEBUG_PROP_PANEL_GRAV
+//            MessageInterface::ShowMessage("   %s\n", cBodies[i].c_str());
+//         #endif
+//         thePrimaryBodyComboBox->Append(cBodies[i].c_str());
+//      }
+//   }
 }
 
 
@@ -2908,7 +2912,20 @@ void PropagationConfigPanel::OnPrimaryBodyComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnOriginComboBox(wxCommandEvent &event)
 {
+   // get the current primary body selection
+   wxString selBody = thePrimaryBodyComboBox->GetStringSelection();
+   // get the updated central body selection
    propOriginName = theOriginComboBox->GetValue();
+   // Update the primary body list to only display None and the central body
+   UpdatePrimaryBodyComboBoxList();
+
+   // Determine whether to set None or the central body as the selection
+   if ((selBody.IsSameAs(propOriginName)) && (FindPointMassBody(propOriginName) == -1))
+      thePrimaryBodyComboBox->SetValue(propOriginName);
+   else
+      thePrimaryBodyComboBox->SetValue("None");
+
+   UpdatePrimaryBodyItems();
 
    isOriginChanged = true;
    EnableUpdate(true);
