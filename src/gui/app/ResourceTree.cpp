@@ -1498,7 +1498,7 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool restartCounter)
    wxString objName;
    wxString objTypeName;
    
-   bool debugAdd = false;
+   bool debugHardware = false;
    #ifdef DEBUG_ADD_DEFAULT_OBJECTS
    MessageInterface::ShowMessage
       ("ResourceTree::AddDefaultHardware() size=%d\n", size);
