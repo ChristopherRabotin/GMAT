@@ -219,3 +219,18 @@ bool Global::RenameRefObject(const Gmat::ObjectType type,
    
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+const StringArray& Global::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   return objectNames;
+}
+
+

@@ -52,6 +52,7 @@
 //#define DBGLVL_GUI_ITEM_SC 2
 //#define DBGLVL_GUI_ITEM_SP 2
 //#define DBGLVL_GUI_ITEM_CS 2
+//#define DBGLVL_GUI_ITEM_GS 2
 //#define DBGLVL_GUI_ITEM_HW 2
 //#define DBGLVL_GUI_ITEM_BURN 2
 //#define DBGLVL_GUI_ITEM_SUBS 2
@@ -372,7 +373,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       
       try
       {
-         GmatBase *refObj = param->GetRefObject(ownerType, ownerName);
+         param->GetRefObject(ownerType, ownerName);
       }
       catch (BaseException &e)
       {
@@ -421,6 +422,8 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
 //------------------------------------------------------------------------------
 /**
  * Updates all objects.
+ *
+ * @param  objType  Type of the object to be updated
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
@@ -431,58 +434,58 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
        objType);
    #endif
    
-   // Handle specific object type
+   // Update specific object type and all object list
    if (objType != Gmat::UNKNOWN_OBJECT)
    {
       switch (objType)
       {
       case Gmat::GROUND_STATION:
-         UpdateGroundStation(false);
+         UpdateGroundStation(true);
          break;
       case Gmat::SPACECRAFT:
-         UpdateSpacecraft(false);
+         UpdateSpacecraft(true);
          break;
       case Gmat::FORMATION:
-         UpdateFormation(false);
+         UpdateFormation(true);
          break;
       case Gmat::HARDWARE:
       case Gmat::FUEL_TANK:
       case Gmat::THRUSTER:
-         UpdateFuelTank(false);
-         UpdateThruster(false);
+         UpdateFuelTank(true);
+         UpdateThruster(true);
       case Gmat::SENSOR:
-         UpdateSensor(false);
+         UpdateSensor(true);
          break;
       case Gmat::BURN:
       case Gmat::IMPULSIVE_BURN:
       case Gmat::FINITE_BURN:
-         UpdateBurn(false);
+         UpdateBurn(true);
          break;
       case Gmat::PARAMETER:
-         UpdateParameter(false);
+         UpdateParameter(true);
          break;
       case Gmat::CALCULATED_POINT:
       case Gmat::SOLAR_SYSTEM:
-         UpdateSolarSystem(false);
+         UpdateSolarSystem(true);
          break;
       case Gmat::COORDINATE_SYSTEM:
-         UpdateCoordSystem(false);
+         UpdateCoordSystem(true);
          break;
       case Gmat::PROP_SETUP:
       case Gmat::PROPAGATOR:
-         UpdatePropagator(false);
+         UpdatePropagator(true);
          break;
       case Gmat::FUNCTION:
-         UpdateFunction(false);
+         UpdateFunction(true);
          break;
       case Gmat::SUBSCRIBER:
-         UpdateSubscriber(false);
+         UpdateSubscriber(true);
          break;
       case Gmat::SOLVER:
-         UpdateSolver(false);
+         UpdateSolver(true);
          break;
       case Gmat::EVENT_LOCATOR:
-         UpdateLocator(false);
+         UpdateLocator(true);
          break;
       default:
          MessageInterface::ShowMessage
@@ -550,6 +553,11 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
    MessageInterface::ShowMessage("======> after UpdateThruster()\n");
    #endif
    
+   UpdateGroundStation(false);
+   #if DBGLVL_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("======> after UpdateGroundStation()\n");
+   #endif
+   
    UpdateSensor(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("======> after UpdateSensor()\n");
@@ -575,7 +583,7 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
    MessageInterface::ShowMessage("======> after UpdateLocator()\n");
    #endif
 
-   AddToAllObjectArray();
+   RefreshAllObjectArray();
    
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage
@@ -600,7 +608,7 @@ void GuiItemManager::UpdateGroundStation(bool updateObjectArray)
    UpdateGroundStationList();
    UpdateSpacePointList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -620,7 +628,7 @@ void GuiItemManager::UpdateCelestialPoint(bool updateObjectArray)
    UpdateCelestialPointList();
    UpdateSpacePointList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -641,7 +649,7 @@ void GuiItemManager::UpdateFormation(bool updateObjectArray)
    UpdateSpaceObjectList();
    UpdateSpacePointList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -660,7 +668,7 @@ void GuiItemManager::UpdateForceModel(bool updateObjectArray)
    
    UpdateForceModelList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -681,7 +689,7 @@ void GuiItemManager::UpdateSpacecraft(bool updateObjectArray)
    UpdateSpaceObjectList();
    UpdateSpacePointList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -700,7 +708,7 @@ void GuiItemManager::UpdateSpacePoint(bool updateObjectArray)
    
    UpdateSpacePointList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -719,7 +727,7 @@ void GuiItemManager::UpdateBurn(bool updateObjectArray)
    
    UpdateBurnList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -738,7 +746,7 @@ void GuiItemManager::UpdateCoordSystem(bool updateObjectArray)
    
    UpdateCoordSystemList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -757,7 +765,7 @@ void GuiItemManager::UpdateFunction(bool updateObjectArray)
    
    UpdateFunctionList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -776,7 +784,7 @@ void GuiItemManager::UpdateFuelTank(bool updateObjectArray)
    
    UpdateFuelTankList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -795,7 +803,7 @@ void GuiItemManager::UpdateThruster(bool updateObjectArray)
    
    UpdateThrusterList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -816,7 +824,7 @@ void GuiItemManager::UpdateSensor(bool updateObjectArray)
    UpdateAntennaList();
    UpdateSensorList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -835,7 +843,7 @@ void GuiItemManager::UpdateParameter(bool updateObjectArray)
    
    UpdateParameterList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -854,7 +862,7 @@ void GuiItemManager::UpdatePropagator(bool updateObjectArray)
    
    UpdatePropagatorList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -875,7 +883,7 @@ void GuiItemManager::UpdateSolarSystem(bool updateObjectArray)
    UpdateCelestialPointList();
    UpdateSpacePointList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -894,7 +902,7 @@ void GuiItemManager::UpdateSolver(bool updateObjectArray)
    
    UpdateSolverList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 
@@ -913,7 +921,7 @@ void GuiItemManager::UpdateSubscriber(bool updateObjectArray)
    
    UpdateSubscriberList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 //------------------------------------------------------------------------------
@@ -933,7 +941,7 @@ void GuiItemManager::UpdateLocator(bool updateObjectArray)
 
    UpdateLocatorList();
    if (updateObjectArray)
-      AddToAllObjectArray();
+      RefreshAllObjectArray();
 }
 
 //------------------------------------------------------------------------------
@@ -2263,6 +2271,12 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
                                          const wxSize &size, bool includeAutoGlobal,
                                          wxArrayString *excList)
 {
+   #ifdef DEBUG_ALL_OBJ_CHECKLISTBOX
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetAllObjectCheckListBox() entered, theNumAllObject=%d\n",
+       theNumAllObject);
+   #endif
+     
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
@@ -2309,6 +2323,9 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
 			{
 				objStr = theAllObjectList[i];
 				objName = objStr.BeforeFirst(' ');
+            #ifdef DEBUG_ALL_OBJ_CHECKLISTBOX
+            MessageInterface::ShowMessage("   objName='%s'\n", objName.c_str());
+            #endif
 				if (!theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
 					checkListBox->Append(theAllObjectList[i]);
 			}
@@ -3777,7 +3794,7 @@ void GuiItemManager::UpdateGroundStationList()
       theGuiInterpreter->GetListOfObjects(Gmat::GROUND_STATION);
    int numGroundStation = items.size();
    
-   #if DBGLVL_GUI_ITEM_HW
+   #if DBGLVL_GUI_ITEM_GS
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdateGroundStationList() numGroundStation=%d\n", numGroundStation);
    #endif
@@ -3789,7 +3806,7 @@ void GuiItemManager::UpdateGroundStationList()
    {
       theGroundStationList.Add(items[i].c_str());
       
-      #if DBGLVL_GUI_ITEM_HW > 1
+      #if DBGLVL_GUI_ITEM_GS > 1
       MessageInterface::ShowMessage
          ("GuiItemManager::UpdateGroundStationList() " + items[i] + "\n");
       #endif
@@ -5279,20 +5296,18 @@ void GuiItemManager::UpdateLocatorList()
 }
 
 //------------------------------------------------------------------------------
-// void AddToAllObjectArray()
+// void RefreshAllObjectArray()
 //------------------------------------------------------------------------------
 /**
- * Currently it adds the following objects:
- *    Spacecraft, Formation, CalulatedPoint, ImpulsiveBurn, FiniteBurn, Solver,
- *    Propagator, ForceModel
+ * It refresh array by clearing and re-adding objects to array.
  *
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::AddToAllObjectArray()
+void GuiItemManager::RefreshAllObjectArray()
 {
    #if DBGLVL_GUI_ITEM_ALL_OBJECT
    MessageInterface::ShowMessage
-      ("GuiItemManager::AddToAllObjectArray() entered\n");
+      ("GuiItemManager::RefreshAllObjectArray() entered\n");
    #endif
    
    theNumAllObject = 0;
@@ -5426,6 +5441,20 @@ void GuiItemManager::AddToAllObjectArray()
       theAllObjectList.Add(theSubscriberList[i] + " <" + typeName + ">");
    }
    
+   // Add GroundStation objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d GroundStations\n", theNumGroundStation);
+   #endif
+   for (int i=0; i<theNumGroundStation; i++)
+      theAllObjectList.Add(theGroundStationList[i] + " <GroundStation>");
+   
+   // Add Sensor objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Sensors\n", theNumSensor);
+   #endif
+   for (int i=0; i<theNumSensor; i++)
+      theAllObjectList.Add(theSensorList[i] + " <Sensor>");
+   
    // Add EventLocator objects to the list
    #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
    MessageInterface::ShowMessage("   Adding %d EventLocators\n", theNumLocator);
@@ -5540,7 +5569,7 @@ void GuiItemManager::AddToAllObjectArray()
    
    #if DBGLVL_GUI_ITEM_ALL_OBJECT
    MessageInterface::ShowMessage
-      ("GuiItemManager::AddToAllObjectArray() exiting, theNumAllObject = %d\n",
+      ("GuiItemManager::RefreshAllObjectArray() exiting, theNumAllObject = %d\n",
        theNumAllObject);
    #endif
 }
@@ -5554,7 +5583,7 @@ GuiItemManager::GuiItemManager()
    #if DBGLVL_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::GuiItemManager() entered\n");
    #endif
-
+   
    mPngHandlerLoaded = false;
    mGuiStatus = 1;
    mActiveScriptStatus = 1;

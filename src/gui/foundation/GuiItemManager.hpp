@@ -365,8 +365,7 @@ private:
    void UpdateForceModelList();
    void UpdateLocatorList();
    
-   //void AddToAllObjectList();
-   void AddToAllObjectArray();
+   void RefreshAllObjectArray();
    
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
