@@ -136,7 +136,17 @@ FuelTank::FuelTank(const FuelTank& ft) :
    pvBase               (ft.pvBase)
 {
    parameterCount = ft.parameterCount;
-   isInitialized  = false;
+   try
+   {
+      isInitialized  = Initialize();
+   }
+   catch (BaseException &)
+   {
+      // Ignore validation messages here, but set uninitialized
+      MessageInterface::ShowMessage("Initialization for FuelTank %s "
+            "failed\n", instanceName.c_str());
+      isInitialized = false;
+   }
 }
 
 
@@ -167,9 +177,18 @@ FuelTank& FuelTank::operator=(const FuelTank& ft)
       pressureModel         = ft.pressureModel;
       gasVolume             = ft.gasVolume;
       pvBase                = ft.pvBase;
-      isInitialized         = false;
 
-      Initialize();
+      try
+      {
+         isInitialized  = Initialize();
+      }
+      catch (BaseException &)
+      {
+         // Ignore validation messages here, but set uninitialized
+         MessageInterface::ShowMessage("Initialization for FuelTank %s "
+               "failed\n", instanceName.c_str());
+         isInitialized = false;
+      }
    }
    
    return *this;
@@ -706,13 +725,16 @@ void FuelTank::Copy(const GmatBase* orig)
 //------------------------------------------------------------------------------
 bool FuelTank::Initialize()
 {
+   isInitialized = false;
+
    if (!Validate())
-	   return false;
-   gasVolume = volume - fuelMass / density;
-   pvBase = pressure * gasVolume;
+   {
+      gasVolume = volume - fuelMass / density;
+      pvBase = pressure * gasVolume;
+      isInitialized = true;
+   }
    
-   isInitialized = true;
-   return true;
+   return isInitialized;
 }
 
 

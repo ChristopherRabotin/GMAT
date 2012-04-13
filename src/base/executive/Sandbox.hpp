@@ -147,6 +147,9 @@ private:
    void      PassToAll(GmatBase *obj);
    void      PassToRegisteredClones(GmatBase *obj);
 
+   void      UpdateAndInitializeCloneOwner(GmatBase *theClone,
+                                           GmatBase* theOwner);
+
    #ifdef DEBUG_SANDBOX_CLONING
       std::vector<Gmat::ObjectType>  clonable;
    #endif

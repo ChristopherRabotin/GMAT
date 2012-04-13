@@ -3523,7 +3523,7 @@ bool Spacecraft::Initialize()
 
 
    // made changes by Tuan Nguyen
-   // Verify all Spacecarft's referenced objects:
+   // Verify all Spacecraft's referenced objects:
    if (VerifyAddHardware() == false)            // verify added hardware
            return false;
 
@@ -3531,6 +3531,14 @@ bool Spacecraft::Initialize()
       MessageInterface::ShowMessage("Spacecraft::Initialize() exiting ----------\n");
    #endif
 
+   for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+   {
+      // MessageInterface::ShowMessage("%d:\n%s\n", i,
+      //       thrusters[i]->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      thrusters[i]->Initialize();
+   }
+
+   isInitialized = true;
    return true;
 }
 
@@ -3990,11 +3998,13 @@ bool Spacecraft::HasLocalClones()
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateClonedObject(GmatBase *obj)
 {
+// MessageInterface::ShowMessage("***Spacecraft clone update for %s on %s\n", obj->GetName().c_str(), instanceName.c_str());
+
    if (obj->IsOfType(Gmat::HARDWARE))
    {
       Gmat::ObjectType objType = obj->GetType();
 
-      // update fueltank?
+      // updates for fueltank
       if (objType == Gmat::FUEL_TANK)
       {
          for (UnsignedInt i = 0; i < tanks.size(); ++i)
@@ -4002,27 +4012,42 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
             if (obj->GetName() == tanks[i]->GetName())
             {
                ((FuelTank*)tanks[i])->operator=(*((FuelTank*)obj));
+               // Update init flag
+               if (isInitialized)
+                  isInitialized = tanks[i]->IsInitialized();
             }
          }
       }
 
-      // update thruster?
+      // updates for thruster
       if (objType == Gmat::THRUSTER)
       {
          {
             for (UnsignedInt i = 0; i < thrusters.size(); ++i)
                if (obj->GetName() == thrusters[i]->GetName())
+               {
                   ((Thruster*)thrusters[i])->operator=(*((Thruster*)obj));
+                  // Update init flag
+                  if (isInitialized)
+                  {
+                     isInitialized = thrusters[i]->IsInitialized();
+                  }
+               }
          }
       }
 
-      // update other hardware?
+      // updates for other hardware
       if (obj->GetType() == Gmat::HARDWARE)
       {
          // Needs to be watched to be sure hardware uses operator= correctly
          for (UnsignedInt i = 0; i < thrusters.size(); ++i)
             if (obj->GetName() == hardwareList[i]->GetName())
+            {
                ((Hardware*)hardwareList[i])->operator =(*((Hardware*)obj));
+               // Update init flag
+               if (isInitialized)
+                  isInitialized = hardwareList[i]->IsInitialized();
+            }
       }
    }
 

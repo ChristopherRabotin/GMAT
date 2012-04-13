@@ -904,6 +904,13 @@ bool Sandbox::Execute()
                state = REFRESH;
                UpdateClones(obj);
                state = retState;
+
+               if (obj->IsInitialized() == false)
+               {
+                  if (obj->Initialize() == false)
+                     MessageInterface::ShowMessage("%s needs initialization, but "
+                           "initialization fails\n", obj->GetName().c_str());
+               }
             }
          }
 
@@ -1619,7 +1626,7 @@ void Sandbox::PassToAll(GmatBase *obj)
       #endif
 
       if (listObj->HasLocalClones())
-         listObj->UpdateClonedObject(obj);
+         UpdateAndInitializeCloneOwner(obj, listObj);
 
       ++current;
    }
@@ -1643,7 +1650,7 @@ void Sandbox::PassToAll(GmatBase *obj)
       #endif
 
       if (listObj->HasLocalClones())
-         listObj->UpdateClonedObject(obj);
+         UpdateAndInitializeCloneOwner(obj, listObj);
 
       ++current;
    }
@@ -1664,9 +1671,7 @@ void Sandbox::PassToAll(GmatBase *obj)
                "has local clones" : "has no local clones"));
       #endif
       if (currentCmd->HasLocalClones())
-      {
-         currentCmd->UpdateClonedObject(obj);
-      }
+         UpdateAndInitializeCloneOwner(obj, currentCmd);
 
       currentCmd = currentCmd->GetNext();
    }
@@ -1691,4 +1696,45 @@ void Sandbox::PassToRegisteredClones(GmatBase *obj)
             obj->GetName().c_str());
    #endif
 
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateAndInitializeCloneOwner(GmatBase *theClone, GmatBase* theOwner)
+//------------------------------------------------------------------------------
+/**
+ * Gives an owned clone owner the opportunity to update its clone
+ *
+ * @param theClone The object that may affect an owned clone
+ * @param theOwner The object that might own the clone
+ */
+//------------------------------------------------------------------------------
+void Sandbox::UpdateAndInitializeCloneOwner(GmatBase *theClone,
+         GmatBase* theOwner)
+{
+   bool incomingInitState = theOwner->IsInitialized();
+
+   theOwner->UpdateClonedObject(theClone);
+
+   if ((theOwner->IsInitialized() == false) && incomingInitState)
+   {
+      #ifdef DEBUG_CLONE_UPDATES
+         MessageInterface::ShowMessage("In Sandbox::UpdateAndInitializeClone"
+               "Owner(%s, %s), %s must be reinitialized\n",
+               theClone->GetName().c_str(), theOwner->GetName().c_str(),
+               theOwner->GetName().c_str());
+      #endif
+
+      ObjectInitializer *objInit = new ObjectInitializer(solarSys, &objectMap, &globalObjectMap,
+               internalCoordSys, true);
+      objInit->BuildReferences(theOwner);
+      objInit->BuildAssociations(theOwner);
+      delete objInit;
+      if (theOwner->Initialize() == false)
+         MessageInterface::ShowMessage("%s needs initialization, but "
+               "initialization fails\n", theOwner->GetName().c_str());
+//      else
+//         MessageInterface::ShowMessage("%s reinitialized\n",
+//               theOwner->GetName().c_str());
+   }
 }
