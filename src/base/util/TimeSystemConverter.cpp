@@ -31,6 +31,7 @@
 //#define DEBUG_TIMECONVERTER_DETAILS
 //#define DEBUG_GREGORIAN
 //#define DEBUG_TIME_CONVERT
+//#define DEBUG_VALIDATE_TIME 1
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -609,15 +610,33 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    std::string fromSystem ;
    std::string fromFormat;
    GetTimeSystemAndFormat(fromType, fromSystem, fromFormat);
+   #ifdef DEBUG_TIME_CONVERT
+      MessageInterface::ShowMessage
+         ("TimeConverterUtil::Convert() fromSystem=%s, fromFormat=%s\n", fromSystem.c_str(), fromFormat.c_str());
+      MessageInterface::ShowMessage
+         ("TimeConverterUtil::Convert() convertToModJulian=%s\n", (convertToModJulian? "true" : "false"));
+   #endif
    
    // Validate from time system
    if (!TimeConverterUtil::ValidateTimeSystem(fromSystem))
+   {
+      #ifdef DEBUG_TIME_CONVERT
+      MessageInterface::ShowMessage
+         ("TimeConverterUtil::Convert() Time System NOT VALIDATED!!!!!\n");
+      #endif
       throw TimeFormatException
          ("\"" + fromSystem + "\" is not a valid time system");
+   }
    
    // Validate time format and value
    if (convertToModJulian)
+   {
       ValidateTimeFormat(fromFormat, fromStr);
+      #ifdef DEBUG_TIME_CONVERT
+      MessageInterface::ShowMessage
+         ("TimeConverterUtil::Convert() Time Format VALIDATED\n");
+      #endif
+   }
    
    //-------------------------------------------------------
    // Get to time system and format
@@ -732,8 +751,18 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
       retval = DateUtil::IsValidGregorian(value, false);
       
       if (!retval)
+      {
+         #if DEBUG_VALIDATE_TIME
+         MessageInterface::ShowMessage
+            ("TimeConverterUtil::ValidateTimeFormat() INVALID Gregorian date ......\n");
+         #endif
           throw TimeFormatException
              ("Gregorian date \"" + value + "\" is not valid.");
+      }
+      #if DEBUG_VALIDATE_TIME
+      MessageInterface::ShowMessage
+         ("TimeConverterUtil::ValidateTimeFormat() valid Gregorian date ......\n");
+      #endif
 
       if (checkValue)
       {
