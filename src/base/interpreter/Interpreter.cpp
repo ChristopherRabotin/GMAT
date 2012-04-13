@@ -5796,7 +5796,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetProperty() obj=<%p>'%s', id=%d, type=%d, value=<%s>\n",
-       obj->GetName().c_str(), id, type, value.c_str());
+       obj, obj->GetName().c_str(), id, type, value.c_str());
    #endif
    
    bool retval = false;
@@ -5927,6 +5927,11 @@ bool Interpreter::SetComplexProperty(GmatBase *obj, const std::string &prop,
       if (parts[0] == "Epoch")
       {
          sc->SetDateFormat(parts[1]);
+         #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("Interpreter::SetComplexProperty() about to set Epoch value %s to spacecraft %s\n",
+                     value.c_str(), sc->GetName().c_str());
+         #endif
          sc->SetEpoch(value);
       }
       else
