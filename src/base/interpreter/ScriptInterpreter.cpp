@@ -611,7 +611,7 @@ bool ScriptInterpreter::ReadFirstPass()
       }
    }
    
-   // Clear staus flags first and then move pointer to beginning
+   // Clear status flags first and then move pointer to beginning
    inStream->clear();
    inStream->seekg(std::ios::beg);
    
@@ -1061,6 +1061,9 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (outStream == NULL)
       return false;
    
+   // Prep for a new write
+   objectsWritten.clear();
+
    //-----------------------------------
    // Header Comment
    //-----------------------------------
@@ -2047,13 +2050,19 @@ void ScriptInterpreter::WriteObjects(StringArray &objs, const std::string &objDe
    
    for (current = objs.begin(); current != objs.end(); ++current)
    {
-      object = FindObject(*current);
-      if (object != NULL)
+      // Only write if the object is not previously written
+      if (find(objectsWritten.begin(), objectsWritten.end(), *current) ==
+            objectsWritten.end())
       {
-         if (object->GetCommentLine() == "")
-            theReadWriter->WriteText("\n");
-         
-         theReadWriter->WriteText(object->GetGeneratingString(mode));
+         object = FindObject(*current);
+         if (object != NULL)
+         {
+            if (object->GetCommentLine() == "")
+               theReadWriter->WriteText("\n");
+
+            theReadWriter->WriteText(object->GetGeneratingString(mode));
+            objectsWritten.push_back(*current);
+         }
       }
    }
    
@@ -2097,8 +2106,16 @@ void ScriptInterpreter::WriteODEModels(StringArray &objs, Gmat::WriteMode mode)
          ODEModel *ode = ps->GetODEModel();
          if (ode != NULL)
          {
-            props.push_back(ps);
-            propOdes.push_back(ode->GetName());
+            std::string odeName = ode->GetName();
+            bool newOde = true;
+            for (UnsignedInt j = 0; j < propOdes.size(); ++j)
+               if (odeName == propOdes[j])
+                  newOde = false;
+            if (newOde)
+            {
+               propOdes.push_back(ode->GetName());
+               props.push_back(ps);
+            }
          }
       }
    }
@@ -2120,7 +2137,6 @@ void ScriptInterpreter::WriteODEModels(StringArray &objs, Gmat::WriteMode mode)
       if (!matchFound)
          odes.push_back(objs[i]);
    }
-
    
    #ifdef DEBUG_SCRIPT_WRITING
    GmatStringUtil::WriteStringArray(objs, "   Input objects", "      ");

@@ -84,6 +84,8 @@ private:
    StringArray sectionDelimiterString;
    /// Script lines with Variable, Array, and String
    StringArray userParameterLines;
+   /// List of written objects, used to avoid duplicates
+   StringArray objectsWritten;
    
    bool ParseDefinitionBlock(const StringArray &chunks, GmatCommand *inCmd,
                              GmatBase *obj);
