@@ -1971,7 +1971,7 @@ void Thruster::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epo
    #ifdef DEBUG_THRUSTER_CONVERT
    MessageInterface::ShowMessage
       ("Thruster::ConvertDirectionToInertial() <%p>'%s' entered, epoch=%.15f\n   "
-       "dir=%.15f %.15f %.15f\n", this, GetName().c_str(), epoch, dir[0], dir[1], dir[1]);
+       "dir=%.15f %.15f %.15f\n", this, GetName().c_str(), epoch, dir[0], dir[1], dir[2]);
    MessageInterface::ShowMessage
       ("   usingLocalCoordSys=%s, coordSystemName='%s', coordSystem=<%p>, "
        "localCoordSystem=<%p>\n", (usingLocalCoordSys?"true":"false"),
