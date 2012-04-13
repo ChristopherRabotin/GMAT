@@ -3590,14 +3590,39 @@ void Spacecraft::SetEpoch(const std::string &ep)
        instanceName.c_str(), ep.c_str());
    #endif
 
-   scEpochStr = ep;
+   std::string timeSystem;
+   std::string timeFormat;
+   TimeConverterUtil::GetTimeSystemAndFormat(epochType, timeSystem, timeFormat);
+   if (timeFormat == "ModJulian") // numeric - save and output without quotes
+      scEpochStr = GmatStringUtil::RemoveEnclosingString(ep, "'");
+   else // "Gregorian" - not numeric - save and output with quotes
+   {
+      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
+         scEpochStr = GmatStringUtil::AddEnclosingString(ep, "'");
+      else
+         scEpochStr = ep;
+   }
+
 
    Real fromMjd = -999.999;
    Real outMjd = -999.999;
    std::string outStr;
 
-   TimeConverterUtil::Convert(epochType, fromMjd, ep, "A1ModJulian", outMjd,
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage
+         ("Spacecraft::SetEpoch() Converting from %s to A1ModJulian\n", epochType.c_str());
+   #endif
+
+   // remove enclosing quotes for the conversion
+   std::string epNoQuote = GmatStringUtil::RemoveEnclosingString(ep, "'");
+   TimeConverterUtil::Convert(epochType, fromMjd, epNoQuote, "A1ModJulian", outMjd,
                               outStr);
+//   TimeConverterUtil::Convert(epochType, fromMjd, ep, "A1ModJulian", outMjd,
+//                              outStr);
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage
+         ("Spacecraft::SetEpoch() Done converting from %s to A1ModJulian\n", epochType.c_str());
+   #endif
 
    if (outMjd != -999.999)
    {
