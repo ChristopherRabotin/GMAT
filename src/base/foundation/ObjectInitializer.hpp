@@ -77,10 +77,14 @@ protected:
    void InitializeInternalObjects();
    void InitializeCoordinateSystem(GmatBase *obj);
    void BuildReferencesAndInitialize(GmatBase *obj);
+public:
    void BuildReferences(GmatBase *obj);
+protected:
    void SetRefFromName(GmatBase *obj, const std::string &oName);
+public:
    void BuildAssociations(GmatBase * obj);
-   
+
+protected:
    SpacePoint* FindSpacePoint(const std::string &spName);
    GmatBase*   FindObject(const std::string &name);
    void        ShowObjectMaps(const std::string &title = "");
