@@ -1630,6 +1630,19 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 bool Assignment::AffectsClones()
 {
+   if (lhsOwner != NULL)
+   {
+      if ( lhsOwner->IsOfType(Gmat::VARIABLE) ||
+           lhsOwner->IsOfType(Gmat::STRING) ||
+
+           // These 2 are current Windows issues
+           lhsOwner->IsOfType(Gmat::SOLVER) ||
+           lhsOwner->IsOfType(Gmat::ODE_MODEL) ||
+
+           lhsOwner->IsOfType(Gmat::ARRAY) )
+         return false;
+   }
+
    return true;
 }
 
