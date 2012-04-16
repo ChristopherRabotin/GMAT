@@ -69,7 +69,7 @@ OptimizePanel::~OptimizePanel()
 // void Create()
 //------------------------------------------------------------------------------
 void OptimizePanel::Create()
-{    
+{
    Integer bsize = 5;
 
    //-------------------------------------------------------
@@ -83,9 +83,16 @@ void OptimizePanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Solver Mode"), wxDefaultPosition,
                        wxDefaultSize, 0);
    
+   wxStaticText *exitModeStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Exit Mode"), wxDefaultPosition,
+                       wxDefaultSize, 0);
+   
    mSolverComboBox =
       theGuiManager->GetOptimizerComboBox(this, ID_COMBO, wxSize(180,-1));
    
+   //-------------------------------------------------------
+   // Solver mode options
+   //-------------------------------------------------------
    StringArray options = theCommand->GetStringArrayParameter("SolveModeOptions");
    wxArrayString theOptions;
    
@@ -95,20 +102,40 @@ void OptimizePanel::Create()
    mSolverModeComboBox =
       new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(180,-1),
                      theOptions, wxCB_READONLY);
+
+   //-------------------------------------------------------
+   // Exit mode options
+   //-------------------------------------------------------
+   options = theCommand->GetStringArrayParameter("ExitModeOptions");
+   theOptions.Clear();
    
+   for (StringArray::iterator i = options.begin(); i != options.end(); ++i)
+      theOptions.Add(i->c_str());
+   
+   mExitModeComboBox = 
+      new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(180,-1),
+            theOptions, wxCB_READONLY);;
+   
+   //-------------------------------------------------------
+   // Apply correction
+   //-------------------------------------------------------
    mApplyCorrectionsButton = new wxButton(this, ID_APPLYBUTTON,
          wxT("Apply Corrections"));
-
+   
+   //-------------------------------------------------------
+   // Add to sizer
+   //-------------------------------------------------------
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(2);
    
    pageSizer->Add(solverNameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(mSolverComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(solverModeStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(mSolverModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(exitModeStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(mExitModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(mApplyCorrectionsButton, 0, wxALIGN_CENTER|wxALL, bsize);
    
    theMiddleSizer->Add(pageSizer, 0, wxGROW, bsize);
-
 }
 
 
@@ -124,12 +151,15 @@ void OptimizePanel::LoadData()
       
       std::string solverName =
          theCommand->GetStringParameter("SolverName");
-      
       mSolverComboBox->SetValue(solverName.c_str());
       
       std::string solverMode =
-               theCommand->GetStringParameter("SolveMode");
+         theCommand->GetStringParameter("SolveMode");
       mSolverModeComboBox->SetValue(solverMode.c_str());
+      
+      std::string exitMode =
+         theCommand->GetStringParameter("ExitMode");
+      mExitModeComboBox->SetValue(exitMode.c_str());
    }
    catch (BaseException &e)
    {
@@ -147,12 +177,15 @@ void OptimizePanel::SaveData()
    {
       std::string solverName = mSolverComboBox->GetValue().c_str();
       std::string solverMode = mSolverModeComboBox->GetValue().c_str();
-
+      std::string exitMode   = mExitModeComboBox->GetValue().c_str();
+      
       theCommand->SetStringParameter(theCommand->GetParameterID("SolverName"),
                                      solverName);
       theCommand->SetStringParameter(theCommand->GetParameterID("SolveMode"), 
-            solverMode);
-
+                                     solverMode);
+      theCommand->SetStringParameter(theCommand->GetParameterID("ExitMode"), 
+                                     exitMode);
+      
       EnableUpdate(false);
    }
    catch (BaseException &e)

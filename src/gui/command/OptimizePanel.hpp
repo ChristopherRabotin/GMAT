@@ -37,6 +37,7 @@ private:
    
    wxComboBox *mSolverComboBox;
    wxComboBox *mSolverModeComboBox;
+   wxComboBox *mExitModeComboBox;
    wxButton   *mApplyCorrectionsButton;
    
    // methods inherited from GmatPanel
