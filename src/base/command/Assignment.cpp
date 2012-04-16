@@ -1637,8 +1637,6 @@ bool Assignment::AffectsClones()
 
            // These 2 are current Windows issues
            lhsOwner->IsOfType(Gmat::SOLVER) ||
-           lhsOwner->IsOfType(Gmat::ODE_MODEL) ||
-
            lhsOwner->IsOfType(Gmat::ARRAY) )
          return false;
    }

@@ -907,9 +907,18 @@ bool Sandbox::Execute()
 
                if (obj->IsInitialized() == false)
                {
-                  if (obj->Initialize() == false)
-                     MessageInterface::ShowMessage("%s needs initialization, but "
-                           "initialization fails\n", obj->GetName().c_str());
+                  #ifdef DEBUG_CLONE_UPDATES
+                     bool retval =
+                  #endif
+
+                  obj->Initialize();
+
+                  #ifdef DEBUG_CLONE_UPDATES
+                     if (retval == false)
+                        MessageInterface::ShowMessage("%s needs initialization"
+                              ", but initialization fails\n", 
+                              obj->GetName().c_str());
+                  #endif
                }
             }
          }
@@ -1673,6 +1682,12 @@ void Sandbox::PassToAll(GmatBase *obj)
       if (currentCmd->HasLocalClones())
          UpdateAndInitializeCloneOwner(obj, currentCmd);
 
+      //if (currentCmd->IsOfType("BranchCommand"))
+      //{
+      //   MessageInterface::ShowMessage("Clone management for a %s command\n",
+      //      currentCmd->GetTypeName().c_str());
+      //}
+
       currentCmd = currentCmd->GetNext();
    }
 }
@@ -1730,11 +1745,17 @@ void Sandbox::UpdateAndInitializeCloneOwner(GmatBase *theClone,
       objInit->BuildReferences(theOwner);
       objInit->BuildAssociations(theOwner);
       delete objInit;
-      if (theOwner->Initialize() == false)
-         MessageInterface::ShowMessage("%s needs initialization, but "
-               "initialization fails\n", theOwner->GetName().c_str());
-//      else
-//         MessageInterface::ShowMessage("%s reinitialized\n",
-//               theOwner->GetName().c_str());
+
+      #ifdef DEBUG_CLONE_UPDATES
+         bool retval =
+      #endif
+
+      theOwner->Initialize();
+
+      #ifdef DEBUG_CLONE_UPDATES
+         if (retval == false)
+            MessageInterface::ShowMessage("%s needs initialization, but "
+                  "initialization fails\n", theOwner->GetName().c_str());
+      #endif
    }
 }

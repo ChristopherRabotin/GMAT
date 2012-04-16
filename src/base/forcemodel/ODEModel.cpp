@@ -75,7 +75,6 @@
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_GEN_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
-//#define DEBUG_INITIALIZATION
 //#define DEBUG_BUILDING_MODELS
 //#define DEBUG_STATE
 //#define DEBUG_MASS_FLOW
@@ -1288,8 +1287,16 @@ bool ODEModel::Initialize()
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
-         "Calling PhysicalModel::Initialize(); dimension = %d\n", dimension);
+         "Calling PhysicalModel::Initialize(); dimension = %d, state = <%p>\n", 
+         dimension, state);
    #endif
+
+   // If the PSM hasn't set the state yet, it's not yet time to initialize
+   if (state == NULL)
+   {
+      isInitialized = false;
+      return false;
+   }
 
    dimension = state->GetSize();
 
@@ -3230,6 +3237,10 @@ bool ODEModel::HasLocalClones()
 //------------------------------------------------------------------------------
 void ODEModel::UpdateClonedObject(GmatBase *obj)
 {
+   #ifdef DEBUG_ODEMODEL_INIT
+      MessageInterface::ShowMessage("Called UpdateClonedObject on %s\n", 
+         instanceName.c_str());
+   #endif
    if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
    {
       /// @note Potential issue
