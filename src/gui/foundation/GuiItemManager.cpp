@@ -371,14 +371,15 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
          ("   It is a system Parameter, owner='%s'<%p>\n", ownerName.c_str(), owner);
       #endif
       
-      try
-      {
-         param->GetRefObject(ownerType, ownerName);
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage(e.GetFullMessage());
-      }
+      // Why this code block was added? Commented out to fix GMT-2485 (LOJ: 2012.04.16)
+      // try
+      // {
+      //    param->GetRefObject(ownerType, ownerName);
+      // }
+      // catch (BaseException &e)
+      // {
+      //    MessageInterface::ShowMessage(e.GetFullMessage());
+      // }
       
       if (allowNonPlottable)
       {

@@ -588,13 +588,18 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
                                             Integer index, const std::string &label,
                                             wxFileConfig *config)
 {
+   #ifdef DEBUG_BASEPANEL_CREATE
+   MessageInterface::ShowMessage
+      ("GmatBaseSetupPanel::BuildControl() entered, label = '%s'\n", label.c_str());
+   #endif
+   
    wxControl *control = NULL;
    
    Gmat::ParameterType paramType = theObject->GetParameterType(index);
    Gmat::ObjectType paramObjType = theObject->GetPropertyObjectType(index);
    #ifdef DEBUG_BASEPANEL_CREATE
    MessageInterface::ShowMessage
-      ("    object type is %s\n", GmatBase::GetObjectTypeString(paramObjType).c_str());
+      ("BuildControl() object type is %s\n", GmatBase::GetObjectTypeString(paramObjType).c_str());
    #endif
    
    #ifdef DEBUG_BASEPANEL_CREATE
@@ -623,13 +628,6 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
       break;
    case Gmat::OBJECT_TYPE:
       {
-         #if 0
-         Gmat::ObjectType paramObjType = theObject->GetPropertyObjectType(index);
-         #ifdef DEBUG_BASEPANEL_CREATE
-         MessageInterface::ShowMessage
-            ("    object type is %s\n", GmatBase::GetObjectTypeString(paramObjType).c_str());
-         #endif
-         #endif
          if (paramObjType== Gmat::SPACE_POINT)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
@@ -644,7 +642,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
          else if (paramObjType== Gmat::CELESTIAL_BODY)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
-            // listen for any SpacePoint updates, so need to unregister
+            // listen for any CelestialBody updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
             theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX,
@@ -655,7 +653,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
          else if (paramObjType== Gmat::SPACECRAFT)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
-            // listen for any SpacePoint updates, so need to unregister
+            // listen for any Spacecraft updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX,
@@ -666,7 +664,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
          else if (paramObjType== Gmat::COORDINATE_SYSTEM)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
-            // listen for any SpacePoint updates, so need to unregister
+            // listen for any CoordinateSystem updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX,
@@ -677,7 +675,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
          else if (paramObjType== Gmat::ANTENNA)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
-            // listen for any SpacePoint updates, so need to unregister
+            // listen for any Antenna updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetAntennaComboBox(this, ID_COMBOBOX,
@@ -688,7 +686,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
          else if (paramObjType== Gmat::SENSOR)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
-            // listen for any SpacePoint updates, so need to unregister
+            // listen for any Sensor updates, so need to unregister
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetSensorComboBox(this, ID_COMBOBOX,
@@ -701,7 +699,6 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
             // Check if enumeration strings available for owned object types
             wxArrayString enumList;
             StringArray enumStrings = theGuiInterpreter->GetListOfObjects(paramObjType);
-            //StringArray enumStrings = theObject->GetPropertyEnumStrings(index);
             for (UnsignedInt i=0; i<enumStrings.size(); i++)
                enumList.Add(enumStrings[i].c_str());
             control = new wxComboBox(parent, ID_COMBOBOX, wxT(""),
@@ -790,6 +787,12 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
    }
    
    control->SetToolTip(config->Read(_T("Hint")));
+
+   #ifdef DEBUG_BASEPANEL_CREATE
+   MessageInterface::ShowMessage
+      ("GmatBaseSetupPanel::BuildControl() leaving, label = '%s'\n", label.c_str());
+   #endif
+   
    return control;
 }
 
@@ -807,7 +810,7 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
 {
    #ifdef DEBUG_LOAD_CONTROL
    MessageInterface::ShowMessage
-      ("GmatBaseSetupPanel::LoadControl() entered, label='%s'\n", label.c_str());
+      ("GmatBaseSetupPanel::LoadControl() entered, label = '%s'\n", label.c_str());
    #endif
 
    Integer paramId = theObject->GetParameterID(label);
@@ -854,9 +857,11 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
          
       case Gmat::OBJECT_TYPE:
          valueString = (theObject->GetStringParameter(theObject->GetParameterID(label))).c_str();
+         #ifdef DEBUG_LOAD_CONTROL
+         MessageInterface::ShowMessage("   valueString = '%s'\n", valueString.c_str());
+         #endif         
          ((wxComboBox*)theControl)->SetStringSelection(valueString);
          //((wxComboBox*)theControl)->Append(valueString); // removed for Bug 1621 wcs 2009.11.10
-         // why no break added? added break (loj: 2011.06.01)
          break;
       case Gmat::OBJECTARRAY_TYPE:
          {
@@ -1318,7 +1323,7 @@ void GmatBaseSetupPanel::OnComboBoxChange(wxCommandEvent& event)
    // The change will be save when an user hits apply button
 	// Actually in some cases we need to reload the value upon ComboBox selection change.
 	// For example, when ComboBox selection changed from Earth to Mars for GroundTrackPlot,
-	// we also want to change the texture map file to Mars. So changed (LOJ: 2011.11.30)
+	// we also want to change the texture map file to Mars. So changed back (LOJ: 2011.11.30)
    if (reloadOnComboBoxChange)
 	{
 		std::string label = localObject->GetParameterText(inverseControlMap[(wxControl *) event.GetEventObject()]);
