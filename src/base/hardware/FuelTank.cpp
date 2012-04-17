@@ -727,7 +727,7 @@ bool FuelTank::Initialize()
 {
    isInitialized = false;
 
-   if (!Validate())
+   if (Validate())
    {
       gasVolume = volume - fuelMass / density;
       pvBase = pressure * gasVolume;
