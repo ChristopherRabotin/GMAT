@@ -3531,6 +3531,13 @@ bool Spacecraft::Initialize()
       MessageInterface::ShowMessage("Spacecraft::Initialize() exiting ----------\n");
    #endif
 
+   for (UnsignedInt i = 0; i < tanks.size(); ++i)
+   {
+      // MessageInterface::ShowMessage("%d:\n%s\n", i,
+      //       tanks[i]->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      tanks[i]->Initialize();
+   }
+
    for (UnsignedInt i = 0; i < thrusters.size(); ++i)
    {
       // MessageInterface::ShowMessage("%d:\n%s\n", i,
