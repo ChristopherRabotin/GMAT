@@ -1682,11 +1682,8 @@ void Sandbox::PassToAll(GmatBase *obj)
       if (currentCmd->HasLocalClones())
          UpdateAndInitializeCloneOwner(obj, currentCmd);
 
-      //if (currentCmd->IsOfType("BranchCommand"))
-      //{
-      //   MessageInterface::ShowMessage("Clone management for a %s command\n",
-      //      currentCmd->GetTypeName().c_str());
-      //}
+      if (currentCmd->IsOfType("BranchCommand"))
+         PassToBranchCommand(obj, (BranchCommand*)currentCmd);
 
       currentCmd = currentCmd->GetNext();
    }
@@ -1712,6 +1709,53 @@ void Sandbox::PassToRegisteredClones(GmatBase *obj)
    #endif
 
 }
+
+
+//------------------------------------------------------------------------------
+// void PassToBranchCommand(GmatBase *theClone, GmatCommand* theBranchCommand)
+//------------------------------------------------------------------------------
+/**
+ * Passes potential owned clones into branch command branches.
+ *
+ * This method calls into branches of branches recursively.
+ *
+ * @param theClone The object that may be an owned clone
+ * @param theBranchCommand The branch command that that manages the branch
+ *                         control sequence
+ */
+//------------------------------------------------------------------------------
+void Sandbox::PassToBranchCommand(GmatBase *theClone,
+                                  BranchCommand* theBranchCommand)
+{
+   #ifdef DEBUG_CLONE_UPDATES
+      MessageInterface::ShowMessage("Clone management for a %s branch "
+            "command\n", theBranchCommand->GetTypeName().c_str());
+   #endif
+
+   // Loop through the branch command, updating each branch member
+   Integer branch = 0;
+   GmatCommand *cmd = NULL;
+   do
+   {
+      cmd = theBranchCommand->GetChildCommand(branch);
+      while ((cmd != NULL) && (cmd != theBranchCommand))
+      {
+         #ifdef DEBUG_CLONE_UPDATES
+            MessageInterface::ShowMessage("   Branch[%d] member: a %s "
+                  "command\n", branch, cmd->GetTypeName().c_str());
+         #endif
+         if (cmd->HasLocalClones())
+            UpdateAndInitializeCloneOwner(theClone, cmd);
+
+         if (cmd->IsOfType("BranchCommand"))
+            PassToBranchCommand(theClone, (BranchCommand*)cmd);
+
+         cmd = cmd->GetNext();
+      }
+      ++branch;
+   } while (cmd != NULL);
+}
+
 
 
 //------------------------------------------------------------------------------

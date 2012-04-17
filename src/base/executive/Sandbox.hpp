@@ -41,11 +41,10 @@
 #include "ObjectInitializer.hpp"
 #include "EventLocator.hpp"
 
-
 //#define DEBUG_SANDBOX_CLONING
 
-
 class Moderator;        // Forward reference for the moderator pointer
+class BranchCommand;    // For owned clone management with branch commands
 
 /**
  * The GMAT workspace for running missions
@@ -147,8 +146,11 @@ private:
    void      PassToAll(GmatBase *obj);
    void      PassToRegisteredClones(GmatBase *obj);
 
+   void      PassToBranchCommand(GmatBase *theClone,
+                                 BranchCommand *theBranchCommand);
+
    void      UpdateAndInitializeCloneOwner(GmatBase *theClone,
-                                           GmatBase* theOwner);
+                                           GmatBase *theOwner);
 
    #ifdef DEBUG_SANDBOX_CLONING
       std::vector<Gmat::ObjectType>  clonable;
