@@ -1617,7 +1617,7 @@ void Sandbox::PassToAll(GmatBase *obj)
 
    // Walk the global object store
    GmatBase *listObj;
-   std::map<std::string, GmatBase *>::iterator current = globalObjectMap.begin();
+   std::map<std::string, GmatBase *>::iterator current=globalObjectMap.begin();
 
    #ifdef DEBUG_CLONE_UPDATES
       MessageInterface::ShowMessage("PassToAll updates: Walking the global "
@@ -1683,9 +1683,12 @@ void Sandbox::PassToAll(GmatBase *obj)
          UpdateAndInitializeCloneOwner(obj, currentCmd);
 
       if (currentCmd->IsOfType("BranchCommand"))
+      {
          PassToBranchCommand(obj, (BranchCommand*)currentCmd);
-
-      currentCmd = currentCmd->GetNext();
+         currentCmd = ((BranchCommand*)currentCmd)->GetNextWhileExecuting();
+      }
+      else
+         currentCmd = currentCmd->GetNext();
    }
 }
 
@@ -1696,7 +1699,7 @@ void Sandbox::PassToAll(GmatBase *obj)
 /**
  * Owned clone update method that only updates registered clones
  *
- * @param obj The updates object that needs to pass parameters to owned clones,
+ * @param obj The updated object that needs to pass parameters to owned clones,
  *            if there are any
  */
 //------------------------------------------------------------------------------
@@ -1747,10 +1750,19 @@ void Sandbox::PassToBranchCommand(GmatBase *theClone,
          if (cmd->HasLocalClones())
             UpdateAndInitializeCloneOwner(theClone, cmd);
 
-         if (cmd->IsOfType("BranchCommand"))
+         if ((cmd->IsOfType("BranchCommand")) && (cmd != theBranchCommand))
+         {
+            #ifdef DEBUG_CLONE_UPDATES
+               MessageInterface::ShowMessage("Nesting PassToBranchCommands; "
+                     "passing %p from %p\n", cmd, this);
+            #endif
             PassToBranchCommand(theClone, (BranchCommand*)cmd);
+         }
 
-         cmd = cmd->GetNext();
+         if (cmd->IsOfType("BranchCommand"))
+            cmd = ((BranchCommand*)cmd)->GetNextWhileExecuting();
+         else
+            cmd = cmd->GetNext();
       }
       ++branch;
    } while (cmd != NULL);

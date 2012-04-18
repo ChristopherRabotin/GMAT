@@ -66,6 +66,7 @@ public:
    
    virtual GmatCommand*    GetNext();
    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
+   GmatCommand*            GetNextWhileExecuting();
    virtual void            SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual void            SetEventLocators(std::vector<EventLocator*> *els);
 
@@ -83,6 +84,9 @@ public:
 
    virtual Integer         GetCloneCount();
    virtual GmatBase*       GetClone(Integer cloneIndex);
+
+   virtual bool            AffectsClones();
+   virtual GmatBase*       GetUpdatedObject();
 
 protected:
       
@@ -110,6 +114,8 @@ protected:
    Integer                 nestLevel;
    /// Currently executing member of the branch.  NULL if branch not executing.
    GmatCommand             *current;
+   /// Most recently executed member of the branch.  NULL if branch not executed.
+   GmatCommand             *lastFired;
    
    std::vector<GmatCommand*>             
                            cmdsWithFunctions;

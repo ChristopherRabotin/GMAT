@@ -71,7 +71,8 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
    branchToExecute      (0),
    branchToFill         (0),
    nestLevel            (0),
-   current              (NULL)
+   current              (NULL),
+   lastFired            (NULL)
 {
    depthChange = 1;
    parameterCount = BranchCommandParamCount;
@@ -169,7 +170,8 @@ BranchCommand::BranchCommand(const BranchCommand& bc) :
    branchToExecute   (0),
    branchToFill      (0),
    nestLevel         (bc.nestLevel),
-   current           (NULL)
+   current           (NULL),
+   lastFired         (NULL)
 {
    depthChange = 1;
    parameterCount = BranchCommandParamCount;
@@ -190,7 +192,10 @@ BranchCommand::BranchCommand(const BranchCommand& bc) :
 BranchCommand& BranchCommand::operator=(const BranchCommand& bc)
 {
    if (this != &bc)
+   {
       GmatCommand::operator=(bc);
+      lastFired = NULL;
+   }
 
    return *this;
 }
@@ -215,6 +220,29 @@ GmatCommand* BranchCommand::GetNext()
    if ((commandExecuting) && (!commandComplete))
       return this;
    
+   return next;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatCommand* BranchCommand::GetNextWhileExecuting()
+//------------------------------------------------------------------------------
+/**
+ * Provides a mechanism to communicate with subsequent commands
+ *
+ * This method provides unconditional access to the next pointer in the branch
+ * command, so that the Sandbox can communicate critical information to the full
+ * Mission Control Sequence, even when the branch command is still executing.
+ *
+ * This method is used to pass owned clone data to the entire MCS when it is
+ * generated from a command in a Branch Control Sequence.
+ *
+ * @return The next command at the current control sequence nesting level,
+ *         regardless of the execution state of the current command.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* BranchCommand::GetNextWhileExecuting()
+{
    return next;
 }
 
@@ -350,6 +378,7 @@ bool BranchCommand::Initialize()
    commandExecuting = false;
    branchExecuting = false;
    current = NULL;
+   lastFired = NULL;
    
    return retval;
 }
@@ -1212,6 +1241,7 @@ bool BranchCommand::ExecuteBranch(Integer which)
       //commandExecuting = false;  // ***********************
       //commandComplete  = true;   // ***********************
       current = NULL;
+      lastFired = NULL;
    }
    
    if (current != NULL)
@@ -1247,7 +1277,10 @@ bool BranchCommand::ExecuteBranch(Integer which)
          }
          
          if (current != NULL)
+         {
+            lastFired = current;
             current = current->GetNext();
+         }
          
          branchExecuting = true;
          // Set commandExecuting to true if branch is executing (LOJ: 2010.08.06)
@@ -1295,6 +1328,7 @@ void BranchCommand::RunComplete()
    #endif
    
    current = NULL;
+   lastFired = NULL;
    
    for (std::vector <GmatCommand *>::iterator i = branch.begin(); i != branch.end(); ++i)
       if (*i != NULL)
@@ -1592,4 +1626,39 @@ GmatBase* BranchCommand::GetClone(Integer cloneIndex)
    }
 
    return retptr;
+}
+
+
+//------------------------------------------------------------------------------
+// bool AffectsClones()
+//------------------------------------------------------------------------------
+/**
+ * Identifies commands that update objects that could be cloned in other objects
+ *
+ * @return true if a potential clone update is possible, false (the default) if
+ *         not
+ */
+//------------------------------------------------------------------------------
+bool BranchCommand::AffectsClones()
+{
+   if ((lastFired != NULL) && (lastFired != this))
+      return lastFired->AffectsClones();
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetUpdatedObject()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves object that has updates so it can be passed to owned clones
+ *
+ * @return The object pointer, or NULL (the default) if there is no such object
+ */
+//------------------------------------------------------------------------------
+GmatBase* BranchCommand::GetUpdatedObject()
+{
+   if ((lastFired != NULL) && (lastFired != this))
+      return lastFired->GetUpdatedObject();
+   return NULL;
 }
