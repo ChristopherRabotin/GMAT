@@ -1754,7 +1754,7 @@ bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
       #if DEBUG_REMOVE
       MessageInterface::ShowMessage("   Checking if '%s' is used in resource\n", name.c_str());
       #endif
-      GmatBase *obj = theConfigManager->GetFirstItemUsing(type, name);
+      GmatBase *obj = theConfigManager->GetFirstItemUsing(type, name, false);
       if (obj != NULL)
       {
          MessageInterface::ShowMessage
@@ -1782,7 +1782,7 @@ bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
          }
          else
          {
-            bool retval = theConfigManager->RemoveItem(type, name);
+            bool retval = theConfigManager->RemoveItem(type, name, true);
             #if DEBUG_REMOVE
             MessageInterface::ShowMessage
                ("Moderator::RemoveObject() It is not used in the sequence, "
@@ -8391,17 +8391,33 @@ const std::string& Moderator::GetStarterStringList()
 Spacecraft* Moderator::GetDefaultSpacecraft()
 {
    StringArray soConfigList = GetListOfObjects(Gmat::SPACECRAFT);
-   
+
+   #ifdef DEBUG_DEFAULT_COMMAND
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultSpacecraft() entered, there are %d spacecrafts\n",
+       soConfigList.size());
+   #endif
    if (soConfigList.size() > 0)
    {
       // return 1st Spacecraft
       SpaceObject *so = GetSpacecraft(soConfigList[0]);
+      #ifdef DEBUG_DEFAULT_COMMAND
+      MessageInterface::ShowMessage
+         ("Moderator::GetDefaultSpacecraft() returning existing spacecraft <%p>'%s'\n",
+          so, so->GetName().c_str());
+      #endif
       return (Spacecraft*)so;
    }
    else
    {
       // create Spacecraft
-      return (Spacecraft*)CreateSpacecraft("Spacecraft", "DefaultSC");
+      SpaceObject *so = CreateSpacecraft("Spacecraft", "DefaultSC");
+      #ifdef DEBUG_DEFAULT_COMMAND
+      MessageInterface::ShowMessage
+         ("Moderator::GetDefaultSpacecraft() returning new spacecraft <%p>'%s'\n",
+          so, so->GetName().c_str());
+      #endif
+      return (Spacecraft*)so;
    }
 }
 

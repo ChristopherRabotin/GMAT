@@ -1538,28 +1538,38 @@ bool ConfigManager::RemoveAllItems()
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
+bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name,
+                               bool removeAssociatedSysParam)
 {
    #ifdef DEBUG_CONFIG_REMOVE
    MessageInterface::ShowMessage
       ("ConfigManager::RemoveItem() entered, type=%d, typeString='%s', "
-       "name='%s'\n", type, GmatBase::GetObjectTypeString(type).c_str(),
-       name.c_str());
+       "name='%s', removeAssociatedSysParam=%d\n", type,
+       GmatBase::GetObjectTypeString(type).c_str(), name.c_str(),
+       removeAssociatedSysParam);
    #endif
    
    bool status = false;
    
-   // remove from objects
-   std::vector<GmatBase*>::iterator currentIter =
-      (std::vector<GmatBase*>::iterator)(objects.begin());
-   
    #ifdef DEBUG_CONFIG_REMOVE
-   MessageInterface::ShowMessage("   There are %d objects\n", objects.size());
+   MessageInterface::ShowMessage("   \nThere are %d objects\n", objects.size());
+   #endif
+   #ifdef DEBUG_CONFIG_REMOVE_MORE
+   ObjectArray::iterator iter = objects.begin();
+   while (iter != objects.end())
+   {
+      MessageInterface::ShowMessage
+         ("   obj=<%p><%s>'%s'\n", (*iter), (*iter)->GetTypeName().c_str(),
+          (*iter)->GetName().c_str());
+      ++iter;
+   }
    #endif
    
-   while (currentIter != (std::vector<GmatBase*>::iterator)(objects.end()))
+   // remove from objects
+   ObjectArray::iterator objIter = objects.begin();
+   while (objIter != objects.end())
    {
-      GmatBase *obj = (*currentIter);
+      GmatBase *obj = (*objIter);
       if (obj->IsOfType(type))
       {
          if (obj->GetName() == name)
@@ -1568,16 +1578,55 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
             MessageInterface::ShowMessage
                ("   Removing '%s' from objects\n", name.c_str());
             #endif
-            objects.erase(currentIter);
+            objects.erase(objIter);
             break;
          }
       }
-      ++currentIter;
+      ++objIter;
    }
    
-   // remove from mapping
+   // Remove associated system Parameter from objects
+   if (removeAssociatedSysParam)
+   {
+      #ifdef DEBUG_CONFIG_REMOVE
+      MessageInterface::ShowMessage("   \nNow checking associated Parameters in objects\n");
+      MessageInterface::ShowMessage("   There are %d objects\n", objects.size());
+      #endif
+      std::string objName;
+      std::string nameToFind = name + ".";
+      objIter = objects.begin();
+      while (objIter != objects.end())
+      {
+         bool checkNext = true;
+         GmatBase *obj = (*objIter);
+         objName = obj->GetName();
+         #ifdef DEBUG_CONFIG_REMOVE_MORE
+         MessageInterface::ShowMessage
+            ("   obj=<%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+             obj->GetName().c_str());
+         #endif
+         if (objName.find(nameToFind) != objName.npos)
+         {
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               #ifdef DEBUG_CONFIG_REMOVE
+               MessageInterface::ShowMessage
+                  ("   Removing '%s' from objects\n", objName.c_str());
+               #endif
+               objects.erase(objIter);
+               checkNext = false;
+            }
+         }
+         
+         if (checkNext)
+            ++objIter;
+      }
+   }
+   
+   // remove and delete from mapping
    #ifdef DEBUG_CONFIG_REMOVE
-   MessageInterface::ShowMessage("   There are %d objects in the mapping\n", mapping.size());
+   MessageInterface::ShowMessage
+      ("   \nThere are %d objects in the mapping\n", mapping.size());
    #endif
    
    if (mapping.find(name) != mapping.end())
@@ -1585,6 +1634,11 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
       GmatBase *obj = mapping[name];
       if (obj != NULL)
       {
+         #ifdef DEBUG_CONFIG_REMOVE_MORE
+         MessageInterface::ShowMessage
+            ("   obj=<%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+             obj->GetName().c_str());
+         #endif
          if (obj->IsOfType(type))
          {
             mapping.erase(name);
@@ -1611,7 +1665,65 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
          #endif
       }
    }
-
+   
+   // Remove and delete associated system Parameter from mapping
+   bool status1 = true;
+   if (removeAssociatedSysParam)
+   {
+      #ifdef DEBUG_CONFIG_REMOVE
+      MessageInterface::ShowMessage("   \nNow checking associated Parameters in mapping\n");
+      MessageInterface::ShowMessage("   There are %d objects in the mapping\n", mapping.size());
+      #endif
+      std::string objName;
+      std::string nameToFind = name + ".";
+      GmatBase *obj = NULL;
+      ObjectMap::iterator mapIter = mapping.begin();
+      while (mapIter != mapping.end())
+      {
+         bool checkNext = true;
+         objName = mapIter->first;
+         obj = mapIter->second;
+         #ifdef DEBUG_CONFIG_REMOVE_MORE
+         MessageInterface::ShowMessage
+            ("   objName='%s', obj=<%p><%s>'%s'\n", objName.c_str(), obj,
+             obj ? obj->GetTypeName().c_str() : "NULL",
+             obj ? obj->GetName().c_str() : "NULL");
+         #endif
+         
+         if (obj)
+         {            
+            if (objName.find(nameToFind) != objName.npos)
+            {
+               if (obj->IsOfType(Gmat::PARAMETER))
+               {
+                  #ifdef DEBUG_CONFIG_REMOVE
+                  MessageInterface::ShowMessage
+                     ("   Deleting '%s' from mapping\n", objName.c_str());
+                  #endif
+                  // Need to increment mapIter before erase
+                  mapIter++;
+                  mapping.erase(objName);
+                  
+                  #ifdef DEBUG_MEMORY
+                  MemoryTracker::Instance()->Remove
+                     (obj, objName, "ConfigManager::RemoveItem()",
+                      "deleting object from mapping");
+                  #endif
+                  
+                  #ifdef DEBUG_CONFIG_REMOVE
+                  MessageInterface::ShowMessage("   Deleting obj<%p>\n", obj);
+                  #endif
+                  delete obj;
+                  checkNext = false;
+               }
+            }
+         }
+         
+         if (checkNext)
+            mapIter++;
+      }
+   }
+   
    // Item was removed, so set conguration changed flag to true
    configChanged = true;
    

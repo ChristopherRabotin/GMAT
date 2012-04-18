@@ -111,7 +111,8 @@ public:
                                   const std::string &newName);
    
    bool                RemoveAllItems();
-   bool                RemoveItem(Gmat::ObjectType type, const std::string &name);
+   bool                RemoveItem(Gmat::ObjectType type, const std::string &name,
+                                  bool removeAssociatedSysParam = false);
    bool                ReconfigureItem(GmatBase *newobj, const std::string &name);
    
    
