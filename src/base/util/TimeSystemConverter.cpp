@@ -233,12 +233,6 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
 
        return taiJd;
     }
-    case TimeConverterUtil::TCBMJD:
-    case TimeConverterUtil::TCB:
-          throw UnimplementedException(
-               "Not Implemented - TCB to TAI");
-//      Real tdbMjd;
-//      return ConvertToTaiMjd("TdbMjd", tdbMjd);    
     case TimeConverterUtil::TTMJD:
     case TimeConverterUtil::TT:
           return (origValue -
@@ -391,23 +385,6 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
              Real tdbJd = ttJd + offset;
              return tdbJd;
           }
-       case TimeConverterUtil::TCBMJD:
-       case TimeConverterUtil::TCB:
-       {
-          #ifdef DEBUG_TIMECONVERTER_DETAILS
-             MessageInterface::ShowMessage("      In the 'tcb' block\n");
-          #endif
-          // convert time to tdb
-          Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::TDBMJD, 
-                origValue, refJd);
-          //Real jdValue = origValue;  // but this is TAI
-          Real jdValue = tdbMjd;
-          //Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET) * GmatTimeConstants::SECS_PER_DAY;
-          Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET);
-          // units of offset are in seconds, so convert to fraction of days
-          //return ((offset / GmatTimeConstants::SECS_PER_DAY) + tdbMjd);
-          return (offset + tdbMjd);
-       }
        case TimeConverterUtil::TTMJD:
        case TimeConverterUtil::TT:
        {
@@ -819,12 +796,12 @@ StringArray TimeConverterUtil::GetValidTimeRepresentations()
    StringArray systems;
    for (Integer i = A1; i < TimeSystemCount; ++i)
    {
-      if ((i != UT1) && (i != TDB) && (i != TCB))
+      if ((i != UT1) && (i != TDB))
          systems.push_back(TIME_SYSTEM_TEXT[i] + "ModJulian");
    }
    for (Integer i = A1; i < TimeSystemCount; ++i)
    {
-      if ((i != UT1) && (i != TDB) && (i != TCB))
+      if ((i != UT1) && (i != TDB))
          systems.push_back(TIME_SYSTEM_TEXT[i] + "Gregorian");
    }
    return systems;

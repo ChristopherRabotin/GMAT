@@ -67,7 +67,7 @@ protected:
    
    enum TimeDataID
    {
-      A1, TAI, TT, TDB, TCB, UTC, 
+      A1, TAI, TT, TDB, UTC,
       YEARS, MONTHS, DAYS, HOURS, MINS, SECS
    };
    

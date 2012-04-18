@@ -214,11 +214,6 @@ Real TimeData::GetTimeReal(Integer id)
                                         TimeConverterUtil::TDBMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
-   case TCB:
-      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::TCBMJD,
-                                        GmatTimeConstants::JD_JAN_5_1941);
-      break;
    case UTC:
       time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::UTCMJD,
@@ -284,12 +279,6 @@ void TimeData::SetTimeReal(Integer id, Real value)
                                          GmatTimeConstants::JD_JAN_5_1941);
       mSpacecraft->SetRealParameter(epochId, a1Mjd);
       break;
-   case TCB:
-      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TCBMJD,
-                                         TimeConverterUtil::A1MJD,
-                                         GmatTimeConstants::JD_JAN_5_1941);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
-      break;
    case UTC:
       a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::UTCMJD,
                                          TimeConverterUtil::A1MJD,
@@ -329,7 +318,6 @@ std::string TimeData::GetTimeString(Integer id)
    case TAI:
    case TT:
    case TDB:
-   case TCB:
    case UTC:
       #ifdef DEBUG_TIMEDATA
       MessageInterface::ShowMessage
@@ -386,11 +374,6 @@ void TimeData::SetTimeString(Integer id, const std::string &value)
       break;
    case TDB:
       TimeConverterUtil::Convert("TDBGregorian", fromMjd, value, 
-                                 "A1ModJulian", a1Mjd, a1MjdString);
-      mSpacecraft->SetRealParameter(epochId, a1Mjd);
-      break;
-   case TCB:
-      TimeConverterUtil::Convert("TCBGregorian", fromMjd, value, 
                                  "A1ModJulian", a1Mjd, a1MjdString);
       mSpacecraft->SetRealParameter(epochId, a1Mjd);
       break;

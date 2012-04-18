@@ -72,7 +72,6 @@ namespace TimeConverterUtil
    static const Real T_TT_OFFSET                   = GmatTimeConstants::JD_OF_J2000;
    static const Real T_TT_COEFF1                   = GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    static const Real L_B                           = 1.550505e-8;
-   static const Real TCB_JD_MJD_OFFSET             = 2443144.5;
    static const Real NUM_SECS                      = GmatTimeConstants::SECS_PER_DAY;
 
    enum TimeSystemTypes
@@ -82,14 +81,12 @@ namespace TimeConverterUtil
       UTCMJD,
       UT1MJD,
       TDBMJD,
-      TCBMJD,
       TTMJD,
       A1,
       TAI,
       UTC,
       UT1,
       TDB,
-      TCB,
       TT,
       TimeSystemCount
    };
@@ -101,7 +98,6 @@ namespace TimeConverterUtil
       "UtcMjd",
       "Ut1Mjd",
       "TdbMjd",
-      "TcbMjd",
       "TtMjd",
       // New entries added by DJC
       "A1",
@@ -109,7 +105,6 @@ namespace TimeConverterUtil
       "UTC",
       "UT1",
       "TDB",
-      "TCB",
       "TT",
    };
 

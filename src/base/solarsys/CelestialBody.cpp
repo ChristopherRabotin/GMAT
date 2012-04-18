@@ -55,6 +55,7 @@
 
 //#define DEBUG_CELESTIAL_BODY 1
 //#define DEBUG_GET_STATE
+//#define DEBUG_CB_SPICE_VS_DE
 //#define DEBUG_CB_SET
 //#define DEBUG_CB_INIT
 //#define DEBUG_TWO_BODY
@@ -176,7 +177,6 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::STRING_TYPE,   //"TextureMapFileName"
 };
 
-const Real    CelestialBody::JD_EPOCH_2000_TCB          = GmatTimeConstants::JD_OF_J2000;
 const Real    CelestialBody::JD_EPOCH_2000_TT           = GmatTimeConstants::JD_OF_J2000; // @ todo Figure out JD_EPOCH_2000_TT
 const Real    CelestialBody::dDot                       = 1.0;
 const Real    CelestialBody::TDot                       = 1.0;
@@ -233,7 +233,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    userDefined        (false),
    allowSpice         (false),
    orientationDateFormat ("TAIModJulian"),
-   orientationEpoch   (GmatTimeConstants::MJD_OF_J2000), // @todo - really need it to be the TCB epoch used for the major bodies
+   orientationEpoch   (GmatTimeConstants::MJD_OF_J2000),
    orientation        (GmatSolarSystemDefaults::PLANET_ORIENTATION_PARAMETERS[GmatSolarSystemDefaults::EARTH]),
    naifIdSet          (false),
    naifName           (name),
@@ -322,7 +322,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    userDefined        (false),
    allowSpice         (false),
    orientationDateFormat ("TAIModJulian"),
-   orientationEpoch   (GmatTimeConstants::MJD_OF_J2000), // @todo - really need it to be the TCB epoch used for the major bodies
+   orientationEpoch   (GmatTimeConstants::MJD_OF_J2000),
    orientation        (GmatSolarSystemDefaults::PLANET_ORIENTATION_PARAMETERS[GmatSolarSystemDefaults::EARTH]),
    naifIdSet          (false),
    naifName           (name),
@@ -802,6 +802,17 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
          Rvector6 spiceState = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName, naifIdObserver);
          state.Set(spiceState[0], spiceState[1], spiceState[2],
                    spiceState[3], spiceState[4], spiceState[5]);
+#ifdef DEBUG_CB_SPICE_VS_DE
+   Real *deState;
+   deState = (Real *)malloc(6);
+   deState = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
+   MessageInterface::ShowMessage("for body %s, for time: %12.10f:\n", instanceName.c_str(), atTime.Get());
+   MessageInterface::ShowMessage("     SPICE state is: %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+         spiceState[0], spiceState[1], spiceState[2], spiceState[3], spiceState[4], spiceState[5]);
+   MessageInterface::ShowMessage("     DE state is:    %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+         deState[0], deState[1], deState[2], deState[3], deState[4], deState[5]);
+   delete deState;
+#endif
          #else
          // Throw an error if GMAT was not build with __USE_SPICE__ (LOJ: 2010.05.18)
          std::string errmsg = "Use of SPICE file was disabled";
@@ -929,6 +940,18 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
          if (!spiceSetupDone) SetUpSPICE();
          state = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName, naifIdObserver);
          for (Integer i=0;i<6;i++) outState[i] = state[i];
+         #ifdef DEBUG_CB_SPICE_VS_DE
+            Real *deState;
+            deState = (Real *)malloc(6);
+            deState = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
+            MessageInterface::ShowMessage("for body %s, for time: %12.10f:\n", instanceName.c_str(), atTime.Get());
+            MessageInterface::ShowMessage("     SPICE state is: %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+                  state[0], state[1], state[2], state[3], state[4], state[5]);
+            MessageInterface::ShowMessage("     DE state is:    %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+                  deState[0], deState[1], deState[2], deState[3], deState[4], deState[5]);
+            delete deState;
+         #endif
+
       #endif
          break;
       default:
@@ -1911,9 +1934,9 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
 //------------------------------------------------------------------------------
 /**
  * This method sets the time system override flag for the body 
- * (i.e. if true, TDB and TCB times will be overridden with TT times).
+ * (i.e. if true, TDB times will be overridden with TT times).
  *
- * @param <overrideIt> overrride TDB or TCB time with TT?.
+ * @param <overrideIt> overrride TDB time with TT?.
  *
  * @return flag indicating success of the method.
  *
@@ -2399,7 +2422,7 @@ Rvector CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) cons
       Real delta = 0;
       Real W     = 0;
       Real Wdot  = 0.0; 
-      Real d = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
+      Real d = GetJulianDaysFromTTEpoch(forTime); // interval in Julian days
       Real T = d / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY; // interval in Julian centuries
       
       alpha = orientation[0]  + orientation[1] * T;
@@ -4047,18 +4070,18 @@ bool CelestialBody::IsBlank(char* aLine)
 
 
 //------------------------------------------------------------------------------
-//  Real GetJulianDaysFromTCBEpoch(const A1Mjd &forTime)
+//  Real GetJulianDaysFromTTEpoch(const A1Mjd &forTime)
 //------------------------------------------------------------------------------
 /**
- * This method computes the Julian days from the TCB Epoch.
+ * This method computes the Julian days from the TT Epoch.
  *
- * @return number of Julian days since the TCB epoch.
+ * @return number of Julian days since the TT epoch.
  *
- * @note If the overrideTime flag is set, this actually computes the Julian Days
- *       from TT epoch.
+ * @note This method computes the Julian Days from the TT epoch.  The original
+ * intent of this method was to compute the Julian days from the TCB epoch.
  */
 //------------------------------------------------------------------------------
-Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
+Real CelestialBody::GetJulianDaysFromTTEpoch(const A1Mjd &forTime) const
 {
    Real jdTime = 0.0;
    Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),

@@ -7501,8 +7501,6 @@ void Moderator::CreateDefaultParameters()
    CreateParameter("TTGregorian", "DefaultSC.TTGregorian");
    CreateParameter("TDBModJulian", "DefaultSC.TDBModJulian");
    CreateParameter("TDBGregorian", "DefaultSC.TDBGregorian");
-   CreateParameter("TCBModJulian", "DefaultSC.TCBModJulian");
-   CreateParameter("TCBGregorian", "DefaultSC.TCBGregorian");
    CreateParameter("UTCModJulian", "DefaultSC.UTCModJulian");
    CreateParameter("UTCGregorian", "DefaultSC.UTCGregorian");      
    #if DEBUG_DEFAULT_MISSION > 1

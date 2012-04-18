@@ -213,7 +213,7 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    {
       if (rotationSrc == Gmat::IAU_2002)
       {
-      Real d = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
+      Real d = GetJulianDaysFromTTEpoch(forTime); // interval in Julian days
       Real T = d / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;  // interval in Julian centuries
       Real N    = 357.85 + 52.316 * T;
       //Real NDot = 52.316 * CelestialBody::TDot;

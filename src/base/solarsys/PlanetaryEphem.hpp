@@ -86,7 +86,7 @@ public:
 	*
 	* @param forBody            body number for which to return the state
 	* @param atTime             time at which to get the state for the body
-	* @param overrideTimeSystem override the TCB or TDB time used, with TT?
+	* @param overrideTimeSystem override the TDB time used, with TT?
     *
     * @return the position and velocity of the specified body at the rerquested
     *         time.

@@ -263,8 +263,8 @@ public:
    //   delta = SpinAxisDECConstant + SpinAxisDECRate * T
    //   W     = RotationConstant + RotationRate * d;
    //   Wdot  = RotationRate;
-   // where T = Julian Days from TCB epoch
-   //       d = Julian centuries from TCB epoch
+   // where T = Julian Days from TCB epoch (NOTE: we use TT here)
+   //       d = Julian centuries from TCB epoch (NOTE: we use TT here)
    //
    // @todo - we will need to use more terms for moons in the future
    //
@@ -400,7 +400,6 @@ protected:
    static const std::string PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount];
 
    static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount];
-   static const Real    JD_EPOCH_2000_TCB;
    static const Real    JD_EPOCH_2000_TT;
    static const Real    dDot;
    static const Real    TDot;
@@ -516,7 +515,7 @@ protected:
    /// flag indicating whether or not the twoBody method epoch and 
    /// state have been modified
    bool                   newTwoBody;
-   /// flag indicating whether or not to override the TDB/TCB tiems with TT
+   /// flag indicating whether or not to override the TDB times with TT
    bool                   overrideTime;
    /// update interval for the ephemeris calculations (file-reading)
    Real                   ephemUpdateInterval;
@@ -573,7 +572,7 @@ protected:
    bool             ReadPotentialFile();
    
    bool             IsBlank(char* aLine);
-   virtual Real     GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const;
+   virtual Real     GetJulianDaysFromTTEpoch(const A1Mjd &forTime) const;
    virtual Rvector6 ComputeTwoBody(const A1Mjd &forTime);
    virtual Rvector6 KeplersProblem(const A1Mjd &forTime);
    virtual bool     SetUpSPICE();

@@ -96,10 +96,6 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new TDBModJulian(withName);
    if (ofType == "TDBGregorian")
       return new TDBGregorian(withName);
-   if (ofType == "TCBModJulian")
-      return new TCBModJulian(withName);
-   if (ofType == "TCBGregorian")
-      return new TCBGregorian(withName);
    if (ofType == "UTCModJulian")
       return new UTCModJulian(withName);
    if (ofType == "UTCGregorian")
@@ -416,8 +412,6 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("TTGregorian");
       creatables.push_back("TDBModJulian");
       creatables.push_back("TDBGregorian");
-      creatables.push_back("TCBModJulian");
-      creatables.push_back("TCBGregorian");
       creatables.push_back("UTCModJulian");
       creatables.push_back("UTCGregorian");
 

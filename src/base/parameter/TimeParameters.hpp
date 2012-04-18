@@ -17,7 +17,7 @@
 /**
  * Declares Time related parameter classes.
  *   CurrA1MJD, A1ModJulian, A1Gregorian, TAIModJulian, TAIGregorian, TTModJulian,
- *   TTGregorian, TDBModJulian, TDBGregorian, TCBModJulian, TCBGregorian,
+ *   TTGregorian, TDBModJulian, TDBGregorian,
  *   UTCModJulian, UGCGregorian, ElapsedDays, ElapsedDaysFromStart, ElapsedSecs,
  *   ElapsedSecsFromStart
  */
@@ -262,57 +262,6 @@ private:
 
 };
 
-
-//==============================================================================
-//                              TCBModJulian
-//==============================================================================
-
-class GMAT_API TCBModJulian : public TimeReal
-{
-public:
-
-   TCBModJulian(const std::string &name = "", GmatBase *obj = NULL);
-   TCBModJulian(const TCBModJulian &copy);
-   TCBModJulian& operator= (const TCBModJulian &right); 
-   virtual ~TCBModJulian();
-   
-   // methods inherited from Parameter
-   virtual bool Evaluate();
-   virtual void SetReal(Real val);
-   
-   // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-   
-protected:
-private:
-
-};
-
-
-//==============================================================================
-//                              TCBGregorian
-//==============================================================================
-
-class GMAT_API TCBGregorian : public TimeString
-{
-public:
-
-   TCBGregorian(const std::string &name = "", GmatBase *obj = NULL);
-   TCBGregorian(const TCBGregorian &copy);
-   TCBGregorian& operator= (const TCBGregorian &right); 
-   virtual ~TCBGregorian();
-   
-   // methods inherited from Parameter
-   virtual bool Evaluate();
-   virtual void SetString(const std::string &val);
-   
-   // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-   
-protected:
-private:
-
-};
 
 
 //==============================================================================
