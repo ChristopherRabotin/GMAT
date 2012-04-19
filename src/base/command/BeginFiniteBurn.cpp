@@ -594,7 +594,7 @@ bool BeginFiniteBurn::Initialize()
    
    #ifdef DEBUG_BEGIN_MANEUVER
    MessageInterface::ShowMessage
-      ("BeginFiniteBurn::Initialize() returning %d\n", initialized);
+      ("BeginFiniteBurn::Initialize() returning %d\n", isInitialized);
    #endif
    
    return isInitialized;

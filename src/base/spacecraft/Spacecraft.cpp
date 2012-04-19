@@ -4033,12 +4033,17 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
             for (UnsignedInt i = 0; i < thrusters.size(); ++i)
                if (obj->GetName() == thrusters[i]->GetName())
                {
+                  // Buffer the isFiring flag for the thruster
+                  bool active = thrusters[i]->GetBooleanParameter("IsFiring");
+
                   ((Thruster*)thrusters[i])->operator=(*((Thruster*)obj));
                   // Update init flag
                   if (isInitialized)
                   {
                      isInitialized = thrusters[i]->IsInitialized();
                   }
+
+                  thrusters[i]->SetBooleanParameter("IsFiring", active);
                }
          }
       }
@@ -4497,6 +4502,9 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
    std::string objType = obj->GetTypeName();
    std::string objName = obj->GetName();
 
+   /// This is a bit kludgy, but preserves the firing state for thrusters
+   bool isFiring = false;
+
    #ifdef DEBUG_SC_REF_OBJECT
    MessageInterface::ShowMessage
       ("Spacecraft::SetHardware() <%p>'%s' entered, obj=<%p>'%s'\n", this,
@@ -4508,6 +4516,9 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
    for (UnsignedInt i=0; i<hwArray.size(); i++)
       MessageInterface::ShowMessage("   hwArray[%d] = <%p>\n", i, hwArray[i]);
    #endif
+
+   /// @todo The find test here will always reach the end() iterator because
+   /// the hardware was cloned, so it ought to be reworked
 
    // if not adding the same hardware
    if (find(hwArray.begin(), hwArray.end(), obj) == hwArray.end())
@@ -4537,6 +4548,8 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
             {
                // delete the old one
                GmatBase *old = (*i);
+               if (old->IsOfType(Gmat::THRUSTER))
+                  isFiring = old->GetBooleanParameter("IsFiring");
                hwArray.erase(i);
                #ifdef DEBUG_MEMORY
                MemoryTracker::Instance()->Remove
@@ -4577,6 +4590,7 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
             // Set SolarSystem and Spacecraft
             clonedObj->SetSolarSystem(solarSystem);
             clonedObj->SetRefObject(this, Gmat::SPACECRAFT, GetName());
+            clonedObj->SetBooleanParameter("IsFiring", isFiring);
             // Set CoordinateSystem
             std::string csName;
             csName = clonedObj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);

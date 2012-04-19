@@ -382,7 +382,7 @@ Thruster& Thruster::operator=(const Thruster& th)
    
    memcpy(cCoefficients, th.cCoefficients, COEFFICIENT_COUNT * sizeof(Real));
    memcpy(kCoefficients, th.kCoefficients, COEFFICIENT_COUNT * sizeof(Real));
-   
+
    thrusterFiring      = th.thrusterFiring;
    decrementMass       = th.decrementMass;
    constantExpressions = th.constantExpressions;
@@ -1772,8 +1772,15 @@ bool Thruster::CalculateThrustAndIsp()
 Real Thruster::CalculateMassFlow()
 {
    if (!thrusterFiring)
+   {
+      #ifdef DEBUG_THRUSTER
+         MessageInterface::ShowMessage("Thruster %s is not firing\n",
+               instanceName.c_str());
+      #endif
+
       return 0.0;
-   else 
+   }
+   else
    {
       if (tanks.empty())
          throw HardwareException("Thruster \"" + instanceName +
