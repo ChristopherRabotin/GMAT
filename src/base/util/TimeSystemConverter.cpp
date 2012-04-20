@@ -796,12 +796,12 @@ StringArray TimeConverterUtil::GetValidTimeRepresentations()
    StringArray systems;
    for (Integer i = A1; i < TimeSystemCount; ++i)
    {
-      if ((i != UT1) && (i != TDB))
+      if (i != UT1)
          systems.push_back(TIME_SYSTEM_TEXT[i] + "ModJulian");
    }
    for (Integer i = A1; i < TimeSystemCount; ++i)
    {
-      if ((i != UT1) && (i != TDB))
+      if (i != UT1)
          systems.push_back(TIME_SYSTEM_TEXT[i] + "Gregorian");
    }
    return systems;
