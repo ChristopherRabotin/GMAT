@@ -4705,10 +4705,6 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
          break;
       case GmatTree::SCRIPT_FILE:
          break; // nothing to add
-      case GmatTree::FORMATION:
-         menu.Append(POPUP_OPEN, wxT("Open"));
-         menu.Append(POPUP_CLOSE, wxT("Close"));
-         break;
       default:
          menu.Append(POPUP_OPEN, wxT("Open"));
          menu.Append(POPUP_CLOSE, wxT("Close"));

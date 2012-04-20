@@ -22,6 +22,7 @@
 #include "XyPlot.hpp"
 #include "PlotInterface.hpp"         // for XY plot
 #include "SubscriberException.hpp"
+#include "StringUtil.hpp"            // for GmatStringUtil::ReplaceName()
 #include "MessageInterface.hpp"      // for ShowMessage()
 #include <sstream>                   // for <<
 
@@ -526,8 +527,9 @@ bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
 {
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("XyPlot::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
-       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+      ("XyPlot::RenameRefObject() this='%s', type=%s, oldName=%s, newName=%s\n",
+       GetName().c_str(), GetObjectTypeString(type).c_str(), oldName.c_str(),
+       newName.c_str());
    #endif
    
    if (type != Gmat::PARAMETER && type != Gmat::COORDINATE_SYSTEM &&
@@ -549,17 +551,35 @@ bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
    }
    else
    {
-      std::string::size_type pos = mXParamName.find(oldName);
+      // Replace X variable
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   before replace mXParamName='%s'\n", mXParamName.c_str());
+      #endif
       
-      if (pos != mXParamName.npos)
-         mXParamName.replace(pos, oldName.size(), newName);
+      if (mXParamName.find(oldName) != mXParamName.npos)
+         mXParamName = GmatStringUtil::ReplaceName(mXParamName, oldName, newName);
       
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("    after replace mXParamName='%s'\n", mXParamName.c_str());
+      #endif
+      
+      // Replace Y variables
       for (unsigned int i=0; i<mYParamNames.size(); i++)
-      {
-         pos = mYParamNames[i].find(oldName);
+      {         
+         #if DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   before replace mYParamNames[%d] = '%s'\n", i, mYParamNames[i].c_str());
+         #endif
          
-         if (pos != mYParamNames[i].npos)
-            mYParamNames[i].replace(pos, oldName.size(), newName);
+         if (mYParamNames[i].find(oldName) != oldName.npos)
+            mYParamNames[i] = GmatStringUtil::ReplaceName(mYParamNames[i], oldName, newName);
+         
+         #if DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("    after replace mYParamNames[%d] = '%s'\n", i, mYParamNames[i].c_str());
+         #endif
       }
    }
    
