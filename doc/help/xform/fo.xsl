@@ -486,7 +486,7 @@
     </xsl:template>
     
     <xsl:attribute-set name="refentry.title.properties">
-        <xsl:attribute>
+        <xsl:attribute name="font-size">
             <xsl:value-of select="$body.font.master * 1.3"/>
         </xsl:attribute>
         <xsl:attribute name="color">
