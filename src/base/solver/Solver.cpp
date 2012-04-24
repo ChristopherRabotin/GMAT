@@ -1019,6 +1019,12 @@ std::string Solver::GetStringParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 bool Solver::SetStringParameter(const Integer id, const std::string &value)
 {
+   #ifdef DEBUG_PARAM_SET
+   MessageInterface::ShowMessage
+      ("Solver::SetStringParameter() <%p><%s>'%s' entered, id=%d, value='%s'\n",
+       this, GetTypeName().c_str(), GetName().c_str(), id, value.c_str());
+   #endif
+   
    if (id == ReportStyle)
    {
       for (Integer i = NORMAL_STYLE; i < MaxStyle; ++i)
@@ -1041,7 +1047,7 @@ bool Solver::SetStringParameter(const Integer id, const std::string &value)
       solverTextFile = value;
       return true;
    }
-
+   
    if (id == variableNamesID) 
    {
       variableNames.push_back(value);
@@ -1397,8 +1403,9 @@ void Solver::OpenSolverTextFile()
 {
    #ifdef DEBUG_SOLVER_INIT
    MessageInterface::ShowMessage
-      ("Solver::OpenSolverTextFile() entered, showProgress=%d, solverTextFile='%s', "
-       "textFileOpen=%d", showProgress, solverTextFile.c_str(), textFile.is_open());
+      ("Solver::OpenSolverTextFile() <%p><%s>'%s' entered\n   showProgress=%d, "
+       "solverTextFile='%s', textFileOpen=%d\n", this, GetTypeName().c_str(),
+       GetName().c_str(), showProgress, solverTextFile.c_str(), textFile.is_open());
    #endif
    
    if (!showProgress)
@@ -1407,12 +1414,18 @@ void Solver::OpenSolverTextFile()
    FileManager *fm;
    fm = FileManager::Instance();
    std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
-   std::string fullSolverTextFile = outPath + solverTextFile;
+   std::string fullSolverTextFile = solverTextFile;
+   
+   // Add output path if there is no path (LOJ: 2012.04.19 for GMT-1542 fix)
+   if (solverTextFile.find("/") == solverTextFile.npos &&
+       solverTextFile.find("\\") == solverTextFile.npos)
+      fullSolverTextFile = outPath + solverTextFile;
    
    if (textFile.is_open())
       textFile.close();
    
    #ifdef DEBUG_SOLVER_INIT
+   MessageInterface::ShowMessage("   fullSolverTextFile='%s'\n", fullSolverTextFile.c_str());
    MessageInterface::ShowMessage("   instanceNumber=%d\n", instanceNumber);
    #endif
    
@@ -1423,7 +1436,7 @@ void Solver::OpenSolverTextFile()
    
    if (!textFile.is_open())
       throw SolverException("Error opening targeter text file " +
-                            solverTextFile);
+                            fullSolverTextFile);
    
    textFile.precision(16);
    
