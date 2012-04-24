@@ -173,5 +173,9 @@ bool ClearPlot::Execute()
       if (thePlotList.at(ii))
          if (!(thePlotList.at(ii)->TakeAction("ClearData"))) return false;
    }
+   
+   // Build command summary
+   BuildCommandSummary(true);
+   
    return true;
 }

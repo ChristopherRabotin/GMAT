@@ -86,8 +86,9 @@ Assignment::Assignment  () :
 {
    objectTypeNames.push_back("GMAT");
    objectTypeNames.push_back("Assignment");
-
-   includeInSummary = false;
+   
+   // Changed to show summary data (LOJ: 2012.04.19)
+   includeInSummary = true;
 }
 
 
@@ -1094,6 +1095,9 @@ bool Assignment::Execute()
    // Update clones
    PassToClones();
 
+   // Build command summary
+   BuildCommandSummary(true);
+   
    #ifdef DEBUG_TRACE
    clock_t t2 = clock();
    MessageInterface::ShowMessage

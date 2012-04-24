@@ -140,7 +140,7 @@ bool Global::Initialize()
 
 
 //---------------------------------------------------------------------------
-//  bool GmatCommand::Execute()
+//  bool Execute()
 //---------------------------------------------------------------------------
 /**
  * The method that is fired to perform this Global command.
@@ -188,7 +188,10 @@ bool Global::Execute()
          throw CommandException(ex);
       }
    }
-      
+   
+   // Build command summary
+   BuildCommandSummary(true);
+   
    return true;
 }
 

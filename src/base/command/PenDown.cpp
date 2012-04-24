@@ -182,6 +182,9 @@ bool PenDown::Execute()
          if (!(thePlotList.at(ii)->TakeAction("PenDown"))) return false;
    }
    
+   // Build command summary
+   BuildCommandSummary(true);
+   
    #ifdef DEBUG_PENDOWN
       MessageInterface::ShowMessage("PenDown::Execute() returning true\n");
    #endif

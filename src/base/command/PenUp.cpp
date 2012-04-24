@@ -172,5 +172,9 @@ bool PenUp::Execute()
       if (thePlotList.at(ii))
          if (!(thePlotList.at(ii)->TakeAction("PenUp"))) return false;
    }
+   
+   // Build command summary
+   BuildCommandSummary(true);
+   
    return true;
 }

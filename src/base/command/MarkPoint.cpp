@@ -156,7 +156,7 @@ bool MarkPoint::Initialize()
 
 
 //---------------------------------------------------------------------------
-//  bool PlotCommand::Execute()
+//  bool Execute()
 //---------------------------------------------------------------------------
 /**
  * The method that is fired to perform the PlotCommand.
@@ -180,6 +180,9 @@ bool MarkPoint::Execute()
       if (thePlotList.at(ii))
          if (!(thePlotList.at(ii)->TakeAction("MarkPoint"))) return false;
    }
+   
+   // Build command summary
+   BuildCommandSummary(true);
    
    #ifdef DEBUG_MarkPoint
       MessageInterface::ShowMessage("MarkPoint::Execute() returning true\n");
