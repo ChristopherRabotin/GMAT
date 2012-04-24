@@ -3014,7 +3014,7 @@ bool Propagate::Initialize()
          try
          {
             stopWhen[i]->Initialize();
-            stopWhen[i]->SetSpacecraft((SpaceObject*)sats[0]);
+            stopWhen[i]->SetSpacecrafts(sats, stopSats);
 
             if (!stopWhen[i]->IsInitialized())
             {

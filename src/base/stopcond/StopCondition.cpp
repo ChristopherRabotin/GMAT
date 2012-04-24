@@ -41,6 +41,7 @@
 //#define DEBUG_BUFFER_FILLING
 //#define DEBUG_CYCLIC_PARAMETERS
 //#define DEBUG_STOPCOND_EPOCH
+//#define DEBUG_SET_SPACECRAFT
 //#define DEBUG_WRAPPERS
 //#define DEBUG_CYCLIC_TIME
 
@@ -1211,16 +1212,16 @@ bool StopCondition::Validate()
       //   ("StopCondition::Validate() stop parameter: " + mStopParamName +
       //    " has NULL pointer.\n");
       throw StopConditionException
-         ("Currently GMAT expects a Spacecraft Parameter to be on the LHS of "
-          "stopping condition");
+         ("Currently GMAT expects a Parameter of propagating Spacecraft to be on the LHS of "
+          "stopping condition (stop Parameter is NULL)");
    }
    
    // check if stop parameter is a system Parameter such as Sat.X
    if (mStopParam->GetKey() != GmatParam::SYSTEM_PARAM)
    {
       throw StopConditionException
-         ("Currently GMAT expects a Spacecraft Parameter to be on the LHS of "
-          "stopping condition");
+         ("Currently GMAT expects a Parameter of propagating Spacecraft to be on the LHS of "
+          "stopping condition (stop Parameter is not a predefined Parameter)");
    }
    
    isCyclicTimeCondition = false;
@@ -1281,7 +1282,7 @@ bool StopCondition::Validate()
             ("StopCondition::Validate(): Creating KepEcc...\n");
          #endif
          
-         mEccParam = new KepEcc("");
+         mEccParam = new KepEcc(mStopParam->GetRefObjectName(Gmat::SPACECRAFT));
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
             (mEccParam, mEccParam->GetName(), "StopCondition::Validate()",
@@ -1323,7 +1324,7 @@ bool StopCondition::Validate()
                 depObjName.c_str());
             #endif
             
-            mRmagParam = new SphRMag("");
+            mRmagParam = new SphRMag(mStopParam->GetRefObjectName(Gmat::SPACECRAFT));
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Add
                (mRmagParam, mRmagParam->GetName(), "StopCondition::Validate()",
@@ -1753,21 +1754,157 @@ bool StopCondition::SetRhsWrapper(ElementWrapper *toWrapper)
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetSpacecraft(Spacecraft *sc)
+// bool SetSpacecrafts(const ObjectArray &propSats,
+//                     const std::vector<SpaceObject *> stopSats)
 //------------------------------------------------------------------------------
 /**
  * Sets spacecraft pointer to internal parameter used in stop condition.
  *
+ * @param  propSats  The list of propagating SpaceObjects
+ * @param  stopSats  The list of Spacecraft that are used in stoppting condition
+ *
  * @return true if spacecraft has been set.
  */
 //------------------------------------------------------------------------------
-bool StopCondition::SetSpacecraft(SpaceObject *sc)
+bool StopCondition::SetSpacecrafts(const ObjectArray &propSats,
+                                   const std::vector<SpaceObject *> stopSats)
 {
-   if (mEccParam != NULL)
-      mEccParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName());
+   Integer numPropSats = propSats.size();
+   Integer numStopSats = stopSats.size();
    
+   #ifdef DEBUG_SET_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("StopCondition::SetSpacecrafts() entered, this=<%p>'%s'\n"
+       "There are %d prop sats and %d stop sats\n", this, GetName().c_str(),
+       numPropSats, numStopSats);
+   #endif
+   
+   if (numPropSats == 0 || numStopSats == 0)
+      return false;
+   
+   bool propFormationFound = false;
+   StringArray allPropSats;
+   for (Integer i = 0; i < numPropSats; i++)
+   {
+      // Check for NULL propagating spacecraft
+      if (propSats[i] == NULL)
+         throw StopConditionException
+            ("StopCondition::SetSpacecrafts() - Cannot continue. One of propagating "
+             "SpaceObject is NULL\n");
+      
+      #ifdef DEBUG_SET_SPACECRAFT
+      MessageInterface::ShowMessage
+         ("   prop sat[%d] = <%p><%s>'%s'\n", i, propSats[i],
+          propSats[i]->GetTypeName().c_str(), propSats[i]->GetName().c_str());
+      #endif
+      if (propSats[i]->IsOfType(Gmat::FORMATION))
+      {
+         propFormationFound = true;
+         StringArray formSats = propSats[i]->GetStringArrayParameter("Add");
+         copy(formSats.begin(), formSats.end(), back_inserter(allPropSats));
+      }
+      else
+         allPropSats.push_back(propSats[i]->GetName());
+   }
+   
+   numPropSats = allPropSats.size();
+   
+   #ifdef DEBUG_SET_SPACECRAFT
+   for (Integer i = 0; i < numPropSats; i++)
+      MessageInterface::ShowMessage
+         ("   all prop sat[%d] = '%s'\n", i, allPropSats[i].c_str());
+   #endif
+   
+   for (Integer i = 0; i < numStopSats; i++)
+   {
+      // Check for NULL stopping spacecraft
+      if (stopSats[i] == NULL)
+         throw StopConditionException
+            ("StopCondition::SetSpacecrafts() - Cannot continue. One of propagating "
+             "SpaceObject is NULL\n");
+      
+      #ifdef DEBUG_SET_SPACECRAFT
+      MessageInterface::ShowMessage
+         ("   stop sat[%d] = '%s'\n", i, stopSats[i]->GetName().c_str());
+      #endif
+   }
+   
+   // Currently LHS should be a Parameter of propagating spcecraft, so check.
+   // GMT-1599 (LOJ: 2012.04.05)
+   std::string type, owner, dep;
+   GmatStringUtil::ParseParameter(lhsString, type, owner, dep);
+   #ifdef DEBUG_SET_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("   lhsString='%s', owner='%s'\n", lhsString.c_str(), owner.c_str());
+   #endif
+   bool stopSatFound = false;
+   for (Integer i = 0; i < numPropSats; i++)
+   {
+      if (owner == allPropSats[i])
+      {
+         stopSatFound = true;
+         break;
+      }
+   }
+   
+   #ifdef DEBUG_SET_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("   sat='%s', stopSatFound=%d\n", owner.c_str(), stopSatFound);
+   #endif
+
+   //@todo - When spacecraft is added to formation in the sequence and then propagate
+   // the formation, the formmation is not updated, so exclude it for checking for now.
+   if (!stopSatFound && !propFormationFound)
+   {
+      #ifdef DEBUG_SET_SPACECRAFT
+      MessageInterface::ShowMessage
+         ("StopCondition::SetSpacecraft() throwng exception\n\n");
+      #endif
+      throw StopConditionException
+         ("*** Currently GMAT expects a Parameter of propagating Spacecraft to be on the LHS of "
+          "stopping condition (propagating spacecraft not found)");
+   }
+   
+   // Set ref. Spacecraft for mEccParam
+   if (mEccParam != NULL)
+   {
+      std::string eccParamSatName = mEccParam->GetName();
+      #ifdef DEBUG_SET_SPACECRAFT
+      MessageInterface::ShowMessage
+         ("   Setting spacecraft '%s' to mEccParam\n", eccParamSatName.c_str());
+      #endif
+      for (Integer i = 0; i < numStopSats; i++)
+      {
+         if (eccParamSatName == stopSats[i]->GetName())
+         {
+            mEccParam->SetRefObject(stopSats[i], Gmat::SPACECRAFT, eccParamSatName);
+            break;
+         }
+      }
+   }
+   
+   // Set ref. Spacecraft for mRmagParam
    if (mRmagParam != NULL)
-      mRmagParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName());
+   {
+      std::string rmagParamSatName = mRmagParam->GetName();
+      #ifdef DEBUG_SET_SPACECRAFT
+      MessageInterface::ShowMessage
+         ("   Setting spacecraft '%s' to mRmagParam\n", rmagParamSatName.c_str());
+      #endif
+      for (Integer i = 0; i < numStopSats; i++)
+      {
+         if (rmagParamSatName == stopSats[i]->GetName())
+         {
+            mRmagParam->SetRefObject(stopSats[i], Gmat::SPACECRAFT, rmagParamSatName);
+            break;
+         }
+      }
+   }
+   
+   #ifdef DEBUG_SET_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("StopCondition::SetSpacecraft() returning true\n\n");
+   #endif
    
    return true;
 }
@@ -1794,7 +1931,7 @@ bool StopCondition::RenameRefObject(const Gmat::ObjectType type,
    if (type != Gmat::SPACECRAFT && type != Gmat::PARAMETER)
       return true;
    
-   //set new StopCondition name
+   // set new StopCondition name
    std::string name = GetName();
    std::string::size_type pos = name.find(oldName);
    if (pos != name.npos)
@@ -1803,19 +1940,24 @@ bool StopCondition::RenameRefObject(const Gmat::ObjectType type,
       SetName(name);
    }
    
-   //set new epoch parameter name
+   // set new epoch parameter name
    pos = mEpochParamName.find(oldName);
    if (pos != mEpochParamName.npos)
       mEpochParamName = GmatStringUtil::ReplaceName(mEpochParamName, oldName, newName);
    
-   //set new stop parameter name
+   // set new stop parameter name
    pos = mStopParamName.find(oldName);
    if (pos != mStopParamName.npos)
       mStopParamName = GmatStringUtil::ReplaceName(mStopParamName, oldName, newName);
    
-   //set new stop goal string
+   // set new lhs string
+   pos = lhsString.find(oldName);
+   if (pos != lhsString.npos)
+      lhsString = GmatStringUtil::ReplaceName(lhsString, oldName, newName);
+   
+   // set new rhs string
    pos = rhsString.find(oldName);
-   if (pos != mStopParamName.npos)
+   if (pos != rhsString.npos)
       rhsString = GmatStringUtil::ReplaceName(rhsString, oldName, newName);
    
    return true;

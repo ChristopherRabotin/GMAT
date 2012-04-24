@@ -84,7 +84,10 @@ public:
    bool SetLhsWrapper(ElementWrapper* toWrapper);
    bool SetRhsWrapper(ElementWrapper* toWrapper);
    
-   virtual bool SetSpacecraft(SpaceObject *sc);
+   //virtual bool SetSpacecraft(SpaceObject *sc);
+   //bool SetSpacecrafts(const std::vector<SpaceObject *> stopSats);
+   bool SetSpacecrafts(const ObjectArray &propSats,
+                               const std::vector<SpaceObject *> stopSats);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
