@@ -179,7 +179,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    inlineComment     (""),
    showPrefaceComment(true),
    showInlineComment (true),
-   cloaking          (false)
+   cloaking          (false),
+   blockCommandModeAssignment (false)
 {
    attributeCommentLines.clear();
    attributeInlineComments.clear();
@@ -272,6 +273,7 @@ GmatBase::GmatBase(const GmatBase &a) :
     showPrefaceComment        (a.showPrefaceComment),
     showInlineComment         (a.showInlineComment),
     cloaking                  (a.cloaking),
+    blockCommandModeAssignment(a.blockCommandModeAssignment),
     covarianceList            (a.covarianceList),
     covarianceIds             (a.covarianceIds),
     covarianceSizes           (a.covarianceSizes),
@@ -325,6 +327,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    showPrefaceComment        = a.showPrefaceComment;
    showInlineComment         = a.showInlineComment;
    cloaking                  = a.cloaking;
+   blockCommandModeAssignment= a.blockCommandModeAssignment;
    covarianceList            = a.covarianceList;
    covarianceIds             = a.covarianceIds;
    covarianceSizes           = a.covarianceSizes;
@@ -4268,8 +4271,32 @@ Covariance* GmatBase::GetCovariance()
 }
 
 
+//------------------------------------------------------------------------------
+// void UpdateClonedObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Entry point for updating locally owned clones
+ *
+ * @param obj The object that may have been cloned
+ */
+//------------------------------------------------------------------------------
 void GmatBase::UpdateClonedObject(GmatBase *obj)
 {
    MessageInterface::ShowMessage("UpdateClonedObject called in GmatBase; does "
          "the override exist in the %s class?\n", typeName.c_str());
+}
+
+
+//------------------------------------------------------------------------------
+// bool BlockCommandModeAssignment()
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if the object accepts command mode assignment
+ *
+ * @retval true if command mode assignment is allowed, false if not
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::BlockCommandModeAssignment()
+{
+   return blockCommandModeAssignment;
 }

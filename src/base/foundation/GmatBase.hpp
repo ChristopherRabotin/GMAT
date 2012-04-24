@@ -453,6 +453,7 @@ public:
    // Cloned object update management
    virtual bool HasLocalClones() = 0;
    virtual void UpdateClonedObject(GmatBase *obj);
+   bool BlockCommandModeAssignment();
 
 protected:
    /// Parameter IDs
@@ -533,6 +534,9 @@ protected:
    bool                cloaking;
    /// Utility array used to return types for objects to be shown on a GUI
    ObjectTypeArray     listedTypes;
+
+   /// Flag used to turn off command mode assignment, throwing an exception if true and used
+   bool                blockCommandModeAssignment;
 
    // Ordered list of parameters that have covariances
    StringArray         covarianceList;

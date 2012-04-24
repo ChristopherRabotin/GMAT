@@ -175,6 +175,9 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    objectTypes.push_back(Gmat::PHYSICAL_MODEL);
    objectTypeNames.push_back("PhysicalModel");
    parameterCount = PhysicalModelParamCount;
+
+   // Do not allow ODE model changes in command mode
+   blockCommandModeAssignment = true;
 }
              
 //------------------------------------------------------------------------------

@@ -254,6 +254,9 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    currentForce = 0;
    parameterCount = ODEModelParamCount;
 
+   // Do not allow ODE model changes in command mode
+   blockCommandModeAssignment = true;
+
    muMap.clear();
 }
 

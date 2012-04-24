@@ -878,6 +878,20 @@ bool Sandbox::Execute()
             runState = currentState;
          }
          
+         if (current->AffectsClones())
+         {
+            // Manage owned clones
+            GmatBase *obj = current->GetUpdatedObject();
+            if (obj != NULL)
+            {
+               if (obj->BlockCommandModeAssignment())
+                  throw SandboxException("Assignment is not allowed after the "
+                        "BeginMissionSequence command for " +
+                        obj->GetTypeName() + " objects on the line\n" +
+                        current->GetGeneratingString(Gmat::NO_COMMENTS));
+            }
+         }
+
          rv = current->Execute();
          
          if (!rv)
