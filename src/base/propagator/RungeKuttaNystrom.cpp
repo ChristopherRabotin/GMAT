@@ -36,6 +36,9 @@
 
 #include "gmatdefs.hpp"
 #include "RungeKuttaNystrom.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_INITIALIZATION
 
 //---------------------------------
 // public
@@ -54,17 +57,20 @@
 //}
 
 //------------------------------------------------------------------------------
-// RungeKuttaNystrom::RungeKuttaNystrom(Gmat::ObjectType id, const std::string &typeStr,
+// RungeKuttaNystrom(Gmat::ObjectType id, const std::string &typeStr,
 //                            const std::string &nomme)
 //------------------------------------------------------------------------------
 /**
  * The constructor
+ *
+ * @param st Number of stages in the specific algorithm implemented
+ * @param order Order of the expansion used for the integrator
+ * @param typeStr The integrator type
+ * @param nomme The name of the object being created
  */
 //------------------------------------------------------------------------------
-//RungeKuttaNystrom::RungeKuttaNystrom(const std::string &nomme) :
-//    RungeKutta (9, 8, "RungeKuttaNystrom", nomme)
-RungeKuttaNystrom::RungeKuttaNystrom(Integer st, Integer order, const std::string &typeStr,
-                                           const std::string &nomme) :
+RungeKuttaNystrom::RungeKuttaNystrom(Integer st, Integer order,
+      const std::string &typeStr, const std::string &nomme) :
     RungeKutta          (st, order, typeStr, nomme),
     cdotj               (NULL),
     derivativeMap       (NULL),
@@ -76,7 +82,7 @@ RungeKuttaNystrom::RungeKuttaNystrom(Integer st, Integer order, const std::strin
 }
 
 //------------------------------------------------------------------------------
-// RungeKuttaNystrom::~RungeKuttaNystrom()
+// ~RungeKuttaNystrom()
 //------------------------------------------------------------------------------
 /**
  * The destructor
@@ -95,10 +101,12 @@ RungeKuttaNystrom::~RungeKuttaNystrom()
 }
 
 //------------------------------------------------------------------------------
-// RungeKuttaNystrom::RungeKuttaNystrom(const RungeKuttaNystrom& rk)
+// RungeKuttaNystrom(const RungeKuttaNystrom& rk)
 //------------------------------------------------------------------------------
 /**
  * The copy constructor
+ *
+ * @param rk The integrator being copied
  */
 //------------------------------------------------------------------------------
 RungeKuttaNystrom::RungeKuttaNystrom(const RungeKuttaNystrom& rk) :
@@ -113,10 +121,12 @@ RungeKuttaNystrom::RungeKuttaNystrom(const RungeKuttaNystrom& rk) :
 }
 
 //------------------------------------------------------------------------------
-// RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
+// RungeKuttaNystrom & operator=(const RungeKuttaNystrom& rk)
 //------------------------------------------------------------------------------
 /**
  * The assignment operator
+ *
+ * @param rk The integrator being copied
  */
 //------------------------------------------------------------------------------
 RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
@@ -132,25 +142,11 @@ RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
 }
 
 //------------------------------------------------------------------------------
-// Propagator* RungeKuttaNystrom::Clone() const
-//------------------------------------------------------------------------------
-/**
- * Method used to create a copy of the object
- */
-//------------------------------------------------------------------------------
-//Propagator* RungeKuttaNystrom::Clone() const
-//{
-//    return new RungeKuttaNystrom(*this);
-//}
-
-//---------------------------------
-// protected
-//---------------------------------
-
-//------------------------------------------------------------------------------
 // bool RungeKuttaNystrom::Initialize()
 //------------------------------------------------------------------------------
 /**
+ * Initialized the Nystrom elements of the integrator & calls the RK initializer
+ *
  * This method allocates the data arrays for the Runge-Kutta-Nystrom integrators
  * by calling the Runge-Kutta initialization method (RungeKutta::Initialize()) 
  * and then initializing the Nystrom specific data.
@@ -158,76 +154,96 @@ RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
 //------------------------------------------------------------------------------
 bool RungeKuttaNystrom::Initialize()
 {
-    RungeKutta::Initialize();
-    isInitialized = true;
-    
-    // DJC: 06/18/04 Dimension needs to be set early in the initialization
-    if (physicalModel) 
-        dimension = physicalModel->GetDimension();
-    
-    if (cdotj) {
-        delete [] cdotj;
-        cdotj = NULL;
-    }
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Entered RungeKuttaNystrom::"
+            "Initialize()\n");
+   #endif
 
-    // Set the Nystrom-specific structures
-    if ((cdotj = new double [stages]) == NULL) {
-        RungeKutta::ClearArrays();
-        isInitialized = false;
-        throw PropagatorException("Could not allocate cdotj");
-    }
+   if (RungeKutta::Initialize())
+   {
+      isInitialized = false;
 
-    /// \todo: Make this consistent with SetupAccumulator in the RK code
-    if (physicalModel == NULL) {
-        isInitialized = false;
-        throw PropagatorException("PhysicalModel was not set");
-    }
+      if (physicalModel == NULL)
+         throw PropagatorException("PhysicalModel was not set");
 
-    if (derivativeMap) {
-        delete [] derivativeMap;
-        derivativeMap = NULL;
-    }
+      if (physicalModel)
+         dimension = physicalModel->GetDimension();
 
-    if (inverseMap) {
-        delete [] inverseMap;
-        inverseMap = NULL;
-    }
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Dimension: %d\n", dimension);
+      #endif
 
-    if (eeDeriv) {
-        delete [] eeDeriv;
-        eeDeriv = NULL;
-    }
+      if (cdotj) {
+         delete [] cdotj;
+         cdotj = NULL;
+      }
 
-    if ((derivativeMap = new int [dimension]) == NULL) {
-        RungeKutta::ClearArrays();
-        delete [] cdotj;
-        cdotj = NULL;
-        isInitialized = false;
-        throw PropagatorException("Could not allocate derivativeMap");
-    }
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Stages\n");
+      #endif
+      // Set the Nystrom-specific structures
+      if ((cdotj = new double [stages]) == NULL) {
+         RungeKutta::ClearArrays();
+         throw PropagatorException("Could not allocate cdotj");
+      }
 
-    if ((inverseMap = new int [dimension]) == NULL) {
-        RungeKutta::ClearArrays();
-        delete [] cdotj;
-        cdotj = NULL;
-        delete [] derivativeMap;
-        derivativeMap = NULL;
-        isInitialized = false;
-        throw PropagatorException("Could not allocate inverseMap");
-    }
+      if (derivativeMap) {
+         delete [] derivativeMap;
+         derivativeMap = NULL;
+      }
 
-    if (!physicalModel->GetComponentMap(derivativeMap)) {
-        RungeKutta::ClearArrays();
-        delete [] cdotj;
-        cdotj = NULL;
-        delete [] derivativeMap;
-        derivativeMap = NULL;
-        isInitialized = false;
-        throw PropagatorException("Could not set the component map");
-    }
+      if (inverseMap) {
+         delete [] inverseMap;
+         inverseMap = NULL;
+      }
 
-    if (derivativeError) {
-        if ((eeDeriv = new double[stages]) == NULL) {
+      if (eeDeriv) {
+         delete [] eeDeriv;
+         eeDeriv = NULL;
+      }
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Derivative map\n");
+      #endif
+      if ((derivativeMap = new int [dimension]) == NULL) {
+         RungeKutta::ClearArrays();
+         delete [] cdotj;
+         cdotj = NULL;
+         throw PropagatorException("Could not allocate derivativeMap");
+      }
+
+      if ((inverseMap = new int [dimension]) == NULL) {
+         RungeKutta::ClearArrays();
+         delete [] cdotj;
+         cdotj = NULL;
+         delete [] derivativeMap;
+         derivativeMap = NULL;
+         throw PropagatorException("Could not allocate inverseMap");
+      }
+
+      // Init the derivative and inverse map
+      for (int i = 0; i < dimension; ++i)
+      {
+         derivativeMap[i] = -1;
+         inverseMap[i] = -1;
+      }
+
+      if (!physicalModel->GetComponentMap(derivativeMap)) {
+         RungeKutta::ClearArrays();
+         delete [] cdotj;
+         cdotj = NULL;
+         delete [] derivativeMap;
+         derivativeMap = NULL;
+         throw PropagatorException("Could not set the component map");
+      }
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Derivative error = %s\n",
+               (derivativeError ? "true" : "false"));
+      #endif
+
+      if (derivativeError) {
+         if ((eeDeriv = new double[stages]) == NULL) {
             RungeKutta::ClearArrays();
             delete [] cdotj;
             cdotj = NULL;
@@ -235,88 +251,121 @@ bool RungeKuttaNystrom::Initialize()
             derivativeMap = NULL;
             delete [] inverseMap;
             inverseMap = NULL;
-            isInitialized = false;
             throw PropagatorException("Encountered derivative error");
-        }
-    }
+         }
+      }
 
-    if (isInitialized == false) {
-        throw PropagatorException("RungeKutta base did not initialize for the RKN class");
-    }
+      // Fill the inverse map from the derivative map
+      for (int i = 0; i < dimension; ++i)
+         if (derivativeMap[i] != -1)
+             inverseMap[derivativeMap[i]] = i;
 
-    // Fill the inverse map from the derivative map
-    for (int i = 0; i < dimension; ++i)
-        inverseMap[i] = -1;
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Setting coefficients\n");
+      #endif
+      isInitialized = true;      // Flag that allows coefficient filling
+      SetCoefficients();
+      isInitialized = SetupAccumulator();  // Final init check and setup
+   }
+   else
+      throw PropagatorException("RungeKutta base did not initialize for the "
+            "RKN class");
 
-    for (int i = 0; i < dimension; ++i)
-        if (derivativeMap[i] != -1)
-            inverseMap[derivativeMap[i]] = i;
-            
-    SetCoefficients();
-    SetupAccumulator();
-    
-    return isInitialized;
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Completed RungeKuttaNystrom::Initialize();"
+            " returning %s\n", (isInitialized ? "true" : "false"));
+   #endif
+   return isInitialized;
 }
 
 
+//------------------------------------------------------------------------------
+// bool Step()
+//------------------------------------------------------------------------------
+/**
+ * Evolves the state vector by one step
+ *
+ * @return true if a successful step was taken, false if not
+ */
+//------------------------------------------------------------------------------
 bool RungeKuttaNystrom::Step()
 {
-    if (!isInitialized) {
-        Initialize();
-        if (!isInitialized)
-            throw PropagatorException("Cannot Step: RKN is not initialized");
-    }
+   if (!isInitialized) {
+      Initialize();
+      if (!isInitialized)
+         throw PropagatorException("Cannot Step: RKN is not initialized");
+   }
     
-    if (!finalStep)
-       if (fabs(stepSize) < minimumStep)
-          stepSize = ((stepSize > 0.0) ? minimumStep : -minimumStep);
+   if (!finalStep)
+      if (fabs(stepSize) < minimumStep)
+         stepSize = ((stepSize > 0.0) ? minimumStep : -minimumStep);
     
-    if (fabs(stepSize) > maximumStep)
-        stepSize = ((stepSize > 0.0) ? maximumStep : -maximumStep);
+   if (fabs(stepSize) > maximumStep)
+      stepSize = ((stepSize > 0.0) ? maximumStep : -maximumStep);
         
-    bool goodStepTaken = false;
-    double maxerror;
+   bool goodStepTaken = false;
+   double maxerror;
     
-    do {
-        if (!RawStep()) {
-            throw PropagatorException("RKN::RawStep() failed");
-            return false;
-        }
+   do {
+      if (!RawStep()) {
+         throw PropagatorException("RKN::RawStep() failed");
+         return false;
+      }
 
-        maxerror = EstimateError();
-        stepTaken = stepSize;
-        if (AdaptStep(maxerror))
-            goodStepTaken = true;
+      maxerror = EstimateError();
+      stepTaken = stepSize;
+      if (AdaptStep(maxerror))
+         goodStepTaken = true;
 
-        if (stepAttempts >= maxStepAttempts) {
-            throw PropagatorException("Too many step attempts in RKN Propagator");
-            return false;
-        }
-    } while (!goodStepTaken);
+      if (stepAttempts >= maxStepAttempts) {
+         throw PropagatorException("Too many step attempts in RKN Propagator");
+         return false;
+      }
+   } while (!goodStepTaken);
 
-    physicalModel->IncrementTime(stepTaken);
-    return true;
+   physicalModel->IncrementTime(stepTaken);
+   return true;
 }
 
 
+//------------------------------------------------------------------------------
+// bool Step(double dt)
+//------------------------------------------------------------------------------
+/**
+ * Evolves the state vector by a specified step
+ *
+ * @param dt The step desired
+ *
+ * @return true if the step was taken, false if not
+ */
+//------------------------------------------------------------------------------
 bool RungeKuttaNystrom::Step(double dt)
 {
-    bool stepFinished = false;
-    timeleft = dt;
-    do {
-        if (!Propagator::Step(timeleft)) {
-            throw PropagatorException("Propagator::Step(timeleft) failed in RKN");
-            return false;
-        }
-        if (timeleft == stepTaken)
-            stepFinished = true;
-        timeleft -= stepTaken;
-    } while (stepFinished == false);
+   bool stepFinished = false;
+   timeleft = dt;
+   do {
+      if (!Propagator::Step(timeleft)) {
+         throw PropagatorException("Propagator::Step(timeleft) failed in RKN");
+         return false;
+      }
+      if (timeleft == stepTaken)
+         stepFinished = true;
+      timeleft -= stepTaken;
+   } while (stepFinished == false);
 
-    return true;
+   return true;
 }
 
 
+//------------------------------------------------------------------------------
+// bool RungeKuttaNystrom::RawStep()
+//------------------------------------------------------------------------------
+/**
+ * Applies the Nystrom algorithm to evolve the state vector
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool RungeKuttaNystrom::RawStep()
 {
     int i, j, k;
@@ -384,9 +433,30 @@ bool RungeKuttaNystrom::RawStep()
 }
 
 //------------------------------------------------------------------------------
+// Integer GetPropagatorOrder() const
+//------------------------------------------------------------------------------
+/**
+ * Identifies the derivative order needed by this integrator
+ *
+ * @return 2, since Nystrom integrators are second order integrators.
+ */
+//------------------------------------------------------------------------------
+Integer RungeKuttaNystrom::GetPropagatorOrder() const
+{
+    return 2;
+}
+
+
+//---------------------------------
+// protected
+//---------------------------------
+
+//------------------------------------------------------------------------------
 // void RungeKuttaNystrom::EstimateError()
 //------------------------------------------------------------------------------
 /**
+ * Provides the element by element error estimate for the evolved state vector
+ *
  * This method takes the state vector and calculates the error in each 
  * component.  The error is then divided by the change in the component.  The
  * function returns the largest of the resulting relative errors.
@@ -417,11 +487,3 @@ Real RungeKuttaNystrom::EstimateError()
     // Find the maximum error
     return physicalModel->EstimateError(errorEstimates, candidateState);
 }
-
-Integer RungeKuttaNystrom::GetPropagatorOrder() const
-{
-    return 2;
-}
-
-
-
