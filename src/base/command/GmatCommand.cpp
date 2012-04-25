@@ -60,6 +60,7 @@
 //#define DEBUG_COMMAND_SUMMARY_TYPE
 //#define DEBUG_MISSION_SUMMARY
 //#define DEBUG_SUMMARY_STRINGS
+//#define DEBUG_DEFSTR
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -2353,9 +2354,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                  << "        RMAG = "               << BuildNumber(sphStateAZFPA[0])           << " km   "
                  << "        Mean Motion        = " << BuildNumber(meanMotion, true)           << " deg/sec\n"
                  << "        RA   = "               << BuildNumber(sphStateAZFPA[1])           << " deg  "
-                 << "        Orbit Energy       = " << BuildNumber(orbitEnergy, false)         << " Km^2/s^2\n"
+                 << "        Orbit Energy       = " << BuildNumber(orbitEnergy, false)         << " km^2/s^2\n"
                  << "        DEC  = "               << BuildNumber(sphStateAZFPA[2])           << " deg  "
-                 << "        C3                 = " << BuildNumber(c3, false)                  << " Km^2/s^2\n"
+                 << "        C3                 = " << BuildNumber(c3, false)                  << " km^2/s^2\n"
                  << "        VMAG = "               << BuildNumber(sphStateAZFPA[3])           << " km/s "
                  << "        Semilatus Rectum   = " << BuildNumber(semilatusRectum, false)     << " km   \n"
                  << "        AZI  = "               << BuildNumber(sphStateAZFPA[4])           << " deg  "
@@ -2406,7 +2407,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                }
             }
 
-            data << "\n\n        Spacecraft properties \n"
+            data << "\n\n        Spacecraft Properties \n"
                  << "        ------------------------------\n"
                  << "        Cd                    = " << BuildNumber(parmData[i*6],   false, 10) << "\n"
                  << "        Drag area             = " << BuildNumber(parmData[i*6+1], false, 10) << " m^2\n"
@@ -2521,7 +2522,10 @@ const std::string GmatCommand::BuildNumber(Real value, bool useExp, Integer leng
             fraction = length - 3 - fraction;
             sprintf(defstr, "%%%d.%dlf", length, fraction);
          }
-
+         #ifdef DEBUG_DEFSTR
+            MessageInterface::ShowMessage("defstr = %s\n", defstr);
+            if (fraction < 0) MessageInterface::ShowMessage("   and fraction = %d\n", fraction);
+         #endif
          sprintf(temp, defstr, value);
       }
       retval = temp;
