@@ -913,7 +913,7 @@ Real PhysicalModel::EstimateError(Real * diffs, Real * answer) const
  *
  * @return             Returns true if a mapping was made, false otherwise.  A
  *                     false return value can be used to indicate that the
- *                     requested map is not available, and verefore that the
+ *                     requested map is not available, and therefore that the
  *                     model may not be appropriate for the requested
  *                     operations.
  * 
