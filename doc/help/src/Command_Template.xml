@@ -74,7 +74,7 @@ Use replaceable for italic parts and <literal>literal</literal> for bold parts.<
 
                   <listitem>
                     <para>a list of data types from the Data Type column of
-                    the Field Spec</para>
+                    the User Interface Spec</para>
                   </listitem>
                 </varlistentry>
 
@@ -82,17 +82,8 @@ Use replaceable for italic parts and <literal>literal</literal> for bold parts.<
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>a range spec of list of allowed values from the
-                    Range column of the Field Spec</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set, get, or only one (from the Access column of the
-                    Field Spec)</para>
+                    <para>a range spec or list of allowed values from the
+                    Range column of the User Interface Spec</para>
                   </listitem>
                 </varlistentry>
 
@@ -100,8 +91,17 @@ Use replaceable for italic parts and <literal>literal</literal> for bold parts.<
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>value from the Default Value column of the Field
-                    Spec</para>
+                    <para>value from the Default Value column of the User
+                    Interface Spec</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes or no (from the Required column of the User
+                    Interface Spec)</para>
                   </listitem>
                 </varlistentry>
 
@@ -109,7 +109,8 @@ Use replaceable for italic parts and <literal>literal</literal> for bold parts.<
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>GUI, script, or only one</para>
+                    <para>GUI, script, or only one (from the Interfaces column
+                    of the User Interface Spec)</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
