@@ -185,7 +185,7 @@ void RungeKutta::SetPhysicalModel(PhysicalModel *pPhysicalModel)
  * RK coefficients and accumulator array (ki) memory allocation.  If any of the
  * allocation fails, the internal initialized flag is set to false.
  *
- * @return trun upon successful initialization
+ * @return true upon successful initialization
  */
 //------------------------------------------------------------------------------
 bool RungeKutta::Initialize()
@@ -251,13 +251,13 @@ bool RungeKutta::Initialize()
         }
     }
 
-    // DJC: 06/18/04 Only set coefficients here for 1st order propagators
     if (derivativeOrder == 1)
     {
        SetCoefficients();
        SetupAccumulator();
     }
 
+    isInitialized = true;
     return true;
 }
 
