@@ -930,7 +930,13 @@ bool PhysicalModel::GetComponentMap(Integer * map, Integer order,
    {
       // Calculate how many spacecraft are in the model
       int satCount = (int)(dimension / 6);
-      for (int i = 0; i < satCount; i++) 
+
+      // Ensure we don't overrun the buffer (this is paranoia, since integer
+      // division effectively rounds down, but perhaps a healthy paranoia)
+      while (satCount * 6 > dimension)
+         --satCount;
+
+      for (int i = 0; i < satCount; ++i)
       {
          i6 = i * 6;
     
