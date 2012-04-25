@@ -2248,8 +2248,8 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                {
                   try
                   {
-                     bDotT            = GmatCalcUtil::CalculateBPlaneData("BDotR", cartState, originMu);
-                     bDotR            = GmatCalcUtil::CalculateBPlaneData("BDotT", cartState, originMu);
+                     bDotT            = GmatCalcUtil::CalculateBPlaneData("BDotT", cartState, originMu);
+                     bDotR            = GmatCalcUtil::CalculateBPlaneData("BDotR", cartState, originMu);
                      bVectorAngle     = GmatCalcUtil::CalculateBPlaneData("BVectorAngle", cartState, originMu);
                      bVectorMag       = GmatCalcUtil::CalculateBPlaneData("BVectorMag", cartState, originMu);
                      dla              = GmatCalcUtil::CalculateAngularData("DLA", cartState, originMu, originToSun);
