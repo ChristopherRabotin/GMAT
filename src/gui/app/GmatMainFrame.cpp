@@ -75,7 +75,6 @@
 #include "ManageObjectPanel.hpp"
 #include "ReportPanel.hpp"
 #include "TogglePanel.hpp"
-//#include "ParameterCreateDialog.hpp"
 #include "ArraySetupPanel.hpp"
 #include "ParameterSetupPanel.hpp"
 #include "ConditionPanel.hpp"
@@ -571,7 +570,7 @@ GmatMainFrame::~GmatMainFrame()
    std::stringstream windowSize("");
    windowSize << windowW << " " << windowH;
    pConfig->Write("/MainFrame/UpperLeft", location.str().c_str());
-   pConfig->Write("/MainFrame/WindowSize", windowSize.str().c_str());
+   pConfig->Write("/MainFrame/Size", windowSize.str().c_str());
    #endif
    //=======================================================
    
@@ -798,9 +797,24 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
          #endif
          #ifdef __WXMAC__
             // reposition vertical position of first panel for Mac, so top button bar is visible
-            int x = (numChildren - 1) * 20;
-            int y = (numChildren) * 20;
-            newChild->SetPosition(wxPoint(x, y));
+            if (itemType == GmatTree::SCRIPT_FILE)
+            {
+               // Use ScriptEditor size from the configuration data
+               Integer x = -1, y = -1, w = -1, h = -1;
+               GetConfigurationData("ScriptEditor", x, y, w, h);
+               #ifdef DEBUG_CHILD_WINDOW
+               MessageInterface::ShowMessage
+                  ("   Using ScriptEditor poistion (%d, %d) and size (%d, %d) "
+                   "from the configuration data\n", x, y, w, h);
+               #endif
+               newChild->SetSize(x, y, w, h, wxSIZE_NO_ADJUSTMENTS);
+            }
+            else
+            {
+               int x = (numChildren - 1) * 20;
+               int y = (numChildren) * 20;
+               newChild->SetPosition(wxPoint(x, y));
+            }
          #else
             PositionNewChild(newChild, numChildren);
          #endif
@@ -993,21 +1007,23 @@ bool GmatMainFrame::IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer 
 }
 
 //------------------------------------------------------------------------------
-// bool IsScriptEditorOpen(Integer &x, Integer &y, Integer &width)
+// bool IsScriptEditorOpen(Integer &x, Integer &y, Integer &width, Integer &height)
 //------------------------------------------------------------------------------
 /**
- * @param x  The upper left x position of undocked mission tree returned
- * @param y  The upper left y position of undocked mission tree returned
- * @param width  The width of undocked mission tree returned
- * @return  true if MissionTree is undocked, false otherwise
+ * @param x  The upper left x position of script editor returned
+ * @param y  The upper left y position of script editor returned
+ * @param width  The width of script editor returned
+ * @param height  The height of script editor returned
+ * @return  true if script editor is open, false otherwise
  */
 //------------------------------------------------------------------------------
-bool GmatMainFrame::IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width)
+bool GmatMainFrame::IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width,
+                                       Integer &height)
 {
    int x = 0, y = 0, h = 0, w = 0;
-   xPos = 0, yPos = 0, width = 0;
-
-   GmatMdiChildFrame *child = GetChild("ScriptEditor");  // TBD - this does not work because script file name is used
+   xPos = 0, yPos = 0, width = 0, height = 0;
+   
+   GmatMdiChildFrame *child = GetChild(mScriptFilename);
    if (child != NULL)
    {
       if (child->GetItemType() == GmatTree::SCRIPT_FILE)
@@ -1017,6 +1033,7 @@ bool GmatMainFrame::IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &wi
          xPos = x;
          yPos = y;
          width = w;
+         height = h;
          return true;
       }
    }
@@ -1530,11 +1547,9 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    {
       wxFileConfig *pConfig;
       pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
-      Integer x = 0, y = 0, width = 0;
-      if (IsScriptEditorOpen(x, y, width))
-      {
+      Integer x = 0, y = 0, width = 0, height = 0;
+      if (IsScriptEditorOpen(x, y, width, height))
          pConfig->Write("/ScriptEditor/Open", "true");
-      }
       else
          pConfig->Write("/ScriptEditor/Open", "false");
    }
@@ -1783,8 +1798,9 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
    
    #ifdef DEBUG_CHILD_WINDOW
    MessageInterface::ShowMessage
-      ("   client window: clientW=%d, clientH=%d, toolH=%d, x=%d, y=%d, "
-       "w=%d, h=%d\n", clientW, clientH, toolH, x, y, w, h);
+      ("GmatMainFrame::PositionNewChild() entered, for '%s'\n   numChildren=%d\n   "
+       "client window: clientW=%d, clientH=%d, toolH=%d, x=%d, y=%d, w=%d, h=%d\n",
+       newChild->GetTitle().c_str(), numChildren, clientW, clientH, toolH, x, y, w, h);
    #endif
    
    // Why it doesn't position first child (0,0) to top left corner?
@@ -1808,7 +1824,8 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
          int height = clientH;
          // We don't want to hide iconized children at the bottom, so reduce the height by 40.
          height = clientH - 40;
-         newChild->SetSize(-1, height);
+         //newChild->SetSize(-1, height);
+         newChild->SetSize(x, y, -1, height, wxSIZE_NO_ADJUSTMENTS);
          
          // Reposition other children
          if (numChildren > 1)
@@ -1832,27 +1849,45 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
          {
             if (numChildren > 1)
             {
-               //x = (numChildren - 2) * 20 + mtW + 20;
                x = (numChildren - 2) * 20 + mtW;
-               y = (numChildren - 2) * 20 - toolH;
+               //y = (numChildren - 2) * 20 - toolH;
+               y = (numChildren - 2) * 20;
             }
-            newChild->SetPosition(wxPoint(x, y));
          }
+         #ifdef DEBUG_CHILD_WINDOW
+         MessageInterface::ShowMessage
+            ("   MissionTree is undocked, new position = (%d, %d)\n", x, y);
+         #endif
       }
-      else
+      
+      if (itemType == GmatTree::SCRIPT_FILE)
+      {
+         // Use ScriptEditor size from the configuration data
+         Integer scriptX = -1, scriptY = -1;
+         GetConfigurationData("ScriptEditor", scriptX, scriptY, w, h);
+         #ifdef DEBUG_CHILD_WINDOW
+         MessageInterface::ShowMessage
+            ("   ScriptEditor size from the configuration data is (%d, %d)\n", w, h);
+         #endif
+      }
+      else if (itemType > GmatTree::OUTPUT_BEGIN_REPORT && itemType < GmatTree::OUTPUT_END_REPORT)
       {
          // Get position of output report for persistency
          // Output plot persistency is handled in GuiPlotReceiver
-         if (itemType > GmatTree::OUTPUT_BEGIN_REPORT && itemType < GmatTree::OUTPUT_END_REPORT)
-            newChild->GetPosition(&x, &y);
-         
-         newChild->SetSize(x, y, w, h, wxSIZE_NO_ADJUSTMENTS);
+         newChild->GetPosition(&x, &y);
       }
+      
+      newChild->SetSize(x, y, w, h, wxSIZE_NO_ADJUSTMENTS);
+      
       #ifdef DEBUG_CHILD_WINDOW
       MessageInterface::ShowMessage
          ("   child positioned to (%d, %d) with size of (%d, %d)\n", x, y, w, h);
       #endif
    }
+   
+   #ifdef DEBUG_CHILD_WINDOW
+   MessageInterface::ShowMessage("GmatMainFrame::PositionNewChild() leaving\n");
+   #endif
 }
 
 
@@ -2024,7 +2059,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    #ifdef DEBUG_INTERPRET
    MessageInterface::ShowMessage
       ("GmatMainFrame::InterpretScript()\n   filename=%s\n   scriptOpenOpt=%d, "
-       "closeScript=%d, readBack=%d, multiScripts=%d\n   savePath=%s\n", filename.c_str(),
+       "closeScript=%d, readBack=%d, multiScripts=%d\n   savePath='%s'\n", filename.c_str(),
        scriptOpenOpt, closeScript, readBack, multiScripts, savePath.c_str());
    #endif
 
@@ -2040,7 +2075,8 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    gmatAppData->GetOutputTree()->UpdateOutput(true, true, true);
    
    // Indicate active script in bold face in the ResourceTree (LOJ: 2010.12.27)
-   RefreshActiveScript(filename);
+   // Pass false so that it will not reload the file contents
+   RefreshActiveScript(filename, false);
    
    // let's try building the script, Moderator::InterpretScript() will
    // clear all resource and commands
@@ -3291,11 +3327,6 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    //}
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
-   // if we are creating a script editor, we need to use saved configuration data, if it exists
-   if (itemType == GmatTree::SCRIPT_FILE)
-   {
-      ; // TBD <<<<<<<<<<
-   }
    GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, name, title, itemType);   
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
    
@@ -3398,7 +3429,6 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       {
          bool activeScript = false;
          
-         //if (mScriptFilename.c_str() == name)
          if (GmatFileUtil::IsSameFileName(mScriptFilename.c_str(), name.c_str()))
             activeScript = true;
          
@@ -3449,6 +3479,9 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    if (itemType != GmatTree::SCRIPT_FILE)
    {
       wxSize bestSize = newChild->GetBestSize();
+      MessageInterface::ShowMessage
+         ("==> Setting size to child's best size (%d, %d)\n",
+          bestSize.GetWidth(), bestSize.GetHeight());
       newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
    }
    else
@@ -4968,7 +5001,6 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-   //MessageInterface::ShowMessage("===> GmatMainFrame::OnScriptRun()\n");
    mRunStatus = RunCurrentMission();
 }
 
@@ -5013,19 +5045,20 @@ bool GmatMainFrame::IsActiveScriptModified()
 
 
 //------------------------------------------------------------------------------
-// void RefreshActiveScript(const wxString &filename)
+// void RefreshActiveScript(const wxString &filename, bool reloadFile = true)
 //------------------------------------------------------------------------------
 /**
  * Refreshes active script by making active script bold face in the ResourceTree,
- * updates active script status on any opened script panel.
+ * updates active script status on any opened script panel, and reloads the
+ * file contents on option.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::RefreshActiveScript(const wxString &filename)
+void GmatMainFrame::RefreshActiveScript(const wxString &filename, bool reloadFile)
 {
    #ifdef DEBUG_REFRESH_SCRIPT
    MessageInterface::ShowMessage
-      ("GmatMainFrame::RefreshActiveScript() entered, filename='%s'\n",
-       filename.c_str());
+      ("GmatMainFrame::RefreshActiveScript() entered, filename='%s', reloadFile=%d\n",
+       filename.c_str(), reloadFile);
    #endif
    
    // If scripts are running batch mode, just skip
@@ -5074,7 +5107,8 @@ void GmatMainFrame::RefreshActiveScript(const wxString &filename)
                   
                   // We don't wan't to reload the file, so commented out (LOJ: 2011.05.20)
                   // We decided to reload the file (See GMAT Software Specification) (LOJ: 2012.02.22)
-                  ((GmatSavePanel*)child->GetAssociatedWindow())->ReloadFile();
+                  if (reloadFile)
+                     ((GmatSavePanel*)child->GetAssociatedWindow())->ReloadFile();
                   ((GmatSavePanel*)child->GetAssociatedWindow())->UpdateScriptActiveStatus(true);
                }
                else
@@ -5121,7 +5155,14 @@ std::string GmatMainFrame::GetActiveScriptFileName()
 //------------------------------------------------------------------------------
 void GmatMainFrame::UpdateGuiScriptSyncStatus(int guiStatus, int scriptStatus)
 {
+   #ifdef DEBUG_REFRESH_SCRIPT
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::UpdateGuiScriptSyncStatus() entered, guiStatus=%d, "
+       "scriptStatus=%d\n", guiStatus, scriptStatus);
+   #endif
+   
    GuiItemManager *guiManager = GuiItemManager::GetInstance();
+   
    if (guiStatus != 0)
       guiManager->SetGuiStatus(guiStatus);
    if (scriptStatus != 0)
@@ -5129,6 +5170,11 @@ void GmatMainFrame::UpdateGuiScriptSyncStatus(int guiStatus, int scriptStatus)
    
    ((GmatToolBar*)theToolBar)->
       UpdateGuiScriptSyncStatus(theToolBar, guiStatus, scriptStatus);
+   
+   #ifdef DEBUG_REFRESH_SCRIPT
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::UpdateGuiScriptSyncStatus() leaving\n");
+   #endif
 }
 
 
@@ -5560,7 +5606,6 @@ void GmatMainFrame::SaveGuiToActiveScript()
    cntStr.Printf("%d", backupCounter);
    wxString currFilename = mScriptFilename.c_str();
    
-   //backupFilename = currFilename + "." + cntStr + ".bak";
    backupFilename = currFilename + ".bak";
    
    // Create backup file for the first time only and show message
@@ -5602,8 +5647,14 @@ void GmatMainFrame::SaveChildPositionsAndSizes()
 //------------------------------------------------------------------------------
 // void GetConfigurationData(const std::string &forItem)
 //------------------------------------------------------------------------------
-bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x, Integer &y, Integer &w, Integer &h)
+bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
+                                         Integer &y, Integer &w, Integer &h)
 {
+   #ifdef DEBUG_CONFIG_DATA
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GetConfigurationData() entered, forItem='%s'\n", forItem.c_str());
+   #endif
+   
    bool isPresetSizeUsed = false;
    // Get configuration data associated with MissionTree or ScriptEditor here
    Real positionX = 0.0, positionY = 0.0;
@@ -5630,7 +5681,6 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
    // Compute the location and size for the item
    std::stringstream upperLeft(treeUpperLeft.c_str());
    std::stringstream size(treeSize.c_str());
-//   std::string xStr, yStr, wStr, hStr;  // ???????????????
    upperLeft >> positionX >> positionY;
    size      >> width     >> height;
 
@@ -5666,19 +5716,18 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
 
    // Since -1 is default position, change it to 0
    #ifndef __WXMAC__
-      //Real realW = (Real)screenWidth;
-      //Real realH = (Real)screenHeight;
-      //Integer xOffset = (Integer)((realW * 0.01) + (10000.0 / realW));
-      //Integer yOffset = (Integer)((realH * 0.06) + (10000.0 / realH));
       if (x == -1) x = 0;
-      //else x -= xOffset;
-      //y -= yOffset;
       #ifdef DEBUG_CONFIG_DATA
-      MessageInterface::ShowMessage("   screen offset: x = %4d, y = %4d\n", xOffset, yOffset);
       MessageInterface::ShowMessage("   after offset : x = %4d, y = %4d\n", x, y);
       #endif
    #endif
 
+   #ifdef DEBUG_CONFIG_DATA
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GetConfigurationData() returning %d, forItem='%s'\n",
+       isPresetSizeUsed, forItem.c_str());
+   #endif
+   
    return isPresetSizeUsed;
 }
 

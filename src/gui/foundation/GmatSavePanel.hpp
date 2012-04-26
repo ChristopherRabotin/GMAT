@@ -51,7 +51,7 @@ public:
    virtual void OnClosePanel(wxCommandEvent &event);
    virtual void OnScript(wxCommandEvent &event);
    
-   virtual void SetEditorModified(bool flag);
+   virtual void SetEditorModified(bool modified, bool updateSyncStatus = true);
    void UpdateScriptActiveStatus(bool isActive);
    void ReloadFile();
    
@@ -65,6 +65,7 @@ protected:
    bool DoesFileExist(std::string scriptFilename);
    void MakeScriptActive(wxCommandEvent &event, bool isScriptModified);
    void RefreshScriptActiveStatus(bool isActive);
+   void SaveScript();
    void SaveAndBuildScript(wxCommandEvent &event);
    
    // member data

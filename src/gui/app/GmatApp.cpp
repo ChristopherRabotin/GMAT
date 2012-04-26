@@ -179,7 +179,7 @@ bool GmatApp::OnInit()
                   upperLeftOk = true;
                }
             }
-            if (pConfig->Read("/MainFrame/WindowSize", &windowSizeStr))
+            if (pConfig->Read("/MainFrame/Size", &windowSizeStr))
             {
                intValues = GmatStringUtil::ToIntegerArray(windowSizeStr.c_str());
                if (intValues.size() == 2)

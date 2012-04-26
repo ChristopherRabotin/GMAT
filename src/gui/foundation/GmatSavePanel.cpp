@@ -43,7 +43,7 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// GmatSavePanel(wxWindow *parent)
+// GmatSavePanel(wxWindow *parent,  bool showScriptButton, ...)
 //------------------------------------------------------------------------------
 /**
  * Constructs GmatSavePanel object.
@@ -130,8 +130,8 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
    theButtonSizer->Add(theSaveButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theSaveAsButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theCloseButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-   if (mIsScriptActive)
-      theButtonSizer->Hide(theSaveButton);
+   ////if (mIsScriptActive)
+   ////   theButtonSizer->Hide(theSaveButton);
    
    bottomGridSizer->Add(theButtonSizer, 0, wxALIGN_RIGHT | wxALL, borderSize);
    theBottomSizer->Add(bottomGridSizer, 0, wxALIGN_LEFT | wxALL, borderSize);
@@ -177,10 +177,11 @@ void GmatSavePanel::Show()
 
 
 //------------------------------------------------------------------------------
-// void OnOk()
+// void OnSave()
 //------------------------------------------------------------------------------
 /**
- * Saves the data and closes the page
+ * Saves the data to disk. No syntax checking is performed and no GUI
+ * synchronization is performed.
  */
 //------------------------------------------------------------------------------
 void GmatSavePanel::OnSave(wxCommandEvent &event)
@@ -193,11 +194,14 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    
    // if it is temp script file, call OnSaveAs() to bring up file dialog to save
    if (mFilename == GmatAppData::Instance()->GetTempScriptName())
-   {
       OnSaveAs(event);
-      return;
-   }
+   else
+      SaveScript();
    
+   // We don't want to build on save so removed (LOJ: 2012.04.25)
+   //=======================================================
+   #if 0
+   //=======================================================
    bool saveScript = false;
    if (theGuiManager->GetGuiStatus() == 1)
    {
@@ -221,6 +225,10 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    
    if (saveScript)
       SaveAndBuildScript(event);
+
+   //=======================================================
+   #endif
+   //=======================================================
    
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
@@ -272,6 +280,13 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
    }
    
    if (saveScript)
+      SaveScript();
+   
+   // We don't want to build on save so removed (LOJ: 2012.04.25)
+   //=======================================================
+   #if 0
+   //=======================================================
+   if (saveScript)
    {
       GmatAppData *gmatAppData = GmatAppData::Instance();
       
@@ -307,6 +322,10 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
          SaveAndBuildScript(event);
       }
    }
+   //=======================================================
+   #endif
+   //=======================================================
+   
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
       ("GmatSavePanel::OnSaveAs() leaving, script = '%s'\n", mFilename.c_str());
@@ -399,22 +418,27 @@ void GmatSavePanel::ReloadFile()
 
 
 //------------------------------------------------------------------------------
-// void SetEditorModified(bool flag)
+// void SetEditorModified(bool modified, updateSyncStatus)
 //------------------------------------------------------------------------------
-void GmatSavePanel::SetEditorModified(bool flag)
+/**
+ * Updates script modified status and GUI/Script sync status if updateSyncStatus
+ * is true
+ */
+//------------------------------------------------------------------------------
+void GmatSavePanel::SetEditorModified(bool modified, bool updateSyncStatus)
 {
    #ifdef DEBUG_TEXT_MODIFIED
    MessageInterface::ShowMessage
-      ("GmatSavePanel::SetEditorModified() entered, flag=%d, mEditorModified=%d, "
-       "hasFileLoaded=%d, mIsScriptActive=%d\n", flag, mEditorModified, hasFileLoaded,
+      ("GmatSavePanel::SetEditorModified() entered, modified=%d, mEditorModified=%d, "
+       "hasFileLoaded=%d, mIsScriptActive=%d\n", modified, mEditorModified, hasFileLoaded,
        mIsScriptActive);
    #endif
    
    // Update script modified status
    if (hasFileLoaded)
    {
-      int scriptStatus = flag ? 2 : 1; // 1 = clean, 2 = dirty
-      if (mEditorModified != flag)
+      int scriptStatus = modified ? 2 : 1; // 1 = clean, 2 = dirty
+      if (mEditorModified != modified)
       {
          if (scriptStatus == 1)
             mScriptDirtyLabel->SetLabel("");
@@ -423,14 +447,14 @@ void GmatSavePanel::SetEditorModified(bool flag)
       }
       
       // For active script, update sync status
-      if (mIsScriptActive)
+      if (mIsScriptActive && updateSyncStatus)
       {
          theGuiManager->SetActiveScriptStatus(scriptStatus);
          GmatAppData::Instance()->GetMainFrame()->
             UpdateGuiScriptSyncStatus(0, scriptStatus);
       }
       
-      mEditorModified = flag;
+      mEditorModified = modified;
    }
 }
 
@@ -458,6 +482,12 @@ bool GmatSavePanel::DoesFileExist(std::string scriptFilename)
 //------------------------------------------------------------------------------
 void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModified)
 {
+   #ifdef DEBUG_ACTIVE_SCRIPT
+   MessageInterface::ShowMessage
+      ("GmatSavePanel::MakeScriptActive() entered, isScriptModified=%d\n",
+       isScriptModified);
+   #endif
+   
    GmatAppData *gmatAppData = GmatAppData::Instance();
    bool continueBuild = true;
    
@@ -522,6 +552,10 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
       // Make current script active script (Fix for GMT-206, LOJ: 2012.02.09)
       UpdateScriptActiveStatus(true);
    }
+   
+   #ifdef DEBUG_ACTIVE_SCRIPT
+   MessageInterface::ShowMessage("GmatSavePanel::MakeScriptActive() leaving\n");
+   #endif
 }
 
 
@@ -532,7 +566,7 @@ void GmatSavePanel::RefreshScriptActiveStatus(bool isActive)
 {
    if (mIsScriptActive)
    {
-      theButtonSizer->Hide(theSaveButton);
+      ////theButtonSizer->Hide(theSaveButton);
       theButtonSizer->Layout();
       
       mScriptActiveLabel->SetLabel(" Active Script ");
@@ -542,7 +576,7 @@ void GmatSavePanel::RefreshScriptActiveStatus(bool isActive)
    }
    else
    {
-      theButtonSizer->Show(theSaveButton);
+      ////theButtonSizer->Show(theSaveButton);
       theButtonSizer->Layout();
       
       mScriptActiveLabel->SetLabel(" Inactive Script ");
@@ -550,6 +584,38 @@ void GmatSavePanel::RefreshScriptActiveStatus(bool isActive)
       mScriptActiveLabel->SetBackgroundColour(bgcolor);
       mScriptActiveLabel->SetForegroundColour(*wxRED);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void SaveScript()
+//------------------------------------------------------------------------------
+void GmatSavePanel::SaveScript()
+{
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage
+      ("GmatSavePanel::SaveScript() entered\n   mFilename = '%s'\n",
+       mFilename.c_str());
+   #endif
+   
+   SaveData();
+   mScriptDirtyLabel->SetLabel("");
+   SetEditorModified(false);
+   
+   if (mIsScriptActive)
+   {
+      GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
+      mainFrame->SetActiveChildDirty(false);
+      mainFrame->SetScriptFileName(mFilename.c_str());
+      mainFrame->RefreshActiveScript(mFilename.c_str(), false);
+      mainFrame->UpdateGuiScriptSyncStatus(2, 2);
+   }
+   
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage
+      ("GmatSavePanel::SaveScript() leaving\n   mFilename = '%s'\n",
+       mFilename.c_str());
+   #endif
 }
 
 
@@ -565,7 +631,6 @@ void GmatSavePanel::SaveAndBuildScript(wxCommandEvent &event)
    #endif
    
    SaveData();
-   
    mScriptDirtyLabel->SetLabel("");
    
    GmatAppData *gmatAppData = GmatAppData::Instance();

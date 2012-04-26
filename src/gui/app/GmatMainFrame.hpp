@@ -77,7 +77,7 @@ public:
                                 bool incScripts = false);
    Integer GetNumberOfActivePlots();
    bool IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer &width);
-   bool IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width);
+   bool IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width, Integer &height);
    void IconizeUndockedMissionTree();
    bool IsChildOpen(GmatTreeItemData *item, bool restore = true);
    bool IsChildOpen(const wxString &name, GmatTree::ItemType itemType,
@@ -207,7 +207,7 @@ public:
 
    bool SetScriptFileName(const std::string &filename);
    bool IsActiveScriptModified();
-   void RefreshActiveScript(const wxString &filename);
+   void RefreshActiveScript(const wxString &filename, bool reloadFile = true);
    std::string GetActiveScriptFileName();
    void UpdateGuiScriptSyncStatus(int guiStatus, int scriptStatus);
    
