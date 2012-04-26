@@ -87,6 +87,9 @@ public:
    virtual Integer             GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string         GetParameterTypeString(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+
    virtual Real    GetRealParameter(const Integer id) const;
    virtual Real    GetRealParameter(const std::string &label) const;
    virtual Real    SetRealParameter(const Integer id, const Real value);
@@ -132,8 +135,8 @@ private:
    Real *estimatedState;
    /// Array containing number of subintervals at each level
    Integer *subinterval;
-   /// Minimum tolerance permitted
-   Real mintolerance;
+//   /// Minimum tolerance permitted
+//   Real mintolerance;
    /// Safety factor used when estimating error
    Real bs_safety1;
    /// Safety factor used to prevent thrashing on the stepsize

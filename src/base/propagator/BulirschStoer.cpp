@@ -39,7 +39,7 @@
 //                               - Added Parameter accessor methods
 //                           : 06/22/2004 - W. Waktola, Missions Applications Branch
 //                                               Removals:
-//                                               - SetParameter()
+//                               - SetParameter()
 //                               - GetParameter()
 //                               - GetParameterName()
 //                               - GetType()
@@ -95,7 +95,7 @@ BulirschStoer::BulirschStoer(const std::string &nomme) :
    nstate                          (NULL),
    estimatedState                  (NULL),
    subinterval                     (NULL),
-   mintolerance                    (1.0e-12),
+//   mintolerance                    (1.0e-12),
    bs_safety1                      (0.25),
    bs_safety2                      (0.70),
    minimumReduction                (0.7),
@@ -174,7 +174,7 @@ BulirschStoer::BulirschStoer(const BulirschStoer& bs) :
    nstate                          (NULL),
    estimatedState                  (NULL),
    subinterval                     (NULL),
-   mintolerance                    (bs.mintolerance),
+//   mintolerance                    (bs.mintolerance),
    bs_safety1                      (0.25),
    bs_safety2                      (0.70),
    minimumReduction                (0.7),
@@ -216,7 +216,7 @@ BulirschStoer& BulirschStoer::operator=(const BulirschStoer& bs)
    nstate             = NULL;
    estimatedState     = NULL;
    subinterval        = NULL;
-   mintolerance       = bs.mintolerance;
+//   mintolerance       = bs.mintolerance;
    bs_safety1         = bs.bs_safety1;
    bs_safety2         = bs.bs_safety2;
    minimumReduction   = bs.minimumReduction;
@@ -256,7 +256,7 @@ GmatBase* BulirschStoer::Clone(void) const
 /**
  * Method used to initialize the B-S integrator.  This method sets up (or resets)
  * the data arrays used by the Bulirsch-Stoer integrator.  
- * There are several things worth mentioning about the implementaqtion provided 
+ * There are several things worth mentioning about the implementation provided
  * here if you are comparing this code to Numerical Recipes.  First, note that 
  * the array "d" in Numerical Recipes is not sized correctly.  It is set to be
  * d[depth][depth], but the polynomial code fills it as if it were 
@@ -266,7 +266,7 @@ GmatBase* BulirschStoer::Clone(void) const
  * dimensional arrays can be made using calls to memcpy().
  */
 //------------------------------------------------------------------------------
-bool BulirschStoer::Initialize(void)
+bool BulirschStoer::Initialize()
 {
    Integer i, j;
 
@@ -447,7 +447,7 @@ bool BulirschStoer::Initialize(void)
       ddt = physicalModel->GetDerivativeArray();
    }
 
-   tolerance = (tolerance > mintolerance ? tolerance : mintolerance);
+//   tolerance = (tolerance > mintolerance ? tolerance : mintolerance);
    accuracyWarningTriggered = false;
 
    first = true;
@@ -1204,6 +1204,45 @@ std::string BulirschStoer::GetParameterTypeString(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Hides parameters that are not intended for user access
+ *
+ * @param id The ID of the parameter
+ *
+ * @return true if the parameter is supposed to be hidden, false if it is
+ *         visible
+ */
+//------------------------------------------------------------------------------
+bool BulirschStoer::IsParameterReadOnly(const Integer id) const
+{
+   if (id == MIN_TOLERANCE)
+      return true;
+
+   return Integrator::IsParameterReadOnly(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Hides parameters that are not intended for user access
+ *
+ * @param label The script label of the parameter
+ *
+ * @return true if the parameter is supposed to be hidden, false if it is
+ *         visible
+ */
+//------------------------------------------------------------------------------
+bool BulirschStoer::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -1214,7 +1253,8 @@ Real BulirschStoer::GetRealParameter(const Integer id) const
 {
    if      (id == MINIMUM_REDUCTION)       return minimumReduction;
    else if (id == MAXIMUM_REDUCTION)       return maximumReduction;
-   else if (id == MIN_TOLERANCE)       return mintolerance;
+   else if (id == MIN_TOLERANCE)          // Deprecated
+      return tolerance;
 
    return Integrator::GetRealParameter(id);
 }
@@ -1259,23 +1299,21 @@ Real BulirschStoer::SetRealParameter(const Integer id, const Real value)
    }
    else if (id == MIN_TOLERANCE)
    {
-      if (fabs(value) <= 1.0)
-      {
-         mintolerance = fabs(value);
-         tolerance = (tolerance > mintolerance ? tolerance : mintolerance);
-         return mintolerance;
-      }
-   }
-//    if (id == INTEGRATION_ACCURACY)
+      MessageInterface::ShowMessage
+            ("*** WARNING *** The MinimumTolerance field of Bulirsch-Stoer "
+             "integrators is deprecated, has no effect, and will be removed "
+             "from a future build.\n");
+
+      return tolerance;
+
+//      if (fabs(value) <= 1.0)
 //      {
-//        // Trap bad tolerance values
-//        if (fabs(val) <= 1.0)
-//              {
-//            tolerance = (fabs(val) > mintolerance ? fabs(val) : mintolerance);
-//            if (tolerance == fabs(val))
-//                retval = true;
-//        }
-//    }
+//         mintolerance = fabs(value);
+//         tolerance = (tolerance > mintolerance ? tolerance : mintolerance);
+//         return mintolerance;
+//      }
+   }
+
    return Integrator::SetRealParameter(id, value);
 }
 
