@@ -1016,6 +1016,25 @@ void PhysicalModel::SetSatelliteParameter(const Integer i,
 {
 }
 
+
+//------------------------------------------------------------------------------
+// bool UsesSpacecraftOrigin()
+//------------------------------------------------------------------------------
+/**
+ * Test to model to see if the Spacecraft origin is needed
+ *
+ * Identifies models that depend on the origin of the Spacecraft rather than the
+ * force model origin.
+ *
+ * @return true if the model is spacecraft origin dependent, false if not
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::UsesSpacecraftOrigin()
+{
+   return false;
+}
+
+
 //------------------------------------------------------------------------------
 // void PhysicalModel::SetSatelliteParameter(const Integer i,
 //                                           const std::string parmName,

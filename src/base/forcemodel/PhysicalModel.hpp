@@ -180,6 +180,7 @@ public:
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
                                       const std::string parm);
+   virtual bool UsesSpacecraftOrigin();
    virtual void ClearSatelliteParameters(const std::string parmName = "");
    virtual bool StateChanged(bool reset = true);
    

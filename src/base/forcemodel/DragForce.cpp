@@ -571,11 +571,10 @@ void DragForce::SetSatelliteParameter(const Integer i,
  */
 //------------------------------------------------------------------------------
 void DragForce::SetSatelliteParameter(const Integer i, 
-                                      const std::string parmName, 
-                                      const std::string parm)
+      const std::string parmName, const std::string parm)
 {
    unsigned parmNumber = (unsigned)(i+1);
-    
+
    if (parmName == "ReferenceBody")
    {
       if (parmNumber < mass.size())
@@ -695,8 +694,8 @@ bool DragForce::Initialize()
          {
             if ((*i) != "Earth" && (*i) != "Mars")
                throw ODEModelException(
-                  "Drag modeling only works at the Earth or Mars in current GMAT "
-                  "builds.");
+                  "Drag modeling only works at the Earth or Mars in current "
+                  "GMAT builds.");
          }
          
          if (dragBody.size() > 0)

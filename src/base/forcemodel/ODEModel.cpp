@@ -1947,19 +1947,25 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                // ... Coordinate System ...
                stringParm = sat->GetStringParameter(satIds[1]);
                
-               CoordinateSystem *cs =
-                  (CoordinateSystem*)(sat->GetRefObject(Gmat::COORDINATE_SYSTEM, 
-                      stringParm));
-               if (!cs)
+
+               if (pm->UsesSpacecraftOrigin())
                {
-                  char sataddr[20];
-                  std::sprintf(sataddr, "%lx", (unsigned long)sat);
-                  throw ODEModelException(
-                     "CoordinateSystem is NULL on Spacecraft " + sat->GetName() +
-                     " at address " + sataddr);
+                  CoordinateSystem *cs =
+                     (CoordinateSystem*)(sat->GetRefObject(Gmat::COORDINATE_SYSTEM,
+                         stringParm));
+                  if (!cs)
+                  {
+                     char sataddr[20];
+                     std::sprintf(sataddr, "%lx", (unsigned long)sat);
+                     throw ODEModelException(
+                        "CoordinateSystem is NULL on Spacecraft " + sat->GetName() +
+                        " at address " + sataddr);
+                  }
+                  pm->SetSatelliteParameter(i, "ReferenceBody", cs->GetOriginName());
                }
-               pm->SetSatelliteParameter(i, "ReferenceBody", cs->GetOriginName());
-               
+               else
+                  pm->SetSatelliteParameter(i, "ReferenceBody", centralBodyName);
+
                // ... Mass ...
                parm = sat->GetRealParameter(satIds[2]);
                if (parm <= 0)
