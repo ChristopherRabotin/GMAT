@@ -1349,7 +1349,12 @@ bool SolarRadiationPressure::SupportsDerivative(Gmat::StateElementId id)
       return true;
    
    if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+   {
+      MessageInterface::ShowMessage("Warning: The orbit state transition "
+            "matrix does not currently contain SRP contributions from shadow "
+            "partial derivatives.\n");
       return true;
+   }
    
    if (id == Gmat::ORBIT_A_MATRIX)
       return true;

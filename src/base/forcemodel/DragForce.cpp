@@ -1802,8 +1802,12 @@ bool DragForce::SupportsDerivative(Gmat::StateElementId id)
    if (id == Gmat::CARTESIAN_STATE)
       return true;
    
-//   if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
-//      return true;
+   if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+   {
+      MessageInterface::ShowMessage("Warning: The orbit state transition "
+            "matrix does not currently contain drag contributions.\n");
+      return false;
+   }
    
    return PhysicalModel::SupportsDerivative(id);
 }
