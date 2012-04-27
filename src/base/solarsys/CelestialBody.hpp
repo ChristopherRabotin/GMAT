@@ -166,7 +166,7 @@ public:
    // Moved to SpacePoint (LOJ: 2010.11.19)
    //virtual void                 SetSolarSystem(SolarSystem *ss);
 #ifdef __USE_SPICE__
-   virtual void                 SetSpiceOrbitKernelReader(SpiceOrbitKernelReader *skr);
+//   virtual void                 SetSpiceOrbitKernelReader(SpiceOrbitKernelReader *skr);
 #endif
    
    // methods to return the body type, central body, gravitational constant,

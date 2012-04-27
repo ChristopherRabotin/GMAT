@@ -437,7 +437,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    isFirstTimeRadius      = true;
    potentialFileRead      = false;
    #ifdef __USE_SPICE__
-      kernelReader = cBody.kernelReader;
+   kernelReader = NULL;
    #endif
    
    if (cBody.atmModel)
@@ -503,7 +503,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    sourceFilename      = cBody.sourceFilename;
    theSourceFile       = cBody.theSourceFile;   // ??????????????
    #ifdef __USE_SPICE__
-      kernelReader        = cBody.kernelReader;
+   kernelReader        = cBody.kernelReader;
    #endif
    usePotentialFile    = cBody.usePotentialFile;
    potentialFileName   = cBody.potentialFileName;
@@ -602,18 +602,31 @@ CelestialBody::~CelestialBody()
       #endif
       delete atmModel;
    }
-   #ifdef DEBUG_CB_SPICE
-      MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel(s):\n",
-            instanceName.c_str());
-      for (unsigned int jj = 0; jj < orbitSpiceKernelNames.size(); jj++)
-         MessageInterface::ShowMessage("    %s\n", (orbitSpiceKernelNames.at(jj)).c_str());
-   #endif
    #ifdef __USE_SPICE__
    // unload the kernel(s) from the SpiceKernelReader
-      for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
-         if (orbitSpiceKernelNames.at(kk) != "" && (kernelReader != NULL) &&
-            (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk))))
-            kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
+      if (kernelReader != NULL)
+      {
+         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
+         {
+            if (orbitSpiceKernelNames.at(kk) != "")
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
    #endif
 }
 
@@ -979,11 +992,11 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
 // }
 
 #ifdef __USE_SPICE__
-void CelestialBody::SetSpiceOrbitKernelReader(SpiceOrbitKernelReader *skr)
-{
-   kernelReader   = skr;
-   spiceSetupDone = false;
-}
+//void CelestialBody::SetSpiceOrbitKernelReader(SpiceOrbitKernelReader *skr)
+//{
+//   kernelReader   = skr;
+//   spiceSetupDone = false;
+//}
 #endif
 
 //------------------------------------------------------------------------------
@@ -4365,6 +4378,7 @@ bool CelestialBody::SetUpSPICE()
          MessageInterface::ShowMessage("   kernelReader is NULL\n");
    #endif
    if (posVelSrc != Gmat::SPICE) return false;
+   if (kernelReader == NULL) kernelReader = theSolarSystem->GetSpiceOrbitKernelReader();
    if (kernelReader == NULL)
    {
       std::string errmsg = "ERROR - SpiceKernelReader not set for body \"";
