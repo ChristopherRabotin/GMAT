@@ -45,6 +45,8 @@
 //#define DEBUG_SS_CLOAKING
 //#define DEBUG_SS_PARAM_EQUAL
 //#define DEBUG_SS_INIT
+//#define DEBUG_PLANETARY_SPK
+
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -344,6 +346,9 @@ SolarSystem::SolarSystem(std::string withName)
       ("SolarSystem::SolarSystem(default), this=<%p>, planetarySPK<%p> created\n",
        this, planetarySPK);
    #endif
+   #ifdef DEBUG_PLANETARY_SPK
+      MessageInterface::ShowMessage("PlanetarySPK is at <%p>\n", planetarySPK);
+   #endif
 #endif
    allowSpiceForDefaultBodies = true; // as of 2010.03.31, this is the default value
 
@@ -554,7 +559,7 @@ SolarSystem::SolarSystem(std::string withName)
    ssb->SetSolarSystem(this);
 #ifdef __USE_SPICE__
   // Set the kernel reader on the solar system barycenter
-   ssb->SetSpiceOrbitKernelReader(planetarySPK);
+//   ssb->SetSpiceOrbitKernelReader(planetarySPK);   //  let special points get the pointer from the SS when it's needed
 #endif
    specialPoints[SOLAR_SYSTEM_BARYCENTER_NAME] = ssb;
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
@@ -644,6 +649,9 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
       ("SolarSystem::SolarSystem(copy), this=<%p>, planetarySPK<%p> cloned\n",
        this, planetarySPK);
    #endif
+   #ifdef DEBUG_PLANETARY_SPK
+      MessageInterface::ShowMessage("in SS copy constructor, cloning planetarySPK from <%p> to <%p>\n", ss.planetarySPK, planetarySPK);
+   #endif
 #endif
 
    // create planetary source first, but do not create default
@@ -725,7 +733,11 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    thePlanetarySourceNames = ss.thePlanetarySourceNames;
    CreatePlanetarySource(false);
 #ifdef __USE_SPICE__
-   planetarySPK          = ss.planetarySPK;
+   if (planetarySPK) delete planetarySPK;
+   planetarySPK          = (ss.planetarySPK)->Clone();   // was ss.planetarySPK;
+   #ifdef DEBUG_PLANETARY_SPK
+      MessageInterface::ShowMessage("in SS operator=, cloning planetarySPK from <%p> to <%p>\n", ss.planetarySPK, planetarySPK);
+   #endif
    #ifdef DEBUG_SS_CREATE
    MessageInterface::ShowMessage
       ("SolarSystem::operator=(), this=<%p>, planetarySPK<%p> copied\n",
@@ -797,6 +809,9 @@ SolarSystem::~SolarSystem()
    }
 
 #ifdef __USE_SPICE__
+   #ifdef DEBUG_PLANETARY_SPK
+      MessageInterface::ShowMessage("in SS destructor, deleting planetarySPK <%p>\n", planetarySPK);
+   #endif
    delete planetarySPK;
 #endif
 }
@@ -1035,24 +1050,24 @@ bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
             SetSourceFile(theDefaultDeFile);
          }
       }
-      else if (id == Gmat::DE421)							// made changes by TUAN NGUYEN
-      {														// made changes by TUAN NGUYEN
-         status = CreateDeFile(Gmat::DE421, fileName);		// made changes by TUAN NGUYEN
-         if (status)										// made changes by TUAN NGUYEN
-         {													// made changes by TUAN NGUYEN
-            thePlanetarySourceNames[id] = fileName;			// made changes by TUAN NGUYEN
-            SetSourceFile(theDefaultDeFile);				// made changes by TUAN NGUYEN
-         }													// made changes by TUAN NGUYEN
-      }														// made changes by TUAN NGUYEN
-      else if (id == Gmat::DE424)							// made changes by TUAN NGUYEN
-      {														// made changes by TUAN NGUYEN
-         status = CreateDeFile(Gmat::DE424, fileName);		// made changes by TUAN NGUYEN
-         if (status)										// made changes by TUAN NGUYEN
-         {													// made changes by TUAN NGUYEN
-            thePlanetarySourceNames[id] = fileName;			// made changes by TUAN NGUYEN
-            SetSourceFile(theDefaultDeFile);				// made changes by TUAN NGUYEN
-         }													// made changes by TUAN NGUYEN
-      }														// made changes by TUAN NGUYEN
+      else if (id == Gmat::DE421)
+      {
+         status = CreateDeFile(Gmat::DE421, fileName);
+         if (status)
+         {
+            thePlanetarySourceNames[id] = fileName;
+            SetSourceFile(theDefaultDeFile);
+         }
+      }
+      else if (id == Gmat::DE424)
+      {
+         status = CreateDeFile(Gmat::DE424, fileName);
+         if (status)
+         {
+            thePlanetarySourceNames[id] = fileName;
+            SetSourceFile(theDefaultDeFile);
+         }
+      }
    }
 
    return status;
@@ -1594,7 +1609,10 @@ bool SolarSystem::AddBody(CelestialBody* cb)
                (cb->GetName()).c_str());
       #endif
      // Set the kernel reader on the celestial bodies
-      cb->SetSpiceOrbitKernelReader(planetarySPK);
+   #ifdef DEBUG_PLANETARY_SPK
+      MessageInterface::ShowMessage("in SS AddBody, setting planetarySPK <%p> on body %s\n", planetarySPK, (cb->GetName()).c_str());
+   #endif
+//      cb->SetSpiceOrbitKernelReader(planetarySPK);  //  let celestial bodies get the pointer from the SS when it's needed
    #endif
 
    return true;
@@ -2925,7 +2943,8 @@ void SolarSystem::CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoint
         cbi != ss.bodiesInUse.end(); ++cbi)
    {
       CelestialBody *cb = (CelestialBody*)((*cbi)->Clone());
-      bodiesInUse.push_back(cb);
+//      bodiesInUse.push_back(cb);
+      AddBody(cb);
       
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
@@ -3025,6 +3044,10 @@ void SolarSystem::DeleteBodiesInUse(bool deleteSpecialPoints)
       std::map<std::string, SpecialCelestialPoint*>::iterator spi = specialPoints.begin();
       while (spi != specialPoints.end())
       {
+         #ifdef DEBUG_SS_CLONING
+         MessageInterface::ShowMessage
+            ("   Deleting %s\n", ((*spi).second)->GetName().c_str());
+         #endif
          delete spi->second;       // delete each special point first
          spi->second = NULL;
          ++spi;
