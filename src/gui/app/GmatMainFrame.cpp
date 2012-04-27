@@ -1023,7 +1023,7 @@ bool GmatMainFrame::IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &wi
    int x = 0, y = 0, h = 0, w = 0;
    xPos = 0, yPos = 0, width = 0, height = 0;
    
-   GmatMdiChildFrame *child = GetChild(mScriptFilename);
+   GmatMdiChildFrame *child = GetChild(mScriptFilename.c_str());
    if (child != NULL)
    {
       if (child->GetItemType() == GmatTree::SCRIPT_FILE)
