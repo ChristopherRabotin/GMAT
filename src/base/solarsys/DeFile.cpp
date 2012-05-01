@@ -211,7 +211,14 @@ DeFile& DeFile::operator=(const DeFile& def)
 DeFile::~DeFile()
 {
    // close the file, if it's open
-   if (Ephemeris_File != NULL) fclose(Ephemeris_File);
+   if (Ephemeris_File != NULL)
+   {
+      fclose(Ephemeris_File);
+
+      // Prevent double closing of the file in the base class destructor
+      if (Ephemeris_File == g_pef_dcb.fptr)
+         g_pef_dcb.fptr = NULL;
+   }
 }
 
 
