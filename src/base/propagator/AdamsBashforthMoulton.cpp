@@ -10,19 +10,19 @@
 //
 // *** File Name : AdamsBashforthMoulton.cpp
 // *** Created   : October 1, 2002
-// ***************************************************************************
-// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)      ***
-// ***  For:  Flight Dynamics Analysis Branch (Code 572)                   ***
-// ***  Under Contract:  P.O.  GSFC S-66617-G                              ***
-// ***                                                                     ***
-// ***  This software is subject to the Software Usage Agreement described ***
-// ***  by NASA Case Number GSC-14735-1.  The Software Usage Agreement     ***
-// ***  must be included in any distribution.  Removal of this header is   ***
-// ***  strictly prohibited.                                               ***
-// ***                                                                     ***
-// ***                                                                     ***
-// ***  Header Version: July 12, 2002                                      ***
-// ***************************************************************************
+// *****************************************************************************
+// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)        ***
+// ***  For:  Flight Dynamics Analysis Branch (Code 572)                     ***
+// ***  Under Contract:  P.O.  GSFC S-66617-G                                ***
+// ***                                                                       ***
+// ***  This software is subject to the Software Usage Agreement described   ***
+// ***  by NASA Case Number GSC-14735-1.  The Software Usage Agreement       ***
+// ***  must be included in any distribution.  Removal of this header is     ***
+// ***  strictly prohibited.                                                 ***
+// ***                                                                       ***
+// ***                                                                       ***
+// ***  Header Version: July 12, 2002                                        ***
+// *****************************************************************************
 // Module Type               : ANSI C++ Source
 // Development Environment   : Visual C++ 7.0
 // Modification History      : 11/26/2002 - D. Conway, Thinking Systems, Inc.
@@ -31,34 +31,39 @@
 //                           : 6/17/2004 - A. Greene, Mission Applications, GSFC
 //                             - Updated style using GMAT cpp style guide
 //                             - All double types to Real types, int to Integer
-// ***************************************************************************
+// *****************************************************************************
 
 
 #include "AdamsBashforthMoulton.hpp"
 #include "MessageInterface.hpp"
+
+//#define DEBUG_PROPAGATION
+
 
 //---------------------------------
 // public
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// AdamsBashforthMoulton::AdamsBashforthMoulton(const std::string &nomme)
+// AdamsBashforthMoulton(const std::string &nomme)
 //------------------------------------------------------------------------------
 /**
  * The constructor for the ABM integrator
+ *
+ * @param nomme The name of the new ABM propagator
  */
 //------------------------------------------------------------------------------
 //AdamsBashforthMoulton::AdamsBashforthMoulton() :
 //    PredictorCorrector      (4, 4),
 AdamsBashforthMoulton::AdamsBashforthMoulton(const std::string &nomme) :
-    PredictorCorrector      (4, 4, "AdamsBashforthMoulton", nomme),
-    eeFactor                (19.0/270.0)
+   PredictorCorrector      (4, 4, "AdamsBashforthMoulton", nomme),
+   eeFactor                (19.0/270.0)
 {
-    starter = new RungeKutta89;
+   starter = new RungeKutta89;
 }
 
 //------------------------------------------------------------------------------
-// AdamsBashforthMoulton::~AdamsBashforthMoulton()
+// ~AdamsBashforthMoulton()
 //------------------------------------------------------------------------------
 /**
  * The destructor
@@ -69,159 +74,229 @@ AdamsBashforthMoulton::~AdamsBashforthMoulton()
 }
 
 //------------------------------------------------------------------------------
-// AdamsBashforthMoulton::AdamsBashforthMoulton(const AdamsBashforthMoulton& abm)
+// AdamsBashforthMoulton(const AdamsBashforthMoulton& abm)
 //------------------------------------------------------------------------------
 /**
  * The copy constructor
+ *
+ * @param abm The propagator that supplies data for this one
  */
 //------------------------------------------------------------------------------
 AdamsBashforthMoulton::AdamsBashforthMoulton(const AdamsBashforthMoulton& abm) :
-    PredictorCorrector      (abm),
-    eeFactor                (abm.eeFactor)
+   PredictorCorrector      (abm),
+   eeFactor                (abm.eeFactor)
 {
-//    starter = new RungeKutta89;
-//    starter = abm.starter;
 }
 
 //------------------------------------------------------------------------------
-// AdamsBashforthMoulton
-//            AdamsBashforthMoulton::operator=(const AdamsBashforthMoulton& abm)
+// AdamsBashforthMoulton operator=(const AdamsBashforthMoulton& abm)
 //------------------------------------------------------------------------------
 /**
  * The assignment operator
+ *
+ * @param abm The propagator that supplies data for this one
  */
 //------------------------------------------------------------------------------
-AdamsBashforthMoulton
-            AdamsBashforthMoulton::operator=(const AdamsBashforthMoulton& abm)
+AdamsBashforthMoulton AdamsBashforthMoulton::operator=(
+      const AdamsBashforthMoulton& abm)
 {
-    if (this == &abm)
-        return *this;
+   if (this == &abm)
+      return *this;
 
-    PredictorCorrector::operator=(abm);
-    eeFactor = abm.eeFactor;
-    //starter = abm.starter;
+   PredictorCorrector::operator=(abm);
+   eeFactor = abm.eeFactor;
 
-    return *this;
+   return *this;
 }
 
 
 //------------------------------------------------------------------------------
-// Propagator* AdamsBashforthMoulton::Clone() const
+// Propagator* Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to create a copy of the object
+ *
+ * @return A clone of this instance
  */
 //------------------------------------------------------------------------------
 Propagator* AdamsBashforthMoulton::Clone() const
 {
-    return new AdamsBashforthMoulton(*this);
+   return new AdamsBashforthMoulton(*this);
 }
   
 //------------------------------------------------------------------------------
-// bool AdamsBashforthMoulton::SetWeights()
+// bool SetWeights()
 //------------------------------------------------------------------------------
 /**
  * Method used to set the ABM weights
+ *
+ * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
 bool AdamsBashforthMoulton::SetWeights()
 {
-    if ((pweights == NULL) || (cweights == NULL))
-        return false;
+   if ((pweights == NULL) || (cweights == NULL))
+      return false;
 
-    pweights[3] =  55.0 / 24.0;
-    pweights[2] = -59.0 / 24.0;
-    pweights[1] =  37.0 / 24.0;
-    pweights[0] = - 9.0 / 24.0;
+   pweights[3] =  55.0 / 24.0;
+   pweights[2] = -59.0 / 24.0;
+   pweights[1] =  37.0 / 24.0;
+   pweights[0] = - 9.0 / 24.0;
 
-    cweights[3] =   9.0 / 24.0;
-    cweights[2] =  19.0 / 24.0;
-    cweights[1] = - 5.0 / 24.0;
-    cweights[0] =   1.0 / 24.0;
+   cweights[3] =   9.0 / 24.0;
+   cweights[2] =  19.0 / 24.0;
+   cweights[1] = - 5.0 / 24.0;
+   cweights[0] =   1.0 / 24.0;
 
-    return true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
-// bool AdamsBashforthMoulton::FireStartupStep()
+// bool FireStartupStep()
 //------------------------------------------------------------------------------
 /**
  * Method used to start the integrator by filling initial states
+ *
+ * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
 bool AdamsBashforthMoulton::FireStartupStep()
 {
-    if (starter == NULL)
-        return false;
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("   Startup Step size %lf\n", stepSize);
+   #endif
 
-    bool retval = starter->Step(stepSize);
-    if (retval) {
-        ++startupCount;
-        if (startupCount == 3) {
-            startupComplete = true;
-        }
-        stepTaken = stepSize;
-    }
-    return retval;
+   if (starter == NULL)
+      return false;
+
+   bool retval = starter->Step(stepSize);
+   if (retval)
+   {
+      #ifdef DEBUG_PROPAGATION
+         MessageInterface::ShowMessage("Startup %d -> ", startupCount);
+      #endif
+      ++startupCount;
+      #ifdef DEBUG_PROPAGATION
+         MessageInterface::ShowMessage("%d ", startupCount);
+      #endif
+      if (startupCount == 3) {
+         startupComplete = true;
+      }
+      stepTaken = stepSize;
+   }
+
+   #ifdef DEBUG_PROPAGATION
+      else
+         MessageInterface::ShowMessage("Bad startup step ");
+   #endif
+
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("   Startup state %d: [", startupCount);
+      for (Integer j = 0; j < dimension-1; ++j)
+         MessageInterface::ShowMessage("%lf ", outState[j]);
+      MessageInterface::ShowMessage("%lf]\n", outState[dimension-1]);
+   #endif
+
+   return retval;
 }
 
 //------------------------------------------------------------------------------
-// bool AdamsBashforthMoulton::Predict()
+// bool Predict()
 //------------------------------------------------------------------------------
 /**
  * Method used to fire the step extrapolation (the predictor phase)
+ *
+ * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
 bool AdamsBashforthMoulton::Predict()
 {
-    int i, j;
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("Predictor phase fired\n");
+   #endif
+   int i, j;
 
-    physicalModel->GetDerivatives(inState);
-    for (i = 0; i < stepCount - 1; i++)
-        memcpy(history[i], history[i+1], dimension * sizeof(double));
-    memcpy(history[stepCount - 1], ddt, dimension * sizeof(double));
+   physicalModel->GetDerivatives(inState);
+
+   for (i = 0; i < stepCount - 1; i++)
+       memcpy(history[i], history[i+1], dimension * sizeof(double));
+   memcpy(history[stepCount - 1], ddt, dimension * sizeof(double));
 
 
-    for (j = 0; j < dimension; j++) {
-        predictorState[j] = inState[j];
-        for (i = 0; i < stepCount; i++) {
-            predictorState[j] += stepSize * pweights[i] * history[i][j];
-        }
-    }
+   for (j = 0; j < dimension; j++)
+   {
+      predictorState[j] = inState[j];
+      for (i = 0; i < stepCount; i++)
+      {
+         predictorState[j] += stepSize * pweights[i] * history[i][j];
+      }
+   }
 
-    return true;
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("   History buffer:\n");
+      for (Integer i = 0; i < stepCount; ++i)
+      {
+         MessageInterface::ShowMessage("      [%d] = [", i);
+         for (Integer j = 0; j < dimension-1; ++j)
+            MessageInterface::ShowMessage(" %.8le ", history[i][j]);
+         MessageInterface::ShowMessage(" %.8le]\n", history[i][dimension-1]);
+      }
+
+      MessageInterface::ShowMessage("   Predictor state: [");
+      for (j = 0; j < dimension-1; ++j)
+         MessageInterface::ShowMessage("%le ", predictorState[j]);
+      MessageInterface::ShowMessage("%le]\n", predictorState[dimension-1]);
+   #endif
+
+   return true;
 }
 
 //------------------------------------------------------------------------------
-// bool AdamsBashforthMoulton::Correct()
+// bool Correct()
 //------------------------------------------------------------------------------
 /**
  * Method used to fire the step refinement (the corrector phase)
+ *
+ * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
 bool AdamsBashforthMoulton::Correct()
 {
-    int i, j;
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("Corrector phase fired\n");
+   #endif
 
-    physicalModel->GetDerivatives(predictorState, stepSize);
-    for (j = 0; j < dimension; j++) {
-        correctorState[j] = inState[j] + stepSize * cweights[stepCount-1] * ddt[j];
-        for (i = 1; i < stepCount; i++) {
-            correctorState[j] += stepSize * cweights[i-1] * history[i][j];
-        }
-    }
+   int i, j;
 
-    return true;
+   physicalModel->GetDerivatives(predictorState, stepSize);
+
+   for (j = 0; j < dimension; j++)
+   {
+      correctorState[j] = inState[j] + stepSize * cweights[stepCount-1] * ddt[j];
+      for (i = 1; i < stepCount; i++)
+      {
+         correctorState[j] += stepSize * cweights[i-1] * history[i][j];
+      }
+   }
+
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("   Corrector state: [");
+      for (j = 0; j < dimension-1; ++j)
+         MessageInterface::ShowMessage("%lf ", predictorState[j]);
+      MessageInterface::ShowMessage("%lf]\n", predictorState[dimension-1]);
+   #endif
+
+   return true;
 }
 
 //------------------------------------------------------------------------------
-// Propagator* PrinceDormand78::Clone() const
+// Real EstimateError()
 //------------------------------------------------------------------------------
 /**
  * Method used to determine the error in the step
  *
- * The error estimate for the Adams-Bashford-Moulton integrator is calculated by
- * finding the difference between the corrector and predictor states, and 
+ * The error estimate for the Adams-Bashforth-Moulton integrator is calculated
+ * by finding the difference between the corrector and predictor states, and
  * multiplying this difference by the difference in the truncated Taylor series 
  * used to derive the algorithm.  For this 4th order implementation, the error 
  * in the \f$i^{th}\f$ component is given by
@@ -231,22 +306,24 @@ bool AdamsBashforthMoulton::Correct()
  *
  * The resulting error components are passed to PhysicalModel->EstimateError()
  * and processed to determine the maximum error in the system.
+ *
+ * @return The maximum error found
  */
 //------------------------------------------------------------------------------
 Real AdamsBashforthMoulton::EstimateError()
 {
-    int i;
+   int i;
 
-    for (i = 0; i < dimension; i++) 
-        errorEstimates[i] = fabs(eeFactor*(correctorState[i]-predictorState[i])); 
+   for (i = 0; i < dimension; i++)
+      errorEstimates[i] = fabs(eeFactor*(correctorState[i]-predictorState[i]));
     
-    maxError = physicalModel->EstimateError(errorEstimates, correctorState);
+   maxError = physicalModel->EstimateError(errorEstimates, correctorState);
 
-    return maxError;
+   return maxError;
 }
 
 //------------------------------------------------------------------------------
-// Propagator* Clone() const
+// bool Reset()
 //------------------------------------------------------------------------------
 /**
  * Method used to restart the integrator, when appropriate
@@ -254,11 +331,19 @@ Real AdamsBashforthMoulton::EstimateError()
  * This method is called when the ABM integrator changes the stepsize or when 
  * the state data in the PhysicalModel is changed discontinuously, so that the
  * internal buffers can be filled with the data for the new stepsize.
+ *
+ * @return true on success
  */
 //------------------------------------------------------------------------------
 bool AdamsBashforthMoulton::Reset()
 {
-    startupCount = 0;
-    startupComplete = false;
-    return true;
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("ABM Resetting\n");
+   #endif
+
+   startupCount = 0;
+   startupComplete = false;
+   ddt = NULL;
+
+   return true;
 }
