@@ -1086,7 +1086,7 @@ bool PhysicalModel::IsTransient()
 // bool DepletesMass()
 //------------------------------------------------------------------------------
 /**
- * Detects mass depletion ffrom a PhysicalModel
+ * Detects mass depletion from a PhysicalModel
  *
  * @return true if the model depletes mass, false if it does not
  */
