@@ -2144,6 +2144,16 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          throw ue;
       }
    }
+   else if (labelUpper == "EQUINOCTIALH")
+   {
+      if ((value < -1.0 + GmatOrbitConstants::KEP_ECC_TOL) || (value > 1.0 + GmatOrbitConstants::KEP_ECC_TOL))
+      {
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "EquinoctialH", "-1.0 < Real Number < 1.0");
+         throw ue;
+      }
+   }
 
    return true;
 }
