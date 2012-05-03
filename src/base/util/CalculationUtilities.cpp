@@ -33,6 +33,8 @@
 //#define __COMPUTE_LONGITUDE_OLDWAY__
 
 //#define DEBUG_CALC_UTIL
+//#define DEBUG_ALTITUDE_LATITUDE
+//#define DEBUG_ANGULAR_DATA
 
 #ifdef DEBUG_CALC_UTIL
 #include "MessageInterface.hpp"
@@ -153,12 +155,20 @@ Real GmatCalcUtil::CalculateBPlaneData(const std::string &item, const Rvector6 &
 Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Rvector6 &state,
                                         const Real &originMu, const Rvector3 &originToSunUnit)
 {
+   #ifdef DEBUG_ANGULAR_DATA
+      MessageInterface::ShowMessage("Entering CalculateAngularData with item = %s, state = %s, originMu = %12.10f\n",
+            item.c_str(), state.ToString().c_str(), originMu);
+   #endif
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);
 
    Rvector3 hVec3 = Cross(pos, vel);
    Real     h     = Sqrt(hVec3 * hVec3);
 
+   #ifdef DEBUG_ANGULAR_DATA
+      MessageInterface::ShowMessage("... pos = %s, vel = %s, hVec3 = %s, h = %12.10f\n",
+            pos.ToString().c_str(), vel.ToString().c_str(), hVec3.ToString().c_str(), h);
+   #endif
    if (item == "SemilatusRectum")
    {
       if (h < GmatOrbitConstants::KEP_TOL)
@@ -340,6 +350,11 @@ Real GmatCalcUtil::CalculatePlanetData(const std::string &item, const Rvector6 &
       Real geodeticTolerance = 1.0e-7;    // Better than 0.0001 degrees
       Real ecc2              = 2.0 * originFlattening - originFlattening*originFlattening;
 
+      #ifdef DEBUG_ALTITUDE_LATITUDE
+            MessageInterface::ShowMessage("originRadius = %12.10f, rxy = %12.10f, geolat = %12.10f, ecc2 = %12.10f\n",
+                  originRadius, rxy, geolat, ecc2);
+      #endif
+
       Real cFactor, oldlat, sinlat;
       while (delta > geodeticTolerance)
       {
@@ -356,12 +371,19 @@ Real GmatCalcUtil::CalculatePlanetData(const std::string &item, const Rvector6 &
          // put latitude between -90 and 90
          geolat = geolat * 180.0 / GmatMathConstants::PI;
          geolat = AngleUtil::PutAngleInDegRange(geolat, -90.0, 90.0);
+         #ifdef DEBUG_ALTITUDE_LATITUDE
+               MessageInterface::ShowMessage("   returning latitude = %12.10f\n", geolat);
+         #endif
          return geolat;
       }
       else  // item == "Altitude"
       {
          sinlat = sin(geolat);
          cFactor = originRadius / sqrt(1.0 - ecc2 * sinlat * sinlat);
+         #ifdef DEBUG_ALTITUDE_LATITUDE
+            MessageInterface::ShowMessage("cFactor = %12.10f\n", cFactor);
+            MessageInterface::ShowMessage("   returning altitude = %12.10f\n", (rxy / cos(geolat) - cFactor));
+         #endif
          return rxy / cos(geolat) - cFactor;
       }
    }

@@ -2196,12 +2196,19 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
                MessageInterface::ShowMessage("----> Spacecraft Origin is %s of type %s\n",
                      objOrigin->GetName().c_str(), objOrigin->GetTypeName().c_str());
-               MessageInterface::ShowMessage("----> Command Origin is %s of type %s\n",
-                     cmdOrigin->GetName().c_str(), cmdOrigin->GetTypeName().c_str());
+               MessageInterface::ShowMessage("----> Command Origin for %s is %s of type %s\n",
+                     summaryName.c_str(), cmdOrigin->GetName().c_str(), cmdOrigin->GetTypeName().c_str());
             #endif
 
+            Rvector6 relativeState = cartState;
+            if (cmdOrigin->GetName() != SolarSystem::EARTH_NAME)
+            {
+               Rvector6 originState = cmdOrigin->GetMJ2000State(a1);
+               relativeState       -= originState;
+            }
+
             meanMotion       = GmatCalcUtil::CalculateKeplerianData("MeanMotion", cartState, originMu);
-            semilatusRectum  = GmatCalcUtil::CalculateAngularData("SemilatusRectum", cartState, originMu, originToSun);
+            semilatusRectum  = GmatCalcUtil::CalculateAngularData("SemilatusRectum", relativeState, originMu, originToSun);
             angularMomentum  = GmatCalcUtil::CalculateAngularData("HMag", cartState, originMu, originToSun);
             betaAngle        = GmatCalcUtil::CalculateAngularData("BetaAngle", cartState, originMu, originToSun);
             orbitEnergy      = GmatCalcUtil::CalculateKeplerianData("Energy", cartState, originMu);
@@ -2474,13 +2481,14 @@ const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head
 
 
 //------------------------------------------------------------------------------
-// const std::string BuildNumber(Real value, Integer length)
+// const std::string BuildNumber(Real value,  bool useExp = false, Integer length)
 //------------------------------------------------------------------------------
 /**
  * Builds a formatted string containing a Real, so the Real can be serialized to
  * the display
  *
- * @param value The Real that needs to be serialized
+ * @param value  The Real that needs to be serialized
+ * @param useExp Use scientific notation
  * @param length The size of the desired string
  *
  * @return The formatted string
@@ -2506,14 +2514,14 @@ const std::string GmatCommand::BuildNumber(Real value, bool useExp, Integer leng
       }
       else
       {
-         if (useExp)
+         Real shift = GmatMathUtil::Abs(value);
+         if (useExp || (shift > GmatMathUtil::Exp10((Real)length-3)))
          {
             fraction = length - 8;
             sprintf(defstr, "%%%d.%de", length, fraction);
          }
          else
          {
-            Real shift = GmatMathUtil::Abs(value);
             while (shift > 10.0)
             {
                ++fraction;
