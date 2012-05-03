@@ -1017,6 +1017,9 @@ void OrbitViewCanvas::OnSize(wxSizeEvent& event)
       
       glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
    }
+   
+   Refresh(false);
+   Update();
 }
 
 

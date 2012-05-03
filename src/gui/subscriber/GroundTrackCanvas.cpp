@@ -573,6 +573,8 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
    }
    
    mAxisLength = (float)(sqrt((Real)(nWidth*nWidth + nHeight*nHeight)));
+   Refresh(false);
+   Update();
    
    #ifdef DEBUG_ONSIZE
    MessageInterface::ShowMessage
