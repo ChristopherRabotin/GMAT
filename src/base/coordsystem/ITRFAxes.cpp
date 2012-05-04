@@ -536,8 +536,8 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    
 
    // compute rotMatrix and rotDotMatrix
-   if (originName == SolarSystem::EARTH_NAME)
-   {
+//   if (originName == SolarSystem::EARTH_NAME)
+//   {
       Real intervalFromOrigin = ((Planet*) origin)->GetNutationUpdateInterval();
       if ((!forceComputation)                                     &&
           (IsEqual(theEpoch,           prevEpoch)                 &&
@@ -630,11 +630,13 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 	  Real omegaEarth = 7.292115146706979e-5*(1 - LOD/86400);
 	  Rvector3 vec(0.0, 0.0, omegaEarth);
 	  Rmatrix33 Rdot = CT*R3(-theta)*Skew(vec)*W;
+	  rotMatrix = R;
+	  rotDotMatrix = Rdot;
 
-//      #ifdef DEBUG_BF_ROT_MATRIX
+//	  #ifdef DEBUG_BF_ROT_MATRIX
 	  MessageInterface::ShowMessage("a1MJD  = %18.10lf\n",a1MJD);
 	  MessageInterface::ShowMessage("utcMJD = %18.10lf\n",utcMJD);
-	  MessageInterface::ShowMessage("dUT1=%18.10lf, xp=%18.10lf, yp=%18.10lf, LOD=%18.10lf\n",dUT1,xp,yp,LOD);
+	  MessageInterface::ShowMessage("dUT1=%18.10e, xp=%18.10e, yp=%18.10e, LOD=%18.10e\n",dUT1,xp,yp,LOD);
       MessageInterface::ShowMessage("ut1MJD = %18.10lf\n",ut1MJD);
       MessageInterface::ShowMessage("ttMJD  = %18.10lf\n",ttMJD);
       MessageInterface::ShowMessage("jdTT   = %18.10lf\n",jdTT);
@@ -660,73 +662,6 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 	  MessageInterface::ShowMessage("Rdot(2,0)=%18.10lf,  Rdot(2,1)=%18.10lf,  Rdot(2,2)=%18.10lf\n",Rdot.GetElement(2,0),Rdot.GetElement(2,1),Rdot.GetElement(2,2));
 //      #endif
 
-   }
-
-
-/*
-      Real dPsi             = 0.0;
-      Real longAscNodeLunar = 0.0;
-      Real cosEpsbar        = 0.0;
-      Real cosAst           = 0.0;
-      Real sinAst           = 0.0;
-      //Real x                = 0.0;
-      //Real y                = 0.0;
-      // Convert to MJD UTC to use for polar motion  and LOD 
-      // interpolations
-      
-      // 20.02.06 - arg: changed to use enum types instead of strings
-//      Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
-//                    "A1Mjd", "UtcMjd", JD_JAN_5_1941);
-
-      Real mjdUTC = TimeConverterUtil::Convert(theEpoch,
-                    TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
-                    JD_JAN_5_1941);
-      Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
-      // convert to MJD referenced from time used in EOP file
-      mjdUTC = mjdUTC + offset;
-
-
-      // convert input time to UT1 for later use (for AST calculation)
-      // 20.02.06 - arg: changed to use enum types instead of strings
-//      Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
-//                    "A1Mjd", "Ut1Mjd", JD_JAN_5_1941);
-
-      Real mjdUT1 = TimeConverterUtil::Convert(theEpoch,
-                    TimeConverterUtil::A1MJD, TimeConverterUtil::UT1, 
-                    JD_JAN_5_1941);
-      
-      // Compute elapsed Julian centuries (UT1)
-      //Real tUT1     = (jdUT1 - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
-      Real tDiff = JD_JAN_5_1941 - JD_OF_J2000;
-      Real tUT1 = (mjdUT1 + tDiff) / DAYS_PER_JULIAN_CENTURY;
-       
-      // convert input A1 MJD to TT MJD (for most calculations)
-      // 20.02.06 - arg: changed to use enum types instead of strings
-//      Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-//                   "A1Mjd", "TtMjd", JD_JAN_5_1941);      
-      Real mjdTT = TimeConverterUtil::Convert(theEpoch,
-                   TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
-                   JD_JAN_5_1941);      
-      Real jdTT    = mjdTT + JD_JAN_5_1941; // right? 
-      // Compute Julian centuries of TDB from the base epoch (J2000) 
-      // NOTE - this is really TT, an approximation of TDB *********
-      //Real tTDB    = (jdTT - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
-      Real tTDB    = (mjdTT + tDiff) / DAYS_PER_JULIAN_CENTURY;
- 
-      #ifdef DEBUG_FIRST_CALL
-         if (!firstCallFired)
-         {
-            Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
-            MessageInterface::ShowMessage(
-               "   Epoch data[mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT1, jdTT, tTDB] "
-               "=\n        [%.10lf %.10lf %.10lf %.10lf %.10lf %.10lf %.10lf ]\n",
-               mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT, jdTT, tTDB);
-         }
-      #endif
-
-      #ifdef DEBUG_BF_ROT_MATRIX
-         MessageInterface::ShowMessage("   about to figure out update interval ...\n");
-      #endif
       if (overrideOriginInterval) 
       {
          updateIntervalToUse = updateInterval;
@@ -750,164 +685,15 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
          #endif
       }
       
-      //MessageInterface::ShowMessage("Setting %4.3f as interval \n",
-      //                              updateIntervalToUse);
-      #ifdef DEBUG_BF_ROT_MATRIX
-         MessageInterface::ShowMessage("About to call ComputePrecessionMatrix\n");
-      #endif
-      ComputePrecessionMatrix(tTDB, atEpoch);
-      #ifdef DEBUG_BF_ROT_MATRIX
-         MessageInterface::ShowMessage("About to call ComputeNutationMatrix\n");
-      #endif
-      ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
-                            forceComputation);
-      #ifdef DEBUG_BF_ROT_MATRIX
-         MessageInterface::ShowMessage("About to call ComputeSiderealTimeRotation\n");
-      #endif
-      ComputeSiderealTimeRotation(jdTT, tUT1, dPsi, longAscNodeLunar, cosEpsbar,
-                             cosAst, sinAst);
-      #ifdef DEBUG_BF_ROT_MATRIX
-         MessageInterface::ShowMessage("About to call ComputeSiderealTimeDotRotation\n");
-      #endif
-      ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst,
-                                     forceComputation);
-      #ifdef DEBUG_BF_ROT_MATRIX
-         MessageInterface::ShowMessage("About to call ComputePolarMotionRotation\n");
-      #endif
-      ComputePolarMotionRotation(mjdUTC, atEpoch, forceComputation);
-      #ifdef DEBUG_BF_ROT_MATRIX
-         MessageInterface::ShowMessage("DONE calling all computation submethods\n");
-      #endif
-      
-   #ifdef DEBUG_BF_MATRICES
-      MessageInterface::ShowMessage("atEpoch = %12.10f\n", atEpoch.Get());
-      MessageInterface::ShowMessage("NUT = %s\n", NUT.ToString().c_str());
-      MessageInterface::ShowMessage("STderiv = %s\n", STderiv.ToString().c_str());
-      MessageInterface::ShowMessage("PM = %s\n", PM.ToString().c_str());
-   #endif
-
-      Real np[3][3], rot[3][3], tmp[3][3];
-      Integer p3;
-      
-      // NUT * PREC
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            np[p][q] = nutData[p3]   * precData[q]   + 
-                       nutData[p3+1] * precData[q+3] + 
-                       nutData[p3+2] * precData[q+6];
-         }
-      }     
-      
-      // ST * (NUT * PREC)
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            tmp[p][q] = stData[p3]   * np[0][q] + 
-                        stData[p3+1] * np[1][q] + 
-                        stData[p3+2] * np[2][q];
-         }
-      }     
-      
-      // PM * (ST * (NUT * PREC))
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            rot[p][q] = pmData[p3]   * tmp[0][q] + 
-                        pmData[p3+1] * tmp[1][q] + 
-                        pmData[p3+2] * tmp[2][q];
-         }
-      }
-
-      rotMatrix.Set(rot[0][0], rot[1][0], rot[2][0],
-                    rot[0][1], rot[1][1], rot[2][1],
-                    rot[0][2], rot[1][2], rot[2][2]);
-
-      #ifdef DEBUG_BF_CHECK_DETERMINANT
-         Real determinant =
-                 rot[0][0] * (rot[1][1] * rot[2][2] - rot[1][2]*rot[2][1]) +
-                 rot[0][1] * (rot[1][2] * rot[2][0] - rot[1][0]*rot[2][2]) +
-                 rot[0][2] * (rot[1][0] * rot[2][1] - rot[1][1]*rot[2][0]);
-         if (Abs(determinant - 1.0) > DETERMINANT_TOLERANCE)
-            throw CoordinateSystemException(
-                  "Computed rotation matrix has a determinant not equal to 1.0");
-      #endif
-
-      // NUT * PREC calculated above
-      // STderiv * (NUT * PREC)
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            tmp[p][q] = stDerivData[p3]   * np[0][q] + 
-                        stDerivData[p3+1] * np[1][q] + 
-                        stDerivData[p3+2] * np[2][q];
-         }
-      }     
-      
-      // PM * (STderiv * (NUT * PREC))
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            rot[p][q] = pmData[p3]   * tmp[0][q] + 
-                        pmData[p3+1] * tmp[1][q] + 
-                        pmData[p3+2] * tmp[2][q];
-         }
-      }
-      rotDotMatrix.Set(rot[0][0], rot[1][0], rot[2][0],
-                       rot[0][1], rot[1][1], rot[2][1],
-                       rot[0][2], rot[1][2], rot[2][2]);
 
       // save the data to compare against next time
       prevUpdateInterval       = updateInterval;
       prevOriginUpdateInterval = intervalFromOrigin;
+//   }
 
-      #ifdef DEBUG_FIRST_CALL
-         if (!firstCallFired) 
-         {
-            MessageInterface::ShowMessage("FK5 Components\n   PREC = \n");
-            for (Integer m = 0; m < 3; ++m)
-               MessageInterface::ShowMessage(
-                  "          %20.12le %20.12le %20.12le \n", PREC(m,0), 
-                  PREC(m,1), PREC(m,2));
-            MessageInterface::ShowMessage("\n   NUT = \n");
-            for (Integer m = 0; m < 3; ++m)
-               MessageInterface::ShowMessage(
-                  "          %20.12le %20.12le %20.12le \n", NUT(m,0), 
-                  NUT(m,1), NUT(m,2));
-            MessageInterface::ShowMessage("\n   ST = \n");
-            for (Integer m = 0; m < 3; ++m)
-               MessageInterface::ShowMessage(
-                  "          %20.12le %20.12le %20.12le \n", ST(m,0), 
-                  ST(m,1), ST(m,2));
-            MessageInterface::ShowMessage("\n   STderiv = \n");
-            for (Integer m = 0; m < 3; ++m)
-               MessageInterface::ShowMessage(
-                  "          %20.12le %20.12le %20.12le \n", STderiv(m,0), 
-                  STderiv(m,1), STderiv(m,2));
-            MessageInterface::ShowMessage("\n   PM = \n");
-            for (Integer m = 0; m < 3; ++m)
-               MessageInterface::ShowMessage(
-                  "          %20.12le %20.12le %20.12le \n", PM(m,0), 
-                  PM(m,1), PM(m,2));
-            MessageInterface::ShowMessage("\n   rotMatrix = \n");
-            for (Integer m = 0; m < 3; ++m)
-               MessageInterface::ShowMessage(
-                  "          %20.12le %20.12le %20.12le \n", rotMatrix(m,0), 
-                  rotMatrix(m,1), rotMatrix(m,2));
-         }
-      #endif
 
-   }
+/*
+
    else if ((originName == SolarSystem::MOON_NAME) &&
            (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_405_FILE))
    {
