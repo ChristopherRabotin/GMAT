@@ -306,6 +306,8 @@ bool ViewCanvas::InitializePlot()
    #endif
    InitOpenGL();
    
+   mViewPointInitialized = false;
+   
    // load body textures
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("   Calling LoadBodyTextures()\n");
@@ -887,8 +889,8 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
 {
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::AddObjectList() entered, object count=%d, color count=%d\n",
-       objNames.GetCount(), objColors.size());
+      ("ViewCanvas::AddObjectList() '%s' entered, object count=%d, color count=%d, "
+       "clearList=%d\n", mPlotName.c_str(), objNames.GetCount(), objColors.size(), clearList);
    #endif
    
    // clear bodies
@@ -909,7 +911,11 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
    {
       // add object names
       mObjectNames.Add(objNames[i]);
-      
+      mTextureIdMap[objNames[i]] = GmatPlot::UNINIT_TEXTURE;
+
+      // Object needs rebinding with texture map during initialization
+      // so remove this. (Fix for GMT-2483 LOJ: 2012.05.04)
+      #if 0
       if (mTextureIdMap.find(objNames[i]) == mTextureIdMap.end())
       {
          #if DEBUG_OBJECT
@@ -920,6 +926,7 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
          
          mTextureIdMap[objNames[i]] = GmatPlot::UNINIT_TEXTURE;
       }
+      #endif
       
       // initialize show object
       mShowObjectMap[objNames[i]] = true;
@@ -962,7 +969,8 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
    ClearPlot();
    
    #if DEBUG_OBJECT
-   MessageInterface::ShowMessage("ViewCanvas::AddObjectList() leaving\n");
+   MessageInterface::ShowMessage
+      ("ViewCanvas::AddObjectList() '%s' leaving\n", mPlotName.c_str());
    #endif
    
 } //AddObjectList()
@@ -1031,6 +1039,10 @@ void ViewCanvas::HandleLightSource()
 //------------------------------------------------------------------------------
 void ViewCanvas::ResetPlotInfo()
 {
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("ViewCanvas::ResetPlotInfo() entered\n");
+   #endif
+   
    mCurrIndex = -1;
    mNumData = 0;
    mTotalPoints = 0;
@@ -1056,7 +1068,16 @@ void ViewCanvas::ResetPlotInfo()
    
    // Initialize view
    if (mUseInitialViewPoint)
+   {
+      #ifdef DEBUG_INIT
+      MessageInterface::ShowMessage("   Calling SetDefaultView()\n");
+      #endif
       SetDefaultView();
+   }
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("ViewCanvas::ResetPlotInfo() leaving\n");
+   #endif
 }
 
 //---------------------------------------------------------------------------
@@ -1361,7 +1382,8 @@ bool ViewCanvas::LoadBodyTextures()
 {
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadBodyTextures() entered, mObjectCount=%d\n", mObjectCount);
+      ("ViewCanvas::LoadBodyTextures() '%s' entered, mObjectCount=%d\n",
+       mPlotName.c_str(), mObjectCount);
    #endif
    
    //--------------------------------------------------
@@ -1396,7 +1418,8 @@ bool ViewCanvas::LoadBodyTextures()
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadBodyTextures() leaving, mObjectCount=%d\n", mObjectCount);
+      ("ViewCanvas::LoadBodyTextures() '%s' leaving, mObjectCount=%d\n",
+       mPlotName.c_str(), mObjectCount);
    #endif
    
    return true;   
@@ -1422,8 +1445,8 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::BindTexture() entered, objName='%s', textureFile = '%s'\n",
-       objName.c_str(), textureFile.c_str());
+      ("ViewCanvas::BindTexture() '%s' entered, objName='%s', textureFile = '%s'\n",
+       mPlotName.c_str(), objName.c_str(), textureFile.c_str());
    #endif
    
    try
@@ -1504,8 +1527,8 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::BindTexture() leaving, objName='%s', texId=%d\n",
-		 objName.c_str(), texId);
+      ("ViewCanvas::BindTexture() '%s' leaving, objName='%s', texId=%d\n",
+		 mPlotName.c_str(), objName.c_str(), texId);
    #endif
    
    return texId;
@@ -1519,7 +1542,8 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
 {
    #if DEBUG_LOAD_IMAGE
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadImage() file='%s'\n", fileName.c_str());
+      ("ViewCanvas::LoadImage() '%s' entered, file='%s', isSpacecraft=%d\n",
+       mPlotName.c_str(), fileName.c_str(), isSpacecraft);
    #endif
    
    if (fileName == "")
@@ -1620,7 +1644,8 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
    {
       #if DEBUG_LOAD_IMAGE
       MessageInterface::ShowMessage
-         ("ViewCanvas::LoadImage() returning true, mipmapsStatus=%d\n", mipmapsStatus);
+         ("ViewCanvas::LoadImage() '%s' returning true, mipmapsStatus=%d\n",
+          mPlotName.c_str(), mipmapsStatus);
       #endif
       
       return true;
@@ -1629,7 +1654,8 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
    {
       #if DEBUG_LOAD_IMAGE
       MessageInterface::ShowMessage
-         ("ViewCanvas::LoadImage() returning false, mipmapsStatus=%d\n", mipmapsStatus);
+         ("ViewCanvas::LoadImage() '%s' returning false, mipmapsStatus=%d\n",
+          mPlotName.c_str(), mipmapsStatus);
       #endif
       return false;
    }
@@ -1647,7 +1673,8 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
    
    #if DEBUG_LOAD_IMAGE
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadImage() returning true, using glTexImage2D\d\n");
+      ("ViewCanvas::LoadImage() '%s' returning true, using glTexImage2D\d\n",
+       mPlotName.c_str());
    #endif
    
    return true;
@@ -1737,9 +1764,9 @@ bool ViewCanvas::LoadSpacecraftModels()
 {
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadSpacecraftModels() entered, mGlInitialized = %d, "
-       "modelsAreLoaded = %d, mScCount = %d\n", mGlInitialized, modelsAreLoaded,
-       mScCount);
+      ("ViewCanvas::LoadSpacecraftModels() '%s' entered, mGlInitialized = %d, "
+       "modelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), mGlInitialized,
+       modelsAreLoaded, mScCount);
    #endif
    
    if (mGlInitialized)
@@ -1820,8 +1847,8 @@ bool ViewCanvas::LoadSpacecraftModels()
    
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadSpacecraftModels() leaving, mGlInitialized = %d, "
-       "modelsAreLoaded = %d\n", mGlInitialized, modelsAreLoaded);
+      ("ViewCanvas::LoadSpacecraftModels() '%s' leaving, mGlInitialized = %d, "
+       "modelsAreLoaded = %d\n", mPlotName.c_str(), mGlInitialized, modelsAreLoaded);
    #endif
    
    return modelsAreLoaded;
