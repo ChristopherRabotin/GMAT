@@ -511,6 +511,9 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    if (mCanSaveLocation == false)
       return;
 
+   if (IsIconized())
+      return;
+   
    // Get the position and size of the window first
    #ifdef __WXMAC__
       Integer screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
@@ -596,18 +599,15 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    }
    else if (mItemType == GmatTree::SCRIPT_FILE)
    {
-      if (!IsIconized())
-      {
-         // get the config object
-         wxFileConfig *pConfig;
-         pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
-         std::stringstream location("");
-         location << upperLeft[0] << " " << upperLeft[1];
-         std::stringstream size("");
-         size << childSize[0] << " " << childSize[1];
-         pConfig->Write("/ScriptEditor/UpperLeft", location.str().c_str());
-         pConfig->Write("/ScriptEditor/Size", size.str().c_str());
-      }
+      // get the config object
+      wxFileConfig *pConfig;
+      pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
+      std::stringstream location("");
+      location << upperLeft[0] << " " << upperLeft[1];
+      std::stringstream size("");
+      size << childSize[0] << " " << childSize[1];
+      pConfig->Write("/ScriptEditor/UpperLeft", location.str().c_str());
+      pConfig->Write("/ScriptEditor/Size", size.str().c_str());
    }
 }
 
