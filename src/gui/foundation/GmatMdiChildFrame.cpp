@@ -596,15 +596,18 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    }
    else if (mItemType == GmatTree::SCRIPT_FILE)
    {
-      // get the config object
-      wxFileConfig *pConfig;
-      pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
-      std::stringstream location("");
-      location << upperLeft[0] << " " << upperLeft[1];
-      std::stringstream size("");
-      size << childSize[0] << " " << childSize[1];
-      pConfig->Write("/ScriptEditor/UpperLeft", location.str().c_str());
-      pConfig->Write("/ScriptEditor/Size", size.str().c_str());
+      if (!IsIconized())
+      {
+         // get the config object
+         wxFileConfig *pConfig;
+         pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
+         std::stringstream location("");
+         location << upperLeft[0] << " " << upperLeft[1];
+         std::stringstream size("");
+         size << childSize[0] << " " << childSize[1];
+         pConfig->Write("/ScriptEditor/UpperLeft", location.str().c_str());
+         pConfig->Write("/ScriptEditor/Size", size.str().c_str());
+      }
    }
 }
 

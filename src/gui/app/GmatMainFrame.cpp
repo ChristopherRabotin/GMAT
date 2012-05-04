@@ -3304,7 +3304,7 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
 {
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CreateNewResource() title='%s', name='%s', itemType=%d\n",
+      ("GmatMainFrame::CreateNewResource() entered, title='%s', name='%s', itemType=%d\n",
        title.c_str(), name.c_str(), itemType);
    #endif
    
@@ -3479,9 +3479,11 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    if (itemType != GmatTree::SCRIPT_FILE)
    {
       wxSize bestSize = newChild->GetBestSize();
+      #ifdef DEBUG_CREATE_CHILD
       MessageInterface::ShowMessage
-         ("==> Setting size to child's best size (%d, %d)\n",
+         ("   Setting size to child's best size (%d, %d)\n",
           bestSize.GetWidth(), bestSize.GetHeight());
+      #endif
       newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
    }
    else
@@ -3501,6 +3503,11 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    newChild->Show();
 #endif
 
+   #ifdef DEBUG_CREATE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CreateNewResource() '%s' returning newChild <%p>\n",
+       title.c_str(), newChild);
+   #endif
    return newChild;
 }
 
