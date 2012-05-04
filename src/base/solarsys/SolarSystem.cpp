@@ -2936,14 +2936,17 @@ void SolarSystem::CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoint
    MessageInterface::ShowMessage("   ===> Cloning %d bodies\n", ss.bodiesInUse.size());
    #endif
 
+   // clear vectors
    bodiesInUse.clear();
+   bodyStrings.clear();
+   userDefinedBodyStrings.clear();
+   defaultBodyStrings.clear();
 
    // clone the SS bodies
    for (std::vector<CelestialBody*>::const_iterator cbi = ss.bodiesInUse.begin();
         cbi != ss.bodiesInUse.end(); ++cbi)
    {
       CelestialBody *cb = (CelestialBody*)((*cbi)->Clone());
-//      bodiesInUse.push_back(cb);
       AddBody(cb);
       
       #ifdef DEBUG_MEMORY
