@@ -25,6 +25,8 @@
 #include "GuiItemManager.hpp"
 #include "GmatTreeItemData.hpp"
 #include "GmatMenuBar.hpp"       // for namespace GmatMenu
+#include <wx/fileconf.h>
+#include <wx/config.h>
 
 // @todo We cannot create own MenuBar yet.
 // Double Window menu appears when more than one child is open and cannot

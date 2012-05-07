@@ -520,6 +520,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    
    // Create HelpController from CHM file
    std::string helpFileName = fm->GetFullPathname("HELP_FILE");
+   #ifdef DEBUG_MENU_HELP
+   MessageInterface::ShowMessage("Help file name ='%s'\n", helpFileName.c_str());
+   #endif
    #ifdef __WXMSW__
    theHelpController = new wxCHMHelpController;
    theHelpController->Initialize(helpFileName);
@@ -3174,7 +3177,13 @@ void GmatMainFrame::OnHelpContents(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpOnline(wxCommandEvent& WXUNUSED(event))
 {
-   wxString url = "http://gmat.sourceforge.net/docs/R2011a/html/index.html";
+   wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
+   config->SetPath("/Welcome/Links");
+   wxString url = config->Read("Online Help");
+   #ifdef DEBUG_MENU_HELP
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnHelpOnline() base help url='%s'\n", url.c_str());
+   #endif
    ::wxLaunchDefaultBrowser(url);
 }
 
@@ -3190,7 +3199,13 @@ void GmatMainFrame::OnHelpOnline(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpTutorial(wxCommandEvent& WXUNUSED(event))
 {
-   wxString url = "http://gmat.sourceforge.net/docs/R2011a/help.html#N10373";
+   wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
+   config->SetPath("/GettingStarted/Tutorials");
+   wxString url = config->Read("Step By Step Text Tutorials");
+   #ifdef DEBUG_MENU_HELP
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnHelpTutorial() text tutorials url='%s'\n", url.c_str());
+   #endif
    ::wxLaunchDefaultBrowser(url);
 }
 
@@ -3206,8 +3221,15 @@ void GmatMainFrame::OnHelpTutorial(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpForum(wxCommandEvent& WXUNUSED(event))
 {
-   wxString wikiUrl = "http://gmat.ed-pages.com/forum/index.php";
-   ::wxLaunchDefaultBrowser(wikiUrl);
+   wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
+   config->SetPath("/Welcome/Links");
+   wxString path = config->GetPath();
+   wxString url = config->Read("Forums");
+   #ifdef DEBUG_MENU_HELP
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnHelpForum() forum url='%s'\n", url.c_str());
+   #endif
+   ::wxLaunchDefaultBrowser(url);
 }
 
 
@@ -3222,8 +3244,14 @@ void GmatMainFrame::OnHelpForum(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpIssue(wxCommandEvent& WXUNUSED(event))
 {
-   wxString wikiUrl = "http://pows003.gsfc.nasa.gov/bugzilla/";
-   ::wxLaunchDefaultBrowser(wikiUrl);
+   wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
+   config->SetPath("/Welcome/Links");
+   wxString url = config->Read("Report an Issue");
+   #ifdef DEBUG_MENU_HELP
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnHelpIssue() report issue url='%s'\n", url.c_str());
+   #endif
+   ::wxLaunchDefaultBrowser(url);
 }
 
 
@@ -3243,7 +3271,7 @@ void GmatMainFrame::OnHelpFeedback(wxCommandEvent& WXUNUSED(event))
    // Get current working directory
    wxString cwd1 = ::wxGetCwd();
 
-   #ifdef DEBUG_FEEDBACK
+   #ifdef DEBUG_MENU_HELP
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnHelpFeedback() before email, cwd = '%s'\n", cwd1.c_str());
    #endif
@@ -3261,7 +3289,7 @@ void GmatMainFrame::OnHelpFeedback(wxCommandEvent& WXUNUSED(event))
    
    wxString cwd2 = ::wxGetCwd();
    
-   #ifdef DEBUG_FEEDBACK
+   #ifdef DEBUG_MENU_HELP
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnHelpFeedback()  after email, cwd = '%s'\n", cwd2.c_str());
    #endif
@@ -3270,14 +3298,14 @@ void GmatMainFrame::OnHelpFeedback(wxCommandEvent& WXUNUSED(event))
    {   
       cwd2 = ::wxGetCwd();
       
-      #ifdef DEBUG_FEEDBACK
+      #ifdef DEBUG_MENU_HELP
       MessageInterface::ShowMessage
          ("GmatMainFrame::OnHelpFeedback()  after resetting cwd, cwd = '%s'\n", cwd2.c_str());
       #endif
    }
    else
    {
-      #ifdef DEBUG_FEEDBACK
+      #ifdef DEBUG_MENU_HELP
       MessageInterface::ShowMessage
          ("GmatMainFrame::OnHelpFeedback()  failed resetting cwd to '%s'\n", cwd1.c_str());
       #endif

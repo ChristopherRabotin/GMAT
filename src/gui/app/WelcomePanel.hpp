@@ -34,12 +34,14 @@
 class WelcomePanel: public wxFrame
 {
 public:
-   WelcomePanel( wxFrame *frame, const wxString& title,
-         int x, int y, int w, int h);
+   WelcomePanel(wxFrame *frame, const wxString& title, int x, int y, int w, int h);
    ~WelcomePanel();
    void OnOpenRecentScript(wxHyperlinkEvent &event);
+   void OnOpenSampleScript(wxHyperlinkEvent &event);
    void OnShowWelcomePanelClicked(wxCommandEvent &event);
-   wxFlexGridSizer *FillGroup( wxString INIGroup, wxString INIIconGroup, int maxCols, wxWindowID id, bool isFileList, wxFileConfig *config );
+   wxFlexGridSizer *FillGroup(wxFileConfig *config, wxString INIGroup,
+                              wxString INIIconGroup, int maxCols,
+                              wxWindowID id, bool isFileList);
    
 protected:
    wxBitmap LoadBitmap( wxString filename, int width, int height );
@@ -50,17 +52,16 @@ private:
    void OnExit(wxCommandEvent& event);
    
    Integer bsize;
-
-
+   
    // Event Handling
    DECLARE_EVENT_TABLE();
    
-
    // IDs for the controls and the menu commands
    enum
    {
       ID_CHECKBOX = 39040,
       ID_URL,
+      ID_FILE,
       ID_BUTTON_RECENT
    };
 };

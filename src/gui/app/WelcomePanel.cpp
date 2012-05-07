@@ -32,12 +32,14 @@
 #include <wx/gdicmn.h>
 
 //#define DEBUG_FILL_GROUP
+//#define DEBUG_SAMPLE_SCRIPT
 
 //------------------------------
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(WelcomePanel, wxFrame)
    EVT_HYPERLINK(ID_BUTTON_RECENT, WelcomePanel::OnOpenRecentScript)
+   EVT_HYPERLINK(ID_FILE, WelcomePanel::OnOpenSampleScript)
    EVT_CHECKBOX(ID_CHECKBOX, WelcomePanel::OnShowWelcomePanelClicked)
 END_EVENT_TABLE()
 
@@ -160,9 +162,14 @@ void WelcomePanel::Create()
    resourcesSizer->AddSpacer(bsize*2);
    // add the recent scripts
    pConfig = (wxFileConfig *) wxConfigBase::Get();
-//   MessageInterface::PopupMessage(Gmat::INFO_, "Getting Welcome Links");
-   resourcesSizer->Add(FillGroup("/Welcome/Links", "", 3, ID_URL, false, pConfig), 0, wxALIGN_LEFT|wxALL, bsize*2);
-//   MessageInterface::PopupMessage(Gmat::INFO_, "Got Welcome Links");
+   resourcesSizer->Add(FillGroup(pConfig, "/Welcome/Links", "", 3, ID_URL, false),
+                       0, wxALIGN_LEFT|wxALL, bsize*2);
+
+   //-----------------------------------------------------------------
+   // now Sample Projects
+   //-----------------------------------------------------------------
+   resourcesSizer->Add(FillGroup(pConfig, "/Welcome/Samples", "", 3, ID_FILE, false),
+                       0, wxALIGN_LEFT|wxALL, bsize*2);
 
    //-----------------------------------------------------------------
    // now Getting Started
@@ -174,8 +181,8 @@ void WelcomePanel::Create()
    wxBoxSizer *gettingStartedSizer = new wxBoxSizer(wxVERTICAL);
    gettingStartedSizer->Add(getStartedText, 0, wxALIGN_LEFT|wxALL, bsize);
    gettingStartedSizer->AddSpacer(bsize*2);
-   gettingStartedSizer->Add(FillGroup("/GettingStarted/Tutorials", "/GettingStarted/Tutorials/Icons",
-                                      1, ID_URL, false, pConfig), 0, wxALIGN_LEFT|wxALL, bsize*2);
+   gettingStartedSizer->Add(FillGroup(pConfig, "/GettingStarted/Tutorials", "/GettingStarted/Tutorials/Icons",
+                                      1, ID_URL, false), 0, wxALIGN_LEFT|wxALL, bsize*2);
    //gettingStartedSizer->AddSpacer(bsize*2);
 
    //-----------------------------------------------------------------
@@ -190,7 +197,8 @@ void WelcomePanel::Create()
    recentSizer->AddSpacer(bsize*2);
    // add the recent scripts
    pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
-   recentSizer->Add(FillGroup("/RecentFiles", "", 1, ID_BUTTON_RECENT, true, pConfig), 0, wxALIGN_LEFT|wxALL, bsize*2);
+   recentSizer->Add(FillGroup(pConfig, "/RecentFiles", "", 1, ID_BUTTON_RECENT, true),
+                    0, wxALIGN_LEFT|wxALL, bsize*2);
 
 
    //-----------------------------------------------------------------
@@ -279,24 +287,24 @@ void WelcomePanel::OnShowWelcomePanelClicked(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// wxFlexGridSizer *FillGroup( wxString INIGroup, int maxRows, wxFileConfig *config )
+// wxFlexGridSizer *FillGroup(wxFileConfig *config, wxString INIGroup, int maxRows, ...)
 //------------------------------------------------------------------------------
 /**
  * Handles filling a sizer with entries from INI group.
  *
+ * @param config configuration file to read
  * @param INIGroup name of group (should include any preceding slashes, e.g. "/RecentFiles")
  * @param maxCols maximum number of columns
- * @param config configuration file to read
  */
 //------------------------------------------------------------------------------
-wxFlexGridSizer *WelcomePanel::FillGroup( wxString INIGroup, wxString INIIconGroup,
-                                          int maxCols, wxWindowID id, bool isFileList,
-                                          wxFileConfig *config )
+wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup,
+                                         wxString INIIconGroup, int maxCols,
+                                         wxWindowID id, bool isFileList)
 {
    #ifdef DEBUG_FILL_GROUP
    MessageInterface::ShowMessage
-      ("WelcomePanel::FillGroup() entered, INIGroup='%s', INIIconGroup='%s'\n",
-       INIGroup.c_str(), INIIconGroup.c_str());
+      ("WelcomePanel::FillGroup() entered, INIGroup='%s', INIIconGroup='%s', "
+       "isFileList=%d\n", INIGroup.c_str(), INIIconGroup.c_str(), isFileList);
    #endif
    
    wxFlexGridSizer *aSizer;
@@ -308,12 +316,12 @@ wxFlexGridSizer *WelcomePanel::FillGroup( wxString INIGroup, wxString INIIconGro
    wxBitmapButton *abitmapButton = NULL;
 
    wxString aKey;
+   wxString aValue;
    long dummy;
    int aCol = 1;
    wxHyperlinkCtrl *aButton;
    wxStaticLine *line1;
-
-
+   
    // get the links from the config
    config->SetPath(INIGroup);
    // read filenames from config object
@@ -323,14 +331,27 @@ wxFlexGridSizer *WelcomePanel::FillGroup( wxString INIGroup, wxString INIIconGro
          linkLabels.Add(GmatFileUtil::ParseFileName(config->Read(aKey).c_str()).c_str());
       else
          linkLabels.Add(aKey);
-      linkURLs.Add(config->Read(aKey));
+      
+      aValue = config->Read(aKey);
+      linkURLs.Add(aValue);
+      
+      #ifdef DEBUG_FILL_GROUP
+      MessageInterface::ShowMessage("   aKey='%s', aValue='%s'\n", aKey.c_str(), aValue.c_str());
+      #endif
+      
       while (config->GetNextEntry(aKey, dummy))
       {
          if (isFileList)
             linkLabels.Add(GmatFileUtil::ParseFileName(config->Read(aKey).c_str()).c_str());
          else
             linkLabels.Add(aKey);
-         linkURLs.Add(config->Read(aKey));
+         
+         aValue = config->Read(aKey);
+         linkURLs.Add(aValue);
+         
+         #ifdef DEBUG_FILL_GROUP
+         MessageInterface::ShowMessage("   aKey='%s', aValue='%s'\n", aKey.c_str(), aValue.c_str());
+         #endif
       }
    }
    // get the icons if section exists
@@ -419,6 +440,36 @@ wxFlexGridSizer *WelcomePanel::FillGroup( wxString INIGroup, wxString INIIconGro
 void WelcomePanel::OnOpenRecentScript(wxHyperlinkEvent& event)
 {
    GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(event.GetURL(), event);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnOpenSampleScript(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles opening script file from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void WelcomePanel::OnOpenSampleScript(wxHyperlinkEvent& event)
+{
+   wxString sampleDir = event.GetURL();
+   #ifdef DEBUG_SAMPLE_SCRIPT
+   MessageInterface::ShowMessage
+      ("WelcomePanel::OnOpenSampleScript() entered, sampleDir='%s'\n",
+       sampleDir.c_str());
+   #endif
+   wxFileDialog dialog(this, _T("Choose a file"), _T(sampleDir), _T(""), _T("*.*"));
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxString scriptfile;
+      scriptfile = dialog.GetPath().c_str();
+      #ifdef DEBUG_SAMPLE_SCRIPT
+      MessageInterface::ShowMessage("   scriptfile='%s'\n", scriptfile.c_str());
+      #endif
+      GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(scriptfile, event);
+   }
 }
 
 

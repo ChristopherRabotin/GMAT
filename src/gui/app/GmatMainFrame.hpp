@@ -36,7 +36,6 @@
 #include "GmatTreeItemData.hpp"
 #include "GmatServer.hpp"
 #include "GmatMdiChildFrame.hpp"
-#include "WelcomePanel.hpp"
 #include "GmatNotebook.hpp"
 
 #include <wx/notebook.h>
@@ -49,6 +48,7 @@
 
 class MdiChildViewFrame;
 class MdiChildTsFrame;
+class WelcomePanel;
 
 namespace GmatGui
 {

@@ -22,8 +22,8 @@
 #include "bitmaps/ClosedFolder.xpm"
 #include "bitmaps/OpenFolder.xpm"
 #include "bitmaps/file.xpm"
-#include "bitmaps/report.xpm"
-#include "bitmaps/openglplot.xpm"
+#include "bitmaps/rt_ReportFile.xpm"
+#include "bitmaps/rt_OrbitView.xpm"
 #include "bitmaps/rt_GroundTrackPlot.xpm"
 #include "bitmaps/rt_XYPlot.xpm"
 #include "bitmaps/rt_Default.xpm"
@@ -587,33 +587,42 @@ void OutputTree::OnEndLabelEdit(wxTreeEvent &event)
 //------------------------------------------------------------------------------
 void OutputTree::AddIcons()
 {
-   int size = 16;
-  
-   wxImageList *images = new wxImageList ( size, size, true );
-  
-   wxBusyCursor wait;
-   wxIcon icons[GmatTree::OUTPUT_ICON_COUNT];
+   #ifdef DEBUG_ADD_ICONS
+   MessageInterface::ShowMessage
+      ("OutputTree::AddIcons() entered, GmatTree::OUTPUT_ICON_COUNT=%d\n",
+       GmatTree::OUTPUT_ICON_COUNT);
+   #endif
    
-   icons[GmatTree::OUTPUT_ICON_CLOSEDFOLDER] = wxIcon(ClosedFolder_xpm);
-   icons[GmatTree::OUTPUT_ICON_OPENFOLDER] = wxIcon(OpenFolder_xpm);
-   icons[GmatTree::OUTPUT_ICON_REPORTFILE] = wxIcon(report_xpm);
-   icons[GmatTree::OUTPUT_ICON_ORBITVIEW] = wxIcon(openglplot_xpm);
-   icons[GmatTree::OUTPUT_ICON_GROUNDTRACK] = wxIcon(rt_GroundTrackPlot_xpm);
-   icons[GmatTree::OUTPUT_ICON_XYPLOT] = wxIcon(rt_XYPlot_xpm);
-   icons[GmatTree::OUTPUT_ICON_FILE] = wxIcon(file_xpm);
-   icons[GmatTree::OUTPUT_ICON_DEFAULT] = wxIcon(rt_Default_xpm);
+   int sizeW = 16;
+   int sizeH = 16;
    
-   int sizeOrig = icons[0].GetWidth();
-   for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
-   {
-      if ( size == sizeOrig )
-         images->Add(icons[i]);
-      else
-         images->Add(wxBitmap(wxBitmap(icons[i]).ConvertToImage().Rescale(size, size)));
-   }
+   wxImageList *images = new wxImageList ( sizeW, sizeH, true );
+   wxBitmap* bitmaps[GmatTree::OUTPUT_ICON_COUNT];
+   int index = 0;
+   long bitmapType = wxBITMAP_TYPE_PNG;
+
+   // Note:
+   // Add icons by the order of enum ResourceIconType in GmatTreeItemData.hpp
+
+   theGuiManager->LoadIcon("ClosedFolder", bitmapType, &bitmaps[index], ClosedFolder_xpm); 
+   theGuiManager->LoadIcon("OpenFolder", bitmapType, &bitmaps[++index], OpenFolder_xpm);
+   theGuiManager->LoadIcon("rt_ReportFile", bitmapType, &bitmaps[++index], rt_ReportFile_xpm);
+   theGuiManager->LoadIcon("rt_OrbitView", bitmapType, &bitmaps[++index], rt_OrbitView_xpm);
+   theGuiManager->LoadIcon("rt_GroundTrackPlot", bitmapType, &bitmaps[++index], rt_GroundTrackPlot_xpm);
+   theGuiManager->LoadIcon("rt_XYPlot", bitmapType, &bitmaps[++index], rt_XYPlot_xpm);
+   theGuiManager->LoadIcon("file", bitmapType, &bitmaps[++index], file_xpm);   
+   theGuiManager->LoadIcon("rt_Default", bitmapType, &bitmaps[++index], rt_Default_xpm);
+   
+   // Let's always rescale all icons since size of icon look different on different platforms
+   for ( size_t i = 0; i < WXSIZEOF(bitmaps); i++ )
+      images->Add(bitmaps[i]->ConvertToImage().Rescale(sizeW, sizeH));
    
    AssignImageList(images);
-
+   
+   #ifdef DEBUG_ADD_ICONS
+   MessageInterface::ShowMessage
+      ("OutputTree::AddIcons() exiting, %d icons added\n", index + 1);
+   #endif
 }
 
 //---------------------------------
