@@ -905,6 +905,12 @@ void ODEModel::UpdateSpaceObject(Real newEpoch)
    vectorSize = stateSize * sizeof(Real);
    
    previousState = (*state);
+
+   #ifdef DEBUG_ODEMODEL_EXE
+      MessageInterface::ShowMessage("Raw state: [%lf %lf %lf...\n", rawState[0],
+            rawState[1], rawState[2]);
+   #endif
+
    memcpy(state->GetState(), rawState, vectorSize);
    
    Real newepoch = epoch + elapsedTime / GmatTimeConstants::SECS_PER_DAY;
@@ -2264,6 +2270,19 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
                ddt[0], ddt[1], ddt[2], ddt[3], ddt[4], ddt[5]);
          }
       #endif
+   }
+
+   if (fillCartesian)
+   {
+      if (order == 1)  // Fill in 1st dv of position with the input velocity
+      {
+         for (Integer i = 0; i < cartStateSize; i += 6)
+         {
+            deriv[cartesianStart + i]     = state[cartesianStart + i + 3];
+            deriv[cartesianStart + i + 1] = state[cartesianStart + i + 4];
+            deriv[cartesianStart + i + 2] = state[cartesianStart + i + 5];
+         }
+      }
    }
 
    if (psm->RequiresCompletion())
@@ -3634,7 +3653,8 @@ std::string ODEModel::BuildForceNameString(PhysicalModel *force)
 void ODEModel::MoveToOrigin(Real newEpoch)
 {
 #ifdef DEBUG_REORIGIN
-   MessageInterface::ShowMessage("ODEModel::MoveToOrigin entered with newEpoch = %le\n", newEpoch);
+   MessageInterface::ShowMessage("ODEModel::MoveToOrigin entered with "
+         "newEpoch = %le\n", newEpoch);
    MessageInterface::ShowMessage("      and epoch = %le\n", epoch);
 #endif
    

@@ -417,15 +417,17 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
                deriv[3 + i6] = relativePosition[0] * mu_r - a_indirect[0];
                deriv[4 + i6] = relativePosition[1] * mu_r - a_indirect[1];
                deriv[5 + i6] = relativePosition[2] * mu_r - a_indirect[2];
+
+               /// ODEModel now fills in the velocity part, so removed it here
                // dr/dt = v, but only fill this piece for the central body
-               if (rbb3 == 0.0)
-               {
-                  deriv[i6]     = state[3 + i6];
-                  deriv[1 + i6] = state[4 + i6];
-                  deriv[2 + i6] = state[5 + i6];
-               }
-               else
-                  deriv[i6] = deriv[1 + i6] = deriv[2 + i6] = 0.0;
+               //if (rbb3 == 0.0)
+               //{
+               //   deriv[i6]     = state[3 + i6];
+               //   deriv[1 + i6] = state[4 + i6];
+               //   deriv[2 + i6] = state[5 + i6];
+               //}
+               //else
+               deriv[i6] = deriv[1 + i6] = deriv[2 + i6] = 0.0;
                   
             } 
             else 
