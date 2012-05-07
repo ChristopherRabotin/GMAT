@@ -461,7 +461,7 @@ bool PropagationStateManager::MapObjectsToVector()
                      stateMap[index]->object->GetName() +
                      " is infinite");
 
-            state[index] =value;
+            state[index] = value;
             break;
             
          case Gmat::RVECTOR_TYPE:
