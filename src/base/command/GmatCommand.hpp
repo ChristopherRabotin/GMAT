@@ -233,6 +233,9 @@ protected:
    static const Gmat::ParameterType 
                      PARAMETER_TYPE[GmatCommandParamCount - GmatBaseParamCount];
    
+   static const Integer MAX_NUM_TANKS;
+
+
    /// Map containing names and associated types
    ObjectTypeMap        association;
    /// List of the associated objects
@@ -353,6 +356,9 @@ protected:
    Real                 *epochData;
    Real                 *stateData;
    Real                 *parmData;
+   Real                 *fuelMassData;
+   StringArray          tankNames;
+
    std::vector <SpaceObject*>
                         satVector;
    Integer              satsInMaps;

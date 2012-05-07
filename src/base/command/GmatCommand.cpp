@@ -89,6 +89,8 @@ const Gmat::ParameterType
       Gmat::STRING_TYPE
    };
 
+const Integer GmatCommand::MAX_NUM_TANKS = 20;
+
 Integer GmatCommand::satEpochID = -1;
 Integer GmatCommand::satCdID;
 Integer GmatCommand::satDragAreaID;
@@ -143,7 +145,8 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    currentRunState      (Gmat::RUNNING),  // RUNNING means just treat normally
    epochData            (NULL),
    stateData            (NULL),
-   parmData             (NULL)
+   parmData             (NULL),
+   fuelMassData         (NULL)
 {
    generatingString = "";
    parameterCount = GmatCommandParamCount;
@@ -236,6 +239,17 @@ GmatCommand::~GmatCommand()
       delete [] parmData;
       parmData = NULL;
    }
+   if (fuelMassData)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (fuelMassData, "fuelMassData", this->GetTypeName() +
+          "::~GmatCommand() deleting fuelMassData");
+      #endif
+      delete [] fuelMassData;
+      fuelMassData = NULL;
+   }
+   tankNames.clear();
 }
 
 
@@ -285,9 +299,12 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    currentRunState      (c.currentRunState),
    epochData            (NULL),
    stateData            (NULL),
-   parmData             (NULL)
+   parmData             (NULL),
+   fuelMassData         (NULL)
 {
    generatingString = c.generatingString;
+
+   tankNames.clear();
 }
 
 
@@ -352,6 +369,8 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    epochData           = NULL;
    stateData           = NULL;
    parmData            = NULL;
+   fuelMassData        = NULL;
+   tankNames.clear();
    
    isInitialized         = false;
 
@@ -1352,8 +1371,8 @@ bool GmatCommand::Initialize()
    #if DEBUG_COMMAND_INIT
    MessageInterface::ShowMessage
       ("GmatCommand::Initialize() %s entering\n   epochData=%p, stateData=%p, "
-       "parmData=%p, satVector.size()=%d\n", GetTypeName().c_str(), epochData,
-       stateData, parmData, satVector.size());
+       "parmData=%p, fuelMassData = %p, satVector.size()=%d\n", GetTypeName().c_str(), epochData,
+       stateData, parmData, fuelMassData, satVector.size());
    #endif
    
    // Check to be sure the basic infrastructure is in place
@@ -1412,14 +1431,26 @@ bool GmatCommand::Initialize()
       parmData = NULL;
    }
    
+   if (fuelMassData != NULL)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (fuelMassData, "fuelMassData", this->GetTypeName() + " deleting fuelMassData");
+      #endif
+      delete [] fuelMassData;
+      fuelMassData = NULL;
+   }
+
+   tankNames.clear();
+
    satVector.clear();
    satsInMaps = 0;
    
    #if DEBUG_COMMAND_INIT
    MessageInterface::ShowMessage
       ("GmatCommand::Initialize() %s leaving\n   epochData=%p, stateData=%p, "
-       "parmData=%p, satVector.size()=%d\n", GetTypeName().c_str(), epochData,
-       stateData, parmData, satVector.size());
+       "parmData=%p, fuelMassData = %p, satVector.size()=%d\n", GetTypeName().c_str(), epochData,
+       stateData, parmData, fuelMassData, satVector.size());
    #endif
    
    return isInitialized;
@@ -1889,8 +1920,8 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
    MessageInterface::ShowMessage
       ("GmatCommand::BuildCommandSummary() %s, commandCompleted=%d, "
        "objectMap=%p, globalObjectMap=%p\n    epochData=%p, stateData=%p, parmData=%p, "
-       "satVector.size()=%d\n", GetTypeName().c_str(), commandCompleted, objectMap,
-       globalObjectMap, epochData, stateData, parmData, satVector.size());
+       "fuelMassData=%p, satVector.size()=%d\n", GetTypeName().c_str(), commandCompleted, objectMap,
+       globalObjectMap, epochData, stateData, parmData, fuelMassData, satVector.size());
    #endif
    
    if (epochData == NULL)
@@ -1995,9 +2026,25 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
             #endif
             delete [] parmData;
          }
+         if (fuelMassData != NULL)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (fuelMassData, "fuelMassData", this->GetTypeName() + "::BuildCommandSummary()",
+                "deleting fuelMassData");
+            #endif
+            delete [] fuelMassData;
+         }
+
+         tankNames.clear();
+
          epochData = new Real[satsInMaps];
          stateData = new Real[6*satsInMaps];
-         parmData = new Real[6*satsInMaps];
+         parmData = new Real[7*satsInMaps];
+
+         fuelMassData = new Real[MAX_NUM_TANKS*satsInMaps];
+         tankNames.resize(MAX_NUM_TANKS * satsInMaps, "");
+
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
             (epochData, "epochData", this->GetTypeName() + "::BuildCommandSummary()",
@@ -2008,6 +2055,9 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
          MemoryTracker::Instance()->Add
             (parmData, "parmData", this->GetTypeName() + "::BuildCommandSummary()",
              "parmData = new Real[satsInMaps]");
+         MemoryTracker::Instance()->Add
+            (fuelMassData, "fuelMassData", this->GetTypeName() + "::BuildCommandSummary()",
+             "fuelMassData = new Real[satsInMaps]");
          #endif
       }
    }
@@ -2026,13 +2076,27 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
       epochData[i] = satVector[i]->GetRealParameter(satEpochID);
       memcpy(&stateData[i6], satVector[i]->GetState().GetState(),
             6*sizeof(Real));
-      parmData[i6]   = satVector[i]->GetRealParameter(satCdID);
-      parmData[i6+1] = satVector[i]->GetRealParameter(satDragAreaID);
-      parmData[i6+2] = satVector[i]->GetRealParameter(satCrID);
-      parmData[i6+3] = satVector[i]->GetRealParameter(satSRPAreaID);
-      parmData[i6+4] = satVector[i]->GetRealParameter(satDryMassID);
-      parmData[i6+5] = satVector[i]->GetRealParameter(satTotalMassID);
    }
+   Integer i7;
+   for (Integer i = 0; i < satsInMaps; ++i)
+   {
+      i7 = i * 7;
+      StringArray tanks = satVector[i]->GetStringArrayParameter(satTankID);
+      parmData[i7]   = satVector[i]->GetRealParameter(satCdID);
+      parmData[i7+1] = satVector[i]->GetRealParameter(satDragAreaID);
+      parmData[i7+2] = satVector[i]->GetRealParameter(satCrID);
+      parmData[i7+3] = satVector[i]->GetRealParameter(satSRPAreaID);
+      parmData[i7+4] = satVector[i]->GetRealParameter(satDryMassID);
+      parmData[i7+5] = satVector[i]->GetRealParameter(satTotalMassID);
+      parmData[i7+6] = (Real) tanks.size();
+
+      for (Integer ii = 0; ii < parmData[i7+6]; ii++)
+      {
+         tankNames.at(MAX_NUM_TANKS*i + ii) = tanks.at(ii);
+         fuelMassData[MAX_NUM_TANKS*i + ii] = satVector[i]->GetRefObject(Gmat::HARDWARE, tanks.at(ii))->GetRealParameter("FuelMass");
+      }
+   }
+
 }
 
 
@@ -2416,25 +2480,25 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 
             data << "\n\n        Spacecraft Properties \n"
                  << "        ------------------------------\n"
-                 << "        Cd                    = " << BuildNumber(parmData[i*6],   false, 10) << "\n"
-                 << "        Drag area             = " << BuildNumber(parmData[i*6+1], false, 10) << " m^2\n"
-                 << "        Cr                    = " << BuildNumber(parmData[i*6+2], false, 10) << "\n"
-                 << "        Reflective (SRP) area = " << BuildNumber(parmData[i*6+3], false, 10) << " m^2\n";
+                 << "        Cd                    = " << BuildNumber(parmData[i*7],   false, 10) << "\n"
+                 << "        Drag area             = " << BuildNumber(parmData[i*7+1], false, 10) << " m^2\n"
+                 << "        Cr                    = " << BuildNumber(parmData[i*7+2], false, 10) << "\n"
+                 << "        Reflective (SRP) area = " << BuildNumber(parmData[i*7+3], false, 10) << " m^2\n";
 
-            data << "        Dry mass              = " << BuildNumber(parmData[i*6+4])            << " kg\n";
-            data << "        Total mass            = " << BuildNumber(parmData[i*6+5])            << " kg\n";
+            data << "        Dry mass              = " << BuildNumber(parmData[i*7+4])            << " kg\n";
+            data << "        Total mass            = " << BuildNumber(parmData[i*7+5])            << " kg\n";
 
-            StringArray tanks = obj->GetStringArrayParameter(satTankID);
-            if (tanks.size() > 0)
+            Integer numTanks = (Integer) parmData[i*7+6];
+            if (numTanks > 0)  data << "\n        Tank masses:\n";
+
+            for (Integer kk = 0; kk < numTanks; kk++)
             {
-               data << "\n        Tank masses:\n";
-               for (StringArray::iterator ii = tanks.begin();
-                    ii != tanks.end(); ++ii)
-                  data << "           " << (*ii) << ":   "
-                       << BuildNumber(obj->GetRefObject(Gmat::HARDWARE, (*ii))->
-                             GetRealParameter("FuelMass")) << " kg\n";
+               Integer nameSize = (tankNames.at(kk)).length();
+               data << "           " << tankNames.at(MAX_NUM_TANKS*i + kk) << ": ";
+               for (Integer mm = 0; mm < 19-nameSize; mm++)  data << " " ;
+               data << BuildNumber(fuelMassData[MAX_NUM_TANKS*i+kk]) << " kg\n";
             }
-            data << "\n";
+           data << "\n";
          }    // for i 0 -> satsInMaps
       }
    }
