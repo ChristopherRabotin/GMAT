@@ -660,7 +660,7 @@ Real * PhysicalModel::GetState()
  * Accessor method used to access the J2000 body based state array
  * Use this method with care -- it exposes the internal array of state data to
  * external users.  The Propagator and Integrator classes can use this access to
- * make system evelotion more efficient, but at the cost of loss of 
+ * make system evolution more efficient, but at the cost of loss of
  * encapsulation of the state data.
  */
 //------------------------------------------------------------------------------
