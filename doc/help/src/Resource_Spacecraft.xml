@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry xml:id="Spacecraft"
-          version="5.0" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Spacecraft"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -27,12 +27,6 @@
     <refpurpose>A spacecraft</refpurpose>
   </refnamediv>
 
-  <refsynopsisdiv>
-    <synopsis>Create Spacecraft <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
-…</synopsis>
-  </refsynopsisdiv>
-
   <refsection>
     <title>Description</title>
 
@@ -41,6 +35,60 @@
     coefficient), and any attached hardware, including thrusters and <link
     linkend="FuelTank">fuel tanks</link>. It also contains information about
     the visual model used to represent it in an OrbitView.</para>
+
+    <refsection>
+      <title>Epoch</title>
+
+      <para>The epoch of a Spacecraft is the time and date corresponding to
+      the specified orbit state. It defines the start time for propagation
+      using the Propagate command. See the Spacecraft Orbit State section for
+      interactions between the epoch, coordinate system, and spacecraft state
+      fields.</para>
+
+      <caution>
+        <para>GMAT’s Modified Julian Date (MJD) format differs from that of
+        other software. The Modified Julian format is a constant offset from
+        the full Julian date (JD):</para>
+
+        <informalequation>
+          <mathphrase>MJD = JD - offset</mathphrase>
+        </informalequation>
+
+        <para>GMAT uses a non-standard offset, as shown in the following
+        table.</para>
+
+        <informaltable>
+          <tgroup cols="3">
+            <tbody>
+              <row>
+                <entry/>
+
+                <entry><emphasis role="bold">GMAT</emphasis></entry>
+
+                <entry>common</entry>
+              </row>
+
+              <row>
+                <entry>reference epoch</entry>
+
+                <entry><emphasis role="bold">05 Jan 1941
+                12:00:00.000</emphasis></entry>
+
+                <entry>17 Nov 1858 00:00:00.000</entry>
+              </row>
+
+              <row>
+                <entry>Modified Julian offset</entry>
+
+                <entry><emphasis role="bold">2430000.0</emphasis></entry>
+
+                <entry>2400000.5</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </caution>
+    </refsection>
   </refsection>
 
   <refsection>
@@ -49,141 +97,301 @@
     <refsection>
       <title>Epoch</title>
 
-      <variablelist>
-        <varlistentry>
-          <term><literal>DateFormat</literal></term>
+      <caution>
+        <para>The range limits on the <guilabel>Epoch</guilabel> field are
+        validated only on input. It is possible to propagate beyond these
+        limits, then use the resulting <guilabel>Epoch</guilabel> in a
+        calculation or output it to a report. This situation has not been
+        tested, and is not expected to be accurate.</para>
+      </caution>
 
-          <listitem>
-            <para>The entry format and time system of the Epoch field.</para>
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1" colwidth=".5*"/>
 
-            <caution>
-              <para>The definition of the modified Julian date is not the same
-              as other software. Most software uses the Smithsonian
-              Astrophysical Observatory definition of 1957, where
-              <inlineequation>
-                  <mathphrase>JD</mathphrase>
-                </inlineequation> is the full Julian date:<informalequation>
-                  <mathphrase>MJD = JD - 2400000.5</mathphrase>
-                </informalequation>GMAT, however, uses the following
-              definition:</para>
+          <colspec colnum="2" colwidth="3*"/>
 
-              <informalequation>
-                <mathphrase>MJD = JD - 2430000.0</mathphrase>
-              </informalequation>
-            </caution>
+          <thead>
+            <row>
+              <entry>Field</entry>
 
-            <informaltable>
-              <tgroup cols="2">
-                <colspec align="center" />
+              <entry>Description</entry>
+            </row>
+          </thead>
 
-                <thead>
-                  <row>
-                    <entry align="center">Value</entry>
+          <tbody>
+            <row>
+              <entry><guilabel>DateFormat</guilabel></entry>
 
-                    <entry align="center">Description</entry>
-                  </row>
-                </thead>
+              <entry><para>The time system and format of the
+              <guilabel>Epoch</guilabel> field. In the GUI, this field is
+              called <guilabel>Epoch Format</guilabel>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
 
-                <tbody>
-                  <row>
-                    <entry><literal>A1Gregorian</literal></entry>
+                    <listitem>
+                      <para>Enumeration</para>
+                    </listitem>
+                  </varlistentry>
 
-                    <entry>A.1 time scale, Gregorian format ("DD MMM YYYY
-                    hh:mm:ss.ddd")</entry>
-                  </row>
+                  <varlistentry>
+                    <term>Allowed Values</term>
 
-                  <row>
-                    <entry><literal>A1ModJulian</literal></entry>
+                    <listitem>
+                      <para>A1ModJulian, TAIModJulian, UTCModJulian,
+                      TTModJulian, TDBModJulian, A1Gregorian, TAIGregorian,
+                      TTGregorian, UTCGregorian, TDBGregorian</para>
+                    </listitem>
+                  </varlistentry>
 
-                    <entry>A.1 time scale, modified Julian format</entry>
-                  </row>
+                  <varlistentry>
+                    <term>Access</term>
 
-                  <row>
-                    <entry><literal>TAIGregorian</literal></entry>
+                    <listitem>
+                      <para>set only</para>
+                    </listitem>
+                  </varlistentry>
 
-                    <entry>TAI time scale</entry>
-                  </row>
+                  <varlistentry>
+                    <term>Default Value</term>
 
-                  <row>
-                    <entry><literal>TAIModJulian</literal></entry>
+                    <listitem>
+                      <para>TAIModJulian</para>
+                    </listitem>
+                  </varlistentry>
 
-                    <entry><emphasis>Default</emphasis></entry>
-                  </row>
+                  <varlistentry>
+                    <term>Interfaces</term>
 
-                  <row>
-                    <entry><literal>TTGregorian</literal></entry>
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
 
-                    <entry>TT time scale</entry>
-                  </row>
+            <row>
+              <entry><guilabel>Epoch</guilabel></entry>
 
-                  <row>
-                    <entry><literal>TTModJulian</literal></entry>
+              <entry><para>The time and date corresponding to the specified
+              orbit state. It defines the start time for propagation using the
+              <guilabel>Propagate</guilabel> command.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
 
-                    <entry></entry>
-                  </row>
+                    <listitem>
+                      <para>Time</para>
+                    </listitem>
+                  </varlistentry>
 
-                  <row>
-                    <entry><literal>UTCGregorian</literal></entry>
+                  <varlistentry>
+                    <term>Allowed Values</term>
 
-                    <entry>UTC time scale</entry>
-                  </row>
+                    <listitem>
+                      <para>Gregorian: <literal>04 Oct 1957
+                      12:00:00.000</literal> &lt;= <guilabel>Epoch</guilabel>
+                      &lt;= <literal>28 Feb 2100 00:00:00.000</literal></para>
 
-                  <row>
-                    <entry><literal>UTCModJulian</literal></entry>
+                      <para>Modified Julian: <userinput>6116.0</userinput>
+                      &lt;= <guilabel>Epoch</guilabel> &lt;=
+                      <userinput>58127.5</userinput></para>
+                    </listitem>
+                  </varlistentry>
 
-                    <entry></entry>
-                  </row>
-                </tbody>
-              </tgroup>
-            </informaltable>
-          </listitem>
-        </varlistentry>
+                  <varlistentry>
+                    <term>Access</term>
 
-        <varlistentry>
-          <term><literal>Epoch</literal></term>
+                    <listitem>
+                      <para>set only</para>
+                    </listitem>
+                  </varlistentry>
 
-          <listitem>
-            <para>The initial epoch of the spacecraft's state and
-            properties.</para>
+                  <varlistentry>
+                    <term>Default Value</term>
 
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Type</term>
+                    <listitem>
+                      <para>21545</para>
+                    </listitem>
+                  </varlistentry>
 
-                <listitem>
-                  <para>string</para>
-                </listitem>
-              </varlistentry>
+                  <varlistentry>
+                    <term>Interfaces</term>
 
-              <varlistentry>
-                <term>Default</term>
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
 
-                <listitem>
-                  <para><literal>21545</literal> (TAIModJulian format)</para>
-                </listitem>
-              </varlistentry>
+            <row>
+              <entry><guilabel>CurrA1MJD</guilabel></entry>
 
-              <varlistentry>
-                <term>Limits</term>
+              <entry><para>The current epoch in the A1ModJulian format. This
+              field can only be used within the mission
+              sequence.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
 
-                <listitem>
-                  <para><literal>04 Oct 1957 12:00:00.000</literal> or later
-                  in all time systems (<literal>6116.0</literal> modified
-                  Julian)</para>
-                </listitem>
-              </varlistentry>
+                    <listitem>
+                      <para>Time</para>
+                    </listitem>
+                  </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+                  <varlistentry>
+                    <term>Allowed Values</term>
 
-                <listitem>
-                  <para>days (modified Julian format only)</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
+                    <listitem>
+                      <para><userinput>6116.0</userinput> &lt;=
+                      <guilabel>CurrA1MJD</guilabel> &lt;=
+                      <userinput>58127.5</userinput></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>get, set (mission sequence only)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para>converted equivalent of 21545 Modified Julian
+                      (TAI)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>script only</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Epoch.<replaceable>format</replaceable></guilabel></entry>
+
+              <entry><para>The spacecraft orbit epoch in the specified system
+              and format. For example, <guilabel>Epoch.TAIModJulian</guilabel>
+              is the epoch in the TAI system and the Modified Julian
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Time</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para>Gregorian: <userinput>04 Oct 1957
+                      12:00:00.000</userinput> &lt;=
+                      <guilabel>Epoch</guilabel> &lt;= <userinput>28 Feb 2100
+                      00:00:00.000</userinput></para>
+
+                      <para>Modified Julian: <userinput>6116.0</userinput>
+                      &lt;= <guilabel>Epoch</guilabel> &lt;=
+                      <userinput>58127.5</userinput></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>get, set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para>converted equivalent of 21545 Modified Julian
+                      (TAI)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>script only</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel><replaceable>format</replaceable></guilabel></entry>
+
+              <entry><para>The spacecraft orbit epoch in the specified system
+              and format. For example, <guilabel>TAIModJulian</guilabel> is
+              the epoch in the TAI system and the Modified Julian format.
+              These fields can only be used within the mission
+              sequence.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Time</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para>Gregorian: <userinput>04 Oct 1957
+                      12:00:00.000</userinput> &lt;=
+                      <guilabel>Epoch</guilabel> &lt;= <userinput>28 Feb 2100
+                      00:00:00.000</userinput></para>
+
+                      <para>Modified Julian: <userinput>6116.0</userinput>
+                      &lt;= <guilabel>Epoch</guilabel> &lt;=
+                      <userinput>58127.5</userinput></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>get, set (mission sequence only)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para>converted equivalent of 21545 Modified Julian
+                      (TAI)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </refsection>
 
     <refsection>
@@ -328,7 +536,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -372,7 +580,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -416,7 +624,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -460,7 +668,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -504,7 +712,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -548,7 +756,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -596,7 +804,7 @@
                   <term>Default</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -646,7 +854,7 @@
                   <term>Default</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -693,7 +901,7 @@
                   <term>Default</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -701,7 +909,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -737,7 +945,7 @@
                   <term>Default</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -745,7 +953,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -781,7 +989,7 @@
                   <term>Default</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -789,7 +997,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -824,7 +1032,7 @@
                   <term>Default</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -832,7 +1040,7 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -873,7 +1081,7 @@
                   <term>Default</term>
 
                   <listitem>
-                    <para></para>
+                    <para/>
                   </listitem>
                 </varlistentry>
 
@@ -920,7 +1128,7 @@
                     <term>Default</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -960,7 +1168,7 @@
 
             <listitem>
               <para>See the <xref
-              linkend="SpacecraftDisplayStateTypeKeplerian" /> section for a
+              linkend="SpacecraftDisplayStateTypeKeplerian"/> section for a
               description of this field.</para>
             </listitem>
           </varlistentry>
@@ -970,7 +1178,7 @@
 
             <listitem>
               <para>See the <xref
-              linkend="SpacecraftDisplayStateTypeKeplerian" /> section for a
+              linkend="SpacecraftDisplayStateTypeKeplerian"/> section for a
               description of this field.</para>
             </listitem>
           </varlistentry>
@@ -980,7 +1188,7 @@
 
             <listitem>
               <para>See the <xref
-              linkend="SpacecraftDisplayStateTypeKeplerian" /> section for a
+              linkend="SpacecraftDisplayStateTypeKeplerian"/> section for a
               description of this field.</para>
             </listitem>
           </varlistentry>
@@ -990,7 +1198,7 @@
 
             <listitem>
               <para>See the <xref
-              linkend="SpacecraftDisplayStateTypeKeplerian" /> section for a
+              linkend="SpacecraftDisplayStateTypeKeplerian"/> section for a
               description of this field.</para>
             </listitem>
           </varlistentry>
@@ -1021,7 +1229,7 @@
                     <term>Default</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1074,7 +1282,7 @@
                     <term>Default</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1082,7 +1290,7 @@
                     <term>Limits</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1117,7 +1325,7 @@
                     <term>Default</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1125,7 +1333,7 @@
                     <term>Limits</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1160,7 +1368,7 @@
                     <term>Default</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1215,7 +1423,7 @@
                     <term>Default</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1223,7 +1431,7 @@
                     <term>Limits</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1258,7 +1466,7 @@
                     <term>Default</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1266,7 +1474,7 @@
                     <term>Limits</term>
 
                     <listitem>
-                      <para></para>
+                      <para/>
                     </listitem>
                   </varlistentry>
 
@@ -1286,12 +1494,261 @@
   </refsection>
 
   <refsection>
+    <title>GUI</title>
+
+    <refsection>
+      <title>Orbit</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_SpacecraftOrbit_Default.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>A change in Epoch Format causes an immediate update to Epoch to
+      reflect the chosen time system and format.</para>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Epoch</title>
+
+      <para>GMAT supports five time systems or scales and two formats:</para>
+
+      <table>
+        <title>Time Systems</title>
+
+        <tgroup cols="2">
+          <tbody>
+            <row>
+              <entry>A.1</entry>
+
+              <entry>USNO atomic time; GMAT’s internal time system </entry>
+            </row>
+
+            <row>
+              <entry>TAI</entry>
+
+              <entry>International Atomic Time</entry>
+            </row>
+
+            <row>
+              <entry>TDB</entry>
+
+              <entry>Barycentric Dynamical Time</entry>
+            </row>
+
+            <row>
+              <entry>TT</entry>
+
+              <entry>Terrestrial Time</entry>
+            </row>
+
+            <row>
+              <entry>UTC</entry>
+
+              <entry>Coordinated Universal Time</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <table>
+        <title>Epoch Formats</title>
+
+        <tgroup cols="2">
+          <tbody>
+            <row>
+              <entry>Gregorian</entry>
+
+              <entry><para>Text with the following format: <literal>dd mmm
+              yyyy HH:MM:SS.FFF</literal></para><variablelist>
+                  <varlistentry>
+                    <term><literal>dd</literal></term>
+
+                    <listitem>
+                      <para>two-digit day of month</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term><literal>mmm</literal></term>
+
+                    <listitem>
+                      <para>first three letters of month</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term><literal>yyyy</literal></term>
+
+                    <listitem>
+                      <para>four-digit year</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term><literal>HH</literal></term>
+
+                    <listitem>
+                      <para>two-digit hour</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term><literal>MM</literal></term>
+
+                    <listitem>
+                      <para>two-digit minute</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term><literal>SS</literal></term>
+
+                    <listitem>
+                      <para>two-digit second</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term><literal>FFF</literal></term>
+
+                    <listitem>
+                      <para>three-digit fraction of second</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry>Modified Julian</entry>
+
+              <entry>Floating-point number of days from a reference epoch. In
+              GMAT, the reference epoch is 05 Jan 1941 12:00:00.000 (JD
+              2430000.0).</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para>The epoch can be set in multiple ways. The default method is to
+      set the DateFormat field to the desired time system and format, then set
+      the Epoch field to the desired epoch. This method cannot be used to get
+      the epoch value, such as on the right-hand side of an assignment
+      statement.</para>
+
+      <programlisting><code>aSat.DateFormat = UTCGregorian
+aSat.Epoch = '18 May 2012 12:00:00.000'</code></programlisting>
+
+      <para>An alternate method is to specify the DateFormat in the parameter
+      name. This method works in both “get” and “set” modes.</para>
+
+      <programlisting><code>aSat.Epoch.UTCGregorian = '18 May 2012 12:00:00.000'
+Report aReport aSat.Epoch.UTCGregorian</code></programlisting>
+
+      <para>A third method can be used in “get” mode everywhere, but in “set”
+      mode only in the mission sequence (i.e. after the BeginMissionSequence
+      command).</para>
+
+      <programlisting><code>aSat.UTCGregorian = '18 May 2012 12:00:00.000'
+Report aReport aSat.UTCGregorian</code></programlisting>
+
+      <para>GMAT uses the A.1 time system in the Modified Julian format for
+      its internal calculations. The system converts all other systems and
+      formats on input and again at output.</para>
+
+      <refsection>
+        <title>Leap Seconds</title>
+
+        <para>When converting to and from the UTC time system, GMAT includes
+        leap seconds as appropriate, according to the
+        <filename>tai-utc.dat</filename> data file from the IERS. This file
+        contains the conversion between TAI and UTC, including all leap
+        seconds that have been added or announced.</para>
+
+        <para>GMAT applies the leap second as the last second before the date
+        listed in the <filename>tai-utc.dat</filename> file, which
+        historically has been either January 1 or July 1. In the Gregorian
+        date format, the leap second appears as a
+        “60<superscript>th</superscript> second”: for example, “31 Dec 2008
+        23:59:60.000”. GMAT will correctly output this epoch, and will accept
+        it as input. GMAT’s Modified Julian format is based on an
+        86,400-second day, however, and will repeat the first second of the
+        following day. Input of the leap second in Modified Julian format is
+        not supported.</para>
+
+        <para>For epochs prior to the first entry in the leap-second file, the
+        UTC and TAI time systems are considered identical (i.e. zero leap
+        seconds are added). For epochs after the last entry, the leap second
+        count from the last entry is used.</para>
+
+        <para>The <filename>tai-utc.dat</filename> file is periodically
+        updated by the IERS when new leap seconds are announced. The latest
+        version of this file can always be found at <link
+        xlink:href="http://maia.usno.navy.mil/ser7/tai-utc.dat"><uri>http://maia.usno.navy.mil/ser7/tai-utc.dat</uri></link>.
+        To replace it, download the latest version and replace GMAT’s file in
+        the location
+        <filename><replaceable>&lt;GMAT&gt;</replaceable>/data/time/tai-utc.dat</filename>,
+        where <filename><replaceable>&lt;GMAT&gt;</replaceable></filename> is
+        the install directory of GMAT on your system.</para>
+      </refsection>
+    </refsection>
+  </refsection>
+
+  <refsection>
     <title>Examples</title>
 
-    <example>
-      <title>Creating a default Spacecraft</title>
+    <informalexample>
+      <para>Setting the epoch for propagation</para>
 
-      <programlisting>Create Spacecraft sc;</programlisting>
-    </example>
+      <programlisting><code>Create Spacecraft aSat
+aSat.DateFormat = TAIModJulian
+aSat.Epoch = 25562.5
+
+Create ForceModel aFM
+Create Propagator aProp
+aProp.FM = aFM
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Plotting and reporting the epoch (syntax #1)</para>
+
+      <programlisting><code>Create Spacecraft aSat
+aSat.DateFormat = A1Gregorian
+aSat.Epoch = '12 Jul 2015 08:21:45.921'
+
+Create XYPlot aPlot
+aPlot.XVariable = aSat.UTCModJulian
+aPlot.YVariables = aSat.Earth.Altitude
+
+Create Report aReport
+aReport.Add = {aSat.UTCGregorian, aSat.EarthMJ2000Eq.ECC}</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Plotting and reporting the epoch (syntax #2)</para>
+
+      <programlisting><code>Create Spacecraft aSat
+aSat.DateFormat = TTGregorian
+aSat.Epoch = '01 Dec 1978 00:00:00.000'
+
+Create XYPlot aPlot
+aPlot.XVariable = aSat.Epoch.TTModJulian
+aPlot.YVariables = aSat.Earth.RMAG
+
+Create Report aReport
+aReport.Add = {aSat.Epoch.A1Gregorian, aSat.Earth.RMAG}</code></programlisting>
+    </informalexample>
   </refsection>
 </refentry>
