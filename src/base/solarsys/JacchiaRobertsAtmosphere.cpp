@@ -27,10 +27,10 @@
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
 
-// #define DEBUG_JR_DRAG 1
-
-
-
+//#define DEBUG_JR_DRAG 1
+//#define UNIT_TEST
+//#define UNIT_TEST_90km
+//#define DEBUG_SHOW_DENSITY
 
 //---------------------------------
 // public
@@ -199,6 +199,12 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
    for (Integer i=0; i<count; i++)
    {
       height = CalculateGeodetics(&pos[i*6], epoch, true);
+
+      // For now, JR is turned off below 100 km altitude
+      if (height <= 100.0)
+         throw AtmosphereException("The Jacchia-Roberts atmosphere model is "
+               "not available for altitudes below 100 km.");
+
       if (epoch != wUpdateEpoch)
          AtmosphereModel::BuildAngularVelocity(epoch);
       
@@ -230,6 +236,16 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
       #endif
    }
    
+   #ifdef DEBUG_SHOW_DENSITY
+      static int iter = 0;
+      if (iter == 0)
+      MessageInterface::ShowMessage
+         ("%.12lf   %lf %lf %lf %lf %g\n", epoch,
+          pos[0], pos[1], pos[2], height, density[0]);
+      if (++iter == 16)
+         iter = 0;
+   #endif
+
    return true;
 }
 
@@ -343,6 +359,72 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    // Geodetic latitude of spacecraft, in radians
    geo_lat = geoLat * GmatMathConstants::RAD_PER_DEG;
 
+   #ifdef UNIT_TEST
+      // March through the altitude regimes
+      Real altitude = 80.0;
+      Real rawdensity;
+      MessageInterface::ShowMessage("-----------------------------------\n");
+      MessageInterface::ShowMessage("Altitude vs Density at temp\n");
+      MessageInterface::ShowMessage("-----------------------------------\n");
+      while (altitude < 130.0)
+      {
+         if (altitude<=90.0)
+         {
+            rawdensity = rho_zero;
+         }
+         else if (altitude < (Real) 100.0)
+         {
+            temperature = exotherm(space_craft, sun, &geo, altitude,
+                  sun_dec, geo_lat);
+            rawdensity = rho_100(altitude, temperature);
+         }
+         else if (height <= (Real) 125.0)
+         {
+            temperature = exotherm(space_craft, sun, &geo, altitude,
+                  sun_dec, geo_lat);
+            rawdensity = rho_125(altitude, temperature);
+         }
+
+         MessageInterface::ShowMessage("%lf    %.10le\n", altitude, rawdensity);
+
+         altitude += 1.0;
+      };
+
+      MessageInterface::ShowMessage("-----------------------------------\n");
+
+      // Check for the 90 km boundary
+      Real density90 = rho_zero;
+      altitude = 89.9995;
+      for (Integer i = 0; i < 100; ++i)
+      {
+         temperature = exotherm(space_craft, sun, &geo, altitude,
+               sun_dec, geo_lat);
+         rawdensity = rho_100(altitude, temperature);
+         MessageInterface::ShowMessage("%lf    %.10le, (%.10le at 90 km)\n",
+               altitude, rawdensity, density90);
+         altitude += 0.00001;
+      }
+
+      // Check for the 100 km boundary
+      MessageInterface::ShowMessage("-----------------------------------\n");
+      temperature = exotherm(space_craft, sun, &geo, altitude,
+            sun_dec, geo_lat);
+      Real density100 = rho_125(altitude, temperature);
+
+      altitude = 99.9995;
+      for (Integer i = 0; i < 100; ++i)
+      {
+         temperature = exotherm(space_craft, sun, &geo, altitude,
+               sun_dec, geo_lat);
+         rawdensity = rho_100(altitude, temperature);
+         MessageInterface::ShowMessage("%lf    %.10le  (%.10le at 100 km)\n",
+               altitude, rawdensity, density100);
+         altitude += 0.00001;
+      }
+
+      throw AtmosphereException("Unit test of JR continuity complete");
+   #endif
+
    // Compute height dependent density
    if (height<=90.0)
    {
@@ -354,7 +436,7 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
       density = rho_100(height, temperature);
       #ifdef DEBUG_JR_DRAG
          MessageInterface::ShowMessage
-            ("   Evaluating for height < 100\n"
+            ("   Evaluating for height < 100;"
              "   temp = %lf\n   density = %15.10le\n",
              temperature, density);
       #endif
@@ -365,7 +447,7 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
       density = rho_125(height, temperature);
       #ifdef DEBUG_JR_DRAG
          MessageInterface::ShowMessage
-            ("   Evaluating for 100 < height < 125\n"
+            ("   Evaluating for 100 < height < 125;"
              "   temp = %lf\n   density = %15.10le\n",
              temperature, density);
       #endif
@@ -489,8 +571,9 @@ Real JacchiaRobertsAtmosphere::exotherm(Real space_craft[2], Real sun[3],
    {
       t_infinity = t1 + 28.0 * geo->tkp + 0.03 * expkp;
    }
-   tx = 371.6678 + 0.0518806 * t_infinity -294.3505 *
-        exp(-0.0021622 * t_infinity);
+
+   tx = 371.6678 + 0.0518806 * t_infinity - 294.3505 *
+        exp(-0.00216222 * t_infinity);
 
    // If the spacecraft altitude is below 125 km then
    if (height < 125.0)
@@ -549,8 +632,8 @@ Real JacchiaRobertsAtmosphere::exotherm(Real space_craft[2], Real sun[3],
       x_root = aux[0][0];
       y_root = fabs(aux[0][1]);
    }
+
    return exotemp;
-   
 }
 
 
@@ -649,9 +732,32 @@ Real JacchiaRobertsAtmosphere::rho_100(Real height, Real temperature)
          (90.0 + cbPolarRadius)))
        + p6 * atan(y_root * (height - 90.0)/(
         y_root*y_root + (height - x_root)*(90.0 - x_root))) / y_root;
+   // Roberts eq 13(b) looks like this:
+   // f2 = (height - 90.0) * (1500625.0 * cbPolarSquared / con_c[4] * m_con[6] +
+   //       p5/((height + cbPolarRadius)*(90.0 + cbPolarRadius)))
+   //       + p6 * atan(y_root * (height - 90.0)/(
+   //       y_root*y_root + (height - x_root)*(90.0 - x_root))) / y_root;
 
    // Compute f1 power
-   factor_k = -1500625.0*g_zero*cbPolarSquared/(gas_con*con_c[4]*(tx-tzero));
+   // Old code (and GTDS):
+   //   factor_k = -1500625.0*g_zero*cbPolarSquared/(gas_con*con_c[4]*(tx-tzero));
+   // Replaced by Vallado's (3rd Ed, p 951):
+   factor_k = -g_zero/(gas_con*(tx-tzero));  // Vallado p 951
+
+   #ifdef UNIT_TEST
+      #ifdef UNIT_TEST_90km
+         MessageInterface::ShowMessage("90-100 km factors, ht = %.12lf, "
+               "temp = %.12lf: rho_zero[%le] * tzero"
+               "[%le] * m_poly[%le] *\n  exp(factor_k[%le]*(log_f1[%le] + "
+               "f2[%le])) / (mzero[%le] * temperature[%le])\n", height,
+               temperature, rho_zero, tzero,
+               m_poly, factor_k, log_f1, f2, mzero, temperature);
+      #endif
+
+      MessageInterface::ShowMessage("   k = %.14le, log_f1 = %.14le, f2 = "
+            "%.14le, sum = %.14le, tx = %lf, tzero = %lf temp = %lf\n", factor_k,
+            log_f1, f2, log_f1 + f2, tx, tzero, temperature);
+   #endif
 
    return rho_zero * tzero * m_poly * exp(factor_k*(log_f1 + f2)) /
        (mzero * temperature);
@@ -800,6 +906,11 @@ Real JacchiaRobertsAtmosphere::rho_cor(Real height, Real a1_time, Real geo_lat,
    eta_lat = sin(2.0*GmatMathConstants::PI*day_58 + 1.72) * sin_lat * fabs(sin_lat);
    slat_cor = 0.014 * (height - 90.0) * eta_lat *
       exp(-0.0013 * (height - 90.0) * (height - 90.0));
+
+   #ifdef DEBUG_JR_DRAG
+      MessageInterface::ShowMessage("Correction factor: %.9lf\n",
+            pow(10.0, geo_cor + semian_cor + slat_cor));
+   #endif
 
    return pow(10.0, geo_cor + semian_cor + slat_cor);
 }
@@ -1099,7 +1210,7 @@ Real JacchiaRobertsAtmosphere::dot_product(Real a[3] , Real b[3])
 // void LoadConstants()
 //------------------------------------------------------------------------------
 /**
- * Loads the constants used inthe model
+ * Loads the constants used in the model
  *
  * (These constants were formerly defined as file level globals)
  */
