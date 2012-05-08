@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="CallFunction"
+<refentry version="5.0" xml:id="CallGmatFunction"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -8,11 +8,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>CallFunction</primary>
+    <primary>CallGmatFunction</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>CallFunction</refentrytitle>
+    <refentrytitle>CallGmatFunction</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -22,21 +22,21 @@
   </refmeta>
 
   <refnamediv>
-    <refname>Call Function</refname>
+    <refname>CallGmatFunction</refname>
 
-    <refpurpose>Perform a call function</refpurpose>
+    <refpurpose>Call a GMAT function</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
-    <synopsis></synopsis>
+    <synopsis>&lt;incomplete&gt;</synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Definition</title>
 
     <para>GMAT functions are very useful and work nearly the same as they do
-    in most programming languages. They may be invoked using the Call Function
-    command covered here.</para>
+    in most programming languages. They may be invoked using the
+    CallGmatFunction command covered here.</para>
   </refsection>
 
   <refsection>
@@ -155,7 +155,7 @@
       </varlistentry>
     </variablelist>
   </refsection>
-  
+
   <refsection>
     <title>Examples</title>
 
@@ -186,7 +186,7 @@ GMAT clearAll
 % Syntax 2
 GMAT [ ] = clearAll( )</code></programlisting>
 
-      <para></para>
+      <para/>
     </refsection>
   </refsection>
 </refentry>
