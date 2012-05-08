@@ -12,57 +12,18 @@
   <section>
     <title>Installation</title>
 
-    <para>Installers and files for all platforms are located on the GMAT
-    SourceForge page at <uri>https://sourceforge.net/projects/gmat</uri>. As
-    of this writing the latest version is R2011a, released April 29,
-    2011.</para>
+    <para>Installers and files for Windows are located on the GMAT SourceForge
+    page at <uri>https://sourceforge.net/projects/gmat</uri>. As of this
+    writing the latest version is R2012a, released May 23, 2012.</para>
 
-    <section>
-      <title>Installing on Windows</title>
+    <para>The GMAT Windows distribution contains an installer that will
+    install and configure GMAT for you automatically. By default GMAT will be
+    installed into the application data folder in your user profile, and a
+    shortcut will be placed in the <guimenu>Start</guimenu> menu.</para>
 
-      <para>The GMAT windows distribution contains an installer that will
-      install and configure GMAT for you automatically. By default GMAT will
-      be installed into the application data folder in your user profile, and
-      a shortcut will be placed in the <guimenu>Start</guimenu> menu.</para>
-    </section>
-
-    <section>
-      <title>Installing on the Mac</title>
-
-      <para>GMAT for Mac is released as a compressed archive. The archive can
-      be uncompressed and installed by either double-clicking on it, or by
-      running the following command in a Terminal window:</para>
-
-      <programlisting>tar -zxf gmat-snowleopard-x86-R2011a-Alpha.tar.gz</programlisting>
-
-      <para>Either method extracts the GMAT system into a folder named
-      <filename>GMAT-R2011a</filename>; this is the GMAT root directory. You
-      may move this folder in its entirety to the Applications folder or your
-      desired installation directory.</para>
-    </section>
-
-    <section>
-      <title>Installing on Linux</title>
-
-      <para>GMAT for Linux is released as a compressed archive. The archive
-      can be uncompressed by running the following command:</para>
-
-      <programlisting>tar -zxf gmat-linux-x64-R2011a-Alpha.tar.gz</programlisting>
-
-      <para>This command extracts the GMAT system into a folder named
-      <filename>GMAT-R2011a</filename>; this is the GMAT root directory.
-      Inside the <filename>bin</filename> directory you will find two
-      application launchers: <filename>RunGmat.sh</filename> and
-      <filename>RunGmatLauncher.sh</filename>. The Linux application is
-      launched by running one of these two shell scripts. Each script file
-      sets GMAT’s library path, then launches the application. If you would
-      like to create a desktop shortcut to launch GMAT, set your launcher to
-      run <filename>RunGmatLauncher.sh</filename>. You might want to set the
-      icon for the launcher as well; GMAT’s icon images are located in the
-      <filename>data/graphics/icons</filename> directory. Both launchers have
-      certain paths hard-coded in them; you should update these paths before
-      using the launchers.</para>
-    </section>
+    <para>GMAT is available as a source code bundle for other platforms. See
+    the <link xlink:href="http://gmat.ed-pages.com/wiki/tiki-index.php">GMAT
+    Wiki</link> for compiling instructions.</para>
   </section>
 
   <section>
@@ -73,7 +34,7 @@
 
       <para>On Microsoft Windows platforms there are several ways to start a
       GMAT session. If you used the GMAT installer, you can click the
-      <guimenuitem>GMAT R2011a</guimenuitem> item in the
+      <guimenuitem>GMAT R2012a</guimenuitem> item in the
       <guimenu>Start</guimenu> menu. If you installed GMAT from a zip file or
       by compiling the system, locate the <filename>bin</filename> directory
       in the GMAT root directory and double-click
