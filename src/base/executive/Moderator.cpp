@@ -1690,6 +1690,11 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
       #endif
       
       renamed = cmd->RenameRefObject(type, oldName, newName);
+      if (!renamed)
+         MessageInterface::ShowMessage
+            ("Moderator failed to rename rename '%s' to '%s' in %s command\n",
+             oldName.c_str(), newName.c_str(), typeName.c_str());
+      
       child = cmd->GetChildCommand(0);
       
       while (renamed && (child != NULL) && (child != cmd))
@@ -1701,7 +1706,13 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
              cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
          #endif
          if (typeName.find("End") == typeName.npos)
+         {
             renamed = child->RenameRefObject(type, oldName, newName);
+            if (!renamed)
+               MessageInterface::ShowMessage
+                  ("Moderator failed to rename rename '%s' to '%s' in %s command\n",
+                   oldName.c_str(), newName.c_str(), typeName.c_str());
+         }
          
          child = child->GetNext();
       }

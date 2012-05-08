@@ -119,7 +119,7 @@ typedef Real Radians;
 #define DEFAULT_TO_NO_CLONES virtual bool HasLocalClones() { return false; }
 #define DEFAULT_TO_NO_REFOBJECTS virtual bool RenameRefObject( \
       const Gmat::ObjectType type, const std::string &oldName, \
-      const std::string &newName) { return false; }
+      const std::string &newName) { return true; }
 
 
 namespace Gmat
