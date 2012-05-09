@@ -27,22 +27,22 @@ does not require administrative privileges, and will install by
 default to your personal AppData\Local folder. This can be customized
 during installation.
 
-For installation under Linux and Mac, please read the install_linux.txt
-and install_mac_snowleopard.txt files included in the distribution.
+GMAT is distributed in source form as well, and can be compiled on the
+Mac and on Linux. It has not been rigorously tested on these platforms,
+though.
 
 -----------------------------------------------------------------------
                            Running GMAT
 -----------------------------------------------------------------------
-On Windows, GMAT can be started by running bin\GMAT.exe.
-
-On Mac and Linux, please consult install_linux.txt and
-install_mac_snowleopard.txt.
+On Windows, click Start, and then point to All Programs. Point to GMAT,
+and then click GMAT R2012a. If you are using the zip-file bundle, start
+the bin\GMAT.exe application.
 
 -----------------------------------------------------------------------
                            Documentation
 -----------------------------------------------------------------------
 GMAT is extensively documented in the docs folder of this distribution.
-End-user documentation can be found in the docs/help folder (for offline
+End-user documentation can be found in the docs\help folder (for offline
 use) or online at http://gmat.sf.net/docs.
 
 -----------------------------------------------------------------------
@@ -57,7 +57,7 @@ optimization.
 Here are instructions for running the sample missions:
 
   - Download and install the GMAT application.
-  - Open GMAT and choose File > Open from the menu.
+  - Start GMAT and choose File > Open from the menu.
   - Navigate to the samples folder which is
     located in the GMAT root directory.
   - Choose the script file of your choice.
@@ -81,12 +81,14 @@ release are of alpha quality, and are included here as a preview only.
                       Credits and Acknowledgments
 -----------------------------------------------------------------------
 GMAT uses:
-- WxWidgets 2.8.11 (http://www.wxwidgets.org/) 
+- wxWidgets 2.8.12 (http://www.wxwidgets.org/) 
 - TSPlot (http://sourceforge.net/projects/tsplot/)
-- SPICE (http://naif.jpl.nasa.gov/naif/toolkit.html)
 - PCRE (http://www.pcre.org/)
+- SPICE (http://naif.jpl.nasa.gov/naif/toolkit.html)
+- SOFA (http://www.iausofa.org/)
 
-Planetary images courtesy of: 
+
+Planetary images are courtesy of: 
 JPL/Caltech/USGS (http://maps.jpl.nasa.gov/)
 Celestial Motherlode (http://www.celestiamotherlode.net/)
 Bjorn Jonsson (http://www.mmedia.is/~bjj/)
@@ -111,12 +113,17 @@ For other comments and questions email:  gmat@gsfc.nasa.gov
 
 Please see the release notes, located online at http://gmat.sf.net/docs.
 
-For a list of known issues, please visit http://pows003.gsfc.nasa.gov/bugzilla/
-or email gmat@gsfc.nasa.gov. 
+For a list of known issues, please visit
+http://li64-187.members.linode.com:8080 or email gmat@gsfc.nasa.gov. 
 
-GMAT R2011a is released as beta for Windows, and as alpha for Linux and Mac.
+GMAT R2012a is released as beta software.
 
-The included plugins are disabled by default, but have the following status:
+The following plugins are included and have the listed status:
+libFminconOptimizer: beta
 libMatlabInterface: beta
-libFminconOptimizer: beta (available for Windows only)
+libMsise00: beta
+libNRLMsise00: beta
+libCInterface: alpha
 libGmatEstimation: alpha
+libEphemPropagator: alpha
+libMarsGRAM: alpha
