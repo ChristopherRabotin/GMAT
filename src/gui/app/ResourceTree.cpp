@@ -763,6 +763,9 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    case GmatTree::SPACECRAFT:
       theGuiManager->UpdateSpacecraft();
       break;
+   case GmatTree::FORMATION:
+      theGuiManager->UpdateFormation();
+      break;
    case GmatTree::GROUND_STATION:
       theGuiManager->UpdateGroundStation();
       break;
@@ -789,6 +792,7 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    case GmatTree::DIFFERENTIAL_CORRECTOR:
    case GmatTree::SQP:
    case GmatTree::SOLVER:
+   case GmatTree::OPTIMIZER:
       theGuiManager->UpdateSolver();
       break;
    case GmatTree::BARYCENTER:
@@ -2121,6 +2125,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    GmatTreeItemData *selItemData = (GmatTreeItemData *) GetItemData(itemId);
    wxString oldName = selItemData->GetName();
    GmatTree::ItemType itemType = selItemData->GetItemType();
+   wxTreeItemId parentId = GetItemParent(itemId);
    
    wxString newName = oldName;
    wxString name;
@@ -2175,25 +2180,21 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          selItemData->SetTitle("");
          selItemData->SetName(newName);
          
-         // notify object name changed to panels which listens to resource update
-         UpdateGuiItem(itemType);
+         // Update and notify object name changed to panels which listens to resource update
+         // Changed to UpdateAll() for GMT-2622 fix (LOJ: 2012.05.08)
+         //UpdateGuiItem(itemType);
+         theGuiManager->UpdateAll(objType);
          theGuiManager->NotifyObjectNameChange(objType, oldName, newName);
          
-         // update formation which may use new spacecraft name
          if (objType == Gmat::SPACECRAFT)
          {
-            Collapse(mSpacecraftItem);
-            DeleteChildren(mSpacecraftItem);
+            // Why refresh spacecraft items?
+            // Commented out (LOJ: 2012.05.08)
+            //Collapse(mSpacecraftItem);
+            //DeleteChildren(mSpacecraftItem);
+            //AddDefaultSpacecraft(mSpacecraftItem);
             
-            ////----- Hardware is child of spacecraft, so create a folder
-            //AddItemFolder(mSpacecraftItem, mHardwareItem, "Hardware",
-            //              GmatTree::HARDWARE_FOLDER);
-            //AddDefaultHardware(mHardwareItem);
-            AddDefaultSpacecraft(mSpacecraftItem);
-            
-            //@todo Select the item just renamed, currently it selects Spacecraft folder
-            //SelectItem(itemId);
-            
+            // update formation which may use new spacecraft name
             Collapse(mFormationItem);
             DeleteChildren(mFormationItem);
             AddDefaultFormations(mFormationItem);
@@ -2203,7 +2204,9 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          Collapse(mVariableItem);
          DeleteChildren(mVariableItem);
          AddDefaultVariables(mVariableItem);
-         SelectItem(FindIdOfNode(newName, mVariableItem));
+         
+         // select renamed item
+         SelectItem(FindIdOfNode(newName, parentId));
          
          // update MissionTree for resource rename
          GmatAppData::Instance()->GetMissionTree()->UpdateMissionForRename();
@@ -4533,12 +4536,11 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    GmatTree::ItemType itemType = selItemData->GetItemType();
    bool showRenameDelete = true;
    
-   // We don't want to show Remove and Delete menu if any panel is open
+   // We don't want to show Rename and Delete menu if any panel is open
    // except MissionTree panel (LOJ: 2012.01.06)
-   //@tbs Do we want to show any message? Gray out Remove and Delete?
-   Integer x, y, w;
-   Integer numChildren = theMainFrame->GetNumberOfChildOpen(false, true);
-   if (numChildren == 1 && theMainFrame->IsMissionTreeUndocked(x, y, w))
+   //@tbs Do we want to show any message? Gray out Rename and Delete?
+   Integer numChildren = theMainFrame->GetNumberOfChildOpen(false, false, true, true);
+   if (numChildren == 1 && theMainFrame->IsMissionTreeUndocked())
       showRenameDelete = true;
    else if (numChildren > 0)
       showRenameDelete = false;

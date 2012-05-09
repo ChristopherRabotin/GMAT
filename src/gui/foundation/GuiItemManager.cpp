@@ -2277,7 +2277,7 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
       ("GuiItemManager::GetAllObjectCheckListBox() entered, theNumAllObject=%d\n",
        theNumAllObject);
    #endif
-     
+   
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
@@ -2304,7 +2304,12 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
 			{
 				objStr = theAllObjectList[i];
 				objName = objStr.BeforeFirst(' ');
-				if (!theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
+            GmatBase *obj = theGuiInterpreter->GetConfiguredObject(objName.c_str());
+            #ifdef DEBUG_ALL_OBJ_CHECKLISTBOX
+            MessageInterface::ShowMessage
+               ("   objName='%s', obj=<%p>'%s'\n", objName.c_str(), obj, obj ? obj->GetName() : "NULL");
+            #endif
+				if (obj != NULL && !obj->IsAutomaticGlobal())
 					checkListBox->Append(theAllObjectList[i]);
 			}
 		}
@@ -2324,10 +2329,12 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
 			{
 				objStr = theAllObjectList[i];
 				objName = objStr.BeforeFirst(' ');
+            GmatBase *obj = theGuiInterpreter->GetConfiguredObject(objName.c_str());
             #ifdef DEBUG_ALL_OBJ_CHECKLISTBOX
-            MessageInterface::ShowMessage("   objName='%s'\n", objName.c_str());
+            MessageInterface::ShowMessage
+               ("   objName='%s', obj=<%p>'%s'\n", objName.c_str(), obj, obj ? obj->GetName() : "NULL");
             #endif
-				if (!theGuiInterpreter->GetConfiguredObject(objName.c_str())->IsAutomaticGlobal())
+            if (obj != NULL && !obj->IsAutomaticGlobal())
 					checkListBox->Append(theAllObjectList[i]);
 			}
 			checkListBox->SetName("AllObjectsExcludingAutoGlobal");

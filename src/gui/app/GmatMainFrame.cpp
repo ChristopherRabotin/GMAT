@@ -779,7 +779,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    // Reposition mdi child windows (LOJ: 2011.02.01 Bug 2320 fix)
    if (newChild != NULL)
    {
-      int numChildren = GetNumberOfChildOpen(false, true, true);
+      int numChildren = GetNumberOfChildOpen(false, true, true, true);
       #ifdef DEBUG_CHILD_WINDOW
       MessageInterface::ShowMessage
          ("   numChildren = %d, mUndockedMissionTreePresized = %d\n", numChildren,
@@ -885,7 +885,7 @@ wxList* GmatMainFrame::GetListOfMdiChildren()
 
 //------------------------------------------------------------------------------
 // Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
-//            bool incScripts = false)
+//            bool incScripts = false, bool incMissionTree = false)
 //------------------------------------------------------------------------------
 /**
  * Returns number of children opened.
@@ -893,10 +893,11 @@ wxList* GmatMainFrame::GetListOfMdiChildren()
  * @param  scriptsOnly  Set this to true if only scripts to be included in counting
  * @param  incPlots     Set this to true if plotcs to be included in counting
  * @param  incScripts   Set this to true if scripts to be included in counting
+ * @param  incMissionTree Set this to true if undocked mission tree to be included in counting
  */
 //------------------------------------------------------------------------------
 Integer GmatMainFrame::GetNumberOfChildOpen(bool scriptsOnly, bool incPlots,
-                                            bool incScripts)
+                                            bool incScripts, bool incMissionTree)
 {
    #ifdef DEBUG_MAINFRAME_CHILD
    MessageInterface::ShowMessage
@@ -921,6 +922,11 @@ Integer GmatMainFrame::GetNumberOfChildOpen(bool scriptsOnly, bool incPlots,
       {
          scriptOpenCount++;
          if (incScripts)
+            openCount++;
+      }
+      else if (itemType == GmatTree::MISSION_TREE_UNDOCKED)
+      {
+         if (incMissionTree)
             openCount++;
       }
       else if (itemType >= GmatTree::BEGIN_OF_OUTPUT && itemType <= GmatTree::END_OF_OUTPUT)
@@ -959,6 +965,22 @@ Integer GmatMainFrame::GetNumberOfChildOpen(bool scriptsOnly, bool incPlots,
 Integer GmatMainFrame::GetNumberOfActivePlots()
 {
    return theGuiInterpreter->GetNumberOfActivePlots();
+}
+
+//------------------------------------------------------------------------------
+// bool IsMissionTreeUndocked()
+//------------------------------------------------------------------------------
+/**
+ * @return  true if MissionTree is undocked, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::IsMissionTreeUndocked()
+{
+   GmatMdiChildFrame *child = GetChild("Mission");
+   if (child != NULL)
+      return true;
+   else
+      return false;
 }
 
 

@@ -74,8 +74,9 @@ public:
    wxList* GetListOfMdiChildren();
    
    Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
-                                bool incScripts = false);
+                                bool incScripts = false, bool incMissionTree = false);
    Integer GetNumberOfActivePlots();
+   bool IsMissionTreeUndocked();
    bool IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer &width);
    bool IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width, Integer &height);
    void IconizeUndockedMissionTree();
