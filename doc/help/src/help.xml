@@ -86,6 +86,7 @@
             <xi:include href="Resource_FiniteBurn.xml" />
             <xi:include href="Resource_Formation.xml" />
             <xi:include href="Resource_FuelTank.xml" />
+            <xi:include href="Resource_GmatFunction.xml" />
             <xi:include href="Resource_GroundStation.xml" />
             <xi:include href="Resource_GroundTrackPlot.xml" />
             <xi:include href="Resource_ImpulsiveBurn.xml" />
@@ -116,6 +117,7 @@
           <xi:include href="Command_BeginFiniteBurn.xml" />
           <xi:include href="Command_BeginMissionSequence.xml" />
           <xi:include href="Command_CallGmatFunction.xml" />
+          <xi:include href="Command_CallMatlabFunction.xml" />
           <xi:include href="Command_ClearPlot.xml" />
           <xi:include href="Command_Else.xml" />
           <xi:include href="Command_EndFiniteBurn.xml" />
@@ -124,8 +126,9 @@
           <xi:include href="Command_Global.xml" />
           <xi:include href="Command_If.xml" />
           <xi:include href="Command_Maneuver.xml" />
+          <xi:include href="Command_MarkPoint.xml" />
           <xi:include href="Command_Minimize.xml" />
-          <xi:include href="Command_NonLinearConstraint.xml" />
+          <xi:include href="Command_NonlinearConstraint.xml" />
           <xi:include href="Command_Optimize.xml" />
           <xi:include href="Command_PenUp.xml" />
           <xi:include href="Command_PenDown.xml" />

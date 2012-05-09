@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="NonLinearConstraint"
+<refentry version="5.0" xml:id="NonlinearConstraint"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -8,11 +8,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>NonLinearConstraint</primary>
+    <primary>NonlinearConstraint</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>NonLinearConstraint</refentrytitle>
+    <refentrytitle>NonlinearConstraint</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -28,7 +28,7 @@
   </refnamediv>
 
   <refsynopsisdiv>
-    <synopsis></synopsis>
+    <synopsis/>
   </refsynopsisdiv>
 
   <refsection>
