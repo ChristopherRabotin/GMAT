@@ -147,7 +147,4 @@ GMAT Data.ColumnWidth = 20;
 %----------------------------------------
 
 BeginMissionSequence;
-Propagate DefaultProp(Sat) {Sat.ElapsedSecs = 12000.0};
-
-Report Data Sat.TAIModJulian Sat.X Sat.Y Sat.Z
-Report Data Sat.Q1 Sat.Q2 Sat.Q3 Sat.Q4
+Propagate 'Prop 120000 s'  DefaultProp(Sat) {Sat.ElapsedSecs = 12000.0};

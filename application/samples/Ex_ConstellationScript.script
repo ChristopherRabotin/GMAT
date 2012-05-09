@@ -331,46 +331,5 @@ GMAT a3Dplot.Add = Sat44;
 
 BeginMissionSequence
 
-Report ConstReport Sat11.X Sat11.Y Sat11.Z Sat11.VX Sat11.VY Sat11.VZ;
-GMAT ConstReport.WriteHeaders = Off;
+Propagate 'Prop 1 Day' prop(form, {Sat11.ElapsedSecs = 86400.0});
 
-BeginScript
-   Report ConstReport Sat21.X Sat21.Y Sat21.Z Sat21.VX Sat21.VY Sat21.VZ;
-   Report ConstReport Sat31.X Sat31.Y Sat31.Z Sat31.VX Sat31.VY Sat31.VZ;
-   Report ConstReport Sat41.X Sat41.Y Sat41.Z Sat41.VX Sat41.VY Sat41.VZ;
-   Report ConstReport Sat12.X Sat12.Y Sat12.Z Sat12.VX Sat12.VY Sat12.VZ;
-   Report ConstReport Sat22.X Sat22.Y Sat22.Z Sat22.VX Sat22.VY Sat22.VZ;
-   Report ConstReport Sat32.X Sat32.Y Sat32.Z Sat32.VX Sat32.VY Sat32.VZ;
-   Report ConstReport Sat42.X Sat42.Y Sat42.Z Sat42.VX Sat42.VY Sat42.VZ;  
-   Report ConstReport Sat13.X Sat13.Y Sat13.Z Sat13.VX Sat13.VY Sat13.VZ; 
-   Report ConstReport Sat23.X Sat23.Y Sat23.Z Sat23.VX Sat23.VY Sat23.VZ;
-   Report ConstReport Sat33.X Sat33.Y Sat33.Z Sat33.VX Sat33.VY Sat33.VZ;
-   Report ConstReport Sat43.X Sat43.Y Sat43.Z Sat43.VX Sat43.VY Sat43.VZ;  
-   Report ConstReport Sat14.X Sat14.Y Sat14.Z Sat14.VX Sat14.VY Sat14.VZ;
-   Report ConstReport Sat24.X Sat24.Y Sat24.Z Sat24.VX Sat24.VY Sat24.VZ;
-   Report ConstReport Sat34.X Sat34.Y Sat34.Z Sat34.VX Sat34.VY Sat34.VZ;
-   Report ConstReport Sat44.X Sat44.Y Sat44.Z Sat44.VX Sat44.VY Sat44.VZ;
-EndScript
-
-Propagate prop(form, {Sat11.ElapsedSecs = 86400.0});
-
-BeginScript
-   GMAT ConstReport.WriteHeaders = On;
-   Report ConstReport Sat11.X Sat11.Y Sat11.Z Sat11.VX Sat11.VY Sat11.VZ;
-   GMAT ConstReport.WriteHeaders = Off;
-   Report ConstReport Sat21.X Sat21.Y Sat21.Z Sat21.VX Sat21.VY Sat21.VZ;
-   Report ConstReport Sat31.X Sat31.Y Sat31.Z Sat31.VX Sat31.VY Sat31.VZ;
-   Report ConstReport Sat41.X Sat41.Y Sat41.Z Sat41.VX Sat41.VY Sat41.VZ;
-   Report ConstReport Sat12.X Sat12.Y Sat12.Z Sat12.VX Sat12.VY Sat12.VZ;
-   Report ConstReport Sat22.X Sat22.Y Sat22.Z Sat22.VX Sat22.VY Sat22.VZ;
-   Report ConstReport Sat32.X Sat32.Y Sat32.Z Sat32.VX Sat32.VY Sat32.VZ;
-   Report ConstReport Sat42.X Sat42.Y Sat42.Z Sat42.VX Sat42.VY Sat42.VZ;
-   Report ConstReport Sat13.X Sat13.Y Sat13.Z Sat13.VX Sat13.VY Sat13.VZ;
-   Report ConstReport Sat23.X Sat23.Y Sat23.Z Sat23.VX Sat23.VY Sat23.VZ;
-   Report ConstReport Sat33.X Sat33.Y Sat33.Z Sat33.VX Sat33.VY Sat33.VZ;
-   Report ConstReport Sat43.X Sat43.Y Sat43.Z Sat43.VX Sat43.VY Sat43.VZ;
-   Report ConstReport Sat14.X Sat14.Y Sat14.Z Sat14.VX Sat14.VY Sat14.VZ;
-   Report ConstReport Sat24.X Sat24.Y Sat24.Z Sat24.VX Sat24.VY Sat24.VZ;
-   Report ConstReport Sat34.X Sat34.Y Sat34.Z Sat34.VX Sat34.VY Sat34.VZ;
-   Report ConstReport Sat44.X Sat44.Y Sat44.Z Sat44.VX Sat44.VY Sat44.VZ;
-EndScript

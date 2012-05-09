@@ -123,24 +123,11 @@ GMAT IntegratorRpt.ColumnWidth = 20;
 % -------------------------------------------------------------------------
 %  Propagate using each of the propagators created above
 BeginMissionSequence
-Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-GMAT IntegratorRpt.WriteHeaders = Off;
-Propagate  EarthPointMass_RK56(Sat, {Sat.ElapsedDays = 0.1});
 
-Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthPointMass_RK68(Sat, {Sat.ElapsedDays = 0.1});
-
-Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthPointMass_RKV89(Sat, {Sat.ElapsedDays = 0.1});
-
-Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthPointMass_PD45(Sat, {Sat.ElapsedDays = 0.1});
-
-Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthPointMass_PD78(Sat, {Sat.ElapsedDays = 0.1});
-
-Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthPointMass_BS(Sat, {Sat.ElapsedDays = 0.1});
-
-Propagate  EarthPointMass_ABM(Sat, {Sat.ElapsedDays = 0.1});
-Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  'Prop w/ RK56' EarthPointMass_RK56(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop w/ RK68' EarthPointMass_RK68(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop w/ RKV89' EarthPointMass_RKV89(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop w/ PD45' EarthPointMass_PD45(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop w/ RK78' EarthPointMass_PD78(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop w/ BulStoer' EarthPointMass_BS(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop w/ ABM' EarthPointMass_ABM(Sat, {Sat.ElapsedDays = 0.1});

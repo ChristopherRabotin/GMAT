@@ -266,32 +266,8 @@ GMAT MarsBPlane.Element1      = 0;
 %---------- Mission Sequence
 %----------------------------------------
 BeginMissionSequence
-Report Data MPS1.A1ModJulian MPS1.X MPS1.Y MPS1.Z MPS1.VX MPS1.VY MPS1.VZ;
-GMAT Data.WriteHeaders = Off;
-Report Data MPS2.A1ModJulian MPS2.X MPS2.Y MPS2.Z MPS2.VX MPS2.VY MPS2.VZ;
-Report Data MPS3.A1ModJulian MPS3.X MPS3.Y MPS3.Z MPS3.VX MPS3.VY MPS3.VZ;
-Report Data MPS4.A1ModJulian MPS4.X MPS4.Y MPS4.Z MPS4.VX MPS4.VY MPS4.VZ;
-Report Data MarsSupply.A1ModJulian MarsSupply.X MarsSupply.Y MarsSupply.Z MarsSupply.VX MarsSupply.VY MarsSupply.VZ;
-Report Data MarsOrbiter.A1ModJulian MarsOrbiter.X MarsOrbiter.Y MarsOrbiter.Z MarsOrbiter.VX MarsOrbiter.VY MarsOrbiter.VZ;
 
-Propagate MarsProp(MPS,   {MPS1.Mars.Periapsis});
+Propagate 'Prop to Periapsis' MarsProp(MPS,   {MPS1.Mars.Periapsis});
+Maneuver 'Apply TOI' TOI(MarsSupply);
+Propagate 'Prop 1 Day' MarsProp(MPS,   {MPS1.ElapsedDays = 1});
 
-Report Data MPS1.A1ModJulian MPS1.X MPS1.Y MPS1.Z MPS1.VX MPS1.VY MPS1.VZ;
-Report Data MPS2.A1ModJulian MPS2.X MPS2.Y MPS2.Z MPS2.VX MPS2.VY MPS2.VZ;
-Report Data MPS3.A1ModJulian MPS3.X MPS3.Y MPS3.Z MPS3.VX MPS3.VY MPS3.VZ;
-Report Data MPS4.A1ModJulian MPS4.X MPS4.Y MPS4.Z MPS4.VX MPS4.VY MPS4.VZ;
-Report Data MarsSupply.A1ModJulian MarsSupply.X MarsSupply.Y MarsSupply.Z MarsSupply.VX MarsSupply.VY MarsSupply.VZ;
-Report Data MarsOrbiter.A1ModJulian MarsOrbiter.X MarsOrbiter.Y MarsOrbiter.Z MarsOrbiter.VX MarsOrbiter.VY MarsOrbiter.VZ;
-
-Maneuver TOI(MarsSupply);
-
-Report Data MarsSupply.A1ModJulian MarsSupply.X MarsSupply.Y MarsSupply.Z MarsSupply.VX MarsSupply.VY MarsSupply.VZ;
-
-Propagate MarsProp(MPS,   {MPS1.ElapsedDays = 1});
-
-Report Data MPS1.A1ModJulian MPS1.X MPS1.Y MPS1.Z MPS1.VX MPS1.VY MPS1.VZ;
-Report Data MPS2.A1ModJulian MPS2.X MPS2.Y MPS2.Z MPS2.VX MPS2.VY MPS2.VZ;
-Report Data MPS3.A1ModJulian MPS3.X MPS3.Y MPS3.Z MPS3.VX MPS3.VY MPS3.VZ;
-Report Data MPS4.A1ModJulian MPS4.X MPS4.Y MPS4.Z MPS4.VX MPS4.VY MPS4.VZ;
-Report Data MarsSupply.A1ModJulian MarsSupply.X MarsSupply.Y MarsSupply.Z MarsSupply.VX MarsSupply.VY MarsSupply.VZ;
-Report Data MarsOrbiter.A1ModJulian MarsOrbiter.X MarsOrbiter.Y MarsOrbiter.Z MarsOrbiter.VX MarsOrbiter.VY MarsOrbiter.VZ;

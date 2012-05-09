@@ -147,8 +147,6 @@ GMAT Data.ColumnWidth = 20;
 %---------- Mission Sequence
 %----------------------------------------
 BeginMissionSequence;
-Propagate DefaultProp(DMSP) {DMSP.ElapsedSecs = 10000.0};
+Propagate 'Prop 10000 s' DefaultProp(DMSP) {DMSP.ElapsedSecs = 10000.0};
 
-Report Data DMSP.TAIModJulian DMSP.X DMSP.Y DMSP.Z
-Report Data DMSP.Q1 DMSP.Q2 DMSP.Q3 DMSP.Q4
 

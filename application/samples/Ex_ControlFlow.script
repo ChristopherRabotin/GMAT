@@ -4,6 +4,10 @@
 %  The control flow used are For, While, and If statements.
 %
 
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
 %
 % -------------------------------------------------------------------------
 % --------------------------- Create Objects ------------------------------
@@ -15,8 +19,8 @@ GMAT Sat.DateFormat = UTCGregorian;
 GMAT Sat.Epoch = '22 Jul 2014 11:29:10.811';
 GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat.DisplayStateType = Keplerian;
-GMAT Sat.SMA = 83474.31800000001;
-GMAT Sat.ECC = 0.8965199999999999;
+GMAT Sat.SMA = 83474.31799999999;
+GMAT Sat.ECC = 0.89652;
 GMAT Sat.INC = 12.4606;
 GMAT Sat.RAAN = 112.8362;
 GMAT Sat.AOP = 218.9805;
@@ -26,78 +30,146 @@ GMAT Sat.Cd = 2.2;
 GMAT Sat.Cr = 1.8;
 GMAT Sat.DragArea = 15;
 GMAT Sat.SRPArea = 1;
+GMAT Sat.NAIFId = -123456789;
+GMAT Sat.NAIFIdReferenceFrame = -123456789;
+GMAT Sat.Id = 'SatId';
+GMAT Sat.Attitude = CoordinateSystemFixed;
+GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat.ModelOffsetX = 0;
+GMAT Sat.ModelOffsetY = 0;
+GMAT Sat.ModelOffsetZ = 0;
+GMAT Sat.ModelRotationX = 0;
+GMAT Sat.ModelRotationY = 0;
+GMAT Sat.ModelRotationZ = 0;
+GMAT Sat.ModelScale = 3;
+GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT Sat.Q1 = 0;
+GMAT Sat.Q2 = 0;
+GMAT Sat.Q3 = 0;
+GMAT Sat.Q4 = 1;
+GMAT Sat.EulerAngleSequence = '321';
+GMAT Sat.AngularVelocityX = 0;
+GMAT Sat.AngularVelocityY = 0;
+GMAT Sat.AngularVelocityZ = 0;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
 
 Create ForceModel FM;
 GMAT FM.CentralBody = Earth;
 GMAT FM.PointMasses = {Earth};
 GMAT FM.Drag = None;
 GMAT FM.SRP = Off;
+GMAT FM.RelativisticCorrection = Off;
+GMAT FM.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
 
 % Create propgator with point mass only
-Create Propagator  EarthPointMass;
-GMAT  EarthPointMass.Type     = PrinceDormand78;
-GMAT  EarthPointMass.StopIfAccuracyIsViolated = false;
-GMAT  EarthPointMass.InitialStepSize = 30;
-GMAT  EarthPointMass.Accuracy = 1e-12;
-GMAT  EarthPointMass.MinStep  = 0;
-GMAT  EarthPointMass.MaxStep  = 86400;
-GMAT  EarthPointMass.FM       = FM;
+Create Propagator EarthPointMass;
+GMAT EarthPointMass.FM = FM;
+GMAT EarthPointMass.Type = PrinceDormand78;
+GMAT EarthPointMass.InitialStepSize = 30;
+GMAT EarthPointMass.Accuracy = 1e-012;
+GMAT EarthPointMass.MinStep = 0;
+GMAT EarthPointMass.MaxStep = 86400;
+GMAT EarthPointMass.MaxStepAttempts = 50;
+GMAT EarthPointMass.StopIfAccuracyIsViolated = false;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
 
 %  Create Variables and Arrays
-Create Variable I ;
+Create Variable I;
+
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
 
 %  Create 
-Create OpenGLPlot EarthView;
-GMAT EarthView.Add = {Sat,Earth};
-GMAT EarthView.ViewScaleFactor = 2.5;
-GMAT EarthView.ViewUpAxis = X;
+Create OrbitView EarthView;
+GMAT EarthView.SolverIterations = Current;
+GMAT EarthView.UpperLeft = [ 0.3685770750988142 0.01259445843828715 ];
+GMAT EarthView.Size = [ 0.5573122529644269 0.8501259445843828 ];
+GMAT EarthView.RelativeZOrder = 183;
+GMAT EarthView.Add = {Sat, Earth};
+GMAT EarthView.CoordinateSystem = EarthMJ2000Eq;
+GMAT EarthView.DrawObject = [ true true ];
+GMAT EarthView.OrbitColor = [ 255 32768 ];
+GMAT EarthView.TargetColor = [ 8421440 0 ];
+GMAT EarthView.DataCollectFrequency = 1;
+GMAT EarthView.UpdatePlotFrequency = 50;
+GMAT EarthView.NumPointsToRedraw = 0;
+GMAT EarthView.ShowPlot = true;
+GMAT EarthView.ViewPointReference = Earth;
 GMAT EarthView.ViewPointVector = [ 0 0 30000 ];
+GMAT EarthView.ViewDirection = Earth;
+GMAT EarthView.ViewScaleFactor = 2.5;
+GMAT EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT EarthView.ViewUpAxis = X;
+GMAT EarthView.CelestialPlane = Off;
+GMAT EarthView.XYPlane = On;
+GMAT EarthView.WireFrame = Off;
+GMAT EarthView.Axes = On;
+GMAT EarthView.Grid = Off;
+GMAT EarthView.SunLine = Off;
+GMAT EarthView.UseInitialView = On;
+GMAT EarthView.StarCount = 7000;
+GMAT EarthView.EnableStars = On;
+GMAT EarthView.EnableConstellations = On;
 
 Create ReportFile Data;
-GMAT Data.Filename = Ex_Data.report
+GMAT Data.SolverIterations = Current;
+GMAT Data.UpperLeft = [ 0 0 ];
+GMAT Data.Size = [ 0 0 ];
+GMAT Data.RelativeZOrder = 0;
+GMAT Data.Filename = 'Ex_Data.report';
 GMAT Data.Precision = 16;
 GMAT Data.WriteHeaders = Off;
+GMAT Data.LeftJustify = On;
+GMAT Data.ZeroFill = Off;
 GMAT Data.ColumnWidth = 20;
+GMAT Data.WriteReport = true;
 
 % -------------------------------------------------------------------------
 % ---------------------------  Begin Mission Sequence ---------------------
 % -------------------------------------------------------------------------
-BeginMissionSequence
+BeginMissionSequence;
 
 % =========================================================================
 %  Example:  Use For loop to Prop for 5 orbits and save ephem at every apogee
 % =========================================================================
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
-For I = 1:5;
-     Propagate EarthPointMass(Sat,  {Sat.Apoapsis} );
-     Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+For 'For I = 1:1:5' I = 1:1:5;
+   Propagate 'Prop to Apoapsis' EarthPointMass(Sat) {Sat.Apoapsis};
 EndFor;
 
 % =========================================================================
 %  Example: Prop to next apogee while the ElapsedDays is less than ten days
 % =========================================================================
-While Sat.TAIModJulian < 26882;
-   Propagate EarthPointMass(Sat,  {Sat.Apoapsis} );
-   Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+While 'While Epoch < 26882' Sat.TAIModJulian < 26882
+   Propagate 'Prop to Apoapsis' EarthPointMass(Sat) {Sat.Apoapsis};
 EndWhile;
 
 % =========================================================================
 %  Example:  If the true anomaly of Sat's orbit is greater than 178 degrees, then
 %  propagate to periapsis.
 % =========================================================================
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
-If  Sat.TA > 178;
-    Propagate EarthPointMass(Sat,  {Sat.Periapsis} );
-    Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+If 'If Sat.TA > 178' Sat.TA > 178
+   Propagate 'Prop to Periapsis' EarthPointMass(Sat) {Sat.Periapsis};
 EndIf;
 
 % =========================================================================
 %  Example:  If TA is < 90 do prop to periapsis, otherwise, prop to apoapsis
 % =========================================================================
-If  Sat.TA > 90;
-    Propagate EarthPointMass(Sat,  {Sat.Periapsis} );
-    Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+If 'If Sat.TA > 90' Sat.TA > 90
+   Propagate 'Prop to Periapsis' EarthPointMass(Sat) {Sat.Periapsis};
 Else
-    Propagate EarthPointMass(Sat,  {Sat.Apoapsis} );
-    Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+   Propagate 'Prop to Apoapsis' EarthPointMass(Sat) {Sat.Apoapsis};
 EndIf;

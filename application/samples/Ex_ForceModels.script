@@ -186,31 +186,22 @@ GMAT Data.ColumnWidth = 20;
 % -------------------------------------------------------------------------
 BeginMissionSequence
 %Propagate using point mass propagator
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-GMAT Data.WriteHeaders = Off;
-Propagate  EarthPointMass(Sat, {Sat.ElapsedDays = 0.1});
+Propagate 'Prop Two Body' EarthPointMass(Sat, {Sat.ElapsedDays = 0.1});
 
 %Propagate using third bodies propagator
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate   EarthThirdBodies(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop Point Mass Perts' EarthThirdBodies(Sat, {Sat.ElapsedDays = 0.1});
 
 %Propagate using 12x12 gravity model propgator
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthAspherical12x12(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop Harmonic Gravity' EarthAspherical12x12(Sat, {Sat.ElapsedDays = 0.1});
 
 %Propagate using Jacchia-Roberts propagator
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthJacchiaRoberts(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop JR Drag' EarthJacchiaRoberts(Sat, {Sat.ElapsedDays = 0.1});
 
 %Propagate using MSISE-90 propagator
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthMSISE90(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop MSISE-90 Drag' EarthMSISE90(Sat, {Sat.ElapsedDays = 0.1});
 
 %Propagate using SRP propagator
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthSRP(Sat, {Sat.ElapsedDays = 0.1});
+Propagate  'Prop SRP' EarthSRP(Sat, {Sat.ElapsedDays = 0.1});
 
 %Propagate using using complex force model
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
-Propagate  EarthFull(Sat, {Sat.ElapsedDays = 0.1});
-Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  'Prop Earth Full' EarthFull(Sat, {Sat.ElapsedDays = 0.1});

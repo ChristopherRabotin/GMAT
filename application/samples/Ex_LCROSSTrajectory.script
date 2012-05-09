@@ -364,7 +364,7 @@ GMAT LCROSS = LRO;
 LunarSMA = 384410.3;
 pi = 3.14159265358979;
 
-BeginScript
+BeginScript 'Initializations'
       
    %---- Define LCROSS physical properties
    GMAT LRO.DryMass = 3256.8;
@@ -440,38 +440,22 @@ BeginScript
    ImpactSat.VY = -0.4568696547646986 
    ImpactSat.VZ = 2.402724393937031;
 
-EndScript;
+   LCM1.Element1 = 0.00306139288909
+   LCM1.Element2 = -0.00154568531603
+   LCM1.Element3 = 0.00308387318091
+   ET_LCM2 = 33.8898378781
+   LCM2.Element1 = -0.00150770654724
+   LCM2.Element2 = 0.0229441083419
+   LCM2.Element3 = 0.00277315503137
+   ET_Coll = 100.068369408
+   dVatMoon.Element1 = -0.014073821735
+   dVatMoon.Element2 = -0.3936966287
+   dVatMoon.Element3 = -0.231610121973
+   LCROSSInit = LCROSS;
+   ImpactSat = ImpactSatInit;
+   LCROSS    = LCROSSInit;
 
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-%  Report Initial Guess Data to file
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-%================================================================================================================
-%------------------------------------------------------------------------
-%----  Part 1: Find the canonical solution
-%------------------------------------------------------------------------
-%================================================================================================================
-
-%------------------------------------------------------------------------
-%----  Target sequence 1:  Try using EDUS dv to achieve BPlane Coordinates
-%------------------------------------------------------------------------
-
-%---- Store LCROSS spacecraft state for later use
-LCM1.Element1 = 0.00306139288909
-LCM1.Element2 = -0.00154568531603
-LCM1.Element3 = 0.00308387318091
-ET_LCM2 = 33.8898378781
-LCM2.Element1 = -0.00150770654724
-LCM2.Element2 = 0.0229441083419
-LCM2.Element3 = 0.00277315503137
-ET_Coll = 100.068369408
-dVatMoon.Element1 = -0.014073821735
-dVatMoon.Element2 = -0.3936966287
-dVatMoon.Element3 = -0.231610121973
-
-LCROSSInit = LCROSS;
-ImpactSat = ImpactSatInit;
-LCROSS    = LCROSSInit;
+EndScript
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %---- Prop to where EDUS performs maneuver
@@ -482,17 +466,9 @@ Propagate EarthFull(LRO) {LRO.A1ModJulian = LCROSS.A1ModJulian};
 GMAT PropEpoch = RefEpoch + ET_EDUSdV;
 LRO.Epoch = LCROSS.Epoch;
 Propagate EarthFull(LCROSS,LRO) {LCROSS.A1ModJulian = PropEpoch};
-Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
-Report Data LRO.TAIModJulian LRO.X LRO.Y LRO.Z LRO.VX LRO.VY LRO.VZ
 
 %---- Perform the maneuver
-dVx = LCROSS.VX; 
-dVy = LCROSS.VY;
-dVz = LCROSS.VZ;
 Maneuver EDUSdv(LCROSS);
-dVx = LCROSS.VX - dVx;
-dVy = LCROSS.VY - dVy;
-dVz = LCROSS.VZ - dVz;
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %---- Prop to LCM1 and perform manevuer
@@ -503,15 +479,9 @@ GMAT PropEpoch = RefEpoch + ET_LCM1;
 Propagate EarthFull(LCROSS,LRO) {LCROSS.A1ModJulian = PropEpoch};
 
 %---- Apply maneuver LCM1
-dVx = LCROSS.VX;
-dVy = LCROSS.VY;
-dVz = LCROSS.VZ;
 Maneuver LCM1(LCROSS);
 Maneuver LROTCM(LRO);
-dVx = LCROSS.VX - dVx;
-dVy = LCROSS.VY - dVy;
-dVz = LCROSS.VZ - dVz;
-Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
+
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %---- Prop to periselene
@@ -525,44 +495,14 @@ Maneuver LROLOI(LRO);
 Propagate NearMoonProp(LCROSS,LRO) {LRO.Luna.Periapsis};
 LROLOI.Element1 = -.500;
 Maneuver LROLOI(LRO);
-Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %---- Prop to LCM2 and perform manevuer
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-%---- Vary the epoch of LCM2
 GMAT PropEpoch = RefEpoch + ET_LCM2;
-   
-%----- Propagate to epoch of LCM2 
 Propagate NearMoonProp(LCROSS,LRO) {LCROSS.A1ModJulian = PropEpoch};
-   
-%----- Vary and apply the maneuver LCM2
-dVx = LCROSS.VX;
-dVy = LCROSS.VY;
-dVz = LCROSS.VZ;
 Maneuver LCM2(LCROSS);
-dVx = LCROSS.VX - dVx;
-dVy = LCROSS.VY - dVy;
-dVz = LCROSS.VZ - dVz;
-Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
-
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-%---- Prop to LCROSS to Impact
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
-%--- Vary the collocation epoch
-GMAT A1CollEpoch = RefEpoch + ET_Coll;
-A1ImpactEpoch = ImpactSat.A1ModJulian
 Propagate NearMoonProp(LCROSS,LRO) {LCROSS.Luna.RMAG = 1700};
-Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
 
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-%---- Calculate Collocation contraints and Cost
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-dx = (ImpactSat.X - LCROSS.X);
-dy = (ImpactSat.Y - LCROSS.Y);
-dz = (ImpactSat.Z - LCROSS.Z); 
 
-PositionError = sqrt(dx^2 + dy^2 + dz^2);
-VelocityError = sqrt(dVx^2 + dVy^2 + dVz^2);  
  

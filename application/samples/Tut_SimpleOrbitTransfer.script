@@ -46,6 +46,10 @@ GMAT DefaultSC.AngularVelocityX = 0;
 GMAT DefaultSC.AngularVelocityY = 0;
 GMAT DefaultSC.AngularVelocityZ = 0;
 
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
 Create ForceModel DefaultProp_ForceModel;
 GMAT DefaultProp_ForceModel.CentralBody = Earth;
 GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
@@ -115,9 +119,9 @@ GMAT DC1.DerivativeMethod = ForwardDifference;
 
 Create OrbitView DefaultOrbitView;
 GMAT DefaultOrbitView.SolverIterations = Current;
-GMAT DefaultOrbitView.UpperLeft = [ 0 0 ];
-GMAT DefaultOrbitView.Size = [ 0 0 ];
-GMAT DefaultOrbitView.RelativeZOrder = 0;
+GMAT DefaultOrbitView.UpperLeft = [ 0.3660377358490566 0.006297229219143577 ];
+GMAT DefaultOrbitView.Size = [ 0.5537735849056604 0.4534005037783375 ];
+GMAT DefaultOrbitView.RelativeZOrder = 576;
 GMAT DefaultOrbitView.Add = {DefaultSC, Earth};
 GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
 GMAT DefaultOrbitView.DrawObject = [ true true ];
@@ -128,7 +132,7 @@ GMAT DefaultOrbitView.UpdatePlotFrequency = 50;
 GMAT DefaultOrbitView.NumPointsToRedraw = 0;
 GMAT DefaultOrbitView.ShowPlot = true;
 GMAT DefaultOrbitView.ViewPointReference = Earth;
-GMAT DefaultOrbitView.ViewPointVector = [ 0 0 120000 ];
+GMAT DefaultOrbitView.ViewPointVector = [ 0 0 120001 ];
 GMAT DefaultOrbitView.ViewDirection = Earth;
 GMAT DefaultOrbitView.ViewScaleFactor = 1;
 GMAT DefaultOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq;
@@ -146,9 +150,9 @@ GMAT DefaultOrbitView.EnableConstellations = On;
 
 Create GroundTrackPlot DefaultGroundTrackPlot;
 GMAT DefaultGroundTrackPlot.SolverIterations = Current;
-GMAT DefaultGroundTrackPlot.UpperLeft = [ 0 0 ];
-GMAT DefaultGroundTrackPlot.Size = [ 0 0 ];
-GMAT DefaultGroundTrackPlot.RelativeZOrder = 0;
+GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.3641509433962264 0.4672544080604534 ];
+GMAT DefaultGroundTrackPlot.Size = [ 0.560377358490566 0.4899244332493703 ];
+GMAT DefaultGroundTrackPlot.RelativeZOrder = 578;
 GMAT DefaultGroundTrackPlot.Add = {DefaultSC, Earth};
 GMAT DefaultGroundTrackPlot.DataCollectFrequency = 1;
 GMAT DefaultGroundTrackPlot.UpdatePlotFrequency = 50;
