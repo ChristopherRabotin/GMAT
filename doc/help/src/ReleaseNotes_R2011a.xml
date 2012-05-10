@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xml:id="ReleaseNotes"
+<chapter version="5.0" xml:id="ReleaseNotesR2011a"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -7,7 +7,7 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>Release Notes</title>
+  <title>R2011a</title>
 
   <para>The General Mission Analysis Tool (GMAT) version R2011a was released
   April 29, 2011 on the following platforms:</para>
@@ -97,13 +97,13 @@
       <informalfigure>
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
               <imagedata contentdepth="50%"
-                         fileref="files/images/relnotes/orbitview-1.png"></imagedata>
+                         fileref="files/images/relnotes/r2011a/orbitview-1.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -142,12 +142,12 @@
       <informalfigure>
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/udbodies.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/udbodies.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -182,12 +182,12 @@
       <informalfigure>
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/ephemerisfile.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/ephemerisfile.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -291,48 +291,48 @@
       <informalfigure>
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/sync.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/sync.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
 
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/guimod.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/guimod.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
 
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/scriptmod.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/scriptmod.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
 
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/unsync.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/unsync.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -411,12 +411,12 @@
       <informalfigure>
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/estimation.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/estimation.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -463,7 +463,7 @@
     <section>
       <title>Screenshot (<inlinemediaobject>
           <imageobject>
-            <imagedata fileref="files/images/relnotes/Screenshot.png"></imagedata>
+            <imagedata fileref="files/images/relnotes/r2011a/Screenshot.png"/>
           </imageobject>
         </inlinemediaobject>)</title>
 
@@ -520,12 +520,12 @@
       <informalfigure>
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/editor.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/editor.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -592,12 +592,12 @@
       <informalfigure>
         <screenshot>
           <info>
-            <title></title>
+            <title/>
           </info>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/GMATSplashScreen.png"></imagedata>
+              <imagedata fileref="files/images/relnotes/r2011a/GMATSplashScreen.png"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -702,7 +702,7 @@
 
               <entry><literal>Axes</literal></entry>
 
-              <entry><literal></literal></entry>
+              <entry><literal/></entry>
             </row>
 
             <row>
@@ -710,7 +710,7 @@
 
               <entry><literal>BurnScaleFactor</literal></entry>
 
-              <entry><literal></literal></entry>
+              <entry><literal/></entry>
             </row>
 
             <row>
@@ -718,7 +718,7 @@
 
               <entry><literal>CoordinateSystem</literal></entry>
 
-              <entry><literal></literal></entry>
+              <entry><literal/></entry>
             </row>
 
             <row>
@@ -726,7 +726,7 @@
 
               <entry><literal>Origin</literal></entry>
 
-              <entry><literal></literal></entry>
+              <entry><literal/></entry>
             </row>
 
             <row>
@@ -734,7 +734,7 @@
 
               <entry><literal>Tanks</literal></entry>
 
-              <entry><literal></literal></entry>
+              <entry><literal/></entry>
             </row>
 
             <row>
@@ -750,7 +750,7 @@
 
               <entry><literal>VectorFormat</literal></entry>
 
-              <entry><literal></literal></entry>
+              <entry><literal/></entry>
             </row>
 
             <row>
@@ -773,7 +773,7 @@
             <row>
               <entry><literal>OpenGLPlot</literal></entry>
 
-              <entry><literal></literal></entry>
+              <entry><literal/></entry>
 
               <entry><literal>OrbitView</literal></entry>
             </row>

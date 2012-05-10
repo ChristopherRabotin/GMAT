@@ -157,5 +157,9 @@
       </chapter>
       -->
     </part>
+    <part xml:id="ReleaseNotes">
+        <title>Release Notes</title>
+        <xi:include href="ReleaseNotes_R2011a.xml" />
+    </part>
     <index condition="ug" xml:id="BookIndex" />
 </book>
