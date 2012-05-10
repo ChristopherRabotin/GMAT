@@ -20,7 +20,7 @@
     <xsl:variable name="white" select="'#ffffff'"/>
 
     <!-- Page layout -->
-    <xsl:param name="double.sided">1</xsl:param>
+    <xsl:param name="double.sided">0</xsl:param>
 
     <!-- Fonts -->
     <!-- other font option is Helvetica:
