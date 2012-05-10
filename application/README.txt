@@ -119,11 +119,11 @@ http://li64-187.members.linode.com:8080 or email gmat@gsfc.nasa.gov.
 GMAT R2012a is released as beta software.
 
 The following plugins are included and have the listed status:
+libEphemPropagator: beta
 libFminconOptimizer: beta
 libMatlabInterface: beta
 libMsise00: beta
 libNRLMsise00: beta
 libCInterface: alpha
 libGmatEstimation: alpha
-libEphemPropagator: alpha
 libMarsGRAM: alpha
