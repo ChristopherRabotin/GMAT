@@ -1780,15 +1780,15 @@ void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowSt
 //                    std::string &name, const std::string &bracketPair)
 //------------------------------------------------------------------------------
 /*
- * Returns array integer row and column index.  This method calls
+ * Returns array integer row and column index starting from 0.  This method calls
  * GetArrayIndexVar() and if row and column string index string is not valid
  * integer, it returns -1 as array index.
  *
  * @see GetArrayIndexVar()
  *
  * @param  str  input array string
- * @param  row  output row integer index, -1 if invalid index
- * @param  col  output column integer index, -1 if invalid index
+ * @param  row  output row integer index starting from 0, -1 if invalid index
+ * @param  col  output column integer index starting from 0, -1 if invalid index
  * @param  name  output array name
  * @param  bracketPair  bracket pair used in the input array, such as "[]", "()"
  */

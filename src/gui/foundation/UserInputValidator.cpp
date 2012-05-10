@@ -48,7 +48,7 @@ UserInputValidator::UserInputValidator()
    mIsInputValid = true;
    
    mMsgFormat =
-      "The value of \"%s\" for field \"%s\" is not an allowed value. \n"
+      "The value of \"%s\" for field \"%s\" is not an allowed value%s. \n"
       "The allowed values are: [%s].";
 }
 
@@ -73,14 +73,14 @@ void UserInputValidator::SetObject(GmatBase *obj)
       {
          mMsgFormat =
             "The value of \"%s\" for field \"%s\" on command \""
-            + mObject->GetTypeName() +  "\" is not an allowed value. \n"
+            + mObject->GetTypeName() +  "\" is not an allowed value%s. \n"
             "The allowed values are: [%s].";
       }
       else
       {
          mMsgFormat =
             "The value of \"%s\" for field \"%s\" on object \""
-            + mObject->GetName() +  "\" is not an allowed value. \n"
+            + mObject->GetName() +  "\" is not an allowed value%s. \n"
             "The allowed values are: [%s].";
       }
    }
@@ -171,7 +171,7 @@ bool UserInputValidator::CheckFileName(const std::string &str,
    {
       std::string msg = GmatFileUtil::GetInvalidFileNameMessage(1);
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
           msg.c_str());
       
       SetErrorFlag();
@@ -183,7 +183,7 @@ bool UserInputValidator::CheckFileName(const std::string &str,
    {
       std::string msg = GmatFileUtil::GetInvalidFileNameMessage(1);
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
           msg.c_str());
       
       SetErrorFlag();
@@ -230,7 +230,7 @@ bool UserInputValidator::CheckReal(Real &rvalue, const std::string &str,
    if (onlyMsg)
    {
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
           expRange.c_str());
 
       SetErrorFlag();
@@ -261,7 +261,7 @@ bool UserInputValidator::CheckReal(Real &rvalue, const std::string &str,
       ("UserInputValidator::CheckReal() NOT a valid real number\n");
    #endif
    MessageInterface::PopupMessage
-      (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+      (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
        expRange.c_str());
    
    SetErrorFlag();
@@ -300,7 +300,7 @@ bool UserInputValidator::CheckInteger(Integer &ivalue, const std::string &str,
    if (onlyMsg)
    {
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
           expRange.c_str());
       
       SetErrorFlag();
@@ -323,7 +323,7 @@ bool UserInputValidator::CheckInteger(Integer &ivalue, const std::string &str,
    }
    
    MessageInterface::PopupMessage
-      (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+      (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
        expRange.c_str());
    
    SetErrorFlag();
@@ -374,7 +374,7 @@ bool UserInputValidator::CheckIntegerRange(Integer &ivalue, const std::string &s
    
    std::string expRange = "Integer";
    MessageInterface::PopupMessage
-      (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+      (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
        expRange.c_str());
    
    SetErrorFlag();
@@ -420,8 +420,8 @@ bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectT
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "The variable \"%s\" for field \"%s\" "
-          "does not exist.\nPlease create it first from the ParameterSelectDialog or "
-          "from the Resource Tree.\n", varName.c_str(), field.c_str());
+          "does not exist.\nPlease create it first from the Resource Tree.\n",
+          varName.c_str(), field.c_str());
       
       SetErrorFlag();
       return false;
@@ -452,10 +452,19 @@ bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectT
       SetErrorFlag();
       return false;
    }
-   else if (retval == 0)
+   else if (retval == 5)
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, mMsgFormat.c_str(), varName.c_str(), field.c_str(),
+          " - invalid array index", expRange.c_str());
+      
+      SetErrorFlag();
+      return false;
+   }
+   else if (retval == 0)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), varName.c_str(), field.c_str(), "",
           expRange.c_str());
       
       SetErrorFlag();
@@ -548,7 +557,7 @@ bool UserInputValidator::CheckRealRange(const std::string &sValue,
 
    std::string expRange = ss.str();
    MessageInterface::PopupMessage
-      (Gmat::ERROR_, mMsgFormat.c_str(), sValue.c_str(), field.c_str(),
+      (Gmat::ERROR_, mMsgFormat.c_str(), sValue.c_str(), field.c_str(), "",
        expRange.c_str());
 
    SetErrorFlag();
@@ -593,7 +602,7 @@ bool UserInputValidator::CheckTimeFormatAndValue(const std::string &format, cons
          expRange = "Real Number";
       }
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), value.c_str(), field.c_str(),
+         (Gmat::ERROR_, mMsgFormat.c_str(), value.c_str(), field.c_str(), "",
           expRange.c_str());
       SetErrorFlag();
       return false;
@@ -619,7 +628,7 @@ bool UserInputValidator::CheckTimeFormatAndValue(const std::string &format, cons
             expRange += " <= Real Number <= " + DateUtil::LATEST_VALID_MJD;
          }
          MessageInterface::PopupMessage
-            (Gmat::ERROR_, mMsgFormat.c_str(), value.c_str(), field.c_str(),
+            (Gmat::ERROR_, mMsgFormat.c_str(), value.c_str(), field.c_str(), "",
              expRange.c_str());
          SetErrorFlag();
          return false;

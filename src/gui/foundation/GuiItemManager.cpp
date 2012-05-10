@@ -271,6 +271,7 @@ wxArrayString GuiItemManager::ToWxArrayString(const StringArray &array)
  *          2 if number is allowed and varName is Real number
  *          3 if varName contains undefined object of Parameter type
  *          4 if varName contains valid Parameter type
+ *          5 if varName found BUT array element is out of bounds
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidVariable(const std::string &varName,
@@ -344,14 +345,31 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    }
    else if (param->IsOfType("Array"))
    {
+      Array *arr = (Array*)param;
+      Integer rowCount = arr->GetRowCount();
+      Integer colCount = arr->GetColCount();
+      #ifdef DEBUG_GUI_ITEM_VALIDATE
+      MessageInterface::ShowMessage
+         ("   rowCount=%d, colCount=%d\n", rowCount, colCount);
+      #endif
       // check to see if it is array element or whole array of 1x1
       if (GmatStringUtil::IsParenPartOfArray(varName))
       {
-         isValid = true;
+         // Check for array index
+         std::string name;
+         Integer row, col;
+         GmatStringUtil::GetArrayIndex(varName, row, col, name);
+         #ifdef DEBUG_GUI_ITEM_VALIDATE
+         MessageInterface::ShowMessage
+            ("   name='%s', row=%d, col=%d\n", name.c_str(), row, col);
+         #endif
+         if ((row > 0 && row < rowCount) && (col > 0 && col < colCount))
+            isValid = true;
+         else
+            return 5;
       }
       else
       {
-         Array *arr = (Array*)param;
          if (arr->GetRowCount() == 1 && arr->GetColCount() == 1)
             isValid = true;
       }
@@ -370,16 +388,6 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       MessageInterface::ShowMessage
          ("   It is a system Parameter, owner='%s'<%p>\n", ownerName.c_str(), owner);
       #endif
-      
-      // Why this code block was added? Commented out to fix GMT-2485 (LOJ: 2012.04.16)
-      // try
-      // {
-      //    param->GetRefObject(ownerType, ownerName);
-      // }
-      // catch (BaseException &e)
-      // {
-      //    MessageInterface::ShowMessage(e.GetFullMessage());
-      // }
       
       if (allowNonPlottable)
       {
