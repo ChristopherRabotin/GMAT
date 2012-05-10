@@ -7,7 +7,7 @@
 # Path/File naming convention:
 #   - Path name should end with _PATH
 #   - File name should end with _FILE
-#   - Path/File names are case sensative
+#   - Path/File names are case sensitive
 #
 # You can add potential and texture files by following the naming convention.
 #   - Potential file should begin with planet name and end with _POT_FILE
@@ -19,11 +19,12 @@
 # the multiple paths you specify and scan for GMAT Functions using the paths 
 # in top to bottom order and use the first function found from the search paths.
 #
-# In order for an object plugin to work inside GMAT, the plugin dynamic link libraries; 
-# Windows(.dll), Linux(.so) and Mac(.dylib), must be placed in the folder containing
-# the GMAT executable or application. Once placed in the correct folder 
-# the PLUGIN line below must be set equal to the plugin name without the dynamic link 
-# library extension with the comment (#) removed from the front of the line.
+# In order for an object plugin to work inside GMAT, the plugin dynamic link 
+# libraries for Windows(.dll), Linux(.so) or Mac(.dylib) must be placed in the 
+# folder containing the GMAT executable or application. Once the appropriate 
+# libraries are placed in the correct folder, the PLUGIN line below must be set 
+# equal to the plugin name without the dynamic link library extension, and with
+# the comment (#) removed from the front of the line.
 #
 # Some available PLUGINs are:
 # PLUGIN = libMatlabInterface
@@ -42,16 +43,16 @@
 #-----------------------------------------------------------
 ROOT_PATH              = ../
 #-----------------------------------------------------------
-PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-PLUGIN                 = ../plugins/libGmatEstimation
-PLUGIN                 = ../plugins/libMatlabInterface
-PLUGIN                 = ../plugins/libFminconOptimizer
-PLUGIN                 = ../plugins/libEphemPropagator
-PLUGIN                 = ../plugins/proprietary/libMarsGRAM
+#PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+#PLUGIN                 = ../plugins/libGmatEstimation
+#PLUGIN                 = ../plugins/libMatlabInterface
+#PLUGIN                 = ../plugins/libFminconOptimizer
+#PLUGIN                 = ../plugins/libEphemPropagator
+#PLUGIN                 = ../plugins/proprietary/libMarsGRAM
 PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                 = ../plugins/proprietary/libMsise86
-PLUGIN                 = ../plugins/proprietary/libEventLocator
-PLUGIN                 = ./libCInterface
+#PLUGIN                 = ../plugins/proprietary/libEventLocator
+#PLUGIN                 = ./libCInterface
 #-----------------------------------------------------------
 OUTPUT_PATH            = ../output/
 LOG_FILE               = OUTPUT_PATH/GmatLog.txt
@@ -118,7 +119,6 @@ SATURN_TEXTURE_FILE    = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
 URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
 NEPTUNE_TEXTURE_FILE   = TEXTURE_PATH/Neptune_BjornJonsson.jpg
 PLUTO_TEXTURE_FILE     = TEXTURE_PATH/Pluto_JPLCaltech.jpg
-
 #-----------------------------------------------------------
 STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
