@@ -349,7 +349,7 @@ Optimize 'Optimal Transfer' SQP1 {SolveMode = Solve, ExitMode = DiscardAndContin
    
    Maneuver 'Apply LOI' LOI(MMSRef);
    Propagate 'Prop to Periselene' MoonCentered(MMSRef) {MMSRef.Luna.Periapsis};
-   GMAT 'Compute Total delta V' Cost = sqrt(LSI.V^2 +LSI.N^2 + LSI.B^2) + LSI.V;
+   GMAT 'Compute Total delta V' Cost = sqrt(TOI.V^2 +TOI.N^2 + TOI.B^2) + TOI.V;
    
    NonlinearConstraint 'SMA = 2300' SQP1(MMSRef.Luna.SMA=2300);
    NonlinearConstraint 'Inc = 65' SQP1(MMSRef.MoonMJ2000Eq.INC=65);
