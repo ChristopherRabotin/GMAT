@@ -4718,6 +4718,9 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
          }
          menu.AppendSeparator();
          menu.Append(POPUP_CLONE, wxT("Clone"));
+         // Disallow clone for Propagator until cloning works for Propagator (GMT-2627)
+         if (itemType == GmatTree::PROPAGATOR)
+            menu.Enable(POPUP_CLONE, false);
          break;
       }
    }
