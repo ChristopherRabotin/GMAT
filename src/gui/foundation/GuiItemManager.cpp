@@ -363,7 +363,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
          MessageInterface::ShowMessage
             ("   name='%s', row=%d, col=%d\n", name.c_str(), row, col);
          #endif
-         if ((row > 0 && row < rowCount) && (col > 0 && col < colCount))
+         if ((row >= 0 && row < rowCount) && (col >= 0 && col < colCount))
             isValid = true;
          else
             return 5;
