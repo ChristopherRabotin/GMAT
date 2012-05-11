@@ -192,6 +192,8 @@ private:
    wxMenu* CreateOptimizeSubMenu(GmatTree::ItemType type, ActionType action);
    wxMenu* CreateControlLogicSubMenu(GmatTree::ItemType type, ActionType action);
    
+   void OpenItem(wxTreeItemId currId);
+   
    wxString ComposeNodeName(GmatCommand *cmd, int cmdCount);
    wxString GetCommandString(GmatCommand *cmd, const wxString &currStr);
    GmatTree::ItemType GetCommandId(const wxString &cmd);

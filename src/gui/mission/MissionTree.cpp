@@ -2796,22 +2796,7 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 {
    // get some info about this item
    wxTreeItemId currId = event.GetItem();
-   MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(currId);
-   MissionTreeItemData *parent = (MissionTreeItemData *)GetItemData(GetItemParent(currId));
-   
-   #if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage
-      ("MissionTree::OnItemActivated() item='%s' parent='%s'\n",
-       item->GetTitle().c_str(), parent->GetTitle().c_str());
-   #endif
-   
-   // Since VaryPanel is used for both Target and Optimize,
-   // set proper id indicating Optimize Vary
-   if ((item->GetItemType() == GmatTree::VARY) &&
-       (parent->GetItemType() == GmatTree::OPTIMIZE))
-      item->SetItemType(GmatTree::OPTIMIZE_VARY);
-   
-   theMainFrame->CreateChild(item);
+   OpenItem(currId);
 }
 
 
@@ -3826,9 +3811,8 @@ void MissionTree::OnExpand(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnOpen(wxCommandEvent &event)
 {
-   // Get info from selected item
-   GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   theMainFrame->CreateChild(item);
+   wxTreeItemId currId = GetSelection();
+   OpenItem(currId);
 }
 
 
@@ -3970,6 +3954,31 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
       return GmatTree::MISSION_ICON_RUN_ESTIMATOR;
    
    return GmatTree::MISSION_ICON_DEFAULT;
+}
+
+
+//------------------------------------------------------------------------------
+// void OpenItem(wxTreeItemId currId)
+//------------------------------------------------------------------------------
+void MissionTree::OpenItem(wxTreeItemId currId)
+{
+   // get some info about this item
+   MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(currId);
+   MissionTreeItemData *parent = (MissionTreeItemData *)GetItemData(GetItemParent(currId));
+   
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage
+      ("MissionTree::OnItemActivated() item='%s' parent='%s'\n",
+       item->GetTitle().c_str(), parent->GetTitle().c_str());
+   #endif
+   
+   // Since VaryPanel is used for both Target and Optimize,
+   // set proper id indicating Optimize Vary
+   if ((item->GetItemType() == GmatTree::VARY) &&
+       (parent->GetItemType() == GmatTree::OPTIMIZE))
+      item->SetItemType(GmatTree::OPTIMIZE_VARY);
+   
+   theMainFrame->CreateChild(item);
 }
 
 
