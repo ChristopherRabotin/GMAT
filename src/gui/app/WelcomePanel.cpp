@@ -20,8 +20,9 @@
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "GuiInterpreter.hpp"
-#include "FileManager.hpp"
-#include "FileUtil.hpp"
+#include "FileManager.hpp"         // for GetFullPathname()
+#include "FileUtil.hpp"            // for DoesDirectoryExist()
+#include "StringUtil.hpp"          // for Replace()
 #include "GmatAppData.hpp"
 #include "GmatMainFrame.hpp"
 #include <wx/confbase.h>
@@ -454,21 +455,38 @@ void WelcomePanel::OnOpenRecentScript(wxHyperlinkEvent& event)
 //------------------------------------------------------------------------------
 void WelcomePanel::OnOpenSampleScript(wxHyperlinkEvent& event)
 {
-   wxString sampleDir = event.GetURL();
+   std::string sampleDir = event.GetURL().c_str();
+   std::string appFullPath = GmatFileUtil::GetApplicationPath();
+   std::string appDir = GmatFileUtil::ParsePathName(appFullPath, true);
+   std::string sampleFullPath = sampleDir;
+   if (GmatFileUtil::IsPathRelative(sampleDir))
+      sampleFullPath = appDir + sampleDir;
+   sampleFullPath = GmatStringUtil::Replace(sampleFullPath, "\\", "/");
+   
    #ifdef DEBUG_SAMPLE_SCRIPT
    MessageInterface::ShowMessage
-      ("WelcomePanel::OnOpenSampleScript() entered, sampleDir='%s'\n",
-       sampleDir.c_str());
+      ("WelcomePanel::OnOpenSampleScript() entered\n   sampleDir='%s'\n   appDir=%s'\n"
+       "   sampleFullPath='%s'\n", sampleDir.c_str(), appDir.c_str(), sampleFullPath.c_str());
    #endif
-   wxFileDialog dialog(this, _T("Choose a file"), _T(sampleDir), _T(""), _T("*.*"));
-   if (dialog.ShowModal() == wxID_OK)
+   
+   if (GmatFileUtil::DoesDirectoryExist(sampleFullPath + "/", false))
    {
-      wxString scriptfile;
-      scriptfile = dialog.GetPath().c_str();
-      #ifdef DEBUG_SAMPLE_SCRIPT
-      MessageInterface::ShowMessage("   scriptfile='%s'\n", scriptfile.c_str());
-      #endif
-      GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(scriptfile, event);
+      wxString samplePath = sampleFullPath.c_str();
+      wxFileDialog dialog(this, _T("Choose a file"), _T(samplePath), _T(""), _T("*.*"));
+      if (dialog.ShowModal() == wxID_OK)
+      {
+         wxString scriptfile;
+         scriptfile = dialog.GetPath().c_str();
+         #ifdef DEBUG_SAMPLE_SCRIPT
+         MessageInterface::ShowMessage("   scriptfile='%s'\n", scriptfile.c_str());
+         #endif
+         GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(scriptfile, event);
+      }
+   }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Cannot open samples directory, '%s'\n", sampleFullPath.c_str());
    }
 }
 

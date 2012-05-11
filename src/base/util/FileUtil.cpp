@@ -418,6 +418,25 @@ std::string GmatFileUtil::GetInvalidFileNameMessage(Integer option)
 
 
 //------------------------------------------------------------------------------
+// bool GMAT_API IsPathRelative(const std::string &fullPath)
+//------------------------------------------------------------------------------
+/**
+ * Checks if given path name has relative path.
+ *
+ * @return true if input path has relative path, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsPathRelative(const std::string &fullPath)
+{
+   if (fullPath.find("./") == 0 || fullPath.find(".\\") == 0 ||
+       fullPath.find("../") == 0 || fullPath.find("..\\") == 0 )
+      return true;
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool GmatFileUtil::IsValidFileName(const std::string &fname, bool blankIsOk = true)
 //------------------------------------------------------------------------------
 bool GmatFileUtil::IsValidFileName(const std::string &fname, bool blankIsOk)
@@ -506,7 +525,7 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool blankIsO
       return true;
    
    #ifdef DEBUG_DIR_EXIST
-   MessageInterface::ShowMessage("   ==> dirName='%s'\n", dirName.c_str());
+   MessageInterface::ShowMessage("   dirName='%s'\n", dirName.c_str());
    #endif
    
 #ifdef _MSC_VER  // if Microsoft Visual C++

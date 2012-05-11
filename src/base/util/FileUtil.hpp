@@ -39,7 +39,8 @@ namespace GmatFileUtil
    std::string GMAT_API ParseFileName(const std::string &fullPath, bool removeExt = false);
    std::string GMAT_API ParseFileExtension(const std::string &fullPath, bool prependDot = false);
    std::string GMAT_API GetInvalidFileNameMessage(Integer option = 1);
-   
+
+   bool GMAT_API IsPathRelative(const std::string &fullPath);
    bool GMAT_API IsValidFileName(const std::string &fname, bool blankIsOk = true);
    bool GMAT_API IsSameFileName(const std::string &fname1, const std::string &fname2);
    bool GMAT_API DoesDirectoryExist(const std::string &dirPath, bool blankIsOk = true);
