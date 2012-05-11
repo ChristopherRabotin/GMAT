@@ -1184,10 +1184,19 @@ void DifferentialCorrector::InvertJacobian()
       }
 
    Rmatrix inv;
-   if (variableCount == goalCount)
-      inv = jac.Inverse();
-   else
-      inv = jac.Pseudoinverse();
+   try
+   {
+      if (variableCount == goalCount)
+         inv = jac.Inverse();
+      else
+         inv = jac.Pseudoinverse();
+   }
+   catch (BaseException &ex)
+   {
+      throw SolverException("Error inverting the Differential Corrector "
+            "Jacobian; it appears that the variables in the Vary command(s) do "
+            "not affect the target parameters in the Achieve command(s)");
+   }
 
    #ifdef DEBUG_JACOBIAN
       MessageInterface::ShowMessage("Inverse Jacobian is %d by %d\n",
