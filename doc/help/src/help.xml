@@ -160,6 +160,7 @@
     <part xml:id="ReleaseNotes">
         <title>Release Notes</title>
         <xi:include href="ReleaseNotes_R2011a.xml" />
+        <xi:include href="ReleaseNotes_R2012a.xml" />
     </part>
     <index condition="ug" xml:id="BookIndex" />
 </book>

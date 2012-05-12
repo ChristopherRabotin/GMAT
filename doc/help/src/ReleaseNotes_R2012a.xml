@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="ReleaseNotesR2011a"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>R2012a</title>
+
+  <para>The General Mission Analysis Tool (GMAT) version R2012a was released
+  May 23, 2012. This is the first public release in over a year, and is the
+  5th public release for the project. In this release:</para>
+
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para>24,000 lines of code were added</para>
+    </listitem>
+
+    <listitem>
+      <para>Code and documentation was contributed by 9 developers from 2
+      organizations</para>
+    </listitem>
+
+    <listitem>
+      <para>6847 system tests were run every weeknight</para>
+    </listitem>
+  </itemizedlist>
+
+  <section>
+    <title>New Features</title>
+
+    <section>
+      <title>Ground Track Plot</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Eclipse Locator [alpha]</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>C Interface [alpha]</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>GMAT Server [alpha]</title>
+
+      <para/>
+    </section>
+  </section>
+
+  <section>
+    <title>Improvements</title>
+
+    <section>
+      <title>Dynamics Models</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Solar System</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>TDB Input</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Mission Tree</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Mission Summary</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Plot Window Persistency</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Switch to Visual Studio</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>New Icons</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Training Manual</title>
+
+      <para/>
+    </section>
+  </section>
+
+  <section>
+    <title>Compatibility Changes</title>
+
+    <section>
+      <title>Script Syntax Changes</title>
+
+      <para>The following syntax elements are deprecated, and will be removed
+      in a future release:</para>
+
+      <informaltable>
+        <tgroup cols="3">
+          <thead>
+            <row>
+              <entry align="center">Resource</entry>
+
+              <entry align="center">Field</entry>
+
+              <entry align="center">Replacement</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>ForceModel</literal></entry>
+
+              <entry><literal>Drag</literal></entry>
+
+              <entry><literal>Drag.AtmosphereModel</literal></entry>
+            </row>
+
+            <row>
+              <entry><literal>Propagator</literal></entry>
+
+              <entry><literal>MinimumTolerance
+              (BulirschStoer)</literal></entry>
+
+              <entry>(none)</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </section>
+  </section>
+
+  <section>
+    <title>Fixed Issues</title>
+
+    <para>733 bugs were closed in this release, including 368 marked “major”
+    or “critical”. See the <link
+    xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/buglist.cgi?query_format=advanced&amp;short_desc_type=allwordssubstr&amp;short_desc=&amp;product=GMAT&amp;long_desc_type=substring&amp;long_desc=&amp;bug_file_loc_type=allwordssubstr&amp;bug_file_loc=&amp;keywords_type=allwords&amp;keywords=&amp;bug_status=RESOLVED&amp;bug_status=VERIFIED&amp;bug_status=CLOSED&amp;bug_severity=critical-GMAT&amp;bug_severity=blocker&amp;bug_severity=critical&amp;bug_severity=major&amp;emailassigned_to1=1&amp;emailtype1=substring&amp;email1=&amp;emailassigned_to2=1&amp;emailreporter2=1&amp;emailcc2=1&amp;emailtype2=substring&amp;email2=&amp;bugidtype=include&amp;bug_id=&amp;chfieldfrom=2008-09-30&amp;chfieldto=Now&amp;chfield=bug_status&amp;chfieldvalue=&amp;cmdtype=doit&amp;order=Reuse+same+sort+as+last+time&amp;field0-0-0=noop&amp;type0-0-0=noop&amp;value0-0-0=">full
+    report for details.</link></para>
+  </section>
+
+  <section>
+    <title>Known Issues</title>
+
+    <para>There remain 268 open bugs in the project’s <link
+    xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/buglist.cgi?query_format=advanced&amp;short_desc_type=allwordssubstr&amp;short_desc=&amp;product=GMAT&amp;long_desc_type=substring&amp;long_desc=&amp;bug_file_loc_type=allwordssubstr&amp;bug_file_loc=&amp;keywords_type=allwords&amp;keywords=&amp;bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;bug_status=ASSIGNED&amp;bug_status=REOPENED&amp;bug_status=NEEDS+CLARIFICATION&amp;bug_status=NEEDS+TEST&amp;emailassigned_to1=1&amp;emailtype1=substring&amp;email1=&amp;emailassigned_to2=1&amp;emailreporter2=1&amp;emailcc2=1&amp;emailtype2=substring&amp;email2=&amp;bugidtype=include&amp;bug_id=&amp;chfieldfrom=&amp;chfieldto=Now&amp;chfieldvalue=&amp;cmdtype=doit&amp;order=Reuse+same+sort+as+last+time&amp;field0-0-0=noop&amp;type0-0-0=noop&amp;value0-0-0=">Bugzilla
+    database</link>, 42 of which are marked “major” or “critical”. These are
+    tabulated below.</para>
+
+    <table>
+      <title>Multiple platforms</title>
+
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=407">407</link></entry>
+
+            <entry>Multi-Matlab run bug</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=636">636</link></entry>
+
+            <entry>MATLAB Callbacks on Linux and Mac</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=648">648</link></entry>
+
+            <entry>DOCUMENT BEHAVIOR - Final orbital state does not match for
+            the two report methods</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=776">776</link></entry>
+
+            <entry>Batch vs Individual Runs different</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1604">1604</link></entry>
+
+            <entry>Keplerian Conversion Errors for Hyperbolic Orbits</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1668">1668</link></entry>
+
+            <entry>Decimal marker not flexible enough for international
+            builds</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1684">1684</link></entry>
+
+            <entry>MMS script in GMAT takes 300 times longer than similar run
+            in FreeFlyer</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1731">1731</link></entry>
+
+            <entry>Major Performance issue in GMAT Functions</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1734">1734</link></entry>
+
+            <entry>Spacecraft allows conversion for singular conic
+            section.</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1992">1992</link></entry>
+
+            <entry>Determinant of "large" disallowed due to poor algorithm
+            performance</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2058">2058</link></entry>
+
+            <entry>Can't set SRP Flux and Nominal Sun via GUI</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2088">2088</link></entry>
+
+            <entry>EOP file reader uses Julian Day</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2147">2147</link></entry>
+
+            <entry>Empty parentheses "( )" are not caught in math
+            validation</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2313">2313</link></entry>
+
+            <entry>Finite Burn/Thruster Tests Have errors &gt; 1000 km but may
+            be due to script differences</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2322">2322</link></entry>
+
+            <entry>DOCUMENT: MATLAB interface requires manual configuration by
+            user</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2344">2344</link></entry>
+
+            <entry>when a propagator object is deleted, its associated force
+            model is not deleted</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2349">2349</link></entry>
+
+            <entry>Performance Issue in Force Modelling</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2410">2410</link></entry>
+
+            <entry>Ephemeris propagator has large numeric error</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2416">2416</link></entry>
+
+            <entry>STM Parameters are wrong when using Coordinate System other
+            than EarthMJ2000Eq</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+
+    <table>
+      <title>Windows</title>
+
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=970">970</link></entry>
+
+            <entry>Matlab connection issue</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1012">1012</link></entry>
+
+            <entry>Quirky Numerical Issues 2 in Batch mode</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1128">1128</link></entry>
+
+            <entry>GMAT incompatible with MATLAB R14 and earlier</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1417">1417</link></entry>
+
+            <entry>Some lines prefixed by "function" are ingored</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1436">1436</link></entry>
+
+            <entry>Potential performance issue using many propagate
+            commands</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1528">1528</link></entry>
+
+            <entry>GMAT Function scripts unusable depending on file
+            ownership/permissions</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1580">1580</link></entry>
+
+            <entry>Spacecraft Attitude Coordinate System Conversion not
+            implemented</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1592">1592</link></entry>
+
+            <entry>Atmosphere Model Setup File Features Not
+            Implemented</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2056">2056</link></entry>
+
+            <entry>Reproducibility of script run not guaranteed</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2065">2065</link></entry>
+
+            <entry>Difficult to read low number in Spacecraft Attitude
+            GUI</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2066">2066</link></entry>
+
+            <entry>SC Attitude GUI won't accept 0.0:90.0:0.0 as a 3-2-1 Euler
+            Angle input</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2067">2067</link></entry>
+
+            <entry>Apply Button Sometimes Not Functional in SC Attitude
+            GUI</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2374">2374</link></entry>
+
+            <entry>Crash when GMAT tries to write to a folder without write
+            permissions</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2381">2381</link></entry>
+
+            <entry>TestComplete does not match user inputs to
+            DefaultSC</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2382">2382</link></entry>
+
+            <entry>Point Mass Issue when using Script vs. User Input</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+
+    <table>
+      <title>Mac OS X</title>
+
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1216">1216</link></entry>
+
+            <entry>MATLAB-&gt;GMAT not working</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2081">2081</link></entry>
+
+            <entry>Texture Maps not showing on Mac for OrbitView</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2092">2092</link></entry>
+
+            <entry>GMAT crashes when MATLAB engine does not open</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2291">2291</link></entry>
+
+            <entry>LSK file text ctrl remains visible when source set to DE405
+            or 2Body</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2311">2311</link></entry>
+
+            <entry>Resource Tree - text messed up for objects in
+            folders</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=2383">2383</link></entry>
+
+            <entry>Crash running RoutineTests with plots ON</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+
+    <table>
+      <title>Linux</title>
+
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1851">1851</link></entry>
+
+            <entry>On Linux, STC Editor crashes GMAT on Close</entry>
+          </row>
+
+          <row>
+            <entry><link
+            xlink:href="http://pows003.gsfc.nasa.gov/bugzilla/show_bug.cgi?id=1877">1877</link></entry>
+
+            <entry>On Linux, Ctrl-C crashes GMAT if no MDIChildren are
+            open</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+  </section>
+</chapter>
