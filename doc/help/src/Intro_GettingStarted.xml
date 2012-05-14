@@ -711,6 +711,16 @@ Sat.X = 1000</programlisting>
       </section>
 
       <section>
+        <title><filename>extras</filename></title>
+
+        <para>The <filename>extras</filename> directory contains various extra
+        convenience files that are helpful for working with GMAT but aren't
+        part of the core codebase. The only file here so far is a syntax
+        coloring file for the GMAT scripting language in the Notepad++ text
+        editor.</para>
+      </section>
+
+      <section>
         <title><filename>matlab</filename></title>
 
         <para>The <filename>matlab</filename> directory contains M-files
