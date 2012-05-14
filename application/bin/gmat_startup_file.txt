@@ -63,7 +63,7 @@ MEASUREMENT_PATH       = OUTPUT_PATH/
 #-----------------------------------------------------------
 EPHEM_PATH             = OUTPUT_PATH/
 #-----------------------------------------------------------
-#GMAT_FUNCTION_PATH    = 
+GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
 #-----------------------------------------------------------
 MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
 #-----------------------------------------------------------
