@@ -19,7 +19,8 @@
  */
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
-#include "bitmaps/folder.xpm"
+//#include "bitmaps/folder.xpm"
+#include "bitmaps/ClosedFolder.xpm"
 #include "bitmaps/OpenFolder.xpm"
 #include "bitmaps/file.xpm"
 #include "bitmaps/propagateevent.xpm"
@@ -2691,7 +2692,7 @@ void MissionTree::AddIcons()
    // Icons should follow the order in GmatTreeItemData::MissionIconType.
    theGuiManager->LoadIcon("propagateevent", bitmapType, &bitmaps[index], propagateevent_xpm);
    theGuiManager->LoadIcon("target", bitmapType, &bitmaps[++index], target_xpm);
-   theGuiManager->LoadIcon("folder", bitmapType, &bitmaps[++index], folder_xpm);
+   theGuiManager->LoadIcon("ClosedFolder", bitmapType, &bitmaps[++index], ClosedFolder_xpm);
    theGuiManager->LoadIcon("file", bitmapType, &bitmaps[++index], file_xpm);
    theGuiManager->LoadIcon("OpenFolder", bitmapType, &bitmaps[++index], OpenFolder_xpm);
    
