@@ -31,6 +31,9 @@
     <xsl:param name="title.font.family">Helvetica</xsl:param>
     <xsl:param name="monospace.font.family">Consolas, monospace</xsl:param>
 
+    <!-- Links -->
+    <xsl:param name="ulink.show">0</xsl:param>
+
     <!-- Titles -->
     <xsl:attribute-set name="component.title.properties">
         <xsl:attribute name="color">
@@ -60,7 +63,8 @@
                     <xsl:value-of select="$blue"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:value-of select="$gray"/>
+                    <!--<xsl:value-of select="$gray"/>-->
+                    <xsl:value-of select="$blue"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:attribute>
@@ -73,7 +77,8 @@
             <xsl:value-of select="$body.font.master * 1.1"/>
         </xsl:attribute>
         <xsl:attribute name="color">
-            <xsl:value-of select="$gray"/>
+            <!--<xsl:value-of select="$gray"/>-->
+            <xsl:value-of select="$blue"/>
         </xsl:attribute>
         <xsl:attribute name="start-indent">
             <xsl:value-of select="$body.start.indent"/>
