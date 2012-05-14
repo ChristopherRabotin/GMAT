@@ -101,7 +101,7 @@
     (<subscript><inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="8pt"
-                     fileref="files/images/icons/NewMission.png" width="1em"></imagedata>
+                     fileref="files/images/icons/NewMission.png" width="1em"/>
         </imageobject>
       </inlinemediaobject></subscript>) or start a new GMAT session.</para>
 
@@ -223,7 +223,7 @@
 
           <!--Empty paragraph to improve spacing (shouldn't be necessary)-->
 
-          <para></para>
+          <para/>
         </listitem>
 
         <listitem>
@@ -235,7 +235,7 @@
               <imageobject>
                 <imagedata align="center" contentdepth="8pt"
                            fileref="files/images/icons/SaveMission.png"
-                           width="1em"></imagedata>
+                           width="1em"/>
               </imageobject>
             </inlinemediaobject></subscript>). If this is the first time you
           have saved the mission, you’ll be prompted to provide a name and
@@ -251,7 +251,7 @@
             <imageobject>
               <imagedata align="center" contentdepth="100%"
                          fileref="files/images/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"
-                         scalefit="1" width="100%"></imagedata>
+                         scalefit="1" width="100%"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -340,7 +340,7 @@
         <listitem>
           <para>Select <guilabel>Use Solar Radiation Pressure</guilabel> to
           toggle it on. Your screen should now match <xref
-          linkend="Tut_PropASpacecraft_PropSetUp" />.</para>
+          linkend="Tut_PropASpacecraft_PropSetUp"/>.</para>
         </listitem>
 
         <listitem>
@@ -355,8 +355,8 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"
-                         scalefit="1" width="100%"></imagedata>
+                         fileref="files/images/Tut_PropSpacecraft_ForceModelConfiguration.png"
+                         scalefit="1" width="100%"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -388,7 +388,7 @@
         <listitem>
           <para>In the <guilabel>Drawing Options</guilabel> list, clear
           <guilabel>Draw XY Plane</guilabel>. Your screen should now match
-          <xref linkend="Tut_PropASpacecraft_OrbitViewDialog" />.</para>
+          <xref linkend="Tut_PropASpacecraft_OrbitViewDialog"/>.</para>
         </listitem>
 
         <listitem>
@@ -404,7 +404,7 @@
             <imageobject>
               <imagedata align="center" contentdepth="100%"
                          fileref="files/images/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.png"
-                         scalefit="1" width="100%"></imagedata>
+                         scalefit="1" width="100%"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -447,7 +447,7 @@
         <para>In the <guilabel>Object Properties</guilabel> list, double-click
         <guilabel>Periapsis</guilabel> to add it to the <guilabel>Selected
         Values</guilabel> list. This is shown in <xref
-        linkend="Tut_PropASpacecraft_StopSetUp" />.</para>
+        linkend="Tut_PropASpacecraft_StopSetUp"/>.</para>
 
         <figure xml:id="Tut_PropASpacecraft_StopSetUp">
           <title>Propagate Command ParameterSelectDialog Configuration</title>
@@ -457,7 +457,7 @@
               <imageobject>
                 <imagedata align="center"
                            fileref="files/images/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.png"
-                           scale="50"></imagedata>
+                           scale="50"/>
               </imageobject>
             </mediaobject>
           </screenshot>
@@ -465,12 +465,12 @@
 
         <!--empty paragraph to help with spacing; shouldn't be necessary-->
 
-        <para></para>
+        <para/>
       </listitem>
 
       <listitem>
         <para>Click <guilabel>OK</guilabel>. Your screen should now match
-        <xref linkend="Tut_PropASpacecraft_Propagate1Dialog" />.</para>
+        <xref linkend="Tut_PropASpacecraft_Propagate1Dialog"/>.</para>
       </listitem>
 
       <listitem>
@@ -486,7 +486,7 @@
           <imageobject>
             <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Tut_PropSpacecraft_PropagateCommandConfiguration.jpeg"
-                       scalefit="1" width="100%"></imagedata>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
@@ -505,7 +505,7 @@
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
                          fileref="files/images/icons/SaveMission.png"
-                         width="1em"></imagedata>
+                         width="1em"/>
             </imageobject>
           </inlinemediaobject></subscript>) to save your mission.</para>
       </listitem>
@@ -516,14 +516,14 @@
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
                          fileref="files/images/icons/RunMission.png"
-                         width="1em"></imagedata>
+                         width="1em"/>
             </imageobject>
           </inlinemediaobject></subscript>).</para>
       </listitem>
     </orderedlist>
 
     <para>You will see GMAT propagate the orbit and stop at orbit periapsis.
-    <xref linkend="Tut_PropASpacecraft_FinalResults" /> illustrates what you
+    <xref linkend="Tut_PropASpacecraft_FinalResults"/> illustrates what you
     should see after correctly completing this tutorial. Here are a few things
     you can try to explore the results of this tutorial:</para>
 
@@ -532,7 +532,7 @@
         <para>Manipulate the <guilabel>DefaultOrbitView</guilabel> plot using
         your mouse to orient the trajectory so that you can to verify that at
         the final location the spacecraft is at periapsis. See <xref
-        linkend="HowTo_ManipulatingThe3DOrbitView" xrefstyle="select:title" />
+        linkend="HowTo_ManipulatingThe3DOrbitView" xrefstyle="select:title"/>
         for details.</para>
       </listitem>
 
@@ -565,7 +565,7 @@
             <imageobject>
               <imagedata align="center" contentdepth="8pt"
                          fileref="files/images/icons/RunAnimation.png"
-                         width="1em"></imagedata>
+                         width="1em"/>
             </imageobject>
           </inlinemediaobject></subscript>) to animate the mission and watch
         the orbit propagate from the initial state to periapsis.</para>
@@ -580,7 +580,7 @@
           <imageobject>
             <imagedata align="center" contentdepth="100%"
                        fileref="files/images/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.png"
-                       scalefit="1" width="100%"></imagedata>
+                       scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>

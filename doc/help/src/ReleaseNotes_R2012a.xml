@@ -96,9 +96,9 @@
 
       <para>Once you've created your desired orbit, it is automatically
       imported into the Spacecraft resource for later use. Here's an example
-      of a sun-synchronous orbit using the Designer. To open the Orbit
-      Designer, click the button on the <guilabel>Spacecraft</guilabel>
-      properties window.</para>
+      of a sun-synchronous orbit using the Designer. To open the
+      <guilabel>Orbit Designer</guilabel>, click the button on the
+      <guilabel>Spacecraft</guilabel> properties window.</para>
 
       <para><screenshot>
           <info>
@@ -161,12 +161,13 @@
     <section>
       <title>GMAT Server [alpha]</title>
 
-      <para>GMAT's Matlab Server got an overhaul to make it cross-platform.
-      Previously based on Windows' DDE protocol, now the server is based on
-      TCP/IP using the standard Berkeley sockets API. While the default Matlab
-      Server is now using the new protocol, it is disabled by default because
-      it has not been rigorously tested. Enable the
-      <filename>libMatlabInterface</filename> plugin to use it.</para>
+      <para>GMAT's <guilabel>Matlab Server</guilabel> got an overhaul to make
+      it cross-platform. Previously based on Windows' DDE protocol, now the
+      server is based on TCP/IP using the standard Berkeley sockets API. While
+      the default <guilabel>Matlab Server</guilabel> is now using the new
+      protocol, it is disabled by default because it has not been rigorously
+      tested. Enable the <filename>libMatlabInterface</filename> plugin to use
+      it.</para>
     </section>
   </section>
 
@@ -237,8 +238,9 @@
     <section>
       <title>TDB Input</title>
 
-      <para>You can now input the epoch of a Spacecraft orbit in the TDB time
-      system (in both Modified Julian and Gregorian formats).</para>
+      <para>You can now input the epoch of a <guilabel>Spacecraft</guilabel>
+      orbit in the TDB time system (in both Modified Julian and Gregorian
+      formats).</para>
 
       <para><screenshot>
           <info>
@@ -258,12 +260,11 @@
     <section>
       <title>Mission Tree</title>
 
-      <para>We've made significant improvements to the
-      <guilabel>Mission</guilabel> tree to make it more user-friendly to heavy
-      users. The biggest improvement is that you can now filter the mission
-      sequence in different ways to make complex missions easier to
-      understand, for example by hiding non-physical events or collapsing the
-      tree to only its top-level elements.</para>
+      <para>We've made significant improvements to the mission tree to make it
+      more user-friendly to heavy users. The biggest improvement is that you
+      can now filter the mission sequence in different ways to make complex
+      missions easier to understand, for example by hiding non-physical events
+      or collapsing the tree to only its top-level elements.</para>
 
       <para><screenshot>
           <info>
@@ -321,14 +322,15 @@
     <section>
       <title>Mission Summary</title>
 
-      <para>You can now change the coordinate system shown in the Mission
-      Summary on the fly: just change the Coordinate System list at the top of
-      the window and the numbers will update. This feature can use any
-      coordinate system currently defined in GMAT, including user-defined
-      ones.</para>
+      <para>You can now change the coordinate system shown in the
+      <guilabel>Mission Summary</guilabel> on the fly: just change the
+      <guilabel>Coordinate System</guilabel> list at the top of the window and
+      the numbers will update. This feature can use any coordinate system
+      currently defined in GMAT, including user-defined ones.</para>
 
-      <para>There's also a new Mission Summary - Physics that shows only
-      physical events (Propagate commands, burns, etc.).</para>
+      <para>There's also a new <guilabel>Mission Summary - Physics-Based
+      Commands</guilabel> that shows only physical events
+      (<guilabel>Propagate</guilabel> commands, burns, etc.).</para>
 
       <para><screenshot>
           <info>
@@ -369,7 +371,7 @@
       <title>New Icons</title>
 
       <para>The last release saw a major overhaul of GMAT's GUI icons. This
-      time we've revised some and added more, especially in the Mission
+      time we've revised some and added more, especially in the mission
       tree.</para>
 
       <para><inlinemediaobject>
