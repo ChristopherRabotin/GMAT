@@ -19,19 +19,22 @@
 # the multiple paths you specify and scan for GMAT Functions using the paths 
 # in top to bottom order and use the first function found from the search paths.
 #
-# In order for an object plugin to work inside GMAT, the plugin dynamic link 
-# libraries for Windows(.dll), Linux(.so) or Mac(.dylib) must be placed in the 
-# folder containing the GMAT executable or application. Once the appropriate 
-# libraries are placed in the correct folder, the PLUGIN line below must be set 
-# equal to the plugin name without the dynamic link library extension, and with
-# the comment (#) removed from the front of the line.
+# In order for an object plugin to work inside GMAT, the path to the plugin
+# dynamic link libraries for Windows (.dll), Linux (.so) or Mac (.dylib) must be
+# specified in a PLUGIN line below. A relative path is interpreted as being
+# relative to the GMAT executable or application. The plugin name should be
+# specified without the file extension.
 #
 # Some available PLUGINs are:
-# PLUGIN = libMatlabInterface
-# PLUGIN = libFminconOptimizer
-# PLUGIN = libVF13Optimizer
-# PLUGIN = libDataFile
-# PLUGIN = libGmatEstimation
+#   - libCInterface
+#   - libEphemPropagator
+#   - libEventLocator
+#   - libFminconOptimizer
+#   - libGmatEstimation
+#   - libMatlabInterface
+#   - libMsise86
+#   - libNRLMsise00
+#   - libVF13Optimizer
 #
 #===============================================================================
 #RUN_MODE              = TESTING
@@ -43,16 +46,16 @@
 #-----------------------------------------------------------
 ROOT_PATH              = ../
 #-----------------------------------------------------------
-#PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-#PLUGIN                 = ../plugins/libGmatEstimation
-#PLUGIN                 = ../plugins/libMatlabInterface
-#PLUGIN                 = ../plugins/libFminconOptimizer
+#PLUGIN                = ../plugins/proprietary/libVF13Optimizer
+#PLUGIN                = ../plugins/libGmatEstimation
+#PLUGIN                = ../plugins/libMatlabInterface
+#PLUGIN                = ../plugins/libFminconOptimizer
 PLUGIN                 = ../plugins/libEphemPropagator
-#PLUGIN                 = ../plugins/proprietary/libMarsGRAM
+#PLUGIN                = ../plugins/proprietary/libMarsGRAM
 PLUGIN                 = ../plugins/libNRLMsise00
 PLUGIN                 = ../plugins/libMsise86
-#PLUGIN                 = ../plugins/libEventLocator
-#PLUGIN                 = ./libCInterface
+#PLUGIN                = ../plugins/libEventLocator
+#PLUGIN                = ./libCInterface
 #-----------------------------------------------------------
 OUTPUT_PATH            = ../output/
 LOG_FILE               = OUTPUT_PATH/GmatLog.txt
