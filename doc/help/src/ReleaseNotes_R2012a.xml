@@ -428,6 +428,81 @@
     <title>Compatibility Changes</title>
 
     <section>
+      <title>Application Control Changes</title>
+
+      <para>The command-line arguments for the GMAT executable have changed.
+      See the following table for replacements.</para>
+
+      <informaltable>
+        <tgroup cols="3">
+          <thead>
+            <row>
+              <entry align="center">Old</entry>
+
+              <entry align="center">New</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>-help</literal></entry>
+
+              <entry><literal>--help</literal>, <literal>-h</literal></entry>
+
+              <entry>Shows available options</entry>
+            </row>
+
+            <row>
+              <entry><literal>-date</literal></entry>
+
+              <entry><literal>--version</literal>,
+              <literal>-v</literal></entry>
+
+              <entry>Shows GMAT build date</entry>
+            </row>
+
+            <row>
+              <entry><literal>-ms</literal></entry>
+
+              <entry><literal>--start-server</literal></entry>
+
+              <entry>Starts GMAT server on startup</entry>
+            </row>
+
+            <row>
+              <entry><literal>-br
+              <replaceable>filename</replaceable></literal></entry>
+
+              <entry><literal>--run</literal>, <literal>-r
+              <replaceable>scriptname</replaceable></literal></entry>
+
+              <entry>Builds and runs the script</entry>
+            </row>
+
+            <row>
+              <entry><literal>-minimize</literal></entry>
+
+              <entry><literal>--minimize</literal>,
+              <literal>-m</literal></entry>
+
+              <entry>Minimizes GMAT window</entry>
+            </row>
+
+            <row>
+              <entry><literal>-exit</literal></entry>
+
+              <entry><literal>--exit</literal>, <literal>-x</literal></entry>
+
+              <entry>Exits GMAT after a script is run</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </section>
+
+    <section>
       <title>Script Syntax Changes</title>
 
       <informaltable>
