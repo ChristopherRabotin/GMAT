@@ -2,6 +2,29 @@ body {
     font-family: Garamond, Helvetica, Arial, serif, sans-serif;
 }
 
-h1, h2, h3, h4, h5 {
+h1.title, h2.title, h3.title, h4.title, h5.title, h6.title, .refentry h1, .refentry h2, .refentry h3, .refentry h4, .refentry h5, .refentry h6 {
     font-family: Helvetica, Arial, sans-serif;
+    color: #0b3d91;
+}
+
+.figure .title {
+    text-align: center;
+}
+
+pre {
+    background-color: #e0e0e0;
+}
+
+.guibutton, .guiicon, .guilabel, .guimenu, .guimenuitem, .guisubmenu {
+    font-weight: bold;
+}
+
+div.note {
+    border: 1px solid black;
+    background-color: #c2cee3;
+}
+
+div.caution, div.warning {
+    border: 1px solid black;
+    background-color: #fecec7;
 }
