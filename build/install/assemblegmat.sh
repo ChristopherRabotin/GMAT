@@ -13,6 +13,7 @@
 #   -p pw         Use repository password pw (default: prompt) 
 #   -t type       Assemble a particular type of distribution:
 #                 full: everything included (default)
+#                 public: publicly-releasable version
 #   -u user       Use repository username user (default: prompt)
 #
 # Prerequisites:
@@ -37,6 +38,7 @@ Options:
   -p pw         Use repository password pw (default: prompt) 
   -t type       Assemble a particular type of distribution:
                 full: everything included (default)
+                public: publicly-releasable version
   -u user       Use repository username user (default: prompt)
 END
 }
@@ -55,7 +57,7 @@ do
         l) LINUX=true; MAC=false; WINDOWS=false;;
         m) LINUX=false; MAC=true; WINDOWS=false;;
         p) pw="$OPTARG";;
-        t) TYPE="$OPTARG";;
+        t) TYPE=`echo "$OPTARG" | tr '[:upper:]' '[:lower:]'`;;
         u) user="$OPTARG";;
         w) LINUX=false; MAC=false; WINDOWS=true;;
         ?) usage; exit 1;;
@@ -104,6 +106,12 @@ then
     # Remove Windows hidden files
     find "$dest" -iname thumbs.db -delete
     
+    # Remove proprietary plugins if necessary
+    if [ $TYPE = 'public' ]
+    then
+        rm -rf "$dest"/plugins/proprietary/*
+    fi
+
 elif $LINUX
 then
     echo 'Linux-specific files not implemented'
@@ -117,16 +125,19 @@ fi
 svn export --force "$apppath" "$dest"
 
 # Mars-GRAM 2005 data
-mgpath="$jazzrepo/trunk/code/MarsGRAMPlugin/data"
-if [ $user ]
+if [ $TYPE = 'full' ]
 then
-    ustring="--username $user"
+    mgpath="$jazzrepo/trunk/code/MarsGRAMPlugin/data"
+    if [ $user ]
+    then
+        ustring="--username $user"
+    fi
+    if [ $pw ]
+    then
+        pwstring="--password $pw"
+    fi
+    svn export $ustring $pwstring --force "$mgpath" "$dest/data"
 fi
-if [ $pw ]
-then
-    pwstring="--password $pw"
-fi
-svn export $ustring $pwstring --force "$mgpath" "$dest/data"
 
 # libCInterface MATLAB files
 cifacepath="$sfrepo/trunk/plugins/CInterfacePlugin"

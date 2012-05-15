@@ -18,7 +18,7 @@ find gmat -type f \
     | sed 's/^gmat/Delete "\$INSTDIR/' \
     | sed 's/$/"/' \
     | unix2dos \
-    > uninstall.nsh
+    >> uninstall.nsh
 
 # delete directories
 find gmat -depth -type d \

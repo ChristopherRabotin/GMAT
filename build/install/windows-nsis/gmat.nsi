@@ -7,14 +7,15 @@
 !include MUI2.nsh
 
 ; General configuration
-Name "GMAT R2011a"
-OutFile "Setup.exe"
+!define VERSION "R2012a-pre"
+Name "GMAT ${VERSION}"
+OutFile "gmat-winInstaller-i586-${VERSION}-Beta.exe"
 SetCompressor /SOLID lzma
 
 ; Multi-user configuration
 !define MULTIUSER_EXECUTIONLEVEL Highest
 !define MULTIUSER_MUI
-!define MULTIUSER_INSTALLMODE_INSTDIR "GMAT\R2011a"
+!define MULTIUSER_INSTALLMODE_INSTDIR "GMAT\${VERSION}"
 !define MULTIUSER_INSTALLMODE_COMMANDLINE
 !include MultiUser.nsh
 
@@ -38,7 +39,7 @@ SetCompressor /SOLID lzma
 
 ; GMAT path settings
 !define UNINST_KEY \
-    "Software\Microsoft\Windows\CurrentVersion\Uninstall\GmatR2011a"
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\Gmat${VERSION}"
 
 ; Make not show UAC on Win7
 RequestExecutionLevel user
@@ -51,19 +52,19 @@ Section "GMAT"
     ; Start Menu shortcut
     SetOutPath "$INSTDIR\bin"
     CreateDirectory "$SMPROGRAMS\GMAT"
-    CreateShortCut "$SMPROGRAMS\GMAT\GMAT R2011a.lnk" "$INSTDIR\bin\GMAT.exe" "" "$INSTDIR\bin\GMAT.exe" 0
+    CreateShortCut "$SMPROGRAMS\GMAT\GMAT ${VERSION}.lnk" "$INSTDIR\bin\GMAT.exe" "" "$INSTDIR\bin\GMAT.exe" 0
     
     ; Uninstaller and Add/Remove Programs registry key
     WriteUninstaller "$INSTDIR\Uninstall.exe"
-    WriteRegStr SHCTX "${UNINST_KEY}" "DisplayName" "GMAT R2011a"
+    WriteRegStr SHCTX "${UNINST_KEY}" "DisplayName" "GMAT ${VERSION}"
     WriteRegStr SHCTX "${UNINST_KEY}" "UninstallString" \
-        "$\"$INSTDIR\uninstall.exe$\" /$MultiUser.InstallMode"
+        "$\"$INSTDIR\Uninstall.exe$\" /$MultiUser.InstallMode"
     WriteRegStr SHCTX "${UNINST_KEY}" "QuietUninstallString" \
-        "$\"$INSTDIR\uninstall.exe$\" /$MultiUser.InstallMode /S"
-    WriteRegStr SHCTX "${UNINST_KEY}" "DisplayVersion" "R2011a"
+        "$\"$INSTDIR\Uninstall.exe$\" /$MultiUser.InstallMode /S"
+    WriteRegStr SHCTX "${UNINST_KEY}" "DisplayVersion" "${VERSION}"
     WriteRegStr SHCTX "${UNINST_KEY}" "Publisher" "GMAT Development Team"
-    WriteRegStr SHCTX "${UNINST_KEY}" "Version" "R2011a"
-    WriteRegStr SHCTX "${UNINST_KEY}" "HelpLink" "http://gmat.ed-pages.com/forum/"
+    WriteRegStr SHCTX "${UNINST_KEY}" "Version" "${VERSION}"
+    WriteRegStr SHCTX "${UNINST_KEY}" "HelpLink" "http://gmat.ed-pages.com/wiki/Contacts"
     WriteRegStr SHCTX "${UNINST_KEY}" "InstallLocation" "$\"$INSTDIR$\""
     WriteRegStr SHCTX "${UNINST_KEY}" "URLInfoAbout" "http://gmat.gsfc.nasa.gov/"
     WriteRegStr SHCTX "${UNINST_KEY}" "URLUpdateInfo" "http://sourceforge.net/projects/gmat/"
@@ -95,7 +96,7 @@ Section "Uninstall"
         RMDir "$INSTDIR\..\..\GMAT"
     
     ; Start Menu shortcut
-    Delete "$SMPROGRAMS\GMAT\GMAT R2011a.lnk"
+    Delete "$SMPROGRAMS\GMAT\GMAT ${VERSION}.lnk"
     RMDir "$SMPROGRAMS\GMAT"
 SectionEnd
 

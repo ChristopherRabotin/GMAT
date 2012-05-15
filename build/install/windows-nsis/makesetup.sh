@@ -7,7 +7,7 @@
 rm -fr gmat
 if [ $? != 0 ]; then echo "Failed to delete gmat directory"; exit 1; fi
 
-../assemblegmat.sh win 2011-04-18
+../assemblegmat.sh -d gmat -t public
 if [ $? != 0 ]; then echo "../assemblegmat.sh failed to run"; exit 1; fi
 
 ./genfilelists.sh

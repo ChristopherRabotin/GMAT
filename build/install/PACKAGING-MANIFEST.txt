@@ -1,6 +1,6 @@
 This file lists all the files that need to be packaged for release and where
 they reside in the GMAT repositories. The list below was created in preparation
-for the R2011a beta release, and should be updated prior to every future
+for the R2012a beta release, and should be updated prior to every future
 release.
 
 This file layout represents the layout of the system once installed by the user.
@@ -9,26 +9,24 @@ the entire directory structure is present in the source location, individual
 files are not listed.
 
 The placeholders used below are:
-    <network>:      \\mesa-file\595\GMAT
-    <SF repo>:      https://gmat.svn.sourceforge.net/svnroot/gmat
-    <Jazz repo>:    https://gs580s-jazz.ndc.nasa.gov/svn/GMAT
+    <network>:  \\mesa-file\595\GMAT
+    <sf>:       https://gmat.svn.sourceforge.net/svnroot/gmat
+    <jazz>:     https://gs580s-jazz.ndc.nasa.gov/svn/GMAT
 
 bin/ (Windows)
-    GMAT.exe                            source: <network>\Builds\windows\<date>
-    GMAT.ini                            source: <SF repo>/trunk/application/
-    gmat_startup_file.txt               source: <SF repo>/trunk/application/
-    libCcsdsEphemerisFile.dll           source: <network>\Builds\windows\<date>
-    libDataFile.dll                     source: <network>\Builds\windows\<date>
-    libGmatBase.dll                     source: <network>\Builds\windows\<date>
-    libpcre-0.dll                       source: <network>\Builds\windows\gcc_lib\other
-    libpcrecpp-0.dll                    source: <network>\Builds\windows\gcc_lib\other
-    mingwm10.dll                        source: <network>\Builds\windows\gcc_lib\other
-    wxbase28_gcc_custom.dll             source: <network>\Builds\windows\gcc_lib\wx2.8.11
-    wxmsw28_adv_gcc_custom.dll          source: <network>\Builds\windows\gcc_lib\wx2.8.11
-    wxmsw28_core_gcc_custom.dll         source: <network>\Builds\windows\gcc_lib\wx2.8.11
-    wxmsw28_gl_gcc_custom.dll           source: <network>\Builds\windows\gcc_lib\wx2.8.11
-    wxmsw28_netutils_gcc_custom.dll     source: <network>\Builds\windows\gcc_lib\wx2.8.11
-    wxmsw28_stc_gcc_custom.dll          source: <network>\Builds\windows\gcc_lib\wx2.8.11
+    GMAT.exe                            source: <network>\Builds\windows\VS2010_build\<date>
+    GMAT.ini                            source: <sf>/trunk/application/
+    gmat_startup_file.txt               source: <sf>/trunk/application/
+    libCInterface.dll                   source: <network>\Builds\windows\VS2010_build\<date>
+    libGmatBase.dll                     source: <network>\Builds\windows\VS2010_build\<date>
+    msvcp100.dll                        source: <network>\Builds\windows\vc_lib
+    msvcr100.dll                        source: <network>\Builds\windows\vc_lib
+    wxbase28_vc_custom.dll              source: <network>\Builds\windows\vc_lib\wx2.8.12
+    wxmsw28_adv_vc_custom.dll           source: <network>\Builds\windows\vc_lib\wx2.8.12
+    wxmsw28_core_vc_custom.dll          source: <network>\Builds\windows\vc_lib\wx2.8.12
+    wxmsw28_gl_vc_custom.dll            source: <network>\Builds\windows\vc_lib\wx2.8.12
+    wxmsw28_netutils_vc_custom.dll      source: <network>\Builds\windows\vc_lib\wx2.8.12
+    wxmsw28_stc_vc_custom.dll           source: <network>\Builds\windows\vc_lib\wx2.8.12
 
 bin/ (Mac OS X)
     <incomplete>
@@ -59,34 +57,39 @@ bin/lib/ (Linux only)                   source: Thinking Systems FTP Server
     libwx_gtk2_html-2.8.so.0  
     libwx_gtk2_richtext-2.8.so.0
 
-data/                                   source: <SF repo>/trunk/application/
+data/                                   source: <sf>/trunk/application/
     *
 
 docs/
-    GMATAcceptanceTestPlan.pdf          source: ?
-    GMATArchitecturalSpec.pdf           source: ?
-    GMATCompilerSetup.pdf               source: ?
-    GMATInputRangeTestPlan.pdf          source: ?
-    GMATMathSpec.pdf                    source: ?
-    GMATMissionStatement.pdf            source: ?
-    GMATProductBrochure.pdf             source: ?
-    GMATQuickTables.pdf                 source: ?
-    GMATStyleGuide.pdf                  source: ?
-    GMATSystemTestPlan.pdf              source: ?
-    GMATUsersGuide.pdf                  source: ?
-    help/                               source: <SF repo>/trunk/application/
+    GMAT-Architectural-Specification.pdf    source: <sf>/trunk/application/
+    GMATEstimationSpecification.pdf         source: <sf>/trunk/application/
+    GMATMathSpec.pdf                        source: <sf>/trunk/application/
+    help/                                   source: <network>\Builds\windows\VS2010_build\<date>
         *
 
-matlab/                                 source: <SF repo>/trunk/application/
+extras/                                 source: <sf>/trunk/application/
     *
 
-output/
-    <empty>
+matlab/
+    gmat_command/                       source: <sf>/trunk/application/
+    gmat_fmincon/                       source: <sf>/trunk/application/
+    gmat_keyword/                       source: <sf>/trunk/application/
+    libCInterface/
+        interfacewrapper.m              source: <network>\Builds\windows\VS2010_build\<date>
+        *                               source: <sf>/trunk/application/
+    *                                   source: <sf>/trunk/application/
+
+output/                                 source: <sf>/trunk/application/
+    *
 
 plugins/ (Windows)
-    libFminconOptimizer.dll             source: <network>\Builds\windows\<date>
-    libGmatEstimation.dll               source: <network>\Builds\windows\<date>
-    libMatlabInterface.dll              source: <network>\Builds\windows\<date>
+    libEphemPropagator.dll              source: <network>\Builds\windows\VS2010_build\<date>
+    libEventLocator.dll                 source: <network>\Builds\windows\VS2010_build\<date>
+    libFminconOptimizer.dll             source: <network>\Builds\windows\VS2010_build\<date>
+    libGmatEstimation.dll               source: <network>\Builds\windows\VS2010_build\<date>
+    libMatlabInterface.dll              source: <network>\Builds\windows\VS2010_build\<date>
+    libMsise86.dll                      source: <network>\Builds\windows\VS2010_build\<date>
+    libNRLMsise00.dll                   source: <network>\Builds\windows\VS2010_build\<date>
     proprietary/
         <empty>
 
@@ -100,11 +103,11 @@ plugins/ (Linux)
     proprietary/
         <empty>
 
-samples/                                source: <SF repo>/trunk/application/
+samples/                                source: <sf>/trunk/application/
     *
 
-userfunctions/                          source: <SF repo>/trunk/application/
+userfunctions/                          source: <sf>/trunk/application/
     *
 
-License.txt                             source: <SF repo>/trunk/application/
-README.txt                              source: <SF repo>/trunk/application/
+License.txt                             source: <sf>/trunk/application/
+README.txt                              source: <sf>/trunk/application/
