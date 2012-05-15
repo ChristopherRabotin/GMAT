@@ -28,6 +28,9 @@
     </listitem>
   </itemizedlist>
 
+  <para>This is a beta release. It has undergone extensive testing in many
+  areas, but is not considered ready for production use.</para>
+
   <section>
     <title>New Features</title>
 
@@ -330,7 +333,8 @@
 
       <para>There's also a new <guilabel>Mission Summary - Physics-Based
       Commands</guilabel> that shows only physical events
-      (<guilabel>Propagate</guilabel> commands, burns, etc.).</para>
+      (<guilabel>Propagate</guilabel> commands, burns, etc.), and further data
+      was added to both <guilabel>Mission Summary</guilabel> types.</para>
 
       <para><screenshot>
           <info>
@@ -348,23 +352,28 @@
     </section>
 
     <section>
-      <title>Plot Window Persistency</title>
+      <title>Window Persistency</title>
 
-      <para>The locations of plot windows are now saved with the mission in
-      the script file. This means that when running a mission, all the plot
+      <para>The locations of output windows are now saved with the mission in
+      the script file. This means that when running a mission, all the output
       windows that were open when the mission was last saved will reappear in
       their old positions.</para>
+
+      <para>In addition, the locations of certain GMAT windows, like the
+      mission tree, the script editor, and the application window itself are
+      saved to the user preferences file
+      (<filename>MyGMAT.ini</filename>).</para>
     </section>
 
     <section>
-      <title>Switch to Visual Studio</title>
+      <title>Switch to Visual Studio on Windows</title>
 
-      <para>With this release, the official GMAT binaries are now compiled
-      with Microsoft Visual Studio 2010 instead of GCC. The biggest benefit of
-      this is in performance; we've seen up to a 50% performance improvement
-      in certain cases in unofficial testing. It also leads to more
-      straightforward development on Windows, as the MinGW suite is no longer
-      needed.</para>
+      <para>With this release, the official GMAT binaries for Windows are now
+      compiled with Microsoft Visual Studio 2010 instead of GCC. The biggest
+      benefit of this is in performance; we've seen up to a 50% performance
+      improvement in certain cases in unofficial testing. It also leads to
+      more a industry-standard development process on Windows, as the MinGW
+      suite is no longer needed.</para>
     </section>
 
     <section>
