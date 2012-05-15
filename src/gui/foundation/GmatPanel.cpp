@@ -398,10 +398,10 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
     // get base help link if available
     baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/R2012a/html/%s.html"));
     sprintf( msgBuffer, baseHelpLink.c_str(), s.c_str());
-    #ifdef DEBUG_GMATPANEL
+    //#ifdef DEBUG_GMATPANEL
       MessageInterface::ShowMessage
          ("GmatPanel::OnHelp() Default Help Link=%s\n", msgBuffer);
-    #endif
+      //#endif
 
     // open separate window to show help
     s = pConfig->Read(_T(s),_T(msgBuffer));
@@ -446,9 +446,13 @@ void GmatPanel::OnScript(wxCommandEvent &event)
 {
    wxString title = "Object Script";
    // open separate window to show scripts?
-   if (mObject != NULL) {
+   if (mObject != NULL)
+   {
       title = "Scripting for ";
-      title += mObject->GetName().c_str();
+      if (mObject->IsOfType("GmatCommand"))
+         title += mObject->GetTypeName().c_str();
+      else
+         title += mObject->GetName().c_str();
    }
    ShowScriptDialog ssd(this, -1, title, mObject);
    ssd.ShowModal();

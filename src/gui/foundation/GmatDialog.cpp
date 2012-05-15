@@ -23,8 +23,9 @@
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_GMAT_DIALOG_SAVE 1
-//#define DEBUG_GMAT_DIALOG_CLOSE 1
+//#define DEBUG_GMAT_DIALOG_SAVE
+//#define DEBUG_GMAT_DIALOG_CLOSE
+//#define DEBUG_GMAT_DIALOG_HELP
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -116,7 +117,7 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
 //------------------------------------------------------------------------------
 void GmatDialog::EnableUpdate(bool enable)
 {
-   #if DEBUG_GMAT_DIALOG_SAVE
+   #ifdef DEBUG_GMAT_DIALOG_SAVE
    MessageInterface::ShowMessage
       ("GmatDialog::EnableUpdate() enable=%d\n", enable);
    #endif
@@ -157,7 +158,7 @@ void GmatDialog::OnOK(wxCommandEvent &event)
 {
    SaveData();
 
-   #if DEBUG_GMAT_DIALOG_SAVE
+   #ifdef DEBUG_GMAT_DIALOG_SAVE
    MessageInterface::ShowMessage
       ("GmatDialog::OnOK() canClose=%d\n", canClose);
    #endif
@@ -194,22 +195,55 @@ void GmatDialog::OnCancel(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GmatDialog::OnHelp(wxCommandEvent &event)
 {
-    wxString s;
-    wxString baseHelpLink;
-    char msgBuffer[255];
-
-    // get the config object
-    wxConfigBase *pConfig = wxConfigBase::Get();
-    pConfig->SetPath(wxT("/Help"));
-    s = GetName().c_str();
-    // get base help link if available
-    baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/R2011a/html/%s.html"));
-    sprintf( msgBuffer, baseHelpLink.c_str(), s.c_str());
-
-    // open separate window to show help
-    s = pConfig->Read(_T(s),_T(msgBuffer));
-
-    wxLaunchDefaultBrowser(s);
+   #ifdef DEBUG_GMAT_DIALOG_HELP
+   MessageInterface::ShowMessage
+      ("GmatDialog::OnHelp() entered, mObject=<%p><%s>'%s'\n", mObject,
+       mObject ? mObject->GetTypeName().c_str() : "NULL",
+       mObject ? mObject->GetName().c_str() : "NULL");
+   #endif
+   
+   wxString objLink;
+   wxString baseHelpLink;
+   char msgBuffer[255];
+   
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   pConfig->SetPath(wxT("/Help"));
+   if (mObject != NULL)
+   {
+      objLink = mObject->GetTypeName().c_str();
+   }
+   else
+   {
+      wxString prefix = "Scripting for ";
+      objLink = GetName().c_str();
+      objLink = objLink.Mid(prefix.size());
+      GmatBase *obj = theGuiInterpreter->GetConfiguredObject(objLink.c_str());
+      if (obj != NULL)
+         objLink = obj->GetTypeName().c_str();
+   }
+   
+   // get base help link if available
+   baseHelpLink = pConfig->Read(_T("BaseHelpLink"),
+                                _T("http://gmat.sourceforge.net/docs/R2012a/html/%s.html"));
+   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
+   
+   #ifdef DEBUG_GMAT_DIALOG_HELP
+   MessageInterface::ShowMessage
+      ("   objLink = '%s', baseHelpLink = '%s'\n   helpLink = '%s'\n",
+       objLink.c_str(), baseHelpLink.c_str(), msgBuffer);
+   #endif
+   
+   // open separate window to show help
+   objLink = pConfig->Read(_T(objLink), _T(msgBuffer));
+   #ifdef DEBUG_GMAT_DIALOG_HELP
+   MessageInterface::ShowMessage("   actual help Link = '%s'\n", objLink.c_str());
+   #endif
+   wxLaunchDefaultBrowser(objLink);
+   
+   #ifdef DEBUG_GMAT_DIALOG_HELP
+   MessageInterface::ShowMessage("GmatDialog::OnHelp() leaving\n");
+   #endif
 }
 
 
@@ -218,7 +252,7 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GmatDialog::OnClose(wxCloseEvent &event)
 {
-   #if DEBUG_GMAT_DIALOG_CLOSE
+   #ifdef DEBUG_GMAT_DIALOG_CLOSE
    MessageInterface::ShowMessage
       ("GmatDialog::OnClose() mDataChanged=%d\n", mDataChanged);
    #endif
