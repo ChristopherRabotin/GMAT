@@ -160,18 +160,6 @@
       xlink:href="http://gmat.sourceforge.net/docs/R2012a/capi/index.html">API
       reference</link> for now.</para>
     </section>
-
-    <section>
-      <title>GMAT Server [alpha]</title>
-
-      <para>GMAT's <guilabel>Matlab Server</guilabel> got an overhaul to make
-      it cross-platform. Previously based on Windows' DDE protocol, now the
-      server is based on TCP/IP using the standard Berkeley sockets API. While
-      the default <guilabel>Matlab Server</guilabel> is now using the new
-      protocol, it is disabled by default because it has not been rigorously
-      tested. Enable the <filename>libMatlabInterface</filename> plugin to use
-      it.</para>
-    </section>
   </section>
 
   <section>
