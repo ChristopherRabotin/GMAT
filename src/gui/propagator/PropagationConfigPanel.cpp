@@ -2464,9 +2464,9 @@ bool PropagationConfigPanel::SaveIntegratorData()
 
    try
    {
-      if (minStep >= maxStep)
+      if (minStep > maxStep)
          throw GmatBaseException("The step control values are invalid; "
-               "Integrators require 0.0 <= Min Step Size < Max Step Size");
+               "Integrators require 0.0 <= Min Step Size <= Max Step Size");
 
       if (thePropagator->IsOfType("PredictorCorrector"))
       {
