@@ -1099,6 +1099,15 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          }
       }
    }
+
+   #ifdef DEBUG_SHOW_Force
+      static int iter = 0;
+      if (iter == 0)
+         MessageInterface::ShowMessage("Drag dv: [%le %le %le]\n", deriv[3],
+               deriv[4], deriv[5]);
+      if (++iter == 16)
+         iter = 0;
+   #endif
    
    return true;
 }

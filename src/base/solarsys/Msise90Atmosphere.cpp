@@ -319,7 +319,7 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
 
       #ifdef DEBUG_MSISE90_ATMOSPHERE
          MessageInterface::ShowMessage(
-            "   Density = %15.9le\n", density[i]);
+            "   Altitude = %15.9lf  Density = %15.9le\n", alt, density[i]);
       #endif
    }
    
