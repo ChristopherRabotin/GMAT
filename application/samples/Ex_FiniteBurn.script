@@ -173,20 +173,6 @@ GMAT fb.Thrusters = {engine1};
 %---------- Subscribers
 %----------------------------------------
 
-%  Create a report file
-Create ReportFile rf;
-GMAT rf.SolverIterations = Current;
-GMAT rf.UpperLeft = [ 0 0 ];
-GMAT rf.Size = [ 0 0 ];
-GMAT rf.RelativeZOrder = 0;
-GMAT rf.Filename = 'Ex_FiniteBurn.report';
-GMAT rf.Precision = 16;
-GMAT rf.WriteHeaders = Off;
-GMAT rf.LeftJustify = On;
-GMAT rf.ZeroFill = Off;
-GMAT rf.ColumnWidth = 20;
-GMAT rf.WriteReport = true;
-
 %  Create an XYPlot  
 Create XYPlot energy;
 GMAT energy.SolverIterations = Current;

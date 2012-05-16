@@ -137,12 +137,6 @@ GMAT Enhanced3DView1.StarCount = 7000;
 GMAT Enhanced3DView1.EnableStars = On;
 GMAT Enhanced3DView1.EnableConstellations = On;
 
-Create ReportFile Data;
-GMAT Data.Filename = Ex_Attitude_NadirPointing.report;
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.ColumnWidth = 20;
-
 %----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------

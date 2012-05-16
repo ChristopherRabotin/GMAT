@@ -181,19 +181,6 @@ GMAT XYPlot1.YVariables = {LunaSat.Luna.RadPer};
 GMAT XYPlot1.ShowGrid = true;
 GMAT XYPlot1.ShowPlot = true;
 
-Create ReportFile Data;
-GMAT Data.SolverIterations = Current;
-GMAT Data.UpperLeft = [ 0 0 ];
-GMAT Data.Size = [ 0 0 ];
-GMAT Data.RelativeZOrder = 0;
-GMAT Data.Filename = 'Ex_LunarOrbitStationKeeping.report';
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.LeftJustify = On;
-GMAT Data.ZeroFill = Off;
-GMAT Data.ColumnWidth = 23;
-GMAT Data.WriteReport = true;
-
 %----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------

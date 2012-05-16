@@ -157,20 +157,6 @@ GMAT XYPlot1.YVariables = {DMSP.MRP1, DMSP.MRP2, DMSP.MRP3};
 GMAT XYPlot1.ShowGrid = true;
 GMAT XYPlot1.ShowPlot = true;
 
-Create ReportFile Data;
-GMAT Data.SolverIterations = Current;
-GMAT Data.UpperLeft = [ 0 0 ];
-GMAT Data.Size = [ 0 0 ];
-GMAT Data.RelativeZOrder = 0;
-GMAT Data.Filename = 'Ex_Attitude_ModifiedRodriquezParameters.report';
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.LeftJustify = On;
-GMAT Data.ZeroFill = Off;
-GMAT Data.ColumnWidth = 20;
-GMAT Data.WriteReport = true;
-
-
 %----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------

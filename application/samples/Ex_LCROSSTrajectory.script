@@ -335,15 +335,6 @@ GMAT MoonView.UpdatePlotFrequency = 50;
 GMAT MoonView.NumPointsToRedraw = 0;
 GMAT MoonView.ShowPlot = true;
 
-Create ReportFile Data;
-GMAT Data.SolverIterations = None;
-GMAT Data.Filename = Data.txt;
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.LeftJustify = On;
-GMAT Data.ZeroFill = On;
-GMAT Data.ColumnWidth = 30;
-
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------

@@ -28,10 +28,8 @@ GMAT Sat.SRPArea = 4;
 %----------------------------Create ForceModels---------------------------
 %  Define Force Model with point mass only
 Create ForceModel PointMass;
-GMAT PointMass.PrimaryBodies        =  {Earth};
-GMAT PointMass.Gravity.Earth.Model  = JGM2;
-GMAT PointMass.Gravity.Earth.Degree = 0;
-GMAT PointMass.Gravity.Earth.Order  = 0;
+GMAT PointMass.PointMasses          =  {Earth};
+
 
 %----------------------------Create Propagators---------------------------
 
@@ -111,12 +109,6 @@ GMAT GLPlot.ViewPointVector = [ -10000 -15000 3000 ];
 GMAT GLPlot.ViewUpAxis = Z;
 GMAT GLPlot.Axes       = On;
 
-%------------------------------ Create Report -----------------------------
-Create ReportFile IntegratorRpt;
-GMAT IntegratorRpt.Filename = Ex_Integrators.report
-GMAT IntegratorRpt.Precision = 16;
-GMAT IntegratorRpt.WriteHeaders = Off;
-GMAT IntegratorRpt.ColumnWidth = 20;
 
 % -------------------------------------------------------------------------
 % ---------------------------  Begin Mission Sequence

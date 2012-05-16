@@ -286,12 +286,6 @@ Create Propagator prop
 GMAT prop.FM = fm;
 GMAT prop.Type = RungeKutta89;
 
-Create ReportFile ConstReport;
-GMAT ConstReport.Filename = Ex_ConstellationScript.report;
-GMAT ConstReport.Precision = 16;
-GMAT ConstReport.WriteHeaders = Off;
-GMAT ConstReport.ColumnWidth = 25;
-
 Create Formation form
 GMAT form.Add = Sat11;
 GMAT form.Add = Sat12;

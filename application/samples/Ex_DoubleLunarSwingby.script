@@ -260,19 +260,6 @@ GMAT EarthDistance.YVariables = {MMSRef.Earth.RMAG};
 GMAT EarthDistance.ShowGrid = true;
 GMAT EarthDistance.ShowPlot = true;
 
-Create ReportFile Data;
-GMAT Data.SolverIterations = Current;
-GMAT Data.UpperLeft = [ 0 0 ];
-GMAT Data.Size = [ 0 0 ];
-GMAT Data.RelativeZOrder = 0;
-GMAT Data.Filename = 'Ex_DoubleLunarSwingby.report';
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.LeftJustify = On;
-GMAT Data.ZeroFill = Off;
-GMAT Data.ColumnWidth = 20;
-GMAT Data.WriteReport = true;
-
 Create OrbitView OGL_EarthMJ2K;
 GMAT OGL_EarthMJ2K.SolverIterations = All;
 GMAT OGL_EarthMJ2K.UpperLeft = [ 0.3018867924528302 0.4861460957178841 ];

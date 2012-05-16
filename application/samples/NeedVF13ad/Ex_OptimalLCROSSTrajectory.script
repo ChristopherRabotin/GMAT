@@ -174,11 +174,11 @@ GMAT ImpactSat_MoonFixed.Epoch = '01 Jan 2000 11:59:28.000';
 GMAT ImpactSat_MoonFixed.CoordinateSystem = MoonFixed;
 GMAT ImpactSat_MoonFixed.DisplayStateType = Cartesian;
 GMAT ImpactSat_MoonFixed.X = 404097.4004557607;
-GMAT ImpactSat_MoonFixed.Y = 30873.01777335558;
-GMAT ImpactSat_MoonFixed.Z = -45917.57222582572;
-GMAT ImpactSat_MoonFixed.VX = 4.405930176834019;
+GMAT ImpactSat_MoonFixed.Y = 30873.01777335557;
+GMAT ImpactSat_MoonFixed.Z = -45917.57222582575;
+GMAT ImpactSat_MoonFixed.VX = 4.40593017683402;
 GMAT ImpactSat_MoonFixed.VY = 5.5017164658627;
-GMAT ImpactSat_MoonFixed.VZ = -2.099602413163656;
+GMAT ImpactSat_MoonFixed.VZ = -2.099602413163657;
 GMAT ImpactSat_MoonFixed.DryMass = 850;
 GMAT ImpactSat_MoonFixed.Cd = 2.2;
 GMAT ImpactSat_MoonFixed.Cr = 1.8;
@@ -294,6 +294,7 @@ GMAT LCROSSInit.AngularVelocityX = 0;
 GMAT LCROSSInit.AngularVelocityY = 0;
 GMAT LCROSSInit.AngularVelocityZ = 0;
 
+
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
@@ -314,6 +315,7 @@ GMAT NearMoonProp_ForceModel.RelativisticCorrection = Off;
 GMAT NearMoonProp_ForceModel.ErrorControl = RSSStep;
 GMAT NearMoonProp_ForceModel.SRP.Flux = 1367;
 GMAT NearMoonProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
+
 
 
 %% Create a force model for near Lunar propagation
@@ -485,6 +487,7 @@ GMAT ImpactSatData = '---------- Impact Sat Data --------------';
 GMAT ImpactData = '------ Impact Data -------';
 
 
+
 %----------------------------------------
 %---------- Coordinate Systems
 %----------------------------------------
@@ -597,9 +600,9 @@ GMAT EarthView.EnableConstellations = On;
 
 Create OrbitView MoonView;
 GMAT MoonView.SolverIterations = Current;
-GMAT MoonView.UpperLeft = [ 0.2745664739884393 0 ];
-GMAT MoonView.Size = [ 0.3535645472061657 0.4509803921568628 ];
-GMAT MoonView.RelativeZOrder = 2104;
+GMAT MoonView.UpperLeft = [ 0.2744090441932169 0 ];
+GMAT MoonView.Size = [ 0.3545734840698869 0.4518072289156627 ];
+GMAT MoonView.RelativeZOrder = 1912;
 GMAT MoonView.Add = {LCROSS, Luna, Earth};
 GMAT MoonView.CoordinateSystem = MoonEarthRot;
 GMAT MoonView.DrawObject = [ true true true ];
@@ -658,9 +661,9 @@ GMAT CostPlot.ShowPlot = false;
 
 Create XYPlot PositionErrorPlot2;
 GMAT PositionErrorPlot2.SolverIterations = Current;
-GMAT PositionErrorPlot2.UpperLeft = [ 0.2707129094412332 0.4607843137254902 ];
-GMAT PositionErrorPlot2.Size = [ 0.3535645472061657 0.4509803921568628 ];
-GMAT PositionErrorPlot2.RelativeZOrder = 2094;
+GMAT PositionErrorPlot2.UpperLeft = [ 0.2702980472764646 0.4593373493975904 ];
+GMAT PositionErrorPlot2.Size = [ 0.3545734840698869 0.4518072289156627 ];
+GMAT PositionErrorPlot2.RelativeZOrder = 1905;
 GMAT PositionErrorPlot2.XVariable = LoopCounter2;
 GMAT PositionErrorPlot2.YVariables = {PositionError};
 GMAT PositionErrorPlot2.ShowGrid = true;
@@ -668,9 +671,9 @@ GMAT PositionErrorPlot2.ShowPlot = true;
 
 Create XYPlot VelocityErrorPlot2;
 GMAT VelocityErrorPlot2.SolverIterations = Current;
-GMAT VelocityErrorPlot2.UpperLeft = [ 0.6425818882466281 0.4607843137254902 ];
-GMAT VelocityErrorPlot2.Size = [ 0.3535645472061657 0.4509803921568628 ];
-GMAT VelocityErrorPlot2.RelativeZOrder = 2090;
+GMAT VelocityErrorPlot2.UpperLeft = [ 0.6423432682425488 0.4593373493975904 ];
+GMAT VelocityErrorPlot2.Size = [ 0.3545734840698869 0.4518072289156627 ];
+GMAT VelocityErrorPlot2.RelativeZOrder = 1900;
 GMAT VelocityErrorPlot2.XVariable = LoopCounter2;
 GMAT VelocityErrorPlot2.YVariables = {VelocityError};
 GMAT VelocityErrorPlot2.ShowGrid = true;
@@ -678,9 +681,9 @@ GMAT VelocityErrorPlot2.ShowPlot = true;
 
 Create XYPlot CostPlot2;
 GMAT CostPlot2.SolverIterations = Current;
-GMAT CostPlot2.UpperLeft = [ 0.6396917148362236 0.004201680672268907 ];
-GMAT CostPlot2.Size = [ 0.3535645472061657 0.4509803921568628 ];
-GMAT CostPlot2.RelativeZOrder = 2102;
+GMAT CostPlot2.UpperLeft = [ 0.6392600205549845 0.003012048192771085 ];
+GMAT CostPlot2.Size = [ 0.3545734840698869 0.4518072289156627 ];
+GMAT CostPlot2.RelativeZOrder = 1910;
 GMAT CostPlot2.XVariable = LoopCounter2;
 GMAT CostPlot2.YVariables = {Cost, LCM1Mag, LCM2Mag};
 GMAT CostPlot2.ShowGrid = true;
@@ -721,19 +724,6 @@ GMAT Check.ZeroFill = Off;
 GMAT Check.ColumnWidth = 20;
 GMAT Check.WriteReport = true;
 
-Create ReportFile StateVectorData;
-GMAT StateVectorData.SolverIterations = Current;
-GMAT StateVectorData.UpperLeft = [ 0 0 ];
-GMAT StateVectorData.Size = [ 0 0 ];
-GMAT StateVectorData.RelativeZOrder = 0;
-GMAT StateVectorData.Filename = 'StateVectorData.txt';
-GMAT StateVectorData.Precision = 16;
-GMAT StateVectorData.WriteHeaders = On;
-GMAT StateVectorData.LeftJustify = On;
-GMAT StateVectorData.ZeroFill = Off;
-GMAT StateVectorData.ColumnWidth = 20;
-GMAT StateVectorData.WriteReport = true;
-
 Create ReportFile Data;
 GMAT Data.SolverIterations = None;
 GMAT Data.UpperLeft = [ 0 0 ];
@@ -758,45 +748,6 @@ GMAT Solution.LeftJustify = On;
 GMAT Solution.ZeroFill = Off;
 GMAT Solution.ColumnWidth = 20;
 GMAT Solution.WriteReport = true;
-
-Create ReportFile LCM2Data;
-GMAT LCM2Data.SolverIterations = Current;
-GMAT LCM2Data.UpperLeft = [ 0 0 ];
-GMAT LCM2Data.Size = [ 0 0 ];
-GMAT LCM2Data.RelativeZOrder = 0;
-GMAT LCM2Data.Filename = 'LCM2Data.txt';
-GMAT LCM2Data.Precision = 16;
-GMAT LCM2Data.WriteHeaders = On;
-GMAT LCM2Data.LeftJustify = On;
-GMAT LCM2Data.ZeroFill = Off;
-GMAT LCM2Data.ColumnWidth = 20;
-GMAT LCM2Data.WriteReport = true;
-
-Create ReportFile LCM1Data;
-GMAT LCM1Data.SolverIterations = Current;
-GMAT LCM1Data.UpperLeft = [ 0 0 ];
-GMAT LCM1Data.Size = [ 0 0 ];
-GMAT LCM1Data.RelativeZOrder = 0;
-GMAT LCM1Data.Filename = 'LCM1Data.txt';
-GMAT LCM1Data.Precision = 16;
-GMAT LCM1Data.WriteHeaders = On;
-GMAT LCM1Data.LeftJustify = On;
-GMAT LCM1Data.ZeroFill = Off;
-GMAT LCM1Data.ColumnWidth = 20;
-GMAT LCM1Data.WriteReport = true;
-
-Create ReportFile EDUSdvData;
-GMAT EDUSdvData.SolverIterations = Current;
-GMAT EDUSdvData.UpperLeft = [ 0 0 ];
-GMAT EDUSdvData.Size = [ 0 0 ];
-GMAT EDUSdvData.RelativeZOrder = 0;
-GMAT EDUSdvData.Filename = 'EDUSdvData.txt';
-GMAT EDUSdvData.Precision = 16;
-GMAT EDUSdvData.WriteHeaders = On;
-GMAT EDUSdvData.LeftJustify = On;
-GMAT EDUSdvData.ZeroFill = Off;
-GMAT EDUSdvData.ColumnWidth = 20;
-GMAT EDUSdvData.WriteReport = true;
 
 Create ReportFile SolutionData;
 GMAT SolutionData.SolverIterations = Current;
@@ -823,19 +774,6 @@ GMAT CollocationData.LeftJustify = On;
 GMAT CollocationData.ZeroFill = Off;
 GMAT CollocationData.ColumnWidth = 20;
 GMAT CollocationData.WriteReport = true;
-
-Create ReportFile CostData;
-GMAT CostData.SolverIterations = Current;
-GMAT CostData.UpperLeft = [ 0 0 ];
-GMAT CostData.Size = [ 0 0 ];
-GMAT CostData.RelativeZOrder = 0;
-GMAT CostData.Filename = 'CostData.txt';
-GMAT CostData.Precision = 16;
-GMAT CostData.WriteHeaders = On;
-GMAT CostData.LeftJustify = On;
-GMAT CostData.ZeroFill = Off;
-GMAT CostData.ColumnWidth = 20;
-GMAT CostData.WriteReport = true;
 
 Create ReportFile SensitivityData;
 GMAT SensitivityData.SolverIterations = Current;

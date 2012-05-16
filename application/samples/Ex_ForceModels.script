@@ -5,6 +5,10 @@
 %
 
 
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
 
 % -------------------------------------------------------------------------
 % --------------------------- Create Objects ------------------------------
@@ -13,11 +17,13 @@
 %----------------------------Create the Spacecraft----------------------
 % Create Sat and define its orbit
 Create Spacecraft Sat;
-GMAT Sat.Epoch.UTCGregorian  = 04 Jan 2003 00:00:00.000;
+GMAT Sat.DateFormat = UTCGregorian;
+GMAT Sat.Epoch = '04 Jan 2003 00:00:00.000';
+GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat.DisplayStateType = Cartesian;
 GMAT Sat.X = -6365.554;
 GMAT Sat.Y = 2087.458;
-GMAT Sat.Z = 878.918
+GMAT Sat.Z = 878.918;
 GMAT Sat.VX = -1.635;
 GMAT Sat.VY = -6.597762;
 GMAT Sat.VZ = 3.5058499;
@@ -26,182 +32,287 @@ GMAT Sat.Cd = 2.25;
 GMAT Sat.Cr = 1.21;
 GMAT Sat.DragArea = 4;
 GMAT Sat.SRPArea = 4;
+GMAT Sat.NAIFId = -123456789;
+GMAT Sat.NAIFIdReferenceFrame = -123456789;
+GMAT Sat.Id = 'SatId';
+GMAT Sat.Attitude = CoordinateSystemFixed;
+GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat.ModelOffsetX = 0;
+GMAT Sat.ModelOffsetY = 0;
+GMAT Sat.ModelOffsetZ = 0;
+GMAT Sat.ModelRotationX = 0;
+GMAT Sat.ModelRotationY = 0;
+GMAT Sat.ModelRotationZ = 0;
+GMAT Sat.ModelScale = 3;
+GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT Sat.Q1 = 0;
+GMAT Sat.Q2 = 0;
+GMAT Sat.Q3 = 0;
+GMAT Sat.Q4 = 1;
+GMAT Sat.EulerAngleSequence = '321';
+GMAT Sat.AngularVelocityX = 0;
+GMAT Sat.AngularVelocityY = 0;
+GMAT Sat.AngularVelocityZ = 0;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
 
 %----------------------------Create ForceModels----------------------
 
 %  Define Force Model with point mass only
 Create ForceModel PointMass;
-GMAT PointMass.PrimaryBodies        = {Earth};
-GMAT PointMass.Gravity.Earth.Model  = JGM2;
-GMAT PointMass.Gravity.Earth.Degree = 0;
-GMAT PointMass.Gravity.Earth.Order  = 0;
+GMAT PointMass.CentralBody = Earth;
+GMAT PointMass.PrimaryBodies = {Earth};
+GMAT PointMass.Drag = None;
+GMAT PointMass.SRP = Off;
+GMAT PointMass.RelativisticCorrection = Off;
+GMAT PointMass.ErrorControl = RSSStep;
+GMAT PointMass.GravityField.Earth.Degree = 0;
+GMAT PointMass.GravityField.Earth.Order = 0;
+GMAT PointMass.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT PointMass.GravityField.Earth.EarthTideModel = 'None';
+
 
 %  Define Force Model with third bodies 
 Create ForceModel ThirdBodies;
-GMAT ThirdBodies.PrimaryBodies        = {Earth};
-GMAT ThirdBodies.Gravity.Earth.Model  = JGM2;
-GMAT ThirdBodies.Gravity.Earth.Degree = 0;
-GMAT ThirdBodies.Gravity.Earth.Order  = 0;
-GMAT ThirdBodies.PointMasses   = { Sun, Luna,  Venus, Mars, Jupiter, Saturn, Uranus, Neptune};
+GMAT ThirdBodies.CentralBody = Earth;
+GMAT ThirdBodies.PrimaryBodies = {Earth};
+GMAT ThirdBodies.PointMasses = {Sun, Luna, Venus, Mars, Jupiter, Saturn, Uranus, Neptune};
+GMAT ThirdBodies.Drag = None;
+GMAT ThirdBodies.SRP = Off;
+GMAT ThirdBodies.RelativisticCorrection = Off;
+GMAT ThirdBodies.ErrorControl = RSSStep;
+GMAT ThirdBodies.GravityField.Earth.Degree = 0;
+GMAT ThirdBodies.GravityField.Earth.Order = 0;
+GMAT ThirdBodies.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT ThirdBodies.GravityField.Earth.EarthTideModel = 'None';
+
 
 %  Define Force Model with 12x12 gravity
 Create ForceModel NonSpherical12;
-GMAT NonSpherical12.PrimaryBodies        = {Earth};
-GMAT NonSpherical12.Gravity.Earth.Model  = JGM2;
-GMAT NonSpherical12.Gravity.Earth.Degree = 12;
-GMAT NonSpherical12.Gravity.Earth.Order  = 12;
+GMAT NonSpherical12.CentralBody = Earth;
+GMAT NonSpherical12.PrimaryBodies = {Earth};
+GMAT NonSpherical12.Drag = None;
+GMAT NonSpherical12.SRP = Off;
+GMAT NonSpherical12.RelativisticCorrection = Off;
+GMAT NonSpherical12.ErrorControl = RSSStep;
+GMAT NonSpherical12.GravityField.Earth.Degree = 12;
+GMAT NonSpherical12.GravityField.Earth.Order = 12;
+GMAT NonSpherical12.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT NonSpherical12.GravityField.Earth.EarthTideModel = 'None';
+
 
 %  Define Force Model with MSISE90 Drag 
-Create ForceModel  MSISE90Drag;
-GMAT  MSISE90Drag.PrimaryBodies        = {Earth};
-GMAT  MSISE90Drag.Gravity.Earth.Model  = JGM2;
-GMAT  MSISE90Drag.Gravity.Earth.Degree = 0;
-GMAT  MSISE90Drag.Gravity.Earth.Order  = 0;
-GMAT  MSISE90Drag.Drag       = MSISE90;
-GMAT  MSISE90Drag.Drag.F107  = 175;
-GMAT  MSISE90Drag.Drag.F107A = 175;
-GMAT  MSISE90Drag.Drag.MagneticIndex = 4;
+Create ForceModel MSISE90Drag;
+GMAT MSISE90Drag.CentralBody = Earth;
+GMAT MSISE90Drag.PrimaryBodies = {Earth};
+GMAT MSISE90Drag.SRP = Off;
+GMAT MSISE90Drag.RelativisticCorrection = Off;
+GMAT MSISE90Drag.ErrorControl = RSSStep;
+GMAT MSISE90Drag.GravityField.Earth.Degree = 0;
+GMAT MSISE90Drag.GravityField.Earth.Order = 0;
+GMAT MSISE90Drag.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT MSISE90Drag.GravityField.Earth.EarthTideModel = 'None';
+GMAT MSISE90Drag.Drag.AtmosphereModel = MSISE90;
+GMAT MSISE90Drag.Drag.F107 = 175;
+GMAT MSISE90Drag.Drag.F107A = 175;
+GMAT MSISE90Drag.Drag.MagneticIndex = 4;
+
 
 %  Define Force Model with Jacchia Roberts Drag 
-Create ForceModel  JRDrag;
-GMAT  JRDrag.PrimaryBodies        = {Earth};
-GMAT  JRDrag.Gravity.Earth.Model  = JGM2;
-GMAT  JRDrag.Gravity.Earth.Degree = 0;
-GMAT  JRDrag.Gravity.Earth.Order  = 0;
-GMAT  JRDrag.Drag       = JacchiaRoberts;
-GMAT  JRDrag.Drag.F107  = 150;
-GMAT  JRDrag.Drag.F107A = 150;
-GMAT  JRDrag.Drag.MagneticIndex = 3;
+Create ForceModel JRDrag;
+GMAT JRDrag.CentralBody = Earth;
+GMAT JRDrag.PrimaryBodies = {Earth};
+GMAT JRDrag.SRP = Off;
+GMAT JRDrag.RelativisticCorrection = Off;
+GMAT JRDrag.ErrorControl = RSSStep;
+GMAT JRDrag.GravityField.Earth.Degree = 0;
+GMAT JRDrag.GravityField.Earth.Order = 0;
+GMAT JRDrag.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT JRDrag.GravityField.Earth.EarthTideModel = 'None';
+GMAT JRDrag.Drag.AtmosphereModel = JacchiaRoberts;
+GMAT JRDrag.Drag.F107 = 150;
+GMAT JRDrag.Drag.F107A = 150;
+GMAT JRDrag.Drag.MagneticIndex = 3;
+
 
 %  Define Force Model with SRP
-Create ForceModel  SRP;
-GMAT  SRP.PrimaryBodies        = {Earth};
-GMAT  SRP.Gravity.Earth.Model  = JGM2;
-GMAT  SRP.Gravity.Earth.Degree = 0;
-GMAT  SRP.Gravity.Earth.Order  = 0;
-GMAT  SRP.SRP = On;
+Create ForceModel SRP;
+GMAT SRP.CentralBody = Earth;
+GMAT SRP.PrimaryBodies = {Earth};
+GMAT SRP.Drag = None;
+GMAT SRP.SRP = On;
+GMAT SRP.RelativisticCorrection = Off;
+GMAT SRP.ErrorControl = RSSStep;
+GMAT SRP.GravityField.Earth.Degree = 0;
+GMAT SRP.GravityField.Earth.Order = 0;
+GMAT SRP.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT SRP.GravityField.Earth.EarthTideModel = 'None';
+GMAT SRP.SRP.Flux = 1367;
+GMAT SRP.SRP.Nominal_Sun = 149597870.691;
+
 
 %  Define Force Model with SRP
-Create ForceModel  AllForces;
-GMAT  AllForces.PrimaryBodies        = {Earth};
-GMAT  AllForces.Gravity.Earth.Model  = JGM2;
-GMAT  AllForces.Gravity.Earth.Degree = 20;
-GMAT  AllForces.Gravity.Earth.Order  = 20;
-GMAT  AllForces.SRP = On;
-GMAT  AllForces.Drag = MSISE90
-GMAT  AllForces.Drag.F107  = 150;
-GMAT  AllForces.Drag.F107A = 150;
-GMAT  AllForces.Drag.MagneticIndex = 3;
+Create ForceModel AllForces;
+GMAT AllForces.CentralBody = Earth;
+GMAT AllForces.PrimaryBodies = {Earth};
+GMAT AllForces.SRP = On;
+GMAT AllForces.RelativisticCorrection = Off;
+GMAT AllForces.ErrorControl = RSSStep;
+GMAT AllForces.GravityField.Earth.Degree = 20;
+GMAT AllForces.GravityField.Earth.Order = 20;
+GMAT AllForces.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT AllForces.GravityField.Earth.EarthTideModel = 'None';
+GMAT AllForces.SRP.Flux = 1367;
+GMAT AllForces.SRP.Nominal_Sun = 149597870.691;
+GMAT AllForces.Drag.AtmosphereModel = MSISE90;
+GMAT AllForces.Drag.F107 = 150;
+GMAT AllForces.Drag.F107A = 150;
+GMAT AllForces.Drag.MagneticIndex = 3;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
 
 %----------------------------Create Propagators----------------------
 % Create propgator with point mass only
-Create Propagator  EarthPointMass;
-GMAT  EarthPointMass.Type     = PrinceDormand78;
-GMAT  EarthPointMass.StopIfAccuracyIsViolated = false;
-GMAT  EarthPointMass.InitialStepSize = 30;
-GMAT  EarthPointMass.Accuracy = 1e-12;
-GMAT  EarthPointMass.MinStep  = 0;
-GMAT  EarthPointMass.MaxStep   = 86400;
-GMAT  EarthPointMass.FM       = PointMass;
+Create Propagator EarthPointMass;
+GMAT EarthPointMass.FM = PointMass;
+GMAT EarthPointMass.Type = PrinceDormand78;
+GMAT EarthPointMass.InitialStepSize = 30;
+GMAT EarthPointMass.Accuracy = 1e-012;
+GMAT EarthPointMass.MinStep = 0;
+GMAT EarthPointMass.MaxStep = 86400;
+GMAT EarthPointMass.MaxStepAttempts = 50;
+GMAT EarthPointMass.StopIfAccuracyIsViolated = false;
 
 % Create propgator with third bodies only
-Create Propagator  EarthThirdBodies;
-GMAT  EarthThirdBodies.Type     = PrinceDormand78;
+Create Propagator EarthThirdBodies;
+GMAT EarthThirdBodies.FM = ThirdBodies;
+GMAT EarthThirdBodies.Type = PrinceDormand78;
+GMAT EarthThirdBodies.InitialStepSize = 30;
+GMAT EarthThirdBodies.Accuracy = 1e-012;
+GMAT EarthThirdBodies.MinStep = 0;
+GMAT EarthThirdBodies.MaxStep = 86400;
+GMAT EarthThirdBodies.MaxStepAttempts = 50;
 GMAT EarthThirdBodies.StopIfAccuracyIsViolated = false;
-GMAT  EarthThirdBodies.InitialStepSize = 30;
-GMAT EarthThirdBodies.Accuracy  = 1e-12;
-GMAT EarthThirdBodies.MinStep   = 0;
-GMAT EarthThirdBodies.MaxStep   = 86400;
-GMAT  EarthThirdBodies.FM       =  ThirdBodies;
 
 % Create propgator with 12x12 gravity only
-Create Propagator  EarthAspherical12x12;
-GMAT EarthAspherical12x12.Type      = PrinceDormand78;
+Create Propagator EarthAspherical12x12;
+GMAT EarthAspherical12x12.FM = NonSpherical12;
+GMAT EarthAspherical12x12.Type = PrinceDormand78;
+GMAT EarthAspherical12x12.InitialStepSize = 30;
+GMAT EarthAspherical12x12.Accuracy = 1e-012;
+GMAT EarthAspherical12x12.MinStep = 0;
+GMAT EarthAspherical12x12.MaxStep = 86400;
+GMAT EarthAspherical12x12.MaxStepAttempts = 50;
 GMAT EarthAspherical12x12.StopIfAccuracyIsViolated = false;
-GMAT  EarthAspherical12x12.InitialStepSize = 30;
-GMAT  EarthAspherical12x12.Accuracy = 1e-12;
-GMAT EarthAspherical12x12.MinStep   = 0;
-GMAT EarthAspherical12x12.MaxStep   = 86400;
-GMAT  EarthAspherical12x12.FM       =  NonSpherical12;
 
 % Create propgator with MSISE-90 drag only
-Create Propagator  EarthMSISE90;
-GMAT EarthMSISE90.Type     = PrinceDormand78;
+Create Propagator EarthMSISE90;
+GMAT EarthMSISE90.FM = MSISE90Drag;
+GMAT EarthMSISE90.Type = PrinceDormand78;
+GMAT EarthMSISE90.InitialStepSize = 60;
+GMAT EarthMSISE90.Accuracy = 1e-012;
+GMAT EarthMSISE90.MinStep = 0;
+GMAT EarthMSISE90.MaxStep = 86400;
+GMAT EarthMSISE90.MaxStepAttempts = 50;
 GMAT EarthMSISE90.StopIfAccuracyIsViolated = false;
-GMAT EarthMSISE90.Accuracy = 1e-12;
-GMAT EarthMSISE90.MinStep  = 0;
-GMAT EarthMSISE90.MaxStep  = 86400;
-GMAT  EarthMSISE90.FM      =   MSISE90Drag;
 
 % Create propgator with Jacchia-Roberts drag only
-Create Propagator  EarthJacchiaRoberts;
-GMAT EarthJacchiaRoberts.Type     = PrinceDormand78;
-GMAT EarthJacchiaRoberts.StopIfAccuracyIsViolated = false;
+Create Propagator EarthJacchiaRoberts;
+GMAT EarthJacchiaRoberts.FM = JRDrag;
+GMAT EarthJacchiaRoberts.Type = PrinceDormand78;
 GMAT EarthJacchiaRoberts.InitialStepSize = 30;
-GMAT EarthJacchiaRoberts.Accuracy = 1e-12;
-GMAT EarthJacchiaRoberts.MinStep  = 0;
-GMAT EarthJacchiaRoberts.MaxStep  = 86400;
-GMAT  EarthJacchiaRoberts.FM      =   JRDrag;
+GMAT EarthJacchiaRoberts.Accuracy = 1e-012;
+GMAT EarthJacchiaRoberts.MinStep = 0;
+GMAT EarthJacchiaRoberts.MaxStep = 86400;
+GMAT EarthJacchiaRoberts.MaxStepAttempts = 50;
+GMAT EarthJacchiaRoberts.StopIfAccuracyIsViolated = false;
 
 % Create propgator with SRP only
-Create Propagator  EarthSRP;
-GMAT  EarthSRP.Type     = PrinceDormand78;
-GMAT  EarthSRP.StopIfAccuracyIsViolated = false;
-GMAT  EarthSRP.InitialStepSize = 30;
-GMAT  EarthSRP.Accuracy = 1e-12;
-GMAT  EarthSRP.MinStep  = 0;
-GMAT  EarthSRP.MaxStep  = 86400;
-GMAT  EarthSRP.FM       =   SRP;
+Create Propagator EarthSRP;
+GMAT EarthSRP.FM = SRP;
+GMAT EarthSRP.Type = PrinceDormand78;
+GMAT EarthSRP.InitialStepSize = 30;
+GMAT EarthSRP.Accuracy = 1e-012;
+GMAT EarthSRP.MinStep = 0;
+GMAT EarthSRP.MaxStep = 86400;
+GMAT EarthSRP.MaxStepAttempts = 50;
+GMAT EarthSRP.StopIfAccuracyIsViolated = false;
 
-Create Propagator  EarthFull;
-GMAT  EarthFull.Type     = PrinceDormand78;
-GMAT  EarthFull.StopIfAccuracyIsViolated = false;
-GMAT  EarthFull.InitialStepSize = 30;
-GMAT  EarthFull.Accuracy = 1e-12;
-GMAT  EarthFull.MinStep  = 0;
-GMAT  EarthFull.MaxStep  = 86400;
-GMAT  EarthFull.FM       =   AllForces;
+Create Propagator EarthFull;
+GMAT EarthFull.FM = AllForces;
+GMAT EarthFull.Type = PrinceDormand78;
+GMAT EarthFull.InitialStepSize = 30;
+GMAT EarthFull.Accuracy = 1e-012;
+GMAT EarthFull.MinStep = 0;
+GMAT EarthFull.MaxStep = 86400;
+GMAT EarthFull.MaxStepAttempts = 50;
+GMAT EarthFull.StopIfAccuracyIsViolated = false;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
 
 %----------------------------Create Plots/Reports----------------------
 
-Create OpenGLPlot GLPlot;
+Create OrbitView GLPlot;
+GMAT GLPlot.SolverIterations = Current;
+GMAT GLPlot.UpperLeft = [ 0 0 ];
+GMAT GLPlot.Size = [ 0 0 ];
+GMAT GLPlot.RelativeZOrder = 0;
 GMAT GLPlot.Add = {Sat, Earth};
 GMAT GLPlot.CoordinateSystem = EarthMJ2000Eq;
+GMAT GLPlot.DrawObject = [ true true ];
+GMAT GLPlot.OrbitColor = [ 255 32768 ];
+GMAT GLPlot.TargetColor = [ 8421440 0 ];
+GMAT GLPlot.DataCollectFrequency = 1;
+GMAT GLPlot.UpdatePlotFrequency = 50;
+GMAT GLPlot.NumPointsToRedraw = 0;
+GMAT GLPlot.ShowPlot = true;
 GMAT GLPlot.ViewPointReference = Earth;
+GMAT GLPlot.ViewPointVector = [ -10000 -15000 3000 ];
 GMAT GLPlot.ViewDirection = Earth;
 GMAT GLPlot.ViewScaleFactor = 1.4;
-GMAT GLPlot.ViewPointVector = [ -10000 -15000 3000 ];
+GMAT GLPlot.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT GLPlot.ViewUpAxis = Z;
-GMAT GLPlot.Axes       = On;
-
-% Create Report
-Create ReportFile Data;
-GMAT Data.Filename = Ex_ForceModels.report;
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.ColumnWidth = 20;
+GMAT GLPlot.CelestialPlane = Off;
+GMAT GLPlot.XYPlane = On;
+GMAT GLPlot.WireFrame = Off;
+GMAT GLPlot.Axes = On;
+GMAT GLPlot.Grid = Off;
+GMAT GLPlot.SunLine = Off;
+GMAT GLPlot.UseInitialView = On;
+GMAT GLPlot.StarCount = 7000;
+GMAT GLPlot.EnableStars = On;
+GMAT GLPlot.EnableConstellations = On;
 
 % -------------------------------------------------------------------------
 % ---------------------------  Begin Mission Sequence ---------------------
 % -------------------------------------------------------------------------
-BeginMissionSequence
+BeginMissionSequence;
 %Propagate using point mass propagator
-Propagate 'Prop Two Body' EarthPointMass(Sat, {Sat.ElapsedDays = 0.1});
+Propagate 'Prop Two Body' EarthPointMass(Sat) {Sat.ElapsedDays = 0.1};
 
 %Propagate using third bodies propagator
-Propagate  'Prop Point Mass Perts' EarthThirdBodies(Sat, {Sat.ElapsedDays = 0.1});
+Propagate 'Prop Point Mass Perts' EarthThirdBodies(Sat) {Sat.ElapsedDays = 0.1};
 
 %Propagate using 12x12 gravity model propgator
-Propagate  'Prop Harmonic Gravity' EarthAspherical12x12(Sat, {Sat.ElapsedDays = 0.1});
+Propagate 'Prop Harmonic Gravity' EarthAspherical12x12(Sat) {Sat.ElapsedDays = 0.1};
 
 %Propagate using Jacchia-Roberts propagator
-Propagate  'Prop JR Drag' EarthJacchiaRoberts(Sat, {Sat.ElapsedDays = 0.1});
+Propagate 'Prop JR Drag' EarthJacchiaRoberts(Sat) {Sat.ElapsedDays = 0.1};
 
 %Propagate using MSISE-90 propagator
-Propagate  'Prop MSISE-90 Drag' EarthMSISE90(Sat, {Sat.ElapsedDays = 0.1});
+Propagate 'Prop MSISE-90 Drag' EarthMSISE90(Sat) {Sat.ElapsedDays = 0.1};
 
 %Propagate using SRP propagator
-Propagate  'Prop SRP' EarthSRP(Sat, {Sat.ElapsedDays = 0.1});
+Propagate 'Prop SRP' EarthSRP(Sat) {Sat.ElapsedDays = 0.1};
 
 %Propagate using using complex force model
-Propagate  'Prop Earth Full' EarthFull(Sat, {Sat.ElapsedDays = 0.1});
+Propagate 'Prop Earth Full' EarthFull(Sat) {Sat.ElapsedDays = 0.1};

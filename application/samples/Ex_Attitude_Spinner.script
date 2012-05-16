@@ -144,13 +144,6 @@ GMAT Enhanced3DView1.EnableStars = On;
 GMAT Enhanced3DView1.EnableConstellations = On;
 GMAT Enhanced3DView1.ShowPlot = true;
 
-
-Create ReportFile Data;
-GMAT Data.Filename = Ex_Attitude_Spinner.report;
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.ColumnWidth = 20;
-
 %----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------

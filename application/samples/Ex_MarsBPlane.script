@@ -1,3 +1,5 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2012-05-16 04:37:14
 
 
 %----------------------------------------
@@ -58,6 +60,7 @@ GMAT MainTank.RefTemperature = 20;
 GMAT MainTank.Volume = 2;
 GMAT MainTank.FuelDensity = 1000;
 GMAT MainTank.PressureModel = PressureRegulated;
+
 
 
 
@@ -177,6 +180,7 @@ GMAT MarsSOI = 577204;
 
 
 
+
 %----------------------------------------
 %---------- Coordinate Systems
 %----------------------------------------
@@ -210,9 +214,9 @@ GMAT DC.DerivativeMethod = ForwardDifference;
 
 Create OrbitView EarthView;
 GMAT EarthView.SolverIterations = Current;
-GMAT EarthView.UpperLeft = [ 0.3265895953757225 0 ];
-GMAT EarthView.Size = [ 0.5520231213872833 0.6862745098039216 ];
-GMAT EarthView.RelativeZOrder = 1393;
+GMAT EarthView.UpperLeft = [ 0.3264150943396226 0 ];
+GMAT EarthView.Size = [ 0.5528301886792453 0.6867469879518072 ];
+GMAT EarthView.RelativeZOrder = 1392;
 GMAT EarthView.Add = {MAVEN, Earth};
 GMAT EarthView.CoordinateSystem = EarthMJ2000Eq;
 GMAT EarthView.DrawObject = [ true true ];
@@ -241,9 +245,9 @@ GMAT EarthView.EnableConstellations = On;
 
 Create OrbitView MarsView;
 GMAT MarsView.SolverIterations = Current;
-GMAT MarsView.UpperLeft = [ 0.3265895953757225 0.4565826330532213 ];
-GMAT MarsView.Size = [ 0.3420038535645472 0.453781512605042 ];
-GMAT MarsView.RelativeZOrder = 1389;
+GMAT MarsView.UpperLeft = [ 0.3264150943396226 0.4563253012048193 ];
+GMAT MarsView.Size = [ 0.3424528301886792 0.4548192771084337 ];
+GMAT MarsView.RelativeZOrder = 1394;
 GMAT MarsView.Add = {MAVEN, Mars};
 GMAT MarsView.CoordinateSystem = MarsFK5;
 GMAT MarsView.DrawObject = [ true true ];
@@ -301,18 +305,6 @@ GMAT SolarSystemView.StarCount = 1000;
 GMAT SolarSystemView.EnableStars = On;
 GMAT SolarSystemView.EnableConstellations = On;
 
-Create ReportFile ErrorData;
-GMAT ErrorData.SolverIterations = Current;
-GMAT ErrorData.UpperLeft = [ 0 0 ];
-GMAT ErrorData.Size = [ 0 0 ];
-GMAT ErrorData.RelativeZOrder = 0;
-GMAT ErrorData.Filename = 'ErrorData.txt';
-GMAT ErrorData.Precision = 16;
-GMAT ErrorData.WriteHeaders = On;
-GMAT ErrorData.LeftJustify = On;
-GMAT ErrorData.ZeroFill = Off;
-GMAT ErrorData.ColumnWidth = 23;
-GMAT ErrorData.WriteReport = true;
 
 %----------------------------------------
 %---------- Mission Sequence
@@ -342,6 +334,7 @@ Target DC {SolveMode = Solve, ExitMode = DiscardAndContinue};
 EndTarget;  % For targeter DC
 
 Propagate 'Prop 1 Day' NearMars(MAVEN) {MAVEN.ElapsedDays = 1};
+
 
 
 

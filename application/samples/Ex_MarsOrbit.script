@@ -202,7 +202,6 @@ GMAT MarsMJ2KView.ViewPointReference = Mars;
 GMAT MarsMJ2KView.ViewPointVector = [ 20000 20000 20000];
 GMAT MarsMJ2KView.ViewDirection = Mars;
 GMAT MarsMJ2KView.ViewScaleFactor = 2;
-GMAT MarsMJ2KView.FixedFovAngle = 45;
 GMAT MarsMJ2KView.ViewUpCoordinateSystem = MarsMJ2000Eq;
 GMAT MarsMJ2KView.ViewUpAxis = Z;
 GMAT MarsMJ2KView.CelestialPlane = Off;
@@ -212,8 +211,6 @@ GMAT MarsMJ2KView.SolverIterations = None;
 GMAT MarsMJ2KView.Axes = On;
 GMAT MarsMJ2KView.SunLine = Off;
 GMAT MarsMJ2KView.UseInitialView = On;
-GMAT MarsMJ2KView.PerspectiveMode = Off;
-GMAT MarsMJ2KView.UseFixedFov = Off;
 GMAT MarsMJ2KView.DataCollectFrequency = 1; 
 GMAT MarsMJ2KView.UpdatePlotFrequency = 50;
 GMAT MarsMJ2KView.NumPointsToRedraw = 0;
@@ -221,13 +218,6 @@ GMAT MarsMJ2KView.NumPointsToRedraw = 0;
 %----------------------------------------
 %---------- Plots/Reports
 %----------------------------------------
-
-Create ReportFile Data;
-GMAT Data.Filename = Ex_MarsOrbit.report;
-GMAT Data.Precision = 16
-GMAT Data.WriteHeaders = Off;
-GMAT Data.ColumnWidth = 25;
-
 
 %----------------------------------------
 %---------- Burns

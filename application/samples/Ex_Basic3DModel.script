@@ -125,15 +125,7 @@ GMAT Enhanced3DView1.ShowPlot = true;
 GMAT Enhanced3DView1.StarCount = 7000;
 GMAT Enhanced3DView1.EnableStars = On;
 GMAT Enhanced3DView1.EnableConstellations = On;
-GMAT Enhanced3DView1.MinFOV = 0;
-GMAT Enhanced3DView1.MaxFOV = 90;
-GMAT Enhanced3DView1.InitialFOV = 45;
 
-Create ReportFile Data;
-GMAT Data.Filename = Ex_Basic3DModel.report;
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.ColumnWidth = 20;
 
 %----------------------------------------
 %---------- Mission Sequence

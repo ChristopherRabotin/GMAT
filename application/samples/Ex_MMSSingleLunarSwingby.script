@@ -282,19 +282,6 @@ GMAT MoonInertialView.StarCount = 7000;
 GMAT MoonInertialView.EnableStars = On;
 GMAT MoonInertialView.EnableConstellations = On;
 
-Create ReportFile Data;
-GMAT Data.SolverIterations = Current;
-GMAT Data.UpperLeft = [ 0 0 ];
-GMAT Data.Size = [ 0 0 ];
-GMAT Data.RelativeZOrder = 0;
-GMAT Data.Filename = 'Ex_MMSSingleLunarSwingby.report';
-GMAT Data.Precision = 16;
-GMAT Data.WriteHeaders = Off;
-GMAT Data.LeftJustify = On;
-GMAT Data.ZeroFill = Off;
-GMAT Data.ColumnWidth = 20;
-GMAT Data.WriteReport = true;
-
 %**************************************************************************
 %**************************The Mission Sequence****************************
 %**************************************************************************
