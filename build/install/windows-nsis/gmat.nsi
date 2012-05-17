@@ -7,7 +7,7 @@
 !include MUI2.nsh
 
 ; General configuration
-!define VERSION "R2012a-pre"
+!define VERSION "R2012a"
 Name "GMAT ${VERSION}"
 OutFile "gmat-winInstaller-i586-${VERSION}-Beta.exe"
 SetCompressor /SOLID lzma
