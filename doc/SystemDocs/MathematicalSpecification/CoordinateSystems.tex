@@ -1,24 +1,51 @@
 \chapter{Coordinate Systems} \label{Ch:CoordinateSystems}
 
-There are numerous coordinate systems used in space mission
-analysis, that when used appropriately can greatly simplify the work
-and yield insight that is not obvious otherwise.  Some examples are
-equatorial and ecliptic systems, and rotating coordinate systems
-based on the relative motion of two bodies such as the Earth and
-Moon.  GMAT has the capability to calculate many parameters in
-different coordinate systems, and these parameters can then be used
-in plots, reports, solvers, control flow statements and stopping
-conditions to name a few.
-
-In this chapter we investigate how GMAT performs coordinate system
-transformations, and how different coordinate systems are defined.
-We begin by defining some notation.  Next, we look at how to
-transform a vector and its first derivative from one coordinate
-system to another when the coordinate systems are translating and
-rotating with respect to one another.  Finally, we look at each
-coordinate system defined in GMAT and discuss how to find its
-rotation matrix and the first derivative of the rotation matrix to
-rotate to the J2000 coordinate system.
+%\section{Temp}
+%
+%From IAU-76 theory, we can covert from a vector in Earth fixed IAU-76, denoted $\mathbf{r}_{F_{76}}$, to
+%inertial IAU-76/FK5, denoted $\mathbf{r}_{I_{76}}$ using the following expression.
+%%
+%\begin{equation}
+%     \mathbf{r}_{F_{76}}  = \mathbf{W}(t) \mathbf{R}(t) \mathbf{N}(\Psi,\epsilon)\mathbf{P}(t)  \mathbf{r}_{I_{76}}
+%\end{equation}
+%%
+%where $\mathbf{W}(t)$,$\mathbf{R}(t)$, $\mathbf{N}(\Psi,\epsilon)$, and $\mathbf{P}(t)$ are respectively polar motion, sidereal time, nutation, and precession.  The IERS provides corrections to $\Psi$ and $\epsilon$ to enable software codes that use 1976-based computer implementations to transform from ITRF to GCRF using
+%%
+%\begin{equation}
+%     \mathbf{r}_{ITRF}  = \mathbf{W}(t) \mathbf{R}(t) \mathbf{N}(\Psi + \delta\Psi,\epsilon + \delta\epsilon)\mathbf{P}(t)    \mathbf{r}_{I_{GCRF}}
+%\end{equation}
+%%
+%If the fixed frames of the two theories are equivalent, then we can equate the two previous expressions to arrive at
+%%
+%\begin{equation}
+%     \mathbf{r}_{I_{76}}   = \mathbf{P}^T(t) \mathbf{N}^T(\Psi ,\epsilon)\mathbf{N}(\Psi + \delta\Psi,\epsilon + \delta \epsilon)\mathbf{P}  (t)  \mathbf{r}_{I_{GCRF}}
+%\end{equation}
+%%
+%I suspect this is wrong because
+%%
+%\begin{equation}
+%     \mathbf{r}_{ITRF}  \neq \mathbf{r}_{F_{76}}
+%\end{equation}
+%
+%There are numerous coordinate systems used in space mission
+%analysis, that when used appropriately can greatly simplify the work
+%and yield insight that is not obvious otherwise.  Some examples are
+%equatorial and ecliptic systems, and rotating coordinate systems
+%based on the relative motion of two bodies such as the Earth and
+%Moon.  GMAT has the capability to calculate many parameters in
+%different coordinate systems, and these parameters can then be used
+%in plots, reports, solvers, control flow statements and stopping
+%conditions to name a few.
+%
+%In this chapter we investigate how GMAT performs coordinate system
+%transformations, and how different coordinate systems are defined.
+%We begin by defining some notation.  Next, we look at how to
+%transform a vector and its first derivative from one coordinate
+%system to another when the coordinate systems are translating and
+%rotating with respect to one another.  Finally, we look at each
+%coordinate system defined in GMAT and discuss how to find its
+%rotation matrix and the first derivative of the rotation matrix to
+%rotate to the J2000 coordinate system.
 
 \section{General Coordinate System \\ Transformations } \index{Coordinate systems!general transformations}
 
@@ -29,71 +56,83 @@ original system.  In this section we derive the equations governing
 coordinate system transformations and describe the algorithm GMAT
 uses to transform position and velocity vectors.
 
-Let's start by defining some notation.  In Fig.~\ref{fig:Frames}, we
-see an illustration of a point $o$ drawn with respect to two
-coordinate systems $\mathcal{F}_i$ and $\mathcal{F}_f$.  The vector
-$\mathbf{r}_i^o$ is the position vector of point $o$ with respect to
-frame $\mathcal{F}_i$.  The vector $\mathbf{r}_f^o$ is the position
-vector of point $o$ with respect to $\mathcal{F}_f$.
-$\mathbf{r}_{fi}$ is the vector from the origin of $\mathcal{F}_i$
-to $\mathcal{F}_f$.  Let's define the rotation matrix that rotates
-from $\mathcal{F}_i$ to $\mathcal{F}_f$ as $\mathbf{R}_{fi}$.
+We start by defining some notation.  In Fig.~\ref{fig:Frames}, we
+see an illustration of a point ``$p$" and two
+coordinate systems $\mathcal{F}_\mathcal{O}$ and $\mathcal{F}_\mathcal{F}$.
+Define the the position of $p$
+expressed in $\mathcal{F}_\mathcal{O}$  as
+%
+$\mathbf{r}_p^\mathcal{O}$.
+%
+Define the position of point $p$ with respect to
+frame $\mathcal{F}_\mathcal{F}$ as
+%
+$\mathbf{r}^\mathcal{F}_p$
+%
+\textit{It is important to
+note that using this notation,} $\|\mathbf{r}_p^\mathcal{O} \| \neq \|\mathbf{r}_p^F\|$, \textit{
+because the transformation defined in the notation contains a translation from the origin
+of $\mathcal{F}_\mathcal{O}$ to the origin of $\mathcal{F}_\mathcal{\mcF}$ as well as a coordinate rotation.}
+$\mathbf{r}_{f/i}$ is the vector from the origin of $\mathcal{F}_i$
+to origin of $\mathcal{F}_f$.  Define the rotation matrix that rotates
+from $\mathcal{F}_\mcI$ to $\mathcal{F}_\mcF$ as $\mathbf{R}^{\mcF/\mcI}$.
 Finally, let's define the  angular velocity $\mbox{\boldmath{$\omega
-$}}_{fi}$ as the angular velocity of $\mathcal{F}_i$ with respect to
-$\mathcal{F}_f$.  To simplify the notation, we assume that a vector
-is expressed in the frame denoted by the right-most subscript.  If
-we need to express a vector in another coordinate system, we use
-curly brackets.  As an example, $\{\mathbf{r}_i^o\}_f$ is the
-position of point $o$, with respect to frame $\mathcal{F}_i$,
-expressed in frame $\mathcal{F}_f$.  In summary, we have
+$}}_{f/i}$ as the angular velocity of $\mathcal{F}_\mcI$ with respect to
+$\mathcal{F}_\mcF$.  To simplify the notation, we assume that a vector
+is expressed in the frame denoted by the superscript.  If need to define a
+point ``p" with respect to $\mathcal{F}_\mathcal{O}$, but express this result in
+$\mathcal{F}_\mathcal{F}$
+we use the notation $[\mathbf{r}_p^\mathcal{O}]^\mcF$
+curly brackets.  In summary, we have
 %
 \begin{tabbing}
 \index{Coordinate systems!nomenclature}
 %
 12345678 \= Reynoldsnumber based on length $s$ \kill
-$\mathbf{r}^{o}_{i}$        \> Position vector of point $o$ w/r/t frame $\mathcal{F}_i$ \+ \\
-                               expressed in $\mathcal{F}_i$ \-\\
+$\mathbf{r}^{\mathcal{O}}_{p}$        \> Position of point $p$ w/r/t frame $\mathcal{F}_\mathcal{O}$
+                               expressed in  $\mathcal{F}_\mathcal{O}$ \\
 %
-$\{\mathbf{r}^{o}_{i}\}_f$      \> Position vector of point $o$ w/r/t frame $\mathcal{F}_i$\+ \\
-                                   expressed in $\mathcal{F}_f$  \-\\
+$[\mathbf{r}^{\mathcal{O}}_{p} ]^\mcF$      \> Position of point $p$ w/r/t frame $\mathcal{F}_\mathcal{O}$
+                                   expressed in $\mathcal{F}_\mcF$   \\
 %
-$\mathbf{r}_{fi}$        \> Position vector from origin of $\mathcal{F}_i$ to origin\+ \\
-                         of $\mathcal{F}_f$ expressed in $\mathcal{F}_f$  \-\\
+$\mathbf{r}_{f/o}^\mcF$        \> Position vector from origin of $\mathcal{F}_\mathcal{O}$ to origin
+                         of $\mathcal{F}_\mcF$ expressed in $\mathcal{F}_\mcF$  \\
 %
-$\mathbf{R}_{fi}$      \> Rotation matrix from frame $\mathcal{F}_i$ to $\mathcal{F}_f$\\
+$\mathbf{R}^{\mcF/\mathcal{O}}$      \> Rotation matrix from frame $\mathcal{F}_\mathcal{O}$ to $\mathcal{F}_\mcF$\\
 %
-$\mbox{\boldmath{$\omega $}}_{fi}$   \>  Angular velocity of frame
-$\mathcal{F}_i$ w/r/t $\mathcal{F}_f$, \+ \\ expressed in frame
-$\mathcal{F}_i$\-\\
+$\mbox{\boldmath{$\omega $}}_{f/o}^\mathcal{O}$   \>  Angular velocity of frame
+$\mathcal{F}_\mathcal{O}$ w/r/t $\mathcal{F}_\mcF$,   expressed in frame
+$\mathcal{F}_\mathcal{O}$ \\
 %
-$\{\mbox{\boldmath{$\omega $}}_{fi}\}_f$   \>  Angular velocity of
-frame $\mathcal{F}_i$ w/r/t $\mathcal{F}_f$, \+ \\ expressed in
+$\mbox{\boldmath{$\omega $}}_{f/o}^\mcF$   \>  Angular velocity of
+frame $\mathcal{F}_\mathcal{O}$ w/r/t $\mathcal{F}_\mcF$,  expressed in
 frame
-$\mathcal{F}_f$\-\\
+$\mathcal{F}_\mcF$ \\
 \end{tabbing}
 
 
 \begin{figure*}[htb]
  \centerline{
-\begin{picture}(100,300)
-\special{psfile= Images/Frames.eps hoffset= -230 voffset= -250
-hscale=80 vscale=80} \makebox(-180,15){$\mathcal{F}_{i}$}
-\makebox(200,210){$\mathcal{F}_{f}$}
-\makebox(-370,340){$\mathbf{r}_{i}$}
-\makebox(-300,230){$\mathbf{r}_{if}$}
-\makebox(-180,430){$\mathbf{r}_{f}$} \makebox(-250,590){o}
+\begin{picture}(100,230)
+\special{psfile= Images/Frames.eps hoffset= -160 voffset= -200
+hscale=60 vscale=60}
+\makebox(-140,15){$\mathcal{F}_{\mathcal{O}}$}
+\makebox(175,140){$\mathcal{F}_{\mcF}$}
+\makebox(-300,240){$\mathbf{r}_{o}^\mathcal{O}$}
+\makebox(-265,180){$\mathbf{r}_{i/f}$}
+\makebox(-165,310){$\mathbf{r}_{o}^\mcF$}
+\makebox(-220,430){$o$}
 \end{picture}}
 \caption{ Illustration of a Translating and Rotating Coordinate
 System } \label{fig:Frames}
 \end{figure*}
 
-To further simplify the notation, let's drop the superscript
-``$o$" from $\mathbf{r}_i^o$ and $\mathbf{r}_f^o$.  Then, from
-inspection of Figure \ref{fig:Frames} we can write
+
+From inspection of Figure \ref{fig:Frames} we can write
 %
 \begin{equation}
-      \mathbf{r}_{f} = \underbrace{\mathbf{R}_{fi}\mathbf{r}_{i}}_{Rot.} +
-     \underbrace{  \mathbf{r}_{if}}_{Trans.}
+      \mathbf{r}_{o}^\mcF = \underbrace{\mathbf{R}^{\mcF/\mcI}\mathbf{r}_{o}^\mcI}_{Rot.} +
+     \underbrace{  \mathbf{r}_{i/f}^\mcF}_{Trans.}
      \label{Eq:PosTransform}
 \end{equation}
 %
@@ -273,24 +312,23 @@ $\mathcal{F}_f$ to obtain the desired quantities.
 %
 \begin{figure*}[htb]
  \centerline{
-\begin{picture}(100,340)
-\special{psfile= Images/RotSequence.eps hoffset= -230 voffset= -160
-hscale=80 vscale=80}\makebox(-205,315){$\mathcal{F}_i$}
-\makebox(300,295){$\mathcal{F}_f$}
-\makebox(-90,410){$\mathcal{F}_2$}
-\makebox(-390,220){$\mathcal{J}_{2k}$}
-\makebox(-780,460){$\mathcal{F}_1$}
-\makebox(-690,580){$\mathbf{r}_{i}$}
+\begin{picture}(100,320)
+\special{psfile= Images/RotSequence.eps hoffset= -200 voffset= -160
+hscale=80 vscale=80}
+%
+\makebox(-175,315){$\mathcal{F}_i$}
+\makebox(350,295){$\mathcal{F}_f$}
+\makebox(-140,410){$\mathcal{F}_2$}
+\makebox(-440,220){$\mathcal{J}_{2k}$}
+\makebox(-830,460){$\mathcal{F}_1$}
+\makebox(-730,580){$\mathbf{r}_{i}$}
 \makebox(-490,560){$\mathbf{r}_{f}$}
-\makebox(-750,290){$\mathbf{r}_{Ri}$}
-\makebox(-480,290){$\mathbf{r}_{fR}$}
+\makebox(-740,290){$\mathbf{r}_{Ri}$}
+\makebox(-510,290){$\mathbf{r}_{fR}$}
 \end{picture}}\vspace{ -1 in} \caption{ General Coordinate System Transformation Approach in GMAT} \label{fig:RotSequence}
 \index{Coordinate systems!transformation algorithm}
 \end{figure*}
 %
-
-
-
 
 
 \section{Pseudo-Rotating Coordinate\\ Systems}\index{Psuedo-Rotating
@@ -341,6 +379,108 @@ and
       \dot{\mathbf{R}}_{if} = \dot{\mathbf{R}}_{J_{2k},i}^{-1} = \dot{\mathbf{R}}_{J_{2k},i}^{T}
 \end{equation}
 
+
+
+
+\clearpage
+
+\section{ITRF and ICRF}
+
+The computation for the ICRF and ITRF tranformations in GMAT are from Kaplan\cite{Kaplan:05} and Capolla\cite{Coppola:etal:05} \emph{et.al.} and employ the IAU 2000A nutation IAU 2006 precession models.  The transformation is performed using three intermediate rotations as follows:
+%
+\begin{equation}
+     \mathbf{R} = \mathbf{C}^T\mathbf{R}_3(-\theta)\mathbf{W}
+\end{equation}
+%
+where $\mathbf{W}$ is the polar motion matrix, $\mathbf{R}_3$ is a 3 rotation through the Earth rotation angle $\theta$ (see Section \ref{sec:BasicRotationMatrices}), and
+$\mathbf{C}$ is a single matrix that captures precession, nutation, and frame bias.
+The time derivative of the rotation matrix assumes that the only significant time variation of the rotation matrix is due to the Earth's spin and is computed using
+%
+\begin{equation}
+     \mathbf{R} = \mathbf{C}^T\mathbf{R}_3(-\theta)\boldsymbol{\omega}_E^x\mathbf{W}
+\end{equation}
+%
+where
+%
+\begin{equation}
+   \boldsymbol{\omega}_E^x =
+   \left(\begin{array} {ccc}
+     0 & -\omega_e & 0 \\
+     \omega_e & 0 & 0 \\
+     0 & 0 & 0
+   \end{array}\right)
+\end{equation}
+%
+and $\omega_e$ is computed using Eq.~(\ref{Eq:EarthAngularVelocity}).
+
+$\mathbf{W}$ is computed from
+Eq.~6.15 in Kaplan\cite{Kaplan:05} as shown below.
+%
+\begin{equation}
+   \mathbf{W} = \mathbf{R}_3(-s')\mathbf{R}_2(x_p)\mathbf{R}_1(y_p)
+\end{equation}
+%
+The variable $s'$ is computed from
+%
+\begin{equation}
+    s' =  (-47 \mu\mbox{as}) T_{TT}
+\end{equation}
+%
+where $T_{TT}$ is given by Eq.~(\ref{Eq:T_TTComputation})and $x_p$ and $y_p$ are interpolated using third order lagrange interpolation from Earth Orientation Parameters (EOP) files provided by the IERS. The Earth Rotation angle is computed from
+%
+\begin{equation}
+    \theta = 2\pi(0.7790572732640 + 1.00273781191135448(JD_{UT1} - 2451545.0))
+\end{equation}
+%
+where $JD_{UT1}$ is the Julian date expressed in UT1 using Eq.~(\ref{Eq:UT1ToUTC}).
+
+$\mathbf{C}^T$ is computed using
+%
+\begin{equation}
+    \mathbf{C}^T = \left(\begin{array}{ccc}
+    1 - b X^2 & -b X Y & X\\
+    -b X Y & 1-b Y^2 & Y\\
+    -X & -Y & 1 - b(X^2 + Y^2)
+    \end{array}\right) \mathbf{R}_{3}(s)
+\end{equation}
+%
+where
+%
+\begin{equation}
+    b = \frac{1}{1 + \sqrt{1 - X^2 - Y^2}}
+\end{equation}
+%
+The variables $X$, $Y$, are respectively the $x$-component and $y$-component of the Celestial Intermediate
+Pole unit vector (CIP), and $s$ is called the Celestial Intermediate Origin (CIO) locator. The computation of $X$, $Y$, and $s$ requires evaluating series expansions with thousands of terms and many trigonometric function evaluations and is computationally expensive.  Vallado \emph{et. al.} show that it is possible to precompute $X$, $Y$, and $s$ at one day intervals and interpolate the values using ninth order Lagrange interpolation and provide values that are accurate to within the error of the theory itself.  The interpolation of $X$, $Y$, and $s$ is over two orders of magnitude faster than the series evaluation.  Interpolation of data at 1 day intervals is possible because all physical affects with a period of two days or less are not included in the theory for $X$, $Y$,
+$s$ and are accounted for in the daily observations provided by the IERS in the EOP files\cite{Kaplan:05}.  GMAT interpolates tabulated values $X$, $Y$, $s$ created using the IAU SOFA routines.  $s$ is computed using the routine iauS06a.c which uses the 2000A nutation model and 2006 precession model.  $X$ and $Y$ are computed using the IAU SOFA routine called iauXy06 which also uses the the 2000A nutation model and 2006 precession model.
+
+
+\section{Transformation from ICRT to MJ2000Eq}
+
+With the inclusion of ICRF-based systems, GMAT supports two types of axis systems: (1) axis systems that are
+based on IAU-1976 theory (called MJ2000Eq in GMAT), and (2) axis systems based on IAU-2000 theory (called ICRF in GMAT).  Rotation from ICRF to MJ2000Eq is performed using the Frame Bias matrix, $\mathbf{B}$, given by Kaplan\cite{Kaplan:05}.
+%%
+\begin{equation}
+   \mathbf{B} = \left(
+   \begin{array}{ccc}
+       1 - 0.5(d\alpha_0^2 + \xi_0^2) & d \alpha_0 & -\xi_0\\
+       -d \alpha_0 - \eta_0 \xi_0 & 1 - 0.5(d \alpha_0^2 + \eta_0^2) & -\eta_0\\
+      \xi_0 - \eta_0 d \alpha_0 & \eta_0+\zeta_0 d \alpha_0 & 1 - 0.5(\eta_0^2 + \xi_0^2)
+   \end{array}
+   \right)
+\end{equation}
+%
+where $d\alpha_0 = -14.6 \mbox{ mas}$, $\xi_0 = -16.6170 \mbox{ mas}$, and $\eta_0 = -6.8192 \mbox{ mas}$.
+
+The rotation between any two axes, defind here as $\mathcal{A}_1$ and $\mathcal{A}_2$, are performed in three steps:
+%
+\begin{enumerate}
+   \item Convert from $\mathcal{A}_1$ to the base axes for $\mathcal{A}_1$.
+   \item If $\mathcal{A}_1$ and $\mathcal{A}_2$ have different base axis systems, use $\mathbf{B}$ to convert from $\mathcal{A}_1$ to the base axes of $\mathcal{A}_2$
+   \item Convert from the base axes for $\mathcal{A}_2$ to $\mathcal{A}_2$
+\end{enumerate}
+
+
 \section{The $\mathcal{F}_{J_{2k}}$ Inertial System and FK5 Reduction}
 
 It is well know that Newton's laws must be applied in an inertial
@@ -360,6 +500,8 @@ transformation is called FK5 reduction.  We begin with a conceptual
 discussion of how the Earth's spin axis moves with respect to
 inertial space.  We conclude this section with a presentation of the
 mathematical theory of FK5 reduction.
+
+
 
 \subsection{Overview of FK5 Reduction} \index{FK5 Reduction!overview}
 \index{FK5 Reduction!Earth fixed system}
@@ -468,6 +610,29 @@ rigid body.  Nutation motion has an amplitude of about 9" and is
 usually represented as the sum of two components one in longitude
 and one in obliquity.
 
+\clearpage
+
+Nutation is modelled by separating the free and forced motion of the
+Earth. The forcing terms are due to torques from the Sun, Moon, and
+planets.   The free terms are determined by observation because they
+are beyond our current modelling abilities. The resulting theory is
+a series expansion that contains coefficients and is a function of
+the location of the Sun, Moon, and planets. Nutation is intimately
+connected with polar motion, and in fact, as we'll see in a later
+section, errors in nutation modelling are captured in polar motion
+measurements.
+%
+\begin{figure}[h]
+    \begin{picture}(100,200)
+       \special{psfile= Images/NutPrec.eps hoffset= 0 voffset=
+       0
+       hscale=10 vscale=10}
+    \end{picture}
+    \makebox(-180,90){$\Upsilon$} \makebox(-200,90){}
+    \caption{Inertial Motion of Earth's Spin Axis}
+    \label{fig:FK5FigOne}
+\end{figure}
+%
 Nutation is modelled by separating the free and forced motion of the
 Earth. The forcing terms are due to torques from the Sun, Moon, and
 planets.   The free terms are determined by observation because they
@@ -478,18 +643,7 @@ intimately connected with polar motion, and in fact, as we'll see in
 a later section, errors in nutation modelling are captured in polar
 motion measurements.
 
-
-\begin{figure}[htb]
-    \begin{picture}(100,300)
-       \special{psfile= Images/FK5FigOne.ps hoffset= -100 voffset=
-       -100
-       hscale=70 vscale=70}
-    \end{picture}
-    \makebox(-180,90){$\Upsilon$} \makebox(-200,90){}
-    \caption{Inertial Motion of Earth's Spin Axis}
-    \label{fig:FK5FigOne}
-\end{figure}
-
+\clearpage
 
 \subsubsection{Sidereal Time}\index{FK5 Reduction!polar motion}
 
@@ -1221,36 +1375,39 @@ either \st{Sphere} or \st{Ellipsoid}.
 \end{itemize}
 
 The calculation of the Topocentric to MJ2000Eq systems is different
-for the different ground system state representations.  If the
-ground station location is provided in cartesian representation, we
-must calculate the spherical representation with respect to the
-desired horizon. We define the axes of the topocentric coordinate
+for the different ground system state representations.  Regardless of
+how the user inputs the state of a ground station, the Topocentric
+axes are always defined with respect to the reference shape of the central body.  GMAT uses
+the appropriate transformation to convert the user input to the cartesian location
+of the ground station expressed in the local body-fixed frame.
+This cartesian representation is used to calculate the topocentric axes.
+
+Define the axes of the topocentric coordinate
 system, expressed in the body fixed system as $\hat{\mathbf{x}}$,
-$\hat{\mathbf{y}}$, and $\hat{\mathbf{z}}$. If the user has provided
-the  cartesian representation for the ground station location, we
-use the following algorithm to determine $\mathbf{R}_{IT}$ and
-$\dot{\mathbf{R}}_{IT}$, the rotation matrix from topocentric to
-inertial and its
-derivative respctively.\\
-
-
-
-\noindent If \st{HorizonReference} is \st{Sphere}
-%
-\begin{equation}
-     \hat{\mathbf{z}} = \frac{\mathbf{r}_s}{r_s}
-\end{equation}
-If \st{HorizonReference} is \st{Ellipsoid}
-\begin{equation}
-     r_{xy} = \sqrt{ x^2 + y^2 }
-\end{equation}
-%
+$\hat{\mathbf{y}}$, and $\hat{\mathbf{z}}$.  Define, $x_F$, $y_F$, and $z_F$ as the location of the station in the local body-fixed coordinate system.
+%If the \st{StateType} is \st{Spherical} and the \st{HorizonReference} is \st{Sphere} then calculate the body fixed location of the station using.
+%%
+%\begin{eqnarray}
+%     x_F &=& (R_b + h)\cos{\phi_{sp}}\cos{\lambda} \\
+%     y_F &=& (R_b + h)\cos{\phi_{sp}}\sin{\lambda} \\
+%     z_F &=& (R_b + h)\sin{\lambda}
+%\end{eqnarray}
+%%
+%where $R_b$ is the body's equatorial radius, $h$ is the height above the reference sphere,  $\phi_{sp}$ is the latitude w/r/t to the reference sphere, and $\lambda$ is the longitude.
+%If the \st{StateType} is \st{Cartesian}, or \st{Spherical} with the \st{HorizonReference = Sphere} then calculate the latitude w/r/t to the reference ellipsoid as follows:
+%%
+%\begin{equation}
+%     r_{xy} = \sqrt{ x_F^2 + y_F^2 }
+%\end{equation}
+%%
 Calculate the geocentric latitude to use as an initial guess to find
 the geodetic latitude
 %
 \begin{equation}
-     \phi_{gd}  \approx \mbox{atan2}(z,  r_{xy}  );
+     \phi_{gd}  \approx \mbox{atan2}(z_F,  r_{xy}  );
 \end{equation}
+%
+The eccentricity of the body is calculated from the flatting $f$ using
 %
 \begin{equation}
     e^2 = 2f-f^2
@@ -1259,13 +1416,12 @@ the geodetic latitude
 
 \noindent Set $\delta = 1.0$ to initialize the loop, then,
 
-
 \noindent While ( $\delta > 10^{-11}$ )
 %
 \begin{eqnarray}
    \phi' & = & \phi_{gd}\\
    C & = & \frac{R} { \sqrt{1 - e^2\sin^2{\phi}}    }\\
-   \phi_{gd} & = & \mbox{atan} \left( \frac{z + C
+   \phi_{gd} & = & \mbox{atan} \left( \frac{z_F + C
    e^2\sin{\phi}}{r_{xy}}
    \right)\\
    \delta & = & | \phi_{gd} - \phi' |
@@ -1274,7 +1430,7 @@ the geodetic latitude
 EndWhile\\
 
 
-The longitude  of the station location, $\lambda$,  is calculate
+The longitude  of the station location, $\lambda$,  is calculated
 using
 
 \begin{equation}
@@ -1324,17 +1480,12 @@ $\mathbf{R}_{IT}$ and $\dot{\mathbf{R}}_{IT}$ using
 %
 \begin{eqnarray}
       \mathbf{R}_{IT} &=& \mathbf{R}_{IF}
-      \mathbf{R}_{FT}\mathbf{R}_{IF}^T\\
+      \mathbf{R}_{FT}\\
 %
       \dot{\mathbf{R}}_{IT} &=& \dot{\mathbf{R}}_{IF}
-      \mathbf{R}_{FT}\mathbf{R}_{IF}^T + \mathbf{R}_{IF}
-      \mathbf{R}_{FT}\dot{\mathbf{R}}_{IF}^T \label{Eq:TopoRdot}
+      \mathbf{R}_{FT}\label{Eq:TopoRdot}
 \end{eqnarray}
 
-If the user provides the spherical components with respect to the
-Ellipsoid, we only require Eqs.~(\ref{Eq:GeodeLatToz})-
-(\ref{Eq:TopoRdot}) to calculate  $\mathbf{R}_{IF}$ and
-$\dot{\mathbf{R}}_{IF}$ . If the user
 
 
 %-------------------------------------------------------------------------------------
@@ -1360,9 +1511,9 @@ written as follows.
      \label{Eq:RFK5}
 \end{equation}
 %
-GMAT assumes that the the only intermediate rotation that has a
-significant time derivative is the sidereal time, [ST].  So, we
-can write
+GMAT assumes that the only intermediate rotation that has a
+significant time derivative is the sidereal time, [ST].  So, we can
+write
 %
 \begin{equation}
      \dot{\mathbf{R}}_{Ii}  = \mathbf{P}^T\mathbf{N}^T\dot{\mathbf{ST}}^T\mathbf{PM}^T \label{Eq:RdotFK5}
@@ -1381,7 +1532,7 @@ where $\dot{\mathbf{ST}}$ is given by
 and $\omega_e$ is given by
 %
 \begin{equation}
-    \omega_e = 7.29211514670698e^{-5} \left( 1 - \frac{LOD}{86400}  \right)
+    \omega_e = 7.29211514670698e^{-5} \left( 1 - \frac{LOD}{86400}  \right) \label{Eq:EarthAngularVelocity}
 \end{equation}
 %
 Note that the 2nd edition of Vallado\cite{vallado2} has
@@ -1523,162 +1674,162 @@ calculated using
 \end{equation}
 %
 The result is a rotation matrix, that is time invariant, for each
-celestial body.  The individual matrices are shown below.
-
-\noindent For the Sun
+celestial body.%  The individual matrices are shown below.
 %
-\begin{eqnarray}
-   R_{11} & = &  0.9606338208497771 \nonumber \\
-   R_{21} & = &  0.2778176780544363 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  -0.2494239059807128 \nonumber \\
-   R_{22} & = &  0.8624542595398803 \nonumber \\
-   R_{32} & = &  0.4404093156676427 \nonumber \\
-   R_{13} & = &  0.1223534934723278 \nonumber \\
-   R_{23} & = &  -0.4230720836476433 \nonumber \\
-   R_{33} & = &  0.8977971010607901
-\end{eqnarray}
-%
-For Mercury
-%
-\begin{eqnarray}
-   R_{11} & = &  0.9815938660446788 \nonumber \\
-   R_{21} & = &  0.1909803187332696 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  -0.1677571842642237 \nonumber \\
-   R_{22} & = &  0.8622324234816705 \nonumber \\
-   R_{32} & = &  0.4779254910806334 \nonumber \\
-   R_{13} & = &  0.09127436261733374 \nonumber \\
-   R_{23} & = &  -0.4691287304711406 \nonumber \\
-   R_{33} & = &  0.8784003785150228
-\end{eqnarray}
-%
-For Venus
-%
- \begin{eqnarray}
-   R_{11} & = &  0.9988399975085459 \nonumber \\
-   R_{21} & = &  0.04815245972043356 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  -0.04437694044018298 \nonumber \\
-   R_{22} & = &  0.9205233405740161 \nonumber \\
-   R_{32} & = &  0.3881590738545506 \nonumber \\
-   R_{13} & = &  0.01869081416890205 \nonumber \\
-   R_{23} & = &  -0.3877088083617988 \nonumber \\
-   R_{33} & = &  0.9215923900425705
-\end{eqnarray}
-%
-For the Earth
-%
-\begin{eqnarray}
-    R_{11} & = & 1 \nonumber \\
-    R_{12} & = & 0 \nonumber \\
-    R_{13} & = & 0 \nonumber \\
-    R_{21} & = & 0 \nonumber \\
-    R_{22} & = & 1 \nonumber \\
-    R_{23} & = & 0 \nonumber \\
-    R_{31} & = & 0 \nonumber \\
-    R_{32} & = & 0 \nonumber \\
-    R_{33} & = & 1
-\end{eqnarray}
-%
-For the Moon
-%
-\begin{eqnarray}
-    R_{11} & = & 0.998496505205088 \nonumber \\
-    R_{21} & = & -0.0548154092680678 \nonumber \\
-    R_{31} & = & 0 \nonumber \\
-    R_{12} & = & 0.0499357293985327 \nonumber \\
-    R_{22} & = & 0.909610125238044 \nonumber \\
-    R_{32} & = & 0.412451018902689 \nonumber \\
-    R_{13} & = & -0.0226086714041825 \nonumber \\
-    R_{23} & = & -0.411830900942613 \nonumber \\
-    R_{33} & = & 0.91097977859343
-\end{eqnarray}
-%
-For Mars
-%
-\begin{eqnarray}
-   R_{11} & = &  0.6732521982472343 \nonumber \\
-   R_{21} & = &  0.7394129276360177 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  -0.5896387605430038 \nonumber \\
-   R_{22} & = &  0.5368794307891334 \nonumber \\
-   R_{32} & = &  0.6033958972853944 \nonumber \\
-   R_{13} & = &  0.4461587269353554 \nonumber \\
-   R_{23} & = &  -0.4062376142607542 \nonumber \\
-   R_{33} & = &  0.7974417791532832
-\end{eqnarray}
-%
-For Jupiter
-%
-\begin{eqnarray}
-   R_{11} & = &  0.9994209020316729 \nonumber \\
-   R_{21} & = &  -0.03402735050216735 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  0.0307100286015568 \nonumber \\
-   R_{22} & = &  0.9019874904580493 \nonumber \\
-   R_{32} & = &  0.430668621100356 \nonumber \\
-   R_{13} & = &  -0.01465451212046692 \nonumber \\
-   R_{23} & = &  -0.4304192217768545 \nonumber \\
-   R_{33} & = &  0.9025101322420253
-\end{eqnarray}
-%
-For Saturn
-%
-\begin{eqnarray}
-   R_{11} & = &  -0.6506284356468798 \nonumber \\
-   R_{21} & = &  0.7593962330217962 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  -0.7545700815904118 \nonumber \\
-   R_{22} & = &  -0.6464935305479939 \nonumber \\
-   R_{32} & = &  0.1125615694996715 \nonumber \\
-   R_{13} & = &  0.08547883186107168 \nonumber \\
-   R_{23} & = &  0.07323575787752883 \nonumber \\
-   R_{33} & = &  0.9936447519469775
-\end{eqnarray}
-%
-For Uranus
-%
-\begin{eqnarray}
-   R_{11} & = &  0.9755767334083795 \nonumber \\
-   R_{21} & = &  -0.2196589111150187 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  -0.05749969269512644 \nonumber \\
-   R_{22} & = &  -0.2553748540714755 \nonumber \\
-   R_{32} & = &  0.9651308042166816 \nonumber \\
-   R_{13} & = &  -0.2119995815377986 \nonumber \\
-   R_{23} & = &  -0.9415591572895125 \nonumber \\
-   R_{33} & = &  -0.2617680858165513
-\end{eqnarray}
-%
-For Neptune
-%
-\begin{eqnarray}
-   R_{11} & = &  0.8717809455009272 \nonumber \\
-   R_{21} & = &  0.4898958900230839 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  -0.3337976487639454 \nonumber \\
-   R_{22} & = &  0.5940005535292547 \nonumber \\
-   R_{32} & = &  0.7319443094160927 \nonumber \\
-   R_{13} & = &  0.3585765089087282 \nonumber \\
-   R_{23} & = &  -0.6380951021167846 \nonumber \\
-   R_{33} & = &  0.6813644604126335
-\end{eqnarray}
-%
-For Pluto
-%
-\begin{eqnarray}
-   R_{11} & = &  0.7311155947298647 \nonumber \\
-   R_{21} & = &  0.6822536091093958 \nonumber \\
-   R_{31} & = &  0 \nonumber \\
-   R_{12} & = &  -0.1077863335431382 \nonumber \\
-   R_{22} & = &  0.1155058299435205 \nonumber \\
-   R_{32} & = &  0.9874413955017208 \nonumber \\
-   R_{13} & = &  0.6736854558650673 \nonumber \\
-   R_{23} & = &  -0.7219338031331282 \nonumber \\
-   R_{33} & = &  0.1579857286263988
-\end{eqnarray}
-%
+%\noindent For the Sun
+%%
+%\begin{eqnarray}
+%   R_{11} & = &  0.9606338208497771 \nonumber \\
+%   R_{21} & = &  0.2778176780544363 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  -0.2494239059807128 \nonumber \\
+%   R_{22} & = &  0.8624542595398803 \nonumber \\
+%   R_{32} & = &  0.4404093156676427 \nonumber \\
+%   R_{13} & = &  0.1223534934723278 \nonumber \\
+%   R_{23} & = &  -0.4230720836476433 \nonumber \\
+%   R_{33} & = &  0.8977971010607901
+%\end{eqnarray}
+%%
+%For Mercury
+%%
+%\begin{eqnarray}
+%   R_{11} & = &  0.9815938660446788 \nonumber \\
+%   R_{21} & = &  0.1909803187332696 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  -0.1677571842642237 \nonumber \\
+%   R_{22} & = &  0.8622324234816705 \nonumber \\
+%   R_{32} & = &  0.4779254910806334 \nonumber \\
+%   R_{13} & = &  0.09127436261733374 \nonumber \\
+%   R_{23} & = &  -0.4691287304711406 \nonumber \\
+%   R_{33} & = &  0.8784003785150228
+%\end{eqnarray}
+%%
+%For Venus
+%%
+% \begin{eqnarray}
+%   R_{11} & = &  0.9988399975085459 \nonumber \\
+%   R_{21} & = &  0.04815245972043356 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  -0.04437694044018298 \nonumber \\
+%   R_{22} & = &  0.9205233405740161 \nonumber \\
+%   R_{32} & = &  0.3881590738545506 \nonumber \\
+%   R_{13} & = &  0.01869081416890205 \nonumber \\
+%   R_{23} & = &  -0.3877088083617988 \nonumber \\
+%   R_{33} & = &  0.9215923900425705
+%\end{eqnarray}
+%%
+%For the Earth
+%%
+%\begin{eqnarray}
+%    R_{11} & = & 1 \nonumber \\
+%    R_{12} & = & 0 \nonumber \\
+%    R_{13} & = & 0 \nonumber \\
+%    R_{21} & = & 0 \nonumber \\
+%    R_{22} & = & 1 \nonumber \\
+%    R_{23} & = & 0 \nonumber \\
+%    R_{31} & = & 0 \nonumber \\
+%    R_{32} & = & 0 \nonumber \\
+%    R_{33} & = & 1
+%\end{eqnarray}
+%%
+%For the Moon
+%%
+%\begin{eqnarray}
+%    R_{11} & = & 0.998496505205088 \nonumber \\
+%    R_{21} & = & -0.0548154092680678 \nonumber \\
+%    R_{31} & = & 0 \nonumber \\
+%    R_{12} & = & 0.0499357293985327 \nonumber \\
+%    R_{22} & = & 0.909610125238044 \nonumber \\
+%    R_{32} & = & 0.412451018902689 \nonumber \\
+%    R_{13} & = & -0.0226086714041825 \nonumber \\
+%    R_{23} & = & -0.411830900942613 \nonumber \\
+%    R_{33} & = & 0.91097977859343
+%\end{eqnarray}
+%%
+%For Mars
+%%
+%\begin{eqnarray}
+%   R_{11} & = &  0.6732521982472343 \nonumber \\
+%   R_{21} & = &  0.7394129276360177 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  -0.5896387605430038 \nonumber \\
+%   R_{22} & = &  0.5368794307891334 \nonumber \\
+%   R_{32} & = &  0.6033958972853944 \nonumber \\
+%   R_{13} & = &  0.4461587269353554 \nonumber \\
+%   R_{23} & = &  -0.4062376142607542 \nonumber \\
+%   R_{33} & = &  0.7974417791532832
+%\end{eqnarray}
+%%
+%For Jupiter
+%%
+%\begin{eqnarray}
+%   R_{11} & = &  0.9994209020316729 \nonumber \\
+%   R_{21} & = &  -0.03402735050216735 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  0.0307100286015568 \nonumber \\
+%   R_{22} & = &  0.9019874904580493 \nonumber \\
+%   R_{32} & = &  0.430668621100356 \nonumber \\
+%   R_{13} & = &  -0.01465451212046692 \nonumber \\
+%   R_{23} & = &  -0.4304192217768545 \nonumber \\
+%   R_{33} & = &  0.9025101322420253
+%\end{eqnarray}
+%%
+%For Saturn
+%%
+%\begin{eqnarray}
+%   R_{11} & = &  -0.6506284356468798 \nonumber \\
+%   R_{21} & = &  0.7593962330217962 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  -0.7545700815904118 \nonumber \\
+%   R_{22} & = &  -0.6464935305479939 \nonumber \\
+%   R_{32} & = &  0.1125615694996715 \nonumber \\
+%   R_{13} & = &  0.08547883186107168 \nonumber \\
+%   R_{23} & = &  0.07323575787752883 \nonumber \\
+%   R_{33} & = &  0.9936447519469775
+%\end{eqnarray}
+%%
+%For Uranus
+%%
+%\begin{eqnarray}
+%   R_{11} & = &  0.9755767334083795 \nonumber \\
+%   R_{21} & = &  -0.2196589111150187 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  -0.05749969269512644 \nonumber \\
+%   R_{22} & = &  -0.2553748540714755 \nonumber \\
+%   R_{32} & = &  0.9651308042166816 \nonumber \\
+%   R_{13} & = &  -0.2119995815377986 \nonumber \\
+%   R_{23} & = &  -0.9415591572895125 \nonumber \\
+%   R_{33} & = &  -0.2617680858165513
+%\end{eqnarray}
+%%
+%For Neptune
+%%
+%\begin{eqnarray}
+%   R_{11} & = &  0.8717809455009272 \nonumber \\
+%   R_{21} & = &  0.4898958900230839 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  -0.3337976487639454 \nonumber \\
+%   R_{22} & = &  0.5940005535292547 \nonumber \\
+%   R_{32} & = &  0.7319443094160927 \nonumber \\
+%   R_{13} & = &  0.3585765089087282 \nonumber \\
+%   R_{23} & = &  -0.6380951021167846 \nonumber \\
+%   R_{33} & = &  0.6813644604126335
+%\end{eqnarray}
+%%
+%For Pluto
+%%
+%\begin{eqnarray}
+%   R_{11} & = &  0.7311155947298647 \nonumber \\
+%   R_{21} & = &  0.6822536091093958 \nonumber \\
+%   R_{31} & = &  0 \nonumber \\
+%   R_{12} & = &  -0.1077863335431382 \nonumber \\
+%   R_{22} & = &  0.1155058299435205 \nonumber \\
+%   R_{32} & = &  0.9874413955017208 \nonumber \\
+%   R_{13} & = &  0.6736854558650673 \nonumber \\
+%   R_{23} & = &  -0.7219338031331282 \nonumber \\
+%   R_{33} & = &  0.1579857286263988
+%\end{eqnarray}
+%%
 
 \subsection{Object Referenced}\index{Coordinate systems!object
 referenced}
@@ -1796,8 +1947,8 @@ and
     \dot{\hat{\mathbf{y}}}
 \end{equation}
 %
-If the user defines the $y$-axis and $z$-axis, then GMAT
-determines the z axis using
+If the user defines the $y$-axis and $z$-axis, then GMAT determines
+the $x$ axis using
 %
 \begin{equation}
     \hat{\mathbf{x}} =  \hat{\mathbf{y}}\times\hat{\mathbf{z}}
@@ -1811,8 +1962,8 @@ and
     \dot{\hat{\mathbf{z}}}
 \end{equation}
 %
-And finally, if the user defines the $x$-axis and $z$-axis then
-GMAT determines the z axis using
+And finally, if the user defines the $x$-axis and $z$-axis then GMAT
+determines the $y$ axis using
 %
 \begin{equation}
     \hat{\mathbf{y}} =  \hat{\mathbf{z}}\times\hat{\mathbf{x}}
@@ -2184,13 +2335,40 @@ Finally,
 \begin{equation}
      \dot{\hat{\mathbf{n}}} = \frac{d}{dt}\left( \mathbf{n} n^{-1}
      \right)= \frac{\mathbf{r} \times \mathbf{a}}{n} - \frac{\mathbf{n}}{n^3} \left(  \mathbf{r}\times\mathbf{a} \cdot \mathbf{n} \right)
-     \label{Eq:VBN_Ndot}
 \end{equation}
 %
 \begin{equation}
      \boxed{\dot{\hat{\mathbf{n}}} = \frac{\mathbf{r} \times \mathbf{a}}{n} - \frac{\hat{\mathbf{n}}}{n} \left(  \mathbf{r}\times\mathbf{a} \cdot \hat{\mathbf{n}} \right)
-     }\label{Eq:VBN_Ndot}
+     }
 \end{equation}
+
+\subsection{Basic Rotation Matrices} \label{sec:BasicRotationMatrices}
+
+\begin{equation}
+   \mathbf{R}_1 = \left(\begin{array}{ccc}
+      1 & 0 & 0 \\
+      0 & \cos{\theta} & \sin{\theta} \\
+      0 & -\sin{\theta} & \cos{\theta}
+   \end{array}\right)
+\end{equation}
+
+\begin{equation}
+   \mathbf{R}_2 = \left(\begin{array}{ccc}
+      \cos{\theta}  & 0 & -\sin{\theta} \\
+      0 & 1 & 0 \\
+      \sin{\theta} & 0 & \cos{\theta}
+   \end{array} \right)
+\end{equation}
+
+
+\begin{equation}
+   \mathbf{R}_3 = \left(\begin{array}{ccc}
+       \cos{\theta} & \sin{\theta} & 0 \\
+      -\sin{\theta} &  \cos{\theta} & 0 \\
+      0 & 0 & 1
+   \end{array}\right)
+\end{equation}
+
 
 
 \begin{table*} \caption{Recommended Values for Pole and Prime Meridian Locations of the Sun and
@@ -2333,4 +2511,3 @@ where & \[
 
 \clearpage
 \include{CSFlowChart}
-\twocolumn

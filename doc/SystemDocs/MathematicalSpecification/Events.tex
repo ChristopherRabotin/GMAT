@@ -1,27 +1,43 @@
-\chapter{Event Functions}  \label{Ch:UGEvents}
+\chapter{Events}  \label{Ch:UGEvents}
 
 
-
-Event functions in GMAT  allow a user to determine when different
-types of events occur such as station contacts, eclipse events, or
-spacecraft-to-spacecraft line of sight. In general, these events are
-dependent upon the orbit state and other time dependent parameters,
+In GMAT, events allow a user to determine when 
+station contacts, eclipses, or
+spacecraft-to-spacecraft occur among others. In general, events are
+dependent upon the orbit dynamics and  time dependent parameters,
 and therefore can only be determined during or after orbit
-propagation.  The implementation of Event Functions requires GMAT to
-find the roots of a parametric function of time.  The roots of the
-parametric equation are the event times.
+propagation.  The implementation of Events requires GMAT to
+find the roots of parametric functions of time.  The roots of the
+parametric equation are the event times, in the case of a discrete event, or define
+the event boundaries, in the case of an interval event.
 
 In this chapter, we'll look at how GMAT calculates the roots of
-Event Functions.  For the implementation in GMAT, this includes two
-subproblems.  The first is determining if a root has occurred during
+event functions and hence locates both discrete and interval events. This includes two
+subproblems.  The first is determining if a root/event has occurred during
 a propagation step.  The second, is determining the numerical value
-of the root.  There is a trade between robustness and performance,
-so we'll look at several options provided in GMAT that allow the
-user to select between a more robust yet slower approach, or a fast
-but less robust approach.  Let's begin my looking at the
+of the root.  We begin by looking at the
 mathematical definition of an event function in GMAT.
 
-\section{Event Function Mathematical Definition}
+\section{Overview of Events}
+
+We begin by defining two types of events: (1) discrete events that occur at
+an instant of time, such as the epoch of an impulsive maneuver, and (2) an interval
+event that occurs over some finite time span, such as a spacecraft eclipse.  Events are located
+using root finding methods.
+
+Let's proceed using an example event.  Assume we wish to determine when a tracking station will next be able to take
+measurements of a spacecraft's range and Doppler.  The conditions that must be satisfied, called the event functions,
+are that the spacecraft must be 5 degrees above the horizon, and that the relative range rate of the spacecraft must be less than 3 km/s.
+
+1)  Feasible
+2)  If not feasible, what condition causes infeasiblity
+3)  Ordered for efficiency
+4)  Event location of for discrete event 
+
+\begin{equation}
+   \Delta t_e < \Delta t_s
+\end{equation}
+
 \label{sec:EventFunctionMathDef}
 
 An Event Function in GMAT has three outputs. The general form of an
@@ -54,7 +70,7 @@ different functions $f$, or
      \mathbf{x}(t),\mathbf{C})\hspace{.05 in}]^T
 \end{equation}
 %
- The output parameter $\mathbf{d}$ allows
+The output parameter $\mathbf{d}$ allows
 the user to define which type of roots for GMAT to calculate. For
 example, in some cases  we might only be interested in roots that
 occur when the function changes from a negative value to a positive
@@ -287,235 +303,3 @@ detail
     \caption{ Event Location Algorithm }
     \label{Plot:EventFunctionsFlowChart2}
 \end{figure*}
-
-\clearpage
-
-
-\section{Appendix 1:  Root Finding Algorithms}
-
-\section{Quadratic Polynomial }
-
-
-We are given three data points defined by a vector of independent
-variables
-%
-\begin{equation}
-     \mathbf{x} = [\hspace{.05 in} x_1 \hspace{.05 in} x_2 \hspace{.05 in}
-     x_3 \hspace{.05
-     in}]^T
-\end{equation}
-%
-and a vector of corresponding dependent variables
-%
-\begin{equation}
-     \mathbf{y} = [\hspace{.05 in} y_1 \hspace{.05 in} y_2 \hspace{.05 in}
-     y_3  \hspace{.05
-     in}]^T
-\end{equation}
-%
-we wish to find a quadratic polynomial that fits the data such
-that
-%
-\begin{equation}
-   y = Ax^2 + Bx +C
-\end{equation}
-%
-We begin by forming the system of linear equations
-%
-\begin{equation}
-    \left(%
-    \begin{array}{ccc}
-       x_1^2 & x_1 & 1 \\
-       x_2^2 & x_2 & 1 \\
-       x_3^2 & x_3 & 1 \\
-    \end{array}%
-    \right)
-    %
-     \left(%
-    \begin{array}{ccc}
-       A \\
-       B \\
-       C \\
-    \end{array}%
-    \right)
-    =
-     \left(%
-    \begin{array}{ccc}
-       y_1 \\
-       y_2 \\
-       y_3 \\
-    \end{array}%
-    \right)
-\end{equation}
-%
-We can solve for the coefficients using
-%
-\begin{equation}
-    A = \frac{
-    %  Numerator
-    \left|%
-    \begin{array}{ccc}
-       y_1 & x_1 & 1 \\
-       y_2 & x_2 & 1 \\
-       y_3 & x_3 & 1 \\
-    \end{array}%
-    \right|
-    }
-    %  Denominator
-    {    \left|%
-    \begin{array}{ccc}
-       x_1^2 & x_1 & 1 \\
-       x_2^2 & x_2 & 1 \\
-       x_3^2 & x_3 & 1 \\
-    \end{array}%
-    \right|}
-\end{equation}
-%
-\begin{equation}
-    B = \frac{
-    %  Numerator
-    \left|%
-    \begin{array}{ccc}
-     x_1^2 & y_1 & 1 \\
-     x_2^2 & y_2 & 1 \\
-     x_3^2 & y_3 & 1 \\
-    \end{array}%
-    \right|
-    }
-    %  Denominator
-    {    \left|%
-    \begin{array}{ccc}
-       x_1^2 & x_1 & 1 \\
-       x_2^2 & x_2 & 1 \\
-       x_3^2 & x_3 & 1 \\
-    \end{array}%
-    \right|}
-\end{equation}
-%
-\begin{equation}
-    C = y_3 - A x_3^2 - B x_3
-\end{equation}
-
-\section{Cubic Spline (Not-a-Knot) }
-
-We are given five data points defined by a vector of independent
-variables
-%
-\begin{equation}
-     \mathbf{x} = [\hspace{.05 in} x_1 \hspace{.05 in} x_2 \hspace{.05 in}
-     x_3 \hspace{.05 in} x_4 \hspace{.05 in} x_5 \hspace{.05
-     in}]^T
-\end{equation}
-%
-and a vector of corresponding dependent variables
-%
-\begin{equation}
-     \mathbf{y} = [\hspace{.05 in} y_1 \hspace{.05 in} y_2 \hspace{.05 in}
-     y_3 \hspace{.05 in} y_4 \hspace{.05 in} y_5 \hspace{.05
-     in}]^T
-\end{equation}
-%
-we wish to find the four cubic polynomials, $i = 1,2,3,4$, such
-that
-%
-\begin{equation}
-    p_i = a_i(x - x_i)^3 + b_i(x - x_i)^2 + c_i(x - x_i) + d_i
-\end{equation}
-%
-where the values for $x_i$ are known from the inputs.
-
-To calculate the coefficients $a_i$, $b_i$, $c_i$, and $d_i$ we
-start by calculating the eight quantities
-%
-\begin{eqnarray}
-     h_i      &=& x_{i+1} - x_i\\
-     \Delta_i &=& \displaystyle\frac{y_{i+1} - y_i}{h_i}
-\end{eqnarray}
-%
-Next we solve the following system of linear equations
-%
-\begin{equation}
-     \mathbf{A}\mathbf{S} = \mathbf{B}
-\end{equation}
-%
-where the components of $\mathbf{A}$ are given by
-%
-\begin{eqnarray}
-     A_{11} &=& 2h_2 + h_1 \\
-     A_{12} &=& 2h_1 + h_2 \\
-     A_{13} &=& 0 \\
-     A_{21} &=& 0 \\
-     A_{22} &=& h_3 + 2h_4 \\
-     A_{23} &=& 2h_3 + h_4 \\
-     A_{31} &=& \displaystyle\frac{h_2^2}{h_1 + h_2} \\
-     A_{32} &=& \displaystyle\frac{h_1h_2}{( h_1 + h_2 )} + 2( h_2 + h_3 ) + \displaystyle\frac{h_3h_4}{( h_3 + h_4
-     )}\\
-     A_{33} &=& \displaystyle\frac{h_3^2}{h_3 + h_4}
-\end{eqnarray}
-%
-the components of $\mathbf{B}$ are
-%
-\begin{eqnarray}
-    B_{11} &=& 6( \Delta_2 - \Delta_1 )\\
-    B_{21} &=& 6( \Delta_4 - \Delta_3 )\\
-    B_{31} &=& 6( \Delta_3 - \Delta_2 )
-\end{eqnarray}
-%
-and $\mathbf{S} = [\hspace{.05 in} S_1 \hspace{.05 in} S_3
-\hspace{.05 in} S_5 \hspace{.05 in}]^T$. We can solve for the
-components of $\mathbf{S}$ using Cramer's Rule as follows
-%
-\begin{equation}
-    S_1 = \frac{
-    %  Numerator
-    \left|%
-    \begin{array}{ccc}
-       B_{11} & A_{12} & A_{13} \\
-       B_{21} & A_{22} & A_{23} \\
-       B_{31} & A_{32} & A_{33} \\
-    \end{array}%
-    \right|
-    }
-    %  Denominator
-    {\mathbf{| \mathbf{A}|}}
-\end{equation}
-%
-\begin{equation}
-    S_3 = \frac{
-    %  Numerator
-    \left|%
-    \begin{array}{ccc}
-       A_{11} & B_{11} & A_{13} \\
-       A_{21} & B_{21} & A_{23} \\
-       A_{31} & B_{31} & A_{33} \\
-    \end{array}%
-    \right|
-    }
-    %  Denominator
-    {\mathbf{| \mathbf{A}|}}
-\end{equation}
-%
-\begin{equation}
-     S_5 = \frac{B_{31} - A_{31} S_1 - A_{32} S_3}{A_{33}}
-\end{equation}
-%
-Now we can calculate $S_2$ and $S_4$ using
-%
-\begin{equation}
-     S_2 = \frac{ h_2 S_1 + h_1 S_3  }{  h_1 + h_2 };
-\end{equation}
-%
-\begin{equation}
-     S_4 = \frac{ h_4 S_3 + h_3 S_5  }{  h_3 + h_4 };
-\end{equation}
-%
-
-Finally, the coefficients for the $i^{th}$ cubic polynomial are
-given by
-\begin{eqnarray}
-   a_i &=&  \frac{ S_{i+1} - S_i   }{ 6  h_i}\\
-   b_i &=&  \frac{S_i}{2}\\
-   c_i &=&  \frac{ y_{i+1} - y_i  }{ h_i } - \frac{ 2 h_i S_i + h_i S_{i+1} }{  6
-   }\\
-   d_i &=&  y_i
-\end{eqnarray}

@@ -84,7 +84,7 @@ seconds of UT1 by occasional leap second adjustments.  The equation
 relating UTC and UT1 is
 %
 \begin{equation}
-    UTC = UT1 - \Delta UT1
+    UTC = UT1 - \Delta UT1 \label{Eq:UT1ToUTC}
 \end{equation}
 %
 In GMAT,  $\Delta UT1$ is read from the file \emph{eopc04.62-now}
@@ -150,7 +150,7 @@ where $T_{TT}$ is the time in TT expressed in the Julian Century
 format.  $T_{TT}$ can be calculated from
 %
 \begin{equation}
-     T_{TT} = \frac{JD_{TT} - 2,451,545.0}{36,525}
+     T_{TT} = \frac{JD_{TT} - 2,451,545.0}{36,525} \label{Eq:T_TTComputation}
 \end{equation}
 %
 where $JD_{TT}$  is the time in TT expressed in the Julian Date
@@ -218,9 +218,9 @@ J2000 Epoch:
 \end{eqnarray}
 %
 \begin{eqnarray}
- & \mbox{01 Jan }   2000 \hspace{.1 in} 12:00:00.000  &\mbox{TT} \nonumber \\
-& \mbox{01 Jan }  2000 \hspace{.1 in} 11:59:27.815986276  &\mbox{TAI} \nonumber \\
-& \mbox{01 Jan }  2000 \hspace{.1 in} 11:59:55.815986276 &\mbox{UTC} \nonumber\\
+ & \mbox{01 Jan }   2000 \hspace{.1 in} 12:00:00.000000000 &\mbox{TT} \nonumber \\
+& \mbox{01 Jan }  2000 \hspace{.1 in}   11:59:27.815986276  &\mbox{TAI} \nonumber \\
+& \mbox{01 Jan }  2000 \hspace{.1 in} 11:58:55.815986276 &\mbox{UTC} \nonumber\\
  & \mbox{01 Jan }  2000 \hspace{.1 in} 11:59:59.999919534  &\mbox{TDB} \nonumber
 \end{eqnarray}
 
@@ -281,7 +281,7 @@ gain.  GMAT calculates the MJD as follows:
      \begin{split}
      \mbox{JDay} = & 367Y - Int\left( \displaystyle\frac{ 7\left( Y + Int\left( \displaystyle\frac{M + 9}{12} \right) \right)}{4}
     \right)+ \\ & Int\left(\displaystyle\frac{275M}{9} \right) + D +
-    1,721,013.5 - 2,430,000.0
+    1,721,013.5
     \end{split}
 \end{equation}
 %
@@ -304,7 +304,7 @@ The Gregorian Date format is primarily used as a time system in
 which to enter state information in GMAT.  GD is not a convenient
 time format for most mathematical calculations.  Hence, GMAT often
 takes input in the GD format and converts it to a MJD format for
-use internally.  The algorithm for converting from GD to MJD is
+use internally.  The algorithm for converting from GD to JD is
 taken from Vallado\cite{vallado2} and reproduced here verbatim.
 
 \begin{equation}

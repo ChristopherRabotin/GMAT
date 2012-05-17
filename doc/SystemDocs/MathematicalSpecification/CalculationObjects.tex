@@ -124,7 +124,7 @@ right ascension of the ascending node, $\Omega$, is undefined for
 equatorial orbits.  However, computer systems don't handle undefined
 values gracefully.  In this section, we'll see how the orbital
 elements are defined for each of the special cases, and how GMAT
-calculates the orbital elements for each case\cite{Vallado:01}.
+calculates the orbital elements for each case\cite{Vallado:02}.
 
 %
 \begin{table*} \caption{The Cartesian State}
@@ -252,23 +252,21 @@ The orbit eccentricity and energy are calculated using
      \xi = \frac{v^2}{2} - \frac{\mu}{r}
 \end{equation}
 %
+For parabolic orbits, the semimajor axis is infinite
+and the energy is zero. Here we check to see if the orbit is near
+parabolic.  If $|1 - e| < 10^{-7}$ an error message is reported
+and conversion is aborted.
 
-Recall that for parabolic orbits, the semimajor axis is infinite
-and the energy is zero. GMAT checks to see if the orbit is near
-parabolic and returns an error message in this case.
-The following error check avoids the possibility of a divide by zero:\\
-
-\noindent if $|1 - e|> 10^{-30}$, then
+The semimajor axis is computed using
+%
 \begin{equation}
      a = -\frac{\mu}{2\xi}
 \end{equation}
 %
-otherwise, report  error and return.  The error reported is:
-``Warning: GMAT does not support parabolic orbits in conversion
-from cartesian to Keplerian state".
+Here we check to see if the conic section is nearly singular.
+If $|a(1-e)| < .001 (km)$ then an error message is thrown and conversion is aborted.
 
-If the orbit is not parabolic according to the above definition,
-then we continue and calculate the inclination.
+If the above tests pass, then we continue and calculate the inclination.
 %
 \begin{equation}
      i = \cos^{-1}\left(\frac{h_z}{h}\right)
@@ -375,32 +373,48 @@ Cartesian state vector.
 \label{Sec:Kep2Cart} \index{Keplerian elements!to
 cartesian} \index{Cartesian state!from Keplerian}
 
-The transformation from the Keplerian elements to the cartesian
+The transformation from the Keplerian elements to the Cartesian
 state is one of the most common state transformations in
 astrodynamics.  We previously defined both state types and refer you
 to Tables \ref{Table:CartesianStates} and
 \ref{Table:KeplerianElements} for their definitions.  Below we show
 the algorithm that GMAT uses to convert from the Keplerian elements
-to the Cartesian state\cite{Vallado:01}.
+to the Cartesian state\cite{Vallado:02}.
 
 \noindent Give:  $a$, $e$, $i$, $\Omega$, $\omega$, $\nu$, and
 $\mu$
 
 \noindent Find:  $\mathbf{r}$  and $\mathbf{v}$
 
-We begin by checking that the magnitude of the position vector is
-not infinite.  This avoids the possibility of a division by zero.
+First check to ensure the keplerian elements are not singular. If $|a(1-e)| < .001 (km)$ then the following error message is reported and conversion is aborted: ``Warning: A nearly singular conic section was encountered while converting from the Keplerian elements to the Cartesian state.  The radius of periapsis must be greater than 1 meter."
 
-\noindent if ($1+e\cos{\nu}$ $<$ 1e-30), then display error and
-return: ``Warning: Radius is near infinite in keplerian to
-cartesian conversion"
+Next check that the magnitude of the position vector is
+not infinite.  If ($1+e\cos{\nu}$ $<$ 1e-30) then the following error message is reported and conversion is aborted:
+``Warning: A near infinite radius  was encountered while converting from the Keplerian elements to the Cartesian state. "
 
-\noindent If their is not a divide by zero issue we continue  by
+Check that the orbit is not parabolic, in which case, $p$ is undefined.  If ($|1-e|< 1e-7$ then the following error message is reported and conversion is aborted:
+``Warning: A nearly parabolic orbit was encountered while converting from the Keplerian elements to the Cartesian state.  The Keplerian elements are undefined for a parabolic orbit.".
+
+Finally, define $\nu_M$ as the true anomaly placed between $-\pi$ and $\pi$.  If $e > 1$  and  $\|\nu_M\| \geq \pi - acos(1/e)$ the following error message is reported and conversion is aborted:\\
+``Error: The TA value is not physically possible for a hyperbolic orbit with  the input values of SMA and ECC.\\
+ The allowed values are: $-limitTA < TA < limitTA$ (degrees).
+ or equivalently\\
+ The allowed values are $TA < limitTA$ or $TA > 360 - limitTA$.
+" where the text ``limitTA"' is replaced by the numeric value computed below in degrees:
+%
+\begin{equation}
+    limitTA = \pi - acos(1/e)
+\end{equation}
+%
+
+If the previous tests pass, we continue  by
 calculating the semilatus rectum, and the radius.
 %
 \begin{equation}
     p = a(1-e^2);
 \end{equation}
+%
+If $1+e\cos{\nu} < 1e-10$, then the following warning is displayed but computation proceeds. ``Warning: The orbital radius is large in  the conversion from Keplerian to Cartesian state and the state may be near a singularity causing numerical errors in the conversion."
 %
 \begin{equation}
      r = \frac{p}{1+e\cos{\nu}}
@@ -452,7 +466,7 @@ the velocity components using
 Now let's look at how to calculate the cartesian state given the
 equinoctial elements.
 
-\subsection{Equinoctial Elements to Cartesian \\State}  \index{Equinoctial elements!to
+\subsection{Equinoctial Elements to Cartesian State}  \index{Equinoctial elements!to
 cartesian}\index{Cartesian state!from Equinotial}
 \label{Sec:EquinoctialtoCartesian}
 
@@ -516,7 +530,7 @@ Once the true longitude is calculated, we continue with
 \end{equation}
 %
 \begin{equation}
-   n = \frac{mu}{a^3}
+   n = \sqrt{\frac{\mu}{a^3}}
 \end{equation}
 %
 \begin{equation}
@@ -588,7 +602,7 @@ and
 Now let's look at how to calculate the cartesian state given the
 equinoctial elements.
 
-\subsection{Cartesian State to Equinoctial \\ Elements}  \index{Equinoctial elements!from cartesian}
+\subsection{Cartesian State to Equinoctial Elements}  \index{Equinoctial elements!from cartesian}
 \index{Cartesian state!to Equinotial}
 \label{Sec:CartesiantoEquinoctial}
 
@@ -601,8 +615,7 @@ GTDS Mathematical Theory \cite{GTDS}.
 
 \noindent Fine:  $a$, $h$, $k$, $p$, $q$, $\lambda$, and $\mu$
 
-We begin by calculating the semimajor axis and the eccentricity
-vector.
+The orbit eccentricity and energy are calculated using
 %
 \begin{equation}
     r = \| \mathbf{r} \|
@@ -613,14 +626,32 @@ vector.
 \end{equation}
 %
 \begin{equation}
-     a = \displaystyle\frac{1}{\displaystyle\frac{2}{r} - \displaystyle\frac{v^2}{\mu}}
+     \mathbf{e} = \displaystyle\frac{(v^2 - \displaystyle\frac{\mu}{r} )\mathbf{r} - (\mathbf{r}\cdot\mathbf{v}  )\mathbf{v}}{\mu}
 \end{equation}
 %
 \begin{equation}
-     \mathbf{e} = -\frac{ \mathbf{r} }{r} - \frac{\left( \mathbf{r} \times \mathbf{v} \right) \times \mathbf{v}}{\mu}
+     e = \| \mathbf{e} \|
 \end{equation}
 %
-The angular momentum vector is
+\begin{equation}
+     \xi = \frac{v^2}{2} - \frac{\mu}{r}
+\end{equation}
+%
+For parabolic orbits, the semimajor axis is infinite
+and the energy is zero. Here we check to see if the orbit is near
+parabolic.  If $|1 - e| < 10^{-7}$ an error message is reported
+and conversion is aborted.
+
+The semimajor axis is computed using
+%
+\begin{equation}
+     a = -\frac{\mu}{2\xi}
+\end{equation}
+%
+Here we check to see if the conic section is nearly singular.
+If $|a(1-e)| < .001 (km)$ then an error message is thrown and conversion is aborted.
+
+The angular momentum unit vector is
 %
 \begin{equation}
    \hat{\mathbf{h}} = \frac{\mathbf{r} \times \mathbf{v} }{ \| \mathbf{r} \times \mathbf{v} \|}
@@ -630,18 +661,18 @@ The unit vectors that define the equinoctial coordinate system can
 be calculated using
 %
 \begin{equation}
-   f_x = 1 - \frac{h_x^2}{ 1 + h_z^j}
+   f_x = 1 - \frac{\hat{h}_x^2}{ 1 + \hat{h}_z^j}
 \end{equation}
 %
 \begin{equation}
-   f_y = -\frac{h_x h_y}{ 1 + h_z^j}
+   f_y = -\frac{\hat{h}_x \hat{h}_y}{ 1 + \hat{h}_z^j}
 \end{equation}
 %
 \begin{equation}
-   f_z = -h_x^j
+   f_z = -\hat{h}_x^j
 \end{equation}
 %
-where $j$ is described in Section \ref{Sec:EquinoctialtoCartesian}.\\
+where $j = 1$ if $ \hat{h}_z > 0 $  and $j = -1$ otherwise. \\
 %
 \begin{equation}
     \hat{\mathbf{g}} = \hat{\mathbf{h}} \times \hat{\mathbf{f}}
@@ -660,11 +691,11 @@ $h$, $k$, $p$, and $q$ using the following relationships.
 \end{equation}
 %
 \begin{equation}
-    p = \frac{h_x}{1+h_z^j}
+    p = \frac{\hat{h}_x}{1+\hat{h}_z^j}
 \end{equation}
 %
 \begin{equation}
-    q = - \frac{h_y}{1+h_z^j}
+    q = - \frac{\hat{h}_y}{1+\hat{h}_z^j}
 \end{equation}
 %
 
@@ -697,7 +728,7 @@ where $\beta$ is given by Eq.~\ref{Eq:Beta}.  The mean longitude
 is computed using the generalized Kepler equation
 %
 \begin{equation}
-    \lambda = F + h \cos{f} - k \sin{F}
+    \lambda = F + h \cos{F} - k \sin{F}
 \end{equation}
 
 Now let's look at transformations involving the spherical
@@ -939,9 +970,9 @@ The position components are calculated using Eqs.
 using
 %
 \begin{eqnarray}
-    v_x &=& v\cos{\lambda}\cos{\delta}\\
-    v_y &=& v_x\tan{\lambda}\\
-    v_z &=& v\sin{\delta}
+    v_x &=& v\cos{\lambda_v}\cos{\delta_v}\\
+    v_y &=& v_x\tan{\lambda_v}\\
+    v_z &=& v\sin{\delta_v}
 \end{eqnarray}
 
 In the last few subsections, we have looked at transformations
@@ -1015,7 +1046,7 @@ modified Keplerian}
 
 The conversion from modified Keplerian elements to the Keplerian
 elements is discussed below.  To perform the conversion, we use
-relationships that allow us to right the semimajor axis, $a$, and
+relationships that allow us to write the semimajor axis, $a$, and
 the eccentricity, $e$, in terms of $r_a$ and $r_p$.
 
 \noindent Given:  $r_p$, $r_a$, $i$, $\omega$, $\Omega$, and $\nu$
@@ -1318,7 +1349,7 @@ if the selected coordinate system does not have a celestial body as
 its origin, then exit and throw an error message.\\
 %
 \begin{figure}[htb]
-    \begin{picture}(100,200)(175,340)
+    \begin{picture}(100,200)(55,340)
         \includegraphics[scale=1]{Images/BPlaneGeometry1.eps}
     \makebox(-520,845){$\theta_B$}
     \makebox(-615,820){$\mathbf{R}$}
@@ -1335,7 +1366,7 @@ its origin, then exit and throw an error message.\\
 \end{figure}
 %
 \begin{figure}[htb]
-    \begin{picture}(100,240)(265,340)
+    \begin{picture}(100,240)(125,340)
         \includegraphics[scale=1]{Images/BPlaneGeometry2.eps}
     \makebox(-420,850){$\mathbf{B}$}
     \makebox(-580,990){Central Body}
@@ -1577,7 +1608,7 @@ Body)
 %
 \begin{equation}
      \mathbf{e} = \displaystyle\frac{(v^2 - \displaystyle\frac{\mu}{r} )\mathbf{r}
-     - (\mathbf{r}\cdot\mathbf{v}  )\mathbf{v}}{\mu}
+     - (\mathbf{r}\cdot\mathbf{v}  )\mathbf{v}}{\mu} \label{Eq:EccentricityVector}
 \end{equation}
 %
 \begin{equation}
@@ -1722,9 +1753,7 @@ non-hyperbolic orbits, \st{HA} returns a value of zero.
 \begin{eqnarray}
     \sinh(H) & = & \frac{ \sin(\nu) \sqrt{e^2 - 1}}{1+e \cos{\nu}}    \\    %Vallado pg. 213,  Eq. 4-9
     %
-    \cosh(H) & = & \frac{ e + \cos{\nu} }{1+e \cos{\nu}}   \\     %Vallado pg. 213,  Eq. 4-9
-    %
-    H & = & \tanh^{-1}(\frac{\sinh{H}}{\cosh{H}})
+    H & = & \mbox{asinh}(\sinh(H))
 \end{eqnarray}
 %
 
@@ -1769,7 +1798,7 @@ particular body chosen by the user.  The algorithm in GMAT is taken
 from Vallado\cite{vallado2}.
 
 \begin{figure}[htb]
-    \begin{picture}(100,200)(185,310)
+    \begin{picture}(100,200)(75,320)
         \includegraphics[scale=1]{Images/GeodeticDiagram.eps}
     \makebox(-575,880){$h$}
     \makebox(-640,680){$\phi_{gd}$}
@@ -1898,7 +1927,7 @@ internal time system), and central body
 \end{itemize}
 
 \begin{figure}[htb]
-    \begin{picture}(100,230)(185,460)
+    \begin{picture}(100,230)(55,460)
         \includegraphics[scale=1]{Images/SiderealTimeDiagram.eps}
     \makebox(-350,1066){$\hat{\mathbf{x}}_I$}
     \makebox(-380,1277){$\hat{\mathbf{x}}_F$}
@@ -2031,7 +2060,7 @@ spacecraft. The algorithm used in GMAT was adapted from
 Montenbruck\cite{Montenbruck:Gill:05} pgs. 80-83.
 
 \begin{figure}[htb]
-    \begin{picture}(100,220)(175,275)
+    \begin{picture}(100,220)(65,275)
         \includegraphics[scale=1]{Images/ShadowGeometry.eps}
     \makebox(-520,850){$\mathbf{r}_B$}
     \makebox(-460,750){$\mathbf{r}_\odot$}
@@ -2109,7 +2138,7 @@ If neither of the above conditions are met, the spacecraft is in
 partial shadow.
 %
 \begin{figure}[htb]
-    \begin{picture}(100,135)(135,355)
+    \begin{picture}(100,135)(35,355)
         \includegraphics[scale=1]{Images/ShadowIllustration.ps}
             \makebox(-650,895){$R'_B$}
             \makebox(-550,870){$R'_\odot$}
@@ -2287,6 +2316,51 @@ Given:  $a$, and $e$
 
 \noindent \textit{Comment}:  $a$ and $e$ are calculated from the
 satellite cartesian state as shown in Section \ref{Sec:Cart2Kep}.
+
+\subsection{RLA and DLA} \index{RLA} \index{DLA}
+
+\noindent \textit{Description}: \st{RLA} ($\lambda_s$) is the right ascenstion of the outgoing
+asypmptote of a hyperbolic trajectory.  \st{DLA} ($\delta_s$)is the declination of the outgoing
+asypmptote of a hyperbolic trajectory.
+
+\noindent \textit{Dependency}:  Coordinate System.
+
+\noindent Given:  $\mathbf{r}$ and $\mathbf{v}$ and desired coordinate system.
+
+\noindent Find:  $\lambda_s$ and $\delta_s$
+
+Begin by converting $\mathbf{r}$ and $\mathbf{v}$ to the desired coordinate system (an excpeption
+is thrown if the origin of the requested coordinate system is not a celestial body).
+The eccentricity vector $\mathbf{e}$ is computed using Eq.~(\ref{Eq:EccentricityVector}).
+If $\|\mathbf{e}\| < 1 + tol$ then RLA = DLA = NaN and return. Otherwise:
+%
+\begin{equation}
+    \mathbf{h} = \mathbf{r} \times \mathbf{v}
+\end{equation}
+%
+\begin{equation}
+    h = \| \mathbf{h} \|
+\end{equation}
+%
+\begin{equation}
+   C_3 = v^2 - \frac{2\mu}{r}
+\end{equation}
+%
+where $\mu$ is gravitational parameter of the central body at the origin of the given coordinate system.   The outgoing asmympote unit vector, $\hat{\mathbf{s}} $, is computed using
+%
+\begin{equation}
+   \hat{\mathbf{s}} = \frac{1}{ 1 + C_3 \displaystyle\left(\frac{h}{\mu}\right)^2}\left(   \frac{\sqrt{C_3}}{\mu} \left(\mathbf{h} \times \mathbf{e} \right) - \mathbf{e} \right)
+\end{equation}
+%
+RLA and DLA are computed from
+%
+\begin{equation}
+    \lambda_s = \tan^{-1}(s_y,s_x)
+\end{equation}
+%
+\begin{equation}
+    \delta_s = \sin^{-1}(s_z)
+\end{equation}
 
 \subsection{RMAG} \index{RMAG}
 
@@ -3214,174 +3288,4 @@ Specification. Then,
 %
 \begin{equation}
     \mathbf{r}_I = \mathbf{R}_{IF}\mathbf{r}_F
-\end{equation}
-
-\section{Geometric Measurements}
-
-The azimuth and elevation angle measurements are fundamental
-quantities employed in orbit determination - primarily when dealing
-with optical telescope data.  These angles are defined in the
-topocentric-horizon coordinate system (SEZ) where azimuth, $\beta$,
-is defined positive clockwise from local North, and elevation,
-$\delta$, is defined positive above the local horizon. In reality,
-the range measurement is not provided by optical telescopes where we
-typically deal with azimuth and elevation. However, for the
-geometric model, we compute the range in  order to compute azimuth
-and elevation. In this regard, the geometric model for range was
-previously described and we will use the same notation.
-
-
-
-%----------------------------------------------------------------------------------
-%---------------------------------- Assumptions -----------------------------------
-%----------------------------------------------------------------------------------
-
-The general form of the measurement model used by GMAT is
-%
-\begin{equation}
-   \mathcal{O}_c = \mathbf{f}_k\left(\mathbf{r}(t), \dot{\mathbf{r}}(t),
-   \mathbf{r}_s, \dot{\mathbf{r}}_s\right) +\mathcal{O}_b + \boldsymbol\delta_a + \boldsymbol\delta_r
-\end{equation}
-%
-%
-\begin{tabbing}[htbp!]
-123456 \= dummy line \kill
-$\mathbf{f}_k$ \> The kinematic model \\
-$\mathbf{r}$ \> Space object position\\
-$\dot{\mathbf{r}}$ \> Space object velocity\\
-$\mathbf{r}_s$ \> Site position\\
-$\dot{\mathbf{r}}_s$    \> Site velocity\\
-$t$    \> Measurement time tag\\
-$\mathcal{O}_b$    \> Measurement bias\\
-$\boldsymbol\delta a$    \> Atmospheric correction\\
-$\boldsymbol\delta r$     \> Relativistic correction\\
-\end{tabbing}
-
-%----------------------------------------------------------------------------------
-%--------------------------------- Definitions ------------------------------------
-%----------------------------------------------------------------------------------
-\subsection*{Definitions}
-\begin{tabbing}[htbp!]
-123  \= space \kill
-$\mathcal{F}^I$ \> Inertial Coordinate System\\
-$\mathcal{F}^F$ \> Body Fixed Coordinate System\\
-T \> Topocentric-horizon Coordinate System\\
-$R_{BI}$ \> Rotation matrix converting $\mathcal{F}^I$ to $\mathcal{F}^B$ \\
-$\beta$ \> Azimuth angle\\
-$\delta$ \> Elevation angle\\
-$\mathbf{r}^{I}$ \> Object position in $\mathcal{F}^I$\\
-$\dot{\mathbf{r}}^{I}$ \> Object velocity in $\mathcal{F}^I$\\
-$\mathbf{r}^{F}_s$ \> Site position in $\mathcal{F}^F$\\
-$\dot{\mathbf{r}}^{F}_s$    \> Site velocity in $\mathcal{F}^F$\\
-$t$    \> Measurement time tag\\
-$\beta_b$    \> Azimuth Measurement bias\\
-$\delta_b$    \> Elevation Measurement bias\\
-\end{tabbing}
--------------------------------------------------------------------
-
-%----------------------------------------------------------------------------------
-%--------------------------------- Mathematical Model -----------------------------
-%----------------------------------------------------------------------------------
-\subsection*{Mathematical Model}
-
-GMAT supports a geometric model for space object azimuth and
-elevation. The azimuth angle is a measure of the angle between an
-observer's local North and a line of sight vector to a space object.
-The elevation angle is a measure of the angle between the local
-horizon plane of the observer and the line of sight vector to a
-space object. The geometric azimuth and elevation model is
-calculated using vector geometry and ignores signal propagation,
-atmospheric distortion, and other error sources.
-
-In order to compute azimuth and elevation we must first obtain the
-range to the space object from the observer in the
-topocentric-horizon reference frame. Let's assume that we have the
-position vectors of both the observer and the space object in the
-Earth Centered Inertial (I) coordinate system. The kinematic model
-for geometric range is simply
-%
-\begin{equation}
-    \boldsymbol\rho^{I} =  \mathbf{r}^{I} - \mathbf{r}^{I}_{site} = \begin{bmatrix} \rho_x & \rho_y & \rho_z \end{bmatrix}^T
-\end{equation}
-
-The I range can be mapped into the Earth Centered Earth Fixed (F)
-coordinate system through the FK5 reduction. The FK5 reduction can
-be encapsulated into a rotation matrix which we will not expand here
-due to its complexity.
-\begin{equation}
-\boldsymbol\rho^{F}  = R_{FK5}\boldsymbol\rho^{I}\label{eq:FK5rot}
-\end{equation}
-In some cases, the observer location will be expressed in terms of
-geodetic Earth coordinates latitude, longitude, and height above the
-geoid. In this case, we must use these coordinates along with the
-local sidereal time to directly compute it's F position which can
-then be differenced from the space object position that has been
-taken through the FK5 rotation.
-
-Now, let's assume that we are working with
-\begin{gather}
-\boldsymbol\rho^{F} =  \mathbf{r}^{F} - \mathbf{r}_{site}^{F}\\
-\dot{\boldsymbol\rho}^{F}  = \dot{\mathbf{r}}^{F} -
-\dot{\mathbf{r}}_{site}^{F}
-\end{gather}
- For approximate cases, one can ignore the velocity of the observer site and set
-\begin{equation}
- \dot{\boldsymbol\rho}^{F}  \approx \dot{\mathbf{r}}^{F}
-\end{equation}
- We need to map the F range and range rate into the topocentric-horizon reference frame (T). This is accomplished via the following rotation
- \begin{equation}
-R^{T/F} = \begin{bmatrix}
-\sin(\phi_{gd})\cos(\lambda) & \sin(\phi_{gd})\sin(\lambda) & -\cos(\phi_{gd}) \\
--\sin(\lambda) & \cos(\lambda) & 0\\
-\cos(\phi_{gd})\cos(\lambda) & \cos(\phi_{gd})\sin(\lambda) & \sin(\phi_{gd})
-\end{bmatrix}
-\end{equation}
-where $\phi_{gd}$ is the geodetic latitude and $\lambda$ is the
-longitude of the observer site. In reality this transformation
-matrix is obtained internally within GMAT by a call to the
-coordinate transformation class, which leads to
-\begin{gather}
-\boldsymbol\rho^{T}  = R^{T/F} \boldsymbol\rho^{F}=\begin{bmatrix} \rho_s & \rho_e & \rho_z \end{bmatrix}^T\\
-\dot{\boldsymbol\rho}^{T}  = R^{T/F}
-\dot{\boldsymbol\rho}^{F}=\begin{bmatrix} \dot{\rho}_s &
-\dot{\rho}_e & \dot{\rho}_z \end{bmatrix}^T \label{eq:Trot}
-\end{gather}
-Now we are ready to compute the azimuth and elevation angles.
-Elevation is simply calculated as
-\begin{equation}
-\sin(\delta) = \frac{\rho_z}{\|\boldsymbol\rho^{T}\|}
-\end{equation}
-Provided that the elevation is not equal to $90^\circ$, we can
-compute the azimuth as
-\begin{equation}
-\tan{\beta} = \frac{\rho_e}{-\rho_s}
-\end{equation}
-In the case where the elevation is exactly equation to $90^\circ$,
-we can compute the azimuth as
-\begin{equation}
-\tan{\beta} = \frac{\dot{\rho}_e}{-\dot{\rho}_s}
-\end{equation}
-
-Now consider that the state vector $\mathbf{s}$ consists of the
-space object position and velocity
-\begin{equation}
- \mathbf{s} = \begin{bmatrix} \mathbf{r} & \dot{\mathbf{r}} \end{bmatrix}^T
-\end{equation}
-Then the Cartesian partial derivatives of the geometric elevation
-can be expressed as
-\begin{equation}
-\frac{\partial\delta}{\partial\mathbf{s}} = \frac{-\rho_z}{\|\boldsymbol\rho^{T}\|^{3}\cos\delta}\begin{bmatrix} \rho_s & \rho_e & \rho_z \end{bmatrix}^T
-\end{equation}
-When the elevation is not $90^{\circ}$, the Cartesian partial
-derivatives of the geometric azimuth can be expressed as
-\begin{equation}
-\frac{\partial\beta}{\partial\mathbf{s}} = \begin{bmatrix}
-\frac{-\rho_e}{\rho^2_s\sec^{2}\beta} & \frac{1}{\rho_s\sec^{2}\beta} & 0 & 0 & 0 & 0
-\end{bmatrix}^T
-\end{equation}
-For the case when the elevation is exactly $90^{\circ}$, the
-Cartesian partial derivatives of the geometric azimuth can be
-expressed as
-\begin{equation}
-\frac{\partial\beta}{\partial\mathbf{s}} = \begin{bmatrix} 0 & 0 & 0 & \frac{-\dot{\rho}_e}{\dot{\rho}^2_s\sec^{2}\beta} & \frac{1}{\dot{\rho}_s\sec^{2}\beta} & 0\end{bmatrix}^T
 \end{equation}

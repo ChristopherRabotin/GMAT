@@ -179,7 +179,7 @@ Ch.~\ref{Ch:CoordinateSystems}.
 In summary, in CSFixed mode, Eq.(\ref{Eq:CSFixedRotationMatrix}) is
 used to calculate $\mathbf{R}_{BI}$, and
 Eq.~(\ref{Eq:CSFixedKinematics3}) is used to calculate
-$\{\mathbf{\boldsymbol\omega}_{IB}\}_B$.  If another attitude
+$\{\mathbf{\boldsymbol\omega}_{IB}^x\}_B$.  If another attitude
 parameterization is required, GMAT uses the algorithms in
 Sec.~\ref{Sec:AttitudeParameterizations} to transform from
 $\mathbf{R}_{BI}$ and $\{\mathbf{\boldsymbol\omega}_{IB}\}_B$ to the
@@ -188,7 +188,7 @@ spacecraft mode.
 
 \subsubsection{Spinning Spacecraft Mode}
 
-In spinnning spacecraft mode, GMAT propagates the attitude by
+In spinning spacecraft mode, GMAT propagates the attitude by
 assuming the spin axis direction is fixed in inertial space.  The
 spacecraft attitude at some time, $t$, is determined from the
 attitude initial conditions, the angular velocity vector, and the
@@ -1134,4 +1134,3 @@ Sec. \ref{sec:DCMtoQuat}.
         \end{tabular}
         \label{table:DCMtoEulerAngles}
 \end{table}
-\twocolumn

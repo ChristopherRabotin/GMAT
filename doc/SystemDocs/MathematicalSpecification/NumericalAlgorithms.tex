@@ -119,7 +119,7 @@ shown below.
 \begin{small}
 \begin{algorithm}[H]
 
-    \SetLine \KwIn{$\mathbf{x}, \mathbf{f},x',q,n$}
+    \KwIn{$\mathbf{x}, \mathbf{f},x',q,n$}
     %
     \KwOut{$\mathbf{f}'$}
     %
@@ -377,6 +377,9 @@ given by
 
 \section{Root Location using Brent's Method}
 
+NOTE: The implementation used in GMAT's even locators follows the Algorithm
+in Numerical Recipes 3rd edition which slightlyl different than the algorithm presented below.
+
 Brent's\cite{Brent:73} method is a root finding algorithm that takes
 advantage of superlinear convergence properties of the secant method
 and inverse quadratic interpolation, and the robustness of the
@@ -404,7 +407,7 @@ desired root.
 \begin{small}
 \begin{algorithm}[H]
 
-    \SetLine \KwIn{$f,a,b,tol,N,$}
+    \KwIn{$f,a,b,tol,N,$}
     %
     \KwOut{$x_o,i$}
     %

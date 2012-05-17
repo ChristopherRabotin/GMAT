@@ -1,5 +1,36 @@
 \section{Spacecraft Model}
 
+\subsection{RF Hardware Models}
+
+The RF Hardware models in GMAT include transmitters, receiver, and transponders.  For each type of RF Hardware there are models for signal transmission/reception feasibility, received frequency, and transmitted frequency to name a few.  In the sections below we present these models for each type of RF Hardware.
+
+\subsubsection{Receiver}
+
+The receiver model supports a frequency model and a reception feasibility model.  The frequency model allows the user to specify the frequency capabilities of the receiver using different methods.  The feasibility model determines whether an RF signal sensed at the receiver can feasibly detected given the receivers capability as defined by the frequency model.
+  
+When the frequency model \st{CenterAndBandwidth} is selected, the feasibility test is as follows.  Define the frequency transmitted by the originating transmitter as $F_t$, the receiver's center frequency as $F_C$, the bandwidth as $\Delta F$, and the range rate between transmitter and receiver as $\dot{\rho}$ (which is positive when the distance $\rho$ is increasing).  The frequency at the receiver is calculated using
+%
+\begin{equation}
+     F_r = F_t(1 - \frac{\dot{\rho}}{c})
+\end{equation}
+%
+where $c$ is the speed of light.  Define the upper limit of the receiver as $F_u = F_c + \Delta F / 2$ and the lower limit as $F_l = F_c - \Delta F / 2$ .  If
+%
+\begin{equation}
+       F_l \leq F_r \leq F_u
+\end{equation}
+%
+then the received frequency is received by the receiver model.  If the above test fails, the receiver does not receive the signal.
+
+\subsubsection{Transmitter}
+
+
+
+\subsubsection{Transponder}
+
+
+\subsubsection{Antenna}
+
 \subsection{Thruster Models}
 
 GMAT supports several thruster models.  The thruster models employ
