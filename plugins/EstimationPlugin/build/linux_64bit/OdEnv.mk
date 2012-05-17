@@ -1,14 +1,14 @@
 # $Id: OdEnv.mk 14 2010-01-25 23:59:47Z djconway@GSFC $
 # Environment settings for the estimation plugin
-GMAT_Code_Location = ../../../GMAT_Development/src
-GMAT_Bin_Location = ../../../GMAT_Development/application/bin
+GMAT_Code_Location = ../../../../src
+GMAT_Bin_Location = ../../../../application/bin
 GMAT_DataFile_Location = ../../../GMAT_DataFilePlugin/src
 
 # Toggle for using the older datafile code or the plugin code
 USE_DATAFILE_PLUGIN = 0
 
 # Toggle for including the ionosphere code
-INCLUDE_IONOSPHERE = 1
+INCLUDE_IONOSPHERE = 0
 
 # Set to 0 for Windows, 1 for Linux or Mac
 LINUX_MAC = 1
