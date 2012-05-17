@@ -309,7 +309,7 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    static Real      result[6];
    // if we're asking for the Earth state, return 0.0 (since we're
    // currently assuming Earth-Centered Equatorial
-   if (forBody == DeFile::EARTH_ID)
+   if (forBody == DeFile::EARTH_ID) // this should check for the J2000Body <<<<
    {
       result[0] = 0.0;
       result[1] = 0.0;
@@ -355,7 +355,7 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    
    
    // if we're asking for the moon state, just get it and return it, as
-   // it is supposed to be a geocentric state from the DE file
+   // it is supposed to be a geocentric state from the DE file  << should check for Moon w.r.t J2000Body here?
    
    // interpolate the data to get the state
    Interpolate_State(absJD, forBody, &rv);
@@ -379,7 +379,7 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    // otherwise, we must take the body's state (in Solar System Barycentric
    // coordinates), then get the Earth-Moon state in SSBarycentric,
    // then get the Earth state from that (using the Moon state in
-   // geocentric), then figure out the body's state wrt the Earth
+   // geocentric), then figure out the body's state wrt the Earth  << should be checking wrt the J2000Body here??
    stateType emrv, mrv;
    // earth-moon barycenter rel to solar system barycenter
    Interpolate_State(absJD,(int)DeFile::EARTH_ID, &emrv);
@@ -392,6 +392,8 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
       MessageInterface::ShowMessage
          ("DeFile::GetPosVel() Moon (geocentric) state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
                mrv.Position[0], mrv.Position[1], mrv.Position[2], mrv.Velocity[0], mrv.Velocity[1], mrv.Velocity[2]);
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() R1.EMRAT = %12.10f\n", R1.EMRAT);
    #endif
 
 //   stateType bwe;
@@ -1077,7 +1079,7 @@ void DeFile::Interpolate_Nutation( double Time , int Target , double Nutation[2]
   /* This function only computes nutations.                                   */
   /*--------------------------------------------------------------------------*/
 
-  if ( Target != 11 )             /* Also protects against weird input errors */
+  if ( Target != SS_BARY_ID )             /* Also protects against weird input errors */
      {
       // printf("\n This function only computes nutations.\n");
        return;
@@ -1223,7 +1225,7 @@ void DeFile::Interpolate_Position( double Time , int Target , double Position[3]
   /* This function doesn't "do" nutations or librations.                      */
   /*--------------------------------------------------------------------------*/
 
-  if ( Target >= 11 )             /* Also protects against weird input errors */
+  if ( Target >= SS_BARY_ID )             /* Also protects against weird input errors */
      {
        //printf("\n This function does not compute nutations or librations.\n");
        return;
@@ -1370,8 +1372,7 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
   /* This function doesn't "do" nutations or librations.                      */
   /*--------------------------------------------------------------------------*/
 
-//  if ( Target >= 11 )             /* Also protects against weird input errors */
-  if ( Target > 11 )             /* Also protects against weird input errors */
+  if ( Target >= SS_BARY_ID )             /* Also protects against weird input errors */
      {
        //printf("\n This function does not compute nutations or librations.\n");
        return;

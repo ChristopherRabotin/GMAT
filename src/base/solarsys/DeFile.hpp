@@ -124,12 +124,45 @@ public:
 
 protected:
 
-   // structs representing the state date (positiona nd velocity)
+   // structs representing the state date (position and velocity)
    // (from JPL/JSC code - Hoffman)
-   struct GMAT_API stateData{
-         double Position[3];
-         double Velocity[3];
-      };
+   struct GMAT_API stateData
+   {
+      // default constructor
+      stateData()
+      {
+         Position[0] = 0.0;
+         Position[1] = 0.0;
+         Position[2] = 0.0;
+         Velocity[0] = 0.0;
+         Velocity[1] = 0.0;
+         Velocity[2] = 0.0;
+      }
+      // copy constructor
+      stateData(const stateData& sd)
+      {
+         Position[0] = sd.Position[0];
+         Position[1] = sd.Position[1];
+         Position[2] = sd.Position[2];
+         Velocity[0] = sd.Velocity[0];
+         Velocity[1] = sd.Velocity[1];
+         Velocity[2] = sd.Velocity[2];
+      }
+      // operator=
+      stateData& operator=(const stateData& sd)
+      {
+         Position[0] = sd.Position[0];
+         Position[1] = sd.Position[1];
+         Position[2] = sd.Position[2];
+         Velocity[0] = sd.Velocity[0];
+         Velocity[1] = sd.Velocity[1];
+         Velocity[2] = sd.Velocity[2];
+         return *this;
+      }
+      // data
+      double Position[3];
+      double Velocity[3];
+   };
 
    typedef struct stateData stateType;
    
@@ -137,9 +170,10 @@ protected:
    // (from JPL/JSC code - Hoffman)
    // wcs - added constructors, and operator=
 #pragma pack(push, 1)
-   struct GMAT_API recOneData {
-      recOneData()  // default constructor
+   struct GMAT_API recOneData
    {
+      recOneData()  // default constructor
+      {
          int i, j;
          for (i=0;i<3;i++)
          {
@@ -157,9 +191,9 @@ protected:
          #else
             DENUM           = (long int) 0;
          #endif
-   }
+      }
       recOneData(const recOneData& r)  // copy constructor
-   {
+      {
          int i, j;
          for (i=0;i<3;i++)
          {
@@ -173,9 +207,9 @@ protected:
          AU              = r.AU;
          EMRAT           = r.EMRAT;
          DENUM           = r.DENUM;
-   }
+      }
       recOneData& operator=(const recOneData& r) 
-   {
+      {
          int i, j;
          for (i=0;i<3;i++)
          {
@@ -190,7 +224,7 @@ protected:
          EMRAT           = r.EMRAT;
          DENUM           = r.DENUM;
          return *this;
-   }
+      }
       // data
       char label[3][84];
       char constName[400][6];
@@ -215,7 +249,8 @@ protected:
       #endif
    };
 
-   struct GMAT_API recTwoData {
+   struct GMAT_API recTwoData
+   {
       // default constructor
       recTwoData()
    {
@@ -265,8 +300,8 @@ private:
    /// ASCII file name - will be unknown if DeFile created with binary file
    std::string asciiFileName;
 
-   /// BINARY file name - may be input on cretion, or may be result of
-   /// conversion of input ASCIi file; date will be read from this file.
+   /// BINARY file name - may be input on creation, or may be result of
+   /// conversion of input ASCII file; date will be read from this file.
    std::string binaryFileName; 
 
    /// type of DE file
