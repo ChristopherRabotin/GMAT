@@ -52,8 +52,8 @@ ROOT_PATH              = ../
 #PLUGIN                = ../plugins/libFminconOptimizer
 PLUGIN                 = ../plugins/libEphemPropagator
 #PLUGIN                = ../plugins/proprietary/libMarsGRAM
-PLUGIN                 = ../plugins/libNRLMsise00
-PLUGIN                 = ../plugins/libMsise86
+#PLUGIN                = ../plugins/proprietary/libNRLMsise00
+#PLUGIN                = ../plugins/proprietary/libMsise86
 #PLUGIN                = ../plugins/libEventLocator
 #PLUGIN                = ./libCInterface
 #-----------------------------------------------------------
