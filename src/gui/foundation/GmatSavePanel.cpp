@@ -26,6 +26,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_SAVE
+//#define DEBUG_ACTIVE_SCRIPT
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -68,7 +69,9 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
       mFilename = GmatAppData::Instance()->GetTempScriptName().c_str();
    mShowScriptActiveStatus = showScriptActiveStatus;
    mIsScriptActive = isScriptActive;
+   mSyncGui = false;
    theParent = parent;
+   SetName(filename);
    
    int borderSize = 2;
    wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );
@@ -188,20 +191,28 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
 {
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::OnSave() entered, mFilename='%s', tempFileName='%s'\n",
-       mFilename.c_str(), GmatAppData::Instance()->GetTempScriptName().c_str());
+      ("GmatSavePanel::OnSave() entered, mSyncGui=%d, mFilename='%s', tempFileName='%s'\n",
+       mSyncGui, mFilename.c_str(), GmatAppData::Instance()->GetTempScriptName().c_str());
    #endif
+   
+   if (theGuiManager->GetActiveScriptStatus() == 1)
+      return;
    
    // if it is temp script file, call OnSaveAs() to bring up file dialog to save
    if (mFilename == GmatAppData::Instance()->GetTempScriptName())
       OnSaveAs(event);
-   else
+   else if (!mSyncGui)
+   {
       SaveScript();
+      mSyncGui = false;
+      #ifdef DEBUG_SAVE
+      MessageInterface::ShowMessage
+         ("GmatSavePanel::OnSave() leaving, mFilename='%s'\n", mFilename.c_str());
+      #endif
+      return;
+   }
    
-   // We don't want to build on save so removed (LOJ: 2012.04.25)
-   //=======================================================
-   #if 0
-   //=======================================================
+   // Confirm user if user wants to refresh GUI with script
    bool saveScript = false;
    if (theGuiManager->GetGuiStatus() == 1)
    {
@@ -209,7 +220,10 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    }
    // If GUI is dirty, prompt user to select an action
    else if (theGuiManager->GetGuiStatus() == 2)
-   {      
+   {
+      #ifdef DEBUG_SAVE
+      MessageInterface::ShowMessage("   ==> Showing GUI ovewrite confirm message\n");
+      #endif
       wxMessageDialog *msgDlg = new wxMessageDialog
          (this, "You will lose changes made in the GUI if the script is saved.  "
           "Do you want to save the script, discard the GUI changes, and reload "
@@ -219,16 +233,18 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
       int result = msgDlg->ShowModal();
       if (result == wxID_YES)
          saveScript = true;
+      else
+         mSyncGui = false;
       
       delete msgDlg;
    }
    
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage("   saveScript=%d, mSyncGui=%d\n", saveScript, mSyncGui);
+   #endif
+   
    if (saveScript)
       SaveAndBuildScript(event);
-
-   //=======================================================
-   #endif
-   //=======================================================
    
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
@@ -281,51 +297,7 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
    
    if (saveScript)
       SaveScript();
-   
-   // We don't want to build on save so removed (LOJ: 2012.04.25)
-   //=======================================================
-   #if 0
-   //=======================================================
-   if (saveScript)
-   {
-      GmatAppData *gmatAppData = GmatAppData::Instance();
       
-      // If script is active, build the script 
-      if (mIsScriptActive)
-      {
-         SaveAndBuildScript(event);
-      }
-      else
-      {
-         wxString activeScriptName =
-            gmatAppData->GetMainFrame()->GetActiveScriptFileName().c_str();
-         
-         #ifdef DEBUG_SAVE
-         MessageInterface::ShowMessage
-            ("   activeScriptName = '%s'\n          mFilename = '%s'\n",
-             activeScriptName.c_str(), mFilename.c_str());
-         #endif
-         
-         if (mFilename == activeScriptName)
-         {
-            // If active script is open, close it first
-            if (gmatAppData->GetMainFrame()->GetChild(activeScriptName) != NULL)
-            {
-               #ifdef DEBUG_SAVE
-               MessageInterface::ShowMessage
-                  ("   Now about to close opened active script\n");
-               #endif
-               gmatAppData->GetMainFrame()->CloseChild(activeScriptName, GmatTree::SCRIPT_FILE);
-            }
-         }
-         
-         SaveAndBuildScript(event);
-      }
-   }
-   //=======================================================
-   #endif
-   //=======================================================
-   
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
       ("GmatSavePanel::OnSaveAs() leaving, script = '%s'\n", mFilename.c_str());
@@ -488,12 +460,22 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
        isScriptModified);
    #endif
    
+   bool saveScript = true;
+   mSyncGui = false;
+   
+   if (event.GetEventObject() == mSaveSyncButton ||
+       event.GetEventObject() == mSaveSyncRunButton)
+      mSyncGui = true;
+   
    GmatAppData *gmatAppData = GmatAppData::Instance();
-   bool continueBuild = true;
    
    // If this is not an active script, prompt the user for setting active
    if (!mIsScriptActive)
    {
+      #ifdef DEBUG_ACTIVE_SCRIPT
+      MessageInterface::ShowMessage("   ==> Showing active script confirm message\n");
+      #endif
+      
       wxMessageDialog *msgDlg = new wxMessageDialog
          (this,"The script file \"" + mFilename + "\" is not the active script.  "
           "Would you like to save, make it the active script, and load it into the GUI?",
@@ -501,42 +483,25 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
       int result = msgDlg->ShowModal();
       
       if (result == wxID_YES)
-         continueBuild = true;
+      {
+         mSyncGui = true;
+         saveScript = true;
+      }
       else
-         continueBuild = false;
+      {
+         mSyncGui = false;
+         saveScript = false;
+      }
    }
    
    // No action is performed if user said No.
    // See GMAT Software Specification, Script Editor section (LOJ: 2012.02.22)
-   if (isScriptModified && continueBuild)
-   {
-      //=======================================
-      #ifdef __PROMPT_USER_ON_MODIFIED__
-      //=======================================
-      
-      // prompt user to save
-      wxMessageDialog *msgDlg = new wxMessageDialog
-         (this, "Would you like to save changes?",
-          "Save...", wxYES_NO | wxICON_QUESTION ,
-          wxDefaultPosition);
-      int result = msgDlg->ShowModal();
-      
-      if (result == wxID_YES)
-         OnSave(event);
-      
-      //=======================================
-      #else
-      //=======================================
-      
+   //if (isScriptModified)
+   if (saveScript)
       OnSave(event);
-      
-      //=======================================
-      #endif
-      //=======================================
-   }
    
    // If continue building, set script file name and build script
-   if (continueBuild)
+   if (mSyncGui)
    {
       if (event.GetEventObject() == mSaveSyncButton)
       {
@@ -551,6 +516,7 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
       
       // Make current script active script (Fix for GMT-206, LOJ: 2012.02.09)
       UpdateScriptActiveStatus(true);
+      mSyncGui = false;
    }
    
    #ifdef DEBUG_ACTIVE_SCRIPT

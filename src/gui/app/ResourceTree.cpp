@@ -4537,12 +4537,10 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    bool showRenameDelete = true;
    
    // We don't want to show Rename and Delete menu if any panel is open
-   // except MissionTree panel (LOJ: 2012.01.06)
+   // except MissionTree and script editor panels (LOJ: 2012.01.06)
    //@tbs Do we want to show any message? Gray out Rename and Delete?
-   Integer numChildren = theMainFrame->GetNumberOfChildOpen(false, false, true, true);
-   if (numChildren == 1 && theMainFrame->IsMissionTreeUndocked())
-      showRenameDelete = true;
-   else if (numChildren > 0)
+   Integer numChildren = theMainFrame->GetNumberOfChildOpen(false, false, false, false);
+   if (numChildren > 0)
       showRenameDelete = false;
    
    #ifdef DEBUG_SHOW_MENU

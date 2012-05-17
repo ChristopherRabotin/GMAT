@@ -2545,7 +2545,7 @@ bool GmatMainFrame::ShowScriptOverwriteMessage()
 {
    wxMessageDialog *msgDlg = new wxMessageDialog
       (this, "You will lose changes made in the script if the GUI is saved.  "
-       "Do you want to save the GUI, discard the script changes,  and reload "
+       "Do you want to save the GUI, discard the script changes, and reload "
        "the script with the saved script?", "Save GUI...",
        wxYES_NO | wxCANCEL |wxICON_QUESTION, wxDefaultPosition);
    
@@ -2915,7 +2915,14 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
       {
          GuiItemManager *guiManager = GuiItemManager::GetInstance();
          // GUI/ActiveScript status: 1 = clean, 2 = dirty, 3 = error
-         if (guiManager->GetGuiStatus() == 2 && guiManager->GetActiveScriptStatus() == 2)
+         int guiStatus = guiManager->GetGuiStatus();
+         int scriptStatus = guiManager->GetActiveScriptStatus();
+         #ifdef DEBUG_MAINFRAME_SAVE
+         MessageInterface::ShowMessage
+            ("   GuiStatus=%d, ActiveScriptStatus=%d\n", guiStatus, scriptStatus);
+         #endif
+         if (scriptStatus == 2)
+         //if (guiStaus == 2 && scriptStatus == 2)
          {
             scriptSaved = ShowScriptOverwriteMessage();
          }
@@ -2943,6 +2950,10 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
       #endif
 
    }
+   
+   #ifdef DEBUG_MAINFRAME_SAVE
+   MessageInterface::ShowMessage("GmatMainFrame::OnSaveScript() leaving\n");
+   #endif
 } // OnSaveScript
 
 

@@ -76,6 +76,7 @@ protected:
    bool hasFileLoaded;
    bool mShowScriptActiveStatus;
    bool mIsScriptActive;
+   bool mSyncGui;
    
    wxString mFilename;
    wxString mScriptFilename;

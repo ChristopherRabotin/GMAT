@@ -99,7 +99,8 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
 {
    #ifdef DEBUG_EDITOR
    MessageInterface::ShowMessage
-      ("Editor::Editor() entered, parent = <%p>\n", parent);
+      ("Editor::Editor() entered, parent = <%p>'%s', notifyChange = %d\n",
+       parent, parent->GetName().c_str(), notifyChange);
    #endif
    
    mParent = (GmatPanel*)parent;
@@ -799,7 +800,9 @@ void Editor::OnTextChange (wxStyledTextEvent &event)
    {
       if (IsModified())
       {
-         mParent->SetEditorModified(true);
+         // Why do I need to cast GmatSavePanel* to work? (LOJ: 2012.05.17)
+         // It used to work without casting since parent is derived from GmatSavePanel.
+         ((GmatSavePanel*)mParent)->SetEditorModified(true);
          GmatAppData::Instance()->GetMainFrame()->SetActiveChildDirty(true);
       }
    }

@@ -327,6 +327,7 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
          (this, "Can not build an empty file ", "Can not build...",
           wxOK | wxICON_INFORMATION, wxDefaultPosition);
       msgDlg->ShowModal();
+      delete msgDlg;
       return;
    }
 
