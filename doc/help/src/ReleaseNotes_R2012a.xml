@@ -15,7 +15,7 @@
 
   <itemizedlist spacing="compact">
     <listitem>
-      <para>24,000 lines of code were added</para>
+      <para>52,000 lines of code were added</para>
     </listitem>
 
     <listitem>
@@ -172,12 +172,6 @@
       model suite. Here's some highlights:</para>
 
       <itemizedlist>
-        <listitem>
-          <para>The MSISE-86 and NRLMSISE-00 Earth atmosphere models are now
-          included by default, complementing the existing Jacchia-Roberts and
-          MSISE-90 models.</para>
-        </listitem>
-
         <listitem>
           <para>GMAT now models Earth ocean and pole tides. This is a
           script-only option that can be turned on alongside an Earth harmonic
