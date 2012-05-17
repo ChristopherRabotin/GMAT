@@ -4,7 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[latin1]{inputenc}
 \usepackage{geometry}
-\usepackage{graphics,color}
+\usepackage{graphicx,color}
 \geometry{letterpaper}
 
 % Enable indexing
@@ -150,8 +150,9 @@ basicstyle=\ttfamily, numberstyle=\tiny, numbers=none}
     \setlength{\@tempdimc}{.5\paperheight}%
     \setlength{\unitlength}{1pt}%
     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
-      \makebox(0,675){\rotatebox{0}{\textcolor[gray]{0.75}{\fontsize{1.5cm}{1.5cm}\selectfont{Draft:
- Work in Progress}}}}
+    
+\makebox(0,650){\rotatebox{0}{\textcolor[gray]{0.75}{\fontsize{0.9cm}{0.9cm}
+\selectfont{Draft for Release 2012a Beta}}}}
     }
 } \makeatother
 
@@ -208,8 +209,6 @@ basicstyle=\ttfamily, numberstyle=\tiny, numbers=none}
 
 \include{FactoryManager}
 
-%\include{Factories}
-
 \include{ConfigManager}
 
 \include{Publisher}
@@ -226,7 +225,7 @@ basicstyle=\ttfamily, numberstyle=\tiny, numbers=none}
 
 %\include{GmatWorkFlow}
 
-%%\part{Subsystem Designs}
+%\part{Subsystem Designs}
 
 \include{CoreClasses}
 
@@ -252,11 +251,11 @@ basicstyle=\ttfamily, numberstyle=\tiny, numbers=none}
 
 \include{Parameters}
 
-\include{PropagatorStates}
-
 \include{PropagatorOverview}
 
 \include{Propagators}
+
+\include{PropagatorStates}
 
 \include{ForceModelDetails}
 
@@ -269,8 +268,6 @@ basicstyle=\ttfamily, numberstyle=\tiny, numbers=none}
 \include{Solvers}
 
 \include{SolverUtilities}
-
-\include{Estimation}
 
 \include{ScriptedMath}
 
