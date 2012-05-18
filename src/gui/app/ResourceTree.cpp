@@ -2208,6 +2208,9 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          // select renamed item
          SelectItem(FindIdOfNode(newName, parentId));
          
+         // Set GUI dirty (LOJ: 2012.05.18)
+         theMainFrame->UpdateGuiScriptSyncStatus(2, 0);
+         
          // update MissionTree for resource rename
          GmatAppData::Instance()->GetMissionTree()->UpdateMissionForRename();
       }
@@ -2276,9 +2279,6 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
       // We don't want to delete all children (bug 547 fix, loj: 2008.11.25)
       //theMainFrame->CloseAllChildren(false, true);
       
-      // Set GUI dirty (LOJ: 2012.05.18)
-      theMainFrame->UpdateGuiScriptSyncStatus(2, 0);
-      
       #ifdef DEBUG_DELETE
       MessageInterface::ShowMessage
          ("ResourceTree::OnDelete() now calling theGuiManager->UpdateAll(%d)\n",
@@ -2288,6 +2288,9 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
       
       // Remove output also
       theMainFrame->RemoveOutputIfOpened(itemName);
+      
+      // Set GUI dirty (LOJ: 2012.05.18)
+      theMainFrame->UpdateGuiScriptSyncStatus(2, 0);
    }
    else
    {
@@ -2346,6 +2349,9 @@ void ResourceTree::OnClone(wxCommandEvent &event)
          SelectItem(GetLastChild(itemId));
          
          UpdateGuiItem(itemType);
+         
+         // Set GUI dirty (LOJ: 2012.05.18)
+         theMainFrame->UpdateGuiScriptSyncStatus(2, 0);
       }
       else
          MessageInterface::PopupMessage
