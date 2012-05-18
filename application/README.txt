@@ -122,8 +122,6 @@ The following plugins are included and have the listed status:
 libEphemPropagator: beta
 libFminconOptimizer: beta
 libMatlabInterface: beta
-libMsise00: beta
-libNRLMsise00: beta
 libCInterface: alpha
+libEventLocator: alpha
 libGmatEstimation: alpha
-libMarsGRAM: alpha
