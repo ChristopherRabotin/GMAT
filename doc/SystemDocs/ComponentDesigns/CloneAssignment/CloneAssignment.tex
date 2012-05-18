@@ -72,8 +72,88 @@ Propagate prop(sat) {sat.ElapsedDays = 5.0};
 
 \section{Overview of the Design}
 
+The design presented here focusses on the Assignment command because parameter updates are made using that command.  GMAT's Assignment command can perform several different types of assignment:
+\begin{itemize}
+\item \textbf{Simple Parameter Value Assignment}: Sets a parameter value explicitly.\\Examples:
+\begin{verbatim}
+    Sat.VX = 1.0
+    Prop.InitialStepSize = 15.0
+    ForceM.SRP = On
+\end{verbatim}
+\item \textbf{Parameter to Parameter Assignment}:  Sets a parameter equal to another parameter.  \\Examples:
+\begin{verbatim}
+    Sat.VX = Impulse.Element1
+    Prop.InitialStepSize = Sat.A1Epoch
+    ForceM.SRP = ForceM2.SRP
+\end{verbatim}
+\item \textbf{Equation to Parameter Value Assignment}:  Sets a parameter value off of a computation.  \\Examples:
+\begin{verbatim}
+    Sat.VX = Sat.VZ + 1.0
+    Prop.InitialStepSize = Sat.A1Epoch / 5000.0
+\end{verbatim}
+\item \textbf{Reference Object Changes}:  Changes a reference object on another object. \\Examples:
+\begin{verbatim}
+    Sat.Tanks = {YetAnotherTank}
+    Prop.FM = ADifferentForceModel
+\end{verbatim}
+\item \textbf{Object to Object Assignment}:  Sets one object to match another of the same type.  \\Examples:
+\begin{verbatim}
+    Sat1 = Sat2
+    ForceM = OtherForces
+\end{verbatim}
+\end{itemize}
+\noindent GMAT manages these different assignment modes through a set of wrapper classes.  For the purposes of this discussion, it is important to note that some assignments set values that require that the object as a whole be reinitialized, while other settings can be taken as is without resetting the object.  In either case, settings passed to objects that are used by cloning need to pass the updated information to the cloned objects.  This parameter passing is done using the object's assignment operator.  The initialization issue requires that objects that need reinitialization first pass the parameter data into the clones before resetting themselves, and that the clones be aware of the initialization state of the data they are receiving so that they can reinitialize -- or initialize for the first time -- if necessary.
+
+
+
 \section{Elements Facilitating Cloned Object Parameter Management}
 
+
+
+Some objects that may receive parameter updates contain additional data that depends on those parameter values before the object can be used, but at a cost in updating performance that precludes performing the update the instant the parameter is received.  The receiving object of this parameter update is in a ``dirty'' state, and needs to be reinitiialized before it is used in the mission.  The GmatBase base class provides a Boolean flag, initialized, that is used to detect this dirty state.  For these types of parameter updates, the parameter setting routine (i.e. SetRealParameter(), SetIntegerParameter(), SetStringParameter, etc) that receives the new parameter also clears the initialized flag, making its value false so that consumers of the object can determine that it is not ready for use in the Mission Control Sequence.  The initialized flag is set (made true) in the object's Initialize() method.  Classes derived from GmatBase inherit the Boolean IsInitialized() method, which returns the current value of the initialized flag. 
+
+Objects that use clones of defined objects are responsible for detecting the states of those objects.  Parameters received by the cloned objects trigger updates to the initialized flag on those objects, but do not necessarily trigger reinitialization.  The owner of the clone should check the flag's value and respond accordingly.  In other words, when the initialized flag is detected in the uninitialized state on a cloned object, the user of the object is responsible for reinitializing the object before using it.
+
 \section{Flow in the Sandbox}
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[scale=0.6]{Images/SandboxStateTransitions-updated.eps}
+\caption{\label{figure:SandboxStates}Initialization of a Control Sequence in the Sandbox}
+\end{center}
+\end{figure}
+
+GMAT's Sandbox implements a finite state machine that manages mission runs.  Figure~\ref{figure:SandboxStates} shows the state transitions performed in the Sandbox during a run.  The REFRESH state, colored cyan in the figure, is of particular interest to the current discussion.  When a GMAT Sandbox executes an Assignment command in the Mission Control Sequence, the Sandbox transitions into the REFRESH state so that objects can be reinitialized if necessary, and so that the hidden clones can receive the new data that was set on the configured objects.  Upon this state transition, GMAT control flow for the Sandbox follows the process illustrated in Figure~\ref{figure:SandboxReinitialization}:
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[scale=0.5]{Images/SandboxCloneUpdates.eps}
+\caption{\label{figure:SandboxReinitialization}Clone Updating and Initialization During a Run}
+\end{center}
+\end{figure}
+
+\begin{itemize}
+\item The Assignment command is executed
+\item The Assignment command passes the updated object pointer to the Sandbox
+\item The Sandbox passes the updated object to each object in the local object store so that local clones can copy the new data into their local clones
+\item If a clone was updated, it is immediately reinitialized if reinitialization is necessary
+\item The Sandbox passes the updated object to each object in the global object store so that local clones can copy the new data into their local clones
+\item If a clone was updated, it is immediately reinitialized if reinitialization is necessary
+\item The Sandbox passes the updated object to each command in the Mission Control Sequence so that local clones can copy the new data into their local clones
+\item If a clone was updated, it is immediately reinitialized if reinitialization is necessary
+\item Reinitialize the updated object
+\end{itemize}
+
+\noindent The basic process, repeated for each of the three target collections of objects (The local object store, the global object store, and the Mission Control Sequence) is to
+
+\begin{enumerate}
+\item Start at the beginning of the collection
+\item Pass the updated object into the UpdateClonedObject() method, which applies the assignment operator to pass the new data to any clone of the object
+\item Check to see if the objects need reinitialization, and reinitialize as needed
+\item Retrieve the next object in the collection
+\item Repeat the process until all members of the collect have had the opportunity to receive the new data for local clones
+\end{enumerate}
+
+\noindent The portion of this process associated with the commands in the Mission Control Sequence is slightly more complex than is shown in the figure when the command is a BranchCommand.  The BranchCommand class walks its branch control sequence, performing the clone management tasks for each command in the branch sequence in turn as part of the UpdateClonedObject() method.  Once all of the object collections have received the updated object for their clones, that object is reinitialized when necessary, completing the process.  Objects that do not have local clones use the default implementation of the UpdateClonedObject() method, which just returns false to indicate that no local clones were updated.
 
 \end{document}
