@@ -802,7 +802,11 @@ void Editor::OnTextChange (wxStyledTextEvent &event)
       {
          // Why do I need to cast GmatSavePanel* to work? (LOJ: 2012.05.17)
          // It used to work without casting since parent is derived from GmatSavePanel.
-         ((GmatSavePanel*)mParent)->SetEditorModified(true);
+         //MessageInterface::ShowMessage("==> mParent='%s'\n", mParent->GetName().c_str());
+         if (mParent->GetName() == "panel")
+            mParent->SetEditorModified(true);
+         else
+            ((GmatSavePanel*)mParent)->SetEditorModified(true);
          GmatAppData::Instance()->GetMainFrame()->SetActiveChildDirty(true);
       }
    }
