@@ -49,8 +49,8 @@ There are three types of object references that GMAT uses when running a script.
 An example of this type of connection is the relationship between the Maneuver command, its ImpulsiveBurn object, and the Spacecraft that received the impulse.  The command sits inside of the Mission Control Sequence, the Maneuver in the Sandbox's Local Object Store, and the Spacecraft in a separate slot in the object store.  When the Maneuver executes, it uses the data from the ImpulsiveBurn to change the value of the velocity of the Spacecraft.  That effect can be observed by examining the data on the Spacecraft object in the object store.
 \item \textbf{Owned objects}: Objects that are entirely encompassed by another object. 
 
-An example of this type of object is the integrator inside of PropSetup (scripted as ``Propagator'') object.  The user specified the class of integrator required, but never directly script the integrator.  GMAT's integrators are always hidden inside of a PropSetup.
-\item \textbf{Cloned objects}: Objects that have a pristine version in an object stores, but that are used in the command or other object by creating a clone.  
+An example of this type of object is the integrator inside of a PropSetup (scripted as a ``Propagator'') object.  The user specified the class of integrator required, but never directly scripts the integrator.  GMAT's integrators are always hidden inside of a PropSetup.
+\item \textbf{Cloned objects}: Objects that have a pristine version in an object store, but that are used in the command or other object by creating a clone.  
 
 An example of the use of cloning in this context is the hardware attached to a Spacecraft.  The user configures FuelTank and Thruster objects directly, and then attaches those objects to a Spacecraft.  When the Spacecraft is passed a pointer to a hardware element, it creates a clone of that element, which it then manages locally.  This design was constructed specifically with formations of spacecraft in mind.  GMAT users can configure groups of identical spacecraft by specifying the details of the hardware on one, and then attaching that hardware to each member of the formation. 
 \end{enumerate}
@@ -68,7 +68,13 @@ Propagate prop(sat) {sat.ElapsedDays = 5.0};
 \end{verbatim}
 \end{quote}
 
-\noindent The user intends for the propagation step at the start of the second Propagate command to be 3 seconds long.  However, the Propagate command has already been initialized before the Assignment command (``\texttt{prop.InitialStepSize = 3.0;}'') is executed.  That initialization creates a clone of the PropSetup named prop which is hidden inside of the Propagate command, and not visible in the scope of the Assignment command using the design as described so far.  This document presents the design for passing data into these hidden clones of the objects that are configured in the object stores.
+\noindent The user intends for the propagation step at the start of the second Propagate command to be 3 seconds long.  However, the Propagate command has already been initialized before the Assignment command 
+\begin{quote}
+\begin{verbatim}
+prop.InitialStepSize = 3.0;
+\end{verbatim}
+\end{quote}
+\noindent is executed.  That initialization creates a clone of the PropSetup named prop which is hidden inside of the Propagate command, and not directly visible in the scope of the Assignment command.  This document presents the elements of GMAT's design that are used when passing data into these hidden clones of the objects that are configured in the object stores.
 
 \section{Overview of the Design}
 
@@ -104,21 +110,17 @@ The design presented here focusses on the Assignment command because parameter u
 \end{itemize}
 \noindent GMAT manages these different assignment modes through a set of wrapper classes.  For the purposes of this discussion, it is important to note that some assignments set values that require that the object as a whole be reinitialized, while other settings can be taken as is without resetting the object.  In either case, settings passed to objects that are used by cloning need to pass the updated information to the cloned objects.  This parameter passing is done using the object's assignment operator.  The initialization issue requires that objects that need reinitialization first pass the parameter data into the clones before resetting themselves, and that the clones be aware of the initialization state of the data they are receiving so that they can reinitialize -- or initialize for the first time -- if necessary.
 
-
-
 \section{Elements Facilitating Cloned Object Parameter Management}
 
+Some objects that may receive parameter updates contain additional data that depends on those parameter values before the object can be used.  The performance cost for these updates may precludes performing the update the instant the parameter is received.  The receiving object of this parameter update is in a ``dirty'' state, and needs to be reinitialized before it is used in the mission.  The GmatBase base class provides a Boolean flag, isInitialized, that is used to detect this dirty state.  For these types of parameter updates, the parameter setting routine (i.e. SetRealParameter(), SetIntegerParameter(), SetStringParameter, etc) that receives the new parameter also clears the isInitialized flag, making its value false so that consumers of the object can determine that it is not ready for use in the Mission Control Sequence.  The initialized flag is set (made true) in the object's Initialize() method.  Classes derived from GmatBase inherit the Boolean IsInitialized() method, which returns the current value of the initialized flag so that the object can be reinitialized as needed. 
 
-
-Some objects that may receive parameter updates contain additional data that depends on those parameter values before the object can be used, but at a cost in updating performance that precludes performing the update the instant the parameter is received.  The receiving object of this parameter update is in a ``dirty'' state, and needs to be reinitiialized before it is used in the mission.  The GmatBase base class provides a Boolean flag, initialized, that is used to detect this dirty state.  For these types of parameter updates, the parameter setting routine (i.e. SetRealParameter(), SetIntegerParameter(), SetStringParameter, etc) that receives the new parameter also clears the initialized flag, making its value false so that consumers of the object can determine that it is not ready for use in the Mission Control Sequence.  The initialized flag is set (made true) in the object's Initialize() method.  Classes derived from GmatBase inherit the Boolean IsInitialized() method, which returns the current value of the initialized flag. 
-
-Objects that use clones of defined objects are responsible for detecting the states of those objects.  Parameters received by the cloned objects trigger updates to the initialized flag on those objects, but do not necessarily trigger reinitialization.  The owner of the clone should check the flag's value and respond accordingly.  In other words, when the initialized flag is detected in the uninitialized state on a cloned object, the user of the object is responsible for reinitializing the object before using it.
+Objects that use clones of defined objects are responsible for detecting the states of those objects.  Parameters received by the cloned objects trigger updates to the isInitialized flag on those objects, but do not necessarily trigger reinitialization.  The owner of the clone should check the flag's value and respond accordingly.  In other words, when the isInitialized flag is detected in the uninitialized state on a cloned object, the user of the object is responsible for reinitializing the object before using it.
 
 \section{Flow in the Sandbox}
 
 \begin{figure}[htb]
 \begin{center}
-\includegraphics[scale=0.6]{Images/SandboxStateTransitions-updated.eps}
+\includegraphics[scale=0.65]{Images/SandboxStateTransitions-updated.eps}
 \caption{\label{figure:SandboxStates}Initialization of a Control Sequence in the Sandbox}
 \end{center}
 \end{figure}
@@ -127,7 +129,7 @@ GMAT's Sandbox implements a finite state machine that manages mission runs.  Fig
 
 \begin{figure}[htb]
 \begin{center}
-\includegraphics[scale=0.5]{Images/SandboxCloneUpdates.eps}
+\includegraphics[scale=0.48]{Images/SandboxCloneUpdates.eps}
 \caption{\label{figure:SandboxReinitialization}Clone Updating and Initialization During a Run}
 \end{center}
 \end{figure}
@@ -140,8 +142,8 @@ GMAT's Sandbox implements a finite state machine that manages mission runs.  Fig
 \item The Sandbox passes the updated object to each object in the global object store so that local clones can copy the new data into their local clones
 \item If a clone was updated, it is immediately reinitialized if reinitialization is necessary
 \item The Sandbox passes the updated object to each command in the Mission Control Sequence so that local clones can copy the new data into their local clones
-\item If a clone was updated, it is immediately reinitialized if reinitialization is necessary
-\item Reinitialize the updated object
+\item If a clone was updated, the command can immediately reinitialize the object, or it can set a flag to reinitialize as part of the command's execution sequence if reinitialization is necessary
+\item The updated object is reinitialized as needed
 \end{itemize}
 
 \noindent The basic process, repeated for each of the three target collections of objects (The local object store, the global object store, and the Mission Control Sequence) is to
