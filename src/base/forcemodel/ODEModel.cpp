@@ -85,6 +85,7 @@
 //#define DEBUG_MU_MAP
 //#define DEBUG_PM_EPOCH
 //#define DEBUG_EVENTLOCATION
+//#define DUMP_ERROR_ESTIMATE_DATA
 
 
 //#ifndef DEBUG_MEMORY
@@ -2474,6 +2475,29 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
             "dimension = %d\n", normType, dimension);
    #endif
 
+   #ifdef DUMP_ERROR_ESTIMATE_DATA
+      MessageInterface::ShowMessage("EstimateError; normType == %d, "
+            "dimension = %d\n", normType, dimension);
+
+      MessageInterface::ShowMessage("   Starting state:       [%.12lf",
+            modelState[0]);
+      for (Integer i = 1; i < dimension; ++i)
+         MessageInterface::ShowMessage(" %.12lf", modelState[i]);
+      MessageInterface::ShowMessage("]\n");
+
+      MessageInterface::ShowMessage("   Reported differences: [%.12le",
+            diffs[0]);
+      for (Integer i = 1; i < dimension; ++i)
+         MessageInterface::ShowMessage(" %.12le", diffs[i]);
+      MessageInterface::ShowMessage("]\n");
+
+      MessageInterface::ShowMessage("   Current answer      : [%.12lf",
+            answer[0]);
+      for (Integer i = 1; i < dimension; ++i)
+         MessageInterface::ShowMessage(" %.12lf", answer[i]);
+      MessageInterface::ShowMessage("]\n");
+   #endif
+
    // Handle non-Cartesian state elements as an L1 norm
    for (int i = 0; i < cartesianStart; ++i)
    {
@@ -2585,6 +2609,11 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
 
    #ifdef DEBUG_ERROR_ESTIMATE
       MessageInterface::ShowMessage("   >>> Estimated Error = %le\n", retval);
+   #endif
+
+   #ifdef DUMP_ERROR_ESTIMATE_DATA
+      MessageInterface::ShowMessage("   ---> Estimated error = %.12le\n",
+            retval);
    #endif
 
    return retval;
