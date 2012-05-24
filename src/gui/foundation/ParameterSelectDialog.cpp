@@ -259,7 +259,7 @@ void ParameterSelectDialog::LoadData()
    {
       if (mAllowSysParam)
       {
-         // Let's alway select the first item (loj: 2009.02.04)
+         // Let's always select the first item (loj: 2009.02.04)
          //if (!mAllowMultiSelect)
          mPropertyListBox->SetSelection(0);
          
@@ -281,7 +281,7 @@ void ParameterSelectDialog::LoadData()
       }
    }
    
-   // Let's alway select the first item (loj: 2009.02.04)   
+   // Let's always select the first item (loj: 2009.02.04)
    // fire ListBoxSect event to show array info or not if single selection
    //if (!mAllowMultiSelect)
    //{

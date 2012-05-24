@@ -124,7 +124,7 @@ StringVar& StringVar::operator= (const StringVar& right)
       mStringValue = right.mStringValue;
       // Set expression so that we can preserve string value when we write (loj: 2008.08.13)
       // Set expression to name of right side since expression is used for
-      // writnig in GetGeneratingString() (loj: 2008.08.13)
+      // writing in GetGeneratingString() (loj: 2008.08.13)
       // For example:
       // str1 = 'this is str1'
       // str2 = str1;
