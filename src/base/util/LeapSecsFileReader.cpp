@@ -23,8 +23,8 @@
 
 #include "LeapSecsFileReader.hpp"
 #include "MessageInterface.hpp"
-#include "StringTokenizer.hpp"
 #include "GmatConstants.hpp"
+#include "StringUtil.hpp"
 #include "UtilityException.hpp"
 
 #include <fstream>
@@ -34,6 +34,7 @@
 
 #include <cstdlib>			// Required for GCC 4.3
 
+//#define DEBUG_READ_LEAP_SECS_FILE
 
 //---------------------------------
 // static data
@@ -88,13 +89,31 @@ bool LeapSecsFileReader::Initialize()
             throw UtilityException(errMsg);
          }
 
+         bool    isOK           = true;
+         Integer numLinesParsed = 0;
          while (!instream.eof())
          {
             std::string line;
             getline(instream,line);
-            Parse(line);
+            if (!GmatStringUtil::IsBlank(line, true))
+            {
+               if (!(isOK = Parse(line))) break;
+               numLinesParsed++;
+            }
          }
 
+         if (!isOK)
+         {
+            std::string errMsg = "Unable to read leap second file "
+                                 + withFileName + " - file is malformed\n";
+            throw UtilityException(errMsg);
+         }
+         if (numLinesParsed == 0)
+         {
+            std::string errMsg = "Unable to read leap second file "
+                                 + withFileName + " - file contains no data\n";
+            throw UtilityException(errMsg);
+         }
          instream.close();
       }
    }
@@ -123,26 +142,55 @@ bool LeapSecsFileReader::Initialize()
 //------------------------------------------------------------------------------
 bool LeapSecsFileReader::Parse(std::string line)
 {
-//   MessageInterface::ShowMessage("LeapSecsFileReader::Parse()\n");
+   #ifdef DEBUG_READ_LEAP_SECS_FILE
+      MessageInterface::ShowMessage("Entering LeapSecsFileReader::Parse with line = %s\n", line.c_str());
+   #endif
    Real jDate, off1, off2, off3;
 
-   StringTokenizer stringToken(line," ");
-   Integer count = stringToken.CountTokens();
+   // ignore blank lines
+   if (GmatStringUtil::IsBlank(line, true))  return true;
 
-   if (count == 15)
+   std::istringstream ss(line);
+   Integer year, day;
+   std::string month, equalsJD, tai_utc, S, plus, mjd, minus, closeParen, X, S2;
+   // clear error flags
+   ss.clear();
+   try
    {
-      jDate = atof(stringToken.GetToken(4).c_str());
-      off1 = atof(stringToken.GetToken(6).c_str());
-      off2 = atof(stringToken.GetToken(11).c_str());
-      off3 = atof(stringToken.GetToken(13).c_str());
-
+      ss >> year >> month >> day >> equalsJD >> jDate >> tai_utc >> off1 >> S >> plus >> mjd >> minus >> off2 >> closeParen >> X >> off3 >> S2;
+      #ifdef DEBUG_READ_LEAP_SECS_FILE
+         MessageInterface::ShowMessage("Entering LeapSecsFileReader::Parse - data read from line are: \n");
+         MessageInterface::ShowMessage("         year       = %d\n", year);
+         MessageInterface::ShowMessage("         month      = %s\n", month.c_str());
+         MessageInterface::ShowMessage("         day        = %d\n", day);
+         MessageInterface::ShowMessage("         equalsJD   = %s\n", equalsJD.c_str());
+         MessageInterface::ShowMessage("   >>>jDate = %12.10f\n", jDate);
+         MessageInterface::ShowMessage("         tai_utc    = %s\n", tai_utc.c_str());
+         MessageInterface::ShowMessage("   >>>off1  = %12.10f\n", off1);
+         MessageInterface::ShowMessage("         S          = %s\n", S.c_str());
+         MessageInterface::ShowMessage("         plus       = %s\n", plus.c_str());
+         MessageInterface::ShowMessage("         mjd        = %s\n", mjd.c_str());
+         MessageInterface::ShowMessage("         minus      = %s\n", minus.c_str());
+         MessageInterface::ShowMessage("   >>>off2  = %12.10f\n", off2);
+         MessageInterface::ShowMessage("         closeParen = %s\n", closeParen.c_str());
+         MessageInterface::ShowMessage("         X          = %s\n", X.c_str());
+         MessageInterface::ShowMessage("   >>>off3  = %12.10f\n", off3);
+         MessageInterface::ShowMessage("         S2         = %s\n", S2.c_str());
+         if (ss.fail()) MessageInterface::ShowMessage(" ------ fail is true ------\n");
+         if (ss.bad())  MessageInterface::ShowMessage(" ------ bad  is true ------\n");
+         if (ss.eof())  MessageInterface::ShowMessage(" ------ eof  is true ------\n");
+      #endif
+      // if there was an error reading all of the items from the stream, return false
+         // don't check for eof here, as it will return true when it gets to the end of the line
+      if (ss.bad() || ss.fail()) return false;
       LeapSecondInformation leapSecInfo = {jDate, off1, off2, off3};
       lookUpTable.push_back(leapSecInfo);
       return true;
    }
-   else
+   catch (BaseException &be)
+   {
       return false;
-
+   }
 }
 
 //------------------------------------------------------------------------------
