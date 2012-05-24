@@ -1904,7 +1904,7 @@ std::string GmatStringUtil::GetArrayName(const std::string &str,
    {
       GetArrayIndexVar(str, rowStr, colStr, name, "()");
    }
-   catch (UtilityException &e)
+   catch (UtilityException &)
    {
       return str;
    }
