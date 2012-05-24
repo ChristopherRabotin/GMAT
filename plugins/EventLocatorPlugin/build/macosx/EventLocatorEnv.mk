@@ -16,8 +16,8 @@ endif
 
 # Environment settings for the event locator plugin; Linux 64-bit version
 
-GMAT_CODE_LOCATION = ../../../../../trunk/src
-GMAT_BIN_LOCATION = ../../../../../trunk/application/$(GMAT_BIN_DIR)
+GMAT_CODE_LOCATION = ../../../../src
+GMAT_BIN_LOCATION = ../../../../application/$(GMAT_BIN_DIR)
 
 # Set to 1 for debugging and profiling
 DEBUG_BUILD = 0
