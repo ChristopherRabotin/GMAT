@@ -1,8 +1,8 @@
 # $Id: EventLocatorEnv.mk 1706 2011-09-10 00:13:03Z djconway@NDC $
 # Environment settings for the event locator plugin; Linux 64-bit version
 
-GMAT_CODE_LOCATION = ../../../../GmatDevelopment/src
-GMAT_BIN_LOCATION = ../../../../GmatDevelopment/application/bin
+GMAT_CODE_LOCATION = ../../../../src
+GMAT_BIN_LOCATION = ../../../../application/bin
 
 # Set to 1 for debugging and profiling
 DEBUG_BUILD = 0
@@ -16,6 +16,9 @@ BASE_LIBRARY = GmatBase
 #F2C_LIBDIR = $(F2C_DIR)/lib
 #F2C_HEADERDIR = $(F2C_DIR)/include
 #F2C_LIB = -L$(F2C_LIBDIR) -lf2c -lm
+
+# Use this if no f2c files used (Will be replaced with a later fix)
+F2C_HEADERDIR = .
 
 # Compiler options
 CPP = g++
