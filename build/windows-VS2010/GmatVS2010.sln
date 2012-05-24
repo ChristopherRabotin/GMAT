@@ -27,6 +27,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libEphemPropagator", "libEp
 		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libEventLocator", "..\..\plugins\EventLocatorPlugin\build\VS2010\libEventLocator.vcxproj", "{EBE03A90-86C7-43D9-A815-31058BD74F3C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -125,8 +130,8 @@ Global
 		{FFE4C440-926F-498C-8B75-C29DF159782A}.Release|Win32.Build.0 = Release|Win32
 		{FFE4C440-926F-498C-8B75-C29DF159782A}.Release|x64.ActiveCfg = Release|x64
 		{FFE4C440-926F-498C-8B75-C29DF159782A}.Release|x64.Build.0 = Release|x64
-		{FFE4C440-926F-498C-8B75-C29DF159782A}.ReleaseWithoutF2C|Win32.ActiveCfg = Release|x64
-		{FFE4C440-926F-498C-8B75-C29DF159782A}.ReleaseWithoutF2C|Win32.Build.0 = Release|x64
+		{FFE4C440-926F-498C-8B75-C29DF159782A}.ReleaseWithoutF2C|Win32.ActiveCfg = Release|Win32
+		{FFE4C440-926F-498C-8B75-C29DF159782A}.ReleaseWithoutF2C|Win32.Build.0 = Release|Win32
 		{FFE4C440-926F-498C-8B75-C29DF159782A}.ReleaseWithoutF2C|x64.ActiveCfg = Release|x64
 		{FFE4C440-926F-498C-8B75-C29DF159782A}.ReleaseWithoutF2C|x64.Build.0 = Release|x64
 		{FFE4C440-926F-498C-8B75-C29DF159782A}.ReleaseWithSPICE|Win32.ActiveCfg = ReleaseWithSPICE|Win32
@@ -167,6 +172,25 @@ Global
 		{20551352-0F95-4123-AE5E-4ED0AE4A75DB}.SPICE|Win32.ActiveCfg = Release|Win32
 		{20551352-0F95-4123-AE5E-4ED0AE4A75DB}.SPICE|Win32.Build.0 = Release|Win32
 		{20551352-0F95-4123-AE5E-4ED0AE4A75DB}.SPICE|x64.ActiveCfg = Release|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.Debug|Win32.Build.0 = Debug|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.Debug|x64.ActiveCfg = Debug|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.Debug|x64.Build.0 = Debug|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.Release|Win32.ActiveCfg = Release|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.Release|Win32.Build.0 = Release|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.Release|x64.ActiveCfg = Release|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.Release|x64.Build.0 = Release|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.ReleaseWithoutF2C|Win32.ActiveCfg = Release|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.ReleaseWithoutF2C|Win32.Build.0 = Release|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.ReleaseWithoutF2C|x64.ActiveCfg = Release|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.ReleaseWithoutF2C|x64.Build.0 = Release|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.ReleaseWithSPICE|Win32.ActiveCfg = Release|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.ReleaseWithSPICE|Win32.Build.0 = Release|Win32
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.ReleaseWithSPICE|x64.ActiveCfg = Release|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.ReleaseWithSPICE|x64.Build.0 = Release|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.SPICE|Win32.ActiveCfg = Release|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.SPICE|x64.ActiveCfg = Release|x64
+		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.SPICE|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
