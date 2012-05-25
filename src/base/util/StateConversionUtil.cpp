@@ -423,7 +423,7 @@ Rvector6 StateConversionUtil::CartesianToKeplerian(Real mu, const Rvector3 &pos,
    Integer retval = ComputeCartToKepl(mu, p, v, &tfp, kepOut, &ma);
    if (retval != 0)
    {
-      ; // an error?  warning message?
+      MessageInterface::ShowMessage("Error computing CartToKepl (in CartesianToKeplerian) ...\n");
    }
 
    Real anomaly = kepOut[5];
