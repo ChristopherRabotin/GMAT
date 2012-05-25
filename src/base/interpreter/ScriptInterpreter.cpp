@@ -1529,6 +1529,10 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
    if (count < 2)
    {
       // check for one-word commands
+      /** @todo This code prevents plugin implementation of one word commands.
+       *        It should be fixed.
+       */
+
       if (IsOneWordCommand(chunks[0]))
       {
          obj = (GmatBase*)CreateCommand(chunks[0], "", retval, inCmd);
