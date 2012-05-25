@@ -414,7 +414,7 @@ Integer Array::SetIntegerParameter(const Integer id, const Integer value)
       if (mNumRows == 0)
          mNumRows = value;
       else
-         throw ParameterException("Row alrealy has been set for " + GetName());
+         throw ParameterException("Row has already been set for " + GetName());
 
       if (mNumCols > 0 && !mSizeSet)
       {
@@ -426,7 +426,7 @@ Integer Array::SetIntegerParameter(const Integer id, const Integer value)
       if (mNumCols == 0)
          mNumCols = value;
       else
-         throw ParameterException("Column alrealy has been set for " + GetName());
+         throw ParameterException("Column has already been set for " + GetName());
       
       if (mNumRows > 0 && !mSizeSet)
       {
