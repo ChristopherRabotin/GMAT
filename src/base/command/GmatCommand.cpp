@@ -2212,6 +2212,13 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             rawState                 = &stateData[i*6];  // assumes in internalCoordSystem
             cartStateInternal        = rawState;
             // First convert the cartesian state to the summaryCoordSys
+            #ifdef DEBUG_COMMAND_SUMMARY_STATE
+               MessageInterface::ShowMessage("Now converting from %s to %s coordinate system.\n",
+                     internalCoordSys->GetName().c_str(), summaryCoordSys->GetName().c_str());
+               MessageInterface::ShowMessage("epoch = %12.10f\n", a1.Get());
+               MessageInterface::ShowMessage("cart state from array    = %s\n", cartStateInternal.ToString().c_str());
+               MessageInterface::ShowMessage("cart state in summary CS = %s\n", cartState.ToString().c_str());
+            #endif
             cc.Convert(a1, cartStateInternal, internalCoordSys, cartState, summaryCoordSys);
             // Need to convert state to all representations
             kepState        = StateConversionUtil::CartesianToKeplerian(originMu, cartState);
@@ -2220,11 +2227,6 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             sphStateRADEC   = StateConversionUtil::Convert(originMu, cartState, "Cartesian", "SphericalRADEC");
 
             #ifdef DEBUG_COMMAND_SUMMARY_STATE
-               MessageInterface::ShowMessage("Now converting from %s to %s coordinate system.\n",
-                     internalCoordSys->GetName().c_str(), summaryCoordSys->GetName().c_str());
-               MessageInterface::ShowMessage("epoch = %12.10f\n", a1.Get());
-               MessageInterface::ShowMessage("cart state from array    = %s\n", cartStateInternal.ToString().c_str());
-               MessageInterface::ShowMessage("cart state in summary CS = %s\n", cartState.ToString().c_str());
                MessageInterface::ShowMessage("keplerian state in summary CS = %s\n", kepState.ToString().c_str());
             #endif
 
