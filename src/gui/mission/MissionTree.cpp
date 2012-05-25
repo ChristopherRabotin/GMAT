@@ -3587,14 +3587,21 @@ void MissionTree::OnShowCommandSummary(wxCommandEvent &event)
    // open window to show command summary
    if (cmd != NULL)
    {
-      wxString title = "Command Summary for ";
-      if (cmd->GetName() != "")
-         title += cmd->GetName().c_str();
-      else
-         title += cmd->GetTypeName().c_str();
-      
-      ShowSummaryDialog ssd(this, -1, title, cmd);
-      ssd.ShowModal();
+      try
+      {
+         wxString title = "Command Summary for ";
+         if (cmd->GetName() != "")
+            title += cmd->GetName().c_str();
+         else
+            title += cmd->GetTypeName().c_str();
+
+         ShowSummaryDialog ssd(this, -1, title, cmd);
+         ssd.ShowModal();
+      }
+      catch (BaseException &be)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+      }
    }
    
    #ifdef DEBUG_RENAME
