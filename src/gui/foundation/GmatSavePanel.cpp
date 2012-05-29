@@ -71,7 +71,7 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
    mIsScriptActive = isScriptActive;
    mSyncGui = false;
    theParent = parent;
-   SetName(filename);
+   SetName("GmatSavePanel");
    
    int borderSize = 2;
    wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );

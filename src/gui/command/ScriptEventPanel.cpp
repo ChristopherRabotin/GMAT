@@ -30,6 +30,7 @@
 // This needs more working on size, so commented out
 //#define __USE_SASH_WINDOW__
 
+//#define DEBUG_CREATE 1
 //#define DBGLVL_SEPANEL_CREATE 1
 //#define DBGLVL_SEPANEL_LOAD 1
 //#define DBGLVL_SEPANEL_SAVE 1
@@ -58,6 +59,7 @@ ScriptEventPanel::ScriptEventPanel(wxWindow *parent, MissionTreeItemData *item)
 {
    theItem = item;
    theCommand = item->GetCommand();
+   SetName("ScriptEventPanel");
    
    #if DBGLVL_SEPANEL
    ShowCommand("ScriptEventPanel() theCommand=", theCommand);
@@ -149,7 +151,7 @@ void ScriptEventPanel::Create()
    theScriptsWin->SetOrientation(wxLAYOUT_HORIZONTAL);
    theScriptsWin->SetAlignment(wxLAYOUT_BOTTOM);
    //theScriptsWin->SetSashVisible(wxSASH_TOP, TRUE);
-   
+   theScriptsWin->SetName("SashScriptEventPanel");
    
    // Comment label
    wxStaticText *commentText =
@@ -175,7 +177,9 @@ void ScriptEventPanel::Create()
 #ifdef __USE_STC_EDITOR__
    #ifdef DEBUG_CREATE
    MessageInterface::ShowMessage
-      ("ScriptEventPanel::Create(), creating Editor from parent = <%p>\n", this);
+      ("ScriptEventPanel::Create() Using sash window\n   Creating Editor from "
+       "parent = <%p>'%s', theScriptsWin = <%s>'%s'\n", this, this->GetName().c_str(),
+       theScriptsWin, theScriptsWin->GetName().c_str());
    #endif
    mEditor = new Editor(theScriptsWin, true, ID_STC);
 #else
@@ -186,7 +190,6 @@ void ScriptEventPanel::Create()
    
    mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
 #endif
-   
    
    //------------------------------------------------------
    // add to sizer
@@ -231,7 +234,8 @@ void ScriptEventPanel::Create()
 #ifdef __USE_STC_EDITOR__
    #ifdef DEBUG_CREATE
    MessageInterface::ShowMessage
-      ("ScriptEventPanel::Create(), creating Editor from parent = <%p>\n", this);
+      ("ScriptEventPanel::Create() Not using sash window\n   Creating Editor from "
+       "parent = <%p>'%s'\n", this, this->GetName().c_str());
    #endif
    mEditor = new Editor(this, true, ID_STC);
 #else

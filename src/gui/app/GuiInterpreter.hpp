@@ -44,6 +44,7 @@ public:
    const StringArray& GetListOfAllFactoryItems();
    const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
+   std::string GetStringOfAllFactoryItems(Gmat::ObjectType type);
    std::string GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    
    //----- configuration

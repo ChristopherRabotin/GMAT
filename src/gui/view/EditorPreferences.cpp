@@ -44,6 +44,11 @@ const GmatEditor::CommonInfoType GmatEditor::globalCommonPrefs =
 //----------------------------------------------------------------------------
 // keywordlists
 // GMAT
+// @note
+// These are GMAT default commands and types. Actual commands and types are
+// retrieved via the GuiInterpreter::GetStringOfAllFactoryItemsExcept()
+// and set to GMAT language preference in Editor constructor.
+//
 wxChar* GmatCommands =
    _T("GMAT Create Global Maneuver Propagate Report Save Stop Toggle ")
    _T("Achieve Vary Target Optimize Minimize PenDown PenUp ")
@@ -114,32 +119,33 @@ wxChar* PythonWordlist2 =
 //#define wxSTC_MATLAB_DOUBLEQUOTESTRING 8
 //------------------------------------------------
 
-const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] = {
+const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] =
+{
    //-------------------------------------------------------
-   // GMAT script, function, Matlab scripts
+   // GMAT script, function, Matlab scripts (style 0)
    //-------------------------------------------------------
    {_T("GMAT"),
     _T("*.script;*.m;*.gmf"),
     #if 0
-    // matlab style
-    wxSTC_LEX_MATLAB, // Shows GMAT comments, but no commands
-    {{GMAT_STC_TYPE_DEFAULT, NULL},
-     {GMAT_STC_TYPE_COMMENT_LINE, NULL},
-     {GMAT_STC_TYPE_COMMENT_DOC, NULL},
-     {GMAT_STC_TYPE_NUMBER, NULL},
-     {GMAT_STC_TYPE_WORD1, GmatCommands},   // KEYWORDS
-     {GMAT_STC_TYPE_CHARACTER, NULL},
-     {GMAT_STC_TYPE_OPERATOR, NULL},
-     {GMAT_STC_TYPE_IDENTIFIER, NULL},
-     {GMAT_STC_TYPE_STRING, NULL},
-     {GMAT_STC_TYPE_STRING_EOL, NULL},
-     {GMAT_STC_TYPE_UUID, NULL},
-     {GMAT_STC_TYPE_DEFAULT, NULL},         // VERBATIM
-     {GMAT_STC_TYPE_REGEX, NULL},
-     {GMAT_STC_TYPE_COMMENT_SPECIAL, NULL}, // DOXY
-     {GMAT_STC_TYPE_WORD2, GmatObjectTypes},// EXTRA WORDS
-     {GMAT_STC_TYPE_WORD3, GmatCommands},   // DOXY KEYWORDS
-     {GMAT_STC_TYPE_ERROR, NULL},           // KEYWORDS ERROR
+    // using matlab style - the order is defined in stc.h
+    wxSTC_LEX_MATLAB, // Shows GMAT comments, but no commands in predefined color
+    {{GMAT_STC_TYPE_DEFAULT, NULL},            //  0 DEFAULT
+     {GMAT_STC_TYPE_COMMENT, NULL},            //  1 COMMENT
+     {GMAT_STC_TYPE_COMMAND, GmatCommands},    //  2 COMMAND
+     {GMAT_STC_TYPE_NUMBER, NULL},             //  3 NUMBER
+     {GMAT_STC_TYPE_WORD1, GmatObjectTypes},   //  4 KEYWORDS
+     {GMAT_STC_TYPE_STRING, NULL},             //  5 STRING
+     {GMAT_STC_TYPE_OPERATOR, NULL},           //  6 OPERATOR
+     {GMAT_STC_TYPE_IDENTIFIER, NULL},         //  7 IDENTIFIER
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
      {-1, NULL},
      {-1, NULL},
      {-1, NULL},
@@ -158,23 +164,23 @@ const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] = {
     GMAT_STC_FOLD_COMMENT | GMAT_STC_FOLD_COMPACT |
     GMAT_STC_FOLD_PREPROC},
    #endif
-    // python style
+    // using python style - the order is defined in stc.h
     #if 1
     wxSTC_LEX_PYTHON, // Shows GMAT commands and folds, but no comments, no object types
-    {{GMAT_STC_TYPE_DEFAULT, NULL},
-     {GMAT_STC_TYPE_COMMENT_LINE, NULL},
-     {GMAT_STC_TYPE_NUMBER, NULL},
-     {GMAT_STC_TYPE_STRING, NULL},
-     {GMAT_STC_TYPE_CHARACTER, NULL},
-     {GMAT_STC_TYPE_WORD1, GmatCommands},      // KEYWORDS
-     {GMAT_STC_TYPE_DEFAULT, NULL},            // TRIPLE
-     {GMAT_STC_TYPE_DEFAULT, NULL},            // TRIPLEDOUBLE
-     {GMAT_STC_TYPE_DEFAULT, NULL},            // CLASSNAME
-     {GMAT_STC_TYPE_DEFAULT, GmatObjectTypes}, // DEFNAME
-     {GMAT_STC_TYPE_OPERATOR, NULL},
-     {GMAT_STC_TYPE_IDENTIFIER, NULL},
-     {GMAT_STC_TYPE_DEFAULT, GmatComments},    // COMMENT_BLOCK
-     {GMAT_STC_TYPE_STRING_EOL, NULL},
+    {{GMAT_STC_TYPE_DEFAULT, NULL},               //  0 DEFAULT
+     {GMAT_STC_TYPE_COMMENT_LINE, NULL},          //  1 COMMENTLINE
+     {GMAT_STC_TYPE_NUMBER, NULL},                //  2 NUMBER
+     {GMAT_STC_TYPE_STRING, NULL},                //  3 STRING
+     {GMAT_STC_TYPE_CHARACTER, NULL},             //  4 CHARACTER
+     {GMAT_STC_TYPE_WORD1, GmatCommands},         //  5 WORD
+     {GMAT_STC_TYPE_DEFAULT, NULL},               //  6 TRIPLE
+     {GMAT_STC_TYPE_DEFAULT, NULL},               //  7 TRIPLEDOUBLE
+     {GMAT_STC_TYPE_DEFAULT, NULL},               //  8 CLASSNAME
+     {GMAT_STC_TYPE_WORD2, GmatObjectTypes},      //  9 DEFNAME
+     {GMAT_STC_TYPE_OPERATOR, NULL},              // 10 OPERATOR
+     {GMAT_STC_TYPE_IDENTIFIER, NULL},            // 11 IDENTIFIER
+     {GMAT_STC_TYPE_COMMENT_DOC, NULL},           // 12 COMMENTBLOCK
+     {GMAT_STC_TYPE_STRING_EOL, NULL},            // 13 STRINGEOL
      {-1, NULL},
      {-1, NULL},
      {-1, NULL},
@@ -234,7 +240,49 @@ const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] = {
     GMAT_STC_FOLD_COMMENT | GMAT_STC_FOLD_COMPACT |
     GMAT_STC_FOLD_PREPROC},
     #endif
+   //======================================================================
+   // MATLAB
+   //======================================================================
+   {_T("MATLAB"),
+    _T("*.m;"),
+    wxSTC_LEX_MATLAB, // Shows GMAT comments, but no commands
+    {{GMAT_STC_TYPE_DEFAULT, NULL},            //  0 DEFAULT
+     {GMAT_STC_TYPE_COMMENT, NULL},            //  1 COMMENT
+     {GMAT_STC_TYPE_COMMAND, GmatCommands},    //  2 COMMAND
+     {GMAT_STC_TYPE_NUMBER, NULL},             //  3 NUMBER
+     {GMAT_STC_TYPE_WORD1, GmatObjectTypes},   //  4 KEYWORDS
+     {GMAT_STC_TYPE_STRING, NULL},             //  5 STRING
+     {GMAT_STC_TYPE_OPERATOR, NULL},           //  6 OPERATOR
+     {GMAT_STC_TYPE_IDENTIFIER, NULL},         //  7 IDENTIFIER
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL},
+     {-1, NULL}},
+    GMAT_STC_FOLD_COMMENT | GMAT_STC_FOLD_COMPACT |
+    GMAT_STC_FOLD_PREPROC},
+   //======================================================================
    // C++
+   //======================================================================
    {_T("C++"),
     _T("*.c;*.cc;*.cpp;*.cxx;*.cs;*.h;*.hh;*.hpp;*.hxx;*.sma"),
     wxSTC_LEX_CPP,
@@ -272,7 +320,9 @@ const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] = {
      {-1, NULL}},
     GMAT_STC_FOLD_COMMENT | GMAT_STC_FOLD_COMPACT |
     GMAT_STC_FOLD_PREPROC},
+   //======================================================================
    // Python
+   //======================================================================
    {_T("Python"),
     _T("*.py;*.pyw"),
     wxSTC_LEX_PYTHON,
@@ -309,7 +359,9 @@ const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] = {
      {-1, NULL},
      {-1, NULL}},
     GMAT_STC_FOLD_COMMENTPY | GMAT_STC_FOLD_QUOTESPY},
+   //======================================================================
    // * (any)
+   //======================================================================
    {(wxChar *)DEFAULT_LANGUAGE,
     _T("*.*"),
     wxSTC_LEX_PROPERTIES,
@@ -352,7 +404,8 @@ const int GmatEditor::globalLanguagePrefsSize = WXSIZEOF(GmatEditor::globalLangu
 
 //----------------------------------------------------------------------------
 //! style types
-const GmatEditor::StyleInfoType GmatEditor::globalStylePrefs [] = {
+const GmatEditor::StyleInfoType GmatEditor::globalStylePrefs [] =
+{
    // GMAT_STC_TYPE_DEFAULT
    {_T("Default"),
     _T("BLACK"), _T("WHITE"),

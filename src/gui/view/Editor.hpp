@@ -125,7 +125,8 @@ private:
    
    // file
    wxString mFileName;
-   wxString mGmatKeywords;
+   wxString mGmatCommandTypes;
+   wxString mGmatObjectTypes;
    
    // lanugage properties
    GmatEditor::LanguageInfoType const* mLanguage;

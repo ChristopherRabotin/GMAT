@@ -139,6 +139,29 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItemsExcept(const ObjectTy
 
 
 //------------------------------------------------------------------------------
+// std::string GetStringOfAllFactoryItem(Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Return a std::string of all items that can be created of input object types
+ *
+ * @param <type> requested object types
+ *
+ * @return list of all creatable items in string.
+ */
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::GetStringOfAllFactoryItems(Gmat::ObjectType type)
+{
+   StringArray creatables = theModerator->GetListOfFactoryItems(type);
+   std::string str;
+   
+   for (UnsignedInt i = 0; i < creatables.size(); i++)
+      str = str + creatables[i] + " ";
+   
+   return str;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types)
 //------------------------------------------------------------------------------
 /**

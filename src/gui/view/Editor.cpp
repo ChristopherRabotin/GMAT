@@ -22,16 +22,16 @@
 #include "Editor.hpp"
 #include "GmatMainFrame.hpp"
 #include "GmatSavePanel.hpp"
-#include "FunctionSetupPanel.hpp"
-#include "EditorPreferences.hpp"
+#include "ScriptEventPanel.hpp"
 #include "FindReplaceDialog.hpp"
 #include "MessageInterface.hpp"
 #include <wx/filename.h>           // for wxFileName
 #include <wx/numdlg.h>             // for wxGetNumberFromUser
 
 //#define DEBUG_EDITOR
-//#define DEBUG_EDITOR_FIND
+//#define DEBUG_GMAT_KEYWORDS
 //#define DEBUG_EDITOR_PREF
+//#define DEBUG_EDITOR_FIND
 
 
 BEGIN_EVENT_TABLE (Editor, wxStyledTextCtrl)
@@ -166,14 +166,22 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
    ObjectTypeArray excList;
    excList.push_back(Gmat::PARAMETER);
    excList.push_back(Gmat::MATH_NODE);
+   excList.push_back(Gmat::COMMAND);
    
-   std::string creatables = guiInterpreter->GetStringOfAllFactoryItemsExcept(excList);
-   mGmatKeywords = creatables.c_str();
-
+   std::string objCreatables = guiInterpreter->GetStringOfAllFactoryItemsExcept(excList);
+   objCreatables = objCreatables + "Propagator ";
+   mGmatObjectTypes = objCreatables.c_str();
+   
+   std::string cmdCreatables = guiInterpreter->GetStringOfAllFactoryItems(Gmat::COMMAND);
+   mGmatCommandTypes = cmdCreatables.c_str();
+   std::string keywords = objCreatables + cmdCreatables;
+   wxString gmatKeyWords = keywords.c_str();
+   
    #ifdef DEBUG_GMAT_KEYWORDS
    MessageInterface::ShowMessage
-      ("Editor::Editor():: Here is the list of keywords:\n%s\n",
-       mGmatKeywords.c_str());
+      ("==> Here is the list of object types:\n%s\n", mGmatObjectTypes.c_str());
+   MessageInterface::ShowMessage
+      ("==> Here is the list of command types:\n%s\n", mGmatCommandTypes.c_str());
    #endif
    
    // set GMAT language keywords
@@ -194,9 +202,24 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
       {
          #ifdef DEBUG_GMAT_KEYWORDS
          MessageInterface::ShowMessage
-            ("   ==> Found GMAT language, so setting new keywords\n");
+            ("   ==> Found GMAT language, so setting new keywords for python "
+             "style (see EditorPreference.cpp)\n");
          #endif
-         curInfo->styles[4].words = mGmatKeywords.c_str();
+         //@note LEX language for GMAT is set in globalLanguagePrefs in EditorPreference.cpp,
+         // it is currently set to PYTHON
+         #if 0
+         // wxSTC_LEX_MATLAB (Matlab style) (Why this doesn't show colors for keywords)
+         //curInfo->styles[2].words = mGmatCommandTypes.c_str(); // COMMAND
+         //curInfo->styles[4].words = mGmatObjectTypes.c_str();  // KEYWORDS
+         curInfo->styles[4].words = gmatKeyWords.c_str();  // KEYWORDS
+         #endif
+         #if 1
+         // wxSTC_LEX_PYTHON (Python style)
+         // Why I cannot set two types of keywords?
+         //curInfo->styles[5].words = mGmatCommandTypes.c_str(); // WORD
+         //curInfo->styles[9].words = mGmatObjectTypes.c_str();  // DEFNAME
+         curInfo->styles[5].words = gmatKeyWords.c_str(); // WORD
+         #endif
          found = true;
          break;
       }
@@ -800,14 +823,22 @@ void Editor::OnTextChange (wxStyledTextEvent &event)
    {
       if (IsModified())
       {
-         // Why do I need to cast GmatSavePanel* to work? (LOJ: 2012.05.17)
-         // It used to work without casting since parent is derived from GmatSavePanel.
-         //MessageInterface::ShowMessage("==> mParent='%s'\n", mParent->GetName().c_str());
-         if (mParent->GetName() == "panel")
+         bool setChildDirty = true;
+         wxString parentName = mParent->GetName();
+         #ifdef DEBUG_TEXT_CHANGE
+         MessageInterface::ShowMessage("==> mParent='%s'\n", parentName.c_str());
+         #endif
+         if (parentName == "ScriptEventPanel")
             mParent->SetEditorModified(true);
-         else
+         else if (parentName == "SashScriptEventPanel")
+            ((ScriptEventPanel*)(mParent->GetParent()))->SetEditorModified(true);
+         else if (parentName == "GmatSavePanel")
             ((GmatSavePanel*)mParent)->SetEditorModified(true);
-         GmatAppData::Instance()->GetMainFrame()->SetActiveChildDirty(true);
+         else
+            setChildDirty = false;
+         
+         if (setChildDirty)
+            GmatAppData::Instance()->GetMainFrame()->SetActiveChildDirty(true);
       }
    }
 }
@@ -856,7 +887,8 @@ wxString Editor::DeterminePrefs(const wxString &filename)
       curInfo = &GmatEditor::globalLanguagePrefs [index];
       wxString filepattern = curInfo->filepattern;
       filepattern.Lower();
-      while(!filepattern.empty()) {
+      while(!filepattern.empty())
+      {
          wxString cur = filepattern.BeforeFirst(';');
          if ((cur == filename) ||
             (cur ==(filename.BeforeLast('.') + _T(".*"))) ||
@@ -970,7 +1002,13 @@ bool Editor::InitializePrefs(const wxString &name)
          const wxChar *svalue = curInfo->styles[index].words;
          if (svalue)
          {
+            #ifdef DEBUG_EDITOR_PREF
+            MessageInterface::ShowMessage
+               ("==> styleType = %d, keywordIndex = %d, styles[%d].words = '%s'\n",
+                styleType, keywordIndex, index, svalue);
+            #endif
             SetKeyWords(keywordIndex, svalue);
+            //SetKeyWords(index, svalue);
             keywordIndex += 1;
          }
       }
