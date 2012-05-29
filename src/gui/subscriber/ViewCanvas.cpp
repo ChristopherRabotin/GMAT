@@ -56,7 +56,7 @@
 // static data
 //---------------------------------
 const Real ViewCanvas::RADIUS_ZOOM_RATIO = 2.2;
-
+const int GmatGLCanvasAttribs[2] = {WX_GL_DOUBLEBUFFER, 0};
 // color
 static int *sIntColor = new int;
 static GlColorType *sGlColor = (GlColorType*)sIntColor;
