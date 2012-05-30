@@ -206,11 +206,13 @@ namespace GmatOrbitConstants
    const static Real ORBIT_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 
    // Tolerance
-   const static Real KEP_TOL = 1.0e-11;
+   const static Real KEP_TOL         = 1.0e-11;
    const static Real KEP_ANOMALY_TOL = 1.0e-12;
-   const static Real KEP_ZERO_TOL = 1.0e-30;
-   const static Real KEP_ECC_TOL  = 1.0e-7;  // Determined to using numerical experiments
+   const static Real KEP_ZERO_TOL    = 1.0e-30;
+   const static Real KEP_ECC_TOL     = 1.0e-7;  // Determined to using numerical experiments
                                              // after multiple transformations
+   const static Real ECC_RANGE_TOL   = 1.0e-5;
+
 } // GmatOrbitConstants
 
 

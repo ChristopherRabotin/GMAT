@@ -840,6 +840,15 @@ Rvector6 StateConversionUtil::EquinoctialToCartesian(const Rvector6& equinoctial
    Real q      = equinoctial[4];   // projection of N onto x
    Real lambda = equinoctial[5]*RAD_PER_DEG;   // mean longitude
 
+   // Check for eccentricity out-of-range
+   Real e = Sqrt((h * h) + (k * k));
+   if (e > 1.0 - GmatOrbitConstants::ECC_RANGE_TOL)
+   {
+      throw UtilityException(
+            "Error in conversion from Equinoctial to Cartesian elements: "
+            "Values of EquinoctialH and EquinoctialK result in eccentricity > 1 - eps\n");
+   }
+
    // Use mean longitude to find true longitude
    Real prevF;
    Real fF;
