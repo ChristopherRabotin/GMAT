@@ -2406,9 +2406,9 @@ ElementWrapper* Validator::CreatePropertyWrapper(GmatBase *obj,
 {
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
-      ("Validator::CreatePropertyWrapper() entered, obj=<%p><%s><%s>, manage=%d, "
-       "checkSubProp=%d\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
-       obj ? obj->GetName().c_str() : "NULL", manage, checkSubProp);
+      ("Validator::CreatePropertyWrapper() entered, obj=<%p><%s><%s>, type='%s', "
+       "manage=%d, checkSubProp=%d\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type.c_str(), manage, checkSubProp);
    #endif
    
    if (obj == NULL)
@@ -2433,6 +2433,22 @@ ElementWrapper* Validator::CreatePropertyWrapper(GmatBase *obj,
       #endif
       
       obj->GetParameterID(type);
+      
+      // Object property field allows only one field, so check it (LOJ: 2012.05.16)
+      // ex) Sat1.EarthMJ2000Eq.Epoch should throw an error
+      std::string type, owner, dep;
+      GmatStringUtil::ParseParameter(theDescription, type, owner, dep);
+      if (dep != "")
+      {
+         // Return NULL wrapper
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage
+            ("Validator::CreatePropertyWrapper() returning <%p>\n", ew);
+         #endif
+         
+         return ew;
+      }
+      
       ew = new ObjectPropertyWrapper();
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add

@@ -59,7 +59,8 @@ public:
    
    bool CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
                       const std::string &field, const std::string &expRange,
-                      bool allowNumber = true, bool allowNonPlottable = false);
+                      bool allowNumber = true, bool allowNonPlottable = false,
+                      bool allowObjectProperty = false);
    
    bool CheckRealRange(const std::string &sValue, Real value, const std::string &field,
                        Real lower, Real upper,

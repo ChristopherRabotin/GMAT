@@ -28,6 +28,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_CHECK_REAL
+//#define DEBUG_CHECK_VARIABLE
 
 //---------------------------------
 // static variables
@@ -403,9 +404,18 @@ bool UserInputValidator::CheckIntegerRange(Integer &ivalue, const std::string &s
  */
 //------------------------------------------------------------------------------
 bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
-                              const std::string &field, const std::string &expRange,
-                              bool allowNumber, bool allowNonPlottable)
+                                       const std::string &field, const std::string &expRange,
+                                       bool allowNumber, bool allowNonPlottable,
+                                       bool allowObjectProperty)
 {
+   #ifdef DEBUG_CHECK_VARIABLE
+   MessageInterface::ShowMessage
+      ("UserInputValidator::CheckVariable() entered, varName='%s', ownerType=%d, field='%s'\n"
+       "   expRange='%s', allowNumber=%d, allowNonPlottable=%d, allowObjectProperty=%d\n",
+       varName.c_str(), ownerType, field.c_str(), expRange.c_str(), allowNumber, allowNonPlottable,
+       allowObjectProperty);
+   #endif
+   
    if (mGuiManager == NULL)
    {
       MessageInterface::ShowMessage
@@ -414,15 +424,18 @@ bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectT
    }
    
    int retval = mGuiManager->
-      IsValidVariable(varName.c_str(), ownerType, allowNumber, allowNonPlottable);
+      IsValidVariable(varName.c_str(), ownerType, allowNumber, allowNonPlottable,
+                      allowObjectProperty);
    
    if (retval == -1)
    {
+      std::string lastMsg = mGuiManager->GetLastErrorMessage().c_str();
+      lastMsg = " - " + lastMsg;
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, "The variable \"%s\" for field \"%s\" "
-          "does not exist.\nPlease create it first from the Resource Tree.\n",
-          varName.c_str(), field.c_str());
+         (Gmat::ERROR_, mMsgFormat.c_str(), varName.c_str(), field.c_str(),
+          lastMsg.c_str(), expRange.c_str());
       
+      mGuiManager->SetLastErrorMessage("");
       SetErrorFlag();
       return false;
    }
@@ -432,7 +445,7 @@ bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectT
       GmatStringUtil::ParseParameter(varName, type, ownerName, depObj);
       
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, "The Parameter \"%s\" for field \"%s\" "
+         (Gmat::ERROR_, "The value of \"%s\" for field \"%s\" "
           "has undefined object \"%s\".\nPlease create proper object first "
           "from the Resource Tree.\n", varName.c_str(), field.c_str(), ownerName.c_str());
       
@@ -445,7 +458,7 @@ bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectT
       GmatStringUtil::ParseParameter(varName, type, ownerName, depObj);
       
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, "The Parameter \"%s\" for field \"%s\" "
+         (Gmat::ERROR_, "The value \"%s\" for field \"%s\" "
           "has unknown Parameter type \"%s\".\n", varName.c_str(), field.c_str(),
           type.c_str());
       
@@ -457,6 +470,15 @@ bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectT
       MessageInterface::PopupMessage
          (Gmat::ERROR_, mMsgFormat.c_str(), varName.c_str(), field.c_str(),
           " - invalid array index", expRange.c_str());
+      
+      SetErrorFlag();
+      return false;
+   }
+   else if (retval == 6)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), varName.c_str(), field.c_str(),
+          " - invalid object field", expRange.c_str());
       
       SetErrorFlag();
       return false;

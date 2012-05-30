@@ -149,7 +149,7 @@ void AssignmentPanel::SaveData()
 {
    #if DEBUG_ASSIGNMENT_PANEL_SAVE
    MessageInterface::ShowMessage
-      ("AssignmentPanel::SaveData() mIsTextModified=%d\n", mIsTextModified);
+      ("AssignmentPanel::SaveData() entered, mIsTextModified=%d\n", mIsTextModified);
    #endif
    
    canClose = true;
@@ -182,17 +182,9 @@ void AssignmentPanel::SaveData()
       }
       
       // Lhs should be an existing variable or valid object property
-      // Valid object property should be checked by Assignment::InterpretAction()
-      if (GmatStringUtil::IsValidName(lhs))
-      {
-         if (theGuiInterpreter->GetConfiguredObject(lhs) == NULL)
-         {
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, "Left hand side should be an existing Variable "
-                "or Object Property");
-            canClose = false;
-         }
-      }
+      CheckVariable(lhs, Gmat::UNKNOWN_OBJECT, "Left hand side",
+                    "Variable, Array, Array element, Object property", false,
+                    true, true);
    }
    
    if (!canClose)
@@ -203,7 +195,7 @@ void AssignmentPanel::SaveData()
    //-----------------------------------------------------------------
    if (mIsTextModified)
    {
-      wxString genStr = "GMAT " + mLhsTextCtrl->GetValue() + " = " +
+      wxString genStr = mLhsTextCtrl->GetValue() + " = " +
          mRhsTextCtrl->GetValue();
       
       #if DEBUG_ASSIGNMENT_PANEL_SAVE
@@ -218,7 +210,11 @@ void AssignmentPanel::SaveData()
          
          // Create element wrappers
          if (!theGuiInterpreter->ValidateCommand(theCommand))
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "Error found in the equation \"" + genStr + "\"");
             canClose = false;
+         }
          
          mIsTextModified = false;
       }
@@ -228,6 +224,11 @@ void AssignmentPanel::SaveData()
          canClose = false;
       }
    }
+   
+   #if DEBUG_ASSIGNMENT_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("AssignmentPanel::SaveData() leaving, canClose=%d\n", canClose);
+   #endif
 }
 
 

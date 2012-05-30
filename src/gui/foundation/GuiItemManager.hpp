@@ -48,21 +48,33 @@ public:
    };
    
    static GuiItemManager* GetInstance();
-   
+
    void LoadIcon(const wxString &filename, long bitmapType, wxBitmap **bitmap,
                  const char* xpm[]);
-   
+
+   // For GUI/Script status
    int  GetGuiStatus(); // 1 = clean, 2 = dirty, 3 = error
    void SetGuiStatus(int status);
    int  GetActiveScriptStatus();
    void SetActiveScriptStatus(int status);
-   
+
+   // For wxString conversion
    wxString ToWxString(Real rval);
    wxString ToWxString(Integer ival);
    wxArrayString ToWxArrayString(const StringArray &array);
-   int IsValidVariable(const std::string &varName, Gmat::ObjectType allowedType,
-                       bool allowNumber = false, bool allowNonPlottable = false);
    
+   // For validation
+   wxString GetLastErrorMessage();
+   void     SetLastErrorMessage(const wxString &errMsg = "");
+   int IsValidParameter(const std::string &varName, Gmat::ObjectType allowedType,
+                        bool allowNonPlottable = false);
+   int IsValidObjectProperty(const std::string &varName, Gmat::ObjectType allowedType,
+                             bool allowNonPlottable = false);
+   int IsValidVariable(const std::string &varName, Gmat::ObjectType allowedType,
+                       bool allowNumber = false, bool allowNonPlottable = false,
+                       bool allowObjectProperty = false);
+   
+   // For updating GUI items
    void UpdateAll(Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT);
    void UpdateGroundStation(bool updateObjectArray = true);
    void UpdateBurn(bool updateObjectArray = true);
@@ -369,6 +381,8 @@ private:
    
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
+
+   wxString mLastErrorMsg;
    
    bool mPngHandlerLoaded;
    wxString mPngIconLocation;
