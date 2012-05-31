@@ -44,7 +44,7 @@ END_EVENT_TABLE()
 // CoordSysCreateDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
 CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
-   : GmatDialog(parent, -1, wxString(_T("CoordSysCreateDialog")))
+   : GmatDialog(parent, -1, wxString(_T("New Coordinate System")))
 {
    mIsCoordCreated = false;
    mIsTextModified = false;

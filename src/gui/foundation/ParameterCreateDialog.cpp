@@ -71,7 +71,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, ParameterType paramType)
-   : GmatDialog(parent, -1, wxString(_T("ParameterCreateDialog")))
+   : GmatDialog(parent, -1, wxString(_T("New Variable, Array, or String")))
 {
    #ifdef DEBUG_PARAM_CREATE
    MessageInterface::ShowMessage
@@ -103,7 +103,7 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, ParameterType par
  */
 //------------------------------------------------------------------------------
 ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, const wxString paramName)
-   : GmatDialog(parent, -1, wxString(_T("ParameterCreateDialog")))
+   : GmatDialog(parent, -1, wxString(_T("New Variable, Array, or String")))
 {
    #ifdef DEBUG_PARAM_CREATE
    MessageInterface::ShowMessage
