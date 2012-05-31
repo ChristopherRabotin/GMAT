@@ -329,7 +329,7 @@ int GuiItemManager::IsValidObjectProperty(const std::string &varName,
          ("GuiItemManager::IsValidObjectProperty() returning 0, cannot find "
           "object named '%s'\n", ownerName.c_str());
       #endif
-      mLastErrorMsg = "cannot find object named \"" + ownerName + "\"";
+      mLastErrorMsg = ("cannot find object named \"" + ownerName + "\"").c_str();
       return -1;
    }
    
@@ -390,7 +390,7 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
    
    if (obj == NULL)
    {
-      mLastErrorMsg = "cannot find object named \"" + nameToUse + "\"";
+      mLastErrorMsg = ("cannot find object named \"" + nameToUse + "\"").c_str();
       return -1;
    }
    
