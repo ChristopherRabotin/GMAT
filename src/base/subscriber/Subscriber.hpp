@@ -195,6 +195,7 @@ protected:
 
    /// The current run state, so actions based on state can be taken
    Gmat::RunState       runstate;
+   Gmat::RunState       prevRunState;
    Integer              currProviderId;
    
    /// The list of names of Wrapper objects

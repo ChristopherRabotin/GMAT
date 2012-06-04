@@ -121,6 +121,7 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    isDataStateChanged    (false),
    relativeZOrder        (0),
    runstate              (Gmat::IDLE),
+   prevRunState          (Gmat::IDLE),
    currProviderId        (0)
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
@@ -165,6 +166,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
 //   mPlotSize             (copy.mPlotSize),
    relativeZOrder        (copy.relativeZOrder),
    runstate              (copy.runstate),
+   prevRunState          (copy.prevRunState),
    currProviderId        (copy.currProviderId),
    wrapperObjectNames    (copy.wrapperObjectNames)
 {
@@ -230,6 +232,7 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    isMinimized        = rhs.isMinimized;
 
    runstate = rhs.runstate;
+   prevRunState = rhs.prevRunState;
    currProviderId = rhs.currProviderId;
    
    wrapperObjectNames = rhs.wrapperObjectNames;
@@ -448,6 +451,7 @@ bool Subscriber::SetEndOfRun()
 //------------------------------------------------------------------------------
 void Subscriber::SetRunState(Gmat::RunState rs)
 {
+   prevRunState = runstate;
    runstate = rs;
 }
 
