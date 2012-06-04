@@ -215,7 +215,8 @@ void ReportFileSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1));
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1),
+                     emptyList, wxCB_READONLY);
    
    // Get Solver Iteration option list from the Subscriber
    const std::string *solverIterList = Subscriber::GetSolverIterOptionList();
