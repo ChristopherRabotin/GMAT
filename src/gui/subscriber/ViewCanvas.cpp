@@ -56,7 +56,7 @@
 // static data
 //---------------------------------
 const Real ViewCanvas::RADIUS_ZOOM_RATIO = 2.2;
-const int GmatGLCanvasAttribs[2] = {WX_GL_DOUBLEBUFFER, 0};
+int ViewCanvas::GmatGLCanvasAttribs[2] = {WX_GL_DOUBLEBUFFER, 0};
 // color
 static int *sIntColor = new int;
 static GlColorType *sGlColor = (GlColorType*)sIntColor;
@@ -92,7 +92,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #else
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
-   : wxGLCanvas(parent, id, GmatGLCanvasAttribs, pos, size, style, name)
+   : wxGLCanvas(parent, id, ViewCanvas::GmatGLCanvasAttribs, pos, size, style, name)
    #endif
    #else
    : wxGLCanvas(parent, id, pos, size, style, name)
@@ -865,7 +865,7 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
          ("ViewCanvas::UpdatePlot() Calling InitializeViewPoint()\n");
       #endif
       if (!mViewPointInitialized ||
-          mGlInitialized && mUseInitialViewPoint)
+          (mGlInitialized && mUseInitialViewPoint))
          InitializeViewPoint();
       else
          ;//MessageInterface::ShowMessage("===> using current view\n");
