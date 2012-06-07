@@ -32,6 +32,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libEventLocator", "..\..\pl
 		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GmatConsole", "GmatConsole\GmatConsole.vcxproj", "{37D23513-58F0-4F28-9BF5-FB96D53E844A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -191,6 +196,16 @@ Global
 		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.SPICE|Win32.ActiveCfg = Release|x64
 		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.SPICE|x64.ActiveCfg = Release|x64
 		{EBE03A90-86C7-43D9-A815-31058BD74F3C}.SPICE|x64.Build.0 = Release|x64
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.Debug|x64.ActiveCfg = Debug|x64
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.Release|Win32.ActiveCfg = Release|Win32
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.Release|x64.ActiveCfg = Release|x64
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.ReleaseWithoutF2C|Win32.ActiveCfg = Release|Win32
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.ReleaseWithoutF2C|x64.ActiveCfg = Release|x64
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.ReleaseWithSPICE|Win32.ActiveCfg = Release|Win32
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.ReleaseWithSPICE|x64.ActiveCfg = Release|x64
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.SPICE|Win32.ActiveCfg = Release|Win32
+		{37D23513-58F0-4F28-9BF5-FB96D53E844A}.SPICE|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
