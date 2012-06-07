@@ -177,40 +177,40 @@ Thruster::Thruster(std::string nomme) :
    // C coefficient units
    cCoefUnits.clear();
    cCoefUnits.push_back("N");
-   cCoefUnits.push_back("N/Pa");
+   cCoefUnits.push_back("N/kPa");
    cCoefUnits.push_back("N");
-   cCoefUnits.push_back("N/Pa");
-   cCoefUnits.push_back("N/Pa^2");
-   cCoefUnits.push_back("N/Pa^C7");      
+   cCoefUnits.push_back("N/kPa");
+   cCoefUnits.push_back("N/kPa^2");
+   cCoefUnits.push_back("N/kPa^C7");      
    cCoefUnits.push_back("None");   
-   cCoefUnits.push_back("N/Pa^C9");
+   cCoefUnits.push_back("N/kPa^C9");
    cCoefUnits.push_back("None");
-   cCoefUnits.push_back("N/Pa^C11");
+   cCoefUnits.push_back("N/kPa^C11");
    cCoefUnits.push_back("None");
    cCoefUnits.push_back("N");
    cCoefUnits.push_back("None");
-   cCoefUnits.push_back("1/Pa");
+   cCoefUnits.push_back("1/kPa");
    cCoefUnits.push_back("None");
-   cCoefUnits.push_back("1/Pa");
+   cCoefUnits.push_back("1/kPa");
    
    // K coefficient units
    kCoefUnits.clear();
    kCoefUnits.push_back("s");
-   kCoefUnits.push_back("s/Pa");
+   kCoefUnits.push_back("s/kPa");
    kCoefUnits.push_back("s");
-   kCoefUnits.push_back("s/Pa");
-   kCoefUnits.push_back("s/Pa^2");      
-   kCoefUnits.push_back("s/Pa^K7");   
+   kCoefUnits.push_back("s/kPa");
+   kCoefUnits.push_back("s/kPa^2");      
+   kCoefUnits.push_back("s/kPa^K7");   
    kCoefUnits.push_back("None");
-   kCoefUnits.push_back("s/Pa^K9");
+   kCoefUnits.push_back("s/kPa^K9");
    kCoefUnits.push_back("None");
-   kCoefUnits.push_back("s/Pa^K11");
+   kCoefUnits.push_back("s/kPa^K11");
    kCoefUnits.push_back("None");
    kCoefUnits.push_back("s");
    kCoefUnits.push_back("None");
-   kCoefUnits.push_back("1/Pa");
+   kCoefUnits.push_back("1/kPa");
    kCoefUnits.push_back("None");
-   kCoefUnits.push_back("1/Pa");
+   kCoefUnits.push_back("1/kPa");
    
    // set parameter write order
    for (Integer i=HardwareParamCount; i <= AXES; i++)
@@ -1600,7 +1600,13 @@ bool Thruster::Initialize()
          throw HardwareException
             ("Unable to initialize the thruster object \"" + 
              instanceName + "\"; \"" + localOriginName + "\" \" was not set.");
-      
+
+      #ifdef DEBUG_THRUSTER_INIT
+         MessageInterface::ShowMessage("Initializing thruster local system at "
+            "body %s with J2000 body %s\n", localOrigin->GetName().c_str(), 
+            j2000Body->GetName().c_str());      
+      #endif
+
       // delete old local coordinate system
       if (localCoordSystem != NULL)
       {
@@ -1929,10 +1935,15 @@ CoordinateSystem* Thruster::CreateLocalCoordinateSystem()
       localCS = CoordinateSystem::CreateLocalCoordinateSystem
          ("Local", localAxesName, spacecraft, localOrigin, spacecraft,
           j2000Body, solarSystem);
-      
+
       if (localCS == NULL)
          return NULL;
       
+      #ifdef DEBUG_THRUSTER_INIT
+      MessageInterface::ShowMessage("Created local coordinate system:\n%s\n",
+         localCS->GetGeneratingString(Gmat::NO_COMMENTS, "   ").c_str());
+      #endif
+
       if (localAxesName == "MJ2000Eq")
          isMJ2000EqAxes = true;
       else if (localAxesName == "SpacecraftBody")
