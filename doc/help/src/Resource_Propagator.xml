@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Propagator"
-          xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="For" xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>ResourceName</primary>
+  </indexterm>
+
   <refmeta>
-    <refentrytitle>Propagator</refentrytitle>
+    <refentrytitle>ResourceName</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -20,989 +23,423 @@
   <refnamediv>
     <refname>Propagator</refname>
 
-    <refpurpose>A propagator.</refpurpose>
+    <refpurpose>A propagator models spacecraft motion.</refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis>Create Propagator <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
-</synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>In GMAT, a Propagator is a combination of an integrator and a force
-    model. Hence, a Propagator contains a physical model of the space
-    environment that is used to model the motion of a spacecraft as it moves
-    forwards or backwards in time (VOP formulation is not currently
-    supported). You configure a Propagator by selecting among different
-    numerical integrators and environment models to create a Propagator
-    appropriate to the flight regime of your spacecraft during its mission.
-    GMAT supports numerous numerical integrators as well as Force Models like
-    point mass and non-spherical gravity, atmospheric drag (Earth), and solar
-    radiation pressure.</para>
+    <para>A <guilabel>Propagator</guilabel> is the GMAT component used to
+    model spacecraft motion. GMAT contains two types of propagators: a
+    numerical integrator type, and an ephemeris type. When using a numerical
+    integrator type propagator, you can choose among a suite of numerical
+    integrators implementing Runge-Kutta and predictor corrector methods. See
+    the Remarks section below for detailed discussion of GMAT’s numerical
+    integrators as well as performance and accuracy comparisons, and usage
+    recommendations.</para>
 
-    <para>To propagate spacecraft in GMAT, you first create and configure a
-    Propagator object in the script or in the Resource Tree. Then, in the
-    mission sequence, you create a Propagate command, the topic of another
-    section, and select among previously existing Propagators and Spacecraft.
-    Hence, a Propagator is different from a Propagate command: A Propagator is
-    a resource and is found in the GUI under the resource tree, and a
-    Propagate Event is configured under the Mission Tree and is how you
-    instruct GMAT to propagate spacecraft.</para>
+    <para>A <guilabel>Propagator</guilabel> object that uses a numerical
+    integrator (as opposed to an ephemeris propagator) is one of a few objects
+    in GMAT that is configured differently in the scripting and in the GUI. In
+    the GUI, you configure the integrator and force model setting on the same
+    dialog box. When working in the script, you must create a
+    <guilabel>ForceModel</guilabel> object separately from the
+    <guilabel>Propagator</guilabel> and specify the force model using the
+    “<guilabel>FM</guilabel>” field on the propagator object. See examples
+    later in this section for details.</para>
+
+    <para>The ephemeris based propagator is turned off in the GMAT
+    installation because final testing is not complete. Later in this section,
+    we describe how to enable the SPICE propagator and show a brief example
+    that uses it.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="LinkId"/>, <xref linkend="LinkId"/></para>
   </refsection>
 
   <refsection>
-    <title>Interfaces</title>
+    <title>Options</title>
 
-    <para>The Propagator dialog box is illustrated below and contains two
-    group boxes: the Integrator group and the Force Model group. This section
-    discusses the items in each group on the Propagate Panel. It will present
-    how to configure a propagator and discuss all possible user settable
-    fields in detail.</para>
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
 
-    <refsection>
-      <title>Integrator Group</title>
+        <colspec colnum="2" colwidth="3*"/>
 
-      <para>The Integrator group allows you to select and configure a
-      numerical integrator appropriate to your application. You select the
-      type of numerical integrator in the -+Type+- pull-down menu. After
-      selecting the integrator type, the fields below the -+Type+- pull-down
-      menu dynamically configure to allow you to set relevant parameters for
-      the selected integrator type. All integrators except for
-      Adams-Bashforth-Moulton (ABM) are configured using the same fields. The
-      ABM integrator has the following additional fields:
-      -+MinIntegrationerror+- and -+NomIntegrationerror+-.</para>
-    </refsection>
+        <thead>
+          <row>
+            <entry>Option</entry>
 
-    <refsection>
-      <title>Force Model Group</title>
+            <entry>Description</entry>
+          </row>
+        </thead>
 
-      <para>The Force Model group allows you to configure a force model
-      appropriate to the flight regime of your application. The central body
-      of propagation and error control method are also defined here. On a
-      Propagator, GMAT classifies all celestial bodies into two mutually
-      exclusive categories: Primary Bodies, and Point Masses. Primary bodies
-      can have a complex force model that includes non-spherical gravity,
-      drag, and magnetic field. Point mass bodies only have a point-mass
-      gravitational force.</para>
+        <tbody>
+          <row>
+            <entry><guilabel>FM</guilabel></entry>
 
-      <para>You can add a Primary Body by clicking the Select button in the
-      Primary Bodies group box. Once you have added a Primary Body (or
-      mulitiple bodies in future versions), the pull down menu allows you to
-      configure the force model for each Primary Body. The text box, next to
-      the Select button contains a list of all Primary Bodies so you can see
-      which bodies are being treated with complex force models. In future
-      versions, GMAT will support multiple primary bodies on a propagator
-      allowing you to use a non-spherical gravity model for the Earth and Moon
-      simultaneously.</para>
+            <entry><para>Identifies the force model used by an
+            integrator.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
 
-      <para>Configuring certain fields in the Force Model group affects the
-      availability of other fields. For example, if you remove all bodies from
-      the Primary Bodies list, the Gravity Field, Atmosphere Model, and
-      Magnetic Field groups are disabled. Similarly, in the Gravity Field
-      group, the search button and the Model File field are only active if
-      "Other" is selected in the -+Type+- pull-down. In the Atmosphere Model
-      group, the Setup button is only active when -+MSISE90+- or
-      -+JacchiaRoberts+- are selected in the -+Type+- pull-down.</para>
+                  <listitem>
+                    <para>OBJECT_TYPE</para>
+                  </listitem>
+                </varlistentry>
 
-      <para>GMAT allows you to define Solar flux properties if you select
-      either the -+MSISE90+- or -+JacchiaRoberts+- atmosphere models. By
-      selecting one of these models in the -+Type+- pull-down menu in the
-      Atmosphere Model group, the Setup button is enabled. Clicking on the
-      Setup button brings up the panel illustrated below. Here you can input
-      Solar flux values. GMAT does not currently support flux files though
-      future versions will.</para>
+                <varlistentry>
+                  <term>Allowed Values</term>
 
-      <screenshot>
-        <info>
-          <title>Figure: Default Name and Settings for the Propagator Object
-          Dialog Box</title>
-        </info>
+                  <listitem>
+                    <para>Valid force model.</para>
+                  </listitem>
+                </varlistentry>
 
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_Prop_Default.jpeg"
-                       scalefit="1" width="100%"></imagedata>
-          </imageobject>
+                <varlistentry>
+                  <term>Access</term>
 
-          <caption>
-            <para>Figure: Default Name and Settings for the Propagator Object
-            Dialog Box</para>
-          </caption>
-        </mediaobject>
-      </screenshot>
-    </refsection>
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Type</guilabel></entry>
+
+            <entry><para>Specifies the integrator or analytic propagator used
+            to model time evolution of spacecraft motion. </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>OBJECT_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>PrinceDormand78, PrinceDormand45,
+                    RungeKutta89,RungeKutta68, RungeKutta56, BulirschStoer,
+                    AdamsBashforthMoulton</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>RungeKutta89</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>yes</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
 
   <refsection>
-    <title>Fields</title>
-
-    <refsection>
-      <title>Force Model Group Box Fields</title>
-
-      <variablelist>
-        <varlistentry>
-          <term>ErrorControl</term>
-
-          <listitem>
-            <para>The ErrorControl field allows you to choose how a Propagator
-            measures the error in an integration step. The algorithm selected
-            in the ErrorControl field is used to determine the error in the
-            current step, and this error is compared to the value set in the
-            Accuracy field to determine if the step has an acceptable error or
-            needs to be improved.</para>
-
-            <para>All error measurements are relative error, however, the
-            reference for the relative error changes depending upon the
-            selection of ErrorControl. RSSStep is the Root Sum Square (RSS)
-            relative error measured with respect to the current step. RSSState
-            is the (RSS) relative error measured with respect to the current
-            state. LargestStep is the state vector component with the largest
-            relative error measured with respect to the current step.
-            LargestState is the state vector component with the largest
-            relative error measured with respect to the current state. For a
-            more detailed discussion see the GMAT Mathematical Specification.
-            Units: N/A.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>RSSStep</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>RSSStep, RSSState, LargestState, LargestStep</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>CentralBody</term>
-
-          <listitem>
-            <para>The CentralBody field allows the user to select the origin
-            for the propagation. All propagation occurs in the FK5 axes
-            system, about the CentralBody chosen by the user. The CentralBody
-            must be a gravitational body and so cannot be a LibrationPoint or
-            other special point.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>Earth</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter,
-                  Saturn, Uranus, Neptune, Pluto</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>PrimaryBodies</term>
-
-          <listitem>
-            <para>The PrimaryBodies field is a list of all celestial bodies
-            that are to be modelled with a force model more complex than point
-            mass gravity. Lists are surrounded by curly braces. For each
-            PrimaryBody, the user can choose a drag, magnetic field, and
-            aspherical gravity model. There is a coupling between the
-            PrimaryBodies filed and the PointMasses field. A primary body can
-            be any planet or moon not included in the PointMasses
-            field.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>Earth</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter,
-                  Saturn, Uranus, Neptune, Pluto</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Gravity.PrimaryBody.PotentialFile</term>
-
-          <listitem>
-            <para>This field allows the user to define the source for the
-            non-spherical gravity coefficients for a primary body. If a
-            gravity file is located in the Primary Body's potential path as
-            defined in the startup file, you only need to specify the model
-            name and not the entire path. For example, if the JGM2
-            coefficients file is contained in the directory defined in the
-            startup file by the line EARTH\_POT\_PATH, then you only need to
-            specify the model name JGM2. If the model is not contained in the
-            body's potential path, you must supply the entire path as well as
-            the file name. If GMAT does not successfully find the file
-            requested, it uses the default gravity model as defined in the
-            startup file. From the GUI, only models for Earth appear if Earth
-            is the active primary body. This is to avoid allowing the user to
-            select a lunar potential model for the Earth. If the Other option
-            is selected the user has the ability of selecting a gravity model
-            file on their local computer.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>JGM2</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>CentralBody-based models, Other. See Comments</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Gravity.PrimaryBody.Degree</term>
-
-          <listitem>
-            <para>This field allows the user to select the the degree, or
-            number of zonal terms, in the non-spherical gravity model. Ex.
-            Gravity.Earth.Degree = 2 tells GMAT to use only the J2 zonal term
-            for the Earth. The value for Degree must be less than the maximum
-            degree specified by the Model.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>4</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Integer &gt;= 0 and &lt; the maximum specified by the
-                  model, Order &lt;= Degree</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Gravity.PrimaryBody.Order</term>
-
-          <listitem>
-            <para>This field allows the user to select the the order, or
-            number of tesseral terms, in the non-spherical gravity model. Ex.
-            Gravity.Earth.Order = 2 tells GMAT to use 2 tesseral terms. Note:
-            Order must be greater than or equal to Degree.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>4</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Integer &gt;= 0 and &lt; the maximum specified by the
-                  model, Order &lt;= Degree</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Drag</term>
-
-          <listitem>
-            <para>The Drag field allows a user to specify a drag model.
-            Currently, only one drag model can be chosen for a particular
-            propagator and only Earth models are available.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>None, JacchiaRoberts, MSISE90, Exponential</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A. Note: This field will be deprecated in future
-                  versions of GMAT. Currently, the Drag field and the
-                  Drag.AtmosphereModel field must be set to the same
-                  value.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Drag.AtmosphereModel</term>
-
-          <listitem>
-            <para>The Drag.AtmosphereModel field allows a user to specify a
-            drag model. Currently, only one drag model can be chosen for a
-            particular propagator and only Earth models are available.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>None</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>None, JacchiaRoberts, MSISE90, Exponential</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Drag.F107</term>
-
-          <listitem>
-            <para>The Drag.F107 field allows you to set the
-            F<subscript>10.7</subscript> solar flux value used in computing
-            atmospheric density. F<subscript>10.7</subscript> is the solar
-            radiation at a wavelength of 10.7 cm.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>150</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Real Number &gt;= 0</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>W/m<superscript>2</superscript>/Hz</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Drag.F107A</term>
-
-          <listitem>
-            <para>The Drag.F107A field allows you to set the average
-            F<subscript>10.7</subscript> value. F<subscript>10.7</subscript>
-            is the average of F<subscript>10.7</subscript> over one
-            month.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>150</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Real Number &gt;= 0</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>W/m<superscript>2</superscript>/Hz</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Drag.MagneticIndex</term>
-
-          <listitem>
-            <para>The Drag.MagneticIndex index field allows you to set the
-            k<subscript>p</subscript> value for use in atmospheric density
-            calculations. k<subscript>p</subscript> is a planetary
-            3-hour-average, geomagnetic index that measures magnetic effects
-            of solar radiation.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>3</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>0 &lt;= Real Number &lt;= 9</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>PointMasses</term>
-
-          <listitem>
-            <para>A PointMass is a planet or moon that is modelled by a point
-            source located at its center of gravity. A PointMass body can be
-            any planet or moon not included in the PrimaryBodies field.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>None</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter,
-                  Saturn, Uranus, Neptune, Pluto</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>SRP</term>
-
-          <listitem>
-            <para>The SRP field allows the user to include the force due to
-            solar radiation pressure in the total sum of forces.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>Off</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>On, Off</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </refsection>
-
-    <refsection>
-      <title>Integrator Group Box Fields</title>
-
-      <variablelist>
-        <varlistentry>
-          <term>Type</term>
-
-          <listitem>
-            <para>The Type field is used to set the type of numerical
-            integrator.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>RungeKutta89</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>RungeKutta89, RungeKutta68, RungeKutta56,
-                  PrinceDormand45, PrinceDormand78, BulirschStoer,
-                  AdamsBashforthMoulton</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>InitialStepSize</term>
-
-          <listitem>
-            <para>The InitialStepSize is the size of the first attempted step
-            by the integrator. If the step defined by InitialStepSize does not
-            satisfy Accuracy, the integrator adapts the step according an
-            algorithm defined in the mathematical specifications document to
-            find an acceptable first step that meets the user's
-            requested.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>60 (sec)</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Real Number</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>seconds</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Accuracy</term>
-
-          <listitem>
-            <para>The Accuracy field is used to set the desired accuracy for
-            an integration step. When you set a value for Accuracy, GMAT uses
-            the method selected in ErrorControl field on the Force Model, to
-            determine a metric of the accuracy. For each step, the integrator
-            ensures that the accuracy, as calculated using the method defined
-            by ErrorControl, is less than the limit defined by Accuracy. If an
-            integrator exceeds MaxStepAttempts trying to meet the requested
-            accuracy, and error message is thrown and propagation
-            stops.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>1e-11</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Real Number &gt;= 0</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>MinStep</term>
-
-          <listitem>
-            <para>The MinStep field is used to set the minimum allowable step
-            size.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>.001 (sec)</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Real Number &gt; 0, MinStep &lt;= MaxStep</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>seconds</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>MaxStep</term>
-
-          <listitem>
-            <para>The MaxStep field is used to set the maximum allowable step
-            size.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>2700.0 (sec)</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Real Number &gt; 0, MinStep &lt;= MaxStep</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>seconds</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>MaxStepAttempts</term>
-
-          <listitem>
-            <para>The MaxStepAttempts field allows the user to set the number
-            of attempts the integrator takes to meet the tolerance defined by
-            Accuracy.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>50</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Integer &gt; 0</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>None</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </refsection>
-
-    <refsection>
-      <title>Fields Associated Only with Adams-Bashforth-Moulton
-      Integrator</title>
-
-      <variablelist>
-        <varlistentry>
-          <term>MinIntegrationerror</term>
-
-          <listitem>
-            <para>The MinIntegrationerror field is used by the ABM integrator
-            (and other predictor-corrector integrators when implemented) as
-            the desired integration error to be obtained when the step size is
-            changed. Predictor-Corrector integrators adapt step size when the
-            obtained integration error falls outside of the range of
-            acceptable steps, as determined by the bounds set by the
-            MinIntegrationerror and Accuracy fields. The integrator then
-            applies an internal calculation to recompute the step size,
-            attempting to hit the NomIntegrationerror, and restarts the
-            integrator.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>1.0e-13</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Real Number &gt; 0, MinIntegrationerror &lt;
-                  NomIntegrationerror &lt; Accuracy</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>None</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>NomIntegrationerror</term>
-
-          <listitem>
-            <para>The NomIntegrationerror field is used by the ABM integrator
-            (and other predictor-corrector integrators when implemented) as
-            the desired integration error to be obtained when the step size is
-            changed. Predictor-Corrector integrators adapt step size when the
-            obtained integration error falls outside of the range of
-            acceptable steps, as determined by the bounds set by the
-            MinIntegrationerror and Accuracy fields. The integrator then
-            applies an internal calculation to recompute the step size,
-            attempting to hit the NomIntegrationerror, and restarts the
-            integrator.</para>
-
-            <variablelist spacing="compact">
-              <varlistentry>
-                <term>Default</term>
-
-                <listitem>
-                  <para>1.0e-11</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Limits</term>
-
-                <listitem>
-                  <para>Real Number &gt; 0, MinIntegrationerror ,
-                  NomIntegrationerror , Accuracy</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term>Units</term>
-
-                <listitem>
-                  <para>None</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </refsection>
+    <title>GUI</title>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata align="center" contentdepth="100%"
+                   fileref="files/images/Resource_Integrator.png" scalefit="1"
+                   width="100%"/>
+      </imageobject>
+    </mediaobject>
+
+    <para>Settings for the embedded Runge-Kutta integrators. See the Remarks
+    section for additional settings for the
+    <guilabel>AdamsBashforthMoulton.</guilabel></para>
   </refsection>
 
   <refsection>
-    <title>Interactions</title>
+    <title>Remarks</title>
 
-    <para>A Propagator Requires Other Objects/Commands of Type: Force Model
-    (Script Only). (Note: There are slight differences in how you configure a
-    Propagator in the script and GUI and we refer you to the script example
-    shown in the script section for details. Effort has been made to reduce
-    any difference between the script and GUI.)</para>
+    <para><emphasis>Best Practices for Using Numerical
+    Integrators</emphasis></para>
+
+    <para>We recommend that you study the performance and accuracy analysis
+    documented later in this section to select a numerical integrator for your
+    application. You may need to perform further analysis and comparisons for
+    your application. The comparison data below suggest that the
+    <guilabel>PrinceDormand78</guilabel> integrator is the best all purpose
+    integrator in GMAT. When in doubt, use the
+    <guilabel>PrinceDormance78</guilabel> integrator, and set
+    <guilabel>MinStep</guilabel> to zero so that the integrator’s adaptive
+    step algorithm controls the minimum integration step size. Below are some
+    important comments on GMAT’s step size control algorithms and the dangers
+    of using a non-zero value for the minimum integration step size.</para>
+
+    <caution>
+      <para>Caution: GMAT’s default error computation mode is
+      <guilabel>RSStep</guilabel> and this is a more stringent error control
+      method than <guilabel>RSSState</guilabel> that is often used as the
+      default in other software such as STK. If you set Accuracy to a very
+      small number, 1e-13 for example, and leave
+      <guilabel>ErrorControl</guilabel> set to <guilabel>RSSStep</guilabel>,
+      integrator performance will be poor, for little if any improvement in
+      the accuracy of the orbit integration. To find the best balance between
+      integration accuracy and performance, we recommend you experiment with
+      the accuracy setting for your selected integrator for your application.
+      You can start with a relatively high setting of
+      <guilabel>Accuracy</guilabel>, say 1e-9, and lower the accuracy by an
+      order of magnitude at a time and compare the final orbital states to
+      determine where smaller values of <guilabel>Accuracy</guilabel> result
+      in longer propagation times without providing more accurate orbital
+      solutions.</para>
+    </caution>
+
+    <caution>
+      <para>Caution: GMAT allows you to set a minimum step on numerical
+      integrators. It is possible that the requested
+      <guilabel>Accuracy</guilabel> cannot be achieved given the
+      <guilabel>MinimumStep</guilabel> setting. The
+      <guilabel>Propagator</guilabel> flag
+      <guilabel>StopIfAccuracyIsViolated</guilabel> determines the behavior if
+      <guilabel>Accuracy</guilabel> cannot be satisfied. If
+      <guilabel>StopIfAccuracyIsViolated</guilabel> is true, GMAT will throw
+      an error and stop execution if integration accuracy is not satisfied. If
+      <guilabel>StopIfAccuracyIsViolated</guilabel> is false, GMAT will only
+      throw a warning that the integration accuracy was not satisfied but will
+      continue to propagate the orbit.</para>
+    </caution>
+
+    <para><emphasis>Numerical Integrators Overview</emphasis></para>
+
+    <para>The table below describes each numerical integrator in
+    detail.</para>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Option</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>RungeKutta89</guilabel></entry>
+
+            <entry><para>An adaptive step, ninth order Runge-Kutta integrator
+            with eighth order error control. The coefficients were derived by
+            J. Verner. Verner developed several sets of coefficients for an 89
+            integrator and we have chosen the coefficients that are the most
+            robust but not necessarily the most efficient.</para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>PrinceDormand78</guilabel></entry>
+
+            <entry><para>An adaptive step, eighth order Runge-Kutta integrator
+            with seventh order error control. The coefficients were derived by
+            Prince and Dormand.</para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>PrinceDormand45</guilabel></entry>
+
+            <entry><para>An adaptive step, fifth order Runge-Kutta integrator
+            with fourth order error control. The coefficients were derived by
+            Prince and Dormand.</para> <para>A second order
+            Runge-Kutta-Nystrom type integrator with coefficients developed by
+            by Dormand, El-Mikkawy and Prince. The integrator is a 9-stage
+            Nystrom integrator, with error control on both the dependent
+            variables and their derivatives. This second order implementation
+            will correctly integrate forces that are non-conservative but it
+            is not recommended for this use. See the integrator comparisons
+            below for numerical comparisons. You cannot use this integrator to
+            integrate mass during a finite maneuver because the mass flow rate
+            is a first order differential equation not supported by this
+            integrator.</para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>RungeKutta68</guilabel></entry>
+
+            <entry><para>An adaptive step, fifth order Runge-Kutta integrator
+            with fourth order error control. The coefficients were derived by
+            Prince and Dormand.</para> <para>A second order
+            Runge-Kutta-Nystrom type integrator with coefficients developed by
+            by Dormand, El-Mikkawy and Prince. The integrator is a 9-stage
+            Nystrom integrator, with error control on both the dependent
+            variables and their derivatives. This second order implementation
+            will correctly integrate forces that are non-conservative but it
+            is not recommended for this use. See the integrator comparisons
+            below for numerical comparisons. You cannot use this integrator to
+            integrate mass during a finite maneuver because the mass flow rate
+            is a first order differential equation not supported by this
+            integrator.</para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>RungeKutta56</guilabel></entry>
+
+            <entry><para>An adaptive step, sixth order Runge-Kutta integrator
+            with fifth order error control. The coefficients were derived by
+            E. Fehlberg.</para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AdamsBashforthMoulton</guilabel></entry>
+
+            <entry><para>A fourth-order Adams-Bashford predictor /
+            Adams-Moulton corrector as described in Fundamentals of
+            Astrodynamics by Bate, Mueller and White. The predictor step
+            extrapolates the next state of the variables using the the
+            derivative information at the current state and three previous
+            states of the variables. The corrector uses derivative information
+            evaluated for this state, along with the derivative information at
+            the original state and two preceding states, to tune this state,
+            giving the final, corrected state. The ABM integrator uses the
+            RungeKutta89 integrator to start the integration process. The ABM
+            is a low order integrator and should not be used for precise
+            applications or for highly nonlinear applications such as
+            celestial body flybys.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para><emphasis>Performance &amp; Accuracy Comparison of Numerical
+    Integrators</emphasis></para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata align="center" contentdepth="100%"
+                   fileref="files/images/IntegratorComparisonTable.png"
+                   scalefit="1" width="100%"/>
+      </imageobject>
+    </mediaobject>
+
+    <para><emphasis>Fields Unique to the AdamsBashforthMoulton
+    Integrator</emphasis></para>
+
+    <para>The Adams-Bashforth-Moulton integrator has two additional fields
+    named <guilabel>TargetError</guilabel> and <guilabel>LowerError</guilabel>
+    that are only active when <guilabel>Type</guilabel> is set to
+    <guilabel>AdamsBashforthMoulton</guilabel>. If you are using another
+    integrator type, those fields must be removed from your script file to
+    avoid parsing errors. When working in the GUI, this is performed
+    automatically. See examples below for more details.</para>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <programlisting><code>Create ForceModel DefaultProp_ForceModel;
-DefaultProp_ForceModel.CentralBody = Earth;
-DefaultProp_ForceModel.PrimaryBodies = {Earth};
-DefaultProp_ForceModel.Drag = None;
-DefaultProp_ForceModel.SRP = Off;
-DefaultProp_ForceModel.ErrorControl = RSSStep;
-DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
-DefaultProp_ForceModel.GravityField.Earth.Order = 4;
-DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+    <informalexample>
+      <para>Propagate an orbit using a general purpose Runge-Kutta
+      integrator:</para>
 
-Create Propagator DefaultProp;
-DefaultProp.FM = DefaultProp_ForceModel;
-DefaultProp.Type = RungeKutta89;
-DefaultProp.InitialStepSize = 60;
-DefaultProp.Accuracy = 9.999999999999999e-012;
-DefaultProp.MinStep = 0.001;
-DefaultProp.MaxStep = 2700;
-DefaultProp.MaxStepAttempts = 50;</code></programlisting>
+      <programlisting><code>Create Spacecraft aSat;
+Create ForceModel aForceModel;
+
+Create Propagator aProp;
+aProp.FM              = aForceModel;
+aProp.Type            = PrinceDormand78;
+aProp.InitialStepSize = 60;
+aProp.Accuracy        = 1e-011;
+aProp.MinStep         = 0;
+aProp.MaxStep         = 86400;
+aProp.MaxStepAttempts = 50;
+aProp.StopIfAccuracyIsViolated = true;
+
+BeginMissionSequence;
+
+Propagate aProp(aSat) {aSat.ElapsedDays = .2};</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Propagate using a fixed step configuration. Do this by setting
+      <guilabel>InitialStepSize</guilabel> to the desired fixed step size and
+      setting <guilabel>ErrorControl</guilabel> to <guilabel>None</guilabel>.
+      This example propagates in constant steps of 30 seconds:</para>
+
+      <programlisting><code>Create Spacecraft aSat;
+Create ForceModel aForceModel;
+aForceModel.ErrorControl = None;
+
+Create Propagator aProp;
+aProp.FM              = aForceModel;
+aProp.Type            = PrinceDormand78;
+aProp.InitialStepSize = 30;
+
+BeginMissionSequence;
+
+Propagate aProp(aSat) {aSat.ElapsedDays = .2};</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Propagate an orbit using an Adams-Bashforth-Moulton
+      predictor-corrector integrator:</para>
+
+      <programlisting><code>Create Spacecraft aSat;
+Create ForceModel aForceModel;
+aForceModel.ErrorControl = RSSStep;
+
+Create Propagator aProp;
+aProp.FM              = aForceModel;
+aProp.Type            = AdamsBashforthMoulton;
+aProp.InitialStepSize = 60;
+aProp.MinStep         = 0;
+aProp.MaxStep         = 86400;
+aProp.MaxStepAttempts = 50;
+%  Note the following fields must be set with decreasing values!
+aProp.Accuracy        = 1e-010;
+aProp.TargetError     = 1e-011;
+aProp.LowerError      = 1e-013;
+aProp.StopIfAccuracyIsViolated = true;
+
+BeginMissionSequence;
+
+Propagate aProp(aSat) {aSat.ElapsedDays = .2};</code></programlisting>
+    </informalexample>
+
+  
   </refsection>
 </refentry>
