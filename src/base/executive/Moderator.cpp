@@ -7503,7 +7503,7 @@ void Moderator::CreateDefaultParameters()
    // Time parameters
    CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
    CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");      
-   CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove
+//   CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove  // deprecated
    CreateParameter("A1ModJulian", "DefaultSC.A1ModJulian");
    CreateParameter("A1Gregorian", "DefaultSC.A1Gregorian");
    CreateParameter("TAIModJulian", "DefaultSC.TAIModJulian");

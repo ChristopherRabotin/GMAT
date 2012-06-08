@@ -42,6 +42,17 @@
 CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj)
    : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days", "day", true)
 {
+   // Write deprecated message once per GMAT session
+   static bool writeDeprecatedMsg = true;
+
+   if (writeDeprecatedMsg)
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** \"CurrA1MJD\" is deprecated and will be "
+          "removed from a future build; please use \"A1ModJulian\" "
+          "instead.\n");
+      writeDeprecatedMsg = false;
+   }
 }
 
 

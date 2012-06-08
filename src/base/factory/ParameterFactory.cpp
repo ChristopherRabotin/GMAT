@@ -78,7 +78,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ElapsedDays(withName);
    if (ofType == "ElapsedSecs")
       return new ElapsedSecs(withName);
-   if (ofType == "CurrA1MJD")
+   if (ofType == "CurrA1MJD")            // deprecated
       return new CurrA1MJD(withName);
    if (ofType == "A1ModJulian")
       return new A1ModJulian(withName);
@@ -403,7 +403,7 @@ ParameterFactory::ParameterFactory()
       // Time parameters
       creatables.push_back("ElapsedDays");
       creatables.push_back("ElapsedSecs");
-      creatables.push_back("CurrA1MJD");
+      creatables.push_back("CurrA1MJD");     // deprecated
       creatables.push_back("A1ModJulian");
       creatables.push_back("A1Gregorian");
       creatables.push_back("TAIModJulian");
