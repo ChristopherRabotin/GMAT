@@ -15,7 +15,7 @@
 // Created: 2004/09/20
 //
 /**
- * Implements Array class which handles one or two dimentional array.
+ * Implements Array class which handles one or two dimensional array.
  */
 //------------------------------------------------------------------------------
 
@@ -246,10 +246,6 @@ std::string Array::ToString()
    return mRmatValue.ToString(false, false, false, GmatGlobal::DATA_PRECISION, 1,
                               true, 1, "", false);
    
-   //std::stringstream ss("");
-   //ss.precision(10);
-   //ss << mRmatValue;
-   //return std::string(ss.str());
 }
 
 
@@ -582,7 +578,7 @@ const Rmatrix& Array::GetRmatrixParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// const Rvector& GetRvectorParameter(const std::string &label) const
+// const Rmatrix& GetRmatrixParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
@@ -616,21 +612,6 @@ const Rmatrix& Array::SetRmatrixParameter(const Integer id,
       return Parameter::SetRmatrixParameter(id, value);
    }
    
-//    if (mSizeSet)
-//    {
-//       switch (id)
-//       {
-//       case RMAT_VALUE:
-//          mRmatValue = value;
-//          return value;
-//       default:
-//          return Parameter::SetRmatrixParameter(id, value);
-//       }
-//    }
-//    else
-//    {
-//       throw ParameterException("The size has not been set for " + GetName());
-//    }
 }
 
 
