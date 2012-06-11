@@ -29,24 +29,24 @@
 class GMAT_API IAUFile
 {
 public:
-   // default constructor
-   IAUFile(const std::string &fileName = "IAU_SOFA.DAT", const Integer dim = 1);
-   // copy constructor
-   IAUFile(const IAUFile &iau);
-   // operator = 
-   const IAUFile& operator=(const IAUFile &iau);
-   // destructor
-   virtual ~IAUFile();
-   
-   
-   // initializes the IAUFile (reads it and stores the data)
-   virtual void Initialize();
-  
+   static IAUFile* Instance();
+   virtual void Initialize();	// initializes the IAUFile (reads it and stores the data)
+   void Finalize();
+
    // get IAU2000 data for a given epoch:
    bool GetIAUData(Real epoch, Real* iau, Integer dim, Integer order);
 
-//protected:
-public:	
+private:
+   // default constructor
+   IAUFile(const std::string &fileName = "IAU_SOFA.DAT", const Integer dim = 1);
+
+   // destructor
+   virtual ~IAUFile();
+   
+   static IAUFile *instance;
+   
+protected:
+//public:
    static const Integer MAX_TABLE_SIZE;
 
    std::string          iauFileName;			// name of data file (It contains the path to the file) 
@@ -61,9 +61,9 @@ public:
    
    void AllocateArrays();
    void CleanupArrays();
-   void CopyArrays(const IAUFile &iau);
-   void CopyArraysContent(const IAUFile &iau);
+//   void CopyArrays(const IAUFile &iau);
+//   void CopyArraysContent(const IAUFile &iau);
 };
 
 
-#endif // IAUFile_hpp
+#endif // ICRFFile_hpp
