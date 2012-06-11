@@ -27,12 +27,10 @@
 #include "GmatBase.hpp"
 #include "AxisSystem.hpp"
 #include "DynamicAxes.hpp"
-#include "EopFile.hpp"
 //#include "DeFile.hpp"
 //#include "ItrfCoefficientsFile.hpp"
 //#include "CelestialBody.hpp"
 
-#include "EopFile.hpp"
 #include "IAUFile.hpp"
 #include "Rmatrix33.hpp"
 
@@ -112,8 +110,7 @@ public:
    Real                     prevOriginUpdateInterval;
    Gmat::RotationDataSource prevLunaSrc;
 
-   IAUFile*				iauFile;
-//   EopFile*			eopFile;
+   IAUFile*					iauFile;
 
 };
 #endif // ITRFAxes_hpp

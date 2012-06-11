@@ -37,6 +37,7 @@
 #include "CoordinateSystemException.hpp"
 #include "MessageInterface.hpp"
 #include "Attitude.hpp"
+#include "FileManager.hpp"
 
 #define PI 3.1415926535897
 
@@ -89,7 +90,6 @@ ITRFAxes::ITRFAxes(const std::string &itsName) :
 DynamicAxes("ITRF",itsName),
 //de                       (NULL),
 iauFile					 (NULL),
-//eopFile					 (NULL),
 prevEpoch                (0.0),
 prevUpdateInterval       (-99.9),
 prevOriginUpdateInterval (-99.9),
@@ -116,7 +116,6 @@ ITRFAxes::ITRFAxes(const ITRFAxes &itrfAxes) :
 DynamicAxes(itrfAxes),
 //de                       (NULL),
 iauFile					 (NULL),
-//eopFile					 (NULL),
 prevEpoch                (itrfAxes.prevEpoch),
 prevUpdateInterval       (itrfAxes.prevUpdateInterval),
 prevOriginUpdateInterval (itrfAxes.prevOriginUpdateInterval),
@@ -148,7 +147,6 @@ const ITRFAxes& ITRFAxes::operator=(const ITRFAxes &itrfAxes)
    DynamicAxes::operator=(itrfAxes); 
 //   de                       = itrfAxes.de;
    iauFile					= itrfAxes.iauFile;
-//   eopFile					= itrfAxes.eopFile;
    prevEpoch                = itrfAxes.prevEpoch;
    prevUpdateInterval       = itrfAxes.prevUpdateInterval;
    prevOriginUpdateInterval = itrfAxes.prevOriginUpdateInterval;
@@ -204,17 +202,22 @@ bool ITRFAxes::Initialize()
    #endif
    
    // create and initialize IAU2000/2006 object:
-   if (iauFile != NULL)
-      delete iauFile;
-   iauFile = new IAUFile("IAU_SOFA.DAT", 3);
+//   if (iauFile != NULL)
+//      delete iauFile;
+   if (iauFile == NULL)
+	   iauFile = IAUFile::Instance();
    iauFile->Initialize();
+
    // create and initialize EopFile object:
-//   if (eopFile != NULL)
-//	   delete eopFile;
-//   MessageInterface::PopupMessage(Gmat::WARNING_, "ITRFAxes::Initialize() 7\n");
-//   eopFile = new EopFile("C:/GmatProject/Gmat/application/data/planetary_coeff/eopc04.62-now");
-//   MessageInterface::PopupMessage(Gmat::WARNING_, "ITRFAxes::Initialize() 8\n");
-//   eopFile->Initialize();
+   if (eop == NULL)
+   {
+	   FileManager* fm = FileManager::Instance();
+	   std::string name = fm->GetFilename("EOP_FILE");
+	   MessageInterface::ShowMessage("EOP file name:'%s'\n", name.c_str());
+	   EopFile* eopFile = new EopFile(name);
+	   eopFile->Initialize();
+	   SetEopFile(eopFile);
+   }
 
    return true;
 }
@@ -575,7 +578,6 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
 
 	  // [dUT1,LOD,xp,yp] = GetEOP(utcMJD +  29999.5);
-      MessageInterface::ShowMessage("JD_JAN_5_1941 = %lf,   JD_NOV_17_1858 = %lf,  offset = %lf\n", JD_JAN_5_1941, JD_NOV_17_1858, offset);
 	  Real xp,yp,LOD,dUT1;
 	  dUT1 = eop->GetUt1UtcOffset(utcMJD +  offset);
 	  eop->GetPolarMotionAndLod(utcMJD +  offset, xp, yp, LOD);
@@ -590,7 +592,7 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       // Compute elapsed Julian centuries (UT1)
       //Real tUT1     = (jdUT1 - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
       Real tDiff = JD_JAN_5_1941 - JD_OF_J2000;
-      MessageInterface::ShowMessage("tDiff = %lf\n",tDiff);
+//      MessageInterface::ShowMessage("tDiff = %lf\n",tDiff);
       Real jdUT1 = ut1MJD + JD_JAN_5_1941;
 
       // convert input A1 MJD to TT MJD (for most calculations)
@@ -612,6 +614,10 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 	  //  Compute the precession-nutation matrix
 	  //  . interpolate the XYs data file
 	  Real data[3];
+	  if (iauFile == NULL)
+	  {
+		  MessageInterface::PopupMessage(Gmat::ERROR_, "Error: IAUFile object is NULL. GMAT cann't get IAU data...\n");
+	  }
 	  iauFile->GetIAUData(jdTT,data,3,9);
 	  Real X = data[0]*sec2rad;
 	  Real Y = data[1]*sec2rad;
@@ -633,7 +639,7 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 	  rotMatrix = R;
 	  rotDotMatrix = Rdot;
 
-//	  #ifdef DEBUG_BF_ROT_MATRIX
+	  #ifdef DEBUG_BF_ROT_MATRIX
 	  MessageInterface::ShowMessage("a1MJD  = %18.10lf\n",a1MJD);
 	  MessageInterface::ShowMessage("utcMJD = %18.10lf\n",utcMJD);
 	  MessageInterface::ShowMessage("dUT1=%18.10e, xp=%18.10e, yp=%18.10e, LOD=%18.10e\n",dUT1,xp,yp,LOD);
@@ -659,8 +665,8 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
 	  MessageInterface::ShowMessage("Rdot(0,0)=%18.10lf,  Rdot(0,1)=%18.10lf,  Rdot(0,2)=%18.10lf\n",Rdot.GetElement(0,0),Rdot.GetElement(0,1),Rdot.GetElement(0,2));
 	  MessageInterface::ShowMessage("Rdot(1,0)=%18.10lf,  Rdot(1,1)=%18.10lf,  Rdot(1,2)=%18.10lf\n",Rdot.GetElement(1,0),Rdot.GetElement(1,1),Rdot.GetElement(1,2));
-	  MessageInterface::ShowMessage("Rdot(2,0)=%18.10lf,  Rdot(2,1)=%18.10lf,  Rdot(2,2)=%18.10lf\n",Rdot.GetElement(2,0),Rdot.GetElement(2,1),Rdot.GetElement(2,2));
-//      #endif
+	  MessageInterface::ShowMessage("Rdot(2,0)=%18.10lf,  Rdot(2,1)=%18.10lf,  Rdot(2,2)=%18.10lf\n\n\n",Rdot.GetElement(2,0),Rdot.GetElement(2,1),Rdot.GetElement(2,2));
+      #endif
 
       if (overrideOriginInterval) 
       {
@@ -692,176 +698,6 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 //   }
 
 
-/*
-
-   else if ((originName == SolarSystem::MOON_NAME) &&
-           (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_405_FILE))
-   {
-      #ifdef DEBUG_BF_RECOMPUTE
-         MessageInterface::ShowMessage("   RECOMPUTING!!! - body name is LUNA\n");
-      #endif
-      if (!de)
-      {
-         de = (DeFile*) ((CelestialBody*)origin)->GetSourceFile();
-         if (!de)
-         throw CoordinateSystemException(
-               "No DE file specified - cannot get Moon data");
-         // De file is initialized in its constructor
-      }
-      bool override = ((CelestialBody*)origin)->GetOverrideTimeSystem();
-      Real librationAngles[3], andRates[3];
-      de->GetAnglesAndRates(atEpoch, librationAngles, andRates, override);
-      // convert from rad/day to rad/second
-      //andRates[0] /= GmatTimeConstants::SECS_PER_DAY;
-      //andRates[1] /= GmatTimeConstants::SECS_PER_DAY;
-      //andRates[2] /= GmatTimeConstants::SECS_PER_DAY;
-      rotMatrix    = (Attitude::ToCosineMatrix(librationAngles, 3, 1, 3)).Transpose();
-      Real ca1    = cos(librationAngles[0]);
-      Real ca2    = cos(librationAngles[1]);
-      Real ca3    = cos(librationAngles[2]);
-      Real sa1    = sin(librationAngles[0]);
-      Real sa2    = sin(librationAngles[1]);
-      Real sa3    = sin(librationAngles[2]);
-      Real s1c2   = sa1*ca2;
-      Real s1c3   = sa1*ca3;
-      Real s2c3   = sa2*ca3; 
-      Real s3c1   = sa3*ca1;  
-      Real s3c2   = sa3*ca2;  
-      Real s1s2   = sa1*sa2;  
-      Real s1s3   = sa1*sa3;
-      Real c1c2   = ca1*ca2;  
-      Real c1c3   = ca1*ca3;  
-      Real c2c3   = ca2*ca3;  
-
-      Real s3c2s1 = s3c2*sa1;
-      Real c1c2c3 = ca1*c2c3;
-      Real s3c1c2 = s3c1*ca2;
-      Real s1c2c3 = c2c3*sa1;
-      
-      rotDotMatrix.Set(
-         -andRates[2]*(s3c1+s1c2c3) + andRates[1]*sa3*s1s2  - andRates[0]*(s1c3+s3c1c2),
-         -andRates[2]*(c1c3-s3c2s1) + andRates[1]*ca3*s1s2  + andRates[0]*(s1s3-c1c2c3),
-                                      andRates[1]*s1c2      + andRates[0]*sa2*ca1,
-         -andRates[2]*(s1s3-c1c2c3) - andRates[1]*s3c1*sa2  + andRates[0]*(c1c3-s3c2s1),
-         -andRates[2]*(s1c3+s3c1c2) - andRates[1]*s2c3*ca1  - andRates[0]*(s3c1+s1c2c3),
-                                    - andRates[1]*c1c2      + andRates[0]*s1s2,
-           andRates[2]*s2c3          + andRates[1]*s3c2,
-          -andRates[2]*sa2*sa3       + andRates[1]*c2c3,
-                                     - andRates[1]*sa2
-         );
-      
-       #ifdef DEBUG_MOON_MATRIX
-          MessageInterface::ShowMessage("angles are: %.17f  %.17f  %.17f\n",
-           librationAngles[0], librationAngles[1], librationAngles[2]);
-          MessageInterface::ShowMessage("rates are: %.17f  %.17f  %.17f\n",
-           andRates[0], andRates[1], andRates[2]);
-          MessageInterface::ShowMessage(
-          "rotMatrix = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f %.17f  %.17  %.17ff\n",
-           rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2), 
-           rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2), 
-           rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
-          MessageInterface::ShowMessage(
-          "rotDotMatrix = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f %.17f  %.17f %.17f\n",
-           rotDotMatrix(0,0), rotDotMatrix(0,1), rotDotMatrix(0,2), 
-           rotDotMatrix(1,0), rotDotMatrix(1,1), rotDotMatrix(1,2), 
-           rotDotMatrix(2,0), rotDotMatrix(2,1), rotDotMatrix(2,2));
-      #endif
-   }
-   else // compute for other bodies, using IAU data
-   {
-      #ifdef DEBUG_BF_RECOMPUTE
-         MessageInterface::ShowMessage("   RECOMPUTING!!! - and the body name is %s\n", originName.c_str());
-      #endif
-      Real Wderiv[9];
-      Real R13[3][3];
-      Real rotResult[3][3];
-      Real rotDotResult[3][3];
-      static Rvector cartCoord(4);  
-      const Real *cartC = cartCoord.GetDataVector();
-      #ifdef DEBUG_FIRST_CALL
-         if (!firstCallFired)
-            MessageInterface::ShowMessage("In BFA, Body is %s\n", originName.c_str());
-      #endif
-      // this method will return alpha (deg), delta (deg), 
-      // W (deg), and Wdot (deg/day)
-      cartCoord           = ((CelestialBody*)origin)->
-                            GetBodyCartographicCoordinates(atEpoch);
-      Real rot1           = GmatMathConstants::PI_OVER_TWO + Rad(cartC[0]);
-      Real rot2           = GmatMathConstants::PI_OVER_TWO - Rad(cartC[1]);
-      Real W              = Rad(cartC[2]);
-      Real Wdot           = Rad(cartC[3]) / SECS_PER_DAY; 
-      // Convert Wdot from deg/day to rad/sec
-      Real R3leftT[9]     =  {Cos(rot1),-Sin(rot1),0.0,
-                              Sin(rot1), Cos(rot1),0.0,
-                                    0.0,       0.0,1.0};
-      Real R1middleT[9]   =  {1.0,      0.0,       0.0,
-                              0.0,Cos(rot2),-Sin(rot2),
-                              0.0,Sin(rot2), Cos(rot2)};
-      
-      Real R3rightT[9]    =  {Cos(W),-Sin(W),0.0,
-                              Sin(W), Cos(W),0.0,
-                                 0.0,    0.0,1.0};
-      
-      Integer p3 = 0;
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            R13[p][q] = R1middleT[p3]   * R3rightT[q]   + 
-                        R1middleT[p3+1] * R3rightT[q+3] + 
-                        R1middleT[p3+2] * R3rightT[q+6];
-         }
-      }     
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            rotResult[p][q] = R3leftT[p3]   * R13[0][q] + 
-                              R3leftT[p3+1] * R13[1][q] + 
-                              R3leftT[p3+2] * R13[2][q];
-         }
-      }   
-      rotMatrix.Set(rotResult[0][0],rotResult[0][1],rotResult[0][2],  
-                    rotResult[1][0],rotResult[1][1],rotResult[1][2],
-                    rotResult[2][0],rotResult[2][1],rotResult[2][2]); 
-                    
-      Wderiv[0] = -Wdot*Sin(W);
-      Wderiv[1] = -Wdot*Cos(W);
-      Wderiv[2] =  0.0;
-      Wderiv[3] =  Wdot*Cos(W);
-      Wderiv[4] = -Wdot*Sin(W);
-      Wderiv[5] =  0.0;
-      Wderiv[6] =  0.0;
-      Wderiv[7] =  0.0;
-      Wderiv[8] =  0.0;  
-         
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            R13[p][q] = R1middleT[p3]   * Wderiv[q]   + 
-                        R1middleT[p3+1] * Wderiv[q+3] + 
-                        R1middleT[p3+2] * Wderiv[q+6];
-         }
-      }     
-      for (Integer p = 0; p < 3; ++p)
-      {
-         p3 = 3*p;
-         for (Integer q = 0; q < 3; ++q)
-         {
-            rotDotResult[p][q] = R3leftT[p3]   * R13[0][q] + 
-                                 R3leftT[p3+1] * R13[1][q] + 
-                                 R3leftT[p3+2] * R13[2][q];
-         }
-      }   
-      rotDotMatrix.Set(rotDotResult[0][0],rotDotResult[0][1],rotDotResult[0][2],  
-                       rotDotResult[1][0],rotDotResult[1][1],rotDotResult[1][2],
-                       rotDotResult[2][0],rotDotResult[2][1],rotDotResult[2][2]); 
-   }
-*/      
    // Save the epoch for comparison the next time through
    prevEpoch = theEpoch;
    #ifdef DEBUG_BF_RECOMPUTE
