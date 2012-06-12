@@ -23,6 +23,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatDialog.hpp"
 #include "GuiItemManager.hpp"
+#include <wx/config.h>
 
 class ParameterSelectDialog : public GmatDialog
 {
@@ -31,9 +32,9 @@ public:
    ParameterSelectDialog(wxWindow *parent,
                          const wxArrayString &objectTypeList,
                          int  showOption = GuiItemManager::SHOW_PLOTTABLE,
+                         int  showWholeObjOption = 0,
                          bool allowMultiSelect = false,
                          bool allowString = false,
-                         bool allowWholeObject = false,
                          bool allowSysParam = true,
                          bool allowVariable = true,
                          bool allowArray = true,
@@ -68,18 +69,21 @@ protected:
    bool mAllowArray;
    bool mAllowString;
    bool mAllowMultiSelect;
-   bool mAllowWholeObject;
    bool mCreateParam;
    bool mShowSettableOnly;
    bool mSkipDependency;
+   bool mAllowWholeObject;
    
    int  mShowOption;
+   int  mShowObjectOption;
    int  mNumRow;
    int  mNumCol;
+   int  mLastHardwareSelection;
    
    wxArrayInt mLastObjectSelections;
    wxArrayInt mLastPropertySelections;
    
+   wxStaticText *mHardwareStaticText;
    wxStaticText *mRowStaticText;
    wxStaticText *mColStaticText;
    
@@ -101,6 +105,7 @@ protected:
    
    wxListBox *mUserParamListBox;
    wxListBox *mObjectListBox;
+   wxListBox *mHardwareListBox;
    wxListBox *mPropertyListBox;
    wxListBox *mSelectedListBox;
    
@@ -109,6 +114,8 @@ protected:
    wxBoxSizer *mVarBoxSizer;
    wxBoxSizer *mCoordSysSizer;
    wxSizer *mParameterSizer;
+   
+   wxConfigBase *mConfig;
    
    // abstract methods from GmatDialog
    virtual void Create();
@@ -142,12 +149,21 @@ protected:
 private:
    
    bool AddWholeObject();
-   bool AddParameter();
+   bool AddParameterSelection();
    void AddParameter(const wxString &param);
    bool AddMultipleSelections();
    void AddAll();
    void RemoveParameter();
-   void ShowArrayInfo(bool show);
+   void ShowSpacecraft();
+   void ShowImpulsiveBurns();
+   void ShowArrays();
+   void ShowStrings();
+   void ShowVariables();
+   void ShowArrayIndex(bool show);
+   void ShowAttachedHardware(bool show);
+   void ShowObjectProperties();
+   void BuildAttachedHardware(const wxString &scName);
+   void ShowHardwareProperties(const wxString &scName, const wxString &hwName);
    void ShowCoordSystem();
    void ClearProperties();
    void DeselectAllObjects();
@@ -156,8 +172,12 @@ private:
    
    wxString GetObjectSelection();
    wxString GetPropertySelection();
+   wxString FormArrayElement();
    wxString FormParameterName();
+   
    Parameter* GetParameter(const wxString &name);
+   
+   void DisplayWarning(const wxString &arg1, const wxString &ar2 = "");
 };
 
 #endif

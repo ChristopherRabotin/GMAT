@@ -186,7 +186,8 @@ void ReportPanel::LoadData()
       #endif
       
       // Get parameters to report
-      StringArray parameterList = theCommand->GetRefObjectNameArray(Gmat::PARAMETER);
+      //StringArray parameterList = theCommand->GetRefObjectNameArray(Gmat::PARAMETER);
+      StringArray parameterList = theCommand->GetStringArrayParameter("Add");
       mNumParameters = parameterList.size();
       
       #ifdef DEBUG_REPORTPANEL_LOAD
@@ -204,6 +205,9 @@ void ReportPanel::LoadData()
             paramName = parameterList[i].c_str();
             mSelectedListBox->Append(paramName);
             mReportWxStrings.Add(paramName);
+            #ifdef DEBUG_REPORTPANEL_LOAD
+            MessageInterface::ShowMessage("   added %s\n", paramName.c_str());
+            #endif
          }
       }
    }
@@ -311,9 +315,11 @@ void ReportPanel::OnButtonClick(wxCommandEvent& event)
    {
       // Note:: 2008.01.23
       // The Report command cannot take Arrays yet, so set allowArray to false
+      // 2012.06.05 enabling Arrays since Report command can handle it now.
+      // Allow whole array or array element
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_REPORTABLE, true, true,
-                                     false, true, true, false);
+                                     GuiItemManager::SHOW_REPORTABLE, 2, true,
+                                     true, true, true, true);
       
       paramDlg.SetParamNameArray(mReportWxStrings);
       paramDlg.ShowModal();

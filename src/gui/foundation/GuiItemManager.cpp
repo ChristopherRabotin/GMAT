@@ -1336,6 +1336,14 @@ void GuiItemManager::UnregisterListBox(const wxString &type, wxListBox *lb,
       if (pos2 != mImpBurnExcList.end())
          mImpBurnExcList.erase(pos2);
    }
+   else if (type == "Hardware")
+   {
+      std::vector<wxListBox*>::iterator pos1 =
+         find(mHardwareLBList.begin(), mHardwareLBList.end(), lb);
+      
+      if (pos1 != mHardwareLBList.end())
+         mHardwareLBList.erase(pos1);
+   }
    else if (type == "FuelTank")
    {
       std::vector<wxListBox*>::iterator pos1 =
@@ -1576,94 +1584,116 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
 
 
 //------------------------------------------------------------------------------
-// wxArrayString GetPropertyList(const wxString &objType,
+// wxArrayString GetAttachedHardwareList(const wxString &scName)
+//------------------------------------------------------------------------------
+wxArrayString GuiItemManager::GetAttachedHardwareList(const wxString &scName)
+{
+   wxArrayString hardwareList;
+   
+   // Get requested spacecraft
+   GmatBase *obj = theGuiInterpreter->GetConfiguredObject(scName.c_str());
+   if (obj)
+   {
+      StringArray tanks = obj->GetStringArrayParameter("Tanks");
+      StringArray thrusters = obj->GetStringArrayParameter("Thrusters");
+      
+      // Add Tanks
+      for (unsigned int i = 0; i < tanks.size(); i++)
+         hardwareList.Add(tanks[i]);
+      
+      // Add Thrusters
+      for (unsigned int i = 0; i < thrusters.size(); i++)
+         hardwareList.Add(thrusters[i]);
+   }
+   
+   return hardwareList;
+}
+
+
+//------------------------------------------------------------------------------
+// wxArrayString GetPropertyList(const wxString &objName, const wxString &ownedObjName,
 //               int showOption = SHOW_PLOTTABLE, bool showSettableOnly = false)
 //------------------------------------------------------------------------------
-wxArrayString GuiItemManager::GetPropertyList(const wxString &objType,
+wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
+                                              const wxString &ownedObjName,
                                               int showOption, bool showSettableOnly)
 {
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
-      ("GuiItemManager::GetPropertyList() entered, objType=%s, showOption=%d, "
-       "showSettableOnly=%d\n", objType.c_str(), showOption, showSettableOnly);
+      ("GuiItemManager::GetPropertyList() entered, objName='%s', ownedObjName='%s', "
+       "showOption=%d, showSettableOnly=%d\n", objName.c_str(), ownedObjName.c_str(),
+       showOption, showSettableOnly);
    #endif
    
    wxArrayString array;
    std::string paramName;
    bool add = false;
+   wxString objTypeName, ownedObjTypeName;
+   Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT;
+   Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT;
    
-   if (objType == "Spacecraft")
+   // Get object and owned object type name
+   GmatBase *obj = theGuiInterpreter->GetConfiguredObject(objName.c_str());
+   if (obj)
+   {
+      objTypeName = obj->GetTypeName().c_str();
+      objType = obj->GetType();
+   }
+   
+   if (ownedObjName != "")
+   {
+      obj = theGuiInterpreter->GetConfiguredObject(ownedObjName.c_str());
+      if (obj)
+      {
+         ownedObjTypeName = obj->GetTypeName().c_str();
+         ownedObjType = obj->GetType();
+      }
+   }
+   
+   #if DBGLVL_GUI_ITEM_PROPERTY
+   MessageInterface::ShowMessage
+      ("   objTypeName='%s', ownedObjTypeName='%s'\n", objTypeName.c_str(),
+       ownedObjTypeName.c_str());
+   #endif
+   
+   if (objTypeName == "Spacecraft")
    {
       ParameterInfo *theParamInfo = ParameterInfo::Instance();
-      for (int i=0; i<theNumScProperty; i++)
+      // if owned object property
+      if (ownedObjTypeName != "")
       {
-         paramName = theScPropertyList[i].c_str();
-         add = false;
-         
-         // Attached object dependent Parameters for Spacecraft are not
-         // ready to show in the ParameterSelectDialog, so skipping it for now.
-         // @todo For attached object dependent Parameters, we need to show
-         // owned object name in the dependency ComboBox. (LOJ: 2012.03.09)
-         // eg) Sat1.Tank1.Temperature
-         // Changed to call ParameterInfo::IsForAttachedObject() (LOJ: 2012.04.02)
-         if (theParamInfo->IsForAttachedObject(paramName))
-            continue;
-         
-         if (showOption == SHOW_REPORTABLE)
+         int numScOwnedObjProperty = theScAttachedObjPropertyList.GetCount();
+         for (int i = 0; i < numScOwnedObjProperty; i++)
          {
-            if (theParamInfo->IsReportable(paramName))
+            paramName = theScAttachedObjPropertyList[i].c_str();
+            if (theParamInfo->GetOwnedObjectType(paramName) == ownedObjType)
             {
-               if (!showSettableOnly)
-                  add = true;
-               else if (theParamInfo->IsSettable(paramName))
-                  add = true;
-               
-               if (add)
-               {
-                  #if DBGLVL_GUI_ITEM_PROPERTY > 1
-                  MessageInterface::ShowMessage
-                     ("GetPropertyList() Adding %s\n", paramName.c_str());
-                  #endif
-                  
-                  array.Add(theScPropertyList[i]);
-               }
+               // Currently all spacecraft owned object (hardware) Parameters are plottable
+               #if DBGLVL_GUI_ITEM_PROPERTY > 1
+               MessageInterface::ShowMessage("   Adding '%s'\n", paramName.c_str());
+               #endif
+               array.Add(paramName);
             }
          }
-         else if (showOption == SHOW_PLOTTABLE)
-         {
-            if (theParamInfo->IsPlottable(paramName))
-            {
-               if (!showSettableOnly)
-                  add = true;
-               else if (theParamInfo->IsSettable(paramName))
-                  add = true;
-               
-               if (add)
-               {
-                  #if DBGLVL_GUI_ITEM_PROPERTY > 1
-                  MessageInterface::ShowMessage
-                     ("GetPropertyList() Adding %s\n", paramName.c_str());
-                  #endif
-                  
-                  array.Add(theScPropertyList[i]);
-               }
-            }
-         }
+      }
+      else
+      {
+         array =  GetSpacecraftProperties(showOption, showSettableOnly);
       }
       
       return array;
    }
-   else if (objType == "ImpulsiveBurn")
+   else if (objTypeName == "ImpulsiveBurn")
    {
-      // for now all impulsive burn parameters are reportable
+      // for now all impulsive burn parameters are reportable and plottable
       array = theImpBurnPropertyList;
       return array;
    }
    else
    {
       MessageInterface::ShowMessage
-         ("*** WARNING *** Property list for %s is not available at this time\n",
-          objType.c_str());
+         ("*** WARNING *** Property list for '%s' is not available at this time.\n",
+          objTypeName.c_str());
       
       return array;
    }
@@ -3343,6 +3373,38 @@ wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent, wxWindowID 
 
 
 //------------------------------------------------------------------------------
+// wxListBox* GetAttachedHardwareListBox(wxWindow *parent, wxWindowID id, ...)
+//------------------------------------------------------------------------------
+/**
+ * Returns spacecraft attached hardware ListBox.
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetAttachedHardwareListBox(wxWindow *parent, wxWindowID id,
+                                              const wxSize &size, const wxString &scName)
+{
+   wxArrayString emptyList;
+   wxListBox *hardwareListBox =
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                    wxLB_SINGLE);
+
+   wxArrayString hardwareList = GetAttachedHardwareList(scName);
+   
+   // Add hardware to ListBox
+   for (unsigned int i = 0; i < hardwareList.size(); i++)
+      hardwareListBox->Append(hardwareList[i]);
+   
+   hardwareListBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mHardwareLBList.push_back(hardwareListBox);
+   
+   return hardwareListBox;
+}
+
+
+//------------------------------------------------------------------------------
 // wxListBox* GetFuelTankListBox(wxWindow *parent, wxWindowID id, ...)
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetFuelTankListBox(wxWindow *parent, wxWindowID id,
@@ -3505,8 +3567,10 @@ wxListBox* GuiItemManager::GetSensorListBox(wxWindow *parent, wxWindowID id,
 wxSizer* GuiItemManager::CreateParameterSizer
    (wxWindow *parent,
     wxCheckBox **entireObjCheckBox, wxWindowID entireObjCheckBoxId,
-    wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId, 
+    wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId,
     wxListBox **objectListBox, wxWindowID objectListBoxId,
+    wxStaticText **hardwareStaticText, wxWindowID hardwareTextId,
+    wxListBox **hardwareListBox, wxWindowID hardwareListBoxId,
     wxStaticText **rowStaticText, wxWindowID rowStaticTextId,
     wxStaticText **colStaticText, wxWindowID colStaticTextId,
     wxTextCtrl **rowTextCtrl, wxWindowID rowTextCtrlId,
@@ -3523,8 +3587,8 @@ wxSizer* GuiItemManager::CreateParameterSizer
     wxButton **removeAllButton, wxWindowID removeAllButtonId,
     wxListBox **selectedListBox, wxWindowID selectedListBoxId,
     const wxArrayString &objectTypeList, int showOption,
-    bool showSettableOnly,
-    bool allowMultiSelect, bool showString, bool allowWholeObject,
+    int showObjectOption, bool showSettableOnly,
+    bool allowMultiSelect, bool showString,
     bool showSysParam, bool showVariable, bool showArray,
     const wxString &objectType,
     const wxString configSection)
@@ -3532,10 +3596,10 @@ wxSizer* GuiItemManager::CreateParameterSizer
    #if DEBUG_PARAM_SIZER
    MessageInterface::ShowMessage
       ("GuiItemManager::CreateParameterSizer() entered\n"
-       "   showOption=%d, allowMultiSelect=%d, showString=%d, allowWholeObject=%d, "
+       "   showOption=%d, showObjectOption=%d, allowMultiSelect=%d, showString=%d, "//allowWholeObject=%d, "
        "showSysParam=%d\n   showVariable=%d, showArray=%d, objectType=%s\n",
-       showOption, allowMultiSelect, showString, allowWholeObject, showSysParam,
-       showVariable, showArray, objectType.c_str());
+       showOption, showObjectOption, allowMultiSelect, showString, //allowWholeObject,
+       showSysParam, showVariable, showArray, objectType.c_str());
    #endif
    
    int bsize = 1;
@@ -3555,13 +3619,13 @@ wxSizer* GuiItemManager::CreateParameterSizer
       new wxCheckBox(parent, entireObjCheckBoxId, wxT("Select "GUI_ACCEL_KEY"Entire Object"));
    (*entireObjCheckBox)->SetToolTip(pConfig->Read(_T("SelectEntireObjectHint")));
 
-   if (!allowWholeObject)
+   if (showObjectOption == 0)
       (*entireObjCheckBox)->Disable();
    
    wxArrayString tmpObjTypeList;
    
    // add more object types to the list
-   if (showSysParam || allowWholeObject)
+   if (showSysParam || (showObjectOption == 1))
       tmpObjTypeList = objectTypeList;
    
    if (showVariable)
@@ -3585,17 +3649,31 @@ wxSizer* GuiItemManager::CreateParameterSizer
    
    if (objectType == "Spacecraft")
    {
+      // Show entire object option
+      (*entireObjCheckBox)->Hide();
+      if (showObjectOption == 1)
+      {
+         (*entireObjCheckBox)->SetLabel("Select Entire Object");
+         (*entireObjCheckBox)->Show();
+      }
       // create Spacecraft ListBox
       *objectListBox =
-         GetSpacecraftListBox(parent, objectListBoxId, wxSize(170, 163), NULL,
+         GetSpacecraftListBox(parent, objectListBoxId, wxSize(170, 95), NULL,
                               allowMultiSelect);
       (*objectListBox)->SetToolTip(pConfig->Read(_T("SpacecraftListHint")));
    }
    else if (objectType == "ImpulsiveBurn")
    {
+      // Show entire object option
+      (*entireObjCheckBox)->Hide();
+      if (showObjectOption == 1)
+      {
+         (*entireObjCheckBox)->SetLabel("Select Entire Object");
+         (*entireObjCheckBox)->Show();
+      }
       // create ImpulsiveBurn ListBox
       *objectListBox =
-         GetImpBurnListBox(parent, objectListBoxId, wxSize(170, 163), NULL,
+         GetImpBurnListBox(parent, objectListBoxId, wxSize(170, 95), NULL,
                            allowMultiSelect);
       (*objectListBox)->SetToolTip(pConfig->Read(_T("ImpulsiveBurnListHint")));
    }
@@ -3603,7 +3681,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    {
       // create Variable ListBox
       *objectListBox =
-         GetUserVariableListBox(parent, objectListBoxId, wxSize(170, 163), "",
+         GetUserVariableListBox(parent, objectListBoxId, wxSize(170, 95), "",
                                 allowMultiSelect);
       (*objectListBox)->SetToolTip(pConfig->Read(_T("VariableListHint")));
       
@@ -3611,8 +3689,20 @@ wxSizer* GuiItemManager::CreateParameterSizer
       (*objectTypeComboBox)->SetValue("Variable");
    }
    
-   // select first item
-   //(*objectListBox)->SetSelection(0);
+   //-----------------------------------------------------------------
+   // Spacecraft attached hardware list
+   //-----------------------------------------------------------------
+   *hardwareStaticText =
+      new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Attached Hardware List"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   *hardwareListBox =
+      GetAttachedHardwareListBox(parent, hardwareListBoxId, wxSize(170, 63), "");
+   (*hardwareListBox)->SetToolTip(pConfig->Read(_T("AttachedHardwareListHint")));
+   
+   //----- hardwareSizer
+   wxFlexGridSizer *hardwareSizer = new wxFlexGridSizer(1);
+   hardwareSizer->Add(*hardwareStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   hardwareSizer->Add(*hardwareListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //-----------------------------------------------------------------
    // Array row and column
@@ -3637,19 +3727,21 @@ wxSizer* GuiItemManager::CreateParameterSizer
    arrayIndexSizer->Add(10, 10);
    arrayIndexSizer->Add(*colTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   //----- objectListSizer
-   GmatStaticBoxSizer *objectListSizer =
+   //----- objectSizer
+   GmatStaticBoxSizer *objectSizer =
       new GmatStaticBoxSizer(wxVERTICAL, parent, "");
    
-   objectListSizer->Add(objectTypeStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objectListSizer->Add(*objectTypeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   objectListSizer->Add(10, 5);
-   objectListSizer->Add(*entireObjCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   objectListSizer->Add(10, 10);
-   objectListSizer->Add(objectStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objectListSizer->Add(*objectListBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   objectListSizer->Add(20, 2);
-   objectListSizer->Add(arrayIndexSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   objectSizer->Add(objectTypeStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   objectSizer->Add(*objectTypeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   objectSizer->Add(10, 5);
+   objectSizer->Add(*entireObjCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   objectSizer->Add(10, 10);
+   objectSizer->Add(objectStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   objectSizer->Add(*objectListBox, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   objectSizer->Add(20, 2);
+   objectSizer->Add(hardwareSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   objectSizer->Add(20, 2);
+   objectSizer->Add(arrayIndexSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
    //-----------------------------------------------------------------
    // Object properties
@@ -3773,7 +3865,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    //-----------------------------------------------------------------
    //----- paramSizer
    wxFlexGridSizer *paramSizer = new wxFlexGridSizer(4);
-   paramSizer->Add(objectListSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   paramSizer->Add(objectSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    if (showOption != SHOW_WHOLE_OBJECT_ONLY)
       paramSizer->Add(propertySizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    paramSizer->Add(arrowButtonsSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -3850,6 +3942,66 @@ wxSizer* GuiItemManager::CreateUserVarSizer
 //-------------------------------
 
 //------------------------------------------------------------------------------
+// wxArrayString GetSpacecraftProperties(int showOption, bool showSettableOnly)
+//------------------------------------------------------------------------------
+wxArrayString GuiItemManager::GetSpacecraftProperties(int showOption,
+                                                      bool showSettableOnly)
+{
+   #if DBGLVL_GUI_ITEM_PROPERTY > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetSpacecraftProperties() entered, showOption=%d, "
+       "showSettableOnly=%d\n", showOption, showSettableOnly);
+   #endif
+   
+   wxArrayString array;
+   ParameterInfo *theParamInfo = ParameterInfo::Instance();
+   std::string paramName;
+   bool add = false;
+   
+   for (int i=0; i<theNumScProperty; i++)
+   {
+      paramName = theScPropertyList[i].c_str();
+      add = false;
+      #if DBGLVL_GUI_ITEM_PROPERTY > 1
+      MessageInterface::ShowMessage("   ==> Checking '%s'\n", paramName.c_str());
+      #endif
+      
+      if (theParamInfo->IsReportable(paramName) && showOption == SHOW_REPORTABLE)
+      {
+         if (!showSettableOnly)
+            add = true;
+         else if (theParamInfo->IsSettable(paramName))
+            add = true;
+      }
+      else if (theParamInfo->IsPlottable(paramName) && showOption == SHOW_PLOTTABLE)
+      {
+         if (!showSettableOnly)
+            add = true;
+         else if (theParamInfo->IsSettable(paramName))
+            add = true;
+      }
+      
+      if (add)
+      {
+         #if DBGLVL_GUI_ITEM_PROPERTY > 1
+         MessageInterface::ShowMessage("       Adding %s\n", paramName.c_str());
+         #endif
+         
+         array.Add(theScPropertyList[i]);
+      }
+   }
+   
+   #if DBGLVL_GUI_ITEM_PROPERTY > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetSpacecraftProperties() returning %d items\n",
+       array.GetCount());
+   #endif
+   
+   return array;
+}
+
+
+//------------------------------------------------------------------------------
 //  void UpdatePropertyList()
 //------------------------------------------------------------------------------
 /**
@@ -3891,8 +4043,10 @@ void GuiItemManager::UpdatePropertyList()
       // ParameterSelectDialog is not ready to handle this kind of Parameters
       // since it needs to show dependent object in the ComboBox. (LOJ: 2012.03.09)
       // Changed to call ParameterInfo::IsForAttachedObject() (LOJ: 2012.04.02)
-      if (theParamInfo->IsForAttachedObject(items[i]))
-         continue;
+      // Now ParameterSelectDialog has implemented showing attached hardware Parameters,
+      // but we don't want to show attached object Parameters here (2012.06.07)
+      //if (theParamInfo->IsForAttachedObject(items[i]))
+      //   continue;
       
       // add only reportable parameters (Real, String for now) to list
       // we may want add Rvector6 later, then Rvec6Var needs to be set reportable true
@@ -3902,13 +4056,17 @@ void GuiItemManager::UpdatePropertyList()
          
          #if DBGLVL_GUI_ITEM_PROPERTY > 1
          MessageInterface::ShowMessage
-            ("===> param name=%s, objectType=%d\n",  items[i].c_str(), objectType);
+            ("   name: %-20s, objectType: %d\n",  items[i].c_str(), objectType);
          #endif
          
          if (objectType == Gmat::SPACECRAFT)
          {
-            // update Spacecraft property list
-            theScPropertyList.Add(items[i].c_str());
+            if (theParamInfo->IsForAttachedObject(items[i]))
+               // update Spacecraft attached object property list
+               theScAttachedObjPropertyList.Add(items[i].c_str());
+            else
+               // update Spacecraft property list
+               theScPropertyList.Add(items[i].c_str());
          }
          else if (objectType == Gmat::IMPULSIVE_BURN)
          {
@@ -3926,7 +4084,8 @@ void GuiItemManager::UpdatePropertyList()
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdatePropertyList() theNumScProperty=%d, "
-       "theNumImpBurnProperty=%d\n", theNumScProperty, theNumImpBurnProperty);
+       "theScAttachedObjPropertyList.GetCount()=%d, theNumImpBurnProperty=%d\n",
+       theNumScProperty, theScAttachedObjPropertyList.GetCount(), theNumImpBurnProperty);
    #endif
 }
 

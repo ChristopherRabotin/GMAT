@@ -563,8 +563,10 @@ void ReportFileSetupPanel::OnButtonClick(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mViewButton)
    {
+      // Allow whole array or array element
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_REPORTABLE, true, true);
+                                     GuiItemManager::SHOW_REPORTABLE, 2, true,
+                                     true, true, true, true);
       
       paramDlg.SetParamNameArray(mReportWxStrings);
       paramDlg.ShowModal();

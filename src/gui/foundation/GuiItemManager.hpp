@@ -144,8 +144,10 @@ public:
    wxArrayString GetSolverList() { return theSolverList; }
    wxArrayString GetOptimizerList() { return theOptimizerList; }
    wxArrayString GetAutoGlobalObjectList() { return theAutoGlobalObjectList; }
-	
-   wxArrayString GetPropertyList(const wxString &objType,
+   
+   wxArrayString GetAttachedHardwareList(const wxString &scName);
+   wxArrayString GetPropertyList(const wxString &objName,
+                                 const wxString &ownedObjName = "",
                                  int showOption = SHOW_PLOTTABLE,
                                  bool showSettableOnly = false);
    
@@ -302,6 +304,9 @@ public:
    wxListBox* GetUserParameterListBox(wxWindow *parent, wxWindowID id,
                                       const wxSize &size);
    
+   wxListBox* GetAttachedHardwareListBox(wxWindow *parent, wxWindowID id,
+                                         const wxSize &size,
+                                         const wxString &scName);
    wxListBox* GetFuelTankListBox(wxWindow *parent, wxWindowID id,
                                  const wxSize &size,
                                  wxArrayString *excList = NULL);
@@ -317,6 +322,8 @@ public:
           wxCheckBox **entireObjCheckBox, wxWindowID entireObjCheckBoxId,
           wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId,
           wxListBox **objectListBox, wxWindowID objectListBoxId,
+          wxStaticText **hardwareStaticText, wxWindowID hardwareTextId,
+          wxListBox **hardwareListBox, wxWindowID hardwareListBoxId,
           wxStaticText **rowStaticText, wxWindowID rowStaticTextId,
           wxStaticText **colStaticText, wxWindowID colStaticTextId,
           wxTextCtrl **rowTextCtrl, wxWindowID rowTextCtrlId,
@@ -333,11 +340,10 @@ public:
           wxButton **removeAllButton, wxWindowID removeAllButtonId,
           wxListBox **selectedListBox, wxWindowID selectedListBoxId,
           const wxArrayString &objectTypeList, int showOption = SHOW_PLOTTABLE,
-          bool showSettableOnly = false,
-          bool allowMultiSelect = false, bool showString = false,
-          bool allowWholeObject = false, bool showSysParam = true,
-          bool showVariable = false, bool showArray = false,
-          const wxString &onwer = "Spacecraft",
+          int showObjectOption = 0, bool showSettableOnly = false,
+          bool allowMultiSelect = false, bool showString = false, // bool allowWholeObject = false,
+          bool showSysParam = true, bool showVariable = false,
+          bool showArray = false, const wxString &onwer = "Spacecraft",
           const wxString configSection = "Parameter Select");
    
    wxSizer*
@@ -352,6 +358,8 @@ private:
    virtual ~GuiItemManager();
    GuiItemManager(const GuiItemManager&);
    GuiItemManager& operator=(const GuiItemManager&);
+
+   wxArrayString GetSpacecraftProperties(int showOption, bool showSettableOnly);
    
    void UpdatePropertyList();
    void UpdateParameterList();
@@ -405,6 +413,7 @@ private:
    std::vector<wxCheckListBox*> mSpacePointCLBList;
    std::vector<wxCheckListBox*> mSpacecraftCLBList;
    std::vector<wxCheckListBox*> mAllObjectCLBList;
+   std::vector<wxListBox*> mHardwareLBList;
    std::vector<wxListBox*> mFuelTankLBList;
    std::vector<wxListBox*> mThrusterLBList;
    std::vector<wxListBox*> mSensorLBList;
@@ -504,6 +513,8 @@ private:
 
    // Spacecraft Properties
    wxArrayString theScPropertyList;
+   // Spacecraft Attached Object Properties
+   wxArrayString theScAttachedObjPropertyList;
    
    // Burn Properties
    wxArrayString theImpBurnPropertyList;

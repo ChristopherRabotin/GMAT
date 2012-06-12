@@ -147,7 +147,10 @@ Gmat::ObjectType ParameterInfo::GetOwnedObjectType(const std::string &name)
 {
    if (mOwnedObjTypeMap.find(name) != mOwnedObjTypeMap.end())
    {
-      MessageInterface::ShowMessage("==> GetOwnedObjectType() Returning %d\n", mOwnedObjTypeMap[name]);
+      #ifdef DEBUG_PARAM_INFO
+      MessageInterface::ShowMessage
+         ("GetOwnedObjectType() Returning %d\n", mOwnedObjTypeMap[name]);
+      #endif
       return mOwnedObjTypeMap[name];
    }
    else

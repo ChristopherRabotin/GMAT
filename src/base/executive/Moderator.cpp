@@ -7665,8 +7665,10 @@ void Moderator::CreateDefaultParameters()
    
    // If DEBUG_PARAMETERS was turned on from the startup file,
    // create hardware Parameters. (LOJ: 2012.03.09)
-   if (GmatGlobal::Instance()->IsWritingParameterInfo())
-   {
+   // Now always create hardware Parameters since GuiItemManager and ParameterSelectDialog
+   // can handle it (LOJ: 2012.06.11)
+   //if (GmatGlobal::Instance()->IsWritingParameterInfo())
+   //{
       // FuelTank Parameters
       CreateParameter("FuelMass", "DefaultSC.DefaultFuelTank.FuelMass");
       CreateParameter("Volume", "DefaultSC.DefaultFuelTank.Volume");
@@ -7713,7 +7715,7 @@ void Moderator::CreateDefaultParameters()
       CreateParameter("ThrustDirection1", "DefaultSC.DefaultThruster.ThrustDirection1");
       CreateParameter("ThrustDirection2", "DefaultSC.DefaultThruster.ThrustDirection2");
       CreateParameter("ThrustDirection3", "DefaultSC.DefaultThruster.ThrustDirection3");
-   }
+   //}
    
    #ifdef DEBUG_CREATE_VAR
    // User variable

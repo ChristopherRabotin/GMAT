@@ -513,8 +513,8 @@ void CallFunctionPanel::OnCellRightClick(wxGridEvent& event)
    if (event.GetEventObject() == theInputGrid)
    {
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_REPORTABLE,
-                                     true, true, true);
+                                     GuiItemManager::SHOW_REPORTABLE, 1, 
+                                     true, true);
       theOutputGrid->DeselectRow(0);
       paramDlg.SetParamNameArray(mInputWxStrings);
       paramDlg.ShowModal();
