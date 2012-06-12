@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="For" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Propagator" xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -53,8 +53,8 @@
     we describe how to enable the SPICE propagator and show a brief example
     that uses it.</para>
 
-    <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="LinkId"/>, <xref linkend="LinkId"/></para>
+    <!--<para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="LinkId"/>, <xref linkend="LinkId"/></para>-->
   </refsection>
 
   <refsection>
