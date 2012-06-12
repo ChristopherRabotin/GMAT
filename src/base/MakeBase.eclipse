@@ -237,6 +237,7 @@ OBJECTS = \
     coordsystem/GeocentricSolarEclipticAxes.o \
     coordsystem/GeocentricSolarMagneticAxes.o \
     coordsystem/ICRFAxes.o \
+    coordsystem/ICRFFile.o \
     coordsystem/InertialAxes.o \
     coordsystem/ItrfCoefficientsFile.o \
     coordsystem/MeanOfDateAxes.o \
