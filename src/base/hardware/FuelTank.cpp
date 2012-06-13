@@ -28,6 +28,8 @@
 #include <sstream>
 
 
+#define ZERO_REFERENCE_TEMPERATURE_THRESHOLD 0.01
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -448,7 +450,21 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
          
       case REFERENCE_TEMPERATURE:
          if (value > GmatPhysicalConstants::ABSOLUTE_ZERO_C)
+         {
+            if (GmatMathUtil::Abs(value) <= ZERO_REFERENCE_TEMPERATURE_THRESHOLD)
+            {
+               HardwareException hwe("");
+               std::stringstream ss("");
+               ss << "Real Number > " << ZERO_REFERENCE_TEMPERATURE_THRESHOLD
+                  << " or Real Number < -"
+                  << ZERO_REFERENCE_TEMPERATURE_THRESHOLD;
+               hwe.SetDetails(errorMessageFormat.c_str(),
+                              GmatStringUtil::ToString(value, 16).c_str(),
+                              "RefTemperature", (ss.str()).c_str());
+               throw hwe;
+            }
             refTemperature = value;
+         }
          else
          {
             HardwareException hwe("");
