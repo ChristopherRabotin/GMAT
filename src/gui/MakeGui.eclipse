@@ -231,7 +231,6 @@ OBJECTS = \
     function/FunctionSetupPanel.o \
     function/MatlabFunctionSetupPanel.o \
     hardware/BurnThrusterPanel.o \
-    hardware/TankConfigPanel.o \
     hardware/ThrusterCoefficientDialog.o \
     hardware/ThrusterConfigPanel.o \
     mission/DecoratedTree.o \
