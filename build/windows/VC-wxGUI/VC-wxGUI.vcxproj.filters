@@ -843,9 +843,6 @@
     <ClCompile Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.cpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\propagator\EphemerisPropagator.cpp">
-      <Filter>Source Files\base\propagator</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\propagator\Integrator.cpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClCompile>
@@ -1137,9 +1134,6 @@
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\GravityFile.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
@@ -1417,9 +1411,6 @@
       <Filter>Source Files\gui\function</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp">
-      <Filter>Source Files\gui\hardware</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\hardware\TankConfigPanel.cpp">
       <Filter>Source Files\gui\hardware</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.cpp">
@@ -1712,6 +1703,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp">
       <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\GravityFileUtil.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp">
+      <Filter>Source Files\base\parameter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2405,9 +2402,6 @@
     <ClInclude Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.hpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\propagator\EphemerisPropagator.hpp">
-      <Filter>Source Files\base\propagator</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\Integrator.hpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClInclude>
@@ -2735,9 +2729,6 @@
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\GravityFile.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
@@ -3027,9 +3018,6 @@
       <Filter>Source Files\gui\function</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp">
-      <Filter>Source Files\gui\hardware</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\hardware\TankConfigPanel.hpp">
       <Filter>Source Files\gui\hardware</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.hpp">
@@ -3337,6 +3325,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp">
       <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\GravityFileUtil.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp">
+      <Filter>Source Files\base\parameter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
