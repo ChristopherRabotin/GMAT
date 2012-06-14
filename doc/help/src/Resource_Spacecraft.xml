@@ -109,7 +109,7 @@
         <tgroup cols="2">
           <colspec colnum="1" colwidth=".5*"/>
 
-          <colspec colnum="2" colwidth="3*"/>
+          <colspec colnum="2" colwidth="2*"/>
 
           <thead>
             <row>
@@ -227,8 +227,8 @@
             <row>
               <entry><guilabel>CurrA1MJD</guilabel></entry>
 
-              <entry><para>The current epoch in the A1ModJulian format. This
-              field can only be used within the mission
+              <entry><para>[Deprecated] The current epoch in the A1ModJulian
+              format. This field can only be used within the mission
               sequence.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
@@ -1139,15 +1139,8 @@
                       <informalequation>
                         <alt>RadApo ~= 0</alt>
 
-                        <m:math>
-                          <m:mrow>
-                            <m:mi>RadApo</m:mi>
-
-                            <m:mo></m:mo>
-
-                            <m:mn>0</m:mn>
-                          </m:mrow>
-                        </m:math>
+                        <m:math><m:mrow> <m:mi>RadApo</m:mi> <m:mo></m:mo>
+                        <m:mn>0</m:mn> </m:mrow></m:math>
                       </informalequation>
                     </listitem>
                   </varlistentry>
@@ -1240,13 +1233,8 @@
                       <informalequation>
                         <alt>RMAG &gt; 0</alt>
 
-                        <m:math display="block">
-                          <m:mi>RMAG</m:mi>
-
-                          <m:mo>&gt;</m:mo>
-
-                          <m:mn>0</m:mn>
-                        </m:math>
+                        <m:math display="block"><m:mi>RMAG</m:mi>
+                        <m:mo>&gt;</m:mo> <m:mn>0</m:mn></m:math>
                       </informalequation>
                     </listitem>
                   </varlistentry>
@@ -1389,13 +1377,8 @@
                       <informalequation>
                         <alt>km/s</alt>
 
-                        <m:math>
-                          <m:mi>km</m:mi>
-
-                          <m:mo>/</m:mo>
-
-                          <m:mi>s</m:mi>
-                        </m:math>
+                        <m:math><m:mi>km</m:mi> <m:mo>/</m:mo>
+                        <m:mi>s</m:mi></m:math>
                       </informalequation>
                     </listitem>
                   </varlistentry>
@@ -1522,15 +1505,13 @@
 
       <para>GMAT supports five time systems or scales and two formats:</para>
 
-      <table>
-        <title>Time Systems</title>
-
+      <informaltable>
         <tgroup cols="2">
           <tbody>
             <row>
               <entry>A.1</entry>
 
-              <entry>USNO atomic time; GMAT’s internal time system </entry>
+              <entry>USNO atomic time; GMAT’s internal time system</entry>
             </row>
 
             <row>
@@ -1558,11 +1539,9 @@
             </row>
           </tbody>
         </tgroup>
-      </table>
+      </informaltable>
 
-      <table>
-        <title>Epoch Formats</title>
-
+      <informaltable>
         <tgroup cols="2">
           <tbody>
             <row>
@@ -1637,7 +1616,7 @@
             </row>
           </tbody>
         </tgroup>
-      </table>
+      </informaltable>
 
       <para>The epoch can be set in multiple ways. The default method is to
       set the DateFormat field to the desired time system and format, then set
