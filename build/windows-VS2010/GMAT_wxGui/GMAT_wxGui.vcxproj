@@ -452,7 +452,6 @@
     <ClCompile Include="..\..\..\src\gui\function\FunctionSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp" />
-    <ClCompile Include="..\..\..\src\gui\hardware\TankConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp" />
@@ -706,7 +705,6 @@
     <ClInclude Include="..\..\..\src\gui\function\FunctionSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp" />
-    <ClInclude Include="..\..\..\src\gui\hardware\TankConfigPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\include\ddesetup.hpp" />

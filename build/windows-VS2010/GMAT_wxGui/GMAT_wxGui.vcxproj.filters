@@ -297,9 +297,6 @@
     <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp">
       <Filter>Source Files\hardware</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\hardware\TankConfigPanel.cpp">
-      <Filter>Source Files\hardware</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\mission\MissionTree.cpp">
       <Filter>Source Files\mission</Filter>
     </ClCompile>
@@ -759,9 +756,6 @@
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp">
-      <Filter>Source Files\hardware</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\hardware\TankConfigPanel.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\mission\DecoratedTree.hpp">
