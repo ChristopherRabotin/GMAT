@@ -458,3 +458,7 @@ void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
 }
 
+void  ICRFAxes::GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation)
+{
+	CalculateRotationMatrix(atEpoch, forceComputation);
+}

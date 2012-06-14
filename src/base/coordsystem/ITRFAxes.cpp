@@ -713,3 +713,7 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
 }
 
+void  ITRFAxes::GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation)
+{
+	CalculateRotationMatrix(atEpoch, forceComputation);
+}

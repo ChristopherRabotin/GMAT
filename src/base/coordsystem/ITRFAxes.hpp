@@ -83,8 +83,10 @@ public:
                                               const std::string &value);
     */
 
-//protected:
-public:
+   void  GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation = false);
+
+protected:
+//public:
    Rmatrix33 R1(Real angle);
    Rmatrix33 R2(Real angle);
    Rmatrix33 R3(Real angle);

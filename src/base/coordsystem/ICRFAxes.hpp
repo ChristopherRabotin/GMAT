@@ -58,8 +58,9 @@ public:
    virtual std::string     GetParameterTypeString(const Integer id) const;
     */
 
-public:
-//protected:
+   void  GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation = false);
+
+protected:
 
    enum
    {
