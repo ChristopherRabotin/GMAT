@@ -834,7 +834,10 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
          {
             Real val = theObject->GetRealParameter(
                   theObject->GetParameterID(label));
-            valueString << val;
+            std::stringstream valstr;
+            valstr.precision(16);
+            valstr << val;
+            valueString << valstr.str();
             ((wxTextCtrl*)theControl)->ChangeValue(valueString);
          }
          break;
