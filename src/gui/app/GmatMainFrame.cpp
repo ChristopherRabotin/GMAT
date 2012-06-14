@@ -45,7 +45,6 @@
 // panels
 #include "GmatBaseSetupPanel.hpp"
 #include "SpacecraftPanel.hpp"
-#include "TankConfigPanel.hpp"
 #include "ThrusterConfigPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
