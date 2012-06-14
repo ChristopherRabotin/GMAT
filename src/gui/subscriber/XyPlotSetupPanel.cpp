@@ -208,7 +208,7 @@ void XyPlotSetupPanel::OnButtonClick(wxCommandEvent& event)
    if (event.GetEventObject() == mViewXButton)
    {
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_PLOTTABLE, false);
+                                     GuiItemManager::SHOW_PLOTTABLE, 0, false);
       
       paramDlg.SetParamNameArray(mXvarWxStrings);
       paramDlg.ShowModal();
@@ -234,7 +234,7 @@ void XyPlotSetupPanel::OnButtonClick(wxCommandEvent& event)
    else if (event.GetEventObject() == mViewYButton)
    {
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_PLOTTABLE, true);
+                                     GuiItemManager::SHOW_PLOTTABLE, 0, true);
       
       paramDlg.SetParamNameArray(mYvarWxStrings);
       paramDlg.ShowModal();

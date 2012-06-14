@@ -21,7 +21,6 @@
 #include "ParameterInfo.hpp"            // for GetDepObjectType()
 #include "Array.hpp"                    // for GetRowCount()
 #include "MessageInterface.hpp"
-//#include <wx/config.h>
 
 //#define DEBUG_LOAD
 //#define DEBUG_SAVE
@@ -273,6 +272,9 @@ void ParameterSelectDialog::LoadData()
    MessageInterface::ShowMessage("\nParameterSelectDialog::LoadData() entered.\n");
    #endif
    
+   if (mShowOption == GuiItemManager::SHOW_WHOLE_OBJECT_ONLY)
+      mAllowWholeObject = true;
+   
    if (mShowOption != GuiItemManager::SHOW_WHOLE_OBJECT_ONLY)
    {
       if (mAllowSysParam)
@@ -502,17 +504,20 @@ void ParameterSelectDialog::OnListBoxSelect(wxCommandEvent& event)
          ("   objType: <%s> and objName: <%s> selected\n", objType.c_str(),
           objName.c_str());
       #endif
-      
-      if (objType == "Spacecraft")
+
+      if (mShowOption != GuiItemManager::SHOW_WHOLE_OBJECT_ONLY)
       {
-         // Build attached hardware list
-         BuildAttachedHardware(objName);
-         ShowObjectProperties();
-      }
-      else if (objType == "Array")
-      {         
-         // Show array element if not showing whole array
-         ShowArrayIndex(!mAllowWholeObject);
+         if (objType == "Spacecraft")
+         {
+            // Build attached hardware list
+            BuildAttachedHardware(objName);
+            ShowObjectProperties();
+         }
+         else if (objType == "Array")
+         {         
+            // Show array element if not showing whole array
+            ShowArrayIndex(!mAllowWholeObject);
+         }
       }
    }
    else if (obj == mHardwareListBox)
@@ -1182,6 +1187,11 @@ void ParameterSelectDialog::ShowSpacecraft()
       mAllowWholeObject = mEntireObjectCheckBox->IsChecked();
    }
    
+   #ifdef DEBUG_SHOW_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("ShowSpacecraft() entered, mAllowWholeObject=%d\n", mAllowWholeObject);
+   #endif
+   
    // Show Spacecraft objects
    mObjectListBox->InsertItems(theGuiManager->GetSpacecraftList(), 0);
    mObjectListBox->SetToolTip(mConfig->Read(_T("SpacecraftListHint")));
@@ -1189,9 +1199,15 @@ void ParameterSelectDialog::ShowSpacecraft()
    
    // Show hardware list if not showing entire object
    if (!mAllowWholeObject)
+   {
       ShowAttachedHardware(true);
+      ShowObjectProperties();
+   }
    
-   ShowObjectProperties();
+   #ifdef DEBUG_SHOW_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("ShowSpacecraft() leaving, mAllowWholeObject=%d\n", mAllowWholeObject);
+   #endif
 }
 
 
