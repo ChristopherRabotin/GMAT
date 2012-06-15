@@ -241,7 +241,7 @@ protected:
    /// List of the associated objects
    StringArray          objects;
    // pointer to the function that contains this command
-   Function            *currentFunction;
+   Function             *currentFunction;
    // pointer to the function that is calling this command (ignored for all but
    // CallFunction and Assignment)
    FunctionManager      *callingFunction;

@@ -1599,11 +1599,11 @@ wxArrayString GuiItemManager::GetAttachedHardwareList(const wxString &scName)
       
       // Add Tanks
       for (unsigned int i = 0; i < tanks.size(); i++)
-         hardwareList.Add(tanks[i]);
+         hardwareList.Add(tanks[i].c_str());
       
       // Add Thrusters
       for (unsigned int i = 0; i < thrusters.size(); i++)
-         hardwareList.Add(thrusters[i]);
+         hardwareList.Add(thrusters[i].c_str());
    }
    
    return hardwareList;
@@ -1672,7 +1672,7 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
                #if DBGLVL_GUI_ITEM_PROPERTY > 1
                MessageInterface::ShowMessage("   Adding '%s'\n", paramName.c_str());
                #endif
-               array.Add(paramName);
+               array.Add(paramName.c_str());
             }
          }
       }

@@ -440,7 +440,6 @@ OBJECTS = \
     parameter/VariableWrapper.o \
     plugin/DynamicLibrary.o \
     propagator/AdamsBashforthMoulton.o \
-    propagator/BulirschStoer.o \
     propagator/DormandElMikkawyPrince68.o \
     propagator/Integrator.o \
     propagator/PredictorCorrector.o \

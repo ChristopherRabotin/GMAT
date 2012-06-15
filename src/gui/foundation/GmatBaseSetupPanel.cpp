@@ -837,7 +837,8 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
             std::stringstream valstr;
             valstr.precision(16);
             valstr << val;
-            valueString << valstr.str();
+            std::string cvtr = valstr.str();
+            valueString << wxT(cvtr.c_str());
             ((wxTextCtrl*)theControl)->ChangeValue(valueString);
          }
          break;
