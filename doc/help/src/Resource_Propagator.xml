@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Propagator" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Propagator"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -7,11 +8,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>ResourceName</primary>
+    <primary>Propagator</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>ResourceName</refentrytitle>
+    <refentrytitle>Propagator</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -53,8 +54,8 @@
     we describe how to enable the SPICE propagator and show a brief example
     that uses it.</para>
 
-    <!--<para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="LinkId"/>, <xref linkend="LinkId"/></para>-->
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="ForceModel"/></para>
   </refsection>
 
   <refsection>
@@ -62,9 +63,9 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*" />
 
-        <colspec colnum="2" colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*" />
 
         <thead>
           <row>
@@ -78,8 +79,9 @@
           <row>
             <entry><guilabel>FM</guilabel></entry>
 
-            <entry><para>Identifies the force model used by an
-            integrator.</para><variablelist>
+            <entry><para>Identifies the force model used by an integrator. If
+            no force model is provided, GMAT uses an Earth centered 4x4
+            gravity model only.</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -92,15 +94,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Valid force model.</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
+                    <para><guilabel>ForceModel</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -117,6 +111,22 @@
 
                   <listitem>
                     <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -139,9 +149,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>PrinceDormand78, PrinceDormand45,
-                    RungeKutta89,RungeKutta68, RungeKutta56, BulirschStoer,
-                    AdamsBashforthMoulton</para>
+                    <para><guibutton>PrinceDormand78</guibutton>,
+                    <guibutton>PrinceDormand45</guibutton>,
+                    <guibutton>RungeKutta89</guibutton>,<guibutton>RungeKutta68</guibutton>,
+                    <guibutton>RungeKutta56</guibutton>,
+                    <guibutton>AdamsBashforthMoulton</guibutton></para>
                   </listitem>
                 </varlistentry>
 
@@ -149,7 +161,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>RungeKutta89</para>
+                    <para><guibutton>RungeKutta89</guibutton></para>
                   </listitem>
                 </varlistentry>
 
@@ -168,6 +180,479 @@
                     <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>InitialStepSize</guilabel></entry>
+
+            <entry><para>The size of the first step attempted by the
+            integrator. </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>REAL_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0.0001</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>60</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>sec.</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MinStep</guilabel></entry>
+
+            <entry><para>The minimum allowable step size. </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>REAL_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0 AND <guibutton>MinStep</guibutton> &lt;=
+                    <guibutton>MaxStep</guibutton></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.001</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>sec.</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Accuracy</guilabel></entry>
+
+            <entry><para>The desired accuracy for an integration step. GMAT
+            uses the method selected in the
+            <guibutton>ErrorControl</guibutton> field on the Force Model to
+            determine a metric of the integration accuracy. For each step, the
+            integrator ensures that the error in accuracy is smaller than the
+            value defined by the <guibutton>ErrorControl</guibutton>
+            metric.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>REAL_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0 AND Real &lt; 1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1e-11 except for ABM integrator which is
+                    1e-10</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MaxStep</guilabel></entry>
+
+            <entry><para>The maximum allowable step size.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>REAL_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0 AND <guilabel>MinStep</guilabel> &lt;=
+                    <guilabel>MaxStep</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>2700</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MaxStepAttempts</guilabel></entry>
+
+            <entry><para>The number of attempts the integrator takes to meet
+            the tolerance defined by the <guibutton>Accuracy</guibutton>
+            field..</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>INTEGER_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Integer &gt;= 1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>50</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>LowerError</guilabel></entry>
+
+            <entry><para>The lower bound on integration error, used to
+            determine when to make step size larger. Applies only to
+            AdamsBashforthMoultonIntegrator.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>REAL_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0 AND 0 &lt;
+                    <guilabel>LowerError</guilabel>
+                    &lt;<guilabel>TargetError</guilabel> &lt;
+                    <guilabel>Accuracy</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1e-13</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>TargetError</guilabel></entry>
+
+            <entry><para>The nominal bound on integration error, used to set
+            the target integration accuracy when adjusting step size. Applies
+            only to AdamsBashforthMoultonIntegrator.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>REAL_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0 AND 0 &lt;
+                    <guilabel>LowerError</guilabel> &lt;
+                    <guilabel>TargetError</guilabel> &lt;
+                    <guilabel>Accuracy</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1e-11</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>StopIfAccuracyIsViolated</guilabel></entry>
+
+            <entry><para>The nominal bound on integration error, used to set
+            the target integration accuracy when adjusting step size. Applies
+            only to <guilabel>AdamsBashforthMoulton</guilabel>
+            integrator.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>BOOLEAN_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true, false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>true</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
               </variablelist></entry>
           </row>
         </tbody>
@@ -182,13 +667,13 @@
       <imageobject>
         <imagedata align="center" contentdepth="100%"
                    fileref="files/images/Resource_Integrator.png" scalefit="1"
-                   width="100%"/>
+                   width="100%"></imagedata>
       </imageobject>
     </mediaobject>
 
     <para>Settings for the embedded Runge-Kutta integrators. See the Remarks
     section for additional settings for the
-    <guilabel>AdamsBashforthMoulton.</guilabel></para>
+    <guilabel>AdamsBashforthMoulton</guilabel> integrator.</para>
   </refsection>
 
   <refsection>
@@ -207,7 +692,10 @@
     <guilabel>MinStep</guilabel> to zero so that the integrator’s adaptive
     step algorithm controls the minimum integration step size. Below are some
     important comments on GMAT’s step size control algorithms and the dangers
-    of using a non-zero value for the minimum integration step size.</para>
+    of using a non-zero value for the minimum integration step size. The
+    <guilabel>AdamsBashforthMoulton</guilabel> integrator is a low order
+    integrator and we only recommend its use for low precision analysis when a
+    predictor-corrector algorithm is required.</para>
 
     <caution>
       <para>Caution: GMAT’s default error computation mode is
@@ -250,9 +738,9 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.5*" />
 
-        <colspec colnum="2" colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*" />
 
         <thead>
           <row>
@@ -349,11 +837,107 @@
     <para><emphasis>Performance &amp; Accuracy Comparison of Numerical
     Integrators</emphasis></para>
 
+    <para>The tables below contain performance comparison data for GMAT's
+    numerical integrators. The first table shows the orbit types, dynamics
+    models, and propagation duration for each test case included in the
+    comparison. Five orbit types were compared: low earth orbit, Molniya, mars
+    transfer (Type 2), and finite burn (case 1 is blow down, and case 2 is
+    pressure regulated). For each test case, the orbit was propagated forward
+    for a duration and then back-propagated to the intial epoch. The error
+    values in the table are the RSS difference of the final state value -
+    after forward and backward propagation - to the initial state. The run
+    time data for each orbit type is normalized on the integrator with the
+    fasted run time for that orbit type.</para>
+
+    <para>For all test cases the <guilabel>ErrorControl</guilabel> setting was
+    set to <guilabel>RSSStep</guilabel>. <guilabel>Accuracy</guilabel> was set
+    to 1e-12 for all integrators except for
+    <guilabel>AdamsBashfourthMoulton</guilabel> which was set to 1e-11 because
+    of poor performance at <guilabel>Accuracy</guilabel> was set to
+    1e-11.</para>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="3">
+        <colspec colnum="1" colwidth="1.0*" />
+
+        <colspec colnum="2" colwidth="1.5*" />
+
+        <colspec colnum="3" colwidth="0.75*" />
+
+        <thead>
+          <row>
+            <entry>Orbit</entry>
+
+            <entry>Dynamics Model</entry>
+
+            <entry>Duration</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>LEO</guilabel></entry>
+
+            <entry><para>Earth 20x20, Sun, Moon, MSISE90, SRP </para></entry>
+
+            <entry><para> 1 day </para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Molniya</guilabel></entry>
+
+            <entry><para>Earth 20x20, Sun, Moon, Jacchia Roberts, SRP
+            </para></entry>
+
+            <entry><para> 3 days </para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Mars Transfer</guilabel></entry>
+
+            <entry><para>Near Earth: Earth 8x8, Sun, Moon,
+            SRP</para><para>Deep Space: All planets as point mass
+            perturbations</para><para>Near Mars: Mars 8x8 SRP</para></entry>
+
+            <entry><para> 333 days </para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Lunar Transfer</guilabel></entry>
+
+            <entry><para>Earth central body with all planets as point mass
+            perturbations</para></entry>
+
+            <entry><para> 5.8 days </para></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Finite Burn (case 1 and 2)</guilabel></entry>
+
+            <entry><para>Point mass gravity </para></entry>
+
+            <entry><para> 7200 sec. </para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para>Comparing the run time data for each integrator shown in the table
+    below we see that the <guilabel>PrinceDormand78</guilabel> integrator was
+    the fastest for 4 of the 6 cases and tied with the
+    <guilabel>RungeKutta89</guilabel> integrator for LEO test case. For the
+    Lunar flyby case, the <guilabel>RungeKutta89</guilabel> was the fastest
+    integrator, however, in this case the <guilabel>PrinceDormand78</guilabel>
+    integrator was at least 2 orders of magnitude more accurate given
+    equaivalent settings. Notice that the
+    <guilabel>AdamsBashforthMoulton</guilabel> integrator has km level errors
+    for some orbits because it is a low-order integrator.</para>
+
     <mediaobject>
       <imageobject>
         <imagedata align="center" contentdepth="100%"
                    fileref="files/images/IntegratorComparisonTable.png"
-                   scalefit="1" width="100%"/>
+                   scalefit="1" width="100%"></imagedata>
       </imageobject>
     </mediaobject>
 
@@ -439,7 +1023,5 @@ BeginMissionSequence;
 
 Propagate aProp(aSat) {aSat.ElapsedDays = .2};</code></programlisting>
     </informalexample>
-
-  
   </refsection>
 </refentry>

@@ -84,6 +84,7 @@
             <xi:include href="Resource_EphemerisFile.xml" />
             <xi:include href="Resource_EphemerisPropagator.xml" />
             <xi:include href="Resource_FiniteBurn.xml" />
+			<xi:include href="Resource_ForceModel.xml" />
             <xi:include href="Resource_Formation.xml" />
             <xi:include href="Resource_FuelTank.xml" />
             <xi:include href="Resource_GmatFunction.xml" />
