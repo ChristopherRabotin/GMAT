@@ -52,7 +52,7 @@ $(TARGET) : $(OBJECTS)
 	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) -arch i386 -fPIC
 	install_name_tool -change lib/lib$(BASE_LIBRARY).dylib \
 	$(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
-	cp $(TARGET) $(GMAT_BIN_LOCATION)
+	cp $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
 else
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../../lib
