@@ -28,7 +28,6 @@
 #include "PrinceDormand45.hpp" 
 #include "PrinceDormand78.hpp" 
 #include "AdamsBashforthMoulton.hpp"
-#include "BulirschStoer.hpp"
 
 // Ephemeris propagators
 //#ifdef __USE_SPICE__
@@ -88,8 +87,6 @@ Propagator* PropagatorFactory::CreatePropagator(const std::string &ofType,
 //      return new RungeKuttaFehlberg56(withName);
    if (ofType == "RungeKutta56")
       return new RungeKuttaFehlberg56(withName);
-   if (ofType == "BulirschStoer")
-      return new BulirschStoer(withName);
    if (ofType == "AdamsBashforthMoulton")
       return new AdamsBashforthMoulton(withName);
 //   if (ofType == "Cowell")
@@ -120,10 +117,9 @@ PropagatorFactory::PropagatorFactory()
       creatables.push_back("PrinceDormand78");
       creatables.push_back("PrinceDormand45");
 //      creatables.push_back("DormandElMikkawyPrince68");
-            creatables.push_back("RungeKutta68");
+      creatables.push_back("RungeKutta68");
 //      creatables.push_back("RungeKuttaFehlberg56");
-            creatables.push_back("RungeKutta56");
-      creatables.push_back("BulirschStoer");
+      creatables.push_back("RungeKutta56");
       creatables.push_back("AdamsBashforthMoulton");
 //      creatables.push_back("Cowell");
    }

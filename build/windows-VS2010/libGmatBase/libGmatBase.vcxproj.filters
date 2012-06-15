@@ -501,9 +501,6 @@
     <ClCompile Include="..\..\..\src\base\propagator\PropagationStateManager.cpp">
       <Filter>Source Files\propagator</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\propagator\BulirschStoer.cpp">
-      <Filter>Source Files\propagator</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.cpp">
       <Filter>Source Files\propagator</Filter>
     </ClCompile>
@@ -1710,9 +1707,6 @@
       <Filter>Source Files\forcemodel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\PropagationStateManager.hpp">
-      <Filter>Source Files\propagator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\propagator\BulirschStoer.hpp">
       <Filter>Source Files\propagator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.hpp">

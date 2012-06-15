@@ -47,6 +47,7 @@
 ROOT_PATH              = ../
 #-----------------------------------------------------------
 PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+PLUGIN                 = ../plugins/libExtraPropagators
 PLUGIN                 = ../plugins/libGmatEstimation
 PLUGIN                 = ../plugins/libMatlabInterface
 PLUGIN                 = ../plugins/libFminconOptimizer
