@@ -779,7 +779,6 @@ bool ParameterSelectDialog::AddWholeObject()
    
    wxString objType = mObjectTypeComboBox->GetValue();
    wxString objName = GetObjectSelection();
-   bool retflag = false;
    
    #ifdef DEBUG_WHOLE_OBJECT
    MessageInterface::ShowMessage
@@ -849,8 +848,8 @@ bool ParameterSelectDialog::AddParameterSelection()
       wxArrayInt objectSelects;
       wxArrayInt propertySelects;
       int objCount = mObjectListBox->GetSelections(objectSelects);
-      int propCount = mPropertyListBox->GetSelections(propertySelects);
       #ifdef DEBUG_PARAMETER
+      int propCount = mPropertyListBox->GetSelections(propertySelects);
       MessageInterface::ShowMessage
          ("   objCount=%d, propCount=%d\n", objCount, propCount);
       #endif
@@ -1480,8 +1479,8 @@ void ParameterSelectDialog::ShowCoordSystem()
       
       mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       
-      mCoordSysSizer->Remove(mCoordSysComboBox);
-      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Detach(mCoordSysComboBox);
+      mCoordSysSizer->Detach(mCentralBodyComboBox);
       mCoordSysSizer->Add(mCoordSysComboBox);
       mCoordSysComboBox->Show();
       mCentralBodyComboBox->Hide();
@@ -1495,8 +1494,8 @@ void ParameterSelectDialog::ShowCoordSystem()
       
       // I had to remove mCoordSysComboBox first and then mCentralBodyComboBox,
       // otherwise, mCentralBodyComboBox shows too far to right
-      mCoordSysSizer->Remove(mCoordSysComboBox);
-      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Detach(mCoordSysComboBox);
+      mCoordSysSizer->Detach(mCentralBodyComboBox);
       mCoordSysSizer->Add(mCentralBodyComboBox);
       mCentralBodyComboBox->Show();
       mCoordSysComboBox->Hide();
@@ -1505,8 +1504,8 @@ void ParameterSelectDialog::ShowCoordSystem()
    }
    else
    {
-      mCoordSysSizer->Remove(mCentralBodyComboBox);
-      mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysSizer->Detach(mCentralBodyComboBox);
+      mCoordSysSizer->Detach(mCoordSysComboBox);
       mCoordSysLabel->Hide();
       mCoordSysComboBox->Hide();
       mCentralBodyComboBox->Hide();
