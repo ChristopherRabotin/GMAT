@@ -398,10 +398,10 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
     // get base help link if available
     baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/R2012a/html/%s.html"));
     sprintf( msgBuffer, baseHelpLink.c_str(), s.c_str());
-    //#ifdef DEBUG_GMATPANEL
+    #ifdef DEBUG_GMATPANEL
       MessageInterface::ShowMessage
          ("GmatPanel::OnHelp() Default Help Link=%s\n", msgBuffer);
-      //#endif
+    #endif
 
     // open separate window to show help
     s = pConfig->Read(_T(s),_T(msgBuffer));
@@ -427,10 +427,10 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 
     ////theHelpController->Display(s); // works, display chm, not html
     //theHelpController->KeywordSearch("TRSObjectInspector"); // displays chm, not html
- //   if (!wxLaunchDefaultBrowser(s))
-   //   MessageInterface::PopupMessage
-     //    (Gmat::WARNING_, "The browser could not be launched to show help page: " +
-       //   s + "\n");
+    //if (!wxLaunchDefaultBrowser(s))
+    //   MessageInterface::PopupMessage
+    //   (Gmat::WARNING_, "The browser could not be launched to show help page: " +
+    //   s + "\n");
 
 }
 
