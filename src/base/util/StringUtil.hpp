@@ -93,6 +93,7 @@ namespace GmatStringUtil
    GMAT_API bool ToInteger(const std::string &str, Integer &value, bool trimParens = false);
    GMAT_API bool ToBoolean(const std::string &str, bool *value, bool trimParens = false);
    GMAT_API bool ToBoolean(const std::string &str, bool &value, bool trimParens = false);
+   GMAT_API bool ToOnOff(const std::string &str, std::string &value, bool trimParens = false);
    
    GMAT_API RealArray ToRealArray(const std::string &str);
    GMAT_API IntegerArray ToIntegerArray(const std::string &str);

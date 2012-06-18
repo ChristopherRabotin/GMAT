@@ -36,8 +36,10 @@
 //#define DEBUG_REPORTFILE_SET
 //#define DEBUG_REPORTFILE_GET
 //#define DEBUG_REPORTFILE_INIT
+//#define DEBUG_REPORTFILE_ACTION
 //#define DEBUG_RENAME
 //#define DEBUG_WRAPPER_CODE
+//#define DEBUG_WRITE_MATRIX
 //#define DBGLVL_REPORTFILE_REF_OBJ 1
 //#define DBGLVL_REPORTFILE_DATA 2
 //#define DBGLVL_WRITE_DATA 2
@@ -65,7 +67,7 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
    Gmat::FILENAME_TYPE,      //"Filename",
    Gmat::INTEGER_TYPE,       //"Precision",
    Gmat::OBJECTARRAY_TYPE,   //"Add",
-   Gmat::ON_OFF_TYPE,        //"WriteHeaders",
+   Gmat::BOOLEAN_TYPE,       //"WriteHeaders",
    Gmat::ON_OFF_TYPE,        //"LeftJustify",
    Gmat::ON_OFF_TYPE,        //"ZeroFill",
    Gmat::INTEGER_TYPE,       //"ColumnWidth",
@@ -76,6 +78,10 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 //------------------------------------------------------------------------------
 // ReportFile(const std::string &type, const std::string &name,
 //            const std::string &fileName)
+//------------------------------------------------------------------------------
+/**
+ *  Constructor
+ */
 //------------------------------------------------------------------------------
 ReportFile::ReportFile(const std::string &type, const std::string &name,
                        const std::string &fileName, Parameter *firstParam) :
@@ -110,6 +116,10 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
 //------------------------------------------------------------------------------
 // ~ReportFile(void)
 //------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
 ReportFile::~ReportFile(void)
 {
    dstream.flush();
@@ -119,6 +129,10 @@ ReportFile::~ReportFile(void)
 
 //------------------------------------------------------------------------------
 // ReportFile(const ReportFile &rf)
+//------------------------------------------------------------------------------
+/**
+ * Copy Constructor
+ */
 //------------------------------------------------------------------------------
 ReportFile::ReportFile(const ReportFile &rf) :
    Subscriber      (rf),
@@ -156,7 +170,7 @@ ReportFile::ReportFile(const ReportFile &rf) :
 // ReportFile& ReportFile::operator=(const ReportFile& rf)
 //------------------------------------------------------------------------------
 /**
- * The assignment operator
+ * Assignment operator
  */
 //------------------------------------------------------------------------------
 ReportFile& ReportFile::operator=(const ReportFile& rf)
@@ -281,6 +295,10 @@ Integer ReportFile::GetNumParameters()
 //------------------------------------------------------------------------------
 // bool AddParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
+/**
+ * Adds Parameter name to array if name doesn't already exist.
+ */
+//------------------------------------------------------------------------------
 bool ReportFile::AddParameter(const std::string &paramName, Integer index)
 {
    #ifdef DEBUG_REPORTFILE_SET
@@ -291,7 +309,7 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
    
    if (paramName != "" && index == mNumParams)
    {
-      // if paramName not found, add
+      // if paramName not found, add it
       if (find(mParamNames.begin(), mParamNames.end(), paramName) ==
           mParamNames.end())
       {
@@ -305,31 +323,6 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
             ("   '%s' added, size=%d\n", paramName.c_str(), mNumParams);
          #endif
          
-         return true;
-      }
-   }
-   
-   return false;
-}
-
-
-//------------------------------------------------------------------------------
-// bool AddParameterForTitleOnly(const std::string &paramName)
-//------------------------------------------------------------------------------
-bool ReportFile::AddParameterForTitleOnly(const std::string &paramName)
-{
-   #ifdef DEBUG_REPORTFILE_SET
-   MessageInterface::ShowMessage
-      ("ReportFile::AddParameterForTitle() Adding parameter '%s' to \n   "
-       "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
-   #endif
-   
-   if (paramName != "")
-   {
-      if (find(mParamNames.begin(), mParamNames.end(), paramName) ==
-          mParamNames.end())
-      {
-         mParamNames.push_back(paramName);
          return true;
       }
    }
@@ -367,6 +360,9 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
    // buffer formatted data
    for (Integer i=0; i < numData; i++)
    {
+      if (wrapperArray[i] == NULL)
+         continue;
+      
       desc = wrapperArray[i]->GetDescription();
       
       #if DBGLVL_WRITE_DATA > 1
@@ -639,23 +635,19 @@ bool ReportFile::TakeAction(const std::string &action,
 {
    #ifdef DEBUG_REPORTFILE_ACTION
    MessageInterface::ShowMessage
-      ("ReportFile::TakeAction() action='%s', actionData='%s'\n", action.c_str(),
-       actionData.c_str());
+      ("\nReportFile::TakeAction() this=<%p> entered, action='%s', actionData='%s'\n",
+       this, action.c_str(), actionData.c_str());
    #endif
    
    if (action == "Clear")
    {
       ClearParameters();
-      return true;
    }
-   
-   if (action == "PassedToReport")
+   else if (action == "PassedToReport")
    {
       usedByReport = true;
-      return true;
    }
-   
-   if (action == "ActivateForReport")
+   else if (action == "ActivateForReport")
    {
       calledByReport = ((actionData == "On") ? true : false);
       if (calledByReport)
@@ -666,7 +658,7 @@ bool ReportFile::TakeAction(const std::string &action,
             {
                #ifdef DEBUG_REPORTFILE_ACTION
                MessageInterface::ShowMessage
-                  ("*** WARNING *** ReportFile::Distribute() failed to open "
+                  ("*** WARNING *** ReportFile::TakeAction() failed to open "
                    "report file '%s', so returning false\n");
                #endif
                return false;
@@ -674,12 +666,17 @@ bool ReportFile::TakeAction(const std::string &action,
          }
       }
    }
-   
-   if (action == "Finalize")
+   else if (action == "Finalize")
    {
       if (dstream.is_open())
          dstream.close();
    }
+   
+   #ifdef DEBUG_REPORTFILE_ACTION
+   MessageInterface::ShowMessage
+      ("ReportFile::TakeAction() this=<%p> leaving, action='%s', actionData='%s'\n",
+       this, action.c_str(), actionData.c_str());
+   #endif
    
    return false;
 }
@@ -791,9 +788,15 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool ReportFile::GetBooleanParameter(const Integer id) const
 {
-   if (id == WRITE_REPORT)
+   switch (id)
+   {
+   case WRITE_REPORT:
       return active;
-   return Subscriber::GetBooleanParameter(id);
+   case WRITE_HEADERS:
+      return writeHeaders;
+   default:
+      return Subscriber::GetBooleanParameter(id);
+   }
 }
 
 
@@ -812,12 +815,17 @@ bool ReportFile::SetBooleanParameter(const Integer id, const bool value)
        instanceName.c_str(), id, value);
    #endif
    
-   if (id == WRITE_REPORT)
+   switch (id)
    {
+   case WRITE_REPORT:
       active = value;
       return active;
+   case WRITE_HEADERS:
+      writeHeaders = value;
+      return value;
+   default:
+      return Subscriber::SetBooleanParameter(id, value);
    }
-   return Subscriber::SetBooleanParameter(id, value);
 }
 
 
@@ -1089,9 +1097,6 @@ std::string ReportFile::GetOnOffParameter(const Integer id) const
    
    switch (id)
    {
-   case WRITE_HEADERS:
-      retStr = writeHeaders ? "On" : "Off";
-      return retStr;
    case LEFT_JUSTIFY:
       retStr = leftJustify ? "On" : "Off";
       return retStr;
@@ -1111,9 +1116,6 @@ bool ReportFile::SetOnOffParameter(const Integer id, const std::string &value)
 {
    switch (id)
    {
-   case WRITE_HEADERS:
-      writeHeaders = (value == "On") ? true : false;
-      return true;
    case LEFT_JUSTIFY:
       leftJustify = (value == "On") ? true : false;
       return true;
@@ -1169,13 +1171,22 @@ GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
-{
+{   
    #if DBGLVL_REPORTFILE_REF_OBJ
    MessageInterface::ShowMessage
-      ("ReportFile::SetRefObject() <%p>'%s' entered, obj=%p, name=%s, objtype=%s, "
-       "objname=%s\n", this, GetName().c_str(), obj, name.c_str(), obj->GetTypeName().c_str(),
-       obj->GetName().c_str());
+      ("ReportFile::SetRefObject() <%p>'%s' entered, obj=<%p><%s>'%s', type=%d, name='%s', "
+       "objname=%s\n", this, GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
    #endif
+
+   if (obj == NULL)
+   {
+      #if DBGLVL_REPORTFILE_REF_OBJ
+      MessageInterface::ShowMessage
+         ("ReportFile::SetRefObject() <%p>'%s' returning false, obj is NULL\n");
+      #endif
+      return false;
+   }
    
    if (type == Gmat::PARAMETER)
    {
@@ -1424,7 +1435,7 @@ Integer ReportFile::WriteMatrix(StringArray *output, Integer param,
 {
    #ifdef DEBUG_WRITE_MATRIX
    MessageInterface::ShowMessage
-      ("ReportFile::WriteMatrix() maxRow=%d, defWidth=%d\n", maxRow, defWidth);
+      ("ReportFile::WriteMatrix() entered, maxRow=%d, defWidth=%d\n", maxRow, defWidth);
    #endif
    
    UnsignedInt numRow = rmat.GetNumRows();
@@ -1443,7 +1454,8 @@ Integer ReportFile::WriteMatrix(StringArray *output, Integer param,
       
       #ifdef DEBUG_WRITE_MATRIX
       MessageInterface::ShowMessage
-         ("   rowStr.length()=%d, colWidth=%d\n", rowStr.length(), colWidth);
+         ("   rowStr='%s', rowStr.length()=%d, colWidth=%d\n", rowStr.c_str(),
+          rowStr.length(), colWidth);
       #endif
       
       if (rowStr.length() > (UnsignedInt)colWidth)
@@ -1489,7 +1501,8 @@ bool ReportFile::Distribute(int len)
    {
       if (len == 0)
          return false;
-      else {
+      else
+      {
          if (!dstream.is_open())
             if (!OpenReportFile())
             {

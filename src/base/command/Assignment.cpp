@@ -651,6 +651,8 @@ bool Assignment::Validate()
    bool retval = true;
 
    #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("Assignment::Validate() '%s' entered\n",
+            (lhs + " = " + rhs).c_str());
       MessageInterface::ShowMessage("Assignment command has lhs = %s, "
             "rhs = %s\n", lhs.c_str(), rhs.c_str());
       MessageInterface::ShowMessage("Validate has "
@@ -735,9 +737,22 @@ bool Assignment::Validate()
                {
                   if ((rhsDataType == Gmat::STRING_TYPE) ||
                       (rhsDataType == Gmat::RVECTOR_TYPE))
-                     return true;
+                     retval = true;
                   else
-                     return false;
+                     retval = false;
+               }
+               else if (lhsDataType == Gmat::BOOLEAN_TYPE ||
+                        lhsDataType == Gmat::ON_OFF_TYPE)
+               {
+                  #ifdef DEBUG_VALIDATION
+                  MessageInterface::ShowMessage
+                     ("   We now allow case insensitive True/False/On/Off for BOOLEAN_TYPE "
+                      "and OF_OFF_TYPE (2012.06.15)\n");
+                  #endif
+                  if (rhsDataType == Gmat::BOOLEAN_TYPE || rhsDataType == Gmat::ON_OFF_TYPE)
+                     retval = true;
+                  else
+                     retval = false;
                }
                else
                {
@@ -763,6 +778,11 @@ bool Assignment::Validate()
    else                 // Wrappers should be set by now
       retval = false;
 
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("Assignment::Validate() '%s' returning %d\n", (lhs + " = " + rhs).c_str(), retval);
+   #endif
+   
    return retval;
 }
 

@@ -352,7 +352,7 @@ void ReportFileSetupPanel::LoadData()
       #endif
       
       id = reportFile->GetParameterID("WriteHeaders");
-      if (strcmp(reportFile->GetOnOffParameter(id).c_str(), "On") == 0)
+      if (reportFile->GetBooleanParameter(id))
          showHeaderCheckBox->SetValue(true);
       else
          showHeaderCheckBox->SetValue(false);
@@ -477,9 +477,9 @@ void ReportFileSetupPanel::SaveData()
          
          id = clonedObj->GetParameterID("WriteHeaders");
          if (showHeaderCheckBox->IsChecked())
-            clonedObj->SetOnOffParameter(id, "On");
+            clonedObj->SetBooleanParameter(id, true);
          else
-            clonedObj->SetOnOffParameter(id, "Off");
+            clonedObj->SetBooleanParameter(id, false);
          
          id = clonedObj->GetParameterID("LeftJustify");
          if (leftJustifyCheckBox->IsChecked())

@@ -1577,7 +1577,7 @@ bool Interpreter::ValidateSubscriber(GmatBase *obj)
  * @param  owner  Address of new owner pointer to be returned
  * @param  id     Property ID to return (-1 if property not found)
  * @param  type   Property type to return
- *                (Gmat::UNKNOWN_ParameterType if property not found)
+ *                (Gmat::UNKNOWN_PARAMETER_TYPE if property not found)
  *
  * @return true if property found
  *
@@ -5310,20 +5310,20 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       }
    case Gmat::ON_OFF_TYPE:
       {
-         #ifdef DEBUG_SET
-         MessageInterface::ShowMessage
-            ("   Calling '%s'->SetOnOffParameter(%d, %s)\n",
-             obj->GetName().c_str(), id, valueToUse.c_str());
-         #endif
-         
-         if (valueToUse == "On" || valueToUse == "Off")
+         std::string onOff;
+         if (GmatStringUtil::ToOnOff(valueToUse, onOff))
          {
-            retval = obj->SetOnOffParameter(id, valueToUse);
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   Calling '%s'->SetOnOffParameter(%d, %s)\n",
+                obj->GetName().c_str(), id, onOff.c_str());
+            #endif
+            retval = obj->SetOnOffParameter(id, onOff);
          }
          else
          {
             errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
-            errorMsg2 = " The allowed values are: [On Off]";
+            errorMsg2 = " The allowed values are case insensitive: [On Off True False]";
          }
          break;
       }
@@ -8031,8 +8031,7 @@ bool Interpreter::ValidateMcsCommands(GmatCommand *first, GmatCommand *parent,
       if (current->Validate() == false)
       {
          #ifdef DEBUG_COMMAND_VALIDATION
-            MessageInterface::ShowMessage("The command \"%s\" failed "
-                  "validation\n",
+            MessageInterface::ShowMessage("The command \"%s\" failed validation\n",
                   current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
          #endif
          (*accumulatedErrors) += "   The command \"" +

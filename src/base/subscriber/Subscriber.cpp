@@ -339,15 +339,18 @@ bool Subscriber::ReceiveData(const char *datastream,  const int len)
        "data='%s'\n", this, GetName().c_str(), active, len, datastream);
    #endif
    
-   if (!active)        // Not currently processing data
-   {
-      #ifdef DEBUG_RECEIVE_DATA
-      MessageInterface::ShowMessage
-         ("Subscriber::ReceiveData() '%s' is not active, so just returning true\n",
-          GetName().c_str());
-      #endif
-      return true;
-   }
+   // Report command should be able to write headers even when ReportFile is not
+   // writing data (ShowReport = false), so commented out (LOJ:2012.06.13 - code QA)
+   // if (!active)        // Not currently processing data
+   // {
+   //    #ifdef DEBUG_RECEIVE_DATA
+   //    MessageInterface::ShowMessage
+   //       ("Subscriber::ReceiveData() '%s' is not active, so just returning true\n",
+   //        GetName().c_str());
+   //    #endif
+   //    return true;
+   // }
+   
    
    data = datastream;
    if (!Distribute(len))

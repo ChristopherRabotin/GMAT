@@ -1298,7 +1298,8 @@ bool GmatStringUtil::ToBoolean(const std::string &str, bool *value, bool trimPar
 // bool ToBoolean(const std::string &str, bool &value, bool trimParens = false)
 //------------------------------------------------------------------------------
 /*
- * @return true if string value is boolean (TRUE, FALSE, true, false, True, False).
+ * @return true if string value is one of case insensitive [true, false, on, off].
+ * @note See GMAT Software Specification on Boolean Type. (2012.06.14)
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToBoolean(const std::string &str, bool &value, bool trimParens)
@@ -1313,18 +1314,56 @@ bool GmatStringUtil::ToBoolean(const std::string &str, bool &value, bool trimPar
    if (str2.length() == 0)
       return false;
 
-   if (ToLower(str2) == "true")
+   std::string allLower = ToLower(str2);
+   if (allLower == "true" || allLower == "on")
    {
       value = true;
       return true;
    }
 
-   if (ToLower(str2) == "false")
+   if (allLower == "false" || allLower == "off")
    {
       value = false;
       return true;
    }
 
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ToOnOff(const std::string &str, std::string &value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * @return true if string value is one of case insensitive [true, false, on, off].
+ * @note See GMAT Software Specification on OnOff Type. (2012.06.14)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToOnOff(const std::string &str, std::string &value, bool trimParens)
+{
+   std::string str2 = Trim(str, BOTH);
+   if (trimParens)
+   {
+      str2 = RemoveExtraParen(str2);
+      str2 = Trim(str2, BOTH);
+   }
+   
+   if (str2.length() == 0)
+      return false;
+   
+   std::string allLower = ToLower(str2);
+   if (allLower == "true" || allLower == "on")
+   {
+      value = "On";
+      return true;
+   }
+   
+   if (allLower == "false" || allLower == "off")
+   {
+      value = "Off";
+      return true;
+   }
+   
    return false;
 }
 

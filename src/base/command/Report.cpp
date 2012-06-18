@@ -29,6 +29,7 @@
 //#define DEBUG_REPORT_SET
 //#define DEBUG_REPORT_INIT
 //#define DEBUG_REPORT_EXEC
+//#define DEBUG_WRITE_HEADERS
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_RENAME
@@ -140,13 +141,13 @@ Report& Report::operator=(const Report &rep)
       rfName = rep.rfName;
       reporter = NULL;
       reportID = -1;
+      needsHeaders = rep.needsHeaders;
 
       parmNames = rep.parmNames;
       actualParmNames = rep.actualParmNames;
       parms.clear();
       parmRows.clear();
       parmCols.clear();
-      needsHeaders = rep.needsHeaders;
    }
    
    return *this;
@@ -536,12 +537,22 @@ const StringArray& Report::GetRefObjectNameArray(const Gmat::ObjectType type)
 bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                           const std::string &name, const Integer index)
 {
+   if (obj == NULL)
+   {
+      #ifdef DEBUG_REPORT_OBJ
+      MessageInterface::ShowMessage
+         ("\nReport::SetRefObject() this=<%p> returning false since input object is NULL\n");
+      #endif
+      return false;
+   }
+   
    #ifdef DEBUG_REPORT_OBJ
-      MessageInterface::ShowMessage(
-         "Report::SetRefObject received a %s named '%s', index=%d\n", 
-         obj->GetTypeName().c_str(), obj->GetName().c_str(), index);
+   MessageInterface::ShowMessage
+      ("\nReport::SetRefObject() this=<%p> entered, obj=<%p><%s>'%s'\n   type=%d<%s>, "
+       "name='%s', index=%d\n", this, obj, obj->GetTypeName().c_str(), obj->GetName().c_str(),
+       type, GetObjectTypeString(type).c_str(), name.c_str(), index);
    #endif
-
+   
    if (type == Gmat::SUBSCRIBER)
    {
       if (obj->GetTypeName() != "ReportFile")
@@ -552,10 +563,6 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       // Tell the ReportFile object that a command has requested its services
       obj->TakeAction("PassedToReport");
       reporter = (ReportFile*)obj;
-      
-      // Why we need to clear? (loj: 2007.12.19 commented out)
-      // We want to preserve parameters to report for ReportFile
-      //reporter->TakeAction("Clear");
    }
    else if (type == Gmat::PARAMETER)
    {
@@ -569,14 +576,6 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             "in the list of reported values.\n");
       
       AddParameter(name, index, (Parameter*)obj);
-      
-      #ifdef __SHOW_NAMES_IN_REPORTFILE__
-      // For compare report column header
-      if (reporter)
-         reporter->AddParameterForTitleOnly(name);
-      else
-         throw CommandException("Report command has undefined ReportFile object.\n");
-      #endif
    }
    
    #ifdef DEBUG_REPORT_OBJ
@@ -607,40 +606,70 @@ bool Report::RenameRefObject(const Gmat::ObjectType type,
 {
    #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Report::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
-       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+      ("Report::RenameRefObject() entered, type=%d<%s>, oldName='%s', newName='%s'\n",
+       type, GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
    if (type == Gmat::SUBSCRIBER)
    {
       if (rfName == oldName)
+      {
          rfName = newName;
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   Subscriber name changed to '%s'\n", newName.c_str());
+         #endif
+      }
    }
    else if (type == Gmat::PARAMETER)
    {
       for (UnsignedInt i=0; i<parmNames.size(); i++)
          if (parmNames[i] == oldName)
+         {
             parmNames[i] = newName;
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("   Parameter name changed to '%s'\n", newName.c_str());
+            #endif
+         }
       
       for (UnsignedInt i=0; i<actualParmNames.size(); i++)
          if (actualParmNames[i] == oldName)
+         {
             actualParmNames[i] = newName;
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("   Actual parameter name changed to '%s'\n", newName.c_str());
+            #endif
+         }
    }
    // Since parameter name is composed of spacecraftName.dep.paramType,
    // spacecraftName.hardwareName.paramType, or burnName.dep.paramType
    // check the type first
    else if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
-            type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT ||
-            type == Gmat::HARDWARE)
+            type == Gmat::IMPULSIVE_BURN || type == Gmat::COORDINATE_SYSTEM ||
+            type == Gmat::CALCULATED_POINT || type == Gmat::HARDWARE)
    {
       for (UnsignedInt i=0; i<parmNames.size(); i++)
          if (parmNames[i].find(oldName) != std::string::npos)
+         {
             parmNames[i] = GmatStringUtil::Replace(parmNames[i], oldName, newName);
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("   Parameter name changed to '%s'\n", parmNames[i].c_str());
+            #endif
+         }
       
       for (UnsignedInt i=0; i<actualParmNames.size(); i++)
          if (actualParmNames[i].find(oldName) != std::string::npos)
+         {
             actualParmNames[i] =
                GmatStringUtil::Replace(actualParmNames[i], oldName, newName);
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("   Actual parameter name changed to '%s'\n", actualParmNames[i].c_str());
+            #endif
+         }
       
       // Go through wrappers
       for (WrapperArray::iterator i = parmWrappers.begin(); i < parmWrappers.end(); i++)
@@ -662,6 +691,9 @@ bool Report::RenameRefObject(const Gmat::ObjectType type,
       generatingString = GmatStringUtil::Replace(generatingString, oldName, newName);
    }
    
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("Report::RenameRefObject() leaving\n");
+   #endif
    return true;
 }
 
@@ -739,7 +771,8 @@ bool Report::Initialize()
 
    #ifdef DEBUG_REPORT_INIT
    MessageInterface::ShowMessage
-      ("Report::Initialize() entered, has %d parameter names\n", parmNames.size());
+      ("\nReport::Initialize() this=<%p> entered, has %d parameter names\n",
+       this, parmNames.size());
    #endif
    #ifdef DEBUG_OBJECT_MAP
    ShowObjectMaps();
@@ -759,13 +792,17 @@ bool Report::Initialize()
          "Object named \"" + rfName +
          "\" is not a ReportFile; Report command cannot execute\n");
    
-   // Tell the ReportFile object that a command has requested its services
+   // Tell the ReportFile object that a command has requested its services.
    // Added this here so that ReportFile::Initialize() doesn't throw exception
    // when there is no paramters to report (loj: 2008.06.11)
    reporter->TakeAction("PassedToReport");
    
    needsHeaders =
-      reporter->GetOnOffParameter(reporter->GetParameterID("WriteHeaders")) == "On";
+      reporter->GetBooleanParameter(reporter->GetParameterID("WriteHeaders"));
+
+   #ifdef DEBUG_REPORT_INIT
+   MessageInterface::ShowMessage("   needsHeaders = %d\n", needsHeaders);
+   #endif
    
    for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
    {
@@ -793,7 +830,7 @@ bool Report::Initialize()
    }
    
    // Set Wrapper references (LOJ: 2009.04.01)
-   // We need this to use ReportFile::WriteData() in Execute()
+   // We need this code to use ReportFile::WriteData() in Execute()
    for (WrapperArray::iterator i = parmWrappers.begin(); i < parmWrappers.end(); i++)
    {
       #ifdef DEBUG_REPORT_INIT
@@ -806,7 +843,7 @@ bool Report::Initialize()
    }
    
    #ifdef DEBUG_REPORT_INIT
-   MessageInterface::ShowMessage("Report::Initialize() returning true.\n");
+   MessageInterface::ShowMessage("Report::Initialize() this=<%p> returning true\n", this);
    #endif
    
    return true;
@@ -819,8 +856,7 @@ bool Report::Initialize()
 /**
  * Write the report data to a ReportFile.
  *
- * @return true if the Command runs to completion, false if an error
- *         occurs.
+ * @return true if the Command runs to completion, false if an error occurs.
  */
 //------------------------------------------------------------------------------
 bool Report::Execute()
@@ -832,15 +868,16 @@ bool Report::Execute()
    
    #ifdef DEBUG_REPORT_EXEC
    MessageInterface::ShowMessage
-      ("Report::Execute() this=<%p> '%s' entered, reporter <%s> '%s' has %d Parameters\n",
+      ("\nReport::Execute() this=<%p> <%s> entered, reporter <%s> '%s' has %d Parameters\n",
        this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
-       reporter->GetName().c_str(), reporter->GetFileName().c_str(), parms.size());
+       reporter->GetName().c_str(), reporter->GetStringParameter("Filename").c_str(),
+       parms.size());
    #endif
    
    // Build the data as a string
    std::stringstream datastream;
    
-   // Set the stream to use the settings in the ReportFile
+   // Set the stream to use the settings in the ReportFile.
    // Note that this is done here, rather than during initialization, in case
    // the user has changed the values during the run.
    Integer prec = reporter->GetIntegerParameter(reporter->GetParameterID("Precision"));
@@ -856,11 +893,17 @@ bool Report::Execute()
    
    int colWidth = reporter->GetIntegerParameter(reporter->GetParameterID("ColumnWidth"));
    
+   #ifdef DEBUG_REPORT_EXEC
+   MessageInterface::ShowMessage
+      ("   precision=%d, leftJustify=%d, zeroFill=%d, colWidth=%d, needsHeaders=%d\n",
+       prec, leftJustify, zeroFill, colWidth, needsHeaders);
+   #endif
+   
    if (leftJustify)
       datastream.setf(std::ios::left);
    
    if (needsHeaders &&
-       reporter->GetOnOffParameter(reporter->GetParameterID("WriteHeaders")) == "On")
+       reporter->GetBooleanParameter(reporter->GetParameterID("WriteHeaders")))
       WriteHeaders(datastream, colWidth);
    
    // if zero fill, show decimal point
@@ -874,7 +917,13 @@ bool Report::Execute()
    bool retval = reporter->WriteData(parmWrappers);
    reporter->TakeAction("ActivateForReport", "Off");
    BuildCommandSummary(true);
-   return retval;   
+   
+   #ifdef DEBUG_REPORT_EXEC
+   MessageInterface::ShowMessage
+      ("Report::Execute() this=<%p> returning %d\n", this, retval);
+   #endif
+   
+   return retval;
 }
 
 
@@ -896,8 +945,19 @@ void Report::RunComplete()
 //------------------------------------------------------------------------------
 // void WriteHeaders(std::stringstream &datastream, Integer colWidth)
 //------------------------------------------------------------------------------
+/**
+ * Writes column header by calling ReportFile::ReceiveData() with composed
+ * headers
+ */
+//------------------------------------------------------------------------------
 void Report::WriteHeaders(std::stringstream &datastream, Integer colWidth)
 {
+   #ifdef DEBUG_WRITE_HEADERS
+   MessageInterface::ShowMessage
+      ("Report::WriteHeaders() entered, colWidth = %d, needsHeaders = %d\n",
+       colWidth, needsHeaders);
+   #endif
+   
    reporter->TakeAction("ActivateForReport", "On");
    for (StringArray::iterator i = actualParmNames.begin();
         i != actualParmNames.end(); ++i)
@@ -910,12 +970,22 @@ void Report::WriteHeaders(std::stringstream &datastream, Integer colWidth)
    std::string header = datastream.str();
    reporter->ReceiveData(header.c_str(), header.length());
    datastream.str("");
+   
+   #ifdef DEBUG_WRITE_HEADERS
+   MessageInterface::ShowMessage
+      ("Report::WriteHeaders() leaving, needsHeaders set to false\n");
+   #endif
+   
    needsHeaders = false;
 }
 
 
 //------------------------------------------------------------------------------
 // bool AddParameter(const std::string &paramName, Integer index, Parameter *param)
+//------------------------------------------------------------------------------
+/**
+ * Adds Parameters to the report list.
+ */
 //------------------------------------------------------------------------------
 bool Report::AddParameter(const std::string &paramName, Integer index,
                           Parameter *param)
@@ -965,38 +1035,27 @@ bool Report::AddParameter(const std::string &paramName, Integer index,
       #endif
       parms[index] = param;
    }
-   //if (paramName != "" && index == numParams)
    else
    {
-      #ifdef __NO_DUPLICATES__
-      // if paramName not found, add
-      if (find(actualParmNames.begin(), actualParmNames.end(), paramName) ==
-          actualParmNames.end())
-      {
-      #endif
-         // Handle Array indexing
-         Integer row, col;
-         std::string newName;      
-         GmatStringUtil::GetArrayIndex(paramName, row, col, newName);
-         
-         parmNames.push_back(newName);
-         actualParmNames.push_back(paramName);
-         parmRows.push_back(row);
-         parmCols.push_back(col);
-         parms.push_back(param);
-         parmWrappers.push_back(NULL);
-         numParams = actualParmNames.size();
-         
-         #ifdef DEBUG_REPORT_SET
-         MessageInterface::ShowMessage
-            ("   Added '%s', size=%d\n", paramName.c_str(), numParams);
-         #endif
-         
-         return true;
+      // Handle Array indexing first
+      Integer row, col;
+      std::string newName;      
+      GmatStringUtil::GetArrayIndex(paramName, row, col, newName);
       
-      #ifdef __NO_DUPLICATES__
-      }
+      parmNames.push_back(newName);
+      actualParmNames.push_back(paramName);
+      parmRows.push_back(row);
+      parmCols.push_back(col);
+      parms.push_back(param);
+      parmWrappers.push_back(NULL);
+      numParams = actualParmNames.size();
+      
+      #ifdef DEBUG_REPORT_SET
+      MessageInterface::ShowMessage
+         ("   Added '%s', size=%d\n", paramName.c_str(), numParams);
       #endif
+      
+      return true;
    }
    
    return false;
@@ -1005,6 +1064,10 @@ bool Report::AddParameter(const std::string &paramName, Integer index,
 
 //------------------------------------------------------------------------------
 // void DeleteParameters()
+//------------------------------------------------------------------------------
+/**
+ * Delete Parameters from the report list and wrappers.
+ */
 //------------------------------------------------------------------------------
 void Report::DeleteParameters()
 {
@@ -1017,14 +1080,14 @@ void Report::DeleteParameters()
    
    std::vector<ElementWrapper*> wrappersToDelete;
    
-   // delete wrappers (loj: 2008.11.20)
+   // Add wrappers to the list to delete
    for (std::vector<ElementWrapper*>::iterator ewi = parmWrappers.begin();
         ewi < parmWrappers.end(); ewi++)
    {
       if ((*ewi) == NULL)
          continue;
       
-      // if wrapper not found, add to the list to delete
+      // If wrapper not found, add to the list to delete
       if (find(wrappersToDelete.begin(), wrappersToDelete.end(), (*ewi)) ==
           wrappersToDelete.end())
          wrappersToDelete.push_back((*ewi));
@@ -1035,7 +1098,7 @@ void Report::DeleteParameters()
       ("   There are %d wrappers to delete\n", wrappersToDelete.size());
    #endif
    
-   // delete wrappers (loj: 2008.11.20)
+   // Delete wrappers (loj: 2008.11.20)
    for (std::vector<ElementWrapper*>::iterator ewi = wrappersToDelete.begin();
         ewi < wrappersToDelete.end(); ewi++)
    {

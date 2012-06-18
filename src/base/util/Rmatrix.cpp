@@ -1366,7 +1366,7 @@ std::string Rmatrix::ToRowString(Integer row, Integer precision, Integer width,
        row, precision, width, showPoint);
    #endif
    
-   // Use c-style formatting
+   // Use c-style formatting (LOJ: This works better with alignment)
    //-----------------------------------------------------------------
    #if 1
    //-----------------------------------------------------------------
@@ -1375,9 +1375,9 @@ std::string Rmatrix::ToRowString(Integer row, Integer precision, Integer width,
    char format[50], buffer[200];
    
    if (showPoint)
-      sprintf(format, "%s %d.%de", "%", w, precision);
+      sprintf(format, "%s%d.%de", "%", w, precision);
    else
-      sprintf(format, "%s %d.%dg", "%", w, precision);
+      sprintf(format, "%s%d.%dg", "%", w, precision);
    
    Rvector rowVec = GetRow(row);
    Integer size = rowVec.GetSize();
@@ -1401,7 +1401,7 @@ std::string Rmatrix::ToRowString(Integer row, Integer precision, Integer width,
       ss << sval;
       ss << " ";
    }
-   
+
    return ss.str();
    
    //-----------------------------------------------------------------

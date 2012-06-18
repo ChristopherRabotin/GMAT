@@ -136,6 +136,10 @@ private:
    /// This flag indicates whether or not to create default StringWrapper
    bool            createDefaultStringWrapper;
    
+   // If wrapper type of LHS of assignment command is object property wrapper,
+   // the LHS object field type will be used to create proper RHS wrapper
+   Gmat::ParameterType lhsParamType;
+   
    /// Error handling data
    bool            continueOnError;
    StringArray     theErrorList;

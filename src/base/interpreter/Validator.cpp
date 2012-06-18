@@ -445,6 +445,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    theCommand = cmd;
    theDescription = theCommand->GetGeneratingString(Gmat::NO_COMMENTS);
    continueOnError = contOnError;
+   lhsParamType = Gmat::UNKNOWN_PARAMETER_TYPE;
    std::string typeName = cmd->GetTypeName();
    
    #ifdef DEBUG_VALIDATE_COMMAND
@@ -809,6 +810,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    
    std::string typeName = cmd->GetTypeName();
    const StringArray wrapperNames = cmd->GetWrapperObjectNameArray();
+   lhsParamType = Gmat::UNKNOWN_PARAMETER_TYPE;
    
    //---------------------------------------------------------------------------
    // Special case for Assignment command (LHS = RHS).
@@ -968,6 +970,25 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          theErrorMsg = "Failed to set ElementWrapper for LHS object \"" + lhs +
             "\" in Assignment";
          return HandleError();
+      }
+      
+      // Since BOOLEAN_TYPE and ON_OFF_TYPE can accept case insensitive True/False/On/Off,
+      // save LHS propety type if it is on object property wrapper (LOJ: 2012.06.15)
+      if (leftEw->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
+      {
+         GmatBase *lhsObj = FindObject(owner);
+         if (lhsObj)
+         {
+            GmatBase *toObj = NULL;
+            Integer lhsPropId = -1;
+            if (theInterpreter->FindPropertyID(lhsObj, type, &toObj, lhsPropId, lhsParamType))
+            {
+              #if DBGLVL_WRAPPERS
+              MessageInterface::ShowMessage
+                 ("   ==> LHS is object property and lhsParamType=%d\n", lhsParamType);
+              #endif
+            }
+         }
       }
    }
    catch (BaseException &ex)
@@ -1572,7 +1593,11 @@ ElementWrapper* Validator::CreateOtherWrapper(Integer manage)
       else
       {
          bool bVal;
-         if (GmatStringUtil::ToBoolean(theDescription, bVal))
+         std::string onOffVal;
+         // To allow case insensitive True/False/On/Off for BOOLEAN_TYPE and 
+         // and OF_OFF_TYPE (LOJ: 2012.06.15)
+         if (lhsParamType == Gmat::BOOLEAN_TYPE &&
+             GmatStringUtil::ToBoolean(theDescription, bVal))
          {
             ew = new BooleanWrapper();
             #ifdef DEBUG_MEMORY
@@ -1589,8 +1614,8 @@ ElementWrapper* Validator::CreateOtherWrapper(Integer manage)
                 theDescription.c_str(), "\"\n");
             #endif
          }
-         else if (theDescription == "On" || theDescription == "Off" ||
-                  theDescription == "on" || theDescription == "off")
+         else if (lhsParamType == Gmat::ON_OFF_TYPE &&
+                  GmatStringUtil::ToOnOff(theDescription, onOffVal))
          {
             ew = new OnOffWrapper();
             #ifdef DEBUG_MEMORY
