@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Spacecraft"
-          xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="For" xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -16,7 +15,7 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">2012a</refmiscinfo>
+    <refmiscinfo class="version">2011a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
@@ -24,32 +23,32 @@
   <refnamediv>
     <refname>ResourceName</refname>
 
-    <refpurpose>A one-sentence description of the resource</refpurpose>
+    <refpurpose>A one-sentence description of the command</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The text description of the resource. Use special formatting for
+    <para>The text description of the command. Use special formatting for
     <guilabel>command names</guilabel> and <guilabel>field
     names</guilabel>.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="LinkId"/>, <xref linkend="LinkId"/></para>
+    linkend="LinkId" />, <xref linkend="LinkId" /></para>
   </refsection>
 
   <refsection>
-    <title>Fields</title>
+    <title>Options</title>
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth=".5*" />
 
-        <colspec colnum="2" colwidth="3*"/>
+        <colspec colnum="2" colwidth="3*" />
 
         <thead>
           <row>
-            <entry>Field</entry>
+            <entry>Option</entry>
 
             <entry>Description</entry>
           </row>
@@ -67,8 +66,8 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>The data type from the Data Type column of the Field
-                    Spec</para>
+                    <para>a list of data types from the Data Type column of
+                    the Field Spec</para>
                   </listitem>
                 </varlistentry>
 
@@ -100,6 +99,14 @@
                 </varlistentry>
 
                 <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>the unit or N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
                   <term>Interfaces</term>
 
                   <listitem>
@@ -110,16 +117,17 @@
           </row>
 
           <row>
-            <entry><guilabel>Epoch</guilabel></entry>
+            <entry><guilabel>Start</guilabel></entry>
 
-            <entry><para>The time and date corresponding to the specified
-            orbit state. It defines the start time for propagation using the
-            <guilabel>Propagate</guilabel> command.</para><variablelist>
+            <entry><para>The <guilabel>Start</guilabel> parameter is the
+            initial value for the <guilabel>Index</guilabel>
+            parameter.</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Time</para>
+                    <para>Real Number, Variable, Array Element, or Scalar Real
+                    Object Parameter</para>
                   </listitem>
                 </varlistentry>
 
@@ -127,14 +135,16 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Gregorian: <userinput>04 Oct 1957
-                    12:00:00.000</userinput> &lt;= <guilabel>Epoch</guilabel>
-                    &lt;= <userinput>28 Feb 2100
-                    00:00:00.000</userinput></para>
+                    <para>-∞ &lt; <guilabel>Start</guilabel> &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
 
-                    <para>Modified Julian: <userinput>6116.0</userinput> &lt;=
-                    <guilabel>Epoch</guilabel> &lt;=
-                    <userinput>58127.5</userinput></para>
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get, or only one (from the Access column of the
+                    Field Spec)</para>
                   </listitem>
                 </varlistentry>
 
@@ -142,15 +152,15 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>21545</para>
+                    <para>1</para>
                   </listitem>
                 </varlistentry>
 
                 <varlistentry>
-                  <term>Required</term>
+                  <term>Units</term>
 
                   <listitem>
-                    <para>no</para>
+                    <para>the unit or N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -176,7 +186,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Command_For_Default.bmp"
-                     scalefit="1" width="100%"/>
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
       </mediaobject>
     </screenshot>
