@@ -745,7 +745,7 @@ wxString UserInputValidator::ToWxString(Integer intVal)
 //------------------------------------------------------------------------------
 /**
  * Converts wxString value to Real value. If input string is not a number
- * it returns NaN.
+ * it returns GmatRealConstants::REAL_UNDEFINED.
  */
 //------------------------------------------------------------------------------
 Real UserInputValidator::ToReal(const wxString &wxStr)
@@ -757,9 +757,12 @@ Real UserInputValidator::ToReal(const wxString &wxStr)
    }
    else
    {
-      unsigned long long rawNan = 0x7ff0000000000000;
-      Real nanVal = *( Real* )&rawNan;
-      return nanVal;
+      // I want to return NaN if string is not a valid real number.
+      // Does this code only works on Windows? Commented out (LOJ: 2012.06.19)
+      //unsigned long long rawNan = 0x7ff0000000000000;
+      //Real nanVal = *( Real* )&rawNan;
+      //return nanVal;
+      return GmatRealConstants::REAL_UNDEFINED;
    }
 }
 
