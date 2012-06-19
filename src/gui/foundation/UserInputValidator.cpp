@@ -701,6 +701,88 @@ wxString UserInputValidator::ToWxString(const wxArrayString &names)
 
 
 //------------------------------------------------------------------------------
+/// wxString ToWxString(const std::string &stdStr)
+//------------------------------------------------------------------------------
+wxString UserInputValidator::ToWxString(const std::string &stdStr)
+{
+   wxString wxStr = stdStr.c_str();
+   return wxStr;
+}
+
+
+//------------------------------------------------------------------------------
+// wxString ToWxString(Real realVal)
+//------------------------------------------------------------------------------
+/**
+ * Formats real value using default DATA_PRECESION defined in GmatGlobal.
+ */
+//------------------------------------------------------------------------------
+wxString UserInputValidator::ToWxString(Real realVal)
+{
+   std::string strVal =
+      GmatStringUtil::ToString(realVal, GmatGlobal::DATA_PRECISION, false, 1);
+   return ToWxString(strVal);
+}
+
+
+//------------------------------------------------------------------------------
+// wxString ToWxString(Integer intVal)
+//------------------------------------------------------------------------------
+/**
+ * Formats integer value.
+ */
+//------------------------------------------------------------------------------
+wxString UserInputValidator::ToWxString(Integer intVal)
+{
+   std::string strVal =
+      GmatStringUtil::ToString(intVal, 1);
+   return ToWxString(strVal);
+}
+
+
+//------------------------------------------------------------------------------
+// Real ToReal(const wxString &strVal)
+//------------------------------------------------------------------------------
+/**
+ * Converts wxString value to Real value. If input string is not a number
+ * it returns NaN.
+ */
+//------------------------------------------------------------------------------
+Real UserInputValidator::ToReal(const wxString &wxStr)
+{
+   Real realVal;
+   if (GmatStringUtil::ToReal(wxStr.c_str(), realVal))
+   {
+      return realVal;
+   }
+   else
+   {
+      unsigned long long rawNan = 0x7ff0000000000000;
+      Real nanVal = *( Real* )&rawNan;
+      return nanVal;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Integer ToInteger(const wxString &strVal)
+//------------------------------------------------------------------------------
+/**
+ * Converts wxString value to integer value. If input string is not a number
+ * it returns GmatIntegerConstants::INTEGER_UNDEFINED (-987654321)
+ */
+//------------------------------------------------------------------------------
+Integer UserInputValidator::ToInteger(const wxString &wxStr)
+{
+   Integer intVal;
+   if (GmatStringUtil::ToInteger(wxStr.c_str(), intVal))
+      return intVal;
+   else
+      return GmatIntegerConstants::INTEGER_UNDEFINED;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetErrorFlag()
 //------------------------------------------------------------------------------
 /*

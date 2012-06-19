@@ -73,6 +73,11 @@ public:
 
    wxArrayString ToWxArrayString(const StringArray &array);
    wxString ToWxString(const wxArrayString &names);
+   wxString ToWxString(const std::string &stdStr);
+   wxString ToWxString(Real realVal);
+   wxString ToWxString(Integer intVal);
+   Real     ToReal(const wxString &wxStr);
+   Integer  ToInteger(const wxString &wxStr);
    
 protected:
    static std::string lessOrEq;

@@ -31,7 +31,8 @@ namespace GmatRealConstants
    const Real    REAL_TOL             = 1.0e-15;
    const Real    REAL_UNDEFINED       = -987654321.0123e-45;
    const Real    REAL_UNDEFINED_LARGE = -9876543210.1234;
-
+   const Integer INTEGER_UNDEFINED    = -987654321;
+   
    #ifdef _MSC_VER
       const Integer INTEGER_MAX          = _I32_MAX;
    #else
@@ -112,6 +113,12 @@ namespace GmatPhysicalConstants
     const Real ABSOLUTE_ZERO_K                  = 0.0;           // K
     const Real ABSOLUTE_ZERO_C                  = -273.15;       // degrees C
 } // GmatPhysicalConstants
+
+// Constants relating to integer numbers
+namespace GmatIntegerConstants
+{
+   const Integer INTEGER_UNDEFINED     = -987654321;
+}
 
 // Time Constants
 namespace GmatTimeConstants

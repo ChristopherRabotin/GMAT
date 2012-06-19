@@ -300,19 +300,19 @@ void GroundStationPanel::LoadData()
 
    try
    {
-      stationIDTextCtrl->SetValue(wxVariant(localGroundStation->GetStringParameter(GroundStation::STATION_ID).c_str()));
-      centralBodyComboBox->SetValue(wxVariant(localGroundStation->GetStringParameter(BodyFixedPoint::CENTRAL_BODY).c_str()));
+      stationIDTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(GroundStation::STATION_ID).c_str()));
+      centralBodyComboBox->SetValue(ToWxString(localGroundStation->GetStringParameter(BodyFixedPoint::CENTRAL_BODY).c_str()));
       currentStateType = localGroundStation->GetStringParameter(BodyFixedPoint::STATE_TYPE);
-      stateTypeComboBox->SetValue(wxVariant(currentStateType.c_str()));
+      stateTypeComboBox->SetValue(ToWxString(currentStateType.c_str()));
       currentHorizonReference = localGroundStation->GetStringParameter(BodyFixedPoint::HORIZON_REFERENCE);
-      horizonReferenceComboBox->SetValue(wxVariant(currentHorizonReference.c_str()));
+      horizonReferenceComboBox->SetValue(ToWxString(currentHorizonReference.c_str()));
       location1 = localGroundStation->GetRealParameter(BodyFixedPoint::LOCATION_1);
-      location1TextCtrl->SetValue(wxVariant(location1));
+      location1TextCtrl->SetValue(ToWxString(location1));
       location2 = localGroundStation->GetRealParameter(BodyFixedPoint::LOCATION_2);
-      location2TextCtrl->SetValue(wxVariant(location2));
+      location2TextCtrl->SetValue(ToWxString(location2));
       location3 = localGroundStation->GetRealParameter(BodyFixedPoint::LOCATION_3);
-      location3TextCtrl->SetValue(wxVariant(location3));
-      //hardwareTextCtrl->SetValue(wxVariant(localGroundStation->GetStringParameter(GroundStation::HARDWARE).c_str()));
+      location3TextCtrl->SetValue(ToWxString(location3));
+      //hardwareTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(GroundStation::HARDWARE).c_str()));
       
       // update labels and tooltips based on statetype
       UpdateControls();
@@ -331,7 +331,6 @@ void GroundStationPanel::SaveData()
 {
    canClose = true;
    
-//   Real location1, location2, location3;
    std::string inputString;
    std::string text;
    
@@ -578,9 +577,9 @@ void GroundStationPanel::OnStateTypeComboBoxChange(wxCommandEvent &event)
       localGroundStation->SetRealParameter(BodyFixedPoint::LOCATION_1, location1);
       localGroundStation->SetRealParameter(BodyFixedPoint::LOCATION_2, location2);
       localGroundStation->SetRealParameter(BodyFixedPoint::LOCATION_3, location3);
-      location1TextCtrl->SetValue(wxVariant(location1));
-      location2TextCtrl->SetValue(wxVariant(location2));
-      location3TextCtrl->SetValue(wxVariant(location3));
+      location1TextCtrl->SetValue(ToWxString(location1));
+      location2TextCtrl->SetValue(ToWxString(location2));
+      location3TextCtrl->SetValue(ToWxString(location3));
       currentStateType = sttype;
    }
    UpdateControls();
@@ -649,9 +648,9 @@ void GroundStationPanel::OnHorizonReferenceComboBoxChange(wxCommandEvent &event)
       localGroundStation->SetRealParameter(BodyFixedPoint::LOCATION_1, location1);
       localGroundStation->SetRealParameter(BodyFixedPoint::LOCATION_2, location2);
       localGroundStation->SetRealParameter(BodyFixedPoint::LOCATION_3, location3);
-      location1TextCtrl->SetValue(wxVariant(location1));
-      location2TextCtrl->SetValue(wxVariant(location2));
-      location3TextCtrl->SetValue(wxVariant(location3));
+      location1TextCtrl->SetValue(ToWxString(location1));
+      location2TextCtrl->SetValue(ToWxString(location2));
+      location3TextCtrl->SetValue(ToWxString(location3));
       currentHorizonReference = horizon;
    }
    UpdateControls();
