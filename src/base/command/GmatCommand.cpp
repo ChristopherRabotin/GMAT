@@ -2148,7 +2148,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    else
    {
       if (!commandCompleted)
-         data << "Execute the script to generate command summary data\n";
+         data << "Execute the mission to generate command summary data\n";
       else
       {
         // data << "-------------------------------------------"
@@ -2187,7 +2187,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             {
                std::string errmsg = "Cannot use coordinate system ";
                errmsg += summaryCoordSysName + " to build command summary.\n";
-               errmsg += "Please execute script to make " + summaryCoordSysName + " available.\n";
+               errmsg += "Please rerun the mission to make " + summaryCoordSysName + " available.\n";
                throw CommandException(errmsg);
             }
             cmdOrigin                = summaryCoordSys->GetOrigin();
