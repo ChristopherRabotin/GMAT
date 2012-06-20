@@ -340,8 +340,8 @@ TableTemplate<T>::SetSize(int r, int c, bool zeroElements)
                elementD[(ii * colsD) + jj] = saved[(ii * oldCols) + jj];
             }
          }
+         delete saved;
       }
-      if (saved) delete saved;
    }
 }
 
