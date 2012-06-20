@@ -267,7 +267,7 @@ void OrbitPanel::LoadData()
                mOutCoord->GetName().c_str(), mOutCoord);
          #endif
          
-         // Set the CS's on the spacecraft
+         // Set the CSs on the spacecraft
          theSpacecraft->SetInternalCoordSystem(mInternalCoord);
          theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, mOutCoord->GetName());
          theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
