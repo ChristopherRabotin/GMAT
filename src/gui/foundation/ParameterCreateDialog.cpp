@@ -562,7 +562,7 @@ void ParameterCreateDialog::SaveData()
                   ("   Resetting size of Array '%s' to rows=%d, cols=%d\n",
                    paramName.c_str(), mNumRows, mNumCols);
                #endif
-               ((Array *) mCurrParam)->SetSize(mNumRows, mNumCols);
+               ((Array *) mCurrParam)->SetSize(mNumRows, mNumCols, false);
             }
             
             if (canClose)

@@ -134,7 +134,7 @@ TableTemplate<T>::TableTemplate(const TableTemplate<T> &Table)
 template <class T>
 TableTemplate<T>::~TableTemplate() 
 {
-   delete[] elementD;    
+   delete[] elementD;
 }
 
 //------------------------------------------------------------------------------
@@ -297,16 +297,26 @@ TableTemplate<T>::IsSized() const
 }
 
 //------------------------------------------------------------------------------
-//  virtual void SetSize(int r, int c);
+//  virtual void SetSize(int r, int c, bool zeroElements);
 //------------------------------------------------------------------------------
 template <class T>
 void
-TableTemplate<T>::SetSize(int r, int c)
+TableTemplate<T>::SetSize(int r, int c, bool zeroElements)
 {
+   T        *saved          = NULL;
+   Integer  oldRows         = rowsD;
+   Integer  oldCols         = colsD;
+
    if (isSizedD == true)
    {
       //throw TableTemplateExceptions::TableAlreadySized();
       // wcs = 2008.05.07 - we need to be able to resize
+      if (!zeroElements)
+      {
+         saved = new T[rowsD*colsD];
+         for (int i=0; i<rowsD*colsD; i++)
+            saved[i] = elementD[i];
+      }
       delete [] elementD;
    }
 
@@ -316,6 +326,23 @@ TableTemplate<T>::SetSize(int r, int c)
    }
 
    init(r, c);
+   if (!zeroElements)
+   {
+      if ((saved != NULL) && (oldRows != 0) && (oldCols != 0))
+      {
+         for (int ii = 0; ii < oldRows; ii++)
+         {
+            if (ii >= rowsD) break;
+            for (int jj = 0; jj < oldCols; jj++)
+            {
+               if (jj >= colsD) break;
+               // set to old values here
+               elementD[(ii * colsD) + jj] = saved[(ii * oldCols) + jj];
+            }
+         }
+      }
+      if (saved) delete saved;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -371,7 +398,7 @@ TableTemplate<T>::GetNumRows() const
 //------------------------------------------------------------------------------
 template <class T>
 void
-TableTemplate<T>::init(int r, int c) 
+TableTemplate<T>::init(int r, int c)
 {
    rowsD = r;
    colsD = c;
@@ -389,7 +416,6 @@ TableTemplate<T>::init(int r, int c)
       for (int i=0; i<rowsD*colsD; i++)
          elementD[i] = 0.0;
    }
-   
    isSizedD = true;
 }
 

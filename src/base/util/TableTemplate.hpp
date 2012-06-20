@@ -87,7 +87,7 @@ public:
     virtual T    GetElement(Integer r, Integer c) const;
     virtual void SetElement(Integer r, Integer c, const T &value);
     virtual bool IsSized() const;
-    virtual void SetSize(Integer r, Integer c);
+    virtual void SetSize(Integer r, Integer c, bool zeroElements = true);
     virtual void GetSize(Integer &r, Integer &c) const;
     virtual Integer  GetNumColumns() const;
     virtual Integer  GetNumRows() const;

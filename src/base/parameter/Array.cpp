@@ -190,9 +190,9 @@ bool Array::operator!=(const Array &right) const
 
 
 //------------------------------------------------------------------------------
-// bool SetSize(const Integer row, const Integer col)
+// bool SetSize(const Integer row, const Integer col, bool zeroElements = true)
 //------------------------------------------------------------------------------
-bool Array::SetSize(const Integer row, const Integer col)
+bool Array::SetSize(const Integer row, const Integer col, bool zeroElements)
 {
    #if DEBUG_ARRAY
    MessageInterface::ShowMessage
@@ -201,7 +201,7 @@ bool Array::SetSize(const Integer row, const Integer col)
    
    mNumRows = row;
    mNumCols = col;
-   mRmatValue.SetSize(mNumRows, mNumCols);
+   mRmatValue.SetSize(mNumRows, mNumCols, zeroElements);
    mSizeSet = true;
    return true;
 }
