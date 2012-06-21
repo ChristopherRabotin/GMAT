@@ -2056,20 +2056,21 @@ bool OrbitPlot::UpdateSolverData()
 /**
  * @return 1 if continue
  *         2 if solving and plotting current iteration
+ *
  */
 //------------------------------------------------------------------------------
 Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
 {
    #if DBGLVL_DATA
    MessageInterface::ShowMessage
-      ("OrbitPlot::BufferOrbitData() '%s' entered\n", GetName().c_str());
+      ("OrbitPlot::BufferOrbitData() '%s' entered, len=%d\n", GetName().c_str(),
+       len);
    #endif
    
    //------------------------------------------------------------
    // buffer orbit data
    //------------------------------------------------------------
-
-   //@todo check for lenth of data
+   // zero data length is already checked in UpdateData()
    
    CoordinateConverter coordConverter;
    
@@ -2113,7 +2114,7 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
    Integer idVx, idVy, idVz;
    Integer scIndex = -1;
    
-   for (int i=0; i<mScCount; i++)
+   for (Integer i = 0; i < mScCount; i++)
    {
       idX = FindIndexOfElement(dataLabels, mScNameArray[i]+".X");
       idY = FindIndexOfElement(dataLabels, mScNameArray[i]+".Y");
@@ -2129,69 +2130,74 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
           i, mScNameArray[i].c_str(), idX, idY, idZ, idVx, idVy, idVz);
       #endif
       
-      // if any of index not found, continue with next spacecraft name
-      if (idX  == -1 || idY  == -1 || idZ  == -1 ||
-          idVx == -1 || idVy == -1 || idVz == -1)
-         continue;
-      
       scIndex++;
       
-      // buffer data
-      for (int sc=0; sc<mScCount; sc++)
+      // If any of index not found, fill with zeros and continue with next spacecraft name
+      if (idX  == -1 || idY  == -1 || idZ  == -1 ||
+          idVx == -1 || idVy == -1 || idVz == -1)
       {
-         // If distributed data coordinate system is different from view
-         // coordinate system, convert data here.
-         // if we convert after current epoch, it will not give correct
-         // results, if origin is spacecraft,
-         // ie, sat->GetMJ2000State(epoch) will not give correct results.
-         
-         #if DBGLVL_DATA
-         MessageInterface::ShowMessage
-            ("   %s, %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(), dat[0],
-             dat[idX], dat[idY], dat[idZ]);
-         #endif
-         
-         if ((theDataCoordSystem != NULL && mViewCoordSystem != NULL) &&
-             (mViewCoordSystem != theDataCoordSystem))
-         {
-            Rvector6 inState, outState;
-            
-            // convert position and velocity
-            inState.Set(dat[idX], dat[idY], dat[idZ],
-                        dat[idVx], dat[idVy], dat[idVz]);
-            
-            coordConverter.Convert(dat[0], inState, theDataCoordSystem,
-                                   outState, mViewCoordSystem);
-            
-            mScXArray[scIndex] = outState[0];
-            mScYArray[scIndex] = outState[1];
-            mScZArray[scIndex] = outState[2];
-            mScVxArray[scIndex] = outState[3];
-            mScVyArray[scIndex] = outState[4];
-            mScVzArray[scIndex] = outState[5];
-         }
-         else
-         {
-            mScXArray[scIndex] = dat[idX];
-            mScYArray[scIndex] = dat[idY];
-            mScZArray[scIndex] = dat[idZ];
-            mScVxArray[scIndex] = dat[idVx];
-            mScVyArray[scIndex] = dat[idVy];
-            mScVzArray[scIndex] = dat[idVz];
-         }
-         
-         #if DBGLVL_DATA
-         MessageInterface::ShowMessage
-            ("   after buffering, scNo=%d, scIndex=%d, X,Y,Z = %f, %f, %f\n",
-             i, scIndex, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
-         #endif
-         
-         #if DBGLVL_DATA > 1
-         MessageInterface::ShowMessage
-            ("   Vx,Vy,Vz = %f, %f, %f\n",
-             mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
-         #endif
+         mScXArray[scIndex] = 0.0;
+         mScYArray[scIndex] = 0.0;
+         mScZArray[scIndex] = 0.0;
+         mScVxArray[scIndex] = 0.0;
+         mScVyArray[scIndex] = 0.0;
+         mScVzArray[scIndex] = 0.0;
+         continue;
       }
+      
+      // Buffer actual data
+      
+      #if DBGLVL_DATA
+      MessageInterface::ShowMessage
+         ("   %s, %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(), dat[0],
+          dat[idX], dat[idY], dat[idZ]);
+      #endif
+      
+      // If distributed data coordinate system is different from view
+      // coordinate system, convert data here.
+      // If we convert after current epoch, it will not give correct
+      // results, if origin is spacecraft,
+      // ie, sat->GetMJ2000State(epoch) will not give correct results.
+      if ((theDataCoordSystem != NULL && mViewCoordSystem != NULL) &&
+          (mViewCoordSystem != theDataCoordSystem))
+      {
+         Rvector6 inState, outState;
+         
+         // convert position and velocity
+         inState.Set(dat[idX], dat[idY], dat[idZ],
+                     dat[idVx], dat[idVy], dat[idVz]);
+         
+         coordConverter.Convert(dat[0], inState, theDataCoordSystem,
+                                outState, mViewCoordSystem);
+         
+         mScXArray[scIndex] = outState[0];
+         mScYArray[scIndex] = outState[1];
+         mScZArray[scIndex] = outState[2];
+         mScVxArray[scIndex] = outState[3];
+         mScVyArray[scIndex] = outState[4];
+         mScVzArray[scIndex] = outState[5];
+      }
+      else
+      {
+         mScXArray[scIndex] = dat[idX];
+         mScYArray[scIndex] = dat[idY];
+         mScZArray[scIndex] = dat[idZ];
+         mScVxArray[scIndex] = dat[idVx];
+         mScVyArray[scIndex] = dat[idVy];
+         mScVzArray[scIndex] = dat[idVz];
+      }
+      
+      #if DBGLVL_DATA
+      MessageInterface::ShowMessage
+         ("   after buffering, scNo=%d, scIndex=%d, X,Y,Z = %f, %f, %f\n",
+          i, scIndex, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
+      #endif
+      
+      #if DBGLVL_DATA > 1
+      MessageInterface::ShowMessage
+         ("   Vx,Vy,Vz = %f, %f, %f\n",
+          mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
+      #endif
    }
    
    // if only showing current iteration, buffer data and return

@@ -341,7 +341,7 @@ protected:
                                   bool useMipmaps);
    
    // model
-   virtual bool LoadSpacecraftModels();
+   virtual bool LoadSpacecraftModels(bool writeWarning);
    
    // view objects
    virtual void SetupProjection();

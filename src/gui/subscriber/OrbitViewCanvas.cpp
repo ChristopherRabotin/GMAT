@@ -2284,15 +2284,20 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
 {
    #ifdef DEBUG_ORBIT_LINES
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::DrawOrbitLines() entered, i=%d, objName='%s', "
-       "obj=%d, objId=%d, mTime[%3d]=%f, mTime[%3d]=%f, mIsDrawing[%3d]=%d, "
-       "mIsDrawing[%3d]=%d\n", i, objName.c_str(), obj, objId, i, mTime[i],
-       i-1, mTime[i-1], i, mIsDrawing[i], i-1, mIsDrawing[i-1]);
+      ("OrbitViewCanvas::DrawOrbitLines() entered, objName='%s'\n   i=%2d, obj=%d, "
+       "objId=%d, mTime[%3d]=%f, mTime[%3d]=%f, mIsDrawing[%3d]=%d, mIsDrawing[%3d]=%d\n",
+       objName.c_str(), i, obj, objId, i, mTime[i], i-1, mTime[i-1], i, mIsDrawing[i], i-1,
+       mIsDrawing[i-1]);
    #endif
    
    // If current or previous points are not drawing, just return
    if (!mIsDrawing[i] || !mIsDrawing[i-1])
+   {
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage("DrawOrbitLines() leaving, object is not drawing\n");
+      #endif
       return;
+   }
    
    int index1 = 0, index2 = 0;
    
@@ -2311,7 +2316,12 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       
       // if object position magnitude is 0, skip
       if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
+      {
+         #ifdef DEBUG_ORBIT_LINES
+         MessageInterface::ShowMessage("DrawOrbitLines() leaving, position is zero\n");
+         #endif
          return;
+      }
       
       // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
       #ifdef SKIP_OVER_LIMIT_DATA
@@ -2327,6 +2337,10 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
              GetName().c_str(), i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
              r2.ToString().c_str());
          #endif
+         #ifdef DEBUG_ORBIT_LINES
+         MessageInterface::ShowMessage
+            ("DrawOrbitLines() leaving, position difference is over the limit\n");
+         #endif
          return;
       }
       #endif
@@ -2335,12 +2349,22 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       int colorIndex = objId * MAX_DATA + i;
       if (mDrawOrbitFlag[colorIndex])
       {
-         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT)){
+         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
+         {
             // We are drawing a spacecraft orbit.  This includes solver passes.
-            *sIntColor = mObjectOrbitColor[colorIndex];}
-         else {
+            *sIntColor = mObjectOrbitColor[colorIndex];
+         }
+         else
+         {
             // We are drawing some other trajectory, say for a planet.
-            *sIntColor = mObjectColorMap[objName].GetIntColor();}
+            *sIntColor = mObjectColorMap[objName].GetIntColor();
+         }
+         
+         #ifdef DEBUG_ORBIT_LINES
+         MessageInterface::ShowMessage
+            ("   colorIndex=%4d, sIntColor=%6d, sGlColor=%u\n", colorIndex,
+             *sIntColor, sGlColor);
+         #endif
          
          // PS - Rendering.cpp
          DrawLine(sGlColor, r1, r2);

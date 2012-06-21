@@ -318,7 +318,7 @@ bool ViewCanvas::InitializePlot()
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("   Calling LoadSpacecraftModels()\n");
    #endif
-   LoadSpacecraftModels();
+   LoadSpacecraftModels(true);
    
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
@@ -407,7 +407,7 @@ void ViewCanvas::SetObjectColors(const wxStringColorMap &objectColorMap)
 
 
 //------------------------------------------------------------------------------
-// virtual void SetObjectColors(const wxStringColorMap &objectColorMap)
+// virtual void SetShowObjects(const wxStringColorMap &objectColorMap)
 //------------------------------------------------------------------------------
 void ViewCanvas::SetShowObjects(const wxStringBoolMap &showObjMap)
 {
@@ -809,10 +809,13 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    MessageInterface::ShowMessage
       ("===========================================================================\n");
    MessageInterface::ShowMessage
-      ("ViewCanvas::UpdatePlot() plot=%s, time=%f, posX=%f, mNumData=%d, "
-       "mScCount=%d, scColor=%u\n   solving=%d, solverOption=%d, drawing=%d, "
-       "inFunction=%d\n", GetName().c_str(), time, posX[0], mNumData, mScCount,
-       scColors[0], solving, solverOption, drawing, inFunction);
+      ("ViewCanvas::UpdatePlot() plot=%s, time=%f, mNumData=%d, mScCount=%d, "
+       "solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n", GetName().c_str(),
+       time, mNumData, mScCount, solving, solverOption, drawing, inFunction);
+   for (int i = 0; i < mScCount; i++)
+      MessageInterface::ShowMessage
+         ("   posX:%12.5f, posY:%12.5f, posZ:%12.5f, scColor:%u\n", posX[i], posY[i],
+          posZ[i], scColors[i]);
    #endif
    
    //-----------------------------------------------------------------
@@ -833,7 +836,7 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    
    if (mScCount > GmatPlot::MAX_SCS)
       mScCount = GmatPlot::MAX_SCS;
-      
+   
    //-----------------------------------------------------------------
    // Buffer data for plot
    //-----------------------------------------------------------------
@@ -949,8 +952,8 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
       
       #if DEBUG_OBJECT > 1
       MessageInterface::ShowMessage
-         ("ViewCanvas::AddObjectList() objNames[%d]=%s\n",
-          i, objNames[i].c_str());
+         ("ViewCanvas::AddObjectList() objNames[%d]=%s, objColor=%u, rgb=[%u,%u,%u]\n",
+          i, objNames[i].c_str(), objColors[i], rgb.Red(), rgb.Green(), rgb.Blue());
       #endif
    }
 
@@ -1758,14 +1761,20 @@ int ViewCanvas::AddAlphaToTexture(const wxImage &image, bool isSpacecraft,
 
 
 //------------------------------------------------------------------------------
-// virtual bool LoadSpacecraftModels()
+// virtual bool LoadSpacecraftModels(bool writeWarning)
 //------------------------------------------------------------------------------
-bool ViewCanvas::LoadSpacecraftModels()
+/**
+ * Loads spacecraft model specified in the spacecraft object.
+ *
+ * @param  writeWarning  If true, writes warning if failed to load models
+ */
+//------------------------------------------------------------------------------
+bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 {
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
-      ("ViewCanvas::LoadSpacecraftModels() '%s' entered, mGlInitialized = %d, "
-       "modelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), mGlInitialized,
+      ("ViewCanvas::LoadSpacecraftModels() '%s' entered, writeWarning = %d, mGlInitialized = %d, "
+       "modelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), writeWarning, mGlInitialized,
        modelsAreLoaded, mScCount);
    #endif
    
@@ -1775,8 +1784,8 @@ bool ViewCanvas::LoadSpacecraftModels()
       {
          ModelManager *mm = ModelManager::Instance();
 			
-			int sc = 0;
-         for (sc;  sc < mScCount; sc++)
+			int numModelLoaded = 0;
+         for (int sc = 0;  sc < mScCount; sc++)
          {
 				std::string satName = mScNameArray[sc];
             int satId = GetObjectId(satName.c_str());
@@ -1818,17 +1827,22 @@ bool ViewCanvas::LoadSpacecraftModels()
 								MessageInterface::ShowMessage("   Calling mm->LoadModel(), mm=<%p>\n", mm);
                         #endif
 								sat->modelID = mm->LoadModel(modelPath);
+                        numModelLoaded++;
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage
-									("   Successfully loaded model '%s'\n", modelPath.c_str());
+									("   Successfully loaded model '%s', numModelLoaded\n", modelPath.c_str(),
+                            numModelLoaded);
                         #endif
 							}
 							else
 							{
-								MessageInterface::ShowMessage
-									("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
-									 "The file '%s' does not exist.\n", sat->GetName().c_str(),
-									 modelPath.c_str());
+                        if (writeWarning)
+                        {
+                           MessageInterface::ShowMessage
+                              ("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
+                               "The file '%s' does not exist.\n", sat->GetName().c_str(),
+                               modelPath.c_str());
+                        }
 							}
 						}
                }
@@ -1836,11 +1850,11 @@ bool ViewCanvas::LoadSpacecraftModels()
 			}
 			
          #ifdef DEBUG_LOAD_MODEL
-			MessageInterface::ShowMessage("   sc = %d, mScCount = %d\n", sc, mScCount);
+			MessageInterface::ShowMessage("   numModelLoaded = %d, mScCount = %d\n", numModelLoaded, mScCount);
 			#endif
 			
 			// Set modelsAreLoaded to true if it went through all models
-			if (sc == mScCount)
+			if (numModelLoaded == mScCount)
 				modelsAreLoaded = true;				
 		}
    }
@@ -1959,7 +1973,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
    
    // Load spacecraft models
    if (!modelsAreLoaded)
-      LoadSpacecraftModels();
+      LoadSpacecraftModels(false);
    
    //-------------------------------------------------------
    // update spacecraft position
@@ -1995,7 +2009,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          if (mDrawSolverData || (solverOption == 1 && mNumData == 2))
             mDrawOrbitFlag[colorIndex] = false;
          
-         mObjectOrbitColor[colorIndex] = scColors[sc];
+         mObjectOrbitColor[colorIndex] = scColors[satId];
          
          int posIndex = satId * MAX_DATA * 3 + (mLastIndex*3);
          mObjectViewPos[posIndex+0] = posX[sc];
