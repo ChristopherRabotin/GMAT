@@ -596,6 +596,7 @@ Solver::SolverState Solver::AdvanceState()
         
       case NOMINAL:
          RunNominal();
+         status = RUN;
          break;
         
       case PERTURBING:

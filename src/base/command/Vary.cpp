@@ -1351,7 +1351,7 @@ void Vary::SetInitialValue(Solver *theSolver)
       Real var = solver->GetSolverVariable(variableID);
       initialValue->SetReal(var);
       MessageInterface::ShowMessage(
-            "   Solvers matched; solution value %.12lf reset IV for %s to %.12lf\n",
+            "   Solvers matched; solution value %.12lf reset IV from %s to %.12lf\n",
             var, initialValueName.c_str(), initialValue->EvaluateReal());
       
       if (initialValue->GetWrapperType() == Gmat::NUMBER_WT)

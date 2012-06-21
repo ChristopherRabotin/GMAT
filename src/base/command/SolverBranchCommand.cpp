@@ -637,14 +637,27 @@ std::string SolverBranchCommand::GetSolverOptionText()
 }
 
 
+//-----------------------------------------------------------------------------
+// bool TakeAction(const std::string &action, const std::string &actionData)
+//-----------------------------------------------------------------------------
+/**
+ * Applies a programmatic action to the comamnd
+ *
+ * @param action String describing the desired action
+ * @param actionData Additional data used by teh action (when needed)
+ * 
+ * @return true is the action was applied, false if not.
+ */
+//-----------------------------------------------------------------------------
 bool SolverBranchCommand::TakeAction(const std::string &action, 
       const std::string &actionData)
 {
-   
-   MessageInterface::ShowMessage("Taking action %s\n", action.c_str());
-   
+   #ifdef DEBUG_SOLVER_ACTIONS
+      MessageInterface::ShowMessage("Taking action %s\n", action.c_str());
+   #endif
    if (action == "ApplyCorrections")
    {
+      MessageInterface::ShowMessage("Applying corrections\n");
       if (theSolver == NULL)
       {
          MessageInterface::PopupMessage(Gmat::INFO_, 

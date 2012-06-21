@@ -290,6 +290,7 @@ StringArray FminconOptimizer::AdvanceNestedState(std::vector<Real> vars)
          variable.at(i) = vars.at(i);
       RunNominal();
       nestedState = CALCULATING;
+      status = RUN;  // Enables "Apply corrections"
    }
    else if (nestedState == CALCULATING)
    {
