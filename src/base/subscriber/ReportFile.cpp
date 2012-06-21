@@ -44,6 +44,7 @@
 //#define DBGLVL_REPORTFILE_DATA 2
 //#define DBGLVL_WRITE_DATA 2
 //#define DEBUG_REAL_DATA
+//#define DEBUG_WRITE_HEADERS
 
 //---------------------------------
 // static data

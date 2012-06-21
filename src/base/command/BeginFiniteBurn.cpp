@@ -26,6 +26,7 @@
 //#define DEBUG_BEGIN_MANEUVER_EXE
 //#define DEBUG_TRANSIENT_FORCES
 //#define DEBUG_BFB_THRUSTER
+//#define DEBUG_TRANSIENTFORCE_MANAGEMENT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -98,6 +99,11 @@ BeginFiniteBurn::~BeginFiniteBurn()
       }
       delete burnForce;
    }
+
+   #ifdef DEBUG_TRANSIENT_FORCES
+   MessageInterface::ShowMessage
+      ("BeginFiniteBurn destructor finished\n");
+   #endif
 }
 
 
