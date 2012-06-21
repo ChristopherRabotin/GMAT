@@ -5618,7 +5618,7 @@ void Propagate::ClearTransientForces()
             if (pm->IsTransient())
             {
                #ifdef DEBUG_TRANSIENT_FORCES
-               MessageInterface::ShowMessage("   calling fm->DeleteForce()\n");
+               MessageInterface::ShowMessage("   calling fm->DeleteForce() for %p\n", pm);
                #endif
                fm->DeleteForce(pm->GetName());
                --i;
