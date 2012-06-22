@@ -93,8 +93,6 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
    objectTypeNames.push_back("BoundaryValueSolver");
    objectTypeNames.push_back("DifferentialCorrector");
    parameterCount = DifferentialCorrectorParamCount;
-   
-   AllowScaleFactors = false;
 }
 
 
