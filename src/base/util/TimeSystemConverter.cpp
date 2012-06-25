@@ -59,16 +59,18 @@ Integer TimeConverterUtil::GetTimeTypeID(std::string &str)
 }
 
 //---------------------------------------------------------------------------
-//  Real TimeConverterUtil::Convert(const Real origValue,
+//  Real TimeConverterUtil::Convert(const Real        origValue,
 //                                  const std::string &fromType,
-//                                  const std::string &toType)
+//                                  const std::string &toType,
+//                                  Real              refJd)
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for TimeConverter structures.
  *
  * @param <origValue>            Given Time
  * @param <fromType>  Time which is converted from date format
- * @param <toType>    Tiem which is converted to date format
+ * @param <toType>    Time which is converted to date format
+ * @param <refJd>     Reference Julian Date
  *
  * @return Converted time from the specific data format 
  */
@@ -121,6 +123,19 @@ Real TimeConverterUtil::Convert(const Real origValue,
 
 //---------------------------------------------------------------------------
 // Real ConvertToTaiMjd(std::string fromType, Real origValue, Real refJd)
+//---------------------------------------------------------------------------
+/**
+ * Converts from the input time type to TAIMJD
+ *
+ * @param <fromType>   Time type to convert from
+ * @param <origValue>  Original time value to convert
+ * @param <refJd>      Reference Julian Date
+ *
+ * @exception <TimeFileException> thrown if LeapSecsFileReader is not set
+ * @exception <TimeFileException> thrown if EopFile is not set
+ *
+ * @return Time converted from the input data format to TAIMJD
+ */
 //---------------------------------------------------------------------------
 Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
                                         Real refJd)
@@ -248,6 +263,19 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
 //---------------------------------------------------------------------------
 // Real ConvertFromTaiMjd(std::string toType, Real origValue, Real refJd)
 //---------------------------------------------------------------------------
+/**
+ * Converts to the input time type from TAIMJD
+ *
+ * @param <toType>     Time type to convert to
+ * @param <origValue>  Original time value to convert
+ * @param <refJd>      Reference Julian Date
+ *
+ * @exception <TimeFileException> thrown if LeapSecsFileReader is not set
+ * @exception <TimeFileException> thrown if EopFile is not set
+ *
+ * @return Time converted from TAIMJD to the input data format
+ */
+//---------------------------------------------------------------------------
 Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
                                           Real refJd)
 {
@@ -329,8 +357,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
              MessageInterface::ShowMessage("      In the 'ut1' block\n");
           #endif
           if (theEopFile == NULL)
-             throw TimeFileException(
-                   "EopFile is unknown");
+             throw TimeFileException("EopFile is unknown");
     
           Real offsetValue = 0;
     
@@ -378,8 +405,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
              Real t_TT = (origValue - tttOffset) / T_TT_COEFF1;
 
              // compute M_E
-             Real m_E = (M_E_OFFSET + (M_E_COEFF1 * t_TT)) *
-                   GmatMathConstants::RAD_PER_DEG;
+             Real m_E = (M_E_OFFSET + (M_E_COEFF1 * t_TT)) * GmatMathConstants::RAD_PER_DEG;
              Real offset = ((TDB_COEFF1 *Sin(m_E)) +
                    (TDB_COEFF2 * Sin(2 * m_E))) / GmatTimeConstants::SECS_PER_DAY;
              Real tdbJd = ttJd + offset;
@@ -391,8 +417,7 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
           #ifdef DEBUG_TIMECONVERTER_DETAILS
              MessageInterface::ShowMessage("      In the 'tt' block\n");
           #endif
-          return (origValue +
-                 (GmatTimeConstants::TT_TAI_OFFSET/GmatTimeConstants::SECS_PER_DAY));
+          return (origValue + (GmatTimeConstants::TT_TAI_OFFSET/GmatTimeConstants::SECS_PER_DAY));
        }       
        default:
         ;
@@ -405,6 +430,12 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
 //---------------------------------------------------------------------------
 // void SetEopFile(EopFile *eopFile)
 //---------------------------------------------------------------------------
+/**
+ * Sets the EOP file for the TimsSystemConverter
+ *
+ * @param <eopFile>   EOP file to use
+ */
+//---------------------------------------------------------------------------
 void TimeConverterUtil::SetEopFile(EopFile *eopFile)
 {
    theEopFile = eopFile;
@@ -413,6 +444,12 @@ void TimeConverterUtil::SetEopFile(EopFile *eopFile)
 
 //---------------------------------------------------------------------------
 // void SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader)
+//---------------------------------------------------------------------------
+/**
+ * Sets the Leap Seconds File reader
+ *
+ * @param <leapSecsFileReader>   Leap Seconds File reader to use
+ */
 //---------------------------------------------------------------------------
 void TimeConverterUtil::SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader)
 {
@@ -428,9 +465,9 @@ void TimeConverterUtil::SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileRe
  * Returns time system and format from the input format.
  * For example, TAIModJulian gives TAI and ModJulian.
  *
- * @param  type    input time type
- * @param  system  output time type
- * @param  format  output time format
+ * @param  <type>    input time type
+ * @param  <system>  output time type
+ * @param  <format>  output time format
  *
  * @exception <TimeFormatException> thrown if input type is invalid
  */
@@ -463,8 +500,11 @@ void TimeConverterUtil::GetTimeSystemAndFormat(const std::string &type,
 /**
  * Converts MJD to Gregorian date format.
  *
- * @param  format    1 = "01 Jan 2000 11:59:28.000"
- *                   2 = "2000-01-01T11:59:28.000"
+ * @param  <mjd>       Input time in MJD
+ * @param  <format>    1 = "01 Jan 2000 11:59:28.000"
+ *                     2 = "2000-01-01T11:59:28.000"
+ *
+ * @return  Date in Gregorian format
  */
 //---------------------------------------------------------------------------
 std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd,
@@ -488,6 +528,17 @@ std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd,
 //---------------------------------------------------------------------------
 // Real ConvertGregorianToMjd(const std::string &greg)
 //---------------------------------------------------------------------------
+/**
+ * Converts Gregorian to MJD date format.
+ *
+ * @param  <greg>       Input time in Gregorian
+ *
+ * @exception <TimeFormatException> thrown if input Gregorian date is not
+ *            valid or is out of range
+ *
+ * @return Date in MJD format
+ */
+//---------------------------------------------------------------------------
 Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
 {
    GregorianDate gregorianDate(greg);
@@ -496,9 +547,6 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
    if (!gregorianDate.IsValid())
       throw TimeFormatException(
          "Gregorian date '" + greg + "' is not valid.");
-
-   //MessageInterface::ShowMessage
-   //   ("==> TimeConverterUtil::ConvertGregorianToMjd() greg=%s\n", greg.c_str());
    
    try
    {
@@ -536,9 +584,6 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
       throw TimeFormatException(
          "Gregorian date '" + greg +"' appears to be out of range.");
    }
-
-   //MessageInterface::ShowMessage
-   //   ("==> TimeConverterUtil::ConvertGregorianToMjd() jules=%.11f\n", jules);
    
    return jules;
 }
@@ -553,14 +598,17 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
  * Converts input time and time format to output format. If input fromMjd
  * is -999.999 it uses fromStr to get a input value.
  *
- * @param  fromType  input time system and format (A1ModJulian, etc)
- * @param  fromMjd   input time in mjd Real if fromType is ModJulian
- * @param  fromStr   input time in string to be used if fromMjd is -999.999
- * @param  toType    output time system and format (A1ModJulian, etc)
- * @param  toMjd     output time in mjd Real if toType is ModJulian, -999.999 otherwise
- * @param  toStr     output time string in toType format (1)
- * @param  format    1 = "01 Jan 2000 11:59:28.000"
- *                   2 = "2000-01-01T11:59:28.000"
+ * @param  <fromType>  input time system and format (A1ModJulian, etc)
+ * @param  <fromMjd>   input time in mjd Real if fromType is ModJulian
+ * @param  <fromStr>   input time in string to be used if fromMjd is -999.999
+ * @param  <toType>    output time system and format (A1ModJulian, etc)
+ * @param  <toMjd>     output time in mjd Real if toType is ModJulian, -999.999 otherwise
+ * @param  <toStr>     output time string in toType format (1)
+ * @param  <format>    1 = "01 Jan 2000 11:59:28.000"
+ *                     2 = "2000-01-01T11:59:28.000"
+ *
+ * @exception  <TimeFormatException> thrown if fromSystem or toSystem is not a
+ *             valid time system
  */
 //---------------------------------------------------------------------------
 void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd, 
@@ -669,7 +717,6 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    }
    else
    {
-      //toMjd = fromMjd;  // wcs 2007.05.01 A1ModJulian fix for Bug 807
       toMjd = fromMjdVal;
    }
    
@@ -692,6 +739,14 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
 //---------------------------------------------------------------------------
 // bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 //---------------------------------------------------------------------------
+/*
+ * Checks validity of input time system.
+ *
+ * @param  <sys>  input time system to validate
+ *
+ * @return  true if time system is valid; false, otherwise
+ */
+//---------------------------------------------------------------------------
 bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 {
    for (Integer i = 0; i < TimeSystemCount; ++i)
@@ -706,6 +761,21 @@ bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 // bool TimeConverterUtil::ValidateTimeFormat(const std::string &format, 
 //                                            const std::string &value,
 //                                            bool checkValue = true)
+//---------------------------------------------------------------------------
+/*
+ * Checks validity of input time format.
+ *
+ * @param  <format>     input time format to validate
+ * @param  <value>      input value
+ * @param  <checkValue> flag indicating whether or not to check validity of
+ *                      input value
+ *
+ * @exception <TimeFormatException> thrown if input is not a valid Gregorian
+ * @exception <InvalidTimeException> thrown if input is not a valid MJD
+ * @exception <InvalidFormatException> thrown if format is not valid
+ *
+ * @return  true if time system is valid; false, otherwise
+ */
 //---------------------------------------------------------------------------
 bool TimeConverterUtil::ValidateTimeFormat(const std::string &format, 
                                            const std::string &value,
@@ -790,6 +860,12 @@ bool TimeConverterUtil::ValidateTimeFormat(const std::string &format,
 
 //---------------------------------------------------------------------------
 // StringArray TimeConverterUtil::GetValidTimeRepresentations()
+//---------------------------------------------------------------------------
+/*
+ * Returns the list of valid time representations.
+ *
+ * @return  list of valid time representations
+ */
 //---------------------------------------------------------------------------
 StringArray TimeConverterUtil::GetValidTimeRepresentations()
 {
