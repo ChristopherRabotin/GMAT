@@ -2069,26 +2069,25 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
        satVector.size());
    #endif
    
-   Integer i6;
+   Integer i6, i7;
    for (Integer i = 0; i < satsInMaps; ++i)
    {
+      // Save epoch and state data
       i6 = i * 6;
-      epochData[i] = satVector[i]->GetRealParameter(satEpochID);
+      epochData[i]      = satVector[i]->GetRealParameter(satEpochID);
       memcpy(&stateData[i6], satVector[i]->GetState().GetState(),
             6*sizeof(Real));
-   }
-   Integer i7;
-   for (Integer i = 0; i < satsInMaps; ++i)
-   {
+
+      // Save parameter and fuel tank data
       i7 = i * 7;
       StringArray tanks = satVector[i]->GetStringArrayParameter(satTankID);
-      parmData[i7]   = satVector[i]->GetRealParameter(satCdID);
-      parmData[i7+1] = satVector[i]->GetRealParameter(satDragAreaID);
-      parmData[i7+2] = satVector[i]->GetRealParameter(satCrID);
-      parmData[i7+3] = satVector[i]->GetRealParameter(satSRPAreaID);
-      parmData[i7+4] = satVector[i]->GetRealParameter(satDryMassID);
-      parmData[i7+5] = satVector[i]->GetRealParameter(satTotalMassID);
-      parmData[i7+6] = (Real) tanks.size();
+      parmData[i7]      = satVector[i]->GetRealParameter(satCdID);
+      parmData[i7+1]    = satVector[i]->GetRealParameter(satDragAreaID);
+      parmData[i7+2]    = satVector[i]->GetRealParameter(satCrID);
+      parmData[i7+3]    = satVector[i]->GetRealParameter(satSRPAreaID);
+      parmData[i7+4]    = satVector[i]->GetRealParameter(satDryMassID);
+      parmData[i7+5]    = satVector[i]->GetRealParameter(satTotalMassID);
+      parmData[i7+6]    = (Real) tanks.size();
 
       for (Integer ii = 0; ii < parmData[i7+6]; ii++)
       {
@@ -2096,7 +2095,6 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
          fuelMassData[MAX_NUM_TANKS*i + ii] = satVector[i]->GetRefObject(Gmat::HARDWARE, tanks.at(ii))->GetRealParameter("FuelMass");
       }
    }
-
 }
 
 
@@ -2166,9 +2164,10 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
          Real       latitude, longitude, altitude, bDotT = 0.0, bDotR = 0.0, bVectorAngle = 0.0, bVectorMag = 0.0;
          Real       dla = 0.0, rla = 0.0;
          bool       isEccentric, isHyperbolic, originIsCelestialBody;
-         SpacePoint *objOrigin = NULL, *cmdOrigin = NULL;
-         Real       originEqRad = 0.0;
-         Real       originMu    = 0.0;
+         SpacePoint *objOrigin       = NULL;
+         SpacePoint *cmdOrigin       = NULL;
+         Real       originEqRad      = 0.0;
+         Real       originMu         = 0.0;
          Real       originFlattening = 0.0;
          Real       originHourAngle  = 0.0;
 
@@ -2383,7 +2382,6 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             //  Write the epoch data
             data << "        Spacecraft       : " << obj->GetName() << "\n"
                   << "        Coordinate System: " << summaryCoordSysName <<  "\n\n"
-//                  << "        Coordinate System: EarthMJ2000Eq \n\n"
 
                  << "        Time System   Gregorian                     "
                  << "Modified Julian  \n"
@@ -2607,23 +2605,6 @@ const std::string GmatCommand::BuildNumber(Real value, bool useExp, Integer leng
 
    return retval;
 }
-
-
-////------------------------------------------------------------------------------
-////  void BuildCommandSummary(bool commandCompleted)
-////------------------------------------------------------------------------------
-///**
-// * Generates the summary string for the command
-// *
-// * Inherited commands override this method for specialized summary data.
-// * 
-// * @param <commandCompleted> True if the command ran successfully.
-// */
-////------------------------------------------------------------------------------
-//std::string GmatCommand::GetCommandSummary()
-//{
-//   return commandSummary;
-//}
 
 
 //------------------------------------------------------------------------------

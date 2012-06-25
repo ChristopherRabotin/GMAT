@@ -814,7 +814,6 @@ void BranchCommand::BuildCommandSummaryString(bool commandCompleted)
                      (current->GetSummaryName()).c_str(), (current->GetTypeName()).c_str());
             #endif
             branchSummary += current->GetStringParameter("Summary");
-   //         missionSummary += current->GetStringParameter("MissionSummary");
             current = current->GetNext();
          }
       }
