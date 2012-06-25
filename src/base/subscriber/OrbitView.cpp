@@ -428,12 +428,7 @@ bool OrbitView::Initialize()
          ClearDynamicArrays();
          BuildDynamicArrays();
          
-         
-         // Should these moved to OrbitPlot? (Yes, for now)
-         //mScCount = mScNameArray.size();
-         //mObjectCount = mObjectNameArray.size();
-         
-         // check ViewPoint info to see if any objects need to be
+         // Check ViewPoint info to see if any objects need to be
          // included in the non-spacecraft list
          if (mViewCoordSystem == NULL)
             throw SubscriberException

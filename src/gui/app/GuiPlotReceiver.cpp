@@ -211,10 +211,11 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
          return false;
       }
 
-      frame->SetSavedConfigFlag(isUsingSaved);
-
       if (frame)
       {
+         frame->SetSavedConfigFlag(isUsingSaved);
+         frame->SetIsNewFrame(true);
+         
          if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
             frame->Show(false);
          else
@@ -252,6 +253,8 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
    }
    else
    {
+      frame->SetIsNewFrame(false);
+      
       #if DEBUG_PLOTIF_GL_CREATE
       MessageInterface::ShowMessage
          ("GuiPlotReceiver::CreateGlPlotWindow() PlotName:%s already exist.\n",

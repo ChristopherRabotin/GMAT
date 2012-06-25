@@ -46,6 +46,7 @@ public:
    // initialization
    virtual bool InitializePlot();
    virtual bool InitOpenGL();
+   virtual void SetIsNewFrame(bool flag) {mIsNewFrame = flag; }
    
    // user interrupt
    virtual void SetUserInterrupt() { mHasUserInterrupted = true; }
@@ -182,7 +183,8 @@ protected:
    wxString mPlotName;
    bool mGlInitialized;
    bool mViewPointInitialized;
-   bool modelsAreLoaded;
+   bool mModelsAreLoaded;
+   bool mIsNewFrame;
    
    // performance
    bool mRedrawLastPointsOnly;

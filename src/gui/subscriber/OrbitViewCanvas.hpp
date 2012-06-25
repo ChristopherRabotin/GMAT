@@ -210,9 +210,6 @@ private:
    // default spacecraft drawing
    GLuint mGlList;
    
-   // earth
-   float mEarthRadius;
-   
    // view
    GLfloat mfViewLeft;
    GLfloat mfViewRight;

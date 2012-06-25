@@ -82,6 +82,7 @@ public:
    virtual void SetDrawSunLine(bool flag);
    virtual void SetDrawAxes(bool flag);
    virtual void SetDrawGrid(bool flag);
+   virtual void SetIsNewFrame(bool flag);
    virtual void SetXyPlaneColor(UnsignedInt color);
    virtual void SetSunLineColor(UnsignedInt color);
    virtual void SetObjectColors(const wxStringColorMap &objectColorMap);

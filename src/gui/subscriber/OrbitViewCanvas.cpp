@@ -91,8 +91,8 @@ using namespace FloatAttUtil;
 // showing object and status line in the wx 2.8.4 using implicit GLContext
 //#define __USE_WX280_GL__
 
-// skip over limit data
-//#define SKIP_OVER_LIMIT_DATA
+// skip data over the max position difference
+//#define SKIP_DATA_OVER_LIMIT
 
 // debug
 //#define DEBUG_INIT 1
@@ -236,14 +236,10 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    // projection
    ChangeProjection(size.x, size.y, mAxisLength);
    
-   // Note from Dunn.  Size of earth vs. spacecraft models will take lots of
+   // Note from Dunn.  Size of space object vs. spacecraft models will take lots of
    // work in the future.  Models need to be drawn in meters.  Cameras need to
    // be placed near models to "make big enough to see", and if camera is beyond
    // about 2000 meters, model should be drawn as dot.  More discussion to follow!
-//   mEarthRadius = 6378.14f; //km
-   // @todo - does this need a pointer to the actual Earth object, to get radius? (mEarthRadius does not
-   // appear to be used, though)
-   mEarthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]; //km
    mScRadius = 200;        //km: make big enough to see
    
    // drawing options
@@ -716,9 +712,6 @@ void OrbitViewCanvas::SetGl3dDrawingOption(bool drawEcPlane, bool drawXyPlane,
    mDrawStars = drawStars;
    mDrawConstellations = drawConstellations;
    mStarCount = starCount;
-   
-   if (mUseInitialViewPoint)
-      mViewPointInitialized = false;
    
    if (mDrawWireFrame)
       mPolygonMode = GL_LINE;
@@ -2284,7 +2277,7 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
 {
    #ifdef DEBUG_ORBIT_LINES
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::DrawOrbitLines() entered, objName='%s'\n   i=%2d, obj=%d, "
+      ("\nOrbitViewCanvas::DrawOrbitLines() entered, objName='%s'\n   i=%2d, obj=%d, "
        "objId=%d, mTime[%3d]=%f, mTime[%3d]=%f, mIsDrawing[%3d]=%d, mIsDrawing[%3d]=%d\n",
        objName.c_str(), i, obj, objId, i, mTime[i], i-1, mTime[i-1], i, mIsDrawing[i], i-1,
        mIsDrawing[i-1]);
@@ -2294,7 +2287,7 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    if (!mIsDrawing[i] || !mIsDrawing[i-1])
    {
       #ifdef DEBUG_ORBIT_LINES
-      MessageInterface::ShowMessage("DrawOrbitLines() leaving, object is not drawing\n");
+      MessageInterface::ShowMessage("DrawOrbitLines() leaving, =====> object is not drawing\n");
       #endif
       return;
    }
@@ -2314,17 +2307,21 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       Rvector3 r2(mObjectViewPos[index2+0], mObjectViewPos[index2+1],
                   mObjectViewPos[index2+2]);
       
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage("   r1 = %s   r2 = %s", r1.ToString().c_str(), r2.ToString().c_str());
+      #endif
+      
       // if object position magnitude is 0, skip
       if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
       {
          #ifdef DEBUG_ORBIT_LINES
-         MessageInterface::ShowMessage("DrawOrbitLines() leaving, position is zero\n");
+         MessageInterface::ShowMessage("DrawOrbitLines() leaving, ===> position is zero\n");
          #endif
          return;
       }
       
       // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
-      #ifdef SKIP_OVER_LIMIT_DATA
+      #ifdef SKIP_DATA_OVER_LIMIT
       static Real sMaxDiffDist = 100000.0;
       // if difference is more than sMaxDiffDist skip
       if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||
@@ -2339,7 +2336,7 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
          #endif
          #ifdef DEBUG_ORBIT_LINES
          MessageInterface::ShowMessage
-            ("DrawOrbitLines() leaving, position difference is over the limit\n");
+            ("DrawOrbitLines() leaving, ===> position difference is over the limit\n");
          #endif
          return;
       }
@@ -2376,6 +2373,12 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       #ifdef DEBUG_ORBIT_LINES
       MessageInterface::ShowMessage
          ("DrawOrbitLines() leaving, mObjLastFrame[%d] = %d\n", objId, i);
+      #endif
+   }
+   else
+   {
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage("DrawOrbitLines() leaving, ===> time is not in order\n");
       #endif
    }
 }

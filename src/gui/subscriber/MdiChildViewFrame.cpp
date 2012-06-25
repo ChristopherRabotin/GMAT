@@ -455,6 +455,16 @@ void MdiChildViewFrame::SetDrawGrid(bool flag)
 
 
 //------------------------------------------------------------------------------
+// void SetIsNewFrame(bool flag)
+//------------------------------------------------------------------------------
+void MdiChildViewFrame::SetIsNewFrame(bool flag)
+{
+   if (mCanvas && mViewType == "3D")
+      ((OrbitViewCanvas*)mCanvas)->SetIsNewFrame(flag);
+}
+
+
+//------------------------------------------------------------------------------
 // void SetXyPlaneColor(UnsignedInt color)
 //------------------------------------------------------------------------------
 void MdiChildViewFrame::SetXyPlaneColor(UnsignedInt color)

@@ -113,7 +113,8 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mPlotName = name;
    mGlInitialized = false;
    mViewPointInitialized = false;
-   modelsAreLoaded = false;
+   mModelsAreLoaded = false;
+   mIsNewFrame = true;
    
    // performance
    // if mNumPointsToRedraw =  0 It redraws whole plot
@@ -306,7 +307,12 @@ bool ViewCanvas::InitializePlot()
    #endif
    InitOpenGL();
    
-   mViewPointInitialized = false;
+   // If starting in new frame or using initial setup then initialize view
+   // else just stay in the last view
+   if (mIsNewFrame || mUseInitialViewPoint)
+      mViewPointInitialized = false;
+   else
+      mViewPointInitialized = true;
    
    // load body textures
    #ifdef DEBUG_INIT
@@ -869,9 +875,18 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       #endif
       if (!mViewPointInitialized ||
           (mGlInitialized && mUseInitialViewPoint))
+      {
+         #if DEBUG_UPDATE
+         MessageInterface::ShowMessage("===> Initializing view\n");
+         #endif
          InitializeViewPoint();
+      }
       else
-         ;//MessageInterface::ShowMessage("===> using current view\n");
+      {
+         #if DEBUG_UPDATE
+         MessageInterface::ShowMessage("===> Using current view\n");
+         #endif
+      }
       
       mViewPointInitialized = true;
    }
@@ -1067,7 +1082,7 @@ void ViewCanvas::ResetPlotInfo()
    mInFunction = false;
    
    mWriteRepaintDisalbedInfo = true;
-   modelsAreLoaded = false;
+   mModelsAreLoaded = false;
    
    // Initialize view
    if (mUseInitialViewPoint)
@@ -1774,13 +1789,13 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadSpacecraftModels() '%s' entered, writeWarning = %d, mGlInitialized = %d, "
-       "modelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), writeWarning, mGlInitialized,
-       modelsAreLoaded, mScCount);
+       "mModelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), writeWarning, mGlInitialized,
+       mModelsAreLoaded, mScCount);
    #endif
    
    if (mGlInitialized)
    {
-      if (!modelsAreLoaded)
+      if (!mModelsAreLoaded)
       {
          ModelManager *mm = ModelManager::Instance();
 			
@@ -1853,19 +1868,19 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 			MessageInterface::ShowMessage("   numModelLoaded = %d, mScCount = %d\n", numModelLoaded, mScCount);
 			#endif
 			
-			// Set modelsAreLoaded to true if it went through all models
+			// Set mModelsAreLoaded to true if it went through all models
 			if (numModelLoaded == mScCount)
-				modelsAreLoaded = true;				
+				mModelsAreLoaded = true;				
 		}
    }
    
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadSpacecraftModels() '%s' leaving, mGlInitialized = %d, "
-       "modelsAreLoaded = %d\n", mPlotName.c_str(), mGlInitialized, modelsAreLoaded);
+       "mModelsAreLoaded = %d\n", mPlotName.c_str(), mGlInitialized, mModelsAreLoaded);
    #endif
    
-   return modelsAreLoaded;
+   return mModelsAreLoaded;
 }
 
 
@@ -1967,12 +1982,12 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
    #if DEBUG_UPDATE
    MessageInterface::ShowMessage
       ("ViewCanvas::UpdateSpacecraftData() entered, time=%f, mScCount=%d, "
-       "mGlInitialized=%d, modelsAreLoaded=%d\n", time, mScCount,
-       mGlInitialized, modelsAreLoaded);
+       "mGlInitialized=%d, mModelsAreLoaded=%d\n", time, mScCount,
+       mGlInitialized, mModelsAreLoaded);
    #endif
    
    // Load spacecraft models
-   if (!modelsAreLoaded)
+   if (!mModelsAreLoaded)
       LoadSpacecraftModels(false);
    
    //-------------------------------------------------------
