@@ -27,6 +27,7 @@
 #include "TextParser.hpp"          // for SeparateBrackets()
 #include "StringUtil.hpp"          // for ToReal()
 #include "CoordinateConverter.hpp" // for Convert()
+#include "SpaceObject.hpp"         // for GetEpoch()
 #include <algorithm>               // for find(), distance()
 
 #define __REMOVE_OBJ_BY_SETTING_FLAG__
@@ -1381,10 +1382,20 @@ bool OrbitPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
-      ("OrbitPlot::SetRefObject() this=<%p>'%s', obj=<%p>'%s', type=%d[%s], name='%s'\n",
-       this, GetName().c_str(), obj, obj->GetName().c_str(), type,
-       obj->GetTypeName().c_str(), name.c_str());
+      ("OrbitPlot::SetRefObject() this=<%p>'%s' entered, obj=<%p><%s>'%s', type=%d, "
+       "name='%s'\n", this, GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
    #endif
+   
+   if (obj == NULL)
+   {
+      #if DBGLVL_OBJ
+      MessageInterface::ShowMessage
+         ("OrbitPlot::SetRefObject() this=<%p>'%s' returning false, object is NULL\n",
+          this, GetName().c_str() );
+      #endif
+      return false;
+   }
    
    std::string realName = name;
    if (name == "")
@@ -1414,6 +1425,24 @@ bool OrbitPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
       }
       
+      // If spacecraft, save initial epoch so that data will not be buffered before
+      // the initial epoch
+      if (obj->IsOfType(Gmat::SPACECRAFT))
+      {
+         SpaceObject *so = (SpaceObject*)(obj);
+         #if DBGLVL_OBJ
+         MessageInterface::ShowMessage
+            ("   '%s' is a spacecraft so saving epoch: %f\n", so->GetName().c_str(),
+             so->GetEpoch());
+         #endif
+         mScInitialEpochMap[so->GetName()] = so->GetEpoch();
+      }
+      
+      #if DBGLVL_OBJ > 1
+      MessageInterface::ShowMessage
+         ("OrbitPlot::SetRefObject() this=<%p>'%s' returning true\n",
+          this, GetName().c_str());
+      #endif
       return true;
    }
    
@@ -1421,10 +1450,21 @@ bool OrbitPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       if (realName == mViewCoordSysName)
          mViewCoordSystem = (CoordinateSystem*)obj;
-
+      
+      #if DBGLVL_OBJ > 1
+      WriteCoordinateSystem(mViewCoordSystem, "   mViewCoordSystem");
+      MessageInterface::ShowMessage
+         ("OrbitPlot::SetRefObject() this=<%p>'%s' returning true\n",
+          this, GetName().c_str());
+      #endif
       return true;
    }
    
+   #if DBGLVL_OBJ > 1
+   MessageInterface::ShowMessage
+      ("OrbitPlot::SetRefObject() this=<%p>'%s' returning Subscriber::SetRefObject()\n",
+       this, GetName().c_str());
+   #endif
    return Subscriber::SetRefObject(obj, type, realName);
 }
 
@@ -2051,12 +2091,29 @@ bool OrbitPlot::UpdateSolverData()
 
 
 //------------------------------------------------------------------------------
+// void BufferZeroData(Integer scIndex)
+//------------------------------------------------------------------------------
+/**
+ * Fills spacecraft state with zero
+ */
+//------------------------------------------------------------------------------
+void OrbitPlot::BufferZeroData(Integer scIndex)
+{
+   mScXArray[scIndex] = 0.0;
+   mScYArray[scIndex] = 0.0;
+   mScZArray[scIndex] = 0.0;
+   mScVxArray[scIndex] = 0.0;
+   mScVyArray[scIndex] = 0.0;
+   mScVzArray[scIndex] = 0.0;
+}
+
+
+//------------------------------------------------------------------------------
 // Integer BufferOrbitData(const Real *dat, Integer len)
 //------------------------------------------------------------------------------
 /**
- * @return 1 if continue
+ * @return 1 if continue to updating plot
  *         2 if solving and plotting current iteration
- *
  */
 //------------------------------------------------------------------------------
 Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
@@ -2072,20 +2129,12 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
    //------------------------------------------------------------
    // zero data length is already checked in UpdateData()
    
-   CoordinateConverter coordConverter;
-   
    #if DBGLVL_DATA > 1
    MessageInterface::ShowMessage
       ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=<%p>\n",
        mNumData, mDataCollectFrequency, currentProvider);
-   MessageInterface::ShowMessage
-      ("theDataCoordSystem=<%p><%s>'%s', mViewCoordSystem=<%p><%s>'%s'\n",
-       theDataCoordSystem,
-       theDataCoordSystem ? theDataCoordSystem->GetTypeName().c_str() : "NULL",
-       theDataCoordSystem ? theDataCoordSystem->GetName().c_str() : "NULL",
-       mViewCoordSystem,
-       mViewCoordSystem ? mViewCoordSystem->GetTypeName().c_str() : "NULL",
-       mViewCoordSystem ? mViewCoordSystem->GetName().c_str() : "NULL");
+   WriteCoordinateSystem(theDataCoordSystem, "   theDataCoordSystem");
+   WriteCoordinateSystem(mViewCoordSystem, "   mViewCoordSystem");
    #endif
    
    mNumCollected++;
@@ -2132,16 +2181,19 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
       
       scIndex++;
       
-      // If any of index not found, fill with zeros and continue with next spacecraft name
+      // If any of index not found, fill with zeros and continue with the next spacecraft
       if (idX  == -1 || idY  == -1 || idZ  == -1 ||
           idVx == -1 || idVy == -1 || idVz == -1)
       {
-         mScXArray[scIndex] = 0.0;
-         mScYArray[scIndex] = 0.0;
-         mScZArray[scIndex] = 0.0;
-         mScVxArray[scIndex] = 0.0;
-         mScVyArray[scIndex] = 0.0;
-         mScVzArray[scIndex] = 0.0;
+         BufferZeroData(scIndex);
+         continue;
+      }
+      
+      // If data epoch is before the spacecraft initial epoch,
+      // fill with zeros and continue with the next spacecraft
+      if (dat[0] < mScInitialEpochMap[mScNameArray[i]])
+      {
+         BufferZeroData(scIndex);
          continue;
       }
       
@@ -2149,7 +2201,7 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
       
       #if DBGLVL_DATA
       MessageInterface::ShowMessage
-         ("   %s, %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(), dat[0],
+         ("   %s, epoch = %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(), dat[0],
           dat[idX], dat[idY], dat[idZ]);
       #endif
       
@@ -2161,6 +2213,13 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
       if ((theDataCoordSystem != NULL && mViewCoordSystem != NULL) &&
           (mViewCoordSystem != theDataCoordSystem))
       {
+         #if DBGLVL_DATA
+         MessageInterface::ShowMessage
+            ("   Converting data from '%s' to '%s'\n", theDataCoordSystem->GetName().c_str(),
+             mViewCoordSystem->GetName().c_str());
+         #endif
+         
+         CoordinateConverter coordConverter;
          Rvector6 inState, outState;
          
          // convert position and velocity
@@ -2228,4 +2287,31 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
    
    return 1;
 }
+
+
+//------------------------------------------------------------------------------
+// void WriteCoordinateSystem(CoordinateSystem *cs, const std::string &label = "")
+//------------------------------------------------------------------------------
+void OrbitPlot::WriteCoordinateSystem(CoordinateSystem *cs, const std::string &label)
+{
+   if (cs == NULL)
+   {
+      MessageInterface::ShowMessage("%s CoordinateSystem is NULL\n");
+      return;
+   }
+   
+   std::string originType = "UNKNOWN";
+   std::string originName = "UNKNOWN";
+   if (cs->GetOrigin())
+   {
+      originType = (cs->GetOrigin())->GetTypeName();
+      originName = (cs->GetOrigin())->GetName();
+   }
+   
+   MessageInterface::ShowMessage
+      ("%s = <%p>'%s', isInitialized = %d, origin = <%p><%s>'%s'\n", label.c_str(), cs,
+       cs->GetName().c_str(), cs->IsInitialized(), cs->GetOrigin(), originType.c_str(),
+       originName.c_str());
+}
+
 

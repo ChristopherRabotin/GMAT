@@ -187,11 +187,12 @@ protected:
    std::vector<RealArray> mCurrVyArray;
    std::vector<RealArray> mCurrVzArray;
    
-   // maps for object and color
+   // maps for object and color, flag, epoch
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
    std::map<std::string, bool> mDrawOrbitMap;
    std::map<std::string, bool> mShowObjectMap;
+   std::map<std::string, Real> mScInitialEpochMap;
    
    /// Calls PlotInterface for plotting non-solver data  
    virtual bool         UpdateData(const Real *dat, Integer len);
@@ -200,6 +201,7 @@ protected:
    virtual bool         UpdateSolverData();
    
    /// Buffers published spacecraft orbit data
+   void                 BufferZeroData(Integer scIndex);
    virtual Integer      BufferOrbitData(const Real *dat, Integer len);
    
    /// Adds Spacecraft and other objects to object arrays and color maps
@@ -218,6 +220,10 @@ protected:
    void                 ClearDynamicArrays();
    /// Updates plotting object information such as plotting object pointer, option flags, etc.
    void                 UpdateObjectList(SpacePoint *sp, bool show = false);
+   
+   /// Debug message
+   void                 WriteCoordinateSystem(CoordinateSystem *cs,
+                                              const std::string &label = "");
    
    enum
    {
