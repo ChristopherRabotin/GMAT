@@ -15,7 +15,7 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">2011a</refmiscinfo>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
@@ -34,21 +34,21 @@
     names</guilabel>.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="LinkId" />, <xref linkend="LinkId" /></para>
+    linkend="LinkId"/>, <xref linkend="LinkId"/></para>
   </refsection>
 
   <refsection>
-    <title>Options</title>
+    <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*" />
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2" colwidth="3*" />
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
-            <entry>Option</entry>
+            <entry>Field</entry>
 
             <entry>Description</entry>
           </row>
@@ -186,7 +186,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Command_For_Default.bmp"
-                     scalefit="1" width="100%"></imagedata>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
