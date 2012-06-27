@@ -28,6 +28,7 @@
 //#define DEBUG_MANEUVER_PARSE
 //#define DEBUG_MANEUVER_INIT
 //#define DEBUG_MANEUVER_EXEC
+//#define DEBUG_MANEUVER_COMMAND_SUMMARY
 
 //------------------------------------------------------------------------------
 // Maneuver()
@@ -43,12 +44,21 @@ Maneuver::Maneuver() :
    satName     (""),
    sat         (NULL),
    firedOnce   (false),
+   scNameM     (""),
+   csNameM     (""),
+   originNameM (""),
+   axesNameM   (""),
+   decMassM    (false),
+   elementIspMassData (NULL),
+
    // Parameter IDs
    burnNameID  (parameterCount),
    satNameID   (parameterCount+1)
 {
    parameterCount     += 2;
    physicsBasedCommand = true;
+
+   tankNamesM.clear();
 }
 
 
@@ -61,6 +71,11 @@ Maneuver::Maneuver() :
 //------------------------------------------------------------------------------
 Maneuver::~Maneuver()
 {
+   if (elementIspMassData)
+   {
+      delete [] elementIspMassData;
+      elementIspMassData = NULL;
+   }
 }
 
 
@@ -80,11 +95,18 @@ Maneuver::Maneuver(const Maneuver& m) :
    satName     (m.satName),
    sat         (NULL),
    firedOnce   (false),
+   scNameM     (m.scNameM),
+   csNameM     (m.csNameM),
+   originNameM (m.originNameM),
+   axesNameM   (m.axesNameM),
+   decMassM    (m.decMassM),
+   elementIspMassData (NULL),
    // Parameter IDs
    burnNameID  (m.burnNameID),
    satNameID   (m.satNameID)
 {
    parameterCount = m.parameterCount;
+   tankNamesM.clear();
 }
 
 
@@ -110,6 +132,15 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
    satName   = m.satName;
    sat       = NULL;
    firedOnce = false;
+
+   scNameM            = m.scNameM;
+   csNameM            = m.csNameM;
+   originNameM        = m.originNameM;
+   axesNameM          = m.axesNameM;
+   decMassM           = m.decMassM;
+   elementIspMassData = NULL;
+   tankNamesM.clear();
+
 
    burnNameID = m.burnNameID;
    satNameID = m.satNameID;
@@ -567,6 +598,12 @@ bool Maneuver::Initialize()
    #endif
    #endif
    
+   if (elementIspMassData != NULL)
+   {
+      delete [] elementIspMassData;
+      elementIspMassData = NULL;
+   }
+
    firedOnce = false;
    return true;
 }
@@ -629,16 +666,84 @@ bool Maneuver::Execute()
 // Protected Methods
 //-------------------------------------------
 
-
 //------------------------------------------------------------------------------
 // void BuildCommandSummary(bool commandCompleted)
 //------------------------------------------------------------------------------
 /**
- * This method...
+ * This method saves the maneuver-specific data needed for the Command Summary
  *
- * @param
+ * @param <commandCompleted> has the command completed
  *
- * @return
+ */
+//------------------------------------------------------------------------------
+void Maneuver::BuildCommandSummary(bool commandCompleted)
+{
+   GmatCommand::BuildCommandSummary(commandCompleted);
+
+   if (elementIspMassData != NULL)
+   {
+      delete [] elementIspMassData;
+   }
+   elementIspMassData = new Real[5];
+
+   #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
+      MessageInterface::ShowMessage("Now about to save the Maneuver-specific data for Command Summary\n");
+   #endif
+
+   // Save the Maneuver-specific data
+   scNameM     = burn->GetStringParameter(burn->GetParameterID("SpacecraftName"));
+   csNameM     = burn->GetStringParameter(burn->GetParameterID("CoordinateSystem"));
+   originNameM = burn->GetStringParameter(burn->GetParameterID("Origin"));
+   axesNameM   = burn->GetStringParameter(burn->GetParameterID("Axes"));
+
+   decMassM    = burn->GetBooleanParameter(burn->GetParameterID("DecrementMass"));
+
+   #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
+      MessageInterface::ShowMessage("... scNameM     = %s\n", scNameM.c_str());
+      MessageInterface::ShowMessage("... csNameM     = %s\n", csNameM.c_str());
+      MessageInterface::ShowMessage("... originNameM = %s\n", originNameM.c_str());
+      MessageInterface::ShowMessage("... axesNameM   = %s\n", axesNameM.c_str());
+      MessageInterface::ShowMessage("... decMassM    = %s\n", (decMassM? "true" : "false"));
+   #endif
+
+   elementIspMassData[0] = burn->GetRealParameter(burn->GetParameterID("Element1"));
+   elementIspMassData[1] = burn->GetRealParameter(burn->GetParameterID("Element2"));
+   elementIspMassData[2] = burn->GetRealParameter(burn->GetParameterID("Element3"));
+   if (decMassM)
+   {
+      elementIspMassData[3] = burn->GetRealParameter(burn->GetParameterID("Isp"));
+      elementIspMassData[4] = burn->GetRealParameter(burn->GetParameterID("DeltaTankMass"));
+   }
+   else
+   {
+      elementIspMassData[3] = 0.0;
+      elementIspMassData[4] = 0.0;
+   }
+   #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
+      MessageInterface::ShowMessage("... Element1          = %12.10f\n", elementIspMassData[0]);
+      MessageInterface::ShowMessage("... Element2          = %12.10f\n", elementIspMassData[1]);
+      MessageInterface::ShowMessage("... Element3          = %12.10f\n", elementIspMassData[2]);
+      MessageInterface::ShowMessage("... Isp               = %12.10f\n", elementIspMassData[3]);
+      MessageInterface::ShowMessage("... DeltaTankMass     = %12.10f\n", elementIspMassData[4]);
+   #endif
+
+   tankNamesM = burn->GetStringArrayParameter(burn->GetParameterID("Tank"));
+   #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
+      MessageInterface::ShowMessage("... tankNamesM        =\n");
+      for (unsigned int ii = 0; ii < tankNamesM.size(); ii++)
+         MessageInterface::ShowMessage("...    %s\n", tankNamesM.at(ii).c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void BuildCommandSummaryString(bool commandCompleted)
+//------------------------------------------------------------------------------
+/**
+ * This method builds the Maneuver-specific part of the Command Summary string.
+ *
+ * @param <commandCompleted> has the command completed?
+ *
  */
 //------------------------------------------------------------------------------
 void Maneuver::BuildCommandSummaryString(bool commandCompleted)
@@ -654,46 +759,44 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
            << "\n        Maneuver Summary"
            << "\n        -----------------"
            << "\n        Impulsive Burn:     " << burnName
-           << "\n        Spacecraft:         " << burn->GetStringParameter(burn->GetParameterID("SpacecraftName"))
-           << "\n        Coordinate System:  " << burn->GetStringParameter(burn->GetParameterID("CoordinateSystem"))
-           << "\n        Origin:             " << burn->GetStringParameter(burn->GetParameterID("Origin"))
-           << "\n        Axes:               " << burn->GetStringParameter(burn->GetParameterID("Axes"))
+           << "\n        Spacecraft:         " << scNameM
+           << "\n        Coordinate System:  " << csNameM
+           << "\n        Origin:             " << originNameM
+           << "\n        Axes:               " << axesNameM
 
            << "\n        Burn Vector:"
-           << "\n           Element 1:  " << BuildNumber(burn->GetRealParameter(burn->GetParameterID("Element1")))
-           << "\n           Element 2:  " << BuildNumber(burn->GetRealParameter(burn->GetParameterID("Element2")))
-           << "\n           Element 3:  " << BuildNumber(burn->GetRealParameter(burn->GetParameterID("Element3")))
+           << "\n           Element 1:  " << BuildNumber(elementIspMassData[0])
+           << "\n           Element 2:  " << BuildNumber(elementIspMassData[1])
+           << "\n           Element 3:  " << BuildNumber(elementIspMassData[2])
            << "\n";
 
-      if (burn->GetBooleanParameter(burn->GetParameterID("DecrementMass")))
+      if (decMassM)
       {
          Real thrust, tx, ty, tz;
-         tx = burn->GetRealParameter(burn->GetParameterID("Element1"));
-         ty = burn->GetRealParameter(burn->GetParameterID("Element2"));
-         tz = burn->GetRealParameter(burn->GetParameterID("Element3"));
+         tx = elementIspMassData[0];
+         ty = elementIspMassData[1];
+         tz = elementIspMassData[2];
          thrust = GmatMathUtil::Sqrt(tx*tx + ty*ty + tz*tz);
 
-         StringArray tanks =
-               burn->GetStringArrayParameter(burn->GetParameterID("Tank"));
          std::string tanklist;
 
-         if (tanks.size() == 1)
-            tanklist = tanks[0];
+         if (tankNamesM.size() == 1)
+            tanklist = tankNamesM[0];
          else
          {
-            for (UnsignedInt i = 0; i < tanks.size(); ++i)
+            for (UnsignedInt i = 0; i < tankNamesM.size(); ++i)
             {
-               tanklist += tanks[i];
+               tanklist += tankNamesM[i];
                tanklist += ", ";
-               if (i == (tanks.size() - 2))
+               if (i == (tankNamesM.size() - 2))
                   tanklist += "and ";
             }
          }
 
          data << "\n        Mass depletion from " << tanklist <<":  "
               << "\n           Thrust:       "    << BuildNumber(thrust) << " N"
-              << "\n           Isp:          "    << BuildNumber(burn->GetRealParameter(burn->GetParameterID("Isp"))) << " s"
-              << "\n           Mass change:  "    << BuildNumber(burn->GetRealParameter(burn->GetParameterID("DeltaTankMass"))) << " kg"
+              << "\n           Isp:          "    << BuildNumber(elementIspMassData[3]) << " s"
+              << "\n           Mass change:  "    << BuildNumber(elementIspMassData[4]) << " kg"
               << "\n";
 
       }

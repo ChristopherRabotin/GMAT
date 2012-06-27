@@ -106,12 +106,24 @@ protected:
    /// Flag used to tell if the summary can be built yet
    bool                    firedOnce;
 
+   /// Saved data for Command Summary
+   std::string             scNameM;
+   std::string             csNameM;
+   std::string             originNameM;
+   std::string             axesNameM;
+
+   StringArray             tankNamesM;
+   bool                    decMassM;
+
+   Real                    *elementIspMassData;
+
    // Parameter IDs 
    /// ID for the burn object
    Integer                 burnNameID;
    /// ID for the spacecraft name
    Integer                 satNameID;
 
+   virtual void            BuildCommandSummary(bool commandCompleted = true);
    virtual void            BuildCommandSummaryString(bool commandCompleted = true);
 };
 
