@@ -67,6 +67,8 @@ training: training-pdf
 html: help-html-single \
     help-html-multiple
 
+pdf: help-pdf training-pdf
+
 help-pdf: help-pdf-letter \
     help-pdf-a4
 
