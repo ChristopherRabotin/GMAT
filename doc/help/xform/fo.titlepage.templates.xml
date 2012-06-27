@@ -152,7 +152,7 @@
               keep-with-next.within-column="always"
               text-align="left"
               color="#0b3d91"/>
-      <date space-before="0.5in"
+      <edition space-before="0.5in"
           text-align="left"
           color="#0b3d91"/>
       <!-- If you add editor, include this t:predicate attribute

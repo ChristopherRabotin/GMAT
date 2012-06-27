@@ -510,4 +510,9 @@
         <xsl:call-template name="inline.boldseq"/>
     </xsl:template>
 
+    <!-- Title page -->
+    <xsl:template match="d:edition" mode="titlepage.mode">
+        <xsl:apply-templates mode="titlepage.mode"/>
+    </xsl:template>
+
 </xsl:stylesheet>
