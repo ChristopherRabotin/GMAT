@@ -925,28 +925,8 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
       mGlInitialized = true;
    }
    
-   // set OpenGL to recognize the counter clockwise defined side of a polygon
-   // as its 'front' for lighting and culling purposes
-   glFrontFace(GL_CCW);
-   
-   // enable face culling, so that polygons facing away (defines by front face)
-   // from the viewer aren't drawn (for efficiency).
-   glEnable(GL_CULL_FACE);
-   
-   // tell OpenGL to use glColor() to get material properties for..
-   glEnable(GL_COLOR_MATERIAL);
-   
-   // set the front face's ambient and diffuse components
-   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-   
-   // Set the ambient lighting
-   GLfloat ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
-   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-   
-   int nWidth, nHeight;
-   GetClientSize(&nWidth, &nHeight);
-   glViewport(0, 0, nWidth, nHeight);
-   
+   SetDrawingMode();
+      
    // Linux specific
    #ifdef __WXGTK__
       hasBeenPainted = true;
@@ -1025,10 +1005,11 @@ void OrbitViewCanvas::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
 {
-   
-   //MessageInterface::ShowMessage
-   //   ("===> OnMouse() mUseInitialViewPoint=%d, mIsEndOfData=%d\n",
-   //    mUseInitialViewPoint, mIsEndOfData);
+   #ifdef DEBUG_ON_MOUSE
+   MessageInterface::ShowMessage
+      ("===> OnMouse() mUseInitialViewPoint=%d, mIsEndOfData=%d\n",
+       mUseInitialViewPoint, mIsEndOfData);
+   #endif
    
    if (mIsEndOfData && mInFunction)
       return;
@@ -1142,32 +1123,43 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
          Real x2 = Pow(mLastMouseX - mouseX, 2);
          Real y2 = Pow(mouseY - mLastMouseY, 2);
          Real length = sqrt(x2 + y2);
-         
          Real distance = (mCamera.view_center - mCamera.position).GetMagnitude();
          
          mZoomAmount = length * distance / 500;
          
+         #ifdef DEBUG_ON_MOUSE
+         MessageInterface::ShowMessage
+            ("   mCamera.view_center = %s   mCamera.position    = %s",
+             mCamera.view_center.ToString().c_str(), mCamera.position.ToString().c_str());
+         MessageInterface::ShowMessage
+            ("   mouse length=%f, distance=%f, mZoomAmount=%f\n", length, distance, mZoomAmount);
+         #endif
+         
+         // For zoom in out, move camera forward or backward in z direction
+         // If dragging from upper right corner to lower left corner (zoom in)
          if (mouseX < mLastMouseX && mouseY > mLastMouseY)
          {
-            // dragging from upper right corner to lower left corner
+            // In the future, if we want to limit the zoom in, we can check for
+            // the distance, ie. if (distance < (mOriginRadius * 1.2)) return
             mCamera.Translate(0, 0, mZoomAmount, false);
-            //mCamera.ZoomIn(mZoomAmount);
          }
+         // If dragging from lower left corner to upper right corner (zoom out)
          else if (mouseX > mLastMouseX && mouseY < mLastMouseY)
          {
-            // dragging from lower left corner to upper right corner
             mCamera.Translate(0, 0, -mZoomAmount, false);
-            //mCamera.ZoomOut(mZoomAmount);
          }
          else
          {
-            // if mouse moves toward left then zoom in
+            // If mouse moves toward left then zoom in
             if (mouseX < mLastMouseX || mouseY < mLastMouseY)
+            {
+               // In the future, if we want to limit the zoom in, we can check for
+               // the distance, ie. if (distance < (mOriginRadius * 1.2)) return
                mCamera.Translate(0, 0, mZoomAmount, false);
-               //mCamera.ZoomIn(mZoomAmount);
+            }
+            // Else mouse moves toward right so zoom out
             else
                mCamera.Translate(0, 0, -mZoomAmount, false);
-               //mCamera.ZoomOut(mZoomAmount);
          }
          
          Refresh(false);
@@ -1508,11 +1500,11 @@ void OrbitViewCanvas::SetupWorld()
 {      
    // Setup how we view the world
    GLfloat aspect = (GLfloat)mCanvasSize.x / (GLfloat)mCanvasSize.y;
-         
+   
    // PS - Greatly simplified. Uses the FOV from the active camera, the aspect ratio of the screen,
    //       and a constant near-far plane
    float distance = (mCamera.position - mCamera.view_center).GetMagnitude() * 2;
-   if (500000000.0f > distance)
+   if (distance < 500000000.0f)
       distance = 500000000.0f;
    
    //-----------------------------------------------------------------
@@ -1526,7 +1518,13 @@ void OrbitViewCanvas::SetupWorld()
    //          (always positive).
    //-----------------------------------------------------------------
    
-   gluPerspective(mCamera.fovDeg, aspect, 50.0f, distance);
+   #ifdef DEBUG_SETUP_WORLD
+   MessageInterface::ShowMessage
+      ("SetupWorld(), fov = %f, aspect = %f, distance = %f\n", mCamera.fovDeg, aspect, distance);
+   #endif
+   
+   // Changed zNear from 50 to 0.1 to fix GMT-2386 (LOJ: 2012.06.27)
+   gluPerspective(mCamera.fovDeg, aspect, 0.1f, distance);
    
    //-----------------------------------------------------------------
    // Note: mouse rotation is applied in TransformView as MODELVIEW mode
@@ -1559,17 +1557,19 @@ void OrbitViewCanvas::ChangeView(float viewX, float viewY, float viewZ)
    mfCamRotXAngle = (int)(viewX) % 360 + 270;
    mfCamRotYAngle = (int)(viewY) % 360;
    mfCamRotZAngle = (int)(viewZ) % 360;
-   
-   //MessageInterface::ShowMessage
-   //   ("===> OrbitViewCanvas::ChangeView() mfCamRotXYZAngle = %f %f %f\n",
-   //    mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle);
+
+   #ifdef DEBUG_CHANGE_VIEW
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::ChangeView()entered,  mfCamRotXYZAngle = %f %f %f\n",
+       mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle);
+   #endif
    
    // don't let the rotation angles build up to some insane size
    if (mfCamRotYAngle > 360)
       mfCamRotYAngle -= 360;
    else if (mfCamRotYAngle < 0)
       mfCamRotYAngle += 360;
-
+   
    // don't let the rotation angles build up to some insane size
    if (mfCamRotXAngle > 450)
       mfCamRotXAngle -= 360;
@@ -1581,7 +1581,12 @@ void OrbitViewCanvas::ChangeView(float viewX, float viewY, float viewZ)
       mfCamRotZAngle -= 360;
    else if (mfCamRotZAngle < 0)
       mfCamRotZAngle += 360;
-  
+   
+   #ifdef DEBUG_CHANGE_VIEW
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::ChangeView() levaing,  mfCamRotXYZAngle = %f %f %f\n",
+       mfCamRotXAngle, mfCamRotYAngle, mfCamRotZAngle);
+   #endif
 } // end ChangeView()
 
 
@@ -1589,48 +1594,46 @@ void OrbitViewCanvas::ChangeView(float viewX, float viewY, float viewZ)
 //  void ChangeProjection(int width, int height, float axisLength)
 //------------------------------------------------------------------------------
 /**
- * Changes view projection by viewing area in pixel and axis length in
- * orthographic projection.
+ * Changes view projection by viewing area in pixel and axis length.
  */
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::ChangeProjection(int width, int height, float axisLength)
 {    
    GLfloat fAspect = (GLfloat) height / (GLfloat) width;
    
-   mfViewLeft   = -axisLength/2;
-   mfViewRight  =  axisLength/2;
-   
-   mfViewTop    =  axisLength/2;
-   mfViewBottom = -axisLength/2;
+   GLfloat fViewLeft   = -axisLength/2;
+   GLfloat fViewRight  =  axisLength/2;
+   GLfloat fViewTop    =  axisLength/2;
+   GLfloat fViewBottom = -axisLength/2;
    
    // This makes texture maps upside down
-   //mfViewTop    = -axisLength/2;
-   //mfViewBottom =  axisLength/2;
+   //fViewTop    = -axisLength/2;
+   //fViewBottom =  axisLength/2;
    
-   // Changed 100000 to fix near/far clipping
-   mfViewNear = -axisLength * 100000.0;
-   mfViewFar  =  axisLength * 100000.0;
-   
-   // save the size we are setting the projection for later use
+   // Save the size we are setting the projection for later use
    if (width <= height)
    {
-      mfLeftPos = mfViewLeft;
-      mfRightPos = mfViewRight;
-      mfBottomPos = mfViewBottom*fAspect;
-      mfTopPos = mfViewTop*fAspect;
+      mfLeftPos = fViewLeft;
+      mfRightPos = fViewRight;
+      mfBottomPos = fViewBottom * fAspect;
+      mfTopPos = fViewTop * fAspect;
    }
    else
    {
-      mfLeftPos = mfViewLeft / fAspect;
-      mfRightPos = mfViewRight / fAspect;
-      mfBottomPos = mfViewBottom;
-      mfTopPos = mfViewTop;
+      mfLeftPos = fViewLeft / fAspect;
+      mfRightPos = fViewRight / fAspect;
+      mfBottomPos = fViewBottom;
+      mfTopPos = fViewTop;
    }
 }
 
 
 //------------------------------------------------------------------------------
 // void TransformView()
+//------------------------------------------------------------------------------
+/**
+ * Calls gluLookAt() to display the view using the camera.
+ */
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::TransformView()
 {
@@ -1673,40 +1676,45 @@ void OrbitViewCanvas::TransformView()
 //------------------------------------------------------------------------------
 // virtual void HandleLightSource()
 //------------------------------------------------------------------------------
+/**
+ * Enables to use Sun as the light source.
+ */
+//------------------------------------------------------------------------------
 void OrbitViewCanvas::HandleLightSource()
 {
-   if (mEnableLightSource && mSunPresent)
+   int sunId = GetObjectId("Sun");
+   int frame = mLastIndex;
+   
+   if (sunId == UNKNOWN_OBJ_ID)
    {
-      //----------------------------------------------------------------------
-      // set OpenGL to recognize the counter clockwise defined side of a polygon
-      // as its 'front' for lighting and culling purposes
-      glFrontFace(GL_CCW);
-      
-      // enable face culling, so that polygons facing away (defines by front face)
-      // from the viewer aren't drawn (for efficiency).
-      glEnable(GL_CULL_FACE);
-      
-      // create a light:
-      //float lightColor[4]={1.0f, 1.0f, 1.0f, 1.0f};
-      
-      //glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, lightColor);
-      //glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
-      
-      // enable the light
-      glEnable(GL_LIGHTING);
-      glEnable(GL_LIGHT0);
-      
-      // tell OpenGL to use glColor() to get material properties for..
-      glEnable(GL_COLOR_MATERIAL);
-      
-      // ..the front face's ambient and diffuse components
-      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-      
-      // Set the ambient lighting
-      GLfloat ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
-      glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-      //----------------------------------------------------------------------
+      mLight.SetPosition(0.01f, 1.0f, 0.3f);
+      mLight.SetDirectional(true);
    }
+   else
+   {
+      int index = sunId * MAX_DATA * 3 + frame * 3;
+      mLight.SetPosition(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
+      mLight.SetDirectional(false);
+   }
+   
+   // Dunn is setting sunlight to be a little dimmer.
+   mLight.SetColor(0.8f, 0.8f, 0.8f, 1.0f);
+   
+   // If 4th value is zero, the light source is directional one, and
+   // (x,y,z) values describes its direction.
+   // If 4th value is nonzero, the light is positional, and the (x,y,z) values
+   // specify the location of the light in homogeneous object coordinates.
+   // By default, a positional light radiates in all directions.
+   
+   // Reset the light position to reflect the transformations
+   float lightPos[4], *lightColor = mLight.GetColor();
+   mLight.GetPositionf(lightPos);
+   glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+   glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+   
+   // Enable the lighting
+   glEnable(GL_LIGHTING);
+   glEnable(GL_LIGHT0);
 }
 
 
@@ -1918,11 +1926,9 @@ void OrbitViewCanvas::DrawObjectOrbit()
    int objId;
    wxString objName;
    
-   if (mEnableLightSource && mSunPresent)
-   {
-      // we don't want the orbit paths lit
+   // we don't want the orbit paths lit
+   if (mEnableLightSource)
       glDisable(GL_LIGHTING);
-   }
    
    ComputeActualIndex();
    
@@ -1997,49 +2003,13 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    
    glPushMatrix();
    
-   // first disable GL_TEXTURE_2D to show lines clearly
+   // First disable GL_TEXTURE_2D to show lines clearly
    // without this, lines are drawn dim (loj: 2007.06.11)
    glDisable(GL_TEXTURE_2D);
    
-   //-------------------------------------------------------
-   // enable light source on option
-   //-------------------------------------------------------
-   if (mEnableLightSource && mSunPresent)
-   {
-      int sunId = GetObjectId("Sun");
-      int index;
-      if (sunId == UNKNOWN_OBJ_ID)
-      {
-         mLight.SetPosition(0.01f, 1.0f, 0.3f);
-         mLight.SetDirectional(true);
-      }
-      else
-      {
-         index = sunId * MAX_DATA * 3 + frame * 3;
-         mLight.SetPosition(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
-         mLight.SetDirectional(false);
-      }
-      
-      // Dunn is setting sunlight to be a little dimmer.
-      mLight.SetColor(0.8f,0.8f,0.8f,1.0f);
-      
-      // If 4th value is zero, the light source is directional one, and
-      // (x,y,z) values describes its direction.
-      // If 4th value is nonzero, the light is positional, and the (x,y,z) values
-      // specify the location of the light in homogeneous object coordinates.
-      // By default, a positional light radiates in all directions.
-      
-      // reset the light position to reflect the transformations
-      float lpos[4], *color = mLight.GetColor();
-      mLight.GetPositionf(lpos);
-      glLightfv(GL_LIGHT0, GL_POSITION, lpos);
-      glLightfv(GL_LIGHT0, GL_SPECULAR, color);
-      //glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-      
-      // enable the lighting
-      glEnable(GL_LIGHTING);
-      glEnable(GL_LIGHT0);
-   }
+   // Enable light source on option
+   if (mEnableLightSource)
+      HandleLightSource();
    
    // Draw spacecraft
    if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
@@ -2065,8 +2035,8 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
                          mObjectViewPos[index1+2]);
             GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW32;
             //GlColorType *red = (GlColorType*)&GmatColor::RED32;
-            *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
-            // We want to differenciate spacecraft by orbit color (LOJ: 2011.02.16)
+            *sIntColor = mObjectOrbitColor[objId * MAX_DATA + mObjLastFrame[objId]];
+            // We want to differenciate spacecraft by orbit color so pass sGlColor (LOJ: 2011.02.16)
             //DrawSpacecraft(mScRadius, yellow, red);
             DrawSpacecraft(mScRadius, yellow, sGlColor);
          }
@@ -2084,10 +2054,8 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       DrawObject(objName, obj);
    }
    
-   if (mEnableLightSource && mSunPresent)
-   {
+   if (mEnableLightSource)
       glDisable(GL_LIGHTING);
-   }
    
    glPopMatrix();
 }
@@ -2105,59 +2073,14 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
 {
-   int frame = mLastIndex;
    int objId = GetObjectId(objName);
    
    #if DEBUG_DRAW > 1
    MessageInterface::ShowMessage
-         ("OrbitViewCanvas::DrawObject() drawing:%s, obj=%d, objId:%d, frame:%d\n",
-          objName.c_str(), obj, objId, frame);
-   #endif
-   
-   //-------------------------------------------------------
-   // enable light source on option
-   //-------------------------------------------------------
-   if (mEnableLightSource && mSunPresent)
-   {
-      #if DEBUG_DRAW > 1
-      MessageInterface::ShowMessage("   Enabling Sun as light source\n");
-      #endif
-      int sunId = GetObjectId("Sun");
-      int index = sunId * MAX_DATA * 3 + frame * 3;
-      
-      if (sunId == UNKNOWN_OBJ_ID)
-      {
-         mLight.SetPosition(0.01f, 1.0f, 0.3f);
-      }
-      else
-      {
-         index = sunId * MAX_DATA * 3 + frame * 3;
-         mLight.SetPosition(mObjectViewPos[index+0],mObjectViewPos[index+1],mObjectViewPos[index+2]);
-      }
-      mLight.SetDirectional(true);
-      
-      // Dunn is setting sun level a little dimmer to avoid washing out the models.
-      mLight.SetColor(0.8f,0.8f,0.8f,1.0f);
-      
-      // If 4th value is zero, the light source is directional one, and
-      // (x,y,z) values describes its direction.
-      // If 4th value is nonzero, the light is positional, and the (x,y,z) values
-      // specify the location of the light in homogeneous object coordinates.
-      // By default, a positional light radiates in all directions.
-      
-      float lpos[4];
-      mLight.GetPositionf(lpos);
-      glLightfv(GL_LIGHT0, GL_POSITION, lpos);
-      glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
-      
-      // enable the lighting
-      glEnable(GL_LIGHTING);
-   }
-   
-   #if DEBUG_DRAW > 1
+      ("OrbitViewCanvas::DrawObject() drawing:%s, obj=%d, objId:%d, mLastIndex:%d\n",
+       objName.c_str(), obj, objId, mLastIndex);
    MessageInterface::ShowMessage
-      ("   mTextureIdMap[%s]=%d\n", objName.c_str(),
-       mTextureIdMap[objName]);
+      ("   mTextureIdMap[%s]=%d\n", objName.c_str(), mTextureIdMap[objName]);
    #endif
    
    // Rotate body before drawing texture
@@ -2178,7 +2101,6 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
    // get +X and +Y ECI axis labels.  The DrawAxes function needs to be told
    // which labels to use, so it can show Earth Fixed labels.
    if (mDrawAxes && objId == mOriginId && mCanRotateAxes)
-   //if(true)
    {
       #if DEBUG_DRAW > 1
       MessageInterface::ShowMessage("   Now Drawing axes\n");
@@ -2261,10 +2183,8 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
       glDisable(GL_TEXTURE_2D);
    }
    
-   if (mEnableLightSource && mSunPresent)
-   {
+   if (mEnableLightSource)
       glDisable(GL_LIGHTING);
-   }
    
 } // end DrawObject(const wxString &objName)
 

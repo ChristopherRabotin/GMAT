@@ -168,7 +168,7 @@ protected:
    // Moved from gmatwxdefs.hpp to remove compiler warning: defined but not used (LOJ: 2012.05.29)
    static int GmatGLCanvasAttribs[2]; // = {WX_GL_DOUBLEBUFFER, 0};
    
-   // parent frame
+   // Parent frame
    wxWindow *mParent;
    
    // OpenGL Context
@@ -179,19 +179,19 @@ protected:
    GuiInterpreter *theGuiInterpreter;
    wxStatusBar *theStatusBar;
    
-   // initialization
+   // Initialization
    wxString mPlotName;
    bool mGlInitialized;
    bool mViewPointInitialized;
    bool mModelsAreLoaded;
    bool mIsNewFrame;
    
-   // performance
+   // Performance
    bool mRedrawLastPointsOnly;
    int  mNumPointsToRedraw;
    int  mUpdateFrequency;
    
-   // ring buffer index
+   // Ring buffer index
    int  mBeginIndex1;
    int  mBeginIndex2;
    int  mEndIndex1;
@@ -203,11 +203,11 @@ protected:
    int  mLastIndex;
    int  mCurrIndex;
    
-   // data points
+   // Data points
    int  mNumData;
    int  mTotalPoints;
    
-   // data control flags
+   // Data control flags
    bool mIsEndOfData;
    bool mIsEndOfRun;
    bool mIsFirstRun;
@@ -215,41 +215,42 @@ protected:
    bool mNeedVelocity;
    bool mNeedAttitude;
    
-   // drawing option
+   // Drawing option
    bool mDrawWireFrame;
    bool mDrawGrid;   
    
-   // light source
+   // Light source
    bool mSunPresent;
    bool mEnableLightSource;
+   bool mEnableLightSourceOnlyIfSunIsDrawing;
    
-   // texture
+   // Texture
    std::map<wxString, GLuint> mTextureIdMap;
    std::map<wxString, std::string> mTextureFileMap;
    
-   // view control
+   // View control
    bool mUseInitialViewPoint;
    float mAxisLength;
    
-   // animation
+   // Animation
    bool mIsAnimationRunning;
    bool mHasUserInterrupted;
    int  mUpdateInterval;
    int  mFrameInc;
    
-   // message
+   // Message
    bool mShowMaxWarning;
    int  mOverCounter;
    
-   // error handling and function mode
+   // Error handling and function mode
    bool mFatalErrorFound;
    bool mWriteRepaintDisalbedInfo;
    bool mInFunction;
    
-   // solar system
+   // Solar system
    SolarSystem *pSolarSystem;
    
-   // coordinate system
+   // Coordinate system
    wxString mInternalCoordSysName;
    wxString mViewCoordSysName;
    wxString mViewUpCoordSysName;
@@ -260,18 +261,19 @@ protected:
    CoordinateSystem *pViewUpCoordSystem;
    int mOriginId;
    int mViewObjId;
+   float mOriginRadius;
    
-   // coordinate sytem conversion
+   // Coordinate sytem conversion
    bool mViewCsIsInternalCs;
    CoordinateConverter mCoordConverter;
    
-   // spacecraft data
+   // Spacecraft data
    int   mScCount;
    float mScRadius;
    StringArray mScNameArray;
    GLubyte *mScImage;
    
-   // objects
+   // Celestial objects
    wxArrayString mObjectNames;
    wxArrayString mShowObjectNames;
    wxArrayString mValidCSNames;
@@ -283,7 +285,7 @@ protected:
    int mObjectCount;
    Real mObjectDefaultRadius;
    
-   // data buffers
+   // Data buffers
    Real *mTime;                    // [MAX_DATA]
    bool *mIsDrawing;               // [MAX_DATA]
    Real *mObjectRadius;            // [mObjectCount]
@@ -292,24 +294,24 @@ protected:
    bool *mDrawOrbitFlag;           // [mObjectCount][MAX_DATA]
    UnsignedInt *mObjectOrbitColor; // [mObjectCount][MAX_DATA]
    
-   // object positions
+   // Space object positions
    Real *mObjectGciPos;            // [mObjectCount][MAX_DATA][3]
    Real *mObjectViewPos;           // [mObjectCount][MAX_DATA][3]
    
-   // object velocities
+   // Space object velocities
    Real *mObjectViewVel;           // [mObjectCount][MAX_DATA][3]
    
-   // object attitude
+   // Space object attitude
    Real *mObjectQuat;              // [mObjectCount][MAX_DATA][4]
    
-   // object rotation angle and axis
+   // Space object rotation angle and axis
    Real *mBodyRotAngle;            // [mObjectCount][MAX_DATA]
    Real *mBodyRotAxis;             // [mObjectCount][MAX_DATA[[3]
    
    // Coordinate Transformation Matrices
    Real *mCoordData;               // [MAX_DATA][16]
    
-   // solver data
+   // Solver data
    bool mDrawSolverData;
    bool mIsSolving;
    std::vector<RealArray> mSolverAllPosX; // [numPoints][numSC]
@@ -317,45 +319,45 @@ protected:
    std::vector<RealArray> mSolverAllPosZ; // [numPoints][numSC]
    UnsignedIntArray mSolverIterColorArray;
    
-   // viewing
+   // Viewing
    // Coordinate Transformation Matrices
    Rmatrix mCoordMatrix;
    
-   // events
+   // Events
    virtual void OnPaint(wxPaintEvent &event) = 0;
    virtual void OnSize(wxSizeEvent &event) = 0;
    virtual void OnMouse(wxMouseEvent &event) = 0;
    virtual void OnKeyDown(wxKeyEvent &event) = 0;
 	
-   // initialization
+   // Initialization
    virtual void ResetPlotInfo();   
    virtual void InitializeViewPoint() = 0;
    virtual void SetDefaultView() = 0;
    
-   // for data buffer indexing
+   // Data buffer indexing
    virtual void ComputeBufferIndex(Real time);
    virtual void ComputeActualIndex();
    
-   // texture
+   // Texture
    virtual bool LoadBodyTextures();
    virtual GLuint BindTexture(SpacePoint *obj, const wxString &objName);
    virtual int  AddAlphaToTexture(const wxImage &image, bool isSpacecraft,
                                   bool useMipmaps);
    
-   // model
+   // Model
    virtual bool LoadSpacecraftModels(bool writeWarning);
    
-   // view objects
+   // View objects
    virtual void SetupProjection();
    virtual void SetupWorld() = 0;
-      
-   // drawing mode
+   
+   // Drawing mode
    virtual void SetDrawingMode();
    
-   // light source
+   // Light source
    virtual void HandleLightSource();
    
-   // drawing objects
+   // Drawing objects
    virtual void DrawFrame() = 0;
    virtual void DrawPlot() = 0;
    virtual void DrawObjectOrbit() = 0;
@@ -370,12 +372,12 @@ protected:
                         const wxString &label2, double time,  int xpos = 0,
                         int ypos = 0, bool showCS = true, const wxString &label3 = "");
       
-   // for object
+   // For object
    int  GetObjectId(const wxString &name);
    void ClearObjectArrays(bool deleteArrays = true);
    bool CreateObjectArrays();
    
-   // for data update
+   // For data update
    void UpdateSolverData(const RealArray &posX, const RealArray &posY,
                         const RealArray &posZ, const UnsignedIntArray &scColors,
                         bool solving);
@@ -391,17 +393,17 @@ protected:
    void GetBodyRotationData(int objId, Real &angInDeg, Rvector3 &eAxis);
    void SaveBodyRotationData(int objId, Real angInDeg, const Rvector3 &eAxis);
    
-   // for coordinate system
+   // For coordinate system
    virtual bool ConvertObjectData() = 0;
    virtual void ConvertObject(int objId, int index) = 0;
    
-   // for copy
+   // For copy
    void CopyVector3(Real to[3], Real from[3]);
    
-   // for loading image
+   // For loading image
    virtual bool LoadImage(const std::string &fileName, bool isSpacecraft);
    
-   // for debug
+   // For debug
    void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos);
    
 };

@@ -210,14 +210,6 @@ private:
    // default spacecraft drawing
    GLuint mGlList;
    
-   // view
-   GLfloat mfViewLeft;
-   GLfloat mfViewRight;
-   GLfloat mfViewTop;
-   GLfloat mfViewBottom;
-   GLfloat mfViewNear;
-   GLfloat mfViewFar;
-   
    float mDefaultRotXAngle;
    float mDefaultRotYAngle;
    float mDefaultRotZAngle;

@@ -43,10 +43,11 @@
 
 //#define DEBUG_GL_INFO
 //#define DEBUG_INIT 1
+//#define DEBUG_CS 1
 //#define DEBUG_LOAD_IMAGE 1
 //#define DEBUG_TEXTURE 1
 //#define DEBUG_LOAD_MODEL 1
-//#define DEBUG_OBJECT 1
+//#define DEBUG_OBJECT 2
 //#define DEBUG_DATA_BUFFERRING 1
 //#define DEBUG_UPDATE 1
 //#define DEBUG_DRAW 1
@@ -102,28 +103,28 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    MessageInterface::ShowMessage("ViewCanvas() constructor entered, name='%s'\n", name.c_str());
    #endif
    
-   // initialize pointers
+   // Initialize pointers
    mParent = parent;
    GmatAppData *gmatAppData = GmatAppData::Instance();
    theGuiInterpreter = gmatAppData->GetGuiInterpreter();
    theStatusBar = gmatAppData->GetMainFrame()->GetMainFrameStatusBar();
    mCanvasSize = size;
    
-   // initialization
+   // Initialization
    mPlotName = name;
    mGlInitialized = false;
    mViewPointInitialized = false;
    mModelsAreLoaded = false;
    mIsNewFrame = true;
    
-   // performance
+   // Performance
    // if mNumPointsToRedraw =  0 It redraws whole plot
    // if mNumPointsToRedraw = -1 It does not clear GL_COLOR_BUFFER
    mNumPointsToRedraw = 0;
    mRedrawLastPointsOnly = false;
    mUpdateFrequency = 50;
    
-   // ring buffer index
+   // Ring buffer index
    mBeginIndex1 = 0;
    mBeginIndex2 = -1;
    mEndIndex1 = -1;
@@ -135,11 +136,11 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mLastIndex = 0;
    mCurrIndex = -1;
    
-   // data points
+   // Data points
    mNumData = 0;
    mTotalPoints = 0;
    
-   // data control flags
+   // Data control flags
    mOverCounter = 0;
    mIsEndOfData = false;
    mIsEndOfRun = false;
@@ -151,43 +152,49 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mDrawWireFrame = false;
    mDrawGrid = false;
    
-   // light source
-   mSunPresent = false;
+   // Light source
+   // The base subscriber OrbitView always adds Sun to the object list
+   mSunPresent = true;
+   // If light source is enabled, it will use Sun as light source,
+   // otherwise it will use ambient light
    mEnableLightSource = true;
+   // This flag allows to use Sun as light source only if Sun is drawing
+   mEnableLightSourceOnlyIfSunIsDrawing = false;
    
-   // view control
+   // View control
    mUseInitialViewPoint = true;
    mAxisLength = 30000.0;
    
-   // animation
+   // Animation
    mIsAnimationRunning = false;
    mHasUserInterrupted = false;
    mUpdateInterval = 1;
    mFrameInc = 1;
    
-   // message
+   // Message
    mShowMaxWarning = true;
    mOverCounter = 0;
    
-   // solver data
+   // Solver data
    mDrawSolverData = false;
    mIsSolving = false;
    
-   // error handling and function mode
+   // Error handling and function mode
    mFatalErrorFound = false;
    mWriteRepaintDisalbedInfo = false;
    mInFunction = false;
    
-   // solar system
+   // Solar system
    pSolarSystem = NULL;
    
    // Spacecraft
    mScCount = 0;
    mScImage = NULL;
    
-   // objects
+   // Objects
    mObjectCount = 0;
    mObjectDefaultRadius = 200; //km: make big enough to see
+   mOriginRadius = mObjectDefaultRadius;
    
    // Coordinate System
    pInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
@@ -526,6 +533,7 @@ void ViewCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
    // set view center object
    mOriginName = viewCs->GetOriginName().c_str();
    mOriginId = GetObjectId(mOriginName);
+   mOriginRadius = mObjectRadius[mOriginId];
    
    mViewObjName = mOriginName;
    mViewObjId = mOriginId;
@@ -533,8 +541,8 @@ void ViewCanvas::SetGlCoordSystem(CoordinateSystem *internalCs,
    #if DEBUG_CS
    MessageInterface::ShowMessage
       ("   mViewCoordSysName=%s, pViewCoordSystem=%p, mOriginName=%s, "
-       "mOriginId=%d\n", mViewCoordSysName.c_str(), pViewCoordSystem,
-       mOriginName.c_str(),  mOriginId);
+       "mOriginId=%d, mOriginRadius=%f\n", mViewCoordSysName.c_str(), pViewCoordSystem,
+       mOriginName.c_str(),  mOriginId, mOriginRadius);
    MessageInterface::ShowMessage
       ("   mViewUpCoordSysName=%s, mViewObjName=%s, mViewObjId=%d\n",
        mViewUpCoordSysName.c_str(), mViewObjName.c_str(), mViewObjId);
@@ -591,7 +599,7 @@ void ViewCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
    
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
+      ("ViewCanvas::SetGlDrawOrbitFlag() mDrawOrbitArray.size()=%d, "
        "mObjectCount=%d\n", mDrawOrbitArray.size(), mObjectCount);
    
    bool draw;
@@ -599,7 +607,7 @@ void ViewCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
    {
       draw = mDrawOrbitArray[i] ? true : false;      
       MessageInterface::ShowMessage
-         ("ViewCanvas::SetGlDrawObjectFlag() i=%d, mDrawOrbitArray[%s]=%d\n",
+         ("ViewCanvas::SetGlDrawOrbitFlag() i=%d, mDrawOrbitArray[%s]=%d\n",
           i, mObjectNames[i].c_str(), draw);
    }
    #endif
@@ -615,20 +623,27 @@ void ViewCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
 
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetGlDrawObjectFlag() mDrawOrbitArray.size()=%d, "
-       "mObjectCount=%d\n", mShowObjectArray.size(), mObjectCount);
+      ("ViewCanvas::SetGlDrawObjectFlag() entered, mDrawOrbitArray.size()=%d, "
+       "mObjectCount=%d, mEnableLightSourceOnlyIfSunIsDrawing=%d\n",
+       mShowObjectArray.size(), mObjectCount, mEnableLightSourceOnlyIfSunIsDrawing);
    #endif
    
    bool show;
-   mSunPresent = true;//false;
+   if (mEnableLightSourceOnlyIfSunIsDrawing)
+      mEnableLightSource = false;
+   else
+      mEnableLightSource = true;
    
    for (int i=0; i<mObjectCount; i++)
    {
       show = mShowObjectArray[i] ? true : false;
       mShowObjectMap[mObjectNames[i]] = show;
       
-      if (mObjectNames[i] == "Sun" && mShowObjectMap["Sun"])
-         mSunPresent = true;
+      if (mEnableLightSourceOnlyIfSunIsDrawing)
+      {
+         if (mObjectNames[i] == "Sun" && mShowObjectMap["Sun"])
+            mEnableLightSource = true;
+      }
       
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
@@ -637,12 +652,9 @@ void ViewCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
       #endif
    }
    
-   // Handle light source
-   HandleLightSource();
-   
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetGlDrawObjectFlag() mEnableLightSource=%d, mSunPresent=%d\n",
+      ("ViewCanvas::SetGlDrawObjectFlag() leaving, mEnableLightSource=%d, mSunPresent=%d\n",
        mEnableLightSource, mSunPresent);
    #endif
 }
@@ -773,8 +785,11 @@ void ViewCanvas::TakeAction(const std::string &action)
 // void UpdatePlot(const StringArray &scNames, const Real &time, ...
 //------------------------------------------------------------------------------
 /**
- * Updates spacecraft trajectory. Position and velocity should be in view
- * coordinate system.
+ * Updates spacecraft trajectory data buffer. Incoming spacecraft position and
+ * velocity should be in view coordinate system as this canvas does not convert
+ * the state in view coordinate system. It buffers incoming spacecraft data in
+ * UpdateSpacecraftData(). All other celestial object data are updated by
+ * calling GetMJ2000State(time) in UpdateOtherData()
  *
  * @param <scNames> spacecraft name array
  * @param <time> time
@@ -967,8 +982,9 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
       
       #if DEBUG_OBJECT > 1
       MessageInterface::ShowMessage
-         ("ViewCanvas::AddObjectList() objNames[%d]=%s, objColor=%u, rgb=[%u,%u,%u]\n",
-          i, objNames[i].c_str(), objColors[i], rgb.Red(), rgb.Green(), rgb.Blue());
+         ("   objNames[%d]=%s, objRadius=%f, objColor=%u, rgb=[%u,%u,%u]\n",
+          i, objNames[i].c_str(), mObjectRadius[i], objColors[i], rgb.Red(),
+          rgb.Green(), rgb.Blue());
       #endif
    }
 
@@ -1002,18 +1018,24 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
 //------------------------------------------------------------------------------
 void ViewCanvas::SetDrawingMode()
 {
-   // set OpenGL to recognize the counter clockwise defined side of a polygon
+   #ifdef DEBUG_DRAWING_MODE
+   MessageInterface::ShowMessage
+      ("SetDrawingMode() '%s' entered, mDrawWireFrame=%d\n", mPlotName.c_str(),
+       mDrawWireFrame);
+   #endif
+   
+   // Set OpenGL to recognize the counter clockwise defined side of a polygon
    // as its 'front' for lighting and culling purposes
    glFrontFace(GL_CCW);
    
-   // enable face culling, so that polygons facing away (defines by front face)
+   // Enable face culling, so that polygons facing away (defines by front face)
    // from the viewer aren't drawn (for efficiency).
    glEnable(GL_CULL_FACE);
    
-   // tell OpenGL to use glColor() to get material properties for..
+   // Enable OpenGL to use glColorMaterial() to get material properties
    glEnable(GL_COLOR_MATERIAL);
    
-   // the front face's ambient and diffuse components
+   // Set the front face's ambient and diffuse components
    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
    
    // Set the ambient lighting
@@ -1036,6 +1058,10 @@ void ViewCanvas::SetDrawingMode()
       glPolygonMode(GL_FRONT, GL_FILL);
       glPolygonMode(GL_BACK, GL_FILL);
    }
+   
+   #ifdef DEBUG_DRAWING_MODE
+   MessageInterface::ShowMessage("SetDrawingMode() '%s' leaving\n", mPlotName.c_str());
+   #endif
 }
 
 
@@ -1457,7 +1483,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    GLuint texId = GmatPlot::UNINIT_TEXTURE;
    std::string textureFile;
    
-   // if texture file specified then use it
+   // If texture file specified then use it
    if (mTextureFileMap.find(objName) != mTextureFileMap.end())
       textureFile = mTextureFileMap[objName];
    
@@ -1471,11 +1497,18 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    {
       if (obj->IsOfType(Gmat::CELESTIAL_BODY))
       {
-         // use texture map set by user for this plot, if not set use from the celestial body
+         // Use texture map set by user for this plot, if not set use from the celestial body
          if (textureFile == "" || !GmatFileUtil::DoesFileExist(textureFile))
          {
             CelestialBody *body = (CelestialBody*) obj;
             textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
+            // If texture file does not exist, try with default path from the startup file
+            if (!GmatFileUtil::DoesFileExist(textureFile.c_str()))
+            {
+               FileManager *fm = FileManager::Instance();
+               std::string textureLoc = fm->GetFullPathname("TEXTURE_PATH");
+               textureFile = textureLoc + textureFile;
+            }
          }
       }
       else if (obj->IsOfType(Gmat::SPACECRAFT))
@@ -2100,6 +2133,10 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
 
 //------------------------------------------------------------------------------
 // void UpdateOtherData(const Real &time)
+//------------------------------------------------------------------------------
+/**
+ * Updates celetial body state by calling GetMJ2000State() with time.
+ */
 //------------------------------------------------------------------------------
 void ViewCanvas::UpdateOtherData(const Real &time)
 {
