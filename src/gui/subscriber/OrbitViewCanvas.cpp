@@ -1497,15 +1497,20 @@ void OrbitViewCanvas::SetupProjection()
  */
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::SetupWorld()
-{      
+{
    // Setup how we view the world
    GLfloat aspect = (GLfloat)mCanvasSize.x / (GLfloat)mCanvasSize.y;
    
-   // PS - Greatly simplified. Uses the FOV from the active camera, the aspect ratio of the screen,
-   //       and a constant near-far plane
-   float distance = (mCamera.position - mCamera.view_center).GetMagnitude() * 2;
-   if (distance < 500000000.0f)
-      distance = 500000000.0f;
+   // PS - Greatly simplified. Uses the FOV from the active camera, the aspect ratio of the 
+   //    screen, and a constant near-far plane
+   // LOJ - Changed to use variable near plane distance as it affects plot appearance with objet
+   //    size and distance (2012.06.28)
+   float nearDist = (mCamera.position - mCamera.view_center).GetMagnitude() * 0.001;
+   float farDist = (mCamera.position - mCamera.view_center).GetMagnitude() * 2;
+   if (nearDist < 0.001f)
+      nearDist = 0.001f;
+   if (farDist < 500000000.0f)
+      farDist = 500000000.0f;
    
    //-----------------------------------------------------------------
    // void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
@@ -1520,11 +1525,15 @@ void OrbitViewCanvas::SetupWorld()
    
    #ifdef DEBUG_SETUP_WORLD
    MessageInterface::ShowMessage
-      ("SetupWorld(), fov = %f, aspect = %f, distance = %f\n", mCamera.fovDeg, aspect, distance);
+      ("SetupWorld(), fov = %f, aspect = %f, nearDist = %f, farDist = %f\n",
+       mCamera.fovDeg, aspect, nearDist, farDist);
    #endif
    
    // Changed zNear from 50 to 0.1 to fix GMT-2386 (LOJ: 2012.06.27)
-   gluPerspective(mCamera.fovDeg, aspect, 0.1f, distance);
+   // Changed to use variable near plane distance as it affects plot with objet
+   // size and distance (LOJ: 2012.06.28)
+   //gluPerspective(mCamera.fovDeg, aspect, 0.1f, farDist);
+   gluPerspective(mCamera.fovDeg, aspect, nearDist, farDist);
    
    //-----------------------------------------------------------------
    // Note: mouse rotation is applied in TransformView as MODELVIEW mode
