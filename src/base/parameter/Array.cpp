@@ -60,6 +60,10 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
    Gmat::INTEGER_TYPE,
 };
 
+
+const Integer Array::MAX_ROWS = 1000;
+const Integer Array::MAX_COLS = 1000;
+
 //---------------------------------
 // public methods
 //---------------------------------
@@ -199,6 +203,14 @@ bool Array::SetSize(const Integer row, const Integer col, bool zeroElements)
       ("Array::SetSize() row=%d, col=%d\n", row, col);
    #endif
    
+   if ((row > MAX_ROWS) || (col > MAX_COLS))
+   {
+      std::stringstream errmsg("");
+      errmsg << "Size of Array " << instanceName << " is too large.  Rows and columns are currently limited to ";
+      errmsg << MAX_ROWS << " and " << MAX_COLS << ", respectively. " << std::endl;
+      throw ParameterException(errmsg.str());
+   }
+
    mNumRows = row;
    mNumCols = col;
    mRmatValue.SetSize(mNumRows, mNumCols, zeroElements);
@@ -224,6 +236,17 @@ void Array::SetRmatrix(const Rmatrix &mat)
 {
    if (mSizeSet)
    {
+      Integer r, c;
+      mRmatValue.GetSize(r,c);
+      if ((r > MAX_ROWS) || (c > MAX_COLS))
+      {
+         std::stringstream errmsg("");
+         errmsg << "Size of input matrix for Array " << instanceName << " is too large. ";
+         errmsg << "Rows and columns are currently limited to ";
+         errmsg << MAX_ROWS << " and " << MAX_COLS << ", respectively." << std::endl;
+         throw ParameterException(errmsg.str());
+      }
+
       mRmatValue = mat;
    }
    else
@@ -407,6 +430,13 @@ Integer Array::SetIntegerParameter(const Integer id, const Integer value)
    switch (id)
    {
    case NUM_ROWS:
+      if (value > MAX_ROWS)
+      {
+         std::stringstream errmsg("");
+         errmsg << "Row value for Array " << instanceName << " is too large.  Arrays are currently limited to ";
+         errmsg << MAX_ROWS << " rows." << std::endl;
+         throw ParameterException(errmsg.str());
+      }
       if (mNumRows == 0)
          mNumRows = value;
       else
@@ -419,6 +449,13 @@ Integer Array::SetIntegerParameter(const Integer id, const Integer value)
       }
       return value;
    case NUM_COLS:
+      if (value > MAX_COLS)
+      {
+         std::stringstream errmsg("");
+         errmsg << "Column value for Array " << instanceName << " is too large.  Arrays are currently limited to ";
+         errmsg << MAX_COLS << " columns." << std::endl;
+         throw ParameterException(errmsg.str());
+      }
       if (mNumCols == 0)
          mNumCols = value;
       else
@@ -516,11 +553,23 @@ const Rvector& Array::SetRvectorParameter(const Integer id, const Rvector &value
    switch (id)
    {
    case ROW_VALUE:
+      if (value.GetSize() < mNumCols)
+      {
+         std::string errmsg = "Error setting Array ";
+         errmsg += instanceName + "  from input Rvector: insufficient size.\n";
+         throw ParameterException(errmsg);
+      }
       for (int i=0; i<mNumCols; i++)
          mRmatValue.SetElement(index, i, value(i));
       
       return value;
    case COL_VALUE:
+      if (value.GetSize() < mNumRows)
+      {
+         std::string errmsg = "Error setting Array ";
+         errmsg += instanceName + "  from input Rvector: insufficient size.\n";
+         throw ParameterException(errmsg);
+      }
       for (int i=0; i<mNumRows; i++)
          mRmatValue.SetElement(i, index, value(i));
       
@@ -528,7 +577,6 @@ const Rvector& Array::SetRvectorParameter(const Integer id, const Rvector &value
    default:
       throw ParameterException
          ("Array::GetRvectorParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
-      //return Parameter::SetRvectorParameter(id, value, index);
    }
 }
 

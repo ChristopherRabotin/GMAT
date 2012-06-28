@@ -141,6 +141,9 @@ protected:
       PARAMETER_TYPE[ArrayParamCount - ParameterParamCount];
    static const std::string
       PARAMETER_TEXT[ArrayParamCount - ParameterParamCount];
+
+   static const Integer MAX_ROWS;
+   static const Integer MAX_COLS;
     
 private:
 
