@@ -310,11 +310,6 @@
     You must click the <guilabel>=&gt;</guilabel> button again to save changes
     to the size of the array.</para>
 
-    <caution>
-      <para>If you change the size of an <guilabel>Array</guilabel> in the
-      GUI, the contents of the array will be lost.</para>
-    </caution>
-
     <screenshot>
       <mediaobject>
         <imageobject>
@@ -386,7 +381,8 @@ Create Array b[5, 3]
 b(1) = 1    % same as b(1, 1) = 1
 b(2) = 2    % same as b(1, 2) = 2
 b(3) = 3    % same as b(1, 3) = 3
-b(4) = 4    % error: b(1, 4) does not exist</code></programlisting>
+b(4) = 4    % error: b(1, 4) does not exist
+b(4, 3) = 4 % row 4, column 3</code></programlisting>
   </refsection>
 
   <refsection>
