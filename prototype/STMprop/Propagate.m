@@ -1,6 +1,6 @@
 function [t, PosVel, Phi] = Propagate(Spacecraft,ForceModel,TOF)
 
-global SolarSystem jd_ref
+global SolarSystem jd_ref 
 
 %  Initialize the solar system
 InitSolarSystem;
@@ -15,11 +15,13 @@ X0   = [X0v; sqrmat2vec(eye(6))];
 
 %  Calculate the reference epoch in UTC Julian Date
 datevec = datestr2vec(Spacecraft.Epoch);
-jd_ref  = greg2jd(datevec);
+jd_ref  = greg2jd(datevec);     
+
 
 %  Perform the Propagation
-[t,X] = ode78_FM('dynfunc', 0, TOF, X0, 1e-11 , [], [], ForceModel); 
-
+[t,X] = ode78_FM('dynfunc', 0, TOF, X0, 1e-16 , [], [], ForceModel); 
+%opt = odeset('AbsTol',1e-13,'RelTol',1e-13);
+%[t,X] = ode113('dynfunc',[0:864:TOF], X0, opt); 
 %  Break out portions of the solution
 for i = 1:size(t,1)
     Phi(1:6,1:6,i) = vec2sqrmat(X(i,7:42)');

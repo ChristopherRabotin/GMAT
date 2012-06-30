@@ -1,42 +1,34 @@
-
-%  This script tests propagation using Earth as the central body.  
-
+clc
 
 % --------------------------------------
 %          Define the Force Model
 % --------------------------------------
-ForceModel.CentralBody = 'Earth';
-ForceModel.PrimaryBodies = {'Earth'};
-ForceModel.PointMasses = {'Earth' 'Luna' 'Sun'};
-ForceModel.SRP = 'On';
+ForceModel.CentralBody   = 'Sun';
+ForceModel.PrimaryBodies = {'Sun'};
+ForceModel.PointMasses   = {'Sun','Mars'};
+%ForceModel.PointMasses   = {'Earth' 'Luna' 'Sun' ,'Mars', 'Mercury', 'Venus', 'Jupiter', 'Saturn', 'Uranus','Neptune','Pluto'};
+
+ForceModel.SRP           = 'Off';
 ForceModel.SolarRadiationPressure.Flux = 1367;
 ForceModel.SolarRadiationPressure.Nominal_Sun = 149597870.691;
+ForceModel.EphemerisSource = 'DE405';
 
 % --------------------------------------
 %          Define the Spacecraft
 % --------------------------------------
-MMSRef.Epoch = '27 Jul 2000 20:48:50.014';
-MMSRef.X = 7482.391175343022;
-MMSRef.Y = -4121.720425267366;
-MMSRef.Z = -1169.794220760123;
-MMSRef.VX = 4.43353923085319;
-MMSRef.VY = 8.266695838139212;
-MMSRef.VZ = -1.56943034698562;
-
-MMSRef.X = 7100.000000000000;
-MMSRef.Y = 0.000000000000;
-MMSRef.Z = 1300.000000000000;
-MMSRef.VX = 0.000000000000;
-MMSRef.VY = 7.350000000000;
-MMSRef.VZ = 1.000000000000;
+Sat.Epoch = '17 Apr 2014 19:56:34.235' ;
+Sat.X = -177752991.28891;
+Sat.Y = -60115454.477842;
+Sat.Z = -21787710.987005;
+Sat.VX = 3.8369598289566;
+Sat.VY = -23.242693574021;
+Sat.VZ = -10.744923481157;
 
 % --------------------------------------
 %          Propagate the Spacecraft
 % --------------------------------------
-TOF     = 86400*.5;
-TOF     = 60;
-
-[t, X, Phi] = Propagate(MMSRef,ForceModel,TOF);
+TOF     = 165*86400;
+[t, X, Phi] = Propagate(Sat,ForceModel,TOF);
 
 % --------------------------------------
 %          Output
@@ -48,6 +40,9 @@ disp('-------------------------------')
 disp('  ')
 n =  size(X,1);
 disp(['               X-Comp.            Y-Comp.           Z- Comp.    ']);
-disp(['Position   ' num2str( X(n,1:3),12) ]);
-disp(['Velocity   ' num2str( X(n,4:6),12) ]);
+disp(['Position   ' num2str( X(n,1:3),14) ]);
+disp(['Velocity   ' num2str( X(n,4:6),14) ]);
 disp('  ')
+
+plot3(X(:,1),X(:,2),X(:,3))
+

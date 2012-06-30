@@ -27,6 +27,16 @@ SolarSystem.Mu = [22032.080486418
    
    
 %  Initialize the DE file 
-addpath('c:\Codes\EphemerisReader\KSC-12544\ephm')
-init_eph('DE405.dat');
-
+addpath(genpath('C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\prototype\events\bin\contrib\mice'))
+addpath('C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\test\script\extern\utils\KSC_DEReader\ephm')
+init_eph('de421.dat');
+% if stcmp(ForceModel.EphemerisSource,'SPICE')
+% cspice_furnsh( 'C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\test\files\planetary_ephem\spk\de421.bsp' )
+% cspice_furnsh( 'C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\test\files\planetary_ephem\spk\mar080.bsp')
+% cspice_furnsh( 'C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\test\files\planetary_ephem\spk\jup230-long.bsp')
+% cspice_furnsh( 'C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\test\files\planetary_ephem\spk\sat288.bsp')
+% cspice_furnsh( 'C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\test\files\planetary_ephem\spk\ura083.bsp')
+% cspice_furnsh( 'C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\test\files\planetary_ephem\spk\nep078.bsp')
+% cspice_furnsh( 'C:\Users\sphughe1\Documents\GMAT Files\Jazz\trunk\test\files\planetary_ephem\spk\plu017.bsp')
+% cspice_furnsh( 'C:\Users\sphughe1\Documents\GMAT\data\time\naif0009.tls')
+% end

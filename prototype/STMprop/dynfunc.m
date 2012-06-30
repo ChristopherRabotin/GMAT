@@ -1,6 +1,8 @@
 function [Xdot] = dynfunc(t,x,ForceModel)
 
-global SolarSystem
+
+global SolarSystem 
+%ForceModel = dummy2;
 
 %  Initializations
 xdot = zeros(6,1);
