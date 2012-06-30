@@ -9,7 +9,9 @@ retrogradeLEO = [2124 -4462 6651 -3.6 3.9 4]';
 molniya       = [-52 -3079 -6150 10.043 -0.170 0]';
 geo           = [-743.686572704364 39985.553832 0 -2.855551774845245 -0.053169 1.517940]';
 
-cartState = progradeLEO;
+bugState = [ -1122.002825819228 14375.83796022422 2240.587869013298  -2.462667103354754 3.061006787034337 4.917832567102448]
+
+cartState = bugState;
 
 
 %% Propagate the orbit for one day
@@ -55,10 +57,12 @@ for ephIdx = 1:numEphemPoints
     lat        = asin(posFixed(3)/sqrt(posFixed(1)^2+posFixed(2)^2 + posFixed(3)^2));
     dir        = sign(velFixed(2,1)*posFixed(1,1) - velFixed(1,1)*posFixed(2,1));
     figure(2);
+
     %  Draw new points depending upon special case
     if ephIdx > 2
 
         % Prograde case stepping off RHS of plot
+        disp([long oldLong]*180/pi)
         mLong    = mod(long,2*pi);
         moldLong = mod(oldLong,2*pi);
         mLongM   = mod(long,-2*pi);;
