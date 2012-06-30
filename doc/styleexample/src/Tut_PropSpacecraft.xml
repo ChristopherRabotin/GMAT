@@ -11,14 +11,14 @@
 
   <section>
     <title>Objective and Overview</title>
-
+    <note>
     <para>The most fundamental capability of GMAT is to propagate spacecraft,
     which said another way is to simulate the orbital motion. The ability to
     propagate spacecraft is used in nearly every practical aspect of space
     mission analysis from simple orbital predictions--when will the
     International Space Station be over my house?--to complex analyses that
     determine the thirster firing sequence required to send a spacecraft to
-    the Moon or Mars.</para>
+    the Moon or Mars.</para>    </note>
 
     <para>This tutorial will teach you how to use GMAT to propagate a
     spacecraft. You will learn how to configure a
