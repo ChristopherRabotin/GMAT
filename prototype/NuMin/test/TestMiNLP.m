@@ -10,32 +10,35 @@
 
 global objname conname
 
-Options.DescentMethod     = 'Mathworks';
+Options.DescentMethod     = 'DampedBFGS';
 Options.StepSearchMethod  = 'NocWright';
 Options.FiniteDiffVector  = ones(5,1)*1e-9;
 Options.DerivativeMethod  = 'Analytic';
-Options.MaxIter           = 550;
-Options.MaxFunEvals       = 500;
-Options.TolCon            = 1e-12;
-Options.TolX              = 1e-12;
-Options.TolF              = 1e-12;
-Options.TolGrad           = 1e-12;
-Options.TolStep           = 1e-12;
+Options.MaxIter           = 5550;
+Options.MaxFunEvals       = 5500;
+Options.TolCon            = 1e-8;
+Options.TolX              = 1e-8;
+Options.TolF              = 1e-8;
+Options.TolGrad           = 1e-8;
+Options.TolStep           = 1e-8;
 Options.MaxStepLength     = 1000;
 Options.QPMethod          = 'minQP';
+Options.ConstraintMode    = 'MiNLP';
 opt                       = optimset('Display','iter','GradObj','On','GradCon','On', 'MaxIter',Options.MaxIter ,...
-                                     'MaxFunEvals',Options.MaxFunEvals,'DerivativeCheck','On','TolFun',Options.TolF,'TolCon',Options.TolF);
+                                     'MaxFunEvals',Options.MaxFunEvals,'DerivativeCheck','Off','TolFun',Options.TolF,'TolCon',Options.TolF);
 
-ProblemSet = {'TP6'; 'PQR_P1_4'; 'PLR_T1_4'; 'TP220';'QLR_T1_1';;'SGR_P1_2'; 'LQR_T1_4'; 'TP1';  'TP218';'TP369';    'TP242'; 'TP225';'TP254'; 'PQR_T1_6' ; 'LQR_T1_4';'LLR_T1_1'...
-              ;'LPR_T1_1'; 'LPR_T1_5';  'SGR_P1_2'; 'PLR_T1_2';...
-             'SLR_T1_1'; 'QLR_T1_2' ;  };
+ProblemSet = {'Sample1' ; 'TP6'; 'PQR_P1_4'; 'PLR_T1_4'; 'TP220';'QLR_T1_1'; ...
+              'SGR_P1_2';'LQR_T1_4'; 'TP1';  'TP218';'TP369';  ...
+              'TP242'; 'TP225';'TP254'; 'PQR_T1_6' ; 'LQR_T1_4';...
+              'LPR_T1_1'; 'LPR_T1_5';  'SGR_P1_2'; 'PLR_T1_2';...
+              'SLR_T1_1'; 'QLR_T1_2';'LPR_T1_2'};
 
-snset('Defaults');
-snprintfile('snoptmain2.out');
-snsummary  ('snoptmain2.sum');
-snspec     ('snoptmain2.spc');
-snseti     ('Major Iteration limit', Options.MaxIter );
-snset('Minimize');
+% snset('Defaults');
+% snprintfile('snoptmain2.out');
+% snsummary  ('snoptmain2.sum');
+% snspec     ('snoptmain2.spc');
+% snseti     ('Major Iteration limit', Options.MaxIter );
+% snset('Minimize');
 
 for i = 1:size(ProblemSet,1);
     
@@ -47,7 +50,7 @@ for i = 1:size(ProblemSet,1);
     RunData{i}.func = objname;
     
     %----- Call miNLP and save data
-    [x,f,exitFlag,OutPut]      = miNLP(objname,d.x0,d.A,d.b,d.Aeq,d.beq,d.lb,d.ub,conname,Options);
+    [x,f,exitFlag,OutPut]      = miNLPWithGraphs(objname,d.x0,d.A,d.b,d.Aeq,d.beq,d.lb,d.ub,conname,Options);
     RunData{i}.miNLP.x         = x;
     RunData{i}.miNLP.f         = f;
     RunData{i}.miNLP.exitFlag  = exitFlag;
@@ -64,9 +67,9 @@ for i = 1:size(ProblemSet,1);
     RunData{i}.fmincon.iter      = OutPut.iterations;
     RunData{i}.fmincon.fevals    = OutPut.funcCount;
     
-    [Flow,Fupp,iGfun,jGvar] = prepSNOPT(name,x,d);
-    [x,F,inform] = snopt(d.x0,d.lb,d.ub,Flow,Fupp,'SNOPTdummy',[],[], [],iGfun,jGvar);
-    
+    %[Flow,Fupp,iGfun,jGvar] = prepSNOPT(name,x,d);
+    %[x,F,inform] = snopt(d.x0,d.lb,d.ub,Flow,Fupp,'SNOPTdummy',[],[], [],iGfun,jGvar);
+    return
     
 end
 
@@ -90,6 +93,7 @@ for i = 1:size(RunData,2)
             Xerror = norm(RunData{i}.miNLP.x  - RunData{i}.xstar);
             iterdata = sprintf(formatstr, Solver, RunData{i}.func, RunData{i}.miNLP.exitFlag,Ferror,Xerror,...
                                 RunData{i}.miNLP.iter, RunData{i}.miNLP.fevals );
+            funcEvals(i) = RunData{i}.miNLP.fevals;
         else
             Solver = 'fmincon';
             Ferror = abs(RunData{i}.fmincon.f  - RunData{i}.fstar);
@@ -105,25 +109,11 @@ end
 
 return
 
-
-%----- Paraboloid
-x0 = [10;10];
-[x,f,Converged,OutPut] = miNLP('Paraboloid',x0, [], [], [], [], [],[],'quadraticcon', Options);
-[x,f,Converged,OutPut]   = fmincon('Paraboloid',x0,[],[],[],[],[],[],'quadraticcon',opt);
-
-
-return
-
 %----- LPR_T1_2
 x0 = [.1 .1]';
 lb = [1 0 ]'; ub = [];
 [x,f,Converged,OutPut]   = miNLP('OBJ_LPR_T1_2',x0,[],[],[],[],lb,ub,'CON_LPR_T1_2',Options);
 [x,f,Converged,OutPut]   = fmincon('OBJ_LPR_T1_2',x0,[],[],[],[],lb,ub,'FMINCON_LPR_T1_2',opt);
-
-%----- OBJ_PQR_P1_4
-x0 = ones(3,1);
-[x,f,Converged,OutPut] = miNLP('OBJ_PQR_P1_4',x0, [], [], [], [], [], [],'CON_PQR_P1_4', Options);
-[x,f,Converged,OutPut] = fmincon('OBJ_PQR_P1_4',x0, [], [], [], [], [], [],'FMINCON_PQR_P1_4', opt);
 
 
 

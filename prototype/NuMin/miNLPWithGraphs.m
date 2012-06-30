@@ -233,7 +233,7 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
     %----- Setup the QP subproblem and call minQP
     [px, q, plam, flag] = miNLP_searchdir(x,f,gradF,ce,ci,Je,Ji,A, ...
         b,Aeq,beq,eqInd,ineqInd,Options,mLE,mLI,m,W,lambda);
-    
+    PlotCostAndConstraints(f,gradF,W,ce,ci,Je,Ji,x,px)
     if flag ~=1
         keyboard
     end
@@ -533,6 +533,52 @@ else
     Converged = 0;
     
 end
+
+function PlotCostAndConstraints(f,gradF,W,ce,ci,Je,Ji,x,px)
+
+
+inc = .05;
+iCount = 0; 
+for x1 = -3.3:inc:3.3
+    iCount =  iCount + 1;
+    jCount = 0;
+    for x2 = -3.3:inc:3.3
+        jCount = jCount + 1;
+        X = [x1 x2]';
+        Xprime = X - x;
+        Fapprox(iCount,jCount) = (0.5*Xprime'*W*Xprime + gradF'*Xprime + f);
+        F(iCount,jCount) = OBJ_Sample1(X);
+        Xvar(iCount,jCount) = x1;
+        Yvar(iCount,jCount) = x2;
+    end
+end
+figure(1); clf;
+contourf(Xvar,Yvar,F,15); colorbar;
+
+hold on
+h = contour(Xvar,Yvar,Fapprox,[-40:10:100]);
+plot(x(1),x(2),'r*')
+plot([x(1), x(1) + px(1)],[x(2), x(2) + px(2)],'k-','LineWidth',2);
+
+if ~isempty(Je)
+    iCount = 0;
+    for theta = 0:.05:2*pi
+        iCount = iCount + 1;
+        xC(iCount) = cos(theta);
+        yC(iCount) = sin(theta);
+    end 
+    plot(xC,yC,'k-','LineWidth',2); 
+    axis equal;
+    axis([-3 3 -3 3])
+    m = -Je(1)/Je(2);
+    b = -ce / Je(2);
+    xprime = 3-x(1);
+    cy1 =  m*(xprime)+b;
+    xprime = -3 - x(1);
+    cy2 = m*xprime + b;
+   % plot([3 -3],[cy1 cy2],'r-','LineWidth',2);
+end
+pause
 
 
 

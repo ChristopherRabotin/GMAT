@@ -22,8 +22,8 @@ Options.TolGrad           = 1e-8;
 Options.TolStep           = 1e-8;
 Options.MaxStepLength     = 1000;
 Options.QPMethod          = 'minQP';
-opt                       = optimset('Display','iter','GradObj','On','GradCon','On', 'MaxIter',Options.MaxIter ,...
-                                     'MaxFunEvals',Options.MaxFunEvals,'DerivativeCheck','On','TolFun',Options.TolF,'TolCon',Options.TolF);
+% opt                       = optimset('Display','iter','GradObj','On','GradCon','On', 'MaxIter',Options.MaxIter ,...
+%                                      'MaxFunEvals',Options.MaxFunEvals,'DerivativeCheck','On','TolFun',Options.TolF,'TolCon',Options.TolF);
 % TP319'; 
 %-----  Define names of test problems 
 ProblemSet = {'TP239';'TP238'; 'TP395'; 'TP394'; 'TP246';  'TP201' ; 'TP328'; 'TP6'; 'PLR_T1_4'; 'QLR_T1_1';;'SGR_P1_2';   'TP6';'TP1';  'TP218';...
