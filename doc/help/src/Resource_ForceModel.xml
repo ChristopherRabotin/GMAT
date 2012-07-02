@@ -47,7 +47,7 @@
     application.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="Propagator" /></para>
+    linkend="Propagator"/></para>
   </refsection>
 
   <refsection>
@@ -55,9 +55,9 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*" />
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <colspec colnum="2" colwidth="3*" />
+        <colspec colnum="2" colwidth="3*"/>
 
         <thead>
           <row>
@@ -798,13 +798,12 @@
           <row>
             <entry><guilabel>PrimaryBodies</guilabel></entry>
 
-            <entry><para>A body modelled with a "complex" force model. A
-            <guilabel>PrimaryBody</guilabel> can have an atmosphere and
-            harmonic gravity model. A <guilabel>PrimaryBody</guilabel> can be
-            any celestial body not included in the
-            <guilabel>PointMasses</guilabel> field. Currently GMAT only
-            supports one <guilabel>PrimaryBody</guilabel> per force
-            model.</para><variablelist>
+            <entry><para>A body modeled with a "complex" force model. A
+            primary body can have an atmosphere and harmonic gravity model.
+            Currently GMAT only supports one primary body per force model. The
+            primary body must be the same as the
+            <guilabel>CentralBody</guilabel>, and cannot be included in the
+            <guilabel>PointMasses</guilabel> field. </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1152,7 +1151,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_ForceModel.png"
-                     scalefit="1" width="100%"></imagedata>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -1166,7 +1165,7 @@
     <para><emphasis>Overview of Primary Body/Central Body and Field
     Interactions</emphasis></para>
 
-    <para>In GMAT, a primary body is a celestial body that is modelled with a
+    <para>In GMAT, a primary body is a celestial body that is modeled with a
     complex force model which may include a spherical harmonic gravity model,
     tides, or drag. A body cannot appear in both the
     <guilabel>PrimaryBodies</guilabel> and <guilabel>PointMasses</guilabel>
@@ -1177,13 +1176,15 @@
 
     <para>GMAT currently requires that the primary body is either the same as
     the <guilabel>CentralBody</guilabel> or set to <guilabel>None</guilabel>.
-    If you change you set the <guilabel>CentralBody</guilabel> in the GUI,
-    GMAT changes the primary body to None and you can then select between None
-    and the CentralBody. When you select a Primary Body in the GUI, the
-    Gravity and Drag fields activate and allow you to select models for those
-    forces consistent with the body selected in the Primary Body field. For
-    example, if you select Earth as the Primary Body, you can only select
-    Earth drag models in the Atmosphere Model field. See the Field list above
+    If you change the <guilabel>CentralBody</guilabel> in the GUI, GMAT
+    changes the primary body to <guilabel>None</guilabel>, and you can then
+    select between <guilabel>None</guilabel> and the central body. When you
+    select a primary body in the GUI, the <guilabel>Gravity</guilabel> and
+    <guilabel>Drag</guilabel> fields activate and allow you to select models
+    for those forces consistent with the body selected in the
+    <guilabel>PrimaryBodies</guilabel> field. For example, if you select Earth
+    as the primary body, you can only select Earth drag models in the
+    <guilabel>Drag.AtmosphereModel</guilabel> field. See the field list above
     for available models.</para>
 
     <para><emphasis>Configuring Gravitational Models</emphasis></para>
@@ -1198,7 +1199,7 @@
     a primary body is selected, the <guilabel>CentralBody</guilabel> and
     primary body must be the same.</para>
 
-    <para>Bodies modelled as <guilabel>PointMasses</guilabel> use the
+    <para>Bodies modeled as <guilabel>PointMasses</guilabel> use the
     gravitational parameter defined on the body (i.e. Earth.Mu) in the
     equations of motion. Bodies defined as <guilabel>PrimaryBodies</guilabel>
     use the constants defined on the potential file in the equations of
@@ -1273,11 +1274,11 @@ GMAT aForceModel.Drag.MagneticIndex = 4;
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="3">
-        <colspec colnum="1" colwidth="1.0*" />
+        <colspec colnum="1" colwidth="1.0*"/>
 
-        <colspec colnum="2" colwidth="1.0*" />
+        <colspec colnum="2" colwidth="1.0*"/>
 
-        <colspec colnum="3" colwidth="1.5*" />
+        <colspec colnum="3" colwidth="1.5*"/>
 
         <thead>
           <row>
