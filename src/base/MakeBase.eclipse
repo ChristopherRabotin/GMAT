@@ -39,7 +39,7 @@ SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl 
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared -Wl -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES)
+SHARED_LIB_FLAGS = -shared -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 endif
 

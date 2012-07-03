@@ -45,6 +45,9 @@
 #include <mach-o/dyld.h>
 #endif
 
+#ifdef __linux__
+#include <unistd.h>		// Needed for (linux) gcc 4.7 or later
+#endif
 
 using namespace GmatStringUtil;
 
