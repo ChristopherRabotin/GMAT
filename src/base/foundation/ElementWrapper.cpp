@@ -288,8 +288,8 @@ bool ElementWrapper::RenameObject(const std::string &oldName,
 {
    #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage(
-      "Now entering EW::RenameObject with oldName = %s\n and newName = %s\n",
-      oldName.c_str(), newName.c_str());
+      "Entering EW::RenameObject with oldName = '%s' and newName = '%s', "
+      "description='%s'\n", oldName.c_str(), newName.c_str(), description.c_str());
    #endif
    // replace the old name with the new name in the list of ref objects
    Integer sz = refObjectNames.size();
@@ -311,10 +311,34 @@ bool ElementWrapper::RenameObject(const std::string &oldName,
          #endif
       }
    }
+   
+   // Replace object name in the description
+   if (description.find(oldName) != oldName.npos)
+   {
+      std::string descNew = GmatStringUtil::ReplaceName(description, oldName, newName);
+      if (description != descNew)
+      {
+         description = descNew;
+      
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   new description=<%s>\n", description.c_str());
+         #endif
+      }
+   }
+   
+   #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage(
+      "Leaving  EW::RenameObject with oldName = '%s' and newName = '%s', "
+      "description='%s'\n", oldName.c_str(), newName.c_str(), description.c_str());
+   #endif
    return true;
 }
 
 
+//---------------------------------------------------------------------------
+// bool TakeRequiredAction() const
+//---------------------------------------------------------------------------
 bool ElementWrapper::TakeRequiredAction() const
 {
    return true;

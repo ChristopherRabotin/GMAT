@@ -609,6 +609,20 @@ bool Report::RenameRefObject(const Gmat::ObjectType type,
       ("Report::RenameRefObject() entered, type=%d<%s>, oldName='%s', newName='%s'\n",
        type, GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
+
+   // Check for allowed object types for name change.
+   if (type != Gmat::SUBSCRIBER && type != Gmat::PARAMETER &&
+       type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM &&
+       type != Gmat::BURN && type != Gmat::IMPULSIVE_BURN &&
+       type != Gmat::CALCULATED_POINT && type != Gmat::HARDWARE)
+   {
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("Report::RenameRefObject() returning true, no action is required\n");
+      #endif
+      
+      return true;
+   }
    
    if (type == Gmat::SUBSCRIBER)
    {
@@ -621,74 +635,69 @@ bool Report::RenameRefObject(const Gmat::ObjectType type,
          #endif
       }
    }
-   else if (type == Gmat::PARAMETER)
+   else
    {
+      // Go through Parameter names
       for (UnsignedInt i=0; i<parmNames.size(); i++)
-         if (parmNames[i] == oldName)
+      {
+         if (parmNames[i].find(oldName) != oldName.npos)
          {
-            parmNames[i] = newName;
             #ifdef DEBUG_RENAME
             MessageInterface::ShowMessage
-               ("   Parameter name changed to '%s'\n", newName.c_str());
+               ("   => Before rename, name: '%s'\n", parmNames[i].c_str());
+            #endif
+            
+            parmNames[i] = GmatStringUtil::ReplaceName(parmNames[i], oldName, newName);
+            
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("      After  rename, name: '%s'\n", parmNames[i].c_str());
             #endif
          }
+      }
       
+      // Go through actual Parameter names including array index
       for (UnsignedInt i=0; i<actualParmNames.size(); i++)
-         if (actualParmNames[i] == oldName)
+      {
+         if (actualParmNames[i].find(oldName) != oldName.npos)
          {
-            actualParmNames[i] = newName;
             #ifdef DEBUG_RENAME
             MessageInterface::ShowMessage
-               ("   Actual parameter name changed to '%s'\n", newName.c_str());
+               ("   => Before rename, actual name: '%s'\n", actualParmNames[i].c_str());
             #endif
-         }
-   }
-   // Since parameter name is composed of spacecraftName.dep.paramType,
-   // spacecraftName.hardwareName.paramType, or burnName.dep.paramType
-   // check the type first
-   else if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
-            type == Gmat::IMPULSIVE_BURN || type == Gmat::COORDINATE_SYSTEM ||
-            type == Gmat::CALCULATED_POINT || type == Gmat::HARDWARE)
-   {
-      for (UnsignedInt i=0; i<parmNames.size(); i++)
-         if (parmNames[i].find(oldName) != std::string::npos)
-         {
-            parmNames[i] = GmatStringUtil::Replace(parmNames[i], oldName, newName);
+            
+            actualParmNames[i] = GmatStringUtil::ReplaceName(actualParmNames[i], oldName, newName);
+            
             #ifdef DEBUG_RENAME
             MessageInterface::ShowMessage
-               ("   Parameter name changed to '%s'\n", parmNames[i].c_str());
+               ("      After  rename, actual name: '%s'\n", actualParmNames[i].c_str());
             #endif
          }
-      
-      for (UnsignedInt i=0; i<actualParmNames.size(); i++)
-         if (actualParmNames[i].find(oldName) != std::string::npos)
-         {
-            actualParmNames[i] =
-               GmatStringUtil::Replace(actualParmNames[i], oldName, newName);
-            #ifdef DEBUG_RENAME
-            MessageInterface::ShowMessage
-               ("   Actual parameter name changed to '%s'\n", actualParmNames[i].c_str());
-            #endif
-         }
+      }
       
       // Go through wrappers
       for (WrapperArray::iterator i = parmWrappers.begin(); i < parmWrappers.end(); i++)
       {
-         #ifdef DEBUG_RENAME
-         MessageInterface::ShowMessage
-            ("   before rename, wrapper desc = '%s'\n", (*i)->GetDescription().c_str());
-         #endif
-         
-         (*i)->RenameObject(oldName, newName);
-         
-         #ifdef DEBUG_RENAME
-         MessageInterface::ShowMessage
-            ("   after  rename, wrapper desc = '%s'\n", (*i)->GetDescription().c_str());
-         #endif
+         std::string desc = (*i)->GetDescription();
+         if (desc.find(oldName) != oldName.npos)
+         {
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("   => Before rename, wrapper desc = '%s'\n", desc.c_str());
+            #endif
+            
+            (*i)->RenameObject(oldName, newName);
+            desc = (*i)->GetDescription();
+            
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("      After  rename, wrapper desc = '%s'\n", desc.c_str());
+            #endif
+         }
       }
       
       // Go through generating string
-      generatingString = GmatStringUtil::Replace(generatingString, oldName, newName);
+      generatingString = GmatStringUtil::ReplaceName(generatingString, oldName, newName);
    }
    
    #ifdef DEBUG_RENAME

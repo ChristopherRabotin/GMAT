@@ -912,6 +912,31 @@ bool Parameter::Validate()
 // methods inherited from GmatBase
 //---------------------------------
 
+//---------------------------------------------------------------------------
+//  bool SetName(std::string &who, const std;:string &oldName = "")
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool Parameter::SetName(const std::string &who, const std::string &oldName)
+{
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Parameter::SetName() entered, newName='%s', oldName='%s'\n", who.c_str(),
+       oldName.c_str());
+   #endif
+   
+   GmatBase::SetName(who, oldName);
+   
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("Parameter::SetName() returning true\n");
+   #endif
+   
+   return true;
+}
+
+
 // required method for all subclasses that can be copied in a script
 //------------------------------------------------------------------------------
 // void Copy(const GmatBase* orig)
@@ -935,10 +960,18 @@ bool Parameter::RenameRefObject(const Gmat::ObjectType type,
       ("Parameter::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
-
-   // loj: Should I add SPACE_POINT?
-   if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM)
+   
+   // Check for allowed object types for name change
+   if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM &&
+       type != Gmat::BURN && type != Gmat::IMPULSIVE_BURN &&
+       type != Gmat::CALCULATED_POINT && type != Gmat::HARDWARE)
+   {
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("Report::RenameRefObject() returning true, no action is required\n");
+      #endif
       return true;
+   }
    
    std::string oldExpr = mExpr;
    std::string::size_type pos;

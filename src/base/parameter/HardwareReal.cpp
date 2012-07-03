@@ -140,6 +140,32 @@ bool HardwareReal::Initialize()
 }
 
 
+//---------------------------------------------------------------------------
+//  bool SetName(std::string &newName, const std;:string &oldName = "")
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool HardwareReal::SetName(const std::string &newName, const std::string &oldName)
+{
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("HardwareReal::SetName() entered, newName='%s', oldName='%s'\n", newName.c_str(),
+       oldName.c_str());
+   #endif
+   
+   Parameter::SetName(newName, oldName);
+   RefData::SetName(newName, oldName);
+   
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("HardwareReal::SetName() returning true\n");
+   #endif
+   
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 // bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
 //                      const std::string &newName)

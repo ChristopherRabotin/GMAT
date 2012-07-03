@@ -249,8 +249,8 @@ void OrbitData::SetReal(Integer item, Real rval)
       pe.SetDetails("Currently GMAT cannot set %s; the spacecraft '%s' "
                     "requires values to be in the '%s' coordinate system (setting "
                     "values in different coordinate systems will be implemented in "
-                    "future builds)",  mName.c_str(), mSpacecraft->GetName().c_str(),
-                    satCS->GetName().c_str());
+                    "future builds)",  mActualParamName.c_str(),
+                    mSpacecraft->GetName().c_str(), satCS->GetName().c_str());
       throw pe;
    }
    

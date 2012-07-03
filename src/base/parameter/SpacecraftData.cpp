@@ -392,7 +392,7 @@ void SpacecraftData::InitializeRefObjects()
 {
    #ifdef DEBUG_SPACECRAFTDATA_INIT
    MessageInterface::ShowMessage
-      ("SpacecraftData::InitializeRefObjects() '%s' entered.\n", mName.c_str());
+      ("SpacecraftData::InitializeRefObjects() '%s' entered.\n", mActualParamName.c_str());
    #endif
    
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
@@ -413,7 +413,7 @@ void SpacecraftData::InitializeRefObjects()
    #ifdef DEBUG_SPACECRAFTDATA_INIT
    MessageInterface::ShowMessage
       ("SpacecraftData::InitializeRefObjects() '%s' leaving, mSpacecraft=<%p>'%s'\n",
-       mName.c_str(), mSpacecraft, mSpacecraft->GetName().c_str());
+       mActualParamName.c_str(), mSpacecraft, mSpacecraft->GetName().c_str());
    #endif
 }
 
@@ -447,12 +447,12 @@ Real SpacecraftData::GetOwnedObjectProperty(Gmat::ObjectType objType,
                                             const std::string &propName)
 {
    std::string type, owner, dep;
-   GmatStringUtil::ParseParameter(mName, type, owner, dep);
+   GmatStringUtil::ParseParameter(mActualParamName, type, owner, dep);
    
    #ifdef DEBUG_SC_OWNED_OBJ
    MessageInterface::ShowMessage
-      ("SpacecraftData::GetOwnedObjectProperty() '%s' entered, objType=%d, propName='%s', "
-       "type='%s', owner='%s', dep='%s'\n", mName.c_str(), objType, propName.c_str(),
+      ("SpacecraftData::GetOwnedObjectProperty() '%s' entered, objType=%d, propName='%s'\n   "
+       "type='%s', owner='%s', dep='%s'\n", mActualParamName.c_str(), objType, propName.c_str(),
        type.c_str(), owner.c_str(), dep.c_str());
    #endif
    
@@ -495,13 +495,13 @@ Real SpacecraftData::SetOwnedObjectProperty(Gmat::ObjectType objType,
                                             Real val)
 {
    std::string type, owner, dep;
-   GmatStringUtil::ParseParameter(mName, type, owner, dep);
+   GmatStringUtil::ParseParameter(mActualParamName, type, owner, dep);
    
    #ifdef DEBUG_SC_OWNED_OBJ
    MessageInterface::ShowMessage
       ("SpacecraftData::SetOwnedObjectProperty() '%s' entered, objType=%d, "
        "propName='%s', val=%f, type='%s', owner='%s', dep='%s',\n",
-       mName.c_str(), objType, propName.c_str(), val,
+       mActualParamName.c_str(), objType, propName.c_str(), val,
        type.c_str(), owner.c_str(), dep.c_str());
    #endif
    
@@ -528,7 +528,8 @@ Real SpacecraftData::SetOwnedObjectProperty(Gmat::ObjectType objType,
       
       #ifdef DEBUG_SC_OWNED_OBJ
       MessageInterface::ShowMessage
-         ("SpacecraftData::SetOwnedObjectProperty() '%s' returning %f\n", mName.c_str(), result);
+         ("SpacecraftData::SetOwnedObjectProperty() '%s' returning %f\n",
+          mActualParamName.c_str(), result);
       #endif
       return result;
    }

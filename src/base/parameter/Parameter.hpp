@@ -134,6 +134,8 @@ public:
    virtual bool         Validate();
    
    // methods inherited from GmatBase
+   virtual bool         SetName(const std::string &who,
+                                const std::string &oldName = "");
    virtual void         Copy(const GmatBase*);
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,

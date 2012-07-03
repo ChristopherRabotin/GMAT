@@ -45,6 +45,8 @@ public:
    virtual bool Initialize();
    
    // methods inherited from GmatBase
+   virtual bool         SetName(const std::string &who,
+                                const std::string &oldName = "");
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);

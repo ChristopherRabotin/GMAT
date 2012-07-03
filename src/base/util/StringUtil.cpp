@@ -480,7 +480,14 @@ std::string GmatStringUtil::Replace(const std::string &str, const std::string &f
 /*
  * Replaces all occurenece of <from> string to <to> string if <from> is not
  * part of word. It replaces the string if character before and after <from> are
- * not alphanumeric except underscores "_".
+ * not alphanumeric except underscore '_'. Name with underscores is considered
+ * as valid name in GMAT.
+ *
+ * @param  str   String to be replaced
+ * @param  from  Old string to be replaced
+ * @param  to    New string to replace
+ *
+ * @return  Return replaced string if from string found, else return original string
  *
  */
 //------------------------------------------------------------------------------
@@ -489,8 +496,8 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
 {
    #ifdef DEBUG_REPLACE_NAME
    MessageInterface::ShowMessage
-      ("GmatStringUtil::ReplaceName() str=\"%s\", from=\"%s\", to=\"%s\"\n", str.c_str(),
-       from.c_str(), to.c_str());
+      ("GmatStringUtil::ReplaceName() str=\"%s\", from=\"%s\", to=\"%s\"\n",
+       str.c_str(), from.c_str(), to.c_str());
    #endif
    
    std::string str1 = str;
@@ -509,6 +516,7 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
    std::string::size_type strSize = str1.size();
    std::string::size_type fromSize = from.size();
    bool replace = false;
+   char underscore = '_';
    
    while (!done)
    {
@@ -529,12 +537,12 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
          
          if (pos == 0 && fromSize < strSize)
          {
-            if (!isalnum(str1[fromSize]) && str1[fromSize] != '_')
+            if (!isalnum(str1[fromSize]) && str1[fromSize] != underscore)
                replace = true;
          }
          else if (pos > 0 && (pos + fromSize) < strSize)
          {
-            if (!isalnum(str1[pos + fromSize]) && str1[pos + fromSize] != '_')
+            if (!isalnum(str1[pos + fromSize]) && str1[pos + fromSize] != underscore)
                replace = true;
          }
          else if (pos == strSize-fromSize) // replace last name
@@ -548,8 +556,9 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
          
          if (replace)
          {
-            // Check for the system Parameter name which should not not be replace,
-            // such as SMA in sat.SMA Parameter or sat.EarthEqCS.X
+            // Check for the system Parameter name or object property field which
+            // should not not be replace, such as SMA in sat.SMA Parameter or
+            // X in sat.EarthEqCS.X
             if (pos == 0 || ((pos > 0 && str1[pos-1] == '.') &&
                              (pos-1 != str1.find_last_of('.'))))
                str1.replace(pos, fromSize, to);

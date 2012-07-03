@@ -874,38 +874,39 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
 {
    #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Subscriber::RenameRefObject() type=%d, oldName=<%s>, newName=<%s>\n",
+      ("\nSubscriber::RenameRefObject() type=%d, oldName=<%s>, newName=<%s>\n",
        type, oldName.c_str(), newName.c_str());
    #endif
    
-   // go through wrapper object names
+   // Go through wrapper object names
    Integer sz = wrapperObjectNames.size();
    for (Integer i = 0; i < sz; i++)
    {
-      std::string name = wrapperObjectNames[i];
-      
-      #ifdef DEBUG_RENAME
-      MessageInterface::ShowMessage("   old name=<%s>\n", name.c_str());
-      #endif
-      
-      if (name == oldName)
+      if (wrapperObjectNames[i].find(oldName) != oldName.npos)
       {
-         wrapperObjectNames[i] = newName;
-      }
-      else if (name.find(oldName) != name.npos)
-      {
-         name = GmatStringUtil::Replace(name, oldName, newName);
-         wrapperObjectNames[i] = name;
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   => Before rename, wrapper name: '%s'\n", wrapperObjectNames[i].c_str());
+         #endif
+         
+         wrapperObjectNames[i] =
+            GmatStringUtil::ReplaceName(wrapperObjectNames[i], oldName, newName);
+         
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("      After  rename, wrapper name: '%s'\n", wrapperObjectNames[i].c_str());
+         #endif
       }
    }
    
    #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("   ===== new wrapper name\n");
    for (Integer i = 0; i < sz; i++)
       MessageInterface::ShowMessage
-         ("   new name=<%s>\n", wrapperObjectNames[i].c_str());
+         ("   <%s>\n", wrapperObjectNames[i].c_str());
    #endif
-   
-   // now go through wrappers
+
+   // Go through wrappers
    sz = paramWrappers.size();
    for (Integer i = 0; i < sz; i++)
    {
@@ -916,26 +917,28 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
              ".\" The wrapper is NULL.\n");
       
       std::string desc = paramWrappers[i]->GetDescription();
-      
-      #ifdef DEBUG_RENAME
-      MessageInterface::ShowMessage("   old desc=<%s>\n", desc.c_str());
-      #endif
-      
-      if (desc == oldName)
+      if (desc.find(oldName) != oldName.npos)
       {
-         paramWrappers[i]->SetDescription(newName);
-      }
-      else if (desc.find(oldName) != desc.npos)
-      {
-         desc = GmatStringUtil::Replace(desc, oldName, newName);
-         paramWrappers[i]->SetDescription(desc);         
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   => Before rename, wrapper desc = '%s'\n", desc.c_str());
+         #endif
+         
+         paramWrappers[i]->RenameObject(oldName, newName);
+         desc = paramWrappers[i]->GetDescription();
+         
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("      After  rename, wrapper desc = '%s'\n", desc.c_str());
+         #endif
       }
    }
    
    #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("   ===== new wrapper description\n");
    for (Integer i = 0; i < sz; i++)
       MessageInterface::ShowMessage
-         ("   new desc=<%s>\n", paramWrappers[i]->GetDescription().c_str());
+         ("   <%s>\n", paramWrappers[i]->GetDescription().c_str());
    MessageInterface::ShowMessage
       ("Subscriber::RenameRefObject() returning true\n");
    #endif

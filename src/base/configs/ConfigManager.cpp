@@ -909,7 +909,7 @@ const StringArray& ConfigManager::GetListOfAllItems()
  *
  * @param type The type of the object that is being checked.
  * @param name The name of the object.
- * @param includeSysParam True if system parameter to be included
+ * @param includeSysParam True if system parameter to be included [true]
  *
  * @return array of item names where the name is used.
  */
@@ -1026,23 +1026,33 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
                   #endif
                   
                   pos = rhsString.find(name);
-                  std::string nameDot = name + ".";
+                  std::string nameDot = name + ".";   // for Parameter or object property
+                  std::string nameParen = name + "("; // for array element
                   if (pos != rhsString.npos)
                   {
                      // Add to list if name not found in string enclosed with single quote
                      if (!GmatStringUtil::IsEnclosedWith(rhsString, "'"))
                      {
+                        #if DEBUG_FIND_ITEMS
+                        MessageInterface::ShowMessage
+                           ("   Item name found and it is not enclosed with quotes, so checking further\n");
+                        #endif
                         // Check if it is a whole name or name with dot such as "Sat1." (LOJ: 2012.02.17)
                         // Remove {} first and parse by comma
                         std::string rhs = GmatStringUtil::RemoveOuterString(rhsString, "{", "}");
                         StringArray parts = GmatStringUtil::SeparateByComma(rhs);
                         for (UnsignedInt i = 0; i < parts.size(); i++)
                         {
-                           if (parts[i] == name || parts[i].find(nameDot) != rhs.npos)
+                           #if DEBUG_FIND_ITEMS
+                           MessageInterface::ShowMessage("   Checking '%s'\n", parts[i].c_str());
+                           #endif
+                           
+                           if (parts[i] == name || parts[i].find(nameDot) != rhs.npos ||
+                               parts[i].find(nameParen) != rhs.npos)
                            {
                               #if DEBUG_FIND_ITEMS
                               MessageInterface::ShowMessage
-                                 ("   ==> '%s' found in RHS, so adding '%s'\n", name.c_str(), objName.c_str());
+                                 ("   ==> '%s' found in RHS, so adding object name '%s'\n", name.c_str(), objName.c_str());
                               #endif
                               itemList.push_back(objName);
                            }
@@ -1403,10 +1413,13 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       Parameter *param;
       std::string::size_type pos;
       
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage("   Now going through all Parameters in the map\n");
+      #endif
       for (unsigned int i=0; i<params.size(); i++)
       {
          #if DEBUG_RENAME
-         MessageInterface::ShowMessage("params[%d]=%s\n", i, params[i].c_str());
+         MessageInterface::ShowMessage("   params[%2d]=%s\n", i, params[i].c_str());
          #endif
          
          param = GetParameter(params[i]);
@@ -1417,29 +1430,30 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
             oldParamName = param->GetName();
             pos = oldParamName.find(oldName);
             
-            // rename actual parameter name
+            // Rename actual parameter name
             if (pos != oldParamName.npos)
             {
                newParamName = oldParamName;
-               newParamName.replace(pos, oldName.size(), newName);
+               newParamName = GmatStringUtil::ReplaceName(oldParamName, oldName, newName);
                
                #if DEBUG_RENAME
                MessageInterface::ShowMessage
-                  ("===> oldParamName=%s, newParamName=%s\n",
+                  ("   oldParamName=%s, newParamName=%s\n",
                    oldParamName.c_str(), newParamName.c_str());
                #endif
                
-               // change parameter mapping name
+               // Change parameter mapping name
                if (mapping.find(oldParamName) != mapping.end())
                {
                   mapping.erase(oldParamName);
                   mapping[newParamName] = (GmatBase*)param;
-                  param->SetName(newParamName);
+                  // Give a Parameter new name
+                  param->SetName(newParamName, oldParamName);
                   renamed = true;
                }
             }
          }
-         // if variable, need to change expression
+         // If variable, need to change expression
          else if (param->GetTypeName() == "Variable")
          {
             param->RenameRefObject(Gmat::PARAMETER, oldName, newName);
@@ -1447,15 +1461,17 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       }
    }
    
-   #if DEBUG_RENAME
-   StringArray allItems = GetListOfAllItems();
-   MessageInterface::ShowMessage("===> After rename\n");
-   for (UnsignedInt i=0; i<allItems.size(); i++)
-      MessageInterface::ShowMessage("   item[%d] = %s\n", i, allItems[i].c_str());
-   #endif
-
    // Item was removed, so set configuration changed flag to true
    configChanged = true;
+   
+   #if DEBUG_RENAME
+   StringArray allItems = GetListOfAllItems();
+   MessageInterface::ShowMessage("   =====> After rename object\n");
+   for (UnsignedInt i=0; i<allItems.size(); i++)
+      MessageInterface::ShowMessage("   item[%2d] = %s\n", i, allItems[i].c_str());
+   MessageInterface::ShowMessage
+      ("ConfigManager::RenameItem() returning %d\n", renamed);
+   #endif
    
    return renamed;
 } // RenameItem()

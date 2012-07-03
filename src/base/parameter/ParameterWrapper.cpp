@@ -24,12 +24,13 @@
 #include "GmatBase.hpp"
 #include "ParameterWrapper.hpp"
 #include "ParameterException.hpp"
-
+#include "StringUtil.hpp"           // for ReplaceName()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PW
 //#define DEBUG_PW_REFOBJ
 //#define DEBUG_PARAMETER_WRAPPER
+//#define DEBUG_RENAME
 
 //---------------------------------
 // static data
@@ -404,8 +405,31 @@ bool ParameterWrapper::SetObject(const GmatBase *obj)
 bool ParameterWrapper::RenameObject(const std::string &oldName, 
                                     const std::string &newName)
 {
+   std::string paramName;
+   if (param)
+      paramName = param->GetName();
+
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("\nParameterWrapper::RenameObject() entered, oldName='%s', newName='%s', "
+       "param=<%p>'%s'\n   description='%s'\n", oldName.c_str(), newName.c_str(), param,
+       paramName.c_str(), description.c_str());
+   #endif
+   
    ElementWrapper::RenameObject(oldName, newName);
-   description = refObjectNames[0];  
+   // description is now renamed in ElementWrapper::RenameObject()
+   //description = refObjectNames[0];
+   
+   // @note Parameter name gets changed in the ConfigManager
+   // so nothing to do for the param
+   
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ParameterWrapper::RenameObject() leaving, oldName='%s', newName='%s', "
+       "param=<%p>'%s'\n   description='%s'\n\n", oldName.c_str(), newName.c_str(),
+       param, paramName.c_str(), description.c_str());
+   #endif
+   
    return true;
 }
 

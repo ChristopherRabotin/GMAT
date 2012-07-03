@@ -692,36 +692,48 @@ bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
                                  const std::string &newName)
 {
    #ifdef DEBUG_RENAME
-      MessageInterface::ShowMessage
-         ("ReportFile::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
-          GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   MessageInterface::ShowMessage
+      ("ReportFile::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (type != Gmat::PARAMETER && type != Gmat::COORDINATE_SYSTEM &&
-       type != Gmat::SPACECRAFT)
+   // Check for allowed object types for name change.
+   if (type != Gmat::PARAMETER && type != Gmat::SPACECRAFT &&
+       type != Gmat::COORDINATE_SYSTEM && type != Gmat::BURN &&
+       type != Gmat::IMPULSIVE_BURN && type != Gmat::CALCULATED_POINT &&
+       type != Gmat::HARDWARE)
+   {
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("ReportFile::RenameRefObject() returning true, no action is required\n");
+      #endif
       return true;
+   }
    
-   if (type == Gmat::PARAMETER)
+   std::string::size_type pos;
+   
+   for (unsigned int i=0; i<mParamNames.size(); i++)
    {
-      // parameters
-      for (unsigned int i=0; i<mParamNames.size(); i++)
+      if (mParamNames[i].find(oldName) != oldName.npos)
       {
-         if (mParamNames[i] == oldName)
-            mParamNames[i] = newName;
-      }
-   }
-   else
-   {
-      std::string::size_type pos;
-      
-      for (unsigned int i=0; i<mParamNames.size(); i++)
-      {
-         pos = mParamNames[i].find(oldName);
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   => Before rename, name: '%s'\n", mParamNames[i].c_str());
+         #endif
          
-         if (pos != mParamNames[i].npos)
-            mParamNames[i].replace(pos, oldName.size(), newName);
+         mParamNames[i] = GmatStringUtil::ReplaceName(mParamNames[i], oldName, newName);
+      
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("      After  rename, name: '%s'\n", mParamNames[i].c_str());
+         #endif
       }
    }
+   
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ReportFile::RenameRefObject() returning Subscriber::RenameRefObject()\n");
+   #endif
    
    return Subscriber::RenameRefObject(type, oldName, newName);
 }

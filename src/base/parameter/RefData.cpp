@@ -45,7 +45,7 @@
 //------------------------------------------------------------------------------
 RefData::RefData(const std::string &name)
 {
-   mName = name;
+   mActualParamName = name;
    mRefObjList.clear();
    mNumRefObjects = 0;
 }
@@ -62,7 +62,7 @@ RefData::RefData(const std::string &name)
 //------------------------------------------------------------------------------
 RefData::RefData(const RefData &copy)
 {
-   mName = copy.mName;
+   mActualParamName = copy.mActualParamName;
    mObjectTypeNames = copy.mObjectTypeNames;
    mAllRefObjectNames = copy.mAllRefObjectNames;
    mNumRefObjects = copy.mNumRefObjects;
@@ -83,7 +83,7 @@ RefData::RefData(const RefData &copy)
 //------------------------------------------------------------------------------
 RefData& RefData::operator= (const RefData& right)
 {
-   mName = right.mName;
+   mActualParamName = right.mActualParamName;
    mObjectTypeNames = right.mObjectTypeNames;
    mAllRefObjectNames = right.mAllRefObjectNames;
    mNumRefObjects = right.mNumRefObjects;
@@ -101,8 +101,43 @@ RefData& RefData::operator= (const RefData& right)
 //------------------------------------------------------------------------------
 RefData::~RefData()
 {
-   //MessageInterface::ShowMessage("==> RefData::~RefData()\n");
    mRefObjList.clear();
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetName(std::string &newName, const std::string &oldName = "")
+//---------------------------------------------------------------------------
+/**
+ * Sets new name for any reference object.
+ *
+ * @note SpacecraftData uses this for owned object hardware name.
+ */
+//------------------------------------------------------------------------------
+bool RefData::SetName(const std::string &newName, const std::string &oldName)
+{
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("RefData::SetName() entered, newName='%s', oldName='%s'\n",
+       newName.c_str(), oldName.c_str());
+   #endif
+   
+   if (mActualParamName == oldName)
+   {
+      mActualParamName = newName;
+
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("RefData::SetName() changed the name from '%s' to '%s'\n",
+          oldName.c_str(), newName.c_str());
+      #endif
+   }
+   
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("RefData::SetName() returning true\n");
+   #endif
+   
+   return true;
 }
 
 
@@ -163,7 +198,7 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
       ("RefData::GetRefObjectName() '%s', type=%d, throwing exception "
-       "INVALID_OBJECT_TYPE\n", mName.c_str(), type);
+       "INVALID_OBJECT_TYPE\n", mActualParamName.c_str(), type);
    #endif
    
    //return "RefData::GetRefObjectName(): INVALID_OBJECT_TYPE";
@@ -189,7 +224,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
    #if DEBUG_REFDATA_OBJECT_GET
    MessageInterface::ShowMessage
       ("RefData::GetRefObjectNameArray() '%s', type=%d\n   there are %d ref "
-       "objects\n", mName.c_str(), type, mNumRefObjects);
+       "objects\n", mActualParamName.c_str(), type, mNumRefObjects);
    for (int i=0; i<mNumRefObjects; i++)
    {
       MessageInterface::ShowMessage
@@ -236,7 +271,7 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
       ("RefData::SetRefObjectName() '%s' entered, type=%d(%s), name=%s\n",
-       mName.c_str(), type,  GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(), name.c_str());
+       mActualParamName.c_str(), type,  GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(), name.c_str());
    #endif
    
    if (FindFirstObjectName(type) != "")
@@ -298,7 +333,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    #if DEBUG_REFDATA_OBJECT_SET
    MessageInterface::ShowMessage
       ("RefData::SetRefObject() <%p>'%s' entered\n   numRefObjects=%d, type=%d, "
-       "obj=<%p>'%s'\n", this, mName.c_str(), mNumRefObjects, type, obj, name.c_str());
+       "obj=<%p>'%s'\n", this, mActualParamName.c_str(), mNumRefObjects, type, obj, name.c_str());
    #endif
    
    // Since Sandbox calls SetRefObject() with obj->GetType(), I need to
@@ -345,7 +380,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    
    #if DEBUG_REFDATA_OBJECT_SET
    MessageInterface::ShowMessage
-      ("RefData::SetRefObject() <%p>'%s' returning %d\n", this, mName.c_str(), status);
+      ("RefData::SetRefObject() <%p>'%s' returning %d\n", this, mActualParamName.c_str(), status);
    #endif
    
    return status;
@@ -369,7 +404,7 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("RefData::RenameRefObject() '%s' entered, type=%d, oldName='%s', "
-       "newName='%s'\n", mName.c_str(), type, oldName.c_str(), newName.c_str());
+       "newName='%s'\n", mActualParamName.c_str(), type, oldName.c_str(), newName.c_str());
    MessageInterface::ShowMessage("   mNumRefObjects=%d\n", mNumRefObjects);
    #endif
    
@@ -381,27 +416,27 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
    {
       #if DEBUG_RENAME
       MessageInterface::ShowMessage
-         ("RefData::RenameRefObject() '%s' returning true, there are no allowed types\n",
-          mName.c_str());
+         ("RefData::RenameRefObject() '%s' returning true, nothing is done for the type:%d\n",
+          mActualParamName.c_str(), type);
       #endif
       return true;
    }
    
    // Change instance name
    std::string ownerStr, typeStr, depStr;
-   GmatStringUtil::ParseParameter(mName, typeStr, ownerStr, depStr);
+   GmatStringUtil::ParseParameter(mActualParamName, typeStr, ownerStr, depStr);
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("   mName='%s', owner='%s', dep='%s', type='%s'\n",
-       mName.c_str(), ownerStr.c_str(), depStr.c_str(), typeStr.c_str());
+      ("   mActualParamName='%s', owner='%s', dep='%s', type='%s'\n",
+       mActualParamName.c_str(), ownerStr.c_str(), depStr.c_str(), typeStr.c_str());
    #endif
    // Check for depStr for hardware parameter such as Sat.Thruster1.DutyCycle
    if (ownerStr == oldName || depStr == oldName)
    {
-      mName = GmatStringUtil::ReplaceName(mName, oldName, newName);
+      mActualParamName = GmatStringUtil::ReplaceName(mActualParamName, oldName, newName);
       #if DEBUG_RENAME
       MessageInterface::ShowMessage
-         ("   instance name changed to '%s'\n", mName.c_str());
+         ("   instance name changed to '%s'\n", mActualParamName.c_str());
       #endif
    }
    
@@ -426,7 +461,7 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("RefData::RenameRefObject() '%s' returning true, %d ref objects renamed!\n",
-       mName.c_str(), numRenamed);
+       mActualParamName.c_str(), numRenamed);
    #endif
    return true;
 }
@@ -461,7 +496,7 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
    #if DEBUG_REFDATA_ADD
    MessageInterface::ShowMessage
       ("==> RefData::AddRefObject() '%s' entered, mNumRefObjects=%d, type=%d, "
-       "name=%s, obj=%p, replaceName=%d\n", mName.c_str(), mNumRefObjects, type,
+       "name=%s, obj=%p, replaceName=%d\n", mActualParamName.c_str(), mNumRefObjects, type,
        name.c_str(), obj, replaceName);
    #endif
    
