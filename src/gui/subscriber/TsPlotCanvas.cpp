@@ -107,6 +107,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    labelAxes      (false),
    hasGrid        (true),
    hasLegend      (true),
+   allowPlotOptions(false),			// Change to true to show options dialog
    initializeLegendLoc (true),
    xLabelPrecision(8),
    yLabelPrecision(6),
@@ -205,8 +206,11 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
       menu.AppendCheckItem(ID_TOGGLE_GRID, "Toggle Grid");
       menu.AppendCheckItem(ID_TOGGLE_LEGEND, "Toggle Legend");
       menu.AppendSeparator();
-      menu.Append(ID_PLOT_DETAILS, "Set Plot Options...");
-      menu.AppendSeparator();
+      if (allowPlotOptions)
+      {
+         menu.Append(ID_PLOT_DETAILS, "Set Plot Options...");
+         menu.AppendSeparator();
+      }
       menu.Append(ID_PLOT_SAVE, "Save Plot...");
 
       menu.Check(ID_TOGGLE_GRID, hasGrid);

@@ -179,6 +179,7 @@ protected:
    bool labelAxes;
    bool hasGrid;
    bool hasLegend;
+   bool allowPlotOptions;
    bool initializeLegendLoc;
 
    long zoomLeft, zoomTop, zoomWidth, zoomHeight;
