@@ -526,18 +526,6 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       GmatAppData::Instance()->GetMainFrame()->GetActualClientSize(&screenWidth, &screenHeight, true);
    #endif
 
-//   #ifdef DEBUG_PERSISTENCE
-//   wxRect      wxR         = GetScreenRect();
-//   wxPoint     wxP         = wxR.GetPosition();
-//   wxSize      wxS         = wxR.GetSize();
-//   Integer     x           = (Integer) wxP.x;
-//   Integer     y           = (Integer) wxP.y;
-//   Integer     w           = (Integer) wxS.GetWidth();
-//   Integer     h           = (Integer) wxS.GetHeight();
-//   MessageInterface::ShowMessage
-//      ("wxP.x = %d, wxP.y = %d, wxS.w = %d, wxS.h = %d\n", x, y, w, h);
-//   #endif
-
    int tmpX = -1, tmpY = -1;
    int tmpW = -1, tmpH = -1;
    GetPosition(&tmpX, &tmpY);
@@ -550,18 +538,14 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    MessageInterface::ShowMessage("*** Size of SCREEN %s is: width = %d, height = %d\n", mChildName.c_str(), screenWidth, screenHeight);
    MessageInterface::ShowMessage("Position of View plot %s is: x = %d, y = %d\n", mChildName.c_str(), tmpX, tmpY);
    MessageInterface::ShowMessage("Size of View plot %s is: width = %d, height = %d\n", mChildName.c_str(), tmpW, tmpH);
-//   MessageInterface::ShowMessage("Position of View plot %s in pixels rel. to parent window is: x = %d, y = %d\n",
-//                                 mChildName.c_str(), (Integer) tmpX, (Integer) tmpY);
-//   MessageInterface::ShowMessage("Size of View plot %s in pixels rel. to parent window is: x = %d, y = %d\n",
-//                                 mChildName.c_str(), (Integer) tmpW, (Integer) tmpH);
-//   wxPoint tmpPt = ScreenToClient(wxP);
-//   MessageInterface::ShowMessage("--- Position of View plot %s in client coords is: x = %d, y = %d\n",
-//                                 mChildName.c_str(), (Integer) tmpPt.x, (Integer) tmpPt.y);
    // ======================= end temporary ==============================
    #endif
 
-   if ((mItemType == GmatTree::OUTPUT_REPORT)  || (mItemType == GmatTree::OUTPUT_ORBIT_VIEW) ||
-       (mItemType == GmatTree::OUTPUT_XY_PLOT) || (mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT)
+   if ((mItemType == GmatTree::OUTPUT_REPORT)  ||
+       (mItemType == GmatTree::OUTPUT_CCSDS_OEM_FILE ) ||
+       (mItemType == GmatTree::OUTPUT_ORBIT_VIEW) ||
+       (mItemType == GmatTree::OUTPUT_XY_PLOT) ||
+       (mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT)
        // We'll want to add the event reports eventually, but they are not subscriber based
        //|| (mItemType == GmatTree::EVENT_REPORT)
        )

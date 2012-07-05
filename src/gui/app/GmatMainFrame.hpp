@@ -96,6 +96,9 @@ public:
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          bool closeReports = true, bool closeUndockedMissionTree = true);
    void MinimizeChildren();
+   void ComputeReportPositionAndSize(const wxString &name, Integer &x,
+                                     Integer &y, Integer &w, Integer &h,
+                                     bool &isUsingSaved);
    void PositionNewChild(GmatMdiChildFrame *newChild, int numChildren);
    void RepositionChildren(int xOffset);
    void SetActiveChildDirty(bool dirty);

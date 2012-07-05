@@ -85,12 +85,12 @@ Subscriber::PARAMETER_TEXT[SubscriberParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 Subscriber::PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount] =
 {
-   Gmat::ENUMERATION_TYPE,         // "SolverIterations"
-   Gmat::ON_OFF_TYPE,              // "TargetStatus"
-   Gmat::RVECTOR_TYPE,   //"Position",
-   Gmat::RVECTOR_TYPE,   //"Size",
-   Gmat::INTEGER_TYPE,   // "RelativeZOrder"
-   Gmat::BOOLEAN_TYPE,  // "Minimized"
+   Gmat::ENUMERATION_TYPE,  // "SolverIterations"
+   Gmat::ON_OFF_TYPE,       // "TargetStatus"
+   Gmat::RVECTOR_TYPE,      // "UpperLeft"
+   Gmat::RVECTOR_TYPE,      // "Size"
+   Gmat::INTEGER_TYPE,      // "RelativeZOrder"
+   Gmat::BOOLEAN_TYPE,      // "Minimized"
 };
 
 
@@ -1442,11 +1442,21 @@ const Rvector& Subscriber::GetRvectorParameter(const Integer id) const
    }
 }
 
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const Integer id, const Rvector &value)
+//------------------------------------------------------------------------------
 const Rvector& Subscriber::SetRvectorParameter(const Integer id, const Rvector &value)
 {
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Subscriber::SetRvectorParameter() <%p>'%s' entered, id=%d, value=%s",
+       this, GetName().c_str(), id, value.ToString().c_str());
+   #endif
+   
    if (value.GetSize() != 2)
       throw SubscriberException
          ("incorrect size vector for " + GetParameterText(id));
+   
    switch (id)
    {
    case UPPER_LEFT:

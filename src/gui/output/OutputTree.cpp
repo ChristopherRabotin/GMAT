@@ -23,6 +23,7 @@
 #include "bitmaps/OpenFolder.xpm"
 #include "bitmaps/file.xpm"
 #include "bitmaps/rt_ReportFile.xpm"
+#include "bitmaps/rt_EphemerisFile.xpm"
 #include "bitmaps/rt_OrbitView.xpm"
 #include "bitmaps/rt_GroundTrackPlot.xpm"
 #include "bitmaps/rt_XYPlot.xpm"
@@ -219,12 +220,15 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
        resetTree, removeReports, removePlots);
    #endif
    
+   // Collapse all reports. Consider ephemeris file as a report
    if (removeReports)
    {
       Collapse(mReportItem);
+      Collapse(mEphemFileItem);
       Collapse(mEventsItem);
    }
    
+   // Remove all plots
    if (removePlots)
    {
       Collapse(mOrbitViewItem);
@@ -232,13 +236,15 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
       Collapse(mXyPlotItem);
    }
    
-   // delete all old children
+   // Delete all reports. Consider ephemeris file as a report
    if (removeReports)
    {
       DeleteChildren(mReportItem);
+      DeleteChildren(mEphemFileItem);
       DeleteChildren(mEventsItem);
    }
    
+   // Delete all plots
    if (removePlots)
    {
       DeleteChildren(mOrbitViewItem);
@@ -249,7 +255,7 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
    if (resetTree)    // do not load subscribers
       return;
    
-   // get list of report files, opengl plots, and xy plots
+   // get list of report files, ephemeris files, opengl plots, and xy plots
    StringArray listOfSubs = theGuiInterpreter->GetListOfObjects(Gmat::SUBSCRIBER);
    
    // put each subscriber in the proper folder
@@ -260,28 +266,38 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
       
       wxString objName = wxString(listOfSubs[i].c_str());
       wxString objTypeName = wxString(sub->GetTypeName().c_str());
+      objTypeName = objTypeName.Trim();
       
-      if (objTypeName.Trim() == "ReportFile")
+      if (objTypeName == "ReportFile")
       {
-         AppendItem(mReportItem, objName, GmatTree::OUTPUT_ICON_REPORTFILE, -1,
+         AppendItem(mReportItem, objName, GmatTree::OUTPUT_ICON_REPORT_FILE, -1,
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_REPORT));
       }
-      else if (objTypeName.Trim() == "OrbitView" &&
+      else if (objTypeName == "EphemerisFile" &&
+               sub->GetBooleanParameter("WriteEphemeris"))
+      {
+         if (sub->GetStringParameter("FileFormat") == "CCSDS-OEM")
+         {
+            AppendItem(mEphemFileItem, objName, GmatTree::OUTPUT_ICON_CCSDS_OEM_FILE, -1,
+                       new GmatTreeItemData(objName, GmatTree::OUTPUT_CCSDS_OEM_FILE));
+         }
+      }
+      else if (objTypeName == "OrbitView" &&
                sub->GetBooleanParameter("ShowPlot"))
       {
-         AppendItem(mOrbitViewItem, objName, GmatTree::OUTPUT_ICON_ORBITVIEW, -1,
+         AppendItem(mOrbitViewItem, objName, GmatTree::OUTPUT_ICON_ORBIT_VIEW, -1,
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_ORBIT_VIEW));
       }
-      else if (objTypeName.Trim() == "GroundTrackPlot" &&
+      else if (objTypeName == "GroundTrackPlot" &&
                sub->GetBooleanParameter("ShowPlot"))
       {
-         AppendItem(mGroundTrackItem, objName, GmatTree::OUTPUT_ICON_GROUNDTRACK, -1,
+         AppendItem(mGroundTrackItem, objName, GmatTree::OUTPUT_ICON_GROUND_TRACK_PLOT, -1,
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_GROUND_TRACK_PLOT));
       }
-      else if (objTypeName.Trim() == "XYPlot" &&
+      else if (objTypeName == "XYPlot" &&
                sub->GetBooleanParameter("ShowPlot"))
       {
-         AppendItem(mXyPlotItem, objName, GmatTree::OUTPUT_ICON_XYPLOT, -1,
+         AppendItem(mXyPlotItem, objName, GmatTree::OUTPUT_ICON_XY_PLOT, -1,
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_XY_PLOT));
       }
    }
@@ -295,12 +311,13 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
       if (el != NULL)
       {
          wxString objName = wxString(listOfEls[i].c_str());
-         AppendItem(mEventsItem, objName, GmatTree::OUTPUT_ICON_REPORTFILE, -1,
+         AppendItem(mEventsItem, objName, GmatTree::OUTPUT_ICON_REPORT_FILE, -1,
                new GmatTreeItemData(objName, GmatTree::OUTPUT_EVENT_REPORT));
       }
    }
 
    Expand(mReportItem);
+   Expand(mEphemFileItem);
    Expand(mOrbitViewItem);
    Expand(mGroundTrackItem);
    Expand(mXyPlotItem);
@@ -324,9 +341,18 @@ void OutputTree::AddDefaultResources()
    mReportItem =
       AppendItem(output, wxT("Reports"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
                  new GmatTreeItemData(wxT("Reports"),
-                                      GmatTree::REPORTS_FOLDER));
+                                      GmatTree::EPHEM_FILES_FOLDER));
    
-   SetItemImage(mReportItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
+   SetItemImage(mEphemFileItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+   
+   //----- EphemFile (text output only such as CCSDS Ephememeris)
+   mEphemFileItem =
+      AppendItem(output, wxT("Ephemeris Files"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
+                 new GmatTreeItemData(wxT("Ephemeris Files"),
+                                      GmatTree::EPHEM_FILES_FOLDER));
+   
+   SetItemImage(mEphemFileItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
    
    //----- Orbit Views
@@ -342,7 +368,7 @@ void OutputTree::AddDefaultResources()
    mGroundTrackItem =
       AppendItem(output, wxT("Ground Track Plots"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
                  new GmatTreeItemData(wxT("Ground Track Plots"),
-                                      GmatTree::GROUND_TRACK_FOLDER));
+                                      GmatTree::GROUND_TRACK_PLOTS_FOLDER));
    
    SetItemImage(mGroundTrackItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
@@ -607,6 +633,7 @@ void OutputTree::AddIcons()
    theGuiManager->LoadIcon("ClosedFolder", bitmapType, &bitmaps[index], ClosedFolder_xpm); 
    theGuiManager->LoadIcon("OpenFolder", bitmapType, &bitmaps[++index], OpenFolder_xpm);
    theGuiManager->LoadIcon("rt_ReportFile", bitmapType, &bitmaps[++index], rt_ReportFile_xpm);
+   theGuiManager->LoadIcon("rt_EphemerisFile", bitmapType, &bitmaps[++index], rt_EphemerisFile_xpm);
    theGuiManager->LoadIcon("rt_OrbitView", bitmapType, &bitmaps[++index], rt_OrbitView_xpm);
    theGuiManager->LoadIcon("rt_GroundTrackPlot", bitmapType, &bitmaps[++index], rt_GroundTrackPlot_xpm);
    theGuiManager->LoadIcon("rt_XYPlot", bitmapType, &bitmaps[++index], rt_XYPlot_xpm);
@@ -647,7 +674,7 @@ void OutputTree::OnAddReportFile(wxCommandEvent &event)
    if (theGuiInterpreter->CreateSubscriber
        ("ReportFile", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::OUTPUT_ICON_REPORTFILE, -1,
+      AppendItem(item, name, GmatTree::OUTPUT_ICON_REPORT_FILE, -1,
                  new GmatTreeItemData(name, GmatTree::REPORT_FILE));
 
       Expand(item);
@@ -674,7 +701,7 @@ void OutputTree::OnAddXyPlot(wxCommandEvent &event)
    if (theGuiInterpreter->CreateSubscriber
        ("XYPlot", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::OUTPUT_ICON_XYPLOT, -1,
+      AppendItem(item, name, GmatTree::OUTPUT_ICON_XY_PLOT, -1,
                  new GmatTreeItemData(name, GmatTree::XY_PLOT));
       
       Expand(item);
@@ -701,7 +728,7 @@ void OutputTree::OnAddOrbitView(wxCommandEvent &event)
    if (theGuiInterpreter->CreateSubscriber
        ("OrbitView", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::OUTPUT_ICON_ORBITVIEW, -1,
+      AppendItem(item, name, GmatTree::OUTPUT_ICON_ORBIT_VIEW, -1,
                  new GmatTreeItemData(name, GmatTree::ORBIT_VIEW));
 
       Expand(item);

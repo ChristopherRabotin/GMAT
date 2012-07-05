@@ -757,6 +757,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    {
       // Create panel if Report or Compare Report or Event Report
       if (itemType == GmatTree::OUTPUT_REPORT ||
+          itemType == GmatTree::OUTPUT_CCSDS_OEM_FILE ||
           itemType == GmatTree::OUTPUT_COMPARE_REPORT ||
           itemType == GmatTree::OUTPUT_EVENT_REPORT)
          newChild = CreateNewOutput(item->GetTitle(), item->GetName(), itemType);
@@ -1806,6 +1807,87 @@ void GmatMainFrame::MinimizeChildren()
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void ComputeReportPositionAndSize(const wxString &name, Integer &x,
+//        Integer &y, Integer &w, Integer &h, bool &isUsingSaved)
+//------------------------------------------------------------------------------
+void GmatMainFrame::ComputeReportPositionAndSize(const wxString &name, Integer &x,
+                                                 Integer &y, Integer &w, Integer &h,
+                                                 bool &isUsingSaved)
+{
+   GmatBase *obj = (Subscriber*) theGuiInterpreter->GetConfiguredObject(name.c_str());
+   if ((!obj) || !(obj->IsOfType("Subscriber")))
+   {
+      wxMessageBox(wxT("The object \"" + name + "\" cannot be found or is not a "
+                       "Subscriber - cannot obtain report file panel position and size.\n"),
+                   wxT("GMAT Error"));
+   }
+   Subscriber *sub = (Subscriber*) obj;
+   // Get the position and size of the report file panel
+   Real positionX = sub->GetRealParameter(sub->GetParameterID("UpperLeft"),0);
+   Real positionY = sub->GetRealParameter(sub->GetParameterID("UpperLeft"),1);
+   Real width     = sub->GetRealParameter(sub->GetParameterID("Size"),0);
+   Real height    = sub->GetRealParameter(sub->GetParameterID("Size"),1);
+   
+   #ifdef DEBUG_PERSISTENCE
+   MessageInterface::ShowMessage("   initial report pos  : x = %f, y = %f\n", positionX, positionY);
+   MessageInterface::ShowMessage("   initial report size : w = %f, h = %f\n", width, height);            
+   #endif
+   
+   x = 0.0;
+   y = 0.0;
+   w = 0.0;
+   h = 0.0;
+   isUsingSaved = false;
+   Integer screenWidth = 0;
+   Integer screenHeight = 0;
+         
+   // ********* replace this with cross-platform code *********
+   #ifdef __WXMAC__
+      screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+      screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+   #else
+      GetActualClientSize(&screenWidth, &screenHeight, true);
+   #endif
+   
+   #ifdef DEBUG_PERSISTENCE
+   MessageInterface::ShowMessage("   current screen size : w = %4d, h = %4d\n", screenWidth, screenHeight);
+   #endif
+   
+   // if position and size were not saved from an earlier run, figure out the initial values
+   if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
+       GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
+   {
+      #ifdef __WXMAC__
+         x = -1;   // @todo - move it so it doesn't come up in the upper left corner on top of the main frame
+         y = -1;
+         w = -1;
+         h = -1;
+      #else
+         w = (Integer)((Real)screenWidth * 0.6);
+         h = (Integer)((Real)screenHeight * 0.8);
+         x = -1;
+         y = -1;
+      #endif
+   }
+   else
+   {
+      x = (Integer) (positionX * (Real) screenWidth);
+      y = (Integer) (positionY * (Real) screenHeight);
+      w = (Integer) (width     * (Real) screenWidth);
+      h = (Integer) (height    * (Real) screenHeight);
+      
+      isUsingSaved = true;
+   }
+   
+   #ifdef DEBUG_PERSISTENCE
+   MessageInterface::ShowMessage("     final report pos  : x = %4d, y = %4d\n", x, y);
+   MessageInterface::ShowMessage("     final report size : w = %4d, h = %4d\n\n", w, h);
+   #endif
+   
+}
+
 //------------------------------------------------------------------------------
 // void PositionNewChild(GmatMdiChildFrame *newChild, int numChildren)
 //------------------------------------------------------------------------------
@@ -1848,7 +1930,6 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
          int height = clientH;
          // We don't want to hide iconized children at the bottom, so reduce the height by 40.
          height = clientH - 40;
-         //newChild->SetSize(-1, height);
          newChild->SetSize(x, y, -1, height, wxSIZE_NO_ADJUSTMENTS);
          
          // Reposition other children
@@ -1874,7 +1955,6 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
             if (numChildren > 1)
             {
                x = (numChildren - 2) * 20 + mtW;
-               //y = (numChildren - 2) * 20 - toolH;
                y = (numChildren - 2) * 20;
             }
          }
@@ -2914,9 +2994,9 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
       {
          GuiItemManager *guiManager = GuiItemManager::GetInstance();
          // GUI/ActiveScript status: 1 = clean, 2 = dirty, 3 = error
-         int guiStatus = guiManager->GetGuiStatus();
          int scriptStatus = guiManager->GetActiveScriptStatus();
          #ifdef DEBUG_MAINFRAME_SAVE
+         int guiStatus = guiManager->GetGuiStatus();
          MessageInterface::ShowMessage
             ("   GuiStatus=%d, ActiveScriptStatus=%d\n", guiStatus, scriptStatus);
          #endif
@@ -3791,76 +3871,17 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
    switch (itemType)
    {
    case GmatTree::OUTPUT_REPORT:
+   case GmatTree::OUTPUT_CCSDS_OEM_FILE:
       {
-         GmatBase *obj = (Subscriber*) theGuiInterpreter->GetConfiguredObject(name.c_str());
-         if ((!obj) || !(obj->IsOfType("Subscriber")))
-         {
-            wxMessageBox(wxT("The object \"" + name + "\" cannot be found or is not a "
-                             "Subscriber - cannot obtain report file panel position and size.\n"),
-                         wxT("GMAT Error"));
-         }
-         Subscriber *sub = (Subscriber*) obj;
-         // Get the position and size of the report file panel
-         Real positionX = sub->GetRealParameter(sub->GetParameterID("UpperLeft"),0);
-         Real positionY = sub->GetRealParameter(sub->GetParameterID("UpperLeft"),1);
-         Real width     = sub->GetRealParameter(sub->GetParameterID("Size"),0);
-         Real height    = sub->GetRealParameter(sub->GetParameterID("Size"),1);
-
-         #ifdef DEBUG_PERSISTENCE
-         MessageInterface::ShowMessage("   initial report pos  : x = %f, y = %f\n", positionX, positionY);
-         MessageInterface::ShowMessage("   initial report size : w = %f, h = %f\n", width, height);            
-         #endif
-         
          Integer x = 0.0;
          Integer y = 0.0;
          Integer w = 0.0;
          Integer h = 0.0;
          bool isUsingSaved = false;
-         Integer screenWidth = 0;
-         Integer screenHeight = 0;
          
-         // ********* replace this with cross-platform code *********
-         #ifdef __WXMAC__
-            screenWidth  = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
-            screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
-         #else
-            GetActualClientSize(&screenWidth, &screenHeight, true);
-         #endif
-         
-         #ifdef DEBUG_PERSISTENCE
-         MessageInterface::ShowMessage("   current screen size : w = %4d, h = %4d\n", screenWidth, screenHeight);
-         #endif
-         
-         // if position and size were not saved from an earlier run, figure out the initial values
-         if (GmatMathUtil::IsEqual(positionX,0.0) && GmatMathUtil::IsEqual(positionY,0.0) &&
-             GmatMathUtil::IsEqual(width,0.0)     && GmatMathUtil::IsEqual(height,0.0))
-         {
-            #ifdef __WXMAC__
-               x = -1;   // @todo - move it so it doesn't come up in the upper left corner on top of the main frame
-               y = -1;
-               w = -1;
-               h = -1;
-            #else
-               w = (Integer)((Real)screenWidth * 0.6);
-               h = (Integer)((Real)screenHeight * 0.8);
-               x = -1;
-               y = -1;
-            #endif
-         }
-         else
-         {
-            x = (Integer) (positionX * (Real) screenWidth);
-            y = (Integer) (positionY * (Real) screenHeight);
-            w = (Integer) (width     * (Real) screenWidth);
-            h = (Integer) (height    * (Real) screenHeight);
-            
-            isUsingSaved = true;
-         }
-         
-         #ifdef DEBUG_PERSISTENCE
-         MessageInterface::ShowMessage("     final report pos  : x = %4d, y = %4d\n", x, y);
-         MessageInterface::ShowMessage("     final report size : w = %4d, h = %4d\n\n", w, h);
-         #endif
+         // Get relative position and size from the report object and
+         // compute actual position and size
+         ComputeReportPositionAndSize(name, x, y, w, h, isUsingSaved);
          
          newChild = new GmatMdiChildFrame(this, name, title, itemType, -1, wxPoint(x,y), wxSize(w,h));
          scrolledWin = new wxScrolledWindow(newChild);

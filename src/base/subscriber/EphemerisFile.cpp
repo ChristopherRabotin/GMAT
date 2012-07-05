@@ -787,9 +787,23 @@ bool EphemerisFile::TakeAction(const std::string &action,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 bool EphemerisFile::RenameRefObject(const Gmat::ObjectType type,
-                                 const std::string &oldName,
-                                 const std::string &newName)
+                                    const std::string &oldName,
+                                    const std::string &newName)
 {
+   if (type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM)
+      return true;
+   
+   if (type == Gmat::SPACECRAFT)
+   {
+      if (spacecraftName == oldName)
+         spacecraftName = newName;
+   }
+   else if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      if (outCoordSystemName == oldName)
+         outCoordSystemName = newName;
+   }
+   
    return Subscriber::RenameRefObject(type, oldName, newName);
 }
 
@@ -873,8 +887,6 @@ bool EphemerisFile::IsParameterReadOnly(const Integer id) const
    // Disable interpolator type until it is selectable -- currently set by
    // ephem file format
    if (id == INTERPOLATOR)
-      return true;
-   if (id == UPPER_LEFT || id == SIZE || id == RELATIVE_Z_ORDER || id == MINIMIZED)
       return true;
    
    return Subscriber::IsParameterReadOnly(id);

@@ -45,6 +45,7 @@ private:
    wxString theSubscriberName;
    
    wxTreeItemId mReportItem;
+   wxTreeItemId mEphemFileItem;
    wxTreeItemId mOrbitViewItem;
    wxTreeItemId mGroundTrackItem;
    wxTreeItemId mXyPlotItem;
