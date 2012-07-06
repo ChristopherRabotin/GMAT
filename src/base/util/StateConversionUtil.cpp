@@ -71,6 +71,7 @@ const Integer      StateConversionUtil::MAX_ITERATIONS = 75;
 
 const Real         StateConversionUtil::DEFAULT_MU =
                    GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH];
+
 const std::string  StateConversionUtil::STATE_TYPE_TEXT[StateTypeCount] =
 {
    "Cartesian",
@@ -144,7 +145,7 @@ Rvector6 StateConversionUtil::Convert(Real              mu,
 
    try
    {
-      // Determine the input of state type
+      // Determine the input state type
       if (fromType == "Cartesian")
       {
          if (toType == "Keplerian" || toType == "ModifiedKeplerian")
@@ -844,11 +845,14 @@ Rvector6 StateConversionUtil::EquinoctialToCartesian(const Rvector6& equinoctial
 
    // Check for eccentricity out-of-range
    Real e = Sqrt((h * h) + (k * k));
-   if (e > 1.0 - GmatOrbitConstants::ECC_RANGE_TOL)
+   Real oneMinusEps = 1.0 - GmatOrbitConstants::ECC_RANGE_TOL;
+   if (e > oneMinusEps )
    {
-      throw UtilityException(
-            "Error in conversion from Equinoctial to Cartesian elements: "
-            "Values of EquinoctialH and EquinoctialK result in eccentricity > 1 - eps\n");
+      std::stringstream errmsg("");
+      errmsg << "Error in conversion from Equinoctial to Cartesian elements: ";
+      errmsg << "Values of EquinoctialH and EquinoctialK result in eccentricity > ";
+      errmsg << oneMinusEps << std::endl;
+      throw UtilityException(errmsg.str());
    }
 
    // Use mean longitude to find true longitude
