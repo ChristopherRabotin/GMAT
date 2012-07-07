@@ -1445,8 +1445,10 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
       }
       else if (axesType == "LVLH")
       {
-         theAxes->SetStringParameter("XAxis", "-R");
-         theAxes->SetStringParameter("YAxis", "-N");
+         // theAxes->SetStringParameter("XAxis", "-R");
+         // theAxes->SetStringParameter("YAxis", "-N");
+         theAxes->SetStringParameter("XAxis", "R");
+         theAxes->SetStringParameter("ZAxis", "N");
          localCS->SetStringParameter("Origin", secondary->GetName());
          localCS->SetRefObject(secondary, Gmat::SPACE_POINT, secondary->GetName());
       }
