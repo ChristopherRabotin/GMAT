@@ -24,6 +24,12 @@
 #include <sstream>
 #include <stdlib.h>           // For atoi
 
+//#define DEBUG_GRAVITY_GRV_FILE
+
+#ifdef DEBUG_GRAVITY_GRV_FILE
+#include "MessageInterface.hpp"
+#endif
+
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -143,13 +149,6 @@ void HarmonicGravityGrv::Load()
 
    inStream.close();
    #ifdef DEBUG_GRAVITY_GRV_FILE
-   if (loadcoef)
-   {
       MessageInterface::ShowMessage("Leaving GravityFile::ReadGrvFile\n");
-      MessageInterface::ShowMessage("   cbar[ 2][ 0] = %le   sbar[ 2][ 0] = %le   \n",
-                                    cbar[2][0], sbar[2][0]);
-      MessageInterface::ShowMessage("   cbar[20][20] = %le   sbar[20][20] = %le   \n",
-                                    cbar[20][20], sbar[20][20]);
-   }
    #endif
 }
