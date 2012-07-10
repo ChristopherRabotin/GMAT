@@ -167,7 +167,7 @@ FuelTank& FuelTank::operator=(const FuelTank& ft)
 {
    if (&ft != this)
    {
-      GmatBase::operator=(ft);
+      Hardware::operator=(ft);
    
       fuelMass              = ft.fuelMass;
       pressure              = ft.pressure;
