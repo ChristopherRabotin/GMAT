@@ -1,0 +1,17 @@
+Under Linux, there are a couple of extra steps that might need to be performed 
+to make GMAT's MATLAB interface work:
+
+1.  Be sure that the C-shell, csh, is installed.  The MATLAB engine launches 
+MATLAB through a call to csh.
+
+2.  Make sure that MATLAB can be launched through a call using the C-shell.  
+To do this, type '/bin/csh -f -c matlab' in a console window.  MATLAB should 
+start up.  If it does not, you probably need a symbolic link to it; I created 
+mine using the command
+
+   sudo ln -s /opt/matlab/R2009b/bin/matlab /usr/local/bin/matlab
+   
+Your MATLAB folder location may vary, of course.
+
+- D. Conway
+  gmat@thinksysinc.com
