@@ -157,7 +157,7 @@
 //#define DEBUG_OPEN_SCRIPT
 //#define DEBUG_REFRESH_SCRIPT
 //#define DEBUG_INTERPRET
-//#define DEBUG_RUN
+//#define DEBUG_RUN_MISSION
 //#define DEBUG_SIZE
 //#define DBGLVL_MENUBAR 1
 //#define DEBUG_PENDING_EVENTS
@@ -1354,8 +1354,8 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
              childName.c_str(), name.c_str(), child);
          #endif
          
-         // MdiChildViewFrame::OnPlotClose() and MdiChildTsrame::OnPlotClose()
-         // set deleteChild to false
+         // MdiChildViewFrame::OnPlotClose() and MdiChildTsFrame::OnPlotClose()
+         // sets deleteChild to false
          if (deleteChild)
             delete child;
 
@@ -1667,7 +1667,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       }
       
       //--------------------------------------------------------------
-      // delete children by child->OnClose()
+      // Delete children by child->OnClose()
       //--------------------------------------------------------------
       
       bool childDeleted = false;
@@ -1677,13 +1677,8 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          #ifdef DEBUG_MAINFRAME_CLOSE
          MessageInterface::ShowMessage("   ==> closing child = %s\n", name.c_str());
          #endif
-         
-         //-------------------------------------------------
-         // delete child if frame can be closed
-         // Note: GmatMdiChildFrame::OnClose() calls RemoveChild()
-         // child->Close() will not process OnClose() correctly
-         // So use OnClose(event) instead
-         //-------------------------------------------------
+
+         // If it can exit without confirm, set dirty flag to false
          if (mExitWithoutConfirm)
             child->SetDirty(false);
          
@@ -1691,41 +1686,29 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          MessageInterface::ShowMessage("   ==> calling child->OnClose()\n");
          #endif
          
-         // If it is output frame it is not needed to check for dirty
-         if (type > GmatTree::BEGIN_OF_OUTPUT && type < GmatTree::END_OF_OUTPUT)
+         //-----------------------------------------------------------
+         // Note: GmatMdiChildFrame::OnClose() calls RemoveChild().
+         // child->Close() will not process OnClose() correctly
+         // So use OnClose(event) instead.
+         // Call child's CanClose to figure out if child can be closed or not.
+         // In resource or command panel frame, it checks for dirty flag.
+         // In output child frame, it checks for mission or animation running flag.
+         //-----------------------------------------------------------
+         child->OnClose(event);
+         
+         // Delete child if frame can be closed
+         if (child->CanClose())
          {
-            child->Activate();
-            child->OnClose(event);
             childDeleted = true;
          }
          else
          {
-            // Check if frame is dirty first
-            if (!child->IsDirty())
-            {
-               child->OnClose(event);
-               childDeleted = true;
-            }
-            else
-            {
-               child->OnClose(event);
-               if (child->CanClose())
-               {
-                  childDeleted = true;
-               }
-               else
-               {
-                  canDelete = false;
-                  #ifdef DEBUG_MAINFRAME_CLOSE
-                  MessageInterface::ShowMessage
-                     //("   ==> cannot close this child, so returning false\n");
-                     ("   ==> cannot close this child, so added to ignore list\n");
-                  #endif
-                  // returning false does not check for the next child, so commented out (LOJ: 2010.12.29)
-                  //return false;
-                  ignoreNames.Add(name);
-               }
-            }
+            canDelete = false;
+            #ifdef DEBUG_MAINFRAME_CLOSE
+            MessageInterface::ShowMessage
+               ("   ==> cannot close this child, so added to ignore list\n");
+            #endif
+            ignoreNames.Add(name);
          }
       }
       
@@ -1734,19 +1717,10 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       //-------------------------------------------------
       wxNode *nextNode = NULL;
       if (childDeleted)
-      {
          nextNode = theMdiChildren->GetFirst();
-      }
       else
-      {
          nextNode = node->GetNext();
-         // returning false does not check for the next child, so commented out (LOJ: 2010.12.29)
-         //#ifdef DEBUG_MAINFRAME_CLOSE
-         //MessageInterface::ShowMessage("   ==> child was not deleted, so returning false\n");
-         //#endif
-         //return false;
-      }
-
+      
       #ifdef DEBUG_MAINFRAME_CLOSE
       MessageInterface::ShowMessage
          ("   next node = %p, canDelete = %d\n", nextNode, canDelete);
@@ -1759,7 +1733,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
             ("   title='%s', name='%s'\n", title.c_str(), name.c_str());
       }
       #endif
-
+      
       node = nextNode;
 
    }
@@ -2308,11 +2282,12 @@ void GmatMainFrame::BuildAndRunScript(const wxString &filename, bool addToResour
 //------------------------------------------------------------------------------
 Integer GmatMainFrame::RunCurrentMission()
 {
-   #ifdef DEBUG_RUN
+   #ifdef DEBUG_RUN_MISSION
    MessageInterface::ShowMessage
-      ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
+      ("GmatMainFrame::RunCurrentMission() entered, mRunPaused=%d, mRunCompleted=%d\n",
+       mRunPaused, mRunCompleted);
    #endif
-      
+   
    Integer retval = 1;
    mAnimationEnabled = true;
    
@@ -2356,7 +2331,7 @@ Integer GmatMainFrame::RunCurrentMission()
       GmatAppData::Instance()->GetMessageTextCtrl()->SetFocus();
       retval = theGuiInterpreter->RunMission();
 
-      #ifdef DEBUG_RUN
+      #ifdef DEBUG_RUN_MISSION
       MessageInterface::ShowMessage("   return code from RunMission()=%d\n", retval);
       #endif
 
@@ -2374,7 +2349,13 @@ Integer GmatMainFrame::RunCurrentMission()
       //put items in output tab
       GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true, true);
    }
-
+   
+   #ifdef DEBUG_RUN_MISSION
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::RunCurrentMission() returning %d, mRunPaused=%d, mRunCompleted=%d\n",
+       retval, mRunPaused, mRunCompleted);
+   #endif
+   
    return retval;
 } // end RunCurrentMission()
 
@@ -2388,6 +2369,10 @@ Integer GmatMainFrame::RunCurrentMission()
 //------------------------------------------------------------------------------
 void GmatMainFrame::StopRunningMission()
 {
+   #ifdef DEBUG_RUN_MISSION
+   MessageInterface::ShowMessage("GmatMainFrame::StopRunningMission() entered\n");
+   #endif
+   
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_STOP, FALSE);
    wxYield();
@@ -2400,6 +2385,10 @@ void GmatMainFrame::StopRunningMission()
    UpdateMenus(TRUE);
    toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, TRUE);
    toolBar->EnableTool(TOOL_RUN, TRUE);
+   
+   #ifdef DEBUG_RUN_MISSION
+   MessageInterface::ShowMessage("GmatMainFrame::StopRunningMission() leaving\n");
+   #endif
 }
 
 
@@ -2411,8 +2400,13 @@ void GmatMainFrame::StopRunningMission()
  */
 //------------------------------------------------------------------------------
 void GmatMainFrame::NotifyRunCompleted()
-{
+{   
    mRunCompleted = true;
+   
+   #ifdef DEBUG_RUN_MISSION
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::NotifyRunCompleted() set mRunCompleted to true\n");
+   #endif
 }
 
 
@@ -2519,17 +2513,88 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::OnClose() entered. mMatlabServer=%p\n", mMatlabServer);
+      ("\nGmatMainFrame::OnClose() entered, mMatlabServer=%p, mRunCompleted=%d\n",
+       mMatlabServer, mRunCompleted);
    #endif
-
+   
    if (!mRunCompleted)
    {
-      wxMessageBox(wxT("GMAT is still running the mission.\n"
-                       "Please STOP the run before closing."),
-                   wxT("GMAT Warning"));
-      event.Veto();
+      // If script folder is running, just stop the current mission.
+      if (GmatGlobal::Instance()->IsBatchMode())
+      {
+         int answer =
+            wxMessageBox(wxT("GMAT is running script folder.\n"
+                             "Are you sure you want to stop the batch run?"),
+                         wxT("Please confirm"), wxYES_NO);
+         
+         if (answer == wxYES)
+         {
+            // Stop current mission and quit running the script folder
+            StopRunningMission();
+            GmatAppData *gmatAppData = GmatAppData::Instance();
+            gmatAppData->GetResourceTree()->QuitRunningScriptFolder();
+         }
+         
+         // @todo Figure out why GMAT crashes when running mission is stopped
+         // and process CloseEvent while script folder is running. (LOJ: 2012.07.10)
+         // So veto CloseEvent for now.
+         event.Veto();
+      }
+      else
+      {
+         int answer =
+            wxMessageBox(wxT("GMAT is still running the mission.\n"
+                             "Are you sure you want to stop the mission and close GMAT?"),
+                         wxT("Please confirm"), wxYES_NO);
+         
+         if (answer == wxYES)
+         {
+            StopRunningMission();
+            event.Skip();
+         }
+         else
+         {
+            event.Veto();
+         }
+      }
+      
+      #ifdef DEBUG_MAINFRAME_CLOSE
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::OnClose() leaving, mission was still running\n");
+      #endif
+      
       return;
    }
+   
+   // Check if animation is running
+   wxToolBar *toolBar = GetToolBar();
+   if (toolBar->GetToolState(GmatMenu::TOOL_ANIMATION_PLAY) == true)
+   {
+      int answer =
+         wxMessageBox(wxT("GMAT is running the animation.\n"
+                          "Are you sure you want to stop the animation and close GMAT?"),
+                      wxT("Please confirm"), wxYES_NO);
+      
+      if (answer == wxYES)
+      {
+         // Stop animation first
+         wxCommandEvent tempEvent;
+         tempEvent.SetId(GmatMenu::TOOL_ANIMATION_STOP);
+         OnAnimation(tempEvent);
+         event.Skip();
+      }
+      else
+      {
+         event.Veto();
+      }
+      
+      #ifdef DEBUG_MAINFRAME_CLOSE
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::OnClose() leaving, animation was running\n");
+      #endif
+      return;
+   }
+   
    
    // close all child windows first
    if (CloseAllChildren(true, true, true, true))
@@ -2548,6 +2613,10 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    // stop server if running
    if (mMatlabServer)
       StopMatlabServer();
+   
+   #ifdef DEBUG_MAINFRAME_CLOSE
+   MessageInterface::ShowMessage("GmatMainFrame::OnClose() leaving\n");
+   #endif
 }
 
 
@@ -3192,7 +3261,7 @@ void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
 {
    CloseAllChildren(true, true, true, false);
    wxSafeYield();
-
+   
    wxToolBar* toolBar = GetToolBar();
    // enable screen capture when the simulation is run
    toolBar->EnableTool(TOOL_SCREENSHOT, false);

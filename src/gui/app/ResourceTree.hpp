@@ -53,6 +53,9 @@ public:
    bool WasScriptAdded();
    wxString GetLastScriptAdded();
    
+   bool IsScriptFolderRunning();
+   void QuitRunningScriptFolder();
+   
    // Added so plugin code can update the tree structure
    void AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
          bool onlyChildNodes = false);
@@ -64,7 +67,7 @@ protected:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool mScriptFolderRunning;
-   bool mHasUserInterrupted;
+   bool mScriptFolderRunInterrupted;
    bool mScriptAdded;
    bool mMatlabServerStarted;
    bool mHasEventLocatorPlugin;

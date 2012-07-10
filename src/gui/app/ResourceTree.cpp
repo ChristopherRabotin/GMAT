@@ -136,6 +136,7 @@
 //#define DEBUG_DELETE
 //#define DEBUG_COMPARE_REPORT
 //#define DEBUG_RUN_SCRIPT_FOLDER
+//#define DEBUG_BUILD_OBJECT
 //#define DEBUG_RESOURCE_TREE_UPDATE
 //#define DEBUG_RESOURCE_ICON
 //#define DEBUG_ADD_ICONS
@@ -261,7 +262,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    mScriptFolderRunning = false;
-   mHasUserInterrupted = false;
+   mScriptFolderRunInterrupted = false;
    mHasEventLocatorPlugin = GmatGlobal::Instance()->IsEventLocationAvailable();
    mScriptAdded = false;
    mMatlabServerStarted = false;
@@ -3896,6 +3897,31 @@ wxString ResourceTree::GetLastScriptAdded()
 
 
 //------------------------------------------------------------------------------
+// bool IsScriptFolderRunning()
+//------------------------------------------------------------------------------
+bool ResourceTree::IsScriptFolderRunning()
+{
+   return mScriptFolderRunning;
+}
+
+
+//------------------------------------------------------------------------------
+// void QuitRunningScriptFolder()
+//------------------------------------------------------------------------------
+/**
+ * Sets script folder run interrupted flag to true.
+ * Usually this function is called from the GmatMainFrame when user tries
+ * close the GMAT while script is still running.
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::QuitRunningScriptFolder()
+{
+   mScriptFolderRunInterrupted = true;
+   wxYield();
+}
+
+
+//------------------------------------------------------------------------------
 // void OnRemoveAllScripts(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
@@ -3953,8 +3979,11 @@ void ResourceTree::OnRemoveScript(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
 {
-   //MessageInterface::ShowMessage("===> OnScriptBuildObject()\n");
-
+   #ifdef DEBUG_BUILD_OBJECT
+   MessageInterface::ShowMessage
+      ("OnScriptBuildObject() entered and calling BuildScript()\n");
+   #endif
+   
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetName();
@@ -4064,6 +4093,11 @@ void ResourceTree::OnAddScriptFolder(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
 {
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER
+   MessageInterface::ShowMessage
+      ("ResourceTree::OnRunScriptsFromFolder() entered\n");
+   #endif
+   
    if (theMainFrame == NULL)
    {
       MessageInterface::ShowMessage
@@ -4130,7 +4164,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       ::wxMkdir(currOutPath);
 
    int count = 0;
-   mHasUserInterrupted = false;
+   mScriptFolderRunInterrupted = false;
    scriptId = GetFirstChild(itemId, cookie);
 
    wxTextCtrl *textCtrl = NULL;
@@ -4205,10 +4239,13 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          scriptId = GetNextChild(itemId, cookie);
          continue;
       }
-
-      if (mHasUserInterrupted)
+      
+      if (mScriptFolderRunInterrupted)
+      {
+         MessageInterface::ShowMessage("===> Script folder run interrupted\n");
          break;
-
+      }
+      
       count++;
 
       if (count < startNum)
@@ -4353,7 +4390,11 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       fm->SetAbsPathname(FileManager::OUTPUT_PATH, oldOutPath);
       //MessageInterface::SetLogFile(oldLogFile);
    }
-
+   
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER
+   MessageInterface::ShowMessage("   Now report script batch run status\n");
+   #endif
+   
    // Report completion
    wxString text;
    text.Printf("Finished running %d scripts\n", runCount);
@@ -4423,6 +4464,11 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       text->AppendText(msg);
       dlg->ShowModal();
    }
+   
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER
+   MessageInterface::ShowMessage
+      ("ResourceTree::OnRunScriptsFromFolder() leaving\n");
+   #endif
 }
 
 
@@ -4440,7 +4486,7 @@ void ResourceTree::OnQuitRunScriptsFromFolder(wxCommandEvent &event)
                              "Confirm", wxYES_NO, this);
 
    if (answer == wxYES)
-      mHasUserInterrupted = true;
+      mScriptFolderRunInterrupted = true;
 }
 
 
@@ -4488,7 +4534,7 @@ bool ResourceTree::BuildScript(const wxString &filename, Integer scriptOpenOpt,
                                bool closeScript, bool readBack,
                                const wxString &savePath, bool multiScripts)
 {
-   #ifdef DEBUG_RESOURCE_TREE
+   #ifdef DEBUG_BUILD_OBJECT
    MessageInterface::ShowMessage
       ("ResourceTree::BuildScript() filename=%s, scriptOpenOpt=%d, closeScript=%d, "
        "readBack=%d, multiScripts=%d\n   savePath=%s\n", filename.c_str(),
@@ -4512,7 +4558,7 @@ bool ResourceTree::BuildScript(const wxString &filename, Integer scriptOpenOpt,
          mFailedScriptsList.Add(filename);
       }
 
-      #ifdef DEBUG_RESOURCE_TREE
+      #ifdef DEBUG_BUILD_OBJECT
       MessageInterface::ShowMessage
          ("ResourceTree::BuildScript() returning %s\n", (status ? "true" : "false"));
       #endif
@@ -4520,7 +4566,7 @@ bool ResourceTree::BuildScript(const wxString &filename, Integer scriptOpenOpt,
       return status;
    }
 
-   #ifdef DEBUG_RESOURCE_TREE
+   #ifdef DEBUG_BUILD_OBJECT
    MessageInterface::ShowMessage("ResourceTree::BuildScript() returning false\n");
    #endif
 

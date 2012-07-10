@@ -79,7 +79,7 @@ MdiChildViewFrame::~MdiChildViewFrame()
 {   
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
    MessageInterface::ShowMessage
-      ("~MdiChildViewFrame() mPlotName=%s\n", mPlotName.c_str());
+      ("~MdiChildViewFrame() mChildName=%s\n", mChildName.c_str());
    #endif
    
    MdiGlPlot::mdiChildren.DeleteObject(this);
@@ -674,23 +674,47 @@ void MdiChildViewFrame::OnMove(wxMoveEvent& event)
 void MdiChildViewFrame::OnPlotClose(wxCloseEvent &event)
 {
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
-   MessageInterface::ShowMessage("MdiChildViewFrame::OnPlotClose() entered\n");
+   MessageInterface::ShowMessage
+      ("MdiChildViewFrame::OnPlotClose() '%s' entered\n", mChildName.c_str());
    #endif
    
    CheckFrame();
+   
    if (mCanClose)
    {
-      // remove from list of frames but do not delete
+      // Remove this from the list of GmatMainFrame mdi children but do not delete,
+      // OnClose() calls destructor whiere it can be removed from the plot list and deleted.
       GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType, false);   
       event.Skip();
    }
    else
    {
-      event.Veto();
+      int answer =
+         wxMessageBox(wxT("GMAT is running the the animation.\n"
+                          "Are you sure you want to stop the animation and close?"),
+                      wxT("GMAT Warning"), wxYES_NO);
+      
+      if (answer == wxYES)
+      {
+         #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
+         MessageInterface::ShowMessage
+            ("   Stopping animation and removing this from the list of GmatMainFrame mdi children\n");
+         #endif
+         
+         mCanvas->SetUserInterrupt();
+         mCanClose = true;
+         // Remove this from the list of GmatMainFrame mdi children but do not delete,
+         // OnClose() calls destructor whiere it can be removed from the plot list and deleted.
+         GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType, false);
+         event.Skip();
+      }
+      else
+         event.Veto();
    }
    
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
-   MessageInterface::ShowMessage("MdiChildViewFrame::OnPlotClose() exiting\n");
+   MessageInterface::ShowMessage
+      ("MdiChildViewFrame::OnPlotClose() '%s' exiting\n", mChildName.c_str());
    #endif
 }
 
@@ -701,23 +725,16 @@ void MdiChildViewFrame::OnPlotClose(wxCloseEvent &event)
 void MdiChildViewFrame::OnClose(wxCloseEvent &event)
 {
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
-   MessageInterface::ShowMessage("MdiChildViewFrame::OnClose() entered\n");
+   MessageInterface::ShowMessage
+      ("\nMdiChildViewFrame::OnClose() '%s' entered, mCanClose=%d\n", mChildName.c_str(), mCanClose);
    #endif
    
-   CheckFrame();
-   
-   if (mCanClose)
-   {
-      GmatMdiChildFrame::OnClose(event);
-      event.Skip();
-   }
-   else
-   {
-      event.Veto();
-   }
+   GmatMdiChildFrame::OnClose(event);
+   event.Skip();
    
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
-   MessageInterface::ShowMessage("MdiChildViewFrame::OnClose() exiting\n");
+   MessageInterface::ShowMessage
+      ("MdiChildViewFrame::OnClose() '%s' exiting, mCanClose=%d\n", mChildName.c_str(), mCanClose);
    #endif
 }
 
@@ -947,37 +964,37 @@ void MdiChildViewFrame::SetEndOfRun()
 //------------------------------------------------------------------------------
 // void CheckFrame()
 //------------------------------------------------------------------------------
+/**
+ * Checks if animation is running. If animation is running it sets mCanClose
+ * flag to false.
+ */
+//------------------------------------------------------------------------------
 void MdiChildViewFrame::CheckFrame()
 {
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
    MessageInterface::ShowMessage("MdiChildViewFrame::CheckFrame() entered\n");
    #endif
+
+   mCanClose = false;
    
    if (mCanvas)
    {
-      mCanClose = true;
-
       #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
       MessageInterface::ShowMessage
          ("MdiChildViewFrame::CheckFrame() IsAnimationRunning=%d\n",
           mCanvas->IsAnimationRunning());
       #endif
       
-      wxSafeYield();
-      
       if (mCanvas->IsAnimationRunning())
-      {
-         wxMessageBox(_T("The animation is running.\n"
-                         "Please stop the animation first."),
-                      _T("GMAT Warning"));
          mCanClose = false;
-      }
+      else
+         mCanClose = true;
    }
    
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
-   MessageInterface::ShowMessage("MdiChildViewFrame::CheckFrame() exiting\n");
+   MessageInterface::ShowMessage
+      ("MdiChildViewFrame::CheckFrame() exiting, mCanClose=%d\n", mCanClose);
    #endif
-   
 }
 
 
