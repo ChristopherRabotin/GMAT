@@ -629,13 +629,13 @@ void GroundStationPanel::OnHorizonReferenceComboBoxChange(wxCommandEvent &event)
          locInCurrent[0] *= GmatMathConstants::RAD_PER_DEG;
          locInCurrent[1] *= GmatMathConstants::RAD_PER_DEG;
       }
-      MessageInterface::ShowMessage(" ... Spherical to new horizon ... loc = %12.10f  %12.10f  %12.10f\n",
-            locInCurrent[0], locInCurrent[1], locInCurrent[2]); // *************************
+      //MessageInterface::ShowMessage(" ... Spherical to new horizon ... loc = %12.10f  %12.10f  %12.10f\n",
+      //      locInCurrent[0], locInCurrent[1], locInCurrent[2]); // *************************
       Rvector3 locInNew = BodyFixedStateConverterUtil::Convert(locInCurrent, currentStateType,
                           currentHorizonReference, currentStateType, horizon,
                           flattening, meanRadius);
-      MessageInterface::ShowMessage(" ... result =  %12.10f  %12.10f  %12.10f\n",
-            locInNew[0], locInNew[1], locInNew[2]); // *************************
+      //MessageInterface::ShowMessage(" ... result =  %12.10f  %12.10f  %12.10f\n",
+      //      locInNew[0], locInNew[1], locInNew[2]); // *************************
       location1 = locInNew[0];
       location2 = locInNew[1];
       location3 = locInNew[2];
