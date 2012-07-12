@@ -1629,7 +1629,7 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
       {
          // Bug 2445 fix
          // Check if it is property of associated objects, such as Hardware of Spacecraft.
-         // Hardware objcts are configurable, but those are cloned before association. 
+         // Hardware objects are configurable, but those are cloned before association.
          // So that same Hardware can be associated with multiple Spacecraft.
          if (obj->IsOfType(Gmat::SPACECRAFT))
          {
@@ -6300,11 +6300,18 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    pmType = parts[0];
    forceType = ODEModel::GetScriptAlias(pmType);
    std::string propName = parts[dotCount-1];
+   std::string qualifier = "";
    
+   if (parts.size() == 3)
+	   qualifier = parts[1];
+
    #ifdef DEBUG_SET_FORCE_MODEL
    MessageInterface::ShowMessage
       ("   Setting pmType=%s, forceType=%s, propName=%s\n", pmType.c_str(),
        forceType.c_str(), propName.c_str());
+   if (qualifier != "")
+	   MessageInterface::ShowMessage("   Parameter has the qualifier %s\n",
+			   qualifier.c_str());
    #endif
    
    GmatBase *owner;
@@ -6314,6 +6321,17 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    {
       id = owner->GetParameterID(propName);
       type = owner->GetParameterType(id);
+      // Ensure that the qualifier is correct for the model
+      if (owner->IsOfType(Gmat::PHYSICAL_MODEL))
+      {
+    	   if (((PhysicalModel*)owner)->CheckQualifier(qualifier, forceType) == false)
+    	   {
+    	      throw InterpreterException("The property \"" + prop +
+    	               "\" cannot be set in the ODE Model \"" + obj->GetName() +
+    	               "\"");
+         }
+      }
+
       retval = SetPropertyValue(owner, id, type, value);
       if (fromObj != NULL)
          owner->SetRefObject(fromObj, fromObj->GetType(), value);

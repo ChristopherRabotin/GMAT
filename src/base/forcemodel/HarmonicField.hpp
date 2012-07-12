@@ -81,7 +81,9 @@ public:
     HarmonicField(const HarmonicField& hf);
     HarmonicField&          operator=(const HarmonicField& hf);
 
-    virtual bool            Initialize(void);
+    virtual bool            Initialize();
+    virtual bool            CheckQualifier(const std::string &qualifier,
+                                           const std::string &forType = "");
     virtual bool            SetDegreeOrder(Integer degree, Integer order);
     virtual bool            SetFilename(const std::string &fn);
     virtual void            SetEopFile(EopFile *eopF);

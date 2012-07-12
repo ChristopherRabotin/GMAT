@@ -283,6 +283,33 @@ bool HarmonicField::Initialize()
 
 
 //------------------------------------------------------------------------------
+// bool CheckQualifier(const std::string &qualifier)
+//------------------------------------------------------------------------------
+/**
+ * Ensures that the string qualifier identifies the body for this model
+ *
+ * This method is used, for example, with degree and order strings of the form
+ *
+ *    Forces.GravityField.Earth.Degree = 8;
+ *    Forces.GravityField.Earth.Order  = 8;
+ *
+ * to ensure that the model is actually Earth based.
+ *
+ * @param qualifier The string qualifier
+ *
+ * @return true if the qualifier matches the model, false if not
+ */
+//------------------------------------------------------------------------------
+bool HarmonicField::CheckQualifier(const std::string &qualifier,
+      const std::string &forType)
+{
+   return (qualifier == bodyName);
+}
+
+
+
+
+//------------------------------------------------------------------------------
 //  bool SetDegreeOrder(Integer deg, Integer ord)
 //------------------------------------------------------------------------------
 /**

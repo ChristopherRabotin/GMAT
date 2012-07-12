@@ -111,6 +111,9 @@ public:
    virtual void SetForceOrigin(CelestialBody* toBody);
 
    virtual bool BuildModelFromMap();
+   virtual bool CheckQualifier(const std::string &qualifier,
+                               const std::string &forType);
+
    virtual bool Initialize();
    virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1, 
          const Integer id = -1);

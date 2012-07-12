@@ -188,6 +188,8 @@ public:
    virtual bool DepletesMass();
    virtual bool IsUserForce();
    virtual void SetPropList(ObjectArray *soList);
+   virtual bool CheckQualifier(const std::string &qualifier,
+         const std::string &forType = "");
    
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);

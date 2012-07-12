@@ -1117,15 +1117,47 @@ bool PhysicalModel::IsUserForce()
 
 
 //------------------------------------------------------------------------------
-// bool IsTransient()
+// void SetPropList(ObjectArray *soList)
 //------------------------------------------------------------------------------
 /**
  * Sets the list of propagated space objects for transient forces.
+ *
+ * @param soList List of propagated space objects
+ *
+ * @note This default version does nothing.
  */
 //------------------------------------------------------------------------------
 void PhysicalModel::SetPropList(ObjectArray *soList)
 {
 }
+
+
+//------------------------------------------------------------------------------
+// bool CheckQualifier(const std::string &qualifier, const std::string &forType)
+//------------------------------------------------------------------------------
+/**
+ * Ensures that the string qualifier applies to this model
+ *
+ * This method was added so that qualified force model settings can validate
+ * that the force receiving a setting is correct.  It is used, for example, with
+ * the full field gravity model strings of the form
+ *
+ *    Forces.GravityField.Earth.Order = 8;
+ *
+ * to ensure that the model is actually Earth based.
+ *
+ * @param qualifier The string qualifier
+ * @param forType String identifying owned object type, if needed
+ *
+ * @return true if the qualifier matches the model, false if not
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::CheckQualifier(const std::string &qualifier,
+      const std::string &forType)
+{
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // bool SupportsDerivative(Gmat::StateElementId id)

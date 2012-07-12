@@ -623,7 +623,12 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
                   "propagators; e.g. \"Propagate Synchronized prop(sat1) "
                   "prop(sat2)\"\nexiting");
       }
-      forceList.push_back(pPhysicalModel);
+
+      // Full field models come first to facilitate setting their parameters
+      if (pmType == "GravityField")
+         forceList.insert(forceList.begin(), pPhysicalModel);
+      else
+         forceList.push_back(pPhysicalModel);
    }
    numForces = forceList.size();
    
@@ -1262,6 +1267,47 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
             "ODEModel is using %d components for element %d\n", modelsUsed, id);
    #endif
    
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckQualifier(const std::string &qualifier, const std::string &forType)
+//------------------------------------------------------------------------------
+/**
+ * Ensures that the string qualifier applies to an owned model
+ *
+ * This method was added so that qualified force model settings can validate
+ * that the force receiving a setting is correct.  It is used, for example, with
+ * the full field gravity model strings of the form
+ *
+ *    Forces.GravityField.Earth.Order = 8;
+ *
+ * to ensure that the model is actually Earth based.
+ *
+ * @param qualifier The string qualifier
+ * @param forType String identifying owned object type, if needed
+ *
+ * @return true if the qualifier matches the model, false if not
+ */
+//------------------------------------------------------------------------------
+bool ODEModel::CheckQualifier(const std::string &qualifier,
+                              const std::string &forType)
+{
+   bool retval = false;
+
+   // Find the owned model
+   PhysicalModel *owner = NULL;
+   for (UnsignedInt i = 0; i < forceList.size(); ++i)
+   {
+      if (forceList[i]->IsOfType(forType))
+      {
+         retval = forceList[i]->CheckQualifier(qualifier);
+      }
+      if (retval)
+         break;
+   }
+
    return retval;
 }
 
