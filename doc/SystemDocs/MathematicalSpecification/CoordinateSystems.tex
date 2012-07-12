@@ -2220,6 +2220,100 @@ and
 \end{equation}
 
 
+\subsection{ Body-Spin Sun Coordinates}
+
+The body-spin Sun coordinate system is a celestial-body-based coordinate system defined as follows:
+%
+\begin{itemize}
+   \item x points from the central body to the sun
+   \item y completes the right-handed set
+   \item z lies in the plane of the body's spin axis and the x axis
+\end{itemize}
+%
+This system is similar to the GSM system with the following two differences:  (1)  The magnetic field vector is replaced with the body's spin axis, and (2) the system is based on the fixed frame of the central body and not always referenced to the Earth fixed system, and (3) x points in the opposite direction in the two systems.
+
+Define the vector $\mathbf{r}_{sun}$ as the vector from the central body to the sun. Then,
+%
+\begin{equation}
+     \hat{\mathbf{x}} = \frac{\mathbf{r}_{sun}}{\| \mathbf{r}_{sun} \|}
+\end{equation}
+%
+Define the body's spin axis in the body fixed system as
+%
+\begin{equation}
+    \mathbf{r}_s^I =   \begin{pmatrix}
+               0\\
+                0\\
+                1
+     \end{pmatrix}
+\end{equation}
+
+If $\mathbf{R}^{I/F}$ is the rotation matrix from the central body's fixed frame to
+MJ2000Eq at the current epoch, then we can write the vector that
+describes the spin axis in the inertial frame as
+%
+\begin{equation}
+     \mathbf{r}_s^I =  \mathbf{R}^{I/F} \mathbf{r}_s^F
+\end{equation}
+%
+Then, the $y$-axis is defined as
+%
+\begin{equation}
+     \hat{\mathbf{y}} = \frac{\mathbf{r}_s^I \times \hat{\mathbf{x}}  }{\|  \mathbf{r}_s^I\times \hat{\mathbf{x}}   \|}
+\end{equation}
+%
+the $z$-axis is defined as
+%
+\begin{equation}
+     \hat{\mathbf{z}} = \hat{\mathbf{x}} \times \hat{\mathbf{y}}
+\end{equation}
+%
+and
+%
+\begin{equation}
+     \mathbf{R}_{Ii} = \left[\hspace{.05 in} \hat{\mathbf{x}} \hspace{.2 in} \hat{\mathbf{y}} \hspace{.2 in} \hat{\mathbf{z}} \hspace{.05 in} \right]
+\end{equation}
+%
+To calculate the derivative of the rotation matrix, we know that
+%
+%
+\begin{equation}
+     \frac{d\hat{\mathbf{x}}}{dt} =      \displaystyle\frac{\mathbf{v}_{sun}}{r_{sun}}  -\displaystyle
+     \hat{\mathbf{x}}
+     \left(\hat{\mathbf{x}}  \cdot
+     \frac{\mathbf{v}_{sun}}{r_{sun}} \right)
+\end{equation}
+%
+and
+%
+\begin{equation}
+      \frac{d\mathbf{y}}{dt}  = \dot{\mathbf{y}}=\left(\dot{\mathbf{R}}^{I/F}\mathbf{r}_s^F\right) \times
+      \hat{\mathbf{x}} + \mathbf{r}_s^I \times
+      \frac{d\hat{\mathbf{x}}}{dt}
+\end{equation}
+%
+Now we can write
+%
+\begin{equation}
+     \frac{d\hat{\mathbf{y}}}{dt} = \dot{\hat{\mathbf{y}}} =
+     \frac{\dot{\mathbf{y}}}{y} - \hat{\mathbf{y}}\left(\hat{\mathbf{y}} \cdot \frac{\dot{\mathbf{y}}}{y}  \right)
+\end{equation}
+%
+Finally,
+\begin{equation}
+    \dot{\hat{\mathbf{z}}} = \dot{\hat{\mathbf{x}}} \times
+    \hat{\mathbf{y}}+ \hat{\mathbf{x}} \times
+    \dot{\hat{\mathbf{y}}}
+\end{equation}
+%
+and
+%
+\begin{equation}
+     \dot{\mathbf{R}}_{Ii} = \left[\hspace{.05 in} \frac{d\hat{\mathbf{x}}}{dt} \hspace{.2 in}
+     \frac{d\hat{\mathbf{y}}}{dt} \hspace{.2 in} \frac{d\hat{\mathbf{z}}}{dt} \hspace{.05 in} \right]
+\end{equation}
+
+
 \section{Appendix 1: Derivatives of ObjectReferenced Unit Vectors}
 
 The derivations of the above quantities are shown below.  We start
