@@ -6322,7 +6322,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       id = owner->GetParameterID(propName);
       type = owner->GetParameterType(id);
       // Ensure that the qualifier is correct for the model
-      if (owner->IsOfType(Gmat::PHYSICAL_MODEL))
+      if (owner->IsOfType(Gmat::PHYSICAL_MODEL) && (qualifier != ""))
       {
     	   if (((PhysicalModel*)owner)->CheckQualifier(qualifier, forceType) == false)
     	   {
