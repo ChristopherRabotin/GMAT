@@ -299,6 +299,12 @@ bool CoordinateSystem::UsesSpacecraft() const
    return false;
 }
 
+bool CoordinateSystem::HasCelestialBodyOrigin() const
+{
+   if (axes) return axes->HasCelestialBodyOrigin();
+   return false;
+}
+
 
 
 // methods to set parameters for the AxisSystems

@@ -58,6 +58,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
    virtual bool                           UsesSpacecraft() const;
+   virtual bool                           HasCelestialBodyOrigin() const;
 
    // methods to set parameters for the AxisSystems
    virtual void                  SetPrimaryObject(SpacePoint *prim);

@@ -363,6 +363,13 @@ bool AxisSystem::UsesSpacecraft() const
    return false;
 }
 
+bool AxisSystem::HasCelestialBodyOrigin() const
+{
+   if (origin && origin->IsOfType("CelestialBody")) return true;
+   return false;
+}
+
+
 // methods to set parameters for the AxisSystems - AxisSystems that need these
 // will need to override these implementations
 void AxisSystem::SetPrimaryObject(SpacePoint *prim)
