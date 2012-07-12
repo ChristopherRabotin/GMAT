@@ -3239,6 +3239,17 @@ bool Spacecraft::TakeAction(const std::string &action,
             // don't have a mu to use for conversions until the coordinate system is set).
             // first convert the default cartesian state to the input state type OR if all of the elements have been set,
             // use those values
+            // First, check to see if the stateType requires a coordinate system with a Celestial Body
+            // origin and if so, if the coordinate system meets that criterion
+            bool needsCBOrigin = StateConversionUtil::RequiresCelestialBodyOrigin(stateType);
+            if (needsCBOrigin && coordinateSystem && !coordinateSystem->HasCelestialBodyOrigin())
+            {
+               std::string errmsg = "The Spacecraft \"";
+               errmsg += instanceName + "\" failed to set the orbit state because the state type is \"";
+               errmsg += stateType + "\" and coordinate system \"";
+               errmsg += coordinateSystem->GetName() + "\" does not have a celestial body at the origin.\n";
+               throw SpaceObjectException(errmsg);
+            }
             Rvector6 convertedState;
            if (NumStateElementsSet() == state.GetSize())
            {
@@ -3280,9 +3291,9 @@ bool Spacecraft::TakeAction(const std::string &action,
          }
          catch (BaseException &be)
          {
-            std::string errmsg = "Error applying coordinate system due to errors in spacecraft state. ";
-            errmsg += be.GetFullMessage() + "\n";
-            throw SpaceObjectException(errmsg);
+//            std::string errmsg = "Error applying coordinate system due to errors in spacecraft state. ";
+//            errmsg += be.GetFullMessage() + "\n";
+            throw;
          }
 
          #ifdef DEBUG_SPACECRAFT_CS
@@ -5443,6 +5454,17 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
                     stateType.c_str(), rep.c_str());
             #endif
             stateType = rep;
+            // Check to see if the stateType requires a coordinate system with a Celestial Body
+            // origin and if so, if the coordinate system meets that criterion
+            bool needsCBOrigin = StateConversionUtil::RequiresCelestialBodyOrigin(stateType);
+            if (needsCBOrigin && coordinateSystem && !coordinateSystem->HasCelestialBodyOrigin())
+            {
+               std::string errmsg = "The Spacecraft \"";
+               errmsg += instanceName + "\" failed to set the orbit state because the state type is \"";
+               errmsg += stateType + "\" and coordinate system \"";
+               errmsg += coordinateSystem->GetName() + "\" does not have a celestial body at the origin.\n";
+               throw SpaceObjectException(errmsg);
+            }
          }
       }
       // Has the state type has been fully determined or not?  Only worry about this before the CS has been applied
