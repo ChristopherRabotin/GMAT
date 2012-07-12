@@ -709,8 +709,9 @@ bool HarmonicField::SetStringParameter(const Integer id,
          }
          catch (BaseException &ex)
          {
-            MessageInterface::ShowMessage("**** WARNING ****: %s\n",
-                  ex.GetFullMessage().c_str());
+//            MessageInterface::ShowMessage("**** WARNING ****: %s\n",
+//                  ex.GetFullMessage().c_str());
+            ; // ignore this for now - GMT-2873
          }
          
          #ifdef DEBUG_HARMONIC_FIELD
