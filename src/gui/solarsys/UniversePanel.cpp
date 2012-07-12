@@ -498,7 +498,7 @@ void UniversePanel::SaveData()
                fieldName = "SPKFilename";
             MessageInterface::PopupMessage
                (Gmat::ERROR_, mMsgFormat.c_str(),
-                str.c_str(), fieldName.c_str(), "File must exist");
+                str.c_str(), fieldName.c_str(), "", "File must exist");
             canClose = false;
             return;
          }
@@ -538,7 +538,7 @@ void UniversePanel::SaveData()
             std::string fieldName = "LSKFilename";
             MessageInterface::PopupMessage
                (Gmat::ERROR_, mMsgFormat.c_str(),
-                str.c_str(), fieldName.c_str(), "File must exist");
+                str.c_str(), fieldName.c_str(), "", "File must exist");
             canClose = false;
             return;
          }
