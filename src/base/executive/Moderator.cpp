@@ -1170,9 +1170,9 @@ void Moderator::ResetObjectPointer(ObjectMap *objMap, GmatBase *newObj,
  * @return array of configurable item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-const StringArray& Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
+const StringArray& Moderator::GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier)
 {
-   return theFactoryManager->GetListOfItems(type);
+   return theFactoryManager->GetListOfItems(type, qualifier);
 }
 
 //------------------------------------------------------------------------------

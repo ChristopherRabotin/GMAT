@@ -32,6 +32,10 @@ public:
                                            const std::string &withName = "",
                                            const std::string &forBody = "Earth");
 
+   // method to return list of types of objects that this factory can create
+   virtual StringArray      GetListOfCreatableObjects(
+                                  const std::string &qualifier = "Earth");
+
    // default constructor
    AtmosphereFactory();
    // constructor

@@ -141,7 +141,7 @@ CCommandFactory::~CCommandFactory()
 
 
 StringArray CCommandFactory::GetListOfCreatableObjects(
-                                  const std::string &qualifier) const
+                                  const std::string &qualifier)
 {
    if (qualifier != "")
    {

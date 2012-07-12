@@ -48,7 +48,7 @@ public:
 
       // method to return list of types of objects that this factory can create
    virtual StringArray      GetListOfCreatableObjects(
-                                  const std::string &qualifier = "") const;
+                                  const std::string &qualifier = "");
 
 protected:
    // protected data

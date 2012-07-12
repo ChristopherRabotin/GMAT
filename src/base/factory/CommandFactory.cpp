@@ -360,7 +360,7 @@ CommandFactory::~CommandFactory()
  */
 //------------------------------------------------------------------------------
 StringArray CommandFactory::GetListOfCreatableObjects(
-                                  const std::string &qualifier) const
+                                  const std::string &qualifier)
 {
    if (qualifier != "")
    {

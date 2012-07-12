@@ -140,9 +140,10 @@ public:
    virtual Interface*       CreateInterface(const std::string &ofType,
                                             const std::string &withName = "");
    
-   // method to return list of types of objects that this factory can create
+   // method to return list of types of objects that this factory can create -
+   // not const because the qualifier needs to adapt the return list
    virtual StringArray      GetListOfCreatableObjects(
-                                  const std::string &qualifier = "") const;
+                                  const std::string &qualifier = "");
    // method to check if a createable object type matches a subtype
    virtual bool             DoesObjectTypeMatchSubtype(
                                   const std::string &theType,

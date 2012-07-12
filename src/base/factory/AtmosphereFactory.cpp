@@ -140,6 +140,38 @@ AtmosphereFactory& AtmosphereFactory::operator= (
 }
 
 //------------------------------------------------------------------------------
+// StringArray GetListOfCreatableObjects(const std::string& qualifier) const
+//------------------------------------------------------------------------------
+/**
+ * Finds the list of models for a given body.
+ *
+ * @param qualifier The name of the body that has the atmosphere.
+ *
+ * @return The list of supported atmosphere models.  The current code only has
+ * 			Earth models, so only "Earth" is supported, and the complete list is
+ * 			returned for Earth.
+ */
+//------------------------------------------------------------------------------
+StringArray AtmosphereFactory::GetListOfCreatableObjects(
+      const std::string& qualifier)
+{
+   if (qualifier == "")
+      return creatables;
+
+   qualifiedCreatables.clear();
+
+   if (qualifier == "Earth")
+   {
+      // Simple and Exponential are not part of R2013a, so the list is built by
+      // hand here
+      qualifiedCreatables.push_back("MSISE90");
+      qualifiedCreatables.push_back("JacchiaRoberts");
+   }
+
+   return qualifiedCreatables;
+}
+
+//------------------------------------------------------------------------------
 // ~AtmosphereFactory()
 //------------------------------------------------------------------------------
 /**

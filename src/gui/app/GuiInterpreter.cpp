@@ -115,9 +115,9 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
  * @return array of item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
+const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier)
 {
-   return theModerator->GetListOfFactoryItems(type);
+   return theModerator->GetListOfFactoryItems(type, qualifier);
 }
 
 

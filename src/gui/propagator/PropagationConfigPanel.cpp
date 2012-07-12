@@ -1726,8 +1726,12 @@ void PropagationConfigPanel::Initialize()
    // initialize drag model type array
    dragModelArray.Add("None");
 //   dragModelArray.Add("Exponential");
-   dragModelArray.Add("MSISE90");
-   dragModelArray.Add("JacchiaRoberts");
+   StringArray models = theGuiInterpreter->GetListOfFactoryItems(Gmat::ATMOSPHERE, "Earth");
+   for (UnsignedInt i = 0; i < models.size(); ++i)
+      dragModelArray.Add(models[i].c_str());
+
+//   dragModelArray.Add("MSISE90");
+//   dragModelArray.Add("JacchiaRoberts");
 
    // initialize error control type array
    errorControlArray.Add("None");

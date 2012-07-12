@@ -42,7 +42,7 @@ public:
    
    //----- factory
    const StringArray& GetListOfAllFactoryItems();
-   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
+   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier = "");
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    std::string GetStringOfAllFactoryItems(Gmat::ObjectType type);
    std::string GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types);

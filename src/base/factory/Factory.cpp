@@ -976,7 +976,7 @@ TrackingData* Factory::CreateTrackingData(const std::string &ofType,
  *
  */
 //------------------------------------------------------------------------------
-StringArray Factory::GetListOfCreatableObjects(const std::string &qualifier) const
+StringArray Factory::GetListOfCreatableObjects(const std::string &qualifier)
 {
    if (qualifier == "")
       return creatables;

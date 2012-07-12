@@ -114,7 +114,7 @@ public:
                            const std::string &name);
    
    //----- factory
-   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
+   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier = "");
    const StringArray& GetListOfAllFactoryItems();
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    const StringArray& GetListOfViewableItems(Gmat::ObjectType type);
