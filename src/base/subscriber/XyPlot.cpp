@@ -42,17 +42,17 @@ XyPlot::PARAMETER_TEXT[XyPlotParamCount - SubscriberParamCount] =
 {
    "XVariable",
    "YVariables",
-   "PlotTitle",
-   "XAxisTitle",
-   "YAxisTitle",
+//   "PlotTitle",
+//   "XAxisTitle",
+//   "YAxisTitle",
    "ShowGrid",
    "DataCollectFrequency",
    "UpdatePlotFrequency",
    "ShowPlot",
-   "UseLines",
-   "LineWidth",
-   "UseMarkers",
-   "MarkerSize",
+//   "UseLines",
+//   "LineWidth",
+//   "UseMarkers",
+//   "MarkerSize",
    "Drawing",
    "IndVar",
    "Add",
@@ -64,17 +64,17 @@ XyPlot::PARAMETER_TYPE[XyPlotParamCount - SubscriberParamCount] =
 {
    Gmat::OBJECT_TYPE,      // "IndVar","XVariable"
    Gmat::OBJECTARRAY_TYPE, // "Add","YVariables"
-   Gmat::STRING_TYPE,      // "PlotTitle",
-   Gmat::STRING_TYPE,      // "XAxisTitle",
-   Gmat::STRING_TYPE,      // "YAxisTitle",
+//   Gmat::STRING_TYPE,      // "PlotTitle",
+//   Gmat::STRING_TYPE,      // "XAxisTitle",
+//   Gmat::STRING_TYPE,      // "YAxisTitle",
    Gmat::BOOLEAN_TYPE,     // "ShowGrid"
    Gmat::INTEGER_TYPE,     // "DataCollectFrequency",
    Gmat::INTEGER_TYPE,     // "UpdatePlotFrequency",
    Gmat::BOOLEAN_TYPE,     // "ShowPlot",
-   Gmat::BOOLEAN_TYPE,     // "UseLines",
-   Gmat::INTEGER_TYPE,     // "LineWidth",
-   Gmat::BOOLEAN_TYPE,     // "UseMarkers",
-   Gmat::INTEGER_TYPE,     // "MarkerSize",
+//   Gmat::BOOLEAN_TYPE,     // "UseLines",
+//   Gmat::INTEGER_TYPE,     // "LineWidth",
+//   Gmat::BOOLEAN_TYPE,     // "UseMarkers",
+//   Gmat::INTEGER_TYPE,     // "MarkerSize",
    Gmat::BOOLEAN_TYPE,     // "Drawing"
    Gmat::OBJECT_TYPE,      // "IndVar","XVariable"
    Gmat::OBJECTARRAY_TYPE, // "Add","YVariables"
@@ -609,10 +609,16 @@ Integer XyPlot::GetParameterID(const std::string &str) const
       if (str == PARAMETER_TEXT[i - SubscriberParamCount])
       {
          switch (i)
+         {
             case IND_VAR:
             case ADD:
             case DRAW_GRID:
                WriteDeprecatedMessage(i);
+               break;
+
+            default:
+               break;
+         }
          return i;
       }
    }
@@ -660,15 +666,15 @@ std::string XyPlot::GetParameterTypeString(const Integer id) const
 bool XyPlot::IsParameterReadOnly(const Integer id) const
 {
    if (
-       (id == PLOT_TITLE)             ||
-       (id == X_AXIS_TITLE)           ||
-       (id == Y_AXIS_TITLE)           ||
+//       (id == PLOT_TITLE)             ||
+//       (id == X_AXIS_TITLE)           ||
+//       (id == Y_AXIS_TITLE)           ||
        (id == DATA_COLLECT_FREQUENCY) ||
        (id == UPDATE_PLOT_FREQUENCY)  ||
-       (id == USE_LINES)              ||
-       (id == LINE_WIDTH)             ||
-       (id == USE_MARKERS)            ||
-       (id == MARKER_SIZE)            ||
+//       (id == USE_LINES)              ||
+//       (id == LINE_WIDTH)             ||
+//       (id == USE_MARKERS)            ||
+//       (id == MARKER_SIZE)            ||
        (id == DRAWING)                ||
        (id == IND_VAR)                ||
        (id == ADD)                    ||
@@ -690,10 +696,10 @@ Integer XyPlot::GetIntegerParameter(const Integer id) const
       return mDataCollectFrequency;
    case UPDATE_PLOT_FREQUENCY:
       return mUpdatePlotFrequency;
-   case LINE_WIDTH:
-      return lineWidth;
-   case MARKER_SIZE:
-      return markerSize;
+//   case LINE_WIDTH:
+//      return lineWidth;
+//   case MARKER_SIZE:
+//      return markerSize;
    default:
       return Subscriber::GetIntegerParameter(id);
    }
@@ -721,12 +727,12 @@ Integer XyPlot::SetIntegerParameter(const Integer id, const Integer value)
    case UPDATE_PLOT_FREQUENCY:
       mUpdatePlotFrequency = value;
       return value;
-   case LINE_WIDTH:
-      lineWidth = value;
-      return value;
-   case MARKER_SIZE:
-      markerSize = value;
-      return value;
+//   case LINE_WIDTH:
+//      lineWidth = value;
+//      return value;
+//   case MARKER_SIZE:
+//      markerSize = value;
+//      return value;
    default:
       return Subscriber::SetIntegerParameter(id, value);
    }
@@ -809,12 +815,12 @@ std::string XyPlot::GetStringParameter(const Integer id) const
       WriteDeprecatedMessage(id);
    case XVARIABLE:
       return mXParamName;
-   case PLOT_TITLE:
-      return mPlotTitle;
-   case X_AXIS_TITLE:
-      return mXAxisTitle;
-   case Y_AXIS_TITLE:
-      return mYAxisTitle;
+//   case PLOT_TITLE:
+//      return mPlotTitle;
+//   case X_AXIS_TITLE:
+//      return mXAxisTitle;
+//   case Y_AXIS_TITLE:
+//      return mYAxisTitle;
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -855,15 +861,15 @@ bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
       WriteDeprecatedMessage(id);
    case YVARIABLES:
       return AddYParameter(value, mNumYParams);
-   case PLOT_TITLE:
-      mPlotTitle = value;
-      return true;
-   case X_AXIS_TITLE:
-      mXAxisTitle = value;
-      return true;
-   case Y_AXIS_TITLE:
-      mYAxisTitle = value;
-      return true;
+//   case PLOT_TITLE:
+//      mPlotTitle = value;
+//      return true;
+//   case X_AXIS_TITLE:
+//      mXAxisTitle = value;
+//      return true;
+//   case Y_AXIS_TITLE:
+//      mYAxisTitle = value;
+//      return true;
    default:
       return Subscriber::SetStringParameter(id, value);
    }
@@ -954,10 +960,10 @@ bool XyPlot::GetBooleanParameter(const Integer id) const
 {
    if (id == SHOW_PLOT)
       return active;
-   if (id == USE_MARKERS)
-      return useMarkers;
-   if (id == USE_LINES)
-      return useLines;
+//   if (id == USE_MARKERS)
+//      return useMarkers;
+//   if (id == USE_LINES)
+//      return useLines;
    if (id == SHOW_GRID)
       return mDrawGrid;
    if (id == DRAWING)
@@ -982,21 +988,21 @@ bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
       active = value;
       return active;
    }
-   if (id == USE_MARKERS)
-   {
-      useMarkers = value;
-      // Always have to have either markers or lines
-      if (useMarkers == false)
-         useLines = true;
-      return useMarkers;
-   }
-   if (id == USE_LINES)
-   {
-      useLines = value;
-      if (useLines == false)
-         useMarkers = true;
-      return useLines;
-   }
+//   if (id == USE_MARKERS)
+//   {
+//      useMarkers = value;
+//      // Always have to have either markers or lines
+//      if (useMarkers == false)
+//         useLines = true;
+//      return useMarkers;
+//   }
+//   if (id == USE_LINES)
+//   {
+//      useLines = value;
+//      if (useLines == false)
+//         useMarkers = true;
+//      return useLines;
+//   }
    if (id == SHOW_GRID)
    {
       mDrawGrid = value;
