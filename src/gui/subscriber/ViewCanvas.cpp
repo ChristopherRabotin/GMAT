@@ -2057,7 +2057,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          if (mDrawSolverData || (solverOption == 1 && mNumData == 2))
             mDrawOrbitFlag[colorIndex] = false;
          
-         mObjectOrbitColor[colorIndex] = scColors[satId];
+         mObjectOrbitColor[colorIndex] = scColors[sc];
          
          int posIndex = satId * MAX_DATA * 3 + (mLastIndex*3);
          mObjectViewPos[posIndex+0] = posX[sc];
