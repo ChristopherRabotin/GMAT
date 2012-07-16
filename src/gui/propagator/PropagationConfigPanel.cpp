@@ -3371,7 +3371,7 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
    if (dragForce != NULL)
    {
       std::string title = primaryBodyData->dragType.c_str();
-      title += "DragDialog";
+      title += " Setup";
       DragInputsDialog dragDlg(this, dragForce, title.c_str());
       dragDlg.ShowModal();
    }
