@@ -3372,8 +3372,21 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
    {
       std::string title = primaryBodyData->dragType.c_str();
       title += " Setup";
+
+      // Buffer the settings -- this is temporary, and will need to be more
+      // robust when more settings are added
+      Real dragSettings[3];
+      dragSettings[0] = dragForce->GetRealParameter("F107");
+      dragSettings[1] = dragForce->GetRealParameter("F107A");
+      dragSettings[2] = dragForce->GetRealParameter("MagneticIndex");
+
       DragInputsDialog dragDlg(this, dragForce, title.c_str());
       dragDlg.ShowModal();
+
+      if ((dragSettings[0] != dragForce->GetRealParameter("F107")) ||
+          (dragSettings[1] != dragForce->GetRealParameter("F107A")) ||
+          (dragSettings[2] != dragForce->GetRealParameter("MagneticIndex")) )
+         EnableUpdate(true);
    }
 }
 
