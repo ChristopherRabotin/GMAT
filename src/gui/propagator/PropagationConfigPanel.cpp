@@ -47,6 +47,9 @@
 //#define DEBUG_PROP_PANEL_ERROR
 //#define DEBUG_PROP_INTEGRATOR
 
+// Hard coded drag enumeration replaced by dynamic version, so set NONE_DM here
+#define NONE_DM 0
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -1724,6 +1727,7 @@ void PropagationConfigPanel::Initialize()
    othersGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_OTHER].c_str());
    
    // initialize drag model type array
+   dragModelArray.Clear();
    dragModelArray.Add("None");
 //   dragModelArray.Add("Exponential");
    StringArray models = theGuiInterpreter->GetListOfFactoryItems(Gmat::ATMOSPHERE, "Earth");
@@ -2143,17 +2147,40 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
 {
    #ifdef DEBUG_PROP_PANEL_DISPLAY
    MessageInterface::ShowMessage
-      ("DisplayAtmosphereModelData() currentBodyName=%s dragType=%s\n",
-       currentBodyName.c_str(), primaryBodyList[currentBodyId]->dragType.c_str());
+      ("DisplayAtmosphereModelData() currentBodyName=%s\n", // dragType=%s\n",
+       currentBodyName.c_str()
+       //, primaryBodyList[currentBodyId]->dragType.c_str()
+       );
    #endif
 
-   // Enable atmosphere model only for Earth
-   if (currentBodyName == "Earth")
+   // Enable atmosphere model only for bodies that have models
+   // initialize drag model type array
+   dragModelArray.Clear();
+   dragModelArray.Add("None");
+   StringArray models = theGuiInterpreter->
+         GetListOfFactoryItems(Gmat::ATMOSPHERE, currentBodyName.c_str());
+
+   if (models.size() > 0)
    {
+      for (UnsignedInt i = 0; i < models.size(); ++i)
+         dragModelArray.Add(models[i].c_str());
+      theAtmosModelComboBox->Clear();
+      for (UnsignedInt i = 0; i < dragModelArray.size(); ++i)
+         theAtmosModelComboBox->Append(dragModelArray[i]);
+      // Set the value to either the passed in value or "None"
+      theAtmosModelComboBox->SetValue(atmosModelString); //dragModelArray[0]);
       theAtmosModelComboBox->Enable(true);
+
+      // Current code always enables Setup for any model; disabled for "None"
+//      if (currentBodyName == "Earth")
+      theDragSetupButton->Enable(true);  // Is this right?
+//      else
+//         theDragSetupButton->Enable(false);  // Is this right?
    }
    else
    {
+      theAtmosModelComboBox->Clear();
+      theAtmosModelComboBox->Append("None");
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
    }
@@ -2168,22 +2195,13 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
       theAtmosModelComboBox->SetSelection(NONE_DM);
       theDragSetupButton->Enable(false);
    }
-////   else if (primaryBodyList[currentBodyId]->dragType == dragModelArray[EXPONENTIAL])
-//   else if (primaryBodyData->dragType == dragModelArray[EXPONENTIAL])
-//   {
-//      theAtmosModelComboBox->SetSelection(EXPONENTIAL);
-//      theDragSetupButton->Enable(false);
-//   }
-//   else if (primaryBodyList[currentBodyId]->dragType == dragModelArray[MSISE90])
-   else if (primaryBodyData->dragType == dragModelArray[MSISE90])
+   else
    {
-      theAtmosModelComboBox->SetSelection(MSISE90);
-      theDragSetupButton->Enable(true);
-   }
-//   else if (primaryBodyList[currentBodyId]->dragType == dragModelArray[JR])
-   else if (primaryBodyData->dragType == dragModelArray[JR])
-   {
-      theAtmosModelComboBox->SetSelection(JR);
+      Integer set = 0;
+      for (UnsignedInt i = 0; i < dragModelArray.size(); ++i)
+         if (primaryBodyData->dragType == dragModelArray[i])
+            set = i;
+      theAtmosModelComboBox->SetSelection(set);
       theDragSetupButton->Enable(true);
    }
 }
@@ -2270,16 +2288,23 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
          theGravModelSearchButton->Enable(true);
          potFileTextCtrl->Enable(true);
       }
-      
-      if (thePrimaryBodyComboBox->GetValue() == "Earth")
+
+      StringArray models = theGuiInterpreter->GetListOfFactoryItems(
+            Gmat::ATMOSPHERE, thePrimaryBodyComboBox->GetValue().c_str());
+      Integer atmosCount = models.size();
+      if (atmosCount > 0)
       {
          theAtmosModelComboBox->Enable(true);
          if (theAtmosModelComboBox->GetValue() == dragModelArray[NONE_DM] //||
              //theAtmosModelComboBox->GetValue() == dragModelArray[EXPONENTIAL]
              )
+         {
             theDragSetupButton->Enable(false);
+         }
          else
+         {
             theDragSetupButton->Enable(true);
+         }
       }
       else
       {
@@ -2315,6 +2340,13 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
       theDragSetupButton->Enable(false);
       //theMagfModelComboBox->Enable(false);
       //theSrpCheckBox->Enable(false);
+   }
+
+   // Only enable atmosphere settings if the primary body is selected
+   if (primaryBodyString == "None")
+   {
+      theAtmosModelComboBox->Enable(false);
+      theDragSetupButton->Enable(false);
    }
 }
 
@@ -2932,6 +2964,14 @@ void PropagationConfigPanel::OnOriginComboBox(wxCommandEvent &event)
    UpdatePrimaryBodyItems();
 
    isOriginChanged = true;
+
+   // Only enable atmosphere settings if the primary body is selected
+   if (thePrimaryBodyComboBox->GetValue() == "None")
+   {
+      theAtmosModelComboBox->Enable(false);
+      theDragSetupButton->Enable(false);
+   }
+
    EnableUpdate(true);
 }
 
@@ -3327,30 +3367,13 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
       SaveAtmosModel();
    }
 
-//   dragForce = primaryBodyList[currentBodyId]->dragf;
    dragForce = primaryBodyData->dragf;
    if (dragForce != NULL)
    {
-////      if (primaryBodyList[currentBodyId]->dragType == dragModelArray[EXPONENTIAL])
-//      if (primaryBodyData->dragType == dragModelArray[EXPONENTIAL])
-//      {
-//         // TBD by Code 595
-//         //DragInputsDialog dragDlg(this, dragForce, "ExponentialDragDialog");
-//         //dragDlg.ShowModal();
-//      }
-//      else
-//      if (primaryBodyList[currentBodyId]->dragType == dragModelArray[MSISE90])
-      if (primaryBodyData->dragType == dragModelArray[MSISE90])
-      {
-         DragInputsDialog dragDlg(this, dragForce, "MSISE90DragDialog");
-         dragDlg.ShowModal();
-      }
-//      else if (primaryBodyList[currentBodyId]->dragType == dragModelArray[JR])
-      else if (primaryBodyData->dragType == dragModelArray[JR])
-      {
-         DragInputsDialog dragDlg(this, dragForce, "JacchiaRobertsDialog");
-         dragDlg.ShowModal();
-      }
+      std::string title = primaryBodyData->dragType.c_str();
+      title += "DragDialog";
+      DragInputsDialog dragDlg(this, dragForce, title.c_str());
+      dragDlg.ShowModal();
    }
 }
 

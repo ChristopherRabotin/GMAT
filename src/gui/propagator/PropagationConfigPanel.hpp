@@ -51,15 +51,15 @@ private:
    
    Integer IntegratorCount;
 
-   // Earth drag model
-   enum EarthDragModelType
-   {
-      NONE_DM = 0,
-//      EXPONENTIAL,
-      MSISE90,
-      JR,
-      EarthDragModelCount,
-   };
+//   // Earth drag model
+//   enum EarthDragModelType
+//   {
+//      NONE_DM = 0,
+////      EXPONENTIAL,
+//      MSISE90,
+//      JR,
+//      EarthDragModelCount,
+//   };
    
    // Magnetic force drag model
    enum MagfModelType
