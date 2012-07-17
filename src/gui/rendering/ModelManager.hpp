@@ -31,7 +31,8 @@
 typedef std::map<int, ModelObject*> ModelMap;
 typedef std::map<wxString, int> ModelIdMap;
 
-class ModelManager {
+class ModelManager
+{
 public:
    static ModelManager* Instance();
    ModelManager();
@@ -39,9 +40,10 @@ public:
 	
    wxGLContext *modelContext;
 	
+	void ClearModel();
    ModelObject* GetModel(int id);
    int LoadModel(wxString &modelPath);
-	
+   
 private:
    int numElements;
    ModelMap modelMap;

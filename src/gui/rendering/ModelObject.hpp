@@ -63,20 +63,20 @@ typedef struct{
 
 // The material type
 typedef struct{
-   char name[255];   // The name of the material
-   char texture_name[255]; // The file name of the texture associated with the material
-   int num_faces; // The number of faces that use this material
+   char name[255];                     // The name of the material
+   char texture_name[255];             // The file name of the texture associated with the material
+   int num_faces;                      // The number of faces that use this material
    unsigned short faces[MAX_POLYGONS]; // The indices of the faces using this material
-   rgba_type mat_ambient;  // The ambient color of the material
-   rgba_type mat_diffuse;  // The diffuse color of the material
-   rgba_type mat_specular; // The specular color of the material
-   unsigned short mat_shininess; // The shininess factor of the material (between 0 and 100%, 100 being the highest)
-   int id_texture; // The id of the bound texture
+   rgba_type mat_ambient;              // The ambient color of the material
+   rgba_type mat_diffuse;              // The diffuse color of the material
+   rgba_type mat_specular;             // The specular color of the material
+   unsigned short mat_shininess;       // The shininess factor of the material (between 0 and 100%, 100 being the highest)
+   int id_texture;                     // The id of the bound texture
 } material_type, *material_type_ptr;
 
-// The object type
-//typedef struct {
-class ModelObject{
+
+class ModelObject
+{
 public:
    wxString name;      // The name of the object
    wxString filename;  // The name of the file this object came from
@@ -88,31 +88,28 @@ public:
    int num_materials;
 
    bool isLoaded;
-
-   //Rvector3 position[MAX_POINTS];  // The positions at each frame of the object
    
    vector_type bsphere_center;                  // Center of the object, calculated via bounding sphere
    vector_type vertex[MAX_VERTICES];            // Array of vertices making up the object
    vector_type normal[MAX_VERTICES];            // Array of vertex normals for lighting purposes
-   //vector_type pnormal[MAX_POLYGONS];
    vector_type aabb[8];                         // Array of the vertices' axis-aligned bounding box (aabb)
-   polygon_type polygon[MAX_POLYGONS];       // Array of polygons (triangles), points to vertices list
-   texmap_coord_type mapcoord[MAX_VERTICES]; // Array of U,V coordinates for texture mapping
+   polygon_type polygon[MAX_POLYGONS];          // Array of polygons (triangles), points to vertices list
+   texmap_coord_type mapcoord[MAX_VERTICES];    // Array of U,V coordinates for texture mapping
 
    vector_type lin_speed;   // Object's linear speed
    vector_type rot_speed;   // Object's rotational speed
-   float mass;           // Object's mass
-   float bsphere_radius; // the radius of the object's bounding sphere
-
-   int id_texture;   // The id of the object's texture
+   float mass;              // Object's mass
+   float bsphere_radius;    // the radius of the object's bounding sphere
+   
+   int id_texture;          // The id of the object's texture
    material_type material[MAX_MATERIALS]; // The materials loaded from the file
-
-   matrix_type matrix;       // Object matrix
-
-// Functions
-
+   
+   matrix_type matrix;      // Object matrix
+   
+   // Functions
+   
    ModelObject();
-
+   
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// These are for loading and saving the model from and to a file
    ///////////////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +189,7 @@ private:
    void CreateBSphere(); // Creates the bounding sphere for the object
    void CalcNormals(); // Calculates the vertex normals of the object
    void FindNeighbors(); // Finds all neighboring faces for all polygons
-   int LoadTexture(const wxString &file_name);
+   int  LoadTexture(const wxString &file_name);
    
    ///////////////////////////////////////////////////////////////////////////////////////////
    /// Helper functions for the vector structure used within the class
@@ -221,12 +218,12 @@ private:
    
    void SetMatrix();
    
-   void MatrixSetElement(matrix_type_ptr matrix, int r, int c, float value);
+   void  MatrixSetElement(matrix_type_ptr matrix, int r, int c, float value);
    float MatrixGetElement(matrix_type_ptr matrix, int r, int c);
-   void MatrixIdentity(matrix_type_ptr matrix);
-   void MatrixZero(matrix_type_ptr matrix);
-   void MatrixCopy(matrix_type_ptr source, matrix_type_ptr destination);
-   void MatrixMult(matrix_type_ptr matrix1, matrix_type_ptr matrix2, matrix_type_ptr result);
+   void  MatrixIdentity(matrix_type_ptr matrix);
+   void  MatrixZero(matrix_type_ptr matrix);
+   void  MatrixCopy(matrix_type_ptr source, matrix_type_ptr destination);
+   void  MatrixMult(matrix_type_ptr matrix1, matrix_type_ptr matrix2, matrix_type_ptr result);
    
 };
 #endif

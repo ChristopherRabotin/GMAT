@@ -43,12 +43,20 @@ ModelManager* ModelManager::Instance()
 //------------------------------------------------------------------------------
 ModelManager::ModelManager()
 {
+   #ifdef DEBUG_MODEL_MANAGER
+   MessageInterface::ShowMessage("ModelManager::ModelManager() entered\n");
+   #endif
+   
    modelContext = NULL;
    numElements = 0;
 	modelMap.clear();
 	modelIdMap.clear();
 	// Why create new ModelObject here and set to [-1]? (LOJ: 2011.12.08)
-   modelMap[-1] = new ModelObject();
+   //modelMap[-1] = new ModelObject(); // Commented out (LOJ: 2012.07.17)
+   
+   #ifdef DEBUG_MODEL_MANAGER
+   MessageInterface::ShowMessage("ModelManager::ModelManager() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -56,12 +64,17 @@ ModelManager::ModelManager()
 //------------------------------------------------------------------------------
 ModelManager::~ModelManager()
 {
+   #ifdef DEBUG_MODEL_MANAGER
+   MessageInterface::ShowMessage
+      ("ModelManager::~ModelManager() entered, modelMap.size() = %d\n", modelMap.size());
+   #endif
+   
    for (ModelMap::iterator pos = modelMap.begin(); pos != modelMap.end(); ++pos)
    {
       if (pos->second)
          delete pos->second;
    }
-
+   
    // Patch from Tristan Moody
    //   This patch moves the modelContext deletion to the ModelManager
    //   destructor from the OrbitViewCanvas and GroundTrackCanvas destructors.
@@ -72,6 +85,21 @@ ModelManager::~ModelManager()
    // New code (next 2 lines):
    if (modelContext != NULL)
       delete modelContext;
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearModel()
+//------------------------------------------------------------------------------
+void ModelManager::ClearModel()
+{
+   if (modelContext)
+      delete modelContext;
+   
+   modelContext = NULL;
+   numElements = 0;
+	modelMap.clear();
+	modelIdMap.clear();
 }
 
 
@@ -93,13 +121,11 @@ int ModelManager::LoadModel(wxString &modelPath)
 {
 	#ifdef DEBUG_LOAD_MODEL
 	MessageInterface::ShowMessage
-		("ModelManager::LoadModel() entered,  modelPath = '%s', "
-		 "modelIdMap.size() = %d\n", modelPath.c_str(), modelIdMap.size());
+		("ModelManager::LoadModel() entered,  modelIdMap.size() = %d\n   modelPath = '%s'\n",
+		 modelIdMap.size(), modelPath.c_str());
 	for (ModelIdMap::iterator pos = modelIdMap.begin(); pos != modelIdMap.end(); ++pos)
-   {
 		MessageInterface::ShowMessage
 			("    modelPath = '%s', id = %d\n", (pos->first).c_str(),  pos->second);
-   }
 	#endif
 	
 	// Do we need this flag here? Commented out (LOJ: 2011.12.08)

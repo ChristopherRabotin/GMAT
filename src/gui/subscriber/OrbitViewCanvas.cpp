@@ -174,12 +174,6 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
        name.c_str(), size.GetWidth(), size.GetHeight());
    #endif
    
-   #ifdef __USE_WX280_GL__
-   // Note:
-   // Use wxGLCanvas::m_glContext, otherwise resize will not work
-   //m_glContext = new wxGLContext(this);
-   #endif
-   
    ModelManager *mm = ModelManager::Instance();
    
    #ifndef __WXMAC__
@@ -196,7 +190,8 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
           mm->modelContext = this->GetGLContext();
    #endif
    
-   theContext = mm->modelContext;//new wxGLContext(this);
+   // Use the same context from the ModelManager
+   theContext = mm->modelContext;
    
    mStars = GLStars::Instance();
    mStars->InitStars();
@@ -268,8 +263,6 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    
    // solar system
    pSolarSystem = NULL;
-   //MessageInterface::ShowMessage
-   //   ("==> OrbitViewCanvas::OrbitViewCanvas() pSolarSystem=%p\n", pSolarSystem);
    
    // objects
    mObjectCount         = 0;
@@ -296,15 +289,11 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    
    #if DEBUG_INIT
    MessageInterface::ShowMessage
-      ("   pInternalCoordSystem=%p, pViewCoordSystem=%p\n", pInternalCoordSystem,
-       pViewCoordSystem);
-   if (pInternalCoordSystem)
-      MessageInterface::ShowMessage
-         ("   pInternalCoordSystem=%s\n", pInternalCoordSystem->GetName().c_str());
-   if (pViewCoordSystem)
-      MessageInterface::ShowMessage
-         ("   pViewCoordSystem=%s\n", pViewCoordSystem->GetName().c_str());
-   MessageInterface::ShowMessage("OrbitViewCanvas() constructor exiting\n\n");
+      ("   pInternalCoordSystem=<%p>'%s', pViewCoordSystem=<%p>'%s'\n",
+       pInternalCoordSystem, pInternalCoordSystem ? pInternalCoordSystem->GetName().c_str() : "NULL",
+       pViewCoordSystem, pViewCoordSystem ? pViewCoordSystem->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas() constructor exiting, theContext=<%p>\n\n", theContext);
    #endif
 }
 
@@ -2015,7 +2004,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    // First disable GL_TEXTURE_2D to show lines clearly
    // without this, lines are drawn dim (loj: 2007.06.11)
    glDisable(GL_TEXTURE_2D);
-   
+
    // Enable light source on option
    if (mEnableLightSource)
       HandleLightSource();
@@ -2030,11 +2019,11 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
          MessageInterface::ShowMessage("==> Drawing spacecraft '%s'\n", objName.c_str());
          #endif
          
-         Spacecraft *spac = (Spacecraft*)mObjectArray[obj];
+         Spacecraft *sat = (Spacecraft*)mObjectArray[obj];
          
-         if (spac->modelID != -1)
+         if (sat->modelID != -1)
          {
-            DrawSpacecraft3dModel(spac, objId, frame);
+            DrawSpacecraft3dModel(sat, objId, frame);
          }
          else
          {
@@ -2062,9 +2051,12 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       glTranslatef(mObjectViewPos[index1+0],mObjectViewPos[index1+1],mObjectViewPos[index1+2]);
       DrawObject(objName, obj);
    }
-   
+      
    if (mEnableLightSource)
+   {
       glDisable(GL_LIGHTING);
+      glDisable(GL_LIGHT0);
+   }
    
    glPopMatrix();
 }
@@ -2580,8 +2572,14 @@ void OrbitViewCanvas::DrawGridLines(int objId)
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame)
 {
+   #ifdef DEBUG_DRAW_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::DrawSpacecraft3dModel() entered, sc=<%p>'%s', objId=%d, "
+       "frame=%d\n", sc, sc ? sc->GetName().c_str() : "NULL", objId, frame);
+   #endif
+   
    ModelManager *mm = ModelManager::Instance();
-   ModelObject *model = mm->GetModel(sc->modelID);
+   ModelObject *scModel = mm->GetModel(sc->modelID);
    
    float RTD = (float)GmatMathConstants::DEG_PER_RAD;
    
@@ -2613,14 +2611,14 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    rotation[1] = sc->GetRealParameter(sc->GetParameterID("ModelRotationY"));
    rotation[2] = sc->GetRealParameter(sc->GetParameterID("ModelRotationZ"));
    scale = sc->GetRealParameter(sc->GetParameterID("ModelScale"));
-   model->SetBaseOffset(offset[0], offset[1], offset[2]);
-   model->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-   model->SetBaseScale(scale, scale, scale);
+   scModel->SetBaseOffset(offset[0], offset[1], offset[2]);
+   scModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
+   scModel->SetBaseScale(scale, scale, scale);
    
    // Dunn's new attitude call.  Need to change to quaternions.  Also need
    // to concatenate with BaseRotation.  Also need this to work for replay
    // animation buttons.
-   model->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   scModel->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
    
    // The line above is where the object model gets its orientation.  This
    // also seems to be a good place to give the model its ECI position.
@@ -2631,10 +2629,11 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
                 mObjectViewPos[index1+1],
                 mObjectViewPos[index1+2]);
    
-   model->Draw(true); //isLit
+   // Set isLit to true
+   scModel->Draw(true);
    
    // Old code that may be worth saving
-   //SetCurrent(*theContext);
+   // SetCurrent(*theContext);
    // ModelManager *mm = ModelManager::Instance();
    // SetCurrent(*mm->modelContext);
    // mm->modelContext->SetCurrent(*this);
@@ -2642,7 +2641,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    // Maybe delete this
    // Rvector3  eulersRad   = scAttitude->GetEulerAngles(mTime[frame],1,2,3);  // Uses the 123 Euler Sequence
    
-   // Save line below for when Phil modifies model->Rotate to accept quats
+   // Save line below for when Phil modifies scModel->Rotate to accept quats
    // Rvector   quaternion  = scAttitude->GetQuaternion(mTime[frame]);
    
    // Save line below for when I need to transpose a matrix.
@@ -2652,8 +2651,14 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    // PosX = 0.0;
    // PosY = 0.0;
    // PosZ = 15000.0;
-   // model->Reposition(PosX,PosY,PosZ);
-   // model->TranslateW(PosX,PosY,PosZ);
+   // scModel->Reposition(PosX,PosY,PosZ);
+   // scModel->TranslateW(PosX,PosY,PosZ);
+   
+   #ifdef DEBUG_DRAW_SPACECRAFT
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::DrawSpacecraft3dModel() leaving, sc=<%p>'%s', objId=%d, "
+       "frame=%d\n", sc, sc ? sc->GetName().c_str() : "NULL", objId, frame);
+   #endif
 }
 
 

@@ -26,7 +26,7 @@
 #include "CoordinateConverter.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
-
+#include "ModelObject.hpp"
 #include <map>
 
 class ViewCanvas: public wxGLCanvas

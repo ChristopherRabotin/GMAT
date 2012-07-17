@@ -47,6 +47,7 @@
 //#define DEBUG_LOAD_IMAGE 1
 //#define DEBUG_TEXTURE 1
 //#define DEBUG_LOAD_MODEL 1
+//#define DEBUG_DRAWING_MODE
 //#define DEBUG_OBJECT 2
 //#define DEBUG_DATA_BUFFERRING 1
 //#define DEBUG_UPDATE 1
@@ -244,7 +245,7 @@ ViewCanvas::~ViewCanvas()
       delete [] mScImage;
    
    #ifdef DEBUG_VIEWCANVAS
-   MessageInterface::ShowMessage("ViewCanvas::~ViewCanvas() '%s' leaviing\n", mPlotName.c_str());
+   MessageInterface::ShowMessage("ViewCanvas::~ViewCanvas() '%s' leaving\n", mPlotName.c_str());
    #endif
 }
 
@@ -289,7 +290,8 @@ bool ViewCanvas::InitializePlot()
 {
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
-      ("\nViewCanvas::InitializePlot() '%s' entered\n", mPlotName.c_str());
+      ("\nViewCanvas::InitializePlot() '%s' entered, theContext=<%p>\n",
+       mPlotName.c_str(), theContext);
    #endif
    
    // Add things to do here
@@ -1646,15 +1648,19 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
    // routine to automatically construct the lower levels of details from you
    // original image. This routine re-samples the original image at each level
    // of detail so that the image is available at each of the various smaller sizes.
-   //=======================================================
+   //=======================================================================
    #ifdef __ENABLE_MIPMAPS__
-   //=======================================================
+   //=======================================================================
    
    //used for min and magnifying texture
    int mipmapsStatus = 0;
    
    //pass image to opengl
+   
+   //==============================================
+   // gluBuild2DMipmaps() crashes on Linux
    #ifndef __WXGTK__
+   //==============================================
    
    // If small icon, set background color alpha value to 0 transparent
    // so that it will not be shown when drawing.
@@ -1666,14 +1672,16 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
    {
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      
+            
       // This call crashes GMAT on Linux, so it is excluded here. 
       mipmapsStatus =
          gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
                            GL_UNSIGNED_BYTE, data1);
    }
    
+   //==============================================
    #else
+   //==============================================
    
    if (width <= 16 && height <= 16)
    {
@@ -1689,7 +1697,9 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
                    GL_UNSIGNED_BYTE, data1);
    }
    
+   //==============================================
    #endif
+   //==============================================
    
    if (mipmapsStatus == 0)
    {
@@ -1711,9 +1721,10 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
       return false;
    }
    
-   //=======================================================
+   //=======================================================================
+   // Not using mipmaps
    #else
-   //=======================================================
+   //=======================================================================
    
    //used for min and magnifying texture
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1730,9 +1741,9 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
    
    return true;
    
-   //=======================================================
+   //=======================================================================
    #endif
-   //=======================================================
+   //=======================================================================
 }
 
 
@@ -1862,7 +1873,7 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 					{
                   #ifdef DEBUG_LOAD_MODEL
 						MessageInterface::ShowMessage
-							("   Loading model file from the spacecraft <%p>'%s', modelFile='%s', "
+							("   Loading model file from the spacecraft <%p>'%s'\n   modelFile='%s', "
 							 "modelID=%d\n",  sat, sat->GetName().c_str(), sat->modelFile.c_str(),
 							 sat->modelID);
 				      #endif
@@ -1870,7 +1881,7 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 						{
 							wxString modelPath(sat->modelFile.c_str());
 							if (GmatFileUtil::DoesFileExist(modelPath.c_str()))
-							{
+							{                        
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage("   Calling mm->LoadModel(), mm=<%p>\n", mm);
                         #endif
@@ -1878,7 +1889,7 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
                         numModelLoaded++;
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage
-									("   Successfully loaded model '%s', numModelLoaded\n", modelPath.c_str(),
+									("   Successfully loaded model '%s', numModelLoaded = %d\n", modelPath.c_str(),
                             numModelLoaded);
                         #endif
 							}
@@ -1898,13 +1909,14 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 			}
 			
          #ifdef DEBUG_LOAD_MODEL
-			MessageInterface::ShowMessage("   numModelLoaded = %d, mScCount = %d\n", numModelLoaded, mScCount);
+			MessageInterface::ShowMessage
+            ("   numModelLoaded = %d, mScCount = %d\n", numModelLoaded, mScCount);
 			#endif
 			
 			// Set mModelsAreLoaded to true if it went through all models
 			if (numModelLoaded == mScCount)
 				mModelsAreLoaded = true;				
-		}
+      }
    }
    
    #if DEBUG_LOAD_MODEL
