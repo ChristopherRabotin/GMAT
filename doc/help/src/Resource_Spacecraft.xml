@@ -227,9 +227,10 @@
             <row>
               <entry><guilabel>CurrA1MJD</guilabel></entry>
 
-              <entry><para>[Deprecated] The current epoch in the A1ModJulian
-              format. This field can only be used within the mission
-              sequence.</para><variablelist>
+              <entry><para><emphasis>This field has been deprecated and should
+              no longer be used.</emphasis></para><para>The current epoch in
+              the A1ModJulian format. This field can only be used within the
+              mission sequence.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -1139,8 +1140,15 @@
                       <informalequation>
                         <alt>RadApo ~= 0</alt>
 
-                        <m:math><m:mrow> <m:mi>RadApo</m:mi> <m:mo></m:mo>
-                        <m:mn>0</m:mn> </m:mrow></m:math>
+                        <m:math>
+                          <m:mrow>
+                            <m:mi>RadApo</m:mi>
+
+                            <m:mo></m:mo>
+
+                            <m:mn>0</m:mn>
+                          </m:mrow>
+                        </m:math>
                       </informalequation>
                     </listitem>
                   </varlistentry>
@@ -1233,8 +1241,13 @@
                       <informalequation>
                         <alt>RMAG &gt; 0</alt>
 
-                        <m:math display="block"><m:mi>RMAG</m:mi>
-                        <m:mo>&gt;</m:mo> <m:mn>0</m:mn></m:math>
+                        <m:math display="block">
+                          <m:mi>RMAG</m:mi>
+
+                          <m:mo>&gt;</m:mo>
+
+                          <m:mn>0</m:mn>
+                        </m:math>
                       </informalequation>
                     </listitem>
                   </varlistentry>
@@ -1377,8 +1390,13 @@
                       <informalequation>
                         <alt>km/s</alt>
 
-                        <m:math><m:mi>km</m:mi> <m:mo>/</m:mo>
-                        <m:mi>s</m:mi></m:math>
+                        <m:math>
+                          <m:mi>km</m:mi>
+
+                          <m:mo>/</m:mo>
+
+                          <m:mi>s</m:mi>
+                        </m:math>
                       </informalequation>
                     </listitem>
                   </varlistentry>
