@@ -143,8 +143,11 @@ extern "C"
       if (theModerator == NULL)
          return -1;
 
-      if (theModerator->Initialize() == false)
+      if (theModerator->Initialize("gmat_startup_file.txt") == false)
+      {
+         lastMsg = "The Moderator failed to initialize";
          return -2;
+      }
 
       lastMsg = "The Moderator has been initialized";
       ode     = NULL;
