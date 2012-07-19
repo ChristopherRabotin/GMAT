@@ -1371,7 +1371,7 @@ Real DragForce::SetRealParameter(const Integer id, const Real value)
          throw ODEModelException(
             "The value of \"" + buffer.str() + "\" for field \"Magnetic Index\""
             " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [Real Number >= 0.0]. ");
+            "The allowed values are: [0.0 <= Real Number <= 9.0]. ");
       }
       return kp;
 //      if ((value < 0.0) || (value > 9.0))
