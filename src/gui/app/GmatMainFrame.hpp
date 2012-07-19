@@ -76,6 +76,8 @@ public:
    Integer GetNumberOfChildOpen(bool scriptsOnly = false, bool incPlots = false,
                                 bool incScripts = false, bool incMissionTree = false);
    Integer GetNumberOfActivePlots();
+   bool IsMissionRunning();
+   bool IsAnimationRunning();
    bool IsMissionTreeUndocked();
    bool IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer &width);
    bool IsScriptEditorOpen(Integer &xPos, Integer &yPos, Integer &width, Integer &height);
@@ -111,6 +113,7 @@ public:
    void BuildAndRunScript(const wxString &filename, bool addToResourceTree = false);
    Integer RunCurrentMission();
    void StopRunningMission();
+   void StopAnimation();
    void NotifyRunCompleted();
    void ProcessPendingEvent();
    void StartMatlabServer();
@@ -224,6 +227,7 @@ public:
 protected:
 
 private:
+   wxString mAnimationTitle;
    int  mAnimationFrameInc;
    bool mAnimationEnabled;
    bool mRunPaused;

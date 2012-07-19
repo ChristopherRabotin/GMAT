@@ -228,6 +228,18 @@ UnsignedInt MdiChildViewFrame::GetSunLineColor()
 }
 
 //------------------------------------------------------------------------------
+// bool IsAnimationRunning()
+//------------------------------------------------------------------------------
+bool MdiChildViewFrame::IsAnimationRunning()
+{
+   if (mCanvas)
+      return mCanvas->IsAnimationRunning();
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // Integer GetAnimationUpdateInterval()
 //------------------------------------------------------------------------------
 Integer MdiChildViewFrame::GetAnimationUpdateInterval()

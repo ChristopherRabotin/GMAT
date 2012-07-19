@@ -136,13 +136,14 @@
 // If we want to use child best size define this
 #define __USE_CHILD_BEST_SIZE__
 
+// Now using wxMilliSleep() so removed (LOJ: 2012.07.18)
 // If Sleep in not defined (on unix boxes)
-#ifndef Sleep
-#ifndef __WXMSW__
-#include <unistd.h>
-#define Sleep(t) usleep((t))
-#endif
-#endif
+//#ifndef Sleep
+//#ifndef __WXMSW__
+//#include <unistd.h>
+//#define Sleep(t) usleep((t))
+//#endif
+//#endif
 
 
 //#define DEBUG_MAINFRAME
@@ -158,6 +159,7 @@
 //#define DEBUG_REFRESH_SCRIPT
 //#define DEBUG_INTERPRET
 //#define DEBUG_RUN_MISSION
+//#define DEBUG_ANIMATION
 //#define DEBUG_SIZE
 //#define DBGLVL_MENUBAR 1
 //#define DEBUG_PENDING_EVENTS
@@ -293,10 +295,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    theMessageWin = NULL;
    theMainWin = NULL;
    mWelcomePanel = NULL;
-
+   
    // set the script name
    mTempScriptName = "$gmattempscript$.script";
    mScriptFilename = mTempScriptName;
+   mAnimationTitle = "";
    mAnimationFrameInc = 1;
    mAnimationEnabled = true;
    mInterpretFailed = false;
@@ -968,6 +971,30 @@ Integer GmatMainFrame::GetNumberOfActivePlots()
 }
 
 //------------------------------------------------------------------------------
+// bool IsMissionRunning()
+//------------------------------------------------------------------------------
+bool GmatMainFrame::IsMissionRunning()
+{
+   wxToolBar *toolBar = GetToolBar();
+   if (toolBar->GetToolState(GmatMenu::TOOL_RUN) == true)
+      return true;
+   else
+      return false;
+}
+
+//------------------------------------------------------------------------------
+// bool IsAnimationRunning()
+//------------------------------------------------------------------------------
+bool GmatMainFrame::IsAnimationRunning()
+{
+   wxToolBar *toolBar = GetToolBar();
+   if (toolBar->GetToolState(GmatMenu::TOOL_ANIMATION_PLAY) == true)
+      return true;
+   else
+      return false;
+}
+
+//------------------------------------------------------------------------------
 // bool IsMissionTreeUndocked()
 //------------------------------------------------------------------------------
 /**
@@ -1549,13 +1576,13 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CloseAllChildren() closeScriptWindow=%d, closePlots=%d, "
+      ("\nGmatMainFrame::CloseAllChildren() closeScriptWindow=%d, closePlots=%d, "
        "closeReports=%d, closeUndockedMissionTree=%d\n", closeScriptWindow, closePlots,
        closeReports, closeUndockedMissionTree );
    MessageInterface::ShowMessage
       ("   Number of children = %d\n", theMdiChildren->GetCount());
    #endif
-
+   
    // Make sure the Mission Tree data is set in the personalization file
    if (closeUndockedMissionTree)
    {
@@ -1597,9 +1624,10 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    while (node)
    {
       #ifdef DEBUG_MAINFRAME_CLOSE
-      MessageInterface::ShowMessage("   =====> node = %p\n", node);
+      MessageInterface::ShowMessage("   ==========> node = %p\n", node);
       #endif
 
+      wxSafeYield();
       canDelete = false;
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
 
@@ -1723,14 +1751,14 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       
       #ifdef DEBUG_MAINFRAME_CLOSE
       MessageInterface::ShowMessage
-         ("   next node = %p, canDelete = %d\n", nextNode, canDelete);
+         ("   next node  = %p, canDelete = %d\n", nextNode, canDelete);
       if (nextNode)
       {
          child = (GmatMdiChildFrame *)nextNode->GetData();
          title = child->GetTitle();
          name = child->GetName();
          MessageInterface::ShowMessage
-            ("   title='%s', name='%s'\n", title.c_str(), name.c_str());
+            ("   next title = '%s'\n   next name  = '%s'\n", title.c_str(), name.c_str());
       }
       #endif
       
@@ -1757,6 +1785,10 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
 //------------------------------------------------------------------------------
 void GmatMainFrame::MinimizeChildren()
 {
+   #ifdef DEBUG_MAINFRAME_CLOSE
+   MessageInterface::ShowMessage("GmatMainFrame::MinimizeChildren() entered\n");
+   #endif
+   
    // Close all opened output reports first
    CloseAllChildren(false, false, true, false);
    
@@ -2077,7 +2109,7 @@ void GmatMainFrame::CloseCurrentProject()
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() entered\n");
    #endif
-
+      
    // close all windows
    CloseAllChildren(true, true, true, false);
 
@@ -2136,16 +2168,17 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
 {
    #ifdef DEBUG_INTERPRET
    MessageInterface::ShowMessage
-      ("GmatMainFrame::InterpretScript()\n   filename=%s\n   scriptOpenOpt=%d, "
+      ("\nGmatMainFrame::InterpretScript() entered\n   filename=%s\n   scriptOpenOpt=%d, "
        "closeScript=%d, readBack=%d, multiScripts=%d\n   savePath='%s'\n", filename.c_str(),
        scriptOpenOpt, closeScript, readBack, multiScripts, savePath.c_str());
    #endif
 
+   wxSafeYield();
    UpdateTitle(filename);
-
+   
    bool success = false;
    GmatAppData *gmatAppData = GmatAppData::Instance();
-
+   
    // Always refresh the gui before new scripts are read
    CloseAllChildren(closeScript, true, true, false);
    gmatAppData->GetResourceTree()->ClearResource(true);
@@ -2180,6 +2213,8 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
          theGuiInterpreter->ClearResource();
       }
       
+      wxSafeYield();
+      
       if (success)
       {
          #ifdef DEBUG_INTERPRET
@@ -2188,6 +2223,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
          // Update ResourceTree and MissionTree
          gmatAppData->GetResourceTree()->UpdateResource(true);
          gmatAppData->GetMissionTree()->UpdateMission(true);
+         wxSafeYield();
          
          #ifdef DEBUG_INTERPRET
          MessageInterface::ShowMessage("   Now restoring UndockedMissionPanel\n");
@@ -2226,9 +2262,10 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       wxLog::FlushActive();
       MessageInterface::ShowMessage(e.GetFullMessage());
    }
-
+   
+   wxSafeYield();
    mInterpretFailed = !success;
-
+   
    #ifdef DEBUG_INTERPRET
    MessageInterface::ShowMessage
       ("GmatMainFrame::InterpretScript() returning %d\n", success);
@@ -2393,6 +2430,57 @@ void GmatMainFrame::StopRunningMission()
 
 
 //------------------------------------------------------------------------------
+// void StopAnimation()
+//------------------------------------------------------------------------------
+/*
+ * Stops running animation and updates tool bar accordingly.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::StopAnimation()
+{
+   #ifdef DEBUG_ANIMATION
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::StopAnimation() entered, numPlots=%d, mAnimationTitle='%s'\n",
+       MdiGlPlot::numChildren, mAnimationTitle.c_str());
+   #endif
+   
+   MdiChildViewFrame *frame = NULL;
+   bool frameFound = false;
+   
+   for (int i = 0; i < MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      if (frame && (frame->GetPlotName().IsSameAs(mAnimationTitle)))
+      {
+         frameFound = true;
+         break;
+      }
+   }
+   
+   if (frameFound)
+   {
+      wxToolBar *toolBar = GetToolBar();
+      toolBar->ToggleTool(TOOL_ANIMATION_PLAY, false);
+      toolBar->ToggleTool(TOOL_ANIMATION_STOP, true);
+      frame->SetUserInterrupt();
+      wxYield();
+   }
+   else
+   {
+      #ifdef DEBUG_ANIMATION
+      MessageInterface::ShowMessage
+         ("   Plot with '%s' not found\n", mAnimationTitle.c_str());
+      #endif
+   }
+   
+   #ifdef DEBUG_ANIMATION
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::StopAnimation() leaving, frameFound=%d\n", frameFound);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // void NotifyRunCompleted()
 //------------------------------------------------------------------------------
 /*
@@ -2491,7 +2579,8 @@ void GmatMainFrame::StopMatlabServer()
       for (int i=0; i<10; i++)
       {
          dlg.Update((i+1)*10);
-         Sleep(200);
+         //Sleep(200);
+         wxMilliSleep(200);
       }
       #endif
       //==============================================================
@@ -2568,7 +2657,8 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    
    // Check if animation is running
    wxToolBar *toolBar = GetToolBar();
-   if (toolBar->GetToolState(GmatMenu::TOOL_ANIMATION_PLAY) == true)
+   //if (toolBar->GetToolState(GmatMenu::TOOL_ANIMATION_PLAY) == true)
+   if (IsAnimationRunning())
    {
       int answer =
          wxMessageBox(wxT("GMAT is running the animation.\n"
@@ -2594,7 +2684,6 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       #endif
       return;
    }
-   
    
    // close all child windows first
    if (CloseAllChildren(true, true, true, true))
@@ -2841,7 +2930,7 @@ bool GmatMainFrame::SaveScriptAs()
    if (scriptSaved)
       CloseAllChildren();
    #endif
-
+   
    if (scriptSaved)
       UpdateGuiScriptSyncStatus(1, 1);
    
@@ -3096,7 +3185,6 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
       #ifdef __CLOSE_CHILDREN_AFTER_SAVE__
       CloseAllChildren();
       #endif
-
    }
    
    #ifdef DEBUG_MAINFRAME_SAVE
@@ -3259,6 +3347,10 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
 {
+   #ifdef DEBUG_MAINFRAME_CLOSE
+   MessageInterface::ShowMessage("GmatMainFrame::OnCloseAll() calling CloseAllChildren\n");
+   #endif
+   
    CloseAllChildren(true, true, true, false);
    wxSafeYield();
    
@@ -5181,9 +5273,6 @@ bool GmatMainFrame::SetScriptFileName(const std::string &filename)
          (Gmat::WARNING_, "GMAT is still running the mission.\n"
           "Please STOP before reading a new script.");
       
-      //wxMessageBox(wxT("GMAT is still running the mission.\n"
-      //                 "Please STOP before reading a new script."),
-      //             wxT("GMAT Warning"));
       return false;
    }
    
@@ -5662,17 +5751,18 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
    wxString title = child->GetTitle();
    MdiChildViewFrame *frame = NULL;
    bool frameFound = false;
-
+   
    #ifdef DEBUG_ANIMATION
    MessageInterface::ShowMessage
-      ("GmatMainFrame::OnAnimation() title=%s\n", title.c_str());
+      ("GmatMainFrame::OnAnimation() entered, title=%s\n", title.c_str());
    #endif
-
+   
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       if (frame && (frame->GetPlotName().IsSameAs(title)))
       {
+         mAnimationTitle = title;
          frameFound = true;
          break;
       }
@@ -5680,10 +5770,10 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
 
    if (!frameFound)
       return;
-
+   
    #ifdef DEBUG_ANIMATION
    MessageInterface::ShowMessage
-      ("===> Now start animation of %s\n", frame->GetPlotName().c_str());
+      ("   Apply animation action on frame '%s'\n", frame->GetPlotName().c_str());
    #endif
    
    if (!mAnimationEnabled)
@@ -5704,11 +5794,17 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
    switch (event.GetId())
    {
    case TOOL_ANIMATION_PLAY:
+      #ifdef DEBUG_ANIMATION
+      MessageInterface::ShowMessage("   Starting animation\n");
+      #endif
       frame->SetAnimationUpdateInterval(1);
       frame->SetAnimationFrameIncrement(mAnimationFrameInc);
       frame->RedrawPlot(true);
       break;
    case TOOL_ANIMATION_STOP:
+      #ifdef DEBUG_ANIMATION
+      MessageInterface::ShowMessage("   Stopping animation\n");
+      #endif
       frame->SetUserInterrupt();
       break;
    case TOOL_ANIMATION_FAST:
@@ -5732,6 +5828,11 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
    default:
       break;
    }
+   
+   #ifdef DEBUG_ANIMATION
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnAnimation() leaving, title=%s\n", title.c_str());
+   #endif
 }
 
 

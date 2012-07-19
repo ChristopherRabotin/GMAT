@@ -59,6 +59,7 @@ public:
    virtual bool GetDrawGrid();
    virtual UnsignedInt GetXyPlaneColor();
    virtual UnsignedInt GetSunLineColor();
+   virtual bool IsAnimationRunning();
    virtual Integer GetAnimationUpdateInterval();
    virtual Integer GetAnimationFrameIncrement();
    

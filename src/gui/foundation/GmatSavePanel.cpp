@@ -462,12 +462,57 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
    
    bool saveScript = true;
    mSyncGui = false;
+   GmatAppData *gmatAppData = GmatAppData::Instance();
    
    if (event.GetEventObject() == mSaveSyncButton ||
        event.GetEventObject() == mSaveSyncRunButton)
+   {
+      if (gmatAppData->GetMainFrame()->IsAnimationRunning())
+      {
+         // @todo - Figure out why following happens. (LOJ: 2012.07.18)
+         // It always runs mission before updating the resource tree.
+         // It sometimes crashes when I tried SaveSyncRun again.
+         // @note - Prompt user to stop animation first until issue is resolved.
+         // Is there a timing issue? wxYield() didn't seem to solve the problem.
+         // Use wxTimer?
+         //===========================================================
+         #if 0
+         //===========================================================
+         wxString action = "reload the GUI with the saved script?";
+         if (event.GetEventObject() == mSaveSyncRunButton)
+            action = "reload the GUI with the saved script and run?";
+         
+         int answer =
+            wxMessageBox(wxT("GMAT is running the animation.\n"
+                             "Are you sure you want to stop the animation and " + action),
+                         wxT("Please confirm"), wxYES_NO);
+         
+         if (answer == wxYES)
+         {
+            // Stop animation
+            gmatAppData->GetMainFrame()->StopAnimation();
+         }
+         else
+            return;
+         
+         //===========================================================
+         #else
+         //===========================================================
+        
+         wxMessageBox(wxT("GMAT is running the animation.\n"
+                          "Please stop the animation first."),
+                      wxT("Warning"), wxOK);
+         return;
+         
+         //===========================================================
+         #endif
+         //===========================================================
+      }
+      
       mSyncGui = true;
+   }
    
-   GmatAppData *gmatAppData = GmatAppData::Instance();
+   wxYield();
    
    // If this is not an active script, prompt the user for setting active
    if (!mIsScriptActive)
@@ -499,6 +544,8 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
    //if (isScriptModified)
    if (saveScript)
       OnSave(event);
+   
+   wxYield();
    
    // If continue building, set script file name and build script
    if (mSyncGui)

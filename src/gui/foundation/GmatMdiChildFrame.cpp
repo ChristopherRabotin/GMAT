@@ -380,14 +380,14 @@ void GmatMdiChildFrame::OnActivate(wxActivateEvent &event)
 {
    #ifdef DEBUG_ACTIVATE
    MessageInterface::ShowMessage
-      ("GmatMdiChildFrame::OnActivate() entered, title='%s', mItemType=%d\n",
+      ("\nGmatMdiChildFrame::OnActivate() entered, title='%s', mItemType=%d\n",
        GetTitle().c_str(), mItemType);
    #endif
    
    // update both edit and animation tools
    #ifdef DEBUG_UPDATE_GUI_ITEM
    MessageInterface::ShowMessage
-      ("GmatMdiChildFrame()::OnActivate calling UpdateGuiItem()\n");
+      ("GmatMdiChildFrame::OnActivate calling UpdateGuiItem()\n");
    #endif
    UpdateGuiItem(1, 1);
    UpdateActiveChild();
@@ -395,7 +395,7 @@ void GmatMdiChildFrame::OnActivate(wxActivateEvent &event)
    relativeZOrder = maxZOrder++;
    #ifdef DEBUG_ACTIVATE
    MessageInterface::ShowMessage
-      ("GmatMdiChildFrame::OnActivate() setting zOrder for %s to %d, and maxZOrder set to %d\n",
+      ("GmatMdiChildFrame::OnActivate() leaving, title='%s', zOrder set to %d, and maxZOrder set to %d\n",
        GetTitle().c_str(), relativeZOrder, maxZOrder);
    #endif
    event.Skip();
@@ -640,13 +640,22 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
 {
    #ifdef DEBUG_UPDATE_GUI_ITEM
    MessageInterface::ShowMessage
-      ("GmatMdiChildFrame::UpdateGuiItem() updateEdit=%d, updateAnimation=%d\n",
+      ("GmatMdiChildFrame::UpdateGuiItem() entered, updateEdit=%d, updateAnimation=%d\n",
        updateEdit, updateAnimation);
    #endif
    
    wxToolBar *toolBar = theParent->GetToolBar();
    if (toolBar == NULL)
       return;
+   
+   bool isMissionRunning = ((GmatMainFrame*)theParent)->IsMissionRunning();
+   bool isAnimationRunning = ((GmatMainFrame*)theParent)->IsAnimationRunning();
+   
+   #ifdef DEBUG_UPDATE_GUI_ITEM
+   MessageInterface::ShowMessage
+      ("   IsMissionRunning=%d, IsAnimationRunning=%d\n",
+       isMissionRunning, isAnimationRunning);
+   #endif
    
    int editIndex = theMenuBar->FindMenu("Edit");
    
@@ -676,10 +685,11 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
    //------------------------------------------------------------
    // If mission is running, ignore   
    if (updateAnimation == 1 &&
-      (mItemType == GmatTree::OUTPUT_ORBIT_VIEW || mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT))
+      (mItemType == GmatTree::OUTPUT_ORBIT_VIEW ||
+       mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT))
    {
-      // If Play button is enabled, mission is not running
-      if (toolBar->GetToolEnabled(GmatMenu::TOOL_RUN))
+      // If mission is not running, enable animation tools
+      if (!isMissionRunning)
       {
          toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_PLAY, true);
          toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_STOP, true);
