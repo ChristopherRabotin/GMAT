@@ -243,8 +243,8 @@ void CoordSysCreateDialog::SaveData()
       }
       else
       {
-         wxLogError("The CoordinateSystem \"" + wxString(coordName.c_str()) +
-                    "\" already exist. Please enter different name\n");
+         wxLogError("\"" + wxString(coordName.c_str()) +
+                    "\" already exists. Please enter a different name.\n");
          canClose = false;
       }
    }

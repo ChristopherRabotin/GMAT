@@ -5230,7 +5230,7 @@ int ResourceTree::GetNameFromUser(wxString &newName, const wxString &oldName,
       if (GetObject(newName.c_str()) != NULL)
       {
          MessageInterface::PopupMessage
-            (Gmat::ERROR_, "\"%s\" already exist. Please enter different name.", newName.c_str());
+            (Gmat::ERROR_, "\"%s\" already exists. Please enter a different name.", newName.c_str());
          
          return GetNameFromUser(newName, newName, msg, caption);
       }

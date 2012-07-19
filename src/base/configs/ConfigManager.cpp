@@ -1305,7 +1305,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
          else
          {
             MessageInterface::PopupMessage
-               (Gmat::WARNING_, "%s already exist, Please enter different name.\n",
+               (Gmat::WARNING_, "%s already exists, Please enter a different name.\n",
                 newName.c_str());
          }
       }
