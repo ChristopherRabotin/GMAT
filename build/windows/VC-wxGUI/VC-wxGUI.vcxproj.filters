@@ -837,9 +837,6 @@
     <ClCompile Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.cpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\propagator\BulirschStoer.cpp">
-      <Filter>Source Files\base\propagator</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.cpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClCompile>
@@ -2394,9 +2391,6 @@
       <Filter>Source Files\base\solver</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.hpp">
-      <Filter>Source Files\base\propagator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\propagator\BulirschStoer.hpp">
       <Filter>Source Files\base\propagator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.hpp">
