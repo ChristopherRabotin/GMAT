@@ -70,7 +70,7 @@
 \maketitle
 
 \begin{abstract}
-This document describes the steps needed to build GMAT using Visual Studio 2010 (VS2010).  The instructions start with a fresh installation of VS2010, provide directions for installing wxWidgets, and finally for building GMAT. 
+This document describes the steps needed to build GMAT using Visual Studio 2010 (VS2010).  The instructions start with a fresh installation of VS2010, provide directions for installing wxWidgets, and finally for building GMAT.
 \end{abstract}
 
 \section{Introduction}
@@ -174,7 +174,7 @@ GMAT's source code is located in a Subversion repository at SourceForge.  In add
 \begin{quote}
 https://gmat.svn.sourceforge.net/svnroot/gmat/trunk
 \end{quote}
-\noindent Check out the entire source tree from that location.  When you check out the tree, you'll retrieve GMAT's source code, development files, documentation, source for several plugin libraries, and the support files needed to run GMAT. 
+\noindent Check out the entire source tree from that location.  When you check out the tree, you'll retrieve GMAT's source code, development files, documentation, source for several plugin libraries, and the support files needed to run GMAT.
 
 \section{Building wxWidgets}
 
@@ -185,13 +185,13 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 \begin{enumerate}
 \item Download wxWidgets 2.8 from http://wxwidgets.org/downloads/.  Use the latest stable version of the 2.8 tree (2.8.12 at this writing), and download the wxMSW package.
 \item Unpack the wx code into the folder named wxWidgets in your Gmat3rdParty folder.  You should see folders named art, build, contrib, demos, docs, include, lib, locale, samples, src, and utils in the wxWidgets folder when finished.
-\item Visual Studio 2010 has trouble processing the Visual C++ project files that ship with wx.  Instead, we'll use files already configured for wx at Thinking Systems. 
+\item Visual Studio 2010 has trouble processing the Visual C++ project files that ship with wx.  Instead, we'll use files already configured for wx at Thinking Systems.
 \begin{enumerate}
 \item The Visual Studio 2010 solution and project files for wxWidgets are located in an archive file in the GMAT folders you checked out earlier.  Find the file wxWidgets.zip in the build\textbackslash GmatVS2010 folder of that working copy of the code.
 \item Unpack the wxWidgets.zip archive into your wxWidgets folder.
-\item Check to see that the file wx\_dll.sln is in your Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder.  (This step ensures that all of the build files are properly positioned in the wxWidgets folder structure.  The key files are wx\_dll.sln in the Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder and wxcontrib\_dll.sln in the Gmat3rdParty\textbackslash wxWidgets\textbackslash contrib\textbackslash build folder.) 
+\item Check to see that the file wx\_dll.sln is in your Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder.  (This step ensures that all of the build files are properly positioned in the wxWidgets folder structure.  The key files are wx\_dll.sln in the Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder and wxcontrib\_dll.sln in the Gmat3rdParty\textbackslash wxWidgets\textbackslash contrib\textbackslash build folder.)
 \end{enumerate}
- 
+
 \end{enumerate}
 
 \subsection{Prepare and Build wxWidgets}
@@ -214,7 +214,7 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 \item Most, but not all, of the solution will build.  You may need to repeat the build process to get all of the libraries GMAT requires built.  Build the solution again until all but the dbgrid projects build.  (You are done when 19 of the 20 projects build.)
 \item Select ``File | Open | Project/Solution...'' from the menu bar
 \item Open the wxcontrib\_dll.sln solution file from the contrib\textbackslash build folder of your wxWidgets installation.  (For me, the file is found in  C\:\textbackslash GmatVS\textbackslash Gmat3rdParty\textbackslash wxWidgets\textbackslash contrib\textbackslash build)
-\item On the Visual C++ toolbar select ``DLL Release'' (specifying the build configuration) and set your solution platform to Win32.  
+\item On the Visual C++ toolbar select ``DLL Release'' (specifying the build configuration) and set your solution platform to Win32.
 \item Build the solution (right click on the ``Solution wxcontrib\_dll'' node at the top of the tree and select ``Build Solution''.)
 \end{enumerate}
 
@@ -243,7 +243,7 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 \item wxmsw28\_stc\_vc\_custom.dll
 \item wxmsw28\_xrc\_vc\_custom.dll
 \end{itemize}}
-  
+
 \noindent Copy these into your GmatDevelopment\textbackslash application\textbackslash bin folder.
 
 \section{Preparing SPICE (Optional)}
@@ -260,7 +260,7 @@ http://naif.jpl.nasa.gov/naif/toolkit\_C\_PC\_Windows\_VisualC\_32bit.html
 http://naif.jpl.nasa.gov/naif/toolkit\_C\_PC\_Windows\_VisualC\_64bit.html
 \end{quote}
 \noindent You want the file named cspice.zip.
-\item Unpack the archive into your Gmat3rdParty\textbackslash cspice (or cspice64 for 64-bit) folder.  You should unpack the files so that you have, for example, a Gmat3rdParty\textbackslash cspice\textbackslash include folder that contains the cspice header (.h) files.  
+\item Unpack the archive into your Gmat3rdParty\textbackslash cspice (or cspice64 for 64-bit) folder.  You should unpack the files so that you have, for example, a Gmat3rdParty\textbackslash cspice\textbackslash include folder that contains the cspice header (.h) files.
 \end{enumerate}
 
 \noindent Note that cspice includes the Fortran to C library code; if you build with SPICE, you do not need to manage f2c separately when working with the GMAT base library code.
@@ -282,7 +282,7 @@ At this point, GMAT should build without further configuration.  Follow these st
 \begin{enumerate}
 \item Open Visual C++
 \item Select ``File | Open | Project/Solution...'' from the menu bar
-\item Browse to the GmatDevelopment\textbackslash build\textbackslash GmatVS2010 folder
+\item Browse to the GmatDevelopment\textbackslash build\textbackslash windows-VS2010 folder
 \item Select the GmatVS2010.sln solution file and click the Open button.  The GMAT solution will open and show projects to build GMAT and several plugin libraries.
 \item The solution has several configurations, depending on how you want to proceed: Debug, ReleaseWithoutF2C, Release, and ReleaseWithSPICE.  Here's what you need to know about them:
 \begin{itemize}
@@ -292,7 +292,7 @@ At this point, GMAT should build without further configuration.  Follow these st
 \item \textbf{ReleaseWithSPICE}: This is the ``Guaranteed to work'' configuration of GMAT that includes all of the base components, and includes the plugin libraries for MATLAB and the fmincon optimizer.  Note that the MATLAB extensions require additional configuration, described below.
 \end{itemize}
 \item Set the configuration to ReleaseWithoutF2C, Release, or ReleaseWithSPICE, depending on the elements installed in previous sections.
-\item Right click on the GMAT\_wxGui project, and select Rebuild to completely build GMAT.  This process takes a few minutes.  
+\item Right click on the GMAT\_wxGui project, and select Rebuild to completely build GMAT.  This process takes a few minutes.
 \item Open a windows explorer and browse to your GmatDevelopment\textbackslash bin folder.  You should see GMAT.exe there, along with libGmatBase.dll and your wxWidgets libraries.
 \item Set up the GMAT data files and other files needed to run GMAT (See Appendix A).
 \item Double click on the GMAT.exe file to run GMAT.  Press the Run button to run the default mission.  Rejoice.
@@ -309,7 +309,7 @@ GMAT's source tree includes a project file and code for a GMAT compatible estima
 The source tree also includes code for a C interface into GMAT's object-oriented engine in the shared library libGmatBase.  The C-interface is being used on other projects to provide access to select components of GMAT's engine for external use.  This access is contained in the libCInterface plugin.
 
 Follow these instructions to build libGmatEstimation and libCInterface:
- 
+
 \begin{enumerate}
 \item Building libGmatEstimation
 \begin{enumerate}
@@ -356,7 +356,7 @@ Next we will build the GMAT MATLAB interface.  You'll need to have MATLAB instal
 \item Select the ``Configuration Properties | VC++ Directories'' entry on the property tree in the left panel of the dialog
 \item Select the ``Include Directories'' line, and select \textless Edit...\textgreater from the drop-down button that sets the directory list
 \item A new dialog appears that lists the include directory settings for at the project scope.  Click on the first entry in the list, and then click on the button to its right labeled with ellipses (...)
-\item A file browser will appear.  Navigate in this browser to your MATLAB folder, and then inside of it, navigate to the ``extern\textbackslash include'' folder.  This folder contains the header files GMAT needs to build the interface.  Click the ``Select Folder'' button to select it.  
+\item A file browser will appear.  Navigate in this browser to your MATLAB folder, and then inside of it, navigate to the ``extern\textbackslash include'' folder.  This folder contains the header files GMAT needs to build the interface.  Click the ``Select Folder'' button to select it.
 \item Once the file browser window closes, your include dialog should resemble the one shown in Figure~\ref{fig:SettingIncludeFolder}.  Press the OK button.
 \end{enumerate}
 \item Right click on the libMatlabInterface project, and select Build.  (Don't select Rebuild unless you want to also rebuild libGmatBase.dll).
@@ -389,7 +389,7 @@ This completes the pcre setup.  If you'd prefer to compile pcre yourself, the in
 
 \textit{Instructions to be written as needed}
 
-\begin{thebibliography}{9}                                                                                               
+\begin{thebibliography}{9}
 \bibitem {VisualStudio} Visual Studio Express can be downloaded from http://www.microsoft.com/express/Downloads/\#2010-Visual-CPP
 
 \bibitem {wx} http://wxwidgets.org/downloads/
@@ -452,7 +452,7 @@ At this writing, the software used to populate the Gmat3rdParty folder is as fol
 \item pcre, 8.12
 \item f2c, built from source last updated Sep 3, 2010
 \end{itemize}
- 
+
 \noindent These versions are the target versions for GMAT R2011b.
 
 \section{\label{app:64bit}Building GMAT in 64-bit mode}
