@@ -217,6 +217,9 @@ public:
    virtual bool         HasLocalClones();
    virtual void         UpdateClonedObject(GmatBase *obj);
 
+   // Interface added for the C Interface to force epoch updates
+   bool                 SetEpoch(const GmatEpoch newEpoch); 
+
 protected:
    /// Count of the number of forces in the model
    Integer numForces;

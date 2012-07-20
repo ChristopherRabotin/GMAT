@@ -86,6 +86,7 @@
 //#define DEBUG_PM_EPOCH
 //#define DEBUG_EVENTLOCATION
 //#define DUMP_ERROR_ESTIMATE_DATA
+//#define DEBUG_FOR_CINTERFACE
 
 
 //#ifndef DEBUG_MEMORY
@@ -94,6 +95,11 @@
 
 #ifdef DEBUG_MEMORY
 #include "MemoryTracker.hpp"
+#endif
+
+#ifdef DEBUG_FOR_CINTERFACE
+#include <fstream>
+std::ofstream debugFile;
 #endif
 
 //---------------------------------
@@ -2197,6 +2203,21 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       MessageInterface::ShowMessage("   dynamicProperties: %s\n", (dynamicProperties? "true" : "false"));
    #endif
 
+   #ifdef DEBUG_FOR_CINTERFACE
+      if (debugFile.is_open() == false)
+         debugFile.open("ODE_Debug.txt");
+      debugFile << GetGeneratingString(Gmat::NO_COMMENTS);
+      debugFile.precision(16);
+      debugFile << "GetDv called at epoch " 
+                << epoch 
+                << " with dt = " 
+                << dt 
+                << ":\n   state:";
+      for (Integer i = 0; i < dimension; ++i)
+         debugFile << "   " << state[i];
+      debugFile << "\n";
+   #endif
+
    if (order > 2)
    {
       return false;
@@ -2264,6 +2285,10 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
             forceList.size());
    #endif
 
+   #ifdef DEBUG_FOR_CINTERFACE
+      debugFile << "Forces:";
+   #endif
+
    // Apply superposition of forces/derivatives
    for (std::vector<PhysicalModel *>::iterator i = forceList.begin();
          i != forceList.end(); ++i)
@@ -2271,7 +2296,11 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       #ifdef DEBUG_ODEMODEL_EXE
          MessageInterface::ShowMessage("   %s\n", ((*i)->GetTypeName()).c_str());
       #endif
-   
+
+      #ifdef DEBUG_FOR_CINTERFACE
+         debugFile << "   " << (*i)->GetTypeName();
+      #endif
+
       ddt = (*i)->GetDerivativeArray();
       if (!(*i)->GetDerivatives(state, dt, order))
       {
@@ -2319,6 +2348,10 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       #endif
    }
 
+   #ifdef DEBUG_FOR_CINTERFACE
+      debugFile << "\n";
+   #endif
+   
    if (fillCartesian)
    {
       if (order == 1)  // Fill in 1st dv of position with the input velocity
@@ -2386,6 +2419,13 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
             MessageInterface::ShowMessage("  %le  ", deriv[i+j]);
          MessageInterface::ShowMessage("\n");
       }
+   #endif
+
+   #ifdef DEBUG_FOR_CINTERFACE
+      debugFile << "Derivative:\n";
+      for (Integer i = 0; i < dimension; ++i)
+         debugFile << "   " << deriv[i];
+      debugFile << "\n";
    #endif
 
    return true;
@@ -3352,6 +3392,45 @@ void ODEModel::UpdateClonedObject(GmatBase *obj)
 //            "ODE model for local clones in the member forces\n");
    }
 }
+
+
+//------------------------------------------------------------------------------
+// bool SetEpoch(const GmatEpoch newEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Updates the epoch for the ODE model and all member forces
+ *
+ * This interface into the ODEModel was added for users of external calls into
+ * the model, to ensure that the model and all member forces reference the 
+ * right initial epoch.  It was added to support the GMAT C-Interface (see JIRA
+ * bug GMT-2936), but can be used from other places as well to make the epoch 
+ * for a force model correct in the absense of other structures to force that 
+ * update.
+ *
+ * @param newEpoch The new epoch
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool ODEModel::SetEpoch(const GmatEpoch newEpoch)
+{
+   bool retval = false;
+
+   if (newEpoch > 0.0)
+   {
+      epoch = newEpoch;
+      for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+            i != forceList.end(); ++i)
+      {
+         if ((*i) != NULL)
+            (*i)->SetRealParameter(EPOCH, newEpoch);
+      }
+      retval = true;
+   }
+
+   return retval;
+}
+
 
 
 //---------------------------------------------------------------------------

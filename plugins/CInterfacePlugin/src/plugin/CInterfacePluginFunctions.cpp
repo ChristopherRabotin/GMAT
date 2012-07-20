@@ -477,7 +477,14 @@ extern "C"
          {
             theState->SetEpoch(epoch);
             theState->SetState(state, stateDim);
-
+            if (ode != NULL)
+            {
+               if (!ode->SetEpoch(epoch))
+                  lastMsg = "Error setting the epoch on the ODE model";
+               else
+                  lastMsg = "State and epoch updated on the propagator and "
+                            "ODE Model";
+            }
             retval = 0;
          }
          else
