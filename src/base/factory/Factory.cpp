@@ -978,6 +978,14 @@ TrackingData* Factory::CreateTrackingData(const std::string &ofType,
 //------------------------------------------------------------------------------
 StringArray Factory::GetListOfCreatableObjects(const std::string &qualifier)
 {
+   // This code prevents plugin commands from entering the list of mission
+   // starters unless explicitly placed there 
+   if (qualifier == "SequenceStarters")
+   {
+      qualifiedCreatables.clear();
+      return qualifiedCreatables;
+   }
+
    return creatables;
 }
 
