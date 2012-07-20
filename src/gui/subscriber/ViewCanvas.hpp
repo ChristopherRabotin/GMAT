@@ -334,8 +334,8 @@ protected:
    virtual void InitializeViewPoint() = 0;
    virtual void SetDefaultView() = 0;
    
-   // Data buffer indexing
-   virtual void ComputeBufferIndex(Real time);
+   // Data ring buffer indexing
+   virtual void ComputeRingBufferIndex();
    virtual void ComputeActualIndex();
    
    // Texture

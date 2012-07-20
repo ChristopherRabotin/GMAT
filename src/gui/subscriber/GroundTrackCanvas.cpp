@@ -48,13 +48,14 @@
 using namespace FloatAttUtil;
 #endif
 
+// Now using wxMilliSleep() so removed (LOJ: 2012.07.18)
 // If Sleep in not defined (on unix boxes)
-#ifndef Sleep 
-#ifndef __WXMSW__
-#include <unistd.h>
-#define Sleep(t) usleep((t))
-#endif
-#endif
+//#ifndef Sleep 
+//#ifndef __WXMSW__
+//#include <unistd.h>
+//#define Sleep(t) usleep((t))
+//#endif
+//#endif
 
 
 // For the newer (wx 2.7.x+) method, create a wxGLCanvas window using the
@@ -438,6 +439,9 @@ void GroundTrackCanvas::ViewAnimation(int interval, int frameInc)
    mUpdateInterval = interval;
    mFrameInc = frameInc;
    mHasUserInterrupted = false;
+   // Since current solver iteration is drawn only during the run,
+   // turn off drawing solver data.
+   mDrawSolverData = false;
    
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetMainFrame()->EnableMenuAndToolBar(false, false, true);
@@ -850,16 +854,15 @@ void GroundTrackCanvas::DrawFrame()
       // it again afterwards.
       
       //wxSafeYield();
-      wxYield(); //loj: 8/16/05 to allow mouse event
+      wxYield(); // To allow mouse event
       
       if (mHasUserInterrupted)
          break;
       
-      Sleep(mUpdateInterval);
-      
+      wxMilliSleep(mUpdateInterval);
       mNumData = frame;
       
-      ComputeBufferIndex(mTime[frame]);
+      ComputeRingBufferIndex();
       
       Refresh(false);
    }

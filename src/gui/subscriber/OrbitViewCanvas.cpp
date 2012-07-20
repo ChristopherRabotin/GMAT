@@ -69,13 +69,14 @@
 using namespace FloatAttUtil;
 #endif
 
+// Now using wxMilliSleep() so removed (LOJ: 2012.07.18)
 // If Sleep in not defined (on unix boxes)
-#ifndef Sleep 
-#ifndef __WXMSW__
-#include <unistd.h>
-#define Sleep(t) usleep((t))
-#endif
-#endif
+//#ifndef Sleep 
+//#ifndef __WXMSW__
+//#include <unistd.h>
+//#define Sleep(t) usleep((t))
+//#endif
+//#endif
 
 // For the newer (wx 2.7.x+) method, create a wxGLCanvas window using the
 // constructor that does not create an implicit rendering context, create
@@ -99,6 +100,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_ACTION 1
 //#define DEBUG_CONVERT 1
 //#define DEBUG_DRAW 2
+//#define DEBUG_ORBIT_LINES
 //#define DEBUG_DRAW_STARS 1
 //#define DEBUG_ZOOM 1
 //#define DEBUG_OBJECT 2
@@ -110,7 +112,6 @@ using namespace FloatAttUtil;
 //#define DEBUG_SHOW_SKIP 1
 //#define DEBUG_ROTATE_BODY 1
 //#define DEBUG_DATA_BUFFERRING
-//#define DEBUG_ORBIT_LINES
 
 #define MODE_CENTERED_VIEW 0
 #define MODE_FREE_FLYING 1
@@ -309,7 +310,8 @@ OrbitViewCanvas::~OrbitViewCanvas()
 {
    #ifdef DEBUG_RESOURCE_CLEARING
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::~OrbitViewCanvas() '%s' entered\n", mPlotName.c_str());
+      ("OrbitViewCanvas::~OrbitViewCanvas() '%s' entered, mHasUserInterrupted=%d\n",
+       mPlotName.c_str(), mHasUserInterrupted);
    #endif
    
    // Patch from Tristan Moody
@@ -580,7 +582,7 @@ void OrbitViewCanvas::ViewAnimation(int interval, int frameInc)
 {
    #ifdef DEBUG_ANIMATION
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::ViewAnimation() interval=%d, frameInc=%d\n",
+      ("OrbitViewCanvas::ViewAnimation() entered, interval=%d, frameInc=%d\n",
        interval, frameInc);
    #endif
    
@@ -592,6 +594,9 @@ void OrbitViewCanvas::ViewAnimation(int interval, int frameInc)
    mUpdateInterval = interval;
    mFrameInc = frameInc;
    mHasUserInterrupted = false;
+   // Since current solver iteration is drawn only during the run,
+   // turn off drawing solver data. (LOJ: for GMT-2526 fix)
+   mDrawSolverData = false;
    
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetMainFrame()->EnableMenuAndToolBar(false, false, true);
@@ -603,6 +608,11 @@ void OrbitViewCanvas::ViewAnimation(int interval, int frameInc)
    
    mIsAnimationRunning = false;
    
+   #ifdef DEBUG_ANIMATION
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::ViewAnimation() leaving, mIsAnimationRunning=%d\n",
+       mIsAnimationRunning);
+   #endif
 }
 
 
@@ -1006,8 +1016,11 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
    int flippedY;
    int width, height;
    int mouseX, mouseY;
+
+   // Why is animation running flag set to false here?
+   // Commented out (LOJ: 2012.07.20)
+   //mIsAnimationRunning = false;
    
-   mIsAnimationRunning = false;
    GetClientSize(&width, &height);
    
    mouseX = event.GetX();
@@ -1727,7 +1740,7 @@ void OrbitViewCanvas::DrawFrame()
 {
    #if DEBUG_ANIMATION
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::DrawFrame() mNumData=%d, mUsenitialViewPoint=%d\n"
+      ("OrbitViewCanvas::DrawFrame() entered, mNumData=%d, mUsenitialViewPoint=%d\n"
        "   mViewCoordSysName=%s, mFrameInc=%d\n", mNumData, mUseInitialViewPoint,
        mViewCoordSysName.c_str(), mFrameInc);
    #endif
@@ -1738,7 +1751,7 @@ void OrbitViewCanvas::DrawFrame()
          ToQuat(mQuat, 0.0f, 0.0f, 0.0f, 0.0);
       #endif
          
-      SetDefaultView();            
+      SetDefaultView();
       UpdateRotateFlags();
       
       // set view center object
@@ -1771,29 +1784,11 @@ void OrbitViewCanvas::DrawFrame()
       if (mHasUserInterrupted)
          break;
       
-      Sleep(mUpdateInterval);
+      //Sleep(mUpdateInterval);
+      wxMilliSleep(mUpdateInterval);
       
       mNumData = frame;
-      mCurrIndex++;
-      
-      if (mCurrIndex < MAX_DATA)
-      {
-         mEndIndex1 = mNumData - 1;
-         if (mEndIndex2 != -1)
-         {
-            mBeginIndex1++;
-            if (mBeginIndex1 + 1 > MAX_DATA)
-               mBeginIndex1 = 0;
-            
-            mEndIndex2++;
-            if (mEndIndex2 + 1 > MAX_DATA)
-               mEndIndex2 = 0;
-         }
-      }
-      
-      mLastIndex = mEndIndex1;
-      if (mEndIndex2 != -1)
-         mLastIndex = mEndIndex2;
+      ComputeRingBufferIndex();
       
       Refresh(false);
    }
@@ -1804,7 +1799,11 @@ void OrbitViewCanvas::DrawFrame()
    mNumData = numberOfData;
    mIsEndOfData = true;
    mIsEndOfRun = true;
+   mIsAnimationRunning = false;
    
+   #if DEBUG_ANIMATION
+   MessageInterface::ShowMessage("OrbitViewCanvas::DrawFrame() leaving\n");
+   #endif
 } // end DrawFrame()
 
 
@@ -1833,8 +1832,8 @@ void OrbitViewCanvas::DrawPlot()
        "mUseInitialViewPoint=%d, mAxisLength=%f\n", mRedrawLastPointsOnly, mNumPointsToRedraw,
        mViewCsIsInternalCs, mUseInitialViewPoint, mAxisLength);
    MessageInterface::ShowMessage
-      ("   mIsEndOfData=%d, mIsEndOfRun=%d, mDrawSolverData=%d\n", mIsEndOfData,
-       mIsEndOfRun, mDrawSolverData);
+      ("   mIsEndOfData=%d, mIsEndOfRun=%d, mDrawSolverData=%d, mIsAnimationRunning=%d\n",
+       mIsEndOfData, mIsEndOfRun, mDrawSolverData, mIsAnimationRunning);
    #endif
    
    // Set background color to black

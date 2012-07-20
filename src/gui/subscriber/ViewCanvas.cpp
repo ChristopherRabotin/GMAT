@@ -863,7 +863,7 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    //-----------------------------------------------------------------
    // Buffer data for plot
    //-----------------------------------------------------------------
-   ComputeBufferIndex(time);
+   ComputeRingBufferIndex();
    mTime[mLastIndex] = time;
    mIsDrawing[mLastIndex] = drawing;
    
@@ -1296,9 +1296,14 @@ bool ViewCanvas::CreateObjectArrays()
 
 
 //------------------------------------------------------------------------------
-// void ComputeBufferIndex(Real time)
+// void ComputeRingBufferIndex(bool writeWarning)
 //------------------------------------------------------------------------------
-void ViewCanvas::ComputeBufferIndex(Real time)
+/**
+ * Computes begin and end index of the data in the ring buffer. When it is filled
+ * with MAX_DATA points, the begin index goes back to 0.
+ */
+//------------------------------------------------------------------------------
+void ViewCanvas::ComputeRingBufferIndex()
 {
    mCurrIndex++;
    
@@ -1352,9 +1357,9 @@ void ViewCanvas::ComputeBufferIndex(Real time)
    
    #ifdef DEBUG_DATA_BUFFERRING
    MessageInterface::ShowMessage
-      ("===> time=%f, mTotalPoints=%4d, mNumData=%3d, mCurrIndex=%3d, mLastIndex=%3d\n   "
+      ("===> mTotalPoints=%4d, mNumData=%3d, mCurrIndex=%3d, mLastIndex=%3d\n   "
        "mBeginIndex1=%3d, mEndIndex1=%3d, mBeginIndex2=%3d, mEndIndex2=%3d\n",
-       time, mTotalPoints, mNumData, mCurrIndex, mLastIndex, mBeginIndex1, mEndIndex1,
+       mTotalPoints, mNumData, mCurrIndex, mLastIndex, mBeginIndex1, mEndIndex1,
        mBeginIndex2, mEndIndex2);
    #endif
    
@@ -1502,14 +1507,30 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          // Use texture map set by user for this plot, if not set use from the celestial body
          if (textureFile == "" || !GmatFileUtil::DoesFileExist(textureFile))
          {
+            std::string oldTextureFile = textureFile;
             CelestialBody *body = (CelestialBody*) obj;
             textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
+            if (oldTextureFile != "")
+            {
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The texture file '%s' does not exist, \n"
+                   "    so using the texture file '%s' from the body '%s'.\n",
+                   oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
+            }
             // If texture file does not exist, try with default path from the startup file
             if (!GmatFileUtil::DoesFileExist(textureFile.c_str()))
             {
+               oldTextureFile = textureFile;
                FileManager *fm = FileManager::Instance();
                std::string textureLoc = fm->GetFullPathname("TEXTURE_PATH");
                textureFile = textureLoc + textureFile;
+               if (oldTextureFile != "")
+               {
+                  MessageInterface::ShowMessage
+                     ("*** WARNING *** The texture file '%s' does not exist, \n"
+                      "    so using the texture file '%s' from the startup file.\n",
+                      oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
+               }
             }
          }
       }
@@ -2530,7 +2551,7 @@ void ViewCanvas::DrawOrbit(const wxString &objName, int obj, int objId)
 //  void DrawSolverData()
 //------------------------------------------------------------------------------
 /**
- * Draws solver iteration data
+ * Draws current solver iteration data during the run.
  * This is only called when drawing "current" solver data.  For drawing all
  * solver passes at the same time, see UpdatePlot()
  */

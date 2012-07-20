@@ -115,7 +115,7 @@
 #include "FileManager.hpp"
 #include "FileUtil.hpp"               // for Compare()
 #include "GmatOpenGLSupport.hpp"      // for ScreenShotSave
-
+#include "RealUtilities.hpp"          // for Abs()
 
 #include <wx/dir.h>
 #include <wx/filename.h>
@@ -484,6 +484,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    gmatAppData->GetMissionTree()->SetMainFrame(this);
    
    mMatlabServer = NULL;
+   mIsMissionRunning = false;
    mRunPaused = false;
    mRunCompleted = true;
    
@@ -975,11 +976,15 @@ Integer GmatMainFrame::GetNumberOfActivePlots()
 //------------------------------------------------------------------------------
 bool GmatMainFrame::IsMissionRunning()
 {
-   wxToolBar *toolBar = GetToolBar();
-   if (toolBar->GetToolState(GmatMenu::TOOL_RUN) == true)
-      return true;
-   else
-      return false;
+   return mIsMissionRunning;
+   
+   //@note - Cannot use tool state since TOOL_RUN is not a toggle item
+   // so commented out (LOJ: 2012.07.20)
+   //wxToolBar *toolBar = GetToolBar();
+   //if (toolBar->GetToolState(GmatMenu::TOOL_RUN) == true)
+   //   return true;
+   //else
+   //   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -2349,13 +2354,13 @@ Integer GmatMainFrame::RunCurrentMission()
    
    wxYield();
    SetFocus();
-
+   
    mRunCompleted = false;
-
+   mIsMissionRunning = true;
+   
    if (mRunPaused)
    {
       mRunPaused = false;
-
       MessageInterface::ShowMessage("Execution resumed.\n");
       theGuiInterpreter->ChangeRunState("Resume");
       SetStatusText("Busy", 1);
@@ -2367,18 +2372,18 @@ Integer GmatMainFrame::RunCurrentMission()
       MinimizeChildren();
       GmatAppData::Instance()->GetMessageTextCtrl()->SetFocus();
       retval = theGuiInterpreter->RunMission();
-
+      
       #ifdef DEBUG_RUN_MISSION
       MessageInterface::ShowMessage("   return code from RunMission()=%d\n", retval);
       #endif
-
+      
       // always stop server after run (loj: 2008.02.06) - to investigate Bug 1133
       // stop server after user interrupt (loj: 2008.03.05)
       //if (mMatlabServer)
       if (retval != 1 && mMatlabServer)
          StopMatlabServer(); // stop server if running to avoid getting callback staus
                              // when run stopped by user
-
+      mIsMissionRunning = false;
       EnableMenuAndToolBar(true, true);
       EnableNotebookAndMissionTree(true);
       SetStatusText("", 1);
@@ -2417,6 +2422,7 @@ void GmatMainFrame::StopRunningMission()
    theGuiInterpreter->ChangeRunState("Stop");
    mRunPaused = false;
    mRunCompleted = true;
+   mIsMissionRunning = false;
    
    theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
    UpdateMenus(TRUE);
@@ -3306,16 +3312,18 @@ void GmatMainFrame::OnPause(wxCommandEvent& WXUNUSED(event))
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_PAUSE, FALSE);
    wxYield();
-
+   
    theGuiInterpreter->ChangeRunState("Pause");
    MessageInterface::ShowMessage("Execution paused.\n");
-
+   
    theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
    UpdateMenus(FALSE);
    toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, FALSE);
    toolBar->EnableTool(TOOL_RUN, TRUE);
    SetStatusText("Paused", 1);
    mRunPaused = true;
+   mIsMissionRunning = false;
+   
    theNotebook->Enable(false);
 }
 
@@ -5093,6 +5101,7 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
    #endif
 
    wxToolBar *toolBar = GetToolBar();
+   
    toolBar->EnableTool(TOOL_RUN, enable);
    toolBar->EnableTool(TOOL_PAUSE, enable);
    toolBar->EnableTool(TOOL_STOP, enable);
@@ -5791,14 +5800,18 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
       return;
    }
    
+   Integer actualInc = mAnimationFrameInc;
+   Integer updateIntervalInMilSec = 1;
+   ComputeAnimationSpeed(actualInc, updateIntervalInMilSec, false);
+      
    switch (event.GetId())
    {
    case TOOL_ANIMATION_PLAY:
       #ifdef DEBUG_ANIMATION
       MessageInterface::ShowMessage("   Starting animation\n");
       #endif
-      frame->SetAnimationUpdateInterval(1);
-      frame->SetAnimationFrameIncrement(mAnimationFrameInc);
+      frame->SetAnimationUpdateInterval(updateIntervalInMilSec);
+      frame->SetAnimationFrameIncrement(actualInc);
       frame->RedrawPlot(true);
       break;
    case TOOL_ANIMATION_STOP:
@@ -5808,19 +5821,30 @@ void GmatMainFrame::OnAnimation(wxCommandEvent& event)
       frame->SetUserInterrupt();
       break;
    case TOOL_ANIMATION_FAST:
+      #ifdef DEBUG_ANIMATION
+      MessageInterface::ShowMessage("   Adjusting for FASTER animation\n");
+      #endif
       mAnimationFrameInc += 5;
-      if (mAnimationFrameInc > 50)
-         frame->SetAnimationUpdateInterval(0);
-      else
-         frame->SetAnimationUpdateInterval(1);
-      frame->SetAnimationFrameIncrement(mAnimationFrameInc);
+      actualInc = mAnimationFrameInc;
+      updateIntervalInMilSec = 1;
+      ComputeAnimationSpeed(actualInc, updateIntervalInMilSec, false);
+      frame->SetAnimationUpdateInterval(updateIntervalInMilSec);
+      frame->SetAnimationFrameIncrement(actualInc);
       break;
    case TOOL_ANIMATION_SLOW:
+   {
+      #ifdef DEBUG_ANIMATION
+      MessageInterface::ShowMessage("   Adjusting for SLOWER animation\n");
+      #endif
+      
       mAnimationFrameInc -= 5;
-      if (mAnimationFrameInc < 0)
-         mAnimationFrameInc = 1;
-      frame->SetAnimationFrameIncrement(mAnimationFrameInc);
+      actualInc = mAnimationFrameInc;
+      updateIntervalInMilSec = 1;
+      ComputeAnimationSpeed(actualInc, updateIntervalInMilSec, true);
+      frame->SetAnimationUpdateInterval(updateIntervalInMilSec);
+      frame->SetAnimationFrameIncrement(actualInc);
       break;
+   }
    case TOOL_ANIMATION_OPTIONS:
       // This is deprecated code
       //frame->OnShowOptionDialog(event);
@@ -5988,4 +6012,47 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
    
    return isPresetSizeUsed;
 }
+
+
+//-------------------------------------------------------------------------------
+// void ComputeAnimationSpeed(Integer &frameInc, Integer &updateIntervalInMilSec, bool slower)
+//-------------------------------------------------------------------------------
+/**
+ * Computes animation speed based on the frame increment
+ */
+//-------------------------------------------------------------------------------
+void GmatMainFrame::ComputeAnimationSpeed(Integer &frameInc, Integer &updateIntervalInMilSec,
+                                          bool slower)
+{
+   #ifdef DEBUG_ANIMATION
+   MessageInterface::ShowMessage
+      ("   Before adjustment: mAnimationFrameInc = %3d, frameInc = %3d, updateIntervalInMilSec = %3d\n",
+       mAnimationFrameInc, frameInc, updateIntervalInMilSec);
+   #endif
+   
+   if (frameInc <= 0)
+   {
+      updateIntervalInMilSec = GmatMathUtil::Abs(mAnimationFrameInc);
+      if (updateIntervalInMilSec < 1)
+         updateIntervalInMilSec = 1;
+      frameInc = 1;
+   }
+   else
+   {
+      if (!slower)
+      {
+         if (frameInc > 50)
+            updateIntervalInMilSec = 0;
+         else
+            updateIntervalInMilSec = GmatMathUtil::Abs(frameInc);
+      }
+   }
+   
+   #ifdef DEBUG_ANIMATION
+   MessageInterface::ShowMessage
+      ("   After  adjustment: mAnimationFrameInc = %3d, frameInc = %3d, updateIntervalInMilSec = %3d\n",
+       mAnimationFrameInc, frameInc, updateIntervalInMilSec);
+   #endif
+}
+
 

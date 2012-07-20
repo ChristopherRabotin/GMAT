@@ -230,6 +230,7 @@ private:
    wxString mAnimationTitle;
    int  mAnimationFrameInc;
    bool mAnimationEnabled;
+   bool mIsMissionRunning;
    bool mRunPaused;
    bool mRunCompleted;
    bool mInterpretFailed;
@@ -279,8 +280,12 @@ private:
    void SaveGuiToActiveScript();
    
    void SaveChildPositionsAndSizes();
-   bool GetConfigurationData(const std::string &forItem, Integer &x, Integer &y, Integer &w, Integer &h);
-
+   bool GetConfigurationData(const std::string &forItem, Integer &x, Integer &y,
+                             Integer &w, Integer &h);
+   
+   void ComputeAnimationSpeed(Integer &frameInc, Integer &updateIntervalInMilSec,
+                              bool slower);
+   
    // IDs for the controls
    enum
    {
