@@ -1728,7 +1728,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          // In output child frame, it checks for mission or animation running flag.
          //-----------------------------------------------------------
          child->OnClose(event);
-         
+
          // Delete child if frame can be closed
          if (child->CanClose())
          {
@@ -1742,6 +1742,11 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
                ("   ==> cannot close this child, so added to ignore list\n");
             #endif
             ignoreNames.Add(name);
+
+            #ifdef __linux
+               // Linux needs this; it may make animation flaky (see GMT-2022)
+               childDeleted = true;
+            #endif
          }
       }
       
