@@ -178,10 +178,8 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
 {
    if (this == &rf)
       return *this;
-
+   
    Subscriber::operator=(rf);
-   lastUsedProvider = -1;
-   usedByReport = rf.usedByReport;
    
    outputPath = rf.outputPath;
    filename = rf.filename;
@@ -286,6 +284,10 @@ std::string ReportFile::GetPathAndFileName()
 
 //------------------------------------------------------------------------------
 // Integer GetNumParameters()
+//------------------------------------------------------------------------------
+/**
+ * Returns number of Parameters.
+ */
 //------------------------------------------------------------------------------
 Integer ReportFile::GetNumParameters()
 {
@@ -710,8 +712,6 @@ bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
       return true;
    }
    
-   std::string::size_type pos;
-   
    for (unsigned int i=0; i<mParamNames.size(); i++)
    {
       if (mParamNames[i].find(oldName) != oldName.npos)
@@ -744,10 +744,10 @@ bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 std::string ReportFile::GetParameterText(const Integer id) const
 {
-    if (id >= SubscriberParamCount && id < ReportFileParamCount)
-        return PARAMETER_TEXT[id - SubscriberParamCount];
-    else
-        return Subscriber::GetParameterText(id);
+   if (id >= SubscriberParamCount && id < ReportFileParamCount)
+      return PARAMETER_TEXT[id - SubscriberParamCount];
+   else
+      return Subscriber::GetParameterText(id);
 }
 
 
@@ -771,11 +771,10 @@ Integer ReportFile::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ReportFile::GetParameterType(const Integer id) const
 {
-    if (id >= SubscriberParamCount && id < ReportFileParamCount)
-        return PARAMETER_TYPE[id - SubscriberParamCount];
-    else
-        return Subscriber::GetParameterType(id);
-
+   if (id >= SubscriberParamCount && id < ReportFileParamCount)
+      return PARAMETER_TYPE[id - SubscriberParamCount];
+   else
+      return Subscriber::GetParameterType(id);
 }
 
 
@@ -937,19 +936,6 @@ std::string ReportFile::GetStringParameter(const Integer id) const
    if (id == FILENAME)
    {
       return filename;
-      
-//       std::string::size_type index = filename.find_last_of("/\\");
-//       if (index != filename.npos)
-//          return filename;
-//       else
-//       {
-//          // if pathname is the same as the default path, just write name
-//          std::string opath = filename.substr(0, index+1);
-//          if (opath == outputPath)
-//             return filename.substr(index+1);
-//          else
-//             return filename;
-//       }
    }
    
    return Subscriber::GetStringParameter(id);
@@ -1064,8 +1050,8 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value,
 //                                 const Integer index)
 //------------------------------------------------------------------------------
 bool ReportFile::SetStringParameter(const std::string &label,
-                                const std::string &value,
-                                const Integer index)
+                                    const std::string &value,
+                                    const Integer index)
 {
    return SetStringParameter(GetParameterID(label), value, index);
 }
@@ -1411,7 +1397,6 @@ void ReportFile::WriteHeaders()
           if (leftJustify)
              dstream.setf(std::ios::left);
           
-          //dstream << mParamNames[i] << "   ";
           dstream << mParamNames[i];
       }
       
@@ -1498,7 +1483,12 @@ Integer ReportFile::WriteMatrix(StringArray *output, Integer param,
 //--------------------------------------
 
 //------------------------------------------------------------------------------
-// bool Distribute(int len)
+// virtual bool Distribute(int len)
+//------------------------------------------------------------------------------
+/**
+ * Distributes the data with size of len.  The distrubuted data is stored in
+ * the member data char* data.
+ */
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(int len)
 {
@@ -1552,6 +1542,10 @@ bool ReportFile::Distribute(int len)
 
 //------------------------------------------------------------------------------
 // bool Distribute(const Real * dat, Integer len)
+//------------------------------------------------------------------------------
+/**
+ * Distributes the data with size of len through the Publisher.
+ */
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(const Real * dat, Integer len)
 {
@@ -1665,6 +1659,9 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool IsNotANumber(Real rval)
+//------------------------------------------------------------------------------
 bool ReportFile::IsNotANumber(Real rval)
 {
    #ifdef DEBUG_REAL_DATA
