@@ -45,6 +45,8 @@ static GmatInterface *gmatInt = GmatInterface::Instance();
 #include "MemoryTracker.hpp"
 #endif
 
+//#define SKIP_PENUP
+
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -761,13 +763,17 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
       {
          if (state == Solver::FINISHED)
          {
-            PenDownSubscribers();
+            #ifndef SKIP_PENUP
+               PenDownSubscribers();
+            #endif
             LightenSubscribers(1);
             commandComplete = true;
          }
          else
          {
-            PenUpSubscribers();
+            #ifndef SKIP_PENUP
+               PenUpSubscribers();
+            #endif
          }
       }
    }
@@ -943,7 +949,9 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
                branchExecuting = true;
                ApplySubscriberBreakpoint();
                ResetLoopData();
-               PenDownSubscribers();
+               #ifndef SKIP_PENUP
+                  PenDownSubscribers();
+               #endif
                LightenSubscribers(1);
             }
             break;
@@ -956,7 +964,9 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
             branchExecuting = true;
             ApplySubscriberBreakpoint();
             ResetLoopData();
-            PenDownSubscribers();
+            #ifndef SKIP_PENUP
+               PenDownSubscribers();
+            #endif
             LightenSubscribers(4);
             break;
             
@@ -995,7 +1005,9 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
                ResetLoopData();
                branchExecuting = true;
                ApplySubscriberBreakpoint();
-               PenDownSubscribers();
+               #ifndef SKIP_PENUP
+                  PenDownSubscribers();
+               #endif
                LightenSubscribers(1);
                publisher->SetRunState(Gmat::SOLVEDPASS);
             }
