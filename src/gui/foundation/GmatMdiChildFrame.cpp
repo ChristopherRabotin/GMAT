@@ -524,6 +524,9 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       Integer screenWidth;
       Integer screenHeight;
       GmatAppData::Instance()->GetMainFrame()->GetActualClientSize(&screenWidth, &screenHeight, true);
+      // Since GmatMainFrame::GetActualClientSize() subtracts one, add one here (LOJ: 2012.07.23)
+      screenWidth++;
+      screenHeight++;
    #endif
 
    int tmpX = -1, tmpY = -1;

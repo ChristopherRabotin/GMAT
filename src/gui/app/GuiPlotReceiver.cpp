@@ -1964,9 +1964,9 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
 {
    #ifdef DEBUG_PLOT_PERSISTENCE
    MessageInterface::ShowMessage
-      ("ComputePlotPositionAndSize() entered, %s, positionX = %f, positionY = %f, "
-       "width = %f, height = %f, usingSaved = %d\n", isGLPlot ? "GLPlot" : "XYPlot", positionX,
-       positionY, width, height, usingSaved);
+      ("ComputePlotPositionAndSize() entered, %s, usingSaved = %d\n   positionX = %12.10f, "
+       "positionY = %12.10f, width = %12.10f, height = %12.10f\n", isGLPlot ? "GLPlot" : "XYPlot",
+       usingSaved, positionX, positionY, width, height);
    #endif
    
    if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
@@ -2077,6 +2077,10 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
       isPresetSizeUsed = true;
       usingSaved       = true;
       
+      // @note
+      // Since position and size are truncated to whole integer,
+      // actual plot position and size can differ a pixel or so for
+      // a consecutive run after plots are closed.
       x = (Integer) (positionX * (Real) screenWidth);
       y = (Integer) (positionY * (Real) screenHeight);
       w = (Integer) (width     * (Real) screenWidth);

@@ -674,8 +674,12 @@ void GmatMainFrame::GetActualClientSize(Integer *w, Integer *h, bool ignoreMissi
    MessageInterface::ShowMessage("     ActualSize: w = %4d, h = %4d\n", actW, actH);
    #endif
    
-   *w = actW;
-   *h = actH;
+   // If rerun the mission with plots after plots are tiled, it shows
+   // horizontal and vertical scroll bars, so subtracted 1. (LOJ: 2012.07.23)
+   //*w = actW;
+   //*h = actH;
+   *w = actW - 1;
+   *h = actH - 1;
 }
 
 

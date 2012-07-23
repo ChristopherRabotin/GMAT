@@ -661,7 +661,7 @@ void MdiChildViewFrame::OnMove(wxMoveEvent& event)
    if ( mCanvas )
    {
       // Do not use Refresh, it makes flickering
-      //mCanvas->Refresh(false);
+      mCanvas->Refresh(false);
       mCanvas->Update();
    }
    
