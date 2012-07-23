@@ -1715,7 +1715,7 @@ bool Interpreter::ParseAndSetCommandName(GmatCommand *cmd, const std::string &cm
       
       #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage
-         ("   ==> There are %d parameters and file type parameter %S\n",
+         ("   ==> There are %d parameters and file type parameter %s\n",
           paramCount, fileTypeParamFound ? "FOUND" : "NOT FOUND");
       MessageInterface::ShowMessage
          ("   ==> First char is a single quote, it might be a command name\n");
@@ -1725,56 +1725,74 @@ bool Interpreter::ParseAndSetCommandName(GmatCommand *cmd, const std::string &cm
       // if matching quote found, continue
       if (index1 != desc.npos)
       {
-         // Check for more single quotes where another single quotes whithin the
-         // command name is not allowd (eg. 'Someone's Propagate')
+         // Check for more single quotes where another single quotes within the
+         // command name is not allowed (e.g. 'Someone's Propagate')
          Integer numQuotes = GmatStringUtil::NumberOfOccurrences(desc, '\'');
-         // If number of ' is greator 2, then it may be an error
-         if (numQuotes > 2)
-         {
-            // Currently only SaveMission allows 4 single quotes including command name.
-            // SaveMission 'save mission' 'mymissionfile.txt'
-            bool error = true;
-            if (fileTypeParamFound && numQuotes == 4)
-               error = false;
-            
-            if (error)
-            {
-               InterpreterException ex
-                  ("Found invalid syntax for \"" + cmdType +
-                   "\" command, single quotes within the command name is not allowed");
-               HandleError(ex);
-               return false;
-            }
-         }
          
-         StringArray parts = GmatStringUtil::SeparateBy(newDesc, "'");
-         #ifdef DEBUG_CREATE_COMMAND
-         WriteStringArray("   --->command parts", "", parts);
-         #endif
+         // If number of ' is greater 2, then it may be an error
+//         if (numQuotes > 2)
+//         {
+//            // DJC: This assumption is not true; there are several other core
+//            // commands (including Propagate) that allow more than 2 single
+//            // quotes.  Additionally, plugin commands should not be made to
+//            // suffer from this restriction.  Because of these considerations,
+//            // this part of the code was reworked.
+//
+//            // Currently only SaveMission allows 4 single quotes including command name.
+//            // SaveMission 'save mission' 'mymissionfile.txt'
+//            bool error = true;
+//            if (fileTypeParamFound && numQuotes == 4)
+//               error = false;
+//
+//            if (error)
+//            {
+//               InterpreterException ex
+//                  ("Found invalid syntax for \"" + cmdType +
+//                   "\" command, single quotes within the command name is not allowed");
+//               HandleError(ex);
+//               return false;
+//            }
+//         }
+//
+//         StringArray parts = GmatStringUtil::SeparateBy(newDesc, "'");
+//         #ifdef DEBUG_CREATE_COMMAND
+//         WriteStringArray("   --->command parts", "", parts);
+//         #endif
+//
+//         std::string cmdName = parts[0];
+//         // Set command name
+//         if (parts.size() == 1)
+//         {
+//            //@todo Until we figure out the way to get own class parameter count
+//            // use 4 here which is GmatCommand parameter counter.
+//            // If new parameters are added to GmatBase or GmatCommand, this number
+//            // needs to be changed also.
+//            // We need to add a new virtual method GetOwnParameterCount() to
+//            // GmatBase later in a future.
+//            if (paramCount == 4)
+//            {
+//               cmd->SetName(cmdName);
+//               newDesc = "";
+//            }
+//         }
+//         else if (parts.size() >= 2)
+//         {
+//            if (fileTypeParamFound && parts.size() == 3)
+//               newDesc = parts[2];
+//            else
+//               newDesc = parts[1];
+//            cmd->SetName(cmdName);
+//         }
+
+         std::string cmdName = "";
          
-         std::string cmdName = parts[0];
-         // Set command name
-         if (parts.size() == 1)
+         // For now, commands with file type parameters assume that 4 quotes
+         // are needed to have a command name
+         if ((fileTypeParamFound == false) || (numQuotes == 4))
          {
-            //@todo Until we figure out the way to get own class paramter count
-            // use 4 here which is GmatCommand paramter counter.
-            // If new paramters are added to GmatBase or GmatCommand, this number
-            // needs to be changed also.
-            // We need to add a new virtual method GetOwnParameterCount() to
-            // GmatBase later in a future.
-            if (paramCount == 4)
-            {
-               cmd->SetName(cmdName);
-               newDesc = "";
-            }
-         }
-         else if (parts.size() >= 2)
-         {
-            if (fileTypeParamFound && parts.size() == 3)
-               newDesc = parts[2];
-            else
-               newDesc = parts[1];
+            cmdName = desc.substr(1,index1-1);
             cmd->SetName(cmdName);
+            newDesc = desc.substr(index1+1);
          }
       }
       else
