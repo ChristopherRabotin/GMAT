@@ -579,12 +579,22 @@ Real ImpulsiveBurn::SetRealParameter(const Integer id, const Real value)
             BurnException aException("");
             aException.SetDetails(errorMessageFormat.c_str(),
                         GmatStringUtil::ToString(value, 16).c_str(),
-                        PARAMETER_TEXT[id-DECREMENT_MASS].c_str(), "Real Number >= 0");
+                        PARAMETER_TEXT[id-BurnParamCount].c_str(), "Real Number >= 0");
             throw aException;
          }
          return isp;
       case GRAVITATIONAL_ACCELERATION:
-         gravityAccel = value;
+         if (value > 0.0)
+            gravityAccel = value;
+         else
+         {
+            BurnException aException("");
+            aException.SetDetails(errorMessageFormat.c_str(),
+                        GmatStringUtil::ToString(value, 16).c_str(),
+                        PARAMETER_TEXT[id-BurnParamCount].c_str(),
+                        "Real Number > 0");
+            throw aException;
+         }
          return gravityAccel;
       case DELTA_TANK_MASS:
          deltaTankMass = value;
