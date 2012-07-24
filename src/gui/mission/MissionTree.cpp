@@ -204,6 +204,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    theNotebook = NULL;
    theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
+   SetFont(*wxNORMAL_FONT);
    mViewCommands.Add("All");
    mViewAll = true;
    mUsingViewLevel = true;
