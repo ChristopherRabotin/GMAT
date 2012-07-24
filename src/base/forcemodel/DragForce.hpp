@@ -57,6 +57,8 @@ public:
                                               const std::string parm);
    virtual void         ClearSatelliteParameters(const std::string parmName = "");
    
+   virtual bool         IsUnique(const std::string &forBody = "");
+
    bool                 Initialize();
    virtual bool         GetDerivatives(Real * state, Real dt = 0.0, 
                                        Integer order = 1, 

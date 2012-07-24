@@ -1161,6 +1161,23 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
 
 
 //------------------------------------------------------------------------------
+// bool IsUnique(const std::string &forBody)
+//------------------------------------------------------------------------------
+/**
+ * Specifies if the SRP force is the one and only SRP force allowed
+ *
+ * @param forBody The body at which the force must be unique (unused for SRP)
+ *
+ * @return true for SRP.
+ */
+//------------------------------------------------------------------------------
+bool SolarRadiationPressure::IsUnique(const std::string& forBody)
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // Real ShadowFunction(Real * state)
 //------------------------------------------------------------------------------
 /**

@@ -1117,6 +1117,23 @@ bool PhysicalModel::IsUserForce()
 
 
 //------------------------------------------------------------------------------
+// bool IsUnique(const std::string &forBody)
+//------------------------------------------------------------------------------
+/**
+ * Specifies if a force is the one and only force, optionally at a given body.
+ *
+ * @param forBody The body at which the force must be unique, if body specific
+ *
+ * @return true if the force should be unique in the ODEModel.
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::IsUnique(const std::string &forBody)
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetPropList(ObjectArray *soList)
 //------------------------------------------------------------------------------
 /**

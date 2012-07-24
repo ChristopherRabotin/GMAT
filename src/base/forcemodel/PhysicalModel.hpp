@@ -187,6 +187,7 @@ public:
    virtual bool IsTransient();
    virtual bool DepletesMass();
    virtual bool IsUserForce();
+   virtual bool IsUnique(const std::string &forBody = "");
    virtual void SetPropList(ObjectArray *soList);
    virtual bool CheckQualifier(const std::string &qualifier,
          const std::string &forType = "");

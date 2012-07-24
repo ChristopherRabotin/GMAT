@@ -595,16 +595,39 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
          if (pos->first == rcBodyName)
          {
             #ifdef DEBUG_MU_MAP
-               MessageInterface::ShowMessage("ODEModel::AddForce ---  setting mu value of %12.10f on newly-added RC for body %s\n",
-                                             pos->second, rcBodyName.c_str());
+               MessageInterface::ShowMessage("ODEModel::AddForce ---  setting "
+                     "mu value of %12.10f on newly-added RC for body %s\n",
+                     pos->second, rcBodyName.c_str());
             #endif
             pPhysicalModel->SetRealParameter(pPhysicalModel->GetParameterID("Mu"), pos->second);
          }
       }
    }
 
+   // For some forces, if the force list already has the same type of force as
+   // is associated as the new one, remove it so the new one is a replacement
+   if (pPhysicalModel->IsUnique(forceBody))
+   {
+      for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+            i != forceList.end(); ++i)
+      {
+         #ifdef DEBUG_ODEMODEL_INIT
+            MessageInterface::ShowMessage("Checking uniqueness of <%p> "
+                  "against <%p>\n", pPhysicalModel, *i);
+         #endif
+         if ((*i)->GetTypeName() == pmType)
+         {
+            if ((*i)->IsUnique(pPhysicalModel->GetBodyName()))
+            {
+               forceList.erase(i);
+               delete *i;
+               break;
+            }
+         }
+      }
+   }
 
-   // Add if new PhysicalModel pointer if not found in the forceList
+   // Add if new PhysicalModel pointer is not found in the forceList
    if (find(forceList.begin(), forceList.end(), pPhysicalModel) == forceList.end())
    {
       if (pPhysicalModel->IsTransient())
@@ -1303,7 +1326,6 @@ bool ODEModel::CheckQualifier(const std::string &qualifier,
    bool retval = false;
 
    // Find the owned model
-   PhysicalModel *owner = NULL;
    for (UnsignedInt i = 0; i < forceList.size(); ++i)
    {
       if (forceList[i]->IsOfType(forType))
@@ -1405,8 +1427,11 @@ bool ODEModel::Initialize()
       if (coverageStart > epoch)
       {
 //         std::stringstream warn;
-//         warn << "Warning: Data for force origin " << forceOrigin->GetName() << " at epoch ";
-//         warn << epoch << " is not available.  Setting initial epoch to earliest time of available data, " << coverageStart << ".\n";
+//         warn << "Warning: Data for force origin "
+//              << forceOrigin->GetName() << " at epoch ";
+//         warn << epoch << " is not available.  Setting initial epoch to "
+//                          "earliest time of available data, "
+//              << coverageStart << ".\n";
 //         MessageInterface::PopupMessage(Gmat::WARNING_, warn.str());
          epoch = coverageStart;
          state->SetEpoch(epoch);

@@ -75,6 +75,8 @@ public:
    SolarRadiationPressure(const SolarRadiationPressure &srp);
    SolarRadiationPressure& operator=(const SolarRadiationPressure &srp);
 
+   virtual bool IsUnique(const std::string &forBody = "");
+
    virtual bool Initialize();
    virtual bool SetCentralBody();
    virtual bool GetDerivatives(Real *state, Real dt = 0.0, Integer order = 1, 
