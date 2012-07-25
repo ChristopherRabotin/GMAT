@@ -1528,7 +1528,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
                {
                   MessageInterface::ShowMessage
                      ("*** WARNING *** The texture file '%s' does not exist, \n"
-                      "    so using the texture file '%s' from the startup file.\n",
+                      "    so using the texture file '%s' using the path specified in the startup file.\n",
                       oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
                }
             }
