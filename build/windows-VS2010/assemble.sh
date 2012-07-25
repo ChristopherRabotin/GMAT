@@ -74,6 +74,6 @@ cp -av "$mgpath/"* "$dest/data"
 
 # libCInterface MATLAB files
 cifacepath=${cur}/../../plugins/CInterfacePlugin
-cp -av "$cifacepath/matlab" "$dest/matlab/libCInterface"
+cp -av "$cifacepath"/matlab/* "$dest/matlab/libCInterface"
 
 echo "Finished assembling latest complete version"
