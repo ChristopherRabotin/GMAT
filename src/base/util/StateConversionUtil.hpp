@@ -182,11 +182,14 @@ static Integer ComputeMeanToTrueAnomaly(Real maRadians, Real ecc, Real tol,
 //------------------------------------------------------------------------------
 // private static data
 //------------------------------------------------------------------------------
-static const Real         ORBIT_TOL;      // = 1.0E-10;
-static const Real         ORBIT_TOL_SQ;   // = 1.0E-20;
-static const Real         SINGULAR_TOL;   // = .001
-static const Real         INFINITE_TOL;   // = 1.03-30
-static const Real         PARABOLIC_TOL;  // = 1.0e-7;
+static const Real         ORBIT_TOL;        // = 1.0E-10;
+static const Real         ORBIT_TOL_SQ;     // = 1.0E-20;
+static const Real         SINGULAR_TOL;     // = .001
+static const Real         INFINITE_TOL;     // = 1.0E-30
+static const Real         PARABOLIC_TOL;    // = 1.0E-7;
+static const Real         MU_TOL;           // = 1.0E-15
+static const Real         EQUINOCTIAL_TOL;  // = 1.0E-5
+static const Real         ANGLE_TOL;        // = 0.0 for now
 
 static const Integer      MAX_ITERATIONS; // 75
 

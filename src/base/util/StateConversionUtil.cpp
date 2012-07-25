@@ -61,11 +61,14 @@ using namespace GmatMathConstants;
 // static data
 //------------------------------------------------------------------------------
 
-const Real         StateConversionUtil::ORBIT_TOL      = 1.0E-10;
-const Real         StateConversionUtil::ORBIT_TOL_SQ   = 1.0E-20;
-const Real         StateConversionUtil::SINGULAR_TOL   = .001;
-const Real         StateConversionUtil::INFINITE_TOL   = 1.03-30;
-const Real         StateConversionUtil::PARABOLIC_TOL  = 1.0e-7;
+const Real         StateConversionUtil::ORBIT_TOL          = 1.0E-10;
+const Real         StateConversionUtil::ORBIT_TOL_SQ       = 1.0E-20;
+const Real         StateConversionUtil::SINGULAR_TOL       = .001;
+const Real         StateConversionUtil::INFINITE_TOL       = 1.0E-30;
+const Real         StateConversionUtil::PARABOLIC_TOL      = 1.0E-7;
+const Real         StateConversionUtil::MU_TOL             = 1.0E-15;
+const Real         StateConversionUtil::EQUINOCTIAL_TOL    = 1.0E-5;
+const Real         StateConversionUtil::ANGLE_TOL          = 0.0;
 
 const Integer      StateConversionUtil::MAX_ITERATIONS = 75;
 
@@ -506,7 +509,7 @@ Rvector6 StateConversionUtil::CartesianToKeplerian(Real mu, const Rvector6 &stat
    for (int i=0; i<6; i++)
       kepl[i] = 0.0;
 
-   if(mu < 1.0)
+   if(mu < MU_TOL)
    {
       throw UtilityException("StateConversionUtil::CartesianToKeplerian() gravity constant "
                              "too small for conversion to Keplerian elements\n");
@@ -611,7 +614,7 @@ Rvector6 StateConversionUtil::KeplerianToCartesian(Real mu, const Rvector6 &stat
 
    if (ret)
    {
-      if (mu < 1.0)
+      if (mu < MU_TOL)
       {
          throw UtilityException
             ("StateConversionUtil::KeplerianToCartesian() "
@@ -752,7 +755,7 @@ Rvector6 StateConversionUtil::CartesianToEquinoctial(const Rvector6& cartesian, 
    {
       throw UtilityException("Cannot convert from Cartesian to Equinoctial - position vector is zero vector.\n");
    }
-   if (mu <= 0.0)
+   if (mu < MU_TOL)
    {
       throw UtilityException("Cannot convert from Cartesian to Equinoctial - gravitational constant is zero.\n");
    }
@@ -2088,18 +2091,22 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
             "SCU::ValidateValue:  labelUpper = %s, compareUpper = %s\n", labelUpper.c_str(), compareUpper.c_str());
    #endif
 
+   // these are only limited by the upper and lower limits of the compiler's Real type
    if ((labelUpper == "X")                     || (labelUpper == "Y")                  || (labelUpper == "Z")                        ||
-       (labelUpper == "VX")                    || (labelUpper == "VY")                 || (labelUpper == "VZ"))
+       (labelUpper == "VX")                    || (labelUpper == "VY")                 || (labelUpper == "VZ")                       ||
+       (labelUpper == "AOP")                   || (labelUpper == "AZI")                || (labelUpper == "EquinoctialP")             ||
+       (labelUpper == "EquinoctialQ")          || (labelUpper == "RA")                 || (labelUpper == "RAAN")                     ||
+       (labelUpper == "RAV")                   || (labelUpper == "TA"))
    {
       return true;
    }
    else if (labelUpper == "RADAPO")
    {
-      if (IsEqual(value, 0.0, .001))
+      if (GmatMathUtil::Abs(value) < .001)
       {
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "RadApo", "Real Number != 0.0");
+                       "RadApo", "Real Number >= 1 meter");
          throw ue;
       }
       if (compareUpper == "RADPER")
@@ -2115,11 +2122,11 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
    }
    else if (labelUpper == "RADPER")
    {
-      if (value < 0.0)
+      if (GmatMathUtil::Abs(value) < .001)
       {
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "RadPer", "Real Number > 0.0");
+                       "RadPer", "Real Number >= 1 meter");
          throw ue;
       }
       else if (IsEqual(value, 0.0, .001))
@@ -2129,44 +2136,190 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
          throw ue;
       }
    }
+   else if (labelUpper == "ECC")
+   {
+      if (IsEqual(value, 1.0, PARABOLIC_TOL))
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "Real Number != 1";
+         if (PARABOLIC_TOL != 0.0)
+            rangeMsg << " (tolerance = " << PARABOLIC_TOL << ")";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "ECC", rangeMsg.str().c_str());
+         throw ue;
+      }
+      if (compareUpper == "SMA")
+      {
+         if (((value > 1.0 + PARABOLIC_TOL) || (value < 0.0 - PARABOLIC_TOL)) && (compareValue > 0.0))
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "ECC", "0 < Real Number < 1 when SMA > 0");
+            throw ue;
+         }
+         if ((value <= 1.0 - PARABOLIC_TOL) && (compareValue < 0.0))
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "ECC", "Real Number > 1 when SMA < 0");
+            throw ue;
+         }
+      }
+   }
+   else if (labelUpper == "SMA")
+   {
+      if (IsEqual(value, 0.0, SINGULAR_TOL))
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "Real Number != 0";
+         if (SINGULAR_TOL != 0.0)
+            rangeMsg << " (tolerance = " << SINGULAR_TOL << ")";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "SMA", rangeMsg.str().c_str());
+         throw ue;
+      }
+      if (compareUpper == "ECC")
+      {
+         if ((value < 0.0) && (compareValue < 1.0 - SINGULAR_TOL) && (compareValue > 0.0 + SINGULAR_TOL))
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "SMA", "Real Number > 0 when 0 < ECC < 1");
+            throw ue;
+         }
+         else if ((value > 0.0) && (compareValue > 1.0 + SINGULAR_TOL))
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "SMA", "Real Number < 0 when ECC > 1");
+            throw ue;
+         }
+      }
+   }
+   else if (labelUpper == "INC")
+   {
+      if ((value < 0.0 - ANGLE_TOL) || (value > 180.0 + ANGLE_TOL))
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "0.0 <= Real Number <= 180.0";
+         if (ANGLE_TOL != 0.0)
+            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "INC", rangeMsg.str().c_str());
+         throw ue;
+      }
+   }
    else if (labelUpper == "RMAG")
    {
-      if (value <= 0.0)
+      if (value < 1.0e-10)
       {
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "RMAG", "Real Number > 0.0");
+                       "RMAG", "Real Number > 1.0e-10");
          throw ue;
       }
    }
    else if (labelUpper == "VMAG")
    {
-      if (value < 0.0)
+      if (value < 1.0e-10)
       {
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "VMAG", "Real Number >= 0.0");
+                       "VMAG", "Real Number > 1.0e-10");
+         throw ue;
+      }
+   }
+   else if (labelUpper == "DEC")
+   {
+      if ((value < -90.0 - ANGLE_TOL) || (value > 90.0 + ANGLE_TOL))
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "-90.0 <= Real Number <= 90.0";
+         if (ANGLE_TOL != 0.0)
+            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "DEC", rangeMsg.str().c_str());
+         throw ue;
+      }
+   }
+   else if (labelUpper == "DECV")
+   {
+      if ((value < -90.0 - ANGLE_TOL) || (value > 90.0 + ANGLE_TOL))
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "-90.0 <= Real Number <= 90.0";
+         if (ANGLE_TOL != 0.0)
+            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "DECV", rangeMsg.str().c_str());
+         throw ue;
+      }
+   }
+   else if (labelUpper == "FPA")
+   {
+      if ((value < -90.0 - ANGLE_TOL) || (value > 90.0 + ANGLE_TOL))
+      {
+         std::stringstream rangeMsg;
+         rangeMsg << "-90.0 <= Real Number <= 90.0";
+         if (ANGLE_TOL != 0.0)
+            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "FPA", rangeMsg.str().c_str());
          throw ue;
       }
    }
    else if (labelUpper == "EQUINOCTIALK")
    {
-      if ((value < -1.0 + GmatOrbitConstants::KEP_ECC_TOL) || (value > 1.0 + GmatOrbitConstants::KEP_ECC_TOL))
+      if ((value < -1.0 + EQUINOCTIAL_TOL) || (value > 1.0 - EQUINOCTIAL_TOL))
       {
+         std::stringstream rangeMsg;
+         rangeMsg << "-1 < Real Number < 1";
+         if (EQUINOCTIAL_TOL != 0.0)
+            rangeMsg << " (tolerance = " << EQUINOCTIAL_TOL << ")";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "EquinoctialK", "-1.0 < Real Number < 1.0");
+                       "EquinoctialK", rangeMsg.str().c_str());
          throw ue;
+      }
+      if (compareUpper == "EQUINOCTIALH")
+      {
+         if (GmatMathUtil::Sqrt(value * value + compareValue * compareValue) > 1.0 - EQUINOCTIAL_TOL)
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "EquinoctialK", "Sqrt(EquinoctialH^2 + EquinoctialK^2) < 0.99999");
+            throw ue;
+         }
       }
    }
    else if (labelUpper == "EQUINOCTIALH")
    {
-      if ((value < -1.0 + GmatOrbitConstants::KEP_ECC_TOL) || (value > 1.0 + GmatOrbitConstants::KEP_ECC_TOL))
+      if ((value < -1.0 + EQUINOCTIAL_TOL) || (value > 1.0 - EQUINOCTIAL_TOL))
       {
+         std::stringstream rangeMsg;
+         rangeMsg << "-1 < Real Number < 1";
+         if (EQUINOCTIAL_TOL != 0.0)
+            rangeMsg << " (tolerance = " << EQUINOCTIAL_TOL << ")";
          UtilityException ue;
          ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                       "EquinoctialH", "-1.0 < Real Number < 1.0");
+                       "EquinoctialH", rangeMsg.str().c_str());
          throw ue;
+      }
+      if (compareUpper == "EQUINOCTIALK")
+      {
+         if (GmatMathUtil::Sqrt(value * value + compareValue * compareValue) > 1.0 - EQUINOCTIAL_TOL)
+         {
+            UtilityException ue;
+            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                          "EquinoctialH", "Sqrt(EquinoctialH^2 + EquinoctialK^2) < 0.99999");
+            throw ue;
+         }
       }
    }
 
