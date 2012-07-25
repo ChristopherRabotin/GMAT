@@ -107,6 +107,9 @@ private:
    std::string mTaiMjdStr;
    std::string mAnomalyType;
    
+   std::string errMsgFormat;
+   GmatGlobal  *gg;
+
    void Create();
    void AddElements(wxWindow *parent);
    

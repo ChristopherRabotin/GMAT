@@ -77,6 +77,7 @@
 //#include "Anomaly.hpp"
 #include "StateConversionUtil.hpp"
 #include "RealUtilities.hpp"
+#include "GmatGlobal.hpp"
 #include <sstream>
 #include <wx/config.h>
 
@@ -679,6 +680,10 @@ void OrbitPanel::Create()
    orbitSizer->Add( elementSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    
    this->SetSizer( orbitSizer );
+
+   gg           = GmatGlobal::Instance();
+   errMsgFormat = theSpacecraft->GetErrorMessageFormat();
+
 }
 
 //------------------------------------------------------------------------------
@@ -1659,19 +1664,35 @@ bool OrbitPanel::CheckState(Rvector6 &state)
 bool OrbitPanel::CheckCartesian(Rvector6 &state)
 {
    bool retval = true;
+   std::string cartesianNames[6];
+   cartesianNames[0] = "X";
+   cartesianNames[1] = "Y";
+   cartesianNames[2] = "Z";
+   cartesianNames[3] = "VX";
+   cartesianNames[4] = "VY";
+   cartesianNames[5] = "VZ";
+
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (!theScPanel->CheckReal(state[ii], mElements[ii], cartesianNames[ii], "Real Number"))
+         retval = false;
+      else
+      {
+         try
+         {
+            StateConversionUtil::ValidateValue(cartesianNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+   }
+
    
-   if (!theScPanel->CheckReal(state[0], mElements[0], "X", "Real Number"))
-      retval = false;
-   if (!theScPanel->CheckReal(state[1], mElements[1], "Y", "Real Number"))
-      retval = false;
-   if (!theScPanel->CheckReal(state[2], mElements[2], "Z", "Real Number"))
-      retval = false;
-   if (!theScPanel->CheckReal(state[3], mElements[3], "VX", "Real Number"))
-      retval = false;
-   if (!theScPanel->CheckReal(state[4], mElements[4], "VY", "Real Number"))
-      retval = false;
-   if (!theScPanel->CheckReal(state[5], mElements[5], "VZ", "Real Number"))
-      retval = false;
    
    #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
    MessageInterface::ShowMessage("CheckCartesian() returning %d\n", retval);
@@ -1694,10 +1715,15 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
    
    if (theScPanel->CheckReal(state[0], mElements[0], "SMA", "Real Number"))
    {
-      if (state[0] == 0.0)
+      try
       {
-         theScPanel->CheckReal(state[0], mElements[0], "SMA", "Real Number != 0.0", true);
-         retval = false;
+         StateConversionUtil::ValidateValue("SMA", state[0], errMsgFormat, gg->GetDataPrecision(), "ECC", state[1]);
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
          canClose = false;
       }
    }
@@ -1708,15 +1734,15 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
    
    if (theScPanel->CheckReal(state[1], mElements[1], "ECC", "Real Number"))
    {
-      if ((state[1] < 0.0) || (state[1] == 1.0))
+      try
       {
-         theScPanel->CheckReal(state[1], mElements[1], "ECC",
-                               "0.0 <= Real Number, Real Number != 1.0", true);
-         if (state[1] == 1.0)
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_, "GMAT does not support parabolic orbits");
-         
-         retval = false;
+         StateConversionUtil::ValidateValue("ECC", state[1], errMsgFormat, gg->GetDataPrecision(), "SMA", state[0]);
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
          canClose = false;
       }
    }
@@ -1725,40 +1751,78 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   // check coupling restrictions on SMA and ECC for circular and elliptical orbits
-   if((state[0] < 0.0) && (state[1] <= 1.0))
+   
+   if (theScPanel->CheckReal(state[2], mElements[2], "INC", "Real Number"))
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_,
-          "For circular or elliptical orbit (0.0 <= ECC <= 1.0)\n"
-          " SMA should only be a positive Real Number");
+      try
+      {
+         StateConversionUtil::ValidateValue("INC", state[2], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
-      canClose = false;
    }
    
-   // for hyperbolic orbit
-   else if((state[0] > 0.0) && (state[1] > 1.0))
+   if (theScPanel->CheckReal(state[3], mElements[3], "RAAN", "Real Number"))
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "For hyperbolic orbit (ECC > 1) \n"
-          "SMA should only be a negative Real Number");
+      try
+      {
+         StateConversionUtil::ValidateValue("RAAN", state[3], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
-      canClose = false;
    }
    
-   if (!theScPanel->CheckReal(state[2], mElements[2], "INC", "Real Number"))
+   if (theScPanel->CheckReal(state[4], mElements[4], "AOP", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("AOP", state[4], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
-   
-   if (!theScPanel->CheckReal(state[3], mElements[3], "RAAN", "Real Number"))
-      retval = false;
-   
-   if (!theScPanel->CheckReal(state[4], mElements[4], "AOP", "Real Number"))
-      retval = false;
+   }
    
    // check Anomaly
    if (theScPanel->CheckReal(state[5], mElements[5], mAnomalyType, "Real Number"))
    {
-//      mAnomaly.Set(state[0], state[1], state[5], mAnomalyType);
+      try
+      {
+         StateConversionUtil::ValidateValue("TA", state[5], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
       mAnomaly = state[5];
    }
    else
@@ -1794,10 +1858,15 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
 
    if (theScPanel->CheckReal(state[0], mElements[0], "RadPer", "Real Number"))
    {
-      if (state[0] <= 0.0)
+      try
       {
-         theScPanel->CheckReal(state[0], mElements[0], "RadPer", "Real Number > 0.0", true);
-         retval = false;
+         StateConversionUtil::ValidateValue("RadPer", state[0], errMsgFormat, gg->GetDataPrecision(), "RadApo", state[1]);
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
          canClose = false;
       }
    }
@@ -1808,16 +1877,15 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
    
    if (theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number"))
    {
-      if (GmatMathUtil::IsEqual(state[1], 0.0, 0.001))
+      try
       {
-         theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number != 0.0", true);
-         retval = false;
-         canClose = false;
+         StateConversionUtil::ValidateValue("RadApo", state[1], errMsgFormat, gg->GetDataPrecision(), "RadPer", state[0]);
       }
-      else if ((state[1] > 0.0) && (state[1] < state[0]))
+      catch (BaseException &ue)
       {
-         theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number < 0.0 if RadApo < RadPer", true);
-         retval = false;
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
          canClose = false;
       }
    }
@@ -1826,24 +1894,82 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   if (!theScPanel->CheckReal(state[2], mElements[2], "INC", "Real Number"))
+   if (theScPanel->CheckReal(state[2], mElements[2], "INC", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("INC", state[2], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
-   if (!theScPanel->CheckReal(state[3], mElements[3], "RAAN", "Real Number"))
+   if (theScPanel->CheckReal(state[3], mElements[3], "RAAN", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("RAAN", state[3], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
-   if (!theScPanel->CheckReal(state[4], mElements[4], "AOP", "Real Number"))
+   if (theScPanel->CheckReal(state[4], mElements[4], "AOP", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("AOP", state[4], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
    // check Anomaly
    if (theScPanel->CheckReal(state[5], mElements[5], mAnomalyType, "Real Number"))
    {
+      try
+      {
+         StateConversionUtil::ValidateValue("TA", state[5], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
       #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
          MessageInterface::ShowMessage(
                "OrbitPanel::CheckModKeplerian, about to set anomaly with %12.10f  %12.10f  %12.10f  %s\n",
                state[0], state[1], state[5], mAnomalyType.c_str());
       #endif
-//      mAnomaly.Set(state[0], state[1], state[5], mAnomalyType);
          mAnomaly = state[5];
    }
    else
@@ -1868,9 +1994,16 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
    
    if (theScPanel->CheckReal(state[0], mElements[0], "RMAG", "Real Number"))
    {
-      if (state[0] <= 0.0)
+      try
       {
-         theScPanel->CheckReal(state[0], mElements[0], "RMAG", "Real Number > 0.0", true);
+         StateConversionUtil::ValidateValue("RMAG", state[0], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
       }
    }
    else
@@ -1878,18 +2011,55 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
       retval = false;
    }
    
-   if (!theScPanel->CheckReal(state[1], mElements[1], "RA", "Real Number"))
+   if (theScPanel->CheckReal(state[1], mElements[1], "RA", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("RA", state[1], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
-   if (!theScPanel->CheckReal(state[2], mElements[2], "DEC", "Real Number"))
+   if (theScPanel->CheckReal(state[2], mElements[2], "DEC", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("DEC", state[2], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
    if (theScPanel->CheckReal(state[3], mElements[3], "VMAG", "Real Number"))
    {
-      if (state[3] < 0.0)
+      try
       {
-         theScPanel->CheckReal(state[4], mElements[3], "VMAG", "Real Number >= 0.0", true);
-         retval = false;
+         StateConversionUtil::ValidateValue("VMAG", state[3], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
          canClose = false;
       }
    }
@@ -1911,11 +2081,43 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
       label6 = "DECV";
    }
    
-   if (!theScPanel->CheckReal(state[4], mElements[4], label5, "Real Number"))
+   if (theScPanel->CheckReal(state[4], mElements[4], label5, "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue(label5, state[4], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
-   if (!theScPanel->CheckReal(state[5], mElements[5], label6, "Real Number"))
+   if (theScPanel->CheckReal(state[5], mElements[5], label6, "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue(label6, state[5], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
    #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
    MessageInterface::ShowMessage("CheckSpherical() returning %d\n", retval);
@@ -1934,10 +2136,15 @@ bool OrbitPanel::CheckEquinoctial(Rvector6 &state)
    
    if (theScPanel->CheckReal(state[0], mElements[0], "SMA", "Real Number"))
    {
-      if (state[0] == 0.0)
+      try
       {
-         theScPanel->CheckReal(state[0], mElements[0], "SMA", "Real Number != 0.0", true);
-         retval = false;
+         StateConversionUtil::ValidateValue("SMA", state[0], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
          canClose = false;
       }
    }
@@ -1946,22 +2153,100 @@ bool OrbitPanel::CheckEquinoctial(Rvector6 &state)
       retval = false;
    }
    
-   if ((!theScPanel->CheckReal(state[1], mElements[1], "EquinoctialH", "Real Number")) ||
-       (!theScPanel->CheckRealRange(mElements[1], state[1], "EquinoctialH", -1.0, 1.0, true, true, true, true)))
+   if (theScPanel->CheckReal(state[1], mElements[1], "EquinoctialH", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("EquinoctialH", state[1], errMsgFormat, gg->GetDataPrecision(), "EquinoctialK",state[2]);
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
          retval =  false;
+   }
    
-   if ((!theScPanel->CheckReal(state[2], mElements[2], "EquinoctialK", "Real Number")) ||
-         (!theScPanel->CheckRealRange(mElements[2], state[2], "EquinoctialK", -1.0, 1.0, true, true, true, true)))
+   if (theScPanel->CheckReal(state[2], mElements[2], "EquinoctialK", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("EquinoctialK", state[2], errMsgFormat, gg->GetDataPrecision(), "EquinoctialH",state[1]);
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
-   if (!theScPanel->CheckReal(state[3], mElements[3], "EquinoctialP", "Real Number"))
+   if (theScPanel->CheckReal(state[3], mElements[3], "EquinoctialP", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("EquinoctialP", state[3], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
-   if (!theScPanel->CheckReal(state[4], mElements[4], "EquinoctialQ", "Real Number"))
+   if (theScPanel->CheckReal(state[4], mElements[4], "EquinoctialQ", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("EquinoctialQ", state[4], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
-   if (!theScPanel->CheckReal(state[5], mElements[5], "Mean Longitude", "Real Number"))
+   if (theScPanel->CheckReal(state[5], mElements[5], "Mean Longitude", "Real Number"))
+   {
+      try
+      {
+         StateConversionUtil::ValidateValue("EquinoctialQ", state[5], errMsgFormat, gg->GetDataPrecision());
+      }
+      catch (BaseException &ue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         retval   = false;
+         canClose = false;
+      }
+   }
+   else
+   {
       retval = false;
+   }
    
    #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
    MessageInterface::ShowMessage("CheckEquinoctial() returning %d\n", retval);
