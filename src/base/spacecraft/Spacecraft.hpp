@@ -28,7 +28,6 @@
 #include "GmatState.hpp"
 #include "FuelTank.hpp"
 #include "Thruster.hpp"
-//#include "Anomaly.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "TimeSystemConverter.hpp"
@@ -156,8 +155,8 @@ public:
    const StringArray&   GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
-   virtual std::string  GetStringParameter(const Integer id, const Integer index) const;           // made changes by Tuan Nguyen
-   virtual std::string  GetStringParameter(const std::string & label, const Integer index) const;  // made changes by Tuan Nguyen
+   virtual std::string  GetStringParameter(const Integer id, const Integer index) const;
+   virtual std::string  GetStringParameter(const std::string & label, const Integer index) const;
 
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Gmat::ParameterType
@@ -198,7 +197,6 @@ public:
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
    virtual Integer         HasParameterCovariances(Integer parameterId);
-//   virtual Rmatrix*        GetParameterCovariances(Integer parameterId);
 
    // Cloned object update management
    virtual bool HasLocalClones();
@@ -250,7 +248,7 @@ protected:
       MASS_FLOW,
 
       // Hardware for spacecraft
-      ADD_HARDWARE,                                             // made changes by Tuan Nguyen
+      ADD_HARDWARE,
       // The filename used for the spacecraft's model 
       MODEL_FILE,
 
@@ -422,9 +420,9 @@ protected:
 
    // Hardware
    /// List of hardware names used in the spacecraft
-   StringArray           hardwareNames;                                 // made changes by Tuan Nguyen
+   StringArray       hardwareNames;
    /// List of hardware objects used in the spacecraft
-   ObjectArray           hardwareList;                                  // made changes by Tuan Nguyen
+   ObjectArray       hardwareList;
 
    Real              UpdateTotalMass();
    Real              UpdateTotalMass() const;
@@ -447,14 +445,14 @@ protected:
    Real              GetElement(const std::string &label);
    bool              SetElement(const std::string &label, const Real &value);
    Integer           LookUpLabel(const std::string &label, std::string &rep);
-//   Integer           LookUpID(const Integer id, std::string &label, std::string &rep);
    void              BuildElementLabelMap();
    void              RecomputeStateAtEpoch(const GmatEpoch &toEpoch);
 
 private:
-   bool              VerifyAddHardware();                   // made changes by Tuan Nguyen
+   bool              VerifyAddHardware();
    Integer           NumStateElementsSet();
    void              SetPossibleInputTypes(const std::string& label, const std::string &rep);
+   bool              ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel, Real andValue);
 
 };
 
