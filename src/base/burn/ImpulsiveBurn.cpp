@@ -925,6 +925,11 @@ bool ImpulsiveBurn::SetTankFromSpacecraft()
             ++scTank;
          }
       }
+      if (tankNames.size() != tankMap.size())
+         throw BurnException("The impulsive burn " + instanceName +
+               " could not find the fuel tank needed to deplete mass; please "
+               "attach the tank to the spacecraft " + spacecraft->GetName() +
+               " or turn off mass depletion.");
    }
    
    #ifdef DEBUG_IMPBURN_SET
@@ -972,6 +977,15 @@ void ImpulsiveBurn::DecrementMass()
    // Update tank mass
    if (!tankMap.empty())
    {
+      if (tankMap.size() > 1)
+         throw BurnException("The ImpulsiveBorn object " + instanceName +
+               " is configured to draw mass from multiple tanks, but only one "
+               "tank is supported in the current implementation.");
+
+      // This code is set up to draw from multiple tanks, but the amount drawn
+      // is not calculated to draw proportionally.  Instead, it reduces each
+      // tank by deltaTankMass.  We need to check this code before enabling
+      // mass reduction from multiple tanks in a single impulsive burn.
       for (ObjectMap::iterator tankPos = tankMap.begin();
            tankPos != tankMap.end(); ++tankPos)
       {
@@ -993,6 +1007,12 @@ void ImpulsiveBurn::DecrementMass()
          currTank->SetRealParameter(paramID, currTankMass);
       }
    }
+   else
+      throw BurnException("Impulsive Burn " + instanceName +
+            " is set to decrement mass from a tank named "  + tankNames[0] +
+            ", but the Spacecraft " + spacecraft->GetName() +
+            " does not have the selected fuel tank.");
+
    #ifdef DEBUG_IMPBURN_DECMASS
    MessageInterface::ShowMessage
       ("ImpulsiveBurn::DecrementMass() <%p>'%s' returning\n", this, GetName().c_str());
