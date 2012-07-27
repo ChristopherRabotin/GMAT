@@ -899,7 +899,9 @@ wxTreeItemId MissionTree::BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
       }
       
       // Always show EndBranch command
-      if (!cmd->IsOfType("EndBranch") && !viewCmdFoundInBranch)
+      // Fix constant, was "EndBranch"
+	  // (TGG: 2012.07.17 for bug GMT-2901)
+      if (!cmd->IsOfType("BranchEnd") && !viewCmdFoundInBranch)
       {
          isLastItemHidden = true;
          #if DEBUG_BUILD_TREE_ITEM
@@ -1242,6 +1244,9 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
          wxString branchTypeName = branch->GetTypeName().c_str();
          wxString label = branch->GetSummaryName().c_str();
          label.Replace(branchTypeName, cmdTypeName);
+		 // replace first End with End+Space
+		 // (TGG: 2012.07.17 for bug GMT-2901)
+         label.Replace("End", "End ", false);
          nodeName.Printf("%s", label.c_str());
       }
    }
