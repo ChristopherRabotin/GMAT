@@ -41,6 +41,7 @@
 //#define WIREFRAME_MODE
 
 //#define DEBUG_LOAD
+//#define DEBUG_LOAD_TEXTURE
 //#define DEBUG_DRAW
 //#define DEBUG_DRAW_MORE
 
@@ -163,14 +164,6 @@ char ModelObject::Load(const wxString &full_path,
    // Then we go through each texture from the materials and load those. Any that failed
    // we bind to the default texture passed in
    LoadTextures();
-   //for (i = 0; i < num_materials; i++){
-      //string = path;
-      //string.Append(material[i].texture_name);
-      //strcpy(string, filePath);
-      //strcat(string, material[i].texture_name);
-      //result = LoadTexture(string);
-      //material[i].id_texture = result;
-   //}
    // Create the bounding sphere and AABB of the model
    CreateBSphere();
    // Determine all of the faces neighbors
@@ -230,7 +223,7 @@ int ModelObject::LoadTexture(const wxString &filename)
    
    GLuint id;
    GLenum error;
-   wxImage img; 
+   wxImage image; 
    bool result = false;
    wxString ext;
    
@@ -246,13 +239,13 @@ int ModelObject::LoadTexture(const wxString &filename)
    // Load the file
    ext = filename.AfterLast('.');
    if (strcmp(ext, "bmp") == 0 || strcmp(ext, "BMP") == 0)
-      result = img.LoadFile(filename, wxBITMAP_TYPE_BMP, -1);
+      result = image.LoadFile(filename, wxBITMAP_TYPE_BMP, -1);
    else if (strcmp(ext, "jpg") == 0 || strcmp(ext, "JPG") == 0)
-      result = img.LoadFile(filename, wxBITMAP_TYPE_JPEG, -1);
+      result = image.LoadFile(filename, wxBITMAP_TYPE_JPEG, -1);
    else if (strcmp(ext, "png") == 0 || strcmp(ext, "PNG") == 0)
-      result = img.LoadFile(filename, wxBITMAP_TYPE_PNG, -1);
+      result = image.LoadFile(filename, wxBITMAP_TYPE_PNG, -1);
    else if (strcmp(ext, "tif") == 0 || strcmp(ext, "TIF") == 0)
-      result = img.LoadFile(filename, wxBITMAP_TYPE_TIF, -1);
+      result = image.LoadFile(filename, wxBITMAP_TYPE_TIF, -1);
    else
       return -1;
    
@@ -265,9 +258,20 @@ int ModelObject::LoadTexture(const wxString &filename)
       return -1;
    }
    
+   int width = image.GetWidth();
+   int height = image.GetHeight();
+   GLubyte *data = image.GetData();
+   
+   #ifdef DEBUG_LOAD_TEXTURE
+   MessageInterface::ShowMessage("   Calling glGenTextures() to generate texture id\n");
+   #endif
    // Generate the texture id
    glGenTextures(1, &id);
    error = glGetError();
+
+   #ifdef DEBUG_LOAD_TEXTURE
+   MessageInterface::ShowMessage("   Calling glBindTexture() with texture id: %d\n", id);
+   #endif
    // Bind the texture id
    glBindTexture(GL_TEXTURE_2D, id);
    error = glGetError();
@@ -276,23 +280,38 @@ int ModelObject::LoadTexture(const wxString &filename)
    // Repeat the image if the u,v coordinates exceed the 0,1 range
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-   // Linearly magnify the texture
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   
+   //=================================================================
+   // Create the 2D mipmaps for minification non liniux platform
+   // gluBuild2DMipmaps() crashes on Linux, so it is excluded here.
+   #ifndef __WXGTK__
+   //=================================================================
+   
    // Linearly minify the texture (is that even a real word?)
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-   
-   // Define the 2D texture
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.GetWidth(), img.GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, img.GetData());
-
-   // Create the 2D mipmaps for minification
-   #ifndef __WXGTK__
+   // Linearly magnify the texture
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
    // This call crashes GMAT on Linux, so it is excluded here. 
-   gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, img.GetWidth(), img.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, img.GetData());
+   gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+   
+   //=================================================================
+   #else
+   //=================================================================
+   
+   // Linearly minify the texture (is that even a real word?)
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   // Linearly magnify the texture
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   // Define the 2D texture
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+   
+   //=================================================================
    #endif
+   //=================================================================
    
    #ifdef DEBUG_LOAD_TEXTURE
    MessageInterface::ShowMessage
-      ("ModelObject::LoadTexture() returning id: %d\n", id);
+      ("ModelObject::LoadTexture() returning texture id: %d\n", id);
    #endif
    
    return id;

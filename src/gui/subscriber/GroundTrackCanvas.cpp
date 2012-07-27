@@ -68,12 +68,9 @@ using namespace FloatAttUtil;
 // OpenGL state that is represented by the rendering context to the canvas,
 // and then call wxGLCanvas::SwapBuffers to swap the buffers of the OpenGL
 // canvas and thus show your current output.
-// This still not working so commented out. But there is a problem with
-// showing object and status line in the wx 2.8.4 using implicit GLContext
-//#define __USE_WX280_GL__
 
-// skip over limit data
-//#define SKIP_OVER_LIMIT_DATA
+// Skip data over the max position difference
+//#define SKIP_DATA_OVER_LIMIT
 
 // debug
 //#define DEBUG_INIT 1
@@ -154,31 +151,8 @@ GroundTrackCanvas::GroundTrackCanvas(wxWindow *parent, wxWindowID id,
        name.c_str(), size.GetWidth(), size.GetHeight());
    #endif
    
-   #ifdef __USE_WX280_GL__
-   // Note:
-   // Use wxGLCanvas::m_glContext, otherwise resize will not work
-   //m_glContext = new wxGLContext(this);
-   #endif
    
-   ModelManager *mm = ModelManager::Instance();
-   
-   #ifndef __WXMAC__
-      if (!mm->modelContext)
-      {
-         #if DEBUG_INIT
-         MessageInterface::ShowMessage
-            ("   Setting new wxGLContext(this) to ModelManager::modelContext\n");
-         #endif
-         mm->modelContext = new wxGLContext(this);
-      }
-   #else
-      if (!mm->modelContext)
-          mm->modelContext = this->GetGLContext();
-   #endif
-   
-   theContext = mm->modelContext;//new wxGLContext(this);
-   
-   //@todo remove 3d related stuff
+   //@todo - Remove 3d related stuff
    
    mCamera.Reset();
    mCamera.Relocate(DEFAULT_DIST, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -301,11 +275,7 @@ void GroundTrackCanvas::ClearPlot()
    glClearColor(0.0, 0.0, 0.0, 1);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glFlush();
-   
-   // In wxWidgets-2.8.4, this shows previous plot
-   #ifndef __USE_WX280_GL__
    SwapBuffers();
-   #endif
 }
 
 
@@ -484,21 +454,19 @@ void GroundTrackCanvas::OnPaint(wxPaintEvent& event)
    
    // must always be here
    wxPaintDC dc(this);
+      
+   // Check for any error condition
+   if (mFatalErrorFound)
+   {
+      MessageInterface::ShowMessage("**** ERROR **** fatal error found\n");
+      return;
+   }
    
-   if (mFatalErrorFound) return;
-   
-   #ifndef __WXMOTIF__
-      #ifndef __USE_WX280_GL__
-         if (!GetContext()) return;
-      #endif
-   #endif
-   
-   #ifdef __USE_WX280_GL__
-      theContext->SetCurrent(*this);
-      SetCurrent(*theContext);
-   #else
-      SetCurrent();
-   #endif
+   if (!SetGLContext())
+   {
+      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in GroundTrackCanvas::OnPaint()\n");
+      return;
+   }
    
    if (!mGlInitialized && mObjectCount > 0)
    {
@@ -562,21 +530,17 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
    GetClientSize(&nWidth, &nHeight);
    mCanvasSize.x = nWidth;
    mCanvasSize.y = nHeight;
-#ifndef __WXMOTIF__
-   if (GetContext())
-#endif
+   
+   if (!SetGLContext())
    {
-      #ifdef __USE_WX280_GL__
-      theContext->SetCurrent(*this);
-      SetCurrent(*theContext);
-      #else
-      SetCurrent();
-      #endif
-      
-      glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
+      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in GroundTrackCanvas::OnSize()\n");
+      return;
    }
    
+   
+   glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
    mAxisLength = (float)(sqrt((Real)(nWidth*nWidth + nHeight*nHeight)));
+   
    Refresh(false);
    Update();
    
@@ -1245,7 +1209,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
          return;
       
       // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
-      #ifdef SKIP_OVER_LIMIT_DATA
+      #ifdef SKIP_DATA_OVER_LIMIT
       static Real sMaxDiffDist = 100000.0;
       // if difference is more than sMaxDiffDist skip
       if ((Abs(r2[0]- r1[0]) > sMaxDiffDist && (SignOf(r2[0]) != SignOf(r1[0]))) ||

@@ -49,7 +49,6 @@ public:
    // getters
    virtual bool GetOverlapPlot();
    virtual ViewCanvas* GetGlCanvas();
-   virtual wxGLContext* GetGLContext();
    virtual bool GetUseViewPointInfo();
    virtual bool GetDrawWireFrame();
    virtual bool GetDrawXyPlane();
@@ -65,7 +64,6 @@ public:
    
    // setters
    virtual void SetSolarSystem(SolarSystem *ss);
-   virtual void SetGLContext(wxGLContext *glContext = NULL);
    virtual void SetUserInterrupt();
    
    virtual void SetPlotName(const wxString &name);

@@ -47,6 +47,7 @@
 //#define DEBUG_LOAD_IMAGE 1
 //#define DEBUG_TEXTURE 1
 //#define DEBUG_LOAD_MODEL 1
+//#define DEBUG_GL_CONTEXT 1
 //#define DEBUG_DRAWING_MODE
 //#define DEBUG_OBJECT 2
 //#define DEBUG_DATA_BUFFERRING 1
@@ -87,17 +88,15 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // wxBufferedPaintDC() to reduce the flickering, but I see no difference.
    // Currently it repaints when I make window size larger, but not when I
    // reduce the size. (LOJ: 2011.07.01)
-   #ifdef __USE_WX280_GL__
+   // Repainting issue when reducing size was resolved by adding Refresh(false)
+   // and Update(). (LOJ: 2012.05.03 for GMT-2582 fix)
    #ifdef __WXMSW__
-   // When __USE_WX280_GL__ is defined on Windows, I'm getting pixel format error
-   // with GmatGLCanvasAttribs. So using 0 for attribute list (*int) (LOJ: 2011.12.20)
+   // I'm getting pixel format error with GmatGLCanvasAttribs on Windows.
+   // So using 0 for attribute list (*int) (LOJ: 2011.12.20)
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #else
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
    : wxGLCanvas(parent, id, ViewCanvas::GmatGLCanvasAttribs, pos, size, style, name)
-   #endif
-   #else
-   : wxGLCanvas(parent, id, pos, size, style, name)
    #endif
 {
    #ifdef DEBUG_INIT
@@ -225,7 +224,7 @@ ViewCanvas::~ViewCanvas()
    #ifdef DEBUG_VIEWCANVAS
    MessageInterface::ShowMessage("ViewCanvas::~ViewCanvas() '%s' entered\n", mPlotName.c_str());
    #endif
-   
+      
    // Cleanup textures
    for (std::map<wxString, GLuint>::iterator i = mTextureIdMap.begin();
         i != mTextureIdMap.end(); ++i)
@@ -251,31 +250,49 @@ ViewCanvas::~ViewCanvas()
 
 
 //------------------------------------------------------------------------------
-// wxGLContext* GetGLContext()
+// bool SetGLContext()
 //------------------------------------------------------------------------------
-/*
- * Return current GLContext pointer.
+/**
+ * Sets GL context to ModelManager which stores shared GL context pointer.
+ *
+ * @return true if GL context is not NULL, false otherwise
  */
 //------------------------------------------------------------------------------
-wxGLContext* ViewCanvas::GetGLContext()
+bool ViewCanvas::SetGLContext()
 {
-   return theContext;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetGLContext(wxGLContext *glContext)
-//------------------------------------------------------------------------------
-void ViewCanvas::SetGLContext(wxGLContext *glContext)
-{
-   #ifdef __USE_WX280_GL__
-   if (glContext == NULL)
-      SetCurrent(*theContext);
-   else
-      SetCurrent(*glContext);
-   #else
-   SetCurrent();
+   #ifdef DEBUG_GL_CONTEXT
+   MessageInterface::ShowMessage
+      ("ViewCanvas::SetGLContext() entered, theContet=<%p>\n");
    #endif
+   
+   bool retval = false;
+   ModelManager *mm = ModelManager::Instance();
+   
+   if (!mm->GetSharedGLContext())
+   {
+      #if DEBUG_GL_CONTEXT
+      MessageInterface::ShowMessage
+         ("   Setting new wxGLContext(this) to ModelManager::theContext\n");
+      #endif
+      mm->SetSharedGLContext(new wxGLContext(this));
+   }
+   
+   // Use the shared context from the ModelManager
+   theContext = mm->GetSharedGLContext();
+   
+   if (theContext)
+   {
+      SetCurrent(*theContext);
+      retval = true;
+   }
+   
+   #ifdef DEBUG_GL_CONTEXT
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::SetGLContext() returning %d, theContext=<%p>\n",
+       retval, theContext);
+   #endif
+   
+   return retval;   
 }
 
 
@@ -297,19 +314,12 @@ bool ViewCanvas::InitializePlot()
    // Add things to do here
    wxPaintDC dc(this);
    
-   #ifndef __WXMOTIF__
-      #ifndef __USE_WX280_GL__
-         if (!GetContext()) return false;
-      #endif
-   #endif
+   if (!SetGLContext())
+   {
+      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in ViewCanvas::InitializePlot()\n");
+      return false;
+   }
    
-   #ifdef __USE_WX280_GL__
-      theContext->SetCurrent(*this);
-      SetCurrent(*theContext);
-   #else
-      SetCurrent();
-   #endif
-
 	// initialize opengl
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("   Calling InitOpenGL()\n");
@@ -339,7 +349,7 @@ bool ViewCanvas::InitializePlot()
    MessageInterface::ShowMessage
       ("ViewCanvas::InitializePlot() '%s' leaving\n\n", mPlotName.c_str());
    #endif
-   
+      
    return true;
 }
 
@@ -386,13 +396,13 @@ bool ViewCanvas::InitOpenGL()
       #endif
 		return true;
 	}
-	
-   #ifdef __USE_WX280_GL__
-   SetCurrent(*theContext);
-   #else
-   SetCurrent();
-   #endif
-	
+   
+   if (!SetGLContext())
+   {
+      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in ViewCanvas::InitOpenGL()\n");
+      return false;
+	}
+   
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("   Calling InitGL()\n");
    #endif
@@ -947,25 +957,10 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
       // add object names
       mObjectNames.Add(objNames[i]);
       mTextureIdMap[objNames[i]] = GmatPlot::UNINIT_TEXTURE;
-
-      // Object needs rebinding with texture map during initialization
-      // so remove this. (Fix for GMT-2483 LOJ: 2012.05.04)
-      #if 0
-      if (mTextureIdMap.find(objNames[i]) == mTextureIdMap.end())
-      {
-         #if DEBUG_OBJECT
-         MessageInterface::ShowMessage
-            ("ViewCanvas::AddObjectList() Bind new texture object for '%s'\n",
-             objNames[i].c_str());
-         #endif
-         
-         mTextureIdMap[objNames[i]] = GmatPlot::UNINIT_TEXTURE;
-      }
-      #endif
       
       // initialize show object
       mShowObjectMap[objNames[i]] = true;
-
+      
       // initialize object color
       rgb.Set(objColors[i]);
       mObjectColorMap[objNames[i]] = rgb;
@@ -989,17 +984,6 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames,
           rgb.Green(), rgb.Blue());
       #endif
    }
-
-   // Can we remove this? wx 2.6 is pretty old now.
-   // Always initialize GL before run, InitGL() is called in OnPaint()
-   // if using 2.6.3 or later version
-   // For 2.6.3 version initialize GL here
-   #ifndef __USE_WX280_GL__
-      #ifdef DEBUG_INIT
-      MessageInterface::ShowMessage("   Not using WX280, so calling InitGL()\n");
-      #endif
-   InitGL();
-   #endif
    
    ResetPlotInfo();
    ClearPlot();
@@ -1555,12 +1539,13 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          ("   theContext=<%p>, textureFile='%s'\n", theContext, textureFile.c_str());
       #endif
       
-      #ifdef __USE_WX280_GL__
-         SetCurrent(*theContext);
-      #else
-         SetCurrent();
-      #endif
-
+      if (!SetGLContext())
+      {
+         MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in ViewCanvas::BindTexture()\n");
+         return -1;
+      }
+      
+      
       // Generate text id and bind it before loading image
       glGenTextures(1, &texId);
       glBindTexture(GL_TEXTURE_2D, texId);
@@ -1693,7 +1678,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, bool isSpacecraft)
    {
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            
+      
       // This call crashes GMAT on Linux, so it is excluded here. 
       mipmapsStatus =
          gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB,
@@ -1898,6 +1883,7 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 							 "modelID=%d\n",  sat, sat->GetName().c_str(), sat->modelFile.c_str(),
 							 sat->modelID);
 				      #endif
+                  
 						if (sat->modelFile != "" && sat->modelID == -1)
 						{
 							wxString modelPath(sat->modelFile.c_str());
@@ -1936,7 +1922,7 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 			
 			// Set mModelsAreLoaded to true if it went through all models
 			if (numModelLoaded == mScCount)
-				mModelsAreLoaded = true;				
+				mModelsAreLoaded = true;
       }
    }
    

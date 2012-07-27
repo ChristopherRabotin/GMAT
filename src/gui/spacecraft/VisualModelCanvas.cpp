@@ -32,6 +32,8 @@
 #include "MessageInterface.hpp"
 #include "Rendering.hpp"
 #include "ModelManager.hpp"
+#include "ViewCanvas.hpp"          // for static int GmatGLCanvasAttribs[2]
+
 
 BEGIN_EVENT_TABLE(VisualModelCanvas, wxGLCanvas)
    EVT_PAINT(VisualModelCanvas::OnPaint)
@@ -39,42 +41,35 @@ BEGIN_EVENT_TABLE(VisualModelCanvas, wxGLCanvas)
    EVT_KEY_DOWN(VisualModelCanvas::OnKeyDown)
 END_EVENT_TABLE()
 
-bool glInitialized, recentered;
-GLfloat ox, oy, oz,
-   rx, ry, rz,
-   sx, sy, sz;
 
+//#define DEBUG_LOAD_MODEL
+//#define DEBUG_ON_PAINT
+//#define DEBUG_GL_CONTEXT
+
+//------------------------------------------------------------------------------
+// VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft, ...)
+//------------------------------------------------------------------------------
 VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    const wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name, long style)
-   #ifdef __USE_WX280_GL__
+   #ifdef __WXMSW__
+   // I'm getting pixel format error with GmatGLCanvasAttribs on Windows.
+   // So using 0 for attribute list (*int) (LOJ: 2011.12.20)
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #else
-   : wxGLCanvas(parent, id, pos, size, style, name)
+   // Double buffer activation needed in Linux (Patch from Tristan Moody)
+   : wxGLCanvas(parent, id, ViewCanvas::GmatGLCanvasAttribs, pos, size, style, name)
    #endif
 {
-   vParent = parent;
-
-   //CStars::Instance()->InitStars();
-
+   vParent = parent;   
    currentSpacecraft = spacecraft;
-
-   lastMouseX = 0; lastMouseY = 0;
-
-
-   #ifndef __WXMAC__
-      ModelManager *mm = ModelManager::Instance();
-      if (!mm->modelContext)
-         mm->modelContext = new wxGLContext(this);
-      theContext = mm->modelContext;
-   #else
-      theContext = GetContext();
-   #endif
-
+   lastMouseX = 0;
+   lastMouseY = 0;
+      
    mCamera.Relocate(15000.0f, 15000.0f, 15000.0f, 0.0f, 0.0f, 0.0f);
    mLight.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
    mLight.SetPosition(0.01f, 1.0f, 0.3f);
    mLight.SetDirectional(true);
-
+   
    glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
 
    // enable the light
@@ -96,17 +91,8 @@ VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
 //------------------------------------------------------------------------------
 VisualModelCanvas::~VisualModelCanvas()
 {
-   #ifndef __WXMAC__
-      ModelManager *mm = ModelManager::Instance();
-      if (!mm->modelContext)
-      {
-         // delete modelContext since it was created in the constructor
-         delete mm->modelContext;
-         mm->modelContext = NULL;
-      }
-   #else
-      theContext = GetContext();
-   #endif
+   // @note - LOJ: 2012.07.24
+   // Do not delete theContext here since it is shared with other GL plots.
 }
 
 //------------------------------------------------------------------------------
@@ -118,30 +104,39 @@ VisualModelCanvas::~VisualModelCanvas()
 //------------------------------------------------------------------------------
 void VisualModelCanvas::OnPaint(wxPaintEvent &event)
 {
-   float offset[3] = {0.0f, 0.0f, 0.0f}, rotation[3] = {0.0f, 0.0f, 0.0f}, scale;
-
-   #ifndef __WXMAC__
-      // Set the context
-      theContext->SetCurrent(*this);
-      SetCurrent(*theContext);
-   #else
-      SetCurrent();
+   #ifdef DEBUG_ON_PAINT
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::OnPaint() entered, glInitialized=%d, needToLoadModel=%d\n",
+       glInitialized, needToLoadModel);
    #endif
+   
+   float offset[3] = {0.0f, 0.0f, 0.0f}, rotation[3] = {0.0f, 0.0f, 0.0f}, scale;
+   
    // Set the drawing context
    wxPaintDC dc(this);
+   
+   if (!SetGLContext())
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** Cannot set GL context in VisualModelCanvas::OnPaint()\n");
+      return;
+   }
+   
    // Initialize OpenGL if it hasn't been initialized yet
    if (!glInitialized)
    {
       InitGL();
       glInitialized = true;
    }
+   
    // Loading the model needs to be done within the OpenGL Context, so we do it here
    if (needToLoadModel)
       LoadModel();
+   
    // set OpenGL to recognize the counter clockwise defined side of a polygon
    // as its 'front' for lighting and culling purposes
    glFrontFace(GL_CCW);
-
+   
    // enable face culling, so that polygons facing away (defined by front face)
    // from the viewer aren't drawn (for efficiency).
    // tell OpenGL to use glColor() to get material properties for..
@@ -152,7 +147,7 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
    glClearColor(0.0, 0.0, 0.0, 1);
    // Clear the color and depth bits
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+   
    // Set up the viewport
    GLint h = GetSize().GetHeight(), w = GetSize().GetWidth();
    glViewport(0, 0, w, h);
@@ -165,8 +160,9 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
    gluLookAt(mCamera.position[0], mCamera.position[1], mCamera.position[2],
-      0, 0, 0,
-      mCamera.up[0], mCamera.up[1], mCamera.up[2]);
+             0, 0, 0,
+             mCamera.up[0], mCamera.up[1], mCamera.up[2]);
+   
    // Set up the light and enable lighting
    float lpos[4];
    mLight.GetPositionf(lpos);
@@ -174,6 +170,7 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
    glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
+   
    // Draw the model
    if (currentSpacecraft->modelID == -1)
    {
@@ -196,6 +193,7 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
       loadedModel->SetBaseScale(scale, scale, scale);
       loadedModel->Draw(true);
    }
+   
    glDisable(GL_LIGHTING);
    // Draw the axes
    DrawAxes();
@@ -206,12 +204,17 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
       // @todo - do we need a pointer to any actual CelestialBody object here, to get current EqRadius?
       //         (and for other two places where radius is set, below)
       DrawSphere(GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH], 15, 15, GLU_LINE);
-//      DrawSphere(6378, 15, 15, GLU_LINE);
       glDisable(GL_TEXTURE_2D);
    }
    // Complete the call
    glFlush();
    SwapBuffers();
+
+   #ifdef DEBUG_ON_PAINT
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::OnPaint() leaving, needToLoadModel=%d\n", needToLoadModel);
+   #endif
+   
 }
 
 //------------------------------------------------------------------------------
@@ -229,8 +232,8 @@ void VisualModelCanvas::OnMouse(wxMouseEvent &event)
       // Rotates the camera around the center when the left mouse button is used
       if (event.LeftIsDown())
       {
-         float angleX = (lastMouseX - mouseX) / 300.0,
-            angleY = (lastMouseY - mouseY) / 300.0;
+         float angleX = (lastMouseX - mouseX) / 300.0;
+         float angleY = (lastMouseY - mouseY) / 300.0;
          mCamera.Rotate(angleX, angleY, 0.0, false, true);
          Refresh(false);
       }
@@ -295,9 +298,8 @@ void VisualModelCanvas::DrawAxes()
    // mode.
    //------------------------------------------------------------------------
 
-//   viewDist = 6378.0f; // stays the same
-     viewDist = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]; // stays the same
-
+   viewDist = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]; // stays the same
+   
    Rvector3 axis;
    Rvector3 origin;
    origin.Set(0, 0, 0);
@@ -352,6 +354,10 @@ void VisualModelCanvas::DrawAxes()
 //------------------------------------------------------------------------------
 bool VisualModelCanvas::LoadModel(const wxString &filePath)
 {
+   #ifdef DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::LoadModel(filePath) entered, filePath='%s'\n", filePath.c_str());
+   #endif
    modelPath = filePath;
    needToLoadModel = true;
    Refresh(false);
@@ -375,9 +381,7 @@ void VisualModelCanvas::Rotate(bool useDegrees, float xAngle, float yAngle, floa
    if (needToLoadModel)
       LoadModel();
    if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
-   {
       loadedModel->SetBaseRotation(useDegrees, xAngle, yAngle, zAngle);
-   }
    Refresh(false);
 }
 
@@ -397,7 +401,7 @@ void VisualModelCanvas::Translate(float x, float y, float z)
    if (needToLoadModel)
       LoadModel();
    if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
-         loadedModel->SetBaseOffset(x,y,z);
+      loadedModel->SetBaseOffset(x,y,z);
    Refresh(false);
 }
 
@@ -418,9 +422,7 @@ void VisualModelCanvas::Scale(float xScale, float yScale, float zScale)
    if (needToLoadModel)
       LoadModel();
    if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
-   {
       loadedModel->SetBaseScale(xScale, yScale, zScale);
-   }
    Refresh(false);
 }
 
@@ -437,9 +439,9 @@ void VisualModelCanvas::RecenterModel(float *offset)
       LoadModel();
    if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
    {
-      float x = -loadedModel->bsphere_center.x,
-         y = -loadedModel->bsphere_center.y,
-         z = -loadedModel->bsphere_center.z;
+      float x = -loadedModel->bsphere_center.x;
+      float y = -loadedModel->bsphere_center.y;
+      float z = -loadedModel->bsphere_center.z;
       offset[0] = x;
       offset[1] = y;
       offset[2] = z;
@@ -458,16 +460,70 @@ void VisualModelCanvas::RecenterModel(float *offset)
 //------------------------------------------------------------------------------
 float VisualModelCanvas::AutoscaleModel()
 {
-//   float earthRadius = 6378.0f,
    float earthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH],
       modelRadius = loadedModel->bsphere_radius;
    return earthRadius / (5.0f * modelRadius);
 }
 
+//------------------------------------------------------------------------------
+// void LoadModel()
+//------------------------------------------------------------------------------
 void VisualModelCanvas::LoadModel()
 {
+   #ifdef DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::LoadModel() entered, modelPath='%s'\n", modelPath.c_str());
+   #endif
    ModelManager *mm = ModelManager::Instance();
    currentSpacecraft->modelID = mm->LoadModel(modelPath);
    loadedModel = mm->GetModel(currentSpacecraft->modelID);
    needToLoadModel = false;
 }
+
+//------------------------------------------------------------------------------
+// bool SetGLContext()
+//------------------------------------------------------------------------------
+/**
+ * Sets GL context to ModelManager and sets to current context which stores
+ * shared GL context pointer.
+ *
+ * @return true if GL context is not NULL, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool VisualModelCanvas::SetGLContext()
+{
+   #ifdef DEBUG_GL_CONTEXT
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::SetGLContext() entered, theContet=<%p>\n");
+   #endif
+   
+   bool retval = false;
+   ModelManager *mm = ModelManager::Instance();
+   
+   if (!mm->GetSharedGLContext())
+   {
+      #ifdef DEBUG_GL_CONTEXT
+      MessageInterface::ShowMessage
+         ("   Setting new wxGLContext(this) to ModelManager::theContext\n");
+      #endif
+      mm->SetSharedGLContext(new wxGLContext(this));
+   }
+   
+   // Use the shared context from the ModelManager
+   theContext = mm->GetSharedGLContext();
+   
+   if (theContext)
+   {
+      SetCurrent(*theContext);
+      retval = true;
+   }
+   
+   #ifdef DEBUG_GL_CONTEXT
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::SetGLContext() returning %d, theContext=<%p>\n",
+       retval, theContext);
+   #endif
+   
+   return retval;
+}
+

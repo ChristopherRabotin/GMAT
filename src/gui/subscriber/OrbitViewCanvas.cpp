@@ -88,11 +88,8 @@ using namespace FloatAttUtil;
 // OpenGL state that is represented by the rendering context to the canvas,
 // and then call wxGLCanvas::SwapBuffers to swap the buffers of the OpenGL
 // canvas and thus show your current output.
-// This still not working so commented out. But there is a problem with
-// showing object and status line in the wx 2.8.4 using implicit GLContext
-//#define __USE_WX280_GL__
 
-// skip data over the max position difference
+// Skip data over the max position difference
 //#define SKIP_DATA_OVER_LIMIT
 
 // debug
@@ -174,25 +171,6 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
       ("OrbitViewCanvas() entered, name = '%s', size.X = %d, size.Y = %d\n",
        name.c_str(), size.GetWidth(), size.GetHeight());
    #endif
-   
-   ModelManager *mm = ModelManager::Instance();
-   
-   #ifndef __WXMAC__
-      if (!mm->modelContext)
-      {
-         #if DEBUG_INIT
-         MessageInterface::ShowMessage
-            ("   Setting new wxGLContext(this) to ModelManager::modelContext\n");
-         #endif
-         mm->modelContext = new wxGLContext(this);
-      }
-   #else
-      if (!mm->modelContext)
-          mm->modelContext = this->GetGLContext();
-   #endif
-   
-   // Use the same context from the ModelManager
-   theContext = mm->modelContext;
    
    mStars = GLStars::Instance();
    mStars->InitStars();
@@ -357,11 +335,7 @@ void OrbitViewCanvas::ClearPlot()
    glClearColor(0.0, 0.0, 0.0, 1);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glFlush();
-   
-   // In wxWidgets-2.8.4, this shows previous plot
-   #ifndef __USE_WX280_GL__
    SwapBuffers();
-   #endif
 }
 
 
@@ -893,39 +867,37 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
 {
    #ifdef DEBUG_ON_PAINT
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::OnPaint() entered, mFatalErrorFound=%d, mGlInitialized=%d, "
-       "mObjectCount=%d\n", mFatalErrorFound, mGlInitialized, mObjectCount);
+      ("OrbitViewCanvas::OnPaint() '%s' entered, theContext=<%p>, mFatalErrorFound=%d, mGlInitialized=%d, "
+       "mObjectCount=%d\n", mPlotName.c_str(), theContext, mFatalErrorFound, mGlInitialized, mObjectCount);
    #endif
    
    // must always be here
    wxPaintDC dc(this);
    
-   if (mFatalErrorFound) return;
+   // Check for any error condition
+   if (mFatalErrorFound)
+   {
+      MessageInterface::ShowMessage("**** ERROR **** fatal error found\n");
+      return;
+   }
    
-   #ifndef __WXMOTIF__
-      #ifndef __USE_WX280_GL__
-         if (!GetContext()) return;
-      #endif
-   #endif
-   
-   #ifdef __USE_WX280_GL__
-   theContext->SetCurrent(*this);
-   SetCurrent(*theContext);
-   #else
-   SetCurrent();
-   #endif
+   if (!SetGLContext())
+   {
+      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in OrbitViewCanvas::OnPaint()\n");
+      return;
+   }
    
    if (!mGlInitialized && mObjectCount > 0)
    {
       #ifdef DEBUG_INIT
-      MessageInterface::ShowMessage("OrbitViewCanvas::OnPaint() Calling InitOpenGL()\n");
+      MessageInterface::ShowMessage("OrbitViewCanvas::OnPaint() Calling InitializePlot()\n");
       #endif
-      InitOpenGL();
+      InitializePlot();
       mGlInitialized = true;
    }
    
    SetDrawingMode();
-      
+   
    // Linux specific
    #ifdef __WXGTK__
       hasBeenPainted = true;
@@ -947,6 +919,7 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
    }
    
    DrawPlot();
+   
 }
 
 
@@ -973,22 +946,16 @@ void OrbitViewCanvas::OnSize(wxSizeEvent& event)
    GetClientSize(&nWidth, &nHeight);
    mCanvasSize.x = nWidth;
    mCanvasSize.y = nHeight;
-#ifndef __WXMOTIF__
-   if (GetContext())
-#endif
+   
+   if (!SetGLContext())
    {
-      //loj: need this to make picture not to stretch to canvas
-      ChangeProjection(nWidth, nHeight, mAxisLength);
-      
-      #ifdef __USE_WX280_GL__
-      theContext->SetCurrent(*this);
-      SetCurrent(*theContext);
-      #else
-      SetCurrent();
-      #endif
-      
-      glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
+      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in OrbitViewCanvas::OnSize()\n");
+      return;
    }
+   
+   // Need this to make picture not to stretch to canvas
+   ChangeProjection(nWidth, nHeight, mAxisLength);
+   glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
    
    Refresh(false);
    Update();
@@ -1874,6 +1841,9 @@ void OrbitViewCanvas::DrawPlot()
    SetupProjection();
    TransformView();
    
+   // draw object orbit
+   DrawObjectOrbit();
+   
    // draw axes
    if (mDrawAxes)
       if (!mCanRotateAxes)
@@ -1888,7 +1858,7 @@ void OrbitViewCanvas::DrawPlot()
       DrawEclipticPlane(mEcPlaneColor);
    
    // draw object orbit
-   DrawObjectOrbit();
+   //DrawObjectOrbit();
    
    if (mDrawSolverData)
       DrawSolverData();
@@ -2014,11 +1984,13 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       // If drawing at current position is on
       if (mIsDrawing[frame])
       {
-         #if DEBUG_DRAW
-         MessageInterface::ShowMessage("==> Drawing spacecraft '%s'\n", objName.c_str());
-         #endif
-         
          Spacecraft *sat = (Spacecraft*)mObjectArray[obj];
+         
+         #if DEBUG_DRAW
+         MessageInterface::ShowMessage
+            ("   Drawing spacecraft '%s' with modelId: %d, mModelsAreLoaded=%d\n",
+             objName.c_str(), sat->modelID, mModelsAreLoaded);
+         #endif
          
          if (sat->modelID != -1)
          {
@@ -2042,7 +2014,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    else
    {
       #if DEBUG_DRAW
-      MessageInterface::ShowMessage("==> Drawing body '%s'\n", objName.c_str());
+      MessageInterface::ShowMessage("   Drawing body '%s'\n", objName.c_str());
       #endif
       
       // put object at final position
@@ -2050,7 +2022,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       glTranslatef(mObjectViewPos[index1+0],mObjectViewPos[index1+1],mObjectViewPos[index1+2]);
       DrawObject(objName, obj);
    }
-      
+   
    if (mEnableLightSource)
    {
       glDisable(GL_LIGHTING);
@@ -2058,6 +2030,11 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
    }
    
    glPopMatrix();
+   
+   #if DEBUG_DRAW
+   MessageInterface::ShowMessage
+      ("DrawObjectTexture() leaving, objName='%s'\n", objName.c_str());
+   #endif
 }
 
 
@@ -2491,7 +2468,6 @@ void OrbitViewCanvas::DrawSunLine()
    
 } // end DrawSunLine()
 
-
 //---------------------------------------------------------------------------
 // void DrawAxes()
 //---------------------------------------------------------------------------
@@ -2630,7 +2606,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    
    // Set isLit to true
    scModel->Draw(true);
-   
+      
    // Old code that may be worth saving
    // SetCurrent(*theContext);
    // ModelManager *mm = ModelManager::Instance();

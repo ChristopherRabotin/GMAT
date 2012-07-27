@@ -38,13 +38,16 @@ public:
    ModelManager();
    ~ModelManager();
 	
-   wxGLContext *modelContext;
-	
+   wxGLContext* GetSharedGLContext();
+	void SetSharedGLContext(wxGLContext *glContext);
+   
 	void ClearModel();
    ModelObject* GetModel(int id);
    int LoadModel(wxString &modelPath);
    
 private:
+   /// Shared GL context between GL canvases
+   wxGLContext *theGLContext;
    int numElements;
    ModelMap modelMap;
    ModelIdMap modelIdMap;

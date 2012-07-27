@@ -40,8 +40,7 @@ public:
    virtual ~ViewCanvas();
    
    // GL context
-   virtual wxGLContext* GetGLContext();
-   virtual void SetGLContext(wxGLContext *glContext = NULL);
+   virtual bool SetGLContext();
    
    // initialization
    virtual bool InitializePlot();

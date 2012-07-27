@@ -113,15 +113,6 @@ ViewCanvas* MdiChildViewFrame::GetGlCanvas()
 
 
 //------------------------------------------------------------------------------
-// wxGLContext* GetGLContext()
-//------------------------------------------------------------------------------
-wxGLContext* MdiChildViewFrame::GetGLContext()
-{
-   return mCanvas->GetGLContext();
-}
-
-
-//------------------------------------------------------------------------------
 // bool GetUseViewPointInfo()
 //------------------------------------------------------------------------------
 bool MdiChildViewFrame::GetUseViewPointInfo()
@@ -270,16 +261,6 @@ void MdiChildViewFrame::SetSolarSystem(SolarSystem *ss)
 {
    if (mCanvas)
       mCanvas->SetSolarSystem(ss);
-}
-
-
-//------------------------------------------------------------------------------
-// void SetGLContext(wxGLContext *glContext = NULL)
-//------------------------------------------------------------------------------
-void MdiChildViewFrame::SetGLContext(wxGLContext *glContext)
-{
-   if (mCanvas)
-      mCanvas->SetGLContext(glContext);
 }
 
 

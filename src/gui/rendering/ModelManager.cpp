@@ -47,7 +47,7 @@ ModelManager::ModelManager()
    MessageInterface::ShowMessage("ModelManager::ModelManager() entered\n");
    #endif
    
-   modelContext = NULL;
+   theGLContext = NULL;
    numElements = 0;
 	modelMap.clear();
 	modelIdMap.clear();
@@ -60,7 +60,7 @@ ModelManager::ModelManager()
 }
 
 //------------------------------------------------------------------------------
-// ModelManager()
+// ~ModelManager()
 //------------------------------------------------------------------------------
 ModelManager::~ModelManager()
 {
@@ -76,15 +76,33 @@ ModelManager::~ModelManager()
    }
    
    // Patch from Tristan Moody
-   //   This patch moves the modelContext deletion to the ModelManager
+   //   This patch moves the theGLContext deletion to the ModelManager
    //   destructor from the OrbitViewCanvas and GroundTrackCanvas destructors.
    //   As long as the ModelManager destructor is called after all other
    //   OpenGL-related code is finished (to be verified), this should fix the
    //   problem reported in Bug 2591.
    //
    // New code (next 2 lines):
-   if (modelContext != NULL)
-      delete modelContext;
+   if (theGLContext != NULL)
+      delete theGLContext;
+}
+
+
+//------------------------------------------------------------------------------
+// wxGLContext* GetSharedGLContext()
+//------------------------------------------------------------------------------
+wxGLContext* ModelManager::GetSharedGLContext()
+{
+   return theGLContext;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSharedGLContext(wxGLContext *glContext)
+//------------------------------------------------------------------------------
+void ModelManager::SetSharedGLContext(wxGLContext *glContext)
+{
+   theGLContext = glContext;
 }
 
 
@@ -93,10 +111,10 @@ ModelManager::~ModelManager()
 //------------------------------------------------------------------------------
 void ModelManager::ClearModel()
 {
-   if (modelContext)
-      delete modelContext;
+   if (theGLContext)
+      delete theGLContext;
    
-   modelContext = NULL;
+   theGLContext = NULL;
    numElements = 0;
 	modelMap.clear();
 	modelIdMap.clear();
@@ -121,25 +139,24 @@ int ModelManager::LoadModel(wxString &modelPath)
 {
 	#ifdef DEBUG_LOAD_MODEL
 	MessageInterface::ShowMessage
-		("ModelManager::LoadModel() entered,  modelIdMap.size() = %d\n   modelPath = '%s'\n",
+		("ModelManager::LoadModel() entered,  modelIdMap.size() = %d\n   input modelPath = '%s'\n",
 		 modelIdMap.size(), modelPath.c_str());
 	for (ModelIdMap::iterator pos = modelIdMap.begin(); pos != modelIdMap.end(); ++pos)
 		MessageInterface::ShowMessage
-			("    modelPath = '%s', id = %d\n", (pos->first).c_str(),  pos->second);
+			("   model id = %d, modelPath = '%s'\n", pos->second, (pos->first).c_str());
 	#endif
-	
-	// Do we need this flag here? Commented out (LOJ: 2011.12.08)
-	//#ifdef __USE_WX280_GL__
+   
+   // Check if modelPath found in the map, if found return modelId
    if (modelIdMap.find(modelPath) != modelIdMap.end())
 	{
+      int modelId = modelIdMap[modelPath];      
 	   #ifdef DEBUG_LOAD_MODEL
 		MessageInterface::ShowMessage
 			("ModelManager::LoadModel() modelPath found, returning %d\n",
-			 modelIdMap[modelPath]);
+			 modelId);
 		#endif
-      return modelIdMap[modelPath];
+      return modelId;
 	}
-	//#endif
 	
    ModelObject *newModel = new ModelObject();
 	
@@ -156,7 +173,7 @@ int ModelManager::LoadModel(wxString &modelPath)
 	
 	#ifdef DEBUG_LOAD_MODEL	
 	MessageInterface::ShowMessage
-		("ModelManager::LoadModel() returning %d\n", numElements-1);
+		("ModelManager::LoadModel() created a new model and returning %d\n", numElements-1);
 	#endif
 	
    return numElements-1;
