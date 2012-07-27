@@ -251,7 +251,14 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
 
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i].push_back("None");
-   
+
+   // try to find the texture map file
+   if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+   {
+      std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+      textureMapFileName = textureLoc + textureMapFileName;
+   }
+
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
    #ifdef __USE_SPICE__
       kernelReader = NULL;
@@ -339,6 +346,12 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    mass        = mu / GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    polarRadius = (1.0 - flattening) * equatorialRadius;
 
+   // try to find the texture map file
+   if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+   {
+      std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+      textureMapFileName = textureLoc + textureMapFileName;
+   }
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i].push_back("None");
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
@@ -3142,6 +3155,29 @@ bool CelestialBody::SetStringParameter(const Integer id,
    if (id == TEXTURE_MAP_FILE_NAME)
    {
       textureMapFileName = value;
+      if (!GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+      {
+         std::string oldTextureFile = textureMapFileName;
+         std::string textureLoc     = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+         textureMapFileName         = textureLoc + textureMapFileName;
+         if (oldTextureFile != "")
+         {
+            if (GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+            {
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The texture file '%s' does not exist, \n"
+                   "    so using the texture file '%s' using the path specified in the startup file.\n",
+                   oldTextureFile.c_str(), textureMapFileName.c_str(), instanceName.c_str());
+            }
+            else
+            {
+               std::string errmsg = "Texture map \"";
+               errmsg += oldTextureFile + "\" specified for body \"";
+               errmsg += instanceName + "\" cannot be found.\n";
+               throw SolarSystemException(errmsg);
+            }
+         }
+      }
       return true;
    }
 
