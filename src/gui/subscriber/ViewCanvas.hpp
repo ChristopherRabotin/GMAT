@@ -40,7 +40,7 @@ public:
    virtual ~ViewCanvas();
    
    // GL context
-   virtual bool SetGLContext();
+   virtual bool SetGLContext(const wxString &msg = "");
    
    // initialization
    virtual bool InitializePlot();
@@ -154,6 +154,10 @@ public:
                         const UnsignedIntArray &objColors,
                         bool clearList = true);
    
+   // Double buffer activation needed in Linux (Patch from Tristan Moody)
+   // Moved from gmatwxdefs.hpp to remove compiler warning: defined but not used (LOJ: 2012.05.29)
+   static int GmatGLCanvasAttribs[2]; // = {WX_GL_DOUBLEBUFFER, 0};
+   
 protected:
 
    enum
@@ -163,9 +167,6 @@ protected:
    };
    
    static const Real RADIUS_ZOOM_RATIO;// = 2.2;
-   // Double buffer activation needed in Linux (Patch from Tristan Moody)
-   // Moved from gmatwxdefs.hpp to remove compiler warning: defined but not used (LOJ: 2012.05.29)
-   static int GmatGLCanvasAttribs[2]; // = {WX_GL_DOUBLEBUFFER, 0};
    
    // Parent frame
    wxWindow *mParent;
