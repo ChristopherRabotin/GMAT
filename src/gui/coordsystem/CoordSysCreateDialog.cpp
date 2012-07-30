@@ -236,9 +236,21 @@ void CoordSysCreateDialog::SaveData()
          
          if (axis != NULL)
          {
-            canClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
-            mCoordName = wxString(coordName.c_str());
-            mIsCoordCreated = true;
+            canClose        = mCoordPanel->SaveData(coordName, axis, wxFormatName);
+            if (!canClose)
+            {
+               #ifdef DEBUG_COORD_DIALOG_SAVE
+               MessageInterface::ShowMessage
+                  ("CoordSysCreateDialog::SaveData() Removing coordinate system %s due to error\n", coordName.c_str());
+               #endif
+               // Remove the object if there was an error creating or initializing it
+               theGuiInterpreter->RemoveObjectIfNotUsed(Gmat::COORDINATE_SYSTEM, coordName);
+            }
+            else
+            {
+               mCoordName      = wxString(coordName.c_str());
+               mIsCoordCreated = true;
+            }
          }
       }
       else

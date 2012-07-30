@@ -868,7 +868,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
        coordName.c_str(), epochFormat.c_str(), epochValue.c_str());
    #endif
    
-   bool canClose = true;
+   bool canClose       = true;
    
    try
    {
@@ -908,14 +908,14 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       wxString originName = originComboBox->GetValue().Trim();
       coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
       coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
-      
-      SpacePoint *origin =
-         (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName.c_str());
-      
+
+      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName.c_str());
+
       coordSys->SetOrigin(origin);
       
       CelestialBody *j2000body =
-         (CelestialBody*)theGuiInterpreter->GetConfiguredObject("Earth");
+         (CelestialBody*)theGuiInterpreter->GetConfiguredObject("Earth"); // @todo this will need to be changed when we have
+                                                                          // a non-Earth J2000 body - WCS 2012.07.28
       
       // set Earth as J000Body if NULL
       if (origin->GetJ2000Body() == NULL)
@@ -1051,8 +1051,17 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       
       // set solar system
       coordSys->SetSolarSystem(theGuiInterpreter->GetSolarSystemInUse());
-      coordSys->Initialize();
-
+      try
+      {
+         coordSys->Initialize();
+      }
+      catch (BaseException &be)
+      {
+         // Need to popup this error here
+         MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage().c_str());
+         canClose = false;
+         return canClose;
+      }
    }
    catch (BaseException &e)
    {

@@ -247,8 +247,12 @@ void CoordSystemConfigPanel::SaveData()
             
             canClose = mCoordPanel->SaveData(theCoordSys->GetName(), axis, mEpochFormat);
             
-            theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
-            theCoordSys->Initialize();
+            if (canClose)
+            {
+               // only set these if there was no error creating or initializing the coordinate system
+               theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+               theCoordSys->Initialize();
+            }
          }
          else
          {
