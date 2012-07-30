@@ -33,6 +33,7 @@
 #include "Rendering.hpp"
 #include "ModelManager.hpp"
 #include "ViewCanvas.hpp"          // for static int GmatGLCanvasAttribs[2]
+#include "FileUtil.hpp"            // for GmatFileUtil::DoesFileExist()
 
 
 BEGIN_EVENT_TABLE(VisualModelCanvas, wxGLCanvas)
@@ -51,7 +52,8 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    const wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name, long style)
-   #ifdef __WXMSW__
+//#ifdef __WXMSW__
+   #if 0
    // I'm getting pixel format error with GmatGLCanvasAttribs on Windows.
    // So using 0 for attribute list (*int) (LOJ: 2011.12.20)
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
@@ -60,6 +62,11 @@ VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    : wxGLCanvas(parent, id, ViewCanvas::GmatGLCanvasAttribs, pos, size, style, name)
    #endif
 {
+   #ifdef DEBUG_MODEL_CANVAS
+   MessageInterface::ShowMessage
+      ("\nVisualModelCanvas() constructor entered, spacecraft=<%p>\n", spacecraft);
+   #endif
+   
    vParent = parent;   
    currentSpacecraft = spacecraft;
    lastMouseX = 0;
@@ -346,25 +353,6 @@ void VisualModelCanvas::DrawAxes()
 }
 
 //------------------------------------------------------------------------------
-// void LoadModel(const wxString &filePath)
-//------------------------------------------------------------------------------
-/**
- * Sets up the flags to loaded the given model.
- */
-//------------------------------------------------------------------------------
-bool VisualModelCanvas::LoadModel(const wxString &filePath)
-{
-   #ifdef DEBUG_LOAD_MODEL
-   MessageInterface::ShowMessage
-      ("VisualModelCanvas::LoadModel(filePath) entered, filePath='%s'\n", filePath.c_str());
-   #endif
-   modelPath = filePath;
-   needToLoadModel = true;
-   Refresh(false);
-   return true;
-}
-
-//------------------------------------------------------------------------------
 // void Rotate(bool useDegrees, float xAngle, float yAngle, float zAngle)
 //------------------------------------------------------------------------------
 /**
@@ -435,8 +423,19 @@ void VisualModelCanvas::Scale(float xScale, float yScale, float zScale)
 //------------------------------------------------------------------------------
 void VisualModelCanvas::RecenterModel(float *offset)
 {
+   #ifdef DEBUG_RECENTER
+   MessageInterface::ShowMessage
+      ("RecenterModel() entered, offset=[%f, %f, %f]\n", offset[0], offset[1], offset[2]);
+   #endif
+   
    if (needToLoadModel)
       LoadModel();
+
+   #ifdef DEBUG_RECENTER
+   MessageInterface::ShowMessage
+      ("   modelID=%d, isLoaded=%d\n", currentSpacecraft->modelID, loadedModel->isLoaded);
+   #endif
+   
    if (currentSpacecraft->modelID != -1 && loadedModel->isLoaded)
    {
       float x = -loadedModel->bsphere_center.x;
@@ -448,25 +447,72 @@ void VisualModelCanvas::RecenterModel(float *offset)
       loadedModel->SetBaseOffset(x, y, z);
       recentered = true;
    }
+   
    Refresh(false);
+   
+   #ifdef DEBUG_RECENTER
+   MessageInterface::ShowMessage
+      ("RecenterModel() leaving, offset=[%f, %f, %f]\n", offset[0], offset[1], offset[2]);
+   #endif
 }
 
 //------------------------------------------------------------------------------
-// void RecenterModel()
+// void AutoscaleModel()
 //------------------------------------------------------------------------------
 /**
- * Recenters the model based on its axis-aligned bounding box.
+ * Rescales the model based on the Earth and model radius.
  */
 //------------------------------------------------------------------------------
 float VisualModelCanvas::AutoscaleModel()
 {
-   float earthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH],
-      modelRadius = loadedModel->bsphere_radius;
+   float earthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];
+   float modelRadius = loadedModel->bsphere_radius;
+
+   #ifdef DEBUG_AUTO_SCALE
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::AutoscaleModel() loadedModel=<%p>, modelRadius=%f\n",
+       loadedModel, modelRadius);
+   #endif
+   
    return earthRadius / (5.0f * modelRadius);
 }
 
 //------------------------------------------------------------------------------
+// void LoadModel(const wxString &filePath)
+//------------------------------------------------------------------------------
+/**
+ * Sets up the flags to loaded the given model.
+ */
+//------------------------------------------------------------------------------
+bool VisualModelCanvas::LoadModel(const wxString &filePath)
+{
+   #ifdef DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::LoadModel(filePath) entered, filePath='%s'\n", filePath.c_str());
+   #endif
+   
+   if (GmatFileUtil::DoesFileExist(filePath.c_str()))
+   {
+      modelPath = filePath;
+      needToLoadModel = true;
+      Refresh(false);
+      return true;
+   }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** The model file '%s' does not exist. Please check the path.\n",
+          filePath.c_str());
+      return false;
+   }
+}
+
+//------------------------------------------------------------------------------
 // void LoadModel()
+//------------------------------------------------------------------------------
+/**
+ * Actually loads model with saved member data modelPath.
+ */
 //------------------------------------------------------------------------------
 void VisualModelCanvas::LoadModel()
 {
@@ -478,6 +524,10 @@ void VisualModelCanvas::LoadModel()
    currentSpacecraft->modelID = mm->LoadModel(modelPath);
    loadedModel = mm->GetModel(currentSpacecraft->modelID);
    needToLoadModel = false;
+   #ifdef DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("VisualModelCanvas::LoadModel() leaving, loadedModel=<%p>\n", loadedModel);
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -494,7 +544,7 @@ bool VisualModelCanvas::SetGLContext()
 {
    #ifdef DEBUG_GL_CONTEXT
    MessageInterface::ShowMessage
-      ("VisualModelCanvas::SetGLContext() entered, theContet=<%p>\n");
+      ("VisualModelCanvas::SetGLContext() entered, theContext=<%p>\n", theContext);
    #endif
    
    bool retval = false;
@@ -502,11 +552,12 @@ bool VisualModelCanvas::SetGLContext()
    
    if (!mm->GetSharedGLContext())
    {
+      wxGLContext *glContext = new wxGLContext(this);
       #ifdef DEBUG_GL_CONTEXT
       MessageInterface::ShowMessage
-         ("   Setting new wxGLContext(this) to ModelManager::theContext\n");
+         ("   Setting new wxGLContext(this)<%p> to ModelManager::theContext\n", glContext);
       #endif
-      mm->SetSharedGLContext(new wxGLContext(this));
+      mm->SetSharedGLContext(glContext);
    }
    
    // Use the shared context from the ModelManager

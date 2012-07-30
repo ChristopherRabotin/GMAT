@@ -37,11 +37,11 @@
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(VisualModelPanel, wxPanel)
-   EVT_TEXT_ENTER(ID_TEXTCTRL, VisualModelPanel::OnTextCtrlEnter)
+   EVT_TEXT_ENTER(ID_MODELFILE_TEXT, VisualModelPanel::OnTextCtrlEnter)
    EVT_TEXT_ENTER(ID_ROT_TEXT, VisualModelPanel::OnTextCtrlEnter)
    EVT_TEXT_ENTER(ID_TRAN_TEXT, VisualModelPanel::OnTextCtrlEnter)
    EVT_TEXT_ENTER(ID_SCALE_TEXT, VisualModelPanel::OnTextCtrlEnter)
-   EVT_TEXT(ID_TEXTCTRL, VisualModelPanel::OnTextCtrlChange)
+   EVT_TEXT(ID_MODELFILE_TEXT, VisualModelPanel::OnTextCtrlChange)
    EVT_TEXT(ID_ROT_TEXT, VisualModelPanel::OnTextCtrlChange)
    EVT_TEXT(ID_TRAN_TEXT, VisualModelPanel::OnTextCtrlChange)
    EVT_TEXT(ID_SCALE_TEXT, VisualModelPanel::OnTextCtrlChange)
@@ -79,11 +79,9 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
    currentSpacecraft = spacecraft;
    theSolarSystem = solarsystem;
 
-   //LoadPOV(new ModelObject(), wxT("C:/Programs/DevelGMAT/files/models/DMSPWithTextures/DMSP-WithTextures-POVRayFormat.pov"));
-
    FileManager *fm = FileManager::Instance();
    modelPath = wxT(fm->GetPathname("MODEL_PATH").c_str());
-
+   
    Create();
 }
 
@@ -93,19 +91,20 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
 //------------------------------------------------------------------------------
 VisualModelPanel::~VisualModelPanel()
 {
-
 }
 
 //------------------------------------------------------------------------------
 // bool CanvasOn(bool onOrOff)
+//------------------------------------------------------------------------------
 //
-// Needed for the Mac, to avoid having the other tabs messed up by the Canvas
+// @note - Needed for the Mac, to avoid having the other tabs messed up by the Canvas
 //------------------------------------------------------------------------------
 bool VisualModelPanel::CanvasOn(bool onOrOff)
 {
    if (modelCanvas) modelCanvas->Show(onOrOff);
    return true;
 }
+
 //-------------------------------
 // private methods
 //-------------------------------
@@ -125,8 +124,6 @@ void VisualModelPanel::Create()
    #endif
 
    Integer bsize = 2.0; // border size
-
-   //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
 
    // Creates the sizer for the overall panel
@@ -195,7 +192,7 @@ void VisualModelPanel::Create()
 
    // Text and button for the file loader
    modelTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(180, 20), wxTE_PROCESS_ENTER);
+      new wxTextCtrl(this, ID_MODELFILE_TEXT, wxT(""), wxDefaultPosition, wxSize(180, 20), wxTE_PROCESS_ENTER);
    wxButton *browseButton =
       new wxButton(this, ID_BROWSE_BUTTON, wxT("Browse..."));
 	browseButton->SetToolTip(wxT("Find a model file to attach to the spacecraft"));
@@ -387,6 +384,13 @@ void VisualModelPanel::Create()
    this->SetSizer( visSizer );
 }
 
+//------------------------------------------------------------------------------
+// void ToggleInterface(bool enable)
+//------------------------------------------------------------------------------
+/**
+ * Enable or disable GUI items.
+ */
+//------------------------------------------------------------------------------
 void VisualModelPanel::ToggleInterface(bool enable)
 {
 	if (enable)
@@ -435,8 +439,17 @@ void VisualModelPanel::ToggleInterface(bool enable)
 	}
 }
 
+//------------------------------------------------------------------------------
+// void InitializeCanvas()
+//------------------------------------------------------------------------------
 void VisualModelPanel::InitializeCanvas()
 {
+   #ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage
+      ("==> VisualModelPanel::InitializeCanvas() entered\n   currentSpacecraft->modelFile = '%s'\n",
+       (currentSpacecraft->modelFile).c_str());
+   #endif
+   
    Real x,y,z;
    if (currentSpacecraft->modelFile != "")
    {
@@ -450,8 +463,7 @@ void VisualModelPanel::InitializeCanvas()
       xTranSlider->SetValue(x*100);
       yTranSlider->SetValue(y*100);
       zTranSlider->SetValue(z*100);
-      //modelCanvas->Translate(x, y, z);
-
+      
       x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"));
       y = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"));
       z = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"));
@@ -461,16 +473,18 @@ void VisualModelPanel::InitializeCanvas()
       xRotSlider->SetValue(x);
       yRotSlider->SetValue(y);
       zRotSlider->SetValue(z);
-      //modelCanvas->Rotate(true, x, y, z);
-
+      
       x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelScale"));
       scaleSlider->SetValue(x);
       scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
-      //modelCanvas->Scale(x, x, x);
-
-      modelTextCtrl->ChangeValue(wxT(currentSpacecraft->modelFile.c_str()));
+      
+      modelTextCtrl->SetValue(wxT(currentSpacecraft->modelFile.c_str()));
       modelCanvas->Refresh(false);
    }
+   
+   #ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("VisualModelPanel::InitializeCanvas() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -502,31 +516,32 @@ void VisualModelPanel::ResetSliders()
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), 0);
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"), 0);
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"), 0);
-   scaleSlider->SetValue(1);
-   scaleValueText->SetLabel(wxT("1"));
-   currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), 1);
+   scaleSlider->SetValue(3);
+   scaleValueText->SetLabel(wxT("3"));
+   currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), 3);
 }
 
 //------------------------------------------------------------------------------
-// void OnPaint(wxPaintEvent& event)
+// void AutoScaleModel()
 //------------------------------------------------------------------------------
 /**
- * Paints the panel each cycle.
+ * Calls VisualModelCanvas::AutoscaleModel() to rescale model based on
+ * radius of the Earth and the model.
  */
 //------------------------------------------------------------------------------
-void VisualModelPanel::OnPaint(wxPaintEvent& event)
+void VisualModelPanel::AutoScaleModel()
 {
-	if (interfaceEnabled && currentSpacecraft->modelFile == "")
-	{
-		interfaceEnabled = false;
-		ToggleInterface(false);
-	}
-	if (!interfaceEnabled && currentSpacecraft->modelFile != "")
-	{
-		interfaceEnabled = true;
-		ToggleInterface(true);
-	}
-   wxPaintDC(this);
+	float scale = modelCanvas->AutoscaleModel();
+   #ifdef DEBUG_AUTO_SCALE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel::AutoScaleModel() After call to modelCanvas->AutoscaleModel(), scale=%f\n", scale);
+   #endif
+	scaleSlider->SetValue(scale);
+	scaleValueText->SetLabel(wxString::Format(wxT("%f"), scale));
+	currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), scale);
+	modelCanvas->Refresh(false);
+	dataChanged = true;
+ 	theScPanel->EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -547,7 +562,6 @@ void VisualModelPanel::OnSlide(wxCommandEvent &event)
          x = (float)xRotSlider->GetValue();
          y = (float)yRotSlider->GetValue();
          z = (float)zRotSlider->GetValue();
-         //modelCanvas->Rotate(true, x, y, z);
          currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"), x);
          currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"), y);
          currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"), z);
@@ -560,7 +574,6 @@ void VisualModelPanel::OnSlide(wxCommandEvent &event)
          x = (float)xTranSlider->GetValue()/100.0f;
          y = (float)yTranSlider->GetValue()/100.0f;
          z = (float)zTranSlider->GetValue()/100.0f;
-         //modelCanvas->Translate(x, y, z);
          currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), x);
          currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"), y);
          currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"), z);
@@ -572,13 +585,13 @@ void VisualModelPanel::OnSlide(wxCommandEvent &event)
       case ID_SCALE_SLIDER:
          x = (float)scaleSlider->GetValue();
          // We want to scale down if the value is negative, not invert
-         if (x < 0){
+         if (x < 0)
+         {
             int m = scaleSlider->GetMax();
             x = (float)(m+x)/m;
          }
          else if (x == 0)
             break;
-         //modelCanvas->Scale(x, x, x);
 			scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
 			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), x);
 			modelCanvas->Refresh(false);
@@ -630,17 +643,17 @@ void VisualModelPanel::UpdateTextCtrl(int id)
    
 	switch (id)
 	{
-   case (ID_TEXTCTRL):
+   case (ID_MODELFILE_TEXT):
       // Load the model indicated by the path
-      modelCanvas->LoadModel(modelTextCtrl->GetLabelText());
-      currentSpacecraft->modelFile = modelTextCtrl->GetLabelText();
+      modelCanvas->LoadModel(modelTextCtrl->GetValue());
+      currentSpacecraft->modelFile = modelTextCtrl->GetValue();
       break;
       
 	case (ID_ROT_TEXT):
    {
-      xRotValueText->GetLabelText().ToDouble(&x);
-      yRotValueText->GetLabelText().ToDouble(&y);
-      zRotValueText->GetLabelText().ToDouble(&z);
+      xRotValueText->GetValue().ToDouble(&x);
+      yRotValueText->GetValue().ToDouble(&y);
+      zRotValueText->GetValue().ToDouble(&z);
       
       // Range checking is done in the base code when setting the new value.
       x = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"), x);
@@ -659,9 +672,9 @@ void VisualModelPanel::UpdateTextCtrl(int id)
    }
    
    case (ID_TRAN_TEXT):
-      xTranValueText->GetLabelText().ToDouble(&x);
-      yTranValueText->GetLabelText().ToDouble(&y);
-      zTranValueText->GetLabelText().ToDouble(&z);
+      xTranValueText->GetValue().ToDouble(&x);
+      yTranValueText->GetValue().ToDouble(&y);
+      zTranValueText->GetValue().ToDouble(&z);
       
       // Range checking is done in the base code when setting the new value.
       x = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), x);
@@ -679,7 +692,7 @@ void VisualModelPanel::UpdateTextCtrl(int id)
       break;
       
    case (ID_SCALE_TEXT):
-      scaleValueText->GetLabelText().ToDouble(&x);
+      scaleValueText->GetValue().ToDouble(&x);
       x = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), x);
       scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
       if (x < 1)
@@ -707,25 +720,35 @@ void VisualModelPanel::OnBrowseButton(wxCommandEvent& event)
    // Open up a file dialog
    wxFileDialog fileDialog(this, wxT("Please select a model."), modelPath, wxEmptyString,
       wxT("3DS and POV files (*.3ds;*.pov)|*.3ds;*.pov"), wxOPEN);
-   //wxFileDialog fileDialog(this, wxT("Please select a 3ds model."), modelPath, wxEmptyString,
-      //wxT("3DS files (*.3ds)|*.3ds"), wxOPEN);
+   
    // If it succeeded...
    if (fileDialog.ShowModal() == wxID_OK)
    {
       // Load the model indicated by the path
-      filename = fileDialog.GetFilename();
       path = fileDialog.GetPath();
-      modelCanvas->LoadModel(path);
-      currentSpacecraft->modelFile = path;
-      // Reset all of the sliders
-      ResetSliders();
-      dataChanged = true;
-      theScPanel->EnableUpdate(true);
-      // Set the textctrl to display the selected filename
-      modelTextCtrl->ChangeValue(wxT(filename));
-	  dataChanged = true;
-	  theScPanel->EnableUpdate(true);
-	  ToggleInterface(true);
+
+      #ifdef DEBUG_NEW_MODEL
+      MessageInterface::ShowMessage
+         ("VisualModelPanel::OnBrowseButton() New model path = '%s'\n", path.c_str());
+      #endif
+      
+      if (modelCanvas->LoadModel(path))
+      {
+         // Actually load new model
+         modelCanvas->LoadModel();
+         // Reset all of the sliders
+         ResetSliders();         
+         // Set the textctrl to display the selected path
+         modelTextCtrl->SetValue(path);         
+         // Save to cloned base spacecraft
+         currentSpacecraft->modelFile = path;         
+         // Auto scale model so that model can be shown
+         AutoScaleModel();
+         
+         dataChanged = true;
+         theScPanel->EnableUpdate(true);
+         ToggleInterface(true);
+      }
    }
 }
 
@@ -741,7 +764,13 @@ void VisualModelPanel::OnBrowseButton(wxCommandEvent& event)
 void VisualModelPanel::OnRecenterButton(wxCommandEvent& event)
 {
    float offset[3];
-   modelCanvas->RecenterModel(offset);
+   offset[0] = 0.0, offset[1] = 0.0, offset[2] = 0.0;
+
+   // @note - Why calling this?
+   // I'm getting offset=[-12.500000, -237.250000, -118.500000] which is
+   // out of bounds of -3.5 and 3.5. So commented out (LOJ: 2012.07.30)
+   //modelCanvas->RecenterModel(offset);
+   
    xTranSlider->SetValue(offset[0]*100);
    yTranSlider->SetValue(offset[1]*100);
    zTranSlider->SetValue(offset[2]*100);
@@ -753,19 +782,20 @@ void VisualModelPanel::OnRecenterButton(wxCommandEvent& event)
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"), offset[2]);
    modelCanvas->Refresh(false);
    dataChanged = true;
-
+   
 	theScPanel->EnableUpdate(true);
 }
 
+//------------------------------------------------------------------------------
+// void OnAutoscaleButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * It scales the model using the last saved scale.
+ */
+//------------------------------------------------------------------------------
 void VisualModelPanel::OnAutoscaleButton(wxCommandEvent& event)
 {
-	float scale = modelCanvas->AutoscaleModel();
-	scaleSlider->SetValue(scale);
-	scaleValueText->SetLabel(wxString::Format(wxT("%f"), scale));
-	currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), scale);
-	modelCanvas->Refresh(false);
-	dataChanged = true;
- 	theScPanel->EnableUpdate(true);
+   AutoScaleModel();
 }
 
 //------------------------------------------------------------------------------
@@ -793,15 +823,29 @@ wxString VisualModelPanel::ToString(Real rval)
    return theGuiManager->ToWxString(rval);
 }
 
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves data to base Spacecraft.
+ */
+//------------------------------------------------------------------------------
 void VisualModelPanel::SaveData()
 {
-   // don't do anything if no data has been changed.
+   canClose    = true;
+   
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel::SaveData() entered, mTextChanged=%d, dataChanged=%d, canClose=%d\n",
+       mTextChanged, dataChanged, canClose);
+   #endif
+   
+   // Don't do anything if no data has been changed.
    // note that dataChanged will be true if the user modified any combo box or
    // text ctrl, whether or not he/she actually changed the value; we want to only
    // send the values to the object if something was really changed, to avoid
-   // the hasBeenModified flag being set to true erroneously
-   canClose    = true;
-
+   // the hasBeenModified flag being set to true erroneously.
+   
    try
    {
       if (mTextChanged)
@@ -809,7 +853,7 @@ void VisualModelPanel::SaveData()
         UpdateTextCtrl(ID_ROT_TEXT);
         UpdateTextCtrl(ID_TRAN_TEXT);
         UpdateTextCtrl(ID_SCALE_TEXT);
-        UpdateTextCtrl(ID_TEXTCTRL);
+        UpdateTextCtrl(ID_MODELFILE_TEXT);
         mTextChanged = false;
       }
    }
@@ -819,10 +863,14 @@ void VisualModelPanel::SaveData()
       dataChanged = true;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
-
+   
    if (canClose)
-   {
       dataChanged = false;
-   }
+   
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel::SaveData() leaving, mTextChanged=%d, dataChanged=%d, canClose=%d\n",
+       mTextChanged, dataChanged, canClose);
+   #endif
 }
 

@@ -49,7 +49,7 @@ protected:
       
    // Event Handling
    DECLARE_EVENT_TABLE();
-   void OnPaint(wxPaintEvent& event);
+   
    void OnTextCtrlChange(wxCommandEvent& event);
    void OnTextCtrlEnter(wxCommandEvent& event);
    void OnBrowseButton(wxCommandEvent& event);
@@ -75,12 +75,6 @@ private:
    SolarSystem    *theSolarSystem;
    // The gui manager
    GuiItemManager *theGuiManager;
-   
-   void Create();
-   void ResetSliders();
-   
-   wxString ToString(Real rval);
-
    // The canvas for drawing the model and its transformations
    VisualModelCanvas *modelCanvas;
 
@@ -124,31 +118,35 @@ private:
    
    // The spacecraft panel that this panel belongs to
    GmatPanel *theScPanel;
-
+   
+   void Create();
    void InitializeCanvas();
 	void ToggleInterface(bool enable);
-
+   void AutoScaleModel();
+   void ResetSliders();
+   wxString ToString(Real rval);
+   
    // IDs for the controls and the menu commands
    enum
    {     
       ID_TEXT = 30200,
-      ID_TEXTCTRL,
+      ID_MODELFILE_TEXT,
       ID_CANVAS,
       ID_FRAME,
-
+      
       ID_BROWSE_BUTTON,
       ID_RECENTER_BUTTON,
 		ID_AUTOSCALE_BUTTON,
       ID_EARTH_BUTTON,
-
+      
       ID_ROT_SLIDER,
       ID_TRAN_SLIDER,
       ID_SCALE_SLIDER,
-
-	  ID_ROT_TEXT,
-	  ID_TRAN_TEXT,
-	  ID_SCALE_TEXT,
-        
+      
+      ID_ROT_TEXT,
+      ID_TRAN_TEXT,
+      ID_SCALE_TEXT,
+      
       ID_STATIC_ELEMENT     
    };
 };

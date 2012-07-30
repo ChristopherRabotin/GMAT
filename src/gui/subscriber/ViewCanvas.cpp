@@ -250,7 +250,7 @@ ViewCanvas::~ViewCanvas()
 
 
 //------------------------------------------------------------------------------
-// bool SetGLContext()
+// bool SetGLContext(const wxString &msg)
 //------------------------------------------------------------------------------
 /**
  * Sets GL context to ModelManager which stores shared GL context pointer.
@@ -258,11 +258,11 @@ ViewCanvas::~ViewCanvas()
  * @return true if GL context is not NULL, false otherwise
  */
 //------------------------------------------------------------------------------
-bool ViewCanvas::SetGLContext()
+bool ViewCanvas::SetGLContext(const wxString &msg)
 {
    #ifdef DEBUG_GL_CONTEXT
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetGLContext() entered, theContet=<%p>\n");
+      ("ViewCanvas::SetGLContext() entered, theContext=<%p>\n", theContext);
    #endif
    
    bool retval = false;
@@ -270,11 +270,12 @@ bool ViewCanvas::SetGLContext()
    
    if (!mm->GetSharedGLContext())
    {
-      #if DEBUG_GL_CONTEXT
+      wxGLContext *glContext = new wxGLContext(this);
+      #ifdef DEBUG_GL_CONTEXT
       MessageInterface::ShowMessage
-         ("   Setting new wxGLContext(this) to ModelManager::theContext\n");
+         ("   Setting new wxGLContext(this)<%p> to ModelManager::theContext\n", glContext);
       #endif
-      mm->SetSharedGLContext(new wxGLContext(this));
+      mm->SetSharedGLContext(glContext);
    }
    
    // Use the shared context from the ModelManager
@@ -284,6 +285,12 @@ bool ViewCanvas::SetGLContext()
    {
       SetCurrent(*theContext);
       retval = true;
+   }
+   else
+   {
+      #ifdef DEBUG_GL_CONTEXT
+      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context %s\n", msg.c_str());
+      #endif
    }
    
    #ifdef DEBUG_GL_CONTEXT
@@ -314,11 +321,8 @@ bool ViewCanvas::InitializePlot()
    // Add things to do here
    wxPaintDC dc(this);
    
-   if (!SetGLContext())
-   {
-      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in ViewCanvas::InitializePlot()\n");
+   if (!SetGLContext("in ViewCanvas::InitializePlot()"))
       return false;
-   }
    
 	// initialize opengl
    #ifdef DEBUG_INIT
@@ -397,11 +401,8 @@ bool ViewCanvas::InitOpenGL()
 		return true;
 	}
    
-   if (!SetGLContext())
-   {
-      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in ViewCanvas::InitOpenGL()\n");
+   if (!SetGLContext("in ViewCanvas::InitOpenGL()"))
       return false;
-	}
    
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("   Calling InitGL()\n");
@@ -1539,12 +1540,8 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          ("   theContext=<%p>, textureFile='%s'\n", theContext, textureFile.c_str());
       #endif
       
-      if (!SetGLContext())
-      {
-         MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in ViewCanvas::BindTexture()\n");
+      if (!SetGLContext("in ViewCanvas::BindTexture()"))
          return -1;
-      }
-      
       
       // Generate text id and bind it before loading image
       glGenTextures(1, &texId);
@@ -1842,7 +1839,7 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
        "mModelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), writeWarning, mGlInitialized,
        mModelsAreLoaded, mScCount);
    #endif
-   
+      
    if (mGlInitialized)
    {
       if (!mModelsAreLoaded)
@@ -1919,7 +1916,7 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 			MessageInterface::ShowMessage
             ("   numModelLoaded = %d, mScCount = %d\n", numModelLoaded, mScCount);
 			#endif
-			
+         
 			// Set mModelsAreLoaded to true if it went through all models
 			if (numModelLoaded == mScCount)
 				mModelsAreLoaded = true;

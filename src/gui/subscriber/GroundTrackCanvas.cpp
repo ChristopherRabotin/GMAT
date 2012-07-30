@@ -458,15 +458,14 @@ void GroundTrackCanvas::OnPaint(wxPaintEvent& event)
    // Check for any error condition
    if (mFatalErrorFound)
    {
+      #ifdef DEBUG_ONPAINT
       MessageInterface::ShowMessage("**** ERROR **** fatal error found\n");
+      #endif
       return;
    }
    
-   if (!SetGLContext())
-   {
-      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in GroundTrackCanvas::OnPaint()\n");
+   if (!SetGLContext("in GroundTrackCanvas::OnPaint()"))
       return;
-   }
    
    if (!mGlInitialized && mObjectCount > 0)
    {
@@ -531,12 +530,8 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
    mCanvasSize.x = nWidth;
    mCanvasSize.y = nHeight;
    
-   if (!SetGLContext())
-   {
-      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in GroundTrackCanvas::OnSize()\n");
+   if (!SetGLContext("in GroundTrackCanvas::OnSize()"))
       return;
-   }
-   
    
    glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
    mAxisLength = (float)(sqrt((Real)(nWidth*nWidth + nHeight*nHeight)));

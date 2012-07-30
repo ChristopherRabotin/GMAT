@@ -877,15 +877,14 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
    // Check for any error condition
    if (mFatalErrorFound)
    {
+      #ifdef DEBUG_ON_PAINT
       MessageInterface::ShowMessage("**** ERROR **** fatal error found\n");
+      #endif
       return;
    }
    
-   if (!SetGLContext())
-   {
-      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in OrbitViewCanvas::OnPaint()\n");
+   if (!SetGLContext("in OrbitViewCanvas::OnPaint()"))
       return;
-   }
    
    if (!mGlInitialized && mObjectCount > 0)
    {
@@ -947,11 +946,8 @@ void OrbitViewCanvas::OnSize(wxSizeEvent& event)
    mCanvasSize.x = nWidth;
    mCanvasSize.y = nHeight;
    
-   if (!SetGLContext())
-   {
-      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context in OrbitViewCanvas::OnSize()\n");
+   if (!SetGLContext("in OrbitViewCanvas::OnSize()"))
       return;
-   }
    
    // Need this to make picture not to stretch to canvas
    ChangeProjection(nWidth, nHeight, mAxisLength);
@@ -1841,9 +1837,6 @@ void OrbitViewCanvas::DrawPlot()
    SetupProjection();
    TransformView();
    
-   // draw object orbit
-   DrawObjectOrbit();
-   
    // draw axes
    if (mDrawAxes)
       if (!mCanRotateAxes)
@@ -1858,7 +1851,7 @@ void OrbitViewCanvas::DrawPlot()
       DrawEclipticPlane(mEcPlaneColor);
    
    // draw object orbit
-   //DrawObjectOrbit();
+   DrawObjectOrbit();
    
    if (mDrawSolverData)
       DrawSolverData();

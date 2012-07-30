@@ -39,6 +39,7 @@ public:
                   long style = 0);
    ~VisualModelCanvas();
    bool LoadModel(const wxString &filePath);
+   void LoadModel();
    void RecenterModel(float *offset);
    float AutoscaleModel();
    void Rotate(bool useDegrees, float xAngle, float yAngle, float zAngle);
@@ -79,7 +80,6 @@ private:
    wxWindow *vParent;
    
    void DrawAxes();
-   void LoadModel();
    bool SetGLContext();
 };
 
