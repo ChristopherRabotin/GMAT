@@ -52,8 +52,7 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    const wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name, long style)
-//#ifdef __WXMSW__
-   #if 0
+   #ifdef __WXMSW__
    // I'm getting pixel format error with GmatGLCanvasAttribs on Windows.
    // So using 0 for attribute list (*int) (LOJ: 2011.12.20)
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
