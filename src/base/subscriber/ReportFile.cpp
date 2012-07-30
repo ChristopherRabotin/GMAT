@@ -1391,7 +1391,7 @@ void ReportFile::WriteHeaders()
           MessageInterface::ShowMessage("   column %d: width = %d\n", i, width);
           #endif
           
-          dstream.width(width + 3); // sets miminum field width
+          dstream.width(width + 3); // sets minimum field width
           dstream.fill(' ');
           
           if (leftJustify)
