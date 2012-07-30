@@ -3225,7 +3225,7 @@ void Propagate::PrepareToPropagate()
                      if (propagators[index]->GetODEModel()->BuildModelFromMap()
                            == false)
                         throw CommandException("Unable to assemble the ODE "
-                              "model  after adding a finite burn for " +
+                              "model after adding a finite burn for " +
                               (*i)->GetName());
                   }
                }
