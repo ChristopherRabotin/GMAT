@@ -91,7 +91,6 @@ GmatFunction::GmatFunction(const std::string &name) :
       {
          // Get path of first it is located
          pathname = fm->GetGmatFunctionPath(name + ".gmf");
-         
          // gmat function uses whole path name
          pathname = pathname + name + ".gmf";         
          functionPath = pathname;
@@ -775,7 +774,13 @@ bool GmatFunction::SetStringParameter(const Integer id, const std::string &value
             MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
             #endif
             
-            functionPath = currPath + temp.substr(1);
+            if (temp[1] != '.')
+               functionPath = currPath + temp.substr(1);
+            else
+            {
+               functionPath = currPath + '/';
+               functionPath = functionPath + temp;
+            }
          }
          else
          {

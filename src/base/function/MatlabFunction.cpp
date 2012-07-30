@@ -199,7 +199,13 @@ bool MatlabFunction::SetStringParameter(const Integer id, const std::string &val
             MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
             #endif
             
-            functionPath = currPath + temp.substr(1);
+            if (temp[1] != '.')
+               functionPath = currPath + temp.substr(1);
+            else
+            {
+               functionPath = currPath + '/';
+               functionPath = functionPath + temp;
+            }
          }
          else
          {
