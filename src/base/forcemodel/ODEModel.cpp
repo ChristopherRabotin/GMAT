@@ -1072,7 +1072,8 @@ bool ODEModel::BuildModelFromMap()
    if (psm == NULL)
    {
       MessageInterface::ShowMessage("ODEModel::BuildModelFromMap():  Cannot "
-            "build the model: PropStateManager is NULL\n");
+            "build the model %s: PropStateManager is NULL\n",
+            instanceName.c_str());
       return retval;
    }
 
@@ -4007,18 +4008,40 @@ void ODEModel::ReportEpochData()
 }
 
 
+//------------------------------------------------------------------------------
+// void SetPropStateManager(PropagationStateManager *sm)
+//------------------------------------------------------------------------------
+/**
+ * Sets the ProagationStateManager pointer
+ *
+ * @param sm The PSM that the ODEModel uses
+ */
+//------------------------------------------------------------------------------
 void ODEModel::SetPropStateManager(PropagationStateManager *sm)
 {
+   #ifdef DEBUG_OBJECT_SETTING
+      MessageInterface::ShowMessage("Setting the PSM on %s\n",
+            instanceName.c_str());
+   #endif
    psm = sm;
 }
 
+//------------------------------------------------------------------------------
+// void SetState(GmatState *gms)
+//------------------------------------------------------------------------------
+/**
+ * Sets the GMAT state used with the ODE model
+ *
+ * @param gms The GMAT state
+ */
+//------------------------------------------------------------------------------
 void ODEModel::SetState(GmatState *gms)
 {
    state = gms;
 
    #ifdef DEBUG_STATE
-      MessageInterface::ShowMessage("Setting state with epoch %le and dimension %d to\n   [",
-               state->GetEpoch(), state->GetSize());
+      MessageInterface::ShowMessage("Setting state with epoch %le and "
+            "dimension %d to\n   [", state->GetEpoch(), state->GetSize());
       for (Integer i = 0; i < state->GetSize()-1; ++i)
          MessageInterface::ShowMessage("%le, ", (*state)[i]);
       MessageInterface::ShowMessage("%le]\n", (*state)[state->GetSize()-1]);
@@ -4037,7 +4060,8 @@ void ODEModel::SetState(GmatState *gms)
  * Retrieves owned object property id.
  *
  * @param  id  ODEModel parameter id for for getting owned object parameter id
- * @param  owner  The pointer to owner to set if id provided found from the owned object
+ * @param  owner  The pointer to owner to set if id provided found from the
+ *                owned object
  *
  * @return  parameter ID from the owned object
  */
@@ -4048,7 +4072,8 @@ Integer ODEModel::GetOwnedObjectId(Integer id, GmatBase **owner) const
    GmatBase *ownedObj = NULL;
    
    if (numForces == 0)
-      throw ODEModelException("ODEModel::GetOwnedObjectId() failed, Has empty force list");
+      throw ODEModelException("ODEModel::GetOwnedObjectId() failed, Has empty "
+            "force list");
    
    for (Integer i=0; i<numForces; i++)
    {
