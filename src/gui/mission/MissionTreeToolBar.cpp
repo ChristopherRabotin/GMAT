@@ -187,10 +187,13 @@ void MissionTreeToolBar::CreateMissionTreeToolBar()
    ++index;
    AddCheckTool(TOOL_EXC_CALL, wxT("ExcCall"), *bitmaps[index],
                                  *bitmaps[index], wxT("Exclude CallFunction, Save commands"));
-   AddSeparator();
-   ++index;
-   AddTool(TOOL_CUSTOM_VIEW, wxT("CustomizeView"), *bitmaps[index],
-                            wxT("Customize Mission Tree View"));
+   // Commented out until GMT-2855 is resolved
+   // Commented out button create code until Customize View Window is completely fixed
+   // TGG: 2012-07-31
+   //AddSeparator();
+   //++index;
+   //AddTool(TOOL_CUSTOM_VIEW, wxT("CustomizeView"), *bitmaps[index],
+   //                         wxT("Customize Mission Tree View"));
    Realize();
    
    for (int i = 0; i < NUM_ICONS; i++)
@@ -327,31 +330,25 @@ void MissionTreeToolBar::OnViewByLevel(wxCommandEvent& event)
    {
    case TOOL_LEVEL_ALL:
       viewLevel = 10;
-      ToggleTool(TOOL_LEVEL_1, false);
-      ToggleTool(TOOL_LEVEL_2, false);
-      ToggleTool(TOOL_LEVEL_3, false);
       break;
    case TOOL_LEVEL_1:
       viewLevel = 1;
-      ToggleTool(TOOL_LEVEL_ALL, false);
-      ToggleTool(TOOL_LEVEL_2, false);
-      ToggleTool(TOOL_LEVEL_3, false);
       break;
    case TOOL_LEVEL_2:
       viewLevel = 2;
-      ToggleTool(TOOL_LEVEL_1, false);
-      ToggleTool(TOOL_LEVEL_ALL, false);
-      ToggleTool(TOOL_LEVEL_3, false);
       break;
    case TOOL_LEVEL_3:
       viewLevel = 3;
-      ToggleTool(TOOL_LEVEL_1, false);
-      ToggleTool(TOOL_LEVEL_2, false);
-      ToggleTool(TOOL_LEVEL_ALL, false);
       break;
    default:
       break;
    }
+   // GMT-2924 changed behavior so all level buttons do not stay pressed
+   // TGG: 2012-07-31
+   ToggleTool(TOOL_LEVEL_ALL, false);
+   ToggleTool(TOOL_LEVEL_1, false);
+   ToggleTool(TOOL_LEVEL_2, false);
+   ToggleTool(TOOL_LEVEL_3, false);
    
    ResetMissionTreeIncludeCategory();
    ResetMissionTreeExcludeCategory();
