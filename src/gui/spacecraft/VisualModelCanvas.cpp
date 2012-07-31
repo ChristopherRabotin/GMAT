@@ -47,18 +47,19 @@ END_EVENT_TABLE()
 //#define DEBUG_ON_PAINT
 //#define DEBUG_GL_CONTEXT
 
+
 //------------------------------------------------------------------------------
 // VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft, ...)
 //------------------------------------------------------------------------------
 VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    const wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name, long style)
    #ifdef __WXMSW__
-   // I'm getting pixel format error with GmatGLCanvasAttribs on Windows.
-   // So using 0 for attribute list (*int) (LOJ: 2011.12.20)
+   // Constructor with explicit wxGLContext
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #else
+   // Constructor with implicit wxGLContext
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
-   : wxGLCanvas(parent, id, ViewCanvas::GmatGLCanvasAttribs, pos, size, style, name)
+   : wxGLCanvas(parent, id, pos, size, style, name, ViewCanvas::GmatGLCanvasAttribs)
    #endif
 {
    #ifdef DEBUG_MODEL_CANVAS
@@ -547,27 +548,33 @@ bool VisualModelCanvas::SetGLContext()
    #endif
    
    bool retval = false;
-   ModelManager *mm = ModelManager::Instance();
    
-   if (!mm->GetSharedGLContext())
-   {
-      wxGLContext *glContext = new wxGLContext(this);
-      #ifdef DEBUG_GL_CONTEXT
-      MessageInterface::ShowMessage
-         ("   Setting new wxGLContext(this)<%p> to ModelManager::theContext\n", glContext);
-      #endif
-      mm->SetSharedGLContext(glContext);
-   }
-   
-   // Use the shared context from the ModelManager
-   theContext = mm->GetSharedGLContext();
-   
-   if (theContext)
-   {
-      SetCurrent(*theContext);
+   #ifdef __WXMSW__
+      ModelManager *mm = ModelManager::Instance();
+      if (!mm->GetSharedGLContext())
+      {
+         wxGLContext *glContext = new wxGLContext(this);
+         #ifdef DEBUG_GL_CONTEXT
+         MessageInterface::ShowMessage
+            ("   Setting new wxGLContext(this)<%p> to ModelManager::theContext\n", glContext);
+         #endif
+         mm->SetSharedGLContext(glContext);
+      }
+      
+      // Use the shared context from the ModelManager
+      theContext = mm->GetSharedGLContext();
+      if (theContext)
+      {
+         theContext->SetCurrent(*this);
+         retval = true;
+      }
+   #else
+      theContext = GetContext();
+      SetCurrent();
       retval = true;
-   }
-   
+   #endif
+      
+      
    #ifdef DEBUG_GL_CONTEXT
    MessageInterface::ShowMessage
       ("VisualModelCanvas::SetGLContext() returning %d, theContext=<%p>\n",

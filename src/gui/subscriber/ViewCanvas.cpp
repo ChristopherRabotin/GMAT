@@ -91,12 +91,12 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // Repainting issue when reducing size was resolved by adding Refresh(false)
    // and Update(). (LOJ: 2012.05.03 for GMT-2582 fix)
    #ifdef __WXMSW__
-   // I'm getting pixel format error with GmatGLCanvasAttribs on Windows.
-   // So using 0 for attribute list (*int) (LOJ: 2011.12.20)
+   // Constructor with explicit wxGLContext
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #else
+   // Constructor with implicit wxGLContext
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
-   : wxGLCanvas(parent, id, ViewCanvas::GmatGLCanvasAttribs, pos, size, style, name)
+   : wxGLCanvas(parent, id, pos, size, style, name, ViewCanvas::GmatGLCanvasAttribs)
    #endif
 {
    #ifdef DEBUG_INIT
@@ -266,32 +266,39 @@ bool ViewCanvas::SetGLContext(const wxString &msg)
    #endif
    
    bool retval = false;
-   ModelManager *mm = ModelManager::Instance();
    
-   if (!mm->GetSharedGLContext())
-   {
-      wxGLContext *glContext = new wxGLContext(this);
-      #ifdef DEBUG_GL_CONTEXT
-      MessageInterface::ShowMessage
-         ("   Setting new wxGLContext(this)<%p> to ModelManager::theContext\n", glContext);
-      #endif
-      mm->SetSharedGLContext(glContext);
-   }
-   
-   // Use the shared context from the ModelManager
-   theContext = mm->GetSharedGLContext();
-   
-   if (theContext)
-   {
-      SetCurrent(*theContext);
+   #ifdef __WXMSW__
+       ModelManager *mm = ModelManager::Instance();
+       if (!mm->GetSharedGLContext())
+       {
+          wxGLContext *glContext = new wxGLContext(this);
+          #ifdef DEBUG_GL_CONTEXT
+          MessageInterface::ShowMessage
+             ("   Setting new wxGLContext(this)<%p> to ModelManager::theContext\n", glContext);
+          #endif
+          mm->SetSharedGLContext(glContext);
+       }
+
+       // Use the shared context from the ModelManager
+       theContext = mm->GetSharedGLContext();
+       
+       if (theContext)
+       {
+          SetCurrent(*theContext);
+          retval = true;
+       }
+       else
+       {
+          #ifdef DEBUG_GL_CONTEXT
+          MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context %s\n", msg.c_str());
+          #endif
+       }
+   #else
+      theContext = GetContext();
+      SetCurrent();
       retval = true;
-   }
-   else
-   {
-      #ifdef DEBUG_GL_CONTEXT
-      MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context %s\n", msg.c_str());
-      #endif
-   }
+   #endif
+
    
    #ifdef DEBUG_GL_CONTEXT
    MessageInterface::ShowMessage
