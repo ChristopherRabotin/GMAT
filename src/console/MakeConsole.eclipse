@@ -72,8 +72,8 @@ $(TARGET): $(OBJECTS)
 	cp $(TARGET) ../../application/$(GMAT_BIN_DIR)/$(TARGET)
 else
 $(TARGET): $(OBJECTS)
-	$(CPP) $(OBJECTS) $(CONSOLE_LINK_FLAGS) $(LIBRARIES) $(OPTIMIZATIONS) $(SPICE_LIBRARIES) \
-	$(FORTRAN_LIB) -o $(TARGET)
+	$(CPP) $(OBJECTS) $(LIBRARIES) $(OPTIMIZATIONS) $(SPICE_LIBRARIES) \
+	$(FORTRAN_LIB) -o $(TARGET) $(CONSOLE_LINK_FLAGS)
 	mkdir -p ../../application
 	mkdir -p ../../application/$(GMAT_BIN_DIR)
 	cp $(TARGET) ../../application/$(GMAT_BIN_DIR)/$(TARGET)
