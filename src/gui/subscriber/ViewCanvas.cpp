@@ -100,7 +100,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    #elif __linux
    // Constructor with explicit wxGLContext
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
-   : wxGLCanvas(parent, id, pos, size, style, name, ViewCanvas::GmatGLCanvasAttribs)
+   : wxGLCanvas(parent, id, ViewCanvas::GmatGLCanvasAttribs, pos, size, style, name)
    #else
    // Constructor with explicit wxGLContext with default GL attributes
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
@@ -290,6 +290,7 @@ bool ViewCanvas::SetGLContext(const wxString &msg)
       theContext = mm->GetSharedGLContext();
       if (theContext)
       {
+         theContext->SetCurrent(*this);
          SetCurrent(*theContext);
          retval = true;
       }
