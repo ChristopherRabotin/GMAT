@@ -91,12 +91,19 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // Repainting issue when reducing size was resolved by adding Refresh(false)
    // and Update(). (LOJ: 2012.05.03 for GMT-2582 fix)
    #ifdef __WXMSW__
-   // Constructor with explicit wxGLContext
+   // Constructor with explicit wxGLContext with default GL attributes
+   // It is getting pixel format error with GmatGLCanvasAttribs
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
-   #else
-   // Constructor with implicit wxGLContext
+   #elif __WXMAC__
+   // Constructor with implicit wxGLContext with default GL attributes
+   : wxGLCanvas(parent, id, pos, size, style, name)
+   #elif __linux
+   // Constructor with explicit wxGLContext
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
    : wxGLCanvas(parent, id, pos, size, style, name, ViewCanvas::GmatGLCanvasAttribs)
+   #else
+   // Constructor with explicit wxGLContext with default GL attributes
+   : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #endif
 {
    #ifdef DEBUG_INIT
@@ -267,38 +274,37 @@ bool ViewCanvas::SetGLContext(const wxString &msg)
    
    bool retval = false;
    
-   #ifdef __WXMSW__
-       ModelManager *mm = ModelManager::Instance();
-       if (!mm->GetSharedGLContext())
-       {
-          wxGLContext *glContext = new wxGLContext(this);
-          #ifdef DEBUG_GL_CONTEXT
-          MessageInterface::ShowMessage
-             ("   Setting new wxGLContext(this)<%p> to ModelManager::theContext\n", glContext);
-          #endif
-          mm->SetSharedGLContext(glContext);
-       }
-
-       // Use the shared context from the ModelManager
-       theContext = mm->GetSharedGLContext();
-       
-       if (theContext)
-       {
-          SetCurrent(*theContext);
-          retval = true;
-       }
-       else
-       {
-          #ifdef DEBUG_GL_CONTEXT
-          MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context %s\n", msg.c_str());
-          #endif
-       }
+   #ifndef __WXMAC__
+      ModelManager *mm = ModelManager::Instance();
+      if (!mm->GetSharedGLContext())
+      {
+         wxGLContext *glContext = new wxGLContext(this);
+         #ifdef DEBUG_GL_CONTEXT
+         MessageInterface::ShowMessage
+            ("   Setting new wxGLContext(this)<%p> to ModelManager::theContext\n", glContext);
+         #endif
+         mm->SetSharedGLContext(glContext);
+      }
+      
+      // Use the shared context from the ModelManager
+      theContext = mm->GetSharedGLContext();
+      if (theContext)
+      {
+         SetCurrent(*theContext);
+         retval = true;
+      }
+      else
+      {
+         #ifdef DEBUG_GL_CONTEXT
+         MessageInterface::ShowMessage("**** ERROR **** Cannot set GL context %s\n", msg.c_str());
+         #endif
+      }
    #else
+      // Use implicit GL context on Mac
       theContext = GetContext();
       SetCurrent();
       retval = true;
    #endif
-
    
    #ifdef DEBUG_GL_CONTEXT
    MessageInterface::ShowMessage
@@ -838,6 +844,8 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
 {
    if (IsFrozen())
       Thaw();
+   
+   SetGLContext();
    
    mTotalPoints++;
    mInFunction = inFunction;   
@@ -1846,7 +1854,12 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
        "mModelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), writeWarning, mGlInitialized,
        mModelsAreLoaded, mScCount);
    #endif
-      
+   
+   // Add this here to see if it works on Linux loading spacecraft 3ds model (LOJ: 2012.08.01)
+   wxPaintDC dc(this);
+   if (!SetGLContext("in ViewCanvas::LoadSpacecraftModels()"))
+      return false;
+   
    if (mGlInitialized)
    {
       if (!mModelsAreLoaded)

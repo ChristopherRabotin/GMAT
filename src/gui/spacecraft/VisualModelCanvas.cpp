@@ -54,12 +54,19 @@ END_EVENT_TABLE()
 VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    const wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name, long style)
    #ifdef __WXMSW__
-   // Constructor with explicit wxGLContext
+   // Constructor with explicit wxGLContext with default GL attributes
+   // It is getting pixel format error with GmatGLCanvasAttribs
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
-   #else
-   // Constructor with implicit wxGLContext
+   #elif __WXMAC__
+   // Constructor with implicit wxGLContext with default GL attributes
+   : wxGLCanvas(parent, id, pos, size, style, name)
+   #elif __linux
+   // Constructor with explicit wxGLContext
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
-   : wxGLCanvas(parent, id, pos, size, style, name, ViewCanvas::GmatGLCanvasAttribs)
+   : wxGLCanvas(parent, id, ViewCanvas::GmatGLCanvasAttribs, pos, size, style, name)
+   #else
+   // Constructor with explicit wxGLContext with default GL attributes
+   : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #endif
 {
    #ifdef DEBUG_MODEL_CANVAS
@@ -78,7 +85,7 @@ VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    mLight.SetDirectional(true);
    
    glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
-
+   
    // enable the light
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
@@ -534,8 +541,8 @@ void VisualModelCanvas::LoadModel()
 // bool SetGLContext()
 //------------------------------------------------------------------------------
 /**
- * Sets GL context to ModelManager and sets to current context which stores
- * shared GL context pointer.
+ * Creates GL context if not already created and sets to ModelManager to share
+ * with other GL canvas. 
  *
  * @return true if GL context is not NULL, false otherwise
  */
@@ -549,7 +556,7 @@ bool VisualModelCanvas::SetGLContext()
    
    bool retval = false;
    
-   #ifdef __WXMSW__
+   #ifndef __WXMAC__
       ModelManager *mm = ModelManager::Instance();
       if (!mm->GetSharedGLContext())
       {
@@ -569,6 +576,7 @@ bool VisualModelCanvas::SetGLContext()
          retval = true;
       }
    #else
+      // Use implicit GL context on Mac
       theContext = GetContext();
       SetCurrent();
       retval = true;
