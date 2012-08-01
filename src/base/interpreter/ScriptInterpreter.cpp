@@ -1407,7 +1407,7 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
       if (!inFunctionMode)
       {
          InterpreterException ex
-            ("GMAT currently requires that all object are created before the "
+            ("GMAT currently requires that all objects are created before the "
              "mission sequence begins");
          HandleError(ex, true, true);
          return true; // just a warning, so return true
