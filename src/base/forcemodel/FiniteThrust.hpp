@@ -38,6 +38,7 @@ public:
    virtual ~FiniteThrust();
    FiniteThrust(const FiniteThrust& ft);
    FiniteThrust&           operator=(const FiniteThrust& ft);
+   bool                    operator==(const FiniteThrust& ft) const;
 
    virtual GmatBase*       Clone() const;
 

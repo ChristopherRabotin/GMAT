@@ -53,6 +53,7 @@ FiniteThrust::FiniteThrust(const std::string &name) :
    depleteMass          (true)
 {
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
+   objectTypeNames.push_back("FiniteThrust");
 }
 
 
@@ -125,6 +126,89 @@ FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
       depleteMass    = ft.depleteMass;
    }
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// bool FiniteThrust::operator==(const FiniteThrust& ft) const
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if two FiniteThrusts apply the same thruster force.
+ *
+ * The check performed here identifies if the burns overlap at all; in other
+ * words, if the input burn applies finite thrust using any thruster-spacecraft
+ * combination that is also covered by this instance, the return value will be
+ * true indicating that the finite thrust from ft overlaps with this one.
+ *
+ * @param ft The second FiniteThrust
+ *
+ * @return true if the thrust is applied from the same thruster on the same
+ * spacecraft as this instance applies, false if it is a different independent
+ * force.
+ */
+//------------------------------------------------------------------------------
+bool FiniteThrust::operator==(const FiniteThrust& ft) const
+{
+   bool retval = false;
+
+   #ifdef DEBUG_COMPARISON
+      MessageInterface::ShowMessage("Comparing: Does %p == %p?\n", this, &ft);
+      MessageInterface::ShowMessage("   %s\n", (isInitialized ? "Initialized" :
+            "Not Initialized"));
+   #endif
+//   if (isInitialized)
+   {
+      StringArray ftBurnNames = ((FiniteThrust&)ft).GetRefObjectNameArray(
+            Gmat::FINITE_BURN);
+      StringArray ftSatNames = ((FiniteThrust&)ft).GetRefObjectNameArray(
+            Gmat::SPACECRAFT);
+
+      #ifdef DEBUG_COMPARISON
+         MessageInterface::ShowMessage("   %d Sats, %d burns\n",
+               ftSatNames.size(), ftBurnNames.size());
+      #endif
+      // Check to see if there is spacecraft overlap
+      Integer satOverlap = 0, burnOverlap = 0;
+      for (UnsignedInt i = 0; i < mySpacecraft.size(); ++i)
+      {
+         #ifdef DEBUG_COMPARISON
+            MessageInterface::ShowMessage("   Sats: %s?\n",
+                  mySpacecraft[i].c_str());
+         #endif
+         if (find(ftSatNames.begin(), ftSatNames.end(),
+               mySpacecraft[i]) != ftSatNames.end())
+         {
+            ++satOverlap;
+            #ifdef DEBUG_COMPARISON
+               MessageInterface::ShowMessage("   MatchFound\n");
+            #endif
+         }
+      }
+
+      for (UnsignedInt i = 0; i < burnNames.size(); ++i)
+      {
+         #ifdef DEBUG_COMPARISON
+            MessageInterface::ShowMessage("   Burns: %s?\n",
+                  burnNames[i].c_str());
+         #endif
+         if (find(ftBurnNames.begin(), ftBurnNames.end(),
+               burnNames[i]) != ftBurnNames.end())
+         {
+            ++burnOverlap;
+            #ifdef DEBUG_COMPARISON
+               MessageInterface::ShowMessage("   MatchFound\n");
+            #endif
+         }
+      }
+
+      // Note that the current test is not yet rigorous -- it will return a
+      // false positive if sat1.thruster2 and sat2.thruster1 both fire if both
+      // sats and thrusters are in the lists
+      if ((satOverlap > 0) && (burnOverlap > 0))
+         retval = true;
+   }
+
+   return retval;
 }
 
 
@@ -220,6 +304,9 @@ const StringArray& FiniteThrust::GetRefObjectNameArray(
 {
    if (type == Gmat::SPACECRAFT)
       return mySpacecraft;
+
+   if (type == Gmat::FINITE_BURN)
+      return burnNames;
       
    return PhysicalModel::GetRefObjectNameArray(type);
 }
@@ -249,7 +336,13 @@ bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             "FiniteThrust::SetRefObject cannot use objects of type " + 
             obj->GetTypeName());
       if (find(burns.begin(), burns.end(), obj) == burns.end())
+      {
          burns.push_back((FiniteBurn*)obj);
+         if (find(burnNames.begin(), burnNames.end(), name) == burnNames.end())
+         {
+            burnNames.push_back(name);
+         }
+      }
       return true;
    }
    
@@ -446,8 +539,10 @@ bool FiniteThrust::Initialize()
    #ifdef DEBUG_FINITETHRUST_INIT
       MessageInterface::ShowMessage("FiniteThrust::Initialize entered\n");
    #endif
+
+   isInitialized = PhysicalModel::Initialize();
       
-   if (!PhysicalModel::Initialize())
+   if (!isInitialized)
       throw ODEModelException("Unable to initialize FiniteThrust base");
       
    // set up the indices into the state vector that match spacecraft with active 
@@ -500,6 +595,7 @@ bool FiniteThrust::Initialize()
             "FiniteThrust::Initialize finished\n");
    #endif
    
+   isInitialized = true;
    return true;
 }
 

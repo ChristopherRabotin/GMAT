@@ -437,7 +437,7 @@ bool BeginFiniteBurn::RenameRefObject(const Gmat::ObjectType type,
    if (burnName == oldName)
       burnName = newName;
    
-   for (UnsignedInt i=0; i<satNames.size(); i++)
+   for (UnsignedInt i = 0; i < satNames.size(); ++i)
       if (satNames[i] == oldName)
          satNames[i] = newName;
    
@@ -563,7 +563,8 @@ bool BeginFiniteBurn::Initialize()
             if (transient != transientForces->end())
             {
                #ifdef DEBUG_TRANSIENTFORCE_MANAGEMENT
-                  MessageInterface::ShowMessage("Removing burn force <%p> from the transient force list\n", burnForce);
+                  MessageInterface::ShowMessage("Removing burn force <%p> from "
+                        "the transient force list\n", burnForce);
                #endif
                transientForces->erase(transient);
             }
@@ -583,6 +584,7 @@ bool BeginFiniteBurn::Initialize()
       
       burnForce->SetRefObject(maneuver, maneuver->GetType(),
                               maneuver->GetName());
+
       Gmat::ObjectType type = Gmat::SPACECRAFT;
       StringArray::iterator iter;
       
@@ -663,18 +665,55 @@ bool BeginFiniteBurn::Execute()
    }
 
    if (transientForces == NULL)
-      throw CommandException("Transient force list was NOT initialized; ABORTING RUN!!!\n\n");
+      throw CommandException("Transient force list was NOT initialized; "
+            "ABORTING RUN!!!\n\n");
    
    // Insert the force into the list of transient forces if not found
-   if (find(transientForces->begin(), transientForces->end(), burnForce) ==
-       transientForces->end())
+//   if (find(transientForces->begin(), transientForces->end(), burnForce) ==
+//       transientForces->end())
+
+   if (transientForces->size() == 0)
    {
       #ifdef DEBUG_TRANSIENT_FORCES
       MessageInterface::ShowMessage
-         ("BeginFiniteBurn::Execute() Adding burnForce<%p>'%s' to transientForces\n",
-          burnForce, burnForce->GetName().c_str());
+         ("BeginFiniteBurn::Execute() Adding first burnForce<%p>'%s' to "
+               "transientForces\n", burnForce, burnForce->GetName().c_str());
       #endif
       transientForces->push_back(burnForce);
+   }
+   else
+   {
+      bool alreadyThere = false;
+      for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
+            i !=transientForces->end(); ++i)
+      {
+         if ((*i)->IsOfType("FiniteThrust"))
+         {
+            FiniteThrust *transient = (FiniteThrust*)(*i);
+            if (transient == burnForce)
+            {
+               alreadyThere = true;
+            }
+
+            if ((*transient) == (*burnForce))
+            {
+               MessageInterface::ShowMessage("Burn activated by the line\n   "
+                     "%s\noverlaps with an active finite burn.  No new finite burn "
+                     "will be applied.\n",
+                     GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+               alreadyThere = true;
+            }
+         }
+      }
+      if (alreadyThere == false)
+      {
+         #ifdef DEBUG_TRANSIENT_FORCES
+         MessageInterface::ShowMessage("BeginFiniteBurn::Execute() Adding "
+               "burnForce<%p>'%s' to transientForces\n", burnForce,
+               burnForce->GetName().c_str());
+         #endif
+         transientForces->push_back(burnForce);
+      }
    }
    
    // Set maneuvering to Publisher so that any subscriber can do its own action
