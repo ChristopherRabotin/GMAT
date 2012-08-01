@@ -105,7 +105,9 @@ protected:
    
    static const Real CONVERGENCE_TOLERANCE;// = 1.0e-8;
    static const Real MAX_ITERATIONS;//        = 2000;
-   
+   static const Real ZERO_MASS_TOL;//        = 1.0E-15;
+   static const Real ZERO_MAG_TOL;//        = 1E-12;
+
    std::string primaryBodyName;
    std::string secondaryBodyName;
    std::string whichPoint;

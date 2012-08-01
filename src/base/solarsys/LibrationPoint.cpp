@@ -30,6 +30,7 @@
 #include "Rvector6.hpp"
 #include "Rmatrix33.hpp"
 #include "MessageInterface.hpp"
+#include "GmatDefaults.hpp"
 
 #include <iostream>
 
@@ -42,6 +43,8 @@
 //---------------------------------
 const Real LibrationPoint::CONVERGENCE_TOLERANCE = 1.0e-8;
 const Real LibrationPoint::MAX_ITERATIONS        = 2000;
+const Real LibrationPoint::ZERO_MASS_TOL         = 1.0E-15;
+const Real LibrationPoint::ZERO_MAG_TOL          = 1.0E-12;
 
 const std::string
 LibrationPoint::PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCount] =
@@ -192,10 +195,19 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
       massSecondary = ((CelestialBody*) secondaryBody)->GetMass();
    else  // Barycenter
       massSecondary = ((Barycenter*) secondaryBody)->GetMass();
-   if ((massPrimary == 0.0) && (massSecondary == 0.0))
-      throw SolarSystemException(
-            "Primary and secondary bodies for LibrationPoint are massless");
+   
+   // Test that masses are not too small
+   if (massPrimary <= LibrationPoint::ZERO_MASS_TOL) 
+		 throw SolarSystemException(
+		    "The mass of the Primary on LibrationPoint \""
+			+ GetName() + "\" is near zero or negative.\n");
+   if (massSecondary <= LibrationPoint::ZERO_MASS_TOL) 
+		 throw SolarSystemException(
+		    "The mass of the Secondary on LibrationPoint \"" 
+			+ GetName() + "\" is near zero or negative.\n");
+   // Divide by zero is avoided by previous mass tests
    Real muStar = massSecondary / (massPrimary + massSecondary);
+
    #ifdef DEBUG_GET_STATE
    MessageInterface::ShowMessage
       ("   Mass of the primary is %f\n", massPrimary);
@@ -296,6 +308,12 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
    Rvector3 ri(x, y, 0.0);
    Rvector3 vi(x, y, 0.0);
    Real rMag  = r.GetMagnitude();
+
+   if (rMag <= LibrationPoint::ZERO_MAG_TOL) 
+		 throw SolarSystemException(
+		    "The LibrationPoint \""
+			+ GetName() + "\" is undefined because the Primary and Secondary are too close together.\n");
+
    ri         = rMag * ri;
    Real vMult = (v * r) / rMag;
    vi         = vMult * vi;
@@ -723,7 +741,16 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
        "secondaryBody=<%p>\n", primaryBodyName.c_str(), primaryBody,
        secondaryBodyName.c_str(), secondaryBody);
    #endif
-   
+
+   // Check that ref objects are of valid type
+   if ((obj->GetName() == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME) ||
+	   ((!obj->IsOfType("CelestialBody") ) && (!obj->IsOfType("Barycenter") )))
+		 throw SolarSystemException(
+		    "The value of \"" + obj->GetName() + "\" for field \"Primary\""
+            " or \"Secondary\"" 
+			"on LibrationPoint \"" + GetName() + "\" is not an allowed value.\n"
+			"The allowed values are: CelestialBody or Barycenter (except SSB). ");
+
    // Call parent class to add objects to bodyList
    return CalculatedPoint::SetRefObject(obj, type, name);
 }
@@ -794,7 +821,9 @@ void LibrationPoint::CheckBodies()
          ("   bodyList[%d] = %s\n", i,
           (bodyList[i] == NULL ? "NULL" : bodyList[i]->GetName().c_str()));
       #endif
-      
+      if (bodyList.at(i)->GetName() == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+		 throw SolarSystemException(
+             "Cannot Use SolarSystemBarycenter in a LibrationPoint");
       if (((bodyList.at(i))->GetType() != Gmat::CELESTIAL_BODY) &&
           ((bodyList.at(i))->GetTypeName() != "Barycenter"))
          throw SolarSystemException(
