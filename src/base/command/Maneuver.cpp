@@ -764,10 +764,10 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
            << "\n        Origin:             " << originNameM
            << "\n        Axes:               " << axesNameM
 
-           << "\n        Burn Vector:"
-           << "\n           Element 1:  " << BuildNumber(elementIspMassData[0])
-           << "\n           Element 2:  " << BuildNumber(elementIspMassData[1])
-           << "\n           Element 3:  " << BuildNumber(elementIspMassData[2])
+           << "\n        Delta V Vector:"
+           << "\n           Element 1:  " << BuildNumber(elementIspMassData[0]) << " km/s"
+           << "\n           Element 2:  " << BuildNumber(elementIspMassData[1]) << " km/s"
+           << "\n           Element 3:  " << BuildNumber(elementIspMassData[2]) << " km/s"
            << "\n";
 
       if (decMassM)
@@ -794,16 +794,17 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
          }
 
          data << "\n        Mass depletion from " << tanklist <<":  "
-              << "\n           Thrust:       "    << BuildNumber(thrust) << " N"
+              << "\n           Delta V:      "    << BuildNumber(thrust) << " km/s"
               << "\n           Isp:          "    << BuildNumber(elementIspMassData[3]) << " s"
               << "\n           Mass change:  "    << BuildNumber(elementIspMassData[4]) << " kg"
               << "\n";
+		 data << "\n";
 
       }
       else
-         data << "\n"
-              << "\n        No mass depletion\n";
-
+         data << "\n        No mass depletion\n";
+	     data << "\n";
+	     
 
       commandSummary = commandSummary + data.str();
    }
