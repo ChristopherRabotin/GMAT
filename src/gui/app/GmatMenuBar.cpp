@@ -280,16 +280,16 @@ void GmatMenuBar::UpdateRecentMenu(wxArrayString files)
 
    // create a new recent menu
    wxMenu *recentMenu = new wxMenu;
-   if (files.GetCount() > 0)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT1, files[0]);
-   if (files.GetCount() > 1)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT2, files[1]);
-   if (files.GetCount() > 2)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT3, files[2]);
-   if (files.GetCount() > 3)
-      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT4, files[3]);
    if (files.GetCount() > 4)
       recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT5, files[4]);
+   if (files.GetCount() > 3)
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT4, files[3]);
+   if (files.GetCount() > 2)
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT3, files[2]);
+   if (files.GetCount() > 1)
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT2, files[1]);
+   if (files.GetCount() > 0)
+      recentMenu->Append(MENU_FILE_OPEN_RECENT_SCRIPT1, files[0]);
 
    wxMenuItem *recentMenuItem = fileMenu->Insert(3, MENU_FILE_OPEN_RECENT_SCRIPT1, wxT("Open Recent"), recentMenu, wxT(""));
    if (recentMenu->GetMenuItemCount() == 0)
