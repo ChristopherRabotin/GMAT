@@ -619,8 +619,9 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
          {
             if ((*i)->IsUnique(pPhysicalModel->GetBodyName()))
             {
+               PhysicalModel *toBeReplaced = *i;
                forceList.erase(i);
-               delete *i;
+               delete toBeReplaced;
                break;
             }
          }
