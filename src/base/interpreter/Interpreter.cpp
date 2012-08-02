@@ -6421,7 +6421,7 @@ bool Interpreter::SetDragForceProperty(GmatBase *obj,
    if (!pm->SetStringParameter("AtmosphereModel", valueToUse))
    {
       InterpreterException ex
-         ("Unable to set AtmosphereModel for drag force");
+         ("Unable to set AtmosphereModel " + valueToUse + " for drag force");
       HandleError(ex);
       ignoreError = true;
       return false;
@@ -6959,7 +6959,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
       for (int i=0; i<ownedObjCount; i++)
       {
          tempObj = owner->GetOwnedObject(i);
-         if (ownedObj)
+         if (tempObj)
          {
             #ifdef DEBUG_FIND_OBJECT
             MessageInterface::ShowMessage
