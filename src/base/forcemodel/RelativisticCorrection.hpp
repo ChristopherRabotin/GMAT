@@ -62,11 +62,6 @@ public:
 
    virtual Real                GetRealParameter(const Integer id) const;
    virtual Real                SetRealParameter(const Integer id, const Real value);
-//   virtual bool                GetBooleanParameter(const Integer id) const;
-//   virtual bool                SetBooleanParameter(const Integer id, const bool value);
-//   virtual Integer             GetIntegerParameter(const Integer id) const;
-//   virtual Integer             SetIntegerParameter(const Integer id, const Integer value);
-
 
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
@@ -86,15 +81,12 @@ protected:
    /// Gravitational parameter of the central body expressed in the local celestial
    /// body J2000 frame
    Real bodyMu;
+   /// Gravitational parameter of the Sun expressed in the local celestial
+   /// body J2000 frame
+   Real sunMu;
    /// Spin rate of the body
    Real bodySpinRate;
-   /// Vector from the Sun to the central body
-   Rvector6 sunToCBVector;
-   /// Flag used to detect if the central body is Earth
-   bool bodyIsTheEarth;
 
-   Rvector6 sunrv;
-   Rvector6 cbrv;
    A1Mjd    now;
 
    /// Number of spacecraft in the state vector that use CartesianState
@@ -108,8 +100,6 @@ protected:
    EopFile          *eop;
 
    CoordinateConverter cc;
-
-   Real             sunMu;
 
 
 private:

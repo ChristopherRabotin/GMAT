@@ -34,6 +34,7 @@
 
 //#define DEBUG_RELATIVISTIC_CORRECTION
 //#define DEBUG_DERIVATIVES
+//#define DEBUG_REL_CORR_SET_GET
 
 
 //------------------------------------------------------------------------------
@@ -67,12 +68,10 @@ RelativisticCorrection::RelativisticCorrection(const std::string &name, const st
   bodyRadius             (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]),
   bodyMu                 (GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH]),
   bodySpinRate           (0.0),
-  bodyIsTheEarth         (true),
   satCount               (0),
   bodyInertial           (NULL),
   bodyFixed              (NULL),
-  eop                    (NULL),
-  sunMu                  (GmatSolarSystemDefaults::STAR_MU)
+  eop                    (NULL)
 {
    objectTypeNames.push_back("RelativisticCorrection");
    parameterCount = RelativisticCorrectionParamCount;
@@ -114,16 +113,11 @@ RelativisticCorrection::RelativisticCorrection(const RelativisticCorrection &rc)
    bodyRadius     (rc.bodyRadius),
    bodyMu         (rc.bodyMu),
    bodySpinRate   (rc.bodySpinRate),
-   sunToCBVector  (rc.sunToCBVector),
-   bodyIsTheEarth (rc.bodyIsTheEarth),
-   sunrv          (rc.sunrv),
-   cbrv           (rc.cbrv),
    now            (rc.now),
    satCount       (rc.satCount),
    bodyInertial   (NULL),
    bodyFixed      (NULL),
-   eop            (rc.eop),
-   sunMu          (rc.sunMu)
+   eop            (rc.eop)
 {
    objectTypeNames.push_back("RelativisticCorrection");
    parameterCount = RelativisticCorrectionParamCount;
@@ -154,16 +148,11 @@ RelativisticCorrection& RelativisticCorrection::operator=(const RelativisticCorr
    bodyRadius     = rc.bodyRadius;
    bodyMu         = rc.bodyMu;
    bodySpinRate   = rc.bodySpinRate;
-   sunToCBVector  = rc.sunToCBVector;
-   bodyIsTheEarth = rc.bodyIsTheEarth;
-   sunrv          = rc.sunrv;
-   cbrv           = rc.cbrv;
    now            = rc.now;
    satCount       = rc.satCount;
    bodyInertial   = (CoordinateSystem*) rc.bodyInertial->Clone();
-   bodyFixed      = (CoordinateSystem*) rc.bodyInertial->Clone();
+   bodyFixed      = (CoordinateSystem*) rc.bodyFixed->Clone();
    eop            = rc.eop;
-   sunMu          = rc.sunMu;
 
    return *this;
 }
@@ -184,27 +173,19 @@ bool RelativisticCorrection::Initialize()
 
    if (solarSystem != NULL)
    {
-      body    = solarSystem->GetBody(bodyName);
-      theSun  = solarSystem->GetBody(SolarSystem::SUN_NAME);
+      body                 = solarSystem->GetBody(bodyName);
+      theSun               = solarSystem->GetBody(GmatSolarSystemDefaults::SUN_NAME);
 
-      if (body != NULL)
-      {
-         bodyMu       = body->GetGravitationalConstant();
-         sunMu        = theSun->GetGravitationalConstant();
-
-         #ifdef DEBUG_RELATIVISTIC_CORRECTION
-             MessageInterface::ShowMessage
-                ("RelativisticCorrection::Initialize() setting mu=%f for type=%s, "
-                 "name=%s\n", bodyMu, body->GetTypeName().c_str(),
-                 body->GetName().c_str());
-         #endif
-
-      }
-      else
+      if (body == NULL)
       {
          isInitialized = false;
          throw ODEModelException("RelativisticCorrection::Initialize() body \"" +
             bodyName + "\" is not in the solar system\n");
+      }
+      if (theSun == NULL)
+      {
+         isInitialized = false;
+         throw ODEModelException("RelativisticCorrection::Initialize() Sun not found in the Solar System.\n");
       }
    }
    else
@@ -215,13 +196,13 @@ bool RelativisticCorrection::Initialize()
    }
 
    // Create the coordinate systems needed (Earth only)
-   if (body->GetName() == GmatSolarSystemDefaults::EARTH_NAME)
-   {
+//   if (body->GetName() == GmatSolarSystemDefaults::EARTH_NAME)
+//   {
       bodyInertial = CoordinateSystem::CreateLocalCoordinateSystem("bodyInertial", "MJ2000Eq", body,
                                        NULL, NULL, body->GetJ2000Body(), solarSystem);
       bodyFixed    = CoordinateSystem::CreateLocalCoordinateSystem("bodyFixed", "BodyFixed", body,
                                        NULL, NULL, body->GetJ2000Body(), solarSystem);
-   }
+//   }
 
    return true;
 }
@@ -248,23 +229,38 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillCartesian)
    {
-      Rvector6  stateWRTSun, dummy, dummyResult;
-      Real      r, v, s1, posMag, rvDotvvX4, s2_1, lt1, lt2;
-      Real      muSunc2r3;
-      Real      threeOver2 = 3.0 / 2.0;
-      Rmatrix33 RB_IF;
-      Real      ar[3], geodesic[3], s2[3], s3[3], schwarzschild[3], J1[3], J[3], rvCrossvv[3], vvCrossJ[3];
-      Real      rv[3], vv[3], omega[3], vel[3], pos[3], lenseThirring[3], posWRTSun[3], velWRTSun[3];
       Real      c      = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM;
+      sunMu            = theSun->GetGravitationalConstant();
+      bodyMu           = body->GetGravitationalConstant();  // this is passed in by the ODEModel
+
+      #ifdef DEBUG_RELATIVISTIC_CORRECTION
+         MessageInterface::ShowMessage("c                      = %12.10f\n", c);
+         MessageInterface::ShowMessage("bodyMu                 = %12.10f\n", bodyMu);
+      #endif
+
+      Rvector6  dummy(0.0, 1.0, 2.0, 3.0, 4.0, 5.0), dummyResult;
+      Real      r, v, s1, rvDotvvX4, s2_1, lt1, lt2;
+      Rmatrix33 R;    // fixed to inertial rotation matrix
+      Rmatrix33 Rdot; // fixed to inertial rotation Dot matrix
+      Real      ar[3], geodesic[3], s2[3], s3[3], schwarzschild[3], J1[3], J[3], rvCrossvv[3], vvCrossJ[3];
+      Real      rv[3], vv[3], omega[3], lenseThirring[3];
+      Rvector3  bodySpinVector;
 
       J[0]             = J[1]             = J[2]             = 0.0;
       omega[0]         = omega[1]         = omega[2]         = 0.0;
       geodesic[0]      = geodesic[1]      = geodesic[2]      = 0.0;
       lenseThirring[0] = lenseThirring[1] = lenseThirring[2] = 0.0;
-      if (body->GetName() == GmatSolarSystemDefaults::EARTH_NAME)
+
+
+      // compute quantities needed for geodesic (for non-Sun only) and lense-thirring terms
+      if (body->GetName() != GmatSolarSystemDefaults::SUN_NAME)
       {
-         // compute quantities needed for geodesic and lense-thirring terms, for Earth ONLY
-         stateWRTSun  = - theSun->GetMJ2000State(now);  // since state of Earth wrt Earth = (0.0 0.0 0.0 0.0 0.0 0.0)
+         Rvector6  stateWRTSun;
+         Real      posWRTSun[3], velWRTSun[3], vel[3], pos[3];
+         Real      posMag, muCBc2r3;
+         Real      threeOver2 = 3.0 / 2.0;
+
+         stateWRTSun  = body->GetMJ2000State(now) - theSun->GetMJ2000State(now);
          posWRTSun[0] = stateWRTSun[0];
          posWRTSun[1] = stateWRTSun[1];
          posWRTSun[2] = stateWRTSun[2];
@@ -272,43 +268,56 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
          velWRTSun[1] = stateWRTSun[4];
          velWRTSun[2] = stateWRTSun[5];
          posMag       = GmatMathUtil::Sqrt(posWRTSun[0] * posWRTSun[0] + posWRTSun[1] * posWRTSun[1] + posWRTSun[2] * posWRTSun[2]);
-         muSunc2r3    = sunMu / (c * c * posMag * posMag * posMag);
+
+         muCBc2r3     = sunMu/ (c * c * posMag * posMag * posMag);
+
          vel[0]       = threeOver2 * velWRTSun[0];
          vel[1]       = threeOver2 * velWRTSun[1];
          vel[2]       = threeOver2 * velWRTSun[2];
-         pos[0]       = -muSunc2r3 * posWRTSun[0];
-         pos[1]       = -muSunc2r3 * posWRTSun[1];
-         pos[2]       = -muSunc2r3 * posWRTSun[2];
+         pos[0]       = -muCBc2r3 * posWRTSun[0];
+         pos[1]       = -muCBc2r3 * posWRTSun[1];
+         pos[2]       = -muCBc2r3 * posWRTSun[2];
+         // Compute cross product
          omega[0]     = vel[1]*pos[2] - vel[2]*pos[1];
          omega[1]     = vel[2]*pos[0] - vel[0]*pos[2];
          omega[2]     = vel[0]*pos[1] - vel[1]*pos[0];
-         cc.Convert(now, dummy, bodyFixed, dummyResult, bodyInertial);
-         bodyRadius   = body->GetEquatorialRadius();
-         // Get xp and yp from the EOP file
-//         Real xp, yp;
-//         Real lod = 0.0;   // Set this to 0.0 for now
-//         Real utcmjd  = TimeConverterUtil::Convert(now.Get(), TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
-//                       GmatTimeConstants::JD_JAN_5_1941);
-//         eop->GetPolarMotionAndLod(utcmjd, xp, yp, lod);
-         bodySpinRate = 7.29211514670698e-5; //  * (1.0 - (lod / GmatTimeConstants::SECS_PER_DAY));
-         RB_IF        = cc.GetLastRotationMatrix();
-         J1[0] = 0.0;
-         J1[1] = 0.0;
-         J1[2] = (2.0 / 5.0) * bodyRadius * bodyRadius * bodySpinRate;
-         J[0] = RB_IF(0,0)*J1[0] + RB_IF(0,1)*J1[1] + RB_IF(0,2)*J1[2];
-         J[1] = RB_IF(1,0)*J1[0] + RB_IF(1,1)*J1[1] + RB_IF(1,2)*J1[2];
-         J[2] = RB_IF(2,0)*J1[0] + RB_IF(2,1)*J1[1] + RB_IF(2,2)*J1[2];
-
          #ifdef DEBUG_RELATIVISTIC_CORRECTION
-            MessageInterface::ShowMessage("posWRTSun = %12.10f   %12.10f   %12.10f\n", posWRTSun[0], posWRTSun[1], posWRTSun[2]);
-            MessageInterface::ShowMessage("velWRTSun = %12.10f   %12.10f   %12.10f\n", velWRTSun[0], velWRTSun[1], velWRTSun[2]);
-            MessageInterface::ShowMessage("big Omega = %12.10f   %12.10f   %12.10f\n", omega[0], omega[1], omega[2]);
-            MessageInterface::ShowMessage("J         = %12.10f   %12.10f   %12.10f\n", J[0], J[1], J[2]);
-            MessageInterface::ShowMessage("c         = %12.10f\n", c);
-            MessageInterface::ShowMessage("sunMu     = %12.10f\n", sunMu);
-            MessageInterface::ShowMessage("bodyMu    = %12.10f\n", bodyMu);
+            MessageInterface::ShowMessage("muCBc2r3  = %le\n", muCBc2r3);
+            MessageInterface::ShowMessage("posMag    = %le\n", posMag);
+            MessageInterface::ShowMessage("pos       = %le   %le   %le\n", pos[0], pos[1], pos[2]);
+            MessageInterface::ShowMessage("vel       = %le   %le   %le\n", vel[0], vel[1], vel[2]);
+            MessageInterface::ShowMessage("posWRTSun = %le   %le   %le\n", posWRTSun[0], posWRTSun[1], posWRTSun[2]);
+            MessageInterface::ShowMessage("velWRTSun = %le   %le   %le\n", velWRTSun[0], velWRTSun[1], velWRTSun[2]);
+            MessageInterface::ShowMessage("big Omega = %le   %le   %le\n", omega[0], omega[1], omega[2]);
          #endif
       }
+
+      bodyRadius   = body->GetEquatorialRadius();
+      // We want the body's fixed to inertial rotation matrix
+      cc.Convert(now, dummy, bodyFixed, dummyResult, bodyInertial);
+      R            = cc.GetLastRotationMatrix();
+      Rdot         = cc.GetLastRotationDotMatrix();
+
+      // Compute the body spin rate
+      bodySpinVector[0] = (-R(0,2) * Rdot(0,1)) - (R(1,2) * Rdot(1,1)) - (R(2,2) * Rdot(2,1));
+      bodySpinVector[1] = ( R(0,2) * Rdot(0,0)) + (R(1,2) * Rdot(1,0)) + (R(2,2) * Rdot(2,0));
+      bodySpinVector[2] = (-R(0,1) * Rdot(0,0)) - (R(1,1) * Rdot(1,0)) - (R(2,1) * Rdot(2,0));
+      bodySpinRate = GmatMathUtil::Sqrt(bodySpinVector[0] * bodySpinVector[0] + bodySpinVector[1] * bodySpinVector[1] + bodySpinVector[2] * bodySpinVector[2]);
+      J1[0] = 0.0;
+      J1[1] = 0.0;
+      J1[2] = (2.0 / 5.0) * bodyRadius * bodyRadius * bodySpinRate;
+      J[0] = R(0,0)*J1[0] + R(0,1)*J1[1] + R(0,2)*J1[2];
+      J[1] = R(1,0)*J1[0] + R(1,1)*J1[1] + R(1,2)*J1[2];
+      J[2] = R(2,0)*J1[0] + R(2,1)*J1[1] + R(2,2)*J1[2];
+
+      #ifdef DEBUG_RELATIVISTIC_CORRECTION
+         MessageInterface::ShowMessage("R    = %s\n", R.ToString().c_str());
+         MessageInterface::ShowMessage("Rdot = %s\n", Rdot.ToString().c_str());
+         MessageInterface::ShowMessage("J                      = %le   %le   %le\n", J[0], J[1], J[2]);
+         MessageInterface::ShowMessage("bodySpinVector         = %le   %le   %le\n", bodySpinVector[0], bodySpinVector[1], bodySpinVector[2]);
+         MessageInterface::ShowMessage("bodySpinRate           = %le\n", bodySpinRate);
+      #endif
+
       Integer nOffset;
       for (Integer n = 0; n < cartesianCount; ++n)
       {
@@ -334,44 +343,47 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
          schwarzschild[0] = s1 * (s2[0] + s3[0]);
          schwarzschild[1] = s1 * (s2[1] + s3[1]);
          schwarzschild[2] = s1 * (s2[2] + s3[2]);
-         // ONLY IF the body is the Earth, compute the other terms
-         if (body->GetName() == GmatSolarSystemDefaults::EARTH_NAME)
+
+         // IF the body is not the Sun, compute the geodesic term
+         if (body->GetName() != GmatSolarSystemDefaults::SUN_NAME)
          {
             // Compute the geodesic precession
             geodesic[0]       =  2.0 * (omega[1]*vv[2] - omega[2]*vv[1]);
             geodesic[1]       =  2.0 * (omega[2]*vv[0] - omega[0]*vv[2]);
             geodesic[2]       =  2.0 * (omega[0]*vv[1] - omega[1]*vv[0]);
-
-            // Compute the Lense-Thirring precession
-//            J = 11.8 * omega.GetUnitVector();  // ******************** TEMPORARY - Steve's value
-            rvCrossvv[0] = rv[1]*vv[2] - rv[2]*vv[1];
-            rvCrossvv[1] = rv[2]*vv[0] - rv[0]*vv[2];
-            rvCrossvv[2] = rv[0]*vv[1] - rv[1]*vv[0];
-            vvCrossJ[0]  = vv[1]*J[2]  - vv[2]*J[1];
-            vvCrossJ[1]  = vv[2]*J[0]  - vv[0]*J[2];
-            vvCrossJ[2]  = vv[0]*J[1]  - vv[1]*J[0];
-            lt1          = 2.0 * s1;
-            lt2          = (3.0 / (r * r)) * (rv[0] * J[0] + rv[1] * J[1] + rv[2] * J[2]);
-
-            lenseThirring[0]  =  lt1 * ((lt2 * rvCrossvv[0]) + vvCrossJ[0]);
-            lenseThirring[1]  =  lt1 * ((lt2 * rvCrossvv[1]) + vvCrossJ[1]);
-            lenseThirring[2]  =  lt1 * ((lt2 * rvCrossvv[2]) + vvCrossJ[2]);
-
-            //Add the terms together
-            ar[0]  = schwarzschild[0] + geodesic[0] + lenseThirring[0];
-            ar[1]  = schwarzschild[1] + geodesic[1] + lenseThirring[1];
-            ar[2]  = schwarzschild[2] + geodesic[2] + lenseThirring[2];
          }
-         else
+         else // if it is the Sun, we don't compute the geodesic term
          {
-            ar[0] = schwarzschild[0];
-            ar[1] = schwarzschild[1];
-            ar[2] = schwarzschild[2];
+            geodesic[0]       =  0.0;
+            geodesic[1]       =  0.0;
+            geodesic[2]       =  0.0;
          }
+
+         // Compute the Lense-Thirring precession
+         rvCrossvv[0] = rv[1]*vv[2] - rv[2]*vv[1];
+         rvCrossvv[1] = rv[2]*vv[0] - rv[0]*vv[2];
+         rvCrossvv[2] = rv[0]*vv[1] - rv[1]*vv[0];
+         vvCrossJ[0]  = vv[1]*J[2]  - vv[2]*J[1];
+         vvCrossJ[1]  = vv[2]*J[0]  - vv[0]*J[2];
+         vvCrossJ[2]  = vv[0]*J[1]  - vv[1]*J[0];
+         lt1          = 2.0 * s1;
+         lt2          = (3.0 / (r * r)) * (rv[0] * J[0] + rv[1] * J[1] + rv[2] * J[2]);
+
+         lenseThirring[0]  =  lt1 * ((lt2 * rvCrossvv[0]) + vvCrossJ[0]);
+         lenseThirring[1]  =  lt1 * ((lt2 * rvCrossvv[1]) + vvCrossJ[1]);
+         lenseThirring[2]  =  lt1 * ((lt2 * rvCrossvv[2]) + vvCrossJ[2]);
+
+         //Add the terms together
+         ar[0]  = schwarzschild[0] + geodesic[0] + lenseThirring[0];
+         ar[1]  = schwarzschild[1] + geodesic[1] + lenseThirring[1];
+         ar[2]  = schwarzschild[2] + geodesic[2] + lenseThirring[2];
+
          #ifdef DEBUG_RELATIVISTIC_CORRECTION
-            MessageInterface::ShowMessage("schwarzschild = %12.10f   %12.10f   %12.10f\n", schwarzschild[0], schwarzschild[1], schwarzschild[2]);
-            MessageInterface::ShowMessage("geodesic      = %12.10f   %12.10f   %12.10f\n", geodesic[0], geodesic[1], geodesic[2]);
-            MessageInterface::ShowMessage("lenseThirring = %12.10f   %12.10f   %12.10f\n", lenseThirring[0], lenseThirring[1], lenseThirring[2]);
+            MessageInterface::ShowMessage("spacecraft position = %le   %le   %le\n", rv[0], rv[1], rv[2]);
+            MessageInterface::ShowMessage("spacecraft velocity = %le   %le   %le\n", vv[0], vv[1], vv[2]);
+            MessageInterface::ShowMessage("schwarzschild       = %le   %le   %le\n", schwarzschild[0], schwarzschild[1], schwarzschild[2]);
+            MessageInterface::ShowMessage("geodesic            = %le   %le   %le\n", geodesic[0], geodesic[1], geodesic[2]);
+            MessageInterface::ShowMessage("lenseThirring       = %le   %le   %le\n", lenseThirring[0], lenseThirring[1], lenseThirring[2]);
          #endif
 
          // Fill Derivatives
@@ -592,6 +604,9 @@ bool RelativisticCorrection::IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 Real RelativisticCorrection::GetRealParameter(const Integer id) const
 {
+   #ifdef DEBUG_REL_CORR_SET_GET
+      MessageInterface::ShowMessage("RelativisticCorrection: Getting Real parameter %d\n", id);
+   #endif
    if (id == BODY_RADIUS)
       return bodyRadius;
 
@@ -610,8 +625,13 @@ Real RelativisticCorrection::GetRealParameter(const Integer id) const
  * @param    id  Integer ID for the parameter
  * @param    val The new value for the parameter
  */
+//------------------------------------------------------------------------------
 Real RelativisticCorrection::SetRealParameter(const Integer id, const Real value)
 {
+   #ifdef DEBUG_REL_CORR_SET_GET
+      MessageInterface::ShowMessage("RelativisticCorrection: Setting Real parameter %d to value %le\n",
+            id, value);
+   #endif
    if (id == BODY_RADIUS)
    {
       bodyRadius = value;
@@ -626,11 +646,6 @@ Real RelativisticCorrection::SetRealParameter(const Integer id, const Real value
 
    return PhysicalModel::SetRealParameter(id, value);
 }
-
-//   virtual bool RelativisticCorrection::GetBooleanParameter(const Integer id) const;
-//   virtual bool RelativisticCorrection::SetBooleanParameter(const Integer id, const bool value);
-//   virtual Integer RelativisticCorrection::GetIntegerParameter(const Integer id) const;
-//   virtual Integer RelativisticCorrection::SetIntegerParameter(const Integer id, const Integer value);
 
 
 // Methods used by the ODEModel to set the state indexes, etc
