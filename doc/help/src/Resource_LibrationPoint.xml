@@ -1,180 +1,420 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <refentry version="5.0" xml:id="LibrationPoint"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>LibrationPoint</primary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>LibrationPoint</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="version">R2012a</refmiscinfo>
+    <refmiscinfo class="version">2012a</refmiscinfo>
 
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
-    <refname>Libration Point</refname>
+    <refname>LibrationPoint</refname>
 
-    <refpurpose>A libration point.</refpurpose>
+    <refpurpose>An equilibrium point in the circular, restricted 3-body
+    problem</refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis>Create LibrationPoint <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
-</synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para> A Libration point, also called a Lagrange point, is a point of
-	equilibrium in the restricted three-body problem.  
-   </para>
+    <para>A <guilabel>LibrationPoint</guilabel>, also called a Lagrange point,
+    is an equilibrium point in the circular restricted three-body problem
+    (CRTBP). There are five libration points, three of which are unstable in
+    the CRTBP sense, and two that are stable. See the Remarks section for a
+    detailed explanation of the different libration points and see the
+    Examples for how to configure GMAT for common libration point
+    regimes.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="Barycenter" /></para>
   </refsection>
-  
+
   <refsection>
-    <title>Fields</title>
-    
-    <variablelist>
-        <varlistentry>
-            <term>Primary</term>
+    <title>Options</title>
 
-            <listitem>
-                <para>The Primary field allows you to define the 
-               body treated as the primary in the calculation of the
-            libration point location.  (See Math. Spec for more details).</para>
-                
-                <variablelist spacing="compact">
-                    <varlistentry>
-                        <term>Default</term>
-                        
-                        <listitem>
-                            <para>Sun</para>
-                        </listitem>
-                    </varlistentry>
-                    
-                    <varlistentry>
-                        <term>Limits</term>
-                        
-                        <listitem>
-                            <para>Sun, Mercury,
-            Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus, Neptune,
-            Pluto, or any Barycenter. ( The Primary and Secondary bodies
-            cannot be the same )</para>
-                        </listitem>
-                    </varlistentry>
-                    
-                    <varlistentry>
-                        <term>Units</term>
-                        
-                        <listitem>
-                            <para>N/A</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </listitem>
-        </varlistentry>
-        
-        <varlistentry>
-            <term>Secondary</term>
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*" />
 
-            <listitem>
-                <para>The Secondary field allows you to define the 
-               body treated as the secondary in the calculation of the
-            libration point location.</para>
-                
-                <variablelist spacing="compact">
-                    <varlistentry>
-                        <term>Default</term>
-                        
-                        <listitem>
-                            <para>Earth</para>
-                        </listitem>
-                    </varlistentry>
-                    
-                    <varlistentry>
-                        <term>Limits</term>
-                        
-                        <listitem>
-                            <para>Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus,
-            Neptune, Pluto, or any Barycenter. ( The Primary and Secondary
-            bodies cannot be the same )</para>
-                        </listitem>
-                    </varlistentry>
-                    
-                    <varlistentry>
-                        <term>Units</term>
-                        
-                        <listitem>
-                            <para>N/A</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </listitem>
-        </varlistentry>
-        
-        <varlistentry>
-            <term>Point</term>
+        <colspec colnum="2" colwidth="3*" />
 
-            <listitem>
-                <para>The Point field specifies which libration point
-            the object corresponds to.</para>
-                
-                <variablelist spacing="compact">
-                    <varlistentry>
-                        <term>Default</term>
-                        
-                        <listitem>
-                            <para>L1</para>
-                        </listitem>
-                    </varlistentry>
-                    
-                    <varlistentry>
-                        <term>Limits</term>
-                        
-                        <listitem>
-                            <para>L1, L2, L3, L4, L5</para>
-                        </listitem>
-                    </varlistentry>
-                    
-                    <varlistentry>
-                        <term>Units</term>
-                        
-                        <listitem>
-                            <para>N/A</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </listitem>
-        </varlistentry>
-    </variablelist>
+        <thead>
+          <row>
+            <entry>Option</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>Point </guilabel></entry>
+
+            <entry><para>The libration point index.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>L1, L2, L3, L4, or L5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>L1</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Primary </guilabel></entry>
+
+            <entry><para>The primary body or barycenter.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>UserDefString</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>CelestialBody</guilabel> or
+                    <guilabel>Barycenter</guilabel>.
+                    <guilabel>Primary</guilabel> cannot be
+                    <guilabel>SolarSystemBarycenter</guilabel> and
+                    <guilabel>Primary</guilabel> cannot be the same as
+                    <guilabel>Secondary</guilabel>.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Sun</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Secondary </guilabel></entry>
+
+            <entry><para>The secondary body or barycenter.</para><variablelist>
+                <varlistentry>
+                  <term>Secondary</term>
+
+                  <listitem>
+                    <para>UserDefString</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>CelestialBody</guilabel> or
+                    <guilabel>Barycenter</guilabel>.
+                    <guilabel>Secondary</guilabel> cannot be
+                    <guilabel>SolarSystemBarycenter</guilabel> and
+                    <guilabel>Primary</guilabel> cannot be the same as
+                    <guilabel>Secondary</guilabel>.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Earth</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
-     
+
+  <refsection>
+    <title>GUI</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_Libration_Default.jpeg"
+                     scalefit="1" width="100%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>The <guibutton>LibrationPoint</guibutton> dialog box allows you to
+    select the <guilabel>Primary Body</guilabel>, <guilabel>Secondary
+    Body</guilabel>, and the libration point index. You can select from
+    celestial bodies and barycenters. You cannot choose the
+    <guilabel>SolarSystemBarycenter</guilabel> as either the
+    <guilabel>Primary</guilabel> or <guilabel>Secondary</guilabel> and the
+    <guilabel>Primary</guilabel> and <guilabel>Secondary</guilabel> cannot be
+    the same object.</para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <para><emphasis>Overview of Libration Point Geometry</emphasis></para>
+
+    <para>A <guilabel>LibrationPoint</guilabel>, also called a Lagrange point,
+    is an equilibrium point in the Circular Restricted Three Body Problem
+    (CRTBP). The definitions for the libration points used in GMAT are
+    illustrated in the figure below where the <guilabel>Primary</guilabel> and
+    <guilabel>Secondary</guilabel> bodies are shown in a rotating frame
+    defined with the x-axis pointing from the <guilabel>Primary</guilabel> to
+    the <guilabel>Secondary</guilabel>. GMAT is configured for the full
+    ephemeris problem and computes the location of the libration points by
+    assuming that at a given instant in time, the CRTBP theory developed by
+    Lagrange and Szebehely can be used to compute the location of the
+    libration points using the locations of the primary and secondary from the
+    JPL ephemerides. The three collinear points (L1, L2, and L3) are unstable
+    (even in the CRTBP) and the triangular points (L4, and L5) are stable in
+    CRTBP.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/LibrationPoint_Geometry.png"
+                     scalefit="1" width="100%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para><emphasis>Configuring a Libration Point</emphasis></para>
+
+    <para>GMAT allows you to define the <guilabel>Primary</guilabel> and/or
+    <guilabel>Secondary</guilabel> as a <guibutton>CelestialBody</guibutton>
+    or <guilabel>Barycenter</guilabel> (except
+    <guilabel>SolarSystemBarycenter</guilabel>). This allows you to set the
+    <guilabel>Primary</guilabel> as the Sun, and the
+    <guilabel>Secondary</guilabel> as the Earth-Moon barycenter for modelling
+    Sun-Earth-Moon libration points. See the examples below for
+    details.</para>
+  </refsection>
+
   <refsection>
     <title>Examples</title>
 
-    <refsection>
-      <title>Script Syntax</title>
+    <informalexample>
+      <para>Create and use an Earth-Moon
+      <guilabel>LibrationPoint.</guilabel></para>
 
-      <programlisting><code>
-Create Libration Point;
-.Primary = ;
-.Secondary = ;
-.Point = &lt;'L1', 'L2', 'L3', 'L4', 'L5'&gt;</code></programlisting>
-    </refsection>
+      <programlisting><code>%  Create the libration point and rotating libration point coordinate system
+Create LibrationPoint EarthMoonL2;
+GMAT EarthMoonL2.Primary   = Earth;
+GMAT EarthMoonL2.Secondary = Luna;
+GMAT EarthMoonL2.Point     = L2;
 
-    <refsection>
-      <title>Sample Script</title>
+Create CoordinateSystem EarthMoonRotLibCoord;
+GMAT EarthMoonRotLibCoord.Origin    = EarthMoonL2;
+GMAT EarthMoonRotLibCoord.Axes      = ObjectReferenced;
+GMAT EarthMoonRotLibCoord.XAxis     = R;
+GMAT EarthMoonRotLibCoord.ZAxis     = N;
+GMAT EarthMoonRotLibCoord.Primary   = Earth;
+GMAT EarthMoonRotLibCoord.Secondary = Luna;
 
-      <programlisting><code>Create LibrationPoint Libration1;
-GMAT Libration1.Primary = Sun;
-GMAT Libration1.Secondary = Earth;
-GMAT Libration1.Point = 'L1';</code></programlisting>
-    </refsection>
+%  Configure the spacecraft and propagator
+Create Spacecraft aSat;
+GMAT aSat.DateFormat       = TAIModJulian;
+GMAT aSat.Epoch            = '25220.0006220895';
+GMAT aSat.CoordinateSystem = EarthMoonRotLibCoord;
+GMAT aSat.DisplayStateType = Cartesian;
+GMAT aSat.X  = 9999.752137149568;
+GMAT aSat.Y  = 1.774296833900735e-007;
+GMAT aSat.Z  = 21000.02640446094;
+GMAT aSat.VX = -1.497748388797418e-005;
+GMAT aSat.VY = -0.2087816321971509;
+GMAT aSat.VZ = -5.42471673237177e-006;
+
+Create ForceModel EarthMoonL2Prop_ForceModel;
+GMAT EarthMoonL2Prop_ForceModel.PointMasses = {Earth, Luna, Sun};
+Create Propagator EarthMoonL2Prop;
+GMAT EarthMoonL2Prop.FM = EarthMoonL2Prop_ForceModel;
+
+%  Create the orbit view
+Create OrbitView ViewEarthMoonRot;
+GMAT ViewEarthMoonRot.Add                = {Earth, Luna, Sun,...
+                                            aSat, EarthMoonL2};
+GMAT ViewEarthMoonRot.CoordinateSystem   = EarthMoonRotLibCoord;
+GMAT ViewEarthMoonRot.ViewPointReference = EarthMoonL2;
+GMAT ViewEarthMoonRot.ViewDirection      = EarthMoonL2;
+GMAT ViewEarthMoonRot.ViewScaleFactor    = 5;
+
+Create Variable I
+
+BeginMissionSequence;
+
+% Prop for 3 xz-plane crossings
+For I = 1:3
+  Propagate 'Prop to Y Crossing' EarthMoonL2Prop(aSat) ...
+                      {aSat.EarthMoonRotLibCoord.Y = 0};
+EndFor</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Create and use a Sun, Earth-Moon
+      <guilabel>LibrationPoint</guilabel>.</para>
+
+      <programlisting><code>%  Create the Earth-Moon Barycenter and Libration Point
+Create Barycenter EarthMoonBary
+EarthMoonBary.BodyNames = {Earth,Luna};
+
+Create LibrationPoint SunEarthMoonL1
+SunEarthMoonL1.Primary   = Sun;
+SunEarthMoonL1.Secondary = EarthMoonBary
+SunEarthMoonL1.Point     = L1;
+
+%  Create the coordinate system
+Create CoordinateSystem RotatingSEML1Coord;
+GMAT RotatingSEML1Coord.Origin    = SunEarthMoonL1;
+GMAT RotatingSEML1Coord.Axes      = ObjectReferenced;
+GMAT RotatingSEML1Coord.XAxis     = R;
+GMAT RotatingSEML1Coord.ZAxis     = N;
+GMAT RotatingSEML1Coord.Primary   = Sun;
+GMAT RotatingSEML1Coord.Secondary = EarthMoonBary;
+
+%  Create the spacecraft and propagator
+Create Spacecraft aSpacecraft
+GMAT aSpacecraft.DateFormat       = UTCGregorian;
+GMAT aSpacecraft.Epoch            = '09 Dec 2005 13:00:00.000';
+GMAT aSpacecraft.CoordinateSystem = RotatingSEML1Coord;
+GMAT aSpacecraft.X  = -32197.88223741966;
+GMAT aSpacecraft.Y  = 211529.1500044117;
+GMAT aSpacecraft.Z  = 44708.57017366499;
+GMAT aSpacecraft.VX = 0.03209516489451751;
+GMAT aSpacecraft.VY = 0.06100386504053736;
+GMAT aSpacecraft.VZ = 0.0550442738917212;
+
+Create Propagator aPropagator
+aPropagator.FM           = aForceModel;
+GMAT aPropagator.MaxStep = 86400;
+Create ForceModel aForceModel
+aForceModel.PointMasses = {Earth,Sun,Luna};
+
+% Create a 3-D graphic
+Create OrbitView anOrbitView;
+anOrbitView.Add                     = {aSpacecraft,  Earth, Sun, Luna};
+anOrbitView.CoordinateSystem        = RotatingSEML1Coord;
+anOrbitView.ViewPointReference      = SunEarthMoonL1;
+anOrbitView.ViewPointVector         = [-1500000 0 0 ];
+anOrbitView.ViewDirection           = SunEarthMoonL1;
+anOrbitView.ViewUpCoordinateSystem = RotatingSEML1Coord;
+anOrbitView.Axes                    = Off;
+anOrbitView.XYPlane                 = Off;
+
+BeginMissionSequence
+           
+Propagate aPropagator(aSpacecraft, {aSpacecraft.ElapsedDays = 180});</code></programlisting>
+    </informalexample>
   </refsection>
 </refentry>
