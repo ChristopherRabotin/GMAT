@@ -1029,8 +1029,8 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
          //   complication, we move the camera position based
          //   on the mouse movement. 
          // The angles used are based on how far the mouse moved
-         float angleX = (mLastMouseX - mouseX) / 400.0 * mInversion,
-            angleY = (mLastMouseY - mouseY) / 400.0 * mInversion;
+         float angleX = (mLastMouseX - mouseX) / 200.0 * mInversion,
+            angleY = (mLastMouseY - mouseY) / 200.0 * mInversion;
          if (mControlMode == MODE_CENTERED_VIEW)
          {
             mCamera.Rotate(angleX, angleY, 0.0, false, true);
