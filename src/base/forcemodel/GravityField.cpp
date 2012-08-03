@@ -343,9 +343,15 @@ bool GravityField::Initialize()
       }
       if (order > degree)
       {
-         order = degree;
-         MessageInterface::ShowMessage("In GravityField(%s), order is greater than degree - truncating to order = %d\n",
-               (body->GetName()).c_str(), order);
+		 std::stringstream ss("");
+         ss << "*** WARNING *** In " + GetName();
+		 ss << " the Order (" 
+         << order 
+         << ") is greater than Degree ("
+         << degree 
+         << ") so truncating Order to ";
+         MessageInterface::ShowMessage("%s %d\n",ss.str().c_str(), degree);
+		 order = degree;
       }
       if (degree < 0)
          throw ODEModelException("Invalid degree in GravityField: Degree < 0\n");
