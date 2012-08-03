@@ -2204,7 +2204,7 @@ Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
 
 
 //------------------------------------------------------------------------------
-// bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order)
+// bool GetDerivatives(Real * state, Real dt, Integer order)
 //------------------------------------------------------------------------------
 /**
  * Returns the accumulated superposition of forces 
@@ -2243,6 +2243,16 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       for (Integer i = 0; i < dimension; ++i)
          debugFile << "   " << state[i];
       debugFile << "\n";
+   #endif
+
+   #ifdef DEBUG_FIRST_CALL
+      if (firstCallFired == false)
+      {
+         MessageInterface::ShowMessage(
+            "GetDerivatives input state at dt = %.15lf: "
+            "[%.15lf %.15lf %.15lf %.16le %.16le %.16le]\n", dt,
+            state[0], state[1], state[2], state[3], state[4], state[5]);
+      }
    #endif
 
    if (order > 2)
@@ -2367,9 +2377,9 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
          {
             MessageInterface::ShowMessage(
                "   %s(%s)::GetDerivatives --> "
-               "[%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
-               forceList[0]->GetTypeName().c_str(),
-               forceList[0]->GetName().c_str(),
+               "[%.15lf %.15lf %.15lf %.16le %.16le %.16le]\n",
+               (*i)->GetTypeName().c_str(),
+               (*i)->GetName().c_str(),
                ddt[0], ddt[1], ddt[2], ddt[3], ddt[4], ddt[5]);
          }
       #endif
@@ -2403,8 +2413,10 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       if (firstCallFired == false)
       {
          MessageInterface::ShowMessage(
-            "GetDerivatives: [%.16lf %.16lf %.16lf %.16lf %.16lf %.16lf]\n",
-            deriv[0], deriv[1], deriv[2], deriv[3], deriv[4], deriv[5]);
+            "GetDerivatives: [%.16lf %.16lf %.16lf %.16lf %.16lf %.16lf] "
+            "(%s)\n", deriv[0], deriv[1], deriv[2], deriv[3], deriv[4], deriv[5],
+            (psm->RequiresCompletion() ? "completion was required" : 
+            "completion was not required"));
       }
 
       firstCallFired = true;
