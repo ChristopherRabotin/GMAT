@@ -34,6 +34,7 @@
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_TO_FROM
 //#define DEBUG_BASE_SYSTEM
+//#define DEBUG_ROT_DOT_MATRIX
 
 #ifdef DEBUG_TO_FROM
    #include "MessageInterface.hpp"
@@ -359,6 +360,10 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
             baseState[0], baseState[1], baseState[2]);
       MessageInterface::ShowMessage("          %12.4f   %12.4f   %12.4f\n",
             baseState[3], baseState[4], baseState[5]);
+      MessageInterface::ShowMessage(" ... about to call outCoord->FromBaseSystem ... outCoord is %sNULL\n",
+            (outCoord? "NOT " : ""));
+      MessageInterface::ShowMessage("epoch = %le, coincident = %s, forceComputation = %s\n", epoch.Get(),
+            (coincident? "true" : "false"), (forceComputation? "true" : "false"));
    #endif
 
    outCoord->FromBaseSystem(epoch, baseState, outState, coincident, forceComputation);
@@ -370,25 +375,26 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
    #endif
    
    // last rotation matrix
-   Real lastToMat[9];
-   Real lastFromMat[9];
+   // R1 * R2T
+   Real R1[9];
+   Real R2[9];
    Real lrm[3][3];
    Integer p3;
 
-   inCoord->GetLastRotationMatrix(lastToMat);
-   outCoord->GetLastRotationMatrix(lastFromMat);
-   Real  fromDataT[9] = {lastFromMat[0], lastFromMat[3], lastFromMat[6],
-                         lastFromMat[1], lastFromMat[4], lastFromMat[7],
-                         lastFromMat[2], lastFromMat[5], lastFromMat[8]};
+   inCoord->GetLastRotationMatrix(R1);
+   outCoord->GetLastRotationMatrix(R2);
+   Real  R2T[9] = {R2[0], R2[3], R2[6],
+                   R2[1], R2[4], R2[7],
+                   R2[2], R2[5], R2[8]};
    
    for (Integer p = 0; p < 3; ++p)
    {
       p3 = 3*p;
       for (Integer q = 0; q < 3; ++q)
       {
-         lrm[p][q] = fromDataT[p3]   * lastToMat[q]   + 
-                     fromDataT[p3+1] * lastToMat[q+3] + 
-                     fromDataT[p3+2] * lastToMat[q+6];
+         lrm[p][q] = R2T[p3]   * R1[q]   +
+                     R2T[p3+1] * R1[q+3] +
+                     R2T[p3+2] * R1[q+6];
       }
    }
    lastRotMatrix.Set(lrm[0][0],lrm[0][1],lrm[0][2],
@@ -397,24 +403,48 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
  
 
    // last rotation Dot matrix
-   inCoord->GetLastRotationDotMatrix(lastToMat);
-   outCoord->GetLastRotationDotMatrix(lastFromMat);
-   Real  fromDotDataT[9] = {lastFromMat[0], lastFromMat[3], lastFromMat[6],
-                            lastFromMat[1], lastFromMat[4], lastFromMat[7],
-                            lastFromMat[2], lastFromMat[5], lastFromMat[8]};
+   // R1*R2Dot + R1dot*R2
+   Real R1dot[9];
+   Real R2dot[9];
+
+   inCoord->GetLastRotationDotMatrix(R1dot);
+   outCoord->GetLastRotationDotMatrix(R2dot);
+
+   #ifdef DEBUG_ROT_DOT_MATRIX
+      MessageInterface::ShowMessage("R1dot = %le %le %le %le %le %le %le %le %le\n",
+            R1dot[0],R1dot[1],R1dot[2],R1dot[3],R1dot[4],R1dot[5],R1dot[6],R1dot[7],R1dot[8]);
+      MessageInterface::ShowMessage("R2dot = %le %le %le %le %le %le %le %le %le\n",
+            R2dot[0],R2dot[1],R2dot[2],R2dot[3],R2dot[4],R2dot[5],
+            R2dot[6],R2dot[7],R2dot[8]);
+   #endif
+   Real  R2dotTR1[3][3];
+   Real  R2TR1dot[3][3];
+   Real  R2dotT[9] = {R2dot[0], R2dot[3], R2dot[6],
+                      R2dot[1], R2dot[4], R2dot[7],
+                      R2dot[2], R2dot[5], R2dot[8]};
    for (Integer p = 0; p < 3; ++p)
    {
       p3 = 3*p;
       for (Integer q = 0; q < 3; ++q)
       {
-         lrm[p][q] = fromDotDataT[p3]   * lastToMat[q]   + 
-                     fromDotDataT[p3+1] * lastToMat[q+3] + 
-                     fromDotDataT[p3+2] * lastToMat[q+6];
+         R2dotTR1[p][q] = R2dotT[p3]   * R1[q]   +
+                          R2dotT[p3+1] * R1[q+3] +
+                          R2dotT[p3+2] * R1[q+6];
       }
    }
-   lastRotDotMatrix.Set(lrm[0][0],lrm[0][1],lrm[0][2],
-                        lrm[1][0],lrm[1][1],lrm[1][2],
-                        lrm[2][0],lrm[2][1],lrm[2][2]);
+   for (Integer p = 0; p < 3; ++p)
+   {
+      p3 = 3*p;
+      for (Integer q = 0; q < 3; ++q)
+      {
+         R2TR1dot[p][q] = R2T[p3]   * R1dot[q]   +
+                          R2T[p3+1] * R1dot[q+3] +
+                          R2T[p3+2] * R1dot[q+6];
+      }
+   }
+   lastRotDotMatrix.Set(R2dotTR1[0][0] + R2TR1dot[0][0],   R2dotTR1[0][1] + R2TR1dot[0][1],   R2dotTR1[0][2] + R2TR1dot[0][2],
+                        R2dotTR1[1][0] + R2TR1dot[1][0],   R2dotTR1[1][1] + R2TR1dot[1][1],   R2dotTR1[1][2] + R2TR1dot[1][2],
+                        R2dotTR1[2][0] + R2TR1dot[2][0],   R2dotTR1[2][1] + R2TR1dot[2][1],   R2dotTR1[2][2] + R2TR1dot[2][2]);
 
    #ifdef DEBUG_FIRST_CALL
       if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
