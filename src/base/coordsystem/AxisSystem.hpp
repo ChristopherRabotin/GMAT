@@ -262,5 +262,7 @@ protected:
                                                     bool forceComputation = false);
    virtual void ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
                                             bool forceComputation = false);
+
+   virtual void InitializeOrigin();
 };
 #endif // AxisSystem_hpp

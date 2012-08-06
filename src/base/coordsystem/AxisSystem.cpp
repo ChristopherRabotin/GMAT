@@ -565,7 +565,7 @@ bool AxisSystem::Initialize()
    stDerivData = STderiv.GetDataVector();
    pmData      = PM.GetDataVector();
    
-   
+   InitializeOrigin();
    return true;
 }
 
@@ -1942,5 +1942,16 @@ void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
       firstCallFired = true;
    #endif
 
+}
+
+void AxisSystem::InitializeOrigin()
+{
+   // if the origin is a BodyFixedPoint it needs to be initialized
+   if (origin->IsOfType("BodyFixedPoint"))
+   {
+      origin->SetSolarSystem(solar);
+      origin->Initialize();
+   }
+   // otherwise do nothing (for now, anyway)
 }
 
