@@ -40,6 +40,7 @@
 #include "StringUtil.hpp"
 #include "TimeTypes.hpp"
 #include "GmatDefaults.hpp"
+#include "CoordinateSystem.hpp"
 
 
 //#define DEBUG_OBJECT_MAPPING
@@ -243,53 +244,33 @@ bool BodyFixedPoint::Initialize()
 {
    // Initialize the body data
    if (!theBody)
-      throw AssetException("Unable to initialize ground station " +
-            instanceName + "; its origin is not set\n");
+   {
+      if (!solarSystem)
+         throw AssetException("Unable to initialize ground station " +
+               instanceName + "; its solar system is not set\n");
+      theBody = solarSystem->GetBody(cBodyName);
+      if (!theBody)
+      {
+         throw AssetException("Unable to initialize ground station " +
+               instanceName + "; its origin is not set\n");
+      }
+   }
 
    // Get required data from the body
    flattening            = theBody->GetRealParameter("Flattening");
    meanEquatorialRadius  = theBody->GetRealParameter("EquatorialRadius");
 
+   // set up local coordinate systems - delete the old ones if they have already been created
+   if (mj2kcs)   delete mj2kcs;
+   if (bfcs)     delete bfcs;
+   mj2kcs  = CoordinateSystem::CreateLocalCoordinateSystem("mj2kcs", "MJ2000Eq", theBody,
+                                                           NULL, NULL, theBody->GetJ2000Body(), solarSystem);
+   bfcs    = CoordinateSystem::CreateLocalCoordinateSystem("bfcs", "BodyFixed", theBody,
+                                                           NULL, NULL, theBody->GetJ2000Body(), solarSystem);
 
    // Calculate the body-fixed Cartesian position
    // If it was input in Cartesian, we're done
    UpdateBodyFixedLocation();
-//   if (stateType == "Cartesian")
-//   {
-//      bfLocation[0] = location[0];
-//      bfLocation[1] = location[1];
-//      bfLocation[2] = location[2];
-//   }
-//   // Otherwise, convert from input type to Cartesian
-//   else if (stateType == "Spherical")
-//   {
-//      Rvector3 spherical(location[0], location[1], location[2]);
-//      Rvector3 cart;
-//      if (horizon == "Sphere")
-//      {
-//         cart = BodyFixedStateConverterUtil::SphericalToCartesian(spherical,
-//                flattening, meanEquatorialRadius);
-//         bfLocation[0] = cart[0];
-//         bfLocation[1] = cart[1];
-//         bfLocation[2] = cart[2];
-//      }
-//      else if (horizon == "Ellipsoid")
-//      {
-//         cart = BodyFixedStateConverterUtil::SphericalEllipsoidToCartesian(spherical,
-//                flattening, meanEquatorialRadius);
-//         bfLocation[0] = cart[0];
-//         bfLocation[1] = cart[1];
-//         bfLocation[2] = cart[2];
-//      }
-//      else
-//         throw AssetException("Unable to initialize ground station \"" +
-//               instanceName + "\"; horizon reference is not a recognized type (known "
-//                     "types are either \"Sphere\" or \"Ellipsoid\")");
-//   }
-//   else
-//      throw AssetException("Unable to initialize ground station \"" +
-//            instanceName + "\"; stateType is not a recognized type (known "
-//                  "types are either \"Cartesian\" or \"Spherical\")");
 
    #ifdef DEBUG_INIT
       MessageInterface::ShowMessage("...BodyFixedPoint %s Initialized!\n", instanceName.c_str());
@@ -737,7 +718,7 @@ bool BodyFixedPoint::SetStringParameter(const std::string &label,
  */
 //------------------------------------------------------------------------------
 GmatBase* BodyFixedPoint::GetRefObject(const Gmat::ObjectType type,
-                                     const std::string &name)
+                                       const std::string &name)
 {
    #ifdef TEST_BODYFIXED_POINT
       MessageInterface::ShowMessage("Entering BodyFixedPoint::GetRefObject()");
@@ -801,36 +782,6 @@ bool BodyFixedPoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
          break;
 
-      case Gmat::COORDINATE_SYSTEM:
-         {
-            if (!(obj->IsOfType("CoordinateSystem")))
-               throw AssetException("BodyFixedPoint expecting a CoordinateSystem\n");
-            CoordinateSystem *tmpCS = (CoordinateSystem*)obj;
-            if ((name == bfcsName) &&
-                (tmpCS->GetOriginName() == cBodyName))
-            {
-               #ifdef DEBUG_OBJECT_MAPPING
-                  MessageInterface::ShowMessage
-                     ("BodyFixedPoint::Setting bfcs to %s\n",
-                      tmpCS->GetName().c_str());
-               #endif
-               bfcs = tmpCS;
-               return true;
-            }
-            if ((name == mj2kcsName) &&
-                (tmpCS->GetOriginName() == cBodyName))
-            {
-               #ifdef DEBUG_OBJECT_MAPPING
-                  MessageInterface::ShowMessage
-                     ("BodyFixedPoint::Setting mj2kcs to %s\n",
-                      tmpCS->GetName().c_str());
-               #endif
-               mj2kcs = tmpCS;
-               return true;
-            }
-
-            break;
-         }
       default:
          break;
    }
@@ -895,17 +846,6 @@ Real BodyFixedPoint::SetRealParameter(const Integer id,
    return SpacePoint::SetRealParameter(id, value);
 }
 
-//Real BodyFixedPoint::GetRealParameter(const Integer id,
-//                                      const Integer index) const
-//{
-//   return SpacePoint::GetRealParameter(id, index);
-//}
-//
-//Real BodyFixedPoint::GetRealParameter(const Integer id, const Integer row,
-//                                      const Integer col) const
-//{
-//   return SpacePoint::GetRealParameter(id, row, col);
-//}
 
 Real BodyFixedPoint::GetRealParameter(const std::string &label) const
 {
@@ -1089,12 +1029,6 @@ const StringArray& BodyFixedPoint::GetRefObjectNameArray(const Gmat::ObjectType 
 
    csNames.clear();
 
-   if ((type == Gmat::COORDINATE_SYSTEM) || (type == Gmat::UNKNOWN_OBJECT))
-   {
-      csNames.push_back(bfcsName);
-      csNames.push_back(mj2kcsName);
-   }
-
    return csNames;
 }
 
@@ -1111,7 +1045,6 @@ const StringArray& BodyFixedPoint::GetRefObjectNameArray(const Gmat::ObjectType 
 const ObjectTypeArray& BodyFixedPoint::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
-   refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    return refObjectTypes;
 }
 
@@ -1150,10 +1083,12 @@ const Rvector6 BodyFixedPoint::GetMJ2000State(const A1Mjd &atTime)
    #ifdef DEBUG_BODYFIXED_STATE
       MessageInterface::ShowMessage("... before call to Convert, epoch = %12.10f\n",
             epoch);
-      MessageInterface::ShowMessage(" ... bfcs = %s  and mj2kcs = %s\n",
-            (bfcs? "NOT NULL" : "NULL"), (mj2kcs? "NOT NULL" : "NULL"));
+      MessageInterface::ShowMessage(" ... bfcs (%s) = %s  and mj2kcs (%s) = %s\n",
+            bfcsName.c_str(), (bfcs? "NOT NULL" : "NULL"),
+            mj2kcsName.c_str(), (mj2kcs? "NOT NULL" : "NULL"));
       MessageInterface::ShowMessage("bf state (in bfcs, cartesian) = %s\n",
             (bfState.ToString()).c_str());
+      MessageInterface::ShowMessage("SolarSystem is%s NULL\n", (solarSystem? "NOT " : ""));
    #endif
    ccvtr.Convert(epoch, bfState, bfcs, j2000PosVel, mj2kcs);
    #ifdef DEBUG_BODYFIXED_STATE
