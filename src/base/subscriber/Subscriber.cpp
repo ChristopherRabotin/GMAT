@@ -168,7 +168,9 @@ Subscriber::Subscriber(const Subscriber &copy) :
    runstate              (copy.runstate),
    prevRunState          (copy.prevRunState),
    currProviderId        (copy.currProviderId),
-   wrapperObjectNames    (copy.wrapperObjectNames)
+   xWrapperObjectNames   (copy.xWrapperObjectNames),
+   yWrapperObjectNames   (copy.yWrapperObjectNames),
+   allWrapperObjectNames (copy.allWrapperObjectNames)
 {
    mSolverIterations = copy.mSolverIterations;
    mSolverIterOption = copy.mSolverIterOption;
@@ -180,12 +182,12 @@ Subscriber::Subscriber(const Subscriber &copy) :
 
 #ifdef __ENABLE_CLONING_WRAPPERS__
    // Create new wrappers by cloning (LOJ: 2009.03.10)
-   CloneWrappers(depParamWrappers, copy.depParamWrappers);
-   CloneWrappers(paramWrappers, copy.paramWrappers);   
+   CloneWrappers(xParamWrappers, copy.xParamWrappers);
+   CloneWrappers(yParamWrappers, copy.yParamWrappers);
 #else
    // Copy wrappers
-   depParamWrappers = copy.depParamWrappers;
-   paramWrappers = copy.paramWrappers;
+   xParamWrappers = copy.xParamWrappers;
+   yParamWrappers = copy.yParamWrappers;
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage("Subscriber(copy) copied wrappers\n");
    WriteWrappers();
@@ -235,7 +237,9 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    prevRunState = rhs.prevRunState;
    currProviderId = rhs.currProviderId;
    
-   wrapperObjectNames = rhs.wrapperObjectNames;
+   xWrapperObjectNames = rhs.xWrapperObjectNames;
+   yWrapperObjectNames = rhs.yWrapperObjectNames;
+   allWrapperObjectNames = rhs.allWrapperObjectNames;
    mSolverIterations = rhs.mSolverIterations;
    mSolverIterOption = rhs.mSolverIterOption;
    wrappersCopied = true;
@@ -244,12 +248,12 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    // Clear old wrappers
    ClearWrappers();
    // Create new wrappers by cloning (LOJ: 2009.03.10)
-   CloneWrappers(depParamWrappers, rhs.depParamWrappers);
-   CloneWrappers(paramWrappers, rhs.paramWrappers);
+   CloneWrappers(xParamWrappers, rhs.xParamWrappers);
+   CloneWrappers(yParamWrappers, rhs.yParamWrappers);
 #else
    // Copy wrappers
-   depParamWrappers = rhs.depParamWrappers;
-   paramWrappers = rhs.paramWrappers;
+   xParamWrappers = rhs.xParamWrappers;
+   yParamWrappers = rhs.yParamWrappers;
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage("Subscriber(=) copied wrappers\n");
    WriteWrappers();
@@ -729,7 +733,7 @@ void Subscriber::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 const StringArray& Subscriber::GetWrapperObjectNameArray()
 {
-   return wrapperObjectNames;
+   return allWrapperObjectNames;
 }
 
 
@@ -739,53 +743,48 @@ const StringArray& Subscriber::GetWrapperObjectNameArray()
 bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
                                    const std::string &name)
 {
-   ElementWrapper *ew;
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("\nSubscriber::SetElementWrapper() <%p>'%s' entered, toWrapper=<%p>, name='%s'\n",
+       this, GetName().c_str(), toWrapper, name.c_str());
+   #endif
    
    if (toWrapper == NULL)
       return false;
    
-   #ifdef DEBUG_WRAPPER_CODE   
-   MessageInterface::ShowMessage
-      ("Subscriber::SetElementWrapper() <%p>'%s' entered, toWrapper=<%p>, name='%s'\n",
-       this, GetName().c_str(), toWrapper, name.c_str());
-   #endif
+   bool retval1 = true;
+   bool retval2 = true;
+   ElementWrapper *ew;
+   oldWrappersToDelete.clear();
    
-   Integer sz = wrapperObjectNames.size();
-   for (Integer i = 0; i < sz; i++)
+   if (xWrapperObjectNames.size() > 0)
+      retval1 = SetActualElementWrapper(xWrapperObjectNames, xParamWrappers, toWrapper, name);  
+   
+   if (yWrapperObjectNames.size() > 0)
+      retval2 = SetActualElementWrapper(yWrapperObjectNames, yParamWrappers, toWrapper, name);
+   
+   // Delete old wrappers
+   for (unsigned int i = 0; i < oldWrappersToDelete.size(); i++)
    {
-      if (wrapperObjectNames.at(i) == name)
-      {
-         #ifdef DEBUG_WRAPPER_CODE   
-         MessageInterface::ShowMessage
-            ("   Found wrapper name \"%s\", wrapper=%p\n", name.c_str(), paramWrappers.at(i));
-         #endif
-         
-         if (paramWrappers.at(i) != NULL)
-         {
-            ew = paramWrappers.at(i);
-            paramWrappers.at(i) = toWrapper;
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Remove
-               (ew, ew->GetDescription(), "Subscriber::SetElementWrapper",
-                "deleting old wrapper");
-            #endif
-            delete ew;
-         }
-         else
-         {
-            paramWrappers.at(i) = toWrapper;
-         }
-         
-         #ifdef DEBUG_WRAPPER_CODE   
-         MessageInterface::ShowMessage
-            ("   Set wrapper name \"%s\" to wrapper=%p\n", name.c_str(), paramWrappers.at(i));
-         #endif
-         
-         return true;
-      }
+      ew = oldWrappersToDelete[i];
+      #ifdef DEBUG_WRAPPER_CODE
+      MessageInterface::ShowMessage("   Deleting old wrapper <%p>\n", ew);
+      #endif
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (ew, ew->GetDescription(), "Subscriber::SetElementWrapper",
+          "deleting old wrapper");
+      #endif
+      delete ew;
    }
    
-   return false;
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("Subscriber::SetElementWrapper() <%p>'%s' returing %d\n",
+       this, GetName().c_str(), (retval1 | retval2));
+   #endif
+   
+   return (retval1 | retval2);
 }
 
 
@@ -805,15 +804,15 @@ void Subscriber::ClearWrappers()
    #endif
    
    ElementWrapper *wrapper;
-   for (UnsignedInt i = 0; i < depParamWrappers.size(); ++i)
+   for (UnsignedInt i = 0; i < xParamWrappers.size(); ++i)
    {
-      wrapper = depParamWrappers[i];
+      wrapper = xParamWrappers[i];
       
-      // check if wrapper is in the paramWrappers
-      // if wrapper found in paramWrappers, delete in the paramWrappers
+      // check if wrapper is in the yParamWrappers
+      // if wrapper found in yParamWrappers, delete in the yParamWrappers
       if (wrapper != NULL &&
-          find(paramWrappers.begin(), paramWrappers.end(), wrapper) ==
-          paramWrappers.end())
+          find(yParamWrappers.begin(), yParamWrappers.end(), wrapper) ==
+          yParamWrappers.end())
       {
          #ifdef DEBUG_WRAPPER_CODE
          MessageInterface::ShowMessage("   deleting depParamWrapper = <%p>\n", wrapper);
@@ -828,12 +827,12 @@ void Subscriber::ClearWrappers()
          wrapper = NULL;
       }
       
-      depParamWrappers[i] = NULL;
+      xParamWrappers[i] = NULL;
    }
    
-   for (UnsignedInt i = 0; i < paramWrappers.size(); ++i)
+   for (UnsignedInt i = 0; i < yParamWrappers.size(); ++i)
    {
-      wrapper = paramWrappers[i];
+      wrapper = yParamWrappers[i];
       
       #ifdef DEBUG_WRAPPER_CODE
       MessageInterface::ShowMessage("   deleting paramWrapper = <%p>\n", wrapper);
@@ -850,11 +849,11 @@ void Subscriber::ClearWrappers()
          wrapper = NULL;
       }
       
-      paramWrappers[i] = NULL;
+      yParamWrappers[i] = NULL;
    }
    
-   depParamWrappers.clear();
-   paramWrappers.clear();
+   xParamWrappers.clear();
+   yParamWrappers.clear();
    
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
@@ -879,22 +878,22 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
    #endif
    
    // Go through wrapper object names
-   Integer sz = wrapperObjectNames.size();
+   Integer sz = yWrapperObjectNames.size();
    for (Integer i = 0; i < sz; i++)
    {
-      if (wrapperObjectNames[i].find(oldName) != oldName.npos)
+      if (yWrapperObjectNames[i].find(oldName) != oldName.npos)
       {
          #ifdef DEBUG_RENAME
          MessageInterface::ShowMessage
-            ("   => Before rename, wrapper name: '%s'\n", wrapperObjectNames[i].c_str());
+            ("   => Before rename, wrapper name: '%s'\n", yWrapperObjectNames[i].c_str());
          #endif
          
-         wrapperObjectNames[i] =
-            GmatStringUtil::ReplaceName(wrapperObjectNames[i], oldName, newName);
+         yWrapperObjectNames[i] =
+            GmatStringUtil::ReplaceName(yWrapperObjectNames[i], oldName, newName);
          
          #ifdef DEBUG_RENAME
          MessageInterface::ShowMessage
-            ("      After  rename, wrapper name: '%s'\n", wrapperObjectNames[i].c_str());
+            ("      After  rename, wrapper name: '%s'\n", yWrapperObjectNames[i].c_str());
          #endif
       }
    }
@@ -903,20 +902,20 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
    MessageInterface::ShowMessage("   ===== new wrapper name\n");
    for (Integer i = 0; i < sz; i++)
       MessageInterface::ShowMessage
-         ("   <%s>\n", wrapperObjectNames[i].c_str());
+         ("   <%s>\n", yWrapperObjectNames[i].c_str());
    #endif
 
    // Go through wrappers
-   sz = paramWrappers.size();
+   sz = yParamWrappers.size();
    for (Integer i = 0; i < sz; i++)
    {
-      if (paramWrappers[i] == NULL)
+      if (yParamWrappers[i] == NULL)
          throw SubscriberException
-            ("Subscriber::SetWrapperReference() \"" + GetName() +
+            ("Subscriber::RenameRefObject() \"" + GetName() +
              "\" failed to set reference for object named \"" + oldName +
              ".\" The wrapper is NULL.\n");
       
-      std::string desc = paramWrappers[i]->GetDescription();
+      std::string desc = yParamWrappers[i]->GetDescription();
       if (desc.find(oldName) != oldName.npos)
       {
          #ifdef DEBUG_RENAME
@@ -924,8 +923,8 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
             ("   => Before rename, wrapper desc = '%s'\n", desc.c_str());
          #endif
          
-         paramWrappers[i]->RenameObject(oldName, newName);
-         desc = paramWrappers[i]->GetDescription();
+         yParamWrappers[i]->RenameObject(oldName, newName);
+         desc = yParamWrappers[i]->GetDescription();
          
          #ifdef DEBUG_RENAME
          MessageInterface::ShowMessage
@@ -938,7 +937,7 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
    MessageInterface::ShowMessage("   ===== new wrapper description\n");
    for (Integer i = 0; i < sz; i++)
       MessageInterface::ShowMessage
-         ("   <%s>\n", paramWrappers[i]->GetDescription().c_str());
+         ("   <%s>\n", yParamWrappers[i]->GetDescription().c_str());
    MessageInterface::ShowMessage
       ("Subscriber::RenameRefObject() returning true\n");
    #endif
@@ -1498,6 +1497,62 @@ const std::string* Subscriber::GetSolverIterOptionList()
 //---------------------------------
 
 //------------------------------------------------------------------------------
+// bool SetActualElementWrapper(const StringArray &wrapperNames, ...)
+//------------------------------------------------------------------------------
+bool Subscriber::SetActualElementWrapper(const StringArray &wrapperNames,
+                                         WrapperArray &paramWrappers,
+                                         ElementWrapper* toWrapper,
+                                         const std::string &name)
+{
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Subscriber::SetActualElementWrapper() entered, toWrapper=<%p>, name='%s'\n",
+       toWrapper, name.c_str());
+   #endif
+   
+   ElementWrapper *ew;
+   Integer sz = wrapperNames.size();
+   for (Integer i = 0; i < sz; i++)
+   {
+      if (wrapperNames.at(i) == name)
+      {
+         #ifdef DEBUG_WRAPPER_CODE   
+         MessageInterface::ShowMessage
+            ("   Found wrapper name \"%s\", wrapper=%p\n", name.c_str(), paramWrappers.at(i));
+         #endif
+         
+         if (paramWrappers.at(i) != NULL)
+         {
+            ew = paramWrappers.at(i);
+            if (find(oldWrappersToDelete.begin(), oldWrappersToDelete.end(), ew)
+                == oldWrappersToDelete.end())
+            {
+               #ifdef DEBUG_WRAPPER_CODE
+               MessageInterface::ShowMessage("   Adding ew<%p> to wrappers to delete\n", ew);
+               #endif
+               oldWrappersToDelete.push_back(ew);
+            }
+            paramWrappers.at(i) = toWrapper;
+         }
+         else
+         {
+            paramWrappers.at(i) = toWrapper;
+         }
+         
+         #ifdef DEBUG_WRAPPER_CODE
+         MessageInterface::ShowMessage
+            ("   Set wrapper name \"%s\" to wrapper=%p\n", name.c_str(), paramWrappers.at(i));
+         #endif
+         
+         return true;
+      }
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool CloneWrappers(WrapperArray &toWrappers, const WrapperArray &fromWrappers);
 //------------------------------------------------------------------------------
 bool Subscriber::CloneWrappers(WrapperArray &toWrappers,
@@ -1530,100 +1585,45 @@ bool Subscriber::CloneWrappers(WrapperArray &toWrappers,
 //------------------------------------------------------------------------------
 bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
 {
-   Integer sz = paramWrappers.size();
-   std::string refname, desc;
-   Gmat::WrapperDataType wrapperType;
-   bool nameFound = false;
-   
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("Subscriber::SetWrapperReference() obj=<%p>'%s', name='%s', size=%d\n",
-       obj, obj->GetName().c_str(), name.c_str(), sz);
-   #endif
-   
-   for (Integer i = 0; i < sz; i++)
-   {
-      if (paramWrappers[i] == NULL)
-         throw SubscriberException
-            ("Subscriber::SetWrapperReference() \"" + GetName() +
-             "\" failed to set reference for object named \"" + name +
-             ".\" The wrapper is NULL.\n");
-      
-      refname = paramWrappers[i]->GetDescription();
-      if (paramWrappers[i]->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)
-         refname = refname.substr(0, refname.find('('));
-      if (refname == name)
-      {
-         nameFound = true;
-         break;
-      }
-   }
-   
-   if (!nameFound)
-      throw SubscriberException
-         ("Subscriber::SetWrapperReference() \"" + GetName() +
-          "\" failed to find object named \"" +  name + "\"\n");
-   
-   #ifdef DEBUG_WRAPPER_CODE   
-   MessageInterface::ShowMessage("   setting ref object of wrappers\n");
-   #endif
-   
-   // set ref object of wrappers
-   for (Integer i = 0; i < sz; i++)
-   {
-      desc = paramWrappers[i]->GetDescription();
-      wrapperType = paramWrappers[i]->GetWrapperType();
-      
-      #ifdef DEBUG_WRAPPER_CODE   
+      ("Subscriber::SetWrapperReference() entered, this='%s', obj=<%p>, name='%s'\n",
+       GetName().c_str(), obj, name.c_str());
+   MessageInterface::ShowMessage
+      ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
+       xWrapperObjectNames.size(), yWrapperObjectNames.size());
+   for (unsigned int i = 0; i < xWrapperObjectNames.size(); i++)
       MessageInterface::ShowMessage
-         ("   paramWrappers[%d]=\"%s\", wrapperType=%d\n", i, desc.c_str(),
-          wrapperType);
-      #endif
-      
-      refname = desc;
-      
-      switch (wrapperType)
-      {
-      case Gmat::OBJECT_PROPERTY_WT:
-         if (refname == name)
-         {
-            Parameter *param = (Parameter*)obj;
-            StringArray onames = paramWrappers[i]->GetRefObjectNames();
-            for (UnsignedInt j=0; j<onames.size(); j++)
-            {
-               paramWrappers[i]->
-                  SetRefObject(param->GetRefObject(param->GetOwnerType(), onames[j]));
-            }
-            return true;
-         }
-      case Gmat::ARRAY_ELEMENT_WT:
-         // for array element, we need to go through all array elements set
-         // ref object, so break insted of return
-         refname = refname.substr(0, refname.find('('));
-         if (refname == name)
-            paramWrappers[i]->SetRefObject(obj);
-         break;
-      default:
-         // Others, such as VARIABLE, PARAMETER_OBJECT
-         if (refname == name)
-         {
-            #ifdef DEBUG_WRAPPER_CODE   
-            MessageInterface::ShowMessage
-               ("   Found wrapper name \"%s\" in SetWrapperReference\n", name.c_str());
-            #endif
-            
-            paramWrappers[i]->SetRefObject(obj);
-            return true;
-         }
-      }
-   }
+         ("   xWrapperObjectNames[%d] = '%s'\n", i, xWrapperObjectNames[i].c_str());
+   for (unsigned int i = 0; i < yWrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage
+         ("   yWrapperObjectNames[%d] = '%s'\n", i, yWrapperObjectNames[i].c_str());
+   #endif
+   
+   // Actually SetActualWrapperReferences() returns true or throws a exception
+   bool retval1 = true;
+   bool retval2 = true;
+   
+   // Check X Parameters
+   if (xParamWrappers.size() > 0)
+      retval1 = SetActualWrapperReference(xParamWrappers, obj, name);
+   
+   // Check Y Parameters
+   if (yParamWrappers.size() > 0)
+      retval2 = SetActualWrapperReference(yParamWrappers, obj, name);
+   
+   if (!retval1 && !retval2)
+      throw SubscriberException
+         ("Subscriber::SetActualWrapperReference() \"" + GetName() +
+          "\" failed to find object named \"" +  name + "\"\n");
+
    
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("Subscriber::SetWrapperReference() ArrayElement set. Leaving\n");
+      ("Subscriber::SetWrapperReference() returning %d\n", (retval1 | retval2));
    #endif
    
-   return true;
+   return (retval1 | retval2);
 }
 
 
@@ -1633,23 +1633,25 @@ bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
 void Subscriber::WriteWrappers()
 {
    MessageInterface::ShowMessage
-      ("Subscriber::WriteWrappers() <%p>'%s' has %d depParamWrappers and %d "
-       "paramWrappers\n", this, GetName().c_str(), depParamWrappers.size(),
-       paramWrappers.size());
+      ("Subscriber::WriteWrappers() <%p>'%s' has %d xParamWrappers and %d "
+       "yParamWrappers\n", this, GetName().c_str(), xParamWrappers.size(),
+       yParamWrappers.size());
    
    ElementWrapper *wrapper;
-   for (UnsignedInt i = 0; i < depParamWrappers.size(); ++i)
+   for (UnsignedInt i = 0; i < xParamWrappers.size(); ++i)
    {
-      wrapper = depParamWrappers[i];
+      wrapper = xParamWrappers[i];
       MessageInterface::ShowMessage
-         ("   depPaWrapper = <%p> '%s'\n", wrapper, wrapper->GetDescription().c_str());
+         ("   xParamWrapper = <%p>'%s'\n", wrapper,
+          wrapper ? wrapper->GetDescription().c_str() : "NULL");
    }
    
-   for (UnsignedInt i = 0; i < paramWrappers.size(); ++i)
+   for (UnsignedInt i = 0; i < yParamWrappers.size(); ++i)
    {
-      wrapper = paramWrappers[i];
+      wrapper = yParamWrappers[i];
       MessageInterface::ShowMessage
-         ("   paramWrapper = <%p> '%s'\n", wrapper, wrapper->GetDescription().c_str());
+         ("   yParamWrapper = <%p>'%s'\n", wrapper,
+          wrapper ? wrapper->GetDescription().c_str() : "NULL");
    }
 }
 
@@ -1768,3 +1770,128 @@ const StringArray& Subscriber::GetPropertyEnumStrings(const std::string &label) 
    return GetPropertyEnumStrings(GetParameterID(label));
 }
 
+//---------------------------------------------------------------------------
+// bool SetActualWrapperReference(const WrapperArray &wrappers, GmatBase *obj,
+//         const std::string &name);
+//---------------------------------------------------------------------------
+bool Subscriber::SetActualWrapperReference(const WrapperArray &wrappers,
+                                           GmatBase *obj, const std::string &name)
+{
+   Integer sz = wrappers.size();
+   std::string refname, desc;
+   Gmat::WrapperDataType wrapperType;
+   bool nameFound = false;
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Subscriber::SetActualWrapperReference() entered, obj=<%p>'%s', name='%s', size=%d\n",
+       obj, obj->GetName().c_str(), name.c_str(), sz);
+   for (unsigned int i = 0; i < wrappers.size(); i++)
+      MessageInterface::ShowMessage
+         ("   wrappers[%d] = '%s'\n", i, wrappers[i] ? wrappers[i]->GetDescription().c_str() : "NULL");
+   #endif
+   
+   for (Integer i = 0; i < sz; i++)
+   {
+      if (wrappers[i] == NULL)
+         throw SubscriberException
+            ("Subscriber::SetActualWrapperReference() \"" + GetName() +
+             "\" failed to set reference for object named \"" + name +
+             ".\" The wrapper is NULL.\n");
+      
+      refname = wrappers[i]->GetDescription();
+      if (wrappers[i]->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)
+         refname = refname.substr(0, refname.find('('));
+      
+      #ifdef DEBUG_WRAPPER_CODE   
+      MessageInterface::ShowMessage("   refname = '%s'\n", refname.c_str());
+      #endif
+      
+      if (refname == name)
+      {
+         nameFound = true;
+         break;
+      }
+   }
+   
+   if (!nameFound)
+   {
+      // Moved this code to SetWrapperReference() so that both X and Y wrappers
+      // can be checked. (LOJ: 2012.08.02)
+      //throw SubscriberException
+      //   ("Subscriber::SetActualWrapperReference() \"" + GetName() +
+      //    "\" failed to find object named \"" +  name + "\"\n");
+      #ifdef DEBUG_WRAPPER_CODE   
+      MessageInterface::ShowMessage
+         ("Subscriber::SetActualWrapperReference() returning false, '%s' not found\n",
+          name.c_str());
+      #endif
+     return false;
+   }
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage("   setting ref object of wrappers\n");
+   #endif
+   
+   // set ref object of wrappers
+   for (Integer i = 0; i < sz; i++)
+   {
+      desc = wrappers[i]->GetDescription();
+      wrapperType = wrappers[i]->GetWrapperType();
+      
+      #ifdef DEBUG_WRAPPER_CODE   
+      MessageInterface::ShowMessage
+         ("   wrappers[%d]=\"%s\", wrapperType=%d\n", i, desc.c_str(), wrapperType);
+      #endif
+      
+      refname = desc;
+      
+      switch (wrapperType)
+      {
+      case Gmat::OBJECT_PROPERTY_WT:
+         if (refname == name)
+         {
+            Parameter *param = (Parameter*)obj;
+            StringArray onames = wrappers[i]->GetRefObjectNames();
+            for (UnsignedInt j=0; j<onames.size(); j++)
+            {
+               wrappers[i]->
+                  SetRefObject(param->GetRefObject(param->GetOwnerType(), onames[j]));
+            }
+            return true;
+         }
+      case Gmat::ARRAY_ELEMENT_WT:
+         // for array element, we need to go through all array elements set
+         // ref object, so break switch insted of return
+         refname = refname.substr(0, refname.find('('));
+         if (refname == name)
+         {
+            #ifdef DEBUG_WRAPPER_CODE   
+            MessageInterface::ShowMessage
+               ("   Setting array element wrapper '%s'\n", name.c_str());
+            #endif
+            wrappers[i]->SetRefObject(obj);
+         }
+         break;
+      default:
+         // Others, such as VARIABLE, PARAMETER_OBJECT
+         if (refname == name)
+         {
+            #ifdef DEBUG_WRAPPER_CODE   
+            MessageInterface::ShowMessage
+               ("   Setting other wrapper '%s'\n", name.c_str());
+            #endif
+            
+            wrappers[i]->SetRefObject(obj);
+            return true;
+         }
+      }
+   }
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage
+      ("Subscriber::SetActualWrapperReference() returning true\n");
+   #endif
+   
+   return true;
+}

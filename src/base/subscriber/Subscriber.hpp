@@ -199,15 +199,26 @@ protected:
    Integer              currProviderId;
    
    /// The list of names of Wrapper objects
-   StringArray          wrapperObjectNames;
-   /// vector of pointers to ElementWrappers for the item
-   WrapperArray         depParamWrappers;
-   WrapperArray         paramWrappers;
+   StringArray          xWrapperObjectNames;
+   StringArray          yWrapperObjectNames;
+   StringArray          allWrapperObjectNames;
+   /// ElementWrapper array for the X parameter in XYPlot
+   WrapperArray         xParamWrappers;
+   /// ElemenyWrapper array for the Y parameter in XYPlot and parameters in ReportFile
+   WrapperArray         yParamWrappers;
+   /// Old wrappers to delete after setting new wrappers
+   WrapperArray         oldWrappersToDelete;
    
    // For ElementWrapper
+   bool                 SetActualElementWrapper(const StringArray &wrapperNames,
+                                                WrapperArray &paramWrappers,
+                                                ElementWrapper* toWrapper,
+                                                const std::string &name);
    bool                 CloneWrappers(WrapperArray &toWrappers,
                                       const WrapperArray &fromWrappers);
    bool                 SetWrapperReference(GmatBase *obj, const std::string &name);
+   bool                 SetActualWrapperReference(const WrapperArray &wrappers,
+                                                  GmatBase *obj, const std::string &name);
    void                 WriteWrappers();
    Integer              FindIndexOfElement(StringArray &labelArray,
                                            const std::string &label);
@@ -251,8 +262,7 @@ public:
                         GetPropertyEnumStrings(const std::string &label) const;
    static Integer GetSolverIterOptionCount() { return SolverIterOptionCount; }
    static const std::string* GetSolverIterOptionList();
-   
-   
+      
 private:
    
    static const std::string SOLVER_ITER_OPTION_TEXT[SolverIterOptionCount];

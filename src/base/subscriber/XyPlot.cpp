@@ -22,7 +22,7 @@
 #include "XyPlot.hpp"
 #include "PlotInterface.hpp"         // for XY plot
 #include "SubscriberException.hpp"
-#include "StringUtil.hpp"            // for GmatStringUtil::ReplaceName()
+#include "StringUtil.hpp"            // for GmatStringUtil::ReplaceName(), GetArrayName()
 #include "MessageInterface.hpp"      // for ShowMessage()
 #include <sstream>                   // for <<
 
@@ -32,6 +32,7 @@
 //#define DEBUG_XYPLOT_UPDATE 2
 //#define DEBUG_ACTION_REMOVE 1
 //#define DEBUG_RENAME 1
+//#define DEBUG_WRAPPER_CODE
 
 //---------------------------------
 // static data
@@ -227,13 +228,28 @@ XyPlot::~XyPlot()
 //------------------------------------------------------------------------------
 bool XyPlot::SetXParameter(const std::string &paramName)
 {
+   #if DEBUG_XYPLOT_PARAM
+   MessageInterface::ShowMessage
+      ("XyPlot::SetXParameter() entered, paramName='%s'\n", paramName.c_str());
+   #endif
+   
    if (paramName != "")
    {
       mXParamName = paramName;
       mNumXParams = 1; //loj: only 1 X parameter for now
+      if (xParamWrappers.size() == 0)
+         xParamWrappers.push_back(NULL);
+      
+      #if DEBUG_XYPLOT_PARAM
+      MessageInterface::ShowMessage("XyPlot::SetXParameter() returning true\n");
+      #endif
+      
       return true;
    }
    
+   #if DEBUG_XYPLOT_PARAM
+   MessageInterface::ShowMessage("XyPlot::SetXParameter() returning false\n");
+   #endif
    return false;
 }
 
@@ -244,8 +260,9 @@ bool XyPlot::SetXParameter(const std::string &paramName)
 bool XyPlot::AddYParameter(const std::string &paramName, Integer index)
 {
    #if DEBUG_XYPLOT_PARAM
-   MessageInterface::ShowMessage("XyPlot::AddYParameter() name = %s\n",
-                                 paramName.c_str());
+   MessageInterface::ShowMessage
+      ("XyPlot::AddYParameter() entered, name = '%s', index = %d\n",
+       paramName.c_str(), index);
    #endif
    
    if (paramName != "" && index == mNumYParams)
@@ -257,10 +274,20 @@ bool XyPlot::AddYParameter(const std::string &paramName, Integer index)
          mYParamNames.push_back(paramName);
          mNumYParams = mYParamNames.size();
          mYParams.push_back(NULL);
+         yParamWrappers.push_back(NULL);
+         
+         #if DEBUG_XYPLOT_PARAM
+         MessageInterface::ShowMessage("XyPlot::AddYParameter() returning true\n");
+         #endif
+         
          return true;
       }
    }
-
+   
+   #if DEBUG_XYPLOT_PARAM
+   MessageInterface::ShowMessage("XyPlot::AddYParameter() returning false\n");
+   #endif
+   
    return false;
 }
 
@@ -295,7 +322,9 @@ bool XyPlot::Initialize()
          return false;
       }
       
-      if (mXParam == NULL || mYParams[0] == NULL)
+      // Now using wrappers (LOJ: 2012.08.02)
+      //if (mXParam == NULL || mYParams[0] == NULL)
+      if (xParamWrappers[0] == NULL || yParamWrappers[0] == NULL)
       {
          active = false;
          MessageInterface::PopupMessage
@@ -343,16 +372,22 @@ bool XyPlot::Initialize()
       
       for (int i=0; i<mNumYParams; i++)
       {
-         std::string curveTitle = mYParams[i]->GetName();
-         UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
+         // Now using wrapper for curve title so that it can display array
+         // element such as MyArray(3,3) (Fix for GMT-2370 LOJ: 2012.08.03)
+         if (mYParams[i] && yParamWrappers[i])
+         {
+            //std::string curveTitle = mYParams[i]->GetName();
+            std::string curveTitle = yParamWrappers[i]->GetDescription();
+            UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
             
-         #if DEBUG_XYPLOT_INIT
-         MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
-                                       curveTitle.c_str());
-         #endif
-         
-         PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
-                                       curveTitle, penColor);
+            #if DEBUG_XYPLOT_INIT
+            MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
+                                          curveTitle.c_str());
+            #endif
+            
+            PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
+                                          curveTitle, penColor);
+         }
       }
       
       PlotInterface::ShowXyPlotLegend(instanceName);
@@ -1045,51 +1080,123 @@ GmatBase* XyPlot::GetRefObject(const Gmat::ObjectType type,
 bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                           const std::string &name)
 {
+   #if DEBUG_XYPLOT_OBJECT
+   MessageInterface::ShowMessage
+      ("\nXyPlot::SetRefObject() this=<%p>'%s'entered, obj=<%p><%s>'%s', type=%d, name='%s'\n",
+       this, GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
+   #endif
+   
+   if (obj == NULL)
+   {
+      #if DEBUG_XYPLOT_OBJECT
+      MessageInterface::ShowMessage
+         ("XyPlot::SetRefObject() <%p>'%s' returning false, obj is NULL\n",
+          this, GetName().c_str());
+      #endif
+      return false;
+   }
+   
    if (type == Gmat::PARAMETER)
    {
+      SetWrapperReference(obj, name);
+      
+      // Handle array element
+      std::string realName = GmatStringUtil::GetArrayName(mXParamName);
+      
       // X parameter
-      if (name == mXParamName)
+      //if (name == mXParamName)
+      if (realName == name)
       {
          mXParam = (Parameter*)obj;
          
          if (!mXParam->IsPlottable())
+         {
+            // Array element is plottable, so check it
+            if (!mXParam->IsOfType("Array") || 
+                mXParam->IsOfType("Array") && mXParamName.find("(") == name.npos)
+            {
+               #if DEBUG_XYPLOT_OBJECT
+               MessageInterface::ShowMessage
+                  ("XyPlot::SetRefObject() mXParam <%p>'%s' is not plottable, "
+                   "so throwing an exception\n", mXParam, mXParamName.c_str());
+               #endif
                throw SubscriberException
                   ("The X parameter: " + name + " of " + instanceName +
                    " is not plottable\n");
+            }
+         }
          
          #if DEBUG_XYPLOT_OBJECT
          MessageInterface::ShowMessage
-            ("XyPlot::SetRefObject() mXParam:%s successfully set\n",
-             obj->GetName().c_str());
+            ("XyPlot::SetRefObject() mXParam <%p>'%s' successfully set to <%p>'%s'\n",
+             mXParam, mXParamName.c_str(), obj, obj->GetName().c_str());
          #endif
       }
       
       // Y parameters
       for (int i=0; i<mNumYParams; i++)
       {
-         if (mYParamNames[i] == name)
+         realName = GmatStringUtil::GetArrayName(mYParamNames[i]);
+         
+         //if (mYParamNames[i] == name)
+         if (realName == name)
          {
             mYParams[i] = (Parameter*)obj;
             
             if (!mYParams[i]->IsPlottable())
             {
-               throw SubscriberException
-                  ("The Y parameter: " + name + " of " + instanceName +
-                   " is not plottable\n");
+               // Array element is plottable, so check it
+               if (!mYParams[i]->IsOfType("Array") || 
+                   mYParams[i]->IsOfType("Array") && mYParamNames[i].find("(") == name.npos)
+               {
+                  #if DEBUG_XYPLOT_OBJECT
+                  MessageInterface::ShowMessage
+                     ("XyPlot::SetRefObject() mYParams[%d] <%p>'%s' is not plottable, "
+                      "so throwing an exception\n", i, mYParams[i], mYParamNames[i].c_str());
+                  #endif
+                  throw SubscriberException
+                     ("The Y parameter: " + name + " of " + instanceName +
+                      " is not plottable\n");
+               }
             }
             
             #if DEBUG_XYPLOT_OBJECT
             MessageInterface::ShowMessage
-               ("XyPlot::SetRefObject() mYParams[%s] successfully set\n",
-                obj->GetName().c_str());
+               ("XyPlot::SetRefObject() mYParams[%d] <%p>'%s' successfully set to <%p>'%s'\n",
+                i, mYParams[i], mYParamNames[i].c_str(), obj, obj->GetName().c_str());
             #endif
-            
-            return true;
          }
       }
+
+      #if DEBUG_XYPLOT_OBJECT
+      MessageInterface::ShowMessage
+         ("XyPlot::SetRefObject() this=<%p>'%s' returning true\n", this, GetName().c_str());
+      #endif
+      
+      return true;
+   }
+   else
+   {
+      #if DEBUG_XYPLOT_OBJECT
+      MessageInterface::ShowMessage
+         ("XyPlot::SetRefObject() '%s' is not plottable, "
+          "so throwing an exception\n", name.c_str());
+      #endif
+      std::string whichParam = "The Y parameter ";
+      if (name == mXParamName)
+         whichParam = "The X parameter";
+      throw SubscriberException
+         (whichParam + "\"" + name + "\" on object \"" + instanceName +
+          "\" of XYPlot is not plottable.\n");
    }
    
-   return false;
+   #if DEBUG_XYPLOT_OBJECT
+   MessageInterface::ShowMessage
+      ("XyPlot::SetRefObject() returning Subscriber::SetRefObject()\n");
+   #endif
+   
+   return Subscriber::SetRefObject(obj, type, name);
 }
 
 
@@ -1135,20 +1242,77 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
    {
    case Gmat::UNKNOWN_OBJECT:
    case Gmat::PARAMETER:
-      // add x parameter
+   {
+      std::string realName;
+      // Add x parameter
+      // Handle array index
       if (mXParamName != "")
-         mAllParamNames.push_back(mXParamName);
+      {
+         realName = GmatStringUtil::GetArrayName(mXParamName);
+         //mAllParamNames.push_back(mXParamName);
+         mAllParamNames.push_back(realName);
+      }
       
       // add y parameters
       for (int i=0; i<mNumYParams; i++)
          if (mYParamNames[i] != "")
-            mAllParamNames.push_back(mYParamNames[i]);
+         {
+            realName = GmatStringUtil::GetArrayName(mYParamNames[i]);
+            //mAllParamNames.push_back(mYParamNames[i]);
+            mAllParamNames.push_back(realName);
+         }
       break;
+   }
    default:
       break;
    }
    
+   #ifdef DEBUG_XYPLOT_OBJECT
+   MessageInterface::ShowMessage
+      ("XyPlot::GetRefObjectNameArray() returning %d ref objects\n", mAllParamNames.size());
+   for (unsigned int i = 0; i < mAllParamNames.size(); i++)
+      MessageInterface::ShowMessage("   [%d]: '%s'\n", i, mAllParamNames[i].c_str());
+   #endif
+   
    return mAllParamNames;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+const StringArray& XyPlot::GetWrapperObjectNameArray()
+{
+   xWrapperObjectNames.clear();
+   yWrapperObjectNames.clear();
+   allWrapperObjectNames.clear();
+   
+   xWrapperObjectNames.push_back(mXParamName);
+   yWrapperObjectNames.insert(yWrapperObjectNames.begin(), mYParamNames.begin(),
+                              mYParamNames.end());
+   
+   allWrapperObjectNames.push_back(mXParamName);
+   allWrapperObjectNames.insert(allWrapperObjectNames.end(), mYParamNames.begin(),
+                                mYParamNames.end());
+   
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
+       xWrapperObjectNames.size(), yWrapperObjectNames.size());
+   for (unsigned int i = 0; i < xWrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage
+         ("   xWrapperObjectNames[%d] = '%s'\n", i, xWrapperObjectNames[i].c_str());
+   for (unsigned int i = 0; i < yWrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage
+         ("   yWrapperObjectNames[%d] = '%s'\n", i, yWrapperObjectNames[i].c_str());
+   MessageInterface::ShowMessage
+      ("XyPlot::GetWrapperObjectNameArray() returning, allWrapperObjectNames.size()=%d\n",
+       allWrapperObjectNames.size());
+   for (UnsignedInt i = 0; i < allWrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", allWrapperObjectNames[i].c_str());
+   #endif
+   
+   return allWrapperObjectNames;
 }
 
 //---------------------------------
@@ -1163,13 +1327,20 @@ void XyPlot::BuildPlotTitle()
    //set X and Y axis title
    //if (mXAxisTitle == "")
    //{
-      if (mXParam)
-         mXAxisTitle = mXParam->GetName();
-      else {
-         mXAxisTitle = "No X parameters";
-         mYAxisTitle = "empty";
-         mPlotTitle  = "Plot not fully initialized";
-         return;
+      // Now using wrapppers (LOJ: 2012.08.02)
+      //if (mXParam)
+      //   mXAxisTitle = mXParam->GetName();
+      if (xParamWrappers[0])
+         mXAxisTitle = xParamWrappers[0]->GetDescription();
+      else
+      {
+         // Thorow exception here, since it causes crash (LOJ: 2012.08.02)
+         throw SubscriberException
+            ("Error getting the X parameter title on " + instanceName +  " of XYPlot.\n");
+         //mXAxisTitle = "No X parameters";
+         //mYAxisTitle = "empty";
+         //mPlotTitle  = "Plot not fully initialized";
+         //return;
       }
       //}
       
@@ -1181,9 +1352,13 @@ void XyPlot::BuildPlotTitle()
    mYAxisTitle = "";
    for (int i= 0; i<mNumYParams-1; i++)
    {
-      mYAxisTitle += (mYParams[i]->GetName() + ", ");
+      //if (mYParams[i])
+      //   mYAxisTitle += (mYParams[i]->GetName() + ", ");         
+      if (yParamWrappers[i])
+         mYAxisTitle += (yParamWrappers[i]->GetDescription() + ", ");         
    }
-   mYAxisTitle += mYParams[mNumYParams-1]->GetName();
+   //mYAxisTitle += mYParams[mNumYParams-1]->GetName();
+   mYAxisTitle += yParamWrappers[mNumYParams-1]->GetDescription();
    
    #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mYAxisTitle = %s\n",
@@ -1419,7 +1594,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
    
    #if DEBUG_XYPLOT_UPDATE > 1
    MessageInterface::ShowMessage
-      ("XyPlot::Distribute() entered. isEndOfReceive=%d, active=%d, runState=%d\n",
+      ("\nXyPlot::Distribute() entered. isEndOfReceive=%d, active=%d, runState=%d\n",
        isEndOfReceive, active, runstate);
    #endif
    
@@ -1443,13 +1618,18 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
    
    if (len > 0)
    {
-      if (mXParam != NULL && mNumYParams > 0)
+      // Now using wrappers and supports only one X parameter (LOJ: 2012.08.02)
+      //if (mXParam != NULL && mNumYParams > 0)
+      if (xParamWrappers[0] != NULL && mNumYParams > 0)
       {
          // get x param
-         Real xval = mXParam->EvaluateReal();
-
+         //Real xval = mXParam->EvaluateReal();
+         Real xval = xParamWrappers[0]->EvaluateReal();
+         
          #if DEBUG_XYPLOT_UPDATE
-         MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
+         MessageInterface::ShowMessage
+            ("XyPlot::Distribute() xParamWrappers[0]='%s', xval = %f\n",
+             xParamWrappers[0]->GetDescription().c_str(), xval);
          #endif
          
          // get y params
@@ -1458,7 +1638,9 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
          // put yvals in the order of parameters added
          for (int i=0; i<mNumYParams; i++)
          {
-            if (mYParams[i] == NULL)
+            // Now using wrappers (LOJ: 2012.08.02)
+            //if (mYParams[i] == NULL)
+            if (yParamWrappers[i] == NULL)
             {
                MessageInterface::PopupMessage
                   (Gmat::WARNING_,
@@ -1468,11 +1650,14 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                return true;
             }
             
-            yvals[i] = mYParams[i]->EvaluateReal();
+            // Now using wrappers (LOJ: 2012.08.02)
+            //yvals[i] = mYParams[i]->EvaluateReal();
+            yvals[i] = yParamWrappers[i]->EvaluateReal();
             
             #if DEBUG_XYPLOT_UPDATE
             MessageInterface::ShowMessage
-               ("XyPlot::Distribute() yvals[%d] = %f\n", i, yvals[i]);
+               ("XyPlot::Distribute() yParamWrappers[%d]='%s', yvals[%d] = %f\n",
+                i, yParamWrappers[i]->GetDescription().c_str(), i, yvals[i]);
             #endif
          }
          

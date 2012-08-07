@@ -846,8 +846,10 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
 //               "; this action is not allowed in the Mission Control Sequence.");
          if (!CreatePropSetupProperty(theObj, lhs, rhs))
          {
+            #if DBGLVL_WRAPPERS > 1
             MessageInterface::ShowMessage
-               ("==> Validator::ValidateCommand() returning false\n");
+               ("Validator::ValidateCommand() returning false\n");
+            #endif
             return false;
          }
       }
@@ -1165,6 +1167,73 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       StringArray names = tp.SeparateBrackets(rhs, "{}", " ,", false);
       for (UnsignedInt i=0; i<names.size(); i++)
          theObj->SetStringParameter("Add", names[i]);
+      
+      if (theInterpreter != NULL)
+      {
+         if (!theInterpreter->ValidateSubscriber(theObj))
+         {
+            theErrorMsg = "Failed to create ElementWrapper for \"" +
+               theDescription + "\"";
+            return HandleError();
+         }
+      }
+      else
+      {
+         theErrorMsg = "Failed to create ElementWrapper for \"" +
+            theDescription + "\". The Interpreter is not set.";
+         return HandleError();
+      }
+   }
+   
+   // Special case for XYPlot, we need to create a wrapper for XVariable and
+   // IndVar (deprecated field) so call Interpreter::ValidateSubscriber() to
+   // create wrappers, such as XYPlot.XVariable = {Sat1.A1ModJulian}
+   if (theFunction != NULL && theObj != NULL &&
+       (theObj->IsOfType(Gmat::XY_PLOT) &&
+        (lhs.find(".XVariable") != lhs.npos ||
+         lhs.find(".IndVar") != lhs.npos)))
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage("   Handling XyPlot XVariable/IndVar(deprecated)\n");
+      #endif
+      TextParser tp;
+      StringArray names = tp.SeparateBrackets(rhs, "{}", " ,", false);
+      for (UnsignedInt i=0; i<names.size(); i++)
+         theObj->SetStringParameter("XVariable", names[i]);
+      
+      if (theInterpreter != NULL)
+      {
+         if (!theInterpreter->ValidateSubscriber(theObj))
+         {
+            theErrorMsg = "Failed to create ElementWrapper for \"" +
+               theDescription + "\"";
+            return HandleError();
+         }
+      }
+      else
+      {
+         theErrorMsg = "Failed to create ElementWrapper for \"" +
+            theDescription + "\". The Interpreter is not set.";
+         return HandleError();
+      }
+   }
+   
+   // Special case for XYPlot, we need to create a wrapper for each
+   // YVariables or Add (deprecated field) that is added to XYPlot,
+   // so call Interpreter::ValidateSubscriber() to create wrappers.
+   // XYPlot.YVariables = {Sat1.A1ModJulian, Sat1.EarthMJ2000Eq.X}
+   if (theFunction != NULL && theObj != NULL &&
+       (theObj->IsOfType(Gmat::XY_PLOT) &&
+        (lhs.find(".YVariables") != lhs.npos ||
+         lhs.find(".Add") != lhs.npos)))
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage("   Handling XYPlot YVariables/Add(deprecated)\n");
+      #endif
+      TextParser tp;
+      StringArray names = tp.SeparateBrackets(rhs, "{}", " ,", false);
+      for (UnsignedInt i=0; i<names.size(); i++)
+         theObj->SetStringParameter("YVariables", names[i]);
       
       if (theInterpreter != NULL)
       {

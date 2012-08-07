@@ -26,7 +26,7 @@
 #include "Publisher.hpp"           // for Instance()
 #include "FileManager.hpp"         // for GetPathname()
 #include "SubscriberException.hpp"
-#include "StringUtil.hpp"          // for GetArrayIndex()
+#include "StringUtil.hpp"          // for GetArrayName()
 #include "FileUtil.hpp"            // for GmatFileUtil::
 #include "RealUtilities.hpp"
 #include <iomanip>
@@ -319,7 +319,7 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
          mParamNames.push_back(paramName);
          mNumParams = mParamNames.size();
          mParams.push_back(NULL);
-         paramWrappers.push_back(NULL);
+         yParamWrappers.push_back(NULL);
          
          #ifdef DEBUG_REPORTFILE_SET
          MessageInterface::ShowMessage
@@ -1173,11 +1173,11 @@ bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {   
    #if DBGLVL_REPORTFILE_REF_OBJ
    MessageInterface::ShowMessage
-      ("ReportFile::SetRefObject() <%p>'%s' entered, obj=<%p><%s>'%s', type=%d, name='%s', "
-       "objname=%s\n", this, GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+      ("ReportFile::SetRefObject() <%p>'%s' entered, obj=<%p><%s>'%s', type=%d, name='%s'\n",
+       this, GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
        obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
    #endif
-
+   
    if (obj == NULL)
    {
       #if DBGLVL_REPORTFILE_REF_OBJ
@@ -1194,9 +1194,7 @@ bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       for (int i=0; i<mNumParams; i++)
       {
          // Handle array elements
-         Integer row, col;
-         std::string realName;
-         GmatStringUtil::GetArrayIndex(mParamNames[i], row, col, realName);
+         std::string realName = GmatStringUtil::GetArrayName(mParamNames[i]);
          
          #if DBGLVL_REPORTFILE_REF_OBJ > 1
          MessageInterface::ShowMessage("   realName=%s\n", realName.c_str());
@@ -1257,11 +1255,9 @@ const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type
    case Gmat::PARAMETER:
       {
          // Handle array index
-         Integer row, col;
-         std::string realName;
          for (int i=0; i<mNumParams; i++)
          {
-            GmatStringUtil::GetArrayIndex(mParamNames[i], row, col, realName);
+            std::string realName = GmatStringUtil::GetArrayName(mParamNames[i]);
             mAllRefObjectNames.push_back(realName);
          }
       }
@@ -1278,18 +1274,18 @@ const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type
 //------------------------------------------------------------------------------
 const StringArray& ReportFile::GetWrapperObjectNameArray()
 {
-   wrapperObjectNames.clear();
-   wrapperObjectNames.insert(wrapperObjectNames.begin(), mParamNames.begin(),
-                             mParamNames.end());
+   yWrapperObjectNames.clear();
+   yWrapperObjectNames.insert(yWrapperObjectNames.begin(), mParamNames.begin(),
+                              mParamNames.end());
    
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("ReportFile::GetWrapperObjectNameArray() size=%d\n",  wrapperObjectNames.size());
-   for (UnsignedInt i=0; i<wrapperObjectNames.size(); i++)
-      MessageInterface::ShowMessage("   %s\n", wrapperObjectNames[i].c_str());
+      ("ReportFile::GetWrapperObjectNameArray() size=%d\n",  yWrapperObjectNames.size());
+   for (UnsignedInt i=0; i<yWrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", yWrapperObjectNames[i].c_str());
    #endif
    
-   return wrapperObjectNames;
+   return yWrapperObjectNames;
 }
 
 
@@ -1351,7 +1347,7 @@ void ReportFile::ClearParameters()
    ClearWrappers();
    // commented out since these are cleared in Subscriber::ClearWrappers() (LOJ: 2009.03.10)
    //depParamWrappers.clear();
-   //paramWrappers.clear();
+   //yParamWrappers.clear();
    initial = true;   
 }
 
@@ -1640,7 +1636,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       
       // Write to report file using ReportFile::WriateData().
       // This method takes ElementWrapper array to write data to stream
-      WriteData(paramWrappers);
+      WriteData(yParamWrappers);
       mLastReportTime = dat[0];
       
       if (isEndOfRun)  // close file

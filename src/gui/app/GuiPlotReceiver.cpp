@@ -866,7 +866,7 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
           "MdiChildTsFrame\n   X Axis Title = %s  Y Axis Title = %s\n",
           xAxisTitle.c_str(), yAxisTitle.c_str());
       #endif
-
+      
       Integer x, y, w, h;
       Integer plotCount = MdiGlPlot::numChildren + MdiTsPlot::numChildren;
       bool isUsingSaved = false;
@@ -1695,8 +1695,8 @@ bool GuiPlotReceiver::UpdateXyPlot(const std::string &plotName,
 
    #if DEBUG_PLOTIF_XY_UPDATE
    MessageInterface::ShowMessage
-      ("GuiPlotReceiver::UpdateXyPlot() numChildren = %d\n",
-       MdiTsPlot::numChildren);
+      ("GuiPlotReceiver::UpdateXyPlot() xval = %f, numChildren = %d\n",
+       xval, MdiTsPlot::numChildren);
    #endif
 
    MdiChildTsFrame *frame = NULL;
@@ -1855,18 +1855,9 @@ bool GuiPlotReceiver::UpdateXyPlotCurve(const std::string &plotName,
                #endif
 
                if (whichCurve < numCurves)
-               {
-                  #if DEBUG_PLOTIF_XY_UPDATE
-                     MessageInterface::ShowMessage
-                     ("GuiPlotReceiver::UpdateXyPlot() yvals[%d] = %f\n", j, yvals(j));
-                  #endif
-
                   frame->AddDataPoints(whichCurve, xval, yval, yhi, ylow);
-               }
                if (frame->IsActive())
-               {
                   frame->RedrawCurve();
-               }
                updated = true;
             }
          }

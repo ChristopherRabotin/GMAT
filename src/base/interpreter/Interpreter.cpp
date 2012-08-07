@@ -4757,6 +4757,23 @@ bool Interpreter::SetPropertyToArray(GmatBase *toOwner, const std::string &toPro
       return false;
    }
    
+   // This is fix for allowing array elemement to object type,
+   // such as MyXyPlot.XVariable = MyArray(2,2). (GMT-2370 LOJ: 2012.08.03)
+   // If lhs is object type, set as string
+   if (toType == Gmat::OBJECT_TYPE)
+   {
+      try
+      {
+         toOwner->SetStringParameter(toId, fromArray);
+         return true;
+      }
+      catch (BaseException &e)
+      {
+         HandleError(e);
+         return false;
+      }
+   }
+   
    // Property type must be Real type, so check
    if (toType != Gmat::REAL_TYPE)
    {
@@ -4766,7 +4783,7 @@ bool Interpreter::SetPropertyToArray(GmatBase *toOwner, const std::string &toPro
       HandleError(ex);
       return false;
    }
-      
+   
    // Now try to set array to property
    Integer row, col;
    Real rval = GetArrayValue(fromArray, row, col);

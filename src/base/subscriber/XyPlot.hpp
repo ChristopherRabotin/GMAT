@@ -113,6 +113,10 @@ public:
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    
+   // methods for setting up the items to subscribe
+   virtual const StringArray&
+                        GetWrapperObjectNameArray();
+
 protected:
 
    bool SetXParameter(const std::string &paramName);
