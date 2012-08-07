@@ -1307,21 +1307,24 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
 
       case Gmat::HARDWARE:
           for (ObjectArray::iterator i = hardwareList.begin();
-               i < hardwareList.end(); ++i) {
+               i < hardwareList.end(); ++i)
+          {
              if ((*i)->GetName() == name)
                 return *i;
           }
 
       case Gmat::FUEL_TANK:
          for (ObjectArray::iterator i = tanks.begin();
-              i < tanks.end(); ++i) {
+              i < tanks.end(); ++i)
+         {
             if ((*i)->GetName() == name)
                return *i;
          }
 
       case Gmat::THRUSTER:
          for (ObjectArray::iterator i = thrusters.begin();
-              i < thrusters.end(); ++i) {
+              i < thrusters.end(); ++i)
+         {
             if ((*i)->GetName() == name)
             {
                #ifdef DEBUG_GET_REF_OBJECT
@@ -1386,11 +1389,45 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
       // set fueltank
       if (objType == "FuelTank")
-         return SetHardware(obj, tankNames, tanks);
+      {
+         bool retval = SetHardware(obj, tankNames, tanks);
+         if (retval)
+         {
+            if (isInitialized)
+            {
+               // Update tank/thruster settings; don't throw if misconfigured
+               try
+               {
+                  AttachTanksToThrusters();
+               }
+               catch (BaseException &)
+               {
+               }
+            }
+         }
+         return retval;
+      }
 
       // set thruster
       if (objType == "Thruster")
-         return SetHardware(obj, thrusterNames, thrusters);
+      {
+         bool retval = SetHardware(obj, thrusterNames, thrusters);
+         if (retval)
+         {
+            if (isInitialized)
+            {
+               // Update tank/thruster settings; don't throw if misconfigured
+               try
+               {
+                  AttachTanksToThrusters();
+               }
+               catch (BaseException &)
+               {
+               }
+            }
+         }
+         return retval;
+      }
 
       // set on hardware
       if (obj->GetType() == Gmat::HARDWARE)
