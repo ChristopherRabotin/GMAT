@@ -110,7 +110,7 @@ Barycenter& Barycenter::operator=(const Barycenter &bary)
    CalculatedPoint::operator=(bary);
    parameterCount  = bary.parameterCount;
    isBuiltIn       = bary.isBuiltIn;
-   builtInType     = builtInType;
+   builtInType     = bary.builtInType;
    builtInSP       = bary.builtInSP;
 
    return *this;
