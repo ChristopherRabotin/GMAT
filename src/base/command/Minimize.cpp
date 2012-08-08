@@ -75,6 +75,8 @@ Minimize::Minimize() :
    objId                   (-1),
    interpreted             (false)
 {
+   objectTypeNames.push_back("SolverCommand");
+   
    // nothing to add to settables here ...
 
    #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~

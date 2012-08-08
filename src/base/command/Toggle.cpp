@@ -46,6 +46,7 @@ Toggle::Toggle() :
    subscriberID   (parameterCount),
    toggleStateID  (++parameterCount)
 {
+   objectTypeNames.push_back("SubscriberCommand");
    ++parameterCount;
 }
 
@@ -69,7 +70,7 @@ Toggle::Toggle(const Toggle& t) :
    toggleStateID      (t.toggleStateID)
 {
    parameterCount = t.parameterCount;
-   subNames.clear();
+   subNames = t.subNames;
    subs.clear();
 }
 
@@ -81,23 +82,28 @@ Toggle& Toggle::operator=(const Toggle& t)
 {
    if (this == &t)
       return *this;
-    
+   
    GmatCommand::operator=(t);
    toggleState = t.toggleState;
-   subNames.clear();
+   subscriberID = t.subscriberID;
+   toggleStateID = t.toggleStateID;
+   subNames = t.subNames;
    subs.clear();
    
-   return *this;   
+   return *this;
 }
 
 
 //------------------------------------------------------------------------------
 // bool InterpretAction()
 //------------------------------------------------------------------------------
+/**
+ * Parses Toggle command string.
+ * Sample string:  "Toggle Report On"
+ */
+//------------------------------------------------------------------------------
 bool Toggle::InterpretAction()
 {
-   // Sample string:  "Toggle Report On"
-   
    subNames.clear();
    subs.clear();
    
@@ -298,7 +304,6 @@ const ObjectTypeArray& Toggle::GetRefObjectTypeArray()
 }
 
 
-
 //------------------------------------------------------------------------------
 // const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
@@ -449,11 +454,6 @@ std::string Toggle::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Toggle::GetStringParameter(const Integer id) const
 {
-//   if (id == subscriberID)
-//   {
-//      return subNames[0]; //loj: return first subscriber for now
-//   }
-   //   else if (id == toggleStateID)
    if (id == toggleStateID)
    {
       if (toggleState == true)

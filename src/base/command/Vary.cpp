@@ -108,6 +108,7 @@ Vary::Vary() :
    variableID                    (-1),
    solverDataFinalized           (false)
 {
+   objectTypeNames.push_back("SolverCommand");
    settables.push_back("Perturbation"); 
    settables.push_back("MaxStep");
    settables.push_back("Lower");  

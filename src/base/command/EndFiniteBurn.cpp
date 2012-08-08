@@ -46,6 +46,7 @@ EndFiniteBurn::EndFiniteBurn() :
    //Commented out  since we don't want give it a name in the constructor
    //if (instanceName == "")
    //   instanceName = "EndFiniteBurn";
+   objectTypeNames.push_back("BurnCommand");
    physicsBasedCommand = true;
 }
 

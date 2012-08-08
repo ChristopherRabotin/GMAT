@@ -4646,7 +4646,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
          
          #if DEBUG_CREATE_RESOURCE
          MessageInterface::ShowMessage
-            ("Moderator::CreateSubscriber() Creating default subscriber...\n");
+            ("Moderator::CreateSubscriber() Creating default Subscriber...\n");
          #endif
          
          if (createDefault)
@@ -4695,6 +4695,12 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
          MessageInterface::ShowMessage("Moderator::CreateSubscriber()\n" +
                                        e.GetFullMessage());
       }
+      
+      #if DEBUG_CREATE_RESOURCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateSubscriber() returning new Subscriber <%p><%s>'%s'\n",
+          obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
+      #endif
       
       return obj;
    }
@@ -5459,7 +5465,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       else if (type == "Toggle")
       {
          cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
-                                 GetDefaultSubscriber("OrbitView")->GetName());
+                                 GetDefaultSubscriber("ToggleSubscriber", false, false)->GetName());
       }
       else if (type == "Report")
       {
@@ -8530,11 +8536,30 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
          return sub;
    }
    
-   // If not creating default subscriber, just return NULL
-   if (!createIfNoneFound)
+   // If not ToggleSubscriber and not creating default subscriber, just return NULL
+   if (type != "ToggleSubscriber" && !createIfNoneFound)
       return NULL;
    
-   if (type == "OrbitView")
+   if (type == "ToggleSubscriber")
+   {
+      // First look for Subscribers for Toggle command in the order of
+      // OrbitView, GroundTrackPlot, XYPlot, ReportFile, and EphemerisFile.
+      // (LOJ:2012.08.08 Fix for GMT-2374)
+      Subscriber *orbitView = GetDefaultSubscriber("OrbitView", true, false);
+      Subscriber *groundTrack = GetDefaultSubscriber("GroundTrackPlot", true, false);
+      Subscriber *xyPlot = GetDefaultSubscriber("XYPlot", true, false);
+      Subscriber *reportFile = GetDefaultSubscriber("ReportFile", true, false);
+      Subscriber *ephemFile = GetDefaultSubscriber("EphemerisFile", true, false);
+      if (orbitView)         return orbitView;
+      else if (groundTrack)  return groundTrack;
+      else if (xyPlot)       return xyPlot;
+      else if (reportFile)   return reportFile;
+      else if (ephemFile)    return ephemFile;
+      
+      // If none found, create OrbitView as default toggle subscriber
+      return GetDefaultSubscriber("OrbitView", true, true);
+   }
+   else if (type == "OrbitView")
    {
       // create default OrbitView
       sub = CreateSubscriber("OrbitView", "DefaultOrbitView");
@@ -8584,6 +8609,13 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
       
       // To validate and create element wrappers
       theScriptInterpreter->ValidateSubscriber(sub);
+   }
+   else if (type == "EphemerisFile")
+   {
+      // create default EphemerisFile
+      sub = CreateSubscriber("EphemerisFile", "DefaultEphemerisFile");
+      // add default spacecraft and coordinate system
+      sub->SetStringParameter("Spacecraft", GetDefaultSpacecraft()->GetName());
    }
    else
    {

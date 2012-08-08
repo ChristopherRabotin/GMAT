@@ -146,7 +146,7 @@ private:
    void InsertBefore(const wxString &cmdTypeName);
    void InsertAfter(const wxString &cmdTypeName);
    void DeleteCommand(const wxString &cmdName);
-   void UpdateGuiManager(const wxString &cmdTypeName);
+   void UpdateGuiManager(const GmatCommand *cmd);
    
    void AddDefaultMissionSeq(wxTreeItemId universe);
    void AddIcons();

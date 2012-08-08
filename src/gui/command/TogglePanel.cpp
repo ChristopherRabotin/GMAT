@@ -41,12 +41,16 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// TogglePanel(wxWindow *parent)
+// TogglePanel(wxWindow *parent, GmatCommand *cmd, bool forXyPlotOnly, ...)
 //------------------------------------------------------------------------------
 /**
- * Constructs TogglePanel object.
+ * Constructs TogglePanel object. This panel is used for Toggle and XYPlot
+ * specific commands such as MarkPoint and ClearPlot.
  *
- * @param <parent> input parent.
+ * @param  parent input parent.
+ * @param  cmd    Toggle command pointer
+ * @param  forXyPlotOnly  true if this panel is for XYPlot only.
+ * @param  showToggleState  true if toggle state should be shown
  */
 //------------------------------------------------------------------------------
 TogglePanel::TogglePanel(wxWindow *parent, GmatCommand *cmd, bool forXyPlotOnly,
@@ -117,7 +121,7 @@ bool TogglePanel::TakeAction(const wxString &action)
 // void Create()
 //------------------------------------------------------------------------------
 /**
- * Creates the panel for the Maneuver Command
+ * Creates the panel for the Toggle command
  */
 //------------------------------------------------------------------------------
 void TogglePanel::Create()

@@ -93,6 +93,7 @@ NonlinearConstraint::NonlinearConstraint() :
    constraintId            (-1),
    interpreted             (false)
 {
+   objectTypeNames.push_back("SolverCommand");
    parameterCount = NonlinearConstraintParamCount;
    // nothing to add to settables here ... yet
    // settables.push_back("Tolerance");

@@ -80,7 +80,7 @@ public:
    virtual bool        InterpretAction();
    virtual bool        Initialize();
    virtual bool        Execute();
-        
+   
    DEFAULT_TO_NO_CLONES
 
 protected:
@@ -91,10 +91,10 @@ protected:
    /// Corresponding subscribers
    std::list<Subscriber *>  subs;
    /// Parameter ID for the subscriber names
-   const Integer       subscriberID;
+   Integer             subscriberID;
    /// Parameter ID for the toggle state
-   const Integer       toggleStateID;
-
+   Integer             toggleStateID;
+   
    void BuildSubscriberList();
 };
 

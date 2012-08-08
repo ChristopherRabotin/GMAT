@@ -55,6 +55,7 @@ Maneuver::Maneuver() :
    burnNameID  (parameterCount),
    satNameID   (parameterCount+1)
 {
+   objectTypeNames.push_back("BurnCommand");
    parameterCount     += 2;
    physicsBasedCommand = true;
 

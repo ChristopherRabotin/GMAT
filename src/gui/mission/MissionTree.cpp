@@ -2063,7 +2063,7 @@ void MissionTree::Append(const wxString &cmdTypeName)
    // Insert a node to tree
    if (cmd != NULL)
    {
-      UpdateGuiManager(cmdTypeName);
+      UpdateGuiManager(cmd);
       
       if (currCmd->GetTypeName() == "NoOp" ||
           currCmd->GetTypeName() == "BeginMissionSequence")
@@ -2243,7 +2243,7 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
          WriteCommand("   ", "cmd->GetPrevious() = ", cmd->GetPrevious());
          #endif
          
-         UpdateGuiManager(cmdTypeName);
+         UpdateGuiManager(cmd);
          
 			bool insertBefore = true;
 			if (realPrevCmd->IsOfType("BranchEnd"))
@@ -2380,8 +2380,8 @@ void MissionTree::InsertAfter(const wxString &cmdTypeName)
       
       if (cmd != NULL)
       {
-         UpdateGuiManager(cmdTypeName);
-			
+			UpdateGuiManager(cmd);
+         
          #if DEBUG_MISSION_TREE_INSERT
          WriteNode(3, "   ==> Calling InsertCommand() ", false, "parentId", parentId,
                    "currId", currId, "prevId", prevId);
@@ -2554,28 +2554,26 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
 
 
 //------------------------------------------------------------------------------
-// void UpdateGuiManager(const wxString &cmdName)
+// void UpdateGuiManager(const GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /*
  * Calls GuiItemManager to update corresponding object list to dynamically
  * show new objects.
  *
- * @param  cmdName  Command name
+ * @param  cmd  Command pointer
  */
 //------------------------------------------------------------------------------
-void MissionTree::UpdateGuiManager(const wxString &cmdName)
+void MissionTree::UpdateGuiManager(const GmatCommand *cmd)
 {
-   // Update GuiItemManger since default commands were created wich created
-   // default resource
-   if (cmdName == "BeginFiniteBurn" || cmdName == "EndFiniteBurn" ||
-       cmdName == "Maneuver" || cmdName == "Vary")
+   // Update GuiItemManger since default commands were created with new default
+   // resources if needed
+   if (cmd->IsOfType("BurnCommand") || cmd->IsOfType("Vary"))
       theGuiManager->UpdateBurn();
    
-   if (cmdName == "Target" || cmdName == "Optimize" || cmdName == "Vary" ||
-       cmdName == "Achieve" || cmdName == "Minimize" || cmdName == "NonlinearConstraint")
+   if (cmd->IsOfType("SolverCommand"))
       theGuiManager->UpdateSolver();
    
-   if (cmdName == "Report")
+   if (cmd->IsOfType("SubscriberCommand"))
       theGuiManager->UpdateSubscriber();
    
    // Always update parameter, since it is used in many commands

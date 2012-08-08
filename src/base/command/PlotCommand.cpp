@@ -87,6 +87,8 @@ PlotCommand::PlotCommand(const PlotCommand &c) :
    plotNameList   (c.plotNameList),
    thePlotList    (c.thePlotList)
 {
+   objectTypeNames.push_back("SubscriberCommand");
+   objectTypeNames.push_back("PlotCommand");
 }
 
 //------------------------------------------------------------------------------

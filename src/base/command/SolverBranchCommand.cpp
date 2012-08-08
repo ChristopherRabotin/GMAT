@@ -61,6 +61,7 @@ SolverBranchCommand::SolverBranchCommand(const std::string &typeStr) :
 {
    parameterCount = SolverBranchCommandParamCount;
    objectTypeNames.push_back("SolverBranchCommand");
+   objectTypeNames.push_back("SolverCommand");
    
    solverModes.push_back("RunInitialGuess");
    solverModes.push_back("Solve");
