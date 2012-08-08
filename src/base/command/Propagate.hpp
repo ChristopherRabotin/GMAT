@@ -171,8 +171,6 @@ protected:
    Integer                      interruptCheckFrequency;
    /// Flag that specifies if we are rejoining a run in progress
    bool                         inProgress;
-   /// Flag indicating if this command was already fired once before
-   bool                         hasFired;
    /// ID for the spacecraft epoch parameter
    Integer                      epochID;
    

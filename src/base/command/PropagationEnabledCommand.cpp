@@ -476,7 +476,11 @@ void PropagationEnabledCommand::UpdateClonedObject(GmatBase *obj)
    {
       for (UnsignedInt i = 0; i < propagators.size(); ++i)
          if (obj->GetName() == propagators[i]->GetName())
+         {
             propagators[i]->operator=(*((PropSetup*)obj));
+            // Reset the fired flag so everything gets reconstructed
+            hasFired = false;
+         }
    }
 
    if (obj->IsOfType(Gmat::ODE_MODEL))
