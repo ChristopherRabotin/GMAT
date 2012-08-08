@@ -1640,6 +1640,14 @@ GmatBase* BranchCommand::GetClone(Integer cloneIndex)
 //------------------------------------------------------------------------------
 bool BranchCommand::AffectsClones()
 {
+   #ifdef DEBUG_CLONE_UPDATES
+      MessageInterface::ShowMessage("Checking for branch command clone "
+            "updates: this = %p, lastFired = %p\n", this, lastFired);
+      if ((lastFired != NULL) && (lastFired != this))
+         MessageInterface::ShowMessage("Last fired command:\n%s\n",
+               lastFired->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+
    if ((lastFired != NULL) && (lastFired != this))
       return lastFired->AffectsClones();
    return false;
