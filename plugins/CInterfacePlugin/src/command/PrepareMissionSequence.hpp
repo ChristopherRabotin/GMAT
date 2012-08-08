@@ -25,6 +25,13 @@
 
 /**
  * Command used to toggle GMAT into command mode
+ *
+ * When run, scripts that start the Mission Control Sequence using the
+ * PrepareMissionSequence command will populate the GMAT Sandbox with the
+ * objects identified in the script, and then initialize the objects and
+ * commands in the Sandbox.  The script is not actually executed.  Replacing
+ * BeginMissionSequence with PrepareMissionSequence may save time when
+ * preparing objects for use through the C interface.
  */
 class CINTERFACE_API PrepareMissionSequence : public GmatCommand
 {

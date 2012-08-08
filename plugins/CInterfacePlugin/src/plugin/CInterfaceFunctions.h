@@ -13,7 +13,9 @@
 // Author: Darrel J. Conway (Thinking Systems)
 // Created: 2011/05/17
 //
-/**
+// Note: Since this is pure C code, the file header excludes the Doxygen comment
+//       tag usually part of GMAT file prefaces.
+/* *
  * Functions called on the client (e.g. ODTBX) side of the interface
  *
  * This file is parsed by MATLAB to define the functions that are accessed using 

@@ -47,12 +47,12 @@ PrepareMissionSequence::~PrepareMissionSequence()
 
 
 //------------------------------------------------------------------------------
-//  PrepareMissionSequence(const PrepareMissionSequence& PrepareMissionSequence)
+//  PrepareMissionSequence(const PrepareMissionSequence& bms)
 //------------------------------------------------------------------------------
 /**
  * Makes a copy of the PrepareMissionSequence command (copy constructor).
  *
- * @param PrepareMissionSequence The original used to set parameters for this one.
+ * @param bms The original used to set parameters for this one.
  */
 //------------------------------------------------------------------------------
 PrepareMissionSequence::PrepareMissionSequence(const PrepareMissionSequence& bms) :
@@ -62,12 +62,12 @@ PrepareMissionSequence::PrepareMissionSequence(const PrepareMissionSequence& bms
 
 
 //------------------------------------------------------------------------------
-//  PrepareMissionSequence& operator=(const PrepareMissionSequence&)
+//  PrepareMissionSequence& operator=(const PrepareMissionSequence& bms)
 //------------------------------------------------------------------------------
 /**
  * Sets this PrepareMissionSequence to match another one (assignment operator).
  * 
- * @param PrepareMissionSequence The original used to set parameters for this one.
+ * @param bms The original used to set parameters for this one.
  *
  * @return this instance.
  */
