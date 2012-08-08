@@ -162,7 +162,14 @@ int main(int argc, char *argv[])
           "************************************************************\n\n");
 
    printf("Loading the library\n");
-   void *libHandle = dlopen("libCInterface.dylib", RTLD_LAZY);
+
+   // Load the dynamic library on Mac or Linux
+   /// todo: Add Windows configuration for testing the interface
+   #ifdef __linux
+      void *libHandle = dlopen("libCInterface.so", RTLD_LAZY);
+   #else
+      void *libHandle = dlopen("libCInterface.dylib", RTLD_LAZY);
+   #endif
 
    if (libHandle == NULL)
       printf("\n%s\n", dlerror());
@@ -192,10 +199,10 @@ int main(int argc, char *argv[])
    int i;
    for (i = 0; i < 20; ++i)
    {
-      if (strcmp(scriptName, "defaultOdtbx.script") != 0)
-         sprintf(scriptName, "defaultOdtbx.script");
+      if (strcmp(scriptName, "../samples/Ex_ForceModels.script") != 0)
+         sprintf(scriptName, "../samples/Ex_ForceModels.script");
       else
-         sprintf(scriptName, "Trial2.script");
+         sprintf(scriptName, "../samples/Ex_HohmannTransfer.script");
       printf("Loading the script %s\n", scriptName);
       if(LoadScript(scriptName, 0, libHandle) < 0)
       {
