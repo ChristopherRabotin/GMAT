@@ -34,7 +34,9 @@
  * a maneuver for a spacecraft named Sat1 looks like this:
  *
  *     Create ImpulsiveBurn burn;
- *     burn.Type = VNB;
+ *     burn.CoordinateSystem = Local;
+ *     burn.Origin = Earth;
+ *     burn.Axes = VNB;
  *     burn.Element1 = 0.125;         % km/s
  *     ...
  *     Maneuver burn(Sat1);
@@ -44,25 +46,24 @@ class GMAT_API Maneuver : public GmatCommand
 public:
    Maneuver();
    virtual ~Maneuver();
-   
    Maneuver(const Maneuver& m);
    Maneuver&            operator=(const Maneuver& m);
    
    // Methods used for configuration
-   virtual bool         SetObject(const std::string &name,
-                                  const Gmat::ObjectType type,
-                                  const std::string &associate = "",
-                                  const Gmat::ObjectType associateType =
-                                  Gmat::UNKNOWN_OBJECT);
-   
-   virtual bool         SetObject(GmatBase *obj,
-                                  const Gmat::ObjectType type);
-   
+//   virtual bool         SetObject(const std::string &name,
+//                                  const Gmat::ObjectType type,
+//                                  const std::string &associate = "",
+//                                  const Gmat::ObjectType associateType =
+//                                  Gmat::UNKNOWN_OBJECT);
+//
+//   virtual bool         SetObject(GmatBase *obj,
+//                                  const Gmat::ObjectType type);
    
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                        GetGeneratingString(Gmat::WriteMode mode =
+                                                           Gmat::SCRIPTING,
                                             const std::string &prefix = "",
                                             const std::string &useName = "");
    
@@ -106,25 +107,39 @@ protected:
    /// Flag used to tell if the summary can be built yet
    bool                    firedOnce;
 
-   /// Saved data for Command Summary
+   // Saved data for Command Summary
+   /// Spacecraft that maneuvers, as retrieved from the Burn object
    std::string             scNameM;
+   /// Maneuver coordinate system
    std::string             csNameM;
+   /// Maneuver origin
    std::string             originNameM;
+   /// Maneuver axis system
    std::string             axesNameM;
 
+   /// Spacecraft tanks used for mass depletion from the maneuver
    StringArray             tankNamesM;
+   /// Flag indicating if mass was depleted
    bool                    decMassM;
 
+   /// Maneuver data used in the summary
    Real                    *elementIspMassData;
 
    // Parameter IDs 
-   /// ID for the burn object
-   Integer                 burnNameID;
-   /// ID for the spacecraft name
-   Integer                 satNameID;
+   enum
+   {
+      burnNameID = GmatCommandParamCount,
+      satNameID,
+      ManeuverCommandParamCount
+   };
+   static const std::string
+         PARAMETER_TEXT[ManeuverCommandParamCount - GmatCommandParamCount];
+   static const Gmat::ParameterType
+         PARAMETER_TYPE[ManeuverCommandParamCount - GmatCommandParamCount];
 
    virtual void            BuildCommandSummary(bool commandCompleted = true);
-   virtual void            BuildCommandSummaryString(bool commandCompleted = true);
+   virtual void            BuildCommandSummaryString(
+                                 bool commandCompleted = true);
 };
 
 #endif // Maneuver_hpp

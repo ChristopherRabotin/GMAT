@@ -15,7 +15,7 @@
 // Created: 2004/01/20
 //
 /**
- * Definition for the Maneuver command class
+ * Implementation for the Maneuver command class
  */
 //------------------------------------------------------------------------------
 
@@ -29,6 +29,26 @@
 //#define DEBUG_MANEUVER_INIT
 //#define DEBUG_MANEUVER_EXEC
 //#define DEBUG_MANEUVER_COMMAND_SUMMARY
+
+//------------------------------------------------------------------------------
+// Static Data
+//------------------------------------------------------------------------------
+const std::string
+   Maneuver::PARAMETER_TEXT[ManeuverCommandParamCount - GmatCommandParamCount] =
+   {
+      "Burn",
+      "Spacecraft",
+   };
+
+
+const Gmat::ParameterType
+   Maneuver::PARAMETER_TYPE[ManeuverCommandParamCount - GmatCommandParamCount] =
+   {
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE,
+   };
+
+
 
 //------------------------------------------------------------------------------
 // Maneuver()
@@ -49,14 +69,10 @@ Maneuver::Maneuver() :
    originNameM (""),
    axesNameM   (""),
    decMassM    (false),
-   elementIspMassData (NULL),
-
-   // Parameter IDs
-   burnNameID  (parameterCount),
-   satNameID   (parameterCount+1)
+   elementIspMassData (NULL)
 {
    objectTypeNames.push_back("BurnCommand");
-   parameterCount     += 2;
+   parameterCount      = ManeuverCommandParamCount;
    physicsBasedCommand = true;
 
    tankNamesM.clear();
@@ -90,23 +106,20 @@ Maneuver::~Maneuver()
  */
 //------------------------------------------------------------------------------
 Maneuver::Maneuver(const Maneuver& m) :
-   GmatCommand     (m),
-   burnName    (m.burnName),
-   burn        (NULL),
-   satName     (m.satName),
-   sat         (NULL),
-   firedOnce   (false),
-   scNameM     (m.scNameM),
-   csNameM     (m.csNameM),
-   originNameM (m.originNameM),
-   axesNameM   (m.axesNameM),
-   decMassM    (m.decMassM),
-   elementIspMassData (NULL),
-   // Parameter IDs
-   burnNameID  (m.burnNameID),
-   satNameID   (m.satNameID)
+   GmatCommand          (m),
+   burnName             (m.burnName),
+   burn                 (NULL),
+   satName              (m.satName),
+   sat                  (NULL),
+   firedOnce            (false),
+   scNameM              (m.scNameM),
+   csNameM              (m.csNameM),
+   originNameM          (m.originNameM),
+   axesNameM            (m.axesNameM),
+   decMassM             (m.decMassM),
+   elementIspMassData   (NULL)
 {
-   parameterCount = m.parameterCount;
+   parameterCount = ManeuverCommandParamCount;
    tankNamesM.clear();
 }
 
@@ -119,7 +132,7 @@ Maneuver::Maneuver(const Maneuver& m) :
  *
  * @param m The maneuver that is copied to this one.
  *
- * @return this instance, with the internal data set to match the original's.
+ * @return This instance, with the internal data set to match m's.
  */
 //------------------------------------------------------------------------------
 Maneuver& Maneuver::operator=(const Maneuver& m)
@@ -142,54 +155,49 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
    elementIspMassData = NULL;
    tankNamesM.clear();
 
-
-   burnNameID = m.burnNameID;
-   satNameID = m.satNameID;
-
    return *this;
 }
 
-//------------------------------------------------------------------------------
-//  bool SetObject(const std::string &name, const Gmat::ObjectType type,
-//                 const std::string &associate,
-//                 const Gmat::ObjectType associateType)
-//------------------------------------------------------------------------------
-/**
- * Sets an object used by the Maneuver command.
- *
- * @param name The name of the object.
- * @param type Type of object.
- * @param associate Name of an associated object, if needed.
- * @param associateType Type of associated object.
- *
- * @return true if the object was set.
- */
-//------------------------------------------------------------------------------
-bool Maneuver::SetObject(const std::string &name, const Gmat::ObjectType type,
-                         const std::string &associate,
-                         const Gmat::ObjectType associateType)
-{
-   return GmatCommand::SetObject(name, type, associate, associateType);
-}
-
-
-//------------------------------------------------------------------------------
-//  bool SetObject(GmatBase *obj, const Gmat::ObjectType type)
-//------------------------------------------------------------------------------
-/**
- * Sets an object used by the Maneuver command.
- *
- * @param obj The object.
- * @param type Type of object.
- *
- * @return true if the object was set.
- */
-//------------------------------------------------------------------------------
-bool Maneuver::SetObject(GmatBase *obj, const Gmat::ObjectType type)
-{
-   return GmatCommand::SetObject(obj, type);
-}
-
+////------------------------------------------------------------------------------
+////  bool SetObject(const std::string &name, const Gmat::ObjectType type,
+////                 const std::string &associate,
+////                 const Gmat::ObjectType associateType)
+////------------------------------------------------------------------------------
+///**
+// * Sets an object used by the Maneuver command.
+// *
+// * @param name The name of the object.
+// * @param type Type of object.
+// * @param associate Name of an associated object, if needed.
+// * @param associateType Type of associated object.
+// *
+// * @return true if the object was set.
+// */
+////------------------------------------------------------------------------------
+//bool Maneuver::SetObject(const std::string &name, const Gmat::ObjectType type,
+//                         const std::string &associate,
+//                         const Gmat::ObjectType associateType)
+//{
+//   return GmatCommand::SetObject(name, type, associate, associateType);
+//}
+//
+//
+////------------------------------------------------------------------------------
+////  bool SetObject(GmatBase *obj, const Gmat::ObjectType type)
+////------------------------------------------------------------------------------
+///**
+// * Sets an object used by the Maneuver command.
+// *
+// * @param obj The object.
+// * @param type Type of object.
+// *
+// * @return true if the object was set.
+// */
+////------------------------------------------------------------------------------
+//bool Maneuver::SetObject(GmatBase *obj, const Gmat::ObjectType type)
+//{
+//   return GmatCommand::SetObject(obj, type);
+//}
 
 
 //------------------------------------------------------------------------------
@@ -219,13 +227,13 @@ GmatBase* Maneuver::Clone() const
  * set up the internal object data.  As a side benefit, the script line is
  * available in the GmatCommand structure for debugging purposes.
  *
- * @param <mode>    Specifies the type of serialization requested.
- * @param <prefix>  Optional prefix appended to the object's name. (Used for
+ * @param mode    Specifies the type of serialization requested.
+ * @param prefix  Optional prefix appended to the object's name. (Used for
  *                  indentation)
- * @param <useName> Name that replaces the object's name (Not yet used
+ * @param useName Name that replaces the object's name (Not yet used
  *                  in commands).
  *
- * @return The script line that defines this GmatCommand.
+ * @return The script line that defines this Maneuver command.
  */
 //------------------------------------------------------------------------------
 const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
@@ -250,28 +258,27 @@ const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
  * @param oldName The current name for the object.
  * @param newName The new name for the object.
  *
- * @return true.  Always.  Is this the expected return for all calls?
+ * @return true if a name was changed, otherwise false
  */
 //------------------------------------------------------------------------------
 bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
+   bool retval = false;
+
    #if DEBUG_MANEUVER
       MessageInterface::ShowMessage
          ("Maneuver::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
           GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
 
-   if (type != Gmat::SPACECRAFT && type != Gmat::IMPULSIVE_BURN)
-      return true;
-
    if (type == Gmat::SPACECRAFT)
    {
       if (satName == oldName)
       {
          satName = newName;
-         return true;
+         retval = true;
       }
    }
    else if (type == Gmat::IMPULSIVE_BURN)
@@ -279,10 +286,11 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
       if (burnName == oldName)
       {
          burnName = newName;
+         retval = true;
       }
    }
 
-   return true;
+   return retval;
 }
 
 
@@ -293,7 +301,6 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
  * Retrieves the list of ref object types used by the Maneuver.
  *
  * @return the list of object types.
- *
  */
 //------------------------------------------------------------------------------
 const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
@@ -311,10 +318,10 @@ const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
 /**
  * Retrieves the list of ref objects used by the Maneuver.
  *
- * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
- *               full list.
+ * @param type The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *             full list.
  *
- * @return the list of object names.
+ * @return The list of object names.
  *
  */
 //------------------------------------------------------------------------------
@@ -361,14 +368,8 @@ const StringArray& Maneuver::GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 std::string Maneuver::GetParameterText(const Integer id) const
 {
-   if (id == burnNameID) {
-      return "Burn";
-   }
-
-   else if (id == satNameID) {
-      return "Spacecraft";
-   }
-
+   if (id >= GmatCommandParamCount && id < ManeuverCommandParamCount)
+      return PARAMETER_TEXT[id - GmatCommandParamCount];
    return GmatCommand::GetParameterText(id);
 }
 
@@ -386,12 +387,10 @@ std::string Maneuver::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Maneuver::GetParameterID(const std::string &str) const
 {
-   if (str == "Burn") {
-      return burnNameID;
-   }
-
-   else if (str == "Spacecraft") {
-      return satNameID;
+   for (Integer i = GmatCommandParamCount; i < ManeuverCommandParamCount; ++i)
+   {
+      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+         return i;
    }
 
    return GmatCommand::GetParameterID(str);
@@ -406,18 +405,13 @@ Integer Maneuver::GetParameterID(const std::string &str) const
  *
  * @param id ID for the requested parameter.
  *
- * @return parameter type of the requested parameter.
+ * @return Parameter type of the requested parameter.
  */
 //------------------------------------------------------------------------------
 Gmat::ParameterType Maneuver::GetParameterType(const Integer id) const
 {
-   if (id == burnNameID) {
-      return Gmat::STRING_TYPE;
-   }
-
-   if (id == satNameID) {
-      return Gmat::STRING_TYPE;
-   }
+   if (id >= GmatCommandParamCount && id < ManeuverCommandParamCount)
+      return PARAMETER_TYPE[id - GmatCommandParamCount];
 
    return GmatCommand::GetParameterType(id);
 }
@@ -436,13 +430,7 @@ Gmat::ParameterType Maneuver::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Maneuver::GetParameterTypeString(const Integer id) const
 {
-   if (id == burnNameID)
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-
-   if (id == satNameID)
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-
-   return GmatCommand::GetParameterTypeString(id);
+   return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -471,7 +459,7 @@ std::string Maneuver::GetStringParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-//  std::string  SetStringParameter(const Integer id, const std::string value)
+//  std::string SetStringParameter(const Integer id, const std::string value)
 //------------------------------------------------------------------------------
 /**
  * This method sets the string parameter value, given the input
@@ -485,12 +473,14 @@ std::string Maneuver::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == burnNameID) {
+   if (id == burnNameID)
+   {
       burnName = value;
       return true;
    }
 
-   if (id == satNameID) {
+   if (id == satNameID)
+   {
       satName = value;
       return true;
    }
@@ -514,6 +504,8 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
  * line into the corresponding pieces, and stores the name of the ImpulsiveBurn
  * and the Spacecraft so they can be set to point to the correct objects during
  * initialization.
+ *
+ * @return true on successful parsing, throws an exception on failure
  */
 //------------------------------------------------------------------------------
 bool Maneuver::InterpretAction()
@@ -530,19 +522,22 @@ bool Maneuver::InterpretAction()
    SetStringParameter(burnNameID, currentChunks[0]);
 
    #ifdef DEBUG_MANEUVER_PARSE
-      MessageInterface::ShowMessage("In Maneuver, after Decompose, currentChunks = \n");
+      MessageInterface::ShowMessage("In Maneuver, after Decompose, "
+            "currentChunks = \n");
       for (unsigned int ii=0; ii<currentChunks.size(); ii++)
-         MessageInterface::ShowMessage("    %s\n", currentChunks.at(ii).c_str());
+         MessageInterface::ShowMessage("    %s\n",currentChunks.at(ii).c_str());
    #endif
    // ... and the spacecraft that is maneuvered
    currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ",");
    #ifdef DEBUG_MANEUVER_PARSE
-      MessageInterface::ShowMessage("In Maneuver, after Separatebrackets, currentChunks = \n");
+      MessageInterface::ShowMessage("In Maneuver, after Separatebrackets, "
+            "currentChunks = \n");
       for (unsigned int ii=0; ii<currentChunks.size(); ii++)
-         MessageInterface::ShowMessage("    %s\n", currentChunks.at(ii).c_str());
+         MessageInterface::ShowMessage("    %s\n",currentChunks.at(ii).c_str());
    #endif
    if (currentChunks.size() > 1)
-      throw CommandException("Unexpected text after spacecraft name in Maneuver command\n");
+      throw CommandException("Unexpected text after spacecraft name in "
+            "Maneuver command\n");
 
    SetStringParameter(satNameID, currentChunks[0]);
 
@@ -561,52 +556,55 @@ bool Maneuver::InterpretAction()
 //------------------------------------------------------------------------------
 bool Maneuver::Initialize()
 {
+   bool retval = false;
+
    #ifdef DEBUG_MANEUVER_INIT
    MessageInterface::ShowMessage
       ("Maneuver::Initialize() this=<%p>'%s' entered\n", this,
        GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
    
-   GmatCommand::Initialize();
-
-   GmatBase *mapObj = NULL;
-   if ((mapObj = FindObject(burnName)) == NULL)
-      throw CommandException("Maneuver command cannot find Burn");
-   burn = (Burn *)mapObj;
-   if (!burn)
-      return false;
-
-   if ((mapObj = FindObject(satName)) == NULL)
-      throw CommandException("Maneuver command cannot find Spacecraft");
-   sat = (Spacecraft *)mapObj;
-   if (!sat)
-      return false;
-   
-   // Register this Maneuver to the Publisher (LOJ: 2009.11.10)
-   // Do we need to register? Currently Maneuver does not publish any data.
-   // Just remove it for now.
-   #ifdef __REGISTER_MANEUVER__
-   StringArray owners, elements;
-   owners.push_back(satName);
-   elements.push_back(satName + ".epoch");
-   streamID = publisher->RegisterPublishedData(this, streamID, owners, elements);
-   
-   #ifdef DEBUG_MANEUVER_INIT
-   MessageInterface::ShowMessage("   streamID=%d\n", streamID);
-   MessageInterface::ShowMessage
-      ("Maneuver::Initialize() this=<%p>'%s' returning true\n", this,
-       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-   #endif
-   #endif
-   
-   if (elementIspMassData != NULL)
+   if (GmatCommand::Initialize())
    {
-      delete [] elementIspMassData;
-      elementIspMassData = NULL;
-   }
+      GmatBase *mapObj = NULL;
+      if ((mapObj = FindObject(burnName)) == NULL)
+         throw CommandException("Maneuver command cannot find the Burn " +
+               burnName);
+      if (mapObj->IsOfType(Gmat::BURN))
+         burn = (Burn *)mapObj;
+      else
+         throw CommandException("The object " + burnName + " is not a burn, and "
+               "cannot be used in as such in a Maneuver command");
+   
+      if ((mapObj = FindObject(satName)) == NULL)
+         throw CommandException("Maneuver command cannot find the Spacecraft " +
+               satName);
+      if (mapObj->IsOfType(Gmat::SPACECRAFT))
+         sat = (Spacecraft *)mapObj;
+      else
+         throw CommandException("The object " + satName + " is not a spacecraft, "
+               "and cannot be used in as such in a Maneuver command");
 
-   firedOnce = false;
-   return true;
+      #ifdef DEBUG_MANEUVER_INIT
+      MessageInterface::ShowMessage("   streamID=%d\n", streamID);
+      MessageInterface::ShowMessage
+         ("Maneuver::Initialize() this=<%p>'%s' returning true\n", this,
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      #endif
+
+      if (elementIspMassData != NULL)
+      {
+         delete [] elementIspMassData;
+         elementIspMassData = NULL;
+      }
+   
+      firedOnce = false;
+      retval = true;
+   }
+   else
+      isInitialized = false;
+   
+   return retval;
 }
 
 
@@ -624,16 +622,18 @@ bool Maneuver::Initialize()
 bool Maneuver::Execute()
 {
    #ifdef DEBUG_MANEUVER_EXEC
-      MessageInterface::ShowMessage("Maneuver::Execute this=<%p> maneuvering %s\n",
-            this, ((sat == NULL) ? "a NULL spaceecraft" : sat->GetName().c_str()));
+      MessageInterface::ShowMessage("Maneuver::Execute this=<%p> maneuvering "
+            "%s\n", this, ((sat == NULL) ? "a NULL spaceecraft" :
+               sat->GetName().c_str()));
    #endif
       
    Real epoch = sat->GetRealParameter("A1Epoch");
    
    #ifdef DEBUG_MANEUVER_EXEC
-   Rvector6 state = sat->GetState(0); // Get cartesian state
-   MessageInterface::ShowMessage
-      ("   state before maneuver at epoch %f\n   %s\n", epoch, state.ToString().c_str());
+      Rvector6 state = sat->GetState(0); // Get cartesian state
+      MessageInterface::ShowMessage
+         ("   state before maneuver at epoch %f\n   %s\n", epoch,
+               state.ToString().c_str());
    #endif
    
    burn->SetSpacecraftToManeuver(sat);
@@ -643,20 +643,22 @@ bool Maneuver::Execute()
    
    bool retval = burn->Fire(NULL, epoch);
    
-   // Reset maneuvering to Publisher so that any subscriber can do its own action
+   // Reset maneuvering to Publisher so that any subscriber can do its action
    publisher->SetManeuvering(this, false, epoch, satName, "ImpulsiveBurn");
    
    #ifdef DEBUG_MANEUVER_EXEC
-   state = sat->GetState(0); // Get cartesian state
-   MessageInterface::ShowMessage
-      ("   state after  maneuver at epoch %f \n   %s", epoch, state.ToString().c_str());
+      state = sat->GetState(0); // Get Cartesian state
+      MessageInterface::ShowMessage
+         ("   state after  maneuver at epoch %f \n   %s", epoch,
+               state.ToString().c_str());
    #endif
    
    firedOnce = true;
    BuildCommandSummary(true);
    
    #ifdef DEBUG_MANEUVER_EXEC
-      MessageInterface::ShowMessage("Maneuver::Execute this=<%p> complete\n", this);
+      MessageInterface::ShowMessage("Maneuver::Execute this=<%p> complete\n",
+            this);
    #endif
 
    return retval;
@@ -673,8 +675,7 @@ bool Maneuver::Execute()
 /**
  * This method saves the maneuver-specific data needed for the Command Summary
  *
- * @param <commandCompleted> has the command completed
- *
+ * @param commandCompleted Has the command completed?
  */
 //------------------------------------------------------------------------------
 void Maneuver::BuildCommandSummary(bool commandCompleted)
@@ -688,32 +689,44 @@ void Maneuver::BuildCommandSummary(bool commandCompleted)
    elementIspMassData = new Real[5];
 
    #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
-      MessageInterface::ShowMessage("Now about to save the Maneuver-specific data for Command Summary\n");
+      MessageInterface::ShowMessage("Now about to save the Maneuver-specific "
+            "data for the Command Summary\n");
    #endif
 
    // Save the Maneuver-specific data
-   scNameM     = burn->GetStringParameter(burn->GetParameterID("SpacecraftName"));
-   csNameM     = burn->GetStringParameter(burn->GetParameterID("CoordinateSystem"));
+   scNameM     = burn->GetStringParameter(burn->GetParameterID(
+                     "SpacecraftName"));
+   csNameM     = burn->GetStringParameter(burn->GetParameterID(
+                     "CoordinateSystem"));
    originNameM = burn->GetStringParameter(burn->GetParameterID("Origin"));
    axesNameM   = burn->GetStringParameter(burn->GetParameterID("Axes"));
 
-   decMassM    = burn->GetBooleanParameter(burn->GetParameterID("DecrementMass"));
+   decMassM    = burn->GetBooleanParameter(burn->GetParameterID(
+                     "DecrementMass"));
 
    #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
       MessageInterface::ShowMessage("... scNameM     = %s\n", scNameM.c_str());
       MessageInterface::ShowMessage("... csNameM     = %s\n", csNameM.c_str());
-      MessageInterface::ShowMessage("... originNameM = %s\n", originNameM.c_str());
-      MessageInterface::ShowMessage("... axesNameM   = %s\n", axesNameM.c_str());
-      MessageInterface::ShowMessage("... decMassM    = %s\n", (decMassM? "true" : "false"));
+      MessageInterface::ShowMessage("... originNameM = %s\n",
+            originNameM.c_str());
+      MessageInterface::ShowMessage("... axesNameM   = %s\n",
+            axesNameM.c_str());
+      MessageInterface::ShowMessage("... decMassM    = %s\n",
+            (decMassM ? "true" : "false"));
    #endif
 
-   elementIspMassData[0] = burn->GetRealParameter(burn->GetParameterID("Element1"));
-   elementIspMassData[1] = burn->GetRealParameter(burn->GetParameterID("Element2"));
-   elementIspMassData[2] = burn->GetRealParameter(burn->GetParameterID("Element3"));
+   elementIspMassData[0] = burn->GetRealParameter(burn->GetParameterID(
+         "Element1"));
+   elementIspMassData[1] = burn->GetRealParameter(burn->GetParameterID(
+         "Element2"));
+   elementIspMassData[2] = burn->GetRealParameter(burn->GetParameterID(
+         "Element3"));
    if (decMassM)
    {
-      elementIspMassData[3] = burn->GetRealParameter(burn->GetParameterID("Isp"));
-      elementIspMassData[4] = burn->GetRealParameter(burn->GetParameterID("DeltaTankMass"));
+      elementIspMassData[3] = burn->GetRealParameter(burn->GetParameterID(
+            "Isp"));
+      elementIspMassData[4] = burn->GetRealParameter(burn->GetParameterID(
+            "DeltaTankMass"));
    }
    else
    {
@@ -721,18 +734,25 @@ void Maneuver::BuildCommandSummary(bool commandCompleted)
       elementIspMassData[4] = 0.0;
    }
    #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
-      MessageInterface::ShowMessage("... Element1          = %12.10f\n", elementIspMassData[0]);
-      MessageInterface::ShowMessage("... Element2          = %12.10f\n", elementIspMassData[1]);
-      MessageInterface::ShowMessage("... Element3          = %12.10f\n", elementIspMassData[2]);
-      MessageInterface::ShowMessage("... Isp               = %12.10f\n", elementIspMassData[3]);
-      MessageInterface::ShowMessage("... DeltaTankMass     = %12.10f\n", elementIspMassData[4]);
+      MessageInterface::ShowMessage("... Element1          = %12.10f\n",
+            elementIspMassData[0]);
+      MessageInterface::ShowMessage("... Element2          = %12.10f\n",
+            elementIspMassData[1]);
+      MessageInterface::ShowMessage("... Element3          = %12.10f\n",
+            elementIspMassData[2]);
+      MessageInterface::ShowMessage("... Isp               = %12.10f\n",
+            elementIspMassData[3]);
+      MessageInterface::ShowMessage("... DeltaTankMass     = %12.10f\n",
+            elementIspMassData[4]);
    #endif
 
    tankNamesM = burn->GetStringArrayParameter(burn->GetParameterID("Tank"));
+
    #ifdef DEBUG_MANEUVER_COMMAND_SUMMARY
       MessageInterface::ShowMessage("... tankNamesM        =\n");
       for (unsigned int ii = 0; ii < tankNamesM.size(); ii++)
-         MessageInterface::ShowMessage("...    %s\n", tankNamesM.at(ii).c_str());
+         MessageInterface::ShowMessage("...    %s\n",
+               tankNamesM.at(ii).c_str());
    #endif
 }
 
@@ -743,8 +763,7 @@ void Maneuver::BuildCommandSummary(bool commandCompleted)
 /**
  * This method builds the Maneuver-specific part of the Command Summary string.
  *
- * @param <commandCompleted> has the command completed?
- *
+ * @param commandCompleted Has the command completed?
  */
 //------------------------------------------------------------------------------
 void Maneuver::BuildCommandSummaryString(bool commandCompleted)
@@ -766,10 +785,12 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
            << "\n        Axes:               " << axesNameM
 
            << "\n        Delta V Vector:"
-           << "\n           Element 1:  " << BuildNumber(elementIspMassData[0]) << " km/s"
-           << "\n           Element 2:  " << BuildNumber(elementIspMassData[1]) << " km/s"
-           << "\n           Element 3:  " << BuildNumber(elementIspMassData[2]) << " km/s"
-           << "\n";
+           << "\n           Element 1:  "
+           << BuildNumber(elementIspMassData[0]) << " km/s"
+           << "\n           Element 2:  "
+           << BuildNumber(elementIspMassData[1]) << " km/s"
+           << "\n           Element 3:  "
+           << BuildNumber(elementIspMassData[2]) << " km/s\n";
 
       if (decMassM)
       {
@@ -788,16 +809,20 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
             for (UnsignedInt i = 0; i < tankNamesM.size(); ++i)
             {
                tanklist += tankNamesM[i];
-               tanklist += ", ";
+               if (i != (tankNamesM.size() - 1))
+                  tanklist += ", ";
                if (i == (tankNamesM.size() - 2))
                   tanklist += "and ";
             }
          }
 
          data << "\n        Mass depletion from " << tanklist <<":  "
-              << "\n           Delta V:      "    << BuildNumber(thrust) << " km/s"
-              << "\n           Isp:          "    << BuildNumber(elementIspMassData[3]) << " s"
-              << "\n           Mass change:  "    << BuildNumber(elementIspMassData[4]) << " kg"
+              << "\n           Delta V:      "
+              << BuildNumber(thrust) << " km/s"
+              << "\n           Isp:          "
+              << BuildNumber(elementIspMassData[3]) << " s"
+              << "\n           Mass change:  "
+              << BuildNumber(elementIspMassData[4]) << " kg"
               << "\n";
 		 data << "\n";
 
