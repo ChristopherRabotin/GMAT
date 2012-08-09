@@ -77,7 +77,7 @@ This document describes the steps needed to build GMAT using Visual Studio 2010 
 
 The General Mission Analysis Tool, GMAT, is a space trajectory optimization and mission analysis system developed by NASA and private industry in the spirit of the NASA Vision. GMAT contains new technology and is a testbed for future technology development. To satisfy NASA's mandate and maximize technology transfer, GMAT is an open source software system licensed under the NASA Open Source Agreement.  Interested parties are encouraged to use GMAT to plan spacecraft missions, to build the system when they have requirements for features not yet included in GMAT, and to contribute new capabilities to the system either through direct contributions to the code base or through plugin libraries.
 
-This document describes the steps a new developer takes to set up a build environment for GMAT using Microsoft's Visual Studio development system.  The instructions were written using Visual Studio 2010 Express Edition, and validated using both the Express Edition and the Professional Edition.  The following instructions assume that the developer is running a Windows XP, Vista, or Windows~7 based computer.  Separate instructions are available for users building GMAT with the Gnu Compiler Collection (gcc) on Windows, Mac, or Linux based computers.
+This document describes the steps a new developer takes to set up a build environment for GMAT using Microsoft's Visual Studio development system.  The instructions were written using Visual Studio 2010 Express Edition, and validated using both the Express Edition and the Professional Edition.  The following instructions assume that the developer is running a Windows XP, Vista, or Windows~7 based computer.  Separate instructions are available for users building GMAT with the GNU Compiler Collection (gcc) on Windows, Mac, or Linux based computers.
 
 The following sections describe installation of the compiler, folder arrangements and code used in the GMAT build files, preliminary steps necessary to collect and build the libraries GMAT needs, and the build steps for GMAT itself.  The document concludes with instructions for plugin libraries that GMAT uses to interface with MATLAB and the MATLAB Optimization toolbox, to perform estimation (the estimation plugin is a preview of capabilities still in development), and the VF13ad optimizer (core code available separately).
 
@@ -159,7 +159,7 @@ Create a folder for building GMAT.  I'll use C:\textbackslash GmatVS as the root
 \end{figure}
 
 
-\noindent At this point, your folder structure should match the structure shown in Figure~\ref{fig:FolderStructure}.  If you want to also build the 64-bit release and have either a paid version of Visual Studio 2010 (that is, Professional, Premium, or Ultimate), or if you installed the 64-bit tools in the Windows SDK so you can build a 64-bit version of GMAT, add these folders for the 64-bit versions of the 3rd party tools:
+\noindent At this point, your folder structure should match the structure shown in Figure~\ref{fig:FolderStructure}.  If you want to also build the 64-bit release and have either a paid version of Visual Studio 2010 (that is, Professional, Premium, or Ultimate), or if you installed the 64-bit tools in the Windows SDK, add these folders for the 64-bit versions of the 3rd party tools:
 \begin{itemize}
 \item cspice64
 \item f2c64
@@ -174,7 +174,7 @@ GMAT's source code is located in a Subversion repository at SourceForge.  In add
 \begin{quote}
 https://gmat.svn.sourceforge.net/svnroot/gmat/trunk
 \end{quote}
-\noindent Check out the entire source tree from that location.  When you check out the tree, you'll retrieve GMAT's source code, development files, documentation, source for several plugin libraries, and the support files needed to run GMAT.
+\noindent Check out the entire source tree from that location into the GmatDevelopment folder you created earlier.  When you check out the tree, you'll retrieve GMAT's source code, development files, documentation, source for several plugin libraries, and the support files needed to run GMAT.
 
 \section{Building wxWidgets}
 
@@ -183,12 +183,12 @@ From this point through Section~\ref{sec:Plugins} we will concentrate on the 32-
 \subsection{Install the wx Code}
 
 \begin{enumerate}
-\item Download wxWidgets 2.8 from http://wxwidgets.org/downloads/.  Use the latest stable version of the 2.8 tree (2.8.12 at this writing), and download the wxMSW package.
+\item Download wxWidgets 2.8 from http://wxwidgets.org/downloads/.  Use the latest stable version of the 2.8 tree (2.8.12 at this writing), and download the wxMSW zip package.
 \item Unpack the wx code into the folder named wxWidgets in your Gmat3rdParty folder.  You should see folders named art, build, contrib, demos, docs, include, lib, locale, samples, src, and utils in the wxWidgets folder when finished.
 \item Visual Studio 2010 has trouble processing the Visual C++ project files that ship with wx.  Instead, we'll use files already configured for wx at Thinking Systems.
 \begin{enumerate}
-\item The Visual Studio 2010 solution and project files for wxWidgets are located in an archive file in the GMAT folders you checked out earlier.  Find the file wxWidgets.zip in the build\textbackslash GmatVS2010 folder of that working copy of the code.
-\item Unpack the wxWidgets.zip archive into your wxWidgets folder.
+\item The Visual Studio 2010 solution and project files for wxWidgets are located in an archive file in the GMAT folders you checked out earlier.  Find the file wxWidgets.zip in the build\textbackslash windows-VS2010 folder of that working copy of the code.
+\item Unpack the wxWidgets.zip archive into your wxWidgets folder, overwriting existing files as necessary.
 \item Check to see that the file wx\_dll.sln is in your Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder.  (This step ensures that all of the build files are properly positioned in the wxWidgets folder structure.  The key files are wx\_dll.sln in the Gmat3rdParty\textbackslash wxWidgets\textbackslash build\textbackslash msw folder and wxcontrib\_dll.sln in the Gmat3rdParty\textbackslash wxWidgets\textbackslash contrib\textbackslash build folder.)
 \end{enumerate}
 
@@ -293,7 +293,7 @@ At this point, GMAT should build without further configuration.  Follow these st
 \end{itemize}
 \item Set the configuration to ReleaseWithoutF2C, Release, or ReleaseWithSPICE, depending on the elements installed in previous sections.
 \item Right click on the GMAT\_wxGui project, and select Rebuild to completely build GMAT.  This process takes a few minutes.
-\item Open a windows explorer and browse to your GmatDevelopment\textbackslash bin folder.  You should see GMAT.exe there, along with libGmatBase.dll and your wxWidgets libraries.
+\item Open Windows Explorer and browse to your GmatDevelopment\textbackslash application\textbackslash bin folder.  You should see GMAT.exe there, along with libGmatBase.dll and your wxWidgets libraries.
 \item Set up the GMAT data files and other files needed to run GMAT (See Appendix A).
 \item Double click on the GMAT.exe file to run GMAT.  Press the Run button to run the default mission.  Rejoice.
 \end{enumerate}
