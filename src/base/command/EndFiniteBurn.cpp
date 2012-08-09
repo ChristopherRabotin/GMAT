@@ -175,7 +175,7 @@ std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
          return burnName;
          
       default:
-         ;
+         break;
    }
    
    return GmatCommand::GetRefObjectName(type);
@@ -271,7 +271,19 @@ bool EndFiniteBurn::SetRefObjectName(const Gmat::ObjectType type,
                ("Setting EndFiniteBurn reference spacecraft \"%s\"\n", 
                 name.c_str());
          #endif
+         if (find(satNames.begin(), satNames.end(), name) != satNames.end())
+         {
+            MessageInterface::ShowMessage("In the EndFiniteBurn command %s, "
+                  "the spacecraft %s is set more than once.  Only one instance "
+                  "will be used.\n",
+                  GetGeneratingString(Gmat::NO_COMMENTS).c_str(), name.c_str());
+            return true;
+         }
          satNames.push_back(name);
+         if (satNames.size() > 1)
+            throw CommandException("EndFiniteBurn commands do not currently "
+                  "support multiple Spacecraft; please toggle finite burns off "
+                  "one spacecraft at a time.");
          return true;
       
       case Gmat::FINITE_BURN:
@@ -288,7 +300,7 @@ bool EndFiniteBurn::SetRefObjectName(const Gmat::ObjectType type,
                ("EndFiniteBurn reference object \"%s\" not set!\n", 
                 name.c_str());
          #endif
-         ;
+         break;
    }
    
    return GmatCommand::SetRefObjectName(type, name);
