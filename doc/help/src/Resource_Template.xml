@@ -23,7 +23,8 @@
   <refnamediv>
     <refname>ResourceName</refname>
 
-    <refpurpose>A one-sentence description of the command</refpurpose>
+    <refpurpose>A one-line fragment describing the resource, without a
+    period</refpurpose>
   </refnamediv>
 
   <refsection>
