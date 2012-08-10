@@ -89,7 +89,7 @@ public:
                         GetWrapperObjectNameArray();
    virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
                                           const std::string &name);
-   virtual void         ClearWrappers();
+   virtual void         ClearWrappers(bool clearX = false, bool clearY = true);
    
    // for rename reference objects
    virtual bool         RenameRefObject(const Gmat::ObjectType type,

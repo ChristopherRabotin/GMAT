@@ -439,8 +439,6 @@ void XyPlotSetupPanel::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
-      //MessageInterface::ShowMessage
-      //   ("XyPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetFullMessage().c_str());
    }
 }
 
@@ -452,82 +450,112 @@ void XyPlotSetupPanel::SaveData()
 {
    #if DEBUG_XYPLOT_PANEL_SAVE
    MessageInterface::ShowMessage
-      ("XyPlotSetupPanel::SaveData() mNumXParams=%d, mNumYParams=%d, "
+      ("XyPlotSetupPanel::SaveData() entered, mNumXParams=%d, mNumYParams=%d, "
        "mXParamChanged=%d, mYParamChanged=%d\n",
        mNumXParams, mNumYParams, mXParamChanged, mYParamChanged);
    #endif
    
    canClose = true;
    
-   mXyPlot->Activate(showPlotCheckBox->IsChecked());
-   
-   mXyPlot->SetBooleanParameter(XyPlot::SHOW_GRID, showGridCheckBox->IsChecked());
-
-   mXyPlot->SetStringParameter(Subscriber::SOLVER_ITERATIONS,
-                               mSolverIterComboBox->GetValue().c_str());
-   
-   // set X parameter
-   if (mXParamChanged)
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
    {
-      if (mXSelectedListBox->GetCount() == 0 && showPlotCheckBox->IsChecked())
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "X parameter not selected. "
-             "The plot will not be activated.");
-         mXyPlot->Activate(false);
-      }
-      else
-      {
-         std::string selXName = std::string(mXSelectedListBox->GetString(0).c_str());
-         mXyPlot->SetStringParameter(XyPlot::XVARIABLE, selXName);
-         mXParamChanged = false;
-      }
-   }
-   
-   // set Y parameters
-   if (mYParamChanged)
-   {
-      int numYParams = mYSelectedListBox->GetCount();
+      Subscriber *clonedObj = (Subscriber*)mXyPlot->Clone();
       
-      mNumYParams = numYParams;
-      if (mNumYParams == 0 && showPlotCheckBox->IsChecked())
+      clonedObj->Activate(showPlotCheckBox->IsChecked());
+      clonedObj->SetBooleanParameter(XyPlot::SHOW_GRID, showGridCheckBox->IsChecked());
+      clonedObj->SetStringParameter(Subscriber::SOLVER_ITERATIONS,
+                                  mSolverIterComboBox->GetValue().c_str());
+      
+      // set X parameter
+      if (mXParamChanged)
       {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,"Y parameters not selected. "
-             "The plot will not be activated.");
-         mXyPlot->Activate(false);
+         if (mXSelectedListBox->GetCount() == 0 && showPlotCheckBox->IsChecked())
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "X parameter not selected. "
+                "The plot will not be activated.");
+            clonedObj->Activate(false);
+         }
+         else
+         {
+            std::string selXName = std::string(mXSelectedListBox->GetString(0).c_str());
+            clonedObj->SetStringParameter(XyPlot::XVARIABLE, selXName);
+            //mXParamChanged = false;
+         }
       }
-      else if (numYParams > GmatPlot::MAX_XY_CURVE)
+      
+      // set Y parameters
+      if (mYParamChanged)
       {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "Selected Y parameter count is greater than 6.\n"
-             "First 6 parameters will be plotted.");
+         int numYParams = mYSelectedListBox->GetCount();
          
-         mNumYParams = GmatPlot::MAX_XY_CURVE;
-      }
-      else
-      {
          mNumYParams = numYParams;
+         if (mNumYParams == 0 && showPlotCheckBox->IsChecked())
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_,"Y parameters not selected. "
+                "The plot will not be activated.");
+            clonedObj->Activate(false);
+         }
+         // Actually MAX_XY_CURVE is not used so commented out (LOJ: 2012.08.09)
+         // @todo Remove this code and remove PlotTypes.hpp
+         //else if (numYParams > GmatPlot::MAX_XY_CURVE)
+         //{
+         //   MessageInterface::PopupMessage
+         //      (Gmat::WARNING_, "Selected Y parameter count is greater than %d.\n"
+         //       "First %d parameters will be plotted.", GmatPlot::MAX_XY_CURVE,
+         //       GmatPlot::MAX_XY_CURVE);
+         //   
+         //   mNumYParams = GmatPlot::MAX_XY_CURVE;
+         //}
+         else
+         {
+            mNumYParams = numYParams;
+            //mYParamChanged = false;
+         }
+         
+         if (mNumYParams >= 0) // >=0 because the list needs to be cleared
+         {
+            clonedObj->TakeAction("Clear");
+            for (int i=0; i<mNumYParams; i++)
+            {
+               #if DEBUG_XYPLOT_PANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("XyPlotSetupPanel::SaveData() yVar = %s\n",
+                   mYSelectedListBox->GetString(i).c_str());
+               #endif
+               std::string selYName = std::string(mYSelectedListBox->GetString(i).c_str());
+               clonedObj->SetStringParameter(XyPlot::YVARIABLES, selYName, i);
+            }
+         }
+      }
+      
+      if (mXParamChanged || mYParamChanged)
+      {
+         #if DEBUG_XYPLOT_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("   Calling theGuiInterpreter->ValidateSubscriber()\n");
+         #endif
+         theGuiInterpreter->ValidateSubscriber(clonedObj);
+         mXParamChanged = false;
          mYParamChanged = false;
       }
       
-      if (mNumYParams >= 0) // >=0 because the list needs to be cleared
-      {
-         mXyPlot->TakeAction("Clear");
-         for (int i=0; i<mNumYParams; i++)
-         {
-            #if DEBUG_XYPLOT_PANEL_SAVE
-               MessageInterface::ShowMessage
-                  ("XyPlotSetupPanel::SaveData() DepVar = %s\n",
-                   mYSelectedListBox->GetString(i).c_str());
-            #endif
-            std::string selYName = std::string(mYSelectedListBox->GetString(i).c_str());
-            mXyPlot->SetStringParameter(XyPlot::YVARIABLES, selYName, i);
-         }
-      }
+      mXyPlot->Copy(clonedObj);
+      delete clonedObj;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
+      return;
    }
    
+   #if DEBUG_XYPLOT_PANEL_SAVE
+   MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() leaving\n");
+   #endif
 }
-
-
 

@@ -324,7 +324,8 @@ bool XyPlot::Initialize()
       
       // Now using wrappers (LOJ: 2012.08.02)
       //if (mXParam == NULL || mYParams[0] == NULL)
-      if (xParamWrappers[0] == NULL || yParamWrappers[0] == NULL)
+      //if (xParamWrappers[0] == NULL || yParamWrappers[0] == NULL)
+      if (xParamWrappers.empty() || yParamWrappers.empty())
       {
          active = false;
          MessageInterface::PopupMessage
@@ -1287,11 +1288,15 @@ const StringArray& XyPlot::GetWrapperObjectNameArray()
    yWrapperObjectNames.clear();
    allWrapperObjectNames.clear();
    
-   xWrapperObjectNames.push_back(mXParamName);
+   // Do not add blank name (Fix for GMT-3023 LOJ: 2012.08.09)
+   if (mXParamName != "")
+      xWrapperObjectNames.push_back(mXParamName);
    yWrapperObjectNames.insert(yWrapperObjectNames.begin(), mYParamNames.begin(),
                               mYParamNames.end());
    
-   allWrapperObjectNames.push_back(mXParamName);
+   // Do not add blank name (Fix for GMT-3023 LOJ: 2012.08.09)
+   if (mXParamName != "")
+      allWrapperObjectNames.push_back(mXParamName);
    allWrapperObjectNames.insert(allWrapperObjectNames.end(), mYParamNames.begin(),
                                 mYParamNames.end());
    
@@ -1309,7 +1314,7 @@ const StringArray& XyPlot::GetWrapperObjectNameArray()
       ("XyPlot::GetWrapperObjectNameArray() returning, allWrapperObjectNames.size()=%d\n",
        allWrapperObjectNames.size());
    for (UnsignedInt i = 0; i < allWrapperObjectNames.size(); i++)
-      MessageInterface::ShowMessage("   %s\n", allWrapperObjectNames[i].c_str());
+      MessageInterface::ShowMessage("   '%s'\n", allWrapperObjectNames[i].c_str());
    #endif
    
    return allWrapperObjectNames;
@@ -1381,11 +1386,13 @@ bool XyPlot::ClearYParameters()
    DeletePlotCurves();
    mYParams.clear();
    mYParamNames.clear();
+   mAllParamNames.clear();
    mNumYParams = 0;
    mPlotTitle = "";
    mXAxisTitle = "";
    mYAxisTitle = "";
    mIsXyPlotWindowSet = false;
+   ClearWrappers(false, true);
    return true;
 }
 

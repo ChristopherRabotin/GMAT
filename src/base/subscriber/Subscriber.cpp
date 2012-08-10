@@ -181,6 +181,8 @@ Subscriber::Subscriber(const Subscriber &copy) :
    isMinimized       = false;
 
 #ifdef __ENABLE_CLONING_WRAPPERS__
+   // Clear old wrappers
+   ClearWrappers(true, true);
    // Create new wrappers by cloning (LOJ: 2009.03.10)
    CloneWrappers(xParamWrappers, copy.xParamWrappers);
    CloneWrappers(yParamWrappers, copy.yParamWrappers);
@@ -246,7 +248,7 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    
 #ifdef __ENABLE_CLONING_WRAPPERS__
    // Clear old wrappers
-   ClearWrappers();
+   ClearWrappers(true, true);
    // Create new wrappers by cloning (LOJ: 2009.03.10)
    CloneWrappers(xParamWrappers, rhs.xParamWrappers);
    CloneWrappers(yParamWrappers, rhs.yParamWrappers);
@@ -274,14 +276,14 @@ Subscriber::~Subscriber()
 #else
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("~Subscriber() <%p>'%s' entered, wrappersCopied = %d\n", this, GetName().c_str(),
-       wrappersCopied);
+      ("~Subscriber() <%p>'%s' entered, wrappers%s\n", this, GetName().c_str(),
+       wrappersCopied ? " copied" : " did not copied");
    #endif
    
    // Since we just copies wrappers, we can only delete if it is not a cloned
    if (!wrappersCopied)
    {
-      ClearWrappers();
+      ClearWrappers(true, true);
    }
    else
    {
@@ -756,6 +758,18 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
    bool retval2 = true;
    ElementWrapper *ew;
    oldWrappersToDelete.clear();
+
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
+       xWrapperObjectNames.size(), yWrapperObjectNames.size());
+   for (unsigned int i = 0; i < xWrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage
+         ("   xWrapperObjectNames[%d] = '%s'\n", i, xWrapperObjectNames[i].c_str());
+   for (unsigned int i = 0; i < yWrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage
+         ("   yWrapperObjectNames[%d] = '%s'\n", i, yWrapperObjectNames[i].c_str());
+   #endif
    
    if (xWrapperObjectNames.size() > 0)
       retval1 = SetActualElementWrapper(xWrapperObjectNames, xParamWrappers, toWrapper, name);  
@@ -789,71 +803,79 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
 
 
 //------------------------------------------------------------------------------
-// void ClearWrappers()
+// void ClearWrappers(bool clearX, bool clearY)
 //------------------------------------------------------------------------------
 /*
  * Deletes and sets all wrapper pointers to NULL but leaves size unchanged.
  */
 //------------------------------------------------------------------------------
-void Subscriber::ClearWrappers()
+void Subscriber::ClearWrappers(bool clearX, bool clearY)
 {
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("Subscriber::ClearWrappers() <%p>'%s' entered\n", this, GetName().c_str());
+      ("Subscriber::ClearWrappers() <%p>'%s' entered, clearX=%d, clearY=%d\n",
+       this, GetName().c_str(), clearX, clearY);
    WriteWrappers();
    #endif
    
    ElementWrapper *wrapper;
-   for (UnsignedInt i = 0; i < xParamWrappers.size(); ++i)
+
+   if (clearX)
    {
-      wrapper = xParamWrappers[i];
-      
-      // check if wrapper is in the yParamWrappers
-      // if wrapper found in yParamWrappers, delete in the yParamWrappers
-      if (wrapper != NULL &&
-          find(yParamWrappers.begin(), yParamWrappers.end(), wrapper) ==
-          yParamWrappers.end())
+      for (UnsignedInt i = 0; i < xParamWrappers.size(); ++i)
       {
+         wrapper = xParamWrappers[i];
+         
+         // check if wrapper is in the yParamWrappers
+         // if wrapper found in yParamWrappers, delete in the yParamWrappers
+         if (wrapper != NULL &&
+             find(yParamWrappers.begin(), yParamWrappers.end(), wrapper) ==
+             yParamWrappers.end())
+         {
+            #ifdef DEBUG_WRAPPER_CODE
+            MessageInterface::ShowMessage("   deleting depParamWrapper = <%p>\n", wrapper);
+            #endif
+            
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (wrapper, wrapper->GetDescription(), "Subscriber::ClearWrappers()",
+                "deleting old dep wrapper");
+            #endif
+            delete wrapper;
+            wrapper = NULL;
+         }
+         
+         xParamWrappers[i] = NULL;
+      }
+      xParamWrappers.clear();
+   }
+   
+   if (clearY)
+   {
+      for (UnsignedInt i = 0; i < yParamWrappers.size(); ++i)
+      {
+         wrapper = yParamWrappers[i];
+         
          #ifdef DEBUG_WRAPPER_CODE
-         MessageInterface::ShowMessage("   deleting depParamWrapper = <%p>\n", wrapper);
+         MessageInterface::ShowMessage("   deleting paramWrapper = <%p>\n", wrapper);
          #endif
          
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (wrapper, wrapper->GetDescription(), "Subscriber::ClearWrappers()",
-             "deleting old dep wrapper");
-         #endif
-         delete wrapper;
-         wrapper = NULL;
+         if (wrapper != NULL)
+         {
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (wrapper, wrapper->GetDescription(), "Subscriber::ClearWrappers()",
+                "deleting old wrapper");
+            #endif
+            delete wrapper;
+            wrapper = NULL;
+         }
+         
+         yParamWrappers[i] = NULL;
       }
-      
-      xParamWrappers[i] = NULL;
+      yParamWrappers.clear();
    }
    
-   for (UnsignedInt i = 0; i < yParamWrappers.size(); ++i)
-   {
-      wrapper = yParamWrappers[i];
-      
-      #ifdef DEBUG_WRAPPER_CODE
-      MessageInterface::ShowMessage("   deleting paramWrapper = <%p>\n", wrapper);
-      #endif
-      
-      if (wrapper != NULL)
-      {
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (wrapper, wrapper->GetDescription(), "Subscriber::ClearWrappers()",
-             "deleting old wrapper");
-         #endif
-         delete wrapper;
-         wrapper = NULL;
-      }
-      
-      yParamWrappers[i] = NULL;
-   }
-   
-   xParamWrappers.clear();
-   yParamWrappers.clear();
    
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
@@ -1506,8 +1528,9 @@ bool Subscriber::SetActualElementWrapper(const StringArray &wrapperNames,
 {
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("Subscriber::SetActualElementWrapper() entered, toWrapper=<%p>, name='%s'\n",
-       toWrapper, name.c_str());
+      ("Subscriber::SetActualElementWrapper() entered, wrapperNames.size()=%d, "
+       "paramWrappers.size()=%d, toWrapper=<%p>, name='%s'\n", wrapperNames.size(),
+       paramWrappers.size(), toWrapper, name.c_str());
    #endif
    
    ElementWrapper *ew;
@@ -1562,6 +1585,7 @@ bool Subscriber::CloneWrappers(WrapperArray &toWrappers,
    MessageInterface::ShowMessage
       ("Subscriber::CloneWrappers() <%p>'%s' entered\n", this, GetName().c_str());
    #endif
+   toWrappers.clear();
    for (UnsignedInt i=0; i<fromWrappers.size(); i++)
    {
       if (fromWrappers[i] != NULL)

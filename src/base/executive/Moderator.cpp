@@ -2070,7 +2070,7 @@ GmatBase* Moderator::CreateOtherObject(Gmat::ObjectType objType, const std::stri
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateOtherObject()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateOtherObject()\n" +
                                        e.GetFullMessage());
       }
       
@@ -2209,7 +2209,7 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateCalculatedPoint()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateCalculatedPoint()\n" +
                                        e.GetFullMessage());
       }
       
@@ -2412,7 +2412,7 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateSpacecraft()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateSpacecraft()\n" +
                                        e.GetFullMessage());
       }
       
@@ -2562,7 +2562,7 @@ SpacePoint* Moderator::CreateSpacePoint(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateSpacePoint()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateSpacePoint()\n" +
                                        e.GetFullMessage());
       }
    
@@ -2648,7 +2648,7 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateHardware()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateHardware()\n" +
                                        e.GetFullMessage());
       }
       
@@ -2809,7 +2809,7 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreatePhysicalModel()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreatePhysicalModel()\n" +
                                        e.GetFullMessage());
       }
       
@@ -2873,7 +2873,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreatePhysicalModel()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreatePhysicalModel()\n" +
                                        e.GetFullMessage());
       }
       
@@ -2975,8 +2975,8 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage
-            ("Moderator::CreateAtmosphereModel()\n" + e.GetFullMessage());
+         MessageInterface::ShowMessage("In Moderator::CreateAtmosphereModel()\n" +
+                                       e.GetFullMessage());
       }
     
       return obj;
@@ -3072,7 +3072,7 @@ Burn* Moderator::CreateBurn(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateBurn()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateBurn()\n" +
                                        e.GetFullMessage());
       }
       
@@ -3378,7 +3378,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       // Use exception to remove Visual C++ warning
       e.GetMessageType();
       #if DEBUG_CREATE_PARAMETER
-      MessageInterface::ShowMessage("Moderator::CreateParameter()\n" +
+      MessageInterface::ShowMessage("In Moderator::CreateParameter()\n" +
                                     e.GetFullMessage() + "\n");
       #endif
    }
@@ -3472,7 +3472,7 @@ ODEModel* Moderator::CreateODEModel(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateODEModel()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateODEModel()\n" +
                                        e.GetFullMessage() + "\n");
       }
       
@@ -3592,7 +3592,7 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateSolver()\n" +
                                        e.GetFullMessage());
       }
       
@@ -4530,7 +4530,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          // Use exception to remove Visual C++ warning
          e.GetMessageType();
          #if DEBUG_CREATE_COORDSYS
-         MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem() %s\n",
+         MessageInterface::ShowMessage("In Moderator::CreateCoordinateSystem() %s\n",
                                        e.GetFullMessage().c_str());
          #endif
       }
@@ -4670,6 +4670,9 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                obj->SetStringParameter(XyPlot::XVARIABLE, GetDefaultX()->GetName());
                obj->SetStringParameter(XyPlot::YVARIABLES, GetDefaultY()->GetName(), 0);
                obj->Activate(true);
+               
+               // To validate and create element wrappers
+               theScriptInterpreter->ValidateSubscriber(obj);
             }
             else if (type == "ReportFile")
             {
@@ -4692,7 +4695,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateSubscriber()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateSubscriber()\n" +
                                        e.GetFullMessage());
       }
       
@@ -4851,7 +4854,7 @@ Subscriber* Moderator::CreateEphemerisFile(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateEphemerisFile()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateEphemerisFile()\n" +
                                        e.GetFullMessage());
       }
       
@@ -4958,7 +4961,7 @@ Function* Moderator::CreateFunction(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateFunction()\n" +
+         MessageInterface::ShowMessage("In Moderator::CreateFunction()\n" +
                                        e.GetFullMessage());
       }
       
@@ -5657,7 +5660,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage(e.GetFullMessage());
+      MessageInterface::ShowMessage("In Moderator::CreateDefaultCommand()\n" + e.GetFullMessage());
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    

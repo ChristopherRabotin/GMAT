@@ -1345,9 +1345,6 @@ void ReportFile::ClearParameters()
    mParamNames.clear();
    mNumParams = 0;
    ClearWrappers();
-   // commented out since these are cleared in Subscriber::ClearWrappers() (LOJ: 2009.03.10)
-   //depParamWrappers.clear();
-   //yParamWrappers.clear();
    initial = true;   
 }
 

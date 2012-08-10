@@ -1508,7 +1508,6 @@ bool Interpreter::ValidateSubscriber(GmatBase *obj)
    
    // This method can be called from other than Interpreter, so check if
    // object is SUBSCRIBER type
-   //if (obj->GetType() != Gmat::SUBSCRIBER)
    if (!obj->IsOfType(Gmat::SUBSCRIBER))
    {
       InterpreterException ex
@@ -1529,12 +1528,16 @@ bool Interpreter::ValidateSubscriber(GmatBase *obj)
    MessageInterface::ShowMessage
       ("In ValidateSubscriber, has %d wrapper names:\n", wrapperNames.size());
    for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
-      MessageInterface::ShowMessage("   %s\n", wrapperNames[ii].c_str());
+      MessageInterface::ShowMessage("   '%s'\n", wrapperNames[ii].c_str());
    #endif
    
    for (StringArray::const_iterator i = wrapperNames.begin();
         i != wrapperNames.end(); ++i)
    {
+      // Skip blank name (LOJ: 2012.08.09)
+      if ((*i) == "")
+         continue;
+      
       try
       {
          ElementWrapper *ew = theValidator->CreateElementWrapper(*i, true);
