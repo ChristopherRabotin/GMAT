@@ -70,9 +70,9 @@
 #include "MemoryTracker.hpp"
 #endif
 
-//---------------------------------
+//------------------------------------------------------------------------------
 //  static members
-//---------------------------------
+//------------------------------------------------------------------------------
 const std::string 
    GmatCommand::PARAMETER_TEXT[GmatCommandParamCount - GmatBaseParamCount] =
    {
@@ -85,6 +85,7 @@ const std::string
 const Gmat::ParameterType 
    GmatCommand::PARAMETER_TYPE[GmatCommandParamCount - GmatBaseParamCount] =
    {
+      Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE
    };
@@ -111,6 +112,8 @@ Integer GmatCommand::satTotalMassID;
 //------------------------------------------------------------------------------
 /**
  * Constructs GmatCommand core structures (default constructor).
+ *
+ * @param typeStr The command's scriptable name
  */
 //------------------------------------------------------------------------------
 GmatCommand::GmatCommand(const std::string &typeStr) :
@@ -139,14 +142,14 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    physicsBasedCommand  (false),
    includeInSummary     (true),
    summaryName          ("Unnamed"),
-//   comment              (""),
    commandChanged       (false),
    cloneCount           (0),
    currentRunState      (Gmat::RUNNING),  // RUNNING means just treat normally
    epochData            (NULL),
    stateData            (NULL),
    parmData             (NULL),
-   fuelMassData         (NULL)
+   fuelMassData         (NULL),
+   satsInMaps           (0)
 {
    generatingString = "";
    parameterCount = GmatCommandParamCount;
@@ -189,7 +192,7 @@ GmatCommand::~GmatCommand()
       //    this->GetTypeName().c_str(), nextStr.c_str());
    #endif
       
-   // We need to clean up summary data, so removed return if BranchEnd (loj: 2008.12.19)
+   // We need to clean up summary data, so removed return if BranchEnd
    if (!this->IsOfType("BranchEnd"))
    {      
       // Delete the subsequent GmatCommands
@@ -273,10 +276,12 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    currentFunction      (c.currentFunction),
    callingFunction      (c.callingFunction),
    next                 (NULL),
+   previous             (NULL),
    level                (-1),   // Not set
    objectMap            (c.objectMap),
    globalObjectMap      (c.globalObjectMap),
    solarSys             (c.solarSys),
+   triggerManagers      (c.triggerManagers),
    internalCoordSys     (c.internalCoordSys),
    forces               (c.forces),
    events               (c.events),
@@ -292,7 +297,6 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    physicsBasedCommand  (c.physicsBasedCommand),
    includeInSummary     (c.includeInSummary),
    summaryName          (c.summaryName),
-//   comment              (c.comment),
    commandChanged       (c.commandChanged),
    settables            (c.settables),
    cloneCount           (0),
@@ -300,7 +304,8 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    epochData            (NULL),
    stateData            (NULL),
    parmData             (NULL),
-   fuelMassData         (NULL)
+   fuelMassData         (NULL),
+   satsInMaps           (0)
 {
    generatingString = c.generatingString;
 
@@ -495,27 +500,47 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    return generatingString;
 }
 
-// Added Set/GetCurrentFunction() because we need to add function name
-// in the error message ((LOJ: 2008.09.09)
 
 //------------------------------------------------------------------------------
-// virtual void SetCurrentFunction(Function *function)
+// void SetCurrentFunction(Function *function)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the current function pointer
+ *
+ * @param function The function that is getting set
+ *
+ * @return
+ */
 //------------------------------------------------------------------------------
 void GmatCommand::SetCurrentFunction(Function *function)
 {
    currentFunction = function;
 }
 
+
 //------------------------------------------------------------------------------
-// virtual Function* GetCurrentFunction()
+// Function* GetCurrentFunction()
+//------------------------------------------------------------------------------
+/**
+ * This method retrieves the current function pointer
+ *
+ * @return The current function pointer
+ */
 //------------------------------------------------------------------------------
 Function* GmatCommand::GetCurrentFunction()
 {
    return currentFunction;
 }
 
+
 //------------------------------------------------------------------------------
-// void SetCallingFunction();
+// void SetCallingFunction(FunctionManager *fm)
+//------------------------------------------------------------------------------
+/**
+ * Sets the calling function pointer
+ *
+ * @param fm
+ */
 //------------------------------------------------------------------------------
 void GmatCommand::SetCallingFunction(FunctionManager *fm)
 {
@@ -527,17 +552,36 @@ void GmatCommand::SetCallingFunction(FunctionManager *fm)
    callingFunction = fm;
 }
 
+
 //------------------------------------------------------------------------------
 // const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the names of the wrapper objects used by the command
+ *
+ * @return The array of names
+ */
 //------------------------------------------------------------------------------
 const StringArray& GmatCommand::GetWrapperObjectNameArray()
 {
    return wrapperObjectNames;
 }
 
+
 //------------------------------------------------------------------------------
 // bool SetElementWrapper(ElementWrapper* toWrapper,
-//                        const std::string &withName)
+//          const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Adds an element wrapper to the collection of wrappers
+ *
+ * @param toWrapper The element wrapper
+ * @param withName The name of the wrapper
+ *
+ * @return true on success, false on failure
+ *
+ * @note The default implementation does nothing and returns false
+ */
 //------------------------------------------------------------------------------
 bool GmatCommand::SetElementWrapper(ElementWrapper* toWrapper,
                                     const std::string &withName)
@@ -545,17 +589,39 @@ bool GmatCommand::SetElementWrapper(ElementWrapper* toWrapper,
    return false;
 }
 
+
 //------------------------------------------------------------------------------
 // void ClearWrappers()
 //------------------------------------------------------------------------------
+/**
+ * This method clears the list of wrappers
+ *
+ * @note This default implementation does nothing
+ */
+//------------------------------------------------------------------------------
 void GmatCommand::ClearWrappers()
 {
-   // this default implementation does nothing
 }
 
+
 //------------------------------------------------------------------------------
-// void CheckDataType(ElementWrapper* forWrapper, Gmat::ParameterType needType,
-//                    const std::string &cmdName, bool ignoreUnsetReference)
+// void CheckDataType(ElementWrapper* forWrapper,
+//                    Gmat::ParameterType needType,
+//                    const std::string &cmdName,
+//                    bool ignoreUnsetReference)
+//------------------------------------------------------------------------------
+/**
+ * This method checks the data type for a wrapper against the needed type.
+ *
+ * The method validates the data type, and throws an exception if there is a
+ * type mismatch.
+ *
+ * @param forWrapper The wrapper that is being checked
+ * @param needType The data type that is needed to use the wrapper
+ * @param cmdName The name of the command that is being checked
+ * @param ignoreUnsetReference Flag used to control exceptions when the wrapper
+ *                             object is not set
+ */
 //------------------------------------------------------------------------------
 void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                                 Gmat::ParameterType needType,
@@ -600,7 +666,8 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
       throw CommandException("A value of \"" + desc + "\" of base type \"" +
                   baseStr + "\" on command \"" + cmdName + 
                   "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Object Property (Real), Real Number, Variable, Array Element, or Parameter ]. "); 
+                  " [ Object Property (Real), Real Number, Variable, "
+                  "Array Element, or Parameter ]. ");
    }
 }
 
@@ -713,7 +780,7 @@ bool GmatCommand::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 /**
  * Called by the Sandbox to set the local solar system for the GmatCommand
  * 
- * @param <ss> Pointer to the local solar system
+ * @param ss Pointer to the local solar system
  */
 //------------------------------------------------------------------------------
 void GmatCommand::SetSolarSystem(SolarSystem *ss)
@@ -764,17 +831,22 @@ void GmatCommand::SetInternalCoordSystem(CoordinateSystem *cs)
 
 
 //------------------------------------------------------------------------------
-// virtual void SetSummary(const std::string &csName, bool entireMission = false,
-//                         bool physicsOnly = false)
+// void SetSummary(const std::string &csName, bool entireMission,
+//       bool physicsOnly)
 //------------------------------------------------------------------------------
 /*
  * Sets the name of the coordinate system and flags to use for the Command
  * Summary display.
  *
+ * @param csName Name of the coordinate system used for the summary
+ * @param entireMission Flag indicating if the summary is being generated for
+ *          the entire mission (default: false)
+ * @param physicsOnly Flag indicating if the summary is generated for only
+ *          physics affecting commands
  */
 //------------------------------------------------------------------------------
-void GmatCommand::SetupSummary(const std::string &csName, bool entireMission, bool physicsOnly)
-
+void GmatCommand::SetupSummary(const std::string &csName, bool entireMission,
+      bool physicsOnly)
 {
    #ifdef DEBUG_COMMAND_SET
    MessageInterface::ShowMessage
@@ -786,11 +858,30 @@ void GmatCommand::SetupSummary(const std::string &csName, bool entireMission, bo
    missionPhysicsBasedOnly = physicsOnly;
 }
 
+//------------------------------------------------------------------------------
+// void SetSummaryName(const std::string &sumName)
+//------------------------------------------------------------------------------
+/**
+ * Sets the name of the command summary
+ *
+ * @param sumName The name
+ */
+//------------------------------------------------------------------------------
 void GmatCommand::SetSummaryName(const std::string &sumName)
 {
    summaryName = sumName;
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetSummaryName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the command summary name
+ *
+ * @return The name
+ */
+//------------------------------------------------------------------------------
 std::string GmatCommand::GetSummaryName()
 {
    return summaryName;
@@ -803,7 +894,7 @@ std::string GmatCommand::GetSummaryName()
 /**
  * Called by the Sandbox to set the local asset store used by the GmatCommand
  * 
- * @param <map> Pointer to the local object map
+ * @param map Pointer to the local object map
  */
 //------------------------------------------------------------------------------
 void GmatCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
@@ -813,7 +904,13 @@ void GmatCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 
 
 //------------------------------------------------------------------------------
-// virtual ObjectMap* GetObjectMap()
+// ObjectMap* GetObjectMap()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the object map
+ *
+ * @return The map
+ */
 //------------------------------------------------------------------------------
 ObjectMap* GmatCommand::GetObjectMap()
 {
@@ -827,7 +924,7 @@ ObjectMap* GmatCommand::GetObjectMap()
 /**
  * Called by the Sandbox to set the global asset store used by the GmatCommand
  * 
- * @param <map> Pointer to the local object map
+ * @param map Pointer to the global object map
  */
 //------------------------------------------------------------------------------
 void GmatCommand::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
@@ -842,9 +939,14 @@ void GmatCommand::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
 /**
  * Passes the transient force vector into the commands that need them
  * 
+ * The transient force vector is a set of models used in GMAT's ODEModel for
+ * affects that are turned on and off over the course of a mission.  An example
+ * of a transient force is a finite burn, which is toggled by the
+ * BeginFiniteBurn and EndFiniteBurn commands.  These components are only used
+ * by commands that need them.  Typical usage is found in the propagation
+ * enabled commands.
+ *
  * @param tf The vector of transient forces
- * 
- * @note The default behavior in the GmatCommands is to ignore the vector.
  */
 //------------------------------------------------------------------------------
 void GmatCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
@@ -876,7 +978,7 @@ void GmatCommand::SetEventLocators(std::vector<EventLocator*> *els)
 /**
  * Sets the Publisher used for data generated by the GmatCommand
  * 
- * @param <p> Pointer to the Publisher
+ * @param p Pointer to the Publisher
  */
 //------------------------------------------------------------------------------
 void GmatCommand::SetPublisher(Publisher *p)
@@ -890,6 +992,8 @@ void GmatCommand::SetPublisher(Publisher *p)
 //------------------------------------------------------------------------------
 /**
  * Returns the Publisher used for data generated by the GmatCommand
+ *
+ * @return The Publisher
  */
 //------------------------------------------------------------------------------
 Publisher* GmatCommand::GetPublisher()
@@ -940,7 +1044,7 @@ bool GmatCommand::Validate()
 /**
  * Gets the name of the parameter with the input id.
  * 
- * @param <id> Integer id for the parameter.
+ * @param id Integer id for the parameter.
  * 
  * @return The string name of the parameter.
  */
@@ -960,7 +1064,7 @@ std::string GmatCommand::GetParameterText(const Integer id) const
 /**
  * Gets the id corresponding to a named parameter.
  * 
- * @param <str> Name of the parameter.
+ * @param str Name of the parameter.
  * 
  * @return The ID.
  */
@@ -983,7 +1087,7 @@ Integer GmatCommand::GetParameterID(const std::string &str) const
 /**
  * Retrieve the enumerated type of the object.
  *
- * @param <id> The integer ID for the parameter.
+ * @param id The integer ID for the parameter.
  *
  * @return The enumeration for the type of the parameter.
  */
@@ -1004,7 +1108,7 @@ Gmat::ParameterType GmatCommand::GetParameterType(const Integer id) const
 /**
  * Gets the text description for the type of a parameter.
  * 
- * @param <id> Integer ID of the parameter.
+ * @param id Integer ID of the parameter.
  * 
  * @return The text description of the type of the parameter.
  */
@@ -1015,9 +1119,9 @@ std::string GmatCommand::GetParameterTypeString(const Integer id) const
 }
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  bool IsParameterReadOnly(const Integer id) const
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Checks to see if the requested parameter is read only.
  * 
@@ -1026,12 +1130,12 @@ std::string GmatCommand::GetParameterTypeString(const Integer id) const
  * comment lines come before the command in the script -- and therefore gets
  * special treatment in the Interpreters.
  *
- * @param <id> Description for the parameter.
+ * @param id Description for the parameter.
  *
  * @return true if the parameter is read only, false (the default) if not,
  *         throws if the parameter is out of the valid range of values.
  */
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GmatCommand::IsParameterReadOnly(const Integer id) const
 {
    if ((id >= GmatBaseParamCount) && (id < GmatCommandParamCount))
@@ -1041,18 +1145,18 @@ bool GmatCommand::IsParameterReadOnly(const Integer id) const
 }
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  bool IsParameterReadOnly(const Integer id) const
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Checks to see if the requested parameter is read only.
  * 
- * @param <label> Description for the parameter.
+ * @param label Description for the parameter.
  *
  * @return true if the parameter is read only, false (the default) if not,
  *         throws if the parameter is out of the valid range of values.
  */
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GmatCommand::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
@@ -1065,7 +1169,7 @@ bool GmatCommand::IsParameterReadOnly(const std::string &label) const
 /**
  * Retrieve a string parameter.
  *
- * @param <id>    The integer ID for the parameter.
+ * @param id The integer ID for the parameter.
  *
  * @return The string stored for this parameter.
  */
@@ -1082,7 +1186,8 @@ std::string GmatCommand::GetStringParameter(const Integer id) const
       // This call is not const, so need to break const-ness here:
       ((GmatCommand*)this)->BuildCommandSummaryString();
       #ifdef DEBUG_SUMMARY_STRINGS
-         MessageInterface::ShowMessage("Command Summary:\n%s\n", commandSummary.c_str());
+         MessageInterface::ShowMessage("Command Summary:\n%s\n",
+               commandSummary.c_str());
       #endif
       return commandSummary;
    }
@@ -1093,7 +1198,8 @@ std::string GmatCommand::GetStringParameter(const Integer id) const
       std::string missionSummary =
          ((GmatCommand*)this)->BuildMissionSummaryString(this);
       #ifdef DEBUG_SUMMARY_STRINGS
-         MessageInterface::ShowMessage("Mission Summary:\n%s\n", missionSummary.c_str());
+         MessageInterface::ShowMessage("Mission Summary:\n%s\n",
+               missionSummary.c_str());
       #endif
       return missionSummary;
    }
@@ -1108,8 +1214,8 @@ std::string GmatCommand::GetStringParameter(const Integer id) const
 /**
  * Retrieve a string parameter.
  *
- * @param <id>    The integer ID for the parameter.
- * @param <index> Array index for parameters.
+ * @param id    The integer ID for the parameter.
+ * @param index Array index for parameters.
  *
  * @return The string stored for this parameter.
  */
@@ -1127,8 +1233,8 @@ std::string GmatCommand::GetStringParameter(const Integer id,
 /**
  * Sets the value for a std::string parameter.
  * 
- * @param <id>    Integer ID of the parameter.
- * @param <value> New value for the parameter.
+ * @param id    Integer ID of the parameter.
+ * @param value New value for the parameter.
  * 
  * @return The value of the parameter.
  */
@@ -1162,9 +1268,9 @@ bool GmatCommand::SetStringParameter(const Integer id, const std::string &value)
 /**
  * Sets the value for a std::string parameter.
  * 
- * @param <id>    Integer ID of the parameter.
- * @param <value> New value for the parameter.
- * @param <index> array index for the parameter.
+ * @param id    Integer ID of the parameter.
+ * @param value New value for the parameter.
+ * @param index array index for the parameter.
  * 
  * @return The value of the parameter.
  */
@@ -1182,7 +1288,7 @@ bool GmatCommand::SetStringParameter(const Integer id, const std::string &value,
 /**
  * Retrieve a string parameter.
  *
- * @param <label> The (string) label for the parameter.
+ * @param label The (string) label for the parameter.
  *
  * @return The string stored for this parameter.
  */
@@ -1200,8 +1306,8 @@ std::string GmatCommand::GetStringParameter(const std::string &label) const
 /**
  * Retrieve a string parameter.
  *
- * @param <label> The (string) label for the parameter.
- * @param <index> array index for the parameter.
+ * @param label The (string) label for the parameter.
+ * @param index array index for the parameter.
  *
  * @return The string stored for this parameter.
  */
@@ -1219,8 +1325,8 @@ std::string GmatCommand::GetStringParameter(const std::string &label,
 /**
  * Sets the value for a std::string parameter.
  *
- * @param <label> The (string) label for the parameter.
- * @param <value> New value for the parameter.
+ * @param label The (string) label for the parameter.
+ * @param value New value for the parameter.
  *
  * @return The string stored for this parameter.
  */
@@ -1239,9 +1345,9 @@ bool GmatCommand::SetStringParameter(const std::string &label,
 /**
  * Sets the value for a std::string parameter.
  *
- * @param <label> The (string) label for the parameter.
- * @param <value> New value for the parameter.
- * @param <index> array index for the parameter.
+ * @param label The (string) label for the parameter.
+ * @param value New value for the parameter.
+ * @param index array index for the parameter.
  *
  * @return The string stored for this parameter.
  */
@@ -1272,8 +1378,6 @@ bool GmatCommand::SetStringParameter(const std::string &label,
  *
  * @return true if the condition was set, false if not.  The default
  *         (implemented here) returns false.
- *
- * @note See subclasses for more meaningful implementations.
  */
 //------------------------------------------------------------------------------
 bool GmatCommand::SetCondition(const std::string &lhs, 
@@ -1299,8 +1403,6 @@ bool GmatCommand::SetCondition(const std::string &lhs,
  *
  * @return true if the operator was set, false if not.  The default
  *         (implemented here) returns false.
- *
- * @note See subclasses for more meaningful implementations.
  */
 //------------------------------------------------------------------------------
 bool GmatCommand::SetConditionOperator(const std::string &op, 
@@ -1319,8 +1421,6 @@ bool GmatCommand::SetConditionOperator(const std::string &op,
  *
  * @return true if the condition was removed, false if not.  The default
  *         (implemented here) returns false.
- *
- * @note See subclasses for more meaningful implementations.
  */
 //------------------------------------------------------------------------------
 bool GmatCommand::RemoveCondition(Integer atIndex)
@@ -1338,8 +1438,6 @@ bool GmatCommand::RemoveCondition(Integer atIndex)
  *
  * @return true if the operator was removed, false if not.  The default
  *         (implemented here) returns false.
- *
- * @note See subclasses for more meaningful implementations.
  */
 //------------------------------------------------------------------------------
 bool GmatCommand::RemoveConditionOperator(Integer atIndex)
@@ -1463,7 +1561,9 @@ bool GmatCommand::Initialize()
 /**
  * Accesses the next GmatCommand to be executed in the GmatCommand sequence
  * 
- * @return Pointer to the next GmatCommand
+ * @return Pointer to the next GmatCommand.  Commands that need to be reentrant
+ *       override this method and return their this pointer as needed.  Branch
+ *       commands override this method to manage branching.
  */
 //------------------------------------------------------------------------------
 GmatCommand* GmatCommand::GetNext()
@@ -1488,11 +1588,24 @@ GmatCommand* GmatCommand::GetPrevious()
 
 
 //------------------------------------------------------------------------------
-// bool ForceSetNext(GmatCommand *toCmd)
+// bool GmatCommand::ForceSetNext(GmatCommand *toCmd)
+//------------------------------------------------------------------------------
+/**
+ * Forces the next command pointer to be the input value
+ *
+ * This method overrides the linked list handling methods in the Mission Control
+ * Sequence, replacing the next pointer with the input value.
+ *
+ * This method should only be used in special circumstances.  Usage can lead to
+ * serious memory leaks
+ *
+ * @param toCmd The GmatCommand pointer
+ *
+ * @return true
+ */
 //------------------------------------------------------------------------------
 bool GmatCommand::ForceSetNext(GmatCommand *toCmd) // dangerous!
 {
-   //ShowCommand("GmatCommand::", "ForceSetNext() this = ", this, " toCmd = ", toCmd);
    next = toCmd;
    return true;
 }
@@ -1501,9 +1614,22 @@ bool GmatCommand::ForceSetNext(GmatCommand *toCmd) // dangerous!
 //------------------------------------------------------------------------------
 // bool ForceSetPrevious(GmatCommand *toCmd)
 //------------------------------------------------------------------------------
+/**
+ * Forces the previous command pointer to be the input value
+ *
+ * This method overrides the linked list handling methods in the Mission Control
+ * Sequence, replacing the previous pointer with the input value.
+ *
+ * This method should only be used in special circumstances.  Usage can lead to
+ * serious memory leaks
+ *
+ * @param toCmd The GmatCommand pointer
+ *
+ * @return true
+ */
+//------------------------------------------------------------------------------
 bool GmatCommand::ForceSetPrevious(GmatCommand *toCmd) // dangerous!
 {
-   //ShowCommand("GmatCommand::", "ForceSetPrevious() this = ", this, " toCmd = ", toCmd);
    previous = toCmd;
    return true;
 }
@@ -1769,12 +1895,15 @@ bool GmatCommand::ClearObjects()
 //  bool GmatCommand::InterpretAction()
 //------------------------------------------------------------------------------
 /**
- * Performs command actions.
+ * Parses the command string and builds the corresponding command structures.
  *
- * This default implementation always returns false because the base class does
- * not perform any actions.
+ * This method is used to parse Mission Control Sequence commands in the command
+ * itself.  Commands that handle internal parsing override the method to
+ * implement parsing.  If the method is not overridden, parsing is handled
+ * externally, typically in an Interpreter.
  *
- * @return true if an action was taken, false otherwise.
+ * @return false when parsing is not part of the command, true if parsing is
+ *    handled internally.  Parsing errors result in thrown exceptions.
  */
 //------------------------------------------------------------------------------
 bool GmatCommand::InterpretAction()
@@ -1884,7 +2013,7 @@ void GmatCommand::RunComplete()
 
 
 //------------------------------------------------------------------------------
-// void GmatCommand::SetRunState(Gmat::RunState newState)
+// void SetRunState(Gmat::RunState newState)
 //------------------------------------------------------------------------------
 /**
  * Toggle for the run state
@@ -1911,7 +2040,7 @@ void GmatCommand::SetRunState(Gmat::RunState newState)
  *
  * Inherited commands override this method for specialized summary data.
  * 
- * @param <commandCompleted> True if the command ran successfully.
+ * @param commandCompleted True if the command ran successfully.
  */
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummary(bool commandCompleted)
@@ -2040,7 +2169,7 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
 
          epochData = new Real[satsInMaps];
          stateData = new Real[6*satsInMaps];
-         parmData = new Real[7*satsInMaps];
+         parmData  = new Real[7*satsInMaps];
 
          fuelMassData = new Real[MAX_NUM_TANKS*satsInMaps];
          tankNames.resize(MAX_NUM_TANKS * satsInMaps, "");
@@ -2106,7 +2235,7 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
  *
  * Inherited commands override this method for specialized summary data.
  *
- * @param <commandCompleted> True if the command ran successfully.
+ * @param commandCompleted True if the command ran successfully.
  */
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
@@ -2517,7 +2646,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
  * Inherited commands can override this method to handle branching or other 
  * special cases.
  * 
- * @param <head> The first command in the summary
+ * @param head The first command in the summary
  */
 //------------------------------------------------------------------------------
 const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head)
@@ -2545,7 +2674,8 @@ const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head
 
 
 //------------------------------------------------------------------------------
-// const std::string BuildNumber(Real value,  bool useExp = false, Integer length)
+// const std::string BuildNumber(Real value,  bool useExp = false,
+//       Integer length)
 //------------------------------------------------------------------------------
 /**
  * Builds a formatted string containing a Real, so the Real can be serialized to
@@ -2558,7 +2688,8 @@ const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head
  * @return The formatted string
  */
 //------------------------------------------------------------------------------
-const std::string GmatCommand::BuildNumber(Real value, bool useExp, Integer length)
+const std::string GmatCommand::BuildNumber(Real value, bool useExp,
+      Integer length)
 {
    std::string retval = "Invalid number";
 
@@ -2744,7 +2875,7 @@ GmatBase* GmatCommand::GetUpdatedObject()
 //------------------------------------------------------------------------------
 /**
  * Inserts command name in quotes to generating string. It puts single quotes
- * aroud the instanceName and inserts right after command type. If instanceName
+ * around the instanceName and inserts right after command type. If instanceName
  * is blank or command type is not found, it does nothing.
  *
  * @param  genString  Input/Output generating string to insert command name
@@ -2779,9 +2910,15 @@ void GmatCommand::InsertCommandName(std::string &genString)
 //                  const std::string &title1, GmatCommand *cmd1,
 //                  const std::string &title2 = "", GmatCommand *cmd2 = NULL)
 //------------------------------------------------------------------------------
-/*
+/**
  * <static method>
- * Shows command info to message window.
+ * Shows command info in the message window.
+ *
+ * @param prefix A string to write immediately before writing the data,
+ *          typically used for indentation
+ * @param title1 The substring written for the command in the data
+ * @param title2 The substring written for a second command if present
+ * @param cmd2 A second command which is also written if provided
  */
 //------------------------------------------------------------------------------
 void GmatCommand::ShowCommand(const std::string &prefix,
@@ -2809,12 +2946,18 @@ void GmatCommand::ShowCommand(const std::string &prefix,
 
 
 //------------------------------------------------------------------------------
-// virtual void ShowObjectMaps(const std::string &str)
+// void ShowObjectMaps(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Writes the object maps to the message window, for use when debugging
+ *
+ * @param str A string used to identify the message
+ */
 //------------------------------------------------------------------------------
 void GmatCommand::ShowObjectMaps(const std::string &str)
 {
-   MessageInterface::ShowMessage
-      ("%s\n======================================================================\n",
+   MessageInterface::ShowMessage("%s\n========================================"
+         "==============================\n",
        str.c_str());
    MessageInterface::ShowMessage
       ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>\n",
@@ -2840,8 +2983,8 @@ void GmatCommand::ShowObjectMaps(const std::string &str)
             ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
-   MessageInterface::ShowMessage
-      ("======================================================================\n");
+   MessageInterface::ShowMessage("============================================"
+         "==========================\n");
 }
 
 
@@ -2853,23 +2996,21 @@ void GmatCommand::ShowObjectMaps(const std::string &str)
  * 
  * @return The top level chunks from the instruction contained in the generatng 
  *         string.
- * 
- * @notes - Original by Darrel Conway
  */
 //------------------------------------------------------------------------------
 StringArray GmatCommand::InterpretPreface()
 {
    #ifdef DEBUG_INTERPRET_PREFACE
-      MessageInterface::ShowMessage("In GmatCommand::InterpretPreface, generatingString = %s\n",
-            generatingString.c_str());
+      MessageInterface::ShowMessage("In GmatCommand::InterpretPreface, "
+            "generatingString = %s\n", generatingString.c_str());
    #endif
    parser.EvaluateBlock(generatingString);
    StringArray blocks = parser.DecomposeBlock(generatingString);
    StringArray chunks = parser.ChunkLine();
    
    #ifdef DEBUG_INTERPRET_PREFACE
-      MessageInterface::ShowMessage("   ater call to parser, generatingString = %s\n",
-            generatingString.c_str());
+      MessageInterface::ShowMessage("   after call to parser, "
+            "generatingString = %s\n", generatingString.c_str());
       MessageInterface::ShowMessage("   and blocks are:\n");
       for (unsigned int ii = 0; ii < blocks.size(); ii++)
          MessageInterface::ShowMessage("      %s\n", (blocks.at(ii)).c_str());
@@ -2879,7 +3020,6 @@ StringArray GmatCommand::InterpretPreface()
    #endif
    
    // First comes the command keyword
-   // @note "GMAT" keyword is automatically removed
    if (chunks[0] != typeName && typeName != "GMAT")
       throw CommandException(
          "Line \"" + generatingString +
@@ -2895,12 +3035,10 @@ StringArray GmatCommand::InterpretPreface()
 /**
  * Method used to check a string and see if it is local data
  * 
- * @param <setDesc> The string being checked.
+ * @param setDesc The string being checked.
  * 
  * @return true if the string is associated with a local data member, false if
  *         it is not.
- * 
- * @notes - Original by Darrel Conway
  */
 //------------------------------------------------------------------------------
 bool GmatCommand::IsSettable(const std::string &setDesc)
@@ -2912,17 +3050,17 @@ bool GmatCommand::IsSettable(const std::string &setDesc)
 }
 
 //------------------------------------------------------------------------------
-// bool SeparateEquals(const std::string &description, 
-//                     std::string &lhs, std::string &rhs)
+// bool SeparateEquals(const std::string &description, std::string &lhs,
+//                     std::string &rhs, bool checkOp)
 //------------------------------------------------------------------------------
 /**
  * Method used to separate 'lhs = rhs' style strings into a lhs and rhs.
  * 
- * @param <description> The string that needs to be separated.
- * @param <lhs>         The resulting left hand side.
- * @param <rhs>         The resulting right hand side, or the empty string if 
+ * @param description The string that needs to be separated.
+ * @param lhs         The resulting left hand side.
+ * @param rhs         The resulting right hand side, or the empty string if
  *                      there was no right side.
- * @param <checkOp>     flag indicating whether or not to check to make sure
+ * @param checkOp     Flag indicating whether or not to check to make sure
  *                      there are no "compound" operators using equals signs
  *                      (e.g. "<=", "==", ">=")
  * 
@@ -2979,70 +3117,15 @@ bool GmatCommand::SeparateEquals(const std::string &description,
 
 
 //------------------------------------------------------------------------------
-// Temporary -- need to figure out how we're supposed to do transformations 
-// generically
+// GmatBase* FindObject(const std::string &name)
 //------------------------------------------------------------------------------
-void GmatCommand::CartToKep(const Rvector6 in, Rvector6 &out)
-{
-   GmatBase* earth = FindObject(GmatSolarSystemDefaults::EARTH_NAME);
-   if (!earth)
-      throw CommandException(
-            "GmatCommand::CartToKep failed to find object named \"" +
-            GmatSolarSystemDefaults::EARTH_NAME + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
-
-   Real mu = ((CelestialBody*)earth)->GetGravitationalConstant();
-   Real r = sqrt(in[0]*in[0]+in[1]*in[1]+in[2]*in[2]);
-   Real v2 = in[3]*in[3]+in[4]*in[4]+in[5]*in[5];
-   Real rdotv = in[0]*in[3] + in[1]*in[4] + in[2]*in[5];
-   Real energy = 0.5*v2 - mu / r;
-   /// SMA
-   out[0] = -mu / (2.0 * energy);
-   
-   Rvector3 h, ecc;
-
-   // angular vel = r cross v
-   h[0] = in[1]*in[5] - in[2]*in[4];
-   h[1] = in[2]*in[3] - in[0]*in[5];
-   h[2] = in[0]*in[4] - in[1]*in[3];
-   // eccentricity vector
-   ecc[0] = (in[4]*h[2] - in[5]*h[1]) / mu - in[0] / r;
-   ecc[1] = (in[5]*h[0] - in[3]*h[2]) / mu - in[1] / r;
-   ecc[2] = (in[3]*h[1] - in[4]*h[0]) / mu - in[2] / r;
-   
-   // eccentricity
-   out[1] = sqrt(ecc[0]*ecc[0] + ecc[1]*ecc[1] + ecc[2]*ecc[2]);
-   
-   // inclination
-   Real hMag = sqrt(h[0]*h[0] + h[1]*h[1] + h[2]*h[2]);
-   out[2] = acos(h[2]/hMag) * 180.0 / M_PI;
-   
-   Rvector3 nodevec;
-   nodevec[0] = -h[1];
-   nodevec[1] = h[0];
-   nodevec[2] = 0.0;
-
-   Real magnodevec = sqrt(nodevec[0]*nodevec[0] + nodevec[1]*nodevec[1]);
-
-   // RAAN
-   out[3] = atan2(nodevec[1], nodevec[0]) * 180.0 / M_PI;
-
-   // AOP
-   out[4] = acos((ecc[0]*nodevec[0] + ecc[1]*nodevec[1]) / (out[1]*magnodevec));
-   if (ecc[2] < 0)
-      out[4] = 2.0 * M_PI - out[4];
-   out[4] *= 180.0 / M_PI;
-
-   // TA
-   out[5] = acos((ecc[0]*in[0] + ecc[1]*in[1] + ecc[2]*in[2]) / 
-                 (out[1] * r));
-   if (rdotv < 0)
-      out[5] = 2.0 * M_PI - out[5];
-   out[5] *= 180.0 / M_PI;
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* GmatCommand::FindObject(const std::string &name)
+/**
+ * Locates an object by name from the object stores or solar system
+ *
+ * @param name The object's name
+ *
+ * @return A pointer to the object
+ */
 //------------------------------------------------------------------------------
 GmatBase* GmatCommand::FindObject(const std::string &name)
 {
@@ -3116,7 +3199,15 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// bool SetWrapperReferences(ElementWrapper &wrapper)
+// bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
+//------------------------------------------------------------------------------
+/**
+ * Sets up reference objects for wrappers
+ *
+ * @param wrapper The wrapper that is being configured
+ *
+ * @return true on success, false if an object is not found; throws on error
+ */
 //------------------------------------------------------------------------------
 bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
 {
@@ -3173,14 +3264,25 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
 //------------------------------------------------------------------------------
 // void ClearOldWrappers()
 //------------------------------------------------------------------------------
+/**
+ * Clears the array of old wrappers
+ */
+//------------------------------------------------------------------------------
 void GmatCommand::ClearOldWrappers()
 {
    oldWrappers.clear();
 }
 
 
+
 //------------------------------------------------------------------------------
 // void CollectOldWrappers(ElementWrapper **wrapper)
+//------------------------------------------------------------------------------
+/**
+ * Collects wrappers into a collection of old wrappers
+ *
+ * @param wrapper The wrapper that might be collected
+ */
 //------------------------------------------------------------------------------
 void GmatCommand::CollectOldWrappers(ElementWrapper **wrapper)
 {
@@ -3210,6 +3312,10 @@ void GmatCommand::CollectOldWrappers(ElementWrapper **wrapper)
 
 //------------------------------------------------------------------------------
 // void DeleteOldWrappers()
+//------------------------------------------------------------------------------
+/**
+ * Deletes the wrappers from the old wrapper list
+ */
 //------------------------------------------------------------------------------
 void GmatCommand::DeleteOldWrappers()
 {
@@ -3266,6 +3372,15 @@ void GmatCommand::DeleteOldWrappers()
 }
 
 
+//------------------------------------------------------------------------------
+// void PrepareToPublish(bool publishAll)
+//------------------------------------------------------------------------------
+/**
+ * Prepares the command to interact with the Publisher
+ *
+ * @param publishAll Flag used to identify what to publish
+ */
+//------------------------------------------------------------------------------
 void GmatCommand::PrepareToPublish(bool publishAll)
 {
    StringArray owners, elements;
@@ -3281,6 +3396,13 @@ void GmatCommand::PrepareToPublish(bool publishAll)
 }
 
 
+//------------------------------------------------------------------------------
+// void GmatCommand::PublishData()
+//------------------------------------------------------------------------------
+/**
+ * Pushes data to the Publisher
+ */
+//------------------------------------------------------------------------------
 void GmatCommand::PublishData()
 {
    publisher->Publish(this, streamID, NULL, 0);

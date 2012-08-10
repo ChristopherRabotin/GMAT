@@ -34,27 +34,27 @@
 #include "ElementWrapper.hpp"
 
 // Headers for the referenced classes
-#include "SolarSystem.hpp"    // for SolarSystem
+#include "SolarSystem.hpp"    // For SolarSystem
 #include "Publisher.hpp"      // For the Publisher and ...
-#include "SpaceObject.hpp"    // for SpaceObjects
+#include "SpaceObject.hpp"    // For SpaceObjects
 #include "TriggerManager.hpp" // Trigger managers, usually from a plugin
 
 // Forward reference for the transient force vector
 class PhysicalModel;
 
-// forward reference for the calling FunctionManager
+// Forward reference for the calling FunctionManager
 class FunctionManager;
 
-// forward reference for the function containing this command
+// Forward reference for the function containing this command
 class Function;
 
 // Forward reference for event locators
 class EventLocator;
 
 /**
- * GMAT GmatCommand Base Class, used for timeline elements in the script
+ * GmatCommand Base Class, used for Mission Control Sequence elements in scripts
  *
- * The GMAT GmatCommands all follow a "late-binding" philosophy, in that they do
+ * The GmatCommands all follow a "late-binding" philosophy, in that they do
  * not set object associations until the Sandbox has been populated with both
  * the objects that are used in the model and with the complete GmatCommand 
  * sequence.  Once the Sandbox is populated, it initializes the GmatCommand 
@@ -315,6 +315,29 @@ protected:
    /// Field used for processes that only function in certain run states
    Gmat::RunState       currentRunState;
 
+   // IDs used to buffer the command summary data
+   static Integer       satEpochID;
+   static Integer       satCdID;
+   static Integer       satDragAreaID;
+   static Integer       satCrID;
+   static Integer       satSRPAreaID;
+   static Integer       satTankID;
+   static Integer       satThrusterID;
+   static Integer       satDryMassID;
+   static Integer       satTotalMassID;
+
+
+   // Command summary data buffers
+   Real                 *epochData;
+   Real                 *stateData;
+   Real                 *parmData;
+   Real                 *fuelMassData;
+   StringArray          tankNames;
+
+   std::vector <SpaceObject*>
+                        satVector;
+   Integer              satsInMaps;
+
    virtual bool         AssignObjects();
    virtual bool         ClearObjects();
    virtual void         BuildCommandSummary(bool commandCompleted = true);
@@ -340,31 +363,6 @@ protected:
                                        std::string &lhs, std::string &rhs,
                                        bool checkOp = false);
    
-   // IDs used to buffer the command summary data
-   static Integer       satEpochID;
-   static Integer       satCdID;
-   static Integer       satDragAreaID;
-   static Integer       satCrID;
-   static Integer       satSRPAreaID;
-   static Integer       satTankID;
-   static Integer       satThrusterID;
-   static Integer       satDryMassID;
-   static Integer       satTotalMassID;
-   
-
-   // Command summary data buffers
-   Real                 *epochData;
-   Real                 *stateData;
-   Real                 *parmData;
-   Real                 *fuelMassData;
-   StringArray          tankNames;
-
-   std::vector <SpaceObject*>
-                        satVector;
-   Integer              satsInMaps;
-
-   // Temporary -- replace when convenient
-   void CartToKep(const Rvector6 in, Rvector6 &out);
    GmatBase* FindObject(const std::string &name);
    
    // Method(s) used for ParametersInCommands
