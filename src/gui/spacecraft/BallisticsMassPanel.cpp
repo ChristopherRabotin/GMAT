@@ -44,9 +44,7 @@ END_EVENT_TABLE()
 /**
  * Constructs BallisticsMassPanel object.
  *
- * @param <parent> input parent.
- *
- * @note Creates the Universe GUI
+ * @param <parent> Window parent.
  */
 //------------------------------------------------------------------------------
 BallisticsMassPanel::BallisticsMassPanel(GmatPanel *scPanel, wxWindow *parent,
@@ -62,6 +60,14 @@ BallisticsMassPanel::BallisticsMassPanel(GmatPanel *scPanel, wxWindow *parent,
    Create();
 }
 
+//------------------------------------------------------------------------------
+// ~BallisticsMassPanel()
+//------------------------------------------------------------------------------
+/**
+ * Destructs a  BallisticsMassPanel object.
+ *
+ */
+//------------------------------------------------------------------------------
 BallisticsMassPanel::~BallisticsMassPanel()
 {
 }
@@ -77,8 +83,7 @@ BallisticsMassPanel::~BallisticsMassPanel()
 // void Create()
 //------------------------------------------------------------------------------
 /**
- *
- * @note Creates the page for ballistics and mass information
+ * Creates the page for ballistics and mass information.
  */
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::Create()
@@ -176,28 +181,32 @@ void BallisticsMassPanel::Create()
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
+/**
+ * Loads the data for the ballistics and mass panel.
+ */
+//------------------------------------------------------------------------------
 void BallisticsMassPanel::LoadData()
 {
    try
    {
-      int dryMassID = theSpacecraft->GetParameterID("DryMass");
-      int coeffDragID = theSpacecraft->GetParameterID("Cd");
-      int dragAreaID = theSpacecraft->GetParameterID("DragArea");
-      int reflectCoeffID = theSpacecraft->GetParameterID("Cr");
-      int srpAreaID = theSpacecraft->GetParameterID("SRPArea");
+      Integer dryMassID      = theSpacecraft->GetParameterID("DryMass");
+      Integer coeffDragID    = theSpacecraft->GetParameterID("Cd");
+      Integer dragAreaID     = theSpacecraft->GetParameterID("DragArea");
+      Integer reflectCoeffID = theSpacecraft->GetParameterID("Cr");
+      Integer srpAreaID      = theSpacecraft->GetParameterID("SRPArea");
       
-      Real mass = theSpacecraft->GetRealParameter(dryMassID);
-      Real dragCoeff = theSpacecraft->GetRealParameter(coeffDragID);
-      Real dragArea = theSpacecraft->GetRealParameter(dragAreaID);
+      Real mass         = theSpacecraft->GetRealParameter(dryMassID);
+      Real dragCoeff    = theSpacecraft->GetRealParameter(coeffDragID);
+      Real dragArea     = theSpacecraft->GetRealParameter(dragAreaID);
       Real reflectCoeff = theSpacecraft->GetRealParameter(reflectCoeffID);
-      Real srpArea = theSpacecraft->GetRealParameter(srpAreaID);
+      Real srpArea      = theSpacecraft->GetRealParameter(srpAreaID);
       
       GuiItemManager *theGuiManager = GuiItemManager::GetInstance();
       
       dryMassTextCtrl->SetValue(theGuiManager->ToWxString(mass));
       dragCoeffTextCtrl->SetValue(theGuiManager->ToWxString(dragCoeff));
-      reflectCoeffTextCtrl->SetValue(theGuiManager->ToWxString(reflectCoeff));
       dragAreaTextCtrl->SetValue(theGuiManager->ToWxString(dragArea));
+      reflectCoeffTextCtrl->SetValue(theGuiManager->ToWxString(reflectCoeff));
       srpAreaTextCtrl->SetValue(theGuiManager->ToWxString(srpArea));
    }
    catch (BaseException &e)
@@ -213,24 +222,23 @@ void BallisticsMassPanel::LoadData()
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
+/**
+ * Saves the data from the ballistics and mass panel to the Spacecraft.
+ */
+//------------------------------------------------------------------------------
 void BallisticsMassPanel::SaveData()
 {
    try
    {
       canClose    = true;
     
-      int dryMassID      = theSpacecraft->GetParameterID("DryMass");
-      int coeffDragID    = theSpacecraft->GetParameterID("Cd");
-      int reflectCoeffID = theSpacecraft->GetParameterID("Cr");
-      int dragAreaID     = theSpacecraft->GetParameterID("DragArea");
-      int srpAreaID      = theSpacecraft->GetParameterID("SRPArea");
+      Integer dryMassID      = theSpacecraft->GetParameterID("DryMass");
+      Integer coeffDragID    = theSpacecraft->GetParameterID("Cd");
+      Integer reflectCoeffID = theSpacecraft->GetParameterID("Cr");
+      Integer dragAreaID     = theSpacecraft->GetParameterID("DragArea");
+      Integer srpAreaID      = theSpacecraft->GetParameterID("SRPArea");
 
       std::string inputString;
-//      wxString dryMassStr      = dryMassTextCtrl->GetValue();
-//      wxString dragCoeffStr    = dragCoeffTextCtrl->GetValue();
-//      wxString reflectCoeffStr = reflectCoeffTextCtrl->GetValue();
-//      wxString dragAreaStr     = dragAreaTextCtrl->GetValue();
-//      wxString srpAreaStr      = srpAreaTextCtrl->GetValue();
     
       Real rvalue;
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
@@ -309,35 +317,6 @@ void BallisticsMassPanel::SaveData()
          dataChanged = false;
       
    }
-//      if (atof(massStr) < 0)
-//      {
-//         MessageInterface::PopupMessage
-//            (Gmat::WARNING_, "Mass can not be negative");
-//         canClose = false;
-//         return;
-//      }
-//
-//      if (atof(srpAreaStr) < 0)
-//      {
-//         MessageInterface::PopupMessage
-//            (Gmat::WARNING_, "SRP Area can not be negative");
-//         canClose = false;
-//         return;
-//      }
-//    
-//      if (atof(dragAreaStr) < 0)
-//      {
-//         MessageInterface::PopupMessage
-//           (Gmat::WARNING_, "Drag Area can not be negative");
-//         canClose = false;
-//         return;
-//      }
-//
-//      theSpacecraft->SetRealParameter(dryMassID, atof(massStr));
-//      theSpacecraft->SetRealParameter(coeffDragID, atof(dragCoeffStr));
-//      theSpacecraft->SetRealParameter(dragAreaID, atof(dragAreaStr));
-//      theSpacecraft->SetRealParameter(srpAreaID, atof(srpAreaStr));
-//      theSpacecraft->SetRealParameter(reflectCoeffID, atof(reflectCoeffStr));
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
@@ -353,13 +332,13 @@ void BallisticsMassPanel::SaveData()
 // void OnTextChange()
 //------------------------------------------------------------------------------
 /**
- * @note Activates the Apply button when text is changed
+ * Activates the Apply button when text is changed
  */
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::OnTextChange(wxCommandEvent &event)
 {
-   if (dryMassTextCtrl->IsModified() || dragCoeffTextCtrl->IsModified() ||
-       dragAreaTextCtrl->IsModified() || srpAreaTextCtrl->IsModified() ||
+   if (dryMassTextCtrl->IsModified()       || dragCoeffTextCtrl->IsModified()   ||
+       dragAreaTextCtrl->IsModified()      || srpAreaTextCtrl->IsModified()     ||
        reflectCoeffTextCtrl->IsModified())
    {
       dataChanged = true;
