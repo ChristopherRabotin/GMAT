@@ -159,7 +159,7 @@ archclean :
 
 cleanmacosx :
 	@echo 'cleaning macosx apps .......'
-	rm -rf $(TOP_DIR)/$(GMAT_BIN_DIR)/GMAT.app
+	rm -rf $(TOP_DIR)/application/$(GMAT_BIN_DIR)/GMAT.app
 
 OBJECTS = \
     app/AboutDialog.o \
