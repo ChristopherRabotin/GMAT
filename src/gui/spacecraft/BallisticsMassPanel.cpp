@@ -115,7 +115,7 @@ void BallisticsMassPanel::Create()
     item2->Add( dryMassTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxStaticText *dryMassUnitsText = new wxStaticText( this, ID_TEXT,
-                            wxT("Kg"),
+                            wxT("kg"),
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( dryMassUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
