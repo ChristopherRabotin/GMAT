@@ -2055,36 +2055,36 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                // ... Mass ...
                parm = sat->GetRealParameter(satIds[2]);
                if (parm <= 0)
-                  throw ODEModelException("Mass parameter unphysical on object " + 
-                     sat->GetName());
+                  throw ODEModelException("Total spacecraft mass is less than zero for Spacecraft \"" +
+                                    sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
                pm->SetSatelliteParameter(i, "Mass", parm, satIds[2]);
                
                // ... Coefficient of drag ...
                parm = sat->GetRealParameter(satIds[3]);
                if (parm < 0)
-                  throw ODEModelException("Cd parameter unphysical on object " + 
-                     sat->GetName());
+                  throw ODEModelException("Drag coefficient (Cd) is less than zero for Spacecraft \"" +
+                                    sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
                pm->SetSatelliteParameter(i, "Cd", parm, satIds[3]);
                
                // ... Drag area ...
                parm = sat->GetRealParameter(satIds[4]);
                if (parm < 0)
-                  throw ODEModelException("Drag Area parameter unphysical on object " + 
-                     sat->GetName());
+                  throw ODEModelException("Drag area is less than zero for Spacecraft \"" +
+                                    sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
                pm->SetSatelliteParameter(i, "DragArea", parm, satIds[4]);
                
                // ... SRP area ...
                parm = sat->GetRealParameter(satIds[5]);
                if (parm < 0)
-                  throw ODEModelException("SRP Area parameter unphysical on object " + 
-                     sat->GetName());
+                  throw ODEModelException("SRP area is less than zero for Spacecraft \"" +
+                                    sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
                pm->SetSatelliteParameter(i, "SRPArea", parm, satIds[5]);
                
                // ... and Coefficient of reflectivity
                parm = sat->GetRealParameter(satIds[6]);
                if (parm < 0)
-                  throw ODEModelException("Cr parameter unphysical on object " + 
-                     sat->GetName());
+                  throw ODEModelException("SRP coefficient (Cr) is less than zero for Spacecraft \"" +
+                                    sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
                pm->SetSatelliteParameter(i, "Cr", parm, satIds[6]);
                
                ((SpaceObject*)sat)->ParametersHaveChanged(false);
