@@ -303,7 +303,7 @@ Real GmatMathUtil::ArcsecToRad (Real asec, bool modBy2Pi)
 
 
 //------------------------------------------------------------------------------
-//  Real Sin (Real angleInRad, Real cycleInRad)
+//  Real Sin (Real angleInRad, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Sin (Real angleInRad, Real cycleInRad)
 {
@@ -315,7 +315,7 @@ Real GmatMathUtil::Sin (Real angleInRad, Real cycleInRad)
 
 
 //------------------------------------------------------------------------------
-//  Real SinXOverX (Real angleInRad, Real cycleInRad)
+//  Real SinXOverX (Real angleInRad, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::SinXOverX (Real angleInRad, Real cycleInRad)
 {
@@ -329,7 +329,7 @@ Real GmatMathUtil::SinXOverX (Real angleInRad, Real cycleInRad)
 
 
 //------------------------------------------------------------------------------
-//  Real Cos (Real angleInRad, Real cycleInRad)
+//  Real Cos (Real angleInRad, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Cos (Real angleInRad, Real cycleInRad)
 {
@@ -340,7 +340,7 @@ Real GmatMathUtil::Cos (Real angleInRad, Real cycleInRad)
 }
 
 //------------------------------------------------------------------------------
-//  Real Tan (Real angleInRad, Real cycleInRad)
+//  Real Tan (Real angleInRad, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Tan (Real angleInRad, Real cycleInRad)
 {
@@ -351,7 +351,7 @@ Real GmatMathUtil::Tan (Real angleInRad, Real cycleInRad)
 }
 
 //------------------------------------------------------------------------------
-// Real Cosh (Real angleInRad, Real cycleInRad=TWO_PI)
+// Real Cosh (Real angleInRad, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Cosh (Real angleInRad, Real cycleInRad)
 {
@@ -364,7 +364,7 @@ Real GmatMathUtil::Cosh (Real angleInRad, Real cycleInRad)
 }
 
 //------------------------------------------------------------------------------
-// Real Sinh (Real angleInRad, Real cycleInRad=TWO_PI)
+// Real Sinh (Real angleInRad, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Sinh (Real angleInRad, Real cycleInRad)
 {
@@ -377,7 +377,7 @@ Real GmatMathUtil::Sinh (Real angleInRad, Real cycleInRad)
 }
 
 //------------------------------------------------------------------------------
-// Real Tanh (Real angleInRad, Real cycleInRad=TWO_PI)
+// Real Tanh (Real angleInRad, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Tanh (Real angleInRad, Real cycleInRad)
 {
@@ -390,7 +390,8 @@ Real GmatMathUtil::Tanh (Real angleInRad, Real cycleInRad)
 }
 
 //------------------------------------------------------------------------------
-//  Real ASin (Real x, Real tol=GmatRealConstants::REAL_TOL, Real cycleInRad)
+//  Real ASin (Real x, Real tol=GmatRealConstants::REAL_TOL,
+//             Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::ASin (Real x, Real tol, Real cycleInRad)
 {
@@ -411,7 +412,7 @@ Real GmatMathUtil::ASin (Real x, Real tol, Real cycleInRad)
          return - PI_OVER_TWO;
       else
          throw RealUtilitiesExceptions::ArgumentError
-            ("The input \"" + GmatRealUtil::ToString(x, false, false, true, 17, 1) +
+            ("The input \"" + GmatRealUtil::ToString(x, false, false, true, 15, 1) +
              "\" to ASin() is not within -1.0 and 1.0.");
    }
    
@@ -420,7 +421,8 @@ Real GmatMathUtil::ASin (Real x, Real tol, Real cycleInRad)
 
 
 //------------------------------------------------------------------------------
-//  Real ACos (Real x, Real tol=GmatRealConstants::REAL_TOL, Real cycleInRad=TWO_PI)
+//  Real ACos (Real x, Real tol=GmatRealConstants::REAL_TOL,
+//             Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::ACos (Real x, Real tol, Real cycleInRad)
 {
@@ -440,7 +442,7 @@ Real GmatMathUtil::ACos (Real x, Real tol, Real cycleInRad)
          return PI;
       else
          throw RealUtilitiesExceptions::ArgumentError
-            ("The input \"" + GmatRealUtil::ToString(x, false, false, true, 17, 1) +
+            ("The input \"" + GmatRealUtil::ToString(x, false, false, false, 15, 1) +
              "\" to ACos() is not within -1.0 and 1.0.");
    }
    
@@ -449,7 +451,7 @@ Real GmatMathUtil::ACos (Real x, Real tol, Real cycleInRad)
 
 
 //------------------------------------------------------------------------------
-//  Real ATan (Real y, Real x , Real cycleInRad)
+//  Real ATan (Real y, Real x , Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::ATan (Real y, Real x , Real cycleInRad)
 {
@@ -461,7 +463,7 @@ Real GmatMathUtil::ATan (Real y, Real x , Real cycleInRad)
 
 
 //------------------------------------------------------------------------------
-//  Real ATan2 (Real y, Real x , Real cycleInRad)
+//  Real ATan2 (Real y, Real x , Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::ATan2 (Real y, Real x , Real cycleInRad)
 {
@@ -473,7 +475,7 @@ Real GmatMathUtil::ATan2 (Real y, Real x , Real cycleInRad)
 
 
 //------------------------------------------------------------------------------
-//  Real ASinh (Real x, Real cycleInRad)
+//  Real ASinh (Real x, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::ASinh (Real x, Real cycleInRad)
 {
@@ -495,29 +497,34 @@ Real GmatMathUtil::ASinh (Real x, Real cycleInRad)
 
 
 //------------------------------------------------------------------------------
-//  Real ACosh (Real x, Real cycleInRad)
+//  Real ACosh (Real x, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::ACosh (Real x, Real cycleInRad)
 {
    if (cycleInRad <= 0.0) 
-      throw RealUtilitiesExceptions::ArgumentError("ACosh(angle, cycle <= 0.0)\n");
+      throw RealUtilitiesExceptions::ArgumentError
+         ("Invalid cycle in radians " + GmatRealUtil::ToString(cycleInRad, false, false, false, 15, 1) +
+          " entered, ACosh is undefined for input cycle value <= 0\n");
    
 #ifndef _MSC_VER  // if not Microsoft Visual C++
    return (cycleInRad/TWO_PI)*acosh(x);
 #else
    Real acosh = 0.0;
-	if (x > 0.0)
+	if (x >= 1.0)
 		acosh =  log(x + sqrt(x * x - 1));
 	else
-		acosh = -log(-x + sqrt(x * x - 1));
+		throw RealUtilitiesExceptions::ArgumentError
+         ("Invalid input " + GmatRealUtil::ToString(x, false, false, false, 15, 1) +
+          " entered, ACosh is undefined for input values < 1.0\n");
    
    return (cycleInRad/TWO_PI) * acosh;
+   
 #endif
 }
 
 
 //------------------------------------------------------------------------------
-//  Real ATanh (Real x, Real cycleInRad)
+//  Real ATanh (Real x, Real cycleInRad=GmatMathConstants::TWO_PI)
 //------------------------------------------------------------------------------
 /**
  * Computes inverse hyperbolic tangent of x.
