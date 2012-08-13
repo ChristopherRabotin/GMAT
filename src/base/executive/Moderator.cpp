@@ -3645,18 +3645,28 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    // and Earth PointMassForce
    PropSetup *propSetup = CreatePropSetup(name);
    
-   // Create default force model with Earth primary body with JGM2
-   // Changed back to unnamed ForceModel, since FinalPass() should not be called
-   // from ScriptInterpreter::Interpret(GmatCommand *inCmd, ...) when parsing
-   // commands in ScriptEvent for Bug 2436 fix (LOJ: 2011.07.05)
-   // Why unnamed FM? Changed back to named FM, since it causes error in
-   // Interpreter::FinalPass() when parsing ScriptEvent (Begin/EndScript) from GUI.
-   // The error is about undefined DefaultProp_ForceModel(LOJ: 2011.01.12)
-   //ODEModel *fm= CreateODEModel("ForceModel", name + "_ForceModel");
-   // Create unnamed ODEModel when creating default PropSetup (LOJ: 2009.11.23)
-   // and delete fm after setting it to PropSetup (see below)
-   ODEModel *fm = CreateODEModel("ForceModel", "");
-   fm->SetName(name + "_ForceModel");
+//   // Create default force model with Earth primary body with JGM2
+//   // Changed back to unnamed ForceModel, since FinalPass() should not be called
+//   // from ScriptInterpreter::Interpret(GmatCommand *inCmd, ...) when parsing
+//   // commands in ScriptEvent for Bug 2436 fix (LOJ: 2011.07.05)
+//   // Why unnamed FM? Changed back to named FM, since it causes error in
+//   // Interpreter::FinalPass() when parsing ScriptEvent (Begin/EndScript) from GUI.
+//   // The error is about undefined DefaultProp_ForceModel(LOJ: 2011.01.12)
+//   //ODEModel *fm= CreateODEModel("ForceModel", name + "_ForceModel");
+//   // Create unnamed ODEModel when creating default PropSetup (LOJ: 2009.11.23)
+//   // and delete fm after setting it to PropSetup (see below)
+//   ODEModel *fm = CreateODEModel("ForceModel", "");
+//   fm->SetName(name + "_ForceModel");
+
+   // Hiding the force model from the configuration is causing issues, so I'm
+   // changing the behavior described above, which seems to have been changed
+   // back and forth several times.  The behavior, by design and customer
+   // buy-in, is to always place force models (ODEModel objects) into the
+   // configuration.  Let's adapt the other code that has issues with this to
+   // match this design pattern, rather than changing the design pattern
+   // differently in different portions of the code.
+   std::string theFmName = name + "_ForceModel";
+   ODEModel *fm = CreateODEModel("ForceModel", theFmName);
    
    //=======================================================
    #if 0
