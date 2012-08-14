@@ -158,7 +158,8 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
    // miscelaneous
    mLineNumberMargin = TextWidth(wxSTC_STYLE_LINENUMBER, _T("_999999"));
    mFoldingMargin = 16;
-   //CmdKeyClear(wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
+   // TGG: 2012-08-14, GMT-1854, Script Editor Tab Key does nothing
+   // Commented out CmdKeyClear(wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
    SetLayoutCache(wxSTC_CACHE_PAGE);
    
    // Get object type namses to be used as keywords
@@ -556,6 +557,8 @@ void Editor::OnGoToLine(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 void Editor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
 {
+   // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
+   // fix for when cursor/selection on same line, indent doesn't work
    int cPos = GetCurrentPos();
    int ePos = GetAnchor();
 
@@ -576,6 +579,8 @@ void Editor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 void Editor::OnIndentLess(wxCommandEvent &WXUNUSED(event))
 {
+   // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
+   // fix for when cursor/selection on same line, indent doesn't work
    int cPos = GetCurrentPos();
    int ePos = GetAnchor();
 
@@ -620,6 +625,8 @@ void Editor::OnComment(wxCommandEvent &event)
    MessageInterface::ShowMessage("Editor::OnComment() entered\n");
    #endif
    
+   // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
+   // set up selection so it selects entire lines so replace works
    int cPos = GetCurrentPos();
    int ePos = GetAnchor();
    int i;
@@ -669,6 +676,8 @@ void Editor::OnUncomment(wxCommandEvent &event)
    MessageInterface::ShowMessage("Editor::OnUncomment() entered\n");
    #endif
    
+   // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
+   // set up selection so it selects entire lines so replace works
    int cPos = GetCurrentPos();
    int ePos = GetAnchor();
    int i;
