@@ -158,7 +158,7 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
    // miscelaneous
    mLineNumberMargin = TextWidth(wxSTC_STYLE_LINENUMBER, _T("_999999"));
    mFoldingMargin = 16;
-   CmdKeyClear(wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
+   //CmdKeyClear(wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
    SetLayoutCache(wxSTC_CACHE_PAGE);
    
    // Get object type namses to be used as keywords
@@ -556,6 +556,17 @@ void Editor::OnGoToLine(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 void Editor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
 {
+   int cPos = GetCurrentPos();
+   int ePos = GetAnchor();
+
+   int sLine = LineFromPosition(cPos);
+   int eLine = LineFromPosition(ePos);
+
+   if (sLine == eLine)
+   {
+	   Home();
+   }
+
    CmdKeyExecute(wxSTC_CMD_TAB);
 }
 
@@ -565,6 +576,17 @@ void Editor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 void Editor::OnIndentLess(wxCommandEvent &WXUNUSED(event))
 {
+   int cPos = GetCurrentPos();
+   int ePos = GetAnchor();
+
+   int sLine = LineFromPosition(cPos);
+   int eLine = LineFromPosition(ePos);
+
+   if (sLine == eLine)
+   {
+	   Home();
+   }
+
    CmdKeyExecute(wxSTC_CMD_BACKTAB);
 }
 
@@ -598,14 +620,37 @@ void Editor::OnComment(wxCommandEvent &event)
    MessageInterface::ShowMessage("Editor::OnComment() entered\n");
    #endif
    
+   int cPos = GetCurrentPos();
+   int ePos = GetAnchor();
+   int i;
+   if (cPos > ePos) 
+   {
+	   LineEnd();
+	   i = GetCurrentPos();
+	   SetCurrentPos(ePos);
+	   ePos = i;
+	   Home();
+	   cPos = GetCurrentPos();
+   }
+   else
+   {
+	   Home();
+	   cPos = GetCurrentPos();
+	   SetCurrentPos(ePos);
+	   LineEnd();
+	   ePos = GetCurrentPos();
+	
+   }
+   SetSelection(cPos, ePos);
    // Retrieve the selected text.
    wxString selString = GetSelectedText();
+
    selString.Replace("\n", "\n%");
    selString = "%" + selString;
-   
-   if (selString.Last() == '%')
+
+   if ( (selString.Length() > 1)  && (selString.Last() == '%') )
       selString = selString.Mid(0, selString.Length()-1);
-   
+  
    // Replace the selected text with the argument text.
    ReplaceSelection(selString);
    
@@ -624,6 +669,29 @@ void Editor::OnUncomment(wxCommandEvent &event)
    MessageInterface::ShowMessage("Editor::OnUncomment() entered\n");
    #endif
    
+   int cPos = GetCurrentPos();
+   int ePos = GetAnchor();
+   int i;
+   if (cPos > ePos) 
+   {
+	   LineEnd();
+	   i = GetCurrentPos();
+	   SetCurrentPos(ePos);
+	   ePos = i;
+	   Home();
+	   cPos = GetCurrentPos();
+   }
+   else
+   {
+	   Home();
+	   cPos = GetCurrentPos();
+	   SetCurrentPos(ePos);
+	   LineEnd();
+	   ePos = GetCurrentPos();
+	
+   }
+   SetSelection(cPos, ePos);
+
    // Retrieve the selected text.
    wxString selString = GetSelectedText();
    
