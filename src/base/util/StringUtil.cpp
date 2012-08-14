@@ -40,7 +40,7 @@
 //#define DEBUG_MATH_EQ 1
 //#define DEBUG_STRING_UTIL_SEP_COMMA
 //#define DEBUG_STRING_UTIL_STRING_ARRAY
-
+//#define DEBUG_REPLACE_NAME
 
 //------------------------------------------------------------------------------
 // std::string RemoveAll(const std::string &str, char ch, Integer start = 0)
@@ -521,7 +521,7 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
    while (!done)
    {
       #ifdef DEBUG_REPLACE_NAME
-      MessageInterface::ShowMessage("===> str1='%s'\n", str1.c_str());
+      MessageInterface::ShowMessage("   str1='%s'\n", str1.c_str());
       #endif
       
       strSize = str1.size();
@@ -532,7 +532,7 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
          replace = false;
          
          #ifdef DEBUG_REPLACE_NAME
-         MessageInterface::ShowMessage("===> start=%u, pos=%u\n", start, pos);
+         MessageInterface::ShowMessage("   start=%u, pos=%u\n", start, pos);
          #endif
          
          if (pos == 0 && fromSize < strSize)
@@ -551,23 +551,34 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
          }
          
          #ifdef DEBUG_REPLACE_NAME
-         MessageInterface::ShowMessage("===> replace=%d\n", replace);
+         MessageInterface::ShowMessage("   replace=%d\n", replace);
          #endif
          
          if (replace)
          {
             // Check for the system Parameter name or object property field which
-            // should not not be replace, such as SMA in sat.SMA Parameter or
-            // X in sat.EarthEqCS.X
-            if (pos == 0 || ((pos > 0 && str1[pos-1] == '.') &&
-                             (pos-1 != str1.find_last_of('.'))))
+            // should not be replaced, such as SMA in sat.SMA Parameter or
+            // X in sat.EarthEqCS.X. If previous char is non-alphanumeric, then
+            // it can be replaced, such as arr(2.2)/sat1.X. (Fix for GMT-309 LOJ:2012.08.14)
+            if ((pos == 0) ||
+                ((pos > 0 && str1[pos-1] == '.') && (pos-1 != str1.find_last_of('.'))) ||
+                (pos > 0 && !isalnum(str1[pos-1])))
+            {
                str1.replace(pos, fromSize, to);
+            }
+            else
+            {
+               #ifdef DEBUG_REPLACE_NAME
+               MessageInterface::ShowMessage
+                  ("   ==> name not replaced, it is an object property\n");
+               #endif
+            }
          }
          
          start = pos + to.size();
          
          #ifdef DEBUG_REPLACE_NAME
-         MessageInterface::ShowMessage("===> start=%d, str1=<%s>\n", start, str1.c_str());
+         MessageInterface::ShowMessage("   start=%d, str1=<%s>\n", start, str1.c_str());
          #endif
       }
       else

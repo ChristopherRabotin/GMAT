@@ -1528,10 +1528,36 @@ bool Assignment::RenameRefObject(const Gmat::ObjectType type,
    
    // Go through lhs and rhs
    if (lhs.find(oldName) != lhs.npos)
+   {
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   old name '%s' found in lhs: '%s', so replacing with '%s'\n",
+          oldName.c_str(), lhs.c_str(), newName.c_str());
+      #endif
+      
       lhs = GmatStringUtil::ReplaceName(lhs, oldName, newName);
+      
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   after replacing, lhs = '%s'\n", lhs.c_str());
+      #endif
+   }
    
    if (rhs.find(oldName) != rhs.npos)
+   {
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   old name '%s' found in rhs: '%s', so replacing with '%s'\n",
+          oldName.c_str(), rhs.c_str(), newName.c_str());
+      #endif
+      
       rhs = GmatStringUtil::ReplaceName(rhs, oldName, newName);
+      
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   after replacing, rhs = '%s'\n", rhs.c_str());
+      #endif
+   }
    
    // Go through wrappers
    if (lhsWrapper)
