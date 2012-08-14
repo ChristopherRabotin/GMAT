@@ -73,24 +73,20 @@ public:
 
 protected:
    /// Name of the FiniteBurn object used to set the maneuver details
-   std::string          burnName;
+   std::string                   burnName;
    /// The FiniteBurn object
-   FiniteBurn           *maneuver;
+   FiniteBurn                    *maneuver;
    /// The FiniteThrust that is available for the force models
-   FiniteThrust         *burnForce;
+   FiniteThrust                  *burnForce;
    /// The vector of forces managed by the Sandbox
-   std::vector<PhysicalModel*> 
-                        *transientForces;
+   std::vector<PhysicalModel*>   *transientForces;
    /// The names of the spacecraft that get maneuvered
-   StringArray          satNames;
+   StringArray                   satNames;
    /// The spacecraft that get maneuvered
-   std::vector<Spacecraft *>
-                        sats;
+   std::vector<Spacecraft *>     sats;
    /// The thrusters that get activated
-   std::vector<Thruster *>
-                        thrusters;
-   bool                 firstTimeExecution;
-   
+   std::vector<Thruster *>       thrusters;
+
    void ValidateThrusters();
    
 };

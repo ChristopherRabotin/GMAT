@@ -39,13 +39,8 @@ EndFiniteBurn::EndFiniteBurn() :
    burnForce          (NULL),
    burnName           (""),
    maneuver           (NULL),
-   transientForces    (NULL),
-   firstTimeExecution (true)
+   transientForces    (NULL)
 {
-   //LOJ: 2012.02.15 (For GMT-329 fix)
-   //Commented out  since we don't want give it a name in the constructor
-   //if (instanceName == "")
-   //   instanceName = "EndFiniteBurn";
    objectTypeNames.push_back("BurnCommand");
    physicsBasedCommand = true;
 }
@@ -64,12 +59,12 @@ EndFiniteBurn::~EndFiniteBurn()
 
 
 //------------------------------------------------------------------------------
-// EndFiniteBurn(const BeginManeuver& endman)
+// EndFiniteBurn(const EndFiniteBurn& endman)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  * 
- * @param <endman> The command that gets copied.
+ * @param endman The command that gets copied.
  */
 //------------------------------------------------------------------------------
 EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
@@ -79,8 +74,7 @@ EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
    burnName           (endman.burnName),
    maneuver           (NULL),
    transientForces    (NULL),
-   satNames           (endman.satNames),
-   firstTimeExecution (true)
+   satNames           (endman.satNames)
 {
    sats.clear();
    thrusters.clear();
@@ -93,7 +87,7 @@ EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
 /**
  * Assignment operator.
  * 
- * @param <endman> The command that gets copied.
+ * @param endman The command that gets copied.
  * 
  * @return this instance, with internal data structures set to match the input
  *         instance.
@@ -101,20 +95,20 @@ EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
 //------------------------------------------------------------------------------
 EndFiniteBurn& EndFiniteBurn::operator=(const EndFiniteBurn& endman)
 {
-   if (&endman == this)
-      return *this;
+   if (&endman != this)
+   {
+      GmatCommand::operator=(endman);
+
+      thrustName        = endman.thrustName;
+      burnForce         = NULL;
+      burnName          = endman.burnName;
+      maneuver          = NULL;
+      transientForces   = NULL;
+      satNames          = endman.satNames;
       
-   GmatCommand::operator=(endman);
-   thrustName = endman.thrustName;
-   burnForce = NULL;
-   burnName = endman.burnName;
-   maneuver = NULL;
-   transientForces = NULL;
-   satNames = endman.satNames;
-   firstTimeExecution = true;
-   
-   sats.clear();
-   thrusters.clear();
+      sats.clear();
+      thrusters.clear();
+   }
    
    return *this;
 }
@@ -125,12 +119,15 @@ EndFiniteBurn& EndFiniteBurn::operator=(const EndFiniteBurn& endman)
 //                         const std::string &actionData = "");
 //------------------------------------------------------------------------------
 /**
- * This method performs action.
+ * This method performs a custom action.
  *
- * @param <action> action to perform
- * @param <actionData> action data associated with action
+ * EndFiniteBurn commands implement an action, "Clear", that clears the list of
+ * maneuvering spacecraft.
+ *
+ * @param action action to perform
+ * @param actionData action data associated with action
+ *
  * @return true if action successfully performed
- *
  */
 //------------------------------------------------------------------------------
 bool EndFiniteBurn::TakeAction(const std::string &action,
@@ -158,9 +155,9 @@ bool EndFiniteBurn::TakeAction(const std::string &action,
 /**
  * Accesses names for referenced objects.
  * 
- * @param <type> Type of object requested.
+ * @param type The type of object requested.
  * 
- * @return the referenced object's name.
+ * @return The referenced object's name.
  */
 //------------------------------------------------------------------------------
 std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
@@ -181,6 +178,7 @@ std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
    return GmatCommand::GetRefObjectName(type);
 }
 
+
 //------------------------------------------------------------------------------
 // const ObjectTypeArray& GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
@@ -188,7 +186,6 @@ std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
  * Retrieves the list of ref object types used by the BeginFiniteBurn.
  *
  * @return the list of object types.
- * 
  */
 //------------------------------------------------------------------------------
 const ObjectTypeArray& EndFiniteBurn::GetRefObjectTypeArray()
@@ -196,9 +193,9 @@ const ObjectTypeArray& EndFiniteBurn::GetRefObjectTypeArray()
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::FINITE_BURN);
    refObjectTypes.push_back(Gmat::SPACECRAFT);
+
    return refObjectTypes;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -207,7 +204,7 @@ const ObjectTypeArray& EndFiniteBurn::GetRefObjectTypeArray()
 /**
  * Accesses arrays of names for referenced objects.
  * 
- * @param <type> Type of object requested.
+ * @param type Type of object requested.
  * 
  * @return the StringArray containing the referenced object names.
  */
@@ -220,7 +217,8 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(
    if (type == Gmat::UNKNOWN_OBJECT ||
        type == Gmat::SPACECRAFT)
    {
-      refObjectNames.insert(refObjectNames.end(), satNames.begin(), satNames.end());
+      refObjectNames.insert(refObjectNames.end(), satNames.begin(),
+            satNames.end());
    }
    
    if (type == Gmat::UNKNOWN_OBJECT ||
@@ -230,21 +228,6 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(
    }
 
    return refObjectNames;
-/*   switch (type)
-   {
-      case Gmat::SPACECRAFT:
-         #ifdef DEBUG_END_MANEUVER
-            MessageInterface::ShowMessage
-               ("Getting EndFiniteBurn reference spacecraft list\n");
-         #endif
-         return satNames;
-      
-      default:
-         ;
-   }
-   
-   return GmatCommand::GetRefObjectNameArray(type);
-   */
 }
 
 
@@ -254,8 +237,8 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(
 /**
  * Sets names for referenced objects.
  * 
- * @param <type> Type of the object.
- * @param <name> Name of the object.
+ * @param type Type of the object.
+ * @param name Name of the object.
  * 
  * @return true if the name was set, false if not.
  */
@@ -308,12 +291,12 @@ bool EndFiniteBurn::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the EndFiniteBurn command.
  *
- * @return clone of the Propagate.
+ * @return clone of the command.
  */
 //------------------------------------------------------------------------------
 GmatBase* EndFiniteBurn::Clone() const
@@ -359,19 +342,19 @@ bool EndFiniteBurn::RenameRefObject(const Gmat::ObjectType type,
 //  const std::string GetGeneratingString()
 //------------------------------------------------------------------------------
 /**
- * Method used to retrieve the string that was parsed to build this GmatCommand.
+ * Method used to retrieve the string that builds this GmatCommand.
  *
- * This method is used to retrieve the GmatCommand string from the script that
- * was parsed to build the GmatCommand.  It is used to save the script line, so
- * that the script can be written to a file without inverting the steps taken to
- * set up the internal object data.  As a side benefit, the script line is
- * available in the GmatCommand structure for debugging purposes.
+ * This method is used to retrieve the GmatCommand string that builds the
+ * command.  It is used to save the script line, so that the script can be
+ * written to a file without inverting the steps taken to set up the internal
+ * object data.  As a side benefit, the script line is available in the
+ * command structure for messages and debugging purposes.
  *
- * @param <mode>    Specifies the type of serialization requested.
- * @param <prefix>  Optional prefix appended to the object's name. (Used for
- *                  indentation)
- * @param <useName> Name that replaces the object's name (Not yet used
- *                  in commands).
+ * @param mode    Specifies the type of serialization requested.
+ * @param prefix  Optional prefix appended to the object's name. (Used for
+ *                indentation)
+ * @param useName Name that replaces the object's name (Not yet used
+ *                in commands).
  *
  * @return The script line that defines this GmatCommand.
  */
@@ -401,7 +384,7 @@ const std::string& EndFiniteBurn::GetGeneratingString(Gmat::WriteMode mode,
 /**
  * Sets the array of transient forces for the command.
  *
- * @param <tf> The transient force vector.
+ * @param tf The transient force vector.
  */
 //------------------------------------------------------------------------------
 void EndFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
@@ -422,37 +405,35 @@ void EndFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
 bool EndFiniteBurn::Initialize()
 {
    bool retval = GmatCommand::Initialize();
-   firstTimeExecution = true;
-   
    GmatBase *mapObj;
+   
    if (retval)
    {
       // Look up the maneuver object
       if ((mapObj = FindObject(burnName)) == NULL) 
-         throw CommandException("EndFiniteBurn: Unknown finite burn \"" + burnName + "\"");
-      if (mapObj->GetTypeName() != "FiniteBurn")
-         throw CommandException("EndFiniteBurn: " + (burnName) + " is not a FiniteBurn");
+         throw CommandException("EndFiniteBurn: Unknown finite burn \"" +
+               burnName + "\"");
+      if (mapObj->IsOfType("FiniteBurn") == false)
+         throw CommandException("EndFiniteBurn: " + (burnName) + " is not a "
+               "FiniteBurn");
       maneuver = (FiniteBurn*)mapObj;
       
-      // find all of the spacecraft
+      // Find all of the spacecraft
       StringArray::iterator scName;
       Spacecraft *sc;
-      
       sats.clear();
       for (scName = satNames.begin(); scName != satNames.end(); ++scName)
       {
          if ((mapObj = FindObject(*scName)) == NULL) 
-            throw CommandException("EndFiniteBurn: Unknown SpaceObject \"" + (*scName) + "\"");
+            throw CommandException("EndFiniteBurn: Unknown SpaceObject \"" +
+                  (*scName) + "\"");
          
-         if (mapObj->GetType() != Gmat::SPACECRAFT)
-            throw CommandException("EndFiniteBurn: " + (*scName) + " is not a Spacecraft");
+         if (mapObj->IsOfType(Gmat::SPACECRAFT) == false)
+            throw CommandException("EndFiniteBurn: " + (*scName) +
+                  " is not a Spacecraft");
          sc = (Spacecraft*)mapObj;
          sats.push_back(sc);
       }
-      
-      // We cannot validate thrusters until execution time(LOJ: 2010.08.13)
-      // A script can have sc2 = sc1 before running BeginFiniteBurn
-      //ValidateThrusters();
    }
    
    thrustName = burnName + "_FiniteThrust";
@@ -478,15 +459,6 @@ bool EndFiniteBurn::Initialize()
 //------------------------------------------------------------------------------
 bool EndFiniteBurn::Execute()
 {
-   if (firstTimeExecution)
-   {
-      // Get updated thruster pointers from the spacecraft since spacecraft
-      // clones them
-      //ValidateThrusters(); // commented out (LOJ: 2010.01.25)
-      firstTimeExecution = false;
-   }
-   
-   // Let's validate thrusters all the time (LOJ: 2010.01.25)
    ValidateThrusters();
    
    // Turn off all of the referenced thrusters
@@ -509,13 +481,13 @@ bool EndFiniteBurn::Execute()
       #endif      
    }
    
-   
    // Tell active spacecraft that they are no longer firing
    for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)
    {
-      /// todo: Be sure that no other maneuver has the spacecraft maneuvering
+      /// todo: Be sure that no other maneuver has the spacecraft maneuvering;
+      /// for R2013a this is not an issue since only 1 burn per spacecraft is
+      /// allowed.  We'll need to fix this when that restriction is removed.
       (*s)->IsManeuvering(false);
-//      (*current)->TakeAction("ReleaseCartesianStateDynamics");
    }
    
    // Remove the force from the list of transient forces
@@ -526,8 +498,8 @@ bool EndFiniteBurn::Execute()
       {
          #ifdef DEBUG_TRANSIENT_FORCES
          MessageInterface::ShowMessage
-            ("EndFiniteBurn::Execute() Removing burnForce<%p>'%s' from transientForces\n",
-             burnForce, burnForce->GetName().c_str());
+            ("EndFiniteBurn::Execute() Removing burnForce<%p>'%s' from "
+                  "transientForces\n", burnForce, burnForce->GetName().c_str());
          #endif
          transientForces->erase(j);
          break;
@@ -538,7 +510,8 @@ bool EndFiniteBurn::Execute()
    if (!sats.empty())
    {
       Real epoch = sats[0]->GetEpoch();
-      publisher->SetManeuvering(this, false, epoch, satNames, "end of finite maneuver");
+      publisher->SetManeuvering(this, false, epoch, satNames, "end of finite "
+            "maneuver");
    }
    
    #ifdef DEBUG_END_MANEUVER_EXE
@@ -589,20 +562,20 @@ void EndFiniteBurn::ValidateThrusters()
              thrusterNames.end())
          {
             thrusters.clear();
-            throw CommandException("EndFiniteBurn: Spacecraft " + (*current)->GetName() +
-                                   " does not have a thruster named \"" +
-                                   (*i) + "\"");
+            throw CommandException("EndFiniteBurn: Spacecraft " +
+                  (*current)->GetName() + " does not have a thruster named \"" +
+                  (*i) + "\"");
          }
          
-         Thruster* th = 
-            (Thruster*)((*current)->GetRefObject(Gmat::THRUSTER, *i));
+         Thruster* th = (Thruster*)((*current)->GetRefObject(
+               Gmat::THRUSTER, *i));
          
          if (th)
          {
             #ifdef DEBUG_EFB_THRUSTER
             MessageInterface::ShowMessage
-               ("EndFiniteBurn::ValidateThrusters() addding the Thruster <%p>'%s' "
-                "to thrusters\n", th, th->GetName().c_str());
+               ("EndFiniteBurn::ValidateThrusters() addding the Thruster "
+                "<%p>'%s' to thrusters\n", th, th->GetName().c_str());
             #endif
             thrusters.push_back(th);
          }
@@ -621,4 +594,3 @@ void EndFiniteBurn::ValidateThrusters()
       ("EndFiniteBurn::ValidateThrusters() leaving\n");
    #endif
 }
-
