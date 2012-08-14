@@ -4721,7 +4721,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
       else
       {
          InterpreterException ex
-            (errorMsg1 + "field \"" + toProp + "\" on object " + "\"" +
+            (errorMsg1 + "for field \"" + toProp + "\" on object " + "\"" +
              toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
          HandleError(ex);
       }
@@ -4914,7 +4914,7 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
       else
       {
          InterpreterException ex
-            (errorMsg1 + "field \"" + toProp + "\" on object " + "\"" +
+            (errorMsg1 + "for field \"" + toProp + "\" on object " + "\"" +
              toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
          HandleError(ex);
       }
@@ -5237,7 +5237,10 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
             errorMsg2 = " Only integer number is allowed";
          }
          break;
@@ -5258,7 +5261,10 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
             errorMsg2 = " Only integer number is allowed";
          }
          break;
@@ -5271,7 +5277,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          {
             #ifdef DEBUG_SET
             std::string rvalStr =
-               GmatStringUtil::ToString(rval, false, false, true, 17, 16);
+               GmatStringUtil::ToString(rval, false, false, false, 15, 1);
             MessageInterface::ShowMessage
                ("   Calling <%s>'%s'->SetRealParameter(%d, %s)\n", obj->GetTypeName().c_str(),
                 obj->GetName().c_str(), id, rvalStr.c_str());
@@ -5286,7 +5292,10 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
             errorMsg2 = " The allowed value is Real number";
          }
          break;
@@ -5321,7 +5330,10 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
             errorMsg2 = " The allowed values are: [true false]";
          }
          break;
@@ -5341,7 +5353,10 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
             errorMsg2 = " The allowed values are: [true false]";
          }
          break;
@@ -5360,7 +5375,10 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
             errorMsg2 = " The allowed values are case insensitive: [On Off True False]";
          }
          break;
@@ -5446,7 +5464,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
             errorMsg2 = "  The allowed value is Object Name";
             return false;
          }
@@ -5473,7 +5494,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
             }
             else
             {
-               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+               if (errorMsg1 == "")
+                  errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+               else
+                  errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
                errorMsg2 = "  The allowed value is Object Name";
                return false;
             }
@@ -5922,9 +5946,18 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
       
       if (setWithIndex)
       {
+         retval = true;
          // Set value with index
          for (int i=0; i<count; i++)
-            retval = SetPropertyValue(obj, id, type, rhsValues[i], i);
+         {
+            // If type is RVECTOR_TYPE, we want to catch all non-Real values.
+            // Invalid value for other types will be cautht in the FinalPass().
+            // (Fix for catching [NONE, 123] for RVECTOR LOJ: 2012.08.10)
+            if (type == Gmat::RVECTOR_TYPE)
+               retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
+            else
+               retval = SetPropertyValue(obj, id, type, rhsValues[i], i);
+         }
       }
    }
    else

@@ -22,9 +22,7 @@
 #include "GmatStaticBoxSizer.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
-#include "PlotTypes.hpp"                // for MAX_XY_CURVE
 #include "ParameterSelectDialog.hpp"
-#include "ParameterInfo.hpp"            // for GetDepObjectType()
 #include "MessageInterface.hpp"
 #include <wx/config.h>
 
@@ -294,7 +292,8 @@ void XyPlotSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1), NULL, wxCB_READONLY);
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1),
+                     emptyList, wxCB_READONLY);
    mSolverIterComboBox->SetToolTip(pConfig->Read(_T("SolverIterationsHint")));
    
    // Get Solver Iteration option list from the Subscriber
@@ -377,6 +376,10 @@ void XyPlotSetupPanel::Create()
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::LoadData()
 {
+   #if DEBUG_XYPLOT_PANEL_LOAD
+   MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() entered\n");
+   #endif
+   
    // load data from the core engine
    
    try
@@ -389,15 +392,14 @@ void XyPlotSetupPanel::LoadData()
       mSolverIterComboBox->
          SetValue(mXyPlot->GetStringParameter(Subscriber::SOLVER_ITERATIONS).c_str());
       
-      // get X parameter
+      // Get X parameter
       wxString *xParamNames = new wxString[1];
       xParamNames[0] = mXyPlot->GetStringParameter(XyPlot::XVARIABLE).c_str();
       mXvarWxStrings.Add(xParamNames[0]);
       
       #if DEBUG_XYPLOT_PANEL_LOAD
       MessageInterface::ShowMessage
-         ("XyPlotSetupPanel::LoadData() xParamNames[0] = %s\n",
-          xParamNames[0].c_str());
+         ("   xParamNames[0] = %s\n",  xParamNames[0].c_str());
       #endif
       
       if (!xParamNames[0].IsSameAs(""))
@@ -409,8 +411,10 @@ void XyPlotSetupPanel::LoadData()
       // get Y parameters
       StringArray yParamList = mXyPlot->GetStringArrayParameter(XyPlot::YVARIABLES);
       mNumYParams = yParamList.size();
-      //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() mNumYParams = %d\n",
-      //                              mNumYParams);
+      
+      #if DEBUG_XYPLOT_PANEL_LOAD
+      MessageInterface::ShowMessage("   mNumYParams = %d\n", mNumYParams);
+      #endif
       
       delete [] xParamNames;
       
@@ -422,12 +426,10 @@ void XyPlotSetupPanel::LoadData()
          {
             #if DEBUG_XYPLOT_PANEL_LOAD
                MessageInterface::ShowMessage
-                  ("XyPlotSetupPanel::LoadData() y param = %s\n",
-                   yParamList[i].c_str());
+                  ("   yParamList[%d] = %s\n", i, yParamList[i].c_str());
             #endif
             yParamNames[i] = yParamList[i].c_str();
             mYvarWxStrings.Add(yParamNames[i]);
-            
          }
          
          mYSelectedListBox->Set(mNumYParams, yParamNames);
@@ -440,6 +442,10 @@ void XyPlotSetupPanel::LoadData()
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
+   
+   #if DEBUG_XYPLOT_PANEL_LOAD
+   MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() leaving\n");
+   #endif
 }
 
 
@@ -483,7 +489,6 @@ void XyPlotSetupPanel::SaveData()
          {
             std::string selXName = std::string(mXSelectedListBox->GetString(0).c_str());
             clonedObj->SetStringParameter(XyPlot::XVARIABLE, selXName);
-            //mXParamChanged = false;
          }
       }
       
@@ -500,21 +505,9 @@ void XyPlotSetupPanel::SaveData()
                 "The plot will not be activated.");
             clonedObj->Activate(false);
          }
-         // Actually MAX_XY_CURVE is not used so commented out (LOJ: 2012.08.09)
-         // @todo Remove this code and remove PlotTypes.hpp
-         //else if (numYParams > GmatPlot::MAX_XY_CURVE)
-         //{
-         //   MessageInterface::PopupMessage
-         //      (Gmat::WARNING_, "Selected Y parameter count is greater than %d.\n"
-         //       "First %d parameters will be plotted.", GmatPlot::MAX_XY_CURVE,
-         //       GmatPlot::MAX_XY_CURVE);
-         //   
-         //   mNumYParams = GmatPlot::MAX_XY_CURVE;
-         //}
          else
          {
             mNumYParams = numYParams;
-            //mYParamChanged = false;
          }
          
          if (mNumYParams >= 0) // >=0 because the list needs to be cleared

@@ -1468,7 +1468,7 @@ const Rvector& Subscriber::GetRvectorParameter(const Integer id) const
 //------------------------------------------------------------------------------
 const Rvector& Subscriber::SetRvectorParameter(const Integer id, const Rvector &value)
 {
-   #ifdef DEBUG_SET
+   #ifdef DEBUG_SUBSCRIBER_SET
    MessageInterface::ShowMessage
       ("Subscriber::SetRvectorParameter() <%p>'%s' entered, id=%d, value=%s",
        this, GetName().c_str(), id, value.ToString().c_str());

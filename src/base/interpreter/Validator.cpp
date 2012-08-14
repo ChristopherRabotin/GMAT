@@ -2756,8 +2756,8 @@ bool Validator::ValidateParameter(const StringArray &refNames, GmatBase *obj)
          if (type == "")
          {
             theErrorMsg = "Nonexistent object \"" + refNames[j] + 
-               "\" referenced in the " + obj->GetTypeName() + "\" " +
-               obj->GetName() + "\"";
+               "\" referenced in \"" + obj->GetName() + "\" of type " +
+               obj->GetTypeName();
             HandleError();
             retval = false;
          }

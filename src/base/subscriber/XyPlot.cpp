@@ -145,7 +145,6 @@ XyPlot::XyPlot(const XyPlot &orig) :
    
    mXParamName = orig.mXParamName;
    mYParamNames = orig.mYParamNames;
-   
    mAllParamNames = orig.mAllParamNames;
    
    mOldName = orig.mOldName;
@@ -192,7 +191,6 @@ XyPlot& XyPlot::operator=(const XyPlot& orig)
    
    mXParamName = orig.mXParamName;
    mYParamNames = orig.mYParamNames;
-   
    mAllParamNames = orig.mAllParamNames;
    
    mOldName = orig.mOldName;
@@ -208,10 +206,13 @@ XyPlot& XyPlot::operator=(const XyPlot& orig)
    mNumDataPoints = orig.mNumDataPoints;
    mNumCollected = orig.mNumCollected;
    
+   useLines   = orig.useLines;
+   lineWidth  = orig.lineWidth;
    useMarkers = orig.useMarkers;
-   drawing = orig.drawing;
+   markerSize = orig.markerSize;
+   drawing    = orig.drawing;
    breakCount = orig.breakCount;
-
+   
    return *this;
 }
 
@@ -225,6 +226,14 @@ XyPlot::~XyPlot()
 
 //------------------------------------------------------------------------------
 // bool SetXParameter(const std::string &paramName)
+//------------------------------------------------------------------------------
+/**
+ * Sets X variable name.
+ *
+ * @param  paramName  The name of X variable
+ *
+ * @return  true if X parameter name was set, false when input name is blank
+ */
 //------------------------------------------------------------------------------
 bool XyPlot::SetXParameter(const std::string &paramName)
 {
@@ -577,7 +586,7 @@ bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
       // X parameter
       if (mXParamName == oldName)
          mXParamName = newName;
-   
+      
       // Y parameters
       for (unsigned int i=0; i<mYParamNames.size(); i++)
       {
@@ -992,6 +1001,9 @@ const StringArray& XyPlot::GetStringArrayParameter(const std::string &label) con
 }
 
 
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
 bool XyPlot::GetBooleanParameter(const Integer id) const
 {
    if (id == SHOW_PLOT)
@@ -1007,16 +1019,25 @@ bool XyPlot::GetBooleanParameter(const Integer id) const
    return Subscriber::GetBooleanParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
 bool XyPlot::GetBooleanParameter(const std::string &label) const
 {
    return GetBooleanParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
 bool XyPlot::SetBooleanParameter(const std::string &label, const bool value)
 {
    return SetBooleanParameter(GetParameterID(label), value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
 bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
 {
    if (id == SHOW_PLOT)
