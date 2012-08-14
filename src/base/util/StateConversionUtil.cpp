@@ -2262,10 +2262,10 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
    }
    else if (labelUpper == "FPA")
    {
-      if ((value < -90.0 - ANGLE_TOL) || (value > 90.0 + ANGLE_TOL))
+      if ((value < 0 - ANGLE_TOL) || (value > 180 + ANGLE_TOL))
       {
          std::stringstream rangeMsg;
-         rangeMsg << "-90.0 <= Real Number <= 90.0";
+         rangeMsg << "0.0 <= Real Number <= 180.0";
          if (ANGLE_TOL != 0.0)
             rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
          UtilityException ue;
