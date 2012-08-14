@@ -5543,12 +5543,37 @@ void GmatMainFrame::OnComment(wxCommandEvent& event)
    if (editor)
       editor->OnComment(event);
 #else
+   // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
+   // set up selection so it selects entire lines so replace works
    wxTextCtrl *scriptTC = child->GetScriptTextCtrl();
    wxString selString = scriptTC->GetStringSelection();
+   // if nothing selected, select the previous character (which might be a linefeed)
+   if (selString.Length() == 0) 
+   {
+	   scriptTC->SetSelection( scriptTC->GetInsertionPoint()-1, scriptTC->GetInsertionPoint() );
+	   selString = scriptTC->GetStringSelection();
+   }
+   // make sure the first character of the selection is right after \n
+   if (selString.Length() > 0)
+   {
+	   long textStart, textEnd;
+	   scriptTC->GetSelection( &textStart, &textEnd );
+	   while ( (textStart > 0) && (selString[0] != '\n') )
+	   {
+		   textStart = textStart - 1;
+		   scriptTC->SetSelection( textStart, textEnd );
+		   selString = scriptTC->GetStringSelection();
+	   }
+	   if (selString[0] == '\n')
+	   {
+		   scriptTC->SetSelection( textStart+1, textEnd );
+		   selString = selString.Mid(1, selString.Length());
+	   }
+   }
    selString.Replace("\n", "\n%");
    selString = "%" + selString;
 
-   if (selString.Last() == '%')
+   if ( (selString.Length() > 1)  && (selString.Last() == '%') )
       selString = selString.Mid(0, selString.Length()-1);
 
    scriptTC->WriteText(selString);
@@ -5567,8 +5592,33 @@ void GmatMainFrame::OnUncomment(wxCommandEvent& event)
    if (editor)
       editor->OnUncomment(event);
 #else
+   // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
+   // set up selection so it selects entire lines so replace works
    wxTextCtrl *scriptTC = child->GetScriptTextCtrl();
    wxString selString = scriptTC->GetStringSelection();
+   // if nothing selected, select the previous character (which might be a linefeed)
+   if (selString.Length() == 0) 
+   {
+	   scriptTC->SetSelection( scriptTC->GetInsertionPoint()-1, scriptTC->GetInsertionPoint() );
+	   selString = scriptTC->GetStringSelection();
+   }
+   // make sure the first character of the selection is right after \n
+   if (selString.Length() > 0)
+   {
+	   long textStart, textEnd;
+	   scriptTC->GetSelection( &textStart, &textEnd );
+	   while ( (textStart > 0) && (selString[0] != '\n') )
+	   {
+		   textStart = textStart - 1;
+		   scriptTC->SetSelection( textStart, textEnd );
+		   selString = scriptTC->GetStringSelection();
+	   }
+	   if (selString[0] == '\n')
+	   {
+		   scriptTC->SetSelection( textStart+1, textEnd );
+		   selString = selString.Mid(1, selString.Length());
+	   }
+   }
 
    if (selString.StartsWith("%"))  // gets rid of first %
       selString = selString.Mid(1, selString.Length()-1);
