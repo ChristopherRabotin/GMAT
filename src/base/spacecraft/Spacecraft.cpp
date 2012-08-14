@@ -4079,7 +4079,7 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
       if (obj->GetType() == Gmat::HARDWARE)
       {
          // Needs to be watched to be sure hardware uses operator= correctly
-         for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+         for (UnsignedInt i = 0; i < hardwareList.size(); ++i)
             if (obj->GetName() == hardwareList[i]->GetName())
             {
                ((Hardware*)hardwareList[i])->operator =(*((Hardware*)obj));
