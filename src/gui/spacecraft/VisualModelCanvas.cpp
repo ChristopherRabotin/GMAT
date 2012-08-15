@@ -1,4 +1,4 @@
-// $Id$
+//$Id$
 //------------------------------------------------------------------------------
 //                            VisualModelCanvas
 //------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    const wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name, long style)
    #ifdef __WXMSW__
    // Constructor with explicit wxGLContext with default GL attributes
-   // It is getting pixel format error with GmatGLCanvasAttribs
+   // It is getting pixel format error with GmatGLCanvasAttribs on Windows, so set to default.
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
    #elif __WXMAC__
    // Constructor with implicit wxGLContext with default GL attributes
@@ -78,7 +78,7 @@ VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    currentSpacecraft = spacecraft;
    lastMouseX = 0;
    lastMouseY = 0;
-      
+   
    mCamera.Relocate(15000.0f, 15000.0f, 15000.0f, 0.0f, 0.0f, 0.0f);
    mLight.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
    mLight.SetPosition(0.01f, 1.0f, 0.3f);
@@ -147,15 +147,16 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
    if (needToLoadModel)
       LoadModel();
    
-   // set OpenGL to recognize the counter clockwise defined side of a polygon
+   // Set OpenGL to recognize the counter clockwise defined side of a polygon
    // as its 'front' for lighting and culling purposes
    glFrontFace(GL_CCW);
    
-   // enable face culling, so that polygons facing away (defined by front face)
+   // Enable face culling, so that polygons facing away (defined by front face)
    // from the viewer aren't drawn (for efficiency).
-   // tell OpenGL to use glColor() to get material properties for..
+   // Tell OpenGL to use glColor() to get material properties for
    glEnable(GL_COLOR_MATERIAL);
-   // ..the front face's ambient and diffuse components
+   // Set both front and back material parameters and ambient and diffuse material
+   // parameters to track the current color 
    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
    // Set the clear color to black
    glClearColor(0.0, 0.0, 0.0, 1);
