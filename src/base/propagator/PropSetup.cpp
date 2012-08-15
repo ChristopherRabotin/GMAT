@@ -39,7 +39,7 @@
 //#define DEBUG_PROPSETUP_GEN_STRING
 //#define DEBUG_FUNCTION_CREATION
 //#define DEBUG_CLONES
-
+//#define DEBUG_RENAME
 
 
 //#ifndef DEBUG_MEMORY 
@@ -416,7 +416,7 @@ void PropSetup::SetPropagator(Propagator *propagator, bool fromGUI)
 /**
  * Sets internal force model pointer to given force model.
  *
- *@param <*ODEModel> ODEModel pointer to set internal force model to
+ * @param odeModel ODEModel pointer to set internal force model to
  */
 //------------------------------------------------------------------------------
 void PropSetup::SetODEModel(ODEModel *odeModel)
@@ -542,7 +542,7 @@ bool PropSetup::RenameRefObject(const Gmat::ObjectType type,
       mODEModelName = GmatStringUtil::Replace(mODEModelName, oldName, newName);
    }
    
-   // Rename acutal ODE model name of ODEModel pointer
+   // Rename actual ODE model name of ODEModel pointer
    if (mODEModel)
    {
       std::string modelName = mODEModel->GetName();
