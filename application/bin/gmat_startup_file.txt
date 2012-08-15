@@ -74,7 +74,7 @@ MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
 DATA_PATH              = ROOT_PATH/data/
 #-----------------------------------------------------------
 SPK_PATH               = DATA_PATH/planetary_ephem/spk/
-PLANETARY_SPK_FILE     = SPK_PATH/de421.bsp
+PLANETARY_SPK_FILE     = SPK_PATH/DE421AllPlanets.bsp
 #-----------------------------------------------------------
 DE_PATH                = DATA_PATH/planetary_ephem/de/
 DE405_FILE             = DE_PATH/leDE1941.405
