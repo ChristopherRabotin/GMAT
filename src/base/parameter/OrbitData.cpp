@@ -686,9 +686,7 @@ Real OrbitData::GetKepReal(Integer item)
    
    if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
       throw ParameterException
-         ("OrbitData::GetKepReal(" + GmatRealUtil::ToString(item) +
-          ") position vector is zero. pos: " + pos.ToString() + " vel: " +
-          vel.ToString());
+         ("*** Error *** Cannot convert from Cartesian to Keplerian because position vector is a zero vector.");
    
    switch (item)
    {
@@ -964,9 +962,7 @@ Real OrbitData::GetEquinReal(Integer item)
    
    if (rMag < GmatOrbitConstants::KEP_ZERO_TOL)
       throw ParameterException
-         ("OrbitData::GetEquiReal(" + GmatRealUtil::ToString(item) +
-          ") position vector is zero. pos: " + pos.ToString() + " vel: " +
-          vel.ToString());
+         ("*** Error *** Cannot convert from Cartesian to Equinoctial because position vector is a zero vector.");
    
    switch (item)
    {
