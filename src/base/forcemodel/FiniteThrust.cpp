@@ -331,13 +331,21 @@ bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    if (type == Gmat::FINITE_BURN) 
    {
-      if (obj->GetTypeName() != "FiniteBurn")
+      if (obj->IsOfType("FiniteBurn") == false)
          throw ODEModelException(
             "FiniteThrust::SetRefObject cannot use objects of type " + 
             obj->GetTypeName());
       if (find(burns.begin(), burns.end(), obj) == burns.end())
       {
-         burns.push_back((FiniteBurn*)obj);
+         // Verify that the burn identifies minimal objects needed
+         FiniteBurn *theBurn = (FiniteBurn*)obj;
+         if (theBurn->GetStringArrayParameter(
+               theBurn->GetParameterID("Thrusters")).size() == 0)
+            throw ODEModelException("The finite burn object " +
+                  theBurn->GetName() + " does not identify any thrusters, and "
+                  "cannot be used for a Finite Burn.");
+
+         burns.push_back(theBurn);
          if (find(burnNames.begin(), burnNames.end(), name) == burnNames.end())
          {
             burnNames.push_back(name);
