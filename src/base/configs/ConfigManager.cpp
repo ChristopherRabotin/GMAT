@@ -1278,6 +1278,16 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
          ("ConfigManager::RenameItem() type=%d, oldName='%s', newName='%s'\n",
           type, oldName.c_str(), newName.c_str());
    #endif
+
+   #ifdef DUMP_CONFIGURED_OBJECTS
+      MessageInterface::ShowMessage("Before rename, Configured objects:\n");
+      for (UnsignedInt i = 0; i < objects.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n",
+               objects[i]->GetName().c_str());
+      for (UnsignedInt i = 0; i < newObjects.size(); ++i)
+         MessageInterface::ShowMessage("   N:   %s\n",
+               newObjects[i]->GetName().c_str());
+   #endif
    
    bool renamed = false;
    
@@ -1357,15 +1367,22 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       // Change _ForceMode name if _ForceModel is configured
       std::string oldFmName = oldName + "_ForceModel";
       std::string newFmName = newName + "_ForceModel";
-      if (mapping.find(oldFmName) != mapping.end())
+      // Rename the ODEModel if it is associated with and named by the PropSetup
+      if ((mapping.find(oldFmName) != mapping.end()) &&
+          (mapObj->GetStringParameter("FM") == oldFmName))
       {
+         GmatBase *propSetup = mapObj;
          mapObj = mapping[oldFmName];
          // if newName does not exist, change name
          if (mapping.find(newFmName) == mapping.end())
          {
             mapping.erase(oldFmName);
             mapping[newFmName] = mapObj;
-            mapObj->SetName(newFmName);         
+            mapObj->SetName(newFmName);
+
+            // Update the prop setup with the new name
+            propSetup->SetStringParameter("FM", newFmName);
+            propSetup->RenameRefObject(mapObj->GetType(), oldFmName, newFmName);
             
             #if DEBUG_RENAME
             MessageInterface::ShowMessage
@@ -1473,6 +1490,16 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       ("ConfigManager::RenameItem() returning %d\n", renamed);
    #endif
    
+   #ifdef DUMP_CONFIGURED_OBJECTS
+      MessageInterface::ShowMessage("After rename, Configured objects:\n");
+      for (UnsignedInt i = 0; i < objects.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n",
+               objects[i]->GetName().c_str());
+      for (UnsignedInt i = 0; i < newObjects.size(); ++i)
+         MessageInterface::ShowMessage("   N:   %s\n",
+               newObjects[i]->GetName().c_str());
+   #endif
+
    return renamed;
 } // RenameItem()
 
