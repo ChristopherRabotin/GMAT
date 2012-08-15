@@ -1710,7 +1710,6 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name,
    }
    
    // Remove and delete associated system Parameter from mapping
-   bool status1 = true;
    if (removeAssociatedSysParam)
    {
       #ifdef DEBUG_CONFIG_REMOVE
