@@ -597,7 +597,7 @@ void DragForce::SetSatelliteParameter(const Integer i,
 //------------------------------------------------------------------------------
 void DragForce::ClearSatelliteParameters(const std::string parmName)
 {
-   if ((parmName == "DryMass") || (parmName == ""))
+   if ((parmName == "Mass") || (parmName == ""))
       mass.clear();
    if ((parmName == "Cd") || (parmName == ""))
       dragCoeff.clear();

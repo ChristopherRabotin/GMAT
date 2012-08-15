@@ -14,7 +14,7 @@
 // Created: 2009.03.20
 //
 /**
- * Implements Spacecraft Spacecraft related data class.
+ * Implements Spacecraft related data class.
  */
 //------------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ SpacecraftData::~SpacecraftData()
 // Real GetReal(Integer item)
 //------------------------------------------------------------------------------
 /**
- * Retrives Spacecraft or spacecraft owned hardware element by integer id.
+ * Retrieves Spacecraft or spacecraft owned hardware element by integer id.
  */
 //------------------------------------------------------------------------------
 Real SpacecraftData::GetReal(Integer item)
@@ -93,6 +93,10 @@ Real SpacecraftData::GetReal(Integer item)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
    
+   // if there was an error initializing the ref objects, do not try to get the value
+   if (mSpacecraft == NULL)
+      return BALLISTIC_REAL_UNDEFINED;
+
    switch (item)
    {
    case DRY_MASS:
@@ -227,6 +231,10 @@ Real SpacecraftData::SetReal(Integer item, Real val)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
    
+   // if there was an error initializing the ref objects, do not try to set the value
+   if (mSpacecraft == NULL)
+      return BALLISTIC_REAL_UNDEFINED;
+
    switch (item)
    {
    case DRY_MASS:

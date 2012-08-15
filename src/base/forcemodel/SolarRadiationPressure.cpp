@@ -1334,7 +1334,7 @@ void SolarRadiationPressure::ClearSatelliteParameters(
       msg << "Clearing satellite parameter " << parmName << "\n";
       MessageInterface::ShowMessage(msg.str());
    #endif
-   if ((parmName == "DryMass") || (parmName == ""))
+   if ((parmName == "Mass") || (parmName == ""))
       mass.clear();
    if ((parmName == "Cr") || (parmName == ""))
       cr.clear();
