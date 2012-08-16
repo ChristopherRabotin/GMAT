@@ -91,9 +91,9 @@ bool DryMass::Evaluate()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* DryMass::Clone(void) const
+// GmatBase* DryMass::Clone() const
 //------------------------------------------------------------------------------
-GmatBase* DryMass::Clone(void) const
+GmatBase* DryMass::Clone() const
 {
    return new DryMass(*this);
 }
@@ -163,9 +163,9 @@ bool DragCoeff::Evaluate()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* DragCoeff::Clone(void) const
+// GmatBase* DragCoeff::Clone() const
 //------------------------------------------------------------------------------
-GmatBase* DragCoeff::Clone(void) const
+GmatBase* DragCoeff::Clone() const
 {
    return new DragCoeff(*this);
 }
@@ -235,9 +235,9 @@ bool ReflectCoeff::Evaluate()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* ReflectCoeff::Clone(void) const
+// GmatBase* ReflectCoeff::Clone() const
 //------------------------------------------------------------------------------
-GmatBase* ReflectCoeff::Clone(void) const
+GmatBase* ReflectCoeff::Clone() const
 {
    return new ReflectCoeff(*this);
 }
@@ -307,9 +307,9 @@ bool DragArea::Evaluate()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* DragArea::Clone(void) const
+// GmatBase* DragArea::Clone() const
 //------------------------------------------------------------------------------
-GmatBase* DragArea::Clone(void) const
+GmatBase* DragArea::Clone() const
 {
    return new DragArea(*this);
 }
@@ -379,9 +379,9 @@ bool SRPArea::Evaluate()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* SRPArea::Clone(void) const
+// GmatBase* SRPArea::Clone() const
 //------------------------------------------------------------------------------
-GmatBase* SRPArea::Clone(void) const
+GmatBase* SRPArea::Clone() const
 {
    return new SRPArea(*this);
 }
@@ -451,9 +451,9 @@ bool TotalMass::Evaluate()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* TotalMass::Clone(void) const
+// GmatBase* TotalMass::Clone() const
 //------------------------------------------------------------------------------
-GmatBase* TotalMass::Clone(void) const
+GmatBase* TotalMass::Clone() const
 {
    return new TotalMass(*this);
 }

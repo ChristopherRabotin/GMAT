@@ -42,7 +42,7 @@ public:
    virtual bool Evaluate();
    
    // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    
 protected:
 
@@ -61,7 +61,7 @@ public:
    virtual bool Evaluate();
    
    // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    
 protected:
 
@@ -80,7 +80,7 @@ public:
    virtual bool Evaluate();
    
    // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    
 protected:
 
@@ -99,7 +99,7 @@ public:
    virtual bool Evaluate();
    
    // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    
 protected:
 
@@ -118,7 +118,7 @@ public:
    virtual bool Evaluate();
    
    // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    
 protected:
 
@@ -137,7 +137,7 @@ public:
    virtual bool Evaluate();
    
    // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    
 protected:
 

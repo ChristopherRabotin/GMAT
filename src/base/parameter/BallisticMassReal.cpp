@@ -91,7 +91,7 @@ Integer BallisticMassReal::GetNumRefObjects() const
 
 
 //------------------------------------------------------------------------------
-// bool addRefObject(GmatBase *obj, bool replaceName)
+// bool AddRefObject(GmatBase *obj, bool replaceName)
 //------------------------------------------------------------------------------
 bool BallisticMassReal::AddRefObject(GmatBase *obj, bool replaceName)
 {
@@ -104,7 +104,7 @@ bool BallisticMassReal::AddRefObject(GmatBase *obj, bool replaceName)
       #endif
       
       return SpacecraftData::AddRefObject(obj->GetType(), obj->GetName(), obj,
-                                        replaceName);
+                                          replaceName);
       
    }
    
@@ -128,12 +128,13 @@ bool BallisticMassReal::Initialize()
 {
    try
    {
-      InitializeRefObjects();
+      InitializeRefObjects();  // NOTE - as of 2012.08.16, InitializeRefObejcts
+                               // does not throw an exception
    }
    catch(BaseException &e)
    {
       throw GmatBaseException
-         ("BallisticMassReal::Initialize() Fail to initialize Parameter:" +
+         ("BallisticMassReal::Initialize() failed to initialize Parameter:" +
           this->GetTypeName() + "\n" + e.GetFullMessage());
    }
    
@@ -164,7 +165,7 @@ std::string BallisticMassReal::GetRefObjectName(const Gmat::ObjectType type) con
    {
       throw ParameterException
          ("BallisticMassReal::GetRefObjectName() " + GmatBase::GetObjectTypeString(type) +
-          " is not valid object type of " + this->GetTypeName() + "\n");
+          " is not a valid object type of " + this->GetTypeName() + "\n");
    }
    
    return objName;

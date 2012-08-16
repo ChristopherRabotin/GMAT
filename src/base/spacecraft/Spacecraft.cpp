@@ -226,7 +226,7 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "MLONG",
 };
 
-const Integer  Spacecraft::ATTITUDE_ID_OFFSET = 20000;
+const Integer  Spacecraft::ATTITUDE_ID_OFFSET  = 20000;
 const Real     Spacecraft::UNSET_ELEMENT_VALUE = -999.999;
 
 //-------------------------------------
@@ -824,7 +824,7 @@ Rvector6 Spacecraft::GetState(Integer rep)
 
 
 //------------------------------------------------------------------------------
-//  Rvector6 GetCartesianState()
+//  Rvector6 GetCartesianState()   [OBSOLETE]
 //------------------------------------------------------------------------------
 /**
  * Get the Cartesian state.
@@ -1458,7 +1458,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
           coordSysMap.size(), isThrusterSettingMode);
       #endif
 
-      // first, try setting it on the attitude (owned object)
+      // first, try setting it on the attitude (owned object)   .......
       if (attitude)
       {
          try
@@ -2087,12 +2087,12 @@ Real Spacecraft::GetRealParameter(const Integer id) const
       return (const_cast<Spacecraft*>(this))->GetElement(GetParameterText(id));
    }
 
-   if (id == DRY_MASS_ID) return dryMass;
-   if (id == CD_ID) return coeffDrag;
-   if (id == CR_ID) return reflectCoeff;
-   if (id == DRAG_AREA_ID) return dragArea;
-   if (id == SRP_AREA_ID) return srpArea;
-   if (id == TOTAL_MASS_ID)  return UpdateTotalMass();
+   if (id == DRY_MASS_ID)   return dryMass;
+   if (id == CD_ID)         return coeffDrag;
+   if (id == CR_ID)         return reflectCoeff;
+   if (id == DRAG_AREA_ID)  return dragArea;
+   if (id == SRP_AREA_ID)   return srpArea;
+   if (id == TOTAL_MASS_ID) return UpdateTotalMass();
 
    if (id == CARTESIAN_X )  return state[0];
    if (id == CARTESIAN_Y )  return state[1];
@@ -2101,7 +2101,7 @@ Real Spacecraft::GetRealParameter(const Integer id) const
    if (id == CARTESIAN_VY)  return state[4];
    if (id == CARTESIAN_VZ)  return state[5];
 
-   if (id == MASS_FLOW)  return UpdateTotalMass();
+   if (id == MASS_FLOW)     return UpdateTotalMass();
 
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
