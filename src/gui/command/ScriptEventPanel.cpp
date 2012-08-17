@@ -353,7 +353,14 @@ void ScriptEventPanel::SaveData()
    if (!mFileContentsTextCtrl->IsModified() && mCommentTextCtrl->IsModified())
    #endif
    {
-      theCommand->SetCommentLine(mCommentTextCtrl->GetValue().c_str());
+      wxString comments = mCommentTextCtrl->GetValue();
+      if (comments.StartsWith("%"))  // gets rid of first %
+		comments = comments.Mid(1, comments.Length()-1);
+   
+	  comments.Replace("\n%", "\n");
+	  comments.Replace("\n", "\n%");
+	  comments = "%" + comments;
+      theCommand->SetCommentLine(comments.c_str());
       mCommentTextCtrl->SetModified(false);
       EnableUpdate(false);
       canClose = true;
@@ -599,9 +606,15 @@ void ScriptEventPanel::SaveData()
       // Save comment if modified
       if (mCommentTextCtrl->IsModified())
       {
-         std::string comments = mCommentTextCtrl->GetValue().c_str();
-         comments = comments + "\n";
-         theCommand->SetCommentLine(comments);
+		 wxString comments = mCommentTextCtrl->GetValue();
+ 
+		 if (comments.StartsWith("%"))  // gets rid of first %
+			comments = comments.Mid(1, comments.Length()-1);
+   
+		 comments.Replace("\n%", "\n");
+		 comments.Replace("\n", "\n%");
+		 comments = "%" + comments;
+         theCommand->SetCommentLine(comments.c_str());
          #if DBGLVL_SEPANEL_SAVE
          MessageInterface::ShowMessage("   saving new comments\n");
          #endif
