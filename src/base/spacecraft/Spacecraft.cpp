@@ -5497,7 +5497,12 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
 
    if (id >= 0)
    {
-      if (ValidateOrbitStateValue(rep, label, value))
+      // Only validate coupled elements in Assignment mode (i.e. before initialization).
+      // Assume that errors in setting coupled elements in Command mode will be
+      // caught when state conversion is requested.
+      bool isValid = ValidateOrbitStateValue(rep, label, value, !isInitialized);
+
+      if (isValid)
       {
          if (csSet)
          {
@@ -5924,11 +5929,20 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
 }
 
 //-------------------------------------------------------------------------
-// bool ValidateOrbitStateValue(const std::string &forRep,
-//                              const std::string &withLabel, Real andValue)
+// bool ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel,
+//                              Real andValue,             bool checkCoupled)
 //-------------------------------------------------------------------------
-bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel, Real andValue)
+bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel, Real andValue, bool checkCoupled)
 {
+   if (!checkCoupled)
+   {
+      #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
+         MessageInterface::ShowMessage("In SC::SetElement, about to validate (no coupled element check) %s with value %le\n", label.c_str(), value);
+      #endif
+      return StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision());
+   }
+
+   // On option, check coupled elements
    bool validated = false;
    // if we're setting RadApo, and RadPer has been set, also check for value relative to RadPer
    if ((forRep == "ModifiedKeplerian") && (withLabel == "RadApo") && (state[0] != UNSET_ELEMENT_VALUE))

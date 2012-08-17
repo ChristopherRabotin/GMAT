@@ -452,7 +452,7 @@ private:
    bool              VerifyAddHardware();
    Integer           NumStateElementsSet();
    void              SetPossibleInputTypes(const std::string& label, const std::string &rep);
-   bool              ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel, Real andValue);
+   bool              ValidateOrbitStateValue(const std::string &forRep, const std::string &withLabel, Real andValue, bool checkCoupled = true);
 
 };
 
