@@ -389,6 +389,7 @@ public:
    virtual void         FinalizeCreation();
 
    virtual std::string  GetLastErrorMessage();
+   virtual void         SetLastErrorMessage(const std::string &msg);
    virtual std::string  GetErrorMessageFormat();
    virtual void         SetErrorMessageFormat(const std::string &fmt);
 

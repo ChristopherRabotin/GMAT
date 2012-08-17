@@ -3528,12 +3528,27 @@ std::string GmatBase::BuildPropertyName(GmatBase *ownedObj)
 /**
  * Retrieves the last error message
  *
- * @return The format string.
+ * @return The last error message.
  */
 //------------------------------------------------------------------------------
 std::string GmatBase::GetLastErrorMessage()
 {
    return lastErrorMessage;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetLastErrorMessage(const std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Sets the last error message
+ *
+ * @param msg The last error messsage to set
+ */
+//------------------------------------------------------------------------------
+void GmatBase::SetLastErrorMessage(const std::string &msg)
+{
+   lastErrorMessage = msg;
 }
 
 

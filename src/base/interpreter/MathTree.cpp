@@ -50,7 +50,10 @@
 //------------------------------------------------------------------------------
 MathTree::MathTree(const std::string &typeStr, const std::string &nomme) :
    GmatBase(Gmat::MATH_TREE, typeStr, nomme),
-   theTopNode(NULL)
+   theTopNode(NULL),
+   theObjectMap(NULL),
+   theGlobalObjectMap(NULL),
+   theWrapperMap(NULL)
 {
 }
 
@@ -263,6 +266,70 @@ void MathTree::SetMathWrappers(std::map<std::string, ElementWrapper*> *wrapperMa
    SetMathElementWrappers(theTopNode);
 }
 
+//------------------------------------------------------------------------------
+// bool Validate(std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Validates math tree nodes by going through theWrapperMap.
+ *
+ * @param  msg  Output error message if any
+ *
+ * @return true if math tree is valid, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool MathTree::Validate(std::string &msg)
+{
+   #ifdef DEBUG_VALIDATE
+   MessageInterface::ShowMessage
+      ("MathTree::Validate() entered, theWrapperMap=<%p>\n", theWrapperMap);
+   #endif
+   
+   bool retval = true;
+   msg = "";
+   std::string errmsg = "Cannot use object ";
+   
+   if (theWrapperMap)
+   {
+      WrapperMap::iterator iter = theWrapperMap->begin();
+      while (iter != theWrapperMap->end())
+      {
+         ElementWrapper *ew = iter->second;
+         #ifdef DEBUG_VALIDATE
+         MessageInterface::ShowMessage
+            ("   name = '%s', wrapper = <%p>\n", (iter->first).c_str(), ew);
+         #endif
+         if (ew)
+         {
+            Gmat::WrapperDataType wrapperType = ew->GetWrapperType();
+            
+            // Check for invalid wrapper type
+            if (wrapperType == Gmat::STRING_WT || wrapperType == Gmat::STRING_OBJECT_WT ||
+                wrapperType == Gmat::OBJECT_WT || wrapperType == Gmat::BOOLEAN_WT ||
+                wrapperType == Gmat::ON_OFF_WT || wrapperType == Gmat::UNKNOWN_WRAPPER_TYPE)
+            {
+               errmsg = errmsg + "\"" + iter->first + "\", ";
+               retval = false;
+            }
+         }
+         
+         ++iter;
+      }
+   }
+   
+   if (!retval)
+   {
+      // Remove last , from the errmsg
+      errmsg = GmatStringUtil::RemoveLastString(errmsg, ", ");
+      msg = errmsg + " in a math equation.";
+   }
+   
+   #ifdef DEBUG_VALIDATE
+   MessageInterface::ShowMessage
+      ("MathTree::Validate() returning %d, msg = '%s'\n", retval, msg.c_str());
+   #endif
+   
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // void Evaluate() const

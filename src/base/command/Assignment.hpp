@@ -45,7 +45,9 @@ public:
    virtual bool         HasAFunction();
    const StringArray&   GetGmatFunctionNames();
    void                 SetMathWrappers();
-   
+
+   void                 SetLHS(const std::string &left) { lhs = left; }
+   void                 SetRHS(const std::string &right) {rhs = right; }
    std::string          GetLHS() { return lhs; }
    std::string          GetRHS() { return rhs; }
    

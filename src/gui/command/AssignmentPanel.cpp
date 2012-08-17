@@ -127,11 +127,11 @@ void AssignmentPanel::LoadData()
    
    mObject = theCommand;
    
-   wxString lhs = theCommand->GetLHS().c_str();
-   wxString rhs = theCommand->GetRHS().c_str();
+   lhs = theCommand->GetLHS();
+   rhs = theCommand->GetRHS();
    
-   mLhsTextCtrl->SetValue(lhs);
-   mRhsTextCtrl->SetValue(rhs);
+   mLhsTextCtrl->SetValue(lhs.c_str());
+   mRhsTextCtrl->SetValue(rhs.c_str());
    
    if (lhs == "" || rhs == "")
    {
@@ -149,12 +149,13 @@ void AssignmentPanel::SaveData()
 {
    #if DEBUG_ASSIGNMENT_PANEL_SAVE
    MessageInterface::ShowMessage
-      ("AssignmentPanel::SaveData() entered, mIsTextModified=%d\n", mIsTextModified);
+      ("\nAssignmentPanel::SaveData() entered, mIsTextModified=%d, lhs='%s', rhs='%s'\n",
+       mIsTextModified, lhs.c_str(), rhs.c_str());
    #endif
    
    canClose = true;
-   std::string lhs = mLhsTextCtrl->GetValue().c_str();
-   std::string rhs = mRhsTextCtrl->GetValue().c_str();
+   std::string newLhs = mLhsTextCtrl->GetValue().c_str();
+   std::string newRhs = mRhsTextCtrl->GetValue().c_str();
    
    //-----------------------------------------------------------------
    // check values from text field
@@ -164,7 +165,7 @@ void AssignmentPanel::SaveData()
       Real rval;
       
       // check if it has blank lhs or rhs
-      if (lhs == "" || rhs == "")
+      if (newLhs == "" || newRhs == "")
       {
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "LHS or RHS cannot be blank");
@@ -172,17 +173,16 @@ void AssignmentPanel::SaveData()
          return;
       }
       
-      // Lhs cannot be a number
-      if (GmatStringUtil::ToReal(lhs, rval))
+      // lhs cannot be a number
+      if (GmatStringUtil::ToReal(newLhs, rval))
       {
          MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Left hand side cannot be a number. %f",
-             rval);
+            (Gmat::ERROR_, "Left hand side cannot be a number. %f", rval);
          canClose = false;
       }
       
-      // Lhs should be an existing variable or valid object property
-      CheckVariable(lhs, Gmat::UNKNOWN_OBJECT, "Left hand side",
+      // lhs should be an existing variable or valid object property
+      CheckVariable(newLhs, Gmat::UNKNOWN_OBJECT, "Left hand side",
                     "Variable, Array, Array element, Object property", false,
                     true, true);
    }
@@ -191,36 +191,62 @@ void AssignmentPanel::SaveData()
       return;
    
    //-----------------------------------------------------------------
-   // save values to base, base code should do the syntax checking
+   // save values to base, base code should do the validation
    //-----------------------------------------------------------------
    if (mIsTextModified)
    {
-      wxString genStr = mLhsTextCtrl->GetValue() + " = " +
-         mRhsTextCtrl->GetValue();
+      std::string newGenStr = newLhs + " = " + newRhs;
       
       #if DEBUG_ASSIGNMENT_PANEL_SAVE
-      MessageInterface::ShowMessage("     genStr=%s\n", genStr.c_str());
+      MessageInterface::ShowMessage("     newGenStr = '%s'\n", newGenStr.c_str());
       #endif
       
       try
       {
          // Interpret assignment string         
-         theCommand->SetGeneratingString(genStr.c_str());
+         theCommand->SetGeneratingString(newGenStr);
          theCommand->InterpretAction();
          
          // Create element wrappers
          if (!theGuiInterpreter->ValidateCommand(theCommand))
          {
             MessageInterface::PopupMessage
-               (Gmat::ERROR_, "Error found in the equation \"" + genStr + "\"");
+               (Gmat::ERROR_, "Error found in the equation \"" + newGenStr + "\"");
+            // Set saved lhs and rhs values
+            theCommand->SetLHS(lhs);
+            theCommand->SetRHS(rhs);
             canClose = false;
          }
-         
-         mIsTextModified = false;
+         else if (!theCommand->Validate())
+         {
+            std::string errmsg = theCommand->GetLastErrorMessage();
+            theCommand->SetLastErrorMessage("");
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "\"" + newGenStr + "\" failed validation. " + errmsg);
+            
+            theCommand->SetLHS(lhs);
+            theCommand->SetRHS(rhs);
+            canClose = false;
+         }
+         else
+         {
+            // update lhs and rhs
+            lhs = newLhs;
+            rhs = newRhs;
+            mIsTextModified = false;
+         }
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+         // Set saved lhs and rhs values
+         theCommand->SetLHS(lhs);
+         theCommand->SetRHS(rhs);
+         std::string msg = e.GetFullMessage();
+         // remove duplicate exception message
+         msg = GmatStringUtil::Replace(msg, "Interpreter Exception: Interpreter Exception: ",
+                                       "Interpreter Exception: ");
+         
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg);
          canClose = false;
       }
    }
@@ -231,6 +257,26 @@ void AssignmentPanel::SaveData()
    #endif
 }
 
+//------------------------------------------------------------------------------
+// virtual void OnCancel()
+//------------------------------------------------------------------------------
+/**
+ * Closes panel without saving new input.
+ */
+//------------------------------------------------------------------------------
+void AssignmentPanel::OnCancel(wxCommandEvent &event)
+{
+   #ifdef DEBUG_ASSIGNMENT_PANEL
+   MessageInterface::ShowMessage
+      ("AssignmentPanel::OnCancel() Setting lhs = '%s', rhs = '%s' to command\n",
+       lhs.c_str(), rhs.c_str());
+   #endif
+   
+   // set saved lhs and rhs values
+   theCommand->SetLHS(lhs);
+   theCommand->SetRHS(rhs);
+   GmatPanel::OnCancel(event);
+}
 
 //------------------------------------------------------------------------------
 // void OnTextChange(wxCommandEvent& event)

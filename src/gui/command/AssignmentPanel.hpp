@@ -34,6 +34,8 @@ public:
 private:
    Assignment *theCommand;
    bool mIsTextModified;
+   std::string lhs;
+   std::string rhs;
    
    wxTextCtrl *mLhsTextCtrl;
    wxTextCtrl *mRhsTextCtrl;
@@ -42,6 +44,8 @@ private:
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
+   
+   virtual void OnCancel(wxCommandEvent &event);
    
    void OnTextChange(wxCommandEvent& event);
    

@@ -194,12 +194,23 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
    {
       #ifdef DEBUG_INPUT_OUTPUT
       MessageInterface::ShowMessage
-         ("MathElement::GetOutputInfo() %s is parameter\n", GetName().c_str());
+         ("MathElement::GetOutputInfo() %s is a parameter or an object, "
+          "refObject=<%p><%s>'%s'\n", GetName().c_str(), refObject,
+          refObject ? refObject->GetTypeName().c_str() : "NULL",
+          refObject ? refObject->GetName().c_str() : "NULL");
       #endif
       
       if (refObject)
       {
+         // Check if ref object is Parameter object
+         if (!refObject->IsOfType(Gmat::PARAMETER))
+            throw MathException("The math element \"" + GetName() + "\" of type \"" +
+                                refObject->GetTypeName() + "\" is invalid");
+         
          type = refObject->GetReturnType();
+         #ifdef DEBUG_INPUT_OUTPUT
+         MessageInterface::ShowMessage("   object return type = %d\n", type);
+         #endif
          
          if (type == Gmat::RMATRIX_TYPE)
          {

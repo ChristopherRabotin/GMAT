@@ -56,6 +56,7 @@ public:
    void                 SetTopNode(MathNode *node);
    void                 SetMathWrappers(WrapperMap *wrapperMap);
    
+   bool                 Validate(std::string &msg);
    Real                 Evaluate();
    Rmatrix              MatrixEvaluate();
    bool                 Initialize(ObjectMap *objectMap,

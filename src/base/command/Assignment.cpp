@@ -660,8 +660,10 @@ bool Assignment::Validate()
    #endif
    if (lhsWrapper != NULL)
    {
+      Gmat::ParameterType lhsDataType = lhsWrapper->GetDataType();
       if (rhsWrapper != NULL)
       {
+         Gmat::ParameterType rhsDataType = rhsWrapper->GetDataType();
          if (lhsWrapper->GetWrapperType() != rhsWrapper->GetWrapperType())
          {
             #ifdef DEBUG_VALIDATION
@@ -672,18 +674,15 @@ bool Assignment::Validate()
                MessageInterface::ShowMessage("   rhsWrapper: %d type, \"%s\"\n",
                      rhsWrapper->GetWrapperType(),
                      rhsWrapper->GetDescription().c_str());
-            #endif
-
-            Gmat::ParameterType lhsDataType = lhsWrapper->GetDataType();
-            Gmat::ParameterType rhsDataType = rhsWrapper->GetDataType();
-
-            #ifdef DEBUG_VALIDATION
                MessageInterface::ShowMessage("Checking compatibility of %s "
                      "with %s\n", PARAM_TYPE_STRING[lhsDataType].c_str(),
                      PARAM_TYPE_STRING[rhsDataType].c_str());
             #endif
             if (lhsDataType != rhsDataType)
             {
+               // Initially set last error message, if validated ok then blank out.
+               lastErrorMessage = "Types of LHS and RHS are not compatible.";
+               
                // Object = string is handled separately
                if ((lhsDataType == Gmat::OBJECT_TYPE) ||
                    (lhsDataType == Gmat::OBJECTARRAY_TYPE))
@@ -723,7 +722,9 @@ bool Assignment::Validate()
                {
                   if ((rhsDataType != Gmat::STRING_TYPE) &&
                       (rhsDataType != Gmat::REAL_TYPE))
+                  {
                      retval = false;
+                  }
                }
                else if (lhsDataType == Gmat::INTEGER_TYPE)
                {
@@ -773,11 +774,21 @@ bool Assignment::Validate()
       {
          if (mathTree == NULL)
             retval = false;
+         else
+         {
+            // Validate math tree
+            std::string msg;
+            retval = mathTree->Validate(msg);
+            lastErrorMessage = msg;
+         }
       }
    }
    else                 // Wrappers should be set by now
       retval = false;
-
+   
+   if (retval)
+      lastErrorMessage = "";
+   
    #ifdef DEBUG_VALIDATION
    MessageInterface::ShowMessage
       ("Assignment::Validate() '%s' returning %d\n", (lhs + " = " + rhs).c_str(), retval);

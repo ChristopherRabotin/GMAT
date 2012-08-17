@@ -1713,10 +1713,10 @@ bool Interpreter::ParseAndSetCommandName(GmatCommand *cmd, const std::string &cm
    
    if (desc[0] == '\'')
    {
-      Integer paramCount = cmd->GetParameterCount();
       bool fileTypeParamFound = HasFilenameTypeParameter(cmd);
       
       #ifdef DEBUG_CREATE_COMMAND
+      Integer paramCount = cmd->GetParameterCount();
       MessageInterface::ShowMessage
          ("   ==> There are %d parameters and file type parameter %s\n",
           paramCount, fileTypeParamFound ? "FOUND" : "NOT FOUND");
@@ -7303,6 +7303,9 @@ void Interpreter::HandleErrorMessage(const BaseException &e,
    
    if (continueOnError)
    {
+      // remove duplicate exception message
+      msg = GmatStringUtil::Replace(msg, "Interpreter Exception: Interpreter Exception: ",
+                                    "Interpreter Exception: ");
       errorList.push_back(msg);
       
       #ifdef DEBUG_HANDLE_ERROR
@@ -7315,7 +7318,7 @@ void Interpreter::HandleErrorMessage(const BaseException &e,
          MessageInterface::ShowMessage(msg);
       else
       {
-         // remove duplicate message
+         // remove duplicate exception message
          msg = GmatStringUtil::Replace(msg, "**** ERROR **** Interpreter Exception: ", "");
          throw InterpreterException(msg);
       }
@@ -8119,13 +8122,15 @@ bool Interpreter::ValidateMcsCommands(GmatCommand *first, GmatCommand *parent,
       // Call the command's Validate method to check internal validity
       if (current->Validate() == false)
       {
+         std::string errmsg = current->GetLastErrorMessage();
+         current->SetLastErrorMessage("");
          #ifdef DEBUG_COMMAND_VALIDATION
             MessageInterface::ShowMessage("The command \"%s\" failed validation\n",
                   current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
          #endif
          (*accumulatedErrors) += "   The command \"" +
                current->GetGeneratingString(Gmat::NO_COMMENTS) +
-               "\" failed validation.\n";
+               "\" failed validation. " + errmsg + "\n";
          ++validationErrorCount;
          retval = false;
       }
