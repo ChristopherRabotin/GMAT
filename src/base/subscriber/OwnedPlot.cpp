@@ -276,13 +276,7 @@ bool OwnedPlot::Initialize()
       
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
       mIsOwnedPlotWindowSet = true;
-      
-      // add to Y params to OwnedPlotWindow
-      //loj: temp code
-      int yOffset = 0; //loj: I don't know how this is used
-      Real yMin = -40000.0; //loj: should parameter provide minimum value?
-      Real yMax =  40000.0; //loj: should parameter provide maximum value?
-      
+            
       #if DEBUG_OwnedPlot_INIT
          MessageInterface::ShowMessage
                ("OwnedPlot::Initialize() Get curveTitle and penColor\n");
@@ -295,8 +289,7 @@ bool OwnedPlot::Initialize()
                   "curveTitle = %s\n", curveNames[i].c_str());
          #endif
          
-         PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
-               curveNames[i], curveColor[i]);
+         PlotInterface::AddXyPlotCurve(instanceName, i, curveNames[i], curveColor[i]);
 
          #ifdef DEBUG_ERROR_BARS
             MessageInterface::ShowMessage("In OwnedPlot::Initialize, "

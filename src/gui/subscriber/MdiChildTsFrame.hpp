@@ -59,8 +59,7 @@ public:
    bool DeletePlot();
    void SetPlotTitle(const wxString &title);
    void ShowPlotLegend();
-   void AddPlotCurve(int curveIndex, int yOffset, double yMin,
-                     double yMax, const wxString &curveTitle,
+   void AddPlotCurve(int curveIndex, const wxString &curveTitle,
                      UnsignedInt penColor);
    void DeleteAllPlotCurves();
    void DeletePlotCurve(int curveIndex);

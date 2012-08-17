@@ -369,12 +369,6 @@ bool XyPlot::Initialize()
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
       mIsXyPlotWindowSet = true;
       
-      // add to Y params to XyPlotWindow
-      //loj: temp code
-      int yOffset = 0; //loj: I don't know how this is used
-      Real yMin = -40000.0; //loj: should parameter provide minimum value?
-      Real yMax =  40000.0; //loj: should parameter provide maximum value?
-      
       #if DEBUG_XYPLOT_INIT
       MessageInterface::ShowMessage
          ("XyPlot::Initialize() Get curveTitle and penColor\n");
@@ -386,7 +380,6 @@ bool XyPlot::Initialize()
          // element such as MyArray(3,3) (Fix for GMT-2370 LOJ: 2012.08.03)
          if (mYParams[i] && yParamWrappers[i])
          {
-            //std::string curveTitle = mYParams[i]->GetName();
             std::string curveTitle = yParamWrappers[i]->GetDescription();
             UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
             
@@ -395,8 +388,7 @@ bool XyPlot::Initialize()
                                           curveTitle.c_str());
             #endif
             
-            PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
-                                          curveTitle, penColor);
+            PlotInterface::AddXyPlotCurve(instanceName, i, curveTitle, penColor);
          }
       }
       
@@ -1127,7 +1119,6 @@ bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       std::string realName = GmatStringUtil::GetArrayName(mXParamName);
       
       // X parameter
-      //if (name == mXParamName)
       if (realName == name)
       {
          mXParam = (Parameter*)obj;
@@ -1136,7 +1127,7 @@ bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          {
             // Array element is plottable, so check it
             if (!mXParam->IsOfType("Array") || 
-                mXParam->IsOfType("Array") && mXParamName.find("(") == name.npos)
+                (mXParam->IsOfType("Array") && mXParamName.find("(") == name.npos))
             {
                #if DEBUG_XYPLOT_OBJECT
                MessageInterface::ShowMessage
@@ -1161,7 +1152,6 @@ bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       {
          realName = GmatStringUtil::GetArrayName(mYParamNames[i]);
          
-         //if (mYParamNames[i] == name)
          if (realName == name)
          {
             mYParams[i] = (Parameter*)obj;
@@ -1170,7 +1160,7 @@ bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             {
                // Array element is plottable, so check it
                if (!mYParams[i]->IsOfType("Array") || 
-                   mYParams[i]->IsOfType("Array") && mYParamNames[i].find("(") == name.npos)
+                   (mYParams[i]->IsOfType("Array") && mYParamNames[i].find("(") == name.npos))
                {
                   #if DEBUG_XYPLOT_OBJECT
                   MessageInterface::ShowMessage
@@ -1271,7 +1261,6 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
       if (mXParamName != "")
       {
          realName = GmatStringUtil::GetArrayName(mXParamName);
-         //mAllParamNames.push_back(mXParamName);
          mAllParamNames.push_back(realName);
       }
       
@@ -1280,7 +1269,6 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
          if (mYParamNames[i] != "")
          {
             realName = GmatStringUtil::GetArrayName(mYParamNames[i]);
-            //mAllParamNames.push_back(mYParamNames[i]);
             mAllParamNames.push_back(realName);
          }
       break;
@@ -1647,11 +1635,9 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
    if (len > 0)
    {
       // Now using wrappers and supports only one X parameter (LOJ: 2012.08.02)
-      //if (mXParam != NULL && mNumYParams > 0)
       if (xParamWrappers[0] != NULL && mNumYParams > 0)
       {
-         // get x param
-         //Real xval = mXParam->EvaluateReal();
+         // Get x param value
          Real xval = xParamWrappers[0]->EvaluateReal();
          
          #if DEBUG_XYPLOT_UPDATE
@@ -1660,14 +1646,13 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
              xParamWrappers[0]->GetDescription().c_str(), xval);
          #endif
          
-         // get y params
+         // Get y param values
          Rvector yvals = Rvector(mNumYParams);
          
          // put yvals in the order of parameters added
          for (int i=0; i<mNumYParams; i++)
          {
             // Now using wrappers (LOJ: 2012.08.02)
-            //if (mYParams[i] == NULL)
             if (yParamWrappers[i] == NULL)
             {
                MessageInterface::PopupMessage
@@ -1679,7 +1664,6 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
             }
             
             // Now using wrappers (LOJ: 2012.08.02)
-            //yvals[i] = mYParams[i]->EvaluateReal();
             yvals[i] = yParamWrappers[i]->EvaluateReal();
             
             #if DEBUG_XYPLOT_UPDATE
@@ -1689,7 +1673,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
             #endif
          }
          
-         // update xy plot
+         // Update xy plot
          // X value must start from 0
          if (mIsXyPlotWindowSet)
          {

@@ -116,9 +116,7 @@ public:
                         bool canSaveLocation = true);
    virtual bool DeleteXyPlot(const std::string &plotName);
    virtual bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
-                        int yOffset, Real yMin, Real yMax,
-                        const std::string &curveTitle,
-                        UnsignedInt penColor);
+                        const std::string &curveTitle, UnsignedInt penColor);
    virtual bool DeleteAllXyPlotCurves(const std::string &plotName,
                         const std::string &oldName);
    virtual bool DeleteXyPlotCurve(const std::string &plotName, int curveIndex);

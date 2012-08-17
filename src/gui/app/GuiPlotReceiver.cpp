@@ -978,7 +978,7 @@ bool GuiPlotReceiver::DeleteXyPlot(const std::string &plotName)
 
 //------------------------------------------------------------------------------
 // bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
-//                     int yOffset, Real yMin, Real yMax,
+//                     Real yMin, Real yMax,
 //                     const std::string &curveTitle,
 //                     UnsignedInt penColor)
 //------------------------------------------------------------------------------
@@ -987,9 +987,6 @@ bool GuiPlotReceiver::DeleteXyPlot(const std::string &plotName)
  *
  * @param plotName The name of the plot that receives the new curve
  * @param curveIndex The index for the curve
- * @param yOffset Offset used to shift the curve up or down; deprecated
- * @param yMin Minimum Y value for the curve; deprecated
- * @param yMax Maximum Y value for the curve; deprecated
  * @param curveTitle Label for the curve
  * @param penColor Default color for the curve
  *
@@ -997,8 +994,7 @@ bool GuiPlotReceiver::DeleteXyPlot(const std::string &plotName)
  */
 //------------------------------------------------------------------------------
 bool GuiPlotReceiver::AddXyPlotCurve(const std::string &plotName,
-      int curveIndex, int yOffset, Real yMin, Real yMax,
-      const std::string &curveTitle, UnsignedInt penColor)
+      int curveIndex, const std::string &curveTitle, UnsignedInt penColor)
 {
    UnsignedInt localPenColor = penColor;
    if (penColor == 0)
@@ -1024,8 +1020,7 @@ bool GuiPlotReceiver::AddXyPlotCurve(const std::string &plotName,
 
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
       {
-         frame->AddPlotCurve(curveIndex, yOffset, yMin, yMax,
-                             wxString(curveTitle.c_str()), localPenColor);
+         frame->AddPlotCurve(curveIndex, wxString(curveTitle.c_str()), localPenColor);
          added = true;
       }
    }

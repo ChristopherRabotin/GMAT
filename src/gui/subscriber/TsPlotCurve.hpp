@@ -30,8 +30,7 @@ class TsPlotCanvas;
 class TsPlotCurve
 {
 public:
-   TsPlotCurve(int offsetY, double startY, double endY,
-               const wxString &curveTitle);
+   TsPlotCurve();
    virtual ~TsPlotCurve();
    
    void AddData(double x, double y, double high = 0.0, double low = 0.0);

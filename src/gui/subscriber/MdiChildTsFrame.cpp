@@ -204,43 +204,40 @@ int MdiChildTsFrame::ReadXyPlotFile(const wxString &filename)
       inStream.open(filename.c_str());
       if (inStream.is_open())
       {
-         TsPlotCurve *xCurve = new TsPlotCurve(0, -40000.0, 40000.0,
-               "Position X");
-         TsPlotCurve *yCurve = new TsPlotCurve(0, -40000.0, 40000.0,
-               "Position Y");
-         TsPlotCurve *zCurve = new TsPlotCurve(0, -40000.0, 40000.0,
-               "Position Z");
-
+         TsPlotCurve *xCurve = new TsPlotCurve();
+         TsPlotCurve *yCurve = new TsPlotCurve();
+         TsPlotCurve *zCurve = new TsPlotCurve();
+         
          // read 1st line to get start time
          for (int i=0; i<7; i++)
             inStream >> tempData[i];
-
+         
          startTime = tempData[0];
-
+         
          // set time, X, Y, Z
          xCurve->AddData(0.0, tempData[1]); // time, X
          yCurve->AddData(0.0, tempData[2]); // time, Y
          zCurve->AddData(0.0, tempData[3]); // time, Z
          numData++;
-
+         
          while(!inStream.eof())
          {
             // read time, X, Y, Z, Vx, Vy, Vz
             for (int i=0; i<7; i++)
                inStream >> tempData[i];
-
+            
             // set time, X, Y, Z
             xCurve->AddData(tempData[0]-startTime, tempData[1]); // time, X
             yCurve->AddData(tempData[0]-startTime, tempData[2]); // time, Y
             zCurve->AddData(tempData[0]-startTime, tempData[3]); // time, Z
-
+            
             numData++;
          }
       }
-
+      
       Update();
    }
-
+   
    return numData;
 }
 
@@ -304,26 +301,24 @@ void MdiChildTsFrame::ShowPlotLegend()
 
 
 //------------------------------------------------------------------------------
-// void AddPlotCurve(Integer curveIndex, Integer yOffset, Real yMin, Real yMax,
-//       const wxString &curveTitle, UnsignedInt penColor)
+// void AddPlotCurve(Integer curveIndex, Integer const wxString &curveTitle,
+//                   UnsignedInt penColor)
 //------------------------------------------------------------------------------
 /**
  * Adds a plot curve to XY plow window.
  *
  * @param curveIndex The index for the curve
- * @param yOffset Offset used to shift the curve up or down; deprecated
- * @param yMin Minimum Y value for the curve; deprecated
- * @param yMax Maximum Y value for the curve; deprecated
  * @param curveTitle Label for the curve
  * @param penColor Default color for the curve
  */
 //------------------------------------------------------------------------------
-void MdiChildTsFrame::AddPlotCurve(Integer curveIndex, Integer yOffset,
-      Real yMin, Real yMax, const wxString &curveTitle, UnsignedInt penColor)
+void MdiChildTsFrame::AddPlotCurve(Integer curveIndex, const wxString &curveTitle,
+                                   UnsignedInt penColor)
 {
    #ifdef DEBUG_MDI_TS_FRAME
       MessageInterface::ShowMessage
-         ("MdiChildTsFrame::AddPlotCurve() yMin = %f, yMax = %f\n", yMin, yMax);
+         ("MdiChildTsFrame::AddPlotCurve() curveIndex='%s', curveTitle='%s', penColor=%u\n",
+          curveIndex, curveTitle.c_str(), penColor);
    #endif
    
    if (mXyPlot != NULL)
@@ -331,7 +326,7 @@ void MdiChildTsFrame::AddPlotCurve(Integer curveIndex, Integer yOffset,
       mHasFirstXSet[curveIndex] = false;
       
       // Create XyPlotCurve
-      TsPlotCurve *curve = new TsPlotCurve(yOffset, yMin, yMax, curveTitle);
+      TsPlotCurve *curve = new TsPlotCurve();
       
       #ifdef DEBUG_MDI_TS_FRAME
          MessageInterface::ShowMessage(
@@ -343,9 +338,9 @@ void MdiChildTsFrame::AddPlotCurve(Integer curveIndex, Integer yOffset,
       mXyPlot->SetDataName(curveTitle.c_str());
       
       #ifdef DEBUG_MDI_TS_FRAME
-            MessageInterface::ShowMessage
-               ("MdiChildTsFrame::AddPlotCurve() curve count = %d added\n",
-                mXyPlot->GetCurveCount());
+         MessageInterface::ShowMessage
+            ("MdiChildTsFrame::AddPlotCurve() curve count = %d added\n",
+             mXyPlot->GetCurveCount());
       #endif
    }
    else

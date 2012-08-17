@@ -24,10 +24,9 @@
 // #define TEST_POINT_22  // Tests curve change features starting at point 22
 
 //------------------------------------------------------------------------------
-// TsPlotCurve(int offsetY, double startY, double endY, double defaultY)
+// TsPlotCurve()
 //------------------------------------------------------------------------------
-TsPlotCurve::TsPlotCurve(int offsetY, double startY, double endY,
-                         const wxString &curveTitle) :
+TsPlotCurve::TsPlotCurve() :
    minX              (1e99),
    maxX              (-1e99),
    minY              (1e99),

@@ -428,7 +428,6 @@ bool PlotInterface::DeleteXyPlot(const std::string &plotName)
 
 //------------------------------------------------------------------------------
 // bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
-//                     int yOffset, Real yMin, Real yMax,
 //                     const std::string &curveTitle,
 //                     UnsignedInt penColor)
 //------------------------------------------------------------------------------
@@ -437,9 +436,6 @@ bool PlotInterface::DeleteXyPlot(const std::string &plotName)
  *
  * @param plotName The name of the plot that receives the new curve
  * @param curveIndex The index for the curve
- * @param yOffset Offset used to shift the curve up or down; deprecated
- * @param yMin Minimum Y value for the curve; deprecated
- * @param yMax Maximum Y value for the curve; deprecated
  * @param curveTitle Label for the curve
  * @param penColor Default color for the curve
  *
@@ -447,13 +443,11 @@ bool PlotInterface::DeleteXyPlot(const std::string &plotName)
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
-                                   int yOffset, Real yMin, Real yMax,
                                    const std::string &curveTitle,
                                    UnsignedInt penColor)
 {
    if (thePlotReceiver != NULL)
-      return thePlotReceiver->AddXyPlotCurve(plotName, curveIndex, yOffset, 
-            yMin, yMax, curveTitle, penColor);
+      return thePlotReceiver->AddXyPlotCurve(plotName, curveIndex, curveTitle, penColor);
    
    return false;
 }
