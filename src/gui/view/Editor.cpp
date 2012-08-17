@@ -408,9 +408,9 @@ void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
        mFindReplaceDialog, mFindText.c_str());
    #endif
    
-   // According to document only SearchAnchor() is needed, but it doesn't find
-   // next text, so added GotoPos(). But GotoPos() removes previous selection.
-   GotoPos(mLastSelectPos);
+   // Set the selection anchor to the caret (basically clears selection so that we
+   // stop finding the same thing)
+   SetAnchor(GetCurrentPos());
    SearchAnchor();
       
    #ifdef DEBUG_EDITOR_FIND
@@ -421,6 +421,16 @@ void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
    // Find some text starting at the search anchor.
    // This does not ensure the selection is visible.
    mLastFindPos = SearchNext(wxSTC_FIND_WHOLEWORD, mFindText);
+   // make sure caret is at end of selection
+   int cPos = GetCurrentPos();
+   int ePos = GetAnchor();
+   if (cPos < ePos) 
+   {
+	   int i = cPos;
+	   SetCurrentPos(ePos);
+	   SetAnchor(i);
+   }
+
    int line = GetCurrentLine();
    
    #ifdef DEBUG_EDITOR_FIND
@@ -452,9 +462,9 @@ void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
        mFindReplaceDialog, mFindText.c_str());
    #endif
    
-   // According to document only SearchAnchor() is needed, but it doesn't find
-   // next text, so added GotoPos(). But GotoPos() removes previous selection.
-   GotoPos(mLastSelectPos);
+   // Set the selection anchor to the caret (basically clears selection so that we
+   // stop finding the same thing)
+   SetAnchor(GetCurrentPos());
    SearchAnchor();
    
    #ifdef DEBUG_EDITOR_FIND
@@ -465,6 +475,15 @@ void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
    // Find some text starting at the search anchor and moving backwards.
    // This does not ensure the selection is visible.
    mLastFindPos = SearchPrev(wxSTC_FIND_WHOLEWORD, mFindText);
+   // make sure caret is at beginning of selection
+   int cPos = GetCurrentPos();
+   int ePos = GetAnchor();
+   if (cPos > ePos) 
+   {
+	   int i = cPos;
+	   SetCurrentPos(ePos);
+	   SetAnchor(i);
+   }
    int line = GetCurrentLine();
    
    #ifdef DEBUG_EDITOR_FIND
@@ -490,11 +509,11 @@ void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 void Editor::OnReplaceNext(wxCommandEvent &event)
 {
-   if (mLastFindPos == -1)
+	if (mFindText != GetSelectedText())
       OnFindNext(event);
 
    // if text to replace not found, return
-   if (mLastFindPos == -1)
+   if (mFindText != GetSelectedText())
       return;
    
    // Replace the selected text with the argument text.
@@ -508,8 +527,9 @@ void Editor::OnReplaceNext(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void Editor::OnReplaceAll(wxCommandEvent &event)
 {
+   GotoPos(0);
    OnFindNext(event);
-   while (mLastFindPos != -1)
+   while (mFindText == GetSelectedText())
    {
       ReplaceSelection(mReplaceText);
       OnFindNext(event);
