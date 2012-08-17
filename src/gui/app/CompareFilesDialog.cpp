@@ -345,7 +345,7 @@ void CompareFilesDialog::LoadData()
    mCompareDirs[1] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
    mCompareDirs[2] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
    mCompareDirsComboBox->SetSelection(0);
-   mSaveFileName = mBaseDirectory + "CompareNumericResults.txt";
+   mSaveFileName = mBaseDirectory + "CompareNumericResults.out";
    mBaseDirTextCtrl->SetValue(mBaseDirectory);
    mCompareDirTextCtrl->SetValue(mCompareDirs[0]);
    mSaveFileTextCtrl->SetValue(mSaveFileName);
@@ -444,7 +444,7 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
       {
          mBaseDirectory = dialog.GetPath();
          mBaseDirTextCtrl->SetValue(mBaseDirectory);
-         mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareNumericResults.txt");
+         mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareNumericResults.out");
          UpdateFileInfo(0, true);
          
          #if DEBUG_COMPARE_FILES_DIALOG
