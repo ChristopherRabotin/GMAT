@@ -7950,6 +7950,93 @@ bool Interpreter::FinalPass()
    }
 
    //-------------------------------------------------------------------
+   // Special case for Thrusters, we need to set CoordinateSyatem
+   // pointer or Origin in which burn direction is represented.  So that
+   // Thruster can convert the thrust direction in user representation to
+   // internal representation (MJ2000Eq Cartesian).
+   //-------------------------------------------------------------------
+   objList = theModerator->GetListOfObjects(Gmat::THRUSTER);
+
+   #if DBGLVL_FINAL_PASS > 1
+   MessageInterface::ShowMessage("FinalPass:: Thruster list =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+      MessageInterface::ShowMessage("   %s\n", (objList.at(ii)).c_str());
+   #endif
+
+   for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
+   {
+      obj = FindObject(*i);
+
+      StringArray csNames = obj->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
+      for (StringArray::iterator csName = csNames.begin();
+           csName != csNames.end(); ++csName)
+      {
+         GmatBase *csObj = FindObject(*csName);
+
+         // To catch as many errors we can, continue with next object
+         if (csObj == NULL)
+         {
+            InterpreterException ex
+               ("The CoordinateSystem \"" + *csName + "\" for the Thruster \"" +
+                obj->GetName() + "\" could not be found");
+            HandleError(ex, false);
+            retval = false;
+            continue;
+         }
+
+         #if DBGLVL_FINAL_PASS > 1
+         MessageInterface::ShowMessage
+            ("   Calling '%s'->SetRefObject(%s(%p), %d)\n", obj->GetName().c_str(),
+             csObj->GetName().c_str(), csObj, csObj->GetType());
+         #endif
+
+         if (csObj->GetType() != Gmat::COORDINATE_SYSTEM)
+         {
+            InterpreterException ex
+               ("The Thruster \"" + obj->GetName() + "\" failed to set "
+                "\"CoordinateSystem\" to \"" + *csName + "\"");
+            HandleError(ex, false);
+            retval = false;
+            continue;
+         }
+      }
+
+      StringArray cbNames = obj->GetRefObjectNameArray(Gmat::CELESTIAL_BODY);
+      for (StringArray::iterator cbName = cbNames.begin();
+            cbName != cbNames.end(); ++cbName)
+      {
+         GmatBase *cbObj = FindObject(*cbName);
+
+         // To catch as many errors we can, continue with next object
+         if (cbObj == NULL)
+         {
+            InterpreterException ex
+               ("The Origin \"" + *cbName + "\" for the Thruster \"" +
+                obj->GetName() + "\" could not be found");
+            HandleError(ex, false);
+            retval = false;
+            continue;
+         }
+
+         #if DBGLVL_FINAL_PASS > 1
+         MessageInterface::ShowMessage
+            ("   Calling '%s'->SetRefObject(%s(%p), %d)\n", obj->GetName().c_str(),
+             csObj->GetName().c_str(), csObj, csObj->GetType());
+         #endif
+
+         if (cbObj->GetType() != Gmat::CELESTIAL_BODY)
+         {
+            InterpreterException ex
+               ("The Thruster \"" + obj->GetName() + "\" failed to set "
+                "\"Origin\" to \"" + *cbName + "\"");
+            HandleError(ex, false);
+            retval = false;
+            continue;
+         }
+      }
+   }
+
+   //-------------------------------------------------------------------
    // Special case for SolverBranchCommand such as Optimize, Target,
    // we need to set Solver object to SolverBranchCommand and then
    // to all Vary commands inside. Since Vary command's parameters are

@@ -337,15 +337,7 @@ bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             obj->GetTypeName());
       if (find(burns.begin(), burns.end(), obj) == burns.end())
       {
-         // Verify that the burn identifies minimal objects needed
-         FiniteBurn *theBurn = (FiniteBurn*)obj;
-         if (theBurn->GetStringArrayParameter(
-               theBurn->GetParameterID("Thrusters")).size() == 0)
-            throw ODEModelException("The FiniteFurn object \"" +
-                  theBurn->GetName() + "\" does not identify any Thrusters, and "
-                  "cannot be used for a finite burn.");
-
-         burns.push_back(theBurn);
+         burns.push_back((FiniteBurn*)obj);
          if (find(burnNames.begin(), burnNames.end(), name) == burnNames.end())
          {
             burnNames.push_back(name);
@@ -448,8 +440,6 @@ GmatBase* FiniteThrust::GetRefObject(const Gmat::ObjectType type,
 
    if (type == Gmat::SPACECRAFT)
    {
-      MessageInterface::ShowMessage("Returning spacecrft\n");
-
       if (name == "")
          if (spacecraft.size() > 0)
             return spacecraft[0];
@@ -596,6 +586,17 @@ bool FiniteThrust::Initialize()
             ++satIndex;
          }
       }
+   }
+
+   for (UnsignedInt i = 0; i < burns.size(); ++i)
+   {
+      // Verify that the burn identifies minimal objects needed
+      FiniteBurn *theBurn = burns[i];
+      if (theBurn->GetStringArrayParameter(
+            theBurn->GetParameterID("Thrusters")).size() == 0)
+         throw ODEModelException("The FiniteBurn object \"" +
+               theBurn->GetName() + "\" does not identify any Thrusters, and "
+               "cannot be used for a finite burn.");
    }
    
    #ifdef DEBUG_FINITETHRUST_INIT

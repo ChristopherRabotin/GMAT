@@ -1546,6 +1546,15 @@ void Thruster::SetSolarSystem(SolarSystem *ss)
       {
          localOrigin = solarSystem->GetBody(localOriginName);
          j2000Body = solarSystem->GetBody(j2000BodyName);
+
+         if (localOrigin == NULL)
+         {
+            HardwareException he;
+            he.SetDetails(errorMessageFormat.c_str(),
+                  localOriginName.c_str(), "Origin",
+                  "an object with physical location in space");
+            throw he;
+         }
       }
    }
 }
