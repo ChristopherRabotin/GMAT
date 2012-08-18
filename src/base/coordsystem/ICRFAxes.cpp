@@ -81,8 +81,8 @@ ICRFAxes::PARAMETER_TYPE[ICRFAxesParamCount - InertialAxesParamCount] =
 //---------------------------------------------------------------------------
 ICRFAxes::ICRFAxes(const std::string &itsName) :
 InertialAxes("ICRF",itsName),
-icrfFile		(NULL),
-isInitialized	(false)
+isInitialized	(false),
+icrfFile       (NULL)
 {
    objectTypeNames.push_back("ICRFAxes");
    baseSystem     = "FK5";
@@ -105,8 +105,8 @@ isInitialized	(false)
 //---------------------------------------------------------------------------
 ICRFAxes::ICRFAxes(const ICRFAxes &icrf) :
 InertialAxes(icrf),
-icrfFile 		(icrf.icrfFile),
-isInitialized	(icrf.isInitialized)
+isInitialized	(icrf.isInitialized),
+icrfFile       (icrf.icrfFile)
 {
 }
 
