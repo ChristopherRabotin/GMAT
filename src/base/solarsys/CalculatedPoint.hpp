@@ -40,7 +40,7 @@
  * all types of calculated points will derive.  CalculatedPoint itself derives 
  * from SpacePoint.
  *
- * @note Bodies are sent to an (sub)object of this class via the SetRefObject
+ * @note Bodies are set on a(n) (sub)object of this class via the SetRefObject
  *       method.
  */
 class GMAT_API CalculatedPoint : public SpacePoint
@@ -56,8 +56,8 @@ public:
    // destructor
    virtual ~CalculatedPoint();
    
-   // methods inherited from SpacePoint, that must be implemented here (and/or
-   // in the derived classes (--> in derived classes)
+   // methods inherited from SpacePoint, that must be implemented
+   // in the derived classes
    //virtual const Rvector6           GetMJ2000State(const A1Mjd &atTime);
    //virtual const Rvector3           GetMJ2000Position(const A1Mjd &atTime);
    //virtual const Rvector3           GetMJ2000Velocity(const A1Mjd &atTime);   
@@ -149,7 +149,7 @@ private:
    //------------------------------------------------------------------------------
    /**
     * Abstract method for derived classes that checks to make sure the bodyList has
-    * been defined appropriately (i.e. all are of a tyep that makes sense).
+    * been defined appropriately (i.e. all are of a type that makes sense).
     *
     */
     //------------------------------------------------------------------------------

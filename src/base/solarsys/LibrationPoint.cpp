@@ -13,8 +13,6 @@
 //
 /**
  * Implementation of the LibrationPoint class.
- *
- * @note This is an abstract class.
  */
 //------------------------------------------------------------------------------
 
@@ -41,7 +39,7 @@
 //---------------------------------
 // static data
 //---------------------------------
-const Real LibrationPoint::CONVERGENCE_TOLERANCE = 1.0e-8;
+const Real LibrationPoint::CONVERGENCE_TOLERANCE = 1.0E-8;
 const Real LibrationPoint::MAX_ITERATIONS        = 2000;
 const Real LibrationPoint::ZERO_MASS_TOL         = 1.0E-15;
 const Real LibrationPoint::ZERO_MAG_TOL          = 1.0E-12;
@@ -72,7 +70,6 @@ LibrationPoint::PARAMETER_TYPE[LibrationPointParamCount - CalculatedPointParamCo
  * This method creates an object of the LibrationPoint class
  * (default constructor).
  *
- * @param <ptType>  string representation of its body type
  * @param <itsName> parameter indicating the name of the LibrationPoint.
  */
 //------------------------------------------------------------------------------
@@ -151,11 +148,11 @@ LibrationPoint::~LibrationPoint()
 //  const Rvector6 GetMJ2000State(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 /**
- * Method returning the MJ2000 state of the Barycenter at the time atTime.
+ * Method returning the MJ2000Eq state of the LibrationPoint at the time atTime.
  *
  * @param <atTime> Time for which the state is requested.
  *
- * @return state of the Barycenter at time atTime.
+ * @return state of the LibrationPoint at time atTime.
  */
 //---------------------------------------------------------------------------
 const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
@@ -170,28 +167,28 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
    
    CheckBodies();
    // Compute position and velocity from primary to secondary
-   Rvector6 primaryState = primaryBody->GetMJ2000State(atTime);
+   Rvector6 primaryState   = primaryBody->GetMJ2000State(atTime);
    Rvector6 secondaryState = secondaryBody->GetMJ2000State(atTime);
    
    #ifdef DEBUG_GET_STATE
    MessageInterface::ShowMessage
-      ("   primaryState =\n   %s\n", primaryState.ToString().c_str());
+      ("   primaryState   =\n   %s\n", primaryState.ToString().c_str());
    MessageInterface::ShowMessage
       ("   secondaryState =\n   %s\n", secondaryState.ToString().c_str());
    #endif
    
-   Rvector6 pToS = (secondaryBody->GetMJ2000State(atTime)) - primaryState;
+   Rvector6 pToS = secondaryState - primaryState;
    Rvector3 r    = pToS.GetR();
    Rvector3 v    = pToS.GetV();
    Rvector3 a    = (secondaryBody->GetMJ2000Acceleration(atTime)) -
                    (primaryBody->GetMJ2000Acceleration(atTime));
    
    Real     massPrimary, massSecondary;
-   if ((primaryBody->GetType()) == Gmat::CELESTIAL_BODY)
+   if (primaryBody->IsOfType("CelestialBody"))
       massPrimary = ((CelestialBody*) primaryBody)->GetMass();
    else  // Barycenter
       massPrimary = ((Barycenter*) primaryBody)->GetMass();
-   if ((secondaryBody->GetType()) == Gmat::CELESTIAL_BODY)
+   if (secondaryBody->IsOfType("CelestialBody"))
       massSecondary = ((CelestialBody*) secondaryBody)->GetMass();
    else  // Barycenter
       massSecondary = ((Barycenter*) secondaryBody)->GetMass();
@@ -215,7 +212,7 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
       ("   Mass of the secondary is %f\n", massSecondary);
    #endif
    
-   Real gamma = 0.0;
+   Real gamma  = 0.0;
    Real gamma2 = 0.0, gamma3 = 0.0, gamma4 = 0.0, gamma5 = 0.0, gammaPrev = 0.0;
    Real F = 0.0, Fdot = 0.0;
    if ((whichPoint == "L1") || (whichPoint == "L2") ||
@@ -228,43 +225,43 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
       
 
       Integer counter = 0;
-      Real diff = 999.99;
+      Real diff       = 999.99;
       while (diff > CONVERGENCE_TOLERANCE)
       {
          if (counter > MAX_ITERATIONS)
             throw SolarSystemException(
-                  "Libration point gamma not converging.");
+                  "Libration point \"" + GetName() + "\" gamma not converging.");
          gamma2 = gamma  * gamma;
          gamma3 = gamma2 * gamma;
          gamma4 = gamma3 * gamma;
          gamma5 = gamma4 * gamma;
          if (whichPoint == "L1")
          {
-            F = gamma5 - ((3.0 - muStar) * gamma4) + 
-                ((3.0 - 2.0 * muStar) * gamma3) - 
-                (muStar * gamma2) + (2.0 * muStar * gamma) - muStar;
+            F    = gamma5 - ((3.0 - muStar) * gamma4) +
+                   ((3.0 - 2.0 * muStar) * gamma3) -
+                   (muStar * gamma2) + (2.0 * muStar * gamma) - muStar;
             Fdot = (5.0 * gamma4) - (4.0 * (3.0 - muStar) * gamma3) + 
                    (3.0 * (3.0 - 2.0 * muStar) * gamma2) - 
                    (2.0 * muStar * gamma) + (2.0 * muStar);
          }
          else if (whichPoint == "L2")
          {
-            F = gamma5 + ((3.0 - muStar) * gamma4) + 
-                ((3.0 - 2.0 * muStar) * gamma3) - 
-                (muStar * gamma2) - (2.0 * muStar * gamma) - muStar;
+            F    = gamma5 + ((3.0 - muStar) * gamma4) +
+                   ((3.0 - 2.0 * muStar) * gamma3) -
+                   (muStar * gamma2) - (2.0 * muStar * gamma) - muStar;
             Fdot = (5.0 * gamma4) + (4.0 * (3.0 - muStar) * gamma3) + 
-               (3.0 * (3.0 - 2.0 * muStar) * gamma2) - (2.0 * muStar * gamma) - 
-               (2.0 * muStar);
+                   (3.0 * (3.0 - 2.0 * muStar) * gamma2) - (2.0 * muStar * gamma) -
+                   (2.0 * muStar);
          }
          else  // whichPoint == "L3"
          {
-            F = gamma5 + ((2.0 + muStar) * gamma4) + 
-                ((1.0 + 2.0 * muStar) * gamma3) -
-                ((1.0 - muStar) * gamma2) - (2.0 * (1.0 - muStar) * gamma) - 
-                (1.0 - muStar);
+            F    = gamma5 + ((2.0 + muStar) * gamma4) +
+                   ((1.0 + 2.0 * muStar) * gamma3) -
+                   ((1.0 - muStar) * gamma2) - (2.0 * (1.0 - muStar) * gamma) -
+                   (1.0 - muStar);
             Fdot = (5.0 * gamma4) + (4.0 * (2.0 +  muStar) * gamma3) + 
-               (3.0 * (1.0 +  2.0 * muStar) * gamma2) - 
-               (2.0 * (1.0 - muStar) * gamma) - (2.0 * (1.0 - muStar));
+                   (3.0 * (1.0 +  2.0 * muStar) * gamma2) -
+                   (2.0 * (1.0 - muStar) * gamma) - (2.0 * (1.0 - muStar));
          }
          counter++;
          gammaPrev = gamma;
@@ -369,11 +366,11 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
 //  const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 /**
- * Method returning the MJ2000 position of the Barycenter at the time atTime.
+ * Method returning the MJ2000Eq position of the LibrationPoint at the time atTime.
  *
  * @param <atTime> Time for which the position is requested.
  *
- * @return position of the Barycenter at time atTime.
+ * @return position of the LibrationPoint at time atTime.
  */
 //---------------------------------------------------------------------------
 const Rvector3 LibrationPoint::GetMJ2000Position(const A1Mjd &atTime)
@@ -386,11 +383,11 @@ const Rvector3 LibrationPoint::GetMJ2000Position(const A1Mjd &atTime)
 //  const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 /**
- * Method returning the MJ2000 velocity of the Barycenter at the time atTime.
+ * Method returning the MJ2000Eq velocity of the LibrationPoint at the time atTime.
  *
  * @param <atTime> Time for which the velocity is requested.
  *
- * @return velocity of the Barycenter at time atTime.
+ * @return velocity of the LibrationPoint at time atTime.
  */
 //---------------------------------------------------------------------------
 const Rvector3 LibrationPoint::GetMJ2000Velocity(const A1Mjd &atTime)
@@ -551,14 +548,14 @@ bool LibrationPoint::SetStringParameter(const Integer id,
    if (id == PRIMARY_BODY_NAME)             
    {
       // since we don't know the order of setting, we cannot do the checking
-      // of primary and secondary bodies are the same
+      // to see if primary and secondary bodies are the same
       primaryBodyName = value;
       return true;
    }
    if (id == SECONDARY_BODY_NAME)             
    {
       // since we don't know the order of setting, we cannot do the checking
-      // of primary and secondary bodies are the same
+      // to see if primary and secondary bodies are the same
       secondaryBodyName = value;
       return true;
    }
@@ -599,7 +596,7 @@ bool LibrationPoint::SetStringParameter(const std::string &label,
 }
 
 //------------------------------------------------------------------------------
-//  bool  SetStringParameter(const Integer id, const std::string value.
+//  bool  SetStringParameter(const Integer id, const std::string value,
 //                           const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -616,9 +613,9 @@ bool LibrationPoint::SetStringParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
-bool  LibrationPoint::SetStringParameter(const Integer id,
-                                          const std::string &value,
-                                          const Integer index) 
+bool LibrationPoint::SetStringParameter(const Integer id,
+                                        const std::string &value,
+                                        const Integer index)
 {
    return CalculatedPoint::SetStringParameter(id, value, index);
 }
@@ -641,9 +638,9 @@ bool  LibrationPoint::SetStringParameter(const Integer id,
  *
  */
 //------------------------------------------------------------------------------
-bool  LibrationPoint::SetStringParameter(const std::string &label,
-                                          const std::string &value,
-                                          const Integer index) 
+bool LibrationPoint::SetStringParameter(const std::string &label,
+                                        const std::string &value,
+                                        const Integer index)
 {
    return SetStringParameter(GetParameterID(label),value,index);
 }
@@ -749,7 +746,7 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
 		    "The value of \"" + obj->GetName() + "\" for field \"Primary\""
             " or \"Secondary\"" 
 			"on LibrationPoint \"" + GetName() + "\" is not an allowed value.\n"
-			"The allowed values are: CelestialBody or Barycenter (except SSB). ");
+			"The allowed values are: [CelestialBody or Barycenter (except SSB)]. ");
 
    // Call parent class to add objects to bodyList
    return CalculatedPoint::SetRefObject(obj, type, name);
@@ -799,7 +796,7 @@ void LibrationPoint::Copy(const GmatBase* orig)
 //  void CheckBodies()
 //------------------------------------------------------------------------------
 /**
- * Method for the Barycenter class that checks to make sure the bodyList has
+ * Method for the LibrationPoint class that checks to make sure the bodyList has
  * been defined appropriately (i.e. all CelestialBody objects).
  *
  */

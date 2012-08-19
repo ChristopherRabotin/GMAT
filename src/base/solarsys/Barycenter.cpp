@@ -34,17 +34,7 @@
 //---------------------------------
 // static data
 //---------------------------------
-//const std::string
-//Barycenter::PARAMETER_TEXT[BarycenterParamCount - CalculatedPointParamCount] =
-//{
-//   "",
-//};
-
-//const Gmat::ParameterType
-//Barycenter::PARAMETER_TYPE[BarycenterParamCount - CalculatedPointParamCount] =
-//{
-//   Gmat::,
-//};
+// none
 
 //------------------------------------------------------------------------------
 // public methods
@@ -97,7 +87,7 @@ Barycenter::Barycenter(const Barycenter &bary) :
  * Assignment operator for the Barycenter class.
  *
  * @param <bary> the Barycenter object whose data to assign to "this"
- *             calculated point.
+ *               calculated point.
  *
  * @return "this" Barycenter with data of input Barycenter bary.
  */
@@ -128,11 +118,43 @@ Barycenter::~Barycenter()
    // nothing to do here ..... hm .. hm .. hm
 }
 
+//------------------------------------------------------------------------------
+//  GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Barycenter.
+ *
+ * @return clone of the Barycenter.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Barycenter::Clone() const
+{
+   return (new Barycenter(*this));
+}
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ *
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void Barycenter::Copy(const GmatBase* orig)
+{
+   // We don't want to copy instanceName
+   std::string name = instanceName;
+   operator=(*((Barycenter *)(orig)));
+   instanceName     = name;
+}
+
 //---------------------------------------------------------------------------
 //  const Rvector6 GetMJ2000State(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 /**
- * Method returning the MJ2000 state of the Barycenter at the time atTime.
+ * Method returning the MJ2000Eq state of the Barycenter at the time atTime.
  *
  * @param <atTime> Time for which the state is requested.
  *
@@ -153,21 +175,18 @@ const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
    // otherwise, sum the masses and states
    CheckBodies();
    #ifdef DEBUG_BARYCENTER
-      MessageInterface::ShowMessage("Entering BaryCenter;:GetMJ2000EqState at time %12.10f\n",
+      MessageInterface::ShowMessage("Entering BaryCenter::GetMJ2000EqState at time %12.10f\n",
             atTime.Get());
    #endif
    Real     bodyMass = 0.0;
    Rvector3 bodyPos(0.0,0.0,0.0);
    Rvector3 bodyVel(0.0,0.0,0.0);
 
-//   Real     sumMass  = 0.0;
    Real     weight   = 0.0;
    Rvector3 sumMassPos(0.0,0.0,0.0);
    Rvector3 sumMassVel(0.0,0.0,0.0);
    Rvector6 bodyState;
-   Real      sumMass = GetMass();
-//   for (unsigned int ii = 0; ii < bodyList.size(); ii++)
-//      sumMass +=  ((CelestialBody*) (bodyList.at(ii)))->GetMass();
+   Real     sumMass  = GetMass();
 
    for (unsigned int i = 0; i < bodyList.size() ; i++)
    {
@@ -197,7 +216,7 @@ const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
 //  const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 /**
- * Method returning the MJ2000 position of the Barycenter at the time atTime.
+ * Method returning the MJ2000Eq position of the Barycenter at the time atTime.
  *
  * @param <atTime> Time for which the position is requested.
  *
@@ -214,7 +233,7 @@ const Rvector3 Barycenter::GetMJ2000Position(const A1Mjd &atTime)
 //  const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
 /**
- * Method returning the MJ2000 velocity of the Barycenter at the time atTime.
+ * Method returning the MJ2000Eq velocity of the Barycenter at the time atTime.
  *
  * @param <atTime> Time for which the velocity is requested.
  *
@@ -226,7 +245,6 @@ const Rvector3 Barycenter::GetMJ2000Velocity(const A1Mjd &atTime)
    Rvector6 tmp = GetMJ2000State(atTime);
    return (tmp.GetV());
 }
-
 
 //---------------------------------------------------------------------------
 //  Real GetMass()
@@ -250,119 +268,6 @@ Real Barycenter::GetMass()
       sumMass    += ((CelestialBody*) (bodyList.at(i)))->GetMass();
    }
    return sumMass;
-}
-
-
-//------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param <id> Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string Barycenter::GetParameterText(const Integer id) const
-{
-   if (id >= CalculatedPointParamCount && id < BarycenterParamCount)
-      return PARAMETER_TEXT[id - CalculatedPointParamCount];
-   return CalculatedPoint::GetParameterText(id);
-}*/
-
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param <str> string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Integer     Barycenter::GetParameterID(const std::string &str) const
-{
-   for (Integer i = CalculatedPointParamCount; i < BarycenterParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - CalculatedPointParamCount])
-         return i;
-   }
-   
-   return CalculatedPoint::GetParameterID(str);
-}*/
-
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param <id> ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Gmat::ParameterType Barycenter::GetParameterType(const Integer id) const
-{
-   if (id >= CalculatedPointParamCount && id < BarycenterParamCount)
-      return PARAMETER_TYPE[id - CalculatedPointParamCount];
-      
-   return CalculatedPoint::GetParameterType(id);
-}*/
-
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param <id> ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string Barycenter::GetParameterTypeString(const Integer id) const
-{
-   return CalculatedPoint::PARAM_TYPE_STRING[GetParameterType(id)];
-}*/
-
-//------------------------------------------------------------------------------
-//  GmatBase* Clone() const
-//------------------------------------------------------------------------------
-/**
- * This method returns a clone of the Barycenter.
- *
- * @return clone of the Barycenter.
- *
- */
-//------------------------------------------------------------------------------
-GmatBase* Barycenter::Clone() const
-{
-   return (new Barycenter(*this));
-}
-
-
-//---------------------------------------------------------------------------
-// void Copy(const GmatBase* orig)
-//---------------------------------------------------------------------------
-/**
- * Sets this object to match another one.
- * 
- * @param orig The original that is being copied.
- */
-//---------------------------------------------------------------------------
-void Barycenter::Copy(const GmatBase* orig)
-{
-   // We don't want to copy instanceName
-   std::string name = instanceName;
-   operator=(*((Barycenter *)(orig)));
-   instanceName = name;
 }
 
 
@@ -425,18 +330,45 @@ bool Barycenter::Initialize()
    return CalculatedPoint::Initialize();
 }
 
-
+//---------------------------------------------------------------------------
+//  bool IsBuiltIn()
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not this is a built-in barycenter.
+ *
+ * @return flag indicating whether or not this is a built-in barycenter
+ */
+//---------------------------------------------------------------------------
 bool Barycenter::IsBuiltIn()
 {
    return isBuiltIn;
 }
 
+//---------------------------------------------------------------------------
+//  void SetIsBuiltIn(bool builtIn, const std::string &ofType)
+//---------------------------------------------------------------------------
+/**
+ * Sets the isBuiltIn flag and built-in type.
+ *
+ * @param <builtIn> built-in flag
+ * @param <ofType>  built-in type
+ */
+//---------------------------------------------------------------------------
 void Barycenter::SetIsBuiltIn(bool builtIn, const std::string &ofType)
 {
    isBuiltIn   = builtIn;
    builtInType = ofType;
 }
 
+//---------------------------------------------------------------------------
+//  StringArray GetBuiltInNames()
+//---------------------------------------------------------------------------
+/**
+ * Returns the name(s) of the built-in space point.
+ *
+ * @return  name of the space point for the built-in barycenter
+ */
+//---------------------------------------------------------------------------
 StringArray Barycenter::GetBuiltInNames()
 {
    StringArray spNames;

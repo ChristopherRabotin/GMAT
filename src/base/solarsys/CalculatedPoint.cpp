@@ -61,7 +61,7 @@ CalculatedPoint::PARAMETER_TYPE[CalculatedPointParamCount - SpacePointParamCount
  * This method creates an object of the CalculatedPoint class
  * (default constructor).
  *
- * @param <ptType>  string representation of its body type
+ * @param <ptType>  string representation of its point type
  * @param <itsName> parameter indicating the name of the CalculatedPoint.
  */
 //------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ numberOfBodies  (0)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the CalculatedPoint class as a copy of the
- * specified CalculatedPoint class (copy constructor).
+ * specified CalculatedPoint object (copy constructor).
  *
  * @param <cp> CalculatedPoint object to copy.
  */
@@ -91,11 +91,11 @@ SpacePoint          (cp)
    bodyNames.clear();
    bodyList.clear();
    defaultBodies.clear();
-   // copy the list of body pointers
-   for (unsigned int i = 0; i < (cp.bodyList).size(); i++)
-   {
-      bodyList.push_back((cp.bodyList).at(i));
-   }
+   // copy the list of body pointers - we don't want to do this here wcs 2012.08.18
+//   for (unsigned int i = 0; i < (cp.bodyList).size(); i++)
+//   {
+//      bodyList.push_back((cp.bodyList).at(i));
+//   }
    // copy the list of body names
    for (unsigned int i = 0; i < (cp.bodyNames).size(); i++)
    {
@@ -197,7 +197,7 @@ std::string CalculatedPoint::GetParameterText(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-Integer     CalculatedPoint::GetParameterID(const std::string &str) const
+Integer CalculatedPoint::GetParameterID(const std::string &str) const
 {
    for (Integer i = SpacePointParamCount; i < CalculatedPointParamCount; i++)
    {
@@ -368,7 +368,7 @@ std::string CalculatedPoint::GetStringParameter(const Integer id,
  * @return  string value of the requested parameter.
  *
  * @note - This should not be necessary here, but GCC is getting confused 
- *         cbout this method.
+ *         about this method.
  *
  */
 //------------------------------------------------------------------------------
@@ -405,13 +405,13 @@ std::string CalculatedPoint::GetStringParameter(const std::string &label,
  * This method sets the string parameter value, given the input
  * parameter ID.
  *
- * @param <id> ID for the requested parameter.
- * @param <value> string value for the requested parameter.
+ * @param <id>    ID for the specified parameter.
+ * @param <value> string value for the specified parameter.
  *
  * @return  success flag.
  *
  * @note - This should not be necessary here, but GCC is getting confused 
- *         cbout this method.
+ *         about this method.
  *
  */
 //------------------------------------------------------------------------------
@@ -425,6 +425,8 @@ bool CalculatedPoint::SetStringParameter(const Integer id,
    if (id == BODY_NAMES)
    {
       std::string value1 = GmatStringUtil::Trim(value);
+      // If there are names inside a brace-enclosed list, reset the
+      // entire array of names to that list
       if (GmatStringUtil::IsEnclosedWithBraces(value1))
       {
 //         bodyNames.clear();
@@ -462,8 +464,8 @@ bool CalculatedPoint::SetStringParameter(const Integer id,
  * This method sets the string parameter value, given the input
  * parameter label.
  *
- * @param <label> label for the requested parameter.
- * @param <value> string value for the requested parameter.
+ * @param <label> label for the specified parameter.
+ * @param <value> string value for the specified parameter.
  *
  * @return  success flag.
  *
@@ -486,8 +488,8 @@ bool CalculatedPoint::SetStringParameter(const std::string &label,
  * This method sets the string parameter value, given the input
  * parameter ID, and the index.
  *
- * @param <id>    ID for the requested parameter.
- * @param <value> string value for the requested parameter.
+ * @param <id>    ID for the specified parameter.
+ * @param <value> string value for the specified parameter.
  * @param <index> index into the array of strings.
  *
  * @return  success flag.
@@ -513,7 +515,9 @@ bool  CalculatedPoint::SetStringParameter(const Integer id,
             bodyNames.push_back(value);
          return true;
       }
-      else  // replace current name
+      // replace current name - NOTE that this doesn't preclude setting the same
+      // name to more than one spot in the array - should we check for this?
+      else
       {
          bodyNames.at(index) = value; 
          return true;
@@ -531,8 +535,8 @@ bool  CalculatedPoint::SetStringParameter(const Integer id,
 * This method sets the string parameter value, given the input
  * parameter label, and the index.
  *
- * @param <label> label for the requested parameter.
- * @param <value> string value for the requested parameter.
+ * @param <label> label for the specified parameter.
+ * @param <value> string value for the specified parameter.
  * @param <index> index into the array of strings.
  *
  * @return  success flag.
@@ -563,7 +567,9 @@ const StringArray& CalculatedPoint::GetStringArrayParameter(const Integer id) co
 {
    if (id == BODY_NAMES)
    {
+      //If there have been body names set, return those names
       if (!bodyNames.empty()) return bodyNames;
+      // Otherwise, return the default set of body names
       else                    return defaultBodies;
    }
    
@@ -797,7 +803,7 @@ const StringArray& CalculatedPoint::GetRefObjectNameArray(const Gmat::ObjectType
 /**
  * Interface used to support user actions.
  *
- * @param <action> The string descriptor for the requested action.
+ * @param <action>     The string descriptor for the requested action.
  * @param <actionData> Optional data used for the action.
  *
  * @return true if the action was performed, false if not.
@@ -850,10 +856,9 @@ bool CalculatedPoint::TakeRequiredAction(const Integer id)
 //  void SetDefaultBody(const std::string &defBody)
 //---------------------------------------------------------------------------
 /**
- * Method returning the total mass of the celestial bodies included in
- * this Barycenter.
+ * Method used to set a default body for this CalculatedPoint.
  *
- * @return total mass of the celestial bodies included in this Barycenter.
+ * @param <defBody> name of a default body for this CalculatedPoint.
  */
 //---------------------------------------------------------------------------
 void CalculatedPoint::SetDefaultBody(const std::string &defBody)
@@ -868,12 +873,25 @@ void CalculatedPoint::SetDefaultBody(const std::string &defBody)
    }
 }
 
+//---------------------------------------------------------------------------
+//  const StringArray& GetDefaultBodies() const
+//---------------------------------------------------------------------------
+/**
+ * Method returning a list of Default body names.
+ *
+ * @return the list of default body names for this CalculatedPoint.
+ */
+//---------------------------------------------------------------------------
 const StringArray& CalculatedPoint::GetDefaultBodies() const
 {
    return defaultBodies;
 }
 
 
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+// none at this time
 
 
 //------------------------------------------------------------------------------
