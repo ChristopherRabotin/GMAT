@@ -34,6 +34,7 @@
 #include "TextParser.hpp"
 #include "NumberWrapper.hpp"
 #include "ArrayWrapper.hpp"
+#include "ArrayElementWrapper.hpp"
 #include "FunctionManager.hpp"
 #include "MessageInterface.hpp"
 #include "ObjectPropertyWrapper.hpp"
@@ -769,6 +770,79 @@ bool Assignment::Validate()
                }
             }
          }
+         else if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_WT &&
+                  rhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
+         {
+            #ifdef DEBUG_VALIDATION
+            MessageInterface::ShowMessage("   Both sides are whole array\n");
+            #endif
+            Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
+            Array *rhsArr = (Array*)(rhsWrapper->GetRefObject());
+            if (lhsArr->GetRowCount() != rhsArr->GetRowCount() &&
+                lhsArr->GetColCount() != rhsArr->GetColCount())
+            {
+               lastErrorMessage = "Array dimension of LHS and RHS are not the same";
+               retval = false;
+            }
+         }
+         else if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT &&
+                  rhsWrapper->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)
+         {
+            #ifdef DEBUG_VALIDATION
+            MessageInterface::ShowMessage("   Both sides are array element\n");
+            #endif
+            ElementWrapper* lhsRowWrapper = ((ArrayElementWrapper*)(lhsWrapper))->GetRowWrapper();
+            ElementWrapper* lhsColWrapper = ((ArrayElementWrapper*)(lhsWrapper))->GetColumnWrapper();
+            ElementWrapper* rhsRowWrapper = ((ArrayElementWrapper*)(rhsWrapper))->GetRowWrapper();
+            ElementWrapper* rhsColWrapper = ((ArrayElementWrapper*)(rhsWrapper))->GetColumnWrapper();
+            #ifdef DEBUG_VALIDATION
+            MessageInterface::ShowMessage
+               ("   lhsRowWrapper=<%p>, lhsColWrapper=<%p>, rhsRowWrapper=<%p>, rhsColWrapper=<%p>\n",
+                lhsRowWrapper, lhsColWrapper, rhsRowWrapper, rhsColWrapper);
+            #endif
+            
+            // Check for valid array index if index is a number. We cannot validate other
+            // wrapper types properly during parsing since those needs to be evaluated in
+            // the mission sequence.   For example: "A(B(3,3), C)"
+            if (lhsRowWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
+                lhsColWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
+                rhsRowWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
+                lhsColWrapper->GetWrapperType() == Gmat::NUMBER_WT)
+            {
+               Real lhsRow = lhsRowWrapper->EvaluateReal();
+               Real lhsCol = lhsColWrapper->EvaluateReal();
+               Real rhsRow = rhsRowWrapper->EvaluateReal();
+               Real rhsCol = rhsColWrapper->EvaluateReal();
+               Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
+               Array *rhsArr = (Array*)(rhsWrapper->GetRefObject());
+               Integer lhsRowCount = lhsArr->GetRowCount();
+               Integer lhsColCount = lhsArr->GetColCount();
+               Integer rhsRowCount = rhsArr->GetRowCount();
+               Integer rhsColCount = rhsArr->GetColCount();
+               
+               #ifdef DEBUG_VALIDATION
+               MessageInterface::ShowMessage
+                  ("   lhsRowCount=%d, lhsColCount=%d, rhsRowCount=%d, rhsColCount=%d, "
+                   "lhsRow=%f, lhsCol=%f, rhsRow=%f, rhsCol=%f\n",
+                   lhsRowCount, lhsColCount, rhsRowCount, rhsColCount,
+                   lhsRow, lhsCol, rhsRow, rhsCol);
+               #endif
+               
+               // Check lhs array index for out of bounds
+               if (lhsRow > lhsRowCount || lhsCol > lhsColCount)
+               {
+                  lastErrorMessage = "Array index of LHS is out-of-bounds. ";
+                  retval = false;
+               }
+               
+               // Check rhs array index for out of bounds
+               if (rhsRow > rhsRowCount || rhsCol > rhsColCount)
+               {
+                  lastErrorMessage = lastErrorMessage + "Array index of RHS is out-of-bounds.";
+                  retval = false;
+               }
+            }
+         }
       }
       else
       {
@@ -783,7 +857,7 @@ bool Assignment::Validate()
          }
       }
    }
-   else                 // Wrappers should be set by now
+   else  // Wrappers should be set by now
       retval = false;
    
    if (retval)

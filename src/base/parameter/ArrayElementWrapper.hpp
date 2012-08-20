@@ -57,6 +57,8 @@ public:
    /// additioanl methods needed to handle the row and column elements
    virtual std::string        GetRowName();
    virtual std::string        GetColumnName();
+   virtual ElementWrapper*    GetRowWrapper();
+   virtual ElementWrapper*    GetColumnWrapper();
    
    virtual bool               SetRow(ElementWrapper* toWrapper);
    virtual bool               SetColumn(ElementWrapper* toWrapper);

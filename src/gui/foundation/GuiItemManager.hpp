@@ -67,12 +67,12 @@ public:
    wxString GetLastErrorMessage();
    void     SetLastErrorMessage(const wxString &errMsg = "");
    int IsValidParameter(const std::string &varName, Gmat::ObjectType allowedType,
-                        bool allowNonPlottable = false);
+                        bool allowNonPlottable = false, bool allowWholeArray = false);
    int IsValidObjectProperty(const std::string &varName, Gmat::ObjectType allowedType,
                              bool allowNonPlottable = false);
    int IsValidVariable(const std::string &varName, Gmat::ObjectType allowedType,
                        bool allowNumber = false, bool allowNonPlottable = false,
-                       bool allowObjectProperty = false);
+                       bool allowObjectProperty = false, bool allowWholeArray = false);
    
    // For updating GUI items
    void UpdateAll(Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT);

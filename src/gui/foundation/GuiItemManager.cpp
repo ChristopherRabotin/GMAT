@@ -358,7 +358,7 @@ int GuiItemManager::IsValidObjectProperty(const std::string &varName,
 
 //------------------------------------------------------------------------------
 // int IsValidParameter(const std::string &varName, Gmat::ObjectType allowedType,
-//                      bool allowNonPlottable = true)
+//                      bool allowNonPlottable = true, bool allowWholeArray = false)
 //------------------------------------------------------------------------------
 /**
  * Checks if input variable is a Variable, Array element, or plottable
@@ -368,34 +368,47 @@ int GuiItemManager::IsValidObjectProperty(const std::string &varName,
  * @param  allowedType  input allowed owner type (such as Gmat::SPACECRAFT)
  * @param  allowNumber  true if varName can be a Real number 
  * @param  allowNonPlottable  true if varName can be a non-plottable
+ * @param  allowWholeArray  true if varName can be an whole array [false]
  *
- * @return  -1 if varName NOT found in the configuration
+ * @return  -1 if error found with varName such as varName found in the configuration or
+ *                        invalid array index
  *           0 if varName found BUT is not one of Variable, Array element, or parameter
- *           1 if varName found AND is one of Variable, Array element, or parameter
- *           5 if varName found BUT array element is out of bounds
+ *           1 if varName found AND is one of Variable, Array element, or parameter OR
+ *                        it is array and allowWholeArray is true
+ *
+ * @note mLastErrorMsg contains the detaild error message
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidParameter(const std::string &varName,
                                      Gmat::ObjectType allowedType,
-                                     bool allowNonPlottable)
+                                     bool allowNonPlottable, bool allowWholeArray)
 {
    #ifdef DEBUG_GUI_ITEM_VALIDATE
    MessageInterface::ShowMessage
       ("GuiItemManager::IsValidParameter() entered, varName=<%s>, allowedType=%d,\n   "
-       "allowNonPlottable=%d\n", varName.c_str(), allowedType, allowNonPlottable);
+       "allowNonPlottable=%d, allowWholeArray=%d\n", varName.c_str(), allowedType,
+       allowNonPlottable, allowWholeArray);
    #endif
-
+   
    std::string nameToUse = GmatStringUtil::GetArrayName(varName);
    GmatBase *obj = theGuiInterpreter->GetConfiguredObject(nameToUse);
    
    if (obj == NULL)
    {
       mLastErrorMsg = ("cannot find object named \"" + nameToUse + "\"").c_str();
+      #ifdef DEBUG_GUI_ITEM_VALIDATE
+      MessageInterface::ShowMessage
+         ("GuiItemManager::IsValidParameter() returning -1, cannot find object\n");
+      #endif
       return -1;
    }
    
    if (!obj->IsOfType("Parameter"))
    {
+      #ifdef DEBUG_GUI_ITEM_VALIDATE
+      MessageInterface::ShowMessage
+         ("GuiItemManager::IsValidParameter() returning 0, it is not type of Parameter\n");
+      #endif
       return 0;
    }
    
@@ -441,13 +454,18 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
          else
          {
             mLastErrorMsg = "invalid array index";
-            //return 5;
+            #ifdef DEBUG_GUI_ITEM_VALIDATE
+            MessageInterface::ShowMessage
+               ("GuiItemManager::IsValidParameter() returning -1, array index is invalid\n");
+            #endif
             return -1;
          }
       }
       else
       {
          if (arr->GetRowCount() == 1 && arr->GetColCount() == 1)
+            isValid = true;
+         else if (allowWholeArray)
             isValid = true;
       }
    }
@@ -505,7 +523,8 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
 
 //------------------------------------------------------------------------------
 // int IsValidVariable(const std::string &varName, Gmat::ObjectType allowedType,
-//           bool allowNumber, bool allowNonPlottable, bool allowObjectProperty)
+//           bool allowNumber, bool allowNonPlottable, bool allowObjectProperty,
+//           bool allowWholeArray)
 //------------------------------------------------------------------------------
 /*
  * Checks if input variable is a Variable, Array element, or plottable
@@ -516,10 +535,12 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
  * @param  allowNumber  true if varName can be a Real number [false]
  * @param  allowNonPlottable  true if varName can be a non-plottable [false]
  * @param  allowObjectProperty  true if varName can be an object property [false]
+ * @param  allowWholeArray  true if varName can be an whole array [false]
  *
  * @return -1 if error found in varName (Use GetLastErrorMessage() to retrieve error message)
- *          0 if varName found BUT is not one of Variable, Array element, or parameter
- *          1 if varName found AND is one of Variable, Array element, or parameter
+ *          0 if varName found BUT is not one of Variable, Array element, or parameter 
+ *          1 if varName found AND is one of Variable, Array element, or parameter OR
+ *                       it is a whole array and allowWholeArray is true
  *          2 if number is allowed and varName is Real number (this is not an error)
  *          3 if varName contains undefined object of Parameter type
  *          4 if varName contains valid Parameter type
@@ -528,13 +549,15 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidVariable(const std::string &varName,
                                     Gmat::ObjectType allowedType, bool allowNumber,
-                                    bool allowNonPlottable, bool allowObjectProperty)
+                                    bool allowNonPlottable, bool allowObjectProperty,
+                                    bool allowWholeArray)
 {
    #ifdef DEBUG_GUI_ITEM_VALIDATE
    MessageInterface::ShowMessage
       ("GuiItemManager::IsValidVariable() entered, varName=<%s>, allowedType=%d,\n   "
-       "allowNumber=%d, allowNonPlottable=%d, allowObjectProperty=%d\n", varName.c_str(),
-       allowedType, allowNumber, allowNonPlottable, allowObjectProperty);
+       "allowNumber=%d, allowNonPlottable=%d, allowObjectProperty=%d, allowWholeArray=%d\n",
+       varName.c_str(), allowedType, allowNumber, allowNonPlottable, allowObjectProperty,
+       allowWholeArray);
    #endif
    
    if (allowNumber)
@@ -542,7 +565,13 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       // If input string is a number, just return 2
       Real rval;
       if (GmatStringUtil::ToReal(varName.c_str(), rval))
+      {
+         #ifdef DEBUG_GUI_ITEM_VALIDATE
+         MessageInterface::ShowMessage
+            ("GuiItemManager::IsValidVariable() returning 2, it is a number\n");
+         #endif
          return 2;
+      }
    }
    
    std::string type, ownerName, depObj;
@@ -558,6 +587,10 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    {
       mLastErrorMsg = "cannot find owned object named \"";
       mLastErrorMsg = mLastErrorMsg + depObj.c_str() + "\"";
+      #ifdef DEBUG_GUI_ITEM_VALIDATE
+      MessageInterface::ShowMessage
+         ("GuiItemManager::IsValidVariable() returning -1, cannot find owned object\n");
+      #endif
       return -1;
    }
    
@@ -652,7 +685,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    #ifdef DEBUG_GUI_ITEM_VALIDATE
    MessageInterface::ShowMessage("   Now checking if it is valid Parameter\n");
    #endif
-   validStatus = IsValidParameter(varName, allowedType, allowNonPlottable);
+   validStatus = IsValidParameter(varName, allowedType, allowNonPlottable, allowWholeArray);
    
    #ifdef DEBUG_GUI_ITEM_VALIDATE
    MessageInterface::ShowMessage

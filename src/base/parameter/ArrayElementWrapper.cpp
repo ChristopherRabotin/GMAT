@@ -468,7 +468,22 @@ std::string ArrayElementWrapper::GetColumnName()
    return columnName;
 }
 
-   
+//------------------------------------------------------------------------------
+// ElementWrapper* GetRowWrapper()
+//------------------------------------------------------------------------------
+ElementWrapper* ArrayElementWrapper::GetRowWrapper()
+{
+   return row;
+}
+
+//------------------------------------------------------------------------------
+// ElementWrapper* GetColumnWrapper()
+//------------------------------------------------------------------------------
+ElementWrapper* ArrayElementWrapper::GetColumnWrapper()
+{
+   return column;
+}
+
 bool ArrayElementWrapper::SetRow(ElementWrapper* toWrapper)
 {
    row = toWrapper;

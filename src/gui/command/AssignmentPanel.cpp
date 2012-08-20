@@ -184,7 +184,7 @@ void AssignmentPanel::SaveData()
       // lhs should be an existing variable or valid object property
       CheckVariable(newLhs, Gmat::UNKNOWN_OBJECT, "Left hand side",
                     "Variable, Array, Array element, Object property", false,
-                    true, true);
+                    true, true, true);
    }
    
    if (!canClose)

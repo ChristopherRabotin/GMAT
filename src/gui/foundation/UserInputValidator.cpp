@@ -386,19 +386,21 @@ bool UserInputValidator::CheckIntegerRange(Integer &ivalue, const std::string &s
 //------------------------------------------------------------------------------
 // bool CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
 //                    const std::string &field, const std::string &expRange,
-//                    bool allowNumber  = true, bool allowNonPlottable = false)
+//                    bool allowNumber  = true, bool allowNonPlottable = false,
+//                    bool allowWholeArray = false)
 //------------------------------------------------------------------------------
 /*
  * Checks if input variable is a Number, Variable, Array element, or parameter of
  * input owner type.
  *
- * @param  varName    Input variable name to be checked
+ * @param  varName  Input variable name to be checked
  * @param  ownerType  Input owner type if Parameter (such as Gmat::SPACECRAFT),
  *                       if type is UNKNOWN_OBJECT, it doesn't check for type
- * @param  field      Field name should be used in the error message
- * @param  expRange   Expected value range to be used in the error message
- * @param  allowNumber  true if varName can be a Real number 
- * @param  allowNonPlottable  true if varName can be a non-plottable
+ * @param  field  Field name should be used in the error message
+ * @param  expRange  Expected value range to be used in the error message
+ * @param  allowNumber  true if varName can be a Real number [true]
+ * @param  allowNonPlottable  true if varName can be a non-plottable [false]
+ * @param  allowWholeArray  true if varName can be an whole array [false]
  *
  * @return true if varName is valid
  */
@@ -406,26 +408,26 @@ bool UserInputValidator::CheckIntegerRange(Integer &ivalue, const std::string &s
 bool UserInputValidator::CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
                                        const std::string &field, const std::string &expRange,
                                        bool allowNumber, bool allowNonPlottable,
-                                       bool allowObjectProperty)
+                                       bool allowObjectProperty, bool allowWholeArray)
 {
    #ifdef DEBUG_CHECK_VARIABLE
    MessageInterface::ShowMessage
       ("UserInputValidator::CheckVariable() entered, varName='%s', ownerType=%d, field='%s'\n"
-       "   expRange='%s', allowNumber=%d, allowNonPlottable=%d, allowObjectProperty=%d\n",
-       varName.c_str(), ownerType, field.c_str(), expRange.c_str(), allowNumber, allowNonPlottable,
-       allowObjectProperty);
+       "   expRange='%s'\n   allowNumber=%d, allowNonPlottable=%d, allowObjectProperty=%d, "
+       "allowWholeArray=%d\n", varName.c_str(), ownerType, field.c_str(), expRange.c_str(),
+       allowNumber, allowNonPlottable, allowObjectProperty, allowWholeArray);
    #endif
    
    if (mGuiManager == NULL)
    {
       MessageInterface::ShowMessage
-         ("==> UserInputValidator::CheckVariable() mGuiManager is NULL\n");
+         ("UserInputValidator::CheckVariable() mGuiManager is NULL\n");
       return false;
    }
    
    int retval = mGuiManager->
       IsValidVariable(varName.c_str(), ownerType, allowNumber, allowNonPlottable,
-                      allowObjectProperty);
+                      allowObjectProperty, allowWholeArray);
    
    if (retval == -1)
    {
