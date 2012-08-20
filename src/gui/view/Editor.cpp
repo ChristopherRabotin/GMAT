@@ -671,15 +671,28 @@ void Editor::OnComment(wxCommandEvent &event)
    SetSelection(cPos, ePos);
    // Retrieve the selected text.
    wxString selString = GetSelectedText();
-
-   selString.Replace("\n", "\n%");
-   selString = "%" + selString;
-
-   if ( (selString.Length() > 1)  && (selString.Last() == '%') )
-      selString = selString.Mid(0, selString.Length()-1);
+   wxString newString = "% ";
+   size_t n = 0;
+   while ( n < selString.Length() )
+   {
+	   if (selString.GetChar(n) == '\n')
+	   {
+		   newString.Append(selString.GetChar(n));
+		   newString.Append("% ");
+		   n = n + 1;
+	   }
+	   else
+	   {
+		   newString.Append(selString.GetChar(n));
+		   n = n + 1;
+	   }
+   }
+   
+   if ( (newString.Length() > 1)  && (newString.Last() == '%') )
+      newString = newString.Mid(0, newString.Length()-1);
   
    // Replace the selected text with the argument text.
-   ReplaceSelection(selString);
+   ReplaceSelection(newString);
    
    #ifdef DEBUG_EDITOR_COMMENT
    MessageInterface::ShowMessage("Editor::OnComment() exiting\n");
@@ -723,14 +736,35 @@ void Editor::OnUncomment(wxCommandEvent &event)
 
    // Retrieve the selected text.
    wxString selString = GetSelectedText();
-   
-   if (selString.StartsWith("%"))  // gets rid of first %
-      selString = selString.Mid(1, selString.Length()-1);
-   
-   selString.Replace("\n%", "\n");
+   wxString newString;
+   boolean lookForComment = true;
+   size_t n = 0;
+   while ( n < selString.Length() )
+   {
+	   if (selString.GetChar(n) == '\n')
+	   {
+		   newString.Append(selString.GetChar(n));
+		   lookForComment = true;
+		   n = n + 1;
+	   }
+	   else if (lookForComment && (selString.GetChar(n) == '%'))
+	   {
+		   lookForComment = false;
+		   n = n + 1;
+		   if ((n < selString.Length()) && (selString.GetChar(n) == ' '))
+			   n = n + 1;
+	   }
+	   else
+	   {
+		   if (lookForComment && ((selString.GetChar(n) != ' ') && (selString.GetChar(n) != '\t')))
+			   lookForComment = false;
+		   newString.Append(selString.GetChar(n));
+		   n = n + 1;
+	   }
+   }
    
    // Replace the selected text with the argument text.
-   ReplaceSelection(selString);
+   ReplaceSelection(newString);
    
    #ifdef DEBUG_EDITOR_COMMENT
    MessageInterface::ShowMessage("Editor::OnUncomment() exiting\n");
