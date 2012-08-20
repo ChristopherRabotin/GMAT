@@ -11,7 +11,7 @@
 // Author: Allison Greene
 // Created: 2005/04/21
 /**
- * This class allows user to specify Barycenter bodies
+ * This class allows the user to configure a Barycenter.
  */
 //------------------------------------------------------------------------------
 #ifndef BarycenterPanel_hpp
@@ -56,9 +56,6 @@ private:
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-   //loj: 2/27/04 commented out
-   //virtual void OnHelp();
-   //virtual void OnScript();
     
    void OnButton(wxCommandEvent& event);
 

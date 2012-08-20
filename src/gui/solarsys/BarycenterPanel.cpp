@@ -16,7 +16,7 @@
 // Author: Allison Greene
 // Created: 2005/04/21
 /**
- * This class allows user to specify Barycenter.
+ * This class allows the user to configure a Barycenter.
  */
 //------------------------------------------------------------------------------
 #include "BarycenterPanel.hpp"
@@ -48,7 +48,7 @@ END_EVENT_TABLE()
  *
  * @param <parent> input parent.
  *
- * @note Creates the Universe GUI
+ * @note Creates the Barycenter GUI
  */
 //------------------------------------------------------------------------------
 BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
@@ -68,6 +68,10 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 // ~BarycenterPanel()
 //------------------------------------------------------------------------------
+/**
+ * Destructs the Barycenter panel.
+ */
+//------------------------------------------------------------------------------
 BarycenterPanel::~BarycenterPanel()
 {
    theGuiManager->UnregisterListBox("CelestialBody", bodyListBox, &mExcludedCelesBodyList);
@@ -81,9 +85,7 @@ BarycenterPanel::~BarycenterPanel()
 // void Create()
 //------------------------------------------------------------------------------
 /**
- * @param <scName> input spacecraft name.
- *
- * @note Creates the notebook for spacecraft information
+ * Creates the Barycenter panel's GUI components.
  */
 //------------------------------------------------------------------------------
 void BarycenterPanel::Create()
@@ -128,6 +130,10 @@ void BarycenterPanel::Create()
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads data on the Barycenter panel.
+ */
 //------------------------------------------------------------------------------
 void BarycenterPanel::LoadData()
 {
@@ -182,6 +188,10 @@ void BarycenterPanel::LoadData()
 
 //------------------------------------------------------------------------------
 // virtual void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves data to the Barycenter panel.
+ */
 //------------------------------------------------------------------------------
 void BarycenterPanel::SaveData()
 {
@@ -241,6 +251,12 @@ void BarycenterPanel::SaveData()
 
 //------------------------------------------------------------------------------
 // void OnButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the On Button event
+ *
+ * @param <event> the handled event
+ */
 //------------------------------------------------------------------------------
 void BarycenterPanel::OnButton(wxCommandEvent& event)
 {

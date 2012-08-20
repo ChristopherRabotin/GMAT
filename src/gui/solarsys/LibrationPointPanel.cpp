@@ -16,8 +16,7 @@
 // Author: LaMont Ruley
 // Created: 2005/04/27
 /**
- * This class allows user to specify where Universe information is 
- * coming from
+ * This class allows user to configure a LibrationPoint.
  */
 //------------------------------------------------------------------------------
 
@@ -47,11 +46,11 @@ END_EVENT_TABLE()
 // LibrationPointPanel(wxWindow *parent)
 //------------------------------------------------------------------------------
 /**
- * Constructs LibrationPointPanel object.
+ * Constructs a LibrationPointPanel object.
  *
  * @param <parent> input parent.
  *
- * @note Creates the Universe GUI
+ * @note Creates the LibrationPoint GUI
  */
 //------------------------------------------------------------------------------
 LibrationPointPanel::LibrationPointPanel(wxWindow *parent, const wxString &name)
@@ -70,6 +69,11 @@ LibrationPointPanel::LibrationPointPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 // ~LibrationPointPanel()
 //------------------------------------------------------------------------------
+/**
+ * Destructs a LibrationPointPanel object.
+ *
+ */
+//------------------------------------------------------------------------------
 LibrationPointPanel::~LibrationPointPanel()
 {
    // Unregister GUI components
@@ -84,6 +88,12 @@ LibrationPointPanel::~LibrationPointPanel()
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles a ComboBoxChange event.
+ *
+ * @param <event> the handled event.
+ */
+//------------------------------------------------------------------------------
 void LibrationPointPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    EnableUpdate(true);
@@ -97,9 +107,7 @@ void LibrationPointPanel::OnComboBoxChange(wxCommandEvent& event)
 // void Create()
 //------------------------------------------------------------------------------
 /**
- * @param <scName> input spacecraft name.
- *
- * @note Creates the notebook for spacecraft information
+ * Creates the LibrationPoint panel's GUI components.
  */
 //------------------------------------------------------------------------------
 void LibrationPointPanel::Create()
@@ -162,65 +170,13 @@ void LibrationPointPanel::Create()
    
 }
 
-/*
-void LibrationPointPanel::Create()
-{
-   int bsize = 5; // bordersize
-
-   wxString librationList[] = {"L1", "L2", "L3", "L4", "L5"};
-
-   if (theLibrationPt != NULL)
-   {
-      // create sizers
-      wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 2, bsize, bsize);
-     
-      // label for primary body combobox
-      wxStaticText *primaryBodyLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Primary Body:"), wxDefaultPosition, wxDefaultSize, 0);
-      
-      // combo box for avaliable bodies 
-      primaryBodyCB = 
-         theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
-      
-      // label for secondary body combobox
-      wxStaticText *secondaryBodyLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Secondary Body:"), wxDefaultPosition, wxDefaultSize, 0);
-        
-      // combo box for avaliable bodies 
-      secondaryBodyCB = 
-         theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
-
-      // label for libration point combobox
-      wxStaticText *librationPointLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Libration Point:"), wxDefaultPosition, wxDefaultSize, 0);
-        
-      // combo box for libration points 
-      librationPtCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
-         wxDefaultPosition, wxSize(100,-1), 5, librationList, wxCB_READONLY);
-
-      // add labels and comboboxes to page sizer    
-      pageSizer->Add(primaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(primaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(secondaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(secondaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(librationPointLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(librationPtCB, 0, wxALIGN_LEFT | wxALL, bsize);
-
-      // add page sizer to middle sizer
-      theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-   }
-   else
-   {
-      // show error message
-      MessageInterface::ShowMessage
-         ("LibrationPointPanel:Create() theLP is NULL\n");
-   }
-
-}
-*/
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads data for the LibrationPoint..
+ */
 //------------------------------------------------------------------------------
 void LibrationPointPanel::LoadData()
 {
@@ -295,6 +251,10 @@ void LibrationPointPanel::LoadData()
 
 //------------------------------------------------------------------------------
 // virtual void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves data to the LibrationPoint object.
+ */
 //------------------------------------------------------------------------------
 void LibrationPointPanel::SaveData()
 {

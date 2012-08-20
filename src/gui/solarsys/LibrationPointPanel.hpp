@@ -11,7 +11,7 @@
 // Author: Allison Greene
 // Created: 2005/04/21
 /**
- * This class allows user to specify LibrationPoint bodies
+ * This class allows user to configure a LibrationPoint.
  */
 //------------------------------------------------------------------------------
 #ifndef LibrationPointPanel_hpp
