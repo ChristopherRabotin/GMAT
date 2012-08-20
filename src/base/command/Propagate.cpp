@@ -5553,8 +5553,8 @@ void Propagate::AddTransientForce(StringArray *sats, ODEModel *p,
 
       MessageInterface::ShowMessage(
          "Propagate::AddTransientForces completed; force details:\n");
-      for (std::vector<PropSetup*>::iterator p = prop.begin();
-           p != prop.end(); ++p)
+      for (std::vector<PropSetup*>::iterator p = propagators.begin();
+           p != propagators.end(); ++p)
       {
          fm = (*p)->GetODEModel();
          if (!fm)
@@ -5586,7 +5586,7 @@ void Propagate::ClearTransientForces()
    #ifdef DEBUG_TRANSIENT_FORCES
    MessageInterface::ShowMessage
       ("Propagate::ClearTransientForces() entered, prop.size()=%d\n",
-       prop.size());
+       propagators.size());
    #endif
 
    ODEModel *fm;
@@ -5628,8 +5628,8 @@ void Propagate::ClearTransientForces()
    #ifdef DEBUG_TRANSIENT_FORCES
       MessageInterface::ShowMessage(
          "Propagate::ClearTransientForces completed; force details:\n");
-      for (std::vector<PropSetup*>::iterator p = prop.begin();
-           p != prop.end(); ++p)
+      for (std::vector<PropSetup*>::iterator p = propagators.begin();
+           p != propagators.end(); ++p)
       {
          if ((*p)->GetPropagator()->UsesODEModel())
          {
