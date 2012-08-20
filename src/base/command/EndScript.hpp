@@ -24,19 +24,19 @@
 #ifndef EndScript_hpp
 #define EndScript_hpp
 
-#include "GmatCommand.hpp" // inheriting class's header file
+#include "GmatCommand.hpp" // inherited class's header file
 
 /**
- * Default command used to initialize the command sequence lists in the 
- * Moderator
+ * Script tag used to indicate the end of a block of script that shows up
+ * verbatim in a ScriptEvent panel on the GUI.
  */
 class GMAT_API EndScript : public GmatCommand
 {
 public:
    EndScript();
    virtual ~EndScript();
-   EndScript(const EndScript& noop);
-   EndScript&          operator=(const EndScript&);
+   EndScript(const EndScript& copy);
+   EndScript&          operator=(const EndScript& copy);
    
    bool                Execute();
 

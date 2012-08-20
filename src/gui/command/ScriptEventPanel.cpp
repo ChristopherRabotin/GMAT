@@ -51,7 +51,7 @@ END_EVENT_TABLE()
 // ScriptEventPanel()
 //------------------------------------------------------------------------------
 /**
- * A constructor.
+ * Default constructor.
  */
 //------------------------------------------------------------------------------
 ScriptEventPanel::ScriptEventPanel(wxWindow *parent, MissionTreeItemData *item)
@@ -85,10 +85,7 @@ ScriptEventPanel::ScriptEventPanel(wxWindow *parent, MissionTreeItemData *item)
 // ~ScriptEventPanel()
 //------------------------------------------------------------------------------
 /**
- * A destructor.
- *
- * If new command sequence was created, it replaces the old sequence of commands
- * with new sequence via command->ForceSetNext() and command->ForceSetPrevious().
+ * The destructor.
  */
 //------------------------------------------------------------------------------
 ScriptEventPanel::~ScriptEventPanel()
@@ -106,6 +103,12 @@ ScriptEventPanel::~ScriptEventPanel()
 //------------------------------------------------------------------------------
 // void SetEditorModified(bool isModified)
 //------------------------------------------------------------------------------
+/**
+ * Sets the mEditorModified flag.
+ *
+ * @param <isModified>  value to set the mEditorModified flag to.
+ */
+//------------------------------------------------------------------------------
 void ScriptEventPanel::SetEditorModified(bool isModified)
 {
    EnableUpdate(isModified);
@@ -115,6 +118,10 @@ void ScriptEventPanel::SetEditorModified(bool isModified)
 
 //------------------------------------------------------------------------------
 // void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the ScriptEventPanel's GUI components.
+ */
 //------------------------------------------------------------------------------
 void ScriptEventPanel::Create()
 {
@@ -208,7 +215,7 @@ void ScriptEventPanel::Create()
    //=================================================================
    
    theCommentsWin = NULL;
-   theScriptsWin = NULL;
+   theScriptsWin  = NULL;
    
    // Comment label
    wxStaticText *commentText =
@@ -231,21 +238,21 @@ void ScriptEventPanel::Create()
    beginScriptText->SetForegroundColour(*wxBLUE);
    endScriptText->SetForegroundColour(*wxBLUE);
    
-#ifdef __USE_STC_EDITOR__
-   #ifdef DEBUG_CREATE
-   MessageInterface::ShowMessage
-      ("ScriptEventPanel::Create() Not using sash window\n   Creating Editor from "
-       "parent = <%p>'%s'\n", this, this->GetName().c_str());
+   #ifdef __USE_STC_EDITOR__
+      #ifdef DEBUG_CREATE
+      MessageInterface::ShowMessage
+         ("ScriptEventPanel::Create() Not using sash window\n   Creating Editor from "
+          "parent = <%p>'%s'\n", this, this->GetName().c_str());
+      #endif
+      mEditor = new Editor(this, true, ID_STC);
+   #else
+      // We don't want TextCtrl to wrap text, so add wxTE_DONTWRAP to style
+      mFileContentsTextCtrl =
+         new wxTextCtrl(this, ID_SCRIPT_CTRL, wxT(""), wxDefaultPosition,
+                        wxDefaultSize, wxTE_MULTILINE | wxTE_DONTWRAP);
+
+      mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
    #endif
-   mEditor = new Editor(this, true, ID_STC);
-#else
-   // We don't want TextCtrl to wrap text, so add wxTE_DONTWRAP to style
-   mFileContentsTextCtrl =
-      new wxTextCtrl(this, ID_SCRIPT_CTRL, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, wxTE_MULTILINE | wxTE_DONTWRAP);
-   
-   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
-#endif
    
    //------------------------------------------------------
    // add to sizer
@@ -253,12 +260,12 @@ void ScriptEventPanel::Create()
    
    mBottomSizer = new wxGridSizer( 1, 0, 0 );
    
-#ifdef __USE_STC_EDITOR__
-   mBottomSizer->Add(mEditor, 0, wxGROW | wxALIGN_CENTER | wxALL, bsize);
-#else
-   mBottomSizer->Add(mFileContentsTextCtrl, 0, wxGROW | wxALIGN_CENTER | wxALL, 
-                     bsize);
-#endif
+   #ifdef __USE_STC_EDITOR__
+      mBottomSizer->Add(mEditor, 0, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   #else
+      mBottomSizer->Add(mFileContentsTextCtrl, 0, wxGROW | wxALIGN_CENTER | wxALL,
+                        bsize);
+   #endif
    
    //------------------------------------------------------
    // add to parent sizer
@@ -284,6 +291,10 @@ void ScriptEventPanel::Create()
 
 //------------------------------------------------------------------------------
 // void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data into the panel's GUI widgets.
+ */
 //------------------------------------------------------------------------------
 void ScriptEventPanel::LoadData()
 {
@@ -331,9 +342,10 @@ void ScriptEventPanel::LoadData()
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
-/*
- * In order for ScriptEvent to save new scripts, it creates new sequence of
- * commands and replace the old sequence of commands via command->ForceSetNext()
+/* Saves the data from the GUI widgets to the ScriptEvent.
+ *
+ * In order for ScriptEvent to save new scripts, it creates a new sequence of
+ * commands and replaces the old sequence of commands via command->ForceSetNext()
  * and command->ForceSetPrevious().
  */
 //------------------------------------------------------------------------------
@@ -346,7 +358,7 @@ void ScriptEventPanel::SaveData()
    canClose = false;
    std::stringstream scriptText1;
    
-   // If only comment changed, just set comment and return
+   // If only the comment changed, just set the comment and return
    #ifdef __USE_STC_EDITOR__
    if (!mEditor->IsModified() && mCommentTextCtrl->IsModified())
    #else
@@ -463,8 +475,8 @@ void ScriptEventPanel::SaveData()
    GmatCommand *tempNoOp = new NoOp;
    GmatCommand *inCommand = tempNoOp;
    
-   // Save old function list, so that new functions can be delete if there
-   // is script errors
+   // Save old function list, so that new functions can be deleted if there
+   // are script errors
    StringArray oldFunctions = theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
    for (UnsignedInt i=0; i<oldFunctions.size(); i++)
       MessageInterface::ShowMessage
@@ -583,7 +595,7 @@ void ScriptEventPanel::SaveData()
       }
       
       //--------------------------------------------------------------
-      // Everthing is good to go, delete temporary NoOp
+      // Everything is good to go, so delete temporary NoOp
       //--------------------------------------------------------------
       mNewCommand = tempNoOp->GetNext();
       
@@ -597,7 +609,7 @@ void ScriptEventPanel::SaveData()
       tempNoOp = NULL;
       
       //--------------------------------------------------------------
-      // Replace current ScrptEvent with new one
+      // Replace current ScriptEvent with new one
       //--------------------------------------------------------------
       ReplaceScriptEvent();
       mObject = mNewCommand;
@@ -638,6 +650,12 @@ void ScriptEventPanel::SaveData()
 //------------------------------------------------------------------------------
 // void OnCommentChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles an OnCommentChange event.
+ *
+ * @param <event>  event being handled.
+ */
+//------------------------------------------------------------------------------
 void ScriptEventPanel::OnCommentChange(wxCommandEvent& event)
 {
    EnableUpdate(true);
@@ -647,6 +665,12 @@ void ScriptEventPanel::OnCommentChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnScriptChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles an OnScriptChange event.
+ *
+ * @param <event>  event being handled.
+ */
+//------------------------------------------------------------------------------
 void ScriptEventPanel::OnScriptChange(wxCommandEvent& event)
 {
    EnableUpdate(true);
@@ -655,6 +679,12 @@ void ScriptEventPanel::OnScriptChange(wxCommandEvent& event)
 
 //------------------------------------------------------------------------------
 // void OnSashDrag(wxSashEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles an OnSashDrag event.
+ *
+ * @param <event>  event being handled.
+ */
 //------------------------------------------------------------------------------
 void ScriptEventPanel::OnSashDrag(wxSashEvent &event)
 {
@@ -748,8 +778,8 @@ void ScriptEventPanel::OnSize(wxSizeEvent& event)
 // void ReplaceScriptEvent()
 //------------------------------------------------------------------------------
 /**
- * If new command sequence was created, it replaces the old sequence of commands
- * with new sequence via command->ForceSetNext() and command->ForceSetPrevious().
+ * If a new command sequence was created, it replaces the old sequence of commands
+ * with the new sequence via command->ForceSetNext() and command->ForceSetPrevious().
  */
 //------------------------------------------------------------------------------
 void ScriptEventPanel::ReplaceScriptEvent()
@@ -999,7 +1029,16 @@ void ScriptEventPanel::ReplaceScriptEvent()
 
 //------------------------------------------------------------------------------
 // void ShowCommand(const std::string &title1, GmatCommand *cmd1,
-//                   const std::string &title2, GmatCommand *cmd2)
+//                  const std::string &title2, GmatCommand *cmd2)
+//------------------------------------------------------------------------------
+/**
+ * Shows the command information.
+ *
+ * @param <title1>  title of first command
+ * @param <cmd1>    first command
+ * @param <title2>  title of second command
+ * @param <cmd2>    second command
+ */
 //------------------------------------------------------------------------------
 void ScriptEventPanel::ShowCommand(const std::string &title1, GmatCommand *cmd1,
                                    const std::string &title2, GmatCommand *cmd2)

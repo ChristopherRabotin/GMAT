@@ -42,7 +42,7 @@ EndScript::EndScript() :
 //  ~EndScript()
 //------------------------------------------------------------------------------
 /**
- * Destroys the EndScript command (default constructor).
+ * Destroys the EndScript command (destructor).
  */
 //------------------------------------------------------------------------------
 EndScript::~EndScript()
@@ -51,45 +51,47 @@ EndScript::~EndScript()
 
 
 //------------------------------------------------------------------------------
-//  EndScript(const EndScript& noop)
+//  EndScript(const EndScript& copy)
 //------------------------------------------------------------------------------
 /**
  * Makes a copy of the EndScript command (copy constructor).
+ *
+ * @param copy The original used this one.
  */
 //------------------------------------------------------------------------------
-EndScript::EndScript(const EndScript& noop) :
-    GmatCommand (noop)
+EndScript::EndScript(const EndScript& copy) :
+    GmatCommand (copy)
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  EndScript& operator=(const EndScript&)
+//  EndScript& operator=(const EndScript& copy)
 //------------------------------------------------------------------------------
 /**
  * Sets this EndScript to match another one (assignment operator).
  * 
- * @param noop The original used to set parameters for this one.
+ * @param copy The original used to set parameters for this one.
  */
 //------------------------------------------------------------------------------
-EndScript& EndScript::operator=(const EndScript& noop)
+EndScript& EndScript::operator=(const EndScript& copy)
 {
-   if (this != &noop)
-      GmatCommand::operator=(noop);
+   if (this != &copy)
+      GmatCommand::operator=(copy);
       
    return *this;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool Execute(void)
+//  bool Execute()
 //------------------------------------------------------------------------------
 /**
- * Executes the EndScript command (copy constructor).
+ * Executes the EndScript command.
  * 
  * During mission execution, EndScript is a null operation -- nothing is done
  * in this command.  It functions as a marker in the script, indicating to the
- * GUI where a block of commands ends that should all be grouped together on a
+ * GUI the end of a block of commands that should all be grouped together on a
  * ScriptEvent panel.
  */
 //------------------------------------------------------------------------------
@@ -101,7 +103,7 @@ bool EndScript::Execute()
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the EndScript.
@@ -122,7 +124,7 @@ GmatBase* EndScript::Clone() const
 /**
  * Renames referenced objects.
  *
- * @param type Type of the object that is renamed.
+ * @param type    Type of the object that is renamed.
  * @param oldName The current name for the object.
  * @param newName The name the object has when this operation is complete.
  *

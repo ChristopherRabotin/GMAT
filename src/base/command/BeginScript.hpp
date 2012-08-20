@@ -25,19 +25,19 @@
 #ifndef BeginScript_hpp
 #define BeginScript_hpp
 
-#include "GmatCommand.hpp" // inheriting class's header file
+#include "GmatCommand.hpp" // inherited class's header file
 
 /**
- * Default command used to initialize the command sequence lists in the 
- * Moderator
+ * Script tag used to indicate the start of a block of script that shows up
+ * verbatim in a ScriptEvent panel on the GUI.
  */
 class GMAT_API BeginScript : public GmatCommand
 {
 public:
    BeginScript();
    virtual ~BeginScript();
-   BeginScript(const BeginScript& noop);
-   BeginScript&         operator=(const BeginScript&);
+   BeginScript(const BeginScript& copy);
+   BeginScript&         operator=(const BeginScript& copy);
    
    bool                 Execute();
    
@@ -48,9 +48,6 @@ public:
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
                            const std::string &prefix = "",
                            const std::string &useName = "");
-   
-   const std::string    GetChildString(const std::string &prefix,
-                                       GmatCommand *child, GmatCommand *parent);
    
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,

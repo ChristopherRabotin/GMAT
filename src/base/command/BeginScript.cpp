@@ -49,7 +49,7 @@ BeginScript::BeginScript() :
 //  ~BeginScript()
 //------------------------------------------------------------------------------
 /**
- * Destroys the BeginScript command (default constructor).
+ * Destroys the BeginScript command (destructor).
  */
 //------------------------------------------------------------------------------
 BeginScript::~BeginScript()
@@ -58,37 +58,39 @@ BeginScript::~BeginScript()
 
 
 //------------------------------------------------------------------------------
-//  BeginScript(const BeginScript& noop)
+//  BeginScript(const BeginScript& copy)
 //------------------------------------------------------------------------------
 /**
  * Makes a copy of the BeginScript command (copy constructor).
+ *
+ * @param copy The original used to create this one.
  */
 //------------------------------------------------------------------------------
-BeginScript::BeginScript(const BeginScript& noop) :
-    GmatCommand       (noop)
+BeginScript::BeginScript(const BeginScript& copy) :
+    GmatCommand       (copy)
 {
-        generatingString = noop.generatingString;
+   generatingString = copy.generatingString;
 }
 
 
 //------------------------------------------------------------------------------
-//  BeginScript& operator=(const BeginScript&)
+//  BeginScript& operator=(const BeginScript& copy)
 //------------------------------------------------------------------------------
 /**
  * Sets this BeginScript to match another one (assignment operator).
  * 
- * @param noop The original used to set parameters for this one.
+ * @param copy The original used to set parameters for this one.
  *
  * @return this object.
  */
 //------------------------------------------------------------------------------
-BeginScript& BeginScript::operator=(const BeginScript& noop)
+BeginScript& BeginScript::operator=(const BeginScript& copy)
 {
-   if (this == &noop)
+   if (this == &copy)
       return *this;
 
-   GmatCommand::operator=(noop);
-   generatingString = noop.generatingString;
+   GmatCommand::operator=(copy);
+   generatingString = copy.generatingString;
    
    return *this;
 }
@@ -98,11 +100,11 @@ BeginScript& BeginScript::operator=(const BeginScript& noop)
 //  bool Execute()
 //------------------------------------------------------------------------------
 /**
- * Executes the BeginScript command (copy constructor).
+ * Executes the BeginScript command.
  * 
  * During mission execution, BeginScript is a null operation -- nothing is done
  * in this command.  It functions as a marker in the script, indicating to the
- * GUI where a block of commands starts that should all be grouped together on a
+ * GUI the start of a block of commands that should all be grouped together on a
  * ScriptEvent panel.
  *
  * @return true on success.
@@ -136,14 +138,11 @@ GmatBase* BeginScript::Clone() const
 //                                        const std::string &useName)
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the BeginScript.
+ * This method returns the generating string of the BeginScript.
  *
- * @param <mode>    Specifies the type of serialization requested. (Not yet
- *                  used in commands)
- * @param <prefix>  Optional prefix appended to the object's name.  (Not yet
- *                  used in commands)
- * @param <useName> Name that replaces the object's name.  (Not yet used in
- *                  commands)
+ * @param <mode>    Specifies the type of serialization requested.
+ * @param <prefix>  Optional prefix appended to the object's name.
+ * @param <useName> Name that replaces the object's name.
  *
  * @return The string that reproduces this command.
  */
@@ -152,8 +151,8 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
                                                     const std::string &prefix,
                                                     const std::string &useName)
 {
-   //Note: This method is called only once from the ScriptInterpreter::WriteScript()
-   // So all nested ScriptEvent generating string should be handled here
+   //Note: This method is called only once from the ScriptInterpreter::WriteScript(),
+   // so all nested ScriptEvent generating strings should be handled here.
    
    std::stringstream gen;
    std::string indent;
@@ -233,60 +232,6 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    return generatingString;
 }
 
-
-//------------------------------------------------------------------------------
-// const std::string BeginScript::GetChildString(const std::string &prefix,
-//                                               GmatCommand *cmd,
-//                                               GmatCommand *parent)
-//------------------------------------------------------------------------------
-/**
- * Iteratively recurses through the command tree, building the strings to build
- * the child commands.
- *
- * @param <prefix> Prefix appended to the child command's string (typically used
- *                 to indent the child command strings).
- * @param <cmd>    The first child command in the current nesting level.
- * @param <parent> The command that has this command as a child.
- *
- * @return The string that reproduces the commands at the child's level.
- */
-//------------------------------------------------------------------------------
-const std::string BeginScript::GetChildString(const std::string &prefix,
-                                              GmatCommand *cmd,
-                                              GmatCommand *parent)
-{
-   #ifdef DEBUG_BEGINSCRIPT
-      MessageInterface::ShowMessage("BeginScript::GetChildString entered\n");
-   #endif
-   
-   std::stringstream sstr;
-   std::string cmdstr;
-   Integer whichOne, start;
-   GmatCommand *current = cmd;
-   
-   while ((current != parent) && (current != NULL))
-   {
-      cmdstr = current->GetGeneratingString();
-      start = 0;
-      while (cmdstr[start] == ' ')
-         ++start;
-      cmdstr = cmdstr.substr(start);
-      sstr << prefix << cmdstr << "\n";
-      whichOne = 0;
-      GmatCommand* child = current->GetChildCommand(whichOne);
-      while ((child != NULL) && (child != cmd))
-      {
-         sstr << GetChildString(prefix + "   ", child, current);
-         ++whichOne;
-         child = current->GetChildCommand(whichOne);
-      }
-      current = current->GetNext();
-   }
-   
-   return sstr.str();
-}
-
-
 //------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -294,7 +239,7 @@ const std::string BeginScript::GetChildString(const std::string &prefix,
 /**
  * Renames referenced objects.
  *
- * @param type Type of the object that is renamed.
+ * @param type    Type of the object that is renamed.
  * @param oldName The current name for the object.
  * @param newName The name the object has when this operation is complete.
  *
@@ -335,6 +280,19 @@ bool BeginScript::RenameRefObject(const Gmat::ObjectType type,
 //                       std::string &indent, Gmat::WriteMode mode,
 //                       const std::string &prefix, const std::string &useName,
 //                       bool indentCommentOnly)
+//------------------------------------------------------------------------------
+/**
+ * Indents the child string part(s) of the generatingString.
+ *
+ * @param <gen>               Generating string
+ * @param <cmd>               Command for which to get the child string
+ * @param <indent>            Indent string to use
+ * @param <mode>              Specifies the type of serialization requested.
+ * @param <prefix>            Optional prefix appended to the object's name.
+ * @param <useName>           Name that replaces the object's name.
+ * @param <indentCommentOnly> Flag specifying whether or not to ONLY indent the
+ *                            comment
+ */
 //------------------------------------------------------------------------------
 void BeginScript::IndentChildString(std::stringstream &gen, GmatCommand* cmd, 
                                     std::string &indent, Gmat::WriteMode mode,
@@ -390,6 +348,14 @@ void BeginScript::IndentChildString(std::stringstream &gen, GmatCommand* cmd,
 //------------------------------------------------------------------------------
 //void IndentComment(std::stringstream &gen, std::string &comment,
 //                   const std::string &prefix)
+//------------------------------------------------------------------------------
+/**
+ * Indents the child string part(s) of the generatingString.
+ *
+ * @param <gen>               Generating string
+ * @param <comment>           Comment to indent
+ * @param <prefix>            Optional prefix appended to the object's name.
+ */
 //------------------------------------------------------------------------------
 void BeginScript::IndentComment(std::stringstream &gen, std::string &comment,
                                 const std::string &prefix)
