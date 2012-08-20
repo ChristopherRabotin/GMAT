@@ -631,19 +631,39 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
    // Add if new PhysicalModel pointer is not found in the forceList
    if (find(forceList.begin(), forceList.end(), pPhysicalModel) == forceList.end())
    {
+      bool skipAdd = false;
+
       if (pPhysicalModel->IsTransient())
       {
          #ifdef DEBUG_ODEMODEL_INIT
-            MessageInterface::ShowMessage("Adding a %s to this list:\n",
-                  pPhysicalModel->GetTypeName().c_str());
+            MessageInterface::ShowMessage("Adding a %s (%p) to this list:\n",
+                  pPhysicalModel->GetTypeName().c_str(), pPhysicalModel);
             for (UnsignedInt i = 0; i < forceList.size(); ++i)
-               MessageInterface::ShowMessage("   %s\n",
-                     forceList[i]->GetTypeName().c_str());
+               MessageInterface::ShowMessage("   %s (%p)\n",
+                     forceList[i]->GetTypeName().c_str(), forceList[i]);
             MessageInterface::ShowMessage("Transient count before "
                   "addition = %d\n", transientCount);
          #endif
 
-         ++transientCount;
+         for (UnsignedInt i = 0; i < forceList.size(); ++i)
+         {
+            if (forceList[i]->IsTransient())
+            {
+               #ifdef DEBUG_TRANSIENT_FORCES
+                  MessageInterface::ShowMessage("*** Found transient %s with "
+                        "sat %s\n*** Addend is for sat %s\n",
+                        forceList[i]->GetTypeName().c_str(),
+                        forceList[i]->GetRefObjectNameArray(Gmat::SPACECRAFT)[0].c_str(),
+                        (pPhysicalModel->GetRefObjectNameArray(Gmat::SPACECRAFT))[0].c_str());
+               #endif
+               if (forceList[i]->GetRefObjectNameArray(Gmat::SPACECRAFT)[0] !=
+                     pPhysicalModel->GetRefObjectNameArray(Gmat::SPACECRAFT)[0])
+                  skipAdd = true;
+            }
+         }
+
+         if (!skipAdd)
+            ++transientCount;
 
          // Temporary code: prevent multiple finite burns in single force model
          if (transientCount > 1)
@@ -657,7 +677,7 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
       // Full field models come first to facilitate setting their parameters
       if (pmType == "GravityField")
          forceList.insert(forceList.begin(), pPhysicalModel);
-      else
+      else if (!skipAdd)
          forceList.push_back(pPhysicalModel);
    }
    numForces = forceList.size();
