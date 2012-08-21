@@ -66,6 +66,30 @@ ImpulsiveBurnSetupPanel::~ImpulsiveBurnSetupPanel()
 {
 }
 
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
+void ImpulsiveBurnSetupPanel::Create()
+{
+   #ifdef DEBUG_BURNPANEL_CREATE
+   MessageInterface::ShowMessage("ImpulsiveBurnSetupPanel::Create() entered\n");
+   #endif
+   
+   BurnThrusterPanel::Create();
+   //-----------------------------------------------------------------
+   // thrust vector items
+   //-----------------------------------------------------------------
+   XLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"1"));
+   YLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"2"));
+   ZLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"3"));
+   
+   #ifdef DEBUG_BURNPANEL_CREATE
+   MessageInterface::ShowMessage("ImpulsiveBurnSetupPanel::Create() exiting\n");
+   #endif
+}
+
+
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------

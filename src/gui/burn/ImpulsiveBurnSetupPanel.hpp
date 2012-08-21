@@ -28,7 +28,7 @@ public:
    ~ImpulsiveBurnSetupPanel();
     
 protected:
-   
+   virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
    
