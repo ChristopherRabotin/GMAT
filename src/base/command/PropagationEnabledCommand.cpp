@@ -1572,7 +1572,12 @@ bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index,
          for (UnsignedInt i = 0; i < fm.size(); ++i)
          {
             // events and orbit related parameters use spacecraft for data
-            Real elapsedTime = fm[i]->GetTime();
+            Real elapsedTime;
+
+            if (fm[i])
+               elapsedTime = fm[i]->GetTime();
+            else
+               elapsedTime = p[i]->GetTime();
 
             GmatEpoch tempEpoch = baseEpoch[i] + elapsedTime /
                GmatTimeConstants::SECS_PER_DAY;
