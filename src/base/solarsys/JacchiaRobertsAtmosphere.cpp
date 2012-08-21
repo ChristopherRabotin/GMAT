@@ -56,7 +56,7 @@
 //------------------------------------------------------------------------------
 JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere(const std::string &name) :
    AtmosphereModel      ("JacchiaRoberts", name),
-   cbPolarRadius        (6356.766),       // @todo - check effect of using default from GmatDefaults
+   cbPolarRadius        (6356.766),       // for initialization only. Reset in SetCentralBody()
    cbPolarSquared       (40408473.978756),
    rho_zero             (3.46e-9),
    tzero                (183.0),
