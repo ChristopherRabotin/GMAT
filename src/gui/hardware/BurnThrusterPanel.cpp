@@ -166,7 +166,7 @@ void BurnThrusterPanel::Create()
    
    // ThrustDirection1
    wxStaticText *elem1Unit = new wxStaticText(this, ID_TEXT, wxT(" km/s"));
-   wxStaticText *XLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"1"));
+   XLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"1"));
    elem1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                       wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -175,7 +175,7 @@ void BurnThrusterPanel::Create()
    // ThrustDirection2
    wxStaticText *elem2Unit =
       new wxStaticText(this, ID_TEXT, wxT(" km/s"));
-   wxStaticText *YLabel =
+   YLabel =
       new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"2"),
                         wxDefaultPosition,wxDefaultSize, 0);
    elem2TextCtrl =
@@ -185,7 +185,7 @@ void BurnThrusterPanel::Create()
    
    // ThrustDirection3
    wxStaticText *elem3Unit = new wxStaticText(this, ID_TEXT, wxT(" km/s"));
-   wxStaticText *ZLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"3"));
+   ZLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"3"));
    elem3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));

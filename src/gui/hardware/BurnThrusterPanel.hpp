@@ -71,6 +71,9 @@ protected:
    wxComboBox *axesComboBox;
    wxComboBox *tankComboBox;
    
+   wxStaticText *XLabel;
+   wxStaticText *YLabel;
+   wxStaticText *ZLabel;
    wxTextCtrl *elem1TextCtrl;
    wxTextCtrl *elem2TextCtrl;
    wxTextCtrl *elem3TextCtrl;
