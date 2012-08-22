@@ -15,7 +15,7 @@
 // Created: 2012/08/22
 //
 /**
- * Definition for the SolverSequenceCommand base class
+ * Implementation for the SolverSequenceCommand base class
  */
 //------------------------------------------------------------------------------
 

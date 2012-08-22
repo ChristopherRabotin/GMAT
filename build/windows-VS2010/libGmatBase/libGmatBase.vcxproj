@@ -366,6 +366,7 @@
     <ClCompile Include="..\..\..\src\base\command\Save.cpp" />
     <ClCompile Include="..\..\..\src\base\command\SaveMission.cpp" />
     <ClCompile Include="..\..\..\src\base\command\SolverBranchCommand.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Stop.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Target.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Toggle.cpp" />
@@ -808,6 +809,7 @@
     <ClInclude Include="..\..\..\src\base\command\Save.hpp" />
     <ClInclude Include="..\..\..\src\base\command\SaveMission.hpp" />
     <ClInclude Include="..\..\..\src\base\command\SolverBranchCommand.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Stop.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Target.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Toggle.hpp" />

@@ -1,9 +1,23 @@
-/*
- * SolverSequenceCommand.hpp
- *
- *  Created on: Aug 22, 2012
- *      Author: djc
+//$Id$
+//------------------------------------------------------------------------------
+//                           SolverSequenceCommand
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS
+// contract, Task Order 28.
+//
+// Author: Darrel J. Conway
+// Created: 2012/08/22
+//
+/**
+ * Definition for the SolverSequenceCommand base class
  */
+//------------------------------------------------------------------------------
 
 #ifndef SOLVERSEQUENCECOMMAND_HPP_
 #define SOLVERSEQUENCECOMMAND_HPP_
@@ -19,7 +33,7 @@
  * for accessing the name of the Solver associated with each command.  Full
  * refactorization should be performed when schedule permits.
  */
-class SolverSequenceCommand : public GmatCommand
+class GMAT_API SolverSequenceCommand : public GmatCommand
 {
 public:
    SolverSequenceCommand(const std::string &cmdType);
