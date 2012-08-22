@@ -49,7 +49,7 @@
 //  static data
 //------------------------------------------------------------------------------
 const std::string Vary::PARAMETER_TEXT[VaryParamCount -
-                                       GmatCommandParamCount] = 
+                                       SolverSequenceCommandParamCount] =
 {
    "SolverName",
    "Variable",
@@ -63,7 +63,7 @@ const std::string Vary::PARAMETER_TEXT[VaryParamCount -
 };
 
 const Gmat::ParameterType Vary::PARAMETER_TYPE[VaryParamCount -
-                                               GmatCommandParamCount] = 
+                                              SolverSequenceCommandParamCount] =
 {
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -85,7 +85,7 @@ const Gmat::ParameterType Vary::PARAMETER_TYPE[VaryParamCount -
  */
 //------------------------------------------------------------------------------
 Vary::Vary() :
-   GmatCommand                   ("Vary"),
+   SolverSequenceCommand         ("Vary"),
    solverName                    (""),
    solver                        (NULL),
    variableName                  (""),
@@ -133,7 +133,7 @@ Vary::Vary() :
  */
 //------------------------------------------------------------------------------
 Vary::Vary(const Vary& t) :
-   GmatCommand                   (t),
+   SolverSequenceCommand         (t),
    solverName                    (t.solverName),
    solver                        (NULL),
    variableName                  (t.variableName),
@@ -143,10 +143,10 @@ Vary::Vary(const Vary& t) :
    currentValue                  (0.0),
    perturbationName              (t.perturbationName),
    perturbation                  (NULL),
-   variableLowerName           (t.variableLowerName),
-   variableLower               (NULL),
-   variableUpperName           (t.variableUpperName),
-   variableUpper               (NULL),
+   variableLowerName             (t.variableLowerName),
+   variableLower                 (NULL),
+   variableUpperName             (t.variableUpperName),
+   variableUpper                 (NULL),
    variableMaximumStepName       (t.variableMaximumStepName),
    variableMaximumStep           (NULL),
    additiveScaleFactorName       (t.additiveScaleFactorName),
@@ -173,6 +173,8 @@ Vary& Vary::operator=(const Vary& t)
 {
    if (this == &t)
       return *this;
+
+   SolverSequenceCommand::operator=(t);
         
    solverName                    = t.solverName;
    variableName                  = t.variableName;
@@ -375,7 +377,7 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
    #endif
    
    // Then call the base class method to handle comments
-   return GmatCommand::GetGeneratingString(mode, prefix, useName);
+   return SolverSequenceCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 
@@ -442,7 +444,7 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
                       = multiplicativeScaleFactor->GetDescription();
    }
    
-   return true;
+   return SolverSequenceCommand::RenameRefObject(type, oldName, newName);
 }
 
 
@@ -485,6 +487,9 @@ const StringArray& Vary::GetRefObjectNameArray(const Gmat::ObjectType type)
        type == Gmat::SOLVER)
    {
       refObjectNames.push_back(solverName);
+      if ((solverName != SolverSequenceCommand::solverName) &&
+          (SolverSequenceCommand::solverName != ""))
+         refObjectNames.push_back(SolverSequenceCommand::solverName);
    }
    else if (type == Gmat::PARAMETER)
    {
@@ -515,10 +520,10 @@ const StringArray& Vary::GetRefObjectNameArray(const Gmat::ObjectType type)
 //---------------------------------------------------------------------------
 std::string Vary::GetParameterText(const Integer id) const
 {
-   if ((id >= GmatCommandParamCount) && (id < VaryParamCount))
-      return PARAMETER_TEXT[id - GmatCommandParamCount];
+   if ((id >= SolverSequenceCommandParamCount) && (id < VaryParamCount))
+      return PARAMETER_TEXT[id - SolverSequenceCommandParamCount];
 
-   return GmatCommand::GetParameterText(id);
+   return SolverSequenceCommand::GetParameterText(id);
 }
 
 
@@ -527,13 +532,13 @@ std::string Vary::GetParameterText(const Integer id) const
 //---------------------------------------------------------------------------
 Integer Vary::GetParameterID(const std::string &str) const
 {
-   for (Integer i = GmatCommandParamCount; i < VaryParamCount; ++i)
+   for (Integer i = SolverSequenceCommandParamCount; i < VaryParamCount; ++i)
    {
-      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+      if (str == PARAMETER_TEXT[i - SolverSequenceCommandParamCount])
          return i;
    }
 
-   return GmatCommand::GetParameterID(str);
+   return SolverSequenceCommand::GetParameterID(str);
 }
 
 
@@ -542,10 +547,10 @@ Integer Vary::GetParameterID(const std::string &str) const
 //---------------------------------------------------------------------------
 Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 {
-   if ((id >= GmatCommandParamCount) && (id < VaryParamCount))
-      return PARAMETER_TYPE[id - GmatCommandParamCount];
+   if ((id >= SolverSequenceCommandParamCount) && (id < VaryParamCount))
+      return PARAMETER_TYPE[id - SolverSequenceCommandParamCount];
 
-    return GmatCommand::GetParameterType(id);
+    return SolverSequenceCommand::GetParameterType(id);
 }
 
 
@@ -554,7 +559,7 @@ Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 //---------------------------------------------------------------------------
 std::string Vary::GetParameterTypeString(const Integer id) const
 {
-   return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
+   return SolverSequenceCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -591,7 +596,7 @@ Real Vary::GetRealParameter(const Integer id) const
       if (multiplicativeScaleFactor)
          return multiplicativeScaleFactor->EvaluateReal();
          
-    return GmatCommand::GetRealParameter(id);
+    return SolverSequenceCommand::GetRealParameter(id);
 }
 
 
@@ -606,7 +611,7 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
       (GetParameterText(id)).c_str());
    #endif
 
-   return GmatCommand::SetRealParameter(id, value);
+   return SolverSequenceCommand::SetRealParameter(id, value);
 }
 
 
@@ -644,7 +649,7 @@ std::string Vary::GetStringParameter(const Integer id) const
    if (id == MULTIPLICATIVE_SCALE_FACTOR)
       return multiplicativeScaleFactorName;
     
-   return GmatCommand::GetStringParameter(id);
+   return SolverSequenceCommand::GetStringParameter(id);
 }
 
 
@@ -670,6 +675,8 @@ bool Vary::SetStringParameter(const Integer id, const std::string &value)
    if (id == SOLVER_NAME)
    {
       solverName = value;
+      // Set the superclass too; this will go away on refactoring
+      SolverSequenceCommand::solverName = value;
       return true;
    }
    
@@ -726,7 +733,7 @@ bool Vary::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
     
-   return GmatCommand::SetStringParameter(id, value);
+   return SolverSequenceCommand::SetStringParameter(id, value);
 }
 
 
@@ -770,7 +777,7 @@ bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
       return false;
    }
-   return GmatCommand::SetRefObject(obj, type, name);
+   return SolverSequenceCommand::SetRefObject(obj, type, name);
 }
 
 
@@ -1127,7 +1134,7 @@ void Vary::ClearWrappers()
 //------------------------------------------------------------------------------
 bool Vary::Initialize()
 {
-   bool retval = GmatCommand::Initialize();
+   bool retval = SolverSequenceCommand::Initialize();
 
    if (solver == NULL)
       throw CommandException("solver not initialized for Vary command\n  \""
@@ -1299,7 +1306,7 @@ void Vary::RunComplete()
       (solverDataFinalized? "true" : "false"));
    #endif
    solverDataFinalized = false;
-   GmatCommand::RunComplete();
+   SolverSequenceCommand::RunComplete();
 }
 
 
@@ -1325,7 +1332,7 @@ bool Vary::TakeAction(const std::string &action, const std::string &actionData)
       return true;
    }
 
-   return GmatCommand::TakeAction(action, actionData);
+   return SolverSequenceCommand::TakeAction(action, actionData);
 }
 
 
@@ -1379,7 +1386,7 @@ bool Vary::IsThereSameWrapperName(int param, const std::string &wrapperName)
 {
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("GmatCommand::IsThereSameWrapperName() <%p>'%s' entered, wrapperName='%s'\n",
+      ("Vary::IsThereSameWrapperName() <%p>'%s' entered, wrapperName='%s'\n",
        this, GetTypeName().c_str(), wrapperName.c_str());
    #endif
    
@@ -1400,7 +1407,7 @@ bool Vary::IsThereSameWrapperName(int param, const std::string &wrapperName)
    
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("GmatCommand::IsThereSameWrapperName() <%p>'%s' wrapperName='%s' returning %d\n",
+      ("Vary::IsThereSameWrapperName() <%p>'%s' wrapperName='%s' returning %d\n",
        this, GetTypeName().c_str(), wrapperName.c_str(), retval);
    #endif
    

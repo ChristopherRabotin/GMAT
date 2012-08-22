@@ -24,7 +24,7 @@
 #define NonlinearConstraint_hpp
  
 
-#include "GmatCommand.hpp"
+#include "SolverSequenceCommand.hpp"
 #include "Solver.hpp"
 #include "Parameter.hpp"
 #include "ElementWrapper.hpp"
@@ -32,7 +32,7 @@
 /**
  * Command that manages processing for targeter goals.
  */
-class GMAT_API NonlinearConstraint : public GmatCommand
+class GMAT_API NonlinearConstraint : public SolverSequenceCommand
 {
 public:
    NonlinearConstraint();
@@ -92,7 +92,7 @@ protected:
    // Parameter IDs
    enum 
    {
-      OPTIMIZER_NAME = GmatCommandParamCount,
+      OPTIMIZER_NAME = SolverSequenceCommandParamCount,
       CONSTRAINT_ARG1,
       OPERATOR,
       CONSTRAINT_ARG2,
@@ -100,9 +100,9 @@ protected:
       NonlinearConstraintParamCount
    };
    static const std::string
-                       PARAMETER_TEXT[NonlinearConstraintParamCount - GmatCommandParamCount];
+                       PARAMETER_TEXT[NonlinearConstraintParamCount - SolverSequenceCommandParamCount];
    static const Gmat::ParameterType
-                       PARAMETER_TYPE[NonlinearConstraintParamCount - GmatCommandParamCount];
+                       PARAMETER_TYPE[NonlinearConstraintParamCount - SolverSequenceCommandParamCount];
 
    enum Operator
    {

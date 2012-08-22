@@ -38,14 +38,14 @@
 // static data
 //---------------------------------
 const std::string
-   Minimize::PARAMETER_TEXT[MinimizeParamCount - GmatCommandParamCount] =
+   Minimize::PARAMETER_TEXT[MinimizeParamCount - SolverSequenceCommandParamCount] =
    {
       "OptimizerName",
       "ObjectiveName",
    };
    
 const Gmat::ParameterType
-   Minimize::PARAMETER_TYPE[MinimizeParamCount - GmatCommandParamCount] =
+   Minimize::PARAMETER_TYPE[MinimizeParamCount - SolverSequenceCommandParamCount] =
    {
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
@@ -64,7 +64,7 @@ const Gmat::ParameterType
  */
 //------------------------------------------------------------------------------
 Minimize::Minimize() :
-   GmatCommand             ("Minimize"),
+   SolverSequenceCommand             ("Minimize"),
    optimizerName           (""),
    objectiveName           ("9.999999e300"),
    objective               (NULL),
@@ -96,7 +96,7 @@ Minimize::Minimize() :
  */
 //------------------------------------------------------------------------------
 Minimize::Minimize(const Minimize& m) :
-   GmatCommand             (m),
+   SolverSequenceCommand             (m),
    optimizerName           (m.optimizerName),
    objectiveName           (m.objectiveName),
    objective               (NULL),
@@ -130,7 +130,7 @@ Minimize& Minimize::operator=(const Minimize& m)
    if (this == &m)
       return *this;
     
-   GmatCommand::operator=(m);
+   SolverSequenceCommand::operator=(m);
    optimizerName          = m.optimizerName;
    objectiveName          = m.objectiveName;
    objective              = NULL;
@@ -224,7 +224,8 @@ bool Minimize::RenameRefObject(const Gmat::ObjectType type,
       ("Minimize::RenameRefObject() returning true, objectiveName='%s'\n",
        objectiveName.c_str());
    #endif
-   return true;
+
+   return SolverSequenceCommand::RenameRefObject(type, oldName, newName);
 }
 
 // Parameter accessors
@@ -294,9 +295,9 @@ const StringArray& Minimize::GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 std::string Minimize::GetParameterText(const Integer id) const
 {
-   if (id >= GmatCommandParamCount && id < MinimizeParamCount)
-      return PARAMETER_TEXT[id - GmatCommandParamCount];
-   return GmatCommand::GetParameterText(id);
+   if (id >= SolverSequenceCommandParamCount && id < MinimizeParamCount)
+      return PARAMETER_TEXT[id - SolverSequenceCommandParamCount];
+   return SolverSequenceCommand::GetParameterText(id);
 }
 
 
@@ -313,13 +314,13 @@ std::string Minimize::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Minimize::GetParameterID(const std::string &str) const
 {
-   for (Integer i = GmatCommandParamCount; i < MinimizeParamCount; i++)
+   for (Integer i = SolverSequenceCommandParamCount; i < MinimizeParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+      if (str == PARAMETER_TEXT[i - SolverSequenceCommandParamCount])
          return i;
    }
 
-   return GmatCommand::GetParameterID(str);
+   return SolverSequenceCommand::GetParameterID(str);
 }
 
 
@@ -336,10 +337,10 @@ Integer Minimize::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Minimize::GetParameterType(const Integer id) const
 {
-   if (id >= GmatCommandParamCount && id < MinimizeParamCount)
-      return PARAMETER_TYPE[id - GmatCommandParamCount];
+   if (id >= SolverSequenceCommandParamCount && id < MinimizeParamCount)
+      return PARAMETER_TYPE[id - SolverSequenceCommandParamCount];
 
-   return GmatCommand::GetParameterType(id);
+   return SolverSequenceCommand::GetParameterType(id);
 }
 
 
@@ -356,7 +357,7 @@ Gmat::ParameterType Minimize::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Minimize::GetParameterTypeString(const Integer id) const
 {
-   return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
+   return SolverSequenceCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -378,7 +379,7 @@ Real Minimize::GetRealParameter(const Integer id) const
       return objective->EvaluateReal();
    }
     
-   return GmatCommand::GetRealParameter(id);
+   return SolverSequenceCommand::GetRealParameter(id);
 }
 
 
@@ -396,7 +397,7 @@ Real Minimize::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Minimize::SetRealParameter(const Integer id, const Real value)
 {
-   return GmatCommand::SetRealParameter(id, value);
+   return SolverSequenceCommand::SetRealParameter(id, value);
 }
 
 
@@ -420,7 +421,7 @@ std::string Minimize::GetStringParameter(const Integer id) const
    if (id == OBJECTIVE_NAME)
       return objectiveName;
         
-   return GmatCommand::GetStringParameter(id);
+   return SolverSequenceCommand::GetStringParameter(id);
 }
 
 
@@ -447,6 +448,8 @@ bool Minimize::SetStringParameter(const Integer id, const std::string &value)
    if (id == OPTIMIZER_NAME) 
    {
       optimizerName = value;
+      // Set the base class string
+      solverName    = value;
       interpreted   = false;
       return true;
    }
@@ -463,7 +466,7 @@ bool Minimize::SetStringParameter(const Integer id, const std::string &value)
    }
 
 
-   return GmatCommand::SetStringParameter(id, value);
+   return SolverSequenceCommand::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -507,7 +510,7 @@ bool Minimize::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
     //  return false;
    //}
 
-   return GmatCommand::SetRefObject(obj, type, name);
+   return SolverSequenceCommand::SetRefObject(obj, type, name);
 }
 
 
@@ -753,7 +756,7 @@ bool Minimize::Initialize()
          throw CommandException(
             "Minimize: error interpreting input data\n");
    
-   bool retval = GmatCommand::Initialize();
+   bool retval = SolverSequenceCommand::Initialize();
 
    if (optimizer == NULL)
       throw CommandException(
@@ -864,7 +867,7 @@ void Minimize::RunComplete()
 {
    optimizerDataFinalized = false;
    //ClearWrappers();
-   GmatCommand::RunComplete();
+   SolverSequenceCommand::RunComplete();
 }
 
 //------------------------------------------------------------------------------
@@ -900,7 +903,7 @@ const std::string& Minimize::GetGeneratingString(Gmat::WriteMode mode,
 
    generatingString = gen + ");";
    // Then call the base class method
-   return GmatCommand::GetGeneratingString(mode, prefix, useName);
+   return SolverSequenceCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

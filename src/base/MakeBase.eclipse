@@ -218,6 +218,7 @@ OBJECTS = \
     command/Save.o \
     command/SaveMission.o \
     command/SolverBranchCommand.o \
+    command/SolverSequenceCommand.o \
     command/Stop.o \
     command/Target.o \
     command/Toggle.o \

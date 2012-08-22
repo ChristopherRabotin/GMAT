@@ -24,7 +24,7 @@
 #define Achieve_hpp
  
 
-#include "GmatCommand.hpp"
+#include "SolverSequenceCommand.hpp"
 #include "Solver.hpp"
 #include "Parameter.hpp"
 #include "ElementWrapper.hpp"
@@ -32,11 +32,11 @@
 /**
  * Command that manages processing for targeter goals.
  */
-class GMAT_API Achieve : public GmatCommand
+class GMAT_API Achieve : public SolverSequenceCommand
 {
 public:
-   Achieve(void);
-   virtual ~Achieve(void);
+   Achieve();
+   virtual ~Achieve();
     
    Achieve(const Achieve& t);
    Achieve&             operator=(const Achieve& t);
@@ -114,16 +114,16 @@ protected:
    
    // Parameter IDs
    enum {
-      targeterNameID = GmatCommandParamCount,
+      targeterNameID = SolverSequenceCommandParamCount,
       goalNameID,
       goalValueID,
       toleranceID,
       AchieveParamCount
    };
    static const std::string
-                     PARAMETER_TEXT[AchieveParamCount - GmatCommandParamCount];
+                     PARAMETER_TEXT[AchieveParamCount - SolverSequenceCommandParamCount];
    static const Gmat::ParameterType
-                     PARAMETER_TYPE[AchieveParamCount - GmatCommandParamCount];
+                     PARAMETER_TYPE[AchieveParamCount - SolverSequenceCommandParamCount];
 
 };
 

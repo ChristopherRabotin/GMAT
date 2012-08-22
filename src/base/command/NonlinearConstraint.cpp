@@ -36,7 +36,7 @@
 // static data
 //---------------------------------
 const std::string
-   NonlinearConstraint::PARAMETER_TEXT[NonlinearConstraintParamCount - GmatCommandParamCount] =
+   NonlinearConstraint::PARAMETER_TEXT[NonlinearConstraintParamCount - SolverSequenceCommandParamCount] =
    {
       "OptimizerName",
       "ConstraintArg1",
@@ -46,7 +46,7 @@ const std::string
    };
    
 const Gmat::ParameterType
-   NonlinearConstraint::PARAMETER_TYPE[NonlinearConstraintParamCount - GmatCommandParamCount] =
+   NonlinearConstraint::PARAMETER_TYPE[NonlinearConstraintParamCount - SolverSequenceCommandParamCount] =
    {
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
@@ -76,7 +76,7 @@ const std::string // order must match enum Operator
  */
 //------------------------------------------------------------------------------
 NonlinearConstraint::NonlinearConstraint() :
-   GmatCommand             ("NonlinearConstraint"),
+   SolverSequenceCommand             ("NonlinearConstraint"),
    optimizerName           (""),
    optimizer               (NULL),
    arg1Name                (""),
@@ -110,7 +110,7 @@ NonlinearConstraint::NonlinearConstraint() :
  */
 //------------------------------------------------------------------------------
 NonlinearConstraint::NonlinearConstraint(const NonlinearConstraint& nlc) :
-   GmatCommand             (nlc),
+   SolverSequenceCommand             (nlc),
    optimizerName           (nlc.optimizerName),
    optimizer               (NULL),
    arg1Name                (nlc.arg1Name),
@@ -147,7 +147,7 @@ NonlinearConstraint& NonlinearConstraint::operator=(const NonlinearConstraint& n
    if (this == &nlc)
       return *this;
     
-   GmatCommand::operator=(nlc);
+   SolverSequenceCommand::operator=(nlc);
    optimizerName          = nlc.optimizerName;
    optimizer              = NULL;
    arg1Name               = nlc.arg1Name;
@@ -228,7 +228,7 @@ bool NonlinearConstraint::RenameRefObject(const Gmat::ObjectType type,
       arg2->RenameObject(oldName, newName);
       arg2Name  = arg2->GetDescription();
    }
-   return true;
+   return SolverSequenceCommand::RenameRefObject(type, oldName, newName);
 }
 
 
@@ -301,9 +301,9 @@ const StringArray& NonlinearConstraint::GetRefObjectNameArray(const Gmat::Object
 //------------------------------------------------------------------------------
 std::string NonlinearConstraint::GetParameterText(const Integer id) const
 {
-   if (id >= GmatCommandParamCount && id < NonlinearConstraintParamCount)
-      return PARAMETER_TEXT[id - GmatCommandParamCount];
-   return GmatCommand::GetParameterText(id);
+   if (id >= SolverSequenceCommandParamCount && id < NonlinearConstraintParamCount)
+      return PARAMETER_TEXT[id - SolverSequenceCommandParamCount];
+   return SolverSequenceCommand::GetParameterText(id);
 }
 
 
@@ -320,13 +320,13 @@ std::string NonlinearConstraint::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer NonlinearConstraint::GetParameterID(const std::string &str) const
 {
-   for (Integer i = GmatCommandParamCount; i < NonlinearConstraintParamCount; i++)
+   for (Integer i = SolverSequenceCommandParamCount; i < NonlinearConstraintParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+      if (str == PARAMETER_TEXT[i - SolverSequenceCommandParamCount])
          return i;
    }
 
-   return GmatCommand::GetParameterID(str);
+   return SolverSequenceCommand::GetParameterID(str);
 }
 
 
@@ -343,10 +343,10 @@ Integer NonlinearConstraint::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType NonlinearConstraint::GetParameterType(const Integer id) const
 {
-   if (id >= GmatCommandParamCount && id < NonlinearConstraintParamCount)
-      return PARAMETER_TYPE[id - GmatCommandParamCount];
+   if (id >= SolverSequenceCommandParamCount && id < NonlinearConstraintParamCount)
+      return PARAMETER_TYPE[id - SolverSequenceCommandParamCount];
 
-   return GmatCommand::GetParameterType(id);
+   return SolverSequenceCommand::GetParameterType(id);
 }
 
 
@@ -363,7 +363,7 @@ Gmat::ParameterType NonlinearConstraint::GetParameterType(const Integer id) cons
 //------------------------------------------------------------------------------
 std::string NonlinearConstraint::GetParameterTypeString(const Integer id) const
 {
-   return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
+   return SolverSequenceCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -391,7 +391,7 @@ Real NonlinearConstraint::GetRealParameter(const Integer id) const
       if (arg2)
          return arg2->EvaluateReal();
     
-   return GmatCommand::GetRealParameter(id);
+   return SolverSequenceCommand::GetRealParameter(id);
 }
 
 
@@ -415,7 +415,7 @@ Real NonlinearConstraint::SetRealParameter(const Integer id, const Real value)
       return tolerance;
    }
    
-   return GmatCommand::SetRealParameter(id, value);
+   return SolverSequenceCommand::SetRealParameter(id, value);
 }
 
 
@@ -447,7 +447,7 @@ std::string NonlinearConstraint::GetStringParameter(const Integer id) const
       return OP_STRINGS[(Integer)op];
    }
         
-   return GmatCommand::GetStringParameter(id);
+   return SolverSequenceCommand::GetStringParameter(id);
 }
 
 
@@ -476,7 +476,8 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
    if (id == OPTIMIZER_NAME) 
    {
       optimizerName = value;
-      //interpreted   = false;
+      // Set the base class string
+      solverName    = value;
       return true;
    }
 
@@ -516,7 +517,7 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
       return true;
    }
 
-   return GmatCommand::SetStringParameter(id, value);
+   return SolverSequenceCommand::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -545,7 +546,7 @@ bool NonlinearConstraint::SetRefObject(GmatBase *obj, const Gmat::ObjectType typ
       }
       return false;
    }
-   return GmatCommand::SetRefObject(obj, type, name);
+   return SolverSequenceCommand::SetRefObject(obj, type, name);
 }
 
 
@@ -825,7 +826,7 @@ void NonlinearConstraint::ClearWrappers()
 /**
  * Performs the initialization needed to run the NonlinearConstraint command.
  *
- * @return true if the GmatCommand is initialized, false if an error occurs.
+ * @return true if the SolverSequenceCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
 bool NonlinearConstraint::Initialize()
@@ -843,7 +844,7 @@ bool NonlinearConstraint::Initialize()
    //      throw CommandException(
    //         "NonlinearConstraint: error interpreting input data\n");
    
-   bool retval = GmatCommand::Initialize();
+   bool retval = SolverSequenceCommand::Initialize();
 
    if (optimizer == NULL)
       throw CommandException(
@@ -985,7 +986,7 @@ void NonlinearConstraint::RunComplete()
       (solverDataFinalized? "true" : "false"));
    #endif
    optimizerDataFinalized = false;
-   GmatCommand::RunComplete();
+   SolverSequenceCommand::RunComplete();
 }
 
 //------------------------------------------------------------------------------
@@ -1029,7 +1030,7 @@ const std::string& NonlinearConstraint::GetGeneratingString(Gmat::WriteMode mode
  
    generatingString = gen + ");";
    // Then call the base class method
-   return GmatCommand::GetGeneratingString(mode, prefix, useName);
+   return SolverSequenceCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 

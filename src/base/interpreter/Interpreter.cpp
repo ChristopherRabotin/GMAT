@@ -30,6 +30,7 @@
 #include "Moderator.hpp"
 #include "StringTokenizer.hpp"
 #include "ConditionalBranch.hpp"
+#include "SolverBranchCommand.hpp"  // To check Vary command levels
 #include "StringUtil.hpp"     // for ToReal()
 #include "TimeTypes.hpp"
 #include "Array.hpp"
@@ -8059,7 +8060,17 @@ bool Interpreter::FinalPass()
    try
    {
       if (ValidateMcsCommands(theModerator->GetFirstCommand()) == false)
-         retval = false;;
+         retval = false;
+
+      current = theModerator->GetFirstCommand();
+      while (current != NULL)
+      {
+         if (current->IsOfType("BranchCommand"))
+            if (!ValidateSolverCmdLevels(current, 0))
+               retval = false;
+         current = current->GetNext();
+      }
+
    }
    catch (BaseException &ex)
    {
@@ -8270,6 +8281,97 @@ bool Interpreter::ValidateMcsCommands(GmatCommand *first, GmatCommand *parent,
    if (cleanAccError)
       delete accumulatedErrors;
 
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Interpreter::ValidateSolverCmdLevels(GmatCommand *sbc, Integer cmdLevel)
+//------------------------------------------------------------------------------
+/**
+ * Validates that Solver commands are at the Solver Control Sequence level
+ *
+ * @param sbc A BranchCommand at the head of the search
+ * @param cmdLevel Depth into the branch being examined
+ *
+ * @return true if the levels are correct, false if not
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::ValidateSolverCmdLevels(GmatCommand *sbc, Integer cmdLevel)
+{
+   bool retval = true;
+
+   std::string solverName = "";
+
+   // Handle the solver branch
+   if (sbc->IsOfType("SolverBranchCommand"))
+   {
+      solverName = sbc->GetStringParameter("SolverName");
+
+      // March through the SCS
+      GmatCommand *current = sbc->GetChildCommand(0);
+      while ((current != NULL) && (current != sbc))
+      {
+         if (current->IsOfType("BranchCommand"))
+            retval = ValidateSolverCmdLevels(current, cmdLevel+1);
+         else
+         {
+            // Check that solver names match
+            if (current->IsOfType("SolverSequenceCommand"))
+            {
+               if (current->GetStringParameter("SolverName") != solverName)
+               {
+                  std::string generator = current->GetGeneratingString();
+                  UnsignedInt loc = generator.find("{SOLVER IS",0);
+                  if (loc != std::string::npos)
+                  {
+                     generator = generator.substr(0,loc);
+                     generator = generator + "...";
+                  }
+
+                  throw InterpreterException("The Solver \"" +
+                        current->GetStringParameter("SolverName") +
+                        "\" in the " + current->GetTypeName() + " command does "
+                        "not match the Solver \"" + solverName +
+                        "\" that starts its Solver Control Sequence on "
+                        "the line\n" + generator);
+               }
+            }
+         }
+         current = current->GetNext();
+      }
+
+      solverName = "";
+   }
+   // All other branch commands increment the level and perform checks
+   else
+   {
+      GmatCommand *current = sbc->GetChildCommand(0);
+      while ((current != NULL) && (current != sbc))
+      {
+         if (current->IsOfType("BranchCommand"))
+            retval = ValidateSolverCmdLevels(current, cmdLevel+1);
+         else
+         {
+            if (current->IsOfType("SolverSequenceCommand"))
+            {
+               std::string generator = current->GetGeneratingString();
+
+               UnsignedInt loc = generator.find("{SOLVER IS",0);
+               if (loc != std::string::npos)
+               {
+                  generator = generator.substr(0,loc);
+                  generator = generator + "...";
+               }
+               throw InterpreterException("The command \"" +
+                     generator + "\" is a "
+                     "Solver command, and cannot be nested inside a \"" +
+                     sbc->GetTypeName() + "\" Control Logic command");
+            }
+         }
+         current = current->GetNext();
+      }
+   }
    return retval;
 }
 

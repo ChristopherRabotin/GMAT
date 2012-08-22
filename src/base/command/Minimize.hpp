@@ -24,7 +24,7 @@
 #define Minimize_hpp
  
 
-#include "GmatCommand.hpp"
+#include "SolverSequenceCommand.hpp"
 #include "Solver.hpp"
 #include "Variable.hpp"
 #include "ElementWrapper.hpp"
@@ -32,7 +32,7 @@
 /**
  * Command that manages processing for optimizer variables.
  */
-class GMAT_API Minimize : public GmatCommand
+class GMAT_API Minimize : public SolverSequenceCommand
 {
 public:
    Minimize();
@@ -114,14 +114,14 @@ protected:
    // Parameter IDs
    enum 
    {
-      OPTIMIZER_NAME = GmatCommandParamCount,
+      OPTIMIZER_NAME = SolverSequenceCommandParamCount,
       OBJECTIVE_NAME,
       MinimizeParamCount
    };
    static const std::string
-                       PARAMETER_TEXT[MinimizeParamCount - GmatCommandParamCount];
+                       PARAMETER_TEXT[MinimizeParamCount - SolverSequenceCommandParamCount];
    static const Gmat::ParameterType
-                       PARAMETER_TYPE[MinimizeParamCount - GmatCommandParamCount];
+                       PARAMETER_TYPE[MinimizeParamCount - SolverSequenceCommandParamCount];
 
    //bool                InterpretParameter(const std::string text,
    //                                       std::string &paramType,

@@ -336,6 +336,8 @@ protected:
          StringArray *missingObjects = NULL, std::string
          *accumulatedErrors = NULL);
 
+   bool ValidateSolverCmdLevels(GmatCommand *bc, Integer cmdLevel);
+
 private:
       
    StringArray   commandList;

@@ -44,7 +44,7 @@
 // static data
 //---------------------------------
 const std::string
-   Achieve::PARAMETER_TEXT[AchieveParamCount - GmatCommandParamCount] =
+   Achieve::PARAMETER_TEXT[AchieveParamCount - SolverSequenceCommandParamCount] =
    {
       "TargeterName",
       "Goal",
@@ -53,7 +53,7 @@ const std::string
    };
    
 const Gmat::ParameterType
-   Achieve::PARAMETER_TYPE[AchieveParamCount - GmatCommandParamCount] =
+   Achieve::PARAMETER_TYPE[AchieveParamCount - SolverSequenceCommandParamCount] =
    {
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
@@ -74,7 +74,7 @@ const Gmat::ParameterType
  */
 //------------------------------------------------------------------------------
 Achieve::Achieve() :
-   GmatCommand             ("Achieve"),
+   SolverSequenceCommand   ("Achieve"),
    targeterName            (""),
    goalName                (""),
    goal                    (NULL),
@@ -115,7 +115,7 @@ Achieve::~Achieve()
  */
 //------------------------------------------------------------------------------
 Achieve::Achieve(const Achieve& t) :
-   GmatCommand             (t),
+   SolverSequenceCommand             (t),
    targeterName            (t.targeterName),
    goalName                (t.goalName),
    goal                    (NULL),
@@ -147,7 +147,7 @@ Achieve& Achieve::operator=(const Achieve& t)
    if (this == &t)
       return *this;
     
-   GmatCommand::operator=(t);
+   SolverSequenceCommand::operator=(t);
    targeterName          = t.targeterName;
    goalName              = t.goalName;
    goal                  = NULL;
@@ -219,7 +219,7 @@ bool Achieve::RenameRefObject(const Gmat::ObjectType type,
       toleranceName = tolerance->GetDescription();
    }
    
-   return true;
+   return SolverSequenceCommand::RenameRefObject(type, oldName, newName);
 }
 
 
@@ -294,9 +294,9 @@ const StringArray& Achieve::GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 std::string Achieve::GetParameterText(const Integer id) const
 {
-   if (id >= GmatCommandParamCount && id < AchieveParamCount)
-      return PARAMETER_TEXT[id - GmatCommandParamCount];
-   return GmatCommand::GetParameterText(id);
+   if (id >= SolverSequenceCommandParamCount && id < AchieveParamCount)
+      return PARAMETER_TEXT[id - SolverSequenceCommandParamCount];
+   return SolverSequenceCommand::GetParameterText(id);
 }
 
 
@@ -313,13 +313,13 @@ std::string Achieve::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Achieve::GetParameterID(const std::string &str) const
 {
-   for (Integer i = GmatCommandParamCount; i < AchieveParamCount; i++)
+   for (Integer i = SolverSequenceCommandParamCount; i < AchieveParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+      if (str == PARAMETER_TEXT[i - SolverSequenceCommandParamCount])
          return i;
    }
 
-   return GmatCommand::GetParameterID(str);
+   return SolverSequenceCommand::GetParameterID(str);
 }
 
 
@@ -336,10 +336,10 @@ Integer Achieve::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Achieve::GetParameterType(const Integer id) const
 {
-   if (id >= GmatCommandParamCount && id < AchieveParamCount)
-      return PARAMETER_TYPE[id - GmatCommandParamCount];
+   if (id >= SolverSequenceCommandParamCount && id < AchieveParamCount)
+      return PARAMETER_TYPE[id - SolverSequenceCommandParamCount];
 
-   return GmatCommand::GetParameterType(id);
+   return SolverSequenceCommand::GetParameterType(id);
 }
 
 
@@ -356,7 +356,7 @@ Gmat::ParameterType Achieve::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Achieve::GetParameterTypeString(const Integer id) const
 {
-   return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
+   return SolverSequenceCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -380,7 +380,7 @@ Real Achieve::GetRealParameter(const Integer id) const
    if (id == toleranceID)
       if (tolerance) return tolerance->EvaluateReal();
     
-   return GmatCommand::GetRealParameter(id);
+   return SolverSequenceCommand::GetRealParameter(id);
 }
 
 
@@ -398,7 +398,7 @@ Real Achieve::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Achieve::SetRealParameter(const Integer id, const Real value)
 {
-   return GmatCommand::SetRealParameter(id, value);
+   return SolverSequenceCommand::SetRealParameter(id, value);
 }
 
 
@@ -428,7 +428,7 @@ std::string Achieve::GetStringParameter(const Integer id) const
    if (id == toleranceID) 
       return toleranceName;
 
-   return GmatCommand::GetStringParameter(id);
+   return SolverSequenceCommand::GetStringParameter(id);
 }
 
 
@@ -455,6 +455,8 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
    if (id == targeterNameID) 
    {
       targeterName = value;
+      // Set the base class string
+      solverName    = value;
       return true;
    }
 
@@ -492,7 +494,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
-   return GmatCommand::SetStringParameter(id, value);
+   return SolverSequenceCommand::SetStringParameter(id, value);
 }
 
 
@@ -527,7 +529,7 @@ bool Achieve::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       return false;
    }
 
-   return GmatCommand::SetRefObject(obj, type, name);
+   return SolverSequenceCommand::SetRefObject(obj, type, name);
 }
 
 
@@ -839,7 +841,7 @@ bool Achieve::Initialize()
       ("Achieve::Initialize() entered, targeter=<%p>\n", targeter);
    #endif
    
-   bool retval = GmatCommand::Initialize();
+   bool retval = SolverSequenceCommand::Initialize();
 
    if (targeter == NULL)
       throw CommandException(
@@ -992,7 +994,7 @@ const std::string& Achieve::GetGeneratingString(Gmat::WriteMode mode,
    generatingString = gen + "});";
    
    // Then call the base class method for preface and inline comments
-   return GmatCommand::GetGeneratingString(mode, prefix, useName);
+   return SolverSequenceCommand::GetGeneratingString(mode, prefix, useName);
 }
 
 
@@ -1007,7 +1009,7 @@ void Achieve::RunComplete()
       (targeterDataFinalized? "true" : "false"));
    #endif
    targeterDataFinalized = false;
-   GmatCommand::RunComplete();
+   SolverSequenceCommand::RunComplete();
 }
 
 

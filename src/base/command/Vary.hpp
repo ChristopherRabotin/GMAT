@@ -24,7 +24,7 @@
 #define Vary_hpp
  
 
-#include "BranchCommand.hpp"
+#include "SolverSequenceCommand.hpp"
 #include "Solver.hpp"
 #include "ElementWrapper.hpp"
 
@@ -47,7 +47,7 @@
  * 
  *
  */
-class GMAT_API Vary : public GmatCommand
+class GMAT_API Vary : public SolverSequenceCommand
 {
 public:
    Vary();
@@ -105,7 +105,6 @@ public:
    virtual void         RunComplete();
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
-
    
    // Used to apply corrections to the command
    virtual void         SetInitialValue(Solver *theSolver);
@@ -116,7 +115,7 @@ protected:
    // Parameter IDs
    enum  
    {
-      SOLVER_NAME = GmatCommandParamCount,
+      SOLVER_NAME = SolverSequenceCommandParamCount,
       VARIABLE_NAME,
       INITIAL_VALUE,
       PERTURBATION,
@@ -129,10 +128,10 @@ protected:
    };
 
    static const std::string    PARAMETER_TEXT[VaryParamCount -
-                                              GmatCommandParamCount];
+                                              SolverSequenceCommandParamCount];
    static const Gmat::ParameterType
                                PARAMETER_TYPE[VaryParamCount -
-                                              GmatCommandParamCount];
+                                              SolverSequenceCommandParamCount];
 
    /// The name of the solver that does the solving
    std::string         solverName;
