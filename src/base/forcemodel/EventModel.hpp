@@ -80,6 +80,8 @@ private:
    std::vector<Integer> eventStarts;
    /// Associated state data for event calculations
    std::vector<Integer> eventAssociates;
+   /// Event start index in the state vector
+   Integer eventStartIndex;
 };
 
 #endif /* EventModel_hpp */

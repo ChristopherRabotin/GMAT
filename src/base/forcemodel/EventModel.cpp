@@ -39,7 +39,9 @@
  */
 //-----------------------------------------------------------------------------
 EventModel::EventModel(const std::string &nomme) :
-   PhysicalModel        (Gmat::PHYSICAL_MODEL, "EventModel", nomme)
+   PhysicalModel        (Gmat::PHYSICAL_MODEL, "EventModel", nomme),
+   events               (NULL),
+   eventStartIndex      (-1)
 {
    objectTypeNames.push_back("EventModel");
 
@@ -77,7 +79,8 @@ EventModel::EventModel(const EventModel & em) :
    events               (em.events),
    functionCounts       (em.functionCounts),
    eventStarts          (em.eventStarts),
-   eventAssociates      (em.eventAssociates)
+   eventAssociates      (em.eventAssociates),
+   eventStartIndex      (em.eventStartIndex)
 {
    #ifdef DEBUG_OBJECT_LIFE
       MessageInterface::ShowMessage("Creating EventModel in copy c'tor at %p\n",
@@ -106,6 +109,7 @@ EventModel& EventModel::operator=(const EventModel & em)
       // events points to the EventLocator buffer in the Sandbox; if the 
       // pointer is set, we'll preserve it here, but clear the other buffers.
       events = em.events;
+      eventStartIndex = em.eventStartIndex;
 
       functionCounts.clear();
       eventStarts.clear();
@@ -164,19 +168,25 @@ bool EventModel::Initialize()
    functionCounts.clear();
    eventStarts.clear();
    eventAssociates.clear();
+   Integer fc = 0, es = eventStartIndex;
    for (UnsignedInt i = 0; i < events->size(); ++i)
    {
-      Integer fc = events->at(i)->GetFunctionCount();
+      eventStarts.push_back(es);
+      fc = events->at(i)->GetFunctionCount();
       functionCounts.push_back(fc);
-      for (Integer j = 0; j < fc; ++j)
+      if (eventStartIndex >= 0)
       {
-         #ifdef DEBUG_INIT
-            MessageInterface::ShowMessage("Calling SetStateIndices(%d, %d, "
-                  "%d)\n", j, eventStarts[i] + j,
+         for (Integer j = 0; j < fc; ++j)
+         {
+            #ifdef DEBUG_INIT
+               MessageInterface::ShowMessage("Calling SetStateIndices(%d, %d, "
+                     "%d)\n", j, eventStarts[i] + j,
+                     theState->GetAssociateIndex(eventStarts[i]+j));
+            #endif
+            events->at(i)->SetStateIndices(j, eventStarts[i] + j,
                   theState->GetAssociateIndex(eventStarts[i]+j));
-         #endif
-         events->at(i)->SetStateIndices(j, eventStarts[i] + j,
-               theState->GetAssociateIndex(eventStarts[i]+j));
+         }
+         es += fc;
       }
    }
 
@@ -273,6 +283,7 @@ bool EventModel::SetStart(Gmat::StateElementId id, Integer index,
    if (id == Gmat::EVENT_FUNCTION_STATE)
    {
       eventStarts.push_back(index);
+      eventStartIndex = index;
       retval = true;
    }
 
