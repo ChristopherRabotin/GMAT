@@ -387,8 +387,22 @@ void GmatState::Resize(Integer newSize, bool withCopy)
    Zero(start, newSize - start);
 }
 
+
 Integer GmatState::GetAssociateIndex(const Integer id)
 {
+   #ifdef DEBUG_ASSOCIATE_INDICES
+      MessageInterface::ShowMessage("GmatState::GetAssociateIndex State "
+            "Size = %d, id = %d\n", stateSize, id);
+   #endif
+
+   if ((id < 0) || (id >= stateSize))
+   {
+      std::stringstream msg;
+      msg << "Requested element association index " << id
+          << " is out of bounds for the GMAT state vector, which has size "
+          << stateSize;
+      throw GmatBaseException(msg.str());
+   }
    return associatedElements[id];
 }
 
