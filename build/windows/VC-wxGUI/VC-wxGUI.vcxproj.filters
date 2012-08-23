@@ -1710,6 +1710,18 @@
     <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\ICRFAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\ICRFFile.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\ITRFAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\IAUFile.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -3331,6 +3343,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp">
       <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\ICRFAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\ICRFFile.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\ITRFAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\IAUFile.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

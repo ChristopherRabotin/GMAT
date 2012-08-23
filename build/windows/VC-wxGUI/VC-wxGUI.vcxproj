@@ -173,7 +173,11 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\EquatorAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\GeocentricSolarEclipticAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\GeocentricSolarMagneticAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\IAUFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\ICRFAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\ICRFFile.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\InertialAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\ITRFAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.cpp" />
@@ -692,7 +696,11 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\EquatorAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\GeocentricSolarEclipticAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\GeocentricSolarMagneticAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\IAUFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\ICRFAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\ICRFFile.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\InertialAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\ITRFAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.hpp" />
