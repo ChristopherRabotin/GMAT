@@ -107,12 +107,13 @@ protected:
                                         bool forceComputation = false);
 
 //   DeFile                   *de;
+   IAUFile*					iauFile;
+
    Real                     prevEpoch;
    Real                     prevUpdateInterval;
    Real                     prevOriginUpdateInterval;
    Gmat::RotationDataSource prevLunaSrc;
 
-   IAUFile*					iauFile;
 
 };
 #endif // ITRFAxes_hpp

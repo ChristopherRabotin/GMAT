@@ -88,7 +88,6 @@ using namespace GmatTimeConstants;      // for JD offsets, etc.
 //------------------------------------------------------------------------------
 ITRFAxes::ITRFAxes(const std::string &itsName) :
 DynamicAxes("ITRF",itsName),
-//de                       (NULL),
 iauFile					 (NULL),
 prevEpoch                (0.0),
 prevUpdateInterval       (-99.9),
@@ -145,7 +144,7 @@ const ITRFAxes& ITRFAxes::operator=(const ITRFAxes &itrfAxes)
    if (&itrfAxes == this)
       return *this;
    DynamicAxes::operator=(itrfAxes); 
-//   de                       = itrfAxes.de;
+
    iauFile					= itrfAxes.iauFile;
    prevEpoch                = itrfAxes.prevEpoch;
    prevUpdateInterval       = itrfAxes.prevUpdateInterval;
