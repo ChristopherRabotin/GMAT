@@ -237,8 +237,10 @@ OBJECTS = \
     coordsystem/EquatorAxes.o \
     coordsystem/GeocentricSolarEclipticAxes.o \
     coordsystem/GeocentricSolarMagneticAxes.o \
+    coordsystem/IAUFile.o \
     coordsystem/ICRFAxes.o \
     coordsystem/ICRFFile.o \
+    coordsystem/ITRFAxes.o \
     coordsystem/InertialAxes.o \
     coordsystem/ItrfCoefficientsFile.o \
     coordsystem/MeanOfDateAxes.o \

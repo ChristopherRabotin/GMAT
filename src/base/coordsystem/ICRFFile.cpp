@@ -22,7 +22,8 @@
 #include "ICRFFile.hpp"
 #include <stdio.h>
 #include "LagrangeInterpolator.hpp"
-
+#include "FileManager.hpp"
+//#include "MessageInterface.hpp"
 
 //---------------------------------
 // constant
@@ -60,6 +61,10 @@ void ICRFFile::Initialize()
 	AllocateArrays();
 
 	// Open IAU2000/2006 data file:
+    FileManager* thefile = FileManager::Instance();
+    std::string path = thefile->GetPathname(FileManager::ICRF_FILE);
+    std::string name = thefile->GetFilename(FileManager::ICRF_FILE);
+    icrfFileName = path+name;
 	FILE* fpt = fopen(icrfFileName.c_str(), "r");
 
 	// Read ICRF Euler rotation vector from data file and store to buffer:

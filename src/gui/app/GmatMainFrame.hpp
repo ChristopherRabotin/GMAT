@@ -225,6 +225,14 @@ public:
    wxList *theMdiChildren;
 
 protected:
+//   void RunTest1();
+   void RunMain();
+   void RunMain1();
+   void RunMain2();
+   void RunMain3();
+   void RunMain4();
+//   void RunMain5();
+   void RunMain6();
 
 private:
    wxString mAnimationTitle;

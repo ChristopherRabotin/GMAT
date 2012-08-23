@@ -133,5 +133,7 @@ SPACECRAFT_MODEL_FILE  = MODEL_PATH/aura.3ds
 #-----------------------------------------------------------
 HELP_FILE              = ROOT_PATH/docs/help/help.chm
 #-----------------------------------------------------------
+IAUSOFA_FILE           = DATA_PATH/iau_sofa/IAU_SOFA.DAT
+ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 

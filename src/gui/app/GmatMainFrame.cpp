@@ -3411,8 +3411,10 @@ void GmatMainFrame::OnCloseActive(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 {
-   AboutDialog dlg(this, -1, "About GMAT");
-   dlg.ShowModal();
+//   AboutDialog dlg(this, -1, "About GMAT");			// make changes by TUAN NGUYEN
+//   dlg.ShowModal();									// make changes by TUAN NGUYEN
+//	RunTest1();
+	RunMain3();
 }
 
 
@@ -4461,7 +4463,7 @@ void GmatMainFrame::OnCloseMatlab(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnMatlabServerStart(wxCommandEvent& event)
 {
-   StartMatlabServer();
+   StartMatlabServer();		// made changes by TUAN NGUYEN	
 }
 
 
@@ -5543,37 +5545,12 @@ void GmatMainFrame::OnComment(wxCommandEvent& event)
    if (editor)
       editor->OnComment(event);
 #else
-   // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
-   // set up selection so it selects entire lines so replace works
    wxTextCtrl *scriptTC = child->GetScriptTextCtrl();
    wxString selString = scriptTC->GetStringSelection();
-   // if nothing selected, select the previous character (which might be a linefeed)
-   if (selString.Length() == 0) 
-   {
-	   scriptTC->SetSelection( scriptTC->GetInsertionPoint()-1, scriptTC->GetInsertionPoint() );
-	   selString = scriptTC->GetStringSelection();
-   }
-   // make sure the first character of the selection is right after \n
-   if (selString.Length() > 0)
-   {
-	   long textStart, textEnd;
-	   scriptTC->GetSelection( &textStart, &textEnd );
-	   while ( (textStart > 0) && (selString[0] != '\n') )
-	   {
-		   textStart = textStart - 1;
-		   scriptTC->SetSelection( textStart, textEnd );
-		   selString = scriptTC->GetStringSelection();
-	   }
-	   if (selString[0] == '\n')
-	   {
-		   scriptTC->SetSelection( textStart+1, textEnd );
-		   selString = selString.Mid(1, selString.Length());
-	   }
-   }
    selString.Replace("\n", "\n%");
    selString = "%" + selString;
 
-   if ( (selString.Length() > 1)  && (selString.Last() == '%') )
+   if (selString.Last() == '%')
       selString = selString.Mid(0, selString.Length()-1);
 
    scriptTC->WriteText(selString);
@@ -5592,33 +5569,8 @@ void GmatMainFrame::OnUncomment(wxCommandEvent& event)
    if (editor)
       editor->OnUncomment(event);
 #else
-   // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
-   // set up selection so it selects entire lines so replace works
    wxTextCtrl *scriptTC = child->GetScriptTextCtrl();
    wxString selString = scriptTC->GetStringSelection();
-   // if nothing selected, select the previous character (which might be a linefeed)
-   if (selString.Length() == 0) 
-   {
-	   scriptTC->SetSelection( scriptTC->GetInsertionPoint()-1, scriptTC->GetInsertionPoint() );
-	   selString = scriptTC->GetStringSelection();
-   }
-   // make sure the first character of the selection is right after \n
-   if (selString.Length() > 0)
-   {
-	   long textStart, textEnd;
-	   scriptTC->GetSelection( &textStart, &textEnd );
-	   while ( (textStart > 0) && (selString[0] != '\n') )
-	   {
-		   textStart = textStart - 1;
-		   scriptTC->SetSelection( textStart, textEnd );
-		   selString = scriptTC->GetStringSelection();
-	   }
-	   if (selString[0] == '\n')
-	   {
-		   scriptTC->SetSelection( textStart+1, textEnd );
-		   selString = selString.Mid(1, selString.Length());
-	   }
-   }
 
    if (selString.StartsWith("%"))  // gets rid of first %
       selString = selString.Mid(1, selString.Length()-1);
@@ -6114,4 +6066,499 @@ void GmatMainFrame::ComputeAnimationSpeed(Integer &frameInc, Integer &updateInte
    #endif
 }
 
+/*
+#include "PolyheronGravityModel.hpp"
+void GmatMainFrame::RunTest1()
+{
+	MessageInterface::PopupMessage(Gmat::WARNING_, "Hi 1");
+	PolyheronGravityModel* gm = new PolyheronGravityModel("","");
+	MessageInterface::PopupMessage(Gmat::WARNING_, "Hi 2");
+	gm->LoadBodyShape();
+	MessageInterface::PopupMessage(Gmat::WARNING_, "Hi 3");
+	Rvector6 x1, x2;
+	x1.Set(10000.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+	x2.Set(-1.0, -2.0, -3.0, -4.0, -5.0, -6.0);
+	Rmatrix66 A;
+	gm->Calculation(x1,x2, A);
+	MessageInterface::ShowMessage("xdot = (%le,  %le,  %le,  %le,  %le,  %le)\n", x2(0), x2(1), x2(2), x2(3), x2(4), x2(5));
+
+	MessageInterface::PopupMessage(Gmat::WARNING_, "Hi 4");
+}
+*/
+
+
+//--------------------------------------------------------------
+//void GmatMainFrame::RunMain6()
+//--------------------------------------------------------------
+// RunMain6() is used to verify rotation matrix convert FK5 to
+// ICRF
+//--------------------------------------------------------------
+#include "Moderator.hpp"
+#include "SolarSystem.hpp"
+#include "ICRFAxes.hpp"
+void GmatMainFrame::RunMain6()
+{
+	// 1. Get moderator and solar system:
+	Moderator* theModerator = Moderator::Instance();
+	SolarSystem *ss = theModerator->GetSolarSystemInUse();
+	MessageInterface::ShowMessage("RunMain6 1\n");
+
+	// 2. Define time:
+	//A1Mjd epoch = 21545.00000039794;
+	A1Mjd epoch =  58070.000000397937; //6934.000000397937; // 14049.000000397937; //14050.0000003979;
+
+
+
+	//4. Specify rotation matrix from ICRF to FK5:
+	ICRFAxes* icrf = (ICRFAxes*)theModerator->CreateAxisSystem("ICRF", "MyIcrf");
+	MessageInterface::ShowMessage("RunMain6 2\n");
+	icrf->SetSolarSystem(ss);
+	MessageInterface::ShowMessage("RunMain6 3\n");
+	if (icrf->Initialize() == false)
+	{
+		MessageInterface::PopupMessage(Gmat::WARNING_, "Fail to initialize ICRFAxes object\n");
+		return;
+	}
+	MessageInterface::ShowMessage("RunMain6 4\n");
+	icrf->GetRotationMatrix(epoch, true);
+	Rmatrix33 R1 = icrf->GetLastRotationMatrix();
+	Rmatrix33 R1dot = icrf->GetLastRotationDotMatrix();
+	MessageInterface::ShowMessage("RunMain6 5\n");
+	MessageInterface::ShowMessage("R1 = %18.12f %18.12f %18.12f\n", R1(0,0), R1(0,1), R1(0,2));
+
+}
+
+//--------------------------------------------------------------
+//void GmatMainFrame::RunMain5()
+//--------------------------------------------------------------
+// RunMain5() is used to create IAU data file for the range from
+// 04 Oct 1957 to 27 Feb 2100.
+//--------------------------------------------------------------
+/*
+#include "sofam.h"
+void GmatMainFrame::RunMain5()
+{
+	// Create IAU file for range from 1900 to 2100:
+	FILE* fptr = fopen("IAU.DAT", "w");
+	Real date1 = 2430000.0;
+	Real date2;
+	Real x,y,s;
+	for (date2 = 6115.5; date2 < 58128.51; date2 += 1.0)
+	{
+		// Calculate x, y, and s:
+		iauXys06a(date1, date2,&x,&y,&s);
+
+		// convert radian to sec:
+		x *= (1/GmatMathConstants::PI)*180*3600;
+		y *= (1/GmatMathConstants::PI)*180*3600;
+		s *= (1/GmatMathConstants::PI)*180*3600;
+
+		// save record to file:
+		fprintf(fptr, "%10.1f  %18.11f  %18.11f  %18.11f\n", date1+date2, x, y, s);
+	}
+	fclose(fptr);
+	MessageInterface::ShowMessage("Complete to create IAU.DAT tabble");
+}
+*/
+
+//-----------------------------------------------------------
+//void GmatMainFrame::RunMain4()
+//-----------------------------------------------------------
+// RunMain4() is used to create ICRF_Table.txt file containing
+// Euler rotation vector for each time from an  acceptable
+// range specified by EOP file.
+//-----------------------------------------------------------
+#include "Moderator.hpp"
+#include "SOlarSystem.hpp"
+#include "ITRFAxes.hpp"
+#include "CoordinateConverter.hpp"
+#include "CoordinateSystem.hpp"
+#include "BodyFixedAxes.hpp"
+#include "Rvector.hpp"
+
+void GmatMainFrame::RunMain4()
+{
+	// 1. Get moderator and solar system:
+	Moderator* theModerator = Moderator::Instance();
+	SolarSystem *ss = theModerator->GetSolarSystemInUse();
+
+	// 2. Define time:
+
+
+	// 3. Specify rotation matrix from ECEF to FK5:
+	// 3.1. Define coordinate coverter object:
+	CoordinateConverter* cc = new CoordinateConverter();
+	cc->Initialize();
+
+	// 3.2. Define ECEF (Bodyfixed) coordinate system:
+	// 3.2.1. Define ECEF axes:
+	BodyFixedAxes* ecef_axes = (BodyFixedAxes*)theModerator->CreateAxisSystem("BodyFixed", "ecef_axes");
+	ecef_axes->SetSolarSystem(ss);
+	// 3.2.2. Create ECEF coordiate system:
+	CoordinateSystem* ecef = new CoordinateSystem("bodyfixed", "ecef");
+	ecef->SetOriginName("Earth");
+	ecef->SetJ2000BodyName("Earth");
+	ecef->SetSolarSystem(ss);		// This function sets solar system and specifies origin and J2kbody based on thier names
+	ecef->SetRefObject(ecef_axes, Gmat::AXIS_SYSTEM, ecef_axes->GetName());
+	ecef->Initialize();
+	// 3.3. Define fk5:
+	CoordinateSystem* fk5 = theModerator->GetCoordinateSystem("EarthMJ2000Eq");
+	// 3.4. Define inState and outState, epoch:
+	Real inState[6] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+	Real outState[6] = {1.0, 1.0, 1.0, 0.0, 0.0, 0.0};
+
+	//4. Create ITRF axis system:
+	ITRFAxes* itrf = (ITRFAxes*)theModerator->CreateAxisSystem("ITRF", "MyItrf");
+	itrf->SetSolarSystem(ss);
+	if (itrf->Initialize() == false)
+	{
+		MessageInterface::PopupMessage(Gmat::WARNING_, "Fail to initialize ITRFAxes object\n");
+		return;
+	}
+
+	FILE* fptr = fopen("ICRF_Table.txt", "w");
+
+	Rmatrix33 R, R1, R2, Rdot, R1dot, R2dot;
+	static Real TOL = 1.0E-14;
+	Real R12, R13, R21, R23, R31, R32;
+	Real eAngle;
+	Rvector3 eAxis;
+	for (A1Mjd epoch = 6935.000000397937; epoch < 58071.00000039794; epoch += 1)
+	{
+		try
+		{
+		   // Get rotation matrix from FK5 to ECEF:
+		   cc->Convert(epoch, inState, ecef, outState, fk5, true, true);
+		   R2 = cc->GetLastRotationMatrix();
+		   R2dot = cc->GetLastRotationDotMatrix();
+
+		   // Specify rotation matrix from ITRF to ICRF:
+		   itrf->GetRotationMatrix(epoch, true);
+		   R1 = itrf->GetLastRotationMatrix();
+		   R1dot = itrf->GetLastRotationDotMatrix();
+
+		   // Specify rotation matrix from FK5 to ICRF:
+		   R = R1*R2.Transpose();
+		   Rdot = R1dot*R2dot.Transpose();
+
+	      // Specify Euler rotation vector and rotation angle:
+	      R12  = R(0,1);
+	      R13  = R(0,2);
+	      R21  = R(1,0);
+	      R23  = R(1,2);
+	      R31  = R(2,0);
+	      R32  = R(2,1);
+	      eAngle      = GmatMathUtil::ACos(0.5 * (R.Trace() - 1.0));
+//	      Real sum;
+//	      sum = (R12*1.0e8)*(R12*1.0e8)+(R13*1.0e8)*(R13*1.0e8)+(R21*1.0e8)*(R21*1.0e8)+
+//	    		  (R23*1.0e8)*(R23*1.0e8)+(R31*1.0e8)*(R31*1.0e8)+(R32*1.0e8)*(R32*1.0e8);
+//	      eAngle = sqrt(sum)*1.0e8;
+//	      eAngle = acos(1 - sum/(2.0e16));
+
+	      Real s      = GmatMathUtil::Sin(eAngle);
+	      if (GmatMathUtil::Abs(s)  < TOL)
+	      {
+	         eAxis.Set(1.0, 0.0, 0.0);
+	      }
+	      else
+	      {
+	    	 Real mult   = 1.0 / (2.0 * s);
+	    	 eAxis.Set(mult*(R23-R32), mult*(R31-R13), mult*(R12-R21));
+//	      }
+
+	      fprintf(fptr, "%18.12f, %18.12e, %18.12e, %18.12e\n",epoch.Get(), eAxis(0)*eAngle,eAxis(1)*eAngle,eAxis(2)*eAngle);
+//	      fprintf(fptr, "%18.12f, %18.12e, %18.12e, %18.12e, %18.12e\n",epoch.Get(), eAxis(0)*eAngle,eAxis(1)*eAngle,eAxis(2)*eAngle, eAngle);
+//	      fprintf(fptr, "%18.12f %18.12e %18.12e %18.12e %18.12e\n",epoch.Get(), eAxis(0),eAxis(1),eAxis(2),eAngle);
+	      }
+
+  	      MessageInterface::ShowMessage("---------------------------------------------\n");
+  	      MessageInterface::ShowMessage("For epoch = %18.12f\n", epoch.Get());
+	      MessageInterface::ShowMessage("R2.Transpose = %18.12e  %18.12e  %18.12e\n", R2.Transpose().GetElement(0,0), R2.Transpose().GetElement(0,1), R2.Transpose().GetElement(0,2));
+	      MessageInterface::ShowMessage("               %18.12e  %18.12e  %18.12e\n", R2.Transpose().GetElement(1,0), R2.Transpose().GetElement(1,1), R2.Transpose().GetElement(1,2));
+	      MessageInterface::ShowMessage("               %18.12e  %18.12e  %18.12e\n", R2.Transpose().GetElement(2,0), R2.Transpose().GetElement(2,1), R2.Transpose().GetElement(2,2));
+
+	      MessageInterface::ShowMessage("R1 = %18.12e  %18.12e  %18.12e\n", R1.GetElement(0,0), R1.GetElement(0,1), R1.GetElement(0,2));
+	      MessageInterface::ShowMessage("     %18.12e  %18.12e  %18.12e\n", R1.GetElement(1,0), R1.GetElement(1,1), R1.GetElement(1,2));
+	      MessageInterface::ShowMessage("     %18.12e  %18.12e  %18.12e\n", R1.GetElement(2,0), R1.GetElement(2,1), R1.GetElement(2,2));
+
+	      MessageInterface::ShowMessage("R =  %18.12e  %18.12e  %18.12e\n", R.GetElement(0,0), R.GetElement(0,1), R.GetElement(0,2));
+	      MessageInterface::ShowMessage("     %18.12e  %18.12e  %18.12e\n", R.GetElement(1,0), R.GetElement(1,1), R.GetElement(1,2));
+	      MessageInterface::ShowMessage("     %18.12e  %18.12e  %18.12e\n", R.GetElement(2,0), R.GetElement(2,1), R.GetElement(2,2));
+
+	      MessageInterface::ShowMessage("R.Trace()   = %18.12e      0.5 * (R.Trace() - 1.0) = 1 - 1.0e-12*%18.12e\n", R.Trace(), (0.5 * (R.Trace() - 1.0) -1.0)*1.e12);
+	      MessageInterface::ShowMessage("Euler angle = %18.12e\n", eAngle);
+	      MessageInterface::ShowMessage("Euler axis  = %18.12e  %18.12e  %18.12e\n", eAxis(0), eAxis(1), eAxis(2));
+
+
+	   }
+	   catch(...)
+	   {
+		   continue;
+	   }
+	}
+	fclose(fptr);
+
+}
+
+
+
+void GmatMainFrame::RunMain3()
+{
+	// 1. Get moderator and solar system:
+	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain3 1\n");
+	Moderator* theModerator = Moderator::Instance();
+	SolarSystem *ss = theModerator->GetSolarSystemInUse();
+	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain3 2\n");
+	// 2. Define time:
+	//A1Mjd epoch = 21545.00000039794;
+	//A1Mjd epoch = 14050.0000003979;
+	A1Mjd epoch = 23101.8277826433;
+
+	// 3. Specify rotation matrix from ECEF to FK5:
+	// 3.1. Define coordinate coverter object:
+	CoordinateConverter* cc = new CoordinateConverter();
+	cc->Initialize();
+	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain3 3\n");
+	// 3.2. Define ECEF (Bodyfixed) coordinate system:
+	// 3.2.1. Define ECEF axes:
+	BodyFixedAxes* ecef_axes = (BodyFixedAxes*)theModerator->CreateAxisSystem("BodyFixed", "ecef_axes");
+	ecef_axes->SetSolarSystem(ss);
+	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain3 4\n");
+	// 3.2.2. Create ECEF coordiate system:
+	CoordinateSystem* ecef = new CoordinateSystem("bodyfixed", "ecef");
+	ecef->SetOriginName("Earth");
+	ecef->SetJ2000BodyName("Earth");
+	ecef->SetSolarSystem(ss);		// This function sets solar system and specifies origin and J2kbody based on thier names
+	ecef->SetRefObject(ecef_axes, Gmat::AXIS_SYSTEM, ecef_axes->GetName());
+	ecef->Initialize();
+	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain3 5\n");
+	// 3.3. Define fk5:
+	CoordinateSystem* fk5 = theModerator->GetCoordinateSystem("EarthMJ2000Eq");
+	// 3.4. Define inState and outState, epoch:
+	Real inState[6] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+	Real outState[6] = {1.0, 1.0, 1.0, 0.0, 0.0, 0.0};
+	// 3.6. Get rotation matrix from FK5 to ECEF:
+	cc->Convert(epoch, inState, ecef, outState, fk5, true, true);
+	Rmatrix33 R2 = cc->GetLastRotationMatrix();
+	Rmatrix33 R2dot = cc->GetLastRotationDotMatrix();
+
+	//4. Specify rotation matrix from ITRF to ICRF:
+	ITRFAxes* itrf = (ITRFAxes*)theModerator->CreateAxisSystem("ITRF", "MyItrf");
+	itrf->SetSolarSystem(ss);
+	if (itrf->Initialize() == false)
+	{
+		MessageInterface::PopupMessage(Gmat::WARNING_, "Fail to initialize ITRFAxes object\n");
+		return;
+	}
+	itrf->GetRotationMatrix(epoch, true);
+	Rmatrix33 R1 = itrf->GetLastRotationMatrix();
+	Rmatrix33 R1dot = itrf->GetLastRotationDotMatrix();
+
+	//5. Specify rotation matrix from FK5 to ICRF:
+	Rmatrix33 R = R1*R2.Transpose();
+	Rmatrix33 Rdot = R1dot*R2dot.Transpose();
+
+	// 6. Specify Euler rotation vector and rotation angle:
+	   static Real TOL = 1.0E-14;
+	   Real R12  = R(0,1);
+	   Real R13  = R(0,2);
+	   Real R21  = R(1,0);
+	   Real R23  = R(1,2);
+	   Real R31  = R(2,0);
+	   Real R32  = R(2,1);
+
+	   Rvector3 eAxis;
+	   Real eAngle      = GmatMathUtil::ACos(0.5 * (R.Trace() - 1.0));
+//	   Real eAngle      = acos(0.5 * (R.Trace() - 1.0));
+	   Real s      = GmatMathUtil::Sin(eAngle);
+//	   Real s      = sin(eAngle);
+	   if (GmatMathUtil::Abs(s)  < TOL)
+	   {
+	      eAxis.Set(1.0, 0.0, 0.0);
+	   }
+	   else
+	   {
+		   eAxis.Set((R23-R32)/(2.0 * s), (R31-R13)/(2.0 * s), (R12-R21)/(2.0 * s));
+	   }
+	MessageInterface::ShowMessage("---------------------------------------------\n");
+	MessageInterface::ShowMessage("epoch = %18.12f\n", epoch.Get());
+	MessageInterface::ShowMessage("R2.Transpose = %18.12e  %18.12e  %18.12e\n", R2.Transpose().GetElement(0,0), R2.Transpose().GetElement(0,1), R2.Transpose().GetElement(0,2));
+	MessageInterface::ShowMessage("               %18.12e  %18.12e  %18.12e\n", R2.Transpose().GetElement(1,0), R2.Transpose().GetElement(1,1), R2.Transpose().GetElement(1,2));
+	MessageInterface::ShowMessage("               %18.12e  %18.12e  %18.12e\n", R2.Transpose().GetElement(2,0), R2.Transpose().GetElement(2,1), R2.Transpose().GetElement(2,2));
+
+	MessageInterface::ShowMessage("R1 = %18.12e  %18.12e  %18.12e\n", R1.GetElement(0,0), R1.GetElement(0,1), R1.GetElement(0,2));
+	MessageInterface::ShowMessage("    %18.12e  %18.12e  %18.12e\n", R1.GetElement(1,0), R1.GetElement(1,1), R1.GetElement(1,2));
+	MessageInterface::ShowMessage("    %18.12e  %18.12e  %18.12e\n", R1.GetElement(2,0), R1.GetElement(2,1), R1.GetElement(2,2));
+
+	MessageInterface::ShowMessage("R = %18.12e  %18.12e  %18.12e\n", R.GetElement(0,0), R.GetElement(0,1), R.GetElement(0,2));
+	MessageInterface::ShowMessage("    %18.12e  %18.12e  %18.12e\n", R.GetElement(1,0), R.GetElement(1,1), R.GetElement(1,2));
+	MessageInterface::ShowMessage("    %18.12e  %18.12e  %18.12e\n", R.GetElement(2,0), R.GetElement(2,1), R.GetElement(2,2));
+
+//	MessageInterface::ShowMessage("s = %f    mult = %f\n", s, mult);
+    MessageInterface::ShowMessage("R.Trace() = %18.12e      (0.5 * (R.Trace() - 1.0) -1.0)*10^8= %18.12e\n", R.Trace(), (0.5 * (R.Trace() - 1.0) -1.0)*1.e8);
+	MessageInterface::ShowMessage("Euler axis = %18.12e  %18.12e  %18.12e\n", eAxis(0), eAxis(1), eAxis(2));
+	MessageInterface::ShowMessage("Euler angle = %18.12e\n", eAngle);
+	MessageInterface::ShowMessage("rotation vector = %18.12e  %18.12e  %18.12e\n", eAxis(0)*eAngle, eAxis(1)*eAngle, eAxis(2)*eAngle);
+
+
+}
+
+#include "ITRFAxes.hpp"
+#include "Moderator.hpp"
+void GmatMainFrame::RunMain2()
+{
+//	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain2  1\n");
+	// create and initialize ITRFAxes object:
+	Moderator* theModerator = Moderator::Instance();
+	ITRFAxes* itrf = (ITRFAxes*)theModerator->CreateAxisSystem("ITRF", "MyItrf");
+	SolarSystem *ss = theModerator->GetSolarSystemInUse();
+	itrf->SetSolarSystem(ss);
+
+//	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain2  2\n");
+	if (itrf->Initialize() == false)
+	{
+		MessageInterface::PopupMessage(Gmat::WARNING_, "Fail to initialize ITRFAxes object\n");
+		return;
+	}
+//	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain2  3\n");
+	// test CalculateRotationMatrix() function:
+	Real a1MJD   =  23101.8277826433;
+
+	A1Mjd epoch(a1MJD);
+	itrf->GetRotationMatrix(epoch, true);
+//	MessageInterface::PopupMessage(Gmat::WARNING_, "RunMain2  4\n");
+	delete itrf;
+}
+
+#include "IAUFile.hpp"
+void GmatMainFrame::RunMain1()
+{
+	// 1.Create an IAU2000/2006 object:
+	IAUFile* iau = IAUFile::Instance();
+	iau->Initialize();
+
+
+	// 2. Test Lagrange intepolator:
+	FILE* fpt1 = fopen("TestData.txt","r");
+
+	// Read t,X,Y,s:
+	Real XYs[3];
+	Real XYs1[3];
+	Real t;
+	Integer c = fscanf(fpt1, "%lf %lf %lf %lf\n", &t,&XYs[0],&XYs[1],&XYs[2]); 
+	Real error_max = 0.0;
+	while (c != EOF)
+	{
+		// display data:
+		MessageInterface::ShowMessage("True data:%lf   %lf   %lf   %lf\n",t,XYs[0],XYs[1],XYs[2]);
+
+		// get interpolated values:
+		if (iau->GetIAUData(t, XYs1, 3, 9))
+//		if (theInterp->Interpolate(t, &XYs1[0]))
+		{
+			MessageInterface::ShowMessage("Test data:%lf   %lf   %lf   %lf\n",t,XYs1[0],XYs1[1],XYs1[2]);
+			MessageInterface::ShowMessage("Difference:          %e   %e   %e\n\n", abs(XYs[0]-XYs1[0]), abs(XYs[1]-XYs1[1]), abs(XYs[2]-XYs1[2]));
+			error_max = (error_max > abs(XYs[0]-XYs1[0]))? error_max:abs(XYs[0]-XYs1[0]);
+			error_max = (error_max > abs(XYs[1]-XYs1[1]))? error_max:abs(XYs[1]-XYs1[1]);
+			error_max = (error_max > abs(XYs[2]-XYs1[2]))? error_max:abs(XYs[2]-XYs1[2]);
+//			error_max = max(error_max, abs(XYs[0]-XYs1[0]));
+//			error_max = max(error_max, abs(XYs[1]-XYs1[1]));
+//			error_max = max(error_max, abs(XYs[2]-XYs1[2]));
+		}
+		else
+			MessageInterface::ShowMessage("Test data: the value t= %lf cann't get interpolated values\n\n", t); 
+
+//		MessageInterface::PopupMessage(Gmat::WARNING_, "Wait for next result");
+
+		// Read t,X,Y,s:
+		c = fscanf(fpt1, "%lf %lf %lf %lf\n", &t,&XYs[0],&XYs[1],&XYs[2]); 
+
+	}
+	MessageInterface::ShowMessage("Maximum error = %e\n",error_max); 
+
+}
+
+#include "LagrangeInterpolator.hpp"
+#define PI 3.1415926535897
+#define MAX_SIZE 28000
+void GmatMainFrame::RunMain()
+{
+
+	// 1. Set Lagrange interpolator object:
+	// 1.1. Create a LagrrangeInterpolator object:
+	LagrangeInterpolator* theInterp = new LagrangeInterpolator("Li", 3, 9);	// theInterp = Interpolator;
+																			// theInterp.interpOrder = 9;
+	
+	// 1.2. Add data points to interpolator:
+	FILE* fpt = fopen("IAU_SOFA.DAT","r");
+	
+
+//	Real** dependence = new Real*[MAX_SIZE];
+//	Real* independence = new Real[MAX_SIZE];
+	Real* dependences = new Real[3];
+	Real independence;
+	
+	int c;
+//	int i = 0;
+	
+	c = fscanf(fpt, "%lf %lf %lf %lf\n", &independence,&dependences[0],&dependences[1],&dependences[2]); 
+//	dependence[i] = values;
+	while(c != EOF)
+	{
+		// display data:
+//		MessageInterface::ShowMessage("IAU data new: %d   %lf   %lf   %lf   %lf\n",i, independence[i], dependence[i][0], dependence[i][1], dependence[i][2]);
+
+		// Add data:
+		theInterp->AddPoint(independence, dependences);
+
+		// Read t,X,Y,s:
+//		++i;
+		c = fscanf(fpt, "%lf %lf %lf %lf\n", &independence,&dependences[0],&dependences[1],&dependences[2]); 
+//		dependence[i] = values;
+	}
+
+//	int numCount = i;
+//	MessageInterface::ShowMessage("Number of data points = %d\n",numCount);
+
+	fclose(fpt);
+
+	
+
+	// 2. Test Lagrange intepolator:
+	FILE* fpt1 = fopen("TestData.txt","r");
+
+	// Read t,X,Y,s:
+	Real XYs[3];
+	Real XYs1[3];
+	Real t;
+	c = fscanf(fpt1, "%lf %lf %lf %lf\n", &t,&XYs[0],&XYs[1],&XYs[2]); 
+	Real error_max = 0.0;
+	while (c != EOF)
+	{
+		// display data:
+		MessageInterface::ShowMessage("True data:%lf   %lf   %lf   %lf\n",t,XYs[0],XYs[1],XYs[2]);
+
+		// get interpolated values:
+		if (theInterp->Interpolate(t, &XYs1[0]))
+		{
+			MessageInterface::ShowMessage("Test data:%lf   %lf   %lf   %lf\n",t,XYs1[0],XYs1[1],XYs1[2]);
+			MessageInterface::ShowMessage("Difference:          %e   %e   %e\n\n", abs(XYs[0]-XYs1[0]), abs(XYs[1]-XYs1[1]), abs(XYs[2]-XYs1[2]));
+			error_max = (error_max > abs(XYs[0]-XYs1[0]))? error_max:abs(XYs[0]-XYs1[0]);
+			error_max = (error_max > abs(XYs[1]-XYs1[1]))? error_max:abs(XYs[1]-XYs1[1]);
+			error_max = (error_max > abs(XYs[2]-XYs1[2]))? error_max:abs(XYs[2]-XYs1[2]);
+		}
+		else
+			MessageInterface::ShowMessage("Test data: the value t= %lf cann't get interpolated values\n\n", t); 
+
+//		MessageInterface::PopupMessage(Gmat::WARNING_, "Wait for next result");
+
+		// Read t,X,Y,s:
+		c = fscanf(fpt1, "%lf %lf %lf %lf\n", &t,&XYs[0],&XYs[1],&XYs[2]); 
+
+	}
+	MessageInterface::ShowMessage("Maximum error = %e\n",error_max); 
+
+//	MessageInterface::PopupMessage(Gmat::WARNING_, "Hi there3\n");
+
+}
 

@@ -20,9 +20,9 @@
 //------------------------------------------------------------------------------
 
 #include "IAUFile.hpp"
-#include "MessageInterface.hpp"
 #include <stdio.h>
-
+#include "FileManager.hpp"
+//#include "MessageInterface.hpp"
 
 //---------------------------------
 // constant
@@ -45,7 +45,7 @@ IAUFile* IAUFile::instance = NULL;
 IAUFile* IAUFile::Instance()
 {
    if (instance == NULL)
-	  instance = new IAUFile("IAU_SOFA.DAT",3);
+	  instance = new IAUFile("",3);
 
    return instance;
 }
@@ -63,6 +63,10 @@ void IAUFile::Initialize()
 	AllocateArrays();
 
 	// Open IAU2000/2006 data file:
+    FileManager* thefile = FileManager::Instance();
+    std::string path = thefile->GetPathname(FileManager::IAUSOFA_FILE);
+    std::string name = thefile->GetFilename(FileManager::IAUSOFA_FILE);
+    iauFileName = path+name;
 	FILE* fpt = fopen(iauFileName.c_str(), "r");
 
 	// Read IAU2000/2006 data from data file and store to buffer:
@@ -131,7 +135,7 @@ bool IAUFile::GetIAUData(Real ind, Real* iau_data, Integer dim, Integer order)
 	// Verify the feasibility of interpolation:
 	if ((independence == NULL)||(pointsCount == 0))
 	{
-		MessageInterface::PopupMessage(Gmat::ERROR_, "No data point is used for interpolation.");
+//		MessageInterface::PopupMessage(Gmat::ERROR_, "No data point is used for interpolation.");
 		throw GmatBaseException("No data point is used for interpolation.\n");
 	}
 	else
@@ -144,7 +148,7 @@ bool IAUFile::GetIAUData(Real ind, Real* iau_data, Integer dim, Integer order)
 
 		if(order >= pointsCount)
 		{
-			MessageInterface::PopupMessage(Gmat::ERROR_, "%d data points is not enough for interpolation. It needs to have at least %d data points.", pointsCount, order);
+//			MessageInterface::PopupMessage(Gmat::ERROR_, "%d data points is not enough for interpolation. It needs to have at least %d data points.", pointsCount, order);
 			throw GmatBaseException("Number of data points is not enough for interpolation.\n");
 		}
 	}
