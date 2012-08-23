@@ -1284,6 +1284,9 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\ITRFAxes.cpp">
       <Filter>Source Files\coordsystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2524,6 +2527,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\coordsystem\ITRFAxes.hpp">
       <Filter>Source Files\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp">
+      <Filter>Source Files\command</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
