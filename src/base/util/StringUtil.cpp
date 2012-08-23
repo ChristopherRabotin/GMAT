@@ -32,6 +32,7 @@
 #include <algorithm>             // Required for GCC 4.3
 
 //#define DEBUG_STRING_UTIL 1
+//#define DEBUG_TOREAL
 //#define DEBUG_ARRAY_INDEX 2
 //#define DEBUG_STRING_UTIL_ARRAY 1
 //#define DEBUG_STRING_UTIL_SEP 2
@@ -1148,8 +1149,14 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
    #endif
    
    if (str == "")
+   {
+      #ifdef DEBUG_TOREAL
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::ToReal() returning false, it is blank.\n");
+      #endif
       return false;
-
+   }
+   
    std::string str2 = Trim(str, BOTH);
    if (trimParens)
    {
@@ -1158,9 +1165,15 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
    }
    Integer numDot = 0;
    std::string::size_type index1;
-
+   
    if (str2.length() == 0)
+   {
+      #ifdef DEBUG_TOREAL
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::ToReal() returning false, it is blank after trim.\n");
+      #endif
       return false;
+   }
    
    // Handle infinite number first, '1.#INF' for VC++ compiler,
    // 'inf' for GCC compiler (LOJ: 2012.01.30)
@@ -1178,14 +1191,26 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
    
    // If first character is not '+', '-', '.' and digit, it's false
    if (str2[0] != '+' && str2[0] != '-' && !isdigit(str2[0]) && str2[0] != '.')
+   {
+      #ifdef DEBUG_TOREAL
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::ToReal() returning false, first char is not + - . or number.\n");
+      #endif
       return false;
-
+   }
+   
    // Check for multiple E or e
    index1 = str2.find_first_of("Ee");
    if (index1 != str2.npos)
       if (str2.find_first_of("Ee", index1 + 1) != str2.npos)
+      {
+         #ifdef DEBUG_TOREAL
+         MessageInterface::ShowMessage
+            ("GmatStringUtil::ToReal() returning false, it has multiple Ee.\n");
+         #endif
          return false;
-
+      }
+   
    // Check for multiple + or -
    index1 = str2.find_first_of("+-");
    if (index1 != str2.npos)
@@ -1195,10 +1220,16 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
       {
          std::string::size_type firstE = str2.find_first_of("Ee");
          if (firstE != str2.npos && index1 < firstE)
+         {
+            #ifdef DEBUG_TOREAL
+            MessageInterface::ShowMessage
+               ("GmatStringUtil::ToReal() returning false, it has multiple = or - after Ee.\n");
+            #endif
             return false;
+         }
       }
    }
-
+   
    for (unsigned int i=0; i<str2.length(); i++)
    {
       if (i == 0 && (str2[0] == '-' || str2[0] == '+'))
@@ -1232,6 +1263,21 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens
          return false;
       }
    }
+   
+   // Check if there is + or - without number
+   if (str2 == "+" || str2 == "-")
+   {
+      #ifdef DEBUG_TOREAL
+      MessageInterface::ShowMessage
+         ("   GmatStringUtil::ToReal(%s) return false, missing number after + or -.\n", str2.c_str());
+      #endif
+      return false;
+   }
+   
+   #ifdef DEBUG_TOREAL
+   MessageInterface::ShowMessage
+      ("   Now calling atof('%s') for converting to Real\n", str2.c_str());
+   #endif
    
    value = atof(str2.c_str());
    

@@ -172,6 +172,9 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
    // Check if it is just a number
    else if (GmatStringUtil::ToReal(str, &rval))
    {
+      #if DEBUG_PARSE_EQUATION
+      MessageInterface::ShowMessage("   real value = %f\n", rval);
+      #endif
       isEq = false;
    }
    else
@@ -911,6 +914,10 @@ StringArray MathParser::Decompose(const std::string &str)
    #if DEBUG_DECOMPOSE
    WriteItems("MathParser::Decompose(): returning ", items);
    #endif
+   
+   // Catch missing operands here (Fix for GMT-2961 LOJ: 2012.02.23)
+   if (items[0] != "" && items[1] == "" && items[2] == "")
+      throw MathException("Need right side of \"" + items[0] + "\"");
    
    return items;
 }
