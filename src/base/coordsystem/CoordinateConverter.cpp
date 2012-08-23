@@ -29,6 +29,7 @@
 #include "CoordinateSystemException.hpp"
 #include "Rvector.hpp"
 #include "TimeTypes.hpp"
+#include "ICRFAxes.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FIRST_CALL
@@ -232,6 +233,11 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
 {
    const Real *in = inState.GetDataVector();
    Real *out = new Real[outState.GetSize()];
+
+   #ifdef DEBUG_TO_FROM
+   MessageInterface::ShowMessage("in: %f %f %f %f %f %f %f\n", in[0], in[1], in[2], in[3], in[4], in[5]);
+   MessageInterface::ShowMessage("out: %f %f %f %f %f %f %f\n", out[0], out[1], out[2], out[3], out[4], out[5]);
+   #endif
    
    if (Convert(epoch, in, inCoord, out, outCoord, forceComputation, omitTranslation))
    {
@@ -257,6 +263,10 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
                           CoordinateSystem *outCoord, 
                           bool forceComputation, bool omitTranslation)
 {
+   if ((!inCoord) || (!outCoord))										// made changes by TUAN NGUYEN
+      throw CoordinateSystemException(									// made changes by TUAN NGUYEN
+         "Undefined coordinate system - conversion not performed.");	// made changes by TUAN NGUYEN
+
 //   if (epoch.Get() < 10.0)
 //   {
 //      Real *epochCatcher = NULL;
@@ -274,7 +284,7 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
    #endif
    if (inCoord->GetName() == outCoord->GetName())
    {
-      // asssuming state is size 6 here!!!
+      // assuming state is size 6 here!!!
       for (Integer i=0;i<6;i++) outState[i] = inState[i];
       lastRotMatrix.Set(1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0);
       return true;
@@ -295,9 +305,9 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
       }
    #endif
 
-   if ((!inCoord) || (!outCoord))
-      throw CoordinateSystemException(
-         "Undefined coordinate system - conversion not performed.");
+//   if ((!inCoord) || (!outCoord))										// made changes by TUAN NGUYEN
+//      throw CoordinateSystemException(								// made changes by TUAN NGUYEN
+//         "Undefined coordinate system - conversion not performed.");	// made changes by TUAN NGUYEN
    
    #ifdef DEBUG_TO_FROM
    MessageInterface::ShowMessage
@@ -326,13 +336,13 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
          ("In Convert, sameOrigin is %s,and coincident is %s\n",
          (sameOrigin? "TRUE" : "FALSE"),
          (coincident? "TRUE" : "FALSE"));
-      MessageInterface::ShowMessage("inState = %12.4f   %12.4f   %12.4f\n",
+      MessageInterface::ShowMessage("inState = %18.10f   %18.10f   %18.10f\n",
             inState[0], inState[1], inState[2]);
-      MessageInterface::ShowMessage("          %12.4f   %12.4f   %12.4f\n",
+      MessageInterface::ShowMessage("          %18.10f   %18.10f   %18.10f\n",
             inState[3], inState[4], inState[5]);
-      MessageInterface::ShowMessage("intState = %12.4f   %12.4f   %12.4f\n",
+      MessageInterface::ShowMessage("intState = %18.10f   %18.10f   %18.10f\n",
             intState[0], intState[1], intState[2]);
-      MessageInterface::ShowMessage("          %12.4f   %12.4f   %12.4f\n",
+      MessageInterface::ShowMessage("          %18.10f   %18.10f   %18.10f\n",
             intState[3], intState[4], intState[5]);
    #endif
 
@@ -346,7 +356,7 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
 
    if (inBaseName != outBaseName)
    {
-      ConvertFromBaseToBase(inBaseName, outBaseName, intState, baseState); // need Real* version of this method
+      ConvertFromBaseToBase(epoch, inBaseName, outBaseName, intState, baseState); // need Real* version of this method			// made changes by TUAN NGUYEN
       MessageInterface::ShowMessage("Conversion from base system %s to base system %s = this should not happen yet\n",
             inBaseName.c_str(), outBaseName.c_str());
    }
@@ -356,9 +366,9 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
          baseState[ii] = intState[ii];
    }
    #ifdef DEBUG_BASE_SYSTEM
-      MessageInterface::ShowMessage("baseState = %12.4f   %12.4f   %12.4f\n",
+      MessageInterface::ShowMessage("baseState = %18.10f   %18.10f   %18.10f\n",
             baseState[0], baseState[1], baseState[2]);
-      MessageInterface::ShowMessage("          %12.4f   %12.4f   %12.4f\n",
+      MessageInterface::ShowMessage("          %18.10f   %18.10f   %18.10f\n",
             baseState[3], baseState[4], baseState[5]);
       MessageInterface::ShowMessage(" ... about to call outCoord->FromBaseSystem ... outCoord is %sNULL\n",
             (outCoord? "NOT " : ""));
@@ -368,9 +378,9 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
 
    outCoord->FromBaseSystem(epoch, baseState, outState, coincident, forceComputation);
    #ifdef DEBUG_TO_FROM
-      MessageInterface::ShowMessage("outState = %12.4f   %12.4f   %12.4f\n",
+      MessageInterface::ShowMessage("outState = %18.10f   %18.10f   %18.10f\n",
             outState[0], outState[1], outState[2]);
-      MessageInterface::ShowMessage("          %12.4f   %12.4f   %12.4f\n",
+      MessageInterface::ShowMessage("          %18.10f   %18.10f   %18.10f\n",
             outState[3], outState[4], outState[5]);
    #endif
    
@@ -483,11 +493,13 @@ Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
 
 
 //------------------------------------------------------------------------------
-// bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
-//                                                 const Rvector &inBaseState, Rvector &outBaseState)
+// bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,		// made changes by TUAN NGUYEN
+//          const std::string &inBase,  const std::string &outBase,
+//          const Rvector &inBaseState, Rvector &outBaseState)
 //------------------------------------------------------------------------------
-bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
-                                                const Rvector &inBaseState, Rvector &outBaseState)
+bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,		// made changes by TUAN NGUYEN
+		const std::string &inBase,  const std::string &outBase,
+		const Rvector &inBaseState, Rvector &outBaseState)
 {
    // if the base types are the same, just set the output state to the input state
    if (inBase == outBase)
@@ -508,7 +520,7 @@ bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  cons
    const Real *in  = inBaseState.GetDataVector();
    Real       *out = new Real[outBaseState.GetSize()];
 
-   if (ConvertFromBaseToBase(inBase, outBase, in, out))
+   if (ConvertFromBaseToBase(epoch, inBase, outBase, in, out))		// made changes by TUAN NGUYEN
    {
       outBaseState.Set(out);
       delete [] out;
@@ -520,8 +532,9 @@ bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  cons
 }
 
 
-bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
-                                                const Real *inBaseState,    Real *outBaseState)
+bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,		// made changes by TUAN NGUYEN
+		const std::string &inBase,  const std::string &outBase,
+        const Real *inBaseState,    Real *outBaseState)
 {
    // if the base types are the same, just set the output state to the input state
    if (inBase == outBase)
@@ -532,15 +545,22 @@ bool CoordinateConverter::ConvertFromBaseToBase(const std::string &inBase,  cons
 
    // Use the matrix from ICRF to FK5
    Real iToF[9];  // @todo - this must be computed or set- specs TBD ********************** TBD *********************
-   iToF[0] = 1.0;
-   iToF[1] = 0.0;
-   iToF[2] = 0.0;
-   iToF[3] = 0.0;
-   iToF[4] = 1.0;
-   iToF[5] = 0.0;
-   iToF[6] = 0.0;
-   iToF[7] = 0.0;
-   iToF[8] = 1.0;
+   ICRFAxes* icrf = new ICRFAxes();
+   icrf->Initialize();
+   icrf->GetRotationMatrix(epoch, true);
+   icrf->GetLastRotationMatrix(&iToF[0]);
+
+   delete icrf;
+
+//   iToF[0] = 1.0;
+//   iToF[1] = 0.0;
+//   iToF[2] = 0.0;
+//   iToF[3] = 0.0;
+//   iToF[4] = 1.0;
+//   iToF[5] = 0.0;
+//   iToF[6] = 0.0;
+//   iToF[7] = 0.0;
+//   iToF[8] = 1.0;
 
    if ((inBase == "ICRF") && (outBase == "FK5"))
    {

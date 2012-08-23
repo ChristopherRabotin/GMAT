@@ -67,9 +67,11 @@ protected:
    Rmatrix33 lastRotMatrix;
    Rmatrix33 lastRotDotMatrix;
 
-   bool         ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
+   bool         ConvertFromBaseToBase(const A1Mjd &epoch,
+                                      const std::string &inBase,  const std::string &outBase,
                                       const Rvector &inBaseState, Rvector &outBaseState);
-   bool         ConvertFromBaseToBase(const std::string &inBase,  const std::string &outBase,
+   bool         ConvertFromBaseToBase(const A1Mjd &epoch,
+                                      const std::string &inBase,  const std::string &outBase,
                                       const Real *inBaseState,    Real *outBaseState);
 
    /*
