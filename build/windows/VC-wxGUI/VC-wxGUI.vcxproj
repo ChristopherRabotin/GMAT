@@ -50,7 +50,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__USE_WX280__;__USE_WX280_GL__;__SKIP_MSISE90__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__SKIP_MSISE90__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -75,7 +75,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__USE_WX280__;__USE_WX280_GL__;__SKIP_MSISE90__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__SKIP_MSISE90__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -86,7 +86,7 @@
       <DisableSpecificWarnings>4267;4996;4101;4005;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -154,6 +154,7 @@
     <ClCompile Include="..\..\..\src\base\command\Save.cpp" />
     <ClCompile Include="..\..\..\src\base\command\SaveMission.cpp" />
     <ClCompile Include="..\..\..\src\base\command\SolverBranchCommand.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Stop.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Target.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Toggle.cpp" />
@@ -672,6 +673,7 @@
     <ClInclude Include="..\..\..\src\base\command\Save.hpp" />
     <ClInclude Include="..\..\..\src\base\command\SaveMission.hpp" />
     <ClInclude Include="..\..\..\src\base\command\SolverBranchCommand.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Stop.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Target.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Toggle.hpp" />

@@ -1707,6 +1707,9 @@
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -3325,6 +3328,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp">
       <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp">
+      <Filter>Source Files\base\command</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
