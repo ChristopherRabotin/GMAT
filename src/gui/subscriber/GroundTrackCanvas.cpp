@@ -77,6 +77,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_UPDATE 1
 //#define DEBUG_ACTION 1
 //#define DEBUG_DRAW 1
+//#define DEBUG_DRAW_IMAGE 1
 //#define DEBUG_DRAW_LINE 2
 //#define DEBUG_OBJECT 2
 //#define DEBUG_PROJECTION 3
@@ -960,7 +961,7 @@ void GroundTrackCanvas::DrawObjectOrbit()
          ("DrawObjectOrbit() obj=%d, objId=%d, objName='%s'\n",
           obj, objId, objName.c_str());
       #endif
-     
+      
       #if DEBUG_DRAW_DEBUG
       DrawDebugMessage(" Before DrawOrbit --- ", GmatColor::RED32, 0, 100);
       #endif
@@ -1171,6 +1172,33 @@ void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
 void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
                                        int objId)
 {
+   // If object is the central body, then return
+   if (objName == mCentralBodyName)
+   {
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage
+         ("GroundTrackCanvas::DrawOrbitLines() entered, not drawing central "
+          "body '%s', so leaving\n", objName.c_str());
+      #endif
+      return;
+   }
+   
+   // If object is Sun, then return
+   if (objName == "Sun")
+   {
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage
+         ("GroundTrackCanvas::DrawOrbitLines() entered, not drawing Sun, "
+          " so leaving\n");
+      #endif
+      return;
+   }
+   
+   #if 0
+   if (objName == "GroundStation1")
+      return;
+   #endif
+   
    #if DEBUG_DRAW_DEBUG
    DrawDebugMessage(" Entered DrawOrbitLines  --- ", GmatColor::RED32, 0, 300);
    #endif
@@ -1303,7 +1331,8 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    lat2 *= GmatMathConstants::DEG_PER_RAD;
    
    #if DEBUG_DRAW_LINE
-   MessageInterface::ShowMessage("---> lon1=%f, lat1=%f, lon2=%f, lat2=%f\n", lon1, lat1, lon2, lat2);
+   MessageInterface::ShowMessage
+      ("---> lon1=%f, lat1=%f, lon2=%f, lat2=%f\n", lon1, lat1, lon2, lat2);
    #endif
    
    // Turn on TEXTURE_2D to dim the color, alpha doen't seem to work!!
@@ -1329,8 +1358,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    #endif
    
    #if DEBUG_DRAW_LINE
-   MessageInterface::ShowMessage
-      ("---> dir1=%d, dir2=%d, m=%f\n", dir1, dir2, m);
+   MessageInterface::ShowMessage("---> dir1=%d, dir2=%d\n", dir1, dir2);
    #endif
    
    // New point wrapps off RHS border
@@ -1544,6 +1572,91 @@ void GroundTrackCanvas::DrawCircleAt(GlColorType *color, double lon, double lat,
 
 
 //------------------------------------------------------------------------------
+// void DrawImage(const wxString &objName, float lon, float lat, float imagePos)
+//------------------------------------------------------------------------------
+void GroundTrackCanvas::DrawImage(const wxString &objName, float lon, float lat,
+                                  float imagePos, GLubyte *image)
+{   
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage
+      ("GroundTrackCanvas::DrawImage() entered, objName='%s', lon=%f, "
+       "lat=%f, imagePos=%f\n", objName.c_str(), lon, lat, imagePos);
+   #endif
+   
+   //=======================================================
+   #ifdef __DRAW_WITH_BLENDING__
+   //=======================================================
+   
+   // This code block draws image with blending
+   glPushMatrix();
+   glLoadIdentity();
+   glColor4f(1.0, 1.0, 1.0, 1.0);
+   glEnable(GL_TEXTURE_2D);
+   glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName.c_str()]);
+   
+   // Need to enable blending in order to remove background color of png file.
+   // Actually it works without enabling GL_ALPHA_TEST
+   glEnable (GL_BLEND);
+   //glEnable(GL_ALPHA_TEST);
+   //glAlphaFunc(GL_GREATER, 0.0f); // works
+   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // works
+   //glBlendFunc (GL_DST_COLOR, GL_ZERO); // blends with black
+   //glBlendFunc (GL_SRC_ALPHA, GL_ONE); // blends with white
+   
+   glBegin(GL_QUADS);
+   // Texture coordinate points go counter clockwise from the bottom left corner
+   glTexCoord2f(0.0, 0.0);  glVertex2f(lon-imagePos, lat-imagePos);
+   glTexCoord2f(1.0, 0.0);  glVertex2f(lon+imagePos, lat-imagePos);
+   glTexCoord2f(1.0, 1.0);  glVertex2f(lon+imagePos, lat+imagePos);
+   glTexCoord2f(0.0, 1.0);  glVertex2f(lon-imagePos, lat+imagePos);
+   glEnd();
+   glDisable(GL_TEXTURE_2D);
+   glDisable(GL_BLEND);
+   
+   // Restore old projection matrix
+   glPopMatrix();
+   
+   //=======================================================
+   #else
+   //=======================================================
+   
+   // This code block draws image without blending
+   GLint texW, texH;
+   glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName.c_str()]);
+   glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &texW);
+   glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texH);
+   
+   // Handle crossing boundary
+   //@todo There should be a better way to adjust for drawing at the edge
+   float newPos = imagePos;
+   if (lon == 180.0 || lon == -180.0 ||  lat == 90.0 || lat == -90.0)
+      newPos = 0.0;
+   
+   float lonPos = lon - newPos;
+   float latPos = lat - newPos;
+   
+   glRasterPos3f(lonPos, latPos, 0.0);
+   glEnable(GL_ALPHA_TEST);
+   glAlphaFunc(GL_GREATER, 0.0f);
+   
+   if (image == NULL)
+   {
+      GLubyte *image = new GLubyte[texW * texH * 4];
+      glGetTexImage(GL_TEXTURE_2D,  0,  GL_RGBA, GL_UNSIGNED_BYTE,  image);
+      glDrawPixels(texW, texH, GL_RGBA, GL_UNSIGNED_BYTE,  image);
+      delete[] image;
+   }
+   else
+   {
+      glDrawPixels(texW, texH, GL_RGBA, GL_UNSIGNED_BYTE, image);
+   }
+   
+   //=======================================================
+   #endif
+   //=======================================================
+}
+
+//------------------------------------------------------------------------------
 // void DrawSpacecraft(const wxString &objName, int objId, int index)
 //------------------------------------------------------------------------------
 /**
@@ -1552,6 +1665,12 @@ void GroundTrackCanvas::DrawCircleAt(GlColorType *color, double lon, double lat,
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int index)
 {
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage
+      ("GroundTrackCanvas::DrawSpacecraft() entered, objName='%s', objId=%d, "
+       "index=%d\n", objName.c_str(), objId, index);
+   #endif
+   
    // Compute current position
    Real lon2, lat2;
    Rvector3 r2(mObjectViewPos[index+0], mObjectViewPos[index+1],
@@ -1564,76 +1683,22 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    float defaultCanvasAxis = 1800.0;
    float imagePos = 2.0 * (defaultCanvasAxis / mAxisLength);
    
-   #if DEBUG_DRAW_SPACECRAFT
-   MessageInterface::ShowMessage("   lon2 = %f, lat2 = %f\n", lon2, lat2);
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage
+      ("   lon2 = %f, lat2 = %f, imagePos = %f\n", lon2, lat2, imagePos);
    #endif
    
    if (mTextureIdMap[objName.c_str()] != GmatPlot::UNINIT_TEXTURE)
    {
-      #if DEBUG_DRAW_SPACECRAFT
+      #if DEBUG_DRAW_IMAGE
       MessageInterface::ShowMessage("   drawing with texture map\n");
       #endif
       
-      #if 1
-      
-      // This code block draws spacecraft image without blending
-      GLint texW, texH;
-      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName.c_str()]);
-      glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &texW);
-      glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texH);
-      
-      glRasterPos3f(lon2-imagePos, lat2-imagePos, 0.0);
-      glEnable(GL_ALPHA_TEST);
-      glAlphaFunc(GL_GREATER, 0.0f);
-      
-      if (mScImage == NULL)
-      {
-         GLubyte *image = new GLubyte[texW * texH * 4];
-         glGetTexImage(GL_TEXTURE_2D,  0,  GL_RGBA, GL_UNSIGNED_BYTE,  image);
-         glDrawPixels(texW, texH, GL_RGBA, GL_UNSIGNED_BYTE,  image);
-         delete[] image;
-      }
-      else
-      {
-         glDrawPixels(texW, texH, GL_RGBA, GL_UNSIGNED_BYTE,  mScImage);
-      }
-      
-      #else
-      
-      // This code block draws spacecraft image with blending
-      glPushMatrix();
-      glLoadIdentity();
-      glColor4f(1.0, 1.0, 1.0, 1.0);
-      glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, mTextureIdMap[objName.c_str()]);
-      
-      // Need to enable blending in order to remove background color of png file.
-      // Actually it works without enabling GL_ALPHA_TEST
-      glEnable (GL_BLEND);
-      //glEnable(GL_ALPHA_TEST);
-      //glAlphaFunc(GL_GREATER, 0.0f); // works
-      glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // works
-      //glBlendFunc (GL_DST_COLOR, GL_ZERO); // blends with black
-      //glBlendFunc (GL_SRC_ALPHA, GL_ONE); // blends with white
-      
-      glBegin(GL_QUADS);
-      // Texture coordinate points go counter clockwise from the bottom left corner
-      glTexCoord2f(0.0, 0.0);  glVertex2f(lon2-imagePos, lat2-imagePos);
-      glTexCoord2f(1.0, 0.0);  glVertex2f(lon2+imagePos, lat2-imagePos);
-      glTexCoord2f(1.0, 1.0);  glVertex2f(lon2+imagePos, lat2+imagePos);
-      glTexCoord2f(0.0, 1.0);  glVertex2f(lon2-imagePos, lat2+imagePos);
-      glEnd();
-      glDisable(GL_TEXTURE_2D);
-      glDisable(GL_BLEND);
-      
-      // Restore old projection matrix
-      glPopMatrix();
-      
-      #endif
+      DrawImage(objName, lon2, lat2, imagePos, mScImage);
    }
    else
    {
-      #if DEBUG_DRAW_SPACECRAFT
+      #if DEBUG_DRAW_IMAGE
       MessageInterface::ShowMessage("   drawing with circle\n");
       #endif
       
@@ -1644,10 +1709,13 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    }
    
    // Draw spacecraft label
-   glEnable(GL_TEXTURE_2D);
+   //@todo Need better algorithm for positioning label (LOJ: 2012.08.24)
+   float lonPos = lon2 + imagePos;
+   if (lon2 >= 120.0 && lon2 <= 180.0)
+      lonPos = lon2 - ((imagePos - 0.3) * objName.Len());
+   
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-   DrawStringAt(objName, lon2+imagePos, lat2+imagePos, 0, 1);
-   glDisable(GL_TEXTURE_2D);
+   DrawStringAt(objName, lonPos, lat2+imagePos, 0, 1);
 }
 
 
@@ -1655,40 +1723,81 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
 // void DrawGroundStation(const wxString &objName, int objId, int index)
 //------------------------------------------------------------------------------
 /**
- * Draws a circle at current position
+ * Draws a square at current position
  */
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::DrawGroundStation(const wxString &objName, int objId,
                                           int index)
 {
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage
+      ("GroundTrackCanvas::DrawGroundStation() entered, objName='%s', objId=%d, "
+       "index=%d\n", objName.c_str(), objId, index);
+   #endif
+   
    // Compute current position
    Real lon2, lat2;
    Rvector3 r2(mObjectViewPos[index+0], mObjectViewPos[index+1],
                mObjectViewPos[index+2]);
-   r2.ComputeLongitudeLatitude(lon2, lat2);
-   lon2 *= GmatMathConstants::DEG_PER_RAD;
-   lat2 *= GmatMathConstants::DEG_PER_RAD;
    
-   #if DEBUG_DRAW_GROUNDSTATION
+   r2.ComputeLongitudeLatitude(lon2, lat2);
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage("   r2   = %s", r2.ToString().c_str());
    MessageInterface::ShowMessage("   lon2 = %f, lat2 = %f\n", lon2, lat2);
    #endif
    
-   // Set color to yellow
-   GlColorType *objColor = (GlColorType*)&GmatColor::YELLOW32;
-   //GlColorType *objColor = (GlColorType*)&GmatColor::RED32;
+   lon2 *= GmatMathConstants::DEG_PER_RAD;
+   lat2 *= GmatMathConstants::DEG_PER_RAD;
    
-   // Make the color transparent before drawing, set alpha value to 128
-   glColor4ub(objColor->red, objColor->green, objColor->blue, 128);
-   glEnable(GL_TEXTURE_2D);
-   glEnable (GL_BLEND);
-   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   DrawSquare(lon2, lat2, 2.0, true);
-   glDisable(GL_TEXTURE_2D);
-   glDisable (GL_BLEND);
+   
+   // Use defaultCanvasAxis to draw spacecraft image and label in proper position
+   float defaultCanvasAxis = 1800.0;
+   float imagePos = 2.0 * (defaultCanvasAxis / mAxisLength);
+   
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage
+      ("   lon2 = %f, lat2 = %f, imagePos = %f\n", lon2, lat2, imagePos);
+   #endif
+   
+   if (mTextureIdMap[objName.c_str()] != GmatPlot::UNINIT_TEXTURE)
+   {
+      #if DEBUG_DRAW_IMAGE
+      MessageInterface::ShowMessage("   drawing with texture map\n");
+      #endif
+      
+      DrawImage(objName, lon2, lat2, imagePos, mGsImage);
+   }
+   else
+   {
+      #if DEBUG_DRAW_IMAGE
+      MessageInterface::ShowMessage("   drawing with square\n");
+      #endif
+      
+      // Set color to yellow
+      GlColorType *objColor = (GlColorType*)&GmatColor::YELLOW32;
+      //GlColorType *objColor = (GlColorType*)&GmatColor::RED32;
+      
+      // Make the color transparent before drawing, set alpha value to 128
+      glColor4ub(objColor->red, objColor->green, objColor->blue, 128);
+      glEnable(GL_TEXTURE_2D);
+      // If blending image is enabled
+      #ifdef __ENABLE_BLEND_IMAGE__
+      glEnable (GL_BLEND);
+      glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      #endif
+      DrawSquare(lon2, lat2, 2.0, true);
+      glDisable(GL_TEXTURE_2D);
+      glDisable (GL_BLEND); 
+   }
    
    // Draw ground station label
+   //@todo Need better algorithm for positioning label (LOJ: 2012.08.24)
+   float lonPos = lon2 + imagePos;
+   if (lon2 >= 120.0 && lon2 <= 180.0)
+      lonPos = lon2 - ((imagePos - 0.3) * objName.Len());
+   
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-   DrawStringAt(objName, lon2+1.5, lat2+1.5, 0, 1);
+   DrawStringAt(objName, lonPos, lat2+imagePos, 0, 1);
 }
 
 

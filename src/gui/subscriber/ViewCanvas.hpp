@@ -273,6 +273,9 @@ protected:
    StringArray mScNameArray;
    GLubyte *mScImage;
    
+   // GroundStation data
+   GLubyte *mGsImage;
+   
    // Celestial objects
    wxArrayString mObjectNames;
    wxArrayString mShowObjectNames;
@@ -341,7 +344,7 @@ protected:
    // Texture
    virtual bool LoadBodyTextures();
    virtual GLuint BindTexture(SpacePoint *obj, const wxString &objName);
-   virtual int  AddAlphaToTexture(const wxImage &image, bool isSpacecraft,
+   virtual int  AddAlphaToTexture(const wxImage &image, int objUsingIcon,
                                   bool useMipmaps);
    
    // Model
@@ -401,7 +404,7 @@ protected:
    void CopyVector3(Real to[3], Real from[3]);
    
    // For loading image
-   virtual bool LoadImage(const std::string &fileName, bool isSpacecraft);
+   virtual bool LoadImage(const std::string &fileName, int objUsingIcon);
    
    // For debug
    void DrawDebugMessage(const wxString &msg, unsigned int textColor, int xpos, int ypos);

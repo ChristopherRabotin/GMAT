@@ -150,6 +150,7 @@ private:
                      bool enableTransparency = true);
    void DrawCircleAtCurrentPosition(int objId, int index, double radius,
                                     bool enableTransparency = true);
+   void DrawImage(const wxString &objName, float lon, float lat, float imagePos, GLubyte *image);
    void DrawSpacecraft(const wxString &objName, int objId, int index);
    void DrawGroundStation(const wxString &objName, int objId, int index);
    
