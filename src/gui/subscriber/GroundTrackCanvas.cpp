@@ -1173,7 +1173,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
                                        int objId)
 {
    // If object is the central body, then return
-   if (objName == mCentralBodyName)
+   if (objName == mCentralBodyName.c_str())
    {
       #ifdef DEBUG_ORBIT_LINES
       MessageInterface::ShowMessage
