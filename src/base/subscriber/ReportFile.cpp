@@ -94,6 +94,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    precision       (16),
    columnWidth     (20),
    writeHeaders    (true),
+   headerReset     (false),
    leftJustify     (true),
    zeroFill        (false),
    lastUsedProvider(-1),
@@ -111,6 +112,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    
    parameterCount = ReportFileParamCount;
    initial = true;
+   initialFromReport = true;
 }
 
 
@@ -144,6 +146,7 @@ ReportFile::ReportFile(const ReportFile &rf) :
    precision       (rf.precision),
    columnWidth     (rf.columnWidth),
    writeHeaders    (rf.writeHeaders),
+   headerReset     (rf.headerReset),
    leftJustify     (rf.leftJustify),
    zeroFill        (rf.zeroFill),
    lastUsedProvider(-1),
@@ -158,6 +161,7 @@ ReportFile::ReportFile(const ReportFile &rf) :
    
    parameterCount = ReportFileParamCount;
    initial = true;
+   initialFromReport = true;
 
    #ifdef DEBUG_REPORTFILE
    MessageInterface::ShowMessage
@@ -188,6 +192,7 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    precision = rf.precision;
    columnWidth = rf.columnWidth;
    writeHeaders = rf.writeHeaders;
+   headerReset = rf.headerReset;
    leftJustify = rf.leftJustify;
    zeroFill = rf.zeroFill;
    mParams = rf.mParams; 
@@ -200,6 +205,7 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    calledByReport = rf.calledByReport;
    
    initial = true;
+   initialFromReport = true;
    
    #ifdef DEBUG_REPORTFILE
    MessageInterface::ShowMessage
@@ -381,7 +387,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
       Integer defWidth = columnWidth;
       
       // set longer width of param names or columnWidth
-      if (writeHeaders)
+      if (writeHeaders || headerReset)
       {
          defWidth = (Integer)desc.length() > columnWidth ?
             desc.length() : columnWidth;
@@ -394,7 +400,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
       
       // if writing headers or called by Report add 3 more spaces
       // since header adds 3 more spaces
-      if (writeHeaders || calledByReport)
+      if (writeHeaders || calledByReport || headerReset)
          defWidth = defWidth + 3;
       
       colWidths[i] = defWidth;
@@ -583,6 +589,7 @@ bool ReportFile::Initialize()
       
       initial = true;
       isInitialized = true;
+      initialFromReport = true;
    }
    
    return true;
@@ -599,7 +606,7 @@ bool ReportFile::Initialize()
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* ReportFile::Clone(void) const
+GmatBase* ReportFile::Clone() const
 {
    return (new ReportFile(*this));
 }
@@ -668,6 +675,26 @@ bool ReportFile::TakeAction(const std::string &action,
             }
          }
       }
+   }
+   else if (action == "HeadersWritten")
+   {
+      #ifdef DEBUG_REPORTFILE_ACTION
+         MessageInterface::ShowMessage("...turning off headers\n");
+      #endif
+      headerReset       = false;
+      initialFromReport = false;
+   }
+   else if (action == "CheckHeaderStatus")
+   {
+      #ifdef DEBUG_REPORTFILE_ACTION
+         MessageInterface::ShowMessage("headerReset: %s, writeHeaders: %s, "
+               "initial: %s, initial (report): %s\n",
+               (writeHeaders ? "true" : "false"),
+               (headerReset ? "true" : "false"),
+               (initial ? "true" : "false"),
+               (initialFromReport ? "true" : "false"));
+      #endif
+      return (headerReset || (writeHeaders && initialFromReport));
    }
    else if (action == "Finalize")
    {
@@ -834,6 +861,7 @@ bool ReportFile::SetBooleanParameter(const Integer id, const bool value)
       return active;
    case WRITE_HEADERS:
       writeHeaders = value;
+      headerReset  = value;
       return value;
    default:
       return Subscriber::SetBooleanParameter(id, value);
@@ -1261,6 +1289,7 @@ const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type
             mAllRefObjectNames.push_back(realName);
          }
       }
+      break;            // Clears an Eclipse warning
    default:
       break;
    }
@@ -1346,6 +1375,7 @@ void ReportFile::ClearParameters()
    mNumParams = 0;
    ClearWrappers();
    initial = true;   
+   initialFromReport = true;
 }
 
 
@@ -1360,7 +1390,7 @@ void ReportFile::WriteHeaders()
        mNumParams, columnWidth);
    #endif
    
-   if (writeHeaders)
+   if (writeHeaders || headerReset)
    {
       if (!dstream.is_open())
          return;
@@ -1397,6 +1427,7 @@ void ReportFile::WriteHeaders()
    }
    
    initial = false;
+   headerReset = false;
    
    #ifdef DEBUG_WRITE_HEADERS
    MessageInterface::ShowMessage("ReportFile::WriteHeaders() leaving\n");
@@ -1625,8 +1656,10 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
          if (!OpenReportFile())
             return false;
       
-      if (initial)
+      if (initial || headerReset)
+      {
          WriteHeaders();
+      }
       
       if (!dstream.good())
          dstream.clear();

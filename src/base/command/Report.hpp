@@ -119,6 +119,8 @@ protected:
    std::vector<Parameter*>    parms;
    /// Flag indicating whether the header data has been written
    bool                       needsHeaders;
+   /// Flag to detect if the command executed once
+   bool                       hasExecuted;
    /// Array of parameter row index
    std::vector<Integer>       parmRows;
    /// Array of parameter column index

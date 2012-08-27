@@ -136,6 +136,8 @@ protected:
    Integer              columnWidth;   
    /// Write the headers on the top of the column
    bool                 writeHeaders;
+   /// Flag used to turn headers back on
+   bool                 headerReset;
    /// Left justify
    bool                 leftJustify;
    /// Fill right field with 0
@@ -153,6 +155,7 @@ protected:
    bool                 usedByReport;
    bool                 calledByReport;
    bool                 initial;
+   bool                 initialFromReport;
    
    virtual bool         OpenReportFile(void);
    void                 ClearParameters();

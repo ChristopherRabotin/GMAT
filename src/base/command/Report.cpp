@@ -77,7 +77,8 @@ Report::Report() :
    reporter     (NULL),
    reportID     (-1),
    numParams    (0),
-   needsHeaders (true)
+   needsHeaders (true),
+   hasExecuted  (false)
 {
    // GmatBase data
    objectTypeNames.push_back("Report");
@@ -111,7 +112,8 @@ Report::Report(const Report &rep) :
    rfName         (rep.rfName),
    reporter       (NULL),
    reportID       (-1),
-   needsHeaders   (rep.needsHeaders)
+   needsHeaders   (rep.needsHeaders),
+   hasExecuted    (rep.hasExecuted)
 {
    parmNames = rep.parmNames;
    actualParmNames = rep.actualParmNames;
@@ -142,6 +144,7 @@ Report& Report::operator=(const Report &rep)
       reporter = NULL;
       reportID = -1;
       needsHeaders = rep.needsHeaders;
+      hasExecuted  = rep.hasExecuted;
 
       parmNames = rep.parmNames;
       actualParmNames = rep.actualParmNames;
@@ -808,6 +811,7 @@ bool Report::Initialize()
    
    needsHeaders =
       reporter->GetBooleanParameter(reporter->GetParameterID("WriteHeaders"));
+   hasExecuted = false;
 
    #ifdef DEBUG_REPORT_INIT
    MessageInterface::ShowMessage("   needsHeaders = %d\n", needsHeaders);
@@ -911,8 +915,14 @@ bool Report::Execute()
    if (leftJustify)
       datastream.setf(std::ios::left);
    
-   if (needsHeaders &&
-       reporter->GetBooleanParameter(reporter->GetParameterID("WriteHeaders")))
+   // first time through, use cmd setting; after that, ask reporter
+   if (hasExecuted)
+      needsHeaders = reporter->TakeAction("CheckHeaderStatus");
+   else
+      needsHeaders = reporter->GetBooleanParameter(
+            reporter->GetParameterID("WriteHeaders"));
+
+   if (needsHeaders)
       WriteHeaders(datastream, colWidth);
    
    // if zero fill, show decimal point
@@ -926,6 +936,7 @@ bool Report::Execute()
    bool retval = reporter->WriteData(parmWrappers);
    reporter->TakeAction("ActivateForReport", "Off");
    BuildCommandSummary(true);
+   hasExecuted = true;
    
    #ifdef DEBUG_REPORT_EXEC
    MessageInterface::ShowMessage
@@ -985,6 +996,7 @@ void Report::WriteHeaders(std::stringstream &datastream, Integer colWidth)
       ("Report::WriteHeaders() leaving, needsHeaders set to false\n");
    #endif
    
+   reporter->TakeAction("HeadersWritten");
    needsHeaders = false;
 }
 
