@@ -88,6 +88,7 @@ public:
    bool RenameChild(GmatTreeItemData *item, wxString newName);
    bool RenameChild(const wxString &oldName, const wxString &newName);
    bool RenameActiveChild(const wxString &newName);
+   bool RefreshActiveChildAssociatedWindow();
    bool RemoveChild(const wxString &name, GmatTree::ItemType itemType,
                     bool deleteChild = true);
    void RemoveOutputIfOpened(const wxString &name);
