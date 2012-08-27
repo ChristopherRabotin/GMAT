@@ -132,7 +132,7 @@ void MissionTreeToolBar::CreateMissionTreeToolBar()
 {
    // Load toolbar icons
    GuiItemManager *guiManager = GuiItemManager::GetInstance();
-   const int NUM_ICONS = 13;
+   const int NUM_ICONS = 14;
    wxBitmap* bitmaps[NUM_ICONS];
    int index = -1;
    long bitmapType = wxBITMAP_TYPE_PNG;
