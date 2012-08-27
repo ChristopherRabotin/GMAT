@@ -7887,7 +7887,7 @@ bool Interpreter::FinalPass()
    }
 
    //-------------------------------------------------------------------
-   // Special case for Spacecraft, we need to set CoordinateSyatem
+   // Special case for Spacecraft, we need to set CoordinateSystem
    // pointer in which initial state is represented.  So that
    // Spacecraft can convert initial state in user representation to
    // internal representation (EarthMJ2000Eq Cartesian).
@@ -7900,9 +7900,38 @@ bool Interpreter::FinalPass()
       MessageInterface::ShowMessage("   %s\n", (objList.at(ii)).c_str());
    #endif
 
+
+   // Ordering matters for the Spacecraft state: Celestial body based CS should
+   // used before others, so that states that depend of spacecraft origins get
+   // set after those spacecraft have a change to be set up.  The following code
+   // does a pre-sort for this, and might need further refinements over time.
+   ObjectArray scObjects;
+   Integer cbOrigined = 0;
    for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
    {
       obj = FindObject(*i);
+      if (obj != NULL)
+      {
+         CoordinateSystem *cs = (CoordinateSystem*)
+               FindObject(obj->GetStringParameter("CoordinateSystem"));
+         if (cs != NULL)
+         {
+            if (cs->HasCelestialBodyOrigin())
+            {
+               scObjects.insert(scObjects.begin(), obj);
+               ++cbOrigined;
+            }
+            else
+               scObjects.push_back(obj);
+         }
+         else
+            scObjects.push_back(obj);
+      }
+   }
+
+   for (UnsignedInt i = 0; i < scObjects.size(); ++i)
+   {
+      obj = scObjects[i];
 
       // Now we have more than one CoordinateSystem from Spacecraft.
       // In additions to Spacecraft's CS, it has to handle CS from Thrusters
