@@ -7,6 +7,9 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+		    <indexterm>
+    <primary>SolarSystem</primary>
+  </indexterm>		
   <refmeta>
     <refentrytitle>SolarSystem</refentrytitle>
 
