@@ -3744,6 +3744,7 @@ void Spacecraft::SetState(const std::string &type, const Rvector6 &cartState)
    MessageInterface::ShowMessage
       ("Spacecraft::SetState() type=%s, cartState=\n   %s\n", type.c_str(),
        cartState.ToString().c_str());
+   MessageInterface::ShowMessage("About to set displayStateType to %s\n", type.c_str());
    #endif
 
    //stateType = type;
