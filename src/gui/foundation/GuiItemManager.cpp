@@ -4864,7 +4864,7 @@ void GuiItemManager::UpdateBurnList()
 // void UpdateCoordSystemList()
 //------------------------------------------------------------------------------
 /**
- * Updates confugured coordinate system list
+ * Updates configured coordinate system list
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateCoordSystemList()
