@@ -18,7 +18,7 @@
 // Modified: 2003/09/29
 // Modified: 2003/12/15 by Allison Greene for event handling
 /**
- * This class contains information needed to setup users spacecraft through GUI
+ * This class contains information needed to setup spacecraft through GUI
  * 
  */
 //------------------------------------------------------------------------------
@@ -32,6 +32,8 @@
 #include <stdlib.h>
 
 //#define DEBUG_SPACECRAFT_PANEL 1
+//#define DEBUG_SC_PANEL_EVENT
+
 
 //------------------------------
 // public methods
@@ -41,12 +43,10 @@
 // SpacecraftPanel(wxWindow *parent, const wxString &scName)
 //------------------------------------------------------------------------------
 /**
- * Constructs SpacecraftPanel object.
+ * Constructs a SpacecraftPanel object.
  *
  * @param <parent> input parent.
  * @param <scName> input spacecraft name.
- *
- * @note Creates the spacecraft GUI
  */
 //------------------------------------------------------------------------------
 SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
@@ -72,14 +72,16 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
 //------------------------------------------------------------------------------
 // ~SpacecraftPanel()
 //------------------------------------------------------------------------------
+/**
+ * Destroys the SpacecraftPanel object.
+ *
+ */
+//------------------------------------------------------------------------------
 SpacecraftPanel::~SpacecraftPanel()
 {
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("SpacecraftPanel::~SpacecraftPanel() entered\n");
    #endif
-   // need to delete child from list in mainFrame
-   //    delete(theBallisticMassPanel);
-   //    delete(theOrbitPanel);
    
    delete currentSpacecraft;
 }
@@ -90,6 +92,11 @@ SpacecraftPanel::~SpacecraftPanel()
 
 //------------------------------------------------------------------------------
 // void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the GUI components for the SpacecraftPanel object.
+ *
+ */
 //------------------------------------------------------------------------------
 void SpacecraftPanel::Create()
 {
@@ -184,13 +191,19 @@ void SpacecraftPanel::Create()
    spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
    spacecraftNotebook->AddPage( theVisualModelPanel , wxT("Visualization") );
    
-   // theGridSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
    theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
 }
 
 
 //------------------------------------------------------------------------------
 // void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data into the tabs on the SpacecraftPanel object.
+ *
+ * @param <parent> input parent.
+ * @param <scName> input spacecraft name.
+ */
 //------------------------------------------------------------------------------
 void SpacecraftPanel::LoadData()
 {
@@ -230,6 +243,11 @@ void SpacecraftPanel::LoadData()
 
 //------------------------------------------------------------------------------
 // void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves modified data from the SpacecraftPanel tabs to the Spacecraft object.
+ *
+ */
 //------------------------------------------------------------------------------
 void SpacecraftPanel::SaveData()
 {
@@ -289,7 +307,13 @@ void SpacecraftPanel::SaveData()
 
 
 //------------------------------------------------------------------------------
-// void OnPageChange()
+// void OnPageChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the page change event
+ *
+ * @param <event> the event to handle
+ */
 //------------------------------------------------------------------------------
 void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
 {
@@ -299,4 +323,19 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
    #ifdef __USE_SPICE__
       theSpicePanel->LoadData();
    #endif
-}    
+}
+
+//------------------------------------------------------------------------------
+// bool RefreshConponents()
+//------------------------------------------------------------------------------
+/**
+ * Refreshes the tabs on the panel.  This is called when the SpacecraftPanel
+ * is activated.
+ */
+//------------------------------------------------------------------------------
+bool SpacecraftPanel::RefreshConponents()
+{
+   // Only OrbitPanel needs refreshing at this time
+   return theOrbitPanel->RefreshComponents();
+}
+

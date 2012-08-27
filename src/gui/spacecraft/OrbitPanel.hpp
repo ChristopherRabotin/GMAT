@@ -16,8 +16,7 @@
 // Author: Allison Greene
 // Created: 2004/04/08
 /**
- * This class contains information needed to setup users spacecraft ballistics
- * and mass through GUI
+ * This class contains information needed to setup spacecraft orbit data.
  * 
  */
 //------------------------------------------------------------------------------
@@ -35,7 +34,6 @@
 #include "CoordinateConverter.hpp"
 #include "CoordinateSystem.hpp"
 #include "Rvector6.hpp"
-//#include "Anomaly.hpp"
 #include "OrbitDesignerDialog.hpp"
 
 class OrbitPanel: public wxPanel
@@ -51,6 +49,8 @@ public:
    bool IsDataChanged() { return dataChanged; }
    bool CanClosePanel() { return canClose; }
    
+   bool RefreshComponents();
+
 private:
 
    /// valid state type in the StateConversionUtil
@@ -62,13 +62,9 @@ private:
    
    Real        mAnomaly;
    Real        mTrueAnomaly;
-//   Anomaly mAnomaly;
-//   Anomaly mTrueAnomaly;
    
    bool dataChanged;
    bool canClose;
-   
-   bool coordSysCBOnly;
 
    Spacecraft     *theSpacecraft;
    SolarSystem    *theSolarSystem;

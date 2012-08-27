@@ -17,7 +17,7 @@
 // Created: 2003/09/10
 // Modified: 2003/09/29
 /**
- * This class contains information needed to setup users spacecraft through GUI
+ * This class contains information needed to setup spacecraft through GUI
  * 
  */
 //------------------------------------------------------------------------------
@@ -45,13 +45,16 @@ public:
    SpacecraftPanel(wxWindow *parent, const wxString &scName);
    ~SpacecraftPanel();   
        
+   bool RefreshConponents();
+
 private:    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
+
    void OnPageChange(wxCommandEvent &event);
-   
+
    Spacecraft *theSpacecraft;
    Spacecraft *currentSpacecraft;
    
@@ -78,10 +81,7 @@ private:
    
    wxNotebook *spacecraftNotebook;
    wxNotebook *actuatorNotebook;
-   
-   //wxWidgets2.8.0:deprecated->wxNotebookSizer *spacecraftSizer;
-   //wxWidgets2.8.0:deprecated->wxNotebookSizer *actuatorSizer;
-   
+
    wxPanel *actuators;
    wxPanel *sensors;
    
