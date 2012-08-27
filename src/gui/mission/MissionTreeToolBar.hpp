@@ -77,6 +77,7 @@ private:
       TOOL_LEVEL_1,
       TOOL_LEVEL_2,
       TOOL_LEVEL_3,
+	  TOOL_CLEAR_FILTERS,
       TOOL_INC_PHYSICS,
       TOOL_INC_SOLVER,
       TOOL_INC_SCRIPT,

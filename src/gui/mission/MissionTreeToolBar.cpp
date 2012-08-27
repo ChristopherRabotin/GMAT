@@ -38,10 +38,12 @@
 #include "bitmaps/mtc_ExcPlot.xpm"
 #include "bitmaps/mtc_ExcCall.xpm"
 #include "bitmaps/mtc_CustomView.xpm"
+#include "bitmaps/mtc_ClearFilters.xpm"
 
 //#define DEBUG_MORE_VIEW_OPTIONS
 
 BEGIN_EVENT_TABLE(MissionTreeToolBar, wxToolBar)
+   EVT_TOOL (TOOL_CLEAR_FILTERS, MissionTreeToolBar::OnViewByCategory)
    EVT_TOOL_RANGE (TOOL_LEVEL_ALL, TOOL_LEVEL_3, MissionTreeToolBar::OnViewByLevel)
    EVT_TOOL_RANGE (TOOL_INC_PHYSICS, TOOL_EXC_CALL, MissionTreeToolBar::OnViewByCategory)
    EVT_TOOL (TOOL_CUSTOM_VIEW, MissionTreeToolBar::OnCustomView)
@@ -100,6 +102,8 @@ void MissionTreeToolBar::ResetMissionTreeTools()
    ResetMissionTreeLevel();
    ResetMissionTreeIncludeCategory();
    ResetMissionTreeExcludeCategory();
+   ToggleTool(TOOL_CLEAR_FILTERS, true);
+
 }
 
 
@@ -116,8 +120,8 @@ void MissionTreeToolBar::SetMissionTreeExpandLevel(int level)
       ToggleTool(TOOL_LEVEL_2, true);
    else if (level == 3)
       ToggleTool(TOOL_LEVEL_3, true);
-   else
-      ToggleTool(TOOL_LEVEL_ALL, true);
+   //else
+   //   ToggleTool(TOOL_LEVEL_ALL, true);
 }
 
 
@@ -135,6 +139,7 @@ void MissionTreeToolBar::CreateMissionTreeToolBar()
    
    // Do not change the order, this order is how it appears in the toolbar
    
+   guiManager->LoadIcon("mtc_ClearFilters", bitmapType, &bitmaps[++index], mtc_ClearFilters_xpm);
    guiManager->LoadIcon("mtc_LA", bitmapType, &bitmaps[++index], mtc_LA_xpm);
    guiManager->LoadIcon("mtc_L1", bitmapType, &bitmaps[++index], mtc_L1_xpm);
    guiManager->LoadIcon("mtc_L2", bitmapType, &bitmaps[++index], mtc_L2_xpm);
@@ -150,6 +155,10 @@ void MissionTreeToolBar::CreateMissionTreeToolBar()
    guiManager->LoadIcon("mtc_CustomView", bitmapType, &bitmaps[++index], mtc_CustomView_xpm);
    
    index = 0;
+   AddCheckTool(TOOL_CLEAR_FILTERS, wxT("ClearFilters"), *bitmaps[index],
+                                 *bitmaps[index], wxT("Clear Filters"));
+   AddSeparator();
+   ++index;
    AddCheckTool(TOOL_LEVEL_ALL, wxT("LevelA"), *bitmaps[index],
                                  *bitmaps[index], wxT("Expand All Levels"));
    ++index;
@@ -345,6 +354,7 @@ void MissionTreeToolBar::OnViewByLevel(wxCommandEvent& event)
    }
    // GMT-2924 changed behavior so all level buttons do not stay pressed
    // TGG: 2012-07-31
+   ToggleTool(TOOL_CLEAR_FILTERS, true);
    ToggleTool(TOOL_LEVEL_ALL, false);
    ToggleTool(TOOL_LEVEL_1, false);
    ToggleTool(TOOL_LEVEL_2, false);
@@ -378,6 +388,19 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
    
    switch (eventId)
    {
+   case TOOL_CLEAR_FILTERS:
+      // Stay toggled on if the last one reclicked      
+      if (eventId == mLastIncCategoryClicked)
+      {
+         ToggleTool(eventId, true);
+         return;
+      }
+      
+      ResetMissionTreeTools();
+	  cmdsToInclude.Add("All");
+      mMissionTree->SetViewCommands(cmdsToInclude);
+
+      break;
    case TOOL_INC_PHYSICS:
    case TOOL_INC_SOLVER:
    case TOOL_INC_SCRIPT:
@@ -389,8 +412,10 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
          return;
       }
       
-      ResetMissionTreeLevel();
+//      ResetMissionTreeLevel();
       ResetMissionTreeExcludeCategory();
+	  ToggleTool(TOOL_CLEAR_FILTERS, false);
+
       
       // Include Physics based
       if (GetToolState(TOOL_INC_PHYSICS))
@@ -441,8 +466,9 @@ void MissionTreeToolBar::OnViewByCategory(wxCommandEvent& event)
          return;
       }
       
-      ResetMissionTreeLevel();
+//      ResetMissionTreeLevel();
       ResetMissionTreeIncludeCategory();
+	  ToggleTool(TOOL_CLEAR_FILTERS, false);
       cmdsToInclude = mMissionTree->GetCommandList(true);
       
       // Exclude Report
