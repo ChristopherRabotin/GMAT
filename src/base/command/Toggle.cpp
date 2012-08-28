@@ -208,7 +208,6 @@ bool Toggle::Execute()
    
    for (std::list<Subscriber *>::iterator s = subs.begin(); s != subs.end(); ++s)
    {
-      
       #ifdef DEBUG_TOGGLE_EXE
          MessageInterface::ShowMessage("Toggle::Execute() calling "
                "%s->Activate(%s)\n", (*s)->GetName().c_str(),
@@ -216,6 +215,10 @@ bool Toggle::Execute()
       #endif
       
       (*s)->Activate(toggleState);
+      if (toggleState == true)
+         (*s)->TakeAction("ToggleOn");
+      else
+         (*s)->TakeAction("ToggleOff");
    }
    
    // Why do we need this? (loj: 2008.08.01)

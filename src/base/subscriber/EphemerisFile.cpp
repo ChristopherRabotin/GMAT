@@ -40,6 +40,7 @@
 //#define __USE_DATAFILE__
 
 //#define DEBUG_EPHEMFILE
+//#define DEBUG_EPHEMFILE_ACTION
 //#define DEBUG_EPHEMFILE_SET
 //#define DEBUG_EPHEMFILE_INIT
 //#define DEBUG_EPHEMFILE_OPEN
@@ -772,12 +773,19 @@ bool EphemerisFile::TakeAction(const std::string &action,
       return true;
    }
    
+   if (action == "ToggleOff")
+   {
+      // If toggle off, finish writing ephemeris and restart interpolation
+      if (action == "ToggleOff")
+         RestartInterpolation("", true, true);
+   }
+   
    if (action == "ChangeTypeName")
    {
       typeName = actionData;
       return true;
    }
-
+   
    return false;
 }
 
@@ -1672,7 +1680,8 @@ void EphemerisFile::HandleCcsdsOrbitData(bool writeData)
    }
    
    #ifdef DEBUG_EPHEMFILE_CCSDS
-   MessageInterface::ShowMessage("   timeToWrite=%d\n", timeToWrite);
+   MessageInterface::ShowMessage
+      ("   timeToWrite=%d, writingNewSegment=%d\n", timeToWrite, writingNewSegment);
    #endif
    
    if (timeToWrite)
@@ -1762,23 +1771,27 @@ void EphemerisFile::HandleSpkOrbitData(bool writeData)
 
 
 //------------------------------------------------------------------------------
-// void RestartInterpolation(const std::string &comments = "", bool writeAfterData = true)
+// void RestartInterpolation(const std::string &comments = "", bool writeAfterData = true,
+//                           bool canFinalize = false, bool ignoreBlankComments = true)
 //------------------------------------------------------------------------------
 /**
  * Resets interpolator to start new segments of data.
  */
 //------------------------------------------------------------------------------
-void EphemerisFile::RestartInterpolation(const std::string &comments, bool writeAfterData)
+void EphemerisFile::RestartInterpolation(const std::string &comments, bool writeAfterData,
+                                         bool canFinalize, bool ignoreBlankComments)
 {
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
       ("===== EphemerisFile::RestartInterpolation() entered, comments='%s', "
-       "writeAfterData=%d\n", comments.c_str(), writeAfterData);
+       "writeAfterData=%d, ignoreBlankComments=%d, canFinalize\n", comments.c_str(),
+       writeAfterData, ignoreBlankComments, canFinalize);
    #endif
    
    // Write data for the rest of time on waiting, pass false to indicate that is not
    // the end of data receive.
-   FinishUpWriting(false);
+   //FinishUpWriting(false);
+   FinishUpWriting(canFinalize);
    
    // For CCSDS data, comments are written from
    // CcsdsEphemerisFile::WriteRealCcsdsOrbitDataSegment(), so just set comments here
@@ -1787,18 +1800,18 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool write
    
    // If not using DataFile and writing text ehem file, write comments here
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
-   WriteComments(comments);
+   WriteComments(comments, ignoreBlankComments);
    #endif
    
    if (spkWriter != NULL)
    {
       if (!writeAfterData)
-         WriteComments(comments);
+         WriteComments(comments, ignoreBlankComments);
       
       WriteSpkOrbitDataSegment();
       
       if (writeAfterData)
-         WriteComments(comments);
+         WriteComments(comments, ignoreBlankComments);
       
       currComments = "";
    }
@@ -2568,18 +2581,22 @@ void EphemerisFile::WriteMetaData()
 
 
 //------------------------------------------------------------------------------
-// void WriteComments(const std::string &comments)
+// void WriteComments(const std::string &comments, bool ignoreBlankComments = true)
 //------------------------------------------------------------------------------
 /**
  * Writes comments to specific file.
  */
 //------------------------------------------------------------------------------
-void EphemerisFile::WriteComments(const std::string &comments)
+void EphemerisFile::WriteComments(const std::string &comments, bool ignoreBlankComments)
 {
    #ifdef DEBUG_EPHEMFILE_COMMENTS
    MessageInterface::ShowMessage
-      ("WriteComments() entered, comments='%s'\n", comments.c_str());
+      ("WriteComments() entered, comments='%s', ignoreBlankComments=%d\n",
+       comments.c_str(), ignoreBlankComments);
    #endif
+
+   if (comments == "" && ignoreBlankComments)
+      return;
    
    if (fileType == CCSDS_OEM || fileType == CCSDS_AEM)
       WriteCcsdsComments(comments);

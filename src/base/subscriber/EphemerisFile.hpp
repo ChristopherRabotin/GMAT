@@ -216,7 +216,9 @@ protected:
    
    // Interpolation
    void         RestartInterpolation(const std::string &comments = "",
-                                     bool writeAfterData = true);
+                                     bool writeAfterData = true,
+                                     bool canFinalize = false,
+                                     bool ignoreBlankComments = true);
    bool         IsTimeToWrite(Real epochInSecs, const Real state[6]);
    void         WriteOrbit(Real reqEpochInSecs, const Real state[6]);
    void         WriteOrbitAt(Real reqEpochInSecs, const Real state[6]);
@@ -238,7 +240,8 @@ protected:
    void         WriteString(const std::string &str);
    void         WriteHeader();
    void         WriteMetaData();
-   void         WriteComments(const std::string &comments);
+   void         WriteComments(const std::string &comments,
+                              bool ignoreBlank = true);
    
    // General data buffering
    void         BufferOrbitData(Real epochInDays, const Real state[6]);
