@@ -19,6 +19,7 @@
 #include <wx/utils.h>
 #include <wx/config.h>
 #include "GmatDialog.hpp"
+#include "GmatMainFrame.hpp"
 #include "GmatAppData.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
@@ -223,27 +224,47 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
          objLink = obj->GetTypeName().c_str();
    }
    
-   // get base help link if available
-   baseHelpLink = pConfig->Read(_T("BaseHelpLink"),
-                                _T("http://gmat.sourceforge.net/docs/R2012a/html/%s.html"));
-   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
+    wxHelpController *theHelpController = GmatAppData::Instance()->GetMainFrame()->GetHelpController();
+	if (theHelpController != NULL)
+	{
+		#ifdef DEBUG_GMAT_DIALOG_HELP
+		MessageInterface::ShowMessage
+			("GmatPanel::OnHelp() theHelpController=<%p>\n   "
+			"File to display=%s\n", theHelpController,
+			s);
+		#endif
+		// displays chm, not html
+		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
+		objLink = pConfig->Read(_T(objLink+"Keyword"),_T(objLink));
+
+		if (!theHelpController->KeywordSearch(objLink)) 
+			theHelpController->DisplayContents();
+	}
+	else
+	{
+	   // get base help link if available
+	   baseHelpLink = pConfig->Read(_T("BaseHelpLink"),
+									_T("http://gmat.sourceforge.net/docs/R2012a/html/%s.html"));
+	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
    
-   #ifdef DEBUG_GMAT_DIALOG_HELP
-   MessageInterface::ShowMessage
-      ("   objLink = '%s', baseHelpLink = '%s'\n   helpLink = '%s'\n",
-       objLink.c_str(), baseHelpLink.c_str(), msgBuffer);
-   #endif
+	   #ifdef DEBUG_GMAT_DIALOG_HELP
+	   MessageInterface::ShowMessage
+		  ("   objLink = '%s', baseHelpLink = '%s'\n   helpLink = '%s'\n",
+		   objLink.c_str(), baseHelpLink.c_str(), msgBuffer);
+	   #endif
    
-   // open separate window to show help
-   objLink = pConfig->Read(_T(objLink), _T(msgBuffer));
-   #ifdef DEBUG_GMAT_DIALOG_HELP
-   MessageInterface::ShowMessage("   actual help Link = '%s'\n", objLink.c_str());
-   #endif
-   wxLaunchDefaultBrowser(objLink);
+	   // open separate window to show help
+	   objLink = pConfig->Read(_T(objLink), _T(msgBuffer));
+	   #ifdef DEBUG_GMAT_DIALOG_HELP
+	   MessageInterface::ShowMessage("   actual help Link = '%s'\n", objLink.c_str());
+	   #endif
+	   wxLaunchDefaultBrowser(objLink);
+	}
    
    #ifdef DEBUG_GMAT_DIALOG_HELP
    MessageInterface::ShowMessage("GmatDialog::OnHelp() leaving\n");
    #endif
+
 }
 
 
