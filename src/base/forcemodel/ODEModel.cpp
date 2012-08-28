@@ -214,10 +214,8 @@ std::string& ODEModel::GetScriptAlias(const std::string& alias)
 // public methods
 //---------------------------------
 
-
 //------------------------------------------------------------------------------
-// ODEModel::ODEModel(Gmat::ObjectType id, const std::string &typeStr,
-//                        const std::string &nomme))
+// ODEModel(const std::string &modelName, const std::string typeName)
 //------------------------------------------------------------------------------
 /**
  * The constructor
@@ -269,7 +267,7 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
 
 
 //------------------------------------------------------------------------------
-// ODEModel::~ODEModel()
+// ~ODEModel()
 //------------------------------------------------------------------------------
 /**
  * The destructor
@@ -306,7 +304,7 @@ ODEModel::~ODEModel()
 }
 
 //------------------------------------------------------------------------------
-// ODEModel::ODEModel(const ODEModel& fdf)
+// ODEModel(const ODEModel& fdf)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
@@ -387,15 +385,14 @@ ODEModel::ODEModel(const ODEModel& fdf) :
 
 
 //------------------------------------------------------------------------------
-// ODEModel& ODEModel::operator=(const ODEModel& fdf)
+// ODEModel& operator=(const ODEModel& fdf)
 //------------------------------------------------------------------------------
 /**
  * The assignment operator.
  * 
- * NOTE: The ODEModel assignment operator is not yet tested.  This method 
- *       should be validated before the class is used in external code.
- * 
  * @param fdf   The original of the ODEModel that are copied
+ * 
+ * @return This ODEModel, configured to match fdf
  */
 //------------------------------------------------------------------------------
 ODEModel& ODEModel::operator=(const ODEModel& fdf)
@@ -475,7 +472,7 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
 }
 
 //------------------------------------------------------------------------------
-// void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
+// void AddForce(PhysicalModel *pPhysicalModel)
 //------------------------------------------------------------------------------
 /**
  * Method used to add a new force to the force model
