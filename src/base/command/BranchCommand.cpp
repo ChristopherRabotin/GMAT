@@ -326,8 +326,10 @@ void BranchCommand::SetEventLocators(std::vector<EventLocator*> *els)
                                    "\" was not terminated!");
       }
    }
-
-   MessageInterface::ShowMessage("\n");
+   
+   #ifdef DEBUG_EVENTLOCATION
+      MessageInterface::ShowMessage("\n");
+   #endif
 }
 
 
