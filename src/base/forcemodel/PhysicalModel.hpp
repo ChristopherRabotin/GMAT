@@ -15,8 +15,8 @@
 // ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
 // ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
 // ***                                                                    ***
-// ***  This software is subject to the Sofware Usage Agreement described ***
-// ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
+// ***  This software is subject to the Software Usage Agreement described***
+// ***  by NASA Case Number GSC-14735-1.  The Software Usage Agreement    ***
 // ***  must be included in any distribution.  Removal of this header is  ***
 // ***  strictly prohibited.                                              ***
 // ***                                                                    ***
