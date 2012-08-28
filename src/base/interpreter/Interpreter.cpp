@@ -6138,6 +6138,14 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    debugMsg = "In SetForceModelProperty()";
    bool retval = false;
    StringArray parts = theTextParser.SeparateDots(prop);
+
+   #ifdef DEBUG_SET_FORCE_MODEL
+      MessageInterface::ShowMessage("   %s decomposes to", prop.c_str());
+      for (UnsignedInt i = 0; i < parts.size(); ++i)
+         MessageInterface::ShowMessage(" [%s]", parts[i].c_str());
+      MessageInterface::ShowMessage("\n");
+   #endif
+
    Integer dotCount = parts.size();
    std::string pmType = parts[dotCount-1];
    Integer id;
@@ -6268,7 +6276,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    }
    else if (pmType == "Drag" || pmType == "AtmosphereModel")
    {
-      // Write deprecated message, now we olny use Drag.AtmosphereModel to specify model name
+      // Write deprecated message, now we only use Drag.AtmosphereModel to specify model name
       if (pmType == "Drag" && value != "None")
       {
          InterpreterException ex
@@ -6389,10 +6397,39 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    GmatBase *owner;
    Integer propId;
    Gmat::ParameterType propType;
+
    if (FindPropertyID(forceModel, propName, &owner, propId, propType))
    {
       id = owner->GetParameterID(propName);
       type = owner->GetParameterType(id);
+
+      // If there is a qualifier, it should match the model qualifier
+      if (qualifier != "")
+      {
+
+         std::stringstream errmsg;
+
+         if (pmType == "Drag")
+         {
+            std::string atModel = owner->GetStringParameter("AtmosphereModel");
+            if (atModel != qualifier)
+               errmsg << "The atmosphere model type \"" << qualifier
+                      << "\" does not match the current " << atModel
+                      << " drag model type.  In addition, the ";
+            else
+               errmsg << "The ";
+
+            errmsg << "behavior of the field \"" << prop
+                   << "\" in Forcemodel \"" << obj->GetName()
+                   << "\" has been deprecated and will not be supported in "
+                   << "future versions. Please use the syntax \""
+                   << "Drag." << propName << "\"";
+
+            InterpreterException ex(errmsg.str());
+            HandleError(ex, true, true);
+         }
+      }
+
       // Ensure that the qualifier is correct for the model
       if (owner->IsOfType(Gmat::PHYSICAL_MODEL) && (qualifier != ""))
       {
