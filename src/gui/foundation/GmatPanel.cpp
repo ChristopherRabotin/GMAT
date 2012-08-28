@@ -395,43 +395,44 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
       s = mObject->GetTypeName().c_str();
     else
       s = GetName().c_str();
-    // get base help link if available
-    baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/R2012a/html/%s.html"));
-    sprintf( msgBuffer, baseHelpLink.c_str(), s.c_str());
-    #ifdef DEBUG_GMATPANEL
-      MessageInterface::ShowMessage
-         ("GmatPanel::OnHelp() Default Help Link=%s\n", msgBuffer);
-    #endif
 
-    // open separate window to show help
-    s = pConfig->Read(_T(s),_T(msgBuffer));
-    #ifdef DEBUG_GMATPANEL
-      MessageInterface::ShowMessage
-         ("GmatPanel::OnHelp() Web Page=<%s>\n",
-          s);
-    #endif
+    wxHelpController *theHelpController = GmatAppData::Instance()->GetMainFrame()->GetHelpController();
+	if (theHelpController != NULL)
+	{
+		#ifdef DEBUG_GMATPANEL
+		MessageInterface::ShowMessage
+			("GmatPanel::OnHelp() theHelpController=<%p>\n   "
+			"File to display=%s\n", theHelpController,
+			s);
+		#endif
+		// displays chm, not html
+		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
+		s = pConfig->Read(_T(s+"Keyword"),_T(s));
 
-    wxLaunchDefaultBrowser(s);
+		if (!theHelpController->KeywordSearch(s)) 
+			theHelpController->DisplayContents();
+	}
+	else
+	{
+		// get base help link if available
+		baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/R2012a/html/%s.html"));
+		sprintf( msgBuffer, baseHelpLink.c_str(), s.c_str());
+		#ifdef DEBUG_GMATPANEL
+		  MessageInterface::ShowMessage
+			 ("GmatPanel::OnHelp() Default Help Link=%s\n", msgBuffer);
+		#endif
 
-    //wxHelpController *theHelpController = GmatAppData::Instance()->GetHelpController();
-    //#ifdef DEBUG_GMATPANEL
-    //  MessageInterface::ShowMessage
-    //     ("GmatPanel::OnHelp() theHelpController=<%p>\n   "
-    //      "File to display=%s\n", theHelpController,
-    //      s);
-    //#endif
+		// open separate window to show help
+		s = pConfig->Read(_T(s),_T(msgBuffer));
+		#ifdef DEBUG_GMATPANEL
+		  MessageInterface::ShowMessage
+			 ("GmatPanel::OnHelp() Web Page=<%s>\n",
+			  s);
+		#endif
 
-    //if (!theHelpController->LoadFile(s))
-    //  MessageInterface::ShowMessage
-    //    ("The help controller could not load help page: %s\n",s);
-
-    ////theHelpController->Display(s); // works, display chm, not html
-    //theHelpController->KeywordSearch("TRSObjectInspector"); // displays chm, not html
-    //if (!wxLaunchDefaultBrowser(s))
-    //   MessageInterface::PopupMessage
-    //   (Gmat::WARNING_, "The browser could not be launched to show help page: " +
-    //   s + "\n");
-
+		wxLaunchDefaultBrowser(s);
+	}
+    
 }
 
 
