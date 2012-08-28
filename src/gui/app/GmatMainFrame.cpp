@@ -6105,6 +6105,17 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
    return isPresetSizeUsed;
 }
 
+//------------------------------------------------------------------------------
+//wxHelpController* GetHelpController();
+//------------------------------------------------------------------------------
+/**
+ * returns the helpcontroller (null if not on windows)
+ */
+wxHelpController* GmatMainFrame::GetHelpController()
+{
+	return theHelpController;
+}
+
 
 //-------------------------------------------------------------------------------
 // void ComputeAnimationSpeed(Integer &frameInc, Integer &updateIntervalInMilSec, bool slower)
