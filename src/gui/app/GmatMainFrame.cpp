@@ -1349,7 +1349,7 @@ bool GmatMainFrame::RefreshActiveChildAssociatedWindow()
          wxWindow* associatedWindow = theChild->GetAssociatedWindow();
          if (associatedWindow != NULL)
          {
-            if (((SpacecraftPanel*) associatedWindow)->RefreshConponents())
+            if (((SpacecraftPanel*) associatedWindow)->RefreshComponents())
                return TRUE;
          }
       }

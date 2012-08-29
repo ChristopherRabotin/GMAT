@@ -326,14 +326,14 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// bool RefreshConponents()
+// bool RefreshComponents()
 //------------------------------------------------------------------------------
 /**
  * Refreshes the tabs on the panel.  This is called when the SpacecraftPanel
  * is activated.
  */
 //------------------------------------------------------------------------------
-bool SpacecraftPanel::RefreshConponents()
+bool SpacecraftPanel::RefreshComponents()
 {
    // Only OrbitPanel needs refreshing at this time
    return theOrbitPanel->RefreshComponents();

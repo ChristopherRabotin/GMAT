@@ -45,7 +45,7 @@ public:
    SpacecraftPanel(wxWindow *parent, const wxString &scName);
    ~SpacecraftPanel();   
        
-   bool RefreshConponents();
+   bool RefreshComponents();
 
 private:    
    // methods inherited from GmatPanel
