@@ -892,7 +892,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
                   ("   Computed TrueAnomaly =\n   [%12.10f]\n", mTrueAnomaly);
                #endif
             }
-            catch (BaseException&)
+            catch (BaseException &be)
             {
                #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
                MessageInterface::ShowMessage
@@ -1348,7 +1348,7 @@ void OrbitPanel::DisplayState()
          MessageInterface::ShowMessage("In DisplayState, about to print out anomaly type ...\n");
             MessageInterface::ShowMessage(
                   "In DisplayState, after operator = , mAnomalyType = %s\n",
-                  (mAnomalyType.c_str());
+                  (mAnomalyType.c_str()));
          #endif
       }
    }
@@ -1561,7 +1561,7 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
          tmpCS      = (CoordinateSystem*) theGuiInterpreter->GetConfiguredObject(coordSystemNames.at(ii));
          originName = tmpCS->GetStringParameter("Origin");
          origin     = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(originName);
-         if (origin->IsOfType("CelestialBody"))  // add it to the list
+         if ((origin->IsOfType("CelestialBody")) && !(tmpCS->UsesSpacecraft(theSpacecraft->GetName()))) // add it to the list
             mCoordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
       }
       mCoordSysComboBox->SetValue(newCS.c_str());
@@ -1569,7 +1569,11 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
    else
    {
       for (Integer ii = 0; ii < (Integer) coordSystemNames.size(); ii++)
+      {
+         tmpCS      = (CoordinateSystem*) theGuiInterpreter->GetConfiguredObject(coordSystemNames.at(ii));
+         if (!tmpCS->UsesSpacecraft(theSpacecraft->GetName()))
             mCoordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
+      }
       mCoordSysComboBox->SetValue(currentCS.c_str());
    }
 

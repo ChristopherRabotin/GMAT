@@ -347,18 +347,27 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesNutationUpdateInterval() const
    return GmatCoordinate::NOT_USED;
 }
 
-bool AxisSystem::UsesSpacecraft() const
+bool AxisSystem::UsesSpacecraft(const std::string &withName) const
 {
-   if (origin && origin->IsOfType("Spacecraft"))  return true;
+   if (origin && origin->IsOfType("Spacecraft"))
+   {
+      if ((withName == "") || (origin->GetName() == withName))   return true;
+   }
    if (UsesPrimary())
    {
       SpacePoint *p = GetPrimaryObject();
-      if (p && p->IsOfType("Spacecraft")) return true;
+      if (p && p->IsOfType("Spacecraft"))
+      {
+         if ((withName == "") || (p->GetName() == withName))   return true;
+      }
    }
    if (UsesSecondary())
    {
       SpacePoint *s = GetSecondaryObject();
-      if (s && s->IsOfType("Spacecraft")) return true;
+      if (s && s->IsOfType("Spacecraft"))
+      {
+         if ((withName == "") || (s->GetName() == withName))   return true;
+      }
    }
    return false;
 }

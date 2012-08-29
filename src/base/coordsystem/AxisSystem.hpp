@@ -55,7 +55,7 @@ public:
    virtual GmatCoordinate::ParameterUsage UsesYAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
-   virtual bool                           UsesSpacecraft() const;
+   virtual bool                           UsesSpacecraft(const std::string &withName = "") const;
    virtual bool                           HasCelestialBodyOrigin() const;
 
    // methods to set parameters for the AxisSystems

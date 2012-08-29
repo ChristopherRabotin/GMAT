@@ -293,9 +293,9 @@ GmatCoordinate::ParameterUsage CoordinateSystem::UsesNutationUpdateInterval() co
    return GmatCoordinate::NOT_USED;
 }
 
-bool CoordinateSystem::UsesSpacecraft() const
+bool CoordinateSystem::UsesSpacecraft(const std::string &withName) const
 {
-   if (axes) return axes->UsesSpacecraft();
+   if (axes) return axes->UsesSpacecraft(withName);
    return false;
 }
 
@@ -684,6 +684,10 @@ void CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Real *inState,
                                       Real *outState,  bool coincident,
                                       bool forceComputation)
 {
+   #ifdef DEBUG_INPUTS_OUTPUTS
+     MessageInterface::ShowMessage(
+     "Entering CS::FromBaseSystem (1) ..........\n");
+   #endif
    Real internalState[6];
    if (!coincident)
    {
@@ -697,6 +701,11 @@ void CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Real *inState,
    }
    else
       for (Integer i=0; i<6; i++) internalState[i] = inState[i];
+
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+     "In CS::FromBaseSystem set internalState ...\n");
+   #endif
       
 
    if (axes)
@@ -1697,17 +1706,33 @@ bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
       MessageInterface::ShowMessage(
             "In TranslateFromBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
             (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+      MessageInterface::ShowMessage("   inState  = %le  %le  %le  %le  %le  %le\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
+      MessageInterface::ShowMessage("   epoch = %le\n", epoch.Get());
    #endif
    if (origin == j2000Body)  
+   {
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem, origin IS the same as j2000Body\n");
+      #endif
       outState = inState;
+   }
    else
    {
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem, origin IS NOT the same as j2000Body\n");
+      #endif
       // currently assuming an Rvector6 - update needed later?!?!    - awaiting Darrel on this
       // compute vector from origin of of this system to origin of the base system
       Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
                       (origin->GetMJ2000State(epoch));
       outState = inState + rif;
    }
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage("Leaving TranslateFromBaseSystem\n");
+   #endif
    return true;
 }
 
@@ -1721,18 +1746,35 @@ bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
 {
    #ifdef DEBUG_TRANSLATION
       MessageInterface::ShowMessage(
-            "In TranslateFromBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
+            "In TranslateFromBaseSystem (2), coord. system is %s, origin is %s and j2000Body is %s\n",
             (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
    #endif
-   if (origin == j2000Body)  
+   if (origin == j2000Body)
+   {
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem (2), origin IS the same as j2000Body\n");
+      #endif
       for (Integer i=0; i<6; i++) outState[i] = inState[i];
+   }
    else
    {
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem (2), origin IS NOT the same as j2000Body\n");
+      #endif
       Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
                       (origin->GetMJ2000State(epoch));
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem (2), rif = %s\n",rif.ToString().c_str());
+      #endif
       const Real *toRif = rif.GetDataVector();
       for (Integer i=0; i<6; i++) outState[i] = inState[i] + toRif[i];
    }
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage("Leaving TranslateFromBaseSystem (2)\n");
+   #endif
    return true;
 }
 
