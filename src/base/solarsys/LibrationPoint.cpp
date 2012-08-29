@@ -396,6 +396,21 @@ const Rvector3 LibrationPoint::GetMJ2000Velocity(const A1Mjd &atTime)
    return (tmp.GetV());
 }
 
+//---------------------------------------------------------------------------
+//  StringArray GetBuiltInNames()
+//---------------------------------------------------------------------------
+/**
+ * Returns the name(s) of the built-in space point.
+ *
+ * @return  name of the space point for the built-in libration point
+ */
+//---------------------------------------------------------------------------
+StringArray LibrationPoint::GetBuiltInNames()
+{
+   StringArray spNames;
+   // None at this time
+   return spNames;
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -544,12 +559,23 @@ std::string LibrationPoint::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool LibrationPoint::SetStringParameter(const Integer id, 
                                         const std::string &value)
-{     
+{
+   if (id == BODY_NAMES)
+   {
+      std::string errmsg = "The field \"";
+      errmsg += GetParameterText(id) + "\" on LibrationPoint \"";
+      errmsg += instanceName + "\" is not allowed.\n";
+      errmsg += "Use \"" + GetParameterText(PRIMARY_BODY_NAME) + "\" and \"";
+      errmsg += GetParameterText(SECONDARY_BODY_NAME);
+      errmsg += "\" to set bodies on a LibrationPoint.\n";
+      throw SolarSystemException(errmsg);
+   }
    if (id == PRIMARY_BODY_NAME)             
    {
       // since we don't know the order of setting, we cannot do the checking
       // to see if primary and secondary bodies are the same
       primaryBodyName = value;
+      ValidateBodyName(value, false);
       return true;
    }
    if (id == SECONDARY_BODY_NAME)             
@@ -557,6 +583,7 @@ bool LibrationPoint::SetStringParameter(const Integer id,
       // since we don't know the order of setting, we cannot do the checking
       // to see if primary and secondary bodies are the same
       secondaryBodyName = value;
+      ValidateBodyName(value, false);
       return true;
    }
    if (id == WHICH_POINT)             
@@ -617,6 +644,16 @@ bool LibrationPoint::SetStringParameter(const Integer id,
                                         const std::string &value,
                                         const Integer index)
 {
+   if (id == BODY_NAMES)
+   {
+      std::string errmsg = "The field \"";
+      errmsg += GetParameterText(id) + "\" on LibrationPoint \"";
+      errmsg += instanceName + "\" is not allowed.\n";
+      errmsg += "Use \"" + GetParameterText(PRIMARY_BODY_NAME) + "\" and \"";
+      errmsg += GetParameterText(SECONDARY_BODY_NAME);
+      errmsg += "\" to set bodies on a LibrationPoint.\n";
+      throw SolarSystemException(errmsg);
+   }
    return CalculatedPoint::SetStringParameter(id, value, index);
 }
 
@@ -744,7 +781,7 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
 	   ((!obj->IsOfType("CelestialBody") ) && (!obj->IsOfType("Barycenter") )))
 		 throw SolarSystemException(
 		    "The value of \"" + obj->GetName() + "\" for field \"Primary\""
-            " or \"Secondary\"" 
+            " or \"Secondary\" "
 			"on LibrationPoint \"" + GetName() + "\" is not an allowed value.\n"
 			"The allowed values are: [CelestialBody or Barycenter (except SSB)]. ");
 

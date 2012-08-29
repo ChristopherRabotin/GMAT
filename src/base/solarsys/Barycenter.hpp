@@ -55,13 +55,15 @@ public:
    // methods inherited from SpacePoint, that must be implemented here
    virtual const Rvector6  GetMJ2000State(const A1Mjd &atTime);
    virtual const Rvector3  GetMJ2000Position(const A1Mjd &atTime);
-   virtual const Rvector3  GetMJ2000Velocity(const A1Mjd &atTime);   
+   virtual const Rvector3  GetMJ2000Velocity(const A1Mjd &atTime);
    
+   virtual bool            SetRefObject(GmatBase *obj,
+                                        const Gmat::ObjectType type,
+                                        const std::string &name = "");
+
    virtual Real            GetMass();
    virtual bool            Initialize();
 
-   virtual bool            IsBuiltIn();
-   virtual void            SetIsBuiltIn(bool builtIn, const std::string &ofType = "SSB");
    virtual StringArray     GetBuiltInNames();
 
    // Parameter access methods - overridden from GmatBase - not needed (no additional parameters)
@@ -73,9 +75,7 @@ protected:
       BarycenterParamCount = CalculatedPointParamCount
    };
 
-   /// flag indicating whether or not this is a built-in Barycenter
-   bool                        isBuiltIn;
-   std::string                 builtInType;
+   /// If this is a built-in point, this is the SpacePoint for it
    SpacePoint                  *builtInSP;
     
 private:

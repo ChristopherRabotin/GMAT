@@ -52,7 +52,10 @@ public:
    // in the derived class
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
-   virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);   
+   virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
+
+   virtual StringArray    GetBuiltInNames();
+
    
    // Parameter access methods - overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;

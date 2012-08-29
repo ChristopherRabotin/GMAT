@@ -51,8 +51,6 @@
 //------------------------------------------------------------------------------
 Barycenter::Barycenter(const std::string &itsName) :
    CalculatedPoint("Barycenter", itsName),
-   isBuiltIn      (false),
-   builtInType    (""),
    builtInSP      (NULL)
 {
    objectTypes.push_back(Gmat::BARYCENTER);
@@ -73,8 +71,6 @@ Barycenter::Barycenter(const std::string &itsName) :
 //------------------------------------------------------------------------------
 Barycenter::Barycenter(const Barycenter &bary) :
    CalculatedPoint          (bary),
-   isBuiltIn                (bary.isBuiltIn),
-   builtInType              (bary.builtInType),
    builtInSP                (NULL)
 {
    parameterCount  = bary.parameterCount;
@@ -99,8 +95,6 @@ Barycenter& Barycenter::operator=(const Barycenter &bary)
 
    CalculatedPoint::operator=(bary);
    parameterCount  = bary.parameterCount;
-   isBuiltIn       = bary.isBuiltIn;
-   builtInType     = bary.builtInType;
    builtInSP       = bary.builtInSP;
 
    return *this;
@@ -246,6 +240,39 @@ const Rvector3 Barycenter::GetMJ2000Velocity(const A1Mjd &atTime)
    return (tmp.GetV());
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the reference object.
+ *
+ * @param <obj>   reference object pointer.
+ * @param <type>  type of the reference object.
+ * @param <name>  name of the reference object.
+ * @param <index> Index into the object array.
+ *
+ * @return success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool Barycenter::SetRefObject(GmatBase *obj,
+                              const Gmat::ObjectType type,
+                              const std::string &name)
+{
+   if ((obj->IsOfType(Gmat::SPACE_POINT)) && (!obj->IsOfType("CelestialBody")))
+   {
+      std::string errmsg = "The value of \"";
+      errmsg += name + "\" for field \"BodyNames\" on CalculatedPoint \"";;
+      errmsg += instanceName + "\" is not an allowed value.\n";
+      errmsg += "The allowed values are: [CelestialBody or Barycenter (except SSB)].\n";
+      throw SolarSystemException(errmsg);
+   }
+
+   return CalculatedPoint::SetRefObject(obj, type, name);
+}
+
+
 //---------------------------------------------------------------------------
 //  Real GetMass()
 //---------------------------------------------------------------------------
@@ -328,36 +355,6 @@ bool Barycenter::Initialize()
       #endif
    }
    return CalculatedPoint::Initialize();
-}
-
-//---------------------------------------------------------------------------
-//  bool IsBuiltIn()
-//---------------------------------------------------------------------------
-/**
- * Returns flag indicating whether or not this is a built-in barycenter.
- *
- * @return flag indicating whether or not this is a built-in barycenter
- */
-//---------------------------------------------------------------------------
-bool Barycenter::IsBuiltIn()
-{
-   return isBuiltIn;
-}
-
-//---------------------------------------------------------------------------
-//  void SetIsBuiltIn(bool builtIn, const std::string &ofType)
-//---------------------------------------------------------------------------
-/**
- * Sets the isBuiltIn flag and built-in type.
- *
- * @param <builtIn> built-in flag
- * @param <ofType>  built-in type
- */
-//---------------------------------------------------------------------------
-void Barycenter::SetIsBuiltIn(bool builtIn, const std::string &ofType)
-{
-   isBuiltIn   = builtIn;
-   builtInType = ofType;
 }
 
 //---------------------------------------------------------------------------

@@ -7492,8 +7492,8 @@ void Moderator::CreateDefaultBarycenter()
          #endif
       }
       bary->SetSolarSystem(ss);
-      bary->SetIsBuiltIn(true);
-      bary->Initialize();  // ????
+      bary->SetIsBuiltIn(true, "SSB");
+      bary->Initialize();
    }
    catch (BaseException &e)
    {

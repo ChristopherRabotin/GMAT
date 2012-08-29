@@ -56,6 +56,11 @@ public:
    // destructor
    virtual ~CalculatedPoint();
    
+   virtual bool         IsBuiltIn();
+   virtual void         SetIsBuiltIn(bool builtIn, const std::string &ofType);
+   virtual StringArray  GetBuiltInNames() = 0;
+
+
    // methods inherited from SpacePoint, that must be implemented
    // in the derived classes
    //virtual const Rvector6           GetMJ2000State(const A1Mjd &atTime);
@@ -140,7 +145,13 @@ protected:
    StringArray              bodyNames;
 
    // names of the default bodies to use
-   StringArray defaultBodies;
+   StringArray              defaultBodies;
+
+   /// flag indicating whether or not this is a built-in CalculatedPoint
+   bool                        isBuiltIn;
+   std::string                 builtInType;
+
+   bool ValidateBodyName(const std::string &itsName, bool addToList = true, bool addToEnd = true, Integer index = 0);
     
 private:
       
@@ -153,7 +164,7 @@ private:
     *
     */
     //------------------------------------------------------------------------------
-   virtual void CheckBodies() = 0;      
+   virtual void CheckBodies() = 0;
 };
 #endif // CalculatedPoint_hpp
 

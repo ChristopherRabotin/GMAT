@@ -67,8 +67,10 @@ CalculatedPoint::PARAMETER_TYPE[CalculatedPointParamCount - SpacePointParamCount
 //------------------------------------------------------------------------------
 CalculatedPoint::CalculatedPoint(const std::string &ptType, 
                                  const std::string &itsName) :
-SpacePoint(Gmat::CALCULATED_POINT, ptType, itsName),
-numberOfBodies  (0)
+   SpacePoint(Gmat::CALCULATED_POINT, ptType, itsName),
+   numberOfBodies (0),
+   isBuiltIn      (false),
+   builtInType    ("")
 {
    objectTypes.push_back(Gmat::CALCULATED_POINT);
    objectTypeNames.push_back("CalculatedPoint");
@@ -86,7 +88,9 @@ numberOfBodies  (0)
  */
 //------------------------------------------------------------------------------
 CalculatedPoint::CalculatedPoint(const CalculatedPoint &cp) :
-SpacePoint          (cp)
+   SpacePoint    (cp),
+   isBuiltIn     (cp.isBuiltIn),
+   builtInType   (cp.builtInType)
 {
    bodyNames.clear();
    bodyList.clear();
@@ -148,6 +152,8 @@ CalculatedPoint& CalculatedPoint::operator=(const CalculatedPoint &cp)
    {
       defaultBodies.push_back((cp.defaultBodies).at(i));
    }
+   isBuiltIn       = cp.isBuiltIn;
+   builtInType     = cp.builtInType;
 
    return *this;
 }
@@ -164,6 +170,36 @@ CalculatedPoint::~CalculatedPoint()
    bodyNames.clear();
    bodyList.clear();
    defaultBodies.clear();
+}
+
+//---------------------------------------------------------------------------
+//  bool IsBuiltIn()
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not this is a built-in calculated point.
+ *
+ * @return flag indicating whether or not this is a built-in calculated point
+ */
+//---------------------------------------------------------------------------
+bool CalculatedPoint::IsBuiltIn()
+{
+   return isBuiltIn;
+}
+
+//---------------------------------------------------------------------------
+//  void SetIsBuiltIn(bool builtIn, const std::string &ofType)
+//---------------------------------------------------------------------------
+/**
+ * Sets the isBuiltIn flag and built-in type.
+ *
+ * @param <builtIn> built-in flag
+ * @param <ofType>  built-in type
+ */
+//---------------------------------------------------------------------------
+void CalculatedPoint::SetIsBuiltIn(bool builtIn, const std::string &ofType)
+{
+   isBuiltIn   = builtIn;
+   builtInType = ofType;
 }
 
 //------------------------------------------------------------------------------
@@ -410,8 +446,6 @@ std::string CalculatedPoint::GetStringParameter(const std::string &label,
  *
  * @return  success flag.
  *
- * @note - This should not be necessary here, but GCC is getting confused 
- *         about this method.
  *
  */
 //------------------------------------------------------------------------------
@@ -424,6 +458,14 @@ bool CalculatedPoint::SetStringParameter(const Integer id,
    #endif
    if (id == BODY_NAMES)
    {
+      if (isBuiltIn)
+      {
+         std::string errmsg = "The value of \"";
+         errmsg += value + "\" for field \"BodyNames\" on built-in CalculatedPoint \"";;
+         errmsg += instanceName + "\" is not an allowed value.\n";
+         errmsg += "The allowed values are: [None].\n";
+         throw SolarSystemException(errmsg);
+      }
       std::string value1 = GmatStringUtil::Trim(value);
       // If there are names inside a brace-enclosed list, reset the
       // entire array of names to that list
@@ -431,18 +473,15 @@ bool CalculatedPoint::SetStringParameter(const Integer id,
       {
 //         bodyNames.clear();
          TakeAction("ClearBodies");
-         bodyNames = GmatStringUtil::ToStringArray(value1);
+         StringArray nameList = GmatStringUtil::ToStringArray(value1);
+         for (unsigned int ii = 0; ii < nameList.size(); ii++)
+         {
+            ValidateBodyName(nameList.at(ii), true, true);
+         }
       }
       else
       {
-         if (find(bodyNames.begin(), bodyNames.end(), value) == bodyNames.end())
-         {
-            #ifdef DEBUG_CP_OBJECT
-               MessageInterface::ShowMessage("Adding %s to body name list for object %s\n",
-                     value.c_str(), instanceName.c_str());
-            #endif
-            bodyNames.push_back(value);
-         }
+         ValidateBodyName(value, true, true);
       }
       
       #ifdef DEBUG_CP_SET_STRING
@@ -507,20 +546,22 @@ bool  CalculatedPoint::SetStringParameter(const Integer id,
    #endif
    if (id == BODY_NAMES)
    {
-      if ((index < 0) || (index > (Integer) bodyNames.size()))
-         return false;  // throw an exception here?
+      if (isBuiltIn)
+      {
+         std::string errmsg = "The value of \"";
+         errmsg += value + "\" for field \"BodyNames\" on built-in CalculatedPoint \"";;
+         errmsg += instanceName + "\" is not an allowed value.\n";
+         errmsg += "The allowed values are: [None].\n";
+         throw SolarSystemException(errmsg);
+      }
       if (index == (Integer) bodyNames.size())
       {
-         if (find(bodyNames.begin(), bodyNames.end(), value) == bodyNames.end())
-            bodyNames.push_back(value);
-         return true;
+         return ValidateBodyName(value, true, true);
       }
-      // replace current name - NOTE that this doesn't preclude setting the same
-      // name to more than one spot in the array - should we check for this?
+      // replace current name
       else
       {
-         bodyNames.at(index) = value; 
-         return true;
+         return ValidateBodyName(value, true, false, index);
       }
    }
    
@@ -650,6 +691,14 @@ bool CalculatedPoint::SetRefObject(GmatBase *obj,
 {
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
+      if (!obj->IsOfType("CelestialBody") && !obj->IsOfType("Barycenter"))
+      {
+         std::string errmsg = "The value of \"";
+         errmsg += name + "\" for field \"BodyNames\" on CalculatedPoint \"";;
+         errmsg += instanceName + "\" is not an allowed value.\n";
+         errmsg += "The allowed values are: [CelestialBody or Barycenter (except SSB)].\n";
+         throw SolarSystemException(errmsg);
+      }
       // check to see if it's already in the list
       std::vector<SpacePoint*>::iterator pos =
          find(bodyList.begin(), bodyList.end(), obj);
@@ -891,7 +940,69 @@ const StringArray& CalculatedPoint::GetDefaultBodies() const
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
-// none at this time
+
+//---------------------------------------------------------------------------
+//  bool ValidateBodyName(const std::string &itsName, bool addToList = true,
+//                        bool addToEnd = true, Integer index = 0)
+//---------------------------------------------------------------------------
+/**
+ * Adds the body name to the list if:
+ * - it is not a duplicate
+ * - it is not the built-in SolarSystemBarycenter
+ *
+ * @param <itsName>   name of the body to add to the bodyNames list
+ * @param <addToList> if true, will insert the name into the list
+ * @param <addToEnd>  if true, will append the name to the end of
+ *                    the list; otherwise, will add at index specified
+ * @param <index>     index at which to add the name, if addToEnd = false
+ *
+ * @return true if successful; false otherwise
+ */
+//---------------------------------------------------------------------------
+bool CalculatedPoint::ValidateBodyName(const std::string &itsName, bool addToList, bool addToEnd, Integer index)
+{
+   if (itsName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+   {
+      std::string errmsg = "The value of \"";
+      errmsg += itsName + "\" for field \"BodyNames\" on CalculatedPoint \"";;
+      errmsg += instanceName + "\" is not an allowed value.\n";
+      errmsg += "The allowed values are: [CelestialBody or Barycenter (except SSB)].\n";
+      throw SolarSystemException(errmsg);
+   }
+   if (addToList)
+   {
+      if (find(bodyNames.begin(), bodyNames.end(), itsName) == bodyNames.end())
+      {
+         if (addToEnd)
+         {
+            #ifdef DEBUG_CP_BODIES
+               MessageInterface::ShowMessage("Adding %s to body name list for object %s\n",
+                     itsName.c_str(), instanceName.c_str());
+            #endif
+            bodyNames.push_back(itsName);
+         }
+         else
+         {
+            if ((index < 0) || (index > (Integer) bodyNames.size()))
+               return false;  // throw an exception here?
+            #ifdef DEBUG_CP_BODIES
+               MessageInterface::ShowMessage("Adding %s to body name list at index %d for object %s\n",
+                     itsName.c_str(), index, instanceName.c_str());
+            #endif
+            bodyNames.at(index) = itsName;
+         }
+      }
+      else
+      {
+         std::string errmsg = "Body ";
+         errmsg += itsName + " already in list for CalculatedPoint ";
+         errmsg += instanceName + ".  Each celestial body must be listed only once.\n";
+         throw SolarSystemException(errmsg);
+      }
+   }
+   return true;
+}
+
 
 
 //------------------------------------------------------------------------------
