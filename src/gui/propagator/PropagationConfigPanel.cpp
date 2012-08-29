@@ -1526,25 +1526,30 @@ void PropagationConfigPanel::SaveData()
          MessageInterface::ShowMessage("Saving a force-free propagator\n");
       #endif
 
-
       if (isIntegratorChanged)
       {
          #ifdef DEBUG_PROP_PANEL_SAVE
          ShowPropData("SaveData() BEFORE saving Propagator");
          #endif
 
-         isIntegratorChanged = false;
-
+         // First validate the data
          if (isIntegratorDataChanged)
+         {
             if (SavePropagatorData())
                isIntegratorDataChanged = false;
-
+            else
+               // Invalid data, so do not update the configured objects
+               return;
+         }
+         
          thePropSetup->SetPropagator(thePropagator);
          thePropSetup->SetODEModel(NULL);  // No force model for these puppies
 
          // Since the propagator is cloned in the base code, get new pointer
          thePropagator = thePropSetup->GetPropagator();
          theForceModel = thePropSetup->GetODEModel();
+
+         isIntegratorChanged = false;
       }
       else if (isIntegratorDataChanged)
       {
