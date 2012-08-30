@@ -200,9 +200,6 @@ void SpacecraftPanel::Create()
 //------------------------------------------------------------------------------
 /**
  * Loads the data into the tabs on the SpacecraftPanel object.
- *
- * @param <parent> input parent.
- * @param <scName> input spacecraft name.
  */
 //------------------------------------------------------------------------------
 void SpacecraftPanel::LoadData()
@@ -246,7 +243,6 @@ void SpacecraftPanel::LoadData()
 //------------------------------------------------------------------------------
 /**
  * Saves modified data from the SpacecraftPanel tabs to the Spacecraft object.
- *
  */
 //------------------------------------------------------------------------------
 void SpacecraftPanel::SaveData()
@@ -331,6 +327,8 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
 /**
  * Refreshes the tabs on the panel.  This is called when the SpacecraftPanel
  * is activated.
+ *
+ * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
 bool SpacecraftPanel::RefreshComponents()
