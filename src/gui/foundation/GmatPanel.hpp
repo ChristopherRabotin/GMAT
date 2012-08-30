@@ -52,6 +52,7 @@ public:
    virtual void ObjectNameChanged(Gmat::ObjectType type,
                                   const wxString &oldName,
                                   const wxString &newName);
+   virtual bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
    virtual void EnableUpdate(bool enable = true);
    virtual void SetCanClose(bool flag);
    virtual void SetEditorModified(bool isModified);

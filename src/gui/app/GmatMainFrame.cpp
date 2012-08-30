@@ -1328,35 +1328,6 @@ bool GmatMainFrame::RenameActiveChild(const wxString &newName)
     return FALSE;
 }
 
-//------------------------------------------------------------------------------
-// bool RefreshActiveChildAssociatedWindow()
-//------------------------------------------------------------------------------
-/**
- * Refreshes the associated window of the active child
- *
- * @note Only SpacecraftPanels are refreshed at this time
- */
-//------------------------------------------------------------------------------
-bool GmatMainFrame::RefreshActiveChildAssociatedWindow()
-{
-   GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
-
-   if (theChild != NULL)
-   {
-      // Spacecraft panel
-      if (theChild->GetItemType() == GmatTree::SPACECRAFT)
-      {
-         wxWindow* associatedWindow = theChild->GetAssociatedWindow();
-         if (associatedWindow != NULL)
-         {
-            if (((SpacecraftPanel*) associatedWindow)->RefreshComponents())
-               return TRUE;
-         }
-      }
-   }
-
-   return FALSE;
-}
 
 //------------------------------------------------------------------------------
 // bool RemoveChild(const wxString &name, GmatTree::ItemType itemType,
@@ -3690,12 +3661,8 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new GroundStationPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::SPACECRAFT:
-      {
-         SpacecraftPanel *scPanel = new SpacecraftPanel(scrolledWin, name);
-         newChild->SetAssociatedWindow(scPanel);
-         sizer->Add(scPanel, 0, wxGROW|wxALL, 0);
+         sizer->Add(new SpacecraftPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
          break;
-      }
    case GmatTree::CELESTIAL_BODY:
    case GmatTree::CELESTIAL_BODY_STAR:
    case GmatTree::CELESTIAL_BODY_PLANET:

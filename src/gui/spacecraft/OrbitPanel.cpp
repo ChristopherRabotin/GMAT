@@ -117,6 +117,7 @@ OrbitPanel::OrbitPanel(GmatPanel *scPanel, wxWindow *parent,
 OrbitPanel::~OrbitPanel()
 {
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
+   theGuiManager->RemoveFromResourceUpdateListeners(theScPanel);
 }
 
 
@@ -580,6 +581,9 @@ void OrbitPanel::Create()
    //Get CordinateSystem ComboBox from the GuiItemManager.
    mCoordSysComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
+   // register for updates, in order to refresh
+   theGuiManager->AddToResourceUpdateListeners(theScPanel);
+
    mCoordSysComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
 
    //-----------------------------------------------------------------

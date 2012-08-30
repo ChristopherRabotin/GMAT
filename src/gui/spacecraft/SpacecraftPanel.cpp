@@ -322,18 +322,25 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// bool RefreshComponents()
+// bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT)
 //------------------------------------------------------------------------------
 /**
- * Refreshes the tabs on the panel.  This is called when the SpacecraftPanel
- * is activated.
+ * Refreshes the tabs on the panel.  This is called when the coordinate system
+ * list is updated by the GuiItemManager.
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool SpacecraftPanel::RefreshComponents()
+bool SpacecraftPanel::RefreshObjects(Gmat::ObjectType type)
 {
-   // Only OrbitPanel needs refreshing at this time
-   return theOrbitPanel->RefreshComponents();
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      // Only OrbitPanel needs refreshing at this time
+      return theOrbitPanel->RefreshComponents();
+   }
+   else
+   {
+      return GmatPanel::RefreshObjects(type);
+   }
 }
 

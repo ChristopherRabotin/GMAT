@@ -753,6 +753,4 @@ void GmatMdiChildFrame::UpdateActiveChild()
       
       node = node->GetNext();
    }
-   // Ask the parent to update the associated window, when required
-   ((GmatMainFrame*)theParent)->RefreshActiveChildAssociatedWindow();
 }

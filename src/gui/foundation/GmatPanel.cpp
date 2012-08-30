@@ -256,6 +256,15 @@ void GmatPanel::ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName
    // Do we need anything here?
 }
 
+//------------------------------------------------------------------------------
+// virtual bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT)
+//------------------------------------------------------------------------------
+bool GmatPanel::RefreshObjects(Gmat::ObjectType type)
+{
+   // child classes will implement this as needed
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // void SetCanClose(bool flag)

@@ -1026,6 +1026,11 @@ void GuiItemManager::UpdateCoordSystem(bool updateObjectArray)
    UpdateCoordSystemList();
    if (updateObjectArray)
       RefreshAllObjectArray();
+   // update the listening GmatPanels
+   for (UnsignedInt i=0; i<mResourceUpdateListeners.size(); i++)
+   {
+      mResourceUpdateListeners[i]->RefreshObjects(Gmat::COORDINATE_SYSTEM);
+   }
 }
 
 
