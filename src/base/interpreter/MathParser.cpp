@@ -154,7 +154,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
    MessageInterface::ShowMessage
       ("=================================================================\n");
    MessageInterface::ShowMessage
-      ("MathParser::IsEquation() str=%s\n", str.c_str());
+      ("MathParser::IsEquation() str=<%s>\n", str.c_str());
    MessageInterface::ShowMessage
       ("=================================================================\n");
    #endif
@@ -179,23 +179,30 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
    }
    else
    {
-      // build GmatFunction list first
-      BuildGmatFunctionList(str);
+      // Remove blanks before checking for function name
+      std::string str1 = GmatStringUtil::RemoveAllBlanks(str);
+      #if DEBUG_PARSE_EQUATION
+      MessageInterface::ShowMessage
+         ("   after blank removal str1=<%s>", str1.c_str());
+      #endif
       
-      if (GetFunctionName(MATH_FUNCTION, str, left) != "" ||
-          GetFunctionName(MATRIX_FUNCTION, str, left) != "" ||
-          GetFunctionName(UNIT_CONVERSION, str, left) != "" ||
-          FindOperatorFrom(str, 0, left, right, opIndex) != "" ||
-          GetFunctionName(GMAT_FUNCTION, str, left) != "")
+      // build GmatFunction list first
+      BuildGmatFunctionList(str1);
+      
+      if (GetFunctionName(MATH_FUNCTION, str1, left) != "" ||
+          GetFunctionName(MATRIX_FUNCTION, str1, left) != "" ||
+          GetFunctionName(UNIT_CONVERSION, str1, left) != "" ||
+          FindOperatorFrom(str1, 0, left, right, opIndex) != "" ||
+          GetFunctionName(GMAT_FUNCTION, str1, left) != "")
       {
          isEq = true;
 
          if (checkMinusSign)
          {
             // Check for - sign used as string
-            if (GmatStringUtil::NumberOfOccurrences(str, '-') == 1 &&
-                GmatStringUtil::StartsWith(str, "-") &&
-                GmatStringUtil::IsSingleItem(str))
+            if (GmatStringUtil::NumberOfOccurrences(str1, '-') == 1 &&
+                GmatStringUtil::StartsWith(str1, "-") &&
+                GmatStringUtil::IsSingleItem(str1))
             {
                isEq = false;
             }
@@ -204,7 +211,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       else
       {
          // Check ' for matrix transpose and ^(-1) for inverse
-         if (str.find("'") != str.npos || str.find("^(-1)") != str.npos)
+         if (str1.find("'") != str1.npos || str1.find("^(-1)") != str1.npos)
             isEq = true;
       }
    }
