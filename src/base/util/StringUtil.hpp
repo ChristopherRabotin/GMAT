@@ -34,6 +34,7 @@ namespace GmatStringUtil
    };
    
    GMAT_API std::string RemoveAll(const std::string &str, char ch, Integer start = 0);
+   GMAT_API std::string RemoveAllBlanks(const std::string &str, bool ignoreSingleQuotes = false);
    GMAT_API std::string RemoveLastNumber(const std::string &str, Integer &lastNumber);
    GMAT_API std::string RemoveLastString(const std::string &str, const std::string &lastStr,
                            bool removeAll = false);
@@ -68,7 +69,7 @@ namespace GmatStringUtil
                            Integer width = GmatGlobal::INTEGER_WIDTH);
    GMAT_API std::string ToStringNoZeros(const Real &val);
    
-   GMAT_API std::string RemoveExtraParen(const std::string &str);
+   GMAT_API std::string RemoveExtraParen(const std::string &str, bool ignoreSingleQuotes = false);
    GMAT_API std::string RemoveOuterString(const std::string &str, const std::string &start,
                            const std::string &end);
    GMAT_API std::string RemoveEnclosingString(const std::string &str, const std::string &enStr);

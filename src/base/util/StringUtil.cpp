@@ -42,6 +42,7 @@
 //#define DEBUG_STRING_UTIL_SEP_COMMA
 //#define DEBUG_STRING_UTIL_STRING_ARRAY
 //#define DEBUG_REPLACE_NAME
+//#define DEBUG_REMOVE_EXTRA_PAREN 1
 
 //------------------------------------------------------------------------------
 // std::string RemoveAll(const std::string &str, char ch, Integer start = 0)
@@ -64,6 +65,19 @@ std::string GmatStringUtil::RemoveAll(const std::string &str, char ch,
    }
 
    return str2;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string RemoveAllBlanks(const std::string &str, bool ignoreSingleQuotes = false)
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveAllBlanks(const std::string &str, bool ignoreSingleQuotes)
+{
+   std::string str1 = Trim(str);
+   if (!ignoreSingleQuotes && IsEnclosedWith(str1, "'"))
+      return str1;
+   else
+      return RemoveAll(str1, ' ');
 }
 
 
@@ -3074,7 +3088,7 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
 
 
 //------------------------------------------------------------------------------
-// std::string RemoveExtraParen(const std::string &str)
+// std::string RemoveExtraParen(const std::string &str, bool ignoreSingleQuotes = false)
 //------------------------------------------------------------------------------
 /*
  * This method removs extra pair of parentheses.
@@ -3084,13 +3098,23 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
  * This method is not complete and needs more testing.
  */
 //------------------------------------------------------------------------------
-std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
+std::string GmatStringUtil::RemoveExtraParen(const std::string &str, bool ignoreSingleQuotes)
 {
-   #if DEBUG_STRING_UTIL
+   #if DEBUG_REMOVE_EXTRA_PAREN
    MessageInterface::ShowMessage
       ("RemoveExtraParen() entering str=%s\n", str.c_str());
    #endif
-
+   
+   if (!ignoreSingleQuotes && IsEnclosedWith(str, "'"))
+   {
+      #if DEBUG_REMOVE_EXTRA_PAREN
+      MessageInterface::ShowMessage
+         ("RemoveExtraParen() returning str=<%s>, string is enclosed with "
+          "single quotes\n", str.c_str());
+      #endif
+      return str;
+   }
+   
    std::string str1 = str;
    std::string substr;
    Integer length = str.size();
@@ -3099,21 +3123,23 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
    Integer counter = 0;
    std::map<Integer, Integer> openParenMap;
    std::map<Integer, Integer> closeParenMap;
-
+   //@note using '\a' (bell) for parenthesis removal, is it safe to that? (LOJ: 2012.08.29)
+   char charToRemove = '\a';
+   
    // remove outer parentheses
    while (IsEnclosedWithExtraParen(str1))
    {
       counter++;
       str1 = str.substr(counter, length-counter-counter);
    }
-
-   #if DEBUG_STRING_UTIL
+   
+   #if DEBUG_REMOVE_EXTRA_PAREN
    MessageInterface::ShowMessage("RemoveExtraParen() str1=%s\n", str1.c_str());
    #endif
-
+   
    std::string str2 = str1;
    length = str1.size();
-
+   
    // go through each char and remove extra parentheses
    for (int i=0; i<length; i++)
    {
@@ -3122,8 +3148,8 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
          openParen = i;
          openCounter++;
          openParenMap[openCounter] = i;
-
-         #if DEBUG_STRING_UTIL
+         
+         #if DEBUG_REMOVE_EXTRA_PAREN
          MessageInterface::ShowMessage
             ("===> openParen:  i=%d, openCounter=%d\n", i, openCounter);
          #endif
@@ -3132,55 +3158,67 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
       {
          closeParen = i;
          closeParenMap[openCounter] = i;
-
-         #if DEBUG_STRING_UTIL
+         
+         #if DEBUG_REMOVE_EXTRA_PAREN
          MessageInterface::ShowMessage
             ("===> closeParen: i=%d, openCounter=%d\n", i, openCounter);
          #endif
-
+         
          //-----------------------------------------------------------
          // check one more outer parentheses
          //-----------------------------------------------------------
-
+         
          openParen = openParenMap[openCounter];
          closeParen = closeParenMap[openCounter];
-
+         
          substr = str1.substr(openParen, closeParen-openParen+1);
-
-         #if DEBUG_STRING_UTIL
+         char beforeOpenParen = str1[openParen-1];
+         std::string substr1 = str1.substr(0, openParen);
+         bool isParenPartOfName = false;
+         substr1 = RemoveAllBlanks(substr1);
+         if (substr1.size() > 0 && isalnum(substr1[substr1.size() - 1]))
+            isParenPartOfName = true;
+         #if DEBUG_REMOVE_EXTRA_PAREN
          MessageInterface::ShowMessage
-            ("===> substr=%s\n   openParen=%d, closeParen=%d, "
-             "closeCounter=%d, openCounter=%d\n", substr.c_str(), openParen,
-             closeParen, closeCounter, openCounter);
+            ("   substr=<%s>\n   openParen=%d, closeParen=%d, openCounter=%d\n",
+             substr.c_str(), openParen, closeParen, openCounter);
+         MessageInterface::ShowMessage
+            ("   substr1=<%s>, isParenPartOfName=%d, beforeOpenParen=<%c>\n",
+             substr1.c_str(), isParenPartOfName, beforeOpenParen);
          #endif
-
+         
          // if ( is not part of function or array
-         if ((openParen == 0) ||
-             (str1[openParen-1] == '+' || str1[openParen-1] == '-' ||
-              str1[openParen-1] == '*' || str1[openParen-1] == '/' ||
-              str1[openParen-1] == '(' || str1[openParen-1] == ' '))
+         if (!isParenPartOfName &&
+             (openParen == 0 ||
+              beforeOpenParen == '+' || beforeOpenParen == '-' ||
+              beforeOpenParen == '*' || beforeOpenParen == '/' ||
+              beforeOpenParen == '(' || beforeOpenParen == ' '))
          {
             if (str1[closeParen+1] != '^')
             {
                if (IsEnclosedWithExtraParen(substr))
                {
-                  str2[openParen] = '?';
-                  str2[closeParen] = '?';
+                  #if DEBUG_REMOVE_EXTRA_PAREN
+                  MessageInterface::ShowMessage
+                     ("   <%s> is enclosed with outer parenthesis\n", substr.c_str());
+                  #endif
+                  str2[openParen] = charToRemove;
+                  str2[closeParen] = charToRemove;
                }
             }
          }
-
+         
          openCounter--;
-
+         
       }
    }
-
-   str2 = RemoveAll(str2, '?', 0);
-
-   #if DEBUG_STRING_UTIL
+   
+   str2 = RemoveAll(str2, charToRemove, 0);
+   
+   #if DEBUG_REMOVE_EXTRA_PAREN
    MessageInterface::ShowMessage("RemoveExtraParen() exiting str2=%s\n", str2.c_str());
    #endif
-
+   
    return str2;
 }
 
