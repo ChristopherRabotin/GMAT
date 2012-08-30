@@ -1440,13 +1440,6 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
       CoordinateSystem *cs = (CoordinateSystem*)obj;
-      if (cs->UsesSpacecraft(instanceName))
-      {
-         std::string errmsg = "Cannot set coordinate system \"";
-         errmsg += cs->GetName() + "\" on spacecraft \"";
-         errmsg += instanceName + "\".  Coordinate system contains circular reference to the spacecraft.\n";
-         throw SpaceObjectException(errmsg);
-      }
 
       #ifdef DEBUG_SPACECRAFT_CS
       MessageInterface::ShowMessage
@@ -1513,6 +1506,14 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       // If CS name is not the spacecraft CS name, we are done.
       if (objName != coordSysName)
          return true;
+
+      if (cs->UsesSpacecraft(instanceName))
+      {
+         std::string errmsg = "Cannot set coordinate system \"";
+         errmsg += cs->GetName() + "\" on spacecraft \"";
+         errmsg += instanceName + "\".  Coordinate system contains circular reference to the spacecraft.\n";
+         throw SpaceObjectException(errmsg);
+      }
 
       // Otherwise, convert initial state to new CS
 //      if (coordinateSystem == cs)
