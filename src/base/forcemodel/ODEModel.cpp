@@ -618,6 +618,16 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
             {
                PhysicalModel *toBeReplaced = *i;
                forceList.erase(i);
+               if (pmType == "DragForce")
+               {
+                  // Preserve the drag parameters
+                  pPhysicalModel->SetRealParameter(toBeReplaced->GetParameterID("F107"),
+                        toBeReplaced->GetRealParameter(toBeReplaced->GetParameterID("F107")));
+                  pPhysicalModel->SetRealParameter(toBeReplaced->GetParameterID("F107A"),
+                        toBeReplaced->GetRealParameter(toBeReplaced->GetParameterID("F107A")));
+                  pPhysicalModel->SetRealParameter(toBeReplaced->GetParameterID("MagneticIndex"),
+                        toBeReplaced->GetRealParameter(toBeReplaced->GetParameterID("MagneticIndex")));
+               }
                delete toBeReplaced;
                break;
             }
@@ -1467,15 +1477,18 @@ bool ODEModel::Initialize()
         current != forceList.end(); ++current)
    {
       #ifdef DEBUG_ODEMODEL_INIT
-         std::string name, type;
+      { // Manage scoping for vars named same as in the class
+         std::string name, type, bodyNm;
          name = (*current)->GetName();
          if (name == "")
             name = "unnamed";
          type = (*current)->GetTypeName();
+         bodyNm = (*current)->GetBodyName();
          MessageInterface::ShowMessage
-            ("ODEModel::Initialize() initializing object %s of type %s\n",
-             name.c_str(), type.c_str());
+            ("ODEModel::Initialize() initializing object %s of type %s for "
+                  "body %s\n", name.c_str(), type.c_str(), bodyNm.c_str());
          MessageInterface::ShowMessage(" and the state epoch = %le\n", state->GetEpoch());
+      }
       #endif
       
       (*current)->SetDimension(dimension);
