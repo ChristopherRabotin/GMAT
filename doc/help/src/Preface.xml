@@ -18,11 +18,6 @@
     </listitem>
 
     <listitem>
-      <para><xref linkend="CreatingYourFirstMission"
-      xrefstyle="select:title"/></para>
-    </listitem>
-
-    <listitem>
       <para><xref linkend="CommonTasks" xrefstyle="select:title"/></para>
     </listitem>
 
@@ -58,16 +53,6 @@
     </note>
   </section>
 
-  <section role="notintoc">
-    <title><xref linkend="CreatingYourFirstMission"
-    xrefstyle="select:title"/></title>
-
-    <para>The <xref linkend="CreatingYourFirstMission"
-    xrefstyle="select:title"/> section walks you step-by-step through a sample
-    mission, including creating a spacecraft, a propagator, and an
-    <classname>OrbitView</classname> graphical display, and propagating the
-    spacecraft to orbit perigee.</para>
-  </section>
 
   <section role="notintoc">
     <title><xref linkend="CommonTasks" xrefstyle="select:title"/></title>

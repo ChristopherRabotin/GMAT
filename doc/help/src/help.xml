@@ -31,10 +31,6 @@
   <xi:include href="ReleaseNotes.xml" />
   -->
 
-    <part xml:id="CreatingYourFirstMission">
-        <title>Creating Your First Mission</title>
-        <xi:include href="Tut_SimulatingAnOrbit.xml"/>
-    </part>
 
     <part xml:id="CommonTasks">
         <title>Common Tasks</title>
@@ -46,7 +42,7 @@
 
     <part xml:id="Tutorials">
         <title>Tutorials</title>
-
+        <xi:include href="Tut_SimulatingAnOrbit.xml"/>
         <xi:include href="Tut_SimpleOrbitTransfer.xml" />
         <!--
         <xi:include href="Tut_LEOStationKeeping.xml"/>
