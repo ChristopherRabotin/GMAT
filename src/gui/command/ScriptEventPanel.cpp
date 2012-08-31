@@ -321,7 +321,16 @@ void ScriptEventPanel::LoadData()
    // We don't want to include Begin/EndScript,
    // so pass Gmat::GUI_EDITOR to GetGeneratingString()
    text << theCommand->GetGeneratingString(Gmat::GUI_EDITOR);
-   mCommentTextCtrl->AppendText(theCommand->GetCommentLine().c_str());
+      // TGG: Fix for GMT-2982 
+	  // add comment symbols
+
+   wxString comments = theCommand->GetCommentLine();
+   if (comments.StartsWith("% "))  // gets rid of first %
+     comments = comments.Mid(2, comments.Length()-1);
+   
+   comments.Replace("\n% ", "\n");
+
+   mCommentTextCtrl->AppendText(comments.c_str());
    mCommentTextCtrl->SetModified(false);
    
    wxString scriptText = text.str().c_str();
@@ -365,13 +374,15 @@ void ScriptEventPanel::SaveData()
    if (!mFileContentsTextCtrl->IsModified() && mCommentTextCtrl->IsModified())
    #endif
    {
+      // TGG: Fix for GMT-2982 
+	  // add comment symbols
       wxString comments = mCommentTextCtrl->GetValue();
-      if (comments.StartsWith("%"))  // gets rid of first %
-		comments = comments.Mid(1, comments.Length()-1);
+      if (comments.StartsWith("% "))  // gets rid of first %
+		comments = comments.Mid(2, comments.Length()-1);
    
-	  comments.Replace("\n%", "\n");
-	  comments.Replace("\n", "\n%");
-	  comments = "%" + comments;
+	  comments.Replace("\n% ", "\n");
+	  comments.Replace("\n", "\n% ");
+	  comments = "% " + comments;
       theCommand->SetCommentLine(comments.c_str());
       mCommentTextCtrl->SetModified(false);
       EnableUpdate(false);
