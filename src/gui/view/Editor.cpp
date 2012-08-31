@@ -412,9 +412,15 @@ void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
    cPos = GetCurrentPos();
    ePos = GetAnchor();
    if (cPos > ePos)
-	 SetAnchor(cPos);
+   {
+	   SetCurrentPos(cPos);
+	   SetAnchor(cPos);
+   }
    else
-	 SetAnchor(ePos);
+   {
+	   SetCurrentPos(ePos);
+	   SetAnchor(ePos);
+   }
    SearchAnchor();
       
    #ifdef DEBUG_EDITOR_FIND
