@@ -245,6 +245,11 @@ private:
    /// coefficient drifts per year
    Real               dSbar[17][17];
    
+   /// Flag indicating that the drag buffer has been filled
+   bool               dragBufferReady;
+   /// Buffer for the drag data (F10.7, F10.7a, geomagnetic index)
+   Real               dragParameterBuffer[3];
+
    bool useDragForce;
    bool usePropOriginForSrp;
    bool addRelativisticCorrection;

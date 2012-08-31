@@ -52,7 +52,7 @@ END_EVENT_TABLE()
  * @note Creates the JacchiaRoberts drag dialog
  */
 //------------------------------------------------------------------------------
-DragInputsDialog::DragInputsDialog(wxWindow *parent, DragForce *dragForce,
+DragInputsDialog::DragInputsDialog(wxWindow *parent, Real *dragBuffer,
                                    const wxString& title)
    : GmatDialog(parent, -1, title)
 {
@@ -63,11 +63,10 @@ DragInputsDialog::DragInputsDialog(wxWindow *parent, DragForce *dragForce,
        dragForce ? dragForce->GetName().c_str() : "NULL");
    #endif
    
-   mObject = (GmatBase*)dragForce;   
-   theForce = dragForce;
+   theForceData = dragBuffer;
    isTextModified = false;
    
-   if (theForce != NULL)
+   if (theForceData != NULL)
    {
       Create();
       ShowData();
@@ -75,7 +74,7 @@ DragInputsDialog::DragInputsDialog(wxWindow *parent, DragForce *dragForce,
    else
    {
       MessageInterface::ShowMessage
-         ("***  ERROR *** DragInputsDialog() input drag force is NULL\n");
+         ("***  ERROR *** DragInputsDialog() input drag data is NULL\n");
    }
    
    #ifdef DEBUG_DRAG_INPUT
@@ -91,14 +90,6 @@ DragInputsDialog::~DragInputsDialog()
 {
 }
 
-
-//------------------------------------------------------------------------------
-// void GetForce()
-//------------------------------------------------------------------------------
-DragForce* DragInputsDialog::GetForce()
-{
-   return theForce;
-}
 
 //-------------------------------
 // private methods
@@ -234,80 +225,13 @@ void DragInputsDialog::LoadData()
    MessageInterface::ShowMessage("DragInputsDialog::LoadData() entered\n");
    #endif
    
-   try
-   {
-      solarFluxID = theForce->GetParameterID("F107");
-      solarFluxTextCtrl->
-         SetValue(wxVariant(theForce->GetRealParameter(solarFluxID)));
-   }
-   catch (BaseException &e)
-   {
-      MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetFullMessage()); 
-   }
-   
-   try
-   {
-      avgSolarFluxID = theForce->GetParameterID("F107A");
-      avgSolarFluxTextCtrl->
-         SetValue(wxVariant(theForce->GetRealParameter(avgSolarFluxID)));
-   }
-   catch (BaseException &e)
-   {
-      MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetFullMessage()); 
-   }
-   
-   try
-   {
-      geomagnecticIndexID = theForce->GetParameterID("MagneticIndex");
-      geomagneticIndexTextCtrl->
-         SetValue(wxVariant(theForce->GetRealParameter(geomagnecticIndexID)));
-   }
-   catch (BaseException &e)
-   {
-      MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetFullMessage()); 
-   }
-   
-   try
-   {
-      solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
-      wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
+   useFile = false;
+   userInputRadioButton->SetValue(true);
 
-//      if (!filename.IsNull())
-//         fileNameTextCtrl->SetValue(filename);
-   }
-   catch (BaseException &e)
-   {
-      MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetFullMessage()); 
-   }
-   
-   try
-   {
-      inputSourceID = theForce->GetParameterID("InputSource");
-      inputSourceString = theForce->GetStringParameter(inputSourceID).c_str();
-   }
-   catch (BaseException &e)
-   {
-      MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetFullMessage()); 
-   }
-   
-   if (inputSourceString.CmpNoCase("Constant") == 0)
-   {
-      useFile = false;
-      userInputRadioButton->SetValue(true);
-//      fileInputRadioButton->SetValue(false);
-   }
-   else if (inputSourceString.CmpNoCase("File") == 0)
-   {
-      useFile = true;
-      userInputRadioButton->SetValue(false);
-//      fileInputRadioButton->SetValue(true);
-   }
-   
+   solarFluxTextCtrl->SetValue(wxVariant(theForceData[0]));
+   avgSolarFluxTextCtrl->SetValue(wxVariant(theForceData[1]));
+   geomagneticIndexTextCtrl->SetValue(wxVariant(theForceData[2]));
+
    Update();
    
    #ifdef DEBUG_DRAG_LOAD
@@ -379,12 +303,9 @@ void DragInputsDialog::SaveData()
       {
          if (isTextModified)
          {
-            inputSourceString = wxT("Constant");
-            theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
-            
-            theForce->SetRealParameter(solarFluxID, flux);
-            theForce->SetRealParameter(avgSolarFluxID, avgFlux);
-            theForce->SetRealParameter(geomagnecticIndexID, magIndex);
+            theForceData[0] = flux;
+            theForceData[1] = avgFlux;
+            theForceData[2] = magIndex;
             
             isTextModified = false;
          }

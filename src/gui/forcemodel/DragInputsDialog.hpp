@@ -26,9 +26,8 @@ class DragInputsDialog : public GmatDialog
 {
 public:
    
-   DragInputsDialog(wxWindow *parent, DragForce *dragForce, const wxString &title = "");
-   ~DragInputsDialog();
-   DragForce* GetForce();
+   DragInputsDialog(wxWindow *parent, Real *dragBuffer, const wxString &title = "");
+   virtual ~DragInputsDialog();
    
 private:
    
@@ -52,14 +51,8 @@ private:
    wxRadioButton *userInputRadioButton;
    wxRadioButton *fileInputRadioButton;
    
-   DragForce *theForce;
-   
-   Integer solarFluxID;
-   Integer avgSolarFluxID;
-   Integer geomagnecticIndexID;
-   Integer solarFluxFileID;
-   Integer inputSourceID;
-   
+   Real *theForceData;
+      
    wxString inputSourceString;
    
    // Methods inherited from GmatDialog

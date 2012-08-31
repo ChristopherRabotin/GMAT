@@ -1000,6 +1000,12 @@ void PropagationConfigPanel::PopulateForces()
                primaryBodyData->dragType = atmosModelString;
                primaryBodyData->dragf = theDragForce;
 
+               dragParameterBuffer[0] = theDragForce->GetRealParameter("F107");
+               dragParameterBuffer[1] = theDragForce->GetRealParameter("F107A");
+               dragParameterBuffer[2] = theDragForce->GetRealParameter("MagneticIndex");
+               dragBufferReady = true;
+
+
                //Warn user about bodies already added as Primary body
                Integer pmSize = (Integer)pointMassBodyList.size();
 //               Integer last = (Integer)primaryBodyList.size() - 1;
@@ -1269,18 +1275,16 @@ void PropagationConfigPanel::SaveData()
                   ShowForceList("SaveData() BEFORE  saving DragForce");
                   #endif
 
-                  Real fluxF107 = -999.999;
-                  Real fluxF107A = -999.999;
-                  Real kp = -999.999;
-
-//                  DragForce *df = primaryBodyList[i]->dragf;
                   DragForce *df = primaryBodyData->dragf;
+
                   // save drag flux info for later use
-                  if (df != NULL)
+                  if ((df != NULL) && (!dragBufferReady))
                   {
-                     fluxF107 = df->GetRealParameter("F107");
-                     fluxF107A = df->GetRealParameter("F107A");
-                     kp = df->GetRealParameter("MagneticIndex");
+                     dragParameterBuffer[0] = df->GetRealParameter("F107");
+                     dragParameterBuffer[1] = df->GetRealParameter("F107A");
+                     dragParameterBuffer[2] = df->GetRealParameter("MagneticIndex");
+
+                     dragBufferReady = true;
                   }
 
                   // create new DragForce
@@ -1321,13 +1325,12 @@ void PropagationConfigPanel::SaveData()
                   theDragForce->SetStringParameter(paramId,
                         primaryBodyData->dragType.c_str());
                   theDragForce->SetStringParameter("BodyName", bodyName);
-
                   // if drag force was previous defined, set previous flux value
-                  if (fluxF107 != -999.999)
+                  if (dragBufferReady)
                   {
-                     theDragForce->SetRealParameter("F107", fluxF107);
-                     theDragForce->SetRealParameter("F107A", fluxF107A);
-                     theDragForce->SetRealParameter("MagneticIndex", kp);
+                     theDragForce->SetRealParameter("F107", dragParameterBuffer[0]);
+                     theDragForce->SetRealParameter("F107A", dragParameterBuffer[1]);
+                     theDragForce->SetRealParameter("MagneticIndex", dragParameterBuffer[2]);
                   }
 
 //                  primaryBodyList[i]->dragf = theDragForce;
@@ -1765,6 +1768,10 @@ void PropagationConfigPanel::Initialize()
    // initialize mag. filed model type array
    magfModelArray.Add("None");
 
+   // Initialize the data for drag modeling
+   dragParameterBuffer[0] = dragParameterBuffer[1] = 150.0;
+   dragParameterBuffer[2] = 3.0;
+   dragBufferReady = false;
 }
 
 
@@ -2901,6 +2908,18 @@ bool PropagationConfigPanel::SaveAtmosModel()
       theDragForce->SetStringParameter(paramId, dragType.c_str());
       theDragForce->SetStringParameter("BodyName", bodyName.c_str());
 
+      #ifdef DEBUG_PROP_PANEL_ATMOS
+            MessageInterface::ShowMessage("Drag buffer %s\n",
+                  dragBufferReady ? "Ready" : "Not Ready");
+      #endif
+
+      if (dragBufferReady)
+      {
+         theDragForce->SetRealParameter("F107", dragParameterBuffer[0]);
+         theDragForce->SetRealParameter("F107A", dragParameterBuffer[1]);
+         theDragForce->SetRealParameter("MagneticIndex", dragParameterBuffer[2]);
+      }
+
       isAtmosChanged = false;
       canClose = true;
       return true;
@@ -3060,7 +3079,7 @@ void PropagationConfigPanel::OnAtmosphereModelComboBox(wxCommandEvent &event)
 
    #ifdef DEBUG_PROP_PANEL_ATMOS
    MessageInterface::ShowMessage("OnAtmosphereModelComboBox() body=%s\n",
-                                 primaryBodyList[currentBodyId]->bodyName.c_str());
+                                 primaryBody.c_str());
    #endif
 
    dragTypeName = theAtmosModelComboBox->GetStringSelection();
@@ -3076,8 +3095,8 @@ void PropagationConfigPanel::OnAtmosphereModelComboBox(wxCommandEvent &event)
       #ifdef DEBUG_PROP_PANEL_ATMOS
       MessageInterface::ShowMessage
          ("OnAtmosphereModelComboBox() drag changed from=%s to=%s for body=%s\n",
-          primaryBodyList[currentBodyId]->dragType.c_str(), dragTypeName.c_str(),
-          primaryBodyList[currentBodyId]->bodyName.c_str());
+          primaryBodyData->dragType.c_str(), dragTypeName.c_str(),
+          primaryBody.c_str());
       #endif
 
 //      primaryBodyList[currentBodyId]->dragType = dragTypeName;
@@ -3359,39 +3378,35 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
 void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
 {
    DragForce *dragForce = NULL;
-
-   // if DragForce has not been created, create it first by calling SaveData()
-//   if (primaryBodyList[currentBodyId]->dragf == NULL)
-   if (primaryBodyData->dragf == NULL)
-   {
-      isForceModelChanged = true;
-      SaveData();
-   }
-   else if (isAtmosChanged)
-   {
-      SaveAtmosModel();
-   }
-
    dragForce = primaryBodyData->dragf;
-   if (dragForce != NULL)
+
+   // Per S. Hughes:
+   std::string title = "Space Weather Setup";
+
+   if ((dragForce != NULL) && !dragBufferReady)
    {
-      std::string title = primaryBodyData->dragType.c_str();
-      title += " Setup";
+      dragParameterBuffer[0] = dragForce->GetRealParameter("F107");
+      dragParameterBuffer[1] = dragForce->GetRealParameter("F107A");
+      dragParameterBuffer[2] = dragForce->GetRealParameter("MagneticIndex");
+      dragBufferReady = true;
+   }
 
-      // Buffer the settings -- this is temporary, and will need to be more
-      // robust when more settings are added
-      Real dragSettings[3];
-      dragSettings[0] = dragForce->GetRealParameter("F107");
-      dragSettings[1] = dragForce->GetRealParameter("F107A");
-      dragSettings[2] = dragForce->GetRealParameter("MagneticIndex");
+   // Buffer the settings -- this is temporary, and will need to be more
+   // robust when more settings are added
+   Real dragSettings[3];
+   dragSettings[0] = dragParameterBuffer[0];
+   dragSettings[1] = dragParameterBuffer[1];
+   dragSettings[2] = dragParameterBuffer[2];
 
-      DragInputsDialog dragDlg(this, dragForce, title.c_str());
-      dragDlg.ShowModal();
+   DragInputsDialog dragDlg(this, dragParameterBuffer, title.c_str());
+   dragDlg.ShowModal();
 
-      if ((dragSettings[0] != dragForce->GetRealParameter("F107")) ||
-          (dragSettings[1] != dragForce->GetRealParameter("F107A")) ||
-          (dragSettings[2] != dragForce->GetRealParameter("MagneticIndex")) )
-         EnableUpdate(true);
+   if ((dragSettings[0] != dragParameterBuffer[0]) ||
+       (dragSettings[1] != dragParameterBuffer[1]) ||
+       (dragSettings[2] != dragParameterBuffer[2]) )
+   {
+      dragBufferReady = true;
+      EnableUpdate(true);
    }
 }
 
