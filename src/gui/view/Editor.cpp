@@ -373,7 +373,7 @@ void Editor::OnFind(wxCommandEvent &WXUNUSED(event))
 {
    if (mFindReplaceDialog == NULL)
    {
-      mFindReplaceDialog = new FindReplaceDialog(this, -1, "Find & Replace");
+      mFindReplaceDialog = new FindReplaceDialog(this, -1, "Find and Replace");
       
       #ifdef DEBUG_EDITOR_FIND
       MessageInterface::ShowMessage
@@ -408,9 +408,13 @@ void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
        mFindReplaceDialog, mFindText.c_str());
    #endif
    
-   // Set the selection anchor to the caret (basically clears selection so that we
-   // stop finding the same thing)
-   SetAnchor(GetCurrentPos());
+   int i, cPos, ePos;
+   cPos = GetCurrentPos();
+   ePos = GetAnchor();
+   if (cPos > ePos)
+	 SetAnchor(cPos);
+   else
+	 SetAnchor(ePos);
    SearchAnchor();
       
    #ifdef DEBUG_EDITOR_FIND
@@ -420,13 +424,13 @@ void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
    
    // Find some text starting at the search anchor.
    // This does not ensure the selection is visible.
-   mLastFindPos = SearchNext(wxSTC_FIND_WHOLEWORD, mFindText);
+   mLastFindPos = SearchNext(0, mFindText);
    // make sure caret is at end of selection
-   int cPos = GetCurrentPos();
-   int ePos = GetAnchor();
+   cPos = GetCurrentPos();
+   ePos = GetAnchor();
    if (cPos < ePos) 
    {
-	   int i = cPos;
+	   i = cPos;
 	   SetCurrentPos(ePos);
 	   SetAnchor(i);
    }
@@ -462,19 +466,6 @@ void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
        mFindReplaceDialog, mFindText.c_str());
    #endif
    
-   // Set the selection anchor to the caret (basically clears selection so that we
-   // stop finding the same thing)
-   SetAnchor(GetCurrentPos());
-   SearchAnchor();
-   
-   #ifdef DEBUG_EDITOR_FIND
-   int anchorPos = GetAnchor();
-   MessageInterface::ShowMessage("   anchorPos=%d\n", anchorPos);
-   #endif
-   
-   // Find some text starting at the search anchor and moving backwards.
-   // This does not ensure the selection is visible.
-   mLastFindPos = SearchPrev(wxSTC_FIND_WHOLEWORD, mFindText);
    // make sure caret is at beginning of selection
    int cPos = GetCurrentPos();
    int ePos = GetAnchor();
@@ -484,6 +475,16 @@ void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
 	   SetCurrentPos(ePos);
 	   SetAnchor(i);
    }
+   SearchAnchor();
+   
+   #ifdef DEBUG_EDITOR_FIND
+   int anchorPos = GetAnchor();
+   MessageInterface::ShowMessage("   anchorPos=%d\n", anchorPos);
+   #endif
+   
+   // Find some text starting at the search anchor and moving backwards.
+   // This does not ensure the selection is visible.
+   mLastFindPos = SearchPrev(0, mFindText);
    int line = GetCurrentLine();
    
    #ifdef DEBUG_EDITOR_FIND
