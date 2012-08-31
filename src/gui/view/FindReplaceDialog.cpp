@@ -72,10 +72,11 @@ void FindReplaceDialog::Create()
    wxStaticText *findText = new wxStaticText(this, -1, "Find What");
    mFindComboBox =
       new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize,
-                     mFindArray, wxTE_PROCESS_ENTER);
+                     mFindArray, 0);
    mFindNextButton =
       new wxButton(this, ID_BUTTON, wxT("Find Next"),
                    wxDefaultPosition, wxDefaultSize, 0);
+   mFindNextButton->SetDefault();
    mFindPrevButton =
       new wxButton(this, ID_BUTTON, wxT("Find Previous"),
                    wxDefaultPosition, wxDefaultSize, 0);
@@ -167,7 +168,7 @@ void FindReplaceDialog::OnButtonClick(wxCommandEvent &event)
       mFindText = mFindComboBox->GetValue();
       mReplaceText = mReplaceComboBox->GetValue();
 
-      if (mFindText != "" && mReplaceText != "")
+      if (mFindText != "")
       {
          #ifdef DEBUG_FIND_REPLACE
          MessageInterface::ShowMessage
