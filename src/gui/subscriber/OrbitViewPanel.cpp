@@ -248,16 +248,16 @@ void OrbitViewPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    mDataCollectFreqTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, 20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    mUpdatePlotFreqTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, 20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    mStarCountStaticText =
       new wxStaticText(this, -1, wxT("Number of stars "), 
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mStarCountTextCtrl = 
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("7000"), wxDefaultPosition, wxSize(50, 20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("7000"), wxDefaultPosition, wxSize(50, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    //mStarCountTextCtrl->Disable();
    
    mEnableStarsCheckBox = 
@@ -292,7 +292,7 @@ void OrbitViewPanel::Create()
                                      "(Enter 0 to redraw whole plot)"),
                        wxDefaultPosition, wxSize(-1, 30), 0);
    mNumPointsToRedrawTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(30, 20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(30, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    wxBoxSizer *numPointsSizer = new wxBoxSizer(wxHORIZONTAL);
    numPointsSizer->Add(numPointsToRedrawLabel1, 0, wxALIGN_LEFT|wxALL, 0);
@@ -546,11 +546,11 @@ void OrbitViewPanel::Create()
    // View point reference
    //-----------------------------------------------------------------
    mViewPointRef1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mViewPointRef2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mViewPointRef3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mViewPointRefStaticText = new wxStaticText(this, -1, wxT("km"),
      wxDefaultPosition, wxSize(-1,-1), 0);
    
@@ -564,11 +564,11 @@ void OrbitViewPanel::Create()
    // View point vector
    //-----------------------------------------------------------------
    mViewPointVec1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mViewPointVec2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mViewPointVec3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    mViewPointVecStaticText = new wxStaticText(this, -1, wxT("km"),
      wxDefaultPosition, wxSize(-1,-1), 0);
@@ -585,11 +585,11 @@ void OrbitViewPanel::Create()
    mViewDirVectorSizer = new wxBoxSizer(wxHORIZONTAL);
    
    mViewDir1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mViewDir2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mViewDir3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("-1"), wxDefaultPosition, wxSize(60,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("-1"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mViewDirStaticText = new wxStaticText(this, -1, wxT("km"),
      wxDefaultPosition, wxSize(-1,-1), 0);
 
@@ -636,7 +636,7 @@ void OrbitViewPanel::Create()
       new wxStaticText(this, -1, wxT("View Scale Factor"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mViewScaleFactorTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    mViewDefSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mViewDefSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -1074,7 +1074,7 @@ void OrbitViewPanel::SaveData()
                    "NumPointsToRedraw", "Integer Number >= 0", false, true, true, true);
       
       CheckInteger(starCount, mStarCountTextCtrl->GetValue().c_str(),
-                   "StarCount", "Integer Number >= 0", false, true);
+                   "StarCount", "Integer Number >= 0", false, true, true);
       
       #ifdef __ENABLE_FOV__
       CheckInteger(initialFOV, mFovTextCtrl->GetValue().c_str(),
