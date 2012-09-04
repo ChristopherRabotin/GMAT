@@ -324,7 +324,7 @@ void ScriptEventPanel::LoadData()
       // TGG: Fix for GMT-2982 
 	  // add comment symbols
 
-   wxString comments = theCommand->GetCommentLine();
+   wxString comments = theCommand->GetCommentLine().c_str();
    if (comments.StartsWith("% "))  // gets rid of first %
      comments = comments.Mid(2, comments.Length()-1);
    
