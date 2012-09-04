@@ -32,6 +32,7 @@
 //#define DEBUG_MINIMIZE_PARAM
 //#define DEBUG_MINIMIZE_PARSING
 //#define DEBUG_WRAPPER_CODE
+//#define DEBUG_RENAME
 
 
 //---------------------------------
