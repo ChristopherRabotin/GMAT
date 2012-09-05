@@ -136,6 +136,7 @@ namespace GmatStringUtil
    GMAT_API bool IsEnclosedWithBrackets(const std::string &str);
    GMAT_API bool IsBracketBalanced(const std::string &str, const std::string &bracketPair);
    GMAT_API bool IsParenBalanced(const std::string &str);
+   GMAT_API bool IsParenEmpty(const std::string &str);
    GMAT_API bool AreAllBracketsBalanced(const std::string &str, const std::string &allPairs);
    GMAT_API bool IsOuterParen(const std::string &str);
    GMAT_API bool IsCommaPartOfArray(const std::string &str, Integer start = 0);
@@ -154,6 +155,7 @@ namespace GmatStringUtil
    GMAT_API bool IsBlank(const std::string &str, bool ignoreEol = false);
    GMAT_API bool HasMissingQuote(const std::string &str, const std::string &quote);
    GMAT_API bool IsMathEquation(const std::string &str);
+   GMAT_API bool IsMathOperator(const char &ch);
    
    GMAT_API Integer NumberOfOccurrences(const std::string &str, const char c);
    

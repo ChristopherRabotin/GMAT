@@ -54,7 +54,7 @@
 //#define DEBUG_COORD_SYS_PROP
 //#define DEBUG_PROP_SETUP_PROP
 //#define DEBUG_FORCE_MODEL_PROP
-//#define DBGLVL_WRAPPERS 1
+//#define DBGLVL_WRAPPERS 2
 //#define DEBUG_AXIS_SYSTEM
 
 //#ifndef DEBUG_MEMORY
@@ -629,17 +629,18 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    Real           rval;
    
    // remove extra parens and blank spaces at either end of string
-   theDescription = GmatStringUtil::Trim(desc);
-   theDescription = GmatStringUtil::RemoveExtraParen(theDescription);
-   theDescription = GmatStringUtil::Trim(theDescription);
+   std::string noBlanks = GmatStringUtil::Trim(desc);   
+   std::string noExtraParen = GmatStringUtil::RemoveExtraParen(noBlanks);
+   theDescription = GmatStringUtil::Trim(noExtraParen);
    
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
-      ("In Validator::CreateElementWrapper, original string is \"%s\"\n",
-       desc.c_str(), "\"\n");
+      ("In Validator::CreateElementWrapper\n"
+       "   original string is <%s>\n", desc.c_str(), "\"\n");
    MessageInterface::ShowMessage
-      ("                                 and trimmed string is \"%s\"\n",
-       theDescription.c_str(), "\"\n");
+      ("   with no extra paren is <%s>\n", noExtraParen.c_str());
+   MessageInterface::ShowMessage
+      ("   and trimmed string is <%s>\n", theDescription.c_str(), "\"\n");
    MessageInterface::ShowMessage
       ("   parametersFirst=%d, manage=%d\n", parametersFirst, manage);
    #endif

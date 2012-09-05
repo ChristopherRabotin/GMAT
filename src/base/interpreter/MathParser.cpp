@@ -181,6 +181,9 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
    {
       // Remove blanks before checking for function name
       std::string str1 = GmatStringUtil::RemoveAllBlanks(str);
+      // Remove extra layer of parenthesis before checking
+      str1 = GmatStringUtil::RemoveExtraParen(str1);
+      
       #if DEBUG_PARSE_EQUATION
       MessageInterface::ShowMessage
          ("   after blank removal str1=<%s>", str1.c_str());
@@ -355,7 +358,7 @@ std::string MathParser::FindLowestOperator(const std::string &str,
          ("   substr=%s from %u and length of %u\n", substr.c_str(), close1+1, start1-close1-1);
       #endif
       
-      bool isAfterCloseParen = (close1 != substr.npos ? true : false);
+      bool isAfterCloseParen = (close1 != -1 ? true : false);
       opStr = FindOperator(substr, index, isAfterCloseParen);
       
       if (opStr != "")
@@ -504,14 +507,12 @@ MathNode* MathParser::Parse(const std::string &str)
       ("=================================================================\n");
    #endif
    
-   // first remove all blank spaces and semicoln
-   std::string newEq = GmatStringUtil::RemoveAll(theEquation, ' ');
+   // first remove all blank spaces, extra layer of parenthesis, and semicoln
+   std::string newEq = GmatStringUtil::RemoveAllBlanks(theEquation);
+   newEq = GmatStringUtil::RemoveExtraParen(newEq);
    std::string::size_type index = newEq.find_first_of(';');
    if (index != newEq.npos)
       newEq.erase(index);
-   
-   // second remove extra parenthesis (This need more testing - so commented out)
-   //newEq = GmatStringUtil::RemoveExtraParen(newEq);
    
    // check if parenthesis are balanced
    if (!GmatStringUtil::IsParenBalanced(newEq))
@@ -586,6 +587,11 @@ MathNode* MathParser::ParseNode(const std::string &str)
       
       // Remove extra parenthesis before creating a node (LOJ: 2010.07.29)
       std::string str1 = GmatStringUtil::RemoveExtraParen(str);
+      
+      // Check for empty parenthesis such as () or (()) since RemoveExtraParen()
+      // does not remove it.
+      if (GmatStringUtil::IsParenEmpty(str1))
+         str1 = "";
       
       #if DEBUG_CREATE_NODE
       MessageInterface::ShowMessage
