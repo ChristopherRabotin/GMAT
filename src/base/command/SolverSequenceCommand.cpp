@@ -137,8 +137,7 @@ bool SolverSequenceCommand::RenameRefObject(const Gmat::ObjectType type,
       solverName = newName;
       return true;
    }
-
-   return GmatCommand::RenameRefObject(type, oldName, newName);
+   return true;
 }
 
 //------------------------------------------------------------------------------
