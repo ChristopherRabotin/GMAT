@@ -265,8 +265,6 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
-   bool retval = false;
-
    #if DEBUG_MANEUVER
       MessageInterface::ShowMessage
          ("Maneuver::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
@@ -278,7 +276,7 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
       if (satName == oldName)
       {
          satName = newName;
-         retval = true;
+         return true;
       }
    }
    else if (type == Gmat::IMPULSIVE_BURN)
@@ -286,11 +284,12 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
       if (burnName == oldName)
       {
          burnName = newName;
-         retval = true;
+         return true;
       }
    }
-
-   return retval;
+   // need to return true to avoid error messages in the GUI when the name doesn't match an object
+   // the this command knows about
+   return true;
 }
 
 
