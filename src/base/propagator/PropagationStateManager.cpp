@@ -435,6 +435,15 @@ bool PropagationStateManager::MapObjectsToVector()
 {
    #ifdef DEBUG_OBJECT_UPDATES
       MessageInterface::ShowMessage("Mapping objects to vector\n");
+
+      // Look at state data before
+      MessageInterface::ShowMessage("O -> V: Real object data before: [");
+      for (Integer index = 0; index < stateSize; ++index)
+         if (stateMap[index]->parameterType ==  Gmat::REAL_TYPE)
+            MessageInterface::ShowMessage(" %lf ",
+                  (stateMap[index]->object)->GetRealParameter(
+                        stateMap[index]->parameterID));
+      MessageInterface::ShowMessage("]\n");
    #endif
 
    Real value;
@@ -543,6 +552,15 @@ bool PropagationStateManager::MapObjectsToVector()
          MessageInterface::ShowMessage("   %d: %s%.12lf\n", index, lbl.c_str(), 
                state[index]);
       }
+
+      // Look at state data after
+      MessageInterface::ShowMessage("Real object data after: [");
+      for (Integer index = 0; index < stateSize; ++index)
+         if (stateMap[index]->parameterType ==  Gmat::REAL_TYPE)
+            MessageInterface::ShowMessage(" %lf ",
+                  (stateMap[index]->object)->GetRealParameter(
+                        stateMap[index]->parameterID));
+      MessageInterface::ShowMessage("]\n");
    #endif
 
    return true;
@@ -564,6 +582,15 @@ bool PropagationStateManager::MapVectorToObjects()
    #ifdef DEBUG_OBJECT_UPDATES
       MessageInterface::ShowMessage("Mapping vector to objects\n"
             "   Epoch = %.12lf\n", state.GetEpoch());
+
+      // Look at state data before
+      MessageInterface::ShowMessage("V -> O: Real object data before: [");
+      for (Integer index = 0; index < stateSize; ++index)
+         if (stateMap[index]->parameterType ==  Gmat::REAL_TYPE)
+            MessageInterface::ShowMessage(" %lf ",
+                  (stateMap[index]->object)->GetRealParameter(
+                        stateMap[index]->parameterID));
+      MessageInterface::ShowMessage("]\n");
    #endif
 
    for (Integer index = 0; index < stateSize; ++index)
@@ -610,6 +637,17 @@ bool PropagationStateManager::MapVectorToObjects()
    GmatEpoch theEpoch = state.GetEpoch();
    for (UnsignedInt i = 0; i < objects.size(); ++i)
       objects[i]->SetRealParameter(epochIDs[i], theEpoch);
+
+   #ifdef DEBUG_OBJECT_UPDATES
+      // Look at object data after
+      MessageInterface::ShowMessage("Real object data after: [");
+      for (Integer index = 0; index < stateSize; ++index)
+         if (stateMap[index]->parameterType ==  Gmat::REAL_TYPE)
+            MessageInterface::ShowMessage(" %lf ",
+                  (stateMap[index]->object)->GetRealParameter(
+                        stateMap[index]->parameterID));
+      MessageInterface::ShowMessage("]\n");
+   #endif
 
    return true;
 }

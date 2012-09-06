@@ -574,7 +574,8 @@ void CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Real *inState,
       ("In CS::ToBaseSystem, inState = \n   %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
        inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
    MessageInterface::ShowMessage
-      ("   axes=<%p> '%s'\n", axes, axes ? axes->GetName().c_str() : "NULL");
+      ("   axes=<%p> '%s'\n", axes, axes ? (axes->GetName().c_str() == "" ?
+       axes->GetTypeName().c_str() : axes->GetName().c_str()) : "NULL");
    #endif
    Real internalState[6];
    if (axes)

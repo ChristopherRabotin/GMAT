@@ -814,8 +814,8 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #ifdef DEBUG_ROT_MATRIX
       if (visitCount == 0)
       {
-         MessageInterface::ShowMessage(" ------------ rv Primary to Secondary = %s\n",
-               rv.ToString().c_str());
+         MessageInterface::ShowMessage(" ------------ rv Primary (%s) to Secondary (%s) = %s\n",
+               primary->GetName().c_str(), secondary->GetName().c_str(), rv.ToString().c_str());
          visitCount++;
       }
    #endif

@@ -2077,6 +2077,13 @@ void Thruster::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epo
 //         // Now rotate to MJ2000Eq axes
 //         localCoordSystem->ToMJ2000Eq(epoch, inDir, outDir, true);
          // Now rotate to base system axes
+         #ifdef DEBUG_THRUSTER_CONVERT
+            MessageInterface::ShowMessage("Converting thruster burn direction "
+                  "using local CS:\n%s\n", localCoordSystem->
+                  GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+         #endif
+
+
          localCoordSystem->ToBaseSystem(epoch, inDir, outDir, true);  // @todo - do we need ToMJ2000Eq here?
          
          dirInertial[0] = outDir[0];

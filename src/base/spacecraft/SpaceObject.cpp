@@ -153,6 +153,10 @@ SpaceObject& SpaceObject::operator=(const SpaceObject& so)
 //------------------------------------------------------------------------------
 GmatState& SpaceObject::GetState()
 {
+   #ifdef DEBUG_STATE_ACCESS
+      MessageInterface::ShowMessage("Directly accessing state vector for %s\n",
+            instanceName.c_str());
+   #endif
    return state;
 }
 
@@ -305,13 +309,12 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
          "SpaceObject::GetMJ2000State MJ2000 body not yet set for " +
          instanceName + "\n");
          
-   GmatState ps = GetState();
-   
-   Real *st = ps.GetState();
+   Real *st = state.GetState(); //ps.GetState();
 
    #ifdef DEBUG_J2000_STATE
-      MessageInterface::ShowMessage("   Object state: [%lf %lf %lf %lf %lf "
-            "%lf]\n", st[0], st[1], st[2], st[3], st[4], st[5]);
+      MessageInterface::ShowMessage("   %s Object state: [%lf %lf %lf %lf %lf "
+            "%lf]\n", instanceName.c_str(), st[0], st[1], st[2], st[3], st[4],
+            st[5]);
       MessageInterface::ShowMessage("   Accessing J2000 body state for %s\n",
          j2000Body->GetName().c_str());
    #endif
@@ -323,33 +326,6 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
          bodyState[5]);
    #endif
 
-//   // If origin is NULL, assume it is set at the J2000 origin.
-//   if (origin)
-//   {
-//      if (origin != j2000Body)
-//      {
-//         #ifdef DEBUG_J2000_STATE
-//            MessageInterface::ShowMessage("   Accessing origin state for %s\n",
-//               origin->GetName().c_str());
-//         #endif
-//
-//         Rvector6 offset = origin->GetMJ2000State(atTime);
-//
-//         #ifdef DEBUG_J2000_STATE
-//            MessageInterface::ShowMessage("   origin: [%lf %lf %lf %lf %lf %lf]\n",
-//               offset[0], offset[1], offset[2], offset[3], offset[4], offset[5]);
-//         #endif
-//
-//         bodyState -= offset;
-//
-//         #ifdef DEBUG_J2000_STATE
-//            MessageInterface::ShowMessage("   Diff: [%lf %lf %lf %lf %lf %lf]\n",
-//               bodyState[0], bodyState[1], bodyState[2], bodyState[3], bodyState[4],
-//               bodyState[5]);
-//         #endif
-//      }
-//   }
-   
    Rvector6 j2kState;
    
    j2kState[0] = st[0] - bodyState[0];
