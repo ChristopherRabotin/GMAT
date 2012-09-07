@@ -222,7 +222,6 @@ Thruster::Thruster(std::string nomme) :
    
    for (Integer i=DUTY_CYCLE; i < ThrusterParamCount; i++)
       parameterWriteOrder.push_back(i);
-   
 }
 
 
@@ -321,6 +320,17 @@ Thruster::Thruster(const Thruster& th) :
    tanks = th.tanks;
    
    isInitialized = false;
+
+   // set parameter write order
+   for (Integer i=HardwareParamCount; i <= AXES; i++)
+      parameterWriteOrder.push_back(i);
+
+   parameterWriteOrder.push_back(DIRECTION_X);
+   parameterWriteOrder.push_back(DIRECTION_Y);
+   parameterWriteOrder.push_back(DIRECTION_Z);
+
+   for (Integer i=DUTY_CYCLE; i < ThrusterParamCount; i++)
+      parameterWriteOrder.push_back(i);
 
    #ifdef DEBUG_THRUSTER_CONSTRUCTOR
    MessageInterface::ShowMessage("Thruster::Thruster(copy) exiting\n");
