@@ -34,7 +34,6 @@
 #include "Rmatrix33.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
-//#include "Anomaly.hpp"
 
 class GMAT_API StateConversionUtil
 {
