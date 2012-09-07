@@ -28,7 +28,7 @@
 #include "CoordinateSystem.hpp"
 #include "CelestialBody.hpp"
 
-// Declare forward reference since Spacecraft ownes Thruster
+// Declare forward reference since Spacecraft owns Thruster
 class Spacecraft;
 
 /**

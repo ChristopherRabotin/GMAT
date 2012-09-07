@@ -3851,7 +3851,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    {
       if ((Integer)parameterWriteOrder.size() < paramCount)
       {
-         // Add GmatBase parameters since it's count is no longer 0 (LOJ: 2009.11.20)
+         // Add GmatBase parameters since its count is no longer 0 (LOJ: 2009.11.20)
          for (i = 0; i < GmatBaseParamCount; ++i)
             parameterWriteOrder.push_back(i);
          
