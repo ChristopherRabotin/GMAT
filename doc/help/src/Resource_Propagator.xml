@@ -678,7 +678,7 @@
     <para><emphasis>Best Practices for Using Numerical
     Integrators</emphasis></para>
 
-    <para>The comparison data presennted in a later section suggest that the
+    <para>The comparison data presented in a later section suggest that the
     <guilabel>PrinceDormand78</guilabel> integrator is the best all purpose
     integrator in GMAT. When in doubt, use the
     <guilabel>PrinceDormance78</guilabel> integrator, and set
