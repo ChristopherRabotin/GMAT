@@ -393,7 +393,7 @@ void ConditionPanel::OnCellRightClick(wxGridEvent& event)
       wxString strArray[] = {wxT("=="), wxT("~="), wxT(">"), wxT("<"), 
                              wxT(">="), wxT("<=")};        
       
-      wxSingleChoiceDialog dialog(this, _T("Relation Operator Selection:"),
+      wxSingleChoiceDialog dialog(this, _T("Relational Operator Selection:"),
                                         _T("RelationalOperators"), 6, strArray);
       dialog.SetSelection(0);
       
