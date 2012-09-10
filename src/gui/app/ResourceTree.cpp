@@ -2186,7 +2186,11 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          //UpdateGuiItem(itemType);
          theGuiManager->UpdateAll(objType);
          theGuiManager->NotifyObjectNameChange(objType, oldName, newName);
-         
+
+         // Handle potential FM name change due to PropSetup name change
+         if ((objType == Gmat::PROPAGATOR) || (objType == Gmat::PROP_SETUP))
+            theGuiManager->UpdateForceModel(true);
+
          if (objType == Gmat::SPACECRAFT)
          {
             // Why refresh spacecraft items?
