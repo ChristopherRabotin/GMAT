@@ -3449,10 +3449,19 @@ void GmatMainFrame::OnHelpWelcome(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpContents(wxCommandEvent& WXUNUSED(event))
 {
-   #ifdef __WXMSW__
-   theHelpController->DisplayContents();
-   #else
-   #endif
+	if (theHelpController != NULL)
+		theHelpController->DisplayContents();
+	else
+	{
+	   wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
+	   config->SetPath("/Welcome/Links");
+	   wxString url = config->Read("Online Help");
+	   #ifdef DEBUG_MENU_HELP
+	   MessageInterface::ShowMessage
+		  ("GmatMainFrame::OnHelpOnline() base help url='%s'\n", url.c_str());
+	   #endif
+	   ::wxLaunchDefaultBrowser(url);
+	}
 }
 
 
@@ -3467,14 +3476,8 @@ void GmatMainFrame::OnHelpContents(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpOnline(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileConfig *config = (wxFileConfig*)wxConfigBase::Get();
-   config->SetPath("/Welcome/Links");
-   wxString url = config->Read("Online Help");
-   #ifdef DEBUG_MENU_HELP
-   MessageInterface::ShowMessage
-      ("GmatMainFrame::OnHelpOnline() base help url='%s'\n", url.c_str());
-   #endif
-   ::wxLaunchDefaultBrowser(url);
+	wxCommandEvent event;
+	OnHelpContents(event);
 }
 
 
