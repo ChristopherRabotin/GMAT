@@ -190,6 +190,7 @@ protected:
    Rvector              mPlotUpperLeft;
    Rvector              mPlotSize;
    Integer              relativeZOrder;
+   bool                 isMaximized;
    bool                 isMinimized;
 
 
@@ -246,6 +247,7 @@ public:
       SIZE,
       RELATIVE_Z_ORDER,
       MINIMIZED,
+      MAXIMIZED,
       SubscriberParamCount,
    };
    

@@ -80,6 +80,7 @@ Subscriber::PARAMETER_TEXT[SubscriberParamCount - GmatBaseParamCount] =
    "Size",
    "RelativeZOrder",
    "Minimized",
+   "Maximized",
 };
 
 const Gmat::ParameterType
@@ -91,6 +92,7 @@ Subscriber::PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount] =
    Gmat::RVECTOR_TYPE,      // "Size"
    Gmat::INTEGER_TYPE,      // "RelativeZOrder"
    Gmat::BOOLEAN_TYPE,      // "Minimized"
+   Gmat::BOOLEAN_TYPE,      // "Maximized"
 };
 
 
@@ -139,6 +141,7 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    mPlotUpperLeft = Rvector(2,0.0,0.0);
    mPlotSize      = Rvector(2,0.0,0.0);
    isMinimized    = false;
+   isMaximized    = false;
 }
 
 
@@ -179,6 +182,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
    mPlotUpperLeft    = Rvector(2,copy.mPlotUpperLeft[0], copy.mPlotUpperLeft[1]);
    mPlotSize         = Rvector(2,copy.mPlotSize[0],      copy.mPlotSize[1]);
    isMinimized       = false;
+   isMaximized       = false;
 
 #ifdef __ENABLE_CLONING_WRAPPERS__
    // Clear old wrappers
@@ -234,6 +238,7 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    mPlotSize          = rhs.mPlotSize;
    relativeZOrder     = rhs.relativeZOrder;
    isMinimized        = rhs.isMinimized;
+   isMaximized        = rhs.isMaximized;
 
    runstate = rhs.runstate;
    prevRunState = rhs.prevRunState;
@@ -995,7 +1000,7 @@ bool Subscriber::IsParameterReadOnly(const Integer id) const
 //---------------------------------------------------------------------------
 bool Subscriber::IsParameterVisible(const Integer id) const
 {
-   if (id == TARGET_STATUS || id == UPPER_LEFT || id == SIZE || id == RELATIVE_Z_ORDER|| id == MINIMIZED)
+   if (id == TARGET_STATUS || id == UPPER_LEFT || id == SIZE || id == RELATIVE_Z_ORDER|| id == MINIMIZED || id == MAXIMIZED)
       return false;
    
    return GmatBase::IsParameterVisible(id);
@@ -1280,9 +1285,13 @@ bool Subscriber::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 bool Subscriber::GetBooleanParameter(const Integer id) const
 {
-   if (id == MINIMIZED) return isMinimized;
-
-   return GmatBase::GetBooleanParameter(id);
+	switch (id)
+	{
+		case MINIMIZED: return isMinimized;
+		case MAXIMIZED: return isMaximized;
+		default:		return GmatBase::GetBooleanParameter(id);
+	}
+    
 }
 
 
@@ -1300,13 +1309,21 @@ bool Subscriber::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Subscriber::SetBooleanParameter(const Integer id, const bool value)
 {
-   if (id == MINIMIZED)
-   {
-      isMinimized = value;
-      return isMinimized;
-   }
-
-   return GmatBase::SetBooleanParameter(id, value);
+	switch (id)
+	{
+		case MINIMIZED: 
+		   {
+			  isMinimized = value;
+			  return isMinimized;
+		   }
+		case MAXIMIZED: 
+		   {
+			  isMaximized = value;
+			  return isMaximized;
+		   }
+		default:		
+			return GmatBase::SetBooleanParameter(id, value);
+	}
 }
 
 bool Subscriber::GetBooleanParameter(const std::string &label) const
