@@ -208,7 +208,7 @@ bool GroundTrackPlot::Initialize()
       
       if (PlotInterface::CreateGlPlotWindow
           (instanceName, mOldName, mPlotUpperLeft[0], mPlotUpperLeft[1],
-           mPlotSize[0], mPlotSize[1], mNumPointsToRedraw))
+           mPlotSize[0], mPlotSize[1], isMaximized, mNumPointsToRedraw))
       {
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
