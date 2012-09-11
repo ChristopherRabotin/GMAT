@@ -363,7 +363,7 @@ bool XyPlot::Initialize()
       #endif
       
       PlotInterface::CreateXyPlotWindow(instanceName, mOldName, mPlotUpperLeft[0], mPlotUpperLeft[1],
-                                        mPlotSize[0], mPlotSize[1], mPlotTitle,
+                                        mPlotSize[0], mPlotSize[1], isMaximized, mPlotTitle,
                                         mXAxisTitle, mYAxisTitle, mDrawGrid);
       
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
