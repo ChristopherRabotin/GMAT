@@ -283,7 +283,7 @@ private:
    
    void SaveChildPositionsAndSizes();
    bool GetConfigurationData(const std::string &forItem, Integer &x, Integer &y,
-                             Integer &w, Integer &h);
+                             Integer &w, Integer &h, bool &isMinimized, bool &isMaximized);
    
    void ComputeAnimationSpeed(Integer &frameInc, Integer &updateIntervalInMilSec,
                               bool slower);

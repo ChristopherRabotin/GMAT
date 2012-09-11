@@ -1920,6 +1920,7 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
    int x = (numChildren - 1) * 20;
    int y = x;
    int clientW = -1, clientH = -1;
+   bool isMinimized = false, isMaximized = false;
    GetActualClientSize(&clientW, &clientH, true);
    
    #ifdef DEBUG_CHILD_WINDOW
@@ -1988,7 +1989,7 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
       {
          // Use ScriptEditor size from the configuration data
          Integer scriptX = -1, scriptY = -1;
-         GetConfigurationData("ScriptEditor", scriptX, scriptY, w, h);
+         GetConfigurationData("ScriptEditor", scriptX, scriptY, w, h, isMinimized, isMaximized);
          #ifdef DEBUG_CHILD_WINDOW
          MessageInterface::ShowMessage
             ("   ScriptEditor size from the configuration data is (%d, %d)\n", w, h);
@@ -2002,6 +2003,10 @@ void GmatMainFrame::PositionNewChild(GmatMdiChildFrame *newChild, int numChildre
       }
       
       newChild->SetSize(x, y, w, h, wxSIZE_NO_ADJUSTMENTS);
+	  if (isMinimized)	
+		newChild->Iconize();
+	  else if (isMaximized)
+		newChild->Maximize();
       
       #ifdef DEBUG_CHILD_WINDOW
       MessageInterface::ShowMessage
@@ -4139,7 +4144,8 @@ GmatMainFrame::CreateUndockedMissionPanel(const wxString &title,
    
    // Get config data from the personalization file
    Integer x = -1, y = -1, w = -1, h = -1;
-   mUndockedMissionTreePresized = GetConfigurationData("MissionTree", x, y, w, h);
+   bool isMinimized = false, isMaximized = false;
+   mUndockedMissionTreePresized = GetConfigurationData("MissionTree", x, y, w, h, isMinimized, isMaximized);
 
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, name, title, itemType, -1, wxPoint(x, y), wxSize(w, h));
@@ -4150,6 +4156,10 @@ GmatMainFrame::CreateUndockedMissionPanel(const wxString &title,
    case GmatTree::MISSION_TREE_UNDOCKED:
       {
          UndockedMissionPanel *mtPanel = new UndockedMissionPanel(scrolledWin, name);
+		 if (isMinimized)
+			 newChild->Iconize();
+		 else if (isMaximized)
+			 newChild->Maximize();
          MissionTree *newMissionTree = mtPanel->GetMissionTree();
          
          // Now GMAT will work with new mission tree, so set appropriate pointers
@@ -5992,7 +6002,7 @@ void GmatMainFrame::SaveChildPositionsAndSizes()
 // void GetConfigurationData(const std::string &forItem)
 //------------------------------------------------------------------------------
 bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
-                                         Integer &y, Integer &w, Integer &h)
+                                         Integer &y, Integer &w, Integer &h, bool &isMinimized, bool &isMaximized)
 {
    #ifdef DEBUG_CONFIG_DATA
    MessageInterface::ShowMessage
@@ -6010,10 +6020,16 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
    upperLeftString += forItem + "//UpperLeft";
    std::string sizeString = "//";
    sizeString += forItem + "//Size";
+   std::string isMinString = "//";
+   isMinString += forItem + "//IsMinimized";
+   std::string isMaxString = "//";
+   isMaxString += forItem + "//IsMaximized";
 
    wxString treeUpperLeft, treeSize;
    pConfig->Read(upperLeftString.c_str(), &treeUpperLeft, "false");
    pConfig->Read(sizeString.c_str(), &treeSize, "false");
+   pConfig->Read(isMinString, &isMinimized, false);
+   pConfig->Read(isMaxString, &isMaximized, false);
    if ((treeUpperLeft.Lower() == "false") || (treeSize.Lower() == "false"))
    {
       x = -1;   // @todo - move it so it doesn't come up in the upper left corner on top of the main frame
