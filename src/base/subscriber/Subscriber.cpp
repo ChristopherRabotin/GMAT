@@ -121,6 +121,8 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    isFinalized           (false),
    isDataOn              (true),
    isDataStateChanged    (false),
+   isMinimized			 (false),
+   isMaximized			 (false),
    relativeZOrder        (0),
    runstate              (Gmat::IDLE),
    prevRunState          (Gmat::IDLE),
@@ -140,8 +142,6 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
 
    mPlotUpperLeft = Rvector(2,0.0,0.0);
    mPlotSize      = Rvector(2,0.0,0.0);
-   isMinimized    = false;
-   isMaximized    = false;
 }
 
 
@@ -165,6 +165,8 @@ Subscriber::Subscriber(const Subscriber &copy) :
    isFinalized           (copy.isFinalized),
    isDataOn              (copy.isDataOn),
    isDataStateChanged    (copy.isDataStateChanged),
+   isMinimized			 (copy.isMinimized),
+   isMaximized			 (copy.isMaximized),
 //   mPlotUpperLeft        (copy.mPlotUpperLeft),
 //   mPlotSize             (copy.mPlotSize),
    relativeZOrder        (copy.relativeZOrder),
@@ -181,8 +183,6 @@ Subscriber::Subscriber(const Subscriber &copy) :
    
    mPlotUpperLeft    = Rvector(2,copy.mPlotUpperLeft[0], copy.mPlotUpperLeft[1]);
    mPlotSize         = Rvector(2,copy.mPlotSize[0],      copy.mPlotSize[1]);
-   isMinimized       = false;
-   isMaximized       = false;
 
 #ifdef __ENABLE_CLONING_WRAPPERS__
    // Clear old wrappers
