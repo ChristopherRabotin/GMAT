@@ -42,7 +42,7 @@ public:
    static bool CreateGlPlotWindow(const std::string &plotName,
                         const std::string &oldName,
                         Real positionX, Real positionY,
-                        Real width, Real height,
+                        Real width, Real height, bool isMaximized,
                         Integer numPtsToRedraw);
    
    static void SetViewType(GmatPlot::ViewType view);
@@ -110,7 +110,7 @@ public:
    static bool CreateXyPlotWindow(const std::string &plotName,
                         const std::string &oldName,
                         Real positionX, Real positionY,
-                        Real width, Real height,
+                        Real width, Real height, bool isMaximized,
                         const std::string &plotTitle,
                         const std::string &xAxisTitle,
                         const std::string &yAxisTitle,

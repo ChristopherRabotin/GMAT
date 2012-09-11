@@ -90,7 +90,7 @@ PlotInterface::~PlotInterface()
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        const std::string &oldName,
                                        Real positionX, Real positionY,
-                                       Real width, Real height,
+                                       Real width, Real height, bool isMaximized,
                                        Integer numPtsToRedraw)
 {
    #if DEBUG_PLOTIF_GL_CREATE
@@ -101,7 +101,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    #endif
    
    if (thePlotReceiver != NULL)
-      return thePlotReceiver->CreateGlPlotWindow(plotName, oldName, positionX, positionY, width, height, numPtsToRedraw);
+      return thePlotReceiver->CreateGlPlotWindow(plotName, oldName, positionX, positionY, width, height, isMaximized, numPtsToRedraw);
    
    return false;
 }
@@ -392,14 +392,14 @@ bool PlotInterface::TakeGlAction(const std::string &plotName,
 bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
                                        const std::string &oldName,
                                        Real positionX, Real positionY,
-                                       Real width, Real height,
+                                       Real width, Real height, bool isMaximized,
                                        const std::string &plotTitle,
                                        const std::string &xAxisTitle,
                                        const std::string &yAxisTitle,
                                        bool drawGrid, bool canSave)
 {    
    if (thePlotReceiver != NULL)
-      return thePlotReceiver->CreateXyPlotWindow(plotName, oldName, positionX, positionY, width, height, plotTitle,
+      return thePlotReceiver->CreateXyPlotWindow(plotName, oldName, positionX, positionY, width, height, isMaximized, plotTitle,
             xAxisTitle, yAxisTitle, drawGrid, canSave);
    
    return false;
