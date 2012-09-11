@@ -529,13 +529,25 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       screenHeight++;
    #endif
 
+   bool isMinimized = IsIconized(), isMaximized = IsMaximized();
+   if (isMinimized)	
+	  Iconize(false);
+   else if (isMaximized)
+	  Maximize(false);
+
    int tmpX = -1, tmpY = -1;
    int tmpW = -1, tmpH = -1;
    GetPosition(&tmpX, &tmpY);
    GetSize(&tmpW, &tmpH);
    Rvector upperLeft(2, ((Real) tmpX /(Real)  screenWidth), ((Real) tmpY /(Real)  screenHeight));
    Rvector childSize(2,  ((Real) tmpW /(Real)  screenWidth), ((Real) tmpH /(Real)  screenHeight));
-   
+
+   if (isMinimized)	
+	  Iconize();
+   else if (isMaximized)
+	  Maximize();
+
+
    #ifdef DEBUG_PERSISTENCE
    // ======================= begin temporary ==============================
    MessageInterface::ShowMessage("*** Size of SCREEN %s is: width = %d, height = %d\n", mChildName.c_str(), screenWidth, screenHeight);
@@ -573,6 +585,7 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       sub->SetRvectorParameter(sub->GetParameterID("UpperLeft"), upperLeft);
       sub->SetRvectorParameter(sub->GetParameterID("Size"), childSize);
       sub->SetIntegerParameter(sub->GetParameterID("RelativeZOrder"), relativeZOrder);
+	  sub->SetBooleanParameter(sub->GetParameterID("Maximized"), isMaximized);
    }
    else if (mItemType == GmatTree::MISSION_TREE_UNDOCKED)
    {
@@ -585,6 +598,8 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       size << childSize[0] << " " << childSize[1];
       pConfig->Write("/MissionTree/UpperLeft", location.str().c_str());
       pConfig->Write("/MissionTree/Size", size.str().c_str());
+	  pConfig->Write("/MissionTree/IsMaximized", isMaximized);
+	  pConfig->Write("/MissionTree/IsMinimized", isMinimized);
    }
    else if (mItemType == GmatTree::SCRIPT_FILE)
    {
@@ -597,6 +612,8 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       size << childSize[0] << " " << childSize[1];
       pConfig->Write("/ScriptEditor/UpperLeft", location.str().c_str());
       pConfig->Write("/ScriptEditor/Size", size.str().c_str());
+	  pConfig->Write("/ScriptEditor/IsMaximized", isMaximized);
+	  pConfig->Write("/ScriptEditor/IsMinimized", isMinimized);
    }
 }
 
