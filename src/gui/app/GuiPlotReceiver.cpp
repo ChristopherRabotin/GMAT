@@ -213,8 +213,11 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
 
       if (frame)
       {
-		 if (isMaximized)
-		   frame->Maximize();
+		 // TGG: Commented out until we can fix the painting problem when maximizing right here
+		 //if (isMaximized)
+		 //{
+		 //   frame->Maximize();
+		 //}
          frame->SetSavedConfigFlag(isUsingSaved);
          frame->SetIsNewFrame(true);
          
@@ -895,8 +898,11 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
                              wxString(yAxisTitle.c_str()),
                              wxPoint(x, y), wxSize(w, h),
                              wxDEFAULT_FRAME_STYLE);
-      if (isMaximized)
-	    frame->Maximize();
+		 // TGG: Commented out until we can fix the painting problem when maximizing right here
+		 //if (isMaximized)
+		 //{
+		 //   frame->Maximize();
+		 //}
       
       if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
          frame->Show(false);
