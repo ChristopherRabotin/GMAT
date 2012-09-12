@@ -29,6 +29,7 @@
 //#define DEBUG_COORD_PANEL_LOAD 1
 //#define DEBUG_COORD_PANEL_SAVE 1
 //#define DEBUG_COORD_PANEL_TEXT
+//#define DEBUG_COORD_PANEL_XYZ
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -235,9 +236,16 @@ void CoordSystemConfigPanel::SaveData()
       if (mObjRefChanged)
       {
          AxisSystem *axis = mCoordPanel->CreateAxis();
+         #ifdef DEBUG_COORD_PANEL_XYZ
+            MessageInterface::ShowMessage("CoordSystemConfigPanel:: CreateAxis returned %s\n",
+                  (axis? "not NULL" : "NULL"));
+         #endif
          
          if (axis != NULL)
          {
+            #ifdef DEBUG_COORD_PANEL_XYZ
+               MessageInterface::ShowMessage("CoordSystemConfigPanel:: executing axis not equal to NULL part ...\n");
+            #endif
             //loj: 2007.07.10
             // old axis is deleted in the base CoordianteSyatem::SetRefObject();
             //AxisSystem *oldAxis =
@@ -256,6 +264,9 @@ void CoordSystemConfigPanel::SaveData()
          }
          else
          {
+            #ifdef DEBUG_COORD_PANEL_XYZ
+               MessageInterface::ShowMessage("CoordSystemConfigPanel:: executing axis EQUAL to NULL part ...\n");
+            #endif
             MessageInterface::ShowMessage
                ("CoordSystemConfigPanel::SaveData() Cannot create AxisSystem.\n");
             canClose = false;
