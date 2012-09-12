@@ -3445,13 +3445,13 @@ void Propagate::PrepareToPropagate()
          }
 
          psm.push_back(propagators[n]->GetPropStateManager());
-         currEpoch.push_back(psm[n]->GetState()->GetEpoch());
 
          #ifdef DEBUG_PROPAGATE_INIT
             MessageInterface::ShowMessage("Initializing propagator %d\n", n);
          #endif
          p[n]->Initialize();
          psm[n]->MapObjectsToVector();
+         currEpoch.push_back(psm[n]->GetState()->GetEpoch());
 
          p[n]->Update(direction > 0.0);
          if (propagators[n]->GetPropagator()->UsesODEModel())

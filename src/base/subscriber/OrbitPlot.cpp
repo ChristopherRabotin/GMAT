@@ -2188,14 +2188,17 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
          BufferZeroData(scIndex);
          continue;
       }
+
+      // DJC: A fix in the Propagate command corrects the error that made this filter
+      // necessary, so commenting it out:
       
       // If data epoch is before the spacecraft initial epoch,
       // fill with zeros and continue with the next spacecraft
-      if (dat[0] < mScInitialEpochMap[mScNameArray[i]])
-      {
-         BufferZeroData(scIndex);
-         continue;
-      }
+//      if (dat[0] < mScInitialEpochMap[mScNameArray[i]])
+//      {
+//         BufferZeroData(scIndex);
+//         continue;
+//      }
       
       // Buffer actual data
       
