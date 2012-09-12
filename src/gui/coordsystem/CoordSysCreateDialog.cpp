@@ -30,6 +30,7 @@
 //#define DEBUG_COORD_DIALOG_CREATE
 //#define DEBUG_COORD_DIALOG_LOAD
 //#define DEBUG_COORD_DIALOG_SAVE
+//#define DEBUG_COORD_DIALOG_XYZ
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -233,9 +234,16 @@ void CoordSysCreateDialog::SaveData()
       {
          // create AxisSystem
          AxisSystem *axis = mCoordPanel->CreateAxis();
+         #ifdef DEBUG_COORD_DIALOG_XYZ
+            MessageInterface::ShowMessage("CoordSysCreateDialog:: CreateAxis returned %s\n",
+                  (axis? "not NULL" : "NULL"));
+         #endif
          
          if (axis != NULL)
          {
+            #ifdef DEBUG_COORD_DIALOG_XYZ
+               MessageInterface::ShowMessage("CoordSysCreateDialog:: executing axis not equal to NULL part ...\n");
+            #endif
             canClose        = mCoordPanel->SaveData(coordName, axis, wxFormatName);
             if (!canClose)
             {
@@ -251,6 +259,15 @@ void CoordSysCreateDialog::SaveData()
                mCoordName      = wxString(coordName.c_str());
                mIsCoordCreated = true;
             }
+         }
+         else
+         {
+            #ifdef DEBUG_COORD_DIALOG_XYZ
+               MessageInterface::ShowMessage("CoordSysCreateDialog:: executing axis EQUAL to NULL part ...\n");
+            #endif
+               MessageInterface::ShowMessage
+                  ("CoordSysCreateDialog::SaveData() Cannot create AxisSystem.\n");
+            canClose = false;
          }
       }
       else
