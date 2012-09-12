@@ -31,6 +31,7 @@
 //#define DEBUG_COORD_PANEL_SAVE
 //#define DEBUG_COORD_EPOCH
 //#define DEBUG_COORD_PANEL_PRIMARY_SECONDARY
+//#define DEBUG_COORD_PANEL_XYZ
 
 //------------------------------------------------------------------------------
 // CoordPanel()
@@ -380,6 +381,9 @@ AxisSystem* CoordPanel::CreateAxis()
    
    if (IsValidAxis(axisType, priName, secName, xStr, yStr, zStr))
    {
+      #ifdef DEBUG_COORD_PANEL_XYZ
+         MessageInterface::ShowMessage("CoordPanel::IsValidAxis returned true\n");
+      #endif
       // Create AxisSystem
       axis = (AxisSystem *)theGuiInterpreter->
          //CreateAxisSystem(std::string(axisType.c_str()), "");
@@ -460,6 +464,12 @@ AxisSystem* CoordPanel::CreateAxis()
          }
       }
    }
+   else
+   {
+      #ifdef DEBUG_COORD_PANEL_XYZ
+         MessageInterface::ShowMessage("CoordPanel::IsValidAxis returned false, returning NULL from CreateAxis\n");
+      #endif
+   }
    
    return axis;
 }
@@ -508,6 +518,10 @@ bool CoordPanel::IsValidAxis(const wxString &axisType, const wxString &priName,
                              const wxString &secName, const wxString &xStr,
                              const wxString &yStr, const wxString &zStr)
 {
+   #ifdef DEBUG_COORD_PANEL_XYZ
+      MessageInterface::ShowMessage("Entering CoordPanel::IsValidAxis with X = %s, Y = %s, Z = %s\n",
+            xStr.c_str(), yStr.c_str(), zStr.c_str());
+   #endif
    if (axisType == "")
    {
       MessageInterface::PopupMessage(Gmat::INFO_, "Please select Axis.");
@@ -531,6 +545,9 @@ bool CoordPanel::IsValidAxis(const wxString &axisType, const wxString &priName,
          return false;
       }
       
+      #ifdef DEBUG_COORD_PANEL_XYZ
+         MessageInterface::ShowMessage("In CoordPanel::IsValidAxis, calling IsValidXYZ\n");
+      #endif
       return IsValidXYZ(xStr, yStr, zStr);
    }
    
@@ -545,6 +562,9 @@ bool CoordPanel::IsValidAxis(const wxString &axisType, const wxString &priName,
 bool CoordPanel::IsValidXYZ(const wxString &xStr, const wxString &yStr,
                             const wxString &zStr)
 {
+   #ifdef DEBUG_COORD_PANEL_XYZ
+      MessageInterface::ShowMessage("Entering CoordPanel::IsValidXYZ\n");
+   #endif
    // Check to see if x,y,z are valid axes
    if (xStr.IsSameAs("") && (yStr.IsSameAs("") || zStr.IsSameAs("")))
    {
@@ -555,44 +575,44 @@ bool CoordPanel::IsValidXYZ(const wxString &xStr, const wxString &yStr,
    else if (xStr.Contains("R") && (yStr.Contains("R") || zStr.Contains("R")))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
       return false;
    }
    else if (xStr.Contains("V") && (yStr.Contains("V") || zStr.Contains("V")))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
       return false;
    }
    else if (xStr.Contains("N") && (yStr.Contains("N") || zStr.Contains("N")))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
       return false;
    }
    
    if (yStr.Contains("R") && zStr.Contains("R"))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
       return false;
    }
    else if (yStr.Contains("V") && zStr.Contains("V"))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
       return false;
    }
    else if (yStr.Contains("N") && zStr.Contains("N"))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
       return false;
    }
    else if (yStr.IsSameAs("") && zStr.IsSameAs(""))
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The X, Y, and Z axis must be orthognal.");
+         (Gmat::WARNING_, "The X, Y, and Z axis must be orthogonal.");
       return false;
    }
    
