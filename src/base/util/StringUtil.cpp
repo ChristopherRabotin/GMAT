@@ -38,10 +38,11 @@
 //#define DEBUG_STRING_UTIL_SEP 2
 //#define DEBUG_NO_BRACKETS
 //#define DEBUG_BALANCED_BRACKETS
-//#define DEBUG_MATH_EQ 1
+//#define DEBUG_MATH_EQ 2
 //#define DEBUG_STRING_UTIL_SEP_COMMA
 //#define DEBUG_STRING_UTIL_STRING_ARRAY
 //#define DEBUG_REPLACE_NAME
+//#define DEBUG_EXTRA_PAREN 1
 //#define DEBUG_REMOVE_EXTRA_PAREN 1
 
 //------------------------------------------------------------------------------
@@ -65,6 +66,26 @@ std::string GmatStringUtil::RemoveAll(const std::string &str, char ch,
    }
 
    return str2;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string RemoveAll(const std::string &str, const std::string &removeStr, Integer start = 0)
+//------------------------------------------------------------------------------
+/**
+ * Removes all occurance of characters in removeStr starting at start.
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveAll(const std::string &str, const std::string &removeStr,
+                                      Integer start)
+{
+   std::string str1 = str.substr(start);
+   std::string::size_type removeLength = removeStr.size();
+   
+   for (UnsignedInt i = 0; i < removeLength; i++)
+      str1 = RemoveAll(str1, removeStr[i]);
+   
+   return str1;
 }
 
 
@@ -672,6 +693,46 @@ std::string GmatStringUtil::ReplaceNumber(const std::string &str, const std::str
    #endif
 
    return str1;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ReplaceRepeatedPlusMinusSigns(const std::string &str)
+//------------------------------------------------------------------------------
+std::string ReplaceRepeatedPlusMinusSigns(const std::string &str)
+{
+   // Implementation not complete
+   // Currently not used but will be used by the MathParser in a future
+
+   return str;
+   
+   #if 0
+   // If no + or - found then return
+   if (str.find_first_of("+-") == str.npos)
+      return str;
+   
+   // Find non + or -
+   std::string str1 = str;
+   std::string::size_type start = 0;
+   std::string::size_type length = str1.size();
+   std::size::size_type nonPlusMinus = str1.find_first_not_of(start, "+-");
+   std::string::size_type signLength = length - 1;
+   if (nonPlusMinus != str.npos)
+      signLength = length - (length - nonPlusPinus) + 1;
+   
+   std::string signs = str1.substr(0, signLength);
+   Integer numMinus = signs.NumberOfOccurrences('-');
+   std::string str2;
+   
+   if ((numMinus % 2) == 0)
+      str2 = str2 + "+"
+   else
+      str2 = str2 + "-";
+   
+   // Check more
+   //if (signLength == (length -1))
+   return str2;
+   #endif
 }
 
 
@@ -2301,34 +2362,50 @@ bool GmatStringUtil::IsEnclosedWith(const std::string &str,
  *
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsEnclosedWithExtraParen(const std::string &str, bool checkOps)
+bool GmatStringUtil::IsEnclosedWithExtraParen(const std::string &str, bool checkOps,
+                                              bool ignoreComma)
 {
-   #if DEBUG_STRING_UTIL
-   MessageInterface::ShowMessage("IsEnclosedWithExtraParen() str=%s\n", str.c_str());
+   #if DEBUG_EXTRA_PAREN
+   MessageInterface::ShowMessage
+      ("IsEnclosedWithExtraParen() str=%s, checkOps=%d, ignoreComma=%d\n", str.c_str(),
+       checkOps, ignoreComma);
    #endif
-
+   
    int length = str.size();
    bool isEnclosed = false;
    Integer openCounter = 0;
+   
+   Integer openParen = (Integer)str.find_first_of('(');
+   
+   //if (openParen == (Integer)str.npos)
+   //   openParen = -1;
 
-   Integer openParen = str.find_first_of('(');
-   if (openParen == (Integer)str.npos)
-      openParen = -1;
-
-   Integer closeParen = str.find_last_of(')');
-   if (closeParen == (Integer)str.npos)
-      closeParen = -1;
-
-   #if DEBUG_STRING_UTIL
+   Integer closeParen = (Integer)str.find_last_of(')');
+   //if (closeParen == (Integer)str.npos)
+   //   closeParen = -1;
+   
+   #if DEBUG_EXTRA_PAREN
    MessageInterface::ShowMessage
       ("IsEnclosedWithExtraParen() openParen=%d, closeParen=%d\n", openParen, closeParen);
    #endif
-
+   
    if (openParen == -1 || closeParen == -1)
+   {
+      #if DEBUG_EXTRA_PAREN
+      MessageInterface::ShowMessage
+         ("IsEnclosedWithExtraParen() returning false, no open or close paren found\n");
+      #endif
       return false;
-
+   }
+   
    if (openParen != 0 || closeParen != length-1)
+   {
+      #if DEBUG_EXTRA_PAREN
+      MessageInterface::ShowMessage
+         ("IsEnclosedWithExtraParen() returning false, no outer open or close paren found\n");
+      #endif
       return false;
+   }
    
    // Check for empty parenthesis such as () or (())
    std::string str1 = RemoveAllBlanks(str);
@@ -2368,39 +2445,50 @@ bool GmatStringUtil::IsEnclosedWithExtraParen(const std::string &str, bool check
          if (close2 == length-2)
             isEnclosed = true;
       }
-
+      
       if (!checkOps)
          isEnclosed = true;
-
+      
       if (!isEnclosed)
       {
          // check if there is any operator
          std::string substr = str.substr(1, length-2);
          Real rval;
-
-         #if DEBUG_STRING_UTIL
+         
+         #if DEBUG_EXTRA_PAREN
          MessageInterface::ShowMessage
             ("IsEnclosedWithExtraParen() substr=%s\n", substr.c_str());
          #endif
-
+         
          if (IsParenPartOfArray(substr))
             isEnclosed = true;
          else if (ToReal(substr, rval))
             isEnclosed = true;
          else
          {
-            if (substr.find('+') == substr.npos && substr.find('-') == substr.npos &&
-                substr.find('*') == substr.npos && substr.find('/') == substr.npos)
+            #if DEBUG_EXTRA_PAREN
+            MessageInterface::ShowMessage
+               ("IsEnclosedWithExtraParen() Checking for math symbol and command\n");
+            #endif
+            // if there is math symbol then it is not enclosed with parenthesis
+            if (IsThereMathSymbol(substr))
+               isEnclosed = false;
+            else if (substr.find(",") != substr.npos)
+               if (ignoreComma)
+                  isEnclosed = true;
+               else
+                  isEnclosed = false;
+            else
                isEnclosed = true;
          }
       }
    }
-
-   #if DEBUG_STRING_UTIL
+   
+   #if DEBUG_EXTRA_PAREN
    MessageInterface::ShowMessage
-      ("IsEnclosedWithExtraParen() isEnclosed=%d\n", isEnclosed);
+      ("IsEnclosedWithExtraParen() returning isEnclosed=%d\n", isEnclosed);
    #endif
-
+   
    return isEnclosed;
 }
 
@@ -3130,11 +3218,13 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
  *                    "(())" returns "(())"
  */
 //------------------------------------------------------------------------------
-std::string GmatStringUtil::RemoveExtraParen(const std::string &str, bool ignoreSingleQuotes)
+std::string GmatStringUtil::RemoveExtraParen(const std::string &str, bool ignoreComma,
+                                             bool ignoreSingleQuotes)
 {
    #if DEBUG_REMOVE_EXTRA_PAREN
    MessageInterface::ShowMessage
-      ("\nRemoveExtraParen() entering \n   str=%s\n", str.c_str());
+      ("\nRemoveExtraParen() entering, ignoreComma=%d, ignoreSingleQuotes=%d\n   str=%s\n",
+       ignoreComma, ignoreSingleQuotes, str.c_str());
    #endif
    
    if (!ignoreSingleQuotes && IsEnclosedWith(str, "'"))
@@ -3158,7 +3248,7 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str, bool ignore
    char charToRemove = '\b';
    
    // remove outer parentheses
-   while (IsEnclosedWithExtraParen(str1))
+   while (IsEnclosedWithExtraParen(str1, true, ignoreComma))
       str1 = str1.substr(1, str1.size() - 2);
    
    #if DEBUG_REMOVE_EXTRA_PAREN
@@ -3237,7 +3327,7 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str, bool ignore
          #endif
          
          Integer removeStatus = -99;
-
+         
          // Check if extra parenthesis can be removed. Several Else-If cases for
          // better debugging.
          if (isParenPartOfName)
@@ -3266,7 +3356,10 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str, bool ignore
          {
             // Check for unary - sign first
             if ((trimmedStr.size() > 1 && trimmedStr[1] != '-') &&
-                (IsEnclosedWithExtraParen(trimmedStr)))
+                (IsEnclosedWithExtraParen(trimmedStr, true, true)) &&
+                (!IsMathOperator(chAfterCloseParen)) &&
+                (!IsMathOperator(chBeforeOpenParen)) &&
+                (!IsThereMathSymbol(trimmedStr)))
                removeStatus = 3;
             else
                removeStatus = -3;
@@ -3307,11 +3400,29 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str, bool ignore
 
 
 //------------------------------------------------------------------------------
+// std::string RemoveOuterParen(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Removes outer pair of parenthesis if it has one.
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveOuterParen(const std::string &str)
+{
+   std::string str1 = str;
+   
+   if (StartsWith(str, "(") && EndsWith(str, ")"))
+      str1 = str.substr(1, str.size() - 2);
+   
+   return str1;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string RemoveOuterString(const std::string &str, const std::string &start,
 //                               const std::string end)
 //------------------------------------------------------------------------------
 /*
- * This method removes outer pair of bracket if it has one.
+ * This method removes outer string if it has one.
  * If input string is "(a(1,1) + 10.0)" it return a(1,1) + 10.0.
  *
  * @param  str  Input string
@@ -3328,9 +3439,9 @@ std::string GmatStringUtil::RemoveOuterString(const std::string &str,
       ("RemoveOuterString() entering str=\"%s\", start='%s', end='%s'\n", str.c_str(),
        start.c_str(), end.c_str());
    #endif
-
+   
    std::string str1 = str;
-
+   
    if (StartsWith(str, start) && EndsWith(str, end))
       str1 = str.substr(1, str.size() - 2);
 
@@ -3727,18 +3838,18 @@ bool GmatStringUtil::HasMissingQuote(const std::string &str,
 //------------------------------------------------------------------------------
 /*
  * Checks if string is a math equation with numbers and variables only.
- * Math operators are "/+-*^".
+ * Math operators are "/+-*^'".
  * If string is enclosed with single quotes, it just returns false.
  * If string has function or array, it returns false.
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsMathEquation(const std::string &str)
+bool GmatStringUtil::IsMathEquation(const std::string &str, bool checkInvalidOpOnly)
 {
    #if DEBUG_MATH_EQ > 1
    MessageInterface::ShowMessage
       ("GmatStringUtil::IsMathEquation() entered, str=<%s>\n", str.c_str());
    #endif
-
+   
    if (IsEnclosedWith(str, "'"))
    {
       #if DEBUG_MATH_EQ
@@ -3747,15 +3858,84 @@ bool GmatStringUtil::IsMathEquation(const std::string &str)
       #endif
       return false;
    }
-
-   StringArray parts = SeparateBy(str, "+-*/^");
+   
+   // If check for invalid math operator only
+   if (checkInvalidOpOnly)
+   {
+      // Remove spaces, dots, commas, underscores, and parenthesis
+      std::string removeStr = " .,_()";
+      std::string str1 = RemoveAll(str, removeStr);
+      #if DEBUG_MATH_EQ > 1
+      MessageInterface::ShowMessage
+         ("   after '%s' removed '%s'\n", removeStr.c_str(), str1.c_str());
+      #endif
+      
+      #if 0
+      std::string str1 = RemoveAllBlanks(str, true);
+      #if DEBUG_MATH_EQ > 1
+      MessageInterface::ShowMessage("   after all blanks removed '%s'\n", str1.c_str());
+      #endif
+      
+      // Remove dots (.)
+      str1 = RemoveAll(str1, '.');
+      #if DEBUG_MATH_EQ > 1
+      MessageInterface::ShowMessage("   after all dots removed '%s'\n", str1.c_str());
+      #endif
+      
+      // Remove commas (,)
+      str1 = RemoveAll(str1, ',');
+      #if DEBUG_MATH_EQ > 1
+      MessageInterface::ShowMessage("   after all commas removed '%s'\n", str1.c_str());
+      #endif
+      
+      // Remove underscores (_)
+      str1 = RemoveAll(str1, '_');
+      #if DEBUG_MATH_EQ > 1
+      MessageInterface::ShowMessage("   after all underscores removed '%s'\n", str1.c_str());
+      #endif
+      
+      // Remove parenthesis
+      str1 = RemoveAll(str1, '(');
+      str1 = RemoveAll(str1, ')');
+      #if DEBUG_MATH_EQ > 1
+      MessageInterface::ShowMessage("   after all () removed '%s'\n", str1.c_str());
+      #endif
+      #endif
+      
+      std::string::size_type length = str1.size();
+      bool isValid = true;
+      for (UnsignedInt i = 0; i < length; i++)
+      {
+         if (isalnum(str1[i]) || IsMathOperator(str1[i]))
+            continue;
+         else
+         {
+            isValid = false;
+            break;
+         }
+      }
+      
+      #if DEBUG_MATH_EQ
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::IsMathEquation(%s) returning %s\n", str.c_str(),
+          isValid ? "true" : "false");
+      #endif
+      
+      return isValid;
+   }
+   
+   
+   // Do more through checking
+   
+   StringArray parts = SeparateBy(str, "+-*/^'");
    Integer numParts = parts.size();
-
+   
    #if DEBUG_MATH_EQ > 1
    MessageInterface::ShowMessage("..... has %d parts\n", numParts);
    MessageInterface::ShowMessage("..... check if it has more than 1 part\n");
    #endif
-
+   
+   
    // check if it has more than 1 part
    if (numParts == 1)
    {
@@ -3833,63 +4013,11 @@ bool GmatStringUtil::IsMathEquation(const std::string &str)
 //------------------------------------------------------------------------------
 bool GmatStringUtil::IsMathOperator(const char &ch)
 {
-   if (ch == '+' || ch == '-' || ch == '*' || ch == '/')
+   if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^' || ch == '\'')
       return true;
    else
       return false;
 }
-
-#if 0
-//------------------------------------------------------------------------------
-// bool IsHigherMathOperator(const char &ch1, const char &ch2, const char &chNull)
-//------------------------------------------------------------------------------
-/**
- * Checks if ch1 has higher precedence than ch2
- *
- * @param  ch1 First operator to compare
- * @param  ch2 Second operator to compare
- * @param  chNull The character to indicate null character
- *
- * @return true if ch1 is higher precedence operator than ch2;
- *         false if ch1 is same or lower precendence than ch2;
- */
-//------------------------------------------------------------------------------
-bool GmatStringUtil::IsHigherMathOperator(const char &ch1, const char &ch2,
-                                          const char &chNull)
-{
-   #ifdef DEBUG_HIGHER_MATH_OPERATOR
-   MessageInterface::ShowMessage
-      ("IsHigherMathOperator() entered, ch1='%c', ch2='%c'\n", ch1, ch2);
-   #endif
-   
-   bool higher = true;
-   if (ch1 == chNull || ch2 == chNull)
-   {
-      higher = false;
-   }
-   else if (ch1 == '+' || ch1 == '-')
-   {
-      if (ch2 == '+' || ch2 == '-' || ch2 == '*' || ch2 == '/' || ch2 == '^' || ch2 == '(')
-         higher = false;
-   }
-   else if (ch1 == '*' || ch2 == '/')
-   {
-      if (ch2 == '*' || ch2 == '/' || ch2 == '^')
-         higher = false;
-   }
-   else if (ch1 == ')' && ch2 == '(')
-   {
-      higher = false;
-   }
-   
-   #ifdef DEBUG_HIGHER_MATH_OPERATOR
-   MessageInterface::ShowMessage
-      ("IsHigherMathOperator() returnnig %d\n", higher);
-   #endif
-   
-   return higher;
-}
-#endif
 
 
 //------------------------------------------------------------------------------

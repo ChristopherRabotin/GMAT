@@ -30,6 +30,7 @@
 //#define DEBUG_MATH_TREE_INIT 1
 //#define DEBUG_MATH_TREE_EVAL 1
 //#define DEBUG_MATH_WRAPPERS
+//#define DEBUG_VALIDATE
 //#define DEBUG_RENAME
 //#define DEBUG_FUNCTION
 
@@ -301,12 +302,19 @@ bool MathTree::Validate(std::string &msg)
          if (ew)
          {
             Gmat::WrapperDataType wrapperType = ew->GetWrapperType();
+            #ifdef DEBUG_VALIDATE
+            MessageInterface::ShowMessage("   wrapper type = %d\n", wrapperType);
+            #endif
             
             // Check for invalid wrapper type
             if (wrapperType == Gmat::STRING_WT || wrapperType == Gmat::STRING_OBJECT_WT ||
                 wrapperType == Gmat::OBJECT_WT || wrapperType == Gmat::BOOLEAN_WT ||
                 wrapperType == Gmat::ON_OFF_WT || wrapperType == Gmat::UNKNOWN_WRAPPER_TYPE)
             {
+               #ifdef DEBUG_VALIDATE
+               MessageInterface::ShowMessage
+                  ("   '%s' has invalid wrapper type = %d\n", (iter->first).c_str(), wrapperType);
+               #endif
                errmsg = errmsg + "\"" + iter->first + "\", ";
                retval = false;
             }

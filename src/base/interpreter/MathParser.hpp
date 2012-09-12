@@ -58,6 +58,10 @@ private:
    
    std::string  originalEquation;
    std::string  theEquation;
+   std::string  inverseOpStr;
+   std::string  transposeOpStr;
+   char         inverseOp;
+   char         transposeOp;
    Integer      theGmatFuncCount;
    
    StringArray  ParseParenthesis(const std::string &str);
@@ -82,12 +86,17 @@ private:
    std::string::size_type
                 FindMatchingParen(const std::string &str,
                                   std::string::size_type start);
+   std::string::size_type
+                FindOperatorIndex(std::string::size_type index1,
+                                  std::string::size_type index2,
+                                  std::string::size_type index3 = std::string::npos);
    std::string  FindOperatorFrom(const std::string &str,
                                  std::string::size_type start,
                                  std::string &left, std::string &right,
                                  std::string::size_type &opIndex);
    std::string  GetOperator(const IntegerMap::iterator &pos1,
                             const IntegerMap::iterator &pos2,
+                            const IntegerMap::iterator &pos3,
                             const IntegerMap &opIndexMap,
                             Integer &opIndex);
    std::string  FindOperator(const std::string &str, Integer &opIndex,
@@ -99,7 +108,7 @@ private:
                               std::string &fnName, std::string &leftStr);
    void         FillItems(StringArray &items, const std::string &op,
                           const std::string &left, const std::string &right);
-   void         WriteItems(const std::string &msg, StringArray &items);
+   void         WriteItems(const std::string &msg, StringArray &items, bool addEol = false);
    void         WriteNode(MathNode *node, UnsignedInt level);
    
    enum
