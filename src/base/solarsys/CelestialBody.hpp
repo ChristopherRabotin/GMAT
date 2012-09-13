@@ -443,6 +443,7 @@ protected:
    #ifdef __USE_SPICE__
       /// the SPICE file (kernel) reader
       SpiceOrbitKernelReader      *kernelReader;
+      std::string                 mainSPK;
    #endif
    
    /// flag indicating whether or not to get data from potential file

@@ -71,6 +71,7 @@
 //#define DEBUG_CB_CLOAKING_EPOCH
 //#define DEBUG_CB_EQ_RAD
 //#define DEBUG_CB_CARTOGRAPHIC
+//#define DEBUG_CB_DESTRUCT
 
 
 //#ifndef DEBUG_MEMORY
@@ -262,6 +263,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
    #ifdef __USE_SPICE__
       kernelReader = NULL;
+      mainSPK      = "";
    #endif
    orbitSpiceKernelNames.clear();
    
@@ -358,6 +360,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    
    #ifdef __USE_SPICE__
       kernelReader = NULL;
+      mainSPK      = "";
    #endif
    orbitSpiceKernelNames.clear();
    
@@ -450,7 +453,8 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    isFirstTimeRadius      = true;
    potentialFileRead      = false;
    #ifdef __USE_SPICE__
-   kernelReader = NULL;
+      kernelReader = NULL;
+      mainSPK      = "";
    #endif
    
    if (cBody.atmModel)
@@ -517,6 +521,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    theSourceFile       = cBody.theSourceFile;   // ??????????????
    #ifdef __USE_SPICE__
    kernelReader        = cBody.kernelReader;
+   mainSPK             = cBody.mainSPK;
    #endif
    usePotentialFile    = cBody.usePotentialFile;
    potentialFileName   = cBody.potentialFileName;
@@ -606,6 +611,9 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
 //------------------------------------------------------------------------------
 CelestialBody::~CelestialBody()
 {
+   #ifdef DEBUG_CB_DESTRUCT
+      MessageInterface::ShowMessage(" Entering CelestialBody destructor for body %s .........\n", instanceName.c_str());
+   #endif
    if (atmModel)
    {
       #ifdef DEBUG_MEMORY
@@ -621,7 +629,7 @@ CelestialBody::~CelestialBody()
       {
          for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
          {
-            if (orbitSpiceKernelNames.at(kk) != "")
+            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
             {
                #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
@@ -640,6 +648,9 @@ CelestialBody::~CelestialBody()
             }
          }
       }
+   #endif
+   #ifdef DEBUG_CB_DESTRUCT
+      MessageInterface::ShowMessage(" Exiting CelestialBody destructor for body %s .........\n", instanceName.c_str());
    #endif
 }
 
@@ -728,7 +739,7 @@ const Real CelestialBody::GetFirstStateTime()
             Real endCov   = 0.0;
             // Make sure we are looking for coverage in the main SPK kernel as well
             StringArray allKernels = orbitSpiceKernelNames;
-            std::string mainSPK    = theSolarSystem->GetStringParameter("SPKFilename");
+            mainSPK                = theSolarSystem->GetStringParameter("SPKFilename");
             if (mainSPK != "")  allKernels.push_back(mainSPK);
             #ifdef DEBUG_CB_SPICE
                MessageInterface::ShowMessage("Calling GetCoverage with naifId = %d\n", naifId);
@@ -4425,7 +4436,7 @@ bool CelestialBody::SetUpSPICE()
       if (kernelReader == NULL)
          MessageInterface::ShowMessage("   kernelReader is STILL NULL\n");
    #endif
-   std::string mainSPK = theSolarSystem->GetStringParameter("SPKFilename");
+   mainSPK = theSolarSystem->GetStringParameter("SPKFilename");
    if (orbitSpiceKernelNames.empty())
    {
       if (mainSPK == "")
