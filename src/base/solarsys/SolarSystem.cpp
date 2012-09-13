@@ -812,6 +812,7 @@ SolarSystem::~SolarSystem()
    #ifdef DEBUG_PLANETARY_SPK
       MessageInterface::ShowMessage("in SS destructor, deleting planetarySPK <%p>\n", planetarySPK);
    #endif
+   planetarySPK->UnloadKernel(theSPKFilename);
    delete planetarySPK;
 #endif
 }
