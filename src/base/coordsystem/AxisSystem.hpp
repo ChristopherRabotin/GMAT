@@ -128,9 +128,9 @@ public:
                                                const bool value); 
    virtual bool            SetBooleanParameter(const std::string &label,
                                                const bool value);
-   
+
    // currently, no access to RotMatrix and RotDotMatrix allowed
-   
+
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 

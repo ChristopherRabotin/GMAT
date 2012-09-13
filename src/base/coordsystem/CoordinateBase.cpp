@@ -74,12 +74,12 @@ CoordinateBase::PARAMETER_TYPE[CoordinateBaseParamCount - GmatBaseParamCount] =
 CoordinateBase::CoordinateBase(Gmat::ObjectType ofType, 
                                const std::string &itsType,
                                const std::string &itsName) :
-GmatBase(ofType,itsType,itsName),
-origin         (NULL),
-originName     ("Earth"),
-j2000Body      (NULL),
-j2000BodyName  ("Earth"),
-solar          (NULL)
+   GmatBase(ofType,itsType,itsName),
+   origin         (NULL),
+   originName     ("Earth"),
+   j2000Body      (NULL),
+   j2000BodyName  ("Earth"),
+   solar          (NULL)
 {
    objectTypeNames.push_back("CoordinateBase");
    parameterCount = CoordinateBaseParamCount;
@@ -98,11 +98,11 @@ solar          (NULL)
 //---------------------------------------------------------------------------
 CoordinateBase::CoordinateBase(const CoordinateBase &coordBase) :
 GmatBase(coordBase),
-origin        (NULL),
-originName    (coordBase.originName),
-j2000Body     (NULL),
-j2000BodyName (coordBase.j2000BodyName),
-solar         (NULL)
+   origin        (NULL),
+   originName    (coordBase.originName),
+   j2000Body     (NULL),
+   j2000BodyName (coordBase.j2000BodyName),
+   solar         (NULL)
 {
 }
 
@@ -122,11 +122,6 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
    if (&coordBase == this)
       return *this;
    GmatBase::operator=(coordBase);
-   
-   // Copied original pointer (loj: 2008.02.20)
-   //origin        = NULL;
-   //j2000Body     = NULL;
-   //solar         = NULL;
    
    origin        = coordBase.origin;
    originName    = coordBase.originName;
@@ -153,6 +148,8 @@ CoordinateBase::~CoordinateBase()
 //------------------------------------------------------------------------------
 /**
  * This method sets the Solar System for the CoordinateBase class.
+ *
+ * @param <ss> solar system pointer
  *
  */
 //------------------------------------------------------------------------------
@@ -214,6 +211,8 @@ void CoordinateBase::SetSolarSystem(SolarSystem *ss)
 /**
  * This method sets the origin name for the CoordinateBase class.
  *
+ * @param <toName> the origin name
+ *
  */
 //------------------------------------------------------------------------------
 void CoordinateBase::SetOriginName(const std::string &toName)
@@ -226,6 +225,8 @@ void CoordinateBase::SetOriginName(const std::string &toName)
 //------------------------------------------------------------------------------
 /**
  * This method sets the origin for the CoordinateBase class.
+ *
+ * @param <originPtr> pointer to the origin
  *
  */
 //------------------------------------------------------------------------------
@@ -252,7 +253,9 @@ bool CoordinateBase::RequiresJ2000Body()
 //  void  SetJ2000BodyName(const std::string &toName)
 //------------------------------------------------------------------------------
 /**
- * This method sets the j2000Body for the CoordinateBase class.
+ * This method sets the j2000Body name for the CoordinateBase class.
+ *
+ * @param <toName> the J2000 Body name
  *
  */
 //------------------------------------------------------------------------------
@@ -267,6 +270,8 @@ void CoordinateBase::SetJ2000BodyName(const std::string &toName)
 /**
  * This method sets the j2000Body for the CoordinateBase class.
  *
+ * @param <j2000Ptr> pointer to the j2000Body
+ *
  */
 //------------------------------------------------------------------------------
 void CoordinateBase::SetJ2000Body(SpacePoint *j2000Ptr)
@@ -276,6 +281,14 @@ void CoordinateBase::SetJ2000Body(SpacePoint *j2000Ptr)
 
 
 //------------------------------------------------------------------------------
+//  SolarSystem*  GetSolarSystem() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the pointer to the solar system.
+ *
+ * @return pointer to the solar system
+ *
+ */
 //------------------------------------------------------------------------------
 SolarSystem* CoordinateBase::GetSolarSystem() const
 {
@@ -316,9 +329,9 @@ SpacePoint* CoordinateBase::GetOrigin() const
 //  std::string  GetJ2000BodyName() const
 //------------------------------------------------------------------------------
 /**
- * This method returns the origin name for the CoordinateBase class.
+ * This method returns the j2000Body name for the CoordinateBase class.
  *
- * @return name of the origin for the CoordinateBase object
+ * @return name of the j2000Body for the CoordinateBase object
  */
 //------------------------------------------------------------------------------
 std::string CoordinateBase::GetJ2000BodyName() const
@@ -348,6 +361,8 @@ SpacePoint* CoordinateBase::GetJ2000Body() const
 /**
  * This method initializes the CoordinateBase class.
  *
+ * @return true, if successfully initialized; false, otherwise
+ *
  */
 //------------------------------------------------------------------------------
 bool CoordinateBase::Initialize()
@@ -356,7 +371,7 @@ bool CoordinateBase::Initialize()
       throw CoordinateSystemException(
             "Origin has not been defined for CoordinateBase object " +
             instanceName);
-   if (!j2000Body) // ????????????????????????????????
+   if (!j2000Body)
       throw CoordinateSystemException(
             "j2000Body has not been defined for CoordinateBase object " +
             instanceName);
@@ -458,12 +473,12 @@ std::string CoordinateBase::GetParameterTypeString(const Integer id) const
  *
  * @param <id> Description for the parameter.
  *
- * @return true if the parameter is read only, false (the default) if not,
- *         throws if the parameter is out of the valid range of values.
+ * @return true if the parameter is read only, false (the default) if not
  */
 //---------------------------------------------------------------------------
 bool CoordinateBase::IsParameterReadOnly(const Integer id) const
 {
+   // We don't write out the name of the J2000 Body
    if (id == J2000_BODY_NAME)
       return true;
 
@@ -512,7 +527,7 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-//  std::string  SetStringParameter(const Integer id, const std::string value)
+//  bool  SetStringParameter(const Integer id, const std::string value)
 //------------------------------------------------------------------------------
 /**
  * This method sets the string parameter value, given the input
@@ -525,7 +540,6 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-
  bool CoordinateBase::SetStringParameter(const Integer id, 
                                          const std::string &value)
 {
@@ -571,11 +585,10 @@ std::string CoordinateBase::GetStringParameter(const std::string &label) const
 /**
 * Accessor method used to get a parameter value
  *
- * @param    label  Integer ID for the parameter
+ * @param    label  String label for the parameter
  * @param    value  The new value for the parameter
  */
 //------------------------------------------------------------------------------
-
  bool CoordinateBase::SetStringParameter(const std::string &label,
                                        const std::string &value)
 {
@@ -618,13 +631,13 @@ GmatBase* CoordinateBase::GetRefObject(const Gmat::ObjectType type,
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
- * Returns the names of the reference object. (Derived classes should implement
+ * Returns the name(s) of the reference object(s). (Derived classes should implement
  * this as needed.)
  *
  * @param <type> reference object type.  Gmat::UnknownObject returns all of the
  *               ref objects.
  *
- * @return The names of the reference object.
+ * @return The name(s) of the reference object(s).
  */
 //------------------------------------------------------------------------------
 const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -637,9 +650,6 @@ const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType 
       refs.push_back(originName);
       if (j2000BodyName != originName)
          refs.push_back(j2000BodyName);
-      
-      //for (unsigned int i=0; i<refs.size(); i++)
-      //   MessageInterface::ShowMessage("======> cb obj[%d]=%s\n", i, refs[i].c_str());
       
       return refs;
    }
@@ -696,102 +706,3 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    // Not handled here -- invoke the next higher SetRefObject call
    return GmatBase::SetRefObject(obj, type, name);
 }
-
-// WCS - leaving these in (cut-and-paste from SpacePoint) just in case ...
-// DJC Added, 12/16/04
-// This seems like it should NOT be needed, but GCC seems to be confused about 
-// the overloaded versions of the following six methods:
-
-//------------------------------------------------------------------------------
-// std::string GetStringParameter(const Integer id, const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the string parameter value from a vector of strings, 
- * given the input parameter ID and the index into the vector. 
- *
- * @param id ID for the requested parameter.
- * @param index index for the particular string requested.
- * 
- * @return The requested string.
- */
-//------------------------------------------------------------------------------
-/*
-std::string CoordinateBase::GetStringParameter(const Integer id, 
-                                           const Integer index) const
-{
-   return GmatBase::GetStringParameter(id, index);
-}
-*/
-
-//------------------------------------------------------------------------------
-// bool SetStringParameter(const Integer id, const std::string &value, 
-//                         const Integer index)
-//------------------------------------------------------------------------------
-/**
- * This method sets a value on a string parameter value in a vector of strings, 
- * given the input parameter ID, the value, and the index into the vector. 
- *
- * @param id ID for the requested parameter.
- * @param value The new string.
- * @param index index for the particular string requested.
- * 
- * @return true if successful; otherwise, false.
- */
-//------------------------------------------------------------------------------
-/*
-bool CoordinateBase::SetStringParameter(const Integer id, 
-                                    const std::string &value, 
-                                    const Integer index)
-{
-   return GmatBase::SetStringParameter(id, value, index);
-}
-
-*/
-//------------------------------------------------------------------------------
-// std::string GetStringParameter(const std::string &label, 
-//                                const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the string parameter value from a vector of strings, 
- * given the label associated with the input parameter and the index into the 
- * vector. 
- *
- * @param label String identifier for the requested parameter.
- * @param index index for the particular string requested.
- * 
- * @return The requested string.
- */
-//------------------------------------------------------------------------------
-/*
-std::string CoordinateBase::GetStringParameter(const std::string &label, 
-                                           const Integer index) const
-{
-   return GmatBase::GetStringParameter(label, index);
-}
-*/
-
-//------------------------------------------------------------------------------
-// bool SetStringParameter(const std::string &label, const std::string &value, 
-//                         const Integer index)
-//------------------------------------------------------------------------------
-/**
- * This method sets a value on a string parameter value in a vector of strings, 
- * given the label associated with the input parameter and the index into the 
- * vector. 
- *
- * @param label String identifier for the requested parameter.
- * @param value The new string.
- * @param index index for the particular string requested.
- * 
- * @return true if successful; otherwise, false.
- */
-//------------------------------------------------------------------------------
-/*
-bool CoordinateBase::SetStringParameter(const std::string &label, 
-                                    const std::string &value, 
-                                    const Integer index)
-{
-   return GmatBase::SetStringParameter(label, value, index);
-}
-*/
-

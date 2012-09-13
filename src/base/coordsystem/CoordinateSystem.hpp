@@ -167,7 +167,6 @@ protected:
       AXES = CoordinateBaseParamCount,
       UPDATE_INTERVAL,
       OVERRIDE_ORIGIN_INTERVAL,
-      //INTERNAL_STATE,   // currently, no access allowed
 
       // owned object parameters
       EPOCH,
@@ -184,13 +183,11 @@ protected:
                                       Rvector &outState);
    virtual bool TranslateToBaseSystem(const A1Mjd &epoch, const Real *inState,
                                       Real *outState);
-   // Rvector &outState, SpacePoint *j2000Body);
    
    virtual bool TranslateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
                                         Rvector &outState);
    virtual bool TranslateFromBaseSystem(const A1Mjd &epoch, const Real *inState,
                                         Real *outState);
-   // Rvector &outState, SpacePoint *j2000Body);
    
    /// axis system
    AxisSystem    *axes;

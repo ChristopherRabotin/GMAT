@@ -65,7 +65,6 @@ CoordinateSystem::PARAMETER_TEXT[CoordinateSystemParamCount - CoordinateBasePara
    "Axes",
    "UpdateInterval",
    "OverrideOriginInterval",
-   //"InternalState",
    "Epoch",
 };
 
@@ -75,7 +74,6 @@ CoordinateSystem::PARAMETER_TYPE[CoordinateSystemParamCount - CoordinateBasePara
    Gmat::OBJECT_TYPE,     // "Axes",
    Gmat::REAL_TYPE,       // "UpdateInterval",
    Gmat::BOOLEAN_TYPE,    // "OverrideOriginInterval",
-   //Gmat::RVECTOR_TYPE,    // "InternalState",
    Gmat::REAL_TYPE,       // "Epoch",
 };
 
@@ -85,14 +83,13 @@ CoordinateSystem::PARAMETER_TYPE[CoordinateSystemParamCount - CoordinateBasePara
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  CoordinateSystem(Gmat::ObjectType ofType, const std::string &itsType,
+//  CoordinateSystem(const std::string &itsType,
 //                   const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs CoordinateSystem structures
  * (default constructor).
  *
- * @param ofType   Gmat::ObjectTypes enumeration for the object.
  * @param itsType  GMAT script string associated with this type of object.
  * @param itsName  Optional name for the object.  Defaults to "".
  *
@@ -121,12 +118,11 @@ axes               (NULL)
  * Constructs base CoordinateSystem structures used in derived classes, 
  * by copying the input instance (copy constructor).
  *
- * @param sp  CoordinateSystem instance to copy to create "this" instance.
+ * @param coordSys  CoordinateSystem instance to copy to create "this" instance.
  */
 //---------------------------------------------------------------------------
 CoordinateSystem::CoordinateSystem(const CoordinateSystem &coordSys) :
 CoordinateBase (coordSys)
-//axes           (coordSys.axes)
 {
    if (coordSys.axes)
    {
@@ -190,7 +186,7 @@ const CoordinateSystem& CoordinateSystem::operator=(
 /**
  * Equality operator for CoordinateSystem structures.
  *
- * @param coordSys  The original that is being cjecked for equality with 
+ * @param coordSys  The original that is being checked for equality with
  *                   "this".
  *
  * @return true if "this" is the same as the input coordSys
@@ -200,7 +196,14 @@ const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
 {
    if (&coordSys == this)
       return true;
-   if (axes->GetType() == (coordSys.axes)->GetType()) 
+
+   if (axes == NULL)
+   {
+      if (coordSys.axes == NULL) return true;
+      else                       return false;
+   }
+
+   if (axes->GetType() == (coordSys.axes)->GetType())
    {
       if (origin == coordSys.origin) return true;
       // need to check j2000Body too?
@@ -210,7 +213,7 @@ const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
 }
 
 //---------------------------------------------------------------------------
-//  ~CoordinateSystem(void)
+//  ~CoordinateSystem()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -239,66 +242,180 @@ CoordinateSystem::~CoordinateSystem()
    #endif
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem) const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of an Eop File is required, optional,
+ * or not used for this coordinate system.
+ *
+ * @param <forBaseSystem> system for which an EOP file may be needed <future>
+ *
+ * @return required, not used, or optional use of an EOP File
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesEopFile(const std::string &forBaseSystem) const
 {
    if (axes) return axes->UsesEopFile(forBaseSystem);
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesItrfFile() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of an ITRF File is required, optional,
+ * or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of an ITRF File
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesItrfFile() const
 {
    if (axes) return axes->UsesItrfFile();
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesEpoch() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of an epoch is required, optional,
+ * or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of an epoch
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesEpoch() const
 {
    if (axes) return axes->UsesEpoch();
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesPrimary() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of a primary body is required, optional,
+ * or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of a primary body
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesPrimary() const
 {
    if (axes) return axes->UsesPrimary();
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesSecondary() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of a secondary body is required, optional,
+ * or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of a secondary body
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesSecondary() const
 {
    if (axes) return axes->UsesSecondary();
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesXAxis() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of an X Axis is required, optional,
+ * or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of an X axis
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesXAxis() const
 {
    if (axes) return axes->UsesXAxis();
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesYAxis() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of a Y Axis is required, optional,
+ * or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of a Y axis
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesYAxis() const
 {
    if (axes) return axes->UsesYAxis();
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesZAxis() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of a Z Axis is required, optional,
+ * or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of a Z axis
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesZAxis() const
 {
    if (axes) return axes->UsesZAxis();
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a value indicating whether the use of an nutation update interval
+ * is required, optional, or not used for this coordinate system.
+ *
+ * @return required, not used, or optional use of a nutation update interval
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage CoordinateSystem::UsesNutationUpdateInterval() const
 {
    if (axes) return axes->UsesNutationUpdateInterval();
    return GmatCoordinate::NOT_USED;
 }
 
+//---------------------------------------------------------------------------
+// bool UsesSpacecraft(const std::string &withName) const
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not this coordinate system has a
+ * spacecraft as the origin, secondary, or primary.
+ *
+ * @return flag indicating whether or not this coordinate system has
+ *         a spacecraft as the origin, primary, or secondary
+ */
+//---------------------------------------------------------------------------
 bool CoordinateSystem::UsesSpacecraft(const std::string &withName) const
 {
    if (axes) return axes->UsesSpacecraft(withName);
    return false;
 }
 
+//---------------------------------------------------------------------------
+// bool HasCelestialBodyOrigin(const std::string &withName) const
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not this coordinate system has a
+ * celestial body as the origin.
+ *
+ * @return flag indicating whether or not this coordinate system has
+ *         a celestial body as the origin
+ */
+//---------------------------------------------------------------------------
 bool CoordinateSystem::HasCelestialBodyOrigin() const
 {
    if (axes) return axes->HasCelestialBodyOrigin();
@@ -308,94 +425,265 @@ bool CoordinateSystem::HasCelestialBodyOrigin() const
 
 
 // methods to set parameters for the AxisSystems
+//---------------------------------------------------------------------------
+// void SetPrimaryObject(SpacePoint *prim)
+//---------------------------------------------------------------------------
+/**
+ * Sets the primary object for a coordinate system that needs it.
+ *
+ * @param <prim> primary object
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::SetPrimaryObject(SpacePoint *prim)
 {
    if (axes) axes->SetPrimaryObject(prim);
 }
 
+//---------------------------------------------------------------------------
+// void SetSecondaryObject(SpacePoint *second)
+//---------------------------------------------------------------------------
+/**
+ * Sets the secondary object for a coordinate system that needs it.
+ *
+ * @param <second> secondary object
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::SetSecondaryObject(SpacePoint *second)
 {
    if (axes) axes->SetSecondaryObject(second);
 }
 
+//---------------------------------------------------------------------------
+// void SetEpoch(const A1Mjd &toEpoch)
+//---------------------------------------------------------------------------
+/**
+ * Sets the epoch for a coordinate system that needs it.
+ *
+ * @param <toEpoch> epoch to set
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::SetEpoch(const A1Mjd &toEpoch)
 {
    if (axes) axes->SetEpoch(toEpoch);
 }
 
+//---------------------------------------------------------------------------
+// void SetXAxis(const std::string &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Sets the X axis value for a coordinate system that needs it.
+ *
+ * @param <toValue> X axis value
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::SetXAxis(const std::string &toValue)
 {
    if (axes) axes->SetXAxis(toValue);
 }
 
+//---------------------------------------------------------------------------
+// void SetYAxis(const std::string &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Sets the Y axis value for a coordinate system that needs it.
+ *
+ * @param <toValue> Y axis value
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::SetYAxis(const std::string &toValue)
 {
    if (axes) axes->SetYAxis(toValue);
 }
 
+//---------------------------------------------------------------------------
+// void SetZAxis(const std::string &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Sets the Z axis value for a coordinate system that needs it.
+ *
+ * @param <toValue> Z axis value
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::SetZAxis(const std::string &toValue)
 {
    if (axes) axes->SetZAxis(toValue);
 }
 
+//---------------------------------------------------------------------------
+// void SetEopFile(EopFile *eopF)
+//---------------------------------------------------------------------------
+/**
+ * Sets the EOP file for a coordinate system that needs it.
+ *
+ * @param <eopF> EOP file pointer
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::SetEopFile(EopFile *eopF)
 {
    if (axes) axes->SetEopFile(eopF);
 }
 
+//---------------------------------------------------------------------------
+// void SetCoefficientsFile(ItrfCoefficientsFile *itrfF)
+//---------------------------------------------------------------------------
+/**
+ * Sets the ITRF coefficients file for a coordinate system that needs it.
+ *
+ * @param <itrfF> ITRF coefficients file pointer
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::SetCoefficientsFile(ItrfCoefficientsFile *itrfF)
 {
    if (axes) axes->SetCoefficientsFile(itrfF);
 }
 
+//---------------------------------------------------------------------------
+// SpacePoint* GetPrimaryObject() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a pointer to the primary object.
+ *
+ * @return pointer to the primary object
+ *
+ */
+//---------------------------------------------------------------------------
 SpacePoint* CoordinateSystem::GetPrimaryObject() const
 {
    if (axes) return axes->GetPrimaryObject();
    return NULL;
 }
 
+//---------------------------------------------------------------------------
+// SpacePoint* GetSecondaryObject() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a pointer to the secondary object.
+ *
+ * @return pointer to the secondary object
+ *
+ */
+//---------------------------------------------------------------------------
 SpacePoint* CoordinateSystem::GetSecondaryObject() const
 {
    if (axes) return axes->GetSecondaryObject();
    return NULL;
 }
 
+//---------------------------------------------------------------------------
+// A1Mjd GetEpoch() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the epoch value
+ *
+ * @return A1Mjd epoch
+ *
+ */
+//---------------------------------------------------------------------------
 A1Mjd CoordinateSystem::GetEpoch() const
 {
    if (axes) return axes->GetEpoch();
    return A1Mjd();  // does this make sense?
 }
 
+//---------------------------------------------------------------------------
+// std::string GetXAxis() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the X Axis value
+ *
+ * @return X axis value
+ *
+ */
+//---------------------------------------------------------------------------
 std::string CoordinateSystem::GetXAxis() const
 {
    if (axes) return axes->GetXAxis();
    return "";
 }
 
+//---------------------------------------------------------------------------
+// std::string GetYAxis() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the Y Axis value
+ *
+ * @return Y axis value
+ *
+ */
+//---------------------------------------------------------------------------
 std::string CoordinateSystem::GetYAxis() const
 {
    if (axes) return axes->GetYAxis();
    return "";
 }
 
+//---------------------------------------------------------------------------
+// std::string GetZAxis() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the Z Axis value
+ *
+ * @return Z axis value
+ *
+ */
+//---------------------------------------------------------------------------
 std::string CoordinateSystem::GetZAxis() const
 {
    if (axes) return axes->GetZAxis();
    return "";
 }
 
+//---------------------------------------------------------------------------
+// EopFile* GetEopFile() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a pointer to the EOP file
+ *
+ * @return pointer to the EOP file
+ *
+ */
+//---------------------------------------------------------------------------
 EopFile* CoordinateSystem::GetEopFile() const
 {
    if (axes) return axes->GetEopFile();
    return NULL;
 }
 
+//---------------------------------------------------------------------------
+// ItrfCoefficientsFile* GetItrfCoefficientsFile() const
+//---------------------------------------------------------------------------
+/**
+ * Returns a pointer to the ITRF coefficients file
+ *
+ * @return pointer to the ITRF coefficients file
+ *
+ */
+//---------------------------------------------------------------------------
 ItrfCoefficientsFile* CoordinateSystem::GetItrfCoefficientsFile()
 {
    if (axes) return axes->GetItrfCoefficientsFile();
    return NULL;
 }
 
+//---------------------------------------------------------------------------
+// Rmatrix33 GetLastRotationMatrix() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the rotation matrix last computed by this coordinate system
+ *
+ * @return last-computed rotation matrix (matrix from this coordinate system
+ *         to its base system)
+ *
+ */
+//---------------------------------------------------------------------------
 Rmatrix33 CoordinateSystem::GetLastRotationMatrix() const
 {
    if (!axes) 
@@ -407,6 +695,17 @@ Rmatrix33 CoordinateSystem::GetLastRotationMatrix() const
    return axes->GetLastRotationMatrix();
 }
 
+//---------------------------------------------------------------------------
+// void GetLastRotationMatrix(Real *mat) const
+//---------------------------------------------------------------------------
+/**
+ * Returns the rotation matrix last computed by this coordinate system
+ *
+ * @param <mat> output last-computed rotation matrix (matrix from this
+ *              coordinate system to its base system)
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::GetLastRotationMatrix(Real *mat) const
 {
    if (!axes) 
@@ -418,6 +717,17 @@ void CoordinateSystem::GetLastRotationMatrix(Real *mat) const
    axes->GetLastRotationMatrix(mat);
 }
 
+//---------------------------------------------------------------------------
+// Rmatrix33 GetLastRotationDotMatrix() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the rotation dot matrix last computed by this coordinate system
+ *
+ * @return last-computed rotation dot matrix (matrix from this coordinate system
+ *         to its base system)
+ *
+ */
+//---------------------------------------------------------------------------
 Rmatrix33 CoordinateSystem::GetLastRotationDotMatrix() const
 {
    if (!axes) 
@@ -429,6 +739,17 @@ Rmatrix33 CoordinateSystem::GetLastRotationDotMatrix() const
    return axes->GetLastRotationDotMatrix();
 }
 
+//---------------------------------------------------------------------------
+// void GetLastRotationDotMatrix(Real *mat) const
+//---------------------------------------------------------------------------
+/**
+ * Returns the rotation dot matrix last computed by this coordinate system
+ *
+ * @param <mat> output last-computed dot rotation matrix (matrix from this
+ *              coordinate system to its base system)
+ *
+ */
+//---------------------------------------------------------------------------
 void CoordinateSystem::GetLastRotationDotMatrix(Real *mat) const
 {
    if (!axes) 
@@ -440,12 +761,36 @@ void CoordinateSystem::GetLastRotationDotMatrix(Real *mat) const
    axes->GetLastRotationDotMatrix(mat);
 }
 
+//---------------------------------------------------------------------------
+// bool AreAxesOfType(const std::string &ofType) const
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the coordinate system has
+ * an axis system of the specified type
+ *
+ * @param <ofType> axis type specified
+ *
+ * @return true if axes are of specified type; false otherwise
+ *
+ */
+//---------------------------------------------------------------------------
 bool CoordinateSystem::AreAxesOfType(const std::string &ofType) const
 {
    if (!axes) return false;
    return axes->IsOfType(ofType);
 }
 
+//---------------------------------------------------------------------------
+// std::string GetBaseSystem() const
+//---------------------------------------------------------------------------
+/**
+ * Returns the string value of the base system for this coordinate system/
+ * axis system
+ *
+ * @return base system
+ *
+ */
+//---------------------------------------------------------------------------
 std::string CoordinateSystem::GetBaseSystem() const
 {
    if (!axes)
@@ -462,6 +807,8 @@ std::string CoordinateSystem::GetBaseSystem() const
 //---------------------------------------------------------------------------
 /**
  * Initialization method for this CoordinateSystem.
+ *
+ * @return true if successfully initialized; false otherwise
  *
  */
 //---------------------------------------------------------------------------
@@ -504,9 +851,11 @@ bool CoordinateSystem::Initialize()
 /**
  * This method converts the input state, in 'this' axisSystem, to the base system.
  *
- * @param epoch      epoch for which to do the conversion.
- * @param inState    input state to convert.
- * @param coincident are the systems coincident?.
+ * @param epoch            epoch for which to do the conversion.
+ * @param inState          input state to convert.
+ * @param coincident       are the systems coincident?.
+ * @param forceComputation should we force computation even if it is not time to
+ *                         compute
  *
  * @return input state converted to the base system.
  *
@@ -565,6 +914,17 @@ Rvector CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Rvector &inStat
 // void ToBaseSystem(const A1Mjd &epoch, const Real *inState, Real *outState,
 //                   bool coincident, bool forceComputation)
 //------------------------------------------------------------------------------
+/**
+ * This method converts the input state, in 'this' axisSystem, to the base system.
+ *
+ * @param epoch            epoch for which to do the conversion.
+ * @param inState          input state to convert.
+ * @parm  outState         output state resulting from the conversion
+ * @param coincident       are the systems coincident?.
+ * @param forceComputation should we force computation even if it is not time to
+ *                         compute
+ */
+//------------------------------------------------------------------------------
 void CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Real *inState,
                                     Real *outState,     bool coincident,
                                     bool forceComputation)
@@ -621,9 +981,11 @@ void CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Real *inState,
  * This method converts the input state, in the base axisSystem, to "this"
  * axisSystem.
  *
- * @param epoch      epoch for which to do the conversion.
- * @param inState    input state to convert.
- * @param coincident are the systems coincident?.
+ * @param epoch            epoch for which to do the conversion.
+ * @param inState          input state to convert.
+ * @param coincident       are the systems coincident?.
+ * @param forceComputation should we force computation even if it is not time to
+ *                         compute
  *
  * @return input state converted from the base system to 'this' axisSystem.
  *
@@ -635,11 +997,11 @@ Rvector CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Rvector &inSt
 {
    static Rvector internalState;
    static Rvector finalState;
-    #ifdef DEBUG_INPUTS_OUTPUTS
+   #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
       "In CS::FromBaseSystem, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
       inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
-    #endif
+   #endif
    internalState.SetSize(inState.GetSize());
    finalState.SetSize(inState.GetSize());
    if (!coincident)
@@ -681,6 +1043,23 @@ Rvector CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Rvector &inSt
 }
 
 
+//------------------------------------------------------------------------------
+//  void  FromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+//                       bool coincident, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method converts the input state, in the base axisSystem, to "this"
+ * axisSystem.
+ *
+ * @param epoch            epoch for which to do the conversion.
+ * @param inState          input state to convert.
+ * @param outState         output state resulting from the conversion
+ * @param coincident       are the systems coincident?.
+ * @param forceComputation should we force computation even if it is not time to
+ *                         compute
+ *
+ */
+//------------------------------------------------------------------------------
 void CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Real *inState,
                                       Real *outState,  bool coincident,
                                       bool forceComputation)
@@ -769,6 +1148,18 @@ void CoordinateSystem::Copy(const GmatBase* orig)
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
+/**
+ * Renames the specified reference object to the specified new name.
+ *
+ * @param type type of the reference object to rename
+ * @param oldName old name of the object
+ * @param newName new name of the object
+ *
+ * @return true if rename is successful or not necessary because the
+ *         axis system does not contain a reference to the object;
+ *         false otherwise
+ */
+//---------------------------------------------------------------------------
 bool CoordinateSystem::RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName)
@@ -808,11 +1199,7 @@ bool CoordinateSystem::IsParameterReadOnly(const Integer id) const
 //  bool IsParameterReadOnly(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
- * Checks to see if the requested parameter is read only.
- *
- * @param <label> Description for the parameter.
- *
- * @return true if the parameter is read only, false (the default) if not.
+ * @see GmatBase
  */
 //---------------------------------------------------------------------------
 bool CoordinateSystem::IsParameterReadOnly(const std::string &label) const
@@ -1004,8 +1391,8 @@ Real CoordinateSystem::SetRealParameter(const std::string &label, const Real val
  *
  * @param <id> The integer ID for the parameter.
  *
- * @return The string stored for this parameter, or throw ab=n exception if
- *         there is no string association.
+ * @return The string stored for this parameter, or throw an exception if
+ *         there is no axis system set.
  */
 //------------------------------------------------------------------------------
 std::string CoordinateSystem::GetStringParameter(const Integer id) const
@@ -1031,8 +1418,8 @@ std::string CoordinateSystem::GetStringParameter(const Integer id) const
  *
  * @param <label> The (string) label for the parameter.
  *
- * @return The string stored for this parameter, or the empty string if there
- *         is no string association.
+ * @return The string stored for this parameter, or throw an exception if
+ *         there is no axis system set.
  */
 //------------------------------------------------------------------------------
 std::string CoordinateSystem::GetStringParameter(const std::string &label) const
@@ -1078,6 +1465,10 @@ bool CoordinateSystem::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 // bool GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool CoordinateSystem::GetBooleanParameter(const Integer id) const
 {
    if (id == OVERRIDE_ORIGIN_INTERVAL) 
@@ -1091,6 +1482,10 @@ bool CoordinateSystem::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 // bool GetBooleanParameter(const std::string &label) const
 //------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool CoordinateSystem::GetBooleanParameter(const std::string &label) const
 {
    return GetBooleanParameter(GetParameterID(label));
@@ -1098,6 +1493,10 @@ bool CoordinateSystem::GetBooleanParameter(const std::string &label) const
 
 //------------------------------------------------------------------------------
 // bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
 //------------------------------------------------------------------------------
 bool CoordinateSystem::SetBooleanParameter(const Integer id,
                                            const bool value)
@@ -1114,6 +1513,10 @@ bool CoordinateSystem::SetBooleanParameter(const Integer id,
 
 //------------------------------------------------------------------------------
 // bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
 //------------------------------------------------------------------------------
 bool CoordinateSystem::SetBooleanParameter(const std::string &label,
                                            const bool value)
@@ -1165,6 +1568,10 @@ GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
 //---------------------------------------------------------------------------
 // bool IsOwnedObject(Integer id) const;
 //---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
 bool CoordinateSystem::IsOwnedObject(Integer id) const
 {
    if (id == AXES)
@@ -1233,13 +1640,13 @@ const ObjectTypeArray& CoordinateSystem::GetRefObjectTypeArray()
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
- * Returns the names of the reference object. (Derived classes should implement
+ * Returns the name(s) of the reference object(s). (Derived classes should implement
  * this as needed.)
  *
  * @param <type> reference object type.  Gmat::UnknownObject returns all of the
  *               ref objects.
  *
- * @return The names of the reference object.
+ * @return The name(s) of the reference object(s).
  */
 //------------------------------------------------------------------------------
 const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -1252,7 +1659,7 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
    
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
-      // Here we want the names of all named refence objects used in this
+      // Here we want the names of all named reference objects used in this
       // coordinate system.  (The axis system is not named, so we do not return
       // anything for it.)
       static StringArray refs;
@@ -1585,7 +1992,7 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
 //                              Rvector &outState)
 //------------------------------------------------------------------------------
 /**
- * This method translates the input state, in "this" axisSystem to the the base system
+ * This method translates the input state, in "this" axisSystem to the base system
  * axisSystem.
  *
  * @param epoch      epoch for which to do the conversion.
@@ -1643,6 +2050,18 @@ bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
 //------------------------------------------------------------------------------
 // bool TranslateToBaseSystem(const A1Mjd &epoch, const Real *inState,
 //                            Real *outState)
+//------------------------------------------------------------------------------
+/**
+ * This method translates the input state, in "this" axisSystem to the base system
+ * axisSystem.
+ *
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param outState   output (converted) state.
+ *
+ * @return true if successful; false if not.
+ *
+ */
 //------------------------------------------------------------------------------
 bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
                                              const Real *inState,
@@ -1740,6 +2159,18 @@ bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
 //------------------------------------------------------------------------------
 // bool TranslateFromBaseSystem(const A1Mjd &epoch, const Real *inState,
 //                              Real *outState)
+//------------------------------------------------------------------------------
+/**
+ * This method translates the input state, in the base axisSystem to 'this'
+ * axisSystem.
+ *
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param outState   output (converted) state.
+ *
+ * @return true if successful; false if not.
+ *
+ */
 //------------------------------------------------------------------------------
 bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
                                                const Real *inState,
