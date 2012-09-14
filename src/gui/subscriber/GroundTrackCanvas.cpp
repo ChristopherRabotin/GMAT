@@ -933,7 +933,7 @@ void GroundTrackCanvas::DrawObjectOrbit()
 {
    #if DEBUG_DRAW
    MessageInterface::ShowMessage
-      ("==========> DrawObjectOrbit() entered, mLastIndex=%d, mObjectCount=%d\n",
+      ("\n==========> DrawObjectOrbit() entered, mLastIndex=%d, mObjectCount=%d\n",
        mLastIndex, mObjectCount);
    #endif
    
@@ -974,7 +974,7 @@ void GroundTrackCanvas::DrawObjectOrbit()
       #endif
       
       //---------------------------------------------------------
-      //draw object with texture
+      // draw object with texture
       //---------------------------------------------------------      
       if (mShowObjectMap[objName])
       {
@@ -1056,21 +1056,25 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
    // Draw spacecraft model
    if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
    {     
-      #if DEBUG_DRAW
-      MessageInterface::ShowMessage("==> Drawing spacecraft '%s'\n", objName.c_str());
-      #endif
-      
       // If drawing at current position is on
       if (mIsDrawing[frame])
+      {
+         #if DEBUG_DRAW
+         MessageInterface::ShowMessage("==> Drawing spacecraft image '%s'\n", objName.c_str());
+         #endif
          DrawSpacecraft(objName, objId, index2);
+      }
    }
    else if (mObjectArray[obj]->IsOfType(Gmat::GROUND_STATION))
    {
-      #if DEBUG_DRAW
-      MessageInterface::ShowMessage("==> Drawing ground station '%s'\n", objName.c_str());
-      #endif
-      
-      DrawGroundStation(objName, objId, index2);
+      // If drawing at current position is on
+      if (mIsDrawing[frame])
+      {
+         #if DEBUG_DRAW
+         MessageInterface::ShowMessage("   Drawing ground station image '%s'\n", objName.c_str());
+         #endif
+         DrawGroundStation(objName, objId, index2);
+      }
    }
    else
    {
@@ -1172,48 +1176,41 @@ void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
 void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
                                        int objId)
 {
-   // If object is the central body, then return
-   if (objName == mCentralBodyName.c_str())
-   {
-      #ifdef DEBUG_ORBIT_LINES
-      MessageInterface::ShowMessage
-         ("GroundTrackCanvas::DrawOrbitLines() entered, not drawing central "
-          "body '%s', so leaving\n", objName.c_str());
-      #endif
-      return;
-   }
-   
-   // If object is Sun, then return
-   if (objName == "Sun")
-   {
-      #ifdef DEBUG_ORBIT_LINES
-      MessageInterface::ShowMessage
-         ("GroundTrackCanvas::DrawOrbitLines() entered, not drawing Sun, "
-          " so leaving\n");
-      #endif
-      return;
-   }
-   
-   #if 0
-   if (objName == "GroundStation1")
-      return;
-   #endif
-   
    #if DEBUG_DRAW_DEBUG
    DrawDebugMessage(" Entered DrawOrbitLines  --- ", GmatColor::RED32, 0, 300);
    #endif
    
    #ifdef DEBUG_ORBIT_LINES
    MessageInterface::ShowMessage
-      ("GroundTrackCanvas::DrawOrbitLines() entered, i=%d, objName='%s', "
+      ("\nGroundTrackCanvas::DrawOrbitLines() entered, i=%d, objName='%s', "
        "obj=%d, objId=%d, mTime[%3d]=%f, mTime[%3d]=%f, mIsDrawing[%3d]=%d, "
        "mIsDrawing[%3d]=%d\n", i, objName.c_str(), obj, objId, i, mTime[i],
        i-1, mTime[i-1], i, mIsDrawing[i], i-1, mIsDrawing[i-1]);
    #endif
    
+   // Draw orbit lines for spacecraft only
+   if (!(mObjectArray[objId]->IsOfType(Gmat::SPACECRAFT)))
+   {
+      // We are not drawing trajectory other than spacecraft.
+      // Just settinig color here for label
+      *sIntColor = mObjectColorMap[objName].GetIntColor();
+      
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage
+         ("GroundTrackCanvas::DrawOrbitLines() leaving, not drawing '%s'\n", objName.c_str());
+      #endif
+      return;
+   }
+   
    // If current or previous points are not drawing, just return
    if (!mIsDrawing[i] || !mIsDrawing[i-1])
+   {
+      #ifdef DEBUG_ORBIT_LINES
+      MessageInterface::ShowMessage
+         ("GroundTrackCanvas::DrawOrbitLines() just returning, current or previous lines are not drawn\n");
+      #endif
       return;
+   }
    
    int index1 = 0, index2 = 0;
    
@@ -1232,7 +1229,13 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       
       // if object position magnitude is 0, skip
       if (r1.GetMagnitude() == 0.0 || r2.GetMagnitude() == 0.0)
+      {
+         #ifdef DEBUG_ORBIT_LINES
+         MessageInterface::ShowMessage
+            ("GroundTrackCanvas::DrawOrbitLines() just returning, current or previous position are zero\n");
+         #endif
          return;
+      }
       
       // if object position diff is over limit, skip (ScriptEx_TargetHohmann)
       #ifdef SKIP_DATA_OVER_LIMIT
@@ -1256,17 +1259,8 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       int colorIndex = objId * MAX_DATA + i;
       if (mDrawOrbitFlag[colorIndex])
       {
-         
-         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
-         {
-            // We are drawing a spacecraft orbit.  This includes solver passes.
-            *sIntColor = mObjectOrbitColor[colorIndex];
-         }
-         else
-         {
-            // We are drawing some other trajectory, say for a groundstation.
-            *sIntColor = mObjectColorMap[objName].GetIntColor();
-         }
+         // We are drawing a spacecraft orbit.  This includes solver passes.
+         *sIntColor = mObjectOrbitColor[colorIndex];
          
          Rvector3 v1(mObjectViewVel[index1+0], mObjectViewVel[index1+1],
                      mObjectViewVel[index1+2]);
@@ -1274,18 +1268,18 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
          Rvector3 v2(mObjectViewVel[index2+0], mObjectViewVel[index2+1],
                      mObjectViewVel[index2+2]);
          
-         // We don't want to draw celestial body
-         if (objName != "Earth" && objName != "Sun")
+         #ifdef DEBUG_ORBIT_LINES
+         MessageInterface::ShowMessage("   Drawing ground track lines for '%s'\n", objName.c_str());
+         #endif
+         
+         DrawGroundTrackLines(r1, v1, r2, v2);
+         
+         // draw foot print on option
+         if (mFootPrintOption == 1)
          {
-            DrawGroundTrackLines(r1, v1, r2, v2);
-            
-            // draw foot print on option
-            if (mFootPrintOption == 1)
-            {
-               // Plot shows incosistent gap between foot prints, so commented out
-               //if (i % mFootPrintDrawFrequency == 0)
-                  DrawCircleAtCurrentPosition(objId, index2, 5.0);
-            }
+            // Plot shows incosistent gap between foot prints, so commented out
+            //if (i % mFootPrintDrawFrequency == 0)
+            DrawCircleAtCurrentPosition(objId, index2, 5.0);
          }
       }
       
@@ -1318,7 +1312,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    #if DEBUG_DRAW_DEBUG
    DrawDebugMessage(" Entered DrawGroundTrackLines --- ", GmatColor::RED32, 0, 500);
    #endif
-      
+   
    // Compute latitude and longitude
    Real lon1, lat1, lon2, lat2;
    r1.ComputeLongitudeLatitude(lon1, lat1);
@@ -1332,7 +1326,9 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    
    #if DEBUG_DRAW_LINE
    MessageInterface::ShowMessage
-      ("---> lon1=%f, lat1=%f, lon2=%f, lat2=%f\n", lon1, lat1, lon2, lat2);
+      ("   lon1=%f, lat1=%f, lon2=%f, lat2=%f\n", lon1, lat1, lon2, lat2);
+   MessageInterface::ShowMessage
+      ("   color = [%u, %u, %u]\n", sGlColor->red, sGlColor->green, sGlColor->blue);
    #endif
    
    // Turn on TEXTURE_2D to dim the color, alpha doen't seem to work!!
@@ -1344,7 +1340,6 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    
    Integer dir1 = GmatMathUtil::SignOf(v1[1] * r1[0] - v1[0] * r1[1]);
    Integer dir2 = GmatMathUtil::SignOf(v2[1] * r2[0] - v2[0] * r2[1]);
-   //Real m = (lat2 - lat1) / (lon2 - lon1);
    Real plusLon2 = GmatMathUtil::Mod(lon2, GmatMathConstants::TWO_PI_DEG);
    Real plusLon1 = GmatMathUtil::Mod(lon1, GmatMathConstants::TWO_PI_DEG);
    Real minusLon2 = GmatMathUtil::Mod(lon2, -GmatMathConstants::TWO_PI_DEG);
@@ -1358,7 +1353,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    #endif
    
    #if DEBUG_DRAW_LINE
-   MessageInterface::ShowMessage("---> dir1=%d, dir2=%d\n", dir1, dir2);
+   MessageInterface::ShowMessage("   dir1=%d, dir2=%d\n", dir1, dir2);
    #endif
    
    // New point wrapps off RHS border
@@ -1383,7 +1378,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
       m1 = (lat2 - lat1) / (minusLon2 - minusLon1);
       lat3 = m1 * (-GmatMathConstants::PI_DEG - minusLon2) + lat2;
       #if DEBUG_DRAW_LINE
-      MessageInterface::ShowMessage("------> at LHS border, lat3=%f\n", lat3);
+      MessageInterface::ShowMessage("   ------> at LHS border, lat3=%f\n", lat3);
       #endif
       
       DrawLine(lon1, lat1, -GmatMathConstants::PI_DEG, lat3);
@@ -1392,7 +1387,7 @@ void GroundTrackCanvas::DrawGroundTrackLines(Rvector3 &r1, Rvector3 &v1,
    else
    {
       #if DEBUG_DRAW_LINE
-      MessageInterface::ShowMessage("------> at normal drawing\n");
+      MessageInterface::ShowMessage("   ------> at normal drawing\n");
       #endif
       
       DrawLine(lon1, lat1, lon2, lat2);
@@ -1579,13 +1574,16 @@ void GroundTrackCanvas::DrawImage(const wxString &objName, float lon, float lat,
 {   
    #if DEBUG_DRAW_IMAGE
    MessageInterface::ShowMessage
-      ("GroundTrackCanvas::DrawImage() entered, objName='%s', lon=%f, "
-       "lat=%f, imagePos=%f\n", objName.c_str(), lon, lat, imagePos);
+      ("GroundTrackCanvas::DrawImage() entered, objName='%s', lon=%f, lat=%f, "
+       "imagePos=%f, image=<%p>\n", objName.c_str(), lon, lat, imagePos, image);
    #endif
    
    //=======================================================
    #ifdef __DRAW_WITH_BLENDING__
    //=======================================================
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage("   Drawing image with blending\n");
+   #endif
    
    // This code block draws image with blending
    glPushMatrix();
@@ -1619,6 +1617,9 @@ void GroundTrackCanvas::DrawImage(const wxString &objName, float lon, float lat,
    //=======================================================
    #else
    //=======================================================
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage("   Drawing image without blending\n");
+   #endif
    
    // This code block draws image without blending
    GLint texW, texH;
@@ -1641,10 +1642,10 @@ void GroundTrackCanvas::DrawImage(const wxString &objName, float lon, float lat,
    
    if (image == NULL)
    {
-      GLubyte *image = new GLubyte[texW * texH * 4];
-      glGetTexImage(GL_TEXTURE_2D,  0,  GL_RGBA, GL_UNSIGNED_BYTE,  image);
-      glDrawPixels(texW, texH, GL_RGBA, GL_UNSIGNED_BYTE,  image);
-      delete[] image;
+      GLubyte *tempImage = new GLubyte[texW * texH * 4];
+      glGetTexImage(GL_TEXTURE_2D,  0,  GL_RGBA, GL_UNSIGNED_BYTE,  tempImage);
+      glDrawPixels(texW, texH, GL_RGBA, GL_UNSIGNED_BYTE,  tempImage);
+      delete[] tempImage;
    }
    else
    {
@@ -1654,6 +1655,10 @@ void GroundTrackCanvas::DrawImage(const wxString &objName, float lon, float lat,
    //=======================================================
    #endif
    //=======================================================
+   
+   #if DEBUG_DRAW_IMAGE
+   MessageInterface::ShowMessage("GroundTrackCanvas::DrawImage() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1748,7 +1753,6 @@ void GroundTrackCanvas::DrawGroundStation(const wxString &objName, int objId,
    
    lon2 *= GmatMathConstants::DEG_PER_RAD;
    lat2 *= GmatMathConstants::DEG_PER_RAD;
-   
    
    // Use defaultCanvasAxis to draw spacecraft image and label in proper position
    float defaultCanvasAxis = 1800.0;

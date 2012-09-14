@@ -29,6 +29,7 @@
 
 //#define DBGLVL_PARAM_STRING 2
 //#define DBGLVL_OBJ 1
+//#define DBGLVL_INIT 2
 //#define DBGLVL_UPDATE 1
 
 //---------------------------------
@@ -209,17 +210,11 @@ bool GroundTrackPlot::Initialize()
       if (PlotInterface::CreateGlPlotWindow
           (instanceName, mOldName, mPlotUpperLeft[0], mPlotUpperLeft[1],
            mPlotSize[0], mPlotSize[1], isMaximized, mNumPointsToRedraw))
-      {
-         #if DBGLVL_INIT
-         MessageInterface::ShowMessage
-            ("   mViewPointRefObj=%p, mViewScaleFactor=%f\n",
-             mViewPointRefObj, mViewScaleFactor);
-         #endif
-         
+      {         
          //--------------------------------------------------------
          // Set Spacecraft and non-Spacecraft objects.
          // If non-Spacecraft, position has to be computed in the
-         // TrajPlotCanvas, so need to pass those object pointers.
+         // GroundTrackCanvas, so need to pass those object pointers.
          //--------------------------------------------------------
          
          ClearDynamicArrays();
@@ -237,7 +232,7 @@ bool GroundTrackPlot::Initialize()
              mObjectNameArray.end())
             UpdateObjectList(theSolarSystem->GetBody("Sun"), false);
          //===========================================================
-                  
+         
          #if DBGLVL_INIT > 1
          MessageInterface::ShowMessage
             ("   mScNameArray.size=%d, mScOrbitColorArray.size=%d\n",
@@ -285,7 +280,7 @@ bool GroundTrackPlot::Initialize()
          MessageInterface::ShowMessage
             ("   calling PlotInterface::SetGlCoordSystem()\n");
          #endif
-
+         
          if (mViewCoordSystem == NULL)
          {
             mViewCoordSystem = CoordinateSystem::CreateLocalCoordinateSystem

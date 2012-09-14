@@ -1837,7 +1837,7 @@ void OrbitPlot::BuildDynamicArrays()
        "mAllSpArray.size()=%d\n", mAllSpNameArray.size(), mAllSpArray.size());
    #endif
    
-   // add non-spacecraft plot objects to the list
+   // Add spacecraft objects to the list first
    for (int i=0; i<mAllSpCount; i++)
    {
       #if DBGLVL_INIT > 1
@@ -1848,16 +1848,9 @@ void OrbitPlot::BuildDynamicArrays()
       
       if (mAllSpArray[i])
       {
-         //add all objects to object list
-         mObjectNameArray.push_back(mAllSpNameArray[i]);                  
-         mDrawOrbitArray.push_back(mDrawOrbitMap[mAllSpNameArray[i]]);
-         mDrawObjectArray.push_back(mShowObjectMap[mAllSpNameArray[i]]);
-         mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
-         mTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
-         mObjectArray.push_back(mAllSpArray[i]);
-         
          if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
          {
+            // Add to spacecraft list
             mScNameArray.push_back(mAllSpNameArray[i]);
             mScOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
             mScTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
@@ -1867,18 +1860,107 @@ void OrbitPlot::BuildDynamicArrays()
             mScVxArray.push_back(0.0);
             mScVyArray.push_back(0.0);
             mScVzArray.push_back(0.0);
+            
+            // Add to all object list
+            mObjectNameArray.push_back(mAllSpNameArray[i]);                  
+            mDrawOrbitArray.push_back(mDrawOrbitMap[mAllSpNameArray[i]]);
+            mDrawObjectArray.push_back(mShowObjectMap[mAllSpNameArray[i]]);
+            mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+            mTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
+            mObjectArray.push_back(mAllSpArray[i]);
          }
       }
       else
       {
          MessageInterface::ShowMessage
             ("The SpacePoint name: %s has NULL pointer.\n It will be removed "
-             "from the 3DView.\n", mAllSpNameArray[i].c_str());
+             "from the %s.\n", mAllSpNameArray[i].c_str(), GetTypeName().c_str());
+      }
+   }
+   
+   // Add non-spacecraft objects to the list
+   bool groundStationFound = false;
+   for (int i=0; i<mAllSpCount; i++)
+   {      
+      if (mAllSpArray[i])
+      {
+         if (!mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
+         {
+            if (mAllSpArray[i]->IsOfType(Gmat::GROUND_STATION))
+               groundStationFound = true;
+            
+            // Add to all object list
+            mObjectNameArray.push_back(mAllSpNameArray[i]);                  
+            mDrawOrbitArray.push_back(mDrawOrbitMap[mAllSpNameArray[i]]);
+            mDrawObjectArray.push_back(mShowObjectMap[mAllSpNameArray[i]]);
+            mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+            mTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
+            mObjectArray.push_back(mAllSpArray[i]);
+         }
       }
    }
    
    mScCount = mScNameArray.size();
    mObjectCount = mObjectNameArray.size();
+   
+   // Since we don't know the type of objects until object is initialized,
+   // change to use the same default spacecraft orbit color for OrbitView and
+   // GroundTrackPlot.  If GroundStation is added for GroundTrackPlot, its color
+   // is set to the first default color, which makes color different from OrbitView.
+   // (LOJ: 2012.09.13)
+   if (groundStationFound)
+   {
+      #if DBGLVL_INIT
+      MessageInterface::ShowMessage
+         ("   Now changing colors for spacecraft to use default colors\n");
+      #endif
+      
+      UnsignedIntArray colorArray;
+      
+      for (Integer i = 0; i < mObjectCount; i++)
+      {
+         if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT) ||
+             mObjectArray[i]->IsOfType(Gmat::GROUND_STATION))
+            colorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+      }
+      
+      #if DBGLVL_INIT
+      MessageInterface::ShowMessage("   colorArray.size() = %d\n", colorArray.size());
+      for (UnsignedInt i = 0; i < colorArray.size(); i++)
+         MessageInterface::ShowMessage("      color[%d] = %u\n", i, colorArray[i]);
+      #endif
+      
+      Integer colorIndex = 0;
+      for (Integer i = 0; i < mObjectCount; i++)
+      {
+         if (mObjectArray[i]->IsOfType(Gmat::SPACECRAFT))
+         {
+            mOrbitColorArray[i] = colorArray[colorIndex];
+            colorIndex++;
+         }
+      }
+      
+      for (Integer i = 0; i < mObjectCount; i++)
+      {
+         if (mObjectArray[i]->IsOfType(Gmat::GROUND_STATION))
+         {
+            mOrbitColorArray[i] = colorArray[colorIndex];
+            colorIndex++;
+         }
+      }
+      
+      // Now change mScOrbitColorArray
+      colorIndex = 0;
+      for (Integer i = 0; i < mScCount; i++)
+      {
+         mScOrbitColorArray[i] = colorArray[colorIndex];
+         colorIndex++;
+      }
+   }
+   
+   #if DBGLVL_INIT
+   MessageInterface::ShowMessage("OrbitPlot::BuildDynamicArrays() leaving\n");
+   #endif
 }
 
 
@@ -1952,8 +2034,6 @@ void OrbitPlot::UpdateObjectList(SpacePoint *sp, bool show)
 	
    #if DBGLVL_INIT > 1
    Integer draw, showObj;
-   MessageInterface::ShowMessage
-      ("OrbitPlot::UpdateObjectList() instanceName=%s\n", instanceName.c_str());
    for (int i=0; i<mObjectCount; i++)
    {
       draw = mDrawOrbitArray[i] ? 1 : 0;
@@ -1962,6 +2042,8 @@ void OrbitPlot::UpdateObjectList(SpacePoint *sp, bool show)
          ("   mObjectNameArray[%d]=%s, draw=%d, show=%d, color=%d\n", i,
           mObjectNameArray[i].c_str(), draw, showObj, mOrbitColorArray[i]);
    }
+   MessageInterface::ShowMessage
+      ("OrbitPlot::UpdateObjectList() <%p>'%s' leaving\n", this, instanceName.c_str());
    #endif
 }
 
