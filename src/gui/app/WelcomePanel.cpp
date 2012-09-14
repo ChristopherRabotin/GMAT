@@ -41,6 +41,7 @@
 BEGIN_EVENT_TABLE(WelcomePanel, wxFrame)
    EVT_HYPERLINK(ID_BUTTON_RECENT, WelcomePanel::OnOpenRecentScript)
    EVT_HYPERLINK(ID_FILE, WelcomePanel::OnOpenSampleScript)
+   EVT_HYPERLINK(ID_HELP, WelcomePanel::OnOpenHelpLink)
    EVT_CHECKBOX(ID_CHECKBOX, WelcomePanel::OnShowWelcomePanelClicked)
 END_EVENT_TABLE()
 
@@ -161,9 +162,9 @@ void WelcomePanel::Create()
    wxBoxSizer *resourcesSizer = new wxBoxSizer(wxVERTICAL);
    resourcesSizer->Add(resourcesText, 0, wxALIGN_LEFT|wxALL, bsize);
    resourcesSizer->AddSpacer(bsize*2);
-   // add the recent scripts
+   // now Links
    pConfig = (wxFileConfig *) wxConfigBase::Get();
-   resourcesSizer->Add(FillGroup(pConfig, "/Welcome/Links", "", 3, ID_URL, false),
+   resourcesSizer->Add(FillGroup(pConfig, "/Welcome/Links", "", 3, ID_HELP, false),
                        0, wxALIGN_LEFT|wxALL, bsize*2);
 
    //-----------------------------------------------------------------
@@ -183,7 +184,7 @@ void WelcomePanel::Create()
    gettingStartedSizer->Add(getStartedText, 0, wxALIGN_LEFT|wxALL, bsize);
    gettingStartedSizer->AddSpacer(bsize*2);
    gettingStartedSizer->Add(FillGroup(pConfig, "/GettingStarted/Tutorials", "/GettingStarted/Tutorials/Icons",
-                                      1, ID_URL, false), 0, wxALIGN_LEFT|wxALL, bsize*2);
+                                      1, ID_HELP, false), 0, wxALIGN_LEFT|wxALL, bsize*2);
    //gettingStartedSizer->AddSpacer(bsize*2);
 
    //-----------------------------------------------------------------
@@ -198,7 +199,7 @@ void WelcomePanel::Create()
    recentSizer->AddSpacer(bsize*2);
    // add the recent scripts
    pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
-   recentSizer->Add(FillGroup(pConfig, "/RecentFiles", "", 1, ID_BUTTON_RECENT, true),
+   recentSizer->Add(FillGroup(pConfig, "/RecentFiles", "", 1, ID_BUTTON_RECENT, true, true),
                     0, wxALIGN_LEFT|wxALL, bsize*2);
 
 
@@ -300,7 +301,7 @@ void WelcomePanel::OnShowWelcomePanelClicked(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup,
                                          wxString INIIconGroup, int maxCols,
-                                         wxWindowID id, bool isFileList)
+                                         wxWindowID id, bool isFileList, bool isReversed)
 {
    #ifdef DEBUG_FILL_GROUP
    MessageInterface::ShowMessage
@@ -329,12 +330,25 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
    if (config->GetFirstEntry(aKey, dummy))
    {
       if (isFileList)
-         linkLabels.Add(GmatFileUtil::ParseFileName(config->Read(aKey).c_str()).c_str());
+	  {
+		 if (isReversed)
+			linkLabels.Insert(GmatFileUtil::ParseFileName(config->Read(aKey).c_str()).c_str(), 0);
+		 else
+			linkLabels.Add(GmatFileUtil::ParseFileName(config->Read(aKey).c_str()).c_str());
+	  }
       else
-         linkLabels.Add(aKey);
+	  {
+		 if (isReversed)
+			linkLabels.Insert(aKey, 0);
+		 else
+			linkLabels.Add(aKey);
+	  }
       
       aValue = config->Read(aKey);
-      linkURLs.Add(aValue);
+      if (isReversed)
+		linkURLs.Insert(aValue,0);
+	  else
+		linkURLs.Add(aValue);
       
       #ifdef DEBUG_FILL_GROUP
       MessageInterface::ShowMessage("   aKey='%s', aValue='%s'\n", aKey.c_str(), aValue.c_str());
@@ -343,18 +357,46 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
       while (config->GetNextEntry(aKey, dummy))
       {
          if (isFileList)
-            linkLabels.Add(GmatFileUtil::ParseFileName(config->Read(aKey).c_str()).c_str());
-         else
-            linkLabels.Add(aKey);
+		 {
+			 if (isReversed)
+				linkLabels.Insert(GmatFileUtil::ParseFileName(config->Read(aKey).c_str()).c_str(), 0);
+			 else
+				linkLabels.Add(GmatFileUtil::ParseFileName(config->Read(aKey).c_str()).c_str());
+		 }
+		 else
+		 {
+			 if (isReversed)
+				linkLabels.Insert(aKey, 0);
+			 else
+				linkLabels.Add(aKey);
+		 }
          
          aValue = config->Read(aKey);
-         linkURLs.Add(aValue);
+         if (isReversed)
+		    linkURLs.Insert(aValue,0);
+		 else
+			linkURLs.Add(aValue);
          
          #ifdef DEBUG_FILL_GROUP
          MessageInterface::ShowMessage("   aKey='%s', aValue='%s'\n", aKey.c_str(), aValue.c_str());
          #endif
       }
    }
+   // go through all urls and use INIGROUP/Online if no helpcontroller and is not web url
+   if (GmatAppData::Instance()->GetMainFrame()->GetHelpController() == NULL)
+   {
+	   config->SetPath(INIGroup + "/Online");
+	   for (i=0; i<linkLabels.size(); i++)
+	   {
+		   if (!(linkURLs[i].Contains("\\") || linkURLs[i].Contains("/") || linkURLs[i].Contains(":") ))
+		   {
+			   aValue = config->Read(linkLabels[i]);
+			   if (!aValue.IsEmpty())
+				   linkURLs[i] = aValue;
+		   }
+	   }
+   }
+
    // get the icons if section exists
    if (INIIconGroup != "")
    {
@@ -441,6 +483,28 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
 void WelcomePanel::OnOpenRecentScript(wxHyperlinkEvent& event)
 {
    GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(event.GetURL(), event);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnOpenHelpLink(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles opening a help link (either to help file or web link)
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void WelcomePanel::OnOpenHelpLink(wxHyperlinkEvent& event)
+{
+   // if link is a keyword (no slashes or periods), use help controller
+   // otherwise, assume it is a URL and use the default browser
+   wxString link = event.GetURL();
+   if ((GmatAppData::Instance()->GetMainFrame()->GetHelpController() == NULL) || 
+	   link.Contains("\\") || link.Contains("/") || link.Contains(":") )
+	   ::wxLaunchDefaultBrowser(link);
+   else
+	   GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(link);		
 }
 
 

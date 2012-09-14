@@ -37,11 +37,12 @@ public:
    WelcomePanel(wxFrame *frame, const wxString& title, int x, int y, int w, int h);
    ~WelcomePanel();
    void OnOpenRecentScript(wxHyperlinkEvent &event);
+   void OnOpenHelpLink(wxHyperlinkEvent &event);
    void OnOpenSampleScript(wxHyperlinkEvent &event);
    void OnShowWelcomePanelClicked(wxCommandEvent &event);
    wxFlexGridSizer *FillGroup(wxFileConfig *config, wxString INIGroup,
                               wxString INIIconGroup, int maxCols,
-                              wxWindowID id, bool isFileList);
+                              wxWindowID id, bool isFileList, bool isReversed=false);
    
 protected:
    wxBitmap LoadBitmap( wxString filename, int width, int height );
@@ -62,7 +63,8 @@ private:
       ID_CHECKBOX = 39040,
       ID_URL,
       ID_FILE,
-      ID_BUTTON_RECENT
+      ID_BUTTON_RECENT,
+	  ID_HELP
    };
 };
 
