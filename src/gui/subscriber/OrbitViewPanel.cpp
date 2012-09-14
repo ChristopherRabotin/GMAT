@@ -1044,7 +1044,9 @@ void OrbitViewPanel::LoadData()
 void OrbitViewPanel::SaveData()
 {
    #if DEBUG_OPENGL_PANEL_SAVE
-   MessageInterface::ShowMessage("OrbitViewPanel::SaveData() entered.\n");
+   MessageInterface::ShowMessage
+      ("OrbitViewPanel::SaveData() entered, mHasIntegerDataChanged=%d, mHasRealDataChanged=%d\n",
+       mHasIntegerDataChanged, mHasRealDataChanged);
    #endif
    
    canClose = true;
@@ -1090,6 +1092,10 @@ void OrbitViewPanel::SaveData()
        (mViewPointVectorComboBox->GetStringSelection() == "Vector") ||
        (mViewDirectionComboBox->GetStringSelection() == "Vector"))
       setVector = true;
+   
+   #if DEBUG_OPENGL_PANEL_SAVE
+   MessageInterface::ShowMessage("   setVector=%d\n", setVector);
+   #endif
    
    if (setVector || mHasRealDataChanged)
    {
@@ -2055,7 +2061,8 @@ void OrbitViewPanel::OnTextChange(wxCommandEvent& event)
       {
          mHasIntegerDataChanged = true;
       }
-      else if (obj == mViewPointRef1TextCtrl ||
+      else if (obj == mViewScaleFactorTextCtrl ||
+               obj == mViewPointRef1TextCtrl ||
                obj == mViewPointRef2TextCtrl ||
                obj == mViewPointRef3TextCtrl ||
                obj == mViewPointVec1TextCtrl ||
