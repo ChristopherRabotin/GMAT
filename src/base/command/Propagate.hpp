@@ -208,6 +208,12 @@ protected:
    /// The Propagation State Managers
    std::vector<PropagationStateManager*>  psm;
    
+   // Flags used to globally trigger STM or A-Matrix calculations
+   /// Set to trigger all STM propagation
+   bool                         propAllSTMs;
+   /// Set to trigger all A-Matrix calculations
+   bool                         calcAllAmatrices;
+
    // Members used to flag most recent detected stop, so we don't stop multiple 
    // times at the same point
    /// Flag used to indicate that the first step logic must be executed
@@ -268,6 +274,8 @@ protected:
       PROP_NAME,
       STOP_WHEN,
       PROP_FORWARD,
+      PROP_ALL_STM,
+      CALC_ALL_AMATRIX,
       PropagateCommandParamCount,
    };
 

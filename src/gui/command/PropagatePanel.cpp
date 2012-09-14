@@ -185,6 +185,14 @@ void PropagatePanel::Create()
    backPropCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Backwards Propagation"),
                       wxDefaultPosition, wxDefaultSize, 0);
+
+   // STM and A-matrix propagate
+   stmPropCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Propagate STM"),
+                      wxDefaultPosition, wxDefaultSize, 0);
+   aMatrixCalcCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Compute A-Matrix"),
+                      wxDefaultPosition, wxDefaultSize, 0);
    
    // Propagator Grid
    propGrid =
@@ -254,7 +262,7 @@ void PropagatePanel::Create()
    stopCondGrid->SetRowLabelSize(0);
    stopCondGrid->SetScrollbars(5, 8, 15, 15);
    
-   wxFlexGridSizer *propModeSizer = new wxFlexGridSizer(4, 0, 0);
+   wxFlexGridSizer *propModeSizer = new wxFlexGridSizer(6, 0, 0);
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
    GmatStaticBoxSizer *propSizer = 
       new GmatStaticBoxSizer(wxVERTICAL, this, "Propagators and Spacecraft");
@@ -264,6 +272,8 @@ void PropagatePanel::Create()
    propModeSizer->Add(mPropModeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    propModeSizer->Add(200, 20, wxALIGN_CENTRE|wxALL, bsize);
    propModeSizer->Add(backPropCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   propModeSizer->Add(stmPropCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   propModeSizer->Add(aMatrixCalcCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    propSizer->Add(propModeSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    propSizer->Add(propGrid, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -682,6 +692,18 @@ void PropagatePanel::OnCheckBoxChange(wxCommandEvent& event)
       mPropDirChanged = true;
       EnableUpdate(true);
    }
+
+   if (event.GetEventObject() == stmPropCheckBox)
+   {
+      mPropStmChanged = true;
+      EnableUpdate(true);
+   }
+
+   if (event.GetEventObject() == aMatrixCalcCheckBox)
+   {
+      mCalcAmatrixChanged = true;
+      EnableUpdate(true);
+   }
 }
 
 
@@ -874,6 +896,17 @@ void PropagatePanel::LoadData()
    backPropCheckBox->SetValue(backProp);
    
    //----------------------------------
+   // STM propagation and A-Matrix Calculation
+   //----------------------------------
+   Integer PropSTMId = thePropCmd->GetParameterID("AllSTMs");
+   bool stmProp = thePropCmd->GetBooleanParameter(PropSTMId);
+   stmPropCheckBox->SetValue(stmProp);
+
+   Integer calcAMatrixId = thePropCmd->GetParameterID("AllAMatrices");
+   bool amatCalc = thePropCmd->GetBooleanParameter(calcAMatrixId);
+   aMatrixCalcCheckBox->SetValue(amatCalc);
+
+   //----------------------------------
    // propagator
    //----------------------------------
    Integer propId = thePropCmd->GetParameterID("Propagator");
@@ -936,14 +969,20 @@ void PropagatePanel::LoadData()
          }
          else
          {
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_, "The SpaceObject named '%s' was not created, "
-                "so removed from the display list\n", soList[j].c_str());
+            // No warning for STM or AMatrix
+            if ((soList[j] != "STM") && (soList[j] != "AMatrix"))
+               MessageInterface::PopupMessage
+                  (Gmat::WARNING_, "The SpaceObject named '%s' was not created,"
+                   " so removed from the display list\n", soList[j].c_str());
          }
       }
       
       #ifdef DEBUG_PROPAGATE_PANEL_LOAD
       MessageInterface::ShowMessage("   actualSoCount=%d\n", actualSoCount);
+      MessageInterface::ShowMessage("      Names:\n");
+      for (UnsignedInt m = 0; m < mTempProp[i].soNameList.size(); ++m)
+         MessageInterface::ShowMessage("         %s\n",
+               mTempProp[i].soNameList[m].c_str());
       #endif
       
       soCount = actualSoCount;
@@ -953,16 +992,16 @@ void PropagatePanel::LoadData()
       {
          for (Integer j=0; j<soCount-1; j++)
          {
-            mTempProp[i].soNames += soList[j].c_str();
+            mTempProp[i].soNames += mTempProp[i].soNameList[j].c_str();
             mTempProp[i].soNames += ", ";
          }
          
-         mTempProp[i].soNames += soList[soCount-1].c_str();
+         mTempProp[i].soNames += mTempProp[i].soNameList[soCount-1].c_str();
       }
       
    } // for (Integer i=0; i<mPropCount; i++)
    
-   backPropCheckBox->SetValue(backProp);
+   backPropCheckBox->SetValue(backProp);     // Why repeated here?
    
    //----------------------------------
    // stopping conditions
@@ -1212,6 +1251,23 @@ void PropagatePanel::SaveData()
                                          !(backPropCheckBox->IsChecked()));
       }
       
+      //---------------------------------------
+      // Save STM and A-Matrix settings
+      //---------------------------------------
+      if (mPropStmChanged)
+      {
+         mPropStmChanged = false;
+         thePropCmd->SetBooleanParameter("AllSTMs",
+               stmPropCheckBox->IsChecked());
+      }
+
+      if (mCalcAmatrixChanged)
+      {
+         mCalcAmatrixChanged = false;
+         thePropCmd->SetBooleanParameter("AllAMatrices",
+               aMatrixCalcCheckBox->IsChecked());
+      }
+
       //---------------------------------------
       // Save stop tolerance
       //---------------------------------------

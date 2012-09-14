@@ -87,7 +87,9 @@ Propagate::PARAMETER_TEXT[PropagateCommandParamCount - GmatCommandParamCount] =
    "Spacecraft",
    "Propagator",
    "StopCondition",
-   "PropForward"
+   "PropForward",
+   "AllSTMs",
+   "AllAMatrices"
 };
 
 const Gmat::ParameterType
@@ -100,6 +102,8 @@ Propagate::PARAMETER_TYPE[PropagateCommandParamCount - GmatCommandParamCount] =
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::BOOLEAN_TYPE,
    Gmat::BOOLEAN_TYPE
 };
 
@@ -137,7 +141,11 @@ Propagate::Propagate() :
    epochID                     (-1),
    stopInterval                (0.0),
    stopTrigger                 (-1),
+   propAllSTMs                 (false),
+   calcAllAmatrices            (false),
+   checkFirstStep              (true),
    state                       (NULL),
+   j2kState                    (NULL),
    pubdata                     (NULL),
    stopCondMet                 (false),
    stopEpoch                   (0.0),
@@ -253,7 +261,11 @@ Propagate::Propagate(const Propagate &prp) :
    objectArray                 (prp.objectArray),
    elapsedTime                 (prp.elapsedTime),
    currEpoch                   (prp.currEpoch),
+   propAllSTMs                 (prp.propAllSTMs),
+   calcAllAmatrices            (prp.calcAllAmatrices),
+   checkFirstStep              (true),
    state                       (NULL),
+   j2kState                    (NULL),
    pubdata                     (NULL),
    stopCondMet                 (false),
    stopEpoch                   (prp.stopEpoch),
@@ -279,6 +291,7 @@ Propagate::Propagate(const Propagate &prp) :
    p.clear();
    fm.clear();
    stepBrackets[0] = stepBrackets[1] = 0.0;
+   firstStepTolerance = prp.firstStepTolerance;
 }
 
 
@@ -312,7 +325,9 @@ Propagate& Propagate::operator=(const Propagate &prp)
    objectArray             = prp.objectArray;
    elapsedTime             = prp.elapsedTime;
    currEpoch               = prp.currEpoch;
+   checkFirstStep          = prp.checkFirstStep;
    state                   = NULL;
+   j2kState                = NULL;
    pubdata                 = NULL;
    stopCondMet             = false;
    stopEpoch               = prp.stopEpoch;
@@ -325,6 +340,9 @@ Propagate& Propagate::operator=(const Propagate &prp)
    stopCondEpochID         = prp.stopCondEpochID;
    stopCondBaseEpochID     = prp.stopCondBaseEpochID;
    stopCondStopVarID       = prp.stopCondStopVarID;
+   propAllSTMs             = prp.propAllSTMs;
+   calcAllAmatrices        = prp.calcAllAmatrices;
+
    isInitialized             = false;
 
    baseEpoch.clear();
@@ -537,6 +555,7 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
 
    // Construct the generating string
    UnsignedInt index = 0;
+   Integer stmCount = 0, aMatCount = 0;
 
    if (direction < 0.0)
       gen += (" BackProp");
@@ -544,16 +563,27 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
    if (currentPropMode != "")
       gen += (" " + currentPropMode);
    for (StringArray::iterator prop = propName.begin(); prop != propName.end();
-        ++prop) {
+        ++prop)
+   {
       gen += " " + (*prop) + "(";
       // Spaceobjects that are propagated by this PropSetup
       StringArray *sats = satName[index];
-      for (StringArray::iterator sc = sats->begin(); sc != sats->end(); ++sc) {
+      for (StringArray::iterator sc = sats->begin(); sc != sats->end(); ++sc)
+      {
          // Add a comma if needed
          if (sc != sats->begin())
             gen += ", ";
+         if ((*sc) == "STM")
+            ++stmCount;
+         if ((*sc) == "AMatrix")
+            ++aMatCount;
          gen += (*sc);
       }
+
+      if (propAllSTMs && (stmCount == 0))
+         gen += ", 'STM'";
+      if (calcAllAmatrices && (aMatCount == 0))
+         gen += ", 'AMatrix'";
 
       gen += ")";
       ++index;
@@ -1205,6 +1235,12 @@ bool Propagate::GetBooleanParameter(const Integer id) const
    if (id == PROP_FORWARD)
       return (direction > 0.0 ? true : false);
 
+   if (id == PROP_ALL_STM)
+      return propAllSTMs;
+
+   if (id == CALC_ALL_AMATRIX)
+      return calcAllAmatrices;
+
    return PropagationEnabledCommand::GetBooleanParameter(id);
 }
 
@@ -1245,6 +1281,74 @@ bool Propagate::SetBooleanParameter(const Integer id, const bool value)
                 stopWhen[i]->GetName().c_str());
             #endif
             stopWhen[i]->SetPropDirection(direction);  // Use direction of props
+         }
+      }
+      return true;
+   }
+
+   if (id == PROP_ALL_STM)
+   {
+      propAllSTMs = value;
+      if (propAllSTMs == false)
+      {
+         // STM was intentionally turned off; remove it everywhere
+         for (UnsignedInt i = 0; i < satName.size(); ++i)
+         {
+            StringArray *names = satName[i];
+
+            #ifdef DEBUG_STM_AMATRIX_SETTINGS
+               MessageInterface::ShowMessage("Before erasure:\n");
+               for (UnsignedInt m = 0; m < names->size(); ++m)
+                  MessageInterface::ShowMessage("   %s\n",names->at(m).c_str());
+            #endif
+
+            for (StringArray::iterator j = names->begin(); j != names->end(); ++j)
+            {
+               if ((*j) == "STM")
+                  j = names->erase(j);
+               if (j == names->end())
+                  break;
+            }
+
+            #ifdef DEBUG_STM_AMATRIX_SETTINGS
+               MessageInterface::ShowMessage("After erasure:\n");
+               for (UnsignedInt m = 0; m < names->size(); ++m)
+                  MessageInterface::ShowMessage("   %s\n",names->at(m).c_str());
+            #endif
+         }
+      }
+      return true;
+   }
+
+   if (id == CALC_ALL_AMATRIX)
+   {
+      calcAllAmatrices = value;
+      if (calcAllAmatrices == false)
+      {
+         // A-Matrix was intentionally turned off; remove it everywhere
+         for (UnsignedInt i = 0; i < satName.size(); ++i)
+         {
+            StringArray *names = satName[i];
+
+            #ifdef DEBUG_STM_AMATRIX_SETTINGS
+               MessageInterface::ShowMessage("Before erasure:\n");
+               for (UnsignedInt m = 0; m < names->size(); ++m)
+                  MessageInterface::ShowMessage("   %s\n",names->at(m).c_str());
+            #endif
+
+            for (StringArray::iterator j = names->begin(); j != names->end(); ++j)
+            {
+               if ((*j) == "AMatrix")
+                  j = names->erase(j);
+               if (j == names->end())
+                  break;
+            }
+
+            #ifdef DEBUG_STM_AMATRIX_SETTINGS
+               MessageInterface::ShowMessage("After erasure:\n");
+               for (UnsignedInt m = 0; m < names->size(); ++m)
+                  MessageInterface::ShowMessage("   %s\n",names->at(m).c_str());
+            #endif
          }
       }
       return true;
@@ -1721,7 +1825,7 @@ bool Propagate::InterpretAction()
       #endif
       for (UnsignedInt j = 0; j < satName[i]->size(); ++j)
       {
-         // todo: Point fix for STM.
+         // todo: Point fix for STM and A-Matrix.
          /** @todo: This point fix needs to be generalized so that a list of
           *         keywords isn't maintained here.
           */
@@ -1733,6 +1837,17 @@ bool Propagate::InterpretAction()
             #endif
             objects.push_back((*satName[i])[j]);
             satList.push_back((*satName[i])[j]);
+         }
+         else
+         {
+            #ifdef DEBUG_PROPAGATE_ASSEMBLE
+               MessageInterface::ShowMessage("Setting globally for %s\n",
+                     (*satName[i])[j].c_str());
+            #endif
+            if ((*satName[i])[j] == "STM")
+               propAllSTMs = true;
+            if ((*satName[i])[j] == "AMatrix")
+               calcAllAmatrices = true;
          }
       }
    }
@@ -2823,6 +2938,17 @@ bool Propagate::Initialize()
          {
             psm->SetObject(mapObj);
 
+            // Set the globals for STM and/or A-Matrix if needed
+            if (propAllSTMs)
+               if (psm->SetProperty("STM") == false)
+                  MessageInterface::ShowMessage("WARNING: Unable to set STM "
+                        "propagation for %s\n", mapObj->GetName().c_str());
+            if (calcAllAmatrices)
+               if (psm->SetProperty("AMatrix") == false)
+                  MessageInterface::ShowMessage("WARNING: Unable to set A-"
+                        "Matrix computation for %s\n",
+                        mapObj->GetName().c_str());
+
             so = (SpaceObject*)mapObj;
             if (epochID == -1)
                epochID = so->GetParameterID("A1Epoch");
@@ -3908,6 +4034,7 @@ bool Propagate::Execute()
                         elapsedTime[i] = fm[i]->GetTime();
                      else
                         elapsedTime[i] = p[i]->GetTime();
+                     break;
                }
 
                currEpoch[i] = baseEpoch[i] +
@@ -4099,6 +4226,7 @@ bool Propagate::TakeAStep(Real propStep)
                   "(mode = %d)\n", currentMode);
             #endif
             retval = false;
+            break;
       }
       #ifdef DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage

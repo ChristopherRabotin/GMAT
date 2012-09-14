@@ -12,7 +12,7 @@
 // Created: 2003/09/08
 // Modified:
 //    2004/05/06 Allison Greene: inherit from GmatPanel
-//    2004/10/20 Linda Jun: rename from PropgateCommandPanel
+//    2004/10/20 Linda Jun: rename from PropagateCommandPanel
 /**
  * This class contains the Propagate command setup window.
  */
@@ -37,7 +37,7 @@ class PropagatePanel : public GmatPanel
 public:
    // constructors
    PropagatePanel(wxWindow *parent, GmatCommand *cmd);
-   ~PropagatePanel();  
+   virtual ~PropagatePanel();
    
    virtual bool PrepareObjectNameChange();
    virtual void ObjectNameChanged(Gmat::ObjectType type,
@@ -84,12 +84,17 @@ private:
    wxGrid *stopCondGrid;
 
    wxCheckBox *backPropCheckBox;
+   wxCheckBox *stmPropCheckBox;
+   wxCheckBox *aMatrixCalcCheckBox;
+
    wxTextCtrl *mStopTolTextCtrl;
    wxComboBox *mPropModeComboBox;
    wxComboBox *equalityComboBox;
    
    bool mPropModeChanged;
    bool mPropDirChanged;
+   bool mPropStmChanged;
+   bool mCalcAmatrixChanged;
    bool mPropSatChanged;
    bool mStopCondChanged;
    bool mStopTolChanged;
