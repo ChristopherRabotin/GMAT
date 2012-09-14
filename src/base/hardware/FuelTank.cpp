@@ -165,6 +165,10 @@ FuelTank::FuelTank(const FuelTank& ft) :
 //------------------------------------------------------------------------------
 FuelTank& FuelTank::operator=(const FuelTank& ft)
 {
+   #ifdef DEBUG_TANK_SETTING
+      MessageInterface::ShowMessage("Calling assignment operator on %s\n",
+            instanceName.c_str());
+   #endif
    if (&ft != this)
    {
       Hardware::operator=(ft);
@@ -400,6 +404,10 @@ Real FuelTank::SetRealParameter(const Integer id, const Real value)
    {
       case FUEL_MASS:
          {
+            #ifdef DEBUG_TANK_SETTING
+               MessageInterface::ShowMessage("Updating fuel mass to %lf\n",
+                     value);
+            #endif
             if (value >= 0.0 || allowNegativeFuelMass)
             {
                fuelMass = value;
