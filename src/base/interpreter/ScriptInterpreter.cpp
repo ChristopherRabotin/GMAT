@@ -1221,42 +1221,6 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       WriteObjects(objs, "Burns", mode);
    
    //-----------------------------------
-   // Array, Variable and String
-   //-----------------------------------
-   objs = theModerator->GetListOfObjects(Gmat::PARAMETER);
-   #ifdef DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage("   Found %d Parameters\n", objs.size());
-   #endif
-   bool foundVarsAndArrays = false;
-   bool foundOtherParameter = false; // such as Create X pos; where X is Parameter name
-   if (objs.size() > 0)
-   {
-      for (current = objs.begin(); current != objs.end(); ++current)
-      {
-         #ifdef DEBUG_SCRIPT_WRITING
-         MessageInterface::ShowMessage("      name = '%s'\n", (*current).c_str());
-         #endif
-         
-         object = FindObject(*current);
-         if (object == NULL)
-            throw InterpreterException("Cannot write NULL object \"" + (*current) + "\"");
-         
-         if ((object->GetTypeName() == "Array") ||
-             (object->GetTypeName() == "Variable") ||
-             (object->GetTypeName() == "String"))
-            foundVarsAndArrays = true;
-         else
-            foundOtherParameter = true;
-      }
-   }
-   
-   if (foundVarsAndArrays)
-      WriteVariablesAndArrays(objs, mode);
-   
-   if (foundOtherParameter)
-      WriteOtherParameters(objs, mode);
-   
-   //-----------------------------------
    // Coordinate System
    //-----------------------------------
    // Don't write default coordinate systems since they are automatically created
@@ -1348,6 +1312,42 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objs.size() > 0)
       WriteObjects(objs, "Functions", mode);
    
+   //-----------------------------------
+   // Array, Variable and String
+   //-----------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::PARAMETER);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d Parameters\n", objs.size());
+   #endif
+   bool foundVarsAndArrays = false;
+   bool foundOtherParameter = false; // such as Create X pos; where X is Parameter name
+   if (objs.size() > 0)
+   {
+      for (current = objs.begin(); current != objs.end(); ++current)
+      {
+         #ifdef DEBUG_SCRIPT_WRITING
+         MessageInterface::ShowMessage("      name = '%s'\n", (*current).c_str());
+         #endif
+
+         object = FindObject(*current);
+         if (object == NULL)
+            throw InterpreterException("Cannot write NULL object \"" + (*current) + "\"");
+
+         if ((object->GetTypeName() == "Array") ||
+             (object->GetTypeName() == "Variable") ||
+             (object->GetTypeName() == "String"))
+            foundVarsAndArrays = true;
+         else
+            foundOtherParameter = true;
+      }
+   }
+
+   if (foundVarsAndArrays)
+      WriteVariablesAndArrays(objs, mode);
+
+   if (foundOtherParameter)
+      WriteOtherParameters(objs, mode);
+
    //-----------------------------------
    // Command sequence
    //-----------------------------------
