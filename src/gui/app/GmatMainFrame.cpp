@@ -812,13 +812,18 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
             {
                // Use ScriptEditor size from the configuration data
                Integer x = -1, y = -1, w = -1, h = -1;
-               GetConfigurationData("ScriptEditor", x, y, w, h);
+               bool min1 = false, max1 = false;
+               GetConfigurationData("ScriptEditor", x, y, w, h, min1, max1);
                #ifdef DEBUG_CHILD_WINDOW
                MessageInterface::ShowMessage
                   ("   Using ScriptEditor poistion (%d, %d) and size (%d, %d) "
                    "from the configuration data\n", x, y, w, h);
                #endif
                newChild->SetSize(x, y, w, h, wxSIZE_NO_ADJUSTMENTS);
+               if (min1)
+                newChild->Iconize();
+               else if (max1)
+                newChild->Maximize();
             }
             else
             {
@@ -6028,8 +6033,8 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
    wxString treeUpperLeft, treeSize;
    pConfig->Read(upperLeftString.c_str(), &treeUpperLeft, "false");
    pConfig->Read(sizeString.c_str(), &treeSize, "false");
-   pConfig->Read(isMinString, &isMinimized, false);
-   pConfig->Read(isMaxString, &isMaximized, false);
+   pConfig->Read(isMinString.c_str(), &isMinimized, false);
+   pConfig->Read(isMaxString.c_str(), &isMaximized, false);
    if ((treeUpperLeft.Lower() == "false") || (treeSize.Lower() == "false"))
    {
       x = -1;   // @todo - move it so it doesn't come up in the upper left corner on top of the main frame
