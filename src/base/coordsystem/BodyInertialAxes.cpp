@@ -40,19 +40,7 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-/* placeholder - may be needed later
-const std::string
-BodyInertialAxes::PARAMETER_TEXT[BodyInertialAxesParamCount - InertialAxesParamCount] =
-{
-   "",
-};
-
-const Gmat::ParameterType
-BodyInertialAxes::PARAMETER_TYPE[BodyInertialAxesParamCount - InertialAxesParamCount] =
-{
-};
-*/
+// none
 
 //------------------------------------------------------------------------------
 // public methods
@@ -60,7 +48,7 @@ BodyInertialAxes::PARAMETER_TYPE[BodyInertialAxesParamCount - InertialAxesParamC
 
 //---------------------------------------------------------------------------
 //  BodyInertialAxes(const std::string &itsType,
-//            const std::string &itsName);
+//                   const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs base BodyInertialAxes structures
@@ -131,7 +119,7 @@ const BodyInertialAxes& BodyInertialAxes::operator=(const BodyInertialAxes &body
    return *this;
 }
 //---------------------------------------------------------------------------
-//  ~BodyInertialAxes(void)
+//  ~BodyInertialAxes()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -142,7 +130,7 @@ BodyInertialAxes::~BodyInertialAxes()
 }
 
 //---------------------------------------------------------------------------
-//  bool BodyInertialAxes::Initialize()
+//  bool Initialize()
 //---------------------------------------------------------------------------
 /**
  * Initialization method for this BodyInertialAxes.  Creates the rotation 
@@ -206,6 +194,13 @@ bool BodyInertialAxes::Initialize()
 }
 
 
+//------------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesEpoch() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage BodyInertialAxes::UsesEpoch() const
 {
    return GmatCoordinate::NOT_USED;
@@ -230,86 +225,6 @@ GmatBase* BodyInertialAxes::Clone() const
    return (new BodyInertialAxes(*this));
 }
 
-//------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string BodyInertialAxes::GetParameterText(const Integer id) const
-{
-   if (id >= InertialAxesParamCount && id < BodyInertialAxesParamCount)
-      return PARAMETER_TEXT[id - InertialAxesParamCount];
-   return InertialAxes::GetParameterText(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Integer BodyInertialAxes::GetParameterID(const std::string &str) const
-{
-   for (Integer i = InertialAxesParamCount; i < BodyInertialAxesParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - InertialAxesParamCount])
-         return i;
-   }
-   
-   return InertialAxes::GetParameterID(str);
-}
-*/
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Gmat::ParameterType BodyInertialAxes::GetParameterType(const Integer id) const
-{
-   if (id >= InertialAxesParamCount && id < BodyInertialAxesParamCount)
-      return PARAMETER_TYPE[id - InertialAxesParamCount];
-   
-   return InertialAxes::GetParameterType(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string BodyInertialAxes::GetParameterTypeString(const Integer id) const
-{
-   return InertialAxes::PARAM_TYPE_STRING[GetParameterType(id)];
-}
-*/
-
 
 //------------------------------------------------------------------------------
 // protected methods
@@ -324,10 +239,12 @@ GmatBase* BodyInertialAxes::Clone() const
  * from/to this AxisSystem to/from the MJ2000EqAxes system.
  *
  * @param atEpoch  epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it's not time to do it
+ *                         (default is false)
  */
 //---------------------------------------------------------------------------
 void BodyInertialAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
-                                        bool forceComputation)
+                                               bool forceComputation)
 {
    // already computed in Initialize
 }

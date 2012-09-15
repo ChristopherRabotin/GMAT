@@ -28,20 +28,7 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-/*const std::string
-DynamicAxes::PARAMETER_TEXT[DynamicAxesParamCount - AxisSystemParamCount] =
-{
-   "Epoch",
-};
-
-const Gmat::ParameterType
-DynamicAxes::PARAMETER_TYPE[DynamicAxesParamCount - AxisSystemParamCount] =
-{
-   Gmat::REAL_TYPE,
-   //Gmat::A1MJD_TYPE, // but no access methods available - should be TaiMjd?
-};
-*/
+// none
 
 //------------------------------------------------------------------------------
 // public methods
@@ -104,7 +91,7 @@ const DynamicAxes& DynamicAxes::operator=(const DynamicAxes &dyn)
    return *this;
 }
 //---------------------------------------------------------------------------
-//  ~DynamicAxes(void)
+//  ~DynamicAxes()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -128,7 +115,7 @@ bool DynamicAxes::Initialize()
    return AxisSystem::Initialize();
 }
 
-
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
 //------------------------------------------------------------------------------
+// none at this time

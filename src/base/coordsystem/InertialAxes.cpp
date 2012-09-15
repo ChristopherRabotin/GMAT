@@ -28,19 +28,7 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-/* placeholder - may be needed later
-const std::string
-InertialAxes::PARAMETER_TEXT[InertialAxesParamCount - AxisSystemParamCount] =
-{
-   "",
-};
-
-const Gmat::ParameterType
-InertialAxes::PARAMETER_TYPE[InertialAxesParamCount - AxisSystemParamCount] =
-{
-};
-*/
+// none
 
 //------------------------------------------------------------------------------
 // public methods
@@ -114,13 +102,11 @@ InertialAxes::~InertialAxes()
 }
 
 //---------------------------------------------------------------------------
-//  bool InertialAxes::Initialize()
+//  bool Initialize()
 //---------------------------------------------------------------------------
 /**
  * Initialization method for the InertialAxes classes.
  *
- * @note This method is pure virtual and must be implemented by deriving 
- *       classes (at least at the leaf level).
  */
 //---------------------------------------------------------------------------
 bool InertialAxes::Initialize()
@@ -129,86 +115,7 @@ bool InertialAxes::Initialize()
    return true;
 }
 
-
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string InertialAxes::GetParameterText(const Integer id) const
-{
-   if (id >= AxisSystemParamCount && id < InertialAxesParamCount)
-      return PARAMETER_TEXT[id - AxisSystemParamCount];
-   return AxisSystem::GetParameterText(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Integer InertialAxes::GetParameterID(const std::string &str) const
-{
-   for (Integer i = AxisSystemParamCount; i < InertialAxesParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - AxisSystemParamCount])
-         return i;
-   }
-   
-   return AxisSystem::GetParameterID(str);
-}
-*/
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Gmat::ParameterType InertialAxes::GetParameterType(const Integer id) const
-{
-   if (id >= AxisSystemParamCount && id < InertialAxesParamCount)
-      return PARAMETER_TYPE[id - AxisSystemParamCount];
-   
-   return AxisSystem::GetParameterType(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string InertialAxes::GetParameterTypeString(const Integer id) const
-{
-   return AxisSystem::PARAM_TYPE_STRING[GetParameterType(id)];
-}
-*/
+// none at this time

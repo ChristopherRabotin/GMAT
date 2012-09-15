@@ -50,21 +50,6 @@ public:
    // this must be implemented in the 'leaf' classes
    //virtual GmatBase*       Clone(void) const;
 
-   // Parameter access methods - overridden from GmatBase
-   /*
-   virtual std::string     GetParameterText(const Integer id) const;     
-   virtual Integer         GetParameterID(const std::string &str) const; 
-   virtual Gmat::ParameterType
-                           GetParameterType(const Integer id) const;
-   virtual std::string     GetParameterTypeString(const Integer id) const;
-   virtual Real            GetRealParameter(const Integer id) const;
-   virtual Real            SetRealParameter(const Integer id,
-                                            const Real value);
-   virtual Real            GetRealParameter(const std::string &label) const;
-   virtual Real            SetRealParameter(const std::string &label,
-                                            const Real value);
-    */
-   // need to add (and to GmatBase) GetA1MjdParameter method(s)?????????
    
 protected:
 
@@ -72,13 +57,6 @@ protected:
    {
       DynamicAxesParamCount = AxisSystemParamCount
    };
-   
-   //static const std::string PARAMETER_TEXT[DynamicAxesParamCount - 
-   //                                        AxisSystemParamCount];
-   
-   //static const Gmat::ParameterType PARAMETER_TYPE[DynamicAxesParamCount - 
-   //                                                AxisSystemParamCount];
-   
 
 };
 #endif // DynamicAxes_hpp

@@ -30,6 +30,8 @@
 //------------------------------------------------------------------------------
 /**
 * Constructs an CoordinateSystemException object (default constructor).
+*
+* @param details details to add to the exception message (defaults to "").
  */
 //------------------------------------------------------------------------------
 

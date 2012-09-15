@@ -50,16 +50,7 @@ using namespace GmatTimeConstants;      // for JD offsets, etc.
 //---------------------------------
 // static data
 //---------------------------------
-
-//const std::string
-//EquatorAxes::PARAMETER_TEXT[EquatorAxesParamCount - DynamicAxesParamCount] =
-//{
-//};
-
-//const Gmat::ParameterType
-//EquatorAxes::PARAMETER_TYPE[EquatorAxesParamCount - DynamicAxesParamCount] =
-//{
-//};
+// none
 
 //------------------------------------------------------------------------------
 // public methods
@@ -112,15 +103,15 @@ DynamicAxes(eqAxes)
 //------------------------------------------------------------------------------
 const EquatorAxes& EquatorAxes::operator=(const EquatorAxes &eqAxes)
 {
-   theDeFile = NULL;
    if (&eqAxes == this)
       return *this;
    DynamicAxes::operator=(eqAxes);  
+   theDeFile = NULL;
    return *this;
 }
 
 //------------------------------------------------------------------------------
-//  ~EquatorAxes(void)
+//  ~EquatorAxes()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
@@ -133,6 +124,10 @@ EquatorAxes::~EquatorAxes()
 //------------------------------------------------------------------------------
 // GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const
 //------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
    if ((originName == SolarSystem::EARTH_NAME) && (forBaseSystem == baseSystem)) return GmatCoordinate::REQUIRED;
@@ -142,6 +137,10 @@ GmatCoordinate::ParameterUsage EquatorAxes::UsesEopFile(const std::string &forBa
 //------------------------------------------------------------------------------
 // GmatCoordinate::ParameterUsage UsesItrfFile() const
 //------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesItrfFile() const
 {
    if (originName == SolarSystem::EARTH_NAME) return GmatCoordinate::REQUIRED;
@@ -151,6 +150,10 @@ GmatCoordinate::ParameterUsage EquatorAxes::UsesItrfFile() const
 //------------------------------------------------------------------------------
 // GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const
 //------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesNutationUpdateInterval() const
 {
    if (originName == SolarSystem::EARTH_NAME) 
@@ -159,7 +162,7 @@ GmatCoordinate::ParameterUsage EquatorAxes::UsesNutationUpdateInterval() const
 }
 
 //------------------------------------------------------------------------------
-//  bool EquatorAxes::Initialize()
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initialization method for this EquatorAxes.
@@ -180,9 +183,9 @@ bool EquatorAxes::Initialize()
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the Planet.
+ * This method returns a clone of the EquatorAxes.
  *
- * @return clone of the Planet.
+ * @return clone of the EquatorAxes.
  *
  */
 //------------------------------------------------------------------------------
@@ -190,85 +193,6 @@ GmatBase* EquatorAxes::Clone() const
 {
    return (new EquatorAxes(*this));
 }
-
-//------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//std::string EquatorAxes::GetParameterText(const Integer id) const
-//{
-//   if (id >= DynamicAxesParamCount && id < EquatorAxesParamCount)
-//      return PARAMETER_TEXT[id - DynamicAxesParamCount];
-//   return DynamicAxes::GetParameterText(id);
-//}
-
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//Integer EquatorAxes::GetParameterID(const std::string &str) const
-//{
-//   for (Integer i = DynamicAxesParamCount; i < EquatorAxesParamCount; i++)
-//   {
-//      if (str == PARAMETER_TEXT[i - DynamicAxesParamCount])
-//         return i;
-//   }
-   
-//   return DynamicAxes::GetParameterID(str);
-//}
-
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//Gmat::ParameterType EquatorAxes::GetParameterType(const Integer id) const
-//{
-//   if (id >= DynamicAxesParamCount && id < EquatorAxesParamCount)
-//      return PARAMETER_TYPE[id - DynamicAxesParamCount];
-//   
-//   return DynamicAxes::GetParameterType(id);
-//}
-
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//std::string EquatorAxes::GetParameterTypeString(const Integer id) const
-//{
-//   return DynamicAxes::PARAM_TYPE_STRING[GetParameterType(id)];
-//}
 
 //------------------------------------------------------------------------------
 // protected methods
@@ -283,10 +207,8 @@ GmatBase* EquatorAxes::Clone() const
  * from/to this AxisSystem to/from the MJ2000Eq system
  *
  * @param atEpoch  epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it's not time to do it
  *
- * @note Code (for Earth) adapted from C code written by Steve Queen/ GSFC, 
- *       based on Vallado, pgs. 211- 227.  Equation references in parentheses
- *       will refer to those of the Vallado book.
  */
 //------------------------------------------------------------------------------
 void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
@@ -488,15 +410,9 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       Real R3leftT[9] =  {Cos(rot1),-Sin(rot1),0.0,
                           Sin(rot1), Cos(rot1),0.0,
                                 0.0,       0.0,1.0};
-      //Rmatrix33 R3left( Cos(rot1),  Sin(rot1),  0.0, 
-      //                 -Sin(rot1),  Cos(rot1),  0.0,
-      //                        0.0,        0.0,  1.0);
       Real R1middleT[9] =  {1.0,      0.0,       0.0,
                             0.0,Cos(rot2),-Sin(rot2),
                             0.0,Sin(rot2), Cos(rot2)};
-      //Rmatrix33 R1middle(     1.0,        0.0,       0.0,
-      //                        0.0,  Cos(rot2), Sin(rot2),
-      //                        0.0, -Sin(rot2), Cos(rot2));
       Integer p3 = 0;
       Real    rot[3][3];
       for (Integer p = 0; p < 3; ++p)
@@ -512,9 +428,5 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       rotMatrix.Set(rot[0][0], rot[0][1], rot[0][2],
                     rot[1][0], rot[1][1], rot[1][2],
                     rot[2][0], rot[2][1], rot[2][2]);  
-      //rotMatrix = R3left.Transpose() * R1middle.Transpose();
-      //rotDotmatrix remains the zero matrix
    }
 }
-
-

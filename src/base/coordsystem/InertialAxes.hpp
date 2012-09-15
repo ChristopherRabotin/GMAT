@@ -47,15 +47,6 @@ public:
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
    //virtual GmatBase*       Clone(void) const;
-
-   // Parameter access methods - overridden from GmatBase
-   /* placeholder - may be needed later
-   virtual std::string     GetParameterText(const Integer id) const;     
-   virtual Integer         GetParameterID(const std::string &str) const; 
-   virtual Gmat::ParameterType
-                           GetParameterType(const Integer id) const;
-   virtual std::string     GetParameterTypeString(const Integer id) const;
-    */
    
 protected:
 
@@ -64,12 +55,5 @@ protected:
       InertialAxesParamCount = AxisSystemParamCount,
    };
    
-   //static const std::string PARAMETER_TEXT[InertialAxesParamCount - 
-   //                                        AxisSystemParamCount];
-   
-   //static const Gmat::ParameterType PARAMETER_TYPE[InertialAxesParamCount - 
-   //                                                AxisSystemParamCount];
-   
-   // no additional data at this time
 };
 #endif // InertialAxes_hpp
