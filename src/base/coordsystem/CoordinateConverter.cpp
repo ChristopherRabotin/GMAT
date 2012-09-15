@@ -63,9 +63,7 @@
  * (default constructor).
  */
 //---------------------------------------------------------------------------
-CoordinateConverter::CoordinateConverter() //:
-//j2000Body         (NULL),
-//j2000BodyName     ("Earth")
+CoordinateConverter::CoordinateConverter()
 {
 }
 
@@ -80,9 +78,7 @@ CoordinateConverter::CoordinateConverter() //:
  *                  instance.
  */
 //---------------------------------------------------------------------------
-CoordinateConverter::CoordinateConverter(const CoordinateConverter &coordCvt) //:
-//j2000Body     (coordCvt.j2000Body),
-//j2000BodyName (coordCvt.j2000BodyName)
+CoordinateConverter::CoordinateConverter(const CoordinateConverter &coordCvt)
 {
 }
 
@@ -102,8 +98,6 @@ const CoordinateConverter& CoordinateConverter::operator=(
 {
    if (&coordCvt == this)
       return *this;
-   //j2000Body     = coordCvt.j2000Body;
-   //j2000BodyName = coordCvt.j2000BodyName;
    
    return *this;
 }
@@ -130,78 +124,10 @@ CoordinateConverter::~CoordinateConverter()
 //------------------------------------------------------------------------------
 void CoordinateConverter::Initialize()
 {
-   //if (!j2000Body)
-   //   throw CoordinateSystemException(
-   //         "j2000Body has not been defined for CoordinateConverter object");
-   //toData      = toMJ2000RotMatrix.GetDataVector();
-   //fromData    = fromMJ2000Matrix.GetDataVector();
-   //internalState.SetSize(6);
-   //toMJ2000RotMatrix = Rmatrix33();
-   //fromMJ2000Matrix  = Rmatrix33();
-   //toData      = toMJ2000RotMatrix.GetDataVector();
-   //fromData    = fromMJ2000Matrix.GetDataVector();
    #ifdef DEBUG_FIRST_CALL
       firstCallFired = false;
    #endif
 }
-
-//------------------------------------------------------------------------------
-//  void  SetJ2000BodyName(const std::string &toName)
-//------------------------------------------------------------------------------
-/**
- * This method sets the j2000 body name for the CoordinateConverter object.
- *
- * @param toName name to which to set the j2000 body name.
- */
-//------------------------------------------------------------------------------
-//void CoordinateConverter::SetJ2000BodyName(const std::string &toName)
-//{
-//   j2000BodyName = toName;
-//}
-
-//------------------------------------------------------------------------------
-//  std::string  GetJ2000BodyName() const
-//------------------------------------------------------------------------------
-/**
- * This method returns the j2000 body name for the CoordinateConverter object.
- *
- * @return j2000 body name.
- */
-//------------------------------------------------------------------------------
-//std::string CoordinateConverter::GetJ2000BodyName() const
-//{
-//   if (j2000Body) return j2000Body->GetName();
-//   else           return j2000BodyName;
-//}
-
-//------------------------------------------------------------------------------
-//  void  SetJ2000Body(SpacePoint *toBody)
-//------------------------------------------------------------------------------
-/**
- * This method sets the j2000 body for the CoordinateConverter object.
- *
- * @param toBody body pointer to which to set the j2000 body parameter.
- */
-//------------------------------------------------------------------------------
-//void CoordinateConverter::SetJ2000Body(SpacePoint *toBody)
-//{
-//   j2000Body = toBody;
-//}
-
-//------------------------------------------------------------------------------
-//  SpacePoint*  GetJ2000Body() const
-//------------------------------------------------------------------------------
-/**
- * This method returns the j2000 body pointer for the CoordinateConverter 
- * object.
- *
- * @return j2000 body pointer.
- */
-//------------------------------------------------------------------------------
-//SpacePoint* CoordinateConverter::GetJ2000Body()
-//{
-//   return j2000Body;
-//}
 
 
 //------------------------------------------------------------------------------
@@ -215,13 +141,15 @@ void CoordinateConverter::Initialize()
  * to the coordOut CoordinateSystem, at the input epoch, and returns the
  * result in outState.
  *
- * @param epoch    time for which to do the conversion.
- * @param inState  input State (in inCoord system).
- * @param inCoord  pointer to the input CoordinateSystem.
- * @param outState resulting vector, in the outCoord system.
- * @param outCoord pointer to the output CoordinateSystem.
- * @param omitTranslation omit the translation whether coincident or not
- *                        (default is false)
+ * @param epoch            time for which to do the conversion.
+ * @param inState          input State (in inCoord system).
+ * @param inCoord          pointer to the input CoordinateSystem.
+ * @param outState         resulting vector, in the outCoord system.
+ * @param outCoord         pointer to the output CoordinateSystem.
+ * @param forceComputation force the computation whether it's time to do
+ *                         it or not (default is false)
+ * @param omitTranslation  omit the translation whether coincident or not
+ *                         (default is false)
  *
  * @return true if successful; false otherwise.
  */
@@ -258,20 +186,32 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
 //              CoordinateSystem *outCoord, bool forceComputation = false,
 //              bool omitTranslation = false)
 //------------------------------------------------------------------------------
+/**
+ * This method converts the inState vector from coordIn CoordinateSystem
+ * to the coordOut CoordinateSystem, at the input epoch, and returns the
+ * result in outState.
+ *
+ * @param epoch            time for which to do the conversion.
+ * @param inState          input State (in inCoord system).
+ * @param inCoord          pointer to the input CoordinateSystem.
+ * @param outState         resulting vector, in the outCoord system.
+ * @param outCoord         pointer to the output CoordinateSystem.
+ * @param forceComputation force the computation whether it's time to do
+ *                         it or not (default is false)
+ * @param omitTranslation  omit the translation whether coincident or not
+ *                         (default is false)
+ *
+ * @return true if successful; false otherwise.
+ */
+//------------------------------------------------------------------------------
 bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
                           CoordinateSystem *inCoord, Real *outState,
                           CoordinateSystem *outCoord, 
                           bool forceComputation, bool omitTranslation)
 {
-   if ((!inCoord) || (!outCoord))										// made changes by TUAN NGUYEN
-      throw CoordinateSystemException(									// made changes by TUAN NGUYEN
-         "Undefined coordinate system - conversion not performed.");	// made changes by TUAN NGUYEN
-
-//   if (epoch.Get() < 10.0)
-//   {
-//      Real *epochCatcher = NULL;
-//      (*epochCatcher) = inState[0];
-//   }
+   if ((!inCoord) || (!outCoord))
+      throw CoordinateSystemException(
+         "Undefined coordinate system - conversion not performed.");
    
    #ifdef DEBUG_TO_FROM
       MessageInterface::ShowMessage
@@ -304,10 +244,6 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
             inState[5]);
       }
    #endif
-
-//   if ((!inCoord) || (!outCoord))										// made changes by TUAN NGUYEN
-//      throw CoordinateSystemException(								// made changes by TUAN NGUYEN
-//         "Undefined coordinate system - conversion not performed.");	// made changes by TUAN NGUYEN
    
    #ifdef DEBUG_TO_FROM
    MessageInterface::ShowMessage
@@ -356,9 +292,7 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
 
    if (inBaseName != outBaseName)
    {
-      ConvertFromBaseToBase(epoch, inBaseName, outBaseName, intState, baseState); // need Real* version of this method			// made changes by TUAN NGUYEN
-      MessageInterface::ShowMessage("Conversion from base system %s to base system %s = this should not happen yet\n",
-            inBaseName.c_str(), outBaseName.c_str());
+      ConvertFromBaseToBase(epoch, inBaseName, outBaseName, intState, baseState);
    }
    else
    {
@@ -478,6 +412,13 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
 //------------------------------------------------------------------------------
 // Rmatrix33 CoordinateConverter::GetLastRotationMatrix() const
 //------------------------------------------------------------------------------
+/**
+ * This method returns the last-computed rotation matrix, the matrix from
+ * the input coordinate system to its base system.
+ *
+ * @return last-computed rotation matrix
+ */
+//------------------------------------------------------------------------------
 Rmatrix33 CoordinateConverter::GetLastRotationMatrix() const
 {
    return lastRotMatrix;
@@ -486,6 +427,13 @@ Rmatrix33 CoordinateConverter::GetLastRotationMatrix() const
 //------------------------------------------------------------------------------
 // Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
 //------------------------------------------------------------------------------
+/**
+ * This method returns the last-computed rotation dot matrix, the matrix from
+ * the input coordinate system to its base system.
+ *
+ * @return last-computed rotation dot matrix
+ */
+//------------------------------------------------------------------------------
 Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
 {
    return lastRotDotMatrix;
@@ -493,13 +441,28 @@ Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
 
 
 //------------------------------------------------------------------------------
-// bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,		// made changes by TUAN NGUYEN
+// bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
 //          const std::string &inBase,  const std::string &outBase,
 //          const Rvector &inBaseState, Rvector &outBaseState)
 //------------------------------------------------------------------------------
-bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,		// made changes by TUAN NGUYEN
-		const std::string &inBase,  const std::string &outBase,
-		const Rvector &inBaseState, Rvector &outBaseState)
+/**
+ * This method converts the inBaseState vector the base system of the inCoord
+ * to the base system of the outCoord, and returns the result in outBaseState.
+ *
+ * @param epoch            time for which to do the conversion
+ * @param inBase           inCoord base system
+ * @param outBase          outCoord base system
+ * @param inBaseState      input state, in inCoord base system
+ * @param outBaseState     output state, in outCoord base system
+ *
+ * @return true if successful; false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
+		                                          const std::string &inBase,
+		                                          const std::string &outBase,
+		                                          const Rvector &inBaseState,
+		                                          Rvector &outBaseState)
 {
    // if the base types are the same, just set the output state to the input state
    if (inBase == outBase)
@@ -532,9 +495,29 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,		// made cha
 }
 
 
-bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,		// made changes by TUAN NGUYEN
-		const std::string &inBase,  const std::string &outBase,
-        const Real *inBaseState,    Real *outBaseState)
+//------------------------------------------------------------------------------
+// bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
+//          const std::string &inBase,  const std::string &outBase,
+//          const Real *inBaseState,    Real *&outBaseState)
+//------------------------------------------------------------------------------
+/**
+ * This method converts the inBaseState vector the base system of the inCoord
+ * to the base system of the outCoord, and returns the result in outBaseState.
+ *
+ * @param epoch            time for which to do the conversion
+ * @param inBase           inCoord base system
+ * @param outBase          outCoord base system
+ * @param inBaseState      input state, in inCoord base system
+ * @param outBaseState     output state, in outCoord base system
+ *
+ * @return true if successful; false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
+		                                          const std::string &inBase,
+		                                          const std::string &outBase,
+                                                const Real *inBaseState,
+                                                Real *outBaseState)
 {
    // if the base types are the same, just set the output state to the input state
    if (inBase == outBase)
@@ -544,23 +527,13 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,		// made cha
    }
 
    // Use the matrix from ICRF to FK5
-   Real iToF[9];  // @todo - this must be computed or set- specs TBD ********************** TBD *********************
+   Real iToF[9];
    ICRFAxes* icrf = new ICRFAxes();
    icrf->Initialize();
    icrf->GetRotationMatrix(epoch, true);
    icrf->GetLastRotationMatrix(&iToF[0]);
 
    delete icrf;
-
-//   iToF[0] = 1.0;
-//   iToF[1] = 0.0;
-//   iToF[2] = 0.0;
-//   iToF[3] = 0.0;
-//   iToF[4] = 1.0;
-//   iToF[5] = 0.0;
-//   iToF[6] = 0.0;
-//   iToF[7] = 0.0;
-//   iToF[8] = 1.0;
 
    if ((inBase == "ICRF") && (outBase == "FK5"))
    {
