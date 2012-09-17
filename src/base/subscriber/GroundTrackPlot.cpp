@@ -519,7 +519,8 @@ std::string GroundTrackPlot::GetStringParameter(const Integer id) const
       return centralBodyName;
    case TEXTURE_MAP:
       #if DBGLVL_PARAM_STRING
-		MessageInterface::ShowMessage("   returning '%s'\n", textureMapFileName.c_str());
+		MessageInterface::ShowMessage
+         ("   this = <%p>, returning '%s'\n", this, textureMapFileName.c_str());
 		#endif
       return textureMapFileName;
    case SHOW_FOOT_PRINTS:
@@ -562,17 +563,21 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
       // we want to create local body fixed coord system instead in Initialize()
       break;
    case CENTRAL_BODY:
-		if (centralBodyName != value)
-		{
-			centralBodyName = value;
-			// Since ground track data uses body fixed coordinates, name it here
-			mViewCoordSysName = value + "Fixed";
-			
-			// Get default texture map file for the new body
-			FileManager *fm = FileManager::Instance();
-			std::string mapFile = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
-			textureMapFileName = fm->GetFullPathname(mapFile);
-		}
+      if (centralBodyName != value)
+      {
+         centralBodyName = value;
+         // Since ground track data uses body fixed coordinates, name it here
+         mViewCoordSysName = value + "Fixed";
+         
+         // Get default texture map file for the new body
+         FileManager *fm = FileManager::Instance();
+         std::string mapFile = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
+         textureMapFileName = fm->GetFullPathname(mapFile);
+         #if DBGLVL_PARAM_STRING
+         MessageInterface::ShowMessage
+            ("   this = <%p>, textureMapFile changed to '%s'\n", this, textureMapFileName.c_str());
+         #endif
+      }
       return true;
    case TEXTURE_MAP:
       textureMapFileName = value;

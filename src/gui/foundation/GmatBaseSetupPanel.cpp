@@ -34,10 +34,16 @@
 #include "UtilityException.hpp"
 #include "bitmaps/OpenFolder.xpm"
 
-//#define DEBUG_BASEPANEL_LOAD
-//#define DEBUG_BASEPANEL_CREATE
+//#define DEBUG_CREATE
+//#define DEBUG_LOAD
+//#define DEBUG_SAVE
+//#define DEBUG_CREATE_CONTROL
+//#define DEBUG_BUILD_CONTROL
+//#define DEBUG_REFRESH
+//#define DEBUG_REFRESH_PROPERTY
 //#define DEBUG_LOAD_CONTROL
 //#define DEBUG_SAVE_CONTROL
+//#define DEBUG_COMBOBOX
 
 //-----------------------------------------
 // static members
@@ -80,11 +86,12 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
 													bool reloadOnCBChange)
    : GmatPanel(parent)
 {
-   #ifdef DEBUG_BASEPANEL_CREATE
-   MessageInterface::ShowMessage
-      ("GmatBaseSetupPanel::Constructor() entered, name='%s'", name.c_str());
-   #endif
    mObject = theGuiInterpreter->GetConfiguredObject(name.c_str());
+   #ifdef DEBUG_CREATE
+   MessageInterface::ShowMessage
+      ("\nGmatBaseSetupPanel::Constructor() entered, name='%s', mObject=<%p>\n",
+       name.c_str(), mObject);
+   #endif
 	reloadOnComboBoxChange = reloadOnCBChange;
    clbNumber = 0;
 	
@@ -133,19 +140,23 @@ void GmatBaseSetupPanel::Create()
 {
    // create local copy of mObject
    localObject = mObject->Clone();
-
-   #ifdef DEBUG_BASEPANEL_CREATE
+   
+   #ifdef DEBUG_CREATE
    MessageInterface::ShowMessage
-      (", localObject=<%p><%s> '%s'\n",
+      ("GmatBaseSetupPanel::Create() entered, localObject=<%p><%s>'%s'\n",
        localObject, localObject->GetTypeName().c_str(), localObject->GetName().c_str());
    #endif
-
+   
    wxFlexGridSizer *mainSizer = new wxFlexGridSizer(1);
    CreateControls(mainSizer, localObject);
-
+   
    // fix tab order
    FixTabOrder( NULL, mainSizer );
    theMiddleSizer->Add(mainSizer, 0, wxALL|wxALIGN_LEFT, 5);
+   
+   #ifdef DEBUG_CREATE
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::Create() leaving\n");
+   #endif
 }
 
 
@@ -245,15 +256,17 @@ SizerMapType* GmatBaseSetupPanel::CreateGroups(wxFlexGridSizer *mainSizer,
 //------------------------------------------------------------------------------
 void GmatBaseSetupPanel::LoadData()
 {
+   #ifdef DEBUG_LOAD
+   MessageInterface::ShowMessage("\nGmatBaseSetupPanel::LoadData() entered\n");
+   #endif
    // load data from the core engine
    try
    {
       std::string label;
       Integer propertyCount = localObject->GetParameterCount();
-
-      #ifdef DEBUG_BASEPANEL_LOAD
-      MessageInterface::ShowMessage
-         ("GmatBaseSetupPanel::LoadData() There are %d properties\n", propertyCount);
+      
+      #ifdef DEBUG_LOAD
+      MessageInterface::ShowMessage("   There are %d properties\n", propertyCount);
       #endif
       
       for (Integer i = 0; i < propertyCount; ++i)
@@ -276,6 +289,10 @@ void GmatBaseSetupPanel::LoadData()
    // explicitly disable apply button
    // it is turned on in each of the panels
    EnableUpdate(false);
+   
+   #ifdef DEBUG_LOAD
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::LoadData() leaving\n");
+   #endif
 }
 
 
@@ -283,11 +300,15 @@ void GmatBaseSetupPanel::LoadData()
 // void SaveData()
 //------------------------------------------------------------------------------
 /**
- * Passes configuration data from the panel to the Solver object
+ * Passes configuration data from the panel to the object
  */
 //------------------------------------------------------------------------------
 void GmatBaseSetupPanel::SaveData()
 {
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage("\nGmatBaseSetupPanel::SaveData() entered\n");
+   #endif
+   
    canClose = true;
 
    try
@@ -303,7 +324,7 @@ void GmatBaseSetupPanel::SaveData()
       }
       if (!localObject->Validate())
           throw GmatBaseException("Invalid input\n");
-
+      
       // if no errors, copy the object again
       for (std::map<Integer, wxControl *>::iterator i = controlMap.begin();
             i != controlMap.end(); ++i)
@@ -319,7 +340,12 @@ void GmatBaseSetupPanel::SaveData()
       canClose = false;
       return;
    }
+   
    EnableUpdate(false);
+   
+   #ifdef DEBUG_SAVE
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::SaveData() leaving\n");
+   #endif
 }
 
 
@@ -328,12 +354,16 @@ void GmatBaseSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void GmatBaseSetupPanel::CreateControls(wxFlexGridSizer *mainSizer, GmatBase *theObject)
 {
+   #ifdef DEBUGCREATE_CONTROL
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateControls() entered\n");
+   #endif
+   
    wxFileConfig *pConfig;
    SizerMapType *groups;
    StringArray propertyNames;
    std::vector<wxString> propertyGroups;
    
-   #ifdef DEBUG_BASEPANEL_CREATE
+   #ifdef DEBUGCREATE_CONTROL
    //MessageInterface::PopupMessage
    //   (Gmat::INFO_, "Creating controls for %s...\n", theObject->GetTypeName().c_str());
    MessageInterface::ShowMessage
@@ -351,7 +381,7 @@ void GmatBaseSetupPanel::CreateControls(wxFlexGridSizer *mainSizer, GmatBase *th
    Integer propertyCount = theObject->GetParameterCount();
    for (Integer i = 0; i < propertyCount; ++i)
    {
-      #ifdef DEBUG_BASEPANEL_CREATE
+      #ifdef DEBUGCREATE_CONTROL
       if (theObject->IsParameterReadOnly(i))
          MessageInterface::ShowMessage
            ("   ParameterText(%d)='%s' (ReadOnly=True)\n", i, theObject->GetParameterText(i).c_str());
@@ -387,35 +417,44 @@ void GmatBaseSetupPanel::CreateControls(GmatBase *theObject, Integer index,
                                         wxStaticText **aLabel, wxControl **aControl,
                                         wxControl **aUnit, wxFileConfig *config)
 {
-    wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
+   #ifdef DEBUG_CREATE_CONTROL
+   MessageInterface::ShowMessage("\nGmatBaseSetupPanel::CreateControls() entered\n");
+   #endif
+   
+   wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
     #if __WXMAC__
-    int buttonWidth = 40;
+   int buttonWidth = 40;
     #else
-    int buttonWidth = 25;
+   int buttonWidth = 25;
     #endif
-    std::string labelText;
-    // set the path to the section that contains the parameter's items
-    config->SetPath(wxT(("/"+theObject->GetParameterText(index)).c_str()));
-    labelText = GetParameterLabel(theObject, index, config);
-    labelText = AssignAcceleratorKey(labelText);
-    
-    if (theObject->GetParameterType(index) != Gmat::BOOLEAN_TYPE)
-       *aLabel = new wxStaticText(this, ID_TEXT, labelText.c_str());
-    else
-       *aLabel = new wxStaticText(this, ID_TEXT, "");
-    
-    *aControl = BuildControl(this, theObject, index, labelText, config);
-    (*aControl)->Enable(theObject->IsParameterEnabled(index));
-    
-    if (theObject->GetParameterType(index) == Gmat::FILENAME_TYPE)
-    {
-       *aUnit =
-          new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                             wxSize(buttonWidth, 20));
-    }
-    else
-       *aUnit = new wxStaticText(this, ID_TEXT,
-                                 wxT(GetParameterUnit(theObject, index, config).c_str()));
+   std::string labelText;
+   // set the path to the section that contains the parameter's items
+   config->SetPath(wxT(("/"+theObject->GetParameterText(index)).c_str()));
+   labelText = GetParameterLabel(theObject, index, config);
+   labelText = AssignAcceleratorKey(labelText);
+   
+   if (theObject->GetParameterType(index) != Gmat::BOOLEAN_TYPE)
+      *aLabel = new wxStaticText(this, ID_TEXT, labelText.c_str());
+   else
+      *aLabel = new wxStaticText(this, ID_TEXT, "");
+   
+   *aControl = BuildControl(this, theObject, index, labelText, config);
+   (*aControl)->Enable(theObject->IsParameterEnabled(index));
+   
+   if (theObject->GetParameterType(index) == Gmat::FILENAME_TYPE)
+   {
+      *aUnit =
+         new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
+                            wxSize(buttonWidth, 20));
+   }
+   else
+      *aUnit =
+         new wxStaticText(this, ID_TEXT,
+                          wxT(GetParameterUnit(theObject, index, config).c_str()));
+   
+   #ifdef DEBUG_CREATE_CONTROL
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateControls() leaving\n");
+   #endif
 }
 
 
@@ -588,7 +627,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
                                             Integer index, const std::string &label,
                                             wxFileConfig *config)
 {
-   #ifdef DEBUG_BASEPANEL_CREATE
+   #ifdef DEBUG_BUILD_CONTROL
    MessageInterface::ShowMessage
       ("GmatBaseSetupPanel::BuildControl() entered, label = '%s'\n", label.c_str());
    #endif
@@ -597,12 +636,12 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
    
    Gmat::ParameterType paramType = theObject->GetParameterType(index);
    Gmat::ObjectType paramObjType = theObject->GetPropertyObjectType(index);
-   #ifdef DEBUG_BASEPANEL_CREATE
+   #ifdef DEBUG_BUILD_CONTROL
    MessageInterface::ShowMessage
       ("BuildControl() object type is %s\n", GmatBase::GetObjectTypeString(paramObjType).c_str());
    #endif
    
-   #ifdef DEBUG_BASEPANEL_CREATE
+   #ifdef DEBUG_BUILD_CONTROL
    MessageInterface::ShowMessage
       ("Building control %s (type=%s)\n", label.c_str(),
        theObject->GetParameterTypeString(index).c_str());
@@ -788,7 +827,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
    
    control->SetToolTip(config->Read(_T("Hint")));
 
-   #ifdef DEBUG_BASEPANEL_CREATE
+   #ifdef DEBUG_BUILD_CONTROL
    MessageInterface::ShowMessage
       ("GmatBaseSetupPanel::BuildControl() leaving, label = '%s'\n", label.c_str());
    #endif
@@ -1328,20 +1367,49 @@ void GmatBaseSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 	// Actually in some cases we need to reload the value upon ComboBox selection change.
 	// For example, when ComboBox selection changed from Earth to Mars for GroundTrackPlot,
 	// we also want to change the texture map file to Mars. So changed back (LOJ: 2011.11.30)
+
+   #ifdef DEBUG_COMBOBOX
+   MessageInterface::ShowMessage
+      ("\nGmatBaseSetupPanel::OnComboBoxChange() entered, reloadOnComboBoxChange = %s\n",
+       reloadOnComboBoxChange ? "true" : "false");
+   #endif
+   
    if (reloadOnComboBoxChange)
 	{
 		std::string label = localObject->GetParameterText(inverseControlMap[(wxControl *) event.GetEventObject()]);
+      Integer id = localObject->GetParameterID(label);
+      #ifdef DEBUG_COMBOBOX
+      MessageInterface::ShowMessage("   label = '%s', id = %d\n", label.c_str(), id);
+      #endif
 		try
 		{
-			if (SaveControl(localObject, label))
-				RefreshProperties(localObject);
+         // Special handling for GroundTrackPlot since we don't want to create
+         // customized GroundTrackPlot panel. We need to get new texture map file
+         // from the base when new central body is saved. (LOJ: 2012.09.17)
+         if (localObject->IsOfType("GroundTrackPlot") && label == "CentralBody")
+         {
+            #ifdef DEBUG_COMBOBOX
+            MessageInterface::ShowMessage
+               ("   Saving GroundTrackPlot CentralBody and gettng new texture file.\n");
+            #endif
+            
+            // Save current control
+            if (SaveControl(localObject, label))
+               RefreshProperties(localObject, "", "TextureMap");
+         }
 		}
-		catch (BaseException &)
+		catch (BaseException &be)
 		{
+         MessageInterface::ShowMessage(be.GetFullMessage());
 		}
    }
    
    EnableUpdate(true);
+   
+   #ifdef DEBUG_COMBOBOX
+   MessageInterface::ShowMessage
+      ("GmatBaseSetupPanel::OnComboBoxChange() leaving\n");
+   #endif
 }
 
 
@@ -1618,7 +1686,7 @@ wxWindow *GmatBaseSetupPanel::FixTabOrder( wxWindow *lastControl, wxSizer *sizer
 
 
 //------------------------------------------------------------------------------
-// RefreshProperties(GmatBase *theObject, std::string ignoreControl)
+// RefreshProperties(GmatBase *theObject, const std::string &ignoreControl)
 //------------------------------------------------------------------------------
 /**
  * Refreshes the Parameters/Properties controls (label, control, and unit) by
@@ -1630,22 +1698,45 @@ wxWindow *GmatBaseSetupPanel::FixTabOrder( wxWindow *lastControl, wxSizer *sizer
  *                      is probably currently typing in them
  */
 //------------------------------------------------------------------------------
-void GmatBaseSetupPanel::RefreshProperties(GmatBase *theObject, std::string ignoreControl)
+void GmatBaseSetupPanel::RefreshProperties(GmatBase *theObject, const std::string &ignoreControl,
+                                           const std::string &onlyOneControl)
 {
-   #ifdef DEBUG_BASEPANEL_CREATE
+   #ifdef DEBUG_REFRESH
    MessageInterface::ShowMessage
-      ("GmatBaseSetupPanel::RefreshProperties() entered. Ignore=%s\n", ignoreControl.c_str());
+      ("\nGmatBaseSetupPanel::RefreshProperties() entered. Ignore=%s, RefreshOnlyOne=%s\n",
+       ignoreControl.c_str(), onlyOneControl.c_str());
    #endif
-
+   
    wxFileConfig *pConfig;
    GetLayoutConfig( theObject, &pConfig );
-   // iterate through the map
-   for (std::map<Integer, wxControl *>::iterator i = controlMap.begin();
-        i != controlMap.end(); ++i)
+   
+   if (onlyOneControl == "")
    {
-      if ((ignoreControl == "") || (theObject->GetParameterText(i->first) != ignoreControl))
-         RefreshProperty(theObject, i->first, i->second, pConfig);
+      // iterate through the map
+      for (std::map<Integer, wxControl *>::iterator i = controlMap.begin();
+           i != controlMap.end(); ++i)
+      {
+         if ((ignoreControl == "") || (theObject->GetParameterText(i->first) != ignoreControl))
+            RefreshProperty(theObject, i->first, i->second, pConfig);
+      }
    }
+   else
+   {
+      // iterate through the map and save only one control specified
+      for (std::map<Integer, wxControl *>::iterator i = controlMap.begin();
+           i != controlMap.end(); ++i)
+      {
+         if ((theObject->GetParameterText(i->first) == onlyOneControl))
+         {
+            RefreshProperty(theObject, i->first, i->second, pConfig);
+            break;
+         }
+      }
+   }
+   
+   #ifdef DEBUG_REFRESH
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::RefreshProperties() leaving\n");
+   #endif
 }
 
 
@@ -1664,32 +1755,45 @@ void GmatBaseSetupPanel::RefreshProperties(GmatBase *theObject, std::string igno
 void GmatBaseSetupPanel::RefreshProperty(GmatBase *theObject, Integer index, wxControl *control,
                                          wxFileConfig *config)
 {
-    wxControl *aSibling;
-
-    // refresh the label, the value, and the unit
-    std::string labelText = theObject->GetParameterText(index);
-
-    // set the path to the section that contains the parameter's items
-    config->SetPath(wxT(("/"+labelText).c_str()));
-
-    // refresh value
-    LoadControl(theObject, labelText);
-    control->Enable(theObject->IsParameterEnabled(index));
-
-    // refresh label
-    if (theObject->GetParameterType(index) != Gmat::BOOLEAN_TYPE)
-        aSibling = (wxControl *) control->GetPrevSibling();
-    else
-        aSibling = control;
-
-    labelText = GetParameterLabel(theObject, index, config);
-    if ((aSibling->GetLabelText()).c_str() != labelText)
-    {
-        labelText = AssignAcceleratorKey(labelText);
-        aSibling->SetLabel(labelText.c_str());
-    }
-
-    // refresh units
-    control->GetNextSibling()->SetLabel(wxT(GetParameterUnit(theObject, index, config).c_str()));
+   #ifdef DEBUG_REFRESH_PROPERTY
+   MessageInterface::ShowMessage
+      ("GmatBaseSetupPanel::RefreshProperty() entered, index=%d\n", index);
+   #endif
+   
+   wxControl *aSibling;
+   
+   // refresh the label, the value, and the unit
+   std::string labelText = theObject->GetParameterText(index);
+   
+   #ifdef DEBUG_REFRESH_PROPERTY
+   MessageInterface::ShowMessage("   labelText = '%s'\n", labelText.c_str());
+   #endif
+   
+   // set the path to the section that contains the parameter's items
+   config->SetPath(wxT(("/"+labelText).c_str()));
+   
+   // refresh value
+   LoadControl(theObject, labelText);
+   control->Enable(theObject->IsParameterEnabled(index));
+   
+   // refresh label
+   if (theObject->GetParameterType(index) != Gmat::BOOLEAN_TYPE)
+      aSibling = (wxControl *) control->GetPrevSibling();
+   else
+      aSibling = control;
+   
+   labelText = GetParameterLabel(theObject, index, config);
+   if ((aSibling->GetLabelText()).c_str() != labelText)
+   {
+      labelText = AssignAcceleratorKey(labelText);
+      aSibling->SetLabel(labelText.c_str());
+   }
+   
+   // refresh units
+   control->GetNextSibling()->SetLabel(wxT(GetParameterUnit(theObject, index, config).c_str()));
+   
+   #ifdef DEBUG_REFRESH_PROPERTY
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::RefreshProperty() leaving\n");
+   #endif
 }
 
