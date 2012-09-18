@@ -111,7 +111,7 @@ protected:
    static const std::string FIRST_PLAN_PHRASE_2000; // ????
    
    
-   /// number of terms in nutation logitude series <=MAX_NUT_TERMS
+   /// number of terms in nutation longitude series <=MAX_NUT_TERMS
    Integer    nut;  
    /// number of terms in nutation planetary series <=MAX_PLANET_TERMS
    Integer    nutpl;

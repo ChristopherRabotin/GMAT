@@ -42,17 +42,17 @@
 #include <iostream>
 
 
-using namespace GmatMathUtil;      // for trig functions, etc.
-using namespace GmatTimeConstants;      // for JD offsets, etc.
+using namespace GmatMathUtil;         // for trig functions, etc.
+using namespace GmatTimeConstants;    // for JD offsets, etc.
 
 //#define ROT_MAT_DEBUG
 //#define DEBUG_TIME_CALC
+
 //---------------------------------
 // static data
 //---------------------------------
-// wcs - 2006.05.01 added negative sign per Bug 260
 const Real GeocentricSolarMagneticAxes::lambdaD = -70.1 * GmatMathConstants::RAD_PER_DEG;  // degrees West
-const Real GeocentricSolarMagneticAxes::phiD    = 78.6 * GmatMathConstants::RAD_PER_DEG;  // degrees North
+const Real GeocentricSolarMagneticAxes::phiD    =  78.6 * GmatMathConstants::RAD_PER_DEG;  // degrees North
 
 
 //------------------------------------------------------------------------------
@@ -130,22 +130,50 @@ GeocentricSolarMagneticAxes::~GeocentricSolarMagneticAxes()
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesXAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesXAxis() const
 {
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesYAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesYAxis() const
 {
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesZAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesZAxis() const
 {
    return GmatCoordinate::NOT_USED;
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem) const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
    if (forBaseSystem == baseSystem)
@@ -153,17 +181,29 @@ GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesEopFile(const st
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesItrfFile() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesItrfFile() const
 {
    return GmatCoordinate::REQUIRED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage 
 GeocentricSolarMagneticAxes::UsesNutationUpdateInterval() const
 {
-   //if (originName == SolarSystem::EARTH_NAME) 
       return GmatCoordinate::REQUIRED;
-   //return ObjectReferencedAxes::UsesNutationUpdateInterval();
 }
 
 //------------------------------------------------------------------------------
@@ -172,12 +212,13 @@ GeocentricSolarMagneticAxes::UsesNutationUpdateInterval() const
 /**
  * Initialization method for this GeocentricSolarMagneticAxes.
  *
+ *@return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
 bool GeocentricSolarMagneticAxes::Initialize()
 {
    ObjectReferencedAxes::Initialize();
-   //if (originName == SolarSystem::EARTH_NAME) // 2006.03.14 WCS 
+
    InitializeFK5();
    
    dipEF = dipoleEF.GetDataVector();
@@ -213,19 +254,12 @@ GmatBase* GeocentricSolarMagneticAxes::Clone() const
 //  void ComputeDipoleEarthFixed()
 //------------------------------------------------------------------------------
 /**
- * This method will compute the rotMatrix and rotDotMatrix used for rotations
- * from/to this AxisSystem to/from the MJ2000Eq system
+ * This method will compute the dipole earth fixed
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
- *
- * @note Code (for Earth) adapted from C code written by Steve Queen/ GSFC,
- *       based on Vallado, pgs. 211- 227.  Equation references in parentheses
- *       will refer to those of the Vallado book.
  */
 //------------------------------------------------------------------------------
 void GeocentricSolarMagneticAxes::ComputeDipoleEarthFixed()
 {
-   // wcs 2006.05.01 - removed negative signs on lambdaD per Bug 260
    dipoleEF(0) = Cos(phiD) * Cos(lambdaD);
    dipoleEF(1) = Cos(phiD) * Sin(lambdaD);
    dipoleEF(2) = Sin(phiD);
@@ -237,30 +271,24 @@ void GeocentricSolarMagneticAxes::ComputeDipoleEarthFixed()
 //------------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
- * from/to this AxisSystem to/from the MJ2000Eq system
+ * from this AxisSystem to the MJ2000Eq system
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
- *
- * @note Code (for Earth) adapted from C code written by Steve Queen/ GSFC, 
- *       based on Vallado, pgs. 211- 227.  Equation references in parentheses
- *       will refer to those of the Vallado book.
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
  */
 //------------------------------------------------------------------------------
 void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
-                                  bool forceComputation) 
+                                                          bool forceComputation)
 {
    Real dPsi             = 0.0;
    Real longAscNodeLunar = 0.0;
    Real cosEpsbar        = 0.0;
    Real cosAst           = 0.0;
    Real sinAst           = 0.0;
-   //Real xVal             = 0.0;
-   //Real yVal             = 0.0;
+
    // Convert to MJD UTC to use for polar motion  and LOD
    // interpolations
-   // 20.02.06 - arg: changed to use enum types instead of strings
-//   Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
-//                  "A1Mjd", "UtcMjd", JD_JAN_5_1941);
    Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
                   TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
                   JD_JAN_5_1941);
@@ -270,31 +298,23 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
 
    // convert input time to UT1 for later use (for AST calculation)
-   // 20.02.06 - arg: changed to use enum types instead of strings
-//   Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
-//                  "A1Mjd", "Ut1Mjd", JD_JAN_5_1941);
-
    Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
                   TimeConverterUtil::A1MJD, TimeConverterUtil::UT1MJD,
                   JD_JAN_5_1941);
-   //Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
-                                             // Compute elapsed Julian centuries (UT1)
-   //Real tUT1     = (jdUT1 - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
+
+   // Compute elapsed Julian centuries (UT1)
    offset =  JD_JAN_5_1941 - JD_OF_J2000;
    Real tUT1     = (mjdUT1 + offset) / DAYS_PER_JULIAN_CENTURY;
    
 
    // convert input A1 MJD to TT MJD (for most calculations)
-   // 20.02.06 - arg: changed to use enum types instead of strings
-//   Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-//                  "A1Mjd", "TtMjd", JD_JAN_5_1941);
    Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                   TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
                   JD_JAN_5_1941);
-   Real jdTT    = mjdTT + JD_JAN_5_1941; // right?
-                                          // Compute Julian centuries of TDB from the base epoch (J2000)
-                                          // NOTE - this is really TT, an approximation of TDB *********
-   //Real tTDB    = (jdTT - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
+   Real jdTT    = mjdTT + JD_JAN_5_1941;
+
+   // Compute Julian centuries of TDB from the base epoch (J2000)
+   // NOTE - this is really TT, an approximation of TDB *********
    Real tTDB    = (mjdTT + offset) / DAYS_PER_JULIAN_CENTURY;
 
    if (overrideOriginInterval) updateIntervalToUse = 
@@ -349,15 +369,10 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       }
    }
    
-   //static Rmatrix33 fixedToMJ2000;
-   
    Real fixedToMJ2000[3][3];
    for (Integer i=0;i<3;i++)
       for (Integer j=0;j<3;j++)
          fixedToMJ2000[i][j] = rot[j][i];
-   //fixedToMJ2000.Set(rot[0][0], rot[1][0], rot[2][0],
-   //                  rot[0][1], rot[1][1], rot[2][1],
-   //                  rot[0][2], rot[1][2], rot[2][2]);
 
    Real determinant = 
            fixedToMJ2000[0][0] * (fixedToMJ2000[1][1] * fixedToMJ2000[2][2] 
@@ -398,25 +413,6 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    for (Integer i=0;i<3;i++)
       for (Integer j=0;j<3;j++)
          fixedToMJ2000Dot[i][j] = rot[j][i];
-   //static Rmatrix33 fixedToMJ2000Dot;
-   //fixedToMJ2000Dot.Set(rot[0][0], rot[1][0], rot[2][0],
-   //                     rot[0][1], rot[1][1], rot[2][1],
-   //                     rot[0][2], rot[1][2], rot[2][2]);
-   //rotDotMatrix.Set(rot[0][0], rot[1][0], rot[2][0],
-   //                 rot[0][1], rot[1][1], rot[2][1],
-   //                 rot[0][2], rot[1][2], rot[2][2]);
-
-   //Rmatrix33 fixedToMJ2000    = PREC.Transpose() * (NUT.Transpose() *
-   //                              (ST.Transpose() * PM.Transpose()));
-    //Real determinant = fixedToMJ2000.Determinant();
-   //if (Abs(determinant - 1.0) > DETERMINANT_TOLERANCE)
-   //   throw CoordinateSystemException(
-   //         "Computed rotation matrix has a determinant not equal to 1.0");
-   //Rmatrix33 fixedToMJ2000Dot = PREC.Transpose() * (NUT.Transpose() *
-   //                             (STderiv.Transpose() * PM.Transpose()));
-
-
-   //Rvector3 dipoleFK5 = fixedToMJ2000 * dipoleEF;
    Real dipoleFK5[3];
    //Integer p3 = 0;
    for (Integer p = 0; p < 3; ++p)
@@ -431,25 +427,14 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    rvSunVec = secondary->GetMJ2000State(atEpoch) -
               primary->GetMJ2000State(atEpoch);
 
-   //Rvector3 rSun  = rvSun.GetR();
-   //Rvector3 vSun  = rvSun.GetV();
    Real rSun[3] = {rvSun[0], rvSun[1], rvSun[2]};
    Real vSun[3] = {rvSun[3], rvSun[4], rvSun[5]};
 
-   //Real     rMag  = rSun.GetMagnitude();
-   //Real     vMag  = vSun.GetMagnitude();
    Real rMag = GmatMathUtil::Sqrt((rSun[0] * rSun[0]) + (rSun[1] * rSun[1]) +
                                   (rSun[2] * rSun[2]));
-   ////Real vMag = GmatMathUtil::Sqrt((vSun[0] * vSun[0]) + (vSun[1] * vSun[1]) +
-   ////                               (vSun[2] * vSun[2]));
-
-   //Rvector3 rUnit = rSun / rMag;
-   //Rvector3 vUnit = vSun / vMag;
    // unitize vectors
    Real x[3]     = {rSun[0] / rMag, rSun[1] / rMag, rSun[2] / rMag}; // was rUnit
-   ////Real vUnit[3] = {vSun[0] / vMag, vSun[1] / vMag, vSun[2] / vMag};
 
-   //Rvector3 x     = rUnit;
    //Rvector3 yFK5  = Cross(dipoleFK5,x);
    Real yFK5[3] = {dipoleFK5[1]*x[2] - dipoleFK5[2]*x[1],
                    dipoleFK5[2]*x[0] - dipoleFK5[0]*x[2],
@@ -468,17 +453,6 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                  x[1], y[1], z[1],
                  x[2], y[2], z[2]);
               
-   /*
-   rotMatrix(0,0) = x(0);
-   rotMatrix(0,1) = y(0);
-   rotMatrix(0,2) = z(0);
-   rotMatrix(1,0) = x(1);
-   rotMatrix(1,1) = y(1);
-   rotMatrix(1,2) = z(1);
-   rotMatrix(2,0) = x(2);
-   rotMatrix(2,1) = y(2);
-   rotMatrix(2,2) = z(2);
-   */
    //Rvector3 vR    = vSun / rMag;
    Real vR[3] = {vSun[0] / rMag, vSun[1] / rMag, vSun[2] / rMag};
    Real product = x[0] * vR[0] + x[1] * vR[1] + x[2] * vR[2];
@@ -491,7 +465,6 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    //                 Cross((fixedToMJ2000 * dipoleEF), xDot);
    for (Integer p = 0; p < 3; ++p)
    {
-      //p3 = 3*p;
          tmp1[p] = fixedToMJ2000Dot[p][0]   * dipEF[0] + 
                    fixedToMJ2000Dot[p][1]   * dipEF[1] + 
                    fixedToMJ2000Dot[p][2]   * dipEF[2];
@@ -512,17 +485,6 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real zDot[3] = {(xDot[1]*y[2] - xDot[2]*y[1]) + (x[1]*yDot[2] - x[2]*yDot[1]), 
                    (xDot[2]*y[0] - xDot[0]*y[2]) + (x[2]*yDot[0] - x[0]*yDot[2]),
                    (xDot[0]*y[1] - xDot[1]*y[0]) + (x[0]*yDot[1] - x[1]*yDot[0])};
-   /*   
-   rotDotMatrix(0,0) = xDot(0);
-   rotDotMatrix(0,1) = yDot(0);
-   rotDotMatrix(0,2) = zDot(0);
-   rotDotMatrix(1,0) = xDot(1);
-   rotDotMatrix(1,1) = yDot(1);
-   rotDotMatrix(1,2) = zDot(1);
-   rotDotMatrix(2,0) = xDot(2);
-   rotDotMatrix(2,1) = yDot(2);
-   rotDotMatrix(2,2) = zDot(2);
-  */
   rotDotMatrix.Set(xDot[0],yDot[0],zDot[0],
                    xDot[1],yDot[1],zDot[1],
                    xDot[2],yDot[2],zDot[2]);
@@ -564,5 +526,3 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #endif
 
 }
-
-

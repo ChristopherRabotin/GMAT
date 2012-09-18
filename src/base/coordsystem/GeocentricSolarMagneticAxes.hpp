@@ -64,7 +64,7 @@ protected:
    };
 
    static const Real lambdaD;  // degrees West
-   static const Real phiD;  // degrees North
+   static const Real phiD;     // degrees North
 
    Rvector3         dipoleEF;
    const Real       *dipEF;

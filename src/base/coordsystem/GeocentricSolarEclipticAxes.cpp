@@ -46,6 +46,7 @@ using namespace GmatTimeConstants;      // for JD offsets, etc.
 //---------------------------------
 // static data
 //---------------------------------
+// none
 
 
 //------------------------------------------------------------------------------
@@ -120,16 +121,37 @@ GeocentricSolarEclipticAxes::~GeocentricSolarEclipticAxes()
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesXAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesXAxis() const
 {
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesYAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesYAxis() const
 {
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesZAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesZAxis() const
 {
    return GmatCoordinate::NOT_USED;
@@ -165,18 +187,14 @@ GmatBase* GeocentricSolarEclipticAxes::Clone() const
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000Eq system
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
- *
- * @note Code (for Earth) adapted from C code written by Steve Queen/ GSFC, 
- *       based on Vallado, pgs. 211- 227.  Equation references in parentheses
- *       will refer to those of the Vallado book.
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it's not time to do it
+ *                         (default is false)
  */
 //------------------------------------------------------------------------------
 void GeocentricSolarEclipticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                                           bool forceComputation) 
 {
-   //if (!primary) cout << "Primary not set!!!!!!!!" << endl;
-   //if (!secondary) cout << "Secondary not set!!!!!!!!" << endl;
    Rvector6 rvSun = secondary->GetMJ2000State(atEpoch) -
                     primary->GetMJ2000State(atEpoch);
    Rvector3 rSun  = rvSun.GetR();
@@ -192,7 +210,6 @@ void GeocentricSolarEclipticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real     rxvM  = rxv.GetMagnitude();
 
    Rvector3 x     = rUnit;
-   //Rvector3 z     (0.0, -0.397777155914121383, 0.917482062076895741);
    Rvector3 z     = rxv / rxvM;
    Rvector3 y     = Cross(z,x);
 
@@ -222,5 +239,3 @@ void GeocentricSolarEclipticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    rotDotMatrix(2,2) = zDot(2);
 
 }
-
-

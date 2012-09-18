@@ -66,14 +66,18 @@ const Real    ItrfCoefficientsFile::MULT_2000_PLANET      = 1.0e-04;        // ?
 
 //---------------------------------------------------------------------------
 //  ItrfCoefficientsFile(const std::string &fileName 
-//                       Integer nutTerms  = REDEX96_MAX_NUT_TERMS,
-//                       Integer planTerms = MAX_PLANET_TERMS);
+//                       const std::string planFileName,
+//                       Integer nutTerms  = GmatItrf::NUTATION_1980,
+//                       Integer planTerms = GmatItrf::PLANETARY_1980);
 //---------------------------------------------------------------------------
 /**
  * Constructs base ItrfCoefficientsFile structures used in derived classes
  * (default constructor).
  *
- * @param fileNme  EOP file name.
+ * @param fileNme      Nutation file name.
+ * @param planFileName Planetary terms file name
+ * @param nutTerms     Number of nutation terms  (default GmatItrf::NUTATION_1980)
+ * @param planTerms    Number of Planetary terms (default GmatItrf::PLANETARY_1980)
  */
 //---------------------------------------------------------------------------
 ItrfCoefficientsFile::ItrfCoefficientsFile(const std::string &nutFileName,
@@ -229,8 +233,6 @@ void ItrfCoefficientsFile::Initialize()
 {
    if (filesAreInitialized)  return;
    
-   //Integer a1, a2, a3, a4, a5;
-   //Integer ap1, ap2, ap3, ap4, ap5, ap6, ap7, ap8, ap9, ap10;
    std::string   line;
    // read the nutation file and put the coefficient data into the arrays
    std::ifstream itrfNutFile(nutationFileName.c_str());
@@ -339,32 +341,86 @@ void ItrfCoefficientsFile::Initialize()
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatItrf::NutationTerms GetNutationTermsSource() const
+//------------------------------------------------------------------------------
+/**
+ * Returns the source of the nutation terms
+ *
+ * @return the source of the nutation terms
+ */
+//---------------------------------------------------------------------------
 GmatItrf::NutationTerms ItrfCoefficientsFile::GetNutationTermsSource() const
 {
     return nutation;
 }
 
+//------------------------------------------------------------------------------
+//  GmatItrf::NutationTerms GetPlanetaryTermsSource() const
+//------------------------------------------------------------------------------
+/**
+ * Returns the source of the planetary terms
+ *
+ * @return the source of the planetary terms
+ */
+//---------------------------------------------------------------------------
 GmatItrf::PlanetaryTerms ItrfCoefficientsFile::GetPlanetaryTermsSource() const
 {
     return planetary;
 }
 
+//------------------------------------------------------------------------------
+//  std::string GetNutationFileName() const
+//------------------------------------------------------------------------------
+/**
+ * Returns the name of the nutation file
+ *
+ * @return the name of the nutation file
+ */
+//---------------------------------------------------------------------------
 std::string ItrfCoefficientsFile::GetNutationFileName() const
 {
    return nutationFileName;
 }
 
+//------------------------------------------------------------------------------
+//  std::string GetPlanetaryFileName() const
+//------------------------------------------------------------------------------
+/**
+ * Returns the name of the planetary file
+ *
+ * @return the name of the planetary file
+ */
+//---------------------------------------------------------------------------
 std::string ItrfCoefficientsFile::GetPlanetaryFileName() const
 {
    return planetaryFileName;
 }
 
 
+//------------------------------------------------------------------------------
+//  Integer GetNumberOfNutationTerms() const
+//------------------------------------------------------------------------------
+/**
+ * Returns the number of nutation terms
+ *
+ * @return the number of nutation terms
+ */
+//---------------------------------------------------------------------------
 Integer ItrfCoefficientsFile::GetNumberOfNutationTerms()
 {
    return nut;
 }
 
+//------------------------------------------------------------------------------
+//  Integer GetNumberOfPlanetaryTerms() const
+//------------------------------------------------------------------------------
+/**
+ * Returns the number of planetary terms
+ *
+ * @return the number of planetary terms
+ */
+//---------------------------------------------------------------------------
 Integer ItrfCoefficientsFile::GetNumberOfPlanetaryTerms()
 {
    return nutpl;
@@ -373,7 +429,7 @@ Integer ItrfCoefficientsFile::GetNumberOfPlanetaryTerms()
 //------------------------------------------------------------------------------
 //  bool  GetNutationTerms(std::vector<IntegerArray> &a5, Rvector &Aval, 
 //                         Rvector &Bval, Rvector &Cval,
-//                         Rvector &Dval, Rvector &Eval,Rvector &Fval)
+//                         Rvector &Dval, Rvector &Eval,  Rvector &Fval)
 //------------------------------------------------------------------------------
 /**
  * This method returns the nutation terms read from the file.
@@ -392,7 +448,7 @@ Integer ItrfCoefficientsFile::GetNumberOfPlanetaryTerms()
 bool ItrfCoefficientsFile::GetNutationTerms(
                            std::vector<IntegerArray> &a5, Rvector &Aval, 
                            Rvector &Bval, Rvector &Cval,
-                           Rvector &Dval, Rvector &Eval,Rvector &Fval)
+                           Rvector &Dval, Rvector &Eval,  Rvector &Fval)
 {
    if (!filesAreInitialized) Initialize();
    a5   = a;
@@ -407,11 +463,10 @@ bool ItrfCoefficientsFile::GetNutationTerms(
 
 //------------------------------------------------------------------------------
 //  bool  GetPlanetaryTerms(std::vector<IntegerArray> &ap10, Rvector &Apval, 
-//                          Rvector &Bpval, Rvector &Cpval,
-//                          Rvector &Dpval)
+//                          Rvector &Bpval,  Rvector &Cpval, Rvector &Dpval)
 //------------------------------------------------------------------------------
 /**
- * This method returns the nutation terms read from the file.
+ * This method returns the planetary terms read from the file.
  *
  * @param ap10  planetary coefficients (???)
  * @param Apval Ap coefficients (longitude)
@@ -424,8 +479,7 @@ bool ItrfCoefficientsFile::GetNutationTerms(
 //------------------------------------------------------------------------------
 bool ItrfCoefficientsFile::GetPlanetaryTerms(
                            std::vector<IntegerArray> &ap10, Rvector &Apval, 
-                           Rvector &Bpval, Rvector &Cpval, 
-                           Rvector &Dpval)
+                           Rvector &Bpval,  Rvector &Cpval, Rvector &Dpval)
 {
    if (!filesAreInitialized) Initialize();
    ap10  = ap;
@@ -441,13 +495,12 @@ bool ItrfCoefficientsFile::GetPlanetaryTerms(
 // protected methods
 //------------------------------------------------------------------------------
 
-
 //------------------------------------------------------------------------------
 //  bool InitializeArrays(GmatItrf::NutationTerms nutT,
 //                        GmatItrf::PlanetaryTerms planT)
 //------------------------------------------------------------------------------
 /**
- * This method initilaizes the internal arrays that store the nutation and
+ * This method initializes the internal arrays that store the nutation and
  * planetary data.
  *
  * @param  nutT  nutation data type
@@ -456,7 +509,7 @@ bool ItrfCoefficientsFile::GetPlanetaryTerms(
  * @return success flag.
  */
 //------------------------------------------------------------------------------
-bool ItrfCoefficientsFile::InitializeArrays(GmatItrf::NutationTerms nutT,
+bool ItrfCoefficientsFile::InitializeArrays(GmatItrf::NutationTerms  nutT,
                                             GmatItrf::PlanetaryTerms planT)
 {
     if (nutT == GmatItrf::NUTATION_1980)  
@@ -552,18 +605,17 @@ bool ItrfCoefficientsFile::InitializeArrays(GmatItrf::NutationTerms nutT,
 /**
  * This method returns true if the string is empty or is all white space.
  *
- * @return success flag.
+ * @param aLine  string to test
+ *
+ * @return true if the input string is empty or contains only white space;
+ *         false otherwise
  */
 //------------------------------------------------------------------------------
 bool ItrfCoefficientsFile::IsBlank(const char* aLine)
 {
    Integer i;
    for (i=0;i<(int)strlen(aLine);i++)
-   {
-      //loj: 5/18/04 if (!isblank(aLine[i])) return false;
       if (!isspace(aLine[i])) return false;
-   }
+
    return true;
 }
-
-
