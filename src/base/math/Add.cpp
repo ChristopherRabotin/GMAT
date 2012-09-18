@@ -105,8 +105,8 @@ void Add::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
    if (!rightNode)
       throw MathException("Add::GetOutputInfo() The right node is NULL");
    
-   Integer type1, row1, col1; // Left node
-   Integer type2, row2, col2; // Right node
+   Integer type1 = -1, row1 = -1, col1 = -1; // Left node
+   Integer type2 = -1, row2 = -1, col2 = -1; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    if (leftNode)
@@ -180,8 +180,8 @@ bool Add::ValidateInputs()
    if (rightNode == NULL)
       throw MathException("Add() - Not enough input arguments");
    
-   Integer type1, row1, col1; // Left node
-   Integer type2, row2, col2; // Right node
+   Integer type1 = -1, row1 = -1, col1 = -1; // Left node
+   Integer type2 = -1, row2 = -1, col2 = -1; // Right node
    bool retval = false;
    
    // We can do unary operator + such as, x = + var, so leftNode can be NULL
@@ -210,16 +210,6 @@ bool Add::ValidateInputs()
       if (row1 == row2 && col1 == col2)
          retval = true;
    }
-   
-//    if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
-//       retval = true;
-//    else if ((type1 == Gmat::RMATRIX_TYPE) && (type2 == Gmat::RMATRIX_TYPE))
-//       if ((row1 == row2) && (col1 == col2))
-//          retval = true;
-//       else
-//          retval = false;
-//    else
-//       retval = false;
    
    #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
@@ -273,8 +263,23 @@ Rmatrix Add::MatrixEvaluate()
        rightNode->MatrixEvaluate().ToString().c_str());
    #endif
    
+   Integer type1 = -1, row1 = -1, col1 = -1; // Left node
+   Integer type2 = -1, row2 = -1, col2 = -1; // Right node
+   
    if (leftNode)
-      return leftNode->MatrixEvaluate() + rightNode->MatrixEvaluate();
+   {
+      leftNode->GetOutputInfo(type1, row1, col1);
+      rightNode->GetOutputInfo(type2, row2, col2);
+      
+      if (type1 == Gmat::RMATRIX_TYPE && type2 ==  Gmat::RMATRIX_TYPE)
+         return leftNode->MatrixEvaluate() + rightNode->MatrixEvaluate();
+      else if (type1 == Gmat::RMATRIX_TYPE && type2 ==  Gmat::REAL_TYPE)
+         return leftNode->MatrixEvaluate() + rightNode->Evaluate();
+      else if (type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
+         return leftNode->Evaluate() + rightNode->MatrixEvaluate();
+      else
+         return MathFunction::MatrixEvaluate();
+   }
    else
       return rightNode->MatrixEvaluate();
 }

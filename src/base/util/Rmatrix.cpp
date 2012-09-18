@@ -557,6 +557,70 @@ Rmatrix::operator/=(const Rmatrix &m)
 
 
 //------------------------------------------------------------------------------
+//  Rmatrix operator+(Real scalar) const
+//------------------------------------------------------------------------------
+Rmatrix Rmatrix::operator+(Real scalar) const 
+{
+   if (isSizedD == false)
+      throw TableTemplateExceptions::UnsizedTable();
+   
+   Rmatrix result(rowsD, colsD);
+   
+   for (int i = 0; i < rowsD*colsD; i++)
+      result.elementD[i] = elementD[i] + scalar;
+   
+   return result;
+}
+
+
+//------------------------------------------------------------------------------
+//  const Rmatrix& operator+=(Real scalar)
+//------------------------------------------------------------------------------
+const Rmatrix& Rmatrix::operator+=(Real scalar) 
+{
+   if (isSizedD == false)
+      throw TableTemplateExceptions::UnsizedTable();
+   
+   for (int i = 0; i < rowsD*colsD; i++)
+      elementD[i] = elementD[i] + scalar;
+   
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+//  Rmatrix operator-(Real scalar) const
+//------------------------------------------------------------------------------
+Rmatrix Rmatrix::operator-(Real scalar) const 
+{
+   if (isSizedD == false)
+      throw TableTemplateExceptions::UnsizedTable();
+   
+   Rmatrix result(rowsD, colsD);
+   
+   for (int i = 0; i < rowsD*colsD; i++)
+      result.elementD[i] = elementD[i] - scalar;
+   
+   return result;
+}
+
+
+//------------------------------------------------------------------------------
+//  const Rmatrix& operator-=(Real scalar)
+//------------------------------------------------------------------------------
+const Rmatrix& Rmatrix::operator-=(Real scalar) 
+{
+   if (isSizedD == false)
+      throw TableTemplateExceptions::UnsizedTable();
+   
+   for (int i = 0; i < rowsD*colsD; i++)
+      elementD[i] = elementD[i] - scalar;
+   
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
 //  Rmatrix operator*(Real scalar) const
 //------------------------------------------------------------------------------
 Rmatrix Rmatrix::operator*(Real scalar) const 
@@ -695,6 +759,42 @@ Rvector Rmatrix::operator*(const Rvector &v) const
 //---------------------------------
 // friend functions
 //---------------------------------
+
+//------------------------------------------------------------------------------
+//  <friend>
+//  Rmatrix operator+(Real scalar, const Rmatrix &m)
+//------------------------------------------------------------------------------
+Rmatrix operator+(Real scalar, const Rmatrix &m) 
+{
+   if (m.IsSized() == false)
+      throw TableTemplateExceptions::UnsizedTable();
+   
+   Rmatrix result(m);
+   
+   for (int i = 0; i < m.rowsD*m.colsD; i++)
+      result.elementD[i] += scalar;
+   
+   return result;
+}
+
+
+//------------------------------------------------------------------------------
+//  <friend>
+//  Rmatrix operator-(Real scalar, const Rmatrix &m)
+//------------------------------------------------------------------------------
+Rmatrix operator-(Real scalar, const Rmatrix &m) 
+{
+   if (m.IsSized() == false)
+      throw TableTemplateExceptions::UnsizedTable();
+   
+   Rmatrix result(m);
+   
+   for (int i = 0; i < m.rowsD*m.colsD; i++)
+      result.elementD[i] = scalar - result.elementD[i];
+   
+   return result;
+}
+
 
 //------------------------------------------------------------------------------
 //  <friend>

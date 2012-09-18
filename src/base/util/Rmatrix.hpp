@@ -79,10 +79,18 @@ public:
    const Rmatrix& operator/=(const Rmatrix &RHSRmatrix);
    
    // operations with scalars
+   Rmatrix operator+(Real scalar) const;
+   const Rmatrix& operator+=(Real scalar);
+   
+   Rmatrix operator-(Real scalar) const;
+   const Rmatrix& operator-=(Real scalar);
+   
    Rmatrix operator*(Real scalar) const;
    const Rmatrix& operator*=(Real scalar);
+   
    Rmatrix operator/(Real scalar) const;
    const Rmatrix& operator/=(Real scalar);
+   
    // negate
    Rmatrix operator-() const;
    
@@ -90,6 +98,8 @@ public:
    friend class Rvector3;
    Rvector operator*(const Rvector &v) const;
    
+   friend Rmatrix operator+(Real scalar, const Rmatrix &m);
+   friend Rmatrix operator-(Real scalar, const Rmatrix &m);
    friend Rmatrix operator*(Real scalar, const Rmatrix &m);
    friend Rmatrix operator/(Real scalar, const Rmatrix &m);
    

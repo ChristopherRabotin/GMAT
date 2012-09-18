@@ -101,8 +101,8 @@ void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount
       throw MathException("Subtract() - Missing input arguments in \"" + 
                           GetName() + "\"");
    
-   Integer type1, row1, col1; // Left node
-   Integer type2, row2, col2; // Right node
+   Integer type1 = -1, row1 = -1, col1 = -1; // Left node
+   Integer type2 = -1, row2 = -1, col2 = -1; // Right node
    
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
@@ -164,8 +164,8 @@ bool Subtract::ValidateInputs()
       ("\nSubtract::ValidateInputs() '%s' entered\n", GetName().c_str());
    #endif
    
-   Integer type1, row1, col1; // Left node
-   Integer type2, row2, col2; // Right node
+   Integer type1 = -1, row1 = -1, col1 = -1; // Left node
+   Integer type2 = -1, row2 = -1, col2 = -1; // Right node
    bool retval = false;
    
    if (!leftNode || !rightNode)
@@ -238,10 +238,24 @@ Rmatrix Subtract::MatrixEvaluate()
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage("Subtract::MatrixEvaluate() '%s' entered\n", GetName().c_str());
    #endif
+      
+   Integer type1 = -1, row1 = -1, col1 = -1; // Left node
+   Integer type2 = -1, row2 = -1, col2 = -1; // Right node
    
-   if (ValidateInputs())
-      return leftNode->MatrixEvaluate() - rightNode->MatrixEvaluate();
+   if (leftNode)
+   {
+      leftNode->GetOutputInfo(type1, row1, col1);
+      rightNode->GetOutputInfo(type2, row2, col2);
+      
+      if (type1 == Gmat::RMATRIX_TYPE && type2 ==  Gmat::RMATRIX_TYPE)
+         return leftNode->MatrixEvaluate() - rightNode->MatrixEvaluate();
+      else if (type1 == Gmat::RMATRIX_TYPE && type2 ==  Gmat::REAL_TYPE)
+         return leftNode->MatrixEvaluate() - rightNode->Evaluate();
+      else if (type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
+         return leftNode->Evaluate() - rightNode->MatrixEvaluate();
+      else
+         return MathFunction::MatrixEvaluate();
+   }
    else
-      throw MathException("Subtract::Operands are not of the same type or same "
-                          "dimension.\n");    
+      return rightNode->MatrixEvaluate();
 }
