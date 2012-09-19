@@ -24,10 +24,11 @@
 #ifndef MatlabFunctionFactory_hpp
 #define MatlabFunctionFactory_hpp
 
+#include "matlabinterface_defs.hpp"
 #include "Factory.hpp"
 #include "Function.hpp"
 
-class GMAT_API MatlabFunctionFactory : public Factory
+class MATLAB_API MatlabFunctionFactory : public Factory
 {
 public:
    Function* CreateFunction(const std::string &ofType, const std::string &withName = "");

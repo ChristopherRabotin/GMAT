@@ -1032,12 +1032,6 @@
     <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp">
       <Filter>Source Files\function</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\function\GmatFunction.cpp">
-      <Filter>Source Files\function</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\function\MatlabFunction.cpp">
-      <Filter>Source Files\function</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\interpreter\Interpreter.cpp">
       <Filter>Source Files\interpreter</Filter>
     </ClCompile>
@@ -1126,9 +1120,6 @@
       <Filter>Source Files\factory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\factory\FactoryManager.cpp">
-      <Filter>Source Files\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\FunctionFactory.cpp">
       <Filter>Source Files\factory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\factory\HardwareFactory.cpp">
@@ -2276,12 +2267,6 @@
     <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp">
       <Filter>Source Files\function</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\function\GmatFunction.hpp">
-      <Filter>Source Files\function</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\function\MatlabFunction.hpp">
-      <Filter>Source Files\function</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\interpreter\Interpreter.hpp">
       <Filter>Source Files\interpreter</Filter>
     </ClInclude>
@@ -2370,9 +2355,6 @@
       <Filter>Source Files\factory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\factory\FactoryManager.hpp">
-      <Filter>Source Files\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\FunctionFactory.hpp">
       <Filter>Source Files\factory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\factory\HardwareFactory.hpp">

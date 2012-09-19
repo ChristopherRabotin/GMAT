@@ -59,7 +59,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\plugin;..\..\src\base\propagator;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\factory;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\hardware;..\..\..\..\src\base\propagator;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\plugin;..\..\src\base\propagator;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\factory;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\hardware;..\..\..\..\src\base\propagator;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;PROPAGATOR_EXPORTS;_DYNAMICLINK</PreprocessorDefinitions>
     </ClCompile>
     <Link>

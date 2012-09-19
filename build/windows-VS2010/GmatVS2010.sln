@@ -42,6 +42,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libExtraPropagators", "..\.
 		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libGmatFunction", "..\..\plugins\GmatFunctionPlugin\build\VS2010\libGmatFunction.vcxproj", "{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -226,6 +231,21 @@ Global
 		{8EBE9EC7-22DC-4E43-A618-7BB769B7A744}.SPICE|Win32.ActiveCfg = Release|Win32
 		{8EBE9EC7-22DC-4E43-A618-7BB769B7A744}.SPICE|Win32.Build.0 = Release|Win32
 		{8EBE9EC7-22DC-4E43-A618-7BB769B7A744}.SPICE|x64.ActiveCfg = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.Debug|Win32.Build.0 = Debug|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.Debug|x64.ActiveCfg = Debug|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.Release|Win32.ActiveCfg = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.Release|Win32.Build.0 = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.Release|x64.ActiveCfg = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.ReleaseWithoutF2C|Win32.ActiveCfg = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.ReleaseWithoutF2C|Win32.Build.0 = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.ReleaseWithoutF2C|x64.ActiveCfg = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.ReleaseWithSPICE|Win32.ActiveCfg = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.ReleaseWithSPICE|Win32.Build.0 = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.ReleaseWithSPICE|x64.ActiveCfg = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.SPICE|Win32.ActiveCfg = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.SPICE|Win32.Build.0 = Release|Win32
+		{43D6FC85-30DE-40A3-AA0C-CDDAE23CD9AC}.SPICE|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

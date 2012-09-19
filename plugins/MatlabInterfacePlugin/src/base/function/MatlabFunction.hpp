@@ -23,9 +23,10 @@
 #ifndef MatlabFunction_hpp
 #define MatlabFunction_hpp
 
+#include "matlabinterface_defs.hpp"
 #include "Function.hpp"
 
-class GMAT_API MatlabFunction : public Function
+class MATLAB_API MatlabFunction : public Function
 {
 public:
    MatlabFunction(const std::string &nomme);

@@ -432,7 +432,6 @@
     <ClCompile Include="..\..\..\src\base\factory\Factory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\FactoryException.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\FactoryManager.cpp" />
-    <ClCompile Include="..\..\..\src\base\factory\FunctionFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\HardwareFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\InterfaceFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\MathFactory.cpp" />
@@ -473,8 +472,6 @@
     <ClCompile Include="..\..\..\src\base\function\Function.cpp" />
     <ClCompile Include="..\..\..\src\base\function\FunctionException.cpp" />
     <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp" />
-    <ClCompile Include="..\..\..\src\base\function\GmatFunction.cpp" />
-    <ClCompile Include="..\..\..\src\base\function\MatlabFunction.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\FuelTank.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\Hardware.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\HardwareException.cpp" />
@@ -879,7 +876,6 @@
     <ClInclude Include="..\..\..\src\base\factory\Factory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\FactoryException.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\FactoryManager.hpp" />
-    <ClInclude Include="..\..\..\src\base\factory\FunctionFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\HardwareFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\InterfaceFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\MathFactory.hpp" />
@@ -920,8 +916,6 @@
     <ClInclude Include="..\..\..\src\base\function\Function.hpp" />
     <ClInclude Include="..\..\..\src\base\function\FunctionException.hpp" />
     <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp" />
-    <ClInclude Include="..\..\..\src\base\function\GmatFunction.hpp" />
-    <ClInclude Include="..\..\..\src\base\function\MatlabFunction.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\FuelTank.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\Hardware.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\HardwareException.hpp" />

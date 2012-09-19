@@ -31,6 +31,9 @@
     <Filter Include="Header Files\include">
       <UniqueIdentifier>{97fd02a3-2fff-454a-bb58-eba72c05396f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\function">
+      <UniqueIdentifier>{0c65d706-ba0e-4511-985a-5fc7c046bb68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.cpp">
@@ -53,6 +56,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber\MatlabWorkspace.cpp">
       <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.cpp">
+      <Filter>Source Files\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.cpp">
+      <Filter>Source Files\factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\include\matlabinterface_defs.hpp">
       <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.hpp">
+      <Filter>Source Files\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.hpp">
+      <Filter>Source Files\factory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
