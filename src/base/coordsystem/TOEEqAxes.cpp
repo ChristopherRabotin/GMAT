@@ -38,33 +38,19 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-/* placeholder - may be needed later
-const std::string
-TOEEqAxes::PARAMETER_TEXT[TOEEqAxesParamCount - InertialAxesParamCount] =
-{
-   "",
-};
-
-const Gmat::ParameterType
-TOEEqAxes::PARAMETER_TYPE[TOEEqAxesParamCount - InertialAxesParamCount] =
-{
-};
-*/
+// none
 
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  TOEEqAxes(const std::string &itsType,
-//            const std::string &itsName);
+//  TOEEqAxes(const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs base TOEEqAxes structures
  * (default constructor).
  *
- * @param <itsType> GMAT script string associated with this type of object.
  * @param <itsName> Optional name for the object.  Defaults to "".
  *
  */
@@ -109,8 +95,9 @@ const TOEEqAxes& TOEEqAxes::operator=(const TOEEqAxes &toe)
    InertialAxes::operator=(toe);   
    return *this;
 }
+
 //---------------------------------------------------------------------------
-//  ~TOEEqAxes(void)
+//  ~TOEEqAxes()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -126,6 +113,7 @@ TOEEqAxes::~TOEEqAxes()
 /**
  * Initialization method for this TOEEqAxes.
  *
+ * @return success flag
  */
 //---------------------------------------------------------------------------
 bool TOEEqAxes::Initialize()
@@ -144,24 +132,17 @@ bool TOEEqAxes::Initialize()
    Real cosEpsbar        = 0.0;
 
    // convert epoch (A1 MJD) to TT MJD (for calculations)
-   // 20.02.06 - arg: changed to use enum types instead of strings
-//   Real mjdTT = TimeConverterUtil::Convert(epoch.Get(),
-//                 "A1Mjd", "TtMjd", GmatTimeConstants::JD_JAN_5_1941);      
    Real mjdTT = TimeConverterUtil::Convert(epoch.Get(),
                  TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                  GmatTimeConstants::JD_JAN_5_1941);      
-   //Real jdTT  = mjdTT + GmatTimeConstants::JD_JAN_5_1941;
+
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   //Real tTDB  = (jdTT -GmatTimeConstants::JD_OF_J2000) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    Real offset = GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_OF_J2000;
    Real tTDB  = (mjdTT + offset) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
-//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,
-//                                                longAscNodeLunar, cosEpsbar);
    
    #ifdef DEBUG_TOEEQ
       MessageInterface::ShowMessage("About to call ComputePrecession/Nutation ..........\n");
@@ -211,9 +192,6 @@ bool TOEEqAxes::Initialize()
                  res[1][0],res[1][1],res[1][2],
                  res[2][0],res[2][1],res[2][2]); 
    
-   //rotMatrix = PREC.Transpose() * NUT.Transpose();
-   //rotMatrix = PREC * NUT;
-
    // rotDotMatrix is still the default zero matrix
    
    #ifdef DEBUG_TOEEQ
@@ -223,11 +201,26 @@ bool TOEEqAxes::Initialize()
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesEpoch() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage TOEEqAxes::UsesEpoch() const
 {
    return GmatCoordinate::REQUIRED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesEopFile(
+//                                 const std::string &forBaseSystem) const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage TOEEqAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
    if (forBaseSystem == baseSystem)
@@ -235,11 +228,25 @@ GmatCoordinate::ParameterUsage TOEEqAxes::UsesEopFile(const std::string &forBase
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesItrfFile() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage TOEEqAxes::UsesItrfFile() const
 {
    return GmatCoordinate::REQUIRED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage TOEEqAxes::UsesNutationUpdateInterval() const
 {
    if (originName == SolarSystem::EARTH_NAME) 
@@ -268,87 +275,6 @@ GmatBase* TOEEqAxes::Clone() const
 }
 
 //------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string TOEEqAxes::GetParameterText(const Integer id) const
-{
-   if (id >= InertialAxesParamCount && id < TOEEqAxesParamCount)
-      return PARAMETER_TEXT[id - InertialAxesParamCount];
-   return InertialAxes::GetParameterText(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Integer TOEEqAxes::GetParameterID(const std::string &str) const
-{
-   for (Integer i = InertialAxesParamCount; i < TOEEqAxesParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - InertialAxesParamCount])
-         return i;
-   }
-   
-   return InertialAxes::GetParameterID(str);
-}
-*/
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Gmat::ParameterType TOEEqAxes::GetParameterType(const Integer id) const
-{
-   if (id >= InertialAxesParamCount && id < TOEEqAxesParamCount)
-      return PARAMETER_TYPE[id - InertialAxesParamCount];
-   
-   return InertialAxes::GetParameterType(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string TOEEqAxes::GetParameterTypeString(const Integer id) const
-{
-   return InertialAxes::PARAM_TYPE_STRING[GetParameterType(id)];
-}
-*/
-
-
-//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 
@@ -360,7 +286,9 @@ GmatBase* TOEEqAxes::Clone() const
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000EqAxes system.
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
  */
 //---------------------------------------------------------------------------
 void TOEEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,

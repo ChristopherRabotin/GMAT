@@ -32,33 +32,19 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-/* placeholder - may be needed later
-const std::string
-MOEEqAxes::PARAMETER_TEXT[MOEEqAxesParamCount - InertialAxesParamCount] =
-{
-   "",
-};
-
-const Gmat::ParameterType
-MOEEqAxes::PARAMETER_TYPE[MOEEqAxesParamCount - InertialAxesParamCount] =
-{
-};
-*/
+//none
 
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  MOEEqAxes(const std::string &itsType,
-//            const std::string &itsName);
+//  MOEEqAxes(const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs base MOEEqAxes structures
  * (default constructor).
  *
- * @param <itsType> GMAT script string associated with this type of object.
  * @param <itsName> Optional name for the object.  Defaults to "".
  *
  */
@@ -103,8 +89,9 @@ const MOEEqAxes& MOEEqAxes::operator=(const MOEEqAxes &moe)
    InertialAxes::operator=(moe);   
    return *this;
 }
+
 //---------------------------------------------------------------------------
-//  ~MOEEqAxes(void)
+//  ~MOEEqAxes()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -120,34 +107,28 @@ MOEEqAxes::~MOEEqAxes()
 /**
  * Initialization method for this MOEEqAxes.
  *
+ * @return success flag
  */
 //---------------------------------------------------------------------------
 bool MOEEqAxes::Initialize()
 {
    InertialAxes::Initialize();
-   //InitializeFK5();  // wcs - not needed just for precession
 
    // convert epoch (A1 MJD) to TT MJD (for calculations)
-   // 20.02.06 - arg: changed to use enum types instead of strings
-//   Real mjdTT = TimeConverterUtil::Convert(epoch.Get(),
-//                 "A1Mjd", "TtMjd", GmatTimeConstants::JD_JAN_5_1941);      
    Real mjdTT = TimeConverterUtil::Convert(epoch.Get(),
                  TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                  GmatTimeConstants::JD_JAN_5_1941);      
-   //Real jdTT  = mjdTT + GmatTimeConstants::JD_JAN_5_1941;
+
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   //Real tTDB  = (jdTT - GmatTimeConstants::JD_OF_J2000) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    Real offset = GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_OF_J2000;
    Real tTDB  = (mjdTT + offset) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
+
    ComputePrecessionMatrix(tTDB, epoch);
    
-   //rotMatrix = PREC.Transpose();
-   //rotMatrix = PREC;
    rotMatrix.Set(precData[0], precData[3], precData[6],
                  precData[1], precData[4], precData[7],
                  precData[2], precData[5], precData[8]);
@@ -158,24 +139,17 @@ bool MOEEqAxes::Initialize()
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesEpoch() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage MOEEqAxes::UsesEpoch() const
 {
    return GmatCoordinate::REQUIRED;
 }
-
-//GmatCoordinate::ParameterUsage MOEEqAxes::UsesEopFile(const std::string &forBaseSystem) const
-//{
-//   if (forBaseSystem == baseSystem)
-//      return GmatCoordinate::REQUIRED;
-//   return GmatCoordinate::NOT_USED;
-//}
-
-//GmatCoordinate::ParameterUsage MOEEqAxes::UsesItrfFile() const
-//{
-//   return GmatCoordinate::REQUIRED;
-//}
-
-
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
@@ -196,87 +170,6 @@ GmatBase* MOEEqAxes::Clone() const
 }
 
 //------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string MOEEqAxes::GetParameterText(const Integer id) const
-{
-   if (id >= InertialAxesParamCount && id < MOEEqAxesParamCount)
-      return PARAMETER_TEXT[id - InertialAxesParamCount];
-   return InertialAxes::GetParameterText(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Integer MOEEqAxes::GetParameterID(const std::string &str) const
-{
-   for (Integer i = InertialAxesParamCount; i < MOEEqAxesParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - InertialAxesParamCount])
-         return i;
-   }
-   
-   return InertialAxes::GetParameterID(str);
-}
-*/
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Gmat::ParameterType MOEEqAxes::GetParameterType(const Integer id) const
-{
-   if (id >= InertialAxesParamCount && id < MOEEqAxesParamCount)
-      return PARAMETER_TYPE[id - InertialAxesParamCount];
-   
-   return InertialAxes::GetParameterType(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string MOEEqAxes::GetParameterTypeString(const Integer id) const
-{
-   return InertialAxes::PARAM_TYPE_STRING[GetParameterType(id)];
-}
-*/
-
-
-//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 
@@ -288,7 +181,9 @@ GmatBase* MOEEqAxes::Clone() const
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000EqAxes system.
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
  */
 //---------------------------------------------------------------------------
 void MOEEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,

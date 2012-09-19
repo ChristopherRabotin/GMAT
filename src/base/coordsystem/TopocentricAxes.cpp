@@ -37,8 +37,8 @@
 #include "MessageInterface.hpp"
 #include "BodyFixedPoint.hpp"
 
-using namespace GmatMathUtil;      // for trig functions, etc.
-using namespace GmatTimeConstants;      // for JD offsets, etc.
+using namespace GmatMathUtil;        // for trig functions, etc.
+using namespace GmatTimeConstants;   // for JD offsets, etc.
 
 //#define DEBUG_TOPOCENTRIC_AXES
 
@@ -94,7 +94,9 @@ TopocentricAxes::TopocentricAxes(const TopocentricAxes &tAxes) :
    itsBodyName       (tAxes.itsBodyName),
    horizonReference  (tAxes.horizonReference),
    flattening        (tAxes.flattening),
-   radius            (tAxes.radius)
+   radius            (tAxes.radius),
+   RFT               (tAxes.RFT),
+   bfLocation        (tAxes.bfLocation)
 {
 }
 
@@ -121,12 +123,15 @@ const TopocentricAxes& TopocentricAxes::operator=(const TopocentricAxes &tAxes)
    horizonReference = tAxes.horizonReference;
    flattening       = tAxes.flattening;
    radius           = tAxes.radius;
+   RFT              = tAxes.RFT;
+   bfLocation       = tAxes.bfLocation;
+
    return *this;
 }
 
 
 //------------------------------------------------------------------------------
-//  ~TopocentricAxes(void)
+//  ~TopocentricAxes()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
@@ -142,6 +147,7 @@ TopocentricAxes::~TopocentricAxes()
 /**
  * Initialization method for this TopocentricAxes.
  *
+ * @return success flag
  */
 //------------------------------------------------------------------------------
 bool TopocentricAxes::Initialize()
@@ -171,9 +177,9 @@ bool TopocentricAxes::Initialize()
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the Planet.
+ * This method returns a clone of the TopocentricAxes.
  *
- * @return clone of the Planet.
+ * @return clone of the TopocentricAxes.
  *
  */
 //------------------------------------------------------------------------------
@@ -194,10 +200,12 @@ GmatBase* TopocentricAxes::Clone() const
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000Eq system
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it's not time to do it
+ *                         (default is false)
  *
- * @note  The implementaiton of this method for this class 
- * ignores the forceComputation argument 
+ * @note  The implementation of this method for this class ignores the
+ *        forceComputation argument
  */
 //------------------------------------------------------------------------------
 void TopocentricAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
@@ -267,7 +275,6 @@ void TopocentricAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #endif
    // Determine rotation matrix from body-fixed to inertial
    Rvector bogusIn(6,7000.0,1000.0,6000.0, 0.0, 0.0, 0.0);
-//   Rvector bogusOut = bfcs->ToMJ2000Eq(atEpoch, bogusIn);
    Rvector bogusOut = bfcs->ToBaseSystem(atEpoch, bogusIn); // @todo - need ToMJ2000Eq here?
    #ifdef DEBUG_TOPOCENTRIC_AXES
       MessageInterface::ShowMessage("bogusIn:\n");
@@ -306,12 +313,7 @@ void TopocentricAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    
    rotMatrix        = RIF    * RFT;
    rotDotMatrix     = RIFDot * RFT;
-//   rotMatrix        = RIF * RFT;
-//   rotDotMatrix     = (RIFDot * RFT) +
-//                      (RIF * RFT);
-//   rotMatrix        = RIF * (RFT * RIF.Transpose());
-//   rotDotMatrix     = (RIFDot * (RFT * RIF.Transpose())) +
-//                      (RIF * (RFT * RIFDot.Transpose()));
+
    #ifdef DEBUG_TOPOCENTRIC_AXES
       MessageInterface::ShowMessage("rotMatrix:\n");
       MessageInterface::ShowMessage("%12.17f  %12.17f  %12.17f \n",
@@ -342,7 +344,6 @@ void TopocentricAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
  * @param atEpoch      epoch at which to compute the rotation matrix
  * @param newLocation  location in body-fixed coordinates
  *
- * @note  
  */
 //------------------------------------------------------------------------------
 void TopocentricAxes::CalculateRFT(const A1Mjd &atEpoch, const Rvector3 newLocation)
@@ -458,4 +459,3 @@ void TopocentricAxes::CalculateRFT(const A1Mjd &atEpoch, const Rvector3 newLocat
             RFT(2,0), RFT(2,1), RFT(2,2));
    #endif
 }
-

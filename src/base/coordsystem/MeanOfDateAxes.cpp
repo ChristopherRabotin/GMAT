@@ -47,7 +47,7 @@
  * @param itsName Optional name for the object.  Defaults to "".
  *
  * @note There is no parameter free constructor for MeanOfDateAxes.  Derived 
- *       classes must pass in the typeId and typeStr parameters.
+ *       classes must pass in the itsType and (optionally) itsName parameters.
  */
 //---------------------------------------------------------------------------
 MeanOfDateAxes::MeanOfDateAxes(const std::string &itsType,
@@ -109,6 +109,8 @@ MeanOfDateAxes::~MeanOfDateAxes()
 /**
  * Initialization method for this MeanOfDateAxes.
  *
+ * @return success flag
+ *
  */
 //---------------------------------------------------------------------------
 bool MeanOfDateAxes::Initialize()
@@ -116,19 +118,7 @@ bool MeanOfDateAxes::Initialize()
    return DynamicAxes::Initialize();
 }
 
-//GmatCoordinate::ParameterUsage MeanOfDateAxes::UsesEopFile(const std::string &forBaseSystem) const
-//{
-//   if (forBaseSystem == baseSystem)
-//      return GmatCoordinate::REQUIRED;
-//   return GmatCoordinate::NOT_USED;
-//}
-
-//GmatCoordinate::ParameterUsage MeanOfDateAxes::UsesItrfFile() const
-//{
-//   return GmatCoordinate::REQUIRED;
-//}
-
-
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
 //------------------------------------------------------------------------------
+// none

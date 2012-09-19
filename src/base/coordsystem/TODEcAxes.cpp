@@ -33,33 +33,19 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-/* placeholder - may be needed later
-const std::string
-TODEcAxes::PARAMETER_TEXT[TODEcAxesParamCount - TrueOfDateAxesParamCount] =
-{
-   "",
-};
-
-const Gmat::ParameterType
-TODEcAxes::PARAMETER_TYPE[TODEcAxesParamCount - TrueOfDateAxesParamCount] =
-{
-};
-*/
+// none
 
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  TODEcAxes(const std::string &itsType,
-//            const std::string &itsName);
+//  TODEcAxes(const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs base TODEcAxes structures
  * (default constructor).
  *
- * @param <itsType> GMAT script string associated with this type of object.
  * @param <itsName> Optional name for the object.  Defaults to "".
  *
  */
@@ -105,7 +91,7 @@ const TODEcAxes& TODEcAxes::operator=(const TODEcAxes &tod)
    return *this;
 }
 //---------------------------------------------------------------------------
-//  ~TODEcAxes(void)
+//  ~TODEcAxes()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -121,12 +107,13 @@ TODEcAxes::~TODEcAxes()
 /**
  * Initialization method for this TODEcAxes.
  *
+ * @return success flag
  */
 //---------------------------------------------------------------------------
 bool TODEcAxes::Initialize()
 {
    TrueOfDateAxes::Initialize();
-   //InitializeFK5();   //wcs - moved to TrueOfDateAxes
+   //InitializeFK5() done in TrueOfDateAxes
    
    return true;
 }
@@ -151,87 +138,6 @@ GmatBase* TODEcAxes::Clone() const
 }
 
 //------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string TODEcAxes::GetParameterText(const Integer id) const
-{
-   if (id >= TrueOfDateAxesParamCount && id < TODEcAxesParamCount)
-      return PARAMETER_TEXT[id - TrueOfDateAxesParamCount];
-   return TrueOfDateAxes::GetParameterText(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Integer TODEcAxes::GetParameterID(const std::string &str) const
-{
-   for (Integer i = TrueOfDateAxesParamCount; i < TODEcAxesParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - TrueOfDateAxesParamCount])
-         return i;
-   }
-   
-   return TrueOfDateAxes::GetParameterID(str);
-}
-*/
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Gmat::ParameterType TODEcAxes::GetParameterType(const Integer id) const
-{
-   if (id >= TrueOfDateAxesParamCount && id < TODEcAxesParamCount)
-      return PARAMETER_TYPE[id - TrueOfDateAxesParamCount];
-   
-   return TrueOfDateAxes::GetParameterType(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string TODEcAxes::GetParameterTypeString(const Integer id) const
-{
-   return TrueOfDateAxes::PARAM_TYPE_STRING[GetParameterType(id)];
-}
-*/
-
-
-//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 
@@ -243,7 +149,9 @@ GmatBase* TODEcAxes::Clone() const
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000EqAxes system.
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
  */
 //---------------------------------------------------------------------------
 void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
@@ -254,15 +162,11 @@ void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real cosEpsbar        = 0.0;
    
    // convert epoch (A1 MJD) to TT MJD (for calculations)
-   // 20.02.06 - arg: changed to use enum types instead of strings
-//   Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-//                "A1Mjd", "TtMjd", GmatTimeConstants::JD_JAN_5_1941);      
    Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                 TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                 GmatTimeConstants::JD_JAN_5_1941);      
-   //Real jdTT  = mjdTT + GmatTimeConstants::JD_JAN_5_1941;
+
    // Compute Julian centuries of TDB from the base epoch (J2000) 
-   //Real tTDB  = (jdTT - GmatTimeConstants::JD_OF_J2000) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    Real offset = GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_OF_J2000;
    Real tTDB  = (mjdTT + offset) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
    Real tTDB2 = tTDB * tTDB;
@@ -274,17 +178,11 @@ void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real R1EpsT[9] = { 1.0,                      0.0,                       0.0,
                       0.0,GmatMathUtil::Cos(Epsbar),-GmatMathUtil::Sin(Epsbar),
                       0.0,GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar)};
-   //Rmatrix33 R1Eps( 1.0,                        0.0,                       0.0,
-   //                 0.0,  GmatMathUtil::Cos(Epsbar), GmatMathUtil::Sin(Epsbar),
-   //                 0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
       
    if (overrideOriginInterval) updateIntervalToUse = 
                                ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
-//   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
-//   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, atEpoch, dPsi,
-//                          longAscNodeLunar, cosEpsbar);
-//   
+
    ComputePrecessionMatrix(tTDB, atEpoch);
    ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
                          forceComputation);
@@ -292,9 +190,6 @@ void TODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real R3PsiT[3][3] = { { GmatMathUtil::Cos(-dPsi),-GmatMathUtil::Sin(-dPsi), 0.0},
                          { GmatMathUtil::Sin(-dPsi), GmatMathUtil::Cos(-dPsi), 0.0},
                          {                      0.0,                     0.0,  1.0}};
-   //Rmatrix33 R3Psi( GmatMathUtil::Cos(-dPsi),  GmatMathUtil::Sin(-dPsi),  0.0, 
-   //                -GmatMathUtil::Sin(-dPsi),  GmatMathUtil::Cos(-dPsi),  0.0,
-   //                                      0.0,                       0.0,  1.0);
    
    //rotMatrix = PREC.Transpose() * R1Eps.Transpose() * R3Psi.Transpose();
    Real PrecT[9] = {precData[0], precData[3], precData[6],

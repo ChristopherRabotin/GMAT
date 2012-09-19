@@ -47,7 +47,7 @@
  * @param itsName Optional name for the object.  Defaults to "".
  *
  * @note There is no parameter free constructor for TrueOfDateAxes.  Derived 
- *       classes must pass in the typeId and typeStr parameters.
+ *       classes must pass in the itsType and (optionally) itsName parameters.
  */
 //---------------------------------------------------------------------------
 TrueOfDateAxes::TrueOfDateAxes(const std::string &itsType,
@@ -109,16 +109,24 @@ TrueOfDateAxes::~TrueOfDateAxes()
 /**
  * Initialization method for this TrueOfDateAxes.
  *
+ * @return success flag
  */
 //---------------------------------------------------------------------------
 bool TrueOfDateAxes::Initialize()
 {
    DynamicAxes::Initialize();
-//   if (originName == SolarSystem::EARTH_NAME) // so can use for other bodies as origin  WCS 2010.05.24
-      InitializeFK5();
+   InitializeFK5();
    return true;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesEopFile(
+//                                 const std::string &forBaseSystem) const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
    if (forBaseSystem == baseSystem)
@@ -126,11 +134,25 @@ GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesEopFile(const std::string &fo
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesItrfFile() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesItrfFile() const
 {
    return GmatCoordinate::REQUIRED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesNutationUpdateInterval() const
 {
    if (originName == SolarSystem::EARTH_NAME) 
@@ -142,3 +164,4 @@ GmatCoordinate::ParameterUsage TrueOfDateAxes::UsesNutationUpdateInterval() cons
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
 //------------------------------------------------------------------------------
+// none

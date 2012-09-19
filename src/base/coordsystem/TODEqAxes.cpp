@@ -37,33 +37,19 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-/* placeholder - may be needed later
-const std::string
-TODEqAxes::PARAMETER_TEXT[TODEqAxesParamCount - TrueOfDateAxesParamCount] =
-{
-   "",
-};
-
-const Gmat::ParameterType
-TODEqAxes::PARAMETER_TYPE[TODEqAxesParamCount - TrueOfDateAxesParamCount] =
-{
-};
-*/
+// none
 
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  TODEqAxes(const std::string &itsType,
-//            const std::string &itsName);
+//  TODEqAxes(const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs base TODEqAxes structures
  * (default constructor).
  *
- * @param <itsType> GMAT script string associated with this type of object.
  * @param <itsName> Optional name for the object.  Defaults to "".
  *
  */
@@ -109,7 +95,7 @@ const TODEqAxes& TODEqAxes::operator=(const TODEqAxes &tod)
    return *this;
 }
 //---------------------------------------------------------------------------
-//  ~TODEqAxes(void)
+//  ~TODEqAxes()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -125,12 +111,13 @@ TODEqAxes::~TODEqAxes()
 /**
  * Initialization method for this TODEqAxes.
  *
+ * @return success flag
  */
 //---------------------------------------------------------------------------
 bool TODEqAxes::Initialize()
 {
    TrueOfDateAxes::Initialize();
-   //InitializeFK5();  // wcs - moved to TrueOfDataAxes
+   // InitializeFK5() done in TrueOfDataAxes
    
    return true;
 }
@@ -155,87 +142,6 @@ GmatBase* TODEqAxes::Clone() const
 }
 
 //------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string TODEqAxes::GetParameterText(const Integer id) const
-{
-   if (id >= TrueOfDateAxesParamCount && id < TODEqAxesParamCount)
-      return PARAMETER_TEXT[id - TrueOfDateAxesParamCount];
-   return TrueOfDateAxes::GetParameterText(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Integer TODEqAxes::GetParameterID(const std::string &str) const
-{
-   for (Integer i = TrueOfDateAxesParamCount; i < TODEqAxesParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - TrueOfDateAxesParamCount])
-         return i;
-   }
-   
-   return TrueOfDateAxes::GetParameterID(str);
-}
-*/
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Gmat::ParameterType TODEqAxes::GetParameterType(const Integer id) const
-{
-   if (id >= TrueOfDateAxesParamCount && id < TODEqAxesParamCount)
-      return PARAMETER_TYPE[id - TrueOfDateAxesParamCount];
-   
-   return TrueOfDateAxes::GetParameterType(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string TODEqAxes::GetParameterTypeString(const Integer id) const
-{
-   return TrueOfDateAxes::PARAM_TYPE_STRING[GetParameterType(id)];
-}
-*/
-
-
-//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 
@@ -247,7 +153,9 @@ GmatBase* TODEqAxes::Clone() const
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000EqAxes system.
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
  */
 //---------------------------------------------------------------------------
 void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
@@ -314,9 +222,7 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    rotMatrix.Set(res[0][0],res[0][1],res[0][2],
                  res[1][0],res[1][1],res[1][2],
                  res[2][0],res[2][1],res[2][2]); 
-   
-   //rotMatrix = PREC.Transpose() * NUT.Transpose();
-    
+
    // rotDotMatrix is still the default zero matrix 
    // (assume it is negligibly small)
 }

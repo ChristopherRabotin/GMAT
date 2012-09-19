@@ -1117,9 +1117,9 @@ void CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Real *inState,
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
-* This method returns a clone of the Planet.
+* This method returns a clone of the CoordinateSystem.
  *
- * @return clone of the Planet.
+ * @return clone of the CoordinateSystem.
  *
  */
 //------------------------------------------------------------------------------

@@ -28,33 +28,19 @@
 //---------------------------------
 // static data
 //---------------------------------
-
-/* placeholder - may be needed later
-const std::string
-MJ2000EcAxes::PARAMETER_TEXT[MJ2000EcAxesParamCount - InertialAxesParamCount] =
-{
-   "",
-};
-
-const Gmat::ParameterType
-MJ2000EcAxes::PARAMETER_TYPE[MJ2000EcAxesParamCount - InertialAxesParamCount] =
-{
-};
-*/
+// none
 
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  MJ2000EcAxes(const std::string &itsType,
-//               const std::string &itsName);
+//  MJ2000EcAxes(const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs base MJ2000EcAxes structures
  * (default constructor).
  *
- * @param itsType GMAT script string associated with this type of object.
  * @param itsName Optional name for the object.  Defaults to "".
  *
  */
@@ -99,8 +85,9 @@ const MJ2000EcAxes& MJ2000EcAxes::operator=(const MJ2000EcAxes &MJ2000)
    InertialAxes::operator=(MJ2000);   
    return *this;
 }
+
 //---------------------------------------------------------------------------
-//  ~MJ2000EcAxes(void)
+//  ~MJ2000EcAxes()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -116,6 +103,7 @@ MJ2000EcAxes::~MJ2000EcAxes()
 /**
  * Initialization method for this MJ2000EcAxes.
  *
+ * @return success flag
  */
 //---------------------------------------------------------------------------
 bool MJ2000EcAxes::Initialize()
@@ -131,6 +119,7 @@ bool MJ2000EcAxes::Initialize()
    rotMatrix(2,0) = 0.0;
    rotMatrix(2,1) = 0.397777155914121383;
    rotMatrix(2,2) = 0.917482062076895741;
+
    // rotDotMatrix is still the default zero matrix
    
    return true;
@@ -144,9 +133,9 @@ bool MJ2000EcAxes::Initialize()
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the Planet.
+ * This method returns a clone of the MJ2000EcAxes.
  *
- * @return clone of the Planet.
+ * @return clone of the MJ2000EcAxes.
  *
  */
 //------------------------------------------------------------------------------
@@ -154,87 +143,6 @@ GmatBase* MJ2000EcAxes::Clone() const
 {
    return (new MJ2000EcAxes(*this));
 }
-
-//------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string MJ2000EcAxes::GetParameterText(const Integer id) const
-{
-   if (id >= InertialAxesParamCount && id < MJ2000EcAxesParamCount)
-      return PARAMETER_TEXT[id - InertialAxesParamCount];
-   return InertialAxes::GetParameterText(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Integer MJ2000EcAxes::GetParameterID(const std::string &str) const
-{
-   for (Integer i = InertialAxesParamCount; i < MJ2000EcAxesParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - InertialAxesParamCount])
-         return i;
-   }
-   
-   return InertialAxes::GetParameterID(str);
-}
-*/
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*Gmat::ParameterType MJ2000EcAxes::GetParameterType(const Integer id) const
-{
-   if (id >= InertialAxesParamCount && id < MJ2000EcAxesParamCount)
-      return PARAMETER_TYPE[id - InertialAxesParamCount];
-   
-   return InertialAxes::GetParameterType(id);
-}
-*/
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-/*std::string MJ2000EcAxes::GetParameterTypeString(const Integer id) const
-{
-   return InertialAxes::PARAM_TYPE_STRING[GetParameterType(id)];
-}
-*/
-
 
 //------------------------------------------------------------------------------
 // protected methods
@@ -248,7 +156,9 @@ GmatBase* MJ2000EcAxes::Clone() const
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000EqAxes system.
  *
- * @param atEpoch  epoch at which to compute the roration matrix
+ * @param atEpoch          epoch at which to compute the roration matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
  */
 //---------------------------------------------------------------------------
 void MJ2000EcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,

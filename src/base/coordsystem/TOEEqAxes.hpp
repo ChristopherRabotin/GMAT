@@ -51,16 +51,7 @@ public:
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
-   virtual GmatBase*       Clone(void) const;
-
-   // Parameter access methods - overridden from GmatBase
-   /* placeholder - may be needed later
-   virtual std::string     GetParameterText(const Integer id) const;     
-   virtual Integer         GetParameterID(const std::string &str) const; 
-   virtual Gmat::ParameterType
-                           GetParameterType(const Integer id) const;
-   virtual std::string     GetParameterTypeString(const Integer id) const;
-    */
+   virtual GmatBase*       Clone() const;
    
 protected:
 
@@ -69,15 +60,8 @@ protected:
       TOEEqAxesParamCount = InertialAxesParamCount,
    };
    
-   //static const std::string PARAMETER_TEXT[TOEEqAxesParamCount - 
-   //                                        InertialAxesParamCount];
-   
-   //static const Gmat::ParameterType PARAMETER_TYPE[TOEEqAxesParamCount - 
-   //                                                InertialAxesParamCount];
-   
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);
 
-   // no additional data at this time
 };
 #endif // TOEEqAxes_hpp
