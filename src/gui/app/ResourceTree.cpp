@@ -109,7 +109,7 @@
 #include "CoordSysCreateDialog.hpp"
 #include "RunScriptFolderDialog.hpp"
 #include "ViewTextDialog.hpp"
-#include "GmatFunction.hpp"           // for SetNewFunction()
+#include "Function.hpp"               // for SetNewFunction()
 #include "FileManager.hpp"            // for GetFullPathname()
 #include "FileUtil.hpp"               // for Compare()
 #include "GmatGlobal.hpp"             // for SetBatchMode()
@@ -1040,13 +1040,25 @@ void ResourceTree::AddDefaultResources()
       SetItemImage(mEventLocatorItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
                    wxTreeItemIcon_Expanded);
    }
-   //----- Functions
-   mFunctionItem =
-      AppendItem(resource, wxT("Functions"), GmatTree::RESOURCE_ICON_FOLDER,
-              -1, new GmatTreeItemData(wxT("Functions"), GmatTree::FUNCTION_FOLDER));
-   SetItemImage(mFunctionItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
-                wxTreeItemIcon_Expanded);
 
+   //----- Functions
+   functionTypes = theGuiInterpreter->GetListOfFactoryItems(Gmat::FUNCTION);
+   #ifdef DEBUG_FUNCTION
+      MessageInterface::ShowMessage("Found %d function types\n",
+            functionTypes.size());
+
+      MessageInterface::ShowMessage("Function types:\n");
+      for (UnsignedInt i = 0; i < functionTypes.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", functionTypes[i].c_str());
+   #endif
+   if (functionTypes.size() > 0)
+   {
+      mFunctionItem =
+         AppendItem(resource, wxT("Functions"), GmatTree::RESOURCE_ICON_FOLDER,
+                 -1, new GmatTreeItemData(wxT("Functions"), GmatTree::FUNCTION_FOLDER));
+      SetItemImage(mFunctionItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
+                   wxTreeItemIcon_Expanded);
+   }
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
    AddDefaultSpacecraft(mSpacecraftItem);
@@ -3430,7 +3442,7 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
          {
             obj = CreateObject("GmatFunction", name.c_str());
             if (obj)
-               ((GmatFunction *)(obj))->SetNewFunction(true);
+               ((Function *)(obj))->SetNewFunction(true);
          }
       }
    }
@@ -4915,13 +4927,25 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       break;
    case GmatTree::FUNCTION_FOLDER:
       {
-         if (GmatGlobal::Instance()->IsMatlabAvailable())
+         #ifdef DEBUG_FUNCTION
+            MessageInterface::ShowMessage("Function types:\n");
+            for (UnsignedInt i = 0; i < functionTypes.size(); ++i)
+               MessageInterface::ShowMessage("   %s\n", functionTypes[i].c_str());
+         #endif
+         if (find(functionTypes.begin(), functionTypes.end(), "MatlabFunction") !=
+               functionTypes.end())
+         {
             menu->Append(POPUP_ADD_MATLAB_FUNCTION, wxT("MATLAB Function"));
+         }
          
-         wxMenu *gfMenu = new wxMenu;
-         gfMenu->Append(POPUP_NEW_GMAT_FUNCTION, wxT("New"));
-         gfMenu->Append(POPUP_OPEN_GMAT_FUNCTION, wxT("Open"));
-         menu->Append(POPUP_ADD_GMAT_FUNCTION, wxT("GMAT Function"), gfMenu);
+         if (find(functionTypes.begin(), functionTypes.end(), "GmatFunction") !=
+               functionTypes.end())
+         {
+            wxMenu *gfMenu = new wxMenu;
+            gfMenu->Append(POPUP_NEW_GMAT_FUNCTION, wxT("New"));
+            gfMenu->Append(POPUP_OPEN_GMAT_FUNCTION, wxT("Open"));
+            menu->Append(POPUP_ADD_GMAT_FUNCTION, wxT("GMAT Function"), gfMenu);
+         }
          break;
       }
    case GmatTree::CELESTIAL_BODY:

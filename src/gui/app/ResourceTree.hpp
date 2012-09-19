@@ -109,6 +109,8 @@ protected:
    std::map<std::string, Gmat::ObjectType> nodeTypeMap;
    /// nodeId -> subtype mapping
    std::map<std::string, std::string> nodeSubtypeMap;
+   /// List of the function types supported, so they can move to plugins
+   StringArray functionTypes;
    
    /// Tree item icon Mapping for all object type names (for future use)
    //std::map<std::string, Integer> typeIconMap;

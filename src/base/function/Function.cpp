@@ -220,6 +220,41 @@ void Function::SetOutputTypes(WrapperTypeArray &outputTypes,
    outputColCounts = colCounts;   
 }
 
+//------------------------------------------------------------------------------
+// bool Function::IsNewFunction()
+//------------------------------------------------------------------------------
+/**
+ * Defines the interface that identifies new functions
+ *
+ * @return true if the function is treated as new, false if not
+ *
+ * @note The default implementation just returns true.  Classes (like
+ * GmatFunction) that need different behavior override this method to produce
+ * the desired behavior.
+ */
+//------------------------------------------------------------------------------
+bool Function::IsNewFunction()
+{
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// void SetNewFunction(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Defines the interface that is used to identify new functions.
+ *
+ * GmatFunctions use this interface to identify when a function is being loaded
+ * for the first time.
+ *
+ * @param flag true for new functions, false if not new
+ *
+ * @note This default implementation doesn't do anything.
+ */
+//------------------------------------------------------------------------------
+void Function::SetNewFunction(bool flag)
+{
+}
 
 //------------------------------------------------------------------------------
 // bool Initialize()  [default implementation]

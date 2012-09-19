@@ -23,7 +23,7 @@
 #define FunctionSetupPanel_hpp
 
 #include "GmatPanel.hpp"
-#include "GmatFunction.hpp"
+#include "Function.hpp"
 
 #ifdef __USE_STC_EDITOR__
 #include "Editor.hpp"
@@ -45,7 +45,7 @@ public:
 #endif
    
 private:
-   GmatFunction *theGmatFunction;
+   Function *theGmatFunction;
    wxString mFullFunctionPath;
    wxString mFunctionName;
    

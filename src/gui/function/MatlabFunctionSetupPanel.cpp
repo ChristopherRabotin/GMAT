@@ -49,7 +49,7 @@ END_EVENT_TABLE()
 MatlabFunctionSetupPanel::MatlabFunctionSetupPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent)
 {
-   theMatlabFunction = (MatlabFunction *)
+   theMatlabFunction = (Function *)
       theGuiInterpreter->GetConfiguredObject(name.c_str());
 
    Create();

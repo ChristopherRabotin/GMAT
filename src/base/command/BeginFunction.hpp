@@ -26,7 +26,7 @@
 
 
 #include "GmatCommand.hpp"
-#include "GmatFunction.hpp"
+#include "Function.hpp"
 
 
 
@@ -100,7 +100,7 @@ protected:
    /// Name of the function
    std::string          functionName;
    /// The actual GMAT function
-   GmatFunction         *gfun;
+   Function             *gfun;
    /// List of function parameters defined in the function file
    StringArray          inputs;
    /// List of output elements defined in the function file

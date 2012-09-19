@@ -47,6 +47,8 @@ public:
    virtual void         SetOutputTypes(WrapperTypeArray &outputTypes,
                                        IntegerArray &rowCounts,
                                        IntegerArray &colCounts);
+   virtual bool         IsNewFunction();
+   virtual void         SetNewFunction(bool flag);
    virtual bool         Initialize();
    virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize);
    virtual void         Finalize();

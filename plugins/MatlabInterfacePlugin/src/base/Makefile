@@ -60,9 +60,11 @@ OBJECTS = \
     factory/MatlabInterfaceFactory.o \
     factory/MatlabWorkspaceFactory.o \
     factory/CallMatlabFunctionFactory.o \
+    factory/MatlabFunctionFactory.o \
     interface/MatlabInterface.o \
     subscriber/MatlabWorkspace.o \
     command/CallMatlabFunction.o \
+    function/MatlabFunction.o \
 	 $(MEX_OBJECTS)
 
 ifeq ($(LINUX_MAC), 1)

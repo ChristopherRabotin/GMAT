@@ -702,7 +702,7 @@ bool BeginFunction::Initialize()
          "'; there is no GmatFunction object with that name.\n");
    }
    
-   gfun = (GmatFunction *) mapObj;
+   gfun = (Function *) mapObj;
 
    if (gfun->GetTypeName() != "GmatFunction")
       throw CommandException("Object type Error: The object named '" +
@@ -970,7 +970,7 @@ bool BeginFunction::Initialize()
             throw CommandException("The GmatFunction '" + functionName +
                "' references the function '" + funName +
                "', which cannot be found.");
-         GmatFunction *fun = (GmatFunction*) mapObj;
+         Function *fun = (Function*) mapObj;
          if (fun->GetTypeName() == "GmatFunction")
          {
 //            /// @todo Make the GmatFunction file name handling more robust

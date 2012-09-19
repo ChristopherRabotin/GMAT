@@ -23,7 +23,7 @@
 #define MatlabFunctionSetupPanel_hpp
 
 #include "GmatPanel.hpp"
-#include "MatlabFunction.hpp"
+#include "Function.hpp"
 
 class MatlabFunctionSetupPanel: public GmatPanel
 {
@@ -33,7 +33,7 @@ public:
     
 private:
 
-   MatlabFunction *theMatlabFunction;
+   Function *theMatlabFunction;
 
    wxStaticBoxSizer *mTopSizer;
    wxBoxSizer *mPageSizer;

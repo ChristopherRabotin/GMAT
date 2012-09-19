@@ -24,7 +24,7 @@
 #include "SandboxException.hpp"
 #include "Parameter.hpp"
 #include "FiniteThrust.hpp"
-#include "GmatFunction.hpp"
+#include "Function.hpp"
 #include "CallFunction.hpp"
 #include "Assignment.hpp"
 #include "BranchCommand.hpp"

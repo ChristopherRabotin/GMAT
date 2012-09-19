@@ -72,7 +72,7 @@ FunctionSetupPanel::FunctionSetupPanel(wxWindow *parent, const wxString &name)
    mEditor = NULL;
    #endif
    
-   theGmatFunction = (GmatFunction *)
+   theGmatFunction = (Function *)
       theGuiInterpreter->GetConfiguredObject(name.c_str());
    
    Create();

@@ -62,7 +62,8 @@ all:
 	cd ../../plugins/CInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT); \
 	cd ../../plugins/EphemPropagatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT); \
 	cd ../../plugins/EventLocatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT); \
-	cd ../../plugins/ExtraPropagatorsPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd ../../plugins/ExtraPropagatorsPlugin; make all BUILD_64BIT=$(BUILD_64BIT); \
+	cd ../../plugins/GmatFunctionPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	
 rebuild: 
 	cd src; make -f MakeGmat.eclipse clean BUILD_64BIT=$(BUILD_64BIT); \
@@ -72,7 +73,8 @@ rebuild:
 	cd ../../plugins/CInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT); \
 	cd ../../plugins/EphemPropagatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT); \
 	cd ../../plugins/EventLocatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT); \
-	cd ../../plugins/ExtraPropagatorsPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd ../../plugins/ExtraPropagatorsPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT); \
+	cd ../../plugins/GmatFunctionPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	
 clean:
 	cd src; make -f MakeGmat.eclipse clean BUILD_64BIT=$(BUILD_64BIT); \
@@ -81,7 +83,8 @@ clean:
 	cd ../../plugins/CInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT); \
 	cd ../../plugins/EphemPropagatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT); \
 	cd ../../plugins/EventLocatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT); \
-	cd ../../plugins/ExtraPropagatorsPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd ../../plugins/ExtraPropagatorsPlugin; make clean BUILD_64BIT=$(BUILD_64BIT); \
+	cd ../../plugins/GmatFunctionPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 
 endif
 

@@ -284,7 +284,6 @@ OBJECTS = \
     factory/FactoryManager.o \
     factory/Factory.o \
     factory/ODEModelFactory.o \
-    factory/FunctionFactory.o \
     factory/HardwareFactory.o \
     factory/InterfaceFactory.o \
     factory/MathFactory.o \
@@ -324,8 +323,6 @@ OBJECTS = \
     function/Function.o \
     function/FunctionException.o \
     function/FunctionManager.o \
-    function/GmatFunction.o \
-    function/MatlabFunction.o \
     hardware/FuelTank.o \
     hardware/HardwareException.o \
     hardware/Hardware.o \

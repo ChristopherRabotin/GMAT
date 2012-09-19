@@ -37,7 +37,7 @@
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "Burn.hpp"
-#include "GmatFunction.hpp"
+#include "Function.hpp"
 #include "ObjectInitializer.hpp"
 #include "EventLocator.hpp"
 

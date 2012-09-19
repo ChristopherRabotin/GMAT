@@ -37,7 +37,7 @@
 #include "CommandFactory.hpp"
 #include "CoordinateSystemFactory.hpp"
 #include "ODEModelFactory.hpp"
-#include "FunctionFactory.hpp"
+//#include "FunctionFactory.hpp"
 #include "HardwareFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
@@ -208,7 +208,7 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new CommandFactory());
       theFactoryManager->RegisterFactory(new CoordinateSystemFactory());
       theFactoryManager->RegisterFactory(new ODEModelFactory());
-      theFactoryManager->RegisterFactory(new FunctionFactory());
+//      theFactoryManager->RegisterFactory(new FunctionFactory());
       theFactoryManager->RegisterFactory(new HardwareFactory());
       theFactoryManager->RegisterFactory(new MathFactory());
       theFactoryManager->RegisterFactory(new ParameterFactory());
