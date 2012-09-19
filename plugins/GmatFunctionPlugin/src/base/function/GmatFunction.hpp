@@ -23,10 +23,11 @@
 #ifndef GmatFunction_hpp
 #define GmatFunction_hpp
 
+#include "GmatFunction_defs.hpp"
 #include "Function.hpp"
 #include "ObjectInitializer.hpp"
 
-class GMAT_API GmatFunction : public Function
+class GMATFUNCTION_API GmatFunction : public Function
 {
 public:
    GmatFunction(const std::string &nomme);
@@ -36,8 +37,8 @@ public:
    GmatFunction(const GmatFunction &copy);
    GmatFunction& operator=(const GmatFunction &right);
    
-   bool IsNewFunction();
-   void SetNewFunction(bool flag);
+   virtual bool IsNewFunction();
+   virtual void SetNewFunction(bool flag);
    
    // inherited from Function
    virtual bool         Initialize();

@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                              FunctionFactory
+//                              GmatFunctionFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -15,14 +15,13 @@
 // Created: 2004/9/22
 //
 /**
- * Implementation code for the FunctionFactory class, responsible for creating
- * Function objects.
+ * Implementation code for the GmatFunctionFactory class, responsible for creating
+ * GmatFunction objects.
  */
 //------------------------------------------------------------------------------
 
 
-#include "FunctionFactory.hpp"
-#include "MatlabFunction.hpp"
+#include "GmatFunctionFactory.hpp"
 #include "GmatFunction.hpp"
 
 //---------------------------------
@@ -38,12 +37,10 @@
  * @param <ofType> the Function object to create and return.
  */
 //------------------------------------------------------------------------------
-Function* FunctionFactory::CreateFunction(const std::string &ofType,
+Function* GmatFunctionFactory::CreateFunction(const std::string &ofType,
          const std::string &withName)
 {
-   if (ofType == "MatlabFunction")
-      return new MatlabFunction(withName);
-   else if (ofType == "GmatFunction")
+   if (ofType == "GmatFunction")
       return new GmatFunction(withName);
    // add more here .......
    else {
@@ -54,85 +51,83 @@ Function* FunctionFactory::CreateFunction(const std::string &ofType,
 
 
 //------------------------------------------------------------------------------
-//  FunctionFactory()
+//  GmatFunctionFactory()
 //------------------------------------------------------------------------------
 /**
- * This method creates an object of the class FunctionFactory.
+ * This method creates an object of the class GmatFunctionFactory.
  * (default constructor)
  *
  */
 //------------------------------------------------------------------------------
-FunctionFactory::FunctionFactory() :
+GmatFunctionFactory::GmatFunctionFactory() :
     Factory     (Gmat::FUNCTION)
 {
    if (creatables.empty())
    {
-      creatables.push_back("MatlabFunction");
       creatables.push_back("GmatFunction");
    }
 }
 
 //------------------------------------------------------------------------------
-//  FunctionFactory(StringArray createList)
+//  GmatFunctionFactory(StringArray createList)
 //------------------------------------------------------------------------------
 /**
- * This method creates an object of the class FunctionFactory.
+ * This method creates an object of the class GmatFunctionFactory.
  *
  * @param <createList> list of creatable Function objects
  *
  */
 //------------------------------------------------------------------------------
-FunctionFactory::FunctionFactory(StringArray createList) :
+GmatFunctionFactory::GmatFunctionFactory(StringArray createList) :
     Factory     (createList, Gmat::FUNCTION)
 {
 }
 
 //------------------------------------------------------------------------------
-//  FunctionFactory(const FunctionFactory& fact)
+//  GmatFunctionFactory(const GmatFunctionFactory& fact)
 //------------------------------------------------------------------------------
 /**
-   * This method creates an object of the class FunctionFactory (called by
+   * This method creates an object of the class GmatFunctionFactory (called by
    * copy constructors of derived classes).  (copy constructor)
    *
    * @param <fact> the factory object to copy to "this" factory.
    */
 //------------------------------------------------------------------------------
-FunctionFactory::FunctionFactory(const FunctionFactory& fact) :
+GmatFunctionFactory::GmatFunctionFactory(const GmatFunctionFactory& fact) :
     Factory     (fact)
 {
    if (creatables.empty())
    {
-      creatables.push_back("MatlabFunction");
       creatables.push_back("GmatFunction");
    }
 }
 
 //------------------------------------------------------------------------------
-//  FunctionFactory& operator= (const FunctionFactory& fact)
+//  GmatFunctionFactory& operator= (const GmatFunctionFactory& fact)
 //------------------------------------------------------------------------------
 /**
-   * Assignment operator for the FunctionFactory base class.
+   * Assignment operator for the GmatFunctionFactory base class.
    *
-   * @param <fact> the FunctionFactory object whose data to assign to "this" factory.
+   * @param <fact> the GmatFunctionFactory object whose data to assign to "this" factory.
    *
-   * @return "this" FunctionFactory with data of input factory fact.
+   * @return "this" GmatFunctionFactory with data of input factory fact.
    */
 //------------------------------------------------------------------------------
-FunctionFactory& FunctionFactory::operator=(const FunctionFactory& fact)
+GmatFunctionFactory& GmatFunctionFactory::operator=(const GmatFunctionFactory& fact)
 {
    Factory::operator=(fact);
    return *this;
 }
 
 //------------------------------------------------------------------------------
-// ~FunctionFactory()
+// ~GmatFunctionFactory()
 //------------------------------------------------------------------------------
 /**
-   * Destructor for the FunctionFactory class.
+   * Destructor for the GmatFunctionFactory class.
    *
    */
 //------------------------------------------------------------------------------
-FunctionFactory::~FunctionFactory()
+GmatFunctionFactory::~GmatFunctionFactory()
 {
    // deletes handled by Factory destructor
 }

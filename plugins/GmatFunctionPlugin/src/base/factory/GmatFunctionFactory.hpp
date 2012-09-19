@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                              FunctionFactory
+//                              GmatFunctionFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -15,30 +15,31 @@
 // Created: 2004/9/22
 //
 /**
- * Implementation code for the FunctionFactory class, responsible for creating
- * Function objects.
+ * Implementation code for the GmatFunctionFactory class, responsible for creating
+ * GmatFunction objects.
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef FunctionFactory_hpp
-#define FunctionFactory_hpp
+#ifndef GmatFunctionFactory_hpp
+#define GmatFunctionFactory_hpp
 
+#include "GmatFunction_defs.hpp"
 #include "Factory.hpp"
 #include "Function.hpp"
 
-class GMAT_API FunctionFactory : public Factory
+class GMATFUNCTION_API GmatFunctionFactory : public Factory
 {
 public:
    Function* CreateFunction(const std::string &ofType, const std::string &withName = "");
 
-   FunctionFactory();
-   virtual ~FunctionFactory();
-   FunctionFactory(StringArray createList);
-   FunctionFactory(const FunctionFactory& fact);
-   FunctionFactory& operator= (const FunctionFactory& fact);
+   GmatFunctionFactory();
+   virtual ~GmatFunctionFactory();
+   GmatFunctionFactory(StringArray createList);
+   GmatFunctionFactory(const GmatFunctionFactory& fact);
+   GmatFunctionFactory& operator= (const GmatFunctionFactory& fact);
 
 };
 
 
-#endif // FunctionFactory_hpp
+#endif // GmatFunctionFactory_hpp
