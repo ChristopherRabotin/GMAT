@@ -191,8 +191,9 @@ public:
    void OnMatlabServerStart(wxCommandEvent& event);
    void OnMatlabServerStop(wxCommandEvent& event);
    
-   void OnFileCompareNumeric(wxCommandEvent& event);
-   void OnFileCompareText(wxCommandEvent& event);
+   void OnFileCompareNumericColumns(wxCommandEvent& event);
+   void OnFileCompareTextLines(wxCommandEvent& event);
+   void OnFileCompareNumericLines(wxCommandEvent& event);
    void OnGenerateTextEphemFile(wxCommandEvent& event);
    
    void OnSashDrag(wxSashEvent &event);
@@ -287,6 +288,11 @@ private:
    
    void ComputeAnimationSpeed(Integer &frameInc, Integer &updateIntervalInMilSec,
                               bool slower);
+   
+   void CompareFiles(Integer compareType);
+   void GetBaseFilesToCompare(Integer compareType, const wxString &baseDir,
+                              const wxString &basePrefix, wxArrayString &baseFileNameArray,
+                              wxArrayString &noPrefixNameArray);
    
    // IDs for the controls
    enum

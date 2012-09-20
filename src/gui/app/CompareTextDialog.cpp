@@ -116,7 +116,7 @@ void CompareTextDialog::Create()
                     wxDefaultPosition, wxSize(60,20), 0);
    
    wxStaticText *numFilesBaseDirLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script, .eph):"),
+      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script, .eph, .truth):"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mNumFilesInBaseDirTextCtrl =
@@ -172,7 +172,7 @@ void CompareTextDialog::Create()
                     wxDefaultPosition, wxSize(60,20), 0);
    
    wxStaticText *numFilesInCompareDirLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script, .eph):"),
+      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script, .eph, .truth):"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mNumFilesInCompareDirTextCtrl =
@@ -556,7 +556,7 @@ wxArrayString CompareTextDialog::GetFilenames(const wxString &dirname,
    {
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script") ||
-          filename.Contains(".eph"))
+          filename.Contains(".eph") || filename.Contains(".truth"))
       {
          // if it has prefix
          if (filename.Left(prefixLen) == prefix)

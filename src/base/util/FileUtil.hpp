@@ -54,33 +54,54 @@ namespace GmatFileUtil
                              IntegerArray &outputRows, IntegerArray &outputCols);
    
    StringArray GMAT_API GetFileListFromDirectory(const std::string &dirName,
-                                        bool addPath = false);
+                                                 bool addPath = false);
    StringArray GMAT_API GetTextLines(const std::string &fileName);
+
+   bool                 PrepareCompare(Integer numDirsToCompare,
+                           const std::string &basefilename,
+                           const std::string &filename1,
+                           const std::string &filename2,
+                           const std::string &filename3,
+                           std::ifstream &baseIn, std::ifstream &in1,
+                           std::ifstream &in2, std::ifstream &in3);
+   
+   bool GMAT_API        CompareLines(const std::string &line1,
+                           const std::string &line2, Real &diff,
+                           Real tol = CompareAbsTol);
    
    StringArray GMAT_API &Compare(const std::string &filename1,
-                        const std::string &filename2,
-                        const StringArray &colTitles,
-                        Real tol = CompareAbsTol);
+                           const std::string &filename2,
+                           const StringArray &colTitles,
+                           Real tol = CompareAbsTol);
    
    StringArray GMAT_API &Compare(Integer numDirsToCompare,
-                        const std::string &basefilename,
-                        const std::string &filename1,
-                        const std::string &filename2,
-                        const std::string &filename3,
-                        const StringArray &colTitles,
-                        Real tol = CompareAbsTol);
+                           const std::string &basefilename,
+                           const std::string &filename1,
+                           const std::string &filename2,
+                           const std::string &filename3,
+                           const StringArray &colTitles,
+                           Real tol = CompareAbsTol);
    
-   StringArray GMAT_API &CompareLines(Integer numDirsToCompare,
-                             const std::string &basefilename,
-                             const std::string &filename1,
-                             const std::string &filename2,
-                             const std::string &filename3,
-                             int &file1DiffCount, int &file2DiffCount,
-                             int &file3DiffCount);
+   StringArray GMAT_API &CompareTextLines(Integer numDirsToCompare,
+                           const std::string &basefilename,
+                           const std::string &filename1,
+                           const std::string &filename2,
+                           const std::string &filename3,
+                           int &file1DiffCount, int &file2DiffCount,
+                           int &file3DiffCount);
+   
+   StringArray GMAT_API &CompareNumericLines(Integer numDirsToCompare,
+                           const std::string &basefilename,
+                           const std::string &filename1,
+                           const std::string &filename2,
+                           const std::string &filename3,
+                           int &file1DiffCount, int &file2DiffCount,
+                           int &file3DiffCount, Real tol = CompareAbsTol);
    
    bool GMAT_API SkipHeaderLines(std::ifstream &in, StringArray &tokens);
    
    static StringArray textBuffer;
+   
 }
 
 #endif // FileUtil_hpp

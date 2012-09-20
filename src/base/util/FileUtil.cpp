@@ -1132,6 +1132,152 @@ StringArray GmatFileUtil::GetTextLines(const std::string &fileName)
 
 
 //------------------------------------------------------------------------------
+// bool GmatFileUtil::PrepareCompare(std::ifstream &baseIn, std::ifstream &in1,
+//                                   std::ifstream &in2, std::ifstream &in3)
+//------------------------------------------------------------------------------
+/**
+ * Opens files for comparison. If the same file extention not found for in1, in2,
+ * and in3, it will try open with extension .truth.
+ *
+ * @return  returns true if all files open successfully.
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
+                                  const std::string &basefilename,
+                                  const std::string &filename1,
+                                  const std::string &filename2,
+                                  const std::string &filename3,
+                                  std::ifstream &baseIn, std::ifstream &in1,
+                                  std::ifstream &in2, std::ifstream &in3)
+{
+   textBuffer.clear();
+   textBuffer.push_back("\n======================================== Compare Utility\n");
+   textBuffer.push_back("basefile =" + basefilename + "\n");
+   
+   textBuffer.push_back("filename1=" + filename1 + "\n");
+   
+   if (numDirsToCompare >= 2)
+      textBuffer.push_back("filename2=" + filename2 + "\n");
+   
+   if (numDirsToCompare >= 3)
+      textBuffer.push_back("filename3=" + filename3 + "\n");
+   
+   #if DBGLVL_COMPARE_REPORT
+   MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
+   MessageInterface::ShowMessage("numDirsToCompare=%d\n", numDirsToCompare);
+   MessageInterface::ShowMessage("basefile =%s\n", basefilename.c_str());
+   MessageInterface::ShowMessage("filename1=%s\nfilename2=%s\nfilename3=%s\n",
+                                 filename1.c_str(), filename2.c_str(), filename3.c_str());
+   #endif
+   
+   baseIn.open(basefilename.c_str());
+   in1.open(filename1.c_str());
+   in2.open(filename2.c_str());
+   in3.open(filename3.c_str());
+   std::string truthFile;
+   
+   if (!in1 && filename1 != "")
+   {
+      truthFile = filename1.substr(0, filename1.find("."));
+      truthFile = truthFile + ".truth";
+      in1.open(truthFile.c_str());
+      if (in1)
+         textBuffer.push_back("new filename1=" + truthFile + "\n");
+   }
+   
+   if (!in2 && filename2 != "")
+   {
+      truthFile = filename2.substr(0, filename2.find("."));
+      truthFile = truthFile + ".truth";
+      in2.open(truthFile.c_str());
+      if (in2)
+         textBuffer.push_back("new filename2=" + truthFile + "\n");
+   }
+   
+   if (!in3 && filename3 != "")
+   {
+      truthFile = filename3.substr(0, filename3.find("."));
+      truthFile = truthFile + ".truth";
+      in3.open(truthFile.c_str());
+      if (in3)
+         textBuffer.push_back("new filename3=" + truthFile + "\n");
+   }
+   
+   if (!baseIn)
+   {
+      textBuffer.push_back("Cannot open base file: " +  basefilename + "\n");
+      return false;
+   }
+   
+   if (!in1)
+   {
+      textBuffer.push_back("Cannot open first file: " + filename1 + "\n");
+      return false;
+   }
+   
+   if (numDirsToCompare >= 2)
+      if (!in2)
+      {
+         textBuffer.push_back("Cannot open second file: " + filename2 + "\n");
+         return false;
+      }
+   
+   if (numDirsToCompare >= 3)
+      if (!in3)
+      {
+         textBuffer.push_back("Cannot open third file: " + filename3 + "\n");
+         return false;
+      }
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CompareLines(const std::string &line1, const std::string &line2, ...)
+//------------------------------------------------------------------------------
+/**
+ * Compares numeric values in lines. It ignores strings embeded in the lines.
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::CompareLines(const std::string &line1, const std::string &line2,
+                                Real &diff, Real tol)
+{
+   StringArray items1 = GmatStringUtil::SeparateBy(line1, " ,", true);
+   StringArray items2 = GmatStringUtil::SeparateBy(line2, " ,", true);
+   std::string item1, item2;
+   Integer size1 = items1.size();
+   Integer size2 = items2.size();
+   Real real1, real2;
+   Real prevDiff = 0.0;
+   diff = 999.999;
+   
+   if (size1 != size2)
+      return false;
+   
+   for (Integer i = 0; i < size1; i++)
+   {
+      item1 = items1[i];
+      item2 = items2[i];
+      if (GmatStringUtil::ToReal(item1, real1) && GmatStringUtil::ToReal(item2, real2))
+      {
+         diff = real1 - real2;
+         if (diff > tol)
+            return false;
+         else
+         {
+            if (diff > prevDiff)
+               prevDiff = diff;
+         }
+      }
+   }
+   
+   diff = prevDiff;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // StringArray& Compare(const std::string &filename1, const std::string &filename2,
 //                      Real tol = 1.0e-4)
 //------------------------------------------------------------------------------
@@ -1399,57 +1545,18 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
                                    const std::string &filename1, const std::string &filename2,
                                    const std::string &filename3, const StringArray &colTitles,
                                    Real tol)
-{
-   textBuffer.clear();
-   textBuffer.push_back("\n======================================== Compare Utility\n");
-   textBuffer.push_back("basefile =" + basefilename + "\n");
-
-   textBuffer.push_back("filename1=" + filename1 + "\n");
-   textBuffer.push_back("filename2=" + filename2 + "\n");
+{   
+   std::ifstream baseIn;
+   std::ifstream in1;
+   std::ifstream in2;
+   std::ifstream in3;
    
-   if (numDirsToCompare == 3)
-      textBuffer.push_back("filename3=" + filename3 + "\n");
-
-   #if DBGLVL_COMPARE_REPORT
-   MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
-   MessageInterface::ShowMessage("numDirsToCompare=%3\n", numDirsToCompare);
-   MessageInterface::ShowMessage("basefile =%s\n", basefilename.c_str());
-   MessageInterface::ShowMessage("filename1=%s\nfilename2=%s\nfilename3=%s\n",
-                                 filename1.c_str(), filename2.c_str(), filename3.c_str());
-   #endif
+   bool ok = PrepareCompare(numDirsToCompare, basefilename, filename1,
+                            filename2, filename3, baseIn, in1, in2, in3);
    
-   // open base file
-   std::ifstream baseIn(basefilename.c_str());
-
-   // open compare files
-   std::ifstream in1(filename1.c_str());
-   std::ifstream in2(filename2.c_str());
-   std::ifstream in3(filename3.c_str());
-   
-   if (!baseIn)
-   {
-      textBuffer.push_back("Cannot open base file: " +  basefilename + "\n\n");
+   if (!ok)
       return textBuffer;
-   }
    
-   if (!in1)
-   {
-      textBuffer.push_back("Cannot open first file: " + filename1 + "\n\n");
-      return textBuffer;
-   }
-   
-   if (!in2)
-   {
-      textBuffer.push_back("Cannot open second file: " + filename2 + "\n\n");
-      return textBuffer;
-   }
-
-   if (numDirsToCompare == 3)
-      if (!in3)
-      {
-         textBuffer.push_back("Cannot open third file: " + filename3 + "\n\n");
-         return textBuffer;
-      }
 
    
    char buffer[BUFFER_SIZE];
@@ -1754,10 +1861,9 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    
    
 //------------------------------------------------------------------------------
-// StringArray& Compare(Integer numDirsToCompare, const std::string &basefilename,
-//                      const std::string &filename1, const std::string &filename2,
+// StringArray& CompareTextLines(Integer numDirsToCompare, ...)
 //------------------------------------------------------------------------------
-StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
+StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
                                         const std::string &basefilename,
                                         const std::string &filename1,
                                         const std::string &filename2,
@@ -1765,60 +1871,17 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
                                         int &file1DiffCount, int &file2DiffCount,
                                         int &file3DiffCount)
 {
-   textBuffer.clear();
-   textBuffer.push_back("\n======================================== Compare Utility\n");
-   textBuffer.push_back("basefile =" + basefilename + "\n");
+   std::ifstream baseIn;
+   std::ifstream in1;
+   std::ifstream in2;
+   std::ifstream in3;
    
-   textBuffer.push_back("filename1=" + filename1 + "\n");
+   bool ok = PrepareCompare(numDirsToCompare, basefilename, filename1,
+                            filename2, filename3, baseIn, in1, in2, in3);
    
-   if (numDirsToCompare >= 2)
-      textBuffer.push_back("filename2=" + filename2 + "\n");
-   
-   if (numDirsToCompare >= 3)
-      textBuffer.push_back("filename3=" + filename3 + "\n");
-   
-   #if DBGLVL_COMPARE_REPORT
-   MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
-   MessageInterface::ShowMessage("numDirsToCompare=%3\n", numDirsToCompare);
-   MessageInterface::ShowMessage("basefile =%s\n", basefilename.c_str());
-   MessageInterface::ShowMessage("filename1=%s\nfilename2=%s\nfilename3=%s\n",
-                                 filename1.c_str(), filename2.c_str(), filename3.c_str());
-   #endif
-   
-   // open base file
-   std::ifstream baseIn(basefilename.c_str());
-
-   // open compare files
-   std::ifstream in1(filename1.c_str());
-   std::ifstream in2(filename2.c_str());
-   std::ifstream in3(filename3.c_str());
-   
-   if (!baseIn)
-   {
-      textBuffer.push_back("Cannot open base file: " +  basefilename + "\n");
+   if (!ok)
       return textBuffer;
-   }
    
-   if (!in1)
-   {
-      textBuffer.push_back("Cannot open first file: " + filename1 + "\n");
-      return textBuffer;
-   }
-   
-   if (numDirsToCompare >= 2)
-      if (!in2)
-      {
-         textBuffer.push_back("Cannot open second file: " + filename2 + "\n");
-         return textBuffer;
-      }
-   
-   if (numDirsToCompare >= 3)
-      if (!in3)
-      {
-         textBuffer.push_back("Cannot open third file: " + filename3 + "\n");
-         return textBuffer;
-      }
-
    
    char buffer[BUFFER_SIZE];
    std::string line0, line1, line2, line3;
@@ -1965,8 +2028,186 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    
    return textBuffer;
 }
+
+
+//------------------------------------------------------------------------------
+// StringArray &CompareNumericLines(Integer numDirsToCompare, ... )
+//------------------------------------------------------------------------------
+StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
+                                               const std::string &basefilename,
+                                               const std::string &filename1,
+                                               const std::string &filename2,
+                                               const std::string &filename3,
+                                               int &file1DiffCount, int &file2DiffCount,
+                                               int &file3DiffCount, Real tol)
+{
+   std::ifstream baseIn;
+   std::ifstream in1;
+   std::ifstream in2;
+   std::ifstream in3;
+   
+   bool ok = PrepareCompare(numDirsToCompare, basefilename, filename1,
+                            filename2, filename3, baseIn, in1, in2, in3);
+   
+   if (!ok)
+      return textBuffer;
    
    
+   
+   // Now compare numeric lines
+   char buffer[BUFFER_SIZE];
+   std::string line0, line1, line2, line3;
+   file1DiffCount = 0;
+   file2DiffCount = 0;
+   file3DiffCount = 0;
+   int count = 1;
+   std::stringstream diffLines1("");
+   std::stringstream diffLines2("");
+   std::stringstream diffLines3("");
+   Real diff = 999.999;
+   
+   //------------------------------------------
+   // now start compare
+   //------------------------------------------
+   while (!baseIn.eof() && !in1.eof())
+   {
+      if (numDirsToCompare >= 2)
+         if (in2.eof())
+            break;
+      
+      if (numDirsToCompare >= 3)
+         if (in3.eof())
+            break;
+      
+      count++;
+      
+      #if DBGLVL_COMPARE_REPORT > 1
+      MessageInterface::ShowMessage("============================== line # = %d\n", count);
+      #endif
+      
+      //----------------------------------------------------
+      // base file
+      //----------------------------------------------------
+      baseIn.getline(buffer, BUFFER_SIZE-1);
+      line0 = buffer;
+      
+      #if DBGLVL_COMPARE_REPORT > 2
+      MessageInterface::ShowMessage("===> base file: buffer = %s\n", buffer);
+      #endif
+      
+      //----------------------------------------------------
+      // file 1
+      //----------------------------------------------------
+      in1.getline(buffer, BUFFER_SIZE-1);
+      line1 = buffer;
+      
+      #if DBGLVL_COMPARE_REPORT > 2
+      MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
+      #endif
+      
+      if (!CompareLines(line0, line1, diff))
+      {
+         diffLines1 << " 0: " << line0 << "\n" << " 1: " << line1 << "\n";
+         file1DiffCount++;
+      }
+      
+      
+      //----------------------------------------------------
+      // file 2
+      //----------------------------------------------------      
+      if (numDirsToCompare >= 2)
+      {
+         in2.getline(buffer, BUFFER_SIZE-1);
+         line2 = buffer;
+      
+         #if DBGLVL_COMPARE_REPORT > 2
+         MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
+         #endif
+         
+         if (!CompareLines(line0, line2, diff))
+         {
+            diffLines2 << " 0: " << line0 << "\n" << " 2: " << line2 << "\n";
+            file2DiffCount++;
+         }
+      }
+
+      
+      //----------------------------------------------------
+      // file 3
+      //----------------------------------------------------      
+      if (numDirsToCompare >= 3)
+      {
+         in3.getline(buffer, BUFFER_SIZE-1);
+         line3 = buffer;
+      
+         #if DBGLVL_COMPARE_REPORT > 2
+         MessageInterface::ShowMessage("===> file 3: buffer = %s\n", buffer);
+         #endif
+         
+         if (!CompareLines(line0, line3, diff))
+         {
+            diffLines3 << " 0: " << line0 << "\n" << " 3: " << line3 << "\n";
+            file3DiffCount++;
+         }
+      }
+   }
+   
+   // report the difference summary
+   std::string outLine;
+   outLine = "Total lines compared: " + ToString(count) + "\n\n";
+   textBuffer.push_back(outLine);
+
+   #if DBGLVL_COMPARE_REPORT
+   MessageInterface::ShowMessage("%s", outLine.c_str());
+   #endif
+   
+   outLine = "File1 - Number of Lines different: " + ToString(file1DiffCount) + "\n";
+   textBuffer.push_back(outLine);
+   if (file1DiffCount > 0)
+      textBuffer.push_back(diffLines1.str());
+   
+   #if DBGLVL_COMPARE_REPORT
+   MessageInterface::ShowMessage("%s", outLine.c_str());
+   #endif
+   
+   if (numDirsToCompare >= 2)
+   {
+      outLine = "File2 - Number of Lines different: " + ToString(file2DiffCount) + "\n";
+      textBuffer.push_back(outLine);
+      if (file2DiffCount > 0)
+         textBuffer.push_back(diffLines2.str());
+      
+      #if DBGLVL_COMPARE_REPORT
+      MessageInterface::ShowMessage("%s", outLine.c_str());
+      #endif
+   }
+   
+   if (numDirsToCompare >= 3)
+   {
+      outLine = "File3 - Number of Lines different: " + ToString(file3DiffCount) + "\n";
+      textBuffer.push_back(outLine);
+      if (file3DiffCount > 0)
+         textBuffer.push_back(diffLines3.str());
+      
+      #if DBGLVL_COMPARE_REPORT
+      MessageInterface::ShowMessage("%s", outLine.c_str());
+      #endif
+   }
+
+
+
+
+   
+   textBuffer.push_back("\n");
+   
+   baseIn.close();
+   in1.close();
+   in2.close();
+   in3.close();
+   return textBuffer;
+}
+
+
 //------------------------------------------------------------------------------
 // bool SkipHeaderLines(ifstream &in, StringArray &tokens)
 //------------------------------------------------------------------------------
@@ -2046,3 +2287,5 @@ bool GmatFileUtil::SkipHeaderLines(std::ifstream &in, StringArray &tokens)
 
    return dataFound;
 }
+
+
