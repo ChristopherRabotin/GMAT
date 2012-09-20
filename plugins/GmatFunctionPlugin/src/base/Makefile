@@ -1,5 +1,5 @@
 # $Id$
-# makefile for the GMAT extra propagator Plugin
+# makefile for the GmatFunction Plugin
 # This is the src level makefile 
 #
 # This file builds the plug-in base code

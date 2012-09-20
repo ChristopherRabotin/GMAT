@@ -1,7 +1,7 @@
 # $Id$
 # GmatFunction makefile 
 #
-# This file calls make on the src folder.
+# This file calls make on the base folder.
 
 all: 
 	cd base; make all

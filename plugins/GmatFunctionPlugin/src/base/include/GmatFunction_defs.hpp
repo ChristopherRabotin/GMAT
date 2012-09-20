@@ -3,15 +3,16 @@
 //                 Gmat C Function Import/Export Definitions
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
-// ODTBX: Orbit Determination Toolbox
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
-// Developed jointly by NASA/GSFC, Emergent Space Technologies, Inc.
-// and Thinking Systems, Inc. under the FDSS contract, Task 28
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS
+// contract, task order 28.
 //
-// Author: Darrel J. Conway (Thinking Systems)
-// Created: 2011/03/22
+// Author: Darrel Conway (Thinking Systems)
+// Created: 2012/09/18
 //
 /**
  * Definition for library code interfaces.
