@@ -105,11 +105,15 @@ protected:
       ObjectReferencedAxesParamCount
    };
    
-   static const std::string PARAMETER_TEXT[ObjectReferencedAxesParamCount - 
-                                           DynamicAxesParamCount];
+   static const std::string         PARAMETER_TEXT[ObjectReferencedAxesParamCount -
+                                                   DynamicAxesParamCount];
    
    static const Gmat::ParameterType PARAMETER_TYPE[ObjectReferencedAxesParamCount - 
                                                    DynamicAxesParamCount];
+
+   static const Real                MAGNITUDE_TOL;
+   static const Real                ORTHONORMAL_TOL;
+
    std::string primaryName;
    std::string secondaryName;
    SpacePoint  *primary;
@@ -125,7 +129,6 @@ protected:
    // from AxisSystem
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);
-
 
 };
 #endif // ObjectReferencedAxes_hpp

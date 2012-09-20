@@ -23,25 +23,26 @@
 #include <stdio.h>
 #include "LagrangeInterpolator.hpp"
 #include "FileManager.hpp"
-//#include "MessageInterface.hpp"
 
-//---------------------------------
-// constant
-//---------------------------------
+//------------------------------------------------------------------------------
+// static data
+//------------------------------------------------------------------------------
 const Integer ICRFFile::MAX_TABLE_SIZE = 128;
 
-//---------------------------------
-// static data
-//---------------------------------
-ICRFFile* ICRFFile::instance = NULL;
+ICRFFile*     ICRFFile::instance       = NULL;
 
-
-//---------------------------------
+//------------------------------------------------------------------------------
 //  public methods
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // ICRFFile* Instance()
+//------------------------------------------------------------------------------
+/**
+ * Returns a pointer to the instance of the singleton.
+ *
+ * @return pointer to the instance
+ */
 //------------------------------------------------------------------------------
 ICRFFile* ICRFFile::Instance()
 {
@@ -51,9 +52,12 @@ ICRFFile* ICRFFile::Instance()
    return instance;
 }
 
-
 //------------------------------------------------------------------------------
-// ICRFFile* Initialize()
+// void Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Initializes the instance by reading data from the file.
+ */
 //------------------------------------------------------------------------------
 void ICRFFile::Initialize()
 {
@@ -61,10 +65,10 @@ void ICRFFile::Initialize()
 	AllocateArrays();
 
 	// Open IAU2000/2006 data file:
-    FileManager* thefile = FileManager::Instance();
-    std::string path = thefile->GetPathname(FileManager::ICRF_FILE);
-    std::string name = thefile->GetFilename(FileManager::ICRF_FILE);
-    icrfFileName = path+name;
+   FileManager* thefile = FileManager::Instance();
+   std::string path = thefile->GetPathname(FileManager::ICRF_FILE);
+   std::string name = thefile->GetFilename(FileManager::ICRF_FILE);
+   icrfFileName = path+name;
 	FILE* fpt = fopen(icrfFileName.c_str(), "r");
 
 	// Read ICRF Euler rotation vector from data file and store to buffer:
@@ -72,7 +76,8 @@ void ICRFFile::Initialize()
 	Real rotationvector[3];
 	int c;
 	Integer i;
-	for (i= 0; (c = fscanf(fpt, "%lf, %le, %le, %le\n",&t,&rotationvector[0],&rotationvector[1],&rotationvector[2])) != EOF; ++i)
+	for (i= 0; (c = fscanf(fpt, "%lf, %le, %le, %le\n",&t,
+	      &rotationvector[0],&rotationvector[1],&rotationvector[2])) != EOF; ++i)
 	{
 		// expend the buffer size when it has no room to contain data:
 		if (i >= tableSz)
@@ -103,20 +108,16 @@ void ICRFFile::Initialize()
 
 		for (Integer j = 0; j < dimension; ++j)
 			dependences[i][j] = rotationvector[j];
-
-//		MessageInterface::ShowMessage("index %d: epoch= %18.12f rotation vector = %18.12e    %18.12e    %18.12e\n",i,  t, rotationvector[0], rotationvector[1], rotationvector[2]);
-
 	}
 
-	this->pointsCount = i;
+	pointsCount = i;
 }
-
 
 //------------------------------------------------------------------------------
 // void Finalize()
 //------------------------------------------------------------------------------
 /*
- * Finalizes the system by closing opened file and deleting objects.
+ * Finalizes the system by closing an opened file and deleting objects.
  */
 //------------------------------------------------------------------------------
 void ICRFFile::Finalize()
@@ -124,39 +125,37 @@ void ICRFFile::Finalize()
    CleanupArrays();
 }
 
-
 //------------------------------------------------------------------------------
 // bool GetICRFRotationVector(Real ind, Real* icrfRotationVector, Integer dim,
-//       Integer order)
+//                            Integer order)
 //------------------------------------------------------------------------------
 /*
- * get ICRF Euler rotation vector for a given epoch
+ * Get ICRF Euler rotation vector for a given epoch
  *
- * @param <ind>  	epoch at which Euler rotation vector needed to specify
- * @param <dim>     dimension of dependent vector
- * @param <order>	interpolation order
- * @param <icrfRotationVector>		the array containing the result of Euler rotation vector
+ * @param <ind>                  epoch at which Euler rotation vector needed
+ * @param <icrfRotationVector>   the array containing the result of Euler
+ *                               rotation vector
+ * @param <dim>                  dimension of dependent vector
+ * @param <order>                interpolation order
  */
 //------------------------------------------------------------------------------
-bool ICRFFile::GetICRFRotationVector(Real ind, Real* icrfRotationVector, Integer dim, Integer order)
+bool ICRFFile::GetICRFRotationVector(Real ind,    Real* icrfRotationVector,
+                                     Integer dim, Integer order)
 {
 	// Verify the feasibility of interpolation:
 	if ((independence == NULL)||(pointsCount == 0))
 	{
-//		MessageInterface::PopupMessage(Gmat::ERROR_, "No data point is used for interpolation.");
 		throw GmatBaseException("No data point is used for interpolation.\n");
 	}
 	else
 	{
 		if((ind < independence[0])||(ind > independence[pointsCount-1]))
 		{
-//			MessageInterface::PopupMessage(Gmat::ERROR_, "The value of independent variable (%f)is out of range [%f, %f].", ind, independence[0], independence[pointsCount-1]);
 			throw GmatBaseException("The value of independent variable is out of range.\n");
 		}
 
 		if(order >= pointsCount)
 		{
-//			MessageInterface::PopupMessage(Gmat::ERROR_, "%d data points is not enough for interpolation. It needs to have at least %d data points.", pointsCount, order);
 			throw GmatBaseException("Number of data points is not enough for interpolation.\n");
 		}
 	}
@@ -199,104 +198,9 @@ bool ICRFFile::GetICRFRotationVector(Real ind, Real* icrfRotationVector, Integer
 }
 
 
-//---------------------------------
-//  private methods
-//---------------------------------
-
 //------------------------------------------------------------------------------
-//  ICRFFile(const std::string &fileName = "ICRF_Table.txt", const Integer
-//                 dim = 3);
-//------------------------------------------------------------------------------
-/**
- * Constructs ICRFFile object (default constructor).
- * 
- * @param <fileName>  Name of ICRF data file
- * @param <dim>       dimension of dependent vector
- */
-//------------------------------------------------------------------------------
-ICRFFile::ICRFFile(const std::string &fileName, Integer dim) :
-   icrfFileName		(fileName),
-   independence		(NULL),
-   dependences		(NULL),
-   dimension		(dim),
-   tableSz			(MAX_TABLE_SIZE),
-   pointsCount		(0),
-   isInitialized	(false)
-{
-}
-
-
-//------------------------------------------------------------------------------
-//  ~ICRFFile()
-//------------------------------------------------------------------------------
-/**
- * Destroys ICRFFile object (destructor).
- */
-//------------------------------------------------------------------------------
-ICRFFile::~ICRFFile()
-{
-   CleanupArrays();
-}
-
-
-//------------------------------------------------------------------------------
-//  ICRFFile(const ICRFFile &icrfFile)
-//------------------------------------------------------------------------------
-/**
- * Constructs ICRFFile object, based on another (copy constructor).
- * 
- * @param icrfFile The original that is being copied.
- */
-//------------------------------------------------------------------------------
-/*
-ICRFFile::ICRFFile(const ICRFFile &icrfFile) :
-   icrfFileName		(icrfFile.icrfFileName),
-   dimension		(icrfFile.dimension),
-   tableSz			(icrfFile.tableSz),
-   pointsCount		(icrfFile.pointsCount),
-   isInitialized	(icrfFile.isInitialized)
-{
-	// set values for independence and dependences arrays:
-	if (icrfFile.independence != NULL)
-		CopyArrays(icrfFile);
-}
-*/
-
-//------------------------------------------------------------------------------
-//  ICRFFile& operator=(const ICRFFile &irfFile)
-//------------------------------------------------------------------------------
-/**
- * Sets this ICRFFile object to match another (assignment operator).
- * 
- * @param icrfFile The original that is being copied.
- * 
- * @return A reference to the copy (aka *this).
- */
-//------------------------------------------------------------------------------
-/*
-const ICRFFile&
-ICRFFile::operator=(const ICRFFile &icrfFile)
-{
-   if (&icrfFile == this)
-      return *this;
-   
-   icrfFileName		= icrfFile.icrfFileName;
-   dimension		= icrfFile.dimension;
-   tableSz			= icrfFile.tableSz;
-   pointsCount		= icrfFile.pointsCount;
-   isInitialized	= icrfFile.isInitialized;
-
-   CopyArrays(icrfFile);
-      
-   return *this;
-}
-*/
-
-
-
-//---------------------------------
 //  protected methods
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  void AllocateArrays()
@@ -347,50 +251,41 @@ void ICRFFile::CleanupArrays()
    }
 }
 
+//------------------------------------------------------------------------------
+//  private methods
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  void CopyArraysContain(const IAUFile &iau)
+//  ICRFFile(const std::string &fileName = "ICRF_Table.txt",
+//           const Integer dim = 3);
 //------------------------------------------------------------------------------
 /**
- * Copies the ICRF buffer from one ICRFFile object to this one.
- * 
- * @param icrfFile The ICRFFile object that supplies the data copied to this one.
+ * Constructs ICRFFile object (default constructor).
+ *
+ * @param <fileName>  Name of ICRF data file
+ * @param <dim>       dimension of dependent vector
  */
 //------------------------------------------------------------------------------
-/*
-void ICRFFile::CopyArraysContent(const ICRFFile &icrfFile)
+ICRFFile::ICRFFile(const std::string &fileName, Integer dim) :
+   icrfFileName      (fileName),
+   independence      (NULL),
+   dependences       (NULL),
+   dimension         (dim),
+   tableSz           (MAX_TABLE_SIZE),
+   pointsCount       (0),
+   isInitialized     (false)
 {
-   // copy all contains of the array of independent variable:
-   memcpy(independence, icrfFile.independence, tableSz*sizeof(Real));
-
-   // copy all contains of the array of dependent variables:
-   memcpy(dependences, icrfFile.dependences, tableSz*sizeof(Real*));
-
-   Integer j;
-   for (j = 0; j < tableSz; ++j)
-      memcpy(dependences[j],  icrfFile.dependences[j], dimension*sizeof(Real));
 }
-*/
 
 //------------------------------------------------------------------------------
-//  void CopyArrays(const ICRFFile &ircfFile)
+//  ~ICRFFile()
 //------------------------------------------------------------------------------
 /**
- * Copies the ICRF buffer from one ICRFFile object to this one.
- * 
- * @param icrfFile The ICRFFile object that supplies the data copied to this one.
+ * Destroys ICRFFile object (destructor).
  */
 //------------------------------------------------------------------------------
-/*
-void ICRFFile::CopyArrays(const ICRFFile &icrfFile)
+ICRFFile::~ICRFFile()
 {
-   // clean up buffer:
    CleanupArrays();
-
-   // allocate buffer:
-   AllocateArrays();
-
-   // copy all contains:
-   CopyArraysContent(icrfFile);
 }
-*/
+

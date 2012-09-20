@@ -19,28 +19,31 @@
  */
 //------------------------------------------------------------------------------
 
-#include "IAUFile.hpp"
 #include <stdio.h>
+#include "IAUFile.hpp"
 #include "FileManager.hpp"
-//#include "MessageInterface.hpp"
+#include "LagrangeInterpolator.hpp"
 
-//---------------------------------
-// constant
-//---------------------------------
+//------------------------------------------------------------------------------
+// static data
+//------------------------------------------------------------------------------
 const Integer IAUFile::MAX_TABLE_SIZE = 128;
 
-//---------------------------------
-// static data
-//---------------------------------
-IAUFile* IAUFile::instance = NULL;
+IAUFile*      IAUFile::instance       = NULL;
 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 //  public methods
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // IAUFile* Instance()
+//------------------------------------------------------------------------------
+/**
+ * Returns a pointer to the instance of the singleton.
+ *
+ * @return pointer to the instance
+ */
 //------------------------------------------------------------------------------
 IAUFile* IAUFile::Instance()
 {
@@ -50,9 +53,12 @@ IAUFile* IAUFile::Instance()
    return instance;
 }
 
-
 //------------------------------------------------------------------------------
-// IAUFile* Initialize()
+// void Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Initializes the instance by reading data from the file.
+ */
 //------------------------------------------------------------------------------
 void IAUFile::Initialize()
 {
@@ -63,10 +69,10 @@ void IAUFile::Initialize()
 	AllocateArrays();
 
 	// Open IAU2000/2006 data file:
-    FileManager* thefile = FileManager::Instance();
-    std::string path = thefile->GetPathname(FileManager::IAUSOFA_FILE);
-    std::string name = thefile->GetFilename(FileManager::IAUSOFA_FILE);
-    iauFileName = path+name;
+   FileManager* thefile = FileManager::Instance();
+   std::string path = thefile->GetPathname(FileManager::IAUSOFA_FILE);
+   std::string name = thefile->GetFilename(FileManager::IAUSOFA_FILE);
+   iauFileName = path+name;
 	FILE* fpt = fopen(iauFileName.c_str(), "r");
 
 	// Read IAU2000/2006 data from data file and store to buffer:
@@ -105,12 +111,11 @@ void IAUFile::Initialize()
 
 		for (Integer j = 0; j < dimension; ++j)
 			dependences[i][j] = XYs[j];
-
 	}
 
 	fclose(fpt);
 
-	this->pointsCount = i;
+	pointsCount = i;  // why "this->"?
 }
 
 
@@ -118,7 +123,7 @@ void IAUFile::Initialize()
 // void Finalize()
 //------------------------------------------------------------------------------
 /*
- * Finalizes the system by closing opened file and deleting objects.
+ * Finalizes the system by closing the opened file and deleting objects.
  */
 //------------------------------------------------------------------------------
 void IAUFile::Finalize()
@@ -127,33 +132,40 @@ void IAUFile::Finalize()
 }
 
 
-#include "LagrangeInterpolator.hpp"
-// get IAU2000 data for a given independence variable:
+//------------------------------------------------------------------------------
+// bool GetIAUData(Real ind, Real* iau_data, Integer dim, Integer order)
+//------------------------------------------------------------------------------
+/*
+ * Gets IAU2000 data for a given independence variable.
+ *
+ * @param ind          ???
+ * @param iau_data     ???
+ * @param dim          dimension of ???
+ * @param order        ???
+ *
+ * @return success flag
+ */
+//------------------------------------------------------------------------------
 bool IAUFile::GetIAUData(Real ind, Real* iau_data, Integer dim, Integer order)
 {
-//	MessageInterface::ShowMessage("AIUFile::GetIAUData 1\n");
 	// Verify the feasibility of interpolation:
 	if ((independence == NULL)||(pointsCount == 0))
 	{
-//		MessageInterface::PopupMessage(Gmat::ERROR_, "No data point is used for interpolation.");
 		throw GmatBaseException("No data point is used for interpolation.\n");
 	}
 	else
 	{
 		if((ind < independence[0])||(ind > independence[pointsCount-1]))
 		{
-//			MessageInterface::PopupMessage(Gmat::ERROR_, "The value of independent variable (%f)is out of range [%f, %f].", ind, independence[0], independence[pointsCount-1]);
-			throw GmatBaseException("The value of independent variable is out of range.\n");
+			throw GmatBaseException("The value of an independent variable is out of range.\n");
 		}
 
 		if(order >= pointsCount)
 		{
-//			MessageInterface::PopupMessage(Gmat::ERROR_, "%d data points is not enough for interpolation. It needs to have at least %d data points.", pointsCount, order);
 			throw GmatBaseException("Number of data points is not enough for interpolation.\n");
 		}
 	}
 
-//	MessageInterface::ShowMessage("AIUFile::GetIAUData 2\n");
 	// Specify beginning index and ending index in order to run interpolation:
 	Real stepsize = 1.0;
 	Integer midpoint = (ind-independence[0])/stepsize;
@@ -161,33 +173,27 @@ bool IAUFile::GetIAUData(Real ind, Real* iau_data, Integer dim, Integer order)
 	Integer endIndex = ((pointsCount-1) < (beginIndex+order))? (pointsCount-1):(beginIndex+order);
 	beginIndex = (0 > (endIndex-order))? 0:(endIndex-order);
 
-//	MessageInterface::ShowMessage("AIUFile::GetIAUData 3\n");
 	// Run interpolation:
 	// create an interpolator:
 	LagrangeInterpolator* interpolator = new LagrangeInterpolator("", dim, order);
 
-//	MessageInterface::ShowMessage("AIUFile::GetIAUData 4\n");
 	// add data points in order to run interpolator:
 	for (Integer i= beginIndex; i <= endIndex; ++i)
 	{
 		interpolator->AddPoint(independence[i], dependences[i]);
 	}
 
-//	MessageInterface::ShowMessage("AIUFile::GetIAUData 5\n");
 	// run interpolator and get the result of dependent variables:
 	interpolator->SetForceInterpolation(true);
 	bool returnval = interpolator->Interpolate(ind, iau_data);
 	delete interpolator;
 
-//	MessageInterface::ShowMessage("AIUFile::GetIAUData 6\n");
 	return returnval;
 }
 
-
-
-//---------------------------------
+//------------------------------------------------------------------------------
 //  protected methods
-//---------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  void AllocateArrays()
@@ -198,7 +204,6 @@ bool IAUFile::GetIAUData(Real ind, Real* iau_data, Integer dim, Integer order)
 //------------------------------------------------------------------------------
 void IAUFile::AllocateArrays()
 {
-   
    independence = new Real[tableSz];
 
    dependences = new Real*[tableSz];
@@ -208,7 +213,6 @@ void IAUFile::AllocateArrays()
       dependences[i]  = new Real[dimension];
    }
 }
-
 
 //------------------------------------------------------------------------------
 //  void CleanupArrays()
@@ -233,62 +237,18 @@ void IAUFile::CleanupArrays()
 			  delete dependences[i];
 	  }
 
-	  delete dependences;
+     delete dependences;
 	  dependences = NULL;
    }
 }
 
+//------------------------------------------------------------------------------
+//  private methods
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  void CopyArraysContain(const IAUFile &iau)
-//------------------------------------------------------------------------------
-/**
- * Copies the IAU2000/2006 buffer from one IAUFile object to this one.
- * 
- * @param iau The IAUFile object that supplies the data copied to this one.
- */
-//------------------------------------------------------------------------------
-/*
-void IAUFile::CopyArraysContent(const IAUFile &iau)
-{
-   // copy all contains of the array of independent variable:
-   memcpy(independence, iau.independence, tableSz*sizeof(Real));
-
-   // copy all contains of the array of dependent variables:
-   memcpy(dependences, iau.dependences, tableSz*sizeof(Real*));
-
-   Integer j;
-   for (j = 0; j < tableSz; ++j)
-      memcpy(dependences[j],  iau.dependences[j], dimension*sizeof(Real));
-}
-*/
-
-//------------------------------------------------------------------------------
-//  void CopyArrays(const IAUFile &iau)
-//------------------------------------------------------------------------------
-/**
- * Copies the IAU2000/2006 buffer from one IAUFile object to this one.
- * 
- * @param iau The IAUFile object that supplies the data copied to this one.
- */
-//------------------------------------------------------------------------------
-/*
-void IAUFile::CopyArrays(const IAUFile &iau)
-{
-   // clean up buffer:
-   CleanupArrays();
-
-   // allocate buffer:
-   AllocateArrays();
-
-   // copy all contains:
-   CopyArraysContent(iau);
-}
-*/
-
-//------------------------------------------------------------------------------
-//  IAUFile(const std::string &fileName = "IAU_SOFA.DAT", const Integer
-//                 dim = 1);
+//  IAUFile(const std::string &fileName = "IAU_SOFA.DAT",
+//          const Integer     dim       = 1);
 //------------------------------------------------------------------------------
 /**
  * Constructs IAUFile object (default constructor).
@@ -298,13 +258,13 @@ void IAUFile::CopyArrays(const IAUFile &iau)
  */
 //------------------------------------------------------------------------------
 IAUFile::IAUFile(const std::string &fileName, Integer dim) :
-   iauFileName		(fileName),
-   independence		(NULL),
-   dependences		(NULL),
-   dimension		(dim),
-   tableSz			(MAX_TABLE_SIZE),
-   pointsCount		(0),
-   isInitialized	(false)
+   iauFileName    (fileName),
+   independence   (NULL),
+   dependences    (NULL),
+   dimension      (dim),
+   tableSz        (MAX_TABLE_SIZE),
+   pointsCount    (0),
+   isInitialized  (false)
 {
 }
 

@@ -19,7 +19,7 @@
  *
  * @note There are three data files currently needed:
  *    EOP file containing polar motion (x,y) and UT1-UTC offset
- *    coefficient file containing nutation and planetary coeffifients
+ *    coefficient files containing nutation and planetary coefficients
  */
 //------------------------------------------------------------------------------
 
@@ -52,37 +52,23 @@ public:
    // 3 are needed:
    //    leap second file (NOTE - this should be done in the utilities!!)
    //    EOP file containing polar motion (x,y) and UT1-UTC offset
-   //    coefficient file containing nutation and planetary coefficients
+   //    coefficient files containing nutation and planetary coefficients
    
    virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;
    virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
    virtual GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const;
    
-// method to initialize the data
+   // method to initialize the data
    virtual bool Initialize();
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
-   virtual GmatBase*       Clone(void) const;
-   // We need to override this method from CoordinateBase
+   virtual GmatBase*       Clone() const;
+
+   // We need to override this method from
    // to check for a CelestialBody origin only
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name = "");
-
-   // Parameter access methods - overridden from GmatBase
-   /*
-   virtual std::string     GetParameterText(const Integer id) const;     
-   virtual Integer         GetParameterID(const std::string &str) const; 
-   virtual Gmat::ParameterType
-                           GetParameterType(const Integer id) const;
-   virtual std::string     GetParameterTypeString(const Integer id) const;
-   virtual std::string     GetStringParameter(const Integer id) const;
-   virtual bool            SetStringParameter(const Integer id, 
-                                              const std::string &value);
-   virtual std::string     GetStringParameter(const std::string &label) const;
-   virtual bool            SetStringParameter(const std::string &label, 
-                                              const std::string &value);
-    */
 
 protected:
 
@@ -90,12 +76,6 @@ protected:
    {
       BodyFixedAxesParamCount = DynamicAxesParamCount,
    };
-   
-   //static const std::string PARAMETER_TEXT[BodyFixedAxesParamCount - 
-   //                                        DynamicAxesParamCount];
-   
-   //static const Gmat::ParameterType PARAMETER_TYPE[BodyFixedAxesParamCount - 
-   //                                                DynamicAxesParamCount];
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);

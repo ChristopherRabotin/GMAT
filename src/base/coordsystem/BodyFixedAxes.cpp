@@ -38,8 +38,8 @@
 #include "MessageInterface.hpp"
 #include "Attitude.hpp"
 
-using namespace GmatMathUtil;      // for trig functions, etc.
-using namespace GmatTimeConstants;      // for JD offsets, etc.
+using namespace GmatMathUtil;        // for trig functions, etc.
+using namespace GmatTimeConstants;   // for JD offsets, etc.
 
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_TIME_CALC
@@ -55,19 +55,10 @@ using namespace GmatTimeConstants;      // for JD offsets, etc.
 #endif
 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
-
-//const std::string
-//BodyFixedAxes::PARAMETER_TEXT[BodyFixedAxesParamCount - DynamicAxesParamCount] =
-//{
-//};
-//
-//const Gmat::ParameterType
-//BodyFixedAxes::PARAMETER_TYPE[BodyFixedAxesParamCount - DynamicAxesParamCount] =
-//{
-//};
+//------------------------------------------------------------------------------
+// none
 
 //------------------------------------------------------------------------------
 // public methods
@@ -84,12 +75,12 @@ using namespace GmatTimeConstants;      // for JD offsets, etc.
  */
 //------------------------------------------------------------------------------
 BodyFixedAxes::BodyFixedAxes(const std::string &itsName) :
-DynamicAxes("BodyFixed",itsName),
-de                       (NULL),
-prevEpoch                (0.0),
-prevUpdateInterval       (-99.9),
-prevOriginUpdateInterval (-99.9),
-prevLunaSrc              (Gmat::RotationDataSrcCount)
+   DynamicAxes("BodyFixed",itsName),
+   de                       (NULL),
+   prevEpoch                (0.0),
+   prevUpdateInterval       (-99.9),
+   prevOriginUpdateInterval (-99.9),
+   prevLunaSrc              (Gmat::RotationDataSrcCount)
 {
    objectTypeNames.push_back("BodyFixedAxes");
    parameterCount = BodyFixedAxesParamCount;
@@ -107,12 +98,12 @@ prevLunaSrc              (Gmat::RotationDataSrcCount)
  */
 //------------------------------------------------------------------------------
 BodyFixedAxes::BodyFixedAxes(const BodyFixedAxes &bfAxes) :
-DynamicAxes(bfAxes),
-de                       (NULL),
-prevEpoch                (bfAxes.prevEpoch),
-prevUpdateInterval       (bfAxes.prevUpdateInterval),
-prevOriginUpdateInterval (bfAxes.prevOriginUpdateInterval),
-prevLunaSrc              (bfAxes.prevLunaSrc)
+   DynamicAxes(bfAxes),
+   de                       (NULL),
+   prevEpoch                (bfAxes.prevEpoch),
+   prevUpdateInterval       (bfAxes.prevUpdateInterval),
+   prevOriginUpdateInterval (bfAxes.prevOriginUpdateInterval),
+   prevLunaSrc              (bfAxes.prevLunaSrc)
 {
    #ifdef DEBUG_BF_RECOMPUTE
       MessageInterface::ShowMessage("Constructing a new BFA (%p) from the old one (%p)\n",
@@ -149,7 +140,7 @@ const BodyFixedAxes& BodyFixedAxes::operator=(const BodyFixedAxes &bfAxes)
 
 
 //------------------------------------------------------------------------------
-//  ~BodyFixedAxes(void)
+//  ~BodyFixedAxes()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
@@ -159,18 +150,41 @@ BodyFixedAxes::~BodyFixedAxes()
 {
 }
 
-GmatCoordinate::ParameterUsage BodyFixedAxes::UsesEopFile(const std::string &forBaseSystem) const
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesEopFile(
+//                                 const std::string &forBaseSystem) const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage BodyFixedAxes::UsesEopFile(
+                               const std::string &forBaseSystem) const
 {
    if (forBaseSystem == baseSystem)
       return GmatCoordinate::REQUIRED;
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesItrfFile() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage BodyFixedAxes::UsesItrfFile() const
 {
    return GmatCoordinate::REQUIRED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage BodyFixedAxes::UsesNutationUpdateInterval() const
 {
    if (originName == SolarSystem::EARTH_NAME) 
@@ -185,6 +199,7 @@ GmatCoordinate::ParameterUsage BodyFixedAxes::UsesNutationUpdateInterval() const
 /**
  * Initialization method for this BodyFixedAxes.
  *
+ * @return success flag
  */
 //------------------------------------------------------------------------------
 bool BodyFixedAxes::Initialize()
@@ -196,7 +211,6 @@ bool BodyFixedAxes::Initialize()
       firstCallFired = false;
    #endif
    
-
    return true;
 }
 
@@ -208,9 +222,9 @@ bool BodyFixedAxes::Initialize()
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the Planet.
+ * This method returns a clone of the BodyFixedAxes.
  *
- * @return clone of the Planet.
+ * @return clone of the BodyFixedAxes.
  *
  */
 //------------------------------------------------------------------------------
@@ -226,7 +240,7 @@ GmatBase* BodyFixedAxes::Clone() const
 /**
  * This method sets a reference object for the BodyFixedAxes class.  This is
  * overridden from the CoordinateBase version, in order to make sure the origin
- * is a CelestialBody
+ * is a CelestialBody.
  *
  * @param obj   pointer to the reference object
  * @param type  type of the reference object
@@ -262,156 +276,6 @@ bool BodyFixedAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-//  std::string  GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter text, given the input parameter ID.
- *
- * @param id Id for the requested parameter text.
- *
- * @return parameter text for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//std::string BodyFixedAxes::GetParameterText(const Integer id) const
-//{
-//   if (id >= DynamicAxesParamCount && id < BodyFixedAxesParamCount)
-//      return PARAMETER_TEXT[id - DynamicAxesParamCount];
-//   return DynamicAxes::GetParameterText(id);
-//}
-
-//------------------------------------------------------------------------------
-//  Integer  GetParameterID(const std::string &str) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter ID, given the input parameter string.
- *
- * @param str string for the requested parameter.
- *
- * @return ID for the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//Integer BodyFixedAxes::GetParameterID(const std::string &str) const
-//{
-//   for (Integer i = DynamicAxesParamCount; i < BodyFixedAxesParamCount; i++)
-//   {
-//      if (str == PARAMETER_TEXT[i - DynamicAxesParamCount])
-//         return i;
-//   }
-//   
-//   return DynamicAxes::GetParameterID(str);
-//}
-
-//------------------------------------------------------------------------------
-//  Gmat::ParameterType  GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//Gmat::ParameterType BodyFixedAxes::GetParameterType(const Integer id) const
-//{
-//   if (id >= DynamicAxesParamCount && id < BodyFixedAxesParamCount)
-//      return PARAMETER_TYPE[id - DynamicAxesParamCount];
-//   
-//   return DynamicAxes::GetParameterType(id);
-//}
-
-//------------------------------------------------------------------------------
-//  std::string  GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the parameter type string, given the input parameter ID.
- *
- * @param id ID for the requested parameter.
- *
- * @return parameter type string of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//std::string BodyFixedAxes::GetParameterTypeString(const Integer id) const
-//{
-//   return DynamicAxes::PARAM_TYPE_STRING[GetParameterType(id)];
-//}
-
-//------------------------------------------------------------------------------
-//  std::string  GetStringParameter(const Integer id) const
-//------------------------------------------------------------------------------
-/**
-* This method returns the string parameter value, given the input
- * parameter ID.
- *
- * @param id  ID for the requested parameter.
- *
- * @return  string value of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-//std::string BodyFixedAxes::GetStringParameter(const Integer id) const
-//{
-//   return DynamicAxes::GetStringParameter(id);
-//}
-
-//------------------------------------------------------------------------------
-//  std::string  SetStringParameter(const Integer id, const std::string value)
-//------------------------------------------------------------------------------
-/**
-* This method sets the string parameter value, given the input
- * parameter ID.
- *
- * @param id     ID for the requested parameter.
- * @param value  string value for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//bool BodyFixedAxes::SetStringParameter(const Integer id, 
-//                                       const std::string &value)
-//{
-//   return DynamicAxes::SetStringParameter(id, value);
-//}
-
-//------------------------------------------------------------------------------
-// std::string GetStringParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-/**
-* Accessor method used to get a parameter value
- *
- * @param    label  label ID for the parameter
- *
- * @return the value of the parameter
- */
-//------------------------------------------------------------------------------
-//std::string BodyFixedAxes::GetStringParameter(const std::string &label) const
-//{
-//   return GetStringParameter(GetParameterID(label));
-//}
-
-//------------------------------------------------------------------------------
-// bool SetStringParameter(const std::string &label, const std::string &value)
-//------------------------------------------------------------------------------
-/**
-* Accessor method used to get a parameter value
- *
- * @param    label  Integer ID for the parameter
- * @param    value  The new value for the parameter
- */
-//------------------------------------------------------------------------------
-//bool BodyFixedAxes::SetStringParameter(const std::string &label,
-//                                        const std::string &value)
-//{
-//   return SetStringParameter(GetParameterID(label), value);
-//}
-
-
-//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 
@@ -423,11 +287,9 @@ bool BodyFixedAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000Eq system
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
- *
- * @note Code (for Earth) adapted from C code written by Steve Queen/ GSFC, 
- *       based on Vallado, pgs. 211- 227.  Equation references in parentheses
- *       will refer to those of the Vallado book.
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
  */
 //------------------------------------------------------------------------------
 void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
@@ -447,16 +309,6 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       MessageInterface::ShowMessage("Entering CalculateRotationMatrix on object %s (%p) of type %s, origin = %s\n",
             (coordName.c_str()), this, (GetTypeName()).c_str(), originName.c_str());
       MessageInterface::ShowMessage("     epoch = %12.10f, prevEpoch = %12.10f\n", theEpoch, prevEpoch);
-//      if (originName == SolarSystem::MOON_NAME)
-//         MessageInterface::ShowMessage("   Luna source = %d, prevLunaSrc = %d\n",
-//               (Integer) ((CelestialBody*)origin)->GetRotationDataSource(), (Integer) prevLunaSrc);
-//      if (originName == SolarSystem::EARTH_NAME)
-//      {
-//         MessageInterface::ShowMessage("   Earth interval = %12.10f, prevOriginUpdateInterval = %12.10f\n",
-//               ((Planet*) origin)->GetNutationUpdateInterval(), prevOriginUpdateInterval);
-//         MessageInterface::ShowMessage("    interval = %12.10f, prevUpdateInterval = %12.10f\n",
-//               updateInterval, prevUpdateInterval);
-//      }
    #endif
 
    // Code must check to see if we need to recompute.  Recomputation is only necessary
@@ -476,7 +328,6 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
          return;
       }
    
-
    // compute rotMatrix and rotDotMatrix
    if (originName == SolarSystem::EARTH_NAME)
    {
@@ -510,15 +361,9 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       Real cosEpsbar        = 0.0;
       Real cosAst           = 0.0;
       Real sinAst           = 0.0;
-      //Real x                = 0.0;
-      //Real y                = 0.0;
+
       // Convert to MJD UTC to use for polar motion  and LOD 
       // interpolations
-      
-      // 20.02.06 - arg: changed to use enum types instead of strings
-//      Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
-//                    "A1Mjd", "UtcMjd", JD_JAN_5_1941);
-
       Real mjdUTC = TimeConverterUtil::Convert(theEpoch,
                     TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
                     JD_JAN_5_1941);
@@ -528,30 +373,21 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
 
       // convert input time to UT1 for later use (for AST calculation)
-      // 20.02.06 - arg: changed to use enum types instead of strings
-//      Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
-//                    "A1Mjd", "Ut1Mjd", JD_JAN_5_1941);
-
       Real mjdUT1 = TimeConverterUtil::Convert(theEpoch,
                     TimeConverterUtil::A1MJD, TimeConverterUtil::UT1, 
                     JD_JAN_5_1941);
       
       // Compute elapsed Julian centuries (UT1)
-      //Real tUT1     = (jdUT1 - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
       Real tDiff = JD_JAN_5_1941 - JD_OF_J2000;
       Real tUT1 = (mjdUT1 + tDiff) / DAYS_PER_JULIAN_CENTURY;
        
       // convert input A1 MJD to TT MJD (for most calculations)
-      // 20.02.06 - arg: changed to use enum types instead of strings
-//      Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-//                   "A1Mjd", "TtMjd", JD_JAN_5_1941);      
       Real mjdTT = TimeConverterUtil::Convert(theEpoch,
                    TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                    JD_JAN_5_1941);      
       Real jdTT    = mjdTT + JD_JAN_5_1941; // right? 
       // Compute Julian centuries of TDB from the base epoch (J2000) 
       // NOTE - this is really TT, an approximation of TDB *********
-      //Real tTDB    = (jdTT - JD_OF_J2000) / DAYS_PER_JULIAN_CENTURY;
       Real tTDB    = (mjdTT + tDiff) / DAYS_PER_JULIAN_CENTURY;
  
       #ifdef DEBUG_FIRST_CALL
@@ -582,7 +418,6 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       else 
       {
          updateIntervalToUse = intervalFromOrigin;
-         //MessageInterface::ShowMessage("Using origin interval .....\n");
          #ifdef DEBUG_FIRST_CALL
             if (!firstCallFired)
                MessageInterface::ShowMessage(
@@ -591,8 +426,6 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
          #endif
       }
       
-      //MessageInterface::ShowMessage("Setting %4.3f as interval \n",
-      //                              updateIntervalToUse);
       #ifdef DEBUG_BF_ROT_MATRIX
          MessageInterface::ShowMessage("About to call ComputePrecessionMatrix\n");
       #endif
@@ -766,10 +599,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       bool override = ((CelestialBody*)origin)->GetOverrideTimeSystem();
       Real librationAngles[3], andRates[3];
       de->GetAnglesAndRates(atEpoch, librationAngles, andRates, override);
-      // convert from rad/day to rad/second
-      //andRates[0] /= GmatTimeConstants::SECS_PER_DAY;
-      //andRates[1] /= GmatTimeConstants::SECS_PER_DAY;
-      //andRates[2] /= GmatTimeConstants::SECS_PER_DAY;
+
       rotMatrix    = (Attitude::ToCosineMatrix(librationAngles, 3, 1, 3)).Transpose();
       Real ca1    = cos(librationAngles[0]);
       Real ca2    = cos(librationAngles[1]);

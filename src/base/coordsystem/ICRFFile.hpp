@@ -29,45 +29,49 @@
 class GMAT_API ICRFFile
 {
 public:
+   /// Instance of the class
    static ICRFFile* Instance();
-   virtual void Initialize();	// initializes the ICRFFile (reads it and stores the data)
+   /// initializes the ICRFFile (reads it and stores the data)
+   virtual void Initialize();
+   /// finalizes the ICRFFile
    void Finalize();
 
-   // get ICRF Euler rotation vector for a given epoch:
+   // Get ICRF Euler rotation vector for a given epoch
    bool GetICRFRotationVector(Real epoch, Real* icrfRotationVector, Integer dim, Integer order);
 
+protected:
+   static const Integer MAX_TABLE_SIZE;
+
+   /// name of data file (It contains the path to the file)
+   std::string          icrfFileName;
+
+   /// a table containing values of independent variable
+   Real*                independence;
+   /// a table containing dependent vectors
+   Real**               dependences;
+   /// dimension of dependent vector
+   Integer              dimension;
+   /// the size of the table
+   Integer              tableSz;
+   /// number of data points
+   Integer              pointsCount;
+
+   /// specify whether the object is initialized or not
+   bool isInitialized;
+
+   void AllocateArrays();
+   void CleanupArrays();
 
 private:
    // default constructor
    ICRFFile(const std::string &fileName = "ICRF_Table.txt", const Integer dim = 1);
-   // copy constructor
-//   ICRFFile(const ICRFFile &icrfFile);
-   // operator = 
-//   const ICRFFile& operator=(const ICRFFile &iau);
+   // copy constructor - NOT IMPLEMENTED
+   ICRFFile(const ICRFFile &icrfFile);
+   // operator = - NOT IMPLEMENTED
+   const ICRFFile& operator=(const ICRFFile &icrfFile);
    // destructor
    virtual ~ICRFFile();
    
    static ICRFFile *instance;
-   
-protected:
-//public:
-   static const Integer MAX_TABLE_SIZE;
-
-   std::string          icrfFileName;			// name of data file (It contains the path to the file)
-
-   Real*				independence;			// a table containing values of independent variable 
-   Real**				dependences;			// a table containing dependent vectors 
-   Integer				dimension;				// dimension of dependent vector 
-   Integer              tableSz;				// the size of the table
-   Integer				pointsCount;			// number of data points
-
-   bool isInitialized;							// specify whether the object is initialized or not
-   
-   void AllocateArrays();
-   void CleanupArrays();
-//   void CopyArrays(const ICRFFile &icrfFile);
-//   void CopyArraysContent(const ICRFFile &icrfFile);
 };
-
-
-#endif // IAUFile_hpp
+#endif // ICRFFile_hpp

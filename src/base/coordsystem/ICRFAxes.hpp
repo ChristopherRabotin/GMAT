@@ -47,16 +47,7 @@ public:
 
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
-   virtual GmatBase*       Clone(void) const;
-
-   // Parameter access methods - overridden from GmatBase
-   /* placeholder - may be needed later
-   virtual std::string     GetParameterText(const Integer id) const;
-   virtual Integer         GetParameterID(const std::string &str) const;
-   virtual Gmat::ParameterType
-                           GetParameterType(const Integer id) const;
-   virtual std::string     GetParameterTypeString(const Integer id) const;
-    */
+   virtual GmatBase*       Clone() const;
 
    void  GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation = false);
 
@@ -67,23 +58,18 @@ protected:
       ICRFAxesParamCount = InertialAxesParamCount,
    };
 
-   //static const std::string PARAMETER_TEXT[ICRFAxesParamCount -
-   //                                        InertialAxesParamCount];
-
-   //static const Gmat::ParameterType PARAMETER_TYPE[ICRFAxesParamCount -
-   //                                                InertialAxesParamCount];
-
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);
 
-   bool isInitialized;
+   bool                     isInitialized;
 
    Real                     prevEpoch;
    Real                     prevUpdateInterval;
    Real                     prevOriginUpdateInterval;
    Gmat::RotationDataSource prevLunaSrc;
 
-   ICRFFile* icrfFile;		// this object contains a table of Euler rotation vectors for time range from 1957 to 2100
+   /// this object contains a table of Euler rotation vectors for time range from 1957 to 2100
+   ICRFFile                 *icrfFile;
 
 };
 #endif // ICRFAxes_hpp

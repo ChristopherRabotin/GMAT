@@ -36,17 +36,15 @@
 
 #ifdef DEBUG_OR_AXES
 #include <iostream>
-
-
 #define DEBUG_ROT_MATRIX 1
 #define DEBUG_REFERENCE_SETTING
 #define DEBUG_CS_INIT 1
 static Integer visitCount = 0;
 #endif
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 
 const std::string
 ObjectReferencedAxes::PARAMETER_TEXT[ObjectReferencedAxesParamCount - DynamicAxesParamCount] =
@@ -68,13 +66,18 @@ ObjectReferencedAxes::PARAMETER_TYPE[ObjectReferencedAxesParamCount - DynamicAxe
    Gmat::OBJECT_TYPE,
 };
 
+
+const Real ObjectReferencedAxes::MAGNITUDE_TOL   = 1.0e-16;
+const Real ObjectReferencedAxes::ORTHONORMAL_TOL = 1.0e-14;
+
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  ObjectReferencedAxes(const std::string &itsName);
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Constructs base ObjectReferencedAxes structures
  * (default constructor).
@@ -82,16 +85,16 @@ ObjectReferencedAxes::PARAMETER_TYPE[ObjectReferencedAxesParamCount - DynamicAxe
  * @param itsName Optional name for the object.  Defaults to "".
  *
  */
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 ObjectReferencedAxes::ObjectReferencedAxes(const std::string &itsName) :
-DynamicAxes("ObjectReferenced",itsName),
-primaryName   ("Earth"),
-secondaryName ("Luna"),
-primary       (NULL),
-secondary     (NULL),
-xAxis         (""),
-yAxis         (""),
-zAxis         ("")
+   DynamicAxes("ObjectReferenced",itsName),
+   primaryName   ("Earth"),
+   secondaryName ("Luna"),
+   primary       (NULL),
+   secondary     (NULL),
+   xAxis         (""),
+   yAxis         (""),
+   zAxis         ("")
 {
    objectTypeNames.push_back("ObjectReferencedAxes");
    parameterCount = ObjectReferencedAxesParamCount;
@@ -111,14 +114,14 @@ zAxis         ("")
 //---------------------------------------------------------------------------
 ObjectReferencedAxes::ObjectReferencedAxes(const std::string &itsType,
                                            const std::string &itsName) :
-DynamicAxes(itsType,itsName),
-primaryName   (""),
-secondaryName (""),
-primary       (NULL),
-secondary     (NULL),
-xAxis         (""),
-yAxis         (""),
-zAxis         ("")
+   DynamicAxes(itsType,itsName),
+   primaryName   (""),
+   secondaryName (""),
+   primary       (NULL),
+   secondary     (NULL),
+   xAxis         (""),
+   yAxis         (""),
+   zAxis         ("")
 {
    objectTypeNames.push_back("ObjectReferencedAxes");
    parameterCount = ObjectReferencedAxesParamCount;
@@ -135,14 +138,14 @@ zAxis         ("")
  */
 //---------------------------------------------------------------------------
 ObjectReferencedAxes::ObjectReferencedAxes(const ObjectReferencedAxes &orAxes) :
-DynamicAxes(orAxes),
-primaryName   (orAxes.primaryName),
-secondaryName (orAxes.secondaryName),
-primary       (orAxes.primary),
-secondary     (orAxes.secondary),
-xAxis         (orAxes.xAxis),
-yAxis         (orAxes.yAxis),
-zAxis         (orAxes.zAxis)
+   DynamicAxes(orAxes),
+   primaryName   (orAxes.primaryName),
+   secondaryName (orAxes.secondaryName),
+   primary       (orAxes.primary),
+   secondary     (orAxes.secondary),
+   xAxis         (orAxes.xAxis),
+   yAxis         (orAxes.yAxis),
+   zAxis         (orAxes.zAxis)
 {
    parameterCount = ObjectReferencedAxesParamCount;   
 }
@@ -175,7 +178,7 @@ const ObjectReferencedAxes& ObjectReferencedAxes::operator=(
 }
 
 //---------------------------------------------------------------------------
-//  ~ObjectReferencedAxes(void)
+//  ~ObjectReferencedAxes()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -185,26 +188,61 @@ ObjectReferencedAxes::~ObjectReferencedAxes()
 {
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesPrimary() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesPrimary() const
 {
    return GmatCoordinate::REQUIRED;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesSecondary() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesSecondary() const
 {
    return GmatCoordinate::OPTIONAL_USE;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesXAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesXAxis() const
 {
    return GmatCoordinate::OPTIONAL_USE;  // or REQUIRED?????  (2 of 3 are required)
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesYAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesYAxis() const
 {
    return GmatCoordinate::OPTIONAL_USE;
 }
 
+//------------------------------------------------------------------------------
+//  GmatCoordinate::ParameterUsage UsesZAxis() const
+//------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesZAxis() const
 {
    return GmatCoordinate::OPTIONAL_USE;
@@ -309,31 +347,89 @@ void ObjectReferencedAxes::SetZAxis(const std::string &toValue)
    zAxis = toValue;
 }
 
+//------------------------------------------------------------------------------
+//  SpacePoint* GetPrimaryObject()
+//------------------------------------------------------------------------------
+/**
+ * Returns pointer to the primary object.
+ *
+ * @return pointer to primary object
+ *
+ */
+//------------------------------------------------------------------------------
 SpacePoint* ObjectReferencedAxes::GetPrimaryObject() const
 {
    return primary;
 }
 
+//------------------------------------------------------------------------------
+//  SpacePoint* GetSecondaryObject()
+//------------------------------------------------------------------------------
+/**
+ * Returns pointer to the secondary object.
+ *
+ * @return pointer to secondary object
+ *
+ */
+//------------------------------------------------------------------------------
 SpacePoint* ObjectReferencedAxes::GetSecondaryObject() const
 {
    return secondary;
 }
 
+//------------------------------------------------------------------------------
+//  std::string GetXAxis() const
+//------------------------------------------------------------------------------
+/**
+ * Returns X axis value
+ *
+ * @return X axis value
+ *
+ */
+//------------------------------------------------------------------------------
 std::string ObjectReferencedAxes::GetXAxis() const
 {
    return xAxis;
 }
 
+//------------------------------------------------------------------------------
+//  std::string GetYAxis() const
+//------------------------------------------------------------------------------
+/**
+ * Returns Y axis value
+ *
+ * @return Y axis value
+ *
+ */
+//------------------------------------------------------------------------------
 std::string ObjectReferencedAxes::GetYAxis() const
 {
    return yAxis;
 }
 
+//------------------------------------------------------------------------------
+//  std::string GetZAxis() const
+//------------------------------------------------------------------------------
+/**
+ * Returns Z axis value
+ *
+ * @return Z axis value
+ *
+ */
+//------------------------------------------------------------------------------
 std::string ObjectReferencedAxes::GetZAxis() const
 {
    return zAxis;
 }
 
+//------------------------------------------------------------------------------
+//  void ResetAxes()
+//------------------------------------------------------------------------------
+/**
+ * Resets the X, Y, and Z axes to blank
+ *
+ */
+//------------------------------------------------------------------------------
 void ObjectReferencedAxes::ResetAxes()
 {
    xAxis = "";
@@ -348,24 +444,17 @@ void ObjectReferencedAxes::ResetAxes()
 /**
  * Initialization method for this ObjectReferencedAxes.
  *
+ * @return success flag
  */
 //---------------------------------------------------------------------------
 bool ObjectReferencedAxes::Initialize()
 {
    DynamicAxes::Initialize();
    
-   // Commented out per Bug 1534 (LOJ: 2009.09.21)
    // Setting ObjectReferencedAxes properties inside a GmatFunction does not
    // work properly if not all axes are set. All setting inside a function
    // is done by Assignment commands and this object can be initialized more
    // than one time during function execution.
-   // use defaults, per Steve's email of 2005.05.13
-   //if (xAxis == "" && yAxis == "" && zAxis == "")
-   //{
-   //   xAxis = "R";
-   //   zAxis = "N";
-   //   yAxis = "";
-   //}
    
    #ifdef DEBUG_ORA_INIT
    MessageInterface::ShowMessage
@@ -644,19 +733,17 @@ GmatBase* ObjectReferencedAxes::GetRefObject(const Gmat::ObjectType type,
    return DynamicAxes::GetRefObject(type, name);
 }
 
-
-// DJC added 5/9/05 to facilitate Sandbox initialization
 //------------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
- * Returns the names of the reference object. (Derived classes should implement
+ * Returns the name(s) of the reference object(s). (Derived classes should implement
  * this as needed.)
  *
  * @param <type> reference object type.  Gmat::UnknownObject returns all of the
  *               ref objects.
  *
- * @return The names of the reference object.
+ * @return The name(s) of the reference object(s) of the specified type
  */
 //------------------------------------------------------------------------------
 const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -709,53 +796,45 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
                                         const Gmat::ObjectType type,
                                         const std::string &name)
 {
-   // DJC changed from case to IsOfType 5/13/05.  Definitely Friday the 13th!
-//   switch (type)
-//   {
-//      case Gmat::SPACE_POINT:
-//      {
-      if (obj->IsOfType(Gmat::SPACE_POINT))
+   if (obj->IsOfType(Gmat::SPACE_POINT))
+   {
+      if (name == primaryName)
       {
-         if (name == primaryName)
-         {
-            #ifdef DEBUG_REFERENCE_SETTING
-               MessageInterface::ShowMessage("Setting %s as primary for %s\n",
-                  name.c_str(), instanceName.c_str());
-            #endif
-            primary = (SpacePoint*) obj;
-         }
-         if (name == secondaryName)
-         {
-            #ifdef DEBUG_REFERENCE_SETTING
-               MessageInterface::ShowMessage("Setting %s as secondary for %s\n",
-                  name.c_str(), instanceName.c_str());
-            #endif
-            secondary = (SpacePoint*) obj;
-         }
-         // add in the CoordinateBase SpacePoints here too because if
-         // primaryName or secondaryName == originName or j2000BodyName
-         // (which is likely), the origin and/or j2000Body will never be set
-         if (name == originName)
-         {
-            #ifdef DEBUG_REFERENCE_SETTING
-               MessageInterface::ShowMessage("Setting %s as origin for %s\n",
-                  name.c_str(), instanceName.c_str());
-            #endif
-            origin = (SpacePoint*) obj;
-         }
-         if (name == j2000BodyName)
-         {
-             #ifdef DEBUG_REFERENCE_SETTING
-               MessageInterface::ShowMessage("Setting %s as J2000body for %s\n",
-                  name.c_str(), instanceName.c_str());
-            #endif
-           j2000Body = (SpacePoint*) obj;
-         }
-         return true;
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as primary for %s\n",
+               name.c_str(), instanceName.c_str());
+         #endif
+         primary = (SpacePoint*) obj;
       }
-//      default:
-//         break;
-//   }
+      if (name == secondaryName)
+      {
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as secondary for %s\n",
+               name.c_str(), instanceName.c_str());
+         #endif
+         secondary = (SpacePoint*) obj;
+      }
+      // add in the CoordinateBase SpacePoints here too because if
+      // primaryName or secondaryName == originName or j2000BodyName
+      // (which is likely), the origin and/or j2000Body will never be set
+      if (name == originName)
+      {
+         #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as origin for %s\n",
+               name.c_str(), instanceName.c_str());
+         #endif
+         origin = (SpacePoint*) obj;
+      }
+      if (name == j2000BodyName)
+      {
+          #ifdef DEBUG_REFERENCE_SETTING
+            MessageInterface::ShowMessage("Setting %s as J2000body for %s\n",
+               name.c_str(), instanceName.c_str());
+         #endif
+        j2000Body = (SpacePoint*) obj;
+      }
+      return true;
+   }
 
    // Not handled here -- invoke the next higher SetRefObject call
    return DynamicAxes::SetRefObject(obj, type, name);
@@ -774,7 +853,9 @@ bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the ObjectReferencedAxes system.
  *
- * @param atEpoch  epoch at which to compute the rotation matrix
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
  */
 //---------------------------------------------------------------------------
 void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
@@ -845,11 +926,20 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real     rMag  = r.GetMagnitude();
    Real     vMag  = v.GetMagnitude();
    Real     nMag  = n.GetMagnitude();
+   // check for divide-by-zero
+   if ((GmatMathUtil::IsEqual(rMag, MAGNITUDE_TOL)) || (GmatMathUtil::IsEqual(vMag, MAGNITUDE_TOL)) || (GmatMathUtil::IsEqual(nMag, MAGNITUDE_TOL)))
+   {
+      std::string errmsg = "Object referenced axis system named \"";
+      errmsg += coordName + "\" is undefined because at least one axis is near zero in length.\n";
+      throw CoordinateSystemException(errmsg);
+   }
+
    Rvector3 rDot  = (v / rMag) - (rUnit / rMag) * (rUnit * v);
    Rvector3 vDot  = (a / vMag) - (vUnit / vMag) * (vUnit * a);
    Rvector3 nDot = (Cross(r,a) / nMag) - (nUnit / nMag) * (Cross(r,a) * nUnit);
    Rvector3 xUnit, yUnit, zUnit, xDot, yDot, zDot;
    bool     xUsed = true, yUsed = true, zUsed = true;
+
 
    // determine the x-axis
    if ((xAxis == "R") || (xAxis == "r"))
@@ -1014,13 +1104,10 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       MessageInterface::ShowMessage("%s\n", ss.str().c_str());
    #endif
 
-//      if (!rotMatrix.IsOrthogonal(1.0e-14))
-   if (!rotMatrix.IsOrthonormal(1.0e-14))   // switch to orthonormal per S. Hughes 2010.02.12 wcs
+   if (!rotMatrix.IsOrthonormal(ORTHONORMAL_TOL))
    {
       std::stringstream errmsg("");
-      errmsg << "Object referenced axes definition does not result in an orthonormal system ";
-      errmsg << "(tolerance on orthonormality is 1e-14).  " << std::endl;
-      errmsg << "The rotation matrix is : " <<std::endl << rotMatrix.ToString(16, 20) << std::endl;
-      throw CoordinateSystemException(errmsg.str());
+      errmsg << "*** WARNING*** Object referenced axis system \"" << coordName;
+      errmsg << "\" has a non-orthogonal rotation matrix. " << std::endl;
    }
 }

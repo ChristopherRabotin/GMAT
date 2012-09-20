@@ -16,7 +16,7 @@
 //
 /**
  * Definition of the IAUFile class.  This is the code that provides
- * IAU2000-2006 data
+ * IAU2000-2006 data.  It is a singleton.
  *
  */
 //------------------------------------------------------------------------------
@@ -29,41 +29,50 @@
 class GMAT_API IAUFile
 {
 public:
+   // Returns the instance of this singleton
    static IAUFile* Instance();
-   virtual void Initialize();	// initializes the IAUFile (reads it and stores the data)
+   // Initializes the IAUFile (reads it and stores the data)
+   virtual void Initialize();
+   // Finalizes the IAUFile
    void Finalize();
 
-   // get IAU2000 data for a given epoch:
+   // Get IAU2000 data for a given epoch
    bool GetIAUData(Real epoch, Real* iau, Integer dim, Integer order);
+
+protected:
+
+   static const Integer MAX_TABLE_SIZE;
+
+   /// name of data file (It contains the path to the file)
+   std::string      iauFileName;
+   /// a table containing values of independent variables
+   Real*            independence;
+   /// a table containing dependent vectors
+   Real**           dependences;
+   /// dimension of dependent vector
+   Integer          dimension;
+   /// the size of the table
+   Integer          tableSz;
+   /// number of data points
+   Integer          pointsCount;
+
+   /// specify whether the object is initialized or not
+   bool isInitialized;
+
+   void AllocateArrays();
+   void CleanupArrays();
 
 private:
    // default constructor
    IAUFile(const std::string &fileName = "IAU_SOFA.DAT", const Integer dim = 1);
+   // copy constructor - NOT IMPLEMENTED
+   IAUFile(const IAUFile &iau);
+   // operator = - NOT IMPLEMENTED
+   const IAUFile& operator=(const IAUFile &iau);
 
    // destructor
    virtual ~IAUFile();
    
    static IAUFile *instance;
-   
-protected:
-//public:
-   static const Integer MAX_TABLE_SIZE;
-
-   std::string          iauFileName;			// name of data file (It contains the path to the file) 
-
-   Real*				independence;			// a table containing values of independent variable 
-   Real**				dependences;			// a table containing dependent vectors 
-   Integer				dimension;				// dimension of dependent vector 
-   Integer              tableSz;				// the size of the table
-   Integer				pointsCount;			// number of data points
-
-   bool isInitialized;							// specify whether the object is initailized or not
-   
-   void AllocateArrays();
-   void CleanupArrays();
-//   void CopyArrays(const IAUFile &iau);
-//   void CopyArraysContent(const IAUFile &iau);
 };
-
-
 #endif // ICRFFile_hpp

@@ -929,7 +929,7 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
    
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Input vector to ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Input vector to RotateToBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
       MessageInterface::ShowMessage(
       "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
@@ -941,9 +941,6 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
       rotDotMatrix(0,0),rotDotMatrix(0,1),rotDotMatrix(0,2),
       rotDotMatrix(1,0),rotDotMatrix(1,1),rotDotMatrix(1,2),
       rotDotMatrix(2,0),rotDotMatrix(2,1),rotDotMatrix(2,2));
-      //MessageInterface::ShowMessage(
-      //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
-      //   tmpPosTo[0], tmpPosTo[1], tmpPosTo[2], tmpVelTo[0], tmpVelTo[1], tmpVelTo[2]);
    #endif
    Real  outPos[3];
    Real  outVel[3];
@@ -967,10 +964,10 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
                   outVel[0], outVel[1], outVel[2]);
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Computed Output vector in ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Computed Output vector in ToBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
       MessageInterface::ShowMessage(
-         "Output vector from ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Output vector from ToBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
 
@@ -1028,7 +1025,7 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
    Real vel[3] = {inState[3], inState[4], inState[5]};   
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Input vector to ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Input vector to RotateToBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
       MessageInterface::ShowMessage(
       "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
@@ -1040,13 +1037,6 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
       rotDotMatrix(0,0),rotDotMatrix(0,1),rotDotMatrix(0,2),
       rotDotMatrix(1,0),rotDotMatrix(1,1),rotDotMatrix(1,2),
       rotDotMatrix(2,0),rotDotMatrix(2,1),rotDotMatrix(2,2));
-//      MessageInterface::ShowMessage(
-//      "the rotation matrix (as array) is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
-//      rotData[0],rotData[1],rotData[2],rotData[3],rotData[4],
-//      rotData[5],rotData[6],rotData[7],rotData[8]);
-      //MessageInterface::ShowMessage(
-      //   "Input vector as datavec = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
-      //   tmpPosTo[0], tmpPosTo[1], tmpPosTo[2], tmpVelTo[0], tmpVelTo[1], tmpVelTo[2]);
    #endif
    Integer p3 = 0;
    for (Integer p = 0; p < 3; ++p)
@@ -1067,11 +1057,8 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
    
  
    #ifdef DEBUG_CALCS
-      //MessageInterface::ShowMessage(
-      //   "Computed Output vector in ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
-      //   outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
       MessageInterface::ShowMessage(
-         "Output vector from ToMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Output vector from ToBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
 
@@ -1093,10 +1080,6 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
             "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             inState[0], inState[1], inState[2], inState[3], inState[4], 
             inState[5]);
-         //MessageInterface::ShowMessage(
-         //   "   outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
-         //   outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
-         //   outVel[2]);
       }
    #endif
 
@@ -1143,7 +1126,7 @@ bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
 
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Input vector to FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Input vector to AxisSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
       MessageInterface::ShowMessage(
       "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
@@ -1179,10 +1162,10 @@ bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
 
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Computed Output vector in FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Computed Output vector in FromBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], outVel[2]);
       MessageInterface::ShowMessage(
-         "Output vector from FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Output vector from FromBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
    #ifdef DEBUG_FIRST_CALL
@@ -1242,7 +1225,7 @@ bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
    Real vel[3] = {inState[3], inState[4], inState[5]};   
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Input vector to AxisSystem::FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Input vector to AxisSystem::FromBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
       MessageInterface::ShowMessage(
       "the rotation matrix is : %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f %.17f\n",
@@ -1277,7 +1260,7 @@ bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
    }     
    #ifdef DEBUG_CALCS
       MessageInterface::ShowMessage(
-         "Output vector from AxisSystem::FromMJ2000 = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+         "Output vector from AxisSystem::FromBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
    #ifdef DEBUG_FIRST_CALL
@@ -1298,9 +1281,6 @@ bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
             "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
             inState[0], inState[1], inState[2], inState[3], inState[4], 
             inState[5]);
-         //MessageInterface::ShowMessage(
-         //   outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
-         //   outVel[2]);
          firstCallFired = true;
       }
    #endif
@@ -1584,130 +1564,125 @@ void AxisSystem::InitializeFK5()
       MessageInterface::ShowMessage("Entering InitializeFK5 for coordinate system %s of type %s\n",
             (GetName()).c_str(), (GetTypeName()).c_str());
    #endif
-//   if (originName == SolarSystem::EARTH_NAME)
-//   {
-      if (eop == NULL)
-         throw CoordinateSystemException(
-               "EOP file has not been set for " + instanceName);
-      if (itrf == NULL)
-         throw CoordinateSystemException(
-               "Coefficient file has not been set for " + instanceName);
-      
-      nutationSrc    = itrf->GetNutationTermsSource();
-      planetarySrc   = itrf->GetPlanetaryTermsSource();
-      Integer numNut = itrf->GetNumberOfNutationTerms();
-      A.SetSize(numNut);   A.MakeZeroVector();
-      #ifdef DEBUG_ITRF_UPDATES
-      MessageInterface::ShowMessage("In Axis System, nutation source is %d\n",
-                        (Integer) nutationSrc);
-      //for (Integer ii = 0; ii < A.GetSize(); ii++)
-      //   MessageInterface::ShowMessage("In AxisSystem, A(%d) = %f\n", ii, A(ii));
+   if (eop == NULL)
+      throw CoordinateSystemException(
+            "EOP file has not been set for " + instanceName);
+   if (itrf == NULL)
+      throw CoordinateSystemException(
+            "Coefficient file has not been set for " + instanceName);
+
+   nutationSrc    = itrf->GetNutationTermsSource();
+   planetarySrc   = itrf->GetPlanetaryTermsSource();
+   Integer numNut = itrf->GetNumberOfNutationTerms();
+   A.SetSize(numNut);   A.MakeZeroVector();
+   #ifdef DEBUG_ITRF_UPDATES
+   MessageInterface::ShowMessage("In Axis System, nutation source is %d\n",
+                     (Integer) nutationSrc);
+   #endif
+   B.SetSize(numNut);   B.MakeZeroVector();
+   C.SetSize(numNut);   C.MakeZeroVector();
+   D.SetSize(numNut);   D.MakeZeroVector();
+   E.SetSize(numNut);   E.MakeZeroVector();
+   F.SetSize(numNut);   F.MakeZeroVector();
+
+   Integer numPlan = itrf->GetNumberOfPlanetaryTerms();
+   Ap.SetSize(numPlan);   Ap.MakeZeroVector();
+   Bp.SetSize(numPlan);   Bp.MakeZeroVector();
+   Cp.SetSize(numPlan);   Cp.MakeZeroVector();
+   Dp.SetSize(numPlan);   Dp.MakeZeroVector();
+
+   bool OK = itrf->GetNutationTerms(a, A, B, C, D, E, F);
+   if (!OK) throw CoordinateSystemException("Error getting nutation data.");
+   #ifdef DEBUG_ITRF_UPDATES
+   for (Integer ii = 0; ii < A.GetSize(); ii++)
+      MessageInterface::ShowMessage("In AxisSystem, after getting nutation data, A(%d) = %f\n", ii, A(ii));
+   #endif
+
+   if (aVals)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (aVals, "aVals", "AxisSystem::InitializeFK5()", "deleting aVals");
       #endif
-      B.SetSize(numNut);   B.MakeZeroVector();
-      C.SetSize(numNut);   C.MakeZeroVector();
-      D.SetSize(numNut);   D.MakeZeroVector();
-      E.SetSize(numNut);   E.MakeZeroVector();
-      F.SetSize(numNut);   F.MakeZeroVector();
-      
-      Integer numPlan = itrf->GetNumberOfPlanetaryTerms();
-      Ap.SetSize(numPlan);   Ap.MakeZeroVector();
-      Bp.SetSize(numPlan);   Bp.MakeZeroVector();
-      Cp.SetSize(numPlan);   Cp.MakeZeroVector();
-      Dp.SetSize(numPlan);   Dp.MakeZeroVector();
-      
-      bool OK = itrf->GetNutationTerms(a, A, B, C, D, E, F);
-      if (!OK) throw CoordinateSystemException("Error getting nutation data.");
-      #ifdef DEBUG_ITRF_UPDATES
-      for (Integer ii = 0; ii < A.GetSize(); ii++)
-         MessageInterface::ShowMessage("In AxisSystem, after getting nutation data, A(%d) = %f\n", ii, A(ii));
-      #endif
-      
-      if (aVals)
+      delete [] aVals;
+   }
+
+   aVals = new Integer[numNut * 5];
+   #ifdef DEBUG_MEMORY
+   MemoryTracker::Instance()->Add
+      (aVals, "aVals", "AxisSystem::InitializeFK5()", "aVals = new Integer[numNut * 5]");
+   #endif
+
+   for (Integer i = 0; i < 5; i++)
+   {
+      for (Integer j=0; j< numNut; j++)
+      {
+         aVals[i*numNut+j] = (a.at(i)).at(j);
+      }
+   }
+
+   #ifdef DEBUG_a_MATRIX
+      MessageInterface::ShowMessage("aVals = \n");
+      for (Integer q = 0; q < numNut; ++q)
+         MessageInterface::ShowMessage("         %3d: %8d %8d %8d %8d %8d\n",
+            q+1, aVals[q], aVals[q+numNut], aVals[q+2*numNut],
+            aVals[q+3*numNut], aVals[q+4*numNut]);
+   #endif
+
+   if (nutationSrc == GmatItrf::NUTATION_1996)
+   {
+      OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
+      if (!OK) throw CoordinateSystemException("Error getting planetary data.");
+
+      if (apVals)
       {
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Remove
-            (aVals, "aVals", "AxisSystem::InitializeFK5()", "deleting aVals");
+            (apVals, "apVals", "AxisSystem::InitializeFK5()", "deleting apVals");
          #endif
-         delete [] aVals;
+         delete [] apVals;
       }
       
-      aVals = new Integer[numNut * 5];
+      apVals = new Integer[numPlan*10];
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
-         (aVals, "aVals", "AxisSystem::InitializeFK5()", "aVals = new Integer[numNut * 5]");
+         (apVals, "apVals", "AxisSystem::InitializeFK5()", "apVals = new Integer[numPlan*10]");
       #endif
       
-      for (Integer i = 0; i < 5; i++)
+      for (Integer i = 0; i < 10; i++)
       {
-         for (Integer j=0; j< numNut; j++)
+         for (Integer j=0; j< numPlan; j++)
          {
-            aVals[i*numNut+j] = (a.at(i)).at(j);
+            apVals[i*numPlan+j] = (ap.at(i)).at(j);
          }
       }
-      
-      #ifdef DEBUG_a_MATRIX
-         MessageInterface::ShowMessage("aVals = \n");
-         for (Integer q = 0; q < numNut; ++q)
-            MessageInterface::ShowMessage("         %3d: %8d %8d %8d %8d %8d\n",
-               q+1, aVals[q], aVals[q+numNut], aVals[q+2*numNut], 
-               aVals[q+3*numNut], aVals[q+4*numNut]);
+
+      #ifdef DEBUG_Ap_MATRIX
+          MessageInterface::ShowMessage("apVals = \n");
+         for (Integer q = 0; q < numPlan; ++q)
+             MessageInterface::ShowMessage(
+               "         %3d: %8d %8d %8d %8d %8d   %8d %8d %8d %8d %8d\n",
+               q+1, apVals[q], apVals[q+numPlan], apVals[q+2*numPlan],
+               apVals[q+3*numPlan], apVals[q+4*numPlan], apVals[q+5*numPlan],
+               apVals[q+6*numPlan], apVals[q+7*numPlan], apVals[q+8*numPlan],
+               apVals[q+9*numPlan]);
       #endif
-      
-      if (nutationSrc == GmatItrf::NUTATION_1996)
-      {
-         OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
-         if (!OK) throw CoordinateSystemException("Error getting planetary data.");
+    }
 
-         if (apVals)
-         {
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Remove
-               (apVals, "apVals", "AxisSystem::InitializeFK5()", "deleting apVals");
-            #endif
-            delete [] apVals;
-         }
-         
-         apVals = new Integer[numPlan*10];
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Add
-            (apVals, "apVals", "AxisSystem::InitializeFK5()", "apVals = new Integer[numPlan*10]");
-         #endif
-         
-         for (Integer i = 0; i < 10; i++)
-         {
-            for (Integer j=0; j< numPlan; j++)
-            {
-               apVals[i*numPlan+j] = (ap.at(i)).at(j);
-            }
-         }
-
-         #ifdef DEBUG_Ap_MATRIX
-             MessageInterface::ShowMessage("apVals = \n");
-            for (Integer q = 0; q < numPlan; ++q)
-                MessageInterface::ShowMessage(
-                  "         %3d: %8d %8d %8d %8d %8d   %8d %8d %8d %8d %8d\n",
-                  q+1, apVals[q], apVals[q+numPlan], apVals[q+2*numPlan], 
-                  apVals[q+3*numPlan], apVals[q+4*numPlan], apVals[q+5*numPlan], 
-                  apVals[q+6*numPlan], apVals[q+7*numPlan], apVals[q+8*numPlan], 
-                  apVals[q+9*numPlan]);
-         #endif
-       }
-      
-         AVals = A.GetDataVector();
-         #ifdef DEBUG_ITRF_UPDATES
-         for (Integer ii = 0; ii < A.GetSize(); ii++)
-            MessageInterface::ShowMessage("AVals(%d) = %f\n", ii, AVals[ii]);
-         #endif
-         BVals = B.GetDataVector();
-         CVals = C.GetDataVector();
-         DVals = D.GetDataVector();
-         EVals = E.GetDataVector();
-         FVals = F.GetDataVector();
-         ApVals = Ap.GetDataVector();
-         BpVals = Bp.GetDataVector();
-         CpVals = Cp.GetDataVector();
+   AVals = A.GetDataVector();
+   #ifdef DEBUG_ITRF_UPDATES
+   for (Integer ii = 0; ii < A.GetSize(); ii++)
+      MessageInterface::ShowMessage("AVals(%d) = %f\n", ii, AVals[ii]);
+   #endif
+   BVals = B.GetDataVector();
+   CVals = C.GetDataVector();
+   DVals = D.GetDataVector();
+   EVals = E.GetDataVector();
+   FVals = F.GetDataVector();
+   ApVals = Ap.GetDataVector();
+   BpVals = Bp.GetDataVector();
+   CpVals = Cp.GetDataVector();
          DpVals = Dp.GetDataVector();
-//   }
 }   
 
 //------------------------------------------------------------------------------
@@ -1732,7 +1707,6 @@ void AxisSystem::ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch)
          MessageInterface::ShowMessage(
             "   AxisSystem::ComputePrecessionMatrix(%.12lf, %.12lf)\n", tTDB, 
             atEpoch.Get());
-//         InitializeFK5();
    #endif
    
    #ifdef DEBUG_ROT_MATRIX
@@ -1817,14 +1791,14 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    static const Real const357 = 357.52910918*RAD_PER_DEG;
    static const Real const93  =  93.27209062*RAD_PER_DEG;
    static const Real const297 = 297.85019547*RAD_PER_DEG;
-#ifdef DEBUG_UPDATE
-   MessageInterface::ShowMessage("static consts computed ... \n");
-   MessageInterface::ShowMessage("  const125 = %12.10f\n", const125);
-   MessageInterface::ShowMessage("  const134 = %12.10f\n", const134);
-   MessageInterface::ShowMessage("  const357 = %12.10f\n", const357);
-   MessageInterface::ShowMessage("  const93  = %12.10f\n", const93);
-   MessageInterface::ShowMessage("  const297 = %12.10f\n", const297);
-#endif
+   #ifdef DEBUG_UPDATE
+      MessageInterface::ShowMessage("static consts computed ... \n");
+      MessageInterface::ShowMessage("  const125 = %12.10f\n", const125);
+      MessageInterface::ShowMessage("  const134 = %12.10f\n", const134);
+      MessageInterface::ShowMessage("  const357 = %12.10f\n", const357);
+      MessageInterface::ShowMessage("  const93  = %12.10f\n", const93);
+      MessageInterface::ShowMessage("  const297 = %12.10f\n", const297);
+   #endif
 
    register Real tTDB2   = tTDB  * tTDB;
    register Real tTDB3   = tTDB2 * tTDB;
@@ -1835,12 +1809,12 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // floor, roll around and under the door, down the stairs and into
    // the neighbor's yard.  It can also be used, but is not tested, 
    // with the 2000 Theory.
-#ifdef DEBUG_UPDATE
-   MessageInterface::ShowMessage("registers set up\n");
-   MessageInterface::ShowMessage("  tTDB2 = %12.10f\n", tTDB2);
-   MessageInterface::ShowMessage("  tTDB3 = %12.10f\n", tTDB3);
-   MessageInterface::ShowMessage("  tTDB4 = %12.10f\n", tTDB4);
-#endif
+   #ifdef DEBUG_UPDATE
+      MessageInterface::ShowMessage("registers set up\n");
+      MessageInterface::ShowMessage("  tTDB2 = %12.10f\n", tTDB2);
+      MessageInterface::ShowMessage("  tTDB3 = %12.10f\n", tTDB3);
+      MessageInterface::ShowMessage("  tTDB4 = %12.10f\n", tTDB4);
+   #endif
 
    // Compute values to be passed out first ... 
    longAscNodeLunar  = const125 + (  -6962890.2665*tTDB 
@@ -2362,15 +2336,6 @@ void AxisSystem::ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
             mjdUTC, atEpoch.Get());
    #endif
 
-//   Real dt = fabs(atEpoch.Subtract(lastPMEpoch)) * SECS_PER_DAY;
-//   if (( dt < updateIntervalToUse) && (!forceComputation))
-//   {
-//      #ifdef DEBUG_UPDATE
-//         MessageInterface::ShowMessage(">>> In ComputePolarMotionRotation, using previous saved PM values ......\n");
-//         MessageInterface::ShowMessage("lastPM = %s\n", (lastPM.ToString()).c_str());
-//      #endif
-//      return;
-//   }
    #ifdef DEBUG_UPDATE
       MessageInterface::ShowMessage("----> Computing NEW PM matrix at time %12.10f\n",
          atEpoch.Get());
