@@ -187,6 +187,7 @@ protected:
    bool         inScriptEvent;
    
    /// For handling GmatFunction
+   bool         gmatFunctionsAvailable;
    bool         inFunctionMode;
    bool         hasFunctionDefinition;
    Function     *currentFunction;

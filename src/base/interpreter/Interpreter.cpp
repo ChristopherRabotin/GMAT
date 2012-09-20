@@ -119,16 +119,20 @@ const std::string Interpreter::defaultIndicator = "DFLT__";
 //------------------------------------------------------------------------------
 Interpreter::Interpreter(SolarSystem *ss, ObjectMap *objMap)
 {
+   inCommandMode = false;
+   inRealCommandMode = false;
    initialized = false;
    continueOnError = true;
    parsingDelayedBlock = false;
    ignoreError = false;
    inScriptEvent = false;
+   gmatFunctionsAvailable = false;
    inFunctionMode = false;
    hasFunctionDefinition = false;
    currentFunction = NULL;
    theSolarSystem = NULL;
    theObjectMap = NULL;
+   currentBlockType = Gmat::COMMENT_BLOCK;      // Initialize to something here
    
    theModerator  = Moderator::Instance();
    theReadWriter = ScriptReadWriter::Instance();
@@ -210,7 +214,7 @@ void Interpreter::Initialize()
    
    // Initialize TextParser command list
    theTextParser.Initialize(commandList);
-   
+
    initialized = true;
    
    #ifdef DEBUG_INIT
@@ -342,6 +346,8 @@ void Interpreter::BuildCreatableObjectMaps()
    copy(fns.begin(), fns.end(), back_inserter(allObjectTypeList));
    for (UnsignedInt i = 0; i < functionList.size(); i++)
       objectTypeMap.insert(std::make_pair(functionList[i], Gmat::FUNCTION));
+   gmatFunctionsAvailable =
+         (find(fns.begin(), fns.end(), "GmatFunction") != fns.end());
    
    hardwareList.clear();
    StringArray hws = theModerator->GetListOfFactoryItems(Gmat::HARDWARE);
@@ -524,6 +530,9 @@ void Interpreter::BuildCreatableObjectMaps()
       for (pos = spl.begin(); pos != spl.end(); ++pos)
          MessageInterface::ShowMessage(*pos + "\n   ");
       
+      MessageInterface::ShowMessage("GmatFunctions %s available\n",
+            gmatFunctionsAvailable ? "are" : "are not");
+
       MessageInterface::ShowMessage("\n");
    #endif
    
@@ -1877,7 +1886,15 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          if (func != NULL && func->IsOfType("MatlabFunction"))
             type1 = "CallMatlabFunction";
          else
-            type1 = "CallGmatFunction";
+         {
+            if (gmatFunctionsAvailable)
+               type1 = "CallGmatFunction";
+            else
+               throw InterpreterException("The function \"" + funcName +
+                     "\" is not available; if it is a GmatFunction, you may "
+                     "need to enable the GmatFunction plugin "
+                     "(libGmatFunction)");
+         }
       }
       
       #ifdef DEBUG_CREATE_CALLFUNCTION
@@ -1926,7 +1943,15 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             if (func != NULL && func->IsOfType("MatlabFunction"))
                type1 = "CallMatlabFunction";
             else
-               type1 = "CallGmatFunction";
+            {
+               if (gmatFunctionsAvailable)
+                  type1 = "CallGmatFunction";
+               else
+                  throw InterpreterException("The function \"" + funcName +
+                        "\" is not available; if it is a GmatFunction, you may "
+                        "need to enable the GmatFunction plugin "
+                        "(libGmatFunction)");
+            }
          }
          
          #ifdef DEBUG_CREATE_CALLFUNCTION
@@ -1977,7 +2002,15 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                if (funcPtr != NULL && funcPtr->IsOfType("MatlabFunction"))
                   type1 = "CallMatlabFunction";
                else
-                  type1 = "CallGmatFunction";
+               {
+                  if (gmatFunctionsAvailable)
+                     type1 = "CallGmatFunction";
+                  else
+                     throw InterpreterException("The function \"" + funcName +
+                           "\" is not available; if it is a GmatFunction, you "
+                           "may need to enable the GmatFunction plugin "
+                           "(libGmatFunction)");
+               }
             }
          }
       }
@@ -2174,7 +2207,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
        cmd, retFlag);
    #endif
    
-   return cmd;;
+   return cmd;
 }
 
 
@@ -3278,7 +3311,7 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
    
    try
    {
-      // if object is MatlabFunction make sure we add .m extenstion to avoid
+      // if object is MatlabFunction make sure we add .m extension to avoid
       // automatically creating GmatFunction in the Sandbox::HandleGmatFunction()
       cmd->SetStringParameter("ObjectType", objTypeStrToUse);
       for (UnsignedInt i=0; i<objNames.size(); i++)
@@ -5389,6 +5422,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          ("Interpreter::SetPropertyValue() Cannot handle the type: " +
           GmatBase::PARAM_TYPE_STRING[type] + " yet.\n");
       HandleError(ex);
+      break;
    }
    
    #ifdef DEBUG_SET
@@ -5681,6 +5715,8 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
       
       return false;
    }
+
+   return false;     // Function must have return type on all paths
 }
 
 
