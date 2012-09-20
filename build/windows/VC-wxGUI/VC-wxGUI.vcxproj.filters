@@ -38,9 +38,6 @@
     <Filter Include="Source Files\base\function">
       <UniqueIdentifier>{fb9ecada-a132-4027-b610-a587ccba39d6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\base\interface">
-      <UniqueIdentifier>{e7838287-26b3-4939-8b1a-dfbc8b73d46e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\base\interpolator">
       <UniqueIdentifier>{b5c8af45-c00b-4f6a-bc20-8b25212cf91e}</UniqueIdentifier>
     </Filter>
@@ -156,6 +153,9 @@
     </Filter>
     <Filter Include="Source Files\base\forcemodel\harmonic">
       <UniqueIdentifier>{a60f93e4-c4ec-4f65-be1f-6137abbfd775}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base\interface">
+      <UniqueIdentifier>{7bf28b16-f8a5-442d-a881-92a06bef6da6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -489,9 +489,6 @@
     <ClCompile Include="..\..\..\src\base\factory\FactoryManager.cpp">
       <Filter>Source Files\base\factory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\factory\FunctionFactory.cpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\factory\HardwareFactory.cpp">
       <Filter>Source Files\base\factory</Filter>
     </ClCompile>
@@ -587,18 +584,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp">
       <Filter>Source Files\base\function</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\function\GmatFunction.cpp">
-      <Filter>Source Files\base\function</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\function\MatlabFunction.cpp">
-      <Filter>Source Files\base\function</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp">
-      <Filter>Source Files\base\interface</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\interface\InterfaceException.cpp">
-      <Filter>Source Files\base\interface</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\interpolator\CubicSplineInterpolator.cpp">
       <Filter>Source Files\base\interpolator</Filter>
@@ -1722,6 +1707,21 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\IAUFile.cpp">
       <Filter>Source Files\base\coordsystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\function\GmatFunction.cpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interface\Interface.cpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\interface\InterfaceException.cpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -2054,9 +2054,6 @@
     <ClInclude Include="..\..\..\src\base\factory\FactoryManager.hpp">
       <Filter>Source Files\base\factory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\factory\FunctionFactory.hpp">
-      <Filter>Source Files\base\factory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\factory\HardwareFactory.hpp">
       <Filter>Source Files\base\factory</Filter>
     </ClInclude>
@@ -2152,18 +2149,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp">
       <Filter>Source Files\base\function</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\function\GmatFunction.hpp">
-      <Filter>Source Files\base\function</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\function\MatlabFunction.hpp">
-      <Filter>Source Files\base\function</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp">
-      <Filter>Source Files\base\interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\interface\InterfaceException.hpp">
-      <Filter>Source Files\base\interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\interpolator\CubicSplineInterpolator.hpp">
       <Filter>Source Files\base\interpolator</Filter>
@@ -3355,6 +3340,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\coordsystem\IAUFile.hpp">
       <Filter>Source Files\base\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\function\GmatFunction.hpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interface\Interface.hpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\interface\InterfaceException.hpp">
+      <Filter>Source Files\base\interface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

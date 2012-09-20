@@ -49,8 +49,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__SKIP_MSISE90__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\function;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN)\include;$(WXWIN)\contrib\include;$(WXWIN)\include\msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__SKIP_MSISE90__;__BUILD_GMAT_FUNCTION__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -96,6 +96,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\GmatFunctionPlugin\src\base\function\GmatFunction.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp" />
@@ -219,7 +221,6 @@
     <ClCompile Include="..\..\..\src\base\factory\Factory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\FactoryException.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\FactoryManager.cpp" />
-    <ClCompile Include="..\..\..\src\base\factory\FunctionFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\HardwareFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\MathFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\ODEModelFactory.cpp" />
@@ -258,9 +259,8 @@
     <ClCompile Include="..\..\..\src\base\function\Function.cpp" />
     <ClCompile Include="..\..\..\src\base\function\FunctionException.cpp" />
     <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp" />
-    <ClCompile Include="..\..\..\src\base\function\GmatFunction.cpp" />
-    <ClCompile Include="..\..\..\src\base\function\MatlabFunction.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\interface\Interface.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\InterfaceException.cpp" />
     <ClCompile Include="..\..\..\src\base\interpolator\CubicSplineInterpolator.cpp" />
     <ClCompile Include="..\..\..\src\base\interpolator\Interpolator.cpp" />
@@ -619,6 +619,8 @@
     <ClCompile Include="..\..\..\src\gui\rendering\Rendering.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\factory\GmatFunctionFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\GmatFunctionPlugin\src\base\function\GmatFunction.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp" />
@@ -742,7 +744,6 @@
     <ClInclude Include="..\..\..\src\base\factory\Factory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\FactoryException.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\FactoryManager.hpp" />
-    <ClInclude Include="..\..\..\src\base\factory\FunctionFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\HardwareFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\MathFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\ODEModelFactory.hpp" />
@@ -781,9 +782,8 @@
     <ClInclude Include="..\..\..\src\base\function\Function.hpp" />
     <ClInclude Include="..\..\..\src\base\function\FunctionException.hpp" />
     <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp" />
-    <ClInclude Include="..\..\..\src\base\function\GmatFunction.hpp" />
-    <ClInclude Include="..\..\..\src\base\function\MatlabFunction.hpp" />
     <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\interface\Interface.hpp" />
     <ClInclude Include="..\..\..\src\base\interface\InterfaceException.hpp" />
     <ClInclude Include="..\..\..\src\base\interpolator\CubicSplineInterpolator.hpp" />
     <ClInclude Include="..\..\..\src\base\interpolator\Interpolator.hpp" />

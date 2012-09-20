@@ -38,6 +38,9 @@
 #include "CoordinateSystemFactory.hpp"
 #include "ODEModelFactory.hpp"
 //#include "FunctionFactory.hpp"
+#ifdef __BUILD_GMAT_FUNCTION__
+#include "GmatFunctionFactory.hpp"
+#endif
 #include "HardwareFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
@@ -209,6 +212,9 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new CoordinateSystemFactory());
       theFactoryManager->RegisterFactory(new ODEModelFactory());
 //      theFactoryManager->RegisterFactory(new FunctionFactory());
+      #ifdef __BUILD_GMAT_FUNCTION__
+      theFactoryManager->RegisterFactory(new GmatFunctionFactory());
+      #endif
       theFactoryManager->RegisterFactory(new HardwareFactory());
       theFactoryManager->RegisterFactory(new MathFactory());
       theFactoryManager->RegisterFactory(new ParameterFactory());
