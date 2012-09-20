@@ -1,5 +1,5 @@
 # $Id$
-# Environment settings for the extra propagator plugin
+# Environment settings for the GmatFunction plugin
 GMAT_CODE_LOCATION = /home/djc/GsfcCode/GmatDevelopment/src
 GMAT_BIN_LOCATION  = /home/djc/GsfcCode/GmatDevelopment/application/bin
 
