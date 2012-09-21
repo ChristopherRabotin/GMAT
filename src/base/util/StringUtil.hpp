@@ -56,7 +56,7 @@ namespace GmatStringUtil
                            const std::string &to);
    GMAT_API std::string ReplaceNumber(const std::string &str, const std::string &from,
                            const std::string &to);
-   GMAT_API std::string ReplaceRepeatedPlusMinusSings(const std::string &str);
+   GMAT_API std::string ReplaceRepeatedPlusMinusSigns(const std::string &str);
    
    GMAT_API std::string ToString(const bool &val);
    GMAT_API std::string ToString(const Real &val, Integer precision, bool showPoint = false,
@@ -120,6 +120,7 @@ namespace GmatStringUtil
                            std::string &name, const std::string &bracketPair = "()");
    GMAT_API std::string GetArrayName(const std::string &str,
                            const std::string &bracketPair = "()");
+   GMAT_API bool IsOneElementArray(const std::string &str);
    
    GMAT_API void FindFirstAndLast(const std::string &str, char ch, Integer &first,
                            Integer &last);

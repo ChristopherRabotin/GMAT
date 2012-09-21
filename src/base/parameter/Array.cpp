@@ -27,9 +27,9 @@
 #include <sstream>
 
 //#define DEBUG_ARRAY 1
-//#define DEBUG_ARRAY_GET
-//#define DEBUG_ARRAY_SET
-//#define DEBUG_INITIAL_VALUE
+//#define DEBUG_ARRAY_GET 1
+//#define DEBUG_ARRAY_SET 1
+//#define DEBUG_INITIAL_VALUE 1
 
 //---------------------------------
 // static data
@@ -833,6 +833,11 @@ std::string Array::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Array::SetStringParameter(const Integer id, const std::string &value)
 {
+   #ifdef DEBUG_ARRAY_SET
+   MessageInterface::ShowMessage
+      ("Array::SetStringParameter() entered, id=%d, value='%s'\n", id, value.c_str());
+   #endif
+   
    switch (id)
    {
    case INITIAL_VALUE:
@@ -843,16 +848,34 @@ bool Array::SetStringParameter(const Integer id, const std::string &value)
          if (parts.size() == 2)
          {
             std::string name, rowStr, colStr;
+            Integer row, col;
             // parse array name and index
-            GmatStringUtil::GetArrayIndexVar(parts[0], rowStr, colStr, name);
+            GmatStringUtil::GetArrayIndex(parts[0], rowStr, colStr, row, col, name);
             std::string mapstr = rowStr + "," + colStr;
             #ifdef DEBUG_ARRAY_SET
             MessageInterface::ShowMessage
-               ("Array::SetStringParameter() mapstr='%s', value=%s\n",
-                mapstr.c_str(), parts[1].c_str());
+               ("   mapstr='%s', value=%s, row=%d, col=%d\n",
+                mapstr.c_str(), parts[1].c_str(), row, col);
             #endif
             initialValueMap[mapstr] = parts[1];
+            
+            // Save initial value
+            Real rval;
+            #ifdef DEBUG_ARRAY_SET
+            MessageInterface::ShowMessage
+               ("   mNumRows=%d, mNumCols=%d, mSizeSet=%d\n", mNumRows, mNumCols, mSizeSet);
+            #endif
+            if ((GmatStringUtil::ToReal(parts[1], rval)) && (row != -1 && col != -1))
+            {
+               #ifdef DEBUG_ARRAY_SET
+               MessageInterface::ShowMessage("   Setting %s to %f\n", parts[0].c_str(), rval);
+               #endif
+               mRmatValue(row, col) = rval;
+            }
          }
+         #ifdef DEBUG_ARRAY_SET
+         MessageInterface::ShowMessage("Array::SetStringParameter() returning true\n");
+         #endif
          return true;
       }
    default:

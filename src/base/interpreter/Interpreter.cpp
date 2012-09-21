@@ -4116,7 +4116,9 @@ bool Interpreter::SetObjectToObject(GmatBase *toObj, GmatBase *fromObj,
    }
    else
    {
-      InterpreterException ex("Object type of LHS and RHS are not the same.");
+      //InterpreterException ex("Object type of LHS and RHS are not the same.");
+      InterpreterException ex
+         ("Setting \"" + toObj->GetName() + "\" to \"" + rhs + "\" is not allowed before BeginMissionSequence");
       HandleError(ex);
       return false;
    }
@@ -4337,11 +4339,8 @@ bool Interpreter::SetObjectToValue(GmatBase *toObj, const std::string &value)
        toObjType.c_str(), toObj->GetName().c_str(), value.c_str());
    #endif
    
-   if (toObjType != "Variable" && toObjType != "String")
+   if (toObjType != "Variable" && toObjType != "String" && toObjType != "Array")
    {
-      //InterpreterException ex
-      //   ("Setting a String value \"" + value + "\" to an object \"" + toObj->GetName() +
-      //    "\" of type \"" + toObjType + "\" is not allowed");
       InterpreterException ex
          ("Setting an object \"" + toObj->GetName() + "\" of type \"" + toObjType +
           "\" to a value \"" + value + "\" is not allowed");
@@ -4349,7 +4348,35 @@ bool Interpreter::SetObjectToValue(GmatBase *toObj, const std::string &value)
       return false;
    }
    
-   if (toObjType == "String")
+   if (toObjType == "Array")
+   {
+      // Check if array is one element array
+      std::string desc = toObj->GetStringParameter("Description");
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("   Array = '%s'\n", desc.c_str());
+      #endif
+      if (GmatStringUtil::IsOneElementArray(desc))
+      {
+         // Replace [] to () so that value can be assigned
+         std::string initialValueStr = GmatStringUtil::Replace(desc, "[", "(");
+         initialValueStr = GmatStringUtil::Replace(initialValueStr, "]", ")");
+         initialValueStr = initialValueStr + "=" + value;
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage
+            ("   Setting initial value to '%s'\n", initialValueStr.c_str());
+         #endif
+         toObj->SetStringParameter("InitialValue", initialValueStr);
+      }
+      else
+      {
+         InterpreterException ex
+            ("Setting an object \"" + toObj->GetName() + "\" of type \"" + toObjType +
+             "\" to a value \"" + value + "\" is not allowed");
+         HandleError(ex);
+         return false;
+      }
+   }
+   else if (toObjType == "String")
    {
       // check for unpaired single quotes
       if (GmatStringUtil::HasMissingQuote(value, "'"))

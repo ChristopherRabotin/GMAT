@@ -654,7 +654,16 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             break;
          }
       case Gmat::RMATRIX_TYPE:
-         lhsWrapper->SetArray(rmat);
+         if (rhsDataType == Gmat::RMATRIX_TYPE)
+            lhsWrapper->SetArray(rmat);
+         else if (rhsDataType == Gmat::REAL_TYPE)
+         {
+            // Setting scalar to 1x1 matrix is allowed
+            // Fix for GMT3042 (LOJ: 2012.09.21)
+            Rmatrix onebyoneArray(1,1);
+            onebyoneArray(0,0) = rval;
+            lhsWrapper->SetArray(onebyoneArray);
+         }
          break;
       case Gmat::STRING_TYPE:
       case Gmat::ENUMERATION_TYPE:

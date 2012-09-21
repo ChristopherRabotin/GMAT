@@ -669,12 +669,12 @@ bool Assignment::Validate()
          {
             #ifdef DEBUG_VALIDATION
                MessageInterface::ShowMessage("Wrapper types don't match:\n");
-               MessageInterface::ShowMessage("   lhsWrapper: %d type, \"%s\"\n",
-                     lhsWrapper->GetWrapperType(),
-                     lhsWrapper->GetDescription().c_str());
-               MessageInterface::ShowMessage("   rhsWrapper: %d type, \"%s\"\n",
-                     rhsWrapper->GetWrapperType(),
-                     rhsWrapper->GetDescription().c_str());
+               MessageInterface::ShowMessage("   lhsWrapper: %d type, \"%s\", lhsDataType: %d\n",
+                     lhsWrapper->GetWrapperType(), lhsWrapper->GetDescription().c_str(),
+                     lhsDataType);
+               MessageInterface::ShowMessage("   rhsWrapper: %d type, \"%s\", rhsDataType: %d\n",
+                     rhsWrapper->GetWrapperType(), rhsWrapper->GetDescription().c_str(),
+                     rhsDataType);
                MessageInterface::ShowMessage("Checking compatibility of %s "
                      "with %s\n", PARAM_TYPE_STRING[lhsDataType].c_str(),
                      PARAM_TYPE_STRING[rhsDataType].c_str());
@@ -719,12 +719,31 @@ bool Assignment::Validate()
                   if ((rhsDataType != Gmat::STRING_TYPE) )
                      retval = false;
                }
-               else if (lhsWrapper->GetWrapperType() == Gmat::VARIABLE_WT)
+               //else if (lhsWrapper->GetWrapperType() == Gmat::VARIABLE_WT)
+               else if (lhsDataType == Gmat::REAL_TYPE)
                {
                   if ((rhsDataType != Gmat::STRING_TYPE) &&
                       (rhsDataType != Gmat::REAL_TYPE))
                   {
-                     retval = false;
+                     // Setting one element array to a variable is ok, set it to
+                     // true so that it can be checked at run time
+                     if (rhsDataType == Gmat::RMATRIX_TYPE)
+                        retval = true;
+                     else
+                        retval = false;
+                  }
+               }
+               else if (lhsDataType == Gmat::RMATRIX_TYPE)
+               {
+                  if ((rhsDataType != Gmat::STRING_TYPE) &&
+                      (rhsDataType != Gmat::RMATRIX_TYPE))
+                  {
+                     // Setting scalar to one element array is ok, set it to
+                     // true so that it can be checked at run time
+                     if (rhsDataType == Gmat::REAL_TYPE)
+                        retval = true;
+                     else
+                        retval = false;
                   }
                }
                else if (lhsDataType == Gmat::INTEGER_TYPE)
@@ -1842,17 +1861,29 @@ ElementWrapper* Assignment::RunMathTree()
       topNode->GetOutputInfo(returnType, numRow, numCol);
       
       #ifdef DEBUG_ASSIGNMENT_EXEC
-      MessageInterface::ShowMessage("   returnType=%d\n", returnType);
+      MessageInterface::ShowMessage
+         ("   returnType=%d, numRow=%d, numCol=%d\n", returnType, numRow, numCol);
       #endif
       
       if (lhsDataType != returnType)
       {
+         bool isOk = false;
          if (lhsDataType == Gmat::REAL_TYPE && returnType == Gmat::RMATRIX_TYPE &&
              numRow == 1 && numCol == 1)
          {
             // It's ok to assign 1x1 matrix to scalar
+            isOk = true;
          }
-         else
+         else if (lhsDataType == Gmat::RMATRIX_TYPE)
+         {
+            Array *array = (Array*)lhsWrapper->GetRefObject();
+            
+            // It's ok to assign scalar to 1x1 matrix
+            if (array->GetRowCount() == 1 && array->GetColCount() == 1)
+               isOk = true;
+         }         
+         
+         if (!isOk)
          {
             std::string lhsTypeStr = GmatBase::PARAM_TYPE_STRING[lhsDataType];
             CommandException ce;

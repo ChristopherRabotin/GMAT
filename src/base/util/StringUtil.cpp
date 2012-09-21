@@ -699,40 +699,105 @@ std::string GmatStringUtil::ReplaceNumber(const std::string &str, const std::str
 //------------------------------------------------------------------------------
 // std::string ReplaceRepeatedPlusMinusSigns(const std::string &str)
 //------------------------------------------------------------------------------
-std::string ReplaceRepeatedPlusMinusSigns(const std::string &str)
+/**
+ * Replaces repeated plus (+) or minus (-) signs with one sign.
+ * For example "+--+abc-+--def+-+-ghi" will give "+abc-def_ghi".
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ReplaceRepeatedPlusMinusSigns(const std::string &str)
 {
-   // Implementation not complete
-   // Currently not used but will be used by the MathParser in a future
-
-   return str;
-   
-   #if 0
-   // If no + or - found then return
-   if (str.find_first_of("+-") == str.npos)
-      return str;
-   
-   // Find non + or -
-   std::string str1 = str;
-   std::string::size_type start = 0;
-   std::string::size_type length = str1.size();
-   std::size::size_type nonPlusMinus = str1.find_first_not_of(start, "+-");
-   std::string::size_type signLength = length - 1;
-   if (nonPlusMinus != str.npos)
-      signLength = length - (length - nonPlusPinus) + 1;
-   
-   std::string signs = str1.substr(0, signLength);
-   Integer numMinus = signs.NumberOfOccurrences('-');
-   std::string str2;
-   
-   if ((numMinus % 2) == 0)
-      str2 = str2 + "+"
-   else
-      str2 = str2 + "-";
-   
-   // Check more
-   //if (signLength == (length -1))
-   return str2;
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceRepeatedPlusMinusSigns() entered, str='%s'\n", str.c_str());
    #endif
+   
+   std::string str1 = RemoveAllBlanks(str);
+   Integer length = str1.size();
+   std::string signs, nonSigns, finalStr;
+   bool signFound = false, signDone = false;
+   bool nonSignFound = false, nonSignDone = false;
+   
+   for (int i = 0; i < length; i++)
+   {
+      if (str1[i] == '+' || str1[i] == '-')
+      {
+         if (nonSignFound)
+            nonSignDone = true;
+         
+         signFound = true;
+         nonSignFound = false;
+         
+         if (nonSignDone)
+         {
+            #ifdef DEBUG_REPLACE_PLUSMINUS
+            MessageInterface::ShowMessage("   nonSigns = '%s'\n", nonSigns.c_str());
+            #endif
+            finalStr = finalStr + nonSigns;
+            nonSignDone = false;
+            nonSigns = "";
+            signs = str1[i];
+         }
+         else
+         {
+            signs = signs + str1[i];
+         }
+      }
+      else
+      {
+         if (signFound)
+            signDone = true;
+         
+         signFound = false;
+         nonSignFound = true;
+         
+         if (signDone)
+         {
+            #ifdef DEBUG_REPLACE_PLUSMINUS
+            MessageInterface::ShowMessage("   signs = '%s'\n", signs.c_str());
+            #endif
+            Integer numMinus = NumberOfOccurrences(signs, '-');
+            char finalSign = '-';
+            if ((numMinus % 2) == 0)
+               finalSign = '+';
+            
+            finalStr = finalStr + finalSign;
+            signDone = false;
+            signs = "";
+            nonSigns = str1[i];
+         }
+         else
+         {
+            nonSigns = nonSigns + str1[i];
+         }
+      }
+   }
+   
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage("   last signs = '%s'\n", signs.c_str());
+   MessageInterface::ShowMessage("   last nonSigns = '%s'\n", nonSigns.c_str());
+   #endif
+   
+   // Put last part
+   if (signs != "")
+   {
+      Integer numMinus = NumberOfOccurrences(signs, '-');
+      char finalSign = '-';
+      if ((numMinus % 2) == 0)
+         finalSign = '+';
+      
+      finalStr = finalStr + finalSign;
+   }
+   else if (nonSigns != "")
+   {
+      finalStr = finalStr + nonSigns;
+   }
+   
+   #ifdef DEBUG_REPLACE_PLUSMINUS
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceRepeatedPlusMinusSigns() returning '%s'\n", finalStr.c_str());
+   #endif
+   
+   return finalStr;
 }
 
 
@@ -2090,6 +2155,23 @@ std::string GmatStringUtil::GetArrayName(const std::string &str,
    }
    
    return name;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsOneElementArray(const std::string &str)
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsOneElementArray(const std::string &str)
+{
+   Integer row = -1, col = -1;
+   std::string name;
+   
+   GetArrayIndex(str, row, col, name, "[]");
+   
+   if (row == 1 && col == 1)
+      return true;
+   else
+      return false;
 }
 
 
