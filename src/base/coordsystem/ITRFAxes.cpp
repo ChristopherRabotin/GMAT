@@ -27,8 +27,6 @@
 #include "DynamicAxes.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
-#include "DeFile.hpp"
-#include "Planet.hpp"
 #include "RealUtilities.hpp"
 #include "Linear.hpp"
 #include "GmatConstants.hpp"
@@ -38,8 +36,6 @@
 #include "MessageInterface.hpp"
 #include "Attitude.hpp"
 #include "FileManager.hpp"
-
-#define PI 3.1415926535897
 
 using namespace GmatMathUtil;        // for trig functions, etc.
 using namespace GmatTimeConstants;   // for JD offsets, etc.
@@ -52,6 +48,10 @@ using namespace GmatTimeConstants;   // for JD offsets, etc.
 //#define DEBUG_ITRF_ROT_MATRIX
 //#define DEBUG_ITRF_RECOMPUTE
 //#define DEBUG_ITRF_EPOCHS
+//#define DEBUG_ITRFAXES_CONSTRUCTION
+//#define DEBUG_ITRFAXES_CLONE
+//#define DEBUG_ITRFAXES_INITIALIZE
+//#define DEBUG_ITRF_SET_REF
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -79,16 +79,17 @@ using namespace GmatTimeConstants;   // for JD offsets, etc.
 //------------------------------------------------------------------------------
 ITRFAxes::ITRFAxes(const std::string &itsName) :
    DynamicAxes("ITRF",itsName),
-   iauFile                  (NULL),
-   prevEpoch                (0.0),
-   prevUpdateInterval       (-99.9),
-   prevOriginUpdateInterval (-99.9),
-   prevLunaSrc              (Gmat::RotationDataSrcCount)
+   iauFile                  (NULL)
 {
    objectTypeNames.push_back("ITRFAxes");
    parameterCount = ITRFAxesParamCount;
 
    baseSystem = "ICRF";
+
+   #ifdef DEBUG_ITRFAXES_CONSTRUCTION
+      MessageInterface::ShowMessage("Now constructing ITRFAxes with name '%s'\n",
+         itsName.c_str());
+   #endif
 }
 
 
@@ -104,17 +105,11 @@ ITRFAxes::ITRFAxes(const std::string &itsName) :
 //------------------------------------------------------------------------------
 ITRFAxes::ITRFAxes(const ITRFAxes &itrfAxes) :
    DynamicAxes(itrfAxes),
-   iauFile                  (NULL),
-   prevEpoch                (itrfAxes.prevEpoch),
-   prevUpdateInterval       (itrfAxes.prevUpdateInterval),
-   prevOriginUpdateInterval (itrfAxes.prevOriginUpdateInterval),
-   prevLunaSrc              (itrfAxes.prevLunaSrc)
+   iauFile                  (NULL)
 {
-   #ifdef DEBUG_ITRF_RECOMPUTE
-      MessageInterface::ShowMessage("Constructing a new ITRFAxes (%p) from the old one (%p)\n",
-            this, &itrfAxes);
-      MessageInterface::ShowMessage("   and prevEpoch(old) %12.10f copied to prevEpoch(new) %12.10f\n",
-            itrfAxes.prevEpoch, prevEpoch);
+   #ifdef DEBUG_ITRFAXES_CONSTRUCTION
+       MessageInterface::ShowMessage("Now copy constructing ITRFAxes from object (%p) with name '%s'\n", &itrfAxes,
+         itrfAxes.GetName().c_str());
    #endif
 }
 
@@ -136,11 +131,6 @@ const ITRFAxes& ITRFAxes::operator=(const ITRFAxes &itrfAxes)
    DynamicAxes::operator=(itrfAxes); 
 
    iauFile                  = itrfAxes.iauFile;
-   prevEpoch                = itrfAxes.prevEpoch;
-   prevUpdateInterval       = itrfAxes.prevUpdateInterval;
-   prevOriginUpdateInterval = itrfAxes.prevOriginUpdateInterval;
-   prevLunaSrc              = itrfAxes.prevLunaSrc;
-
    return *this;
 }
 
@@ -207,6 +197,11 @@ GmatCoordinate::ParameterUsage ITRFAxes::UsesNutationUpdateInterval() const
 //------------------------------------------------------------------------------
 bool ITRFAxes::Initialize()
 {
+   #ifdef DEBUG_ITRFAXES_INITIALIZE
+      MessageInterface::ShowMessage("Initialize ITRFAxes: with name '%s'\n",
+         instanceName.c_str());
+   #endif
+
    DynamicAxes::Initialize();
    if (originName == SolarSystem::EARTH_NAME) InitializeFK5();
    #ifdef DEBUG_FIRST_CALL
@@ -223,11 +218,17 @@ bool ITRFAxes::Initialize()
    {
 	   FileManager* fm = FileManager::Instance();
 	   std::string name = fm->GetFilename("EOP_FILE");
-	   MessageInterface::ShowMessage("EOP file name:'%s'\n", name.c_str());
 	   EopFile* eopFile = new EopFile(name);
 	   eopFile->Initialize();
 	   SetEopFile(eopFile);
    }
+
+   isInitialized = true;
+
+   #ifdef DEBUG_ITRFAXES_INITIALIZE
+      MessageInterface::ShowMessage("End initialize ITRFAxes: with name '%s'\n",
+         instanceName.c_str());
+   #endif
 
    return true;
 }
@@ -248,6 +249,11 @@ bool ITRFAxes::Initialize()
 //------------------------------------------------------------------------------
 GmatBase* ITRFAxes::Clone() const
 {
+   #ifdef DEBUG_ITRFAXES_CLONE
+   MessageInterface::ShowMessage("Now clone ITRFAxes from object (%p) with name '%s'\n", this,
+        this->GetName().c_str());
+   #endif
+
    return (new ITRFAxes(*this));
 }
 
@@ -274,7 +280,7 @@ bool ITRFAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    if (obj == NULL)
       return false;
 
-   #ifdef DEBUG_SET_REF
+   #ifdef DEBUG_ITRF_SET_REF
    MessageInterface::ShowMessage
       ("ITRFAxes::SetRefObject() <%s>, obj=%p, name=%s\n", GetName().c_str(),
        obj, name.c_str());
@@ -301,11 +307,12 @@ bool ITRFAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //  Rmatrix33 R1(Real angle)
 //------------------------------------------------------------------------------
 /**
- * This method computes and returns the R1 matrix given the input angle
+ * This method is used to calculate the rotation matrix when the frame rotates
+ * about the X-axis for a given angle.
  *
- * @param <angle>   input angle
+ * @param <angle>   angle (in radians) that the frame rotates about the X-axis.
  *
- * @return R1 matrix
+ * @return R1 rotation matrix
  */
 //------------------------------------------------------------------------------
 Rmatrix33 ITRFAxes::R1(Real angle)
@@ -325,11 +332,12 @@ Rmatrix33 ITRFAxes::R1(Real angle)
 //  Rmatrix33 R2(Real angle)
 //------------------------------------------------------------------------------
 /**
- * This method computes and returns the R2 matrix given the input angle
+ * This method is used to calculate the rotation matrix when the frame rotates
+ * about the Y-axis for a given angle.
  *
- * @param <angle>   input angle
+ * @param <angle>   angle (in radians) that the frame rotates about the Y-axis.
  *
- * @return R2 matrix
+ * @return R1 rotation matrix
  */
 //------------------------------------------------------------------------------
 Rmatrix33 ITRFAxes::R2(Real angle)
@@ -348,11 +356,12 @@ Rmatrix33 ITRFAxes::R2(Real angle)
 //  Rmatrix33 R3(Real angle)
 //------------------------------------------------------------------------------
 /**
- * This method computes and returns the R3 matrix given the input angle
+ * This method is used to calculate the rotation matrix when the frame rotates
+ * about the Z-axis for a given angle.
  *
- * @param <angle>   input angle
+ * @param <angle>   angle (in radians) that the frame rotates about the Z-axis.
  *
- * @return R3 matrix
+ * @return R1 rotation matrix
  */
 //------------------------------------------------------------------------------
 Rmatrix33 ITRFAxes::R3(Real angle)
@@ -372,11 +381,12 @@ Rmatrix33 ITRFAxes::R3(Real angle)
 //  Rmatrix33 Skew(Rvector3 vec)
 //------------------------------------------------------------------------------
 /**
- * This method computes and returns the Skew matrix given the input vector
+ * This method is used to calculate the rotation matrix specified by the
+ * input skew vector.
  *
- * @param <vec>   input vector
+ * @param <vec>   skew vector
  *
- * @return Skew matrix
+ * @return        rotation matrix
  */
 //------------------------------------------------------------------------------
 Rmatrix33 ITRFAxes::Skew(Rvector3 vec)
@@ -409,66 +419,17 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "Calling CalculateRotationMatrix at epoch %lf; ", atEpoch.Get());
+            "Calling ITRF::CalculateRotationMatrix at epoch %18.12lf; \n", atEpoch.Get());
    #endif
    Real theEpoch = atEpoch.Get();
-   #ifdef DEBUG_ITRF_EPOCHS
-      MessageInterface::ShowMessage("CalculateRotationMatrix(%s)   epoch = %12.10f, prevEpoch = %12.10f ...... ",
-            (coordName.c_str()), theEpoch, prevEpoch);
-   #endif
-   #ifdef DEBUG_ITRF_RECOMPUTE
-      MessageInterface::ShowMessage("Entering CalculateRotationMatrix on object %s (%p) of type %s, origin = %s\n",
-            (coordName.c_str()), this, (GetTypeName()).c_str(), originName.c_str());
-      MessageInterface::ShowMessage("     epoch = %12.10f, prevEpoch = %12.10f\n", theEpoch, prevEpoch);
-   #endif
-
-   // Code must check to see if we need to recompute.  Recomputation is only necessary
-   // if one or more of the following conditions are true:
-   // 1. the epoch is different (within machine precision) from the epoch at the last computation
-   // 2. if the origin is the Earth, the nutation update interval has changed
-   // 3. if the origin is Luna, the rotation data source has changed
-
-   if ((!forceComputation)                    &&
-       (originName == SolarSystem::MOON_NAME) &&
-       (IsEqual(theEpoch,      prevEpoch))    &&
-       (prevLunaSrc == ((CelestialBody*)origin)->GetRotationDataSource()))
-   {
-      #ifdef DEBUG_ITRF_RECOMPUTE
-         MessageInterface::ShowMessage("Don't need to recompute for Luna at this time!!\n");
-      #endif
-      return;
-   }
-   
-
-   // compute rotMatrix and rotDotMatrix
-   Real intervalFromOrigin = ((Planet*) origin)->GetNutationUpdateInterval();
-   if ((!forceComputation)                                     &&
-       (IsEqual(theEpoch,           prevEpoch)                 &&
-       (IsEqual(intervalFromOrigin, prevOriginUpdateInterval)) &&
-       (IsEqual(updateInterval,     prevUpdateInterval))))
-   {
-      #ifdef DEBUG_ITRF_EPOCHS
-         MessageInterface::ShowMessage("NOT recomputing\n");
-      #endif
-      return;
-   }
-
-   #ifdef DEBUG_ITRF_EPOCHS
-      MessageInterface::ShowMessage("RECOMPUTING!!!\n");
-   #endif
-   #ifdef DEBUG_FIRST_CALL
-      if (!firstCallFired)
-         MessageInterface::ShowMessage("In BFA, Body is the Earth\n");
-   #endif
-
 
    //  Perform time computations and read EOP file
-   Real sec2rad = PI/180/3600;
+   Real sec2rad = GmatMathConstants::RAD_PER_DEG/3600;
    Real a1MJD = theEpoch;
 
    Real utcMJD = TimeConverterUtil::Convert(a1MJD,
-                 TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
-                 JD_JAN_5_1941);
+                    TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+                    JD_JAN_5_1941);
    Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
 
    Real xp,yp,LOD,dUT1;
@@ -479,8 +440,8 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    yp = yp*sec2rad;
 
    Real ut1MJD = TimeConverterUtil::Convert(a1MJD,
-                 TimeConverterUtil::A1MJD, TimeConverterUtil::UT1,
-                 JD_JAN_5_1941);
+                    TimeConverterUtil::A1MJD, TimeConverterUtil::UT1,
+                    JD_JAN_5_1941);
 
    // Compute elapsed Julian centuries (UT1)
    Real tDiff = JD_JAN_5_1941 - JD_OF_J2000;
@@ -488,8 +449,8 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
    // convert input A1 MJD to TT MJD (for most calculations)
    Real ttMJD = TimeConverterUtil::Convert(a1MJD,
-                TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
-                JD_JAN_5_1941);
+                   TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+                   JD_JAN_5_1941);
 
    Real jdTT    = ttMJD + JD_JAN_5_1941; // right?
    // Compute Julian centuries of TDB from the base epoch (J2000)
@@ -499,14 +460,14 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    //  Compute the Polar Motion Matrix, W, and Earth Rotation Angle, theta
    Real sPrime = -0.000047*sec2rad*T_TT;
    Rmatrix33 W = R3(-sPrime)*R2(xp)*R1(yp);
-   Real theta  = fmod(2*PI*(0.7790572732640 + 1.00273781191135448*(jdUT1 - 2451545.0)),2*PI);
+   Real theta  = fmod(GmatMathConstants::TWO_PI*(0.7790572732640 + 1.00273781191135448*(jdUT1 - 2451545.0)),GmatMathConstants::TWO_PI);
 
    //  Compute the precession-nutation matrix
    //  . interpolate the XYs data file
    Real data[3];
    if (iauFile == NULL)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, "Error: IAUFile object is NULL. GMAT cann't get IAU data...\n");
+      throw CoordinateSystemException("Error: IAUFile object is NULL. GMAT cannot get IAU data.\n");
    }
    iauFile->GetIAUData(jdTT,data,3,9);
    Real X = data[0]*sec2rad;
@@ -558,39 +519,6 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       MessageInterface::ShowMessage("Rdot(2,0)=%18.10lf,  Rdot(2,1)=%18.10lf,  Rdot(2,2)=%18.10lf\n\n\n",Rdot.GetElement(2,0),Rdot.GetElement(2,1),Rdot.GetElement(2,2));
    #endif
 
-   if (overrideOriginInterval)
-   {
-      updateIntervalToUse = updateInterval;
-      #ifdef DEBUG_FIRST_CALL
-         if (!firstCallFired)
-            MessageInterface::ShowMessage(
-               "   Overrode origin interval; set to %.12lf\n",
-               updateIntervalToUse);
-      #endif
-   }
-   else
-   {
-      updateIntervalToUse = intervalFromOrigin;
-      #ifdef DEBUG_FIRST_CALL
-         if (!firstCallFired)
-            MessageInterface::ShowMessage(
-               "   Using body's origin interval, %.12lf\n",
-               updateIntervalToUse);
-      #endif
-   }
-
-   // save the data to compare against next time
-   prevUpdateInterval       = updateInterval;
-   prevOriginUpdateInterval = intervalFromOrigin;
-
-   // Save the epoch for comparison the next time through
-   prevEpoch = theEpoch;
-   #ifdef DEBUG_ITRF_RECOMPUTE
-      MessageInterface::ShowMessage("at the end, just set prevEpoch to %12.10f\n", prevEpoch);
-   #endif
-   if (originName == SolarSystem::MOON_NAME)
-      prevLunaSrc = ((CelestialBody*)origin)->GetRotationDataSource();
-
    #ifdef DEBUG_FIRST_CALL
       firstCallFired = true;
       MessageInterface::ShowMessage("NOW exiting ITRFAxes::CalculateRotationMatrix ...\n");
@@ -599,7 +527,7 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 }
 
 //------------------------------------------------------------------------------
-//  void GetRotationMatrix(const A1Mjd &atEpoch,
+//  Rmatrix33 GetRotationMatrix(const A1Mjd &atEpoch,
 //                         bool forceComputation = false)
 //------------------------------------------------------------------------------
 /**
@@ -610,9 +538,11 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
  * @param forceComputation force computation even if it is not time to do it
  *                         (default is false)
  *
+ * @return rotation matrix
  */
 //------------------------------------------------------------------------------
-void  ITRFAxes::GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation)
+Rmatrix33  ITRFAxes::GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation)
 {
 	CalculateRotationMatrix(atEpoch, forceComputation);
+	return rotMatrix;
 }

@@ -292,7 +292,7 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
 
    if (inBaseName != outBaseName)
    {
-      ConvertFromBaseToBase(epoch, inBaseName, outBaseName, intState, baseState);
+      ConvertFromBaseToBase(epoch, inCoord->GetSolarSystem(), inBaseName, outBaseName, intState, baseState);
    }
    else
    {
@@ -442,6 +442,7 @@ Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
 
 //------------------------------------------------------------------------------
 // bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
+//          SolarSystem *solarSystem,
 //          const std::string &inBase,  const std::string &outBase,
 //          const Rvector &inBaseState, Rvector &outBaseState)
 //------------------------------------------------------------------------------
@@ -450,6 +451,7 @@ Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
  * to the base system of the outCoord, and returns the result in outBaseState.
  *
  * @param epoch            time for which to do the conversion
+ * @param solarSystem      pointer to the solar system to use
  * @param inBase           inCoord base system
  * @param outBase          outCoord base system
  * @param inBaseState      input state, in inCoord base system
@@ -459,6 +461,7 @@ Rmatrix33 CoordinateConverter::GetLastRotationDotMatrix() const
  */
 //------------------------------------------------------------------------------
 bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
+                                                SolarSystem *solarSystem,
 		                                          const std::string &inBase,
 		                                          const std::string &outBase,
 		                                          const Rvector &inBaseState,
@@ -483,7 +486,7 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
    const Real *in  = inBaseState.GetDataVector();
    Real       *out = new Real[outBaseState.GetSize()];
 
-   if (ConvertFromBaseToBase(epoch, inBase, outBase, in, out))		// made changes by TUAN NGUYEN
+   if (ConvertFromBaseToBase(epoch, solarSystem, inBase, outBase, in, out))
    {
       outBaseState.Set(out);
       delete [] out;
@@ -497,6 +500,7 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
 
 //------------------------------------------------------------------------------
 // bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
+//          SolarSystem *solarSystem,
 //          const std::string &inBase,  const std::string &outBase,
 //          const Real *inBaseState,    Real *&outBaseState)
 //------------------------------------------------------------------------------
@@ -505,6 +509,7 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
  * to the base system of the outCoord, and returns the result in outBaseState.
  *
  * @param epoch            time for which to do the conversion
+ * @param solarSystem      pointer to solar system to use
  * @param inBase           inCoord base system
  * @param outBase          outCoord base system
  * @param inBaseState      input state, in inCoord base system
@@ -514,6 +519,7 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
  */
 //------------------------------------------------------------------------------
 bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
+                                                SolarSystem *solarSystem,
 		                                          const std::string &inBase,
 		                                          const std::string &outBase,
                                                 const Real *inBaseState,
@@ -529,6 +535,12 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
    // Use the matrix from ICRF to FK5
    Real iToF[9];
    ICRFAxes* icrf = new ICRFAxes();
+
+   // the values set to origin and j2000body are not needed for computation of
+   // the rotation matrix, but they are needed for initialization
+   icrf->SetOriginName("Sun");
+   icrf->SetJ2000BodyName("Earth");
+   icrf->SetSolarSystem(solarSystem);
    icrf->Initialize();
    icrf->GetRotationMatrix(epoch, true);
    icrf->GetLastRotationMatrix(&iToF[0]);

@@ -64,7 +64,7 @@ public:
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name = "");
 
-   void  GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation = false);
+   Rmatrix33  GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation = false);
 
 protected:
 
@@ -82,12 +82,5 @@ protected:
                                         bool forceComputation = false);
 
    IAUFile*					    iauFile;
-
-   Real                     prevEpoch;
-   Real                     prevUpdateInterval;
-   Real                     prevOriginUpdateInterval;
-   Gmat::RotationDataSource prevLunaSrc;
-
-
 };
 #endif // ITRFAxes_hpp

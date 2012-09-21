@@ -1,4 +1,3 @@
-//$Id$
 //------------------------------------------------------------------------------
 //                                  CoordinateConverter
 //------------------------------------------------------------------------------
@@ -29,6 +28,7 @@
 #include "A1Mjd.hpp"
 #include "CoordinateSystem.hpp"
 #include "Rvector.hpp"
+#include "SolarSystem.hpp"
 
 class GMAT_API CoordinateConverter
 {
@@ -62,10 +62,10 @@ protected:
    Rmatrix33 lastRotMatrix;
    Rmatrix33 lastRotDotMatrix;
 
-   bool         ConvertFromBaseToBase(const A1Mjd &epoch,
+   bool         ConvertFromBaseToBase(const A1Mjd &epoch, SolarSystem *solarSystem,
                                       const std::string &inBase,  const std::string &outBase,
                                       const Rvector &inBaseState, Rvector &outBaseState);
-   bool         ConvertFromBaseToBase(const A1Mjd &epoch,
+   bool         ConvertFromBaseToBase(const A1Mjd &epoch, SolarSystem *solarSystem,
                                       const std::string &inBase,  const std::string &outBase,
                                       const Real *inBaseState,    Real *outBaseState);
    

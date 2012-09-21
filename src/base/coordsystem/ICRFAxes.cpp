@@ -12,6 +12,7 @@
 // Contract NNG10CP02C, Task Order 28
 //
 // Author: Wendy C. Shoan/GSFC/GSSB
+//         Tuan Dang Nguyen/GSFC
 // Created: 2012.02.23
 //
 /**
@@ -23,7 +24,6 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "RealUtilities.hpp"
-#include "Planet.hpp"
 #include "ICRFAxes.hpp"
 #include "InertialAxes.hpp"
 #include "MessageInterface.hpp"
@@ -31,15 +31,12 @@
 using namespace GmatMathUtil;      // for trig functions, etc.
 
 //#define DEBUG_ICRFAXES_CONSTRUCTION
+//#define DEBUG_ICRFAXES_CLONE
 //#define DEBUG_ICRFAXES_INITIALIZE
 //#define DEBUG_ICRFAXES_FIRST_CALL
 //#define DEBUG_ICRFAXES_ROT_MATRIX
 //#define DEBUG_ICRFAXES_RECOMPUTE
 //#define DEBUG_ICRFAXES_EPOCHS
-
-#ifdef DEBUG_ICRFAXES_CONSTRUCTION
-   #include "MessageInterface.hpp"
-#endif
 
 #ifdef DEBUG_ICRFAXES_FIRST_CALL
    static bool firstCallFired = false;
@@ -67,14 +64,13 @@ using namespace GmatMathUtil;      // for trig functions, etc.
 //---------------------------------------------------------------------------
 ICRFAxes::ICRFAxes(const std::string &itsName) :
    InertialAxes   ("ICRF",itsName),
-   isInitialized	(false),
    icrfFile       (NULL)
 {
    objectTypeNames.push_back("ICRFAxes");
    baseSystem     = "FK5";
    parameterCount = ICRFAxesParamCount;
    #ifdef DEBUG_ICRFAXES_CONSTRUCTION
-      MessageInterface::ShowMessage("Now constructing ICRFAxes with name %s\n",
+      MessageInterface::ShowMessage("Now constructing ICRFAxes with name '%s'\n",
          itsName.c_str());
    #endif
 }
@@ -91,9 +87,12 @@ ICRFAxes::ICRFAxes(const std::string &itsName) :
 //---------------------------------------------------------------------------
 ICRFAxes::ICRFAxes(const ICRFAxes &icrf) :
    InertialAxes(icrf),
-   isInitialized	(icrf.isInitialized),
    icrfFile       (icrf.icrfFile)
 {
+#ifdef DEBUG_ICRFAXES_CONSTRUCTION
+   MessageInterface::ShowMessage("Now copy-constructing ICRFAxes from object (%p) with name '%s'\n", &icrf,
+     icrf.GetName().c_str());
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -114,7 +113,6 @@ const ICRFAxes& ICRFAxes::operator=(const ICRFAxes &icrf)
 
    InertialAxes::operator=(icrf);
    icrfFile 		= icrf.icrfFile;
-   isInitialized	= icrf.isInitialized;
 
    return *this;
 }
@@ -142,20 +140,69 @@ ICRFAxes::~ICRFAxes()
 bool ICRFAxes::Initialize()
 {
    #ifdef DEBUG_ICRFAXES_INITIALIZE
-      MessageInterface::ShowMessage("Initialize ICRFAxes: with name %s\n",
+      MessageInterface::ShowMessage("Initialize ICRFAxes: with name '%s'\n",
          instanceName.c_str());
    #endif
-   if (isInitialized) return true;
 
-   InertialAxes::Initialize();
+   if (!isInitialized)
+   {
+      InertialAxes::Initialize();
 
-   // Create an ICRFFile object in order to read Euler rotation vector:
-   if (icrfFile == NULL)
-      icrfFile = ICRFFile::Instance();
-   icrfFile->Initialize();
+      // Create an ICRFFile object in order to read Euler rotation vector:
+      if (icrfFile == NULL)
+         icrfFile = ICRFFile::Instance();
+      icrfFile->Initialize();
+      isInitialized = true;
+   }
+
+   #ifdef DEBUG_ICRFAXES_INITIALIZE
+   MessageInterface::ShowMessage("End initialize ICRFAxes: with name '%s'\n",
+         instanceName.c_str());
+   #endif
 
    return true;
 }
+
+//----------------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesEpoch() const
+//----------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage ICRFAxes::UsesEpoch() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+
+//-----------------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem) const
+//-----------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage ICRFAxes::UsesEopFile(const std::string &forBaseSystem) const
+{
+   if (forBaseSystem == baseSystem)
+      return GmatCoordinate::REQUIRED;
+   return GmatCoordinate::NOT_USED;
+}
+
+
+//----------------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesItrfFile() const
+//----------------------------------------------------------------------------------
+/**
+ * @see AxisSystem
+ */
+//---------------------------------------------------------------------------
+GmatCoordinate::ParameterUsage ICRFAxes::UsesItrfFile() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
@@ -172,6 +219,10 @@ bool ICRFAxes::Initialize()
 //------------------------------------------------------------------------------
 GmatBase* ICRFAxes::Clone() const
 {
+   #ifdef DEBUG_ICRFAXES_CONSTRUCTION
+   MessageInterface::ShowMessage("Now clone ICRFAxes from object (%p) with name '%s'\n", this,
+        this->GetName().c_str());
+   #endif
    return (new ICRFAxes(*this));
 }
 
@@ -196,61 +247,11 @@ GmatBase* ICRFAxes::Clone() const
 void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                             bool forceComputation)
 {
+   Real theEpoch = atEpoch.Get();
    #ifdef DEBUG_ICRFAXES_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "Calling CalculateRotationMatrix at epoch %lf; ", atEpoch.Get());
-   #endif
-   Real theEpoch = atEpoch.Get();
-   #ifdef DEBUG_ICRFAXES_EPOCHS
-      MessageInterface::ShowMessage("CalculateRotationMatrix(%s)   epoch = %12.10f, prevEpoch = %12.10f ...... \n",
-            (coordName.c_str()), theEpoch, prevEpoch);
-   #endif
-   #ifdef DEBUG_ICRFAXES_RECOMPUTE
-      MessageInterface::ShowMessage("Entering CalculateRotationMatrix on object %s (%p) of type %s, origin = %s\n",
-            (coordName.c_str()), this, (GetTypeName()).c_str(), originName.c_str());
-      MessageInterface::ShowMessage("     epoch = %12.10f, prevEpoch = %12.10f\n", theEpoch, prevEpoch);
-   #endif
-
-   // Code must check to see if we need to recompute.  Recomputation is only necessary
-   // if one or more of the following conditions are true:
-   // 1. the epoch is different (within machine precision) from the epoch at the last computation
-   // 2. if the origin is the Earth, the nutation update interval has changed
-   // 3. if the origin is Luna, the rotation data source has changed
-
-   if ((!forceComputation)                    &&
-       (originName == SolarSystem::MOON_NAME) &&
-       (IsEqual(theEpoch,      prevEpoch))    &&
-       (prevLunaSrc == ((CelestialBody*)origin)->GetRotationDataSource()))
-   {
-      #ifdef DEBUG_ICRFAXES_RECOMPUTE
-         MessageInterface::ShowMessage("Don't need to recompute for Luna at this time!!\n");
-      #endif
-      return;
-   }
-
-   // compute rotMatrix and rotDotMatrix
-   Real intervalFromOrigin = ((Planet*) origin)->GetNutationUpdateInterval();
-   if ((!forceComputation)                                     &&
-       (IsEqual(theEpoch,           prevEpoch)                 &&
-       (IsEqual(intervalFromOrigin, prevOriginUpdateInterval)) &&
-       (IsEqual(updateInterval,     prevUpdateInterval))))
-   {
-      #ifdef DEBUG_ICRFAXES_EPOCHS
-         MessageInterface::ShowMessage("NOT recomputing\n");
-      #endif
-      #ifdef DEBUG_ICRFAXES_RECOMPUTE
-         MessageInterface::ShowMessage("Don't need to recompute for Earth at this time!!\n");
-      #endif
-      return;
-   }
-
-   #ifdef DEBUG_ICRFAXES_EPOCHS
-      MessageInterface::ShowMessage("RECOMPUTING!!!\n");
-   #endif
-   #ifdef DEBUG_ICRFAXES_FIRST_CALL
-      if (!firstCallFired)
-         MessageInterface::ShowMessage("In BFA, Body is the Earth\n");
+            "Calling ICRF::CalculateRotationMatrix at epoch %18.12lf; \n", theEpoch);
    #endif
 
    // Specify Euler rotation vector for theEpoch:
@@ -274,10 +275,10 @@ void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    rotMatrix.SetElement(2,2, c+a[2]*a[2]*(1-c));
 
    for (int i = 0; i < 3; ++i)
-     for (int j = 0; j < 3; ++j)
-        rotDotMatrix.SetElement(i,j, 0.0);
+      for (int j = 0; j < 3; ++j)
+    	  rotDotMatrix.SetElement(i,j, 0.0);
 
-	#ifdef DEBUG_ICRFAXES_ROT_MATRIX
+   #ifdef DEBUG_ICRFAXES_ROT_MATRIX
       MessageInterface::ShowMessage("theEpoch  = %18.12lf\n",theEpoch);
 
       MessageInterface::ShowMessage("rotation vector = %18.12e %18.12e %18.12e\n", vec[0], vec[1], vec[2]);
@@ -290,49 +291,17 @@ void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       MessageInterface::ShowMessage("Rdot(2,0)=%18.12e,  Rdot(2,1)=%18.12e,  Rdot(2,2)=%18.12e\n\n\n",rotDotMatrix(2,0),rotDotMatrix(2,1),rotDotMatrix(2,2));
    #endif
 
-   if (overrideOriginInterval)
-   {
-      updateIntervalToUse = updateInterval;
-      #ifdef DEBUG_ICRFAXES_FIRST_CALL
-         if (!firstCallFired)
-            MessageInterface::ShowMessage(
-               "   Overrode origin interval; set to %.12lf\n",
-               updateIntervalToUse);
-      #endif
-   }
-   else
-   {
-      updateIntervalToUse = intervalFromOrigin;
-      #ifdef DEBUG_ICRFAXES_FIRST_CALL
-         if (!firstCallFired)
-            MessageInterface::ShowMessage(
-               "   Using body's origin interval, %.12lf\n",
-               updateIntervalToUse);
-      #endif
-   }
-
-   // save the data to compare against next time
-   prevUpdateInterval       = updateInterval;
-   prevOriginUpdateInterval = intervalFromOrigin;
-
-   // Save the epoch for comparison the next time through
-   prevEpoch = theEpoch;
-   #ifdef DEBUG_ICRFAXES_RECOMPUTE
-      MessageInterface::ShowMessage("at the end, just set prevEpoch to %12.10f\n", prevEpoch);
-   #endif
-   if (originName == SolarSystem::MOON_NAME)
-      prevLunaSrc = ((CelestialBody*)origin)->GetRotationDataSource();
-
    #ifdef DEBUG_ICRFAXES_FIRST_CALL
       firstCallFired = true;
       MessageInterface::ShowMessage("NOW exiting ICRFAxes::CalculateRotationMatrix ...\n");
    #endif
 
+
 }
 
 //------------------------------------------------------------------------------
-//  void GetRotationMatrix(const A1Mjd &atEpoch,
-//                         bool forceComputation = false)
+//  Rmatrix33 GetRotationMatrix(const A1Mjd &atEpoch,
+//                              bool forceComputation = false)
 //------------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
@@ -342,9 +311,11 @@ void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
  * @param forceComputation force computation even if it is not time to do it
  *                         (default is false)
  *
+ * @return rotation matrix
  */
 //------------------------------------------------------------------------------
-void ICRFAxes::GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation)
+Rmatrix33 ICRFAxes::GetRotationMatrix(const A1Mjd &atEpoch, bool forceComputation)
 {
 	CalculateRotationMatrix(atEpoch, forceComputation);
+	return rotMatrix;
 }
