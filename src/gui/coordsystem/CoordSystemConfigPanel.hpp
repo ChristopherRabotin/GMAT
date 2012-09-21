@@ -17,7 +17,6 @@
 #ifndef CoordSystemConfigPanel_hpp
 #define CoordSystemConfigPanel_hpp
 
-// gui includes
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
 #include "CoordinateSystem.hpp"

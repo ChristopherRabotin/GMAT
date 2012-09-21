@@ -18,7 +18,6 @@
 #ifndef CoordPanel_hpp
 #define CoordPanel_hpp
 
-// gui includes
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
@@ -28,11 +27,11 @@
 class CoordPanel : public wxPanel
 {
 public:
-    // constructors
+    // constructors/destructors
     CoordPanel(wxWindow *parent, bool enableAll);
     ~CoordPanel();
     
-   wxString epochValue;
+   wxString epochValue;   // why are these public?  wcs 2012.09.20
    wxString epochFormatValue;
    
    wxComboBox *GetOriginComboBox() {return originComboBox;}
@@ -60,7 +59,6 @@ public:
    void SetDefaultObjectRefAxis();
    void ShowAxisData(AxisSystem *axis);
    AxisSystem* CreateAxis();
-   void ChangeEpoch(wxString &oldFormat);
    bool SaveData(const std::string &coordName, AxisSystem *axis,
                  wxString &epochFormat);
 

@@ -33,7 +33,7 @@
 //#define DEBUG_COORD_DIALOG_XYZ
 
 //------------------------------------------------------------------------------
-// event tables and other macros for wxWindows
+// event tables and other macros for wxWidgets
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(CoordSysCreateDialog, GmatDialog)
@@ -43,6 +43,12 @@ END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
 // CoordSysCreateDialog(wxWindow *parent)
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ *
+ * @param  parent   the parent window
+ */
 //------------------------------------------------------------------------------
 CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
    : GmatDialog(parent, -1, wxString(_T("New Coordinate System")))
@@ -56,6 +62,10 @@ CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
 
 //------------------------------------------------------------------------------
 // virtual void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the panel.
+ */
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::Create()
 {
@@ -99,6 +109,10 @@ void CoordSysCreateDialog::Create()
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
+/**
+ * Loads the data onto the panel.
+ */
+//------------------------------------------------------------------------------
 void CoordSysCreateDialog::LoadData()
 {
    #ifdef DEBUG_COORDDIALOG_LOAD
@@ -112,18 +126,14 @@ void CoordSysCreateDialog::LoadData()
       originComboBox = mCoordPanel->GetOriginComboBox();
       typeComboBox = mCoordPanel->GetTypeComboBox();
       primaryComboBox = mCoordPanel->GetPrimaryComboBox();
-//      formatComboBox = mCoordPanel->GetFormatComboBox();
       secondaryComboBox = mCoordPanel->GetSecondaryComboBox();
 
       xComboBox = mCoordPanel->GetXComboBox();
       yComboBox = mCoordPanel->GetYComboBox();
       zComboBox = mCoordPanel->GetZComboBox();
 
-//      intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
-
       mCoordPanel->SetDefaultAxis();
             
-//      wxFormatName = formatComboBox->GetValue().Trim();
       mCoordPanel->EnableOptions();
    }
    catch (BaseException &e)
@@ -141,6 +151,10 @@ void CoordSysCreateDialog::LoadData()
 
 //------------------------------------------------------------------------------
 // virtual void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the panel to the coordinate system object.
+ */
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::SaveData()
 {
@@ -182,7 +196,6 @@ void CoordSysCreateDialog::SaveData()
    if (mIsTextModified)
    {
       Real epoch;
-//      Real interval;
       std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().c_str();
       #ifdef DEBUG_COORD_DIALOG_SAVE
       MessageInterface::ShowMessage
@@ -198,19 +211,9 @@ void CoordSysCreateDialog::SaveData()
       
       // check range here
       
-//      if (isValid && epoch < 0.0)
-//         CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
       if (isValid)
          CheckRealRange(str, epoch, "Epoch", DateUtil::EARLIEST_VALID_MJD_VALUE,
                         DateUtil::LATEST_VALID_MJD_VALUE, true, true, true, true);
-      
-//      str = mCoordPanel->GetIntervalTextCtrl()->GetValue();
-//      isValid = CheckReal(interval, str, "UpdateInterval", "Real Number >= 0");
-//
-////      if (isValid && epoch < 0.0)
-//      if (isValid && interval < 0.0)
-//         CheckReal(interval, str, "UpdateInterval", "Real Number >= 0", true);
-      
    }
    
    if (!canClose)
@@ -286,6 +289,10 @@ void CoordSysCreateDialog::SaveData()
 //------------------------------------------------------------------------------
 // virtual void ResetData()
 //------------------------------------------------------------------------------
+/**
+ * Resets the data
+ */
+//------------------------------------------------------------------------------
 void CoordSysCreateDialog::ResetData()
 {
    mIsCoordCreated = false;
@@ -300,6 +307,12 @@ void CoordSysCreateDialog::ResetData()
 //------------------------------------------------------------------------------
 // void OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when text is updated.
+ *
+ * @param  event   command event to handle
+ */
+//------------------------------------------------------------------------------
 void CoordSysCreateDialog::OnTextUpdate(wxCommandEvent& event)
 {
    if (nameTextCtrl->GetValue().Trim() != "")
@@ -308,8 +321,6 @@ void CoordSysCreateDialog::OnTextUpdate(wxCommandEvent& event)
    }
    
    if (mCoordPanel->GetEpochTextCtrl()->IsModified() )
-//      if (mCoordPanel->GetEpochTextCtrl()->IsModified() ||
-//          mCoordPanel->GetIntervalTextCtrl()->IsModified())
    {
       EnableUpdate(true);
       mIsTextModified = true;
@@ -320,6 +331,12 @@ void CoordSysCreateDialog::OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when a combo box is updated.
+ *
+ * @param  event   command event to handle
+ */
+//------------------------------------------------------------------------------
 void CoordSysCreateDialog::OnComboBoxChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == originComboBox)
@@ -329,10 +346,6 @@ void CoordSysCreateDialog::OnComboBoxChange(wxCommandEvent& event)
    {
       mCoordPanel->EnableOptions();
    }
-//   else if (event.GetEventObject() == formatComboBox)
-//   {
-//      mCoordPanel->ChangeEpoch(wxFormatName);
-//   }
    
    if (nameTextCtrl->GetValue().Trim() != "")
       EnableUpdate(true);
