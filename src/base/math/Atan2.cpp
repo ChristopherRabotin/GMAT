@@ -88,6 +88,13 @@ GmatBase* Atan2::Clone() const
 //------------------------------------------------------------------------------
 void Atan2::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
+   
+   // Input validation is done in ValidateInputs() so this code is commented out
+   // LOJ: 2012.09.21
+   /*
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
    
@@ -105,6 +112,7 @@ void Atan2::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
       rowCount = row1;
       colCount = col1;
    }
+   */
 }
 
 
@@ -124,19 +132,7 @@ bool Atan2::ValidateInputs()
    if (rightNode == NULL)
       throw MathException("Atan2() - Not enough input arguments");
    
-   Integer type1, row1, col1; // Left node
-   Integer type2, row2, col2; // Right node
-   
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-   
-   // Get the type(Real or Matrix), # rows and # columns of the right node
-   rightNode->GetOutputInfo(type2, row2, col2);
-
-   if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
-      return true;
-   else
-      return false;
+   return ValidateScalarInputs();
 }
 
 

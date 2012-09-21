@@ -290,6 +290,19 @@ bool MathFunction::ValidateScalarInputs()
       throw MathException("Input to " + GetTypeName() + "() is not a scalar or "
                           "1x1 matrix, so cannot do " +  GetTypeName() + "()");
    
+   if (rightNode)
+   {
+      leftNode->GetOutputInfo(type1, row1, col1);
+      
+      if (type1 == Gmat::REAL_TYPE)
+         retval = true;
+      else if (type1 == Gmat::RMATRIX_TYPE && row1 == 1 && col1 == 1)
+         retval = true;
+      else
+         throw MathException("Input to " + GetTypeName() + "() is not a scalar or "
+                             "1x1 matrix, so cannot do " +  GetTypeName() + "()");
+   }
+   
    #ifdef DEBUG_VALIDATE_INPUT
    MessageInterface::ShowMessage
       ("MathFunction::ValidateScalarInputs() <%p><%s> returning %s, "
