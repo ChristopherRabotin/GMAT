@@ -42,23 +42,11 @@ ElseIf::ElseIf() :
 {
 }
 
-
-//------------------------------------------------------------------------------
-//  ~ElseIf()
-//------------------------------------------------------------------------------
-/**
- * Destroys the ElseIf command.  (destructor)
- */
-//------------------------------------------------------------------------------
-ElseIf::~ElseIf()
-{}
-
-    
 //------------------------------------------------------------------------------
 //  ElseIf(const ElseIf& ec)
 //------------------------------------------------------------------------------
 /**
- * Constructor that replicates a for command.  (Copy constructor)
+ * Constructor that replicates an ElseIf command.  (Copy constructor)
  *
  * @param ec Elseif to use to construct 'this' ElseIf.
  *
@@ -69,7 +57,6 @@ ElseIf::ElseIf(const ElseIf& ec) :
     GmatCommand   (ec)
 {
 }
-
 
 //------------------------------------------------------------------------------
 //  ElseIf& operator=(const ElseIf& ec)
@@ -92,16 +79,26 @@ ElseIf& ElseIf::operator=(const ElseIf& ec)
 }
 
 //------------------------------------------------------------------------------
+//  ~ElseIf()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the ElseIf command.  (destructor)
+ */
+//------------------------------------------------------------------------------
+ElseIf::~ElseIf()
+{}
+
+//------------------------------------------------------------------------------
 //  bool Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 /**
  * Inserts the command cmd after the command prev.
  *
- * @param cmd Command to insert.
+ * @param cmd  Command to insert.
  *
  * @param prev Command after which to insert the command cmd.
  *
- * @return true if the cmd is inserted, false otherwise.
+ * @return     true if the cmd is inserted, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool ElseIf::Insert(GmatCommand *cmd, GmatCommand *prev)
@@ -126,8 +123,6 @@ bool ElseIf::Initialize()
 {
     bool retval = GmatCommand::Initialize();
 
-    // if specific initialization goes here:
-    
     return retval;
 }
 

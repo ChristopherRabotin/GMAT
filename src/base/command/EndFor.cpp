@@ -13,48 +13,59 @@
 //
 // Author:  Joey Gurganus
 // Created: 2004/01/29
-// Modified: W. Shoan 2004.09.13 - Updated for use in Build 3
 //
 /**
  * Definition for the closing line of a for loop
  */
 //------------------------------------------------------------------------------
-
-
 #include "EndFor.hpp"
 #include "BranchCommand.hpp"
 
+//------------------------------------------------------------------------------
+// static data
+//------------------------------------------------------------------------------
+//none
 
 //------------------------------------------------------------------------------
-// EndFor::EndFor(void)
+// public methods
 //------------------------------------------------------------------------------
-EndFor::EndFor(void) :
+
+//------------------------------------------------------------------------------
+// EndFor()
+//------------------------------------------------------------------------------
+/*
+ * Creates an EndFor object (default constructor)
+ */
+//---------------------------------------------------------------------------
+EndFor::EndFor() :
     GmatCommand         ("EndFor")
 {
    objectTypeNames.push_back("BranchEnd");
    depthChange = -1;
 }
-
-
-//------------------------------------------------------------------------------
-// ~EndFor(void)
-//------------------------------------------------------------------------------
-EndFor::~EndFor(void)
-{
-}
     
-
 //------------------------------------------------------------------------------
 // EndFor(const EndFor& ef) :
 //------------------------------------------------------------------------------
+/*
+ * Creates an EndFor object from the input object (copy constructor)
+ *
+ * @param ef  the EndFor to copy
+ */
+//---------------------------------------------------------------------------
 EndFor::EndFor(const EndFor& ef) :
     GmatCommand         (ef)
 {
 }
 
-
 //------------------------------------------------------------------------------
 // EndFor& operator=(const EndFor& ef)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator for the EndFor command.
+ *
+ * @return A reference to this instance.
+ */
 //------------------------------------------------------------------------------
 EndFor& EndFor::operator=(const EndFor& ef)
 {
@@ -65,15 +76,31 @@ EndFor& EndFor::operator=(const EndFor& ef)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// ~EndFor()
+//------------------------------------------------------------------------------
+/**
+ * Destroys this EndFor instance (destructor)
+ */
+//------------------------------------------------------------------------------
+EndFor::~EndFor()
+{
+}
 
 //------------------------------------------------------------------------------
-// bool Initialize(void)
+// bool Initialize()
 //------------------------------------------------------------------------------
-bool EndFor::Initialize(void)
+/**
+ * Initializes this EndFor command.
+ *
+ * @return  success flag
+ */
+//------------------------------------------------------------------------------
+bool EndFor::Initialize()
 {
    GmatCommand::Initialize();
    
-   // Validate that next points to the owning for command
+   // Validate that next points to the owning For command
    if (!next)
      throw CommandException("EndFor Command not properly reconnected");
 
@@ -84,28 +111,41 @@ bool EndFor::Initialize(void)
    return true;    
 }
 
-
 //------------------------------------------------------------------------------
-// bool Execute(void)
+// bool Execute()
 //------------------------------------------------------------------------------
-bool EndFor::Execute(void)
+/**
+ * Executes this EndFor command.
+ *
+ * @return  success flag
+ */
+//------------------------------------------------------------------------------
+bool EndFor::Execute()
 {
    BuildCommandSummary(true);
    return true;
 }
 
-
 //------------------------------------------------------------------------------
 // bool Insert(GmatCommand *cmd, GmatCommand *prev)
+//------------------------------------------------------------------------------
+/**
+ * Inserts the input command into the command sequences after the specified
+ * command.
+ *
+ * @param   cmd   command to insert
+ * @param   prev  command after which to insert the command cmd
+ *
+ * @return  success flag
+ */
 //------------------------------------------------------------------------------
 bool EndFor::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    // if inserting after End statement for branch command, we want to 
-   // insert right after the entire If command
+   // insert right after the entire For command
    if (this == prev) return ((BranchCommand*)next)->InsertRightAfter(cmd);
    return false;
 }
-
 
 //---------------------------------------------------------------------------
 // bool RenameRefObject(const Gmat::ObjectType type,
@@ -114,7 +154,7 @@ bool EndFor::Insert(GmatCommand *cmd, GmatCommand *prev)
 /*
  * Renames referenced objects
  *
- * @param <type> type of the reference object.
+ * @param <type>    type of the reference object.
  * @param <oldName> old name of the reference object.
  * @param <newName> new name of the reference object.
  *
@@ -125,29 +165,28 @@ bool EndFor::RenameRefObject(const Gmat::ObjectType type,
                              const std::string &oldName,
                              const std::string &newName)
 {
-   // There are no renamealbe objects
+   // There are no renameable objects
    return true;
 }
 
-
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the EndFor.
  *
  * @return clone of the EndFor.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* EndFor::Clone(void) const
+GmatBase* EndFor::Clone() const
 {   
    return (new EndFor(*this));
 }
 
-
 //------------------------------------------------------------------------------
-//  const std::string GetGeneratingString()
+//  const std::string GetGeneratingString(Gmat::WriteMode mode,
+//                                        const std::string &prefix,
+//                                        const std::string &useName)
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
@@ -175,4 +214,7 @@ const std::string& EndFor::GetGeneratingString(Gmat::WriteMode mode,
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
-
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+// none

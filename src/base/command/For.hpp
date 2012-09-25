@@ -13,27 +13,23 @@
 //
 // Author:  Joey Gurgnaus
 // Created: 2004/01/22
-// Modified: W. Shoan 2004.09.13 - updated for use in Build 3
 //
 /**
  * Definition for the For command class 
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef For_hpp
 #define For_hpp
  
-
 #include "BranchCommand.hpp"
 #include "Parameter.hpp"
 #include "ElementWrapper.hpp"
 
-
 /**
  * Command that manages processing for entry to the For loop
  *
- * The For command manages the for loop.  
+ * The For command manages the For loop.
  *
  */
 class GMAT_API For : public BranchCommand
@@ -43,11 +39,10 @@ public:
    For();
    // copy constructor
    For(const For& f);
+   // operator =
+   For&                 operator=(const For& f);
    // destructor
    virtual ~For();
-
-   // operator = 
-   For&                 operator=(const For& f);
 
    // Inherited methods that need some enhancement from the base class
    virtual bool         Append(GmatCommand *cmd);
@@ -116,10 +111,10 @@ protected:
    };
 
    static const std::string PARAMETER_TEXT[
-      ForParamCount - BranchCommandParamCount];
+                ForParamCount - BranchCommandParamCount];
 
    static const Gmat::ParameterType PARAMETER_TYPE[
-      ForParamCount - BranchCommandParamCount];
+                ForParamCount - BranchCommandParamCount];
    
    static const Real UNINITIALIZED_VALUE;
    static const Real DEFAULT_START;
@@ -127,32 +122,34 @@ protected:
    static const Real DEFAULT_INCREMENT;
 
    /// Start value for the For loop
-   Real         startValue;
+   Real           startValue;
    /// End value for the For loop
-   Real         endValue;
+   Real           endValue;
    /// Step value for the For loop
-   Real         stepSize;
+   Real           stepSize;
    /// Current value for the For loop counter
-   Real         currentValue;
+   Real           currentValue;
    /// Number of passes to be made through the loop
-   int         numPasses;
+   int            numPasses;
    /// Current pass number
-   int         currentPass;
+   int            currentPass;
    
+   /// Wrappers for index, start, end, and increment
    ElementWrapper *indexWrapper;
    ElementWrapper *startWrapper;
    ElementWrapper *endWrapper;
    ElementWrapper *incrWrapper;
    
-   // Are we incrementing the loop variable in a positive direction? i.e. is the stepsize positive?
-   bool        incrPositive;
+   /// Are we incrementing the loop variable in a positive direction? i.e. is the stepsize positive?
+   bool           incrPositive;
 
-   std::string indexName;
-   std::string startName;
-   std::string endName;
-   std::string incrName;
+   /// String representations of index, start, end, and increment numbers
+   std::string    indexName;
+   std::string    startName;
+   std::string    endName;
+   std::string    incrName;
    
-   // method to evaluate the counter to see if we are still looping
+   /// Method to evaluate the counter to see if we are still looping
    bool StillLooping();
 };
 #endif  // For_hpp

@@ -13,7 +13,6 @@
 //
 // Author:  Joey Gurganus/GSFC
 // Created: 2004/01/30
-// Modified: 2004.07.08 Wendy Shoan/GSFC - updated with conditions, etc.
 //
 /**
  * Definition for the If command class
@@ -30,9 +29,9 @@
 //#define DEBUG_IF_APPEND
 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 const std::string
 If::PARAMETER_TEXT[IfParamCount - ConditionalBranchParamCount] =
 {
@@ -53,8 +52,8 @@ If::PARAMETER_TYPE[IfParamCount - ConditionalBranchParamCount] =
  */
 //------------------------------------------------------------------------------
 If::If() :
-ConditionalBranch  ("If"),
-nestLevel          (0)
+   ConditionalBranch  ("If"),
+   nestLevel          (0)
 {
 }
 
@@ -67,8 +66,8 @@ nestLevel          (0)
  */
 //------------------------------------------------------------------------------
 If::If(const If &ic) :
-ConditionalBranch  (ic),
-nestLevel          (0)
+   ConditionalBranch  (ic),
+   nestLevel          (0)
 {
 }
 
@@ -88,7 +87,7 @@ If& If::operator=(const If &ic)
       return *this;
    ConditionalBranch::operator=(ic);
    nestLevel = ic.nestLevel;
-   // do I need to assign numberofConditions, all of the conditions, etc. here?
+
    return *this;
 }
 
@@ -205,7 +204,6 @@ bool If::Execute()
       if (!commandExecuting)
          ConditionalBranch::Execute();
       
-      //if (EvaluateCondition(0)) // must deal with multiple conditions later
       if (EvaluateAllConditions()) 
       {
          #ifdef DEBUG_IF_EXEC
@@ -233,7 +231,6 @@ bool If::Execute()
          #ifdef DEBUG_IF_EXEC
          MessageInterface::ShowMessage
          ("In If::Execute - conditions are FALSE - no other branch to execute\n");
-         //("In If::Execute - ERROR with number of branches - more than two not yet implemented\n");
          #endif
          branchToExecute = 0;
          commandComplete  = true;
@@ -250,13 +247,6 @@ bool If::Execute()
    return retval;
 } // Execute()
 
-
-//bool If::Initialize()
-//{
-//   ConditionalBranch::Initialize();
-//   return true;
-//}
-   
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -376,7 +366,7 @@ Integer If::SetIntegerParameter(const Integer id,
 {
    if (id == NEST_LEVEL)          return (nestLevel  = value);
    
-   return ConditionalBranch::SetIntegerParameter(id,value);  // add others in later
+   return ConditionalBranch::SetIntegerParameter(id,value);
 }
 
 //------------------------------------------------------------------------------
@@ -433,7 +423,9 @@ GmatBase* If::Clone() const
 }
 
 //------------------------------------------------------------------------------
-//  const std::string& GetGeneratingString()
+//  const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//                                         const std::string &prefix,
+//                                         const std::string &useName)
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
@@ -471,3 +463,4 @@ const std::string& If::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
+// none

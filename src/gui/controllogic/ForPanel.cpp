@@ -25,10 +25,15 @@
 //#define DEBUG_FOR_PANEL_SAVE 1
 //#define DEBUG_FOR_PANEL_CELL 1
 
+
+//------------------------------------------------------------------------------
+// static data
+//------------------------------------------------------------------------------
+// none
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
-
 BEGIN_EVENT_TABLE(ForPanel, GmatPanel)
    EVT_GRID_CELL_LEFT_CLICK(ForPanel::OnCellLeftClick)   
    EVT_GRID_CELL_RIGHT_CLICK(ForPanel::OnCellRightClick)   
@@ -36,10 +41,17 @@ BEGIN_EVENT_TABLE(ForPanel, GmatPanel)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// ForPanel()
+// public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// ForPanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
- * A constructor.
+ * Creates a ForPanel (constructor).
+ *
+ * @param parent   the parent window
+ * @param cmd      the command object
  */
 //------------------------------------------------------------------------------
 ForPanel::ForPanel(wxWindow *parent, GmatCommand *cmd)
@@ -47,14 +59,14 @@ ForPanel::ForPanel(wxWindow *parent, GmatCommand *cmd)
 {
    theForCommand = (For *)cmd;
    
-   mStartValue = 0;
-   mIncrValue = 0;
-   mEndValue = 0;   
+   mStartValue   = 0;
+   mIncrValue    = 0;
+   mEndValue     = 0;
    
    mIndexIsParam = false;
    mStartIsParam = false;
-   mEndIsParam = false;
-   mIncrIsParam = false;
+   mEndIsParam   = false;
+   mIncrIsParam  = false;
    
    mObjectTypeList.Add("Spacecraft");
    
@@ -66,7 +78,7 @@ ForPanel::ForPanel(wxWindow *parent, GmatCommand *cmd)
 // ~ForPanel()
 //------------------------------------------------------------------------------
 /**
- * A destructor.
+ * Destroys the ForPanel (destructor).
  */
 //------------------------------------------------------------------------------
 ForPanel::~ForPanel()
@@ -74,43 +86,51 @@ ForPanel::~ForPanel()
    mObjectTypeList.Clear();
 }
 
-//-------------------------------
+//------------------------------------------------------------------------------
 // private methods
-//-------------------------------
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the ForPanel widgets.
+ */
+//------------------------------------------------------------------------------
 void ForPanel::Create()
 {
    // wxGrid
-#if __WXMAC__
-   conditionGrid =
-      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(700,65), wxWANTS_CHARS);
-#else
-   conditionGrid =
-      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(600,65), wxWANTS_CHARS);
-#endif
+   #if __WXMAC__
+      conditionGrid =
+         new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(700,65), wxWANTS_CHARS);
+   #else
+      conditionGrid =
+         new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(600,65), wxWANTS_CHARS);
+   #endif
    
    conditionGrid->CreateGrid(1, MAX_COL, wxGrid::wxGridSelectCells);
    conditionGrid->SetSelectionMode(wxGrid::wxGridSelectCells);
    conditionGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
  
-#if __WXMAC__  
-   conditionGrid->SetColSize(INDEX_SEL_COL, 25);
-   conditionGrid->SetColSize(INDEX_COL, 155);
-   conditionGrid->SetColSize(START_SEL_COL, 25);
-   conditionGrid->SetColSize(START_COL, 155);
-   conditionGrid->SetColSize(INCR_SEL_COL, 25);
-   conditionGrid->SetColSize(INCR_COL, 155);
-   conditionGrid->SetColSize(END_SEL_COL, 25);
-   conditionGrid->SetColSize(END_COL, 155);
-#else
-   conditionGrid->SetColSize(INDEX_SEL_COL, 25);
-   conditionGrid->SetColSize(INDEX_COL, 125);
-   conditionGrid->SetColSize(START_SEL_COL, 25);
-   conditionGrid->SetColSize(START_COL, 125);
-   conditionGrid->SetColSize(INCR_SEL_COL, 25);
-   conditionGrid->SetColSize(INCR_COL, 125);
-   conditionGrid->SetColSize(END_SEL_COL, 25);
-   conditionGrid->SetColSize(END_COL, 125);
-#endif
+   #if __WXMAC__
+      conditionGrid->SetColSize(INDEX_SEL_COL, 25);
+      conditionGrid->SetColSize(INDEX_COL, 155);
+      conditionGrid->SetColSize(START_SEL_COL, 25);
+      conditionGrid->SetColSize(START_COL, 155);
+      conditionGrid->SetColSize(INCR_SEL_COL, 25);
+      conditionGrid->SetColSize(INCR_COL, 155);
+      conditionGrid->SetColSize(END_SEL_COL, 25);
+      conditionGrid->SetColSize(END_COL, 155);
+   #else
+      conditionGrid->SetColSize(INDEX_SEL_COL, 25);
+      conditionGrid->SetColSize(INDEX_COL, 125);
+      conditionGrid->SetColSize(START_SEL_COL, 25);
+      conditionGrid->SetColSize(START_COL, 125);
+      conditionGrid->SetColSize(INCR_SEL_COL, 25);
+      conditionGrid->SetColSize(INCR_COL, 125);
+      conditionGrid->SetColSize(END_SEL_COL, 25);
+      conditionGrid->SetColSize(END_COL, 125);
+   #endif
 
    conditionGrid->SetColLabelValue(INDEX_SEL_COL, _T(""));
    conditionGrid->SetColLabelValue(INDEX_COL, _T("Index"));
@@ -146,9 +166,12 @@ void ForPanel::Create()
    theMiddleSizer->Add(item0, 0, wxGROW, 0);
 }
 
-
 //------------------------------------------------------------------------------
 // void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data into the ForPanel widgets.
+ */
 //------------------------------------------------------------------------------
 void ForPanel::LoadData()
 {
@@ -191,9 +214,12 @@ void ForPanel::LoadData()
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the ForPanel widgets to the For command.
+ */
 //------------------------------------------------------------------------------
 void ForPanel::SaveData()
 {
@@ -248,9 +274,15 @@ void ForPanel::SaveData()
    
 }
 
-
 //------------------------------------------------------------------------------
 // void GetNewValue(Integer row, Integer col)
+//------------------------------------------------------------------------------
+/**
+ * Gets the new value at the row and column specified.
+ *
+ * @param row    specified row
+ * @param col    specified column
+ */
 //------------------------------------------------------------------------------
 void ForPanel::GetNewValue(Integer row, Integer col)
 {
@@ -279,9 +311,14 @@ void ForPanel::GetNewValue(Integer row, Integer col)
    }  
 }
 
-
 //------------------------------------------------------------------------------
 // void OnCellLeftClick(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user left-clicks on the cell.
+ *
+ * @param  event   grid event to handle
+ */
 //------------------------------------------------------------------------------
 void ForPanel::OnCellLeftClick(wxGridEvent& event)
 {
@@ -300,42 +337,29 @@ void ForPanel::OnCellLeftClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
 // void OnCellRightClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user right-clicks on the cell.
+ *
+ * @param  event   grid event to handle
+ */
+//------------------------------------------------------------------------------
 void ForPanel::OnCellRightClick(wxGridEvent& event)
 {
    Integer row = event.GetRow();
    Integer col = event.GetCol();
 
    GetNewValue(row, col);
-
-   
-//    ParameterSelectDialog paramDlg(this, mObjectTypeList);
-//    paramDlg.ShowModal();
-   
-//    if (paramDlg.IsParamSelected())
-//    {
-//       wxString newParamName = paramDlg.GetParamName();
-      
-//       if (newParamName == conditionGrid->GetCellValue(row, col))
-//          return;
-      
-//       conditionGrid->SetCellValue(row, col, newParamName);
-      
-//       if (col == INDEX_COL)
-//          mIndexString = newParamName;
-//       else if (col == START_COL)
-//          mStartString = newParamName;
-//       else if (col == INCR_COL)
-//          mIncrString = newParamName;
-//       else if (col == END_COL)
-//          mEndString = newParamName;
-      
-//       EnableUpdate(true);
-//    }  
 }     
 
 
 //------------------------------------------------------------------------------
 // void OnCellValueChange(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user changes the value in the cell.
+ *
+ * @param  event   grid event to handle
+ */
 //------------------------------------------------------------------------------
 void ForPanel::OnCellValueChange(wxGridEvent& event)
 {

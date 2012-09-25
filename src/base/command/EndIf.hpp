@@ -31,11 +31,10 @@ class GMAT_API EndIf : public GmatCommand
 {
 public:
    EndIf();
-   virtual ~EndIf();
-    
    EndIf(const EndIf& ic);
-   EndIf&              operator=(const EndIf& ic);
-    
+   EndIf&                  operator=(const EndIf& ic);
+   virtual ~EndIf();
+
    virtual bool            Initialize();
    virtual bool            Execute();
 

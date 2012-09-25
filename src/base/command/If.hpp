@@ -43,7 +43,7 @@ public:
    // operator =
    If& operator=(const If &ic);
    // destructor
-   virtual ~If(void);
+   virtual ~If();
    
    // Inherited methods that need some enhancement from the base class
    virtual bool         Append(GmatCommand *cmd);
@@ -86,8 +86,5 @@ protected:
    
    /// Counter to track how deep the If nesting is
    Integer                  nestLevel;
-   /// The object array used in GetRefObjectArray()
-   //ObjectArray              objectArray;
-   
 };
 #endif  // If_hpp

@@ -18,7 +18,6 @@
  * This class contains the condition command such as If and While setup window.
  */
 //------------------------------------------------------------------------------
-
 #include "ConditionPanel.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "gmatdefs.hpp"
@@ -26,6 +25,11 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PANEL_SAVE 1
+
+//------------------------------------------------------------------------------
+// static data
+//------------------------------------------------------------------------------
+// none
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -38,10 +42,17 @@ BEGIN_EVENT_TABLE(ConditionPanel, GmatPanel)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
+// public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // ConditionPanel()
 //------------------------------------------------------------------------------
 /**
- * A constructor.
+ * Creates a ConditionPanel (constructor).
+ *
+ * @param parent   the parent window
+ * @param cmd      the command object
  */
 //------------------------------------------------------------------------------
 ConditionPanel::ConditionPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
@@ -64,10 +75,10 @@ ConditionPanel::ConditionPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(p
 }
 
 //------------------------------------------------------------------------------
-// ConditionPanel()
+// ~ConditionPanel()
 //------------------------------------------------------------------------------
 /**
- * A destructor.
+ * Destroys the ConditionPanel (destructor).
  */
 //------------------------------------------------------------------------------
 ConditionPanel::~ConditionPanel()
@@ -75,12 +86,16 @@ ConditionPanel::~ConditionPanel()
    mObjectTypeList.Clear();
 }
 
-//-------------------------------
+//------------------------------------------------------------------------------
 // private methods
-//-------------------------------
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // void Create()
+//------------------------------------------------------------------------------
+/**
+ * Creates the ConditionPanel widgets.
+ */
 //------------------------------------------------------------------------------
 void ConditionPanel::Create()
 {
@@ -104,11 +119,11 @@ void ConditionPanel::Create()
    conditionGrid->SetColSize(COMMAND_COL, 60);
    conditionGrid->SetColSize(LHS_SEL_COL, 25);
    conditionGrid->SetColSize(LHS_COL, 165);
-#ifdef __WXMAC__
-   conditionGrid->SetColSize(COND_COL, 80);
-#else
-   conditionGrid->SetColSize(COND_COL, 60);
-#endif
+   #ifdef __WXMAC__
+      conditionGrid->SetColSize(COND_COL, 80);
+   #else
+      conditionGrid->SetColSize(COND_COL, 60);
+   #endif
    conditionGrid->SetColSize(RHS_SEL_COL, 25);
    conditionGrid->SetColSize(RHS_COL, 165);
    conditionGrid->SetCellValue(0, COMMAND_COL, theCommand->GetTypeName().c_str());
@@ -131,9 +146,12 @@ void ConditionPanel::Create()
    theMiddleSizer->Add(item0, 0, wxGROW, 0);
 }
 
-
 //------------------------------------------------------------------------------
 // void LoadData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data into the ConditionPanel widgets.
+ */
 //------------------------------------------------------------------------------
 void ConditionPanel::LoadData()
 {
@@ -197,9 +215,12 @@ void ConditionPanel::LoadData()
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void SaveData()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data from the ConditionPanel widgets to the If or While command.
+ */
 //------------------------------------------------------------------------------
 void ConditionPanel::SaveData()
 {
@@ -314,9 +335,15 @@ void ConditionPanel::SaveData()
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void GetNewValue(Integer row, Integer col)
+//------------------------------------------------------------------------------
+/**
+ * Gets the new value at the row and column specified.
+ *
+ * @param row    specified row
+ * @param col    specified column
+ */
 //------------------------------------------------------------------------------
 void ConditionPanel::GetNewValue(Integer row, Integer col)
 {
@@ -334,9 +361,14 @@ void ConditionPanel::GetNewValue(Integer row, Integer col)
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void OnCellLeftClick(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user left-clicks on the cell.
+ *
+ * @param  event   grid event to handle
+ */
 //------------------------------------------------------------------------------
 void ConditionPanel::OnCellLeftClick(wxGridEvent& event)
 {
@@ -350,9 +382,14 @@ void ConditionPanel::OnCellLeftClick(wxGridEvent& event)
       GetNewValue(row, col + 1);
 }
 
-
 //------------------------------------------------------------------------------
 // void OnCellRightClick(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user right-clicks on the cell.
+ *
+ * @param  event   grid event to handle
+ */
 //------------------------------------------------------------------------------
 void ConditionPanel::OnCellRightClick(wxGridEvent& event)
 {
@@ -412,9 +449,14 @@ void ConditionPanel::OnCellRightClick(wxGridEvent& event)
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void OnCellValueChange(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user changes the value in the cell.
+ *
+ * @param  event   grid event to handle
+ */
 //------------------------------------------------------------------------------
 void ConditionPanel::OnCellValueChange(wxGridEvent& event)
 {

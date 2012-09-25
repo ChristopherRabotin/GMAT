@@ -28,7 +28,7 @@
 //  EndIf()
 //------------------------------------------------------------------------------
 /**
- * Creates a EndIf command.  (default constructor)
+ * Creates an EndIf command.  (default constructor)
  */
 //------------------------------------------------------------------------------
 EndIf::EndIf() :
@@ -38,23 +38,11 @@ EndIf::EndIf() :
    depthChange = -1;
 }
 
-
-//------------------------------------------------------------------------------
-//  ~EndIf()
-//------------------------------------------------------------------------------
-/**
- * Destroys the EndIf command.  (destructor)
- */
-//------------------------------------------------------------------------------
-EndIf::~EndIf()
-{}
-    
-
 //------------------------------------------------------------------------------
 //  EndIf(const EndIf& ec)
 //------------------------------------------------------------------------------
 /**
- * Constructor that replicates a for command.  (Copy constructor)
+ * Constructor that replicates an EndIf command.  (Copy constructor)
  *
  * @param ec EndIf to use to construct 'this' EndIf.
  *
@@ -64,7 +52,6 @@ EndIf::~EndIf()
 EndIf::EndIf(const EndIf& ic) :
     GmatCommand         (ic)
 {}
-
 
 //------------------------------------------------------------------------------
 //  EndIf& operator=(const EndIf& ec)
@@ -86,6 +73,15 @@ EndIf& EndIf::operator=(const EndIf& ic)
     return *this;
 }
     
+//------------------------------------------------------------------------------
+//  ~EndIf()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the EndIf command.  (destructor)
+ */
+//------------------------------------------------------------------------------
+EndIf::~EndIf()
+{}
 
 //------------------------------------------------------------------------------
 //  bool Initialize()
@@ -104,7 +100,7 @@ bool EndIf::Initialize()
    if (!next)
       throw CommandException("EndIf Command not properly reconnected");
    
-   // @todo remove references to Else and ElseIf, if EndIf can only be commected 
+   // @todo remove references to Else and ElseIf, if EndIf can only be connected
    //       to If.
    if (next->GetTypeName() != "If" && next->GetTypeName() != "Else" &&
        next->GetTypeName() != "ElseIf")
@@ -152,7 +148,6 @@ bool EndIf::Insert(GmatCommand *cmd, GmatCommand *prev)
    return false;
 }
 
-
 //---------------------------------------------------------------------------
 // bool RenameRefObject(const Gmat::ObjectType type,
 //                      const std::string &oldName, const std::string &newName)
@@ -171,7 +166,7 @@ bool EndIf::RenameRefObject(const Gmat::ObjectType type,
                             const std::string &oldName,
                             const std::string &newName)
 {
-   // There are no renamealbe objects
+   // There are no renameable objects
    return true;
 }
 
@@ -193,7 +188,9 @@ GmatBase* EndIf::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  const std::string GetGeneratingString()
+//  const std::string GetGeneratingString(Gmat::WriteMode mode,
+//                                        const std::string &prefix,
+//                                        const std::string &useName)
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
@@ -214,8 +211,8 @@ GmatBase* EndIf::Clone() const
  */
 //------------------------------------------------------------------------------
 const std::string& EndIf::GetGeneratingString(Gmat::WriteMode mode,
-                                               const std::string &prefix,
-                                               const std::string &useName)
+                                              const std::string &prefix,
+                                              const std::string &useName)
 {
    generatingString = prefix + "EndIf;";
    return GmatCommand::GetGeneratingString(mode, prefix, useName);

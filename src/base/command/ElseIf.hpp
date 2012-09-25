@@ -54,10 +54,10 @@ class GMAT_API ElseIf : public GmatCommand
 {
 public:
     ElseIf();
-    virtual ~ElseIf();
-    
     ElseIf(const ElseIf& ec);
     ElseIf&             operator=(const ElseIf& ec);
+    virtual ~ElseIf();
+    
     
     // Inherited methods that need some enhancement from the base class
     virtual bool        Insert(GmatCommand *cmd, GmatCommand *prev);

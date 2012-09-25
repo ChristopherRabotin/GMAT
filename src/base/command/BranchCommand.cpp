@@ -59,7 +59,7 @@
 /**
  * Constructs the BranchCommand command (default constructor).
  *
- * @param <typeStr> Strinf setting the type name of the command.
+ * @param <typeStr> String setting the type name of the command.
  */
 //------------------------------------------------------------------------------
 BranchCommand::BranchCommand(const std::string &typeStr) :
@@ -80,12 +80,58 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
    objectTypeNames.push_back("BranchCommand");
 }
 
+//------------------------------------------------------------------------------
+//  BranchCommand(const BranchCommand& bc)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the BranchCommand command (copy constructor).
+ *
+ * @param <bc> The instance that is copied.
+ */
+//------------------------------------------------------------------------------
+BranchCommand::BranchCommand(const BranchCommand& bc) :
+   GmatCommand       (bc),
+   branch            (1),
+   commandComplete   (false),
+   commandExecuting  (false),
+   branchExecuting   (false),
+   branchToExecute   (0),
+   branchToFill      (0),
+   nestLevel         (bc.nestLevel),
+   current           (NULL),
+   lastFired         (NULL)
+{
+   depthChange = 1;
+   parameterCount = BranchCommandParamCount;
+}
+
+//------------------------------------------------------------------------------
+//  BranchCommand& operator=(const BranchCommand& bc)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <bc> The instance that is copied.
+ *
+ * @return This instance, set to match the input instance.
+ */
+//------------------------------------------------------------------------------
+BranchCommand& BranchCommand::operator=(const BranchCommand& bc)
+{
+   if (this != &bc)
+   {
+      GmatCommand::operator=(bc);
+      lastFired = NULL;
+   }
+
+   return *this;
+}
 
 //------------------------------------------------------------------------------
 // ~BranchCommand(const std::string &typeStr)
 //------------------------------------------------------------------------------
 /**
- * Destroys the BranchCommand.
+ * Destroys the BranchCommand (destructor)
  */
 //------------------------------------------------------------------------------
 BranchCommand::~BranchCommand()
@@ -111,9 +157,6 @@ BranchCommand::~BranchCommand()
          ShowCommand("   ", "current=", current);
          #endif
          
-         // Why I need to add current != current->GetNext() to avoid
-         // infinite loop? It used to work!! (loj: 2008.12.02)
-         //while (current->GetNext() != this)
          while (current->GetNext() != this && current != current->GetNext())
          {
             current = current->GetNext();
@@ -151,56 +194,6 @@ BranchCommand::~BranchCommand()
    #endif
 }
 
-
-//------------------------------------------------------------------------------
-//  BranchCommand(const BranchCommand& bc)
-//------------------------------------------------------------------------------
-/**
- * Constructs the BranchCommand command (copy constructor).
- *
- * @param <bc> The instance that is copied.
- */
-//------------------------------------------------------------------------------
-BranchCommand::BranchCommand(const BranchCommand& bc) :
-   GmatCommand       (bc),
-   branch            (1),
-   commandComplete   (false),
-   commandExecuting  (false),
-   branchExecuting   (false),
-   branchToExecute   (0),
-   branchToFill      (0),
-   nestLevel         (bc.nestLevel),
-   current           (NULL),
-   lastFired         (NULL)
-{
-   depthChange = 1;
-   parameterCount = BranchCommandParamCount;
-}
-
-
-//------------------------------------------------------------------------------
-//  BranchCommand& operator=(const BranchCommand& bc)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <bc> The instance that is copied.
- *
- * @return This instance, set to match the input instance.
- */
-//------------------------------------------------------------------------------
-BranchCommand& BranchCommand::operator=(const BranchCommand& bc)
-{
-   if (this != &bc)
-   {
-      GmatCommand::operator=(bc);
-      lastFired = NULL;
-   }
-
-   return *this;
-}
-
-
 //------------------------------------------------------------------------------
 //  GmatCommand* GetNext()
 //------------------------------------------------------------------------------
@@ -216,13 +209,12 @@ BranchCommand& BranchCommand::operator=(const BranchCommand& bc)
 GmatCommand* BranchCommand::GetNext()
 {
    // Return the next pointer in the command sequence if this command -- 
-   // includng its branches -- has finished executing.
+   // including its branches -- has finished executing.
    if ((commandExecuting) && (!commandComplete))
       return this;
    
    return next;
 }
-
 
 //------------------------------------------------------------------------------
 // GmatCommand* BranchCommand::GetNextWhileExecuting()
@@ -245,7 +237,6 @@ GmatCommand* BranchCommand::GetNextWhileExecuting()
 {
    return next;
 }
-
 
 //------------------------------------------------------------------------------
 //  GmatCommand* GetChildCommand(Integer whichOne)
@@ -294,7 +285,6 @@ void BranchCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void SetEventLocators(std::vector<EventLocator*> *els)
 //------------------------------------------------------------------------------
@@ -331,7 +321,6 @@ void BranchCommand::SetEventLocators(std::vector<EventLocator*> *els)
       MessageInterface::ShowMessage("\n");
    #endif
 }
-
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -373,8 +362,6 @@ bool BranchCommand::Initialize()
                                    "\" was not terminated!");
       }
    }
-//   for (UnsignedInt i = 0; i < current.size(); ++i)
-//      current[i] = NULL;
    
    commandComplete  = false;
    commandExecuting = false;
@@ -384,7 +371,6 @@ bool BranchCommand::Initialize()
    
    return retval;
 }
-
 
 //------------------------------------------------------------------------------
 // void AddBranch(GmatCommand *cmd, Integer which)
@@ -440,12 +426,8 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       
       (branch.at(which))->Append(cmd);
       
-      // We don't want to override previous command (loj: 2008.01.18)
-      ////SetPreviousCommand(cmd, branch.at(which), true);
-      
    }
 } // AddBranch()
-
 
 //------------------------------------------------------------------------------
 // void AddToFrontOfBranch(GmatCommand *cmd, Integer which)
@@ -508,7 +490,6 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
    }
 } // AddToFrontOfBranch()
 
-
 //------------------------------------------------------------------------------
 // bool BranchCommand::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
@@ -545,7 +526,6 @@ bool BranchCommand::Append(GmatCommand *cmd)
    // Otherwise, just call the base class method
    return GmatCommand::Append(cmd);
 }
-
 
 //------------------------------------------------------------------------------
 // bool Insert(GmatCommand *cmd, GmatCommand *prev)
@@ -657,8 +637,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
                }
                nc = nc->GetNext();
             }
-            //if (inNested = currentOne->Insert(cmd, prev))
-            //   return true;
+
             hereOrNested = currentOne->Insert(cmd, prev);
             // check to see if it got added after the nested command
             if (hereOrNested && (currentOne->GetNext() == cmd))
@@ -688,7 +667,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       cmd->ForceSetNext(this);
       SetPreviousCommand(this, cmd, false);
       
-      // shift all the later comamnds down one branch
+      // shift all the later commands down one branch
       bool isOK = ShiftBranches(toShift, brNum);
       if (!isOK) 
          MessageInterface::ShowMessage
@@ -700,7 +679,6 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
    // Otherwise, just call the base class method
    return GmatCommand::Insert(cmd, prev);
 } // Insert()
-
 
 //------------------------------------------------------------------------------
 // GmatCommand* Remove(GmatCommand *cmd)
@@ -785,7 +763,7 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * Generates the summary string for a command by building the summary string for
- * this command, and then tacking on the summary for the branch commans\ds.
+ * this command, and then tacking on the summary for the branch commands.
  *
  *
  * @param <commandCompleted> has the command completed execution
@@ -846,7 +824,6 @@ bool BranchCommand::InsertRightAfter(GmatCommand *cmd)
    return GmatCommand::Insert(cmd, this);
 }
 
-
 //------------------------------------------------------------------------------
 // void BranchCommand::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
@@ -901,14 +878,13 @@ void BranchCommand::SetInternalCoordSystem(CoordinateSystem *cs)
    }
 }
 
-
 //------------------------------------------------------------------------------
 //  void SetObjectMap(std::map<std::string, Asset *> *map)
 //------------------------------------------------------------------------------
 /**
- * Called by the Sandbox or Function to set the local asset store used by the Command.  This
- * implementation chains through the branches and sets the asset map for each of
- * the branch nodes.
+ * Called by the Sandbox or Function to set the local asset store used by the
+ * Command.  This implementation chains through the branches and sets the asset
+ * map for each of the branch nodes.
  * 
  * @param <map> Pointer to the local asset map
  */
@@ -935,9 +911,9 @@ void BranchCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 //  void SetGlobalObjectMap(std::map<std::string, Asset *> *map)
 //------------------------------------------------------------------------------
 /**
- * Called by the Sandbox or Function to set the global asset store used by the Command.  This
- * implementation chains through the branches and sets the asset map for each of
- * the branch nodes.
+ * Called by the Sandbox or Function to set the global asset store used by the
+ * Command.  This implementation chains through the branches and sets the asset
+ * map for each of the branch nodes.
  * 
  * @param <map> Pointer to the local asset map
  */
@@ -959,7 +935,6 @@ void BranchCommand::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
       }
    }
 }
-
 
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
@@ -1011,9 +986,10 @@ bool BranchCommand::RenameRefObject(const Gmat::ObjectType type,
    return true;
 }
 
-
 //------------------------------------------------------------------------------
-//  const std::string GetGeneratingString()
+//  const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//                                         const std::string &prefix,
+//                                         const std::string &useName)
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
@@ -1132,7 +1108,6 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
    return fullString;
 } // GetGeneratingString()
 
-
 //------------------------------------------------------------------------------
 // bool TakeAction(const std::string &action, const std::string &actionData)
 //------------------------------------------------------------------------------
@@ -1179,7 +1154,6 @@ bool BranchCommand::TakeAction(const std::string &action,
    return GmatCommand::TakeAction(action, actionData);
 }
 
-
 //------------------------------------------------------------------------------
 // bool Execute()
 //------------------------------------------------------------------------------
@@ -1195,7 +1169,6 @@ bool BranchCommand::Execute()
    commandExecuting = true;
    return true;
 }
-
 
 //------------------------------------------------------------------------------
 // bool ExecuteBranch(Integer which)
@@ -1239,8 +1212,6 @@ bool BranchCommand::ExecuteBranch(Integer which)
       #endif
       
       branchExecuting = false;
-      //commandExecuting = false;  // ***********************
-      //commandComplete  = true;   // ***********************
       current = NULL;
       lastFired = NULL;
    }
@@ -1254,21 +1225,18 @@ bool BranchCommand::ExecuteBranch(Integer which)
       try
       {
          // Save current command and set it after current command finished executing
-         // incase for calling GmatFunction.
+         // in case for calling GmatFunction.
          GmatCommand *curcmd = current;
          if (current->Execute() == false)
             retval = false;
          
          current = curcmd;
-         // check for user interruption here (loj: 2007.05.11 Added)
+         // check for user interruption here
          if (GmatGlobal::Instance()->GetRunInterrupted())
             throw CommandException
                ("Branch command \"" + generatingString + "\" interrupted!");
          
-         // Check for NULL pointer here (loj: 2008.09.25 Added)
-         // Why current pointer is reset to NULL running recursive function?
-         // Is this an error or can it be ignored?
-         // Without this change, Factorial_FR testing will not work.
+         // Check for NULL pointer here
          if (current == NULL)
          {
             #ifdef __THROW_EXCEPTION__            
@@ -1284,7 +1252,7 @@ bool BranchCommand::ExecuteBranch(Integer which)
          }
          
          branchExecuting = true;
-         // Set commandExecuting to true if branch is executing (LOJ: 2010.08.06)
+         // Set commandExecuting to true if branch is executing
          commandExecuting = true;
       }
       catch (BaseException &e)
@@ -1310,7 +1278,6 @@ bool BranchCommand::ExecuteBranch(Integer which)
    return retval;
 } // ExecuteBranch()
 
-
 //------------------------------------------------------------------------------
 //  void RunComplete()
 //------------------------------------------------------------------------------
@@ -1335,22 +1302,13 @@ void BranchCommand::RunComplete()
       if (*i != NULL)
          if (!(*i)->IsOfType("BranchEnd"))
             (*i)->RunComplete();
-   
-   
-   // This block of code causes unnecesary looping since next is handled in
-   // the GmatCommand::RunComplete() (loj: 2/16/07)
-   //if (next)
-   //   if (!next->IsOfType("BranchEnd"))
-   //      next->RunComplete();
-   
-   
+
    commandComplete = false;
    commandExecuting = false;
    branchExecuting = false;
 
    GmatCommand::RunComplete();
 }
-
 
 //------------------------------------------------------------------------------
 // protected methods
@@ -1384,7 +1342,6 @@ BranchCommand::ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber)
    return true;
 }
 
-
 //------------------------------------------------------------------------------
 // void SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev,
 //                         bool skipBranchEnd)
@@ -1392,8 +1349,8 @@ BranchCommand::ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber)
 /*
  * Sets previous command of the command.
  *
- * @param  cmd   The command of which previous command to be set
- * @param  prev  The previous command to set to command
+ * @param  cmd            The command of which previous command to be set
+ * @param  prev           The previous command to set to command
  * @param  skipBranchEnd  If true, it sets without checking for BranchEnd
  *
  */
@@ -1429,6 +1386,13 @@ void BranchCommand::SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev,
 
 //------------------------------------------------------------------------------
 // const std::vector<GmatCommand*> GetCommandsWithGmatFunctions()
+//------------------------------------------------------------------------------
+/*
+ * Gets a list of commands that have Gmat Functions
+ *
+ * @return  list of Gmat commands that have Gmat Functions
+ *
+ */
 //------------------------------------------------------------------------------
 const std::vector<GmatCommand*> BranchCommand::GetCommandsWithGmatFunctions()
 {
@@ -1476,6 +1440,13 @@ const std::vector<GmatCommand*> BranchCommand::GetCommandsWithGmatFunctions()
 //------------------------------------------------------------------------------
 // bool HasAFunction()
 //------------------------------------------------------------------------------
+/*
+ * Returns a flag indicating whether or not the command has a function.
+ *
+ * @return  flag indicating whether or not the command has a function
+ *
+ */
+//------------------------------------------------------------------------------
 bool BranchCommand::HasAFunction()
 {
    #ifdef DEBUG_IS_FUNCTION
@@ -1506,7 +1477,14 @@ bool BranchCommand::HasAFunction()
 }
 
 //------------------------------------------------------------------------------
-// void SetCallingFunction();
+// void SetCallingFunction(FunctionManager *fm)
+//------------------------------------------------------------------------------
+/*
+ * Sets the calling function to the input function.
+ *
+ * @param  calling function
+ *
+ */
 //------------------------------------------------------------------------------
 void BranchCommand::SetCallingFunction(FunctionManager *fm)
 {
@@ -1543,7 +1521,6 @@ bool BranchCommand::IsExecuting()
 {
    return branchExecuting;
 }
-
 
 //------------------------------------------------------------------------------
 // Integer GetCloneCount()
@@ -1582,7 +1559,6 @@ Integer BranchCommand::GetCloneCount()
 
    return cloneCount;
 }
-
 
 //------------------------------------------------------------------------------
 // GmatBase* GetClone(Integer cloneIndex)
@@ -1629,7 +1605,6 @@ GmatBase* BranchCommand::GetClone(Integer cloneIndex)
    return retptr;
 }
 
-
 //------------------------------------------------------------------------------
 // bool AffectsClones()
 //------------------------------------------------------------------------------
@@ -1654,7 +1629,6 @@ bool BranchCommand::AffectsClones()
       return lastFired->AffectsClones();
    return false;
 }
-
 
 //------------------------------------------------------------------------------
 // GmatBase* GetUpdatedObject()

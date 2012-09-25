@@ -19,22 +19,18 @@
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef EndWhile_hpp
 #define EndWhile_hpp
 
-
 #include "GmatCommand.hpp"
-
 
 class GMAT_API EndWhile : public GmatCommand
 {
 public:
    EndWhile();
-   virtual ~EndWhile();
-
    EndWhile(const EndWhile& ew);
    EndWhile&              operator=(const EndWhile& ew);
+   virtual ~EndWhile();
 
    virtual bool            Initialize();
    virtual bool            Execute();

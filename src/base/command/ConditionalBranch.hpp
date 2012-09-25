@@ -113,10 +113,6 @@ protected:
    virtual bool         EvaluateCondition(Integer which);
    virtual bool         EvaluateAllConditions();
    
-   virtual bool         SetStringArrayValue(Integer forArray, 
-                                            const std::string &toValue,
-                                            Integer forIndex);
-                                            
    std::string          GetConditionalString();
    
    enum
@@ -158,22 +154,21 @@ protected:
    static const std::string LOGICAL_OPTYPE_TEXT[NumberOfLogicalOperators];
 
    /// Number of conditions for the conditional branch commands
-   Integer                    numberOfConditions;
+   Integer                      numberOfConditions;
    /// Number  of separating logical operators (should be numberOfConditions - 1)
-   Integer                    numberOfLogicalOps;
+   Integer                      numberOfLogicalOps;
    /// Arrays representing conditions
-   StringArray                lhsList;
+   StringArray                  lhsList;
    /// vector of pointers to ElementWrappers for the lhs
    std::vector<ElementWrapper*> lhsWrappers;
    //StringArray                lhsParamList;
-   StringArray                opStrings;
-   std::vector<OpType>        opList;
-   StringArray                rhsList;
+   StringArray                  opStrings;
+   std::vector<OpType>          opList;
+   StringArray                  rhsList;
    /// vector of pointers to ElementWrappers for the rhs
    std::vector<ElementWrapper*> rhsWrappers;
-   //StringArray                rhsParamList;
-   StringArray                logicalOpStrings;
-   std::vector<LogicalOpType> logicalOpList;
+   StringArray                  logicalOpStrings;
+   std::vector<LogicalOpType>   logicalOpList;
    
 };
 #endif  // ConditionalBranch_hpp

@@ -15,10 +15,9 @@
 // Created: 2011/01/06 based on IfPanel which was developed by Waka Waktola
 //
 /**
- * This class contains the Propagator command setup window.
+ * This class contains the If and While command setup window.
  */
 //------------------------------------------------------------------------------
-
 #ifndef ConditionPanel_hpp
 #define ConditionPanel_hpp
 
@@ -26,7 +25,6 @@
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
 
-// base includes
 #include "gmatdefs.hpp"
 #include "GmatCommand.hpp"
 #include "ConditionalBranch.hpp"

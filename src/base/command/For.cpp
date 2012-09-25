@@ -13,14 +13,13 @@
 //
 // Author:  Joey Gurganus
 // Created: 2004/01/29
-// Modified: W. Shoan 2004.09.13 Updated for use in Build 3
 //
 /**
  * Definition for the For command class
  */
 //------------------------------------------------------------------------------
-
 #include <ctype.h>               // for isalpha
+#include <sstream>               // for std::stringstream, used to make generating string
 #include "gmatdefs.hpp"
 #include "For.hpp"
 #include "BranchCommand.hpp"
@@ -28,8 +27,6 @@
 #include "FunctionManager.hpp"   // for GetFunctionPathAndName()
 #include "StringUtil.hpp"        // for ToReal()
 #include "MessageInterface.hpp"
-
-#include <sstream>      // for std::stringstream, used to make generating string
 
 //#define DEBUG_FOR_EXE 1
 //#define DEBUG_FOR_INIT 1
@@ -45,9 +42,9 @@
 #include "MemoryTracker.hpp"
 #endif
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 const std::string
 For::PARAMETER_TEXT[ForParamCount - BranchCommandParamCount] =
 {
@@ -78,18 +75,20 @@ const Real For::DEFAULT_END         = 10;
 const Real For::DEFAULT_INCREMENT   = 1;
 
 //------------------------------------------------------------------------------
-//  For(void)
+//  For()
 //------------------------------------------------------------------------------
 /**
  * Creates a For command.  (default constructor)
  */
 //------------------------------------------------------------------------------
-For::For(void) :
+For::For() :
    BranchCommand   ("For"),
    startValue      (DEFAULT_START),
    endValue        (DEFAULT_END),
    stepSize        (DEFAULT_INCREMENT),
    currentValue    (UNINITIALIZED_VALUE),
+   numPasses       (UNINITIALIZED_VALUE),
+   currentPass     (UNINITIALIZED_VALUE),
    indexWrapper    (NULL),
    startWrapper    (NULL),
    endWrapper      (NULL),
@@ -105,12 +104,12 @@ For::For(void) :
 }
 
 //------------------------------------------------------------------------------
-//  For(const For& t)
+//  For(const For& f)
 //------------------------------------------------------------------------------
 /**
-* Constructor that replicates a for command.  (Copy constructor)
+ * Constructor that replicates a For command.  (Copy constructor)
  *
- * @return A reference to this instance.
+ * @param f For from which to copy data when creating a new For
  */
 //------------------------------------------------------------------------------
 For::For(const For& f) :
@@ -119,6 +118,8 @@ For::For(const For& f) :
    endValue        (f.endValue),
    stepSize        (f.stepSize),
    currentValue    (f.currentValue),
+   numPasses       (f.numPasses),
+   currentPass     (f.currentPass),
    indexWrapper    (NULL),
    startWrapper    (NULL),
    endWrapper      (NULL),
@@ -131,25 +132,13 @@ For::For(const For& f) :
 {
 }
 
-
-//------------------------------------------------------------------------------
-//  ~For(void)
-//------------------------------------------------------------------------------
-/**
- * Destroys the for command.  (destructor)
- */
-//------------------------------------------------------------------------------
-For::~For(void)
-{
-   ClearWrappers();
-}
-
-
 //------------------------------------------------------------------------------
 //  For& operator=(const For& f)
 //------------------------------------------------------------------------------
 /**
- * Assignment operator for the for command.
+ * Assignment operator for the For command.
+ *
+ * @param f  the For command whose data to use to set values for this one.
  *
  * @return A reference to this instance.
  */
@@ -160,10 +149,12 @@ For& For::operator=(const For& f)
      return *this;
    
    BranchCommand::operator=(f);
-   startValue    = f.startValue;  // do I really want to do this?
+   startValue    = f.startValue;
    endValue      = f.endValue;
    stepSize      = f.stepSize;
    currentValue  = f.currentValue;
+   numPasses     = f.numPasses;
+   currentPass   = f.currentPass;
    indexWrapper  = f.indexWrapper;
    startWrapper  = f.startWrapper;
    endWrapper    = f.endWrapper;
@@ -176,17 +167,30 @@ For& For::operator=(const For& f)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+//  ~For()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the For command.  (destructor)
+ */
+//------------------------------------------------------------------------------
+For::~For()
+{
+   ClearWrappers();
+}
 
 //------------------------------------------------------------------------------
 //  bool Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
- * Adds a command to the for loop.
+ * Adds a command to the For loop.
  *
  * This method calls the BranchCommand base class method that adds a command
  * to the command sequence that branches off of the main mission sequence.  This
  * extension was needed so that the EndFor command can be set to point back 
  * to the head of the For loop.
+ *
+ * @param cmd   command to append to the For loop
  *
  * @return true if the Command is appended, false if an error occurs.
  */
@@ -196,7 +200,7 @@ bool For::Append(GmatCommand *cmd)
    if (!BranchCommand::Append(cmd))
      return false;
 
-   // If at the end of a for branch, point that end back to this comand.
+   // If at the end of a For branch, point that end back to this command.
    if (cmd->GetTypeName() == "EndFor") 
    {
       if ((nestLevel== 0) && (branchToFill != -1))
@@ -218,14 +222,13 @@ bool For::Append(GmatCommand *cmd)
    return true;
 }
 
-
 //------------------------------------------------------------------------------
 //  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Performs the initialization needed to run the For loop.
  *
- * @return true if the GmatCommand is initialized, false if an error occurs.
+ * @return true if the command is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
 bool For::Initialize()
@@ -271,15 +274,13 @@ bool For::Initialize()
    return retval;
 }
 
-
 //------------------------------------------------------------------------------
 //  bool Execute()
 //------------------------------------------------------------------------------
 /**
- * Execute this for loop.
+ * Execute this For loop.
  *
- *
- * @return true if the GmatCommand runs to completion, false if an error
+ * @return true if the command runs to completion, false if an error
  *         occurs.
  */
 //------------------------------------------------------------------------------
@@ -361,7 +362,6 @@ bool For::Execute()
    return retval;
 }
 
-
 //------------------------------------------------------------------------------
 // void RunComplete()
 //------------------------------------------------------------------------------
@@ -382,7 +382,7 @@ void For::RunComplete()
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the For.
@@ -391,13 +391,15 @@ void For::RunComplete()
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* For::Clone(void) const
+GmatBase* For::Clone() const
 {
    return (new For(*this));
 }
 
 //------------------------------------------------------------------------------
-//  const std::string& GetGeneratingString()
+//  const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//                                         const std::string &prefix,
+//                                         const std::string &useName)
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
@@ -455,8 +457,10 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
  * This method returns a pointer to the Parameter ref object (used as
  * the index for the For command).
  *
- * @return pointer to the index Parmeter.
+ * @param type  type of reference object to retrieve
+ * @param name  name of the reference object to retrieve
  *
+ * @return pointer to the requested reference object
  */
 //------------------------------------------------------------------------------
 GmatBase* For::GetRefObject(const Gmat::ObjectType type,
@@ -471,11 +475,12 @@ GmatBase* For::GetRefObject(const Gmat::ObjectType type,
 //                    const std::string &name) const
 //------------------------------------------------------------------------------
 /**
- * This method sets a pointer to the Parameter ref object (used as
- * the index for the For command).
+ * This method sets a pointer to the Parameter reference object
+ *
+ * @param type  type of reference object to set
+ * @param name  name of the reference object to set
  *
  * @return success of the operation.
- *
  */
 //------------------------------------------------------------------------------
 bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -484,7 +489,6 @@ bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    // Not handled here -- invoke the next higher SetRefObject call
    return BranchCommand::SetRefObject(obj, type, name);
 }
-
 
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
@@ -529,12 +533,11 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
    return true;
 }
 
-
 //------------------------------------------------------------------------------
 // const ObjectTypeArray& GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 /**
- * Retrieves the list of ref object types used by the For.
+ * Retrieves the list of reference object types used by the For.
  *
  * @return the list of object types.
  * 
@@ -546,12 +549,11 @@ const ObjectTypeArray& For::GetRefObjectTypeArray()
    return refObjectTypes;
 }
 
-
 //------------------------------------------------------------------------------
 // const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
- * Retrieves the list of ref objects used by the For.
+ * Retrieves the list of reference objects used by the For.
  *
  * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
  *               full list.
@@ -580,7 +582,6 @@ const StringArray& For::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    return refObjectNames;
 }
-
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -645,9 +646,11 @@ std::string For::GetParameterTypeString(const Integer id) const
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
- * Accessor method used to obtain a parameter value
+ * Accessor method used to obtain a Real parameter value
  *
  * @param id    Integer ID for the requested parameter
+ *
+ * @return      the Real value of the requested parameter
  */
 //------------------------------------------------------------------------------
 Real For::GetRealParameter(const Integer id) const
@@ -691,6 +694,8 @@ Real For::GetRealParameter(const Integer id) const
  *
  * @param    id  Integer ID for the parameter
  * @param    val The new value for the parameter
+ *
+ * @return   the Real parameter value after being set
  */
 //------------------------------------------------------------------------------
 Real For::SetRealParameter(const Integer id, const Real value)
@@ -705,6 +710,8 @@ Real For::SetRealParameter(const Integer id, const Real value)
  * Accessor method used to obtain a parameter value
  *
  * @param label    string ID for the requested parameter
+ *
+ * @return  the Real value of the requested parameter
  */
 //------------------------------------------------------------------------------
 Real For::GetRealParameter(const std::string &label) const
@@ -720,6 +727,8 @@ Real For::GetRealParameter(const std::string &label) const
  *
  * @param    label    string ID for the requested parameter
  * @param    value    The new value for the parameter
+ *
+ * @return   the Real parameter value after being set
  */
 //------------------------------------------------------------------------------
 Real For::SetRealParameter(const std::string &label, const Real value)
@@ -736,13 +745,13 @@ Real For::SetRealParameter(const std::string &label, const Real value)
  *
  * @param id  ID for the requested parameter.
  *
- * @return  string value of the requested parameter.
+ * @return the string value of the requested parameter.
  *
  */
 //------------------------------------------------------------------------------
 std::string For::GetStringParameter(const Integer id) const
 {
-   if (id == INDEX_NAME)          return indexName;
+   if      (id == INDEX_NAME)     return indexName;
    else if (id == START_NAME)     return startName;
    else if (id == END_NAME)       return endName;
    else if (id == INCREMENT_NAME) return incrName;
@@ -754,7 +763,7 @@ std::string For::GetStringParameter(const Integer id) const
 //  std::string  SetStringParameter(const Integer id, const std::string value)
 //------------------------------------------------------------------------------
 /**
-* This method sets the string parameter value, given the input
+ * This method sets the string parameter value, given the input
  * parameter ID.
  *
  * @param id     ID for the requested parameter.
@@ -800,16 +809,15 @@ bool For::SetStringParameter(const Integer id, const std::string &value)
    return BranchCommand::SetStringParameter(id, value);
 }
 
-
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
-* Accessor method used to get a parameter value
+ * Accessor method used to get a parameter value
  *
  * @param    label  label ID for the parameter
  *
- * @return the value of the parameter
+ * @return  the string value of the parameter
  */
 //------------------------------------------------------------------------------
 std::string For::GetStringParameter(const std::string &label) const
@@ -821,7 +829,7 @@ std::string For::GetStringParameter(const std::string &label) const
 // bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 /**
-* Accessor method used to get a parameter value
+ * Accessor method used to get a parameter value
  *
  * @param    label  Integer ID for the parameter
  * @param    value  The new value for the parameter
@@ -833,9 +841,14 @@ bool For::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
-
 //------------------------------------------------------------------------------
 // const StringArray& For::GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+/**
+ * This method returns an array of object names for the wrappers.
+ *
+ * @return    array of object names for the wrappers
+ */
 //------------------------------------------------------------------------------
 const StringArray& For::GetWrapperObjectNameArray()
 {
@@ -857,9 +870,17 @@ const StringArray& For::GetWrapperObjectNameArray()
    return wrapperObjectNames;
 }
 
-
 //------------------------------------------------------------------------------
 // bool SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the element wrapper for the object with the input name.
+ *
+ * @param toWrapper   pointer to the wrapper
+ * @param withName    name of the object
+ *
+ * @return    success flag
+ */
 //------------------------------------------------------------------------------
 bool For::SetElementWrapper(ElementWrapper *toWrapper,
                             const std::string &withName)
@@ -888,7 +909,7 @@ bool For::SetElementWrapper(ElementWrapper *toWrapper,
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
    
-   // Check for Wrapper data type, it should be REAL_TYPE (loj: 2008.11.20)
+   // Check for Wrapper data type, it should be REAL_TYPE
    CheckDataType(toWrapper, Gmat::REAL_TYPE, "For", true);
    
    #ifdef DEBUG_WRAPPER_CODE   
@@ -961,7 +982,7 @@ bool For::SetElementWrapper(ElementWrapper *toWrapper,
       retval = true;
    }
    
-   // Delete old ElementWrappers (loj: 2008.11.20)
+   // Delete old ElementWrappers
    if (callingFunction == NULL)
    {
       for (std::vector<ElementWrapper*>::iterator ewi = wrappersToDelete.begin();
@@ -990,9 +1011,13 @@ bool For::SetElementWrapper(ElementWrapper *toWrapper,
    return retval;
 }
 
-
 //------------------------------------------------------------------------------
 // void ClearWrappers()
+//------------------------------------------------------------------------------
+/**
+ * This method clears the element wrappers.
+ *
+ */
 //------------------------------------------------------------------------------
 void For::ClearWrappers()
 {
@@ -1101,9 +1126,15 @@ bool For::StillLooping()
           ((stepSize > 0.0) && (startValue > endValue)) ||
                   ((stepSize < 0.0) && (startValue < endValue)) )
       {
-         //throw CommandException(
-         //      "For loop values incorrect - will result in infinite loop "
-         //      "in line:\n   \"" + generatingString + "\"\n");
+         /**
+          * This method sets the element wrapper for the object with the input name.
+          *
+          * @param toWrapper   pointer to the wrapper
+          * @param withName    name of the object
+          *
+          * @return    success flag
+          */
+         //------------------------------------------------------------------------------
          commandComplete = true;
          return false;
       }

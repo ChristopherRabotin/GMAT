@@ -21,14 +21,12 @@
 #ifndef ForPanel_hpp
 #define ForPanel_hpp
 
-// gui includes
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
 
-// base includes
 #include "gmatdefs.hpp"
 #include "GmatCommand.hpp"
 #include "For.hpp"
@@ -36,7 +34,7 @@
 class ForPanel : public GmatPanel
 {
 public:
-   // constructors
+   // constructors/destructors
    ForPanel(wxWindow *parent, GmatCommand *cmd);
    ~ForPanel();  
 

@@ -42,9 +42,9 @@
 #include "MemoryTracker.hpp"
 #endif
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 const std::string
 ConditionalBranch::PARAMETER_TEXT[ConditionalBranchParamCount - BranchCommandParamCount] =
 {
@@ -93,12 +93,11 @@ ConditionalBranch::LOGICAL_OPTYPE_TEXT[NumberOfLogicalOperators] =
  */
 //------------------------------------------------------------------------------
 ConditionalBranch::ConditionalBranch(const std::string &typeStr) :
-BranchCommand      (typeStr),
-numberOfConditions (0),
-numberOfLogicalOps (0)
+   BranchCommand      (typeStr),
+   numberOfConditions (0),
+   numberOfLogicalOps (0)
 {
    objectTypeNames.push_back("ConditionalBranch");
-   // nothing to add to settables here
 }
 
 
@@ -110,9 +109,9 @@ numberOfLogicalOps (0)
  */
 //------------------------------------------------------------------------------
 ConditionalBranch::ConditionalBranch(const ConditionalBranch &cb) :
-BranchCommand      (cb),
-numberOfConditions (cb.numberOfConditions),
-numberOfLogicalOps (cb.numberOfLogicalOps)
+   BranchCommand      (cb),
+   numberOfConditions (cb.numberOfConditions),
+   numberOfLogicalOps (cb.numberOfLogicalOps)
 {   
    Integer i = 0;
    for (i=0; i < numberOfConditions; i++)
@@ -138,6 +137,8 @@ numberOfLogicalOps (cb.numberOfLogicalOps)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the ConditionalBranch command.
+ *
+ * @param  command from which to get values
  *
  * @return A reference to this instance.
  */
@@ -196,6 +197,11 @@ ConditionalBranch::~ConditionalBranch()
 /**
  * This method sets a condition for the ConditionalBranch Command.
  *
+ * @param lhs        string representing the left-hand-side
+ * @param operation  string representing the operator
+ * @param rhs        string representing the right-hand-side
+ * @param atIndex    index at which to set the condition
+ *
  * @return true if successful; false otherwise.
  *
  */
@@ -251,8 +257,8 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
       opList.push_back(ot);
       lhsList.push_back(lhs);
       rhsList.push_back(rhs);
-      lhsWrappers.push_back(NULL); // placeholder for pointer to ElementWrapper
-      rhsWrappers.push_back(NULL); // placeholder for pointer to ElementWrapper
+      lhsWrappers.push_back(NULL);
+      rhsWrappers.push_back(NULL);
       #if DEBUG_CONDITIONS
          MessageInterface::ShowMessage
          ("ConditionalBranch::added condition to end of list\n");
@@ -290,6 +296,9 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
 //------------------------------------------------------------------------------
 /**
  * This method sets a logical operator for the ConditionalBranch Command.
+ *
+ * @param op      operator
+ * @param atIndex index at which to set the operator
  *
  * @return true if successful; false otherwise.
  *
@@ -359,7 +368,9 @@ bool ConditionalBranch::SetConditionOperator(const std::string &op,
 /**
  * Removes the condition for the command, at index atIndex.
  * 
- * @param <atIndex>   where in the list to remove the condition from.
+ * @param <atIndex>   index in the list from which to remove the condition.
+ *
+ * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
 bool ConditionalBranch::RemoveCondition(Integer atIndex)
@@ -399,6 +410,8 @@ bool ConditionalBranch::RemoveCondition(Integer atIndex)
  * Removes the logical operator for the command, at index atIndex.
  * 
  * @param <atIndex>   where in the list to remove the logical operator from.
+ *
+ * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
 bool ConditionalBranch::RemoveConditionOperator(Integer atIndex)
@@ -749,7 +762,6 @@ Integer ConditionalBranch::GetIntegerParameter(const Integer id) const
 {
    if (id == NUMBER_OF_CONDITIONS)          return numberOfConditions;
    if (id == NUMBER_OF_LOGICAL_OPS)         return numberOfLogicalOps;
-   //if (id == NUMBER_OF_REF_PARAMS)          return (Integer) params.size();
    
    return BranchCommand::GetIntegerParameter(id); 
 }
@@ -772,8 +784,6 @@ Integer ConditionalBranch::GetIntegerParameter(const std::string &label) const
 {
    return GetIntegerParameter(GetParameterID(label));
 }
-
-//Integer      ConditionalBranch::SetIntegerParameter(const std::string &label, const Integer value);
 
 //------------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id, const Integer index) const
@@ -981,9 +991,9 @@ bool ConditionalBranch::SetStringParameter(const std::string &label,
 const StringArray& 
 ConditionalBranch::GetStringArrayParameter(const Integer id) const
 {
-   if (id == LEFT_HAND_STRINGS)  return lhsList; //lhsParamList;
+   if (id == LEFT_HAND_STRINGS)  return lhsList;
    if (id == OPERATOR_STRINGS)   return opStrings;
-   if (id == RIGHT_HAND_STRINGS) return rhsList; //rhsParamList;
+   if (id == RIGHT_HAND_STRINGS) return rhsList;
    if (id == LOGICAL_OPERATORS)  return logicalOpStrings;
    
    return BranchCommand::GetStringArrayParameter(id);
@@ -1011,6 +1021,13 @@ ConditionalBranch::GetStringArrayParameter(const std::string &label) const
 
 //------------------------------------------------------------------------------
 // const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+/**
+ * This method returns a list of names of the wrapper objects.
+ *
+ * @return  list of names of the wrapper objects
+ *
+ */
 //------------------------------------------------------------------------------
 const StringArray& ConditionalBranch::GetWrapperObjectNameArray()
 {
@@ -1044,6 +1061,16 @@ const StringArray& ConditionalBranch::GetWrapperObjectNameArray()
 
 //------------------------------------------------------------------------------
 // bool SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the element wrapper with the specified name
+ *
+ * @param toWrapper   pointer to wrapper
+ * @param withName    name of the object that the wrapper is for
+ *
+ * @return  true if successful; false otherwise
+ *
+ */
 //------------------------------------------------------------------------------
 bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper, 
                                           const std::string &withName)
@@ -1141,6 +1168,11 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
 //------------------------------------------------------------------------------
 // void ClearWrappers()
 //------------------------------------------------------------------------------
+/**
+ * This method clears all of the wrappers
+ *
+ */
+//------------------------------------------------------------------------------
 void ConditionalBranch::ClearWrappers()
 {
    #ifdef DEBUG_WRAPPER_CODE
@@ -1186,7 +1218,6 @@ void ConditionalBranch::ClearWrappers()
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Remove
             (ew, ew->GetDescription(), "ConditionalBranch::ClearWrappers()",
-             //GetGeneratingString(Gmat::NO_COMMENTS) + " deleting lhsWrapper");
              GetTypeName() + " deleting lhsWrapper");
          #endif
          delete ew;
@@ -1234,8 +1265,7 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
    {
       #ifdef DEBUG_CONDITIONS
          MessageInterface::ShowMessage(
-         "ConditionalBranch::EvaluateCondition() - returning with FALSE!!!\n");      
-      
+         "ConditionalBranch::EvaluateCondition() - returning with FALSE!!!\n");
       #endif
       return false;
    }
@@ -1338,14 +1368,16 @@ bool ConditionalBranch::EvaluateAllConditions()
       while (!setOfCmdsFound)
       {
          andConditions.push_back(current);
-         if (current == (numberOfConditions-1)) // are we at the end of the list of conditions?
+         // are we at the end of the list of conditions?
+         if (current == (numberOfConditions-1))
          {
             setOfCmdsFound = true;
             done           = true;
          }
          else
          {
-            if (logicalOpList.at(current) == OR) setOfCmdsFound = true; // or is the operator an OR?
+            // or is the operator an OR?
+            if (logicalOpList.at(current) == OR) setOfCmdsFound = true;
             current++;
          }
       }
@@ -1356,32 +1388,8 @@ bool ConditionalBranch::EvaluateAllConditions()
       }
       // previous result OR current result from group of AND conditions
       soFar = soFar || evalAnds;
-   } // not done
+   } //  while !done
    andConditions.clear();
-//   bool soFar = EvaluateCondition(0);
-//   #ifdef DEBUG_CONDITIONS
-//      MessageInterface::ShowMessage(
-//         "   After EvaluateCondition, soFar = %s\n", (soFar? "true" : "false"));
-//   #endif
-//
-//
-//   Integer i = 1;
-//   for (i=1; i < numberOfConditions; i++)
-//   {
-//      switch (logicalOpList.at(i-1))
-//      {
-//         case AND:
-//            soFar = soFar && EvaluateCondition(i);
-//            break;
-//         case OR:
-//            soFar = soFar || EvaluateCondition(i);
-//            break;
-//         default:
-//            throw CommandException(
-//                  "Unknown logical operator in conditional statement.");
-//            break;
-//      }
-//   }
    
    #ifdef DEBUG_CONDITIONS
    if (soFar)
@@ -1392,16 +1400,6 @@ bool ConditionalBranch::EvaluateAllConditions()
    
    return soFar;
 }
-
-
-// remove this?
-bool ConditionalBranch::SetStringArrayValue(Integer forArray, 
-                                            const std::string &toValue,
-                                            Integer forIndex)
-{
-   return true;  // TEMPORARY
-}
-
 
 //------------------------------------------------------------------------------
 //  std::string GetConditionalString()
@@ -1429,13 +1427,13 @@ std::string ConditionalBranch::GetConditionalString()
    
    for (Integer i = 1; i < numberOfConditions; i++)
    {
-   #ifdef DEBUG_CONDBR_GET_GEN_STRING
-      MessageInterface::ShowMessage("Now adding condition %d to the string\n", i);
-      MessageInterface::ShowMessage("The logical operator = \"%s\"\n", logicalOpStrings[i-1].c_str());
-      MessageInterface::ShowMessage("The left-hand-side = \"%s\"\n", lhsList[i].c_str());
-      MessageInterface::ShowMessage("The operator = \"%s\"\n", opStrings[i].c_str());
-      MessageInterface::ShowMessage("The right-hand-side = \"%s\"\n", rhsList[i].c_str());
-   #endif
+      #ifdef DEBUG_CONDBR_GET_GEN_STRING
+         MessageInterface::ShowMessage("Now adding condition %d to the string\n", i);
+         MessageInterface::ShowMessage("The logical operator = \"%s\"\n", logicalOpStrings[i-1].c_str());
+         MessageInterface::ShowMessage("The left-hand-side = \"%s\"\n", lhsList[i].c_str());
+         MessageInterface::ShowMessage("The operator = \"%s\"\n", opStrings[i].c_str());
+         MessageInterface::ShowMessage("The right-hand-side = \"%s\"\n", rhsList[i].c_str());
+      #endif
       cond += " " + logicalOpStrings[i-1] + " ";
       cond += lhsList[i] + " " + opStrings[i] + " " + rhsList[i];
    }

@@ -18,8 +18,6 @@
  * Definition for the closing line of the While Statement
  */
 //------------------------------------------------------------------------------
-
-
 #include "EndWhile.hpp"
 #include "BranchCommand.hpp"
 
@@ -31,35 +29,51 @@
 
 
 //------------------------------------------------------------------------------
-// EndWhile(void) :
+// static data
 //------------------------------------------------------------------------------
-EndWhile::EndWhile(void) :
+// none
+
+
+//------------------------------------------------------------------------------
+// public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// EndWhile() :
+//------------------------------------------------------------------------------
+/*
+ * Creates an EndWhile object (default constructor)
+ */
+//---------------------------------------------------------------------------
+EndWhile::EndWhile() :
 GmatCommand         ("EndWhile")
 {
    objectTypeNames.push_back("BranchEnd");
    depthChange = -1;
 }
 
-
-//------------------------------------------------------------------------------
-// ~EndWhile(void)
-//------------------------------------------------------------------------------
-EndWhile::~EndWhile(void)
-{
-}
-
-
 //------------------------------------------------------------------------------
 // EndWhile(const EndWhile& ew)
 //------------------------------------------------------------------------------
+/*
+ * Creates an EndWhile object from the input object (copy constructor)
+ *
+ * @param ef  the EndFor to copy
+ */
+//---------------------------------------------------------------------------
 EndWhile::EndWhile(const EndWhile& ew) :
 GmatCommand         (ew)
 {
 }
 
-
 //------------------------------------------------------------------------------
 // EndWhile& operator=(const EndWhile& ew)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator for the EndWhile command.
+ *
+ * @return A reference to this instance.
+ */
 //------------------------------------------------------------------------------
 EndWhile& EndWhile::operator=(const EndWhile& ew)
 {
@@ -70,11 +84,27 @@ EndWhile& EndWhile::operator=(const EndWhile& ew)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// ~EndWhile()
+//------------------------------------------------------------------------------
+/**
+ * Destroys this EndWhile instance (destructor)
+ */
+//------------------------------------------------------------------------------
+EndWhile::~EndWhile()
+{
+}
 
 //------------------------------------------------------------------------------
-// bool Initialize(void)
+// bool Initialize()
 //------------------------------------------------------------------------------
-bool EndWhile::Initialize(void)
+/**
+ * Initializes this EndWhile command.
+ *
+ * @return  success flag
+ */
+//------------------------------------------------------------------------------
+bool EndWhile::Initialize()
 {
    GmatCommand::Initialize();
    
@@ -88,11 +118,16 @@ bool EndWhile::Initialize(void)
    return true;
 }
 
-
 //------------------------------------------------------------------------------
-// bool Execute(void)
+// bool Execute()
 //------------------------------------------------------------------------------
-bool EndWhile::Execute(void)
+/**
+ * Executes this EndWhile command.
+ *
+ * @return  success flag
+ */
+//------------------------------------------------------------------------------
+bool EndWhile::Execute()
 {
    BuildCommandSummary(true);
    #ifdef DEBUG_ENDWHILE_EXECUTE
@@ -104,9 +139,18 @@ bool EndWhile::Execute(void)
    return true;
 }
 
-
 //------------------------------------------------------------------------------
 // bool Insert(GmatCommand *cmd, GmatCommand *prev)
+//------------------------------------------------------------------------------
+/**
+ * Inserts the input command into the command sequences after the specified
+ * command.
+ *
+ * @param   cmd   command to insert
+ * @param   prev  command after which to insert the command cmd
+ *
+ * @return  success flag
+ */
 //------------------------------------------------------------------------------
 bool EndWhile::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
@@ -120,7 +164,6 @@ bool EndWhile::Insert(GmatCommand *cmd, GmatCommand *prev)
    if (this == prev) return ((BranchCommand*)next)->InsertRightAfter(cmd);
    return false;
 }
-
 
 //---------------------------------------------------------------------------
 // bool RenameRefObject(const Gmat::ObjectType type,
@@ -140,13 +183,12 @@ bool EndWhile::RenameRefObject(const Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
-   // There are no renamealbe objects
+   // There are no renameable objects
    return true;
 }
 
-
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the EndWhile.
@@ -155,14 +197,15 @@ bool EndWhile::RenameRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* EndWhile::Clone(void) const
+GmatBase* EndWhile::Clone() const
 {
    return (new EndWhile(*this));
 }
 
-
 //------------------------------------------------------------------------------
-//  const std::string GetGeneratingString()
+//  const std::string GetGeneratingString(Gmat::WriteMode mode,
+//                                        const std::string &prefix,
+//                                        const std::string &useNam)
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
@@ -189,3 +232,9 @@ const std::string& EndWhile::GetGeneratingString(Gmat::WriteMode mode,
    generatingString = prefix + "EndWhile;";
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
+
+
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+// none

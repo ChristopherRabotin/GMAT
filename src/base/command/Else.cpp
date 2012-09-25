@@ -13,8 +13,6 @@
 //
 // Author:  Joey Gurganus
 // Created: 2004/01/30
-// Modified: 2004/08/10 W. Shoan - made a subclass of GmatCommand; modified
-//           code accordingly
 //
 /**
  * Implementation for the Else command class
@@ -28,7 +26,7 @@
 //  Else()
 //------------------------------------------------------------------------------
 /**
- * Creates a Else command.  (default constructor)
+ * Creates an Else command.  (default constructor)
  */
 //------------------------------------------------------------------------------
 Else::Else() :
@@ -36,26 +34,13 @@ Else::Else() :
 {
    objectTypeNames.push_back("Else");
    objectTypeNames.push_back("BranchEnd");
-   //depthChange = -1;  // is this correct here?
 }
-
-
-//------------------------------------------------------------------------------
-//  ~Else()
-//------------------------------------------------------------------------------
-/**
- * Destroys the for command.  (destructor)
- */
-//------------------------------------------------------------------------------
-Else::~Else()
-{}
-
     
 //------------------------------------------------------------------------------
 //  Else(const Else& ec)
 //------------------------------------------------------------------------------
 /**
- * Constructor that replicates a for command.  (Copy constructor)
+ * Constructor that replicates an Else command.  (Copy constructor)
  *
  * @param ec Else command to copy to create 'this' one
  *
@@ -89,16 +74,26 @@ Else& Else::operator=(const Else& ec)
 }
 
 //------------------------------------------------------------------------------
+//  ~Else()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the ELse command.  (destructor)
+ */
+//------------------------------------------------------------------------------
+Else::~Else()
+{}
+
+//------------------------------------------------------------------------------
 //  bool Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 /**
  * Inserts the command cmd after the command prev.
  *
- * @param cmd Command to insert.
+ * @param cmd  Command to insert.
  *
  * @param prev Command after which to insert the command cmd.
  *
- * @return true if the cmd is inserted, false otherwise.
+ * @return     true if the cmd is inserted, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool Else::Insert(GmatCommand *cmd, GmatCommand *prev)
@@ -122,8 +117,6 @@ bool Else::Initialize()
 {
     bool retval = GmatCommand::Initialize();
 
-    // if specific initialization goes here:
-    
     return retval;
 }
 
@@ -152,7 +145,7 @@ bool Else::Execute()
 /*
  * Renames referenced objects
  *
- * @param <type> type of the reference object.
+ * @param <type>    type of the reference object.
  * @param <oldName> old name of the reference object.
  * @param <newName> new name of the reference object.
  *
@@ -163,7 +156,7 @@ bool Else::RenameRefObject(const Gmat::ObjectType type,
                            const std::string &oldName,
                            const std::string &newName)
 {
-   // There are no renamealbe objects
+   // There are no renameable objects
    return true;
 }
 
@@ -185,7 +178,9 @@ GmatBase* Else::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  const std::string GetGeneratingString()
+//  const std::string GetGeneratingString(Gmat::WriteMode mode,
+//                                        const std::string &prefix,
+//                                        const std::string &useName)
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.

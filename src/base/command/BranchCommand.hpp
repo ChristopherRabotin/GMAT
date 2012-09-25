@@ -24,17 +24,17 @@
 #define BranchCommand_hpp
 
 
-#include "GmatCommand.hpp"
 #include <vector>
+#include "GmatCommand.hpp"
 
 
 class GMAT_API BranchCommand : public GmatCommand
 {
 public:
    BranchCommand(const std::string &typeStr);
-   virtual ~BranchCommand();
    BranchCommand(const BranchCommand& bc);
    BranchCommand&          operator=(const BranchCommand& bc);
+   virtual ~BranchCommand();
    
    void                    AddBranch(GmatCommand *cmd, Integer which = 0);
    void                    AddToFrontOfBranch(GmatCommand *cmd,
@@ -96,29 +96,29 @@ protected:
       BranchCommandParamCount = GmatCommandParamCount,
    };
    
-   /// The managed branch(es).
+   /// The managed branch(es)
    std::vector <GmatCommand *> branch;
    /// Flag used to indicate if the command is finished executing
-   bool                    commandComplete;
+   bool                        commandComplete;
    /// Flag used to indicate a run is being executed
-   bool                    commandExecuting;
+   bool                        commandExecuting;
    /// Flag used to indicate a branch is being executed
-   bool                    branchExecuting;
+   bool                        branchExecuting;
    /// the branch that is executing
-   Integer                 branchToExecute;
+   Integer                     branchToExecute;
    /// The branch that is being filled while the command sequence is being built
-   Integer                 branchToFill;
+   Integer                     branchToFill;
    /// Local container used to return the full sequence from the branches
-   std::string             fullString;
+   std::string                 fullString;
    /// Counter to track how deep the nesting is
-   Integer                 nestLevel;
+   Integer                     nestLevel;
    /// Currently executing member of the branch.  NULL if branch not executing.
-   GmatCommand             *current;
+   GmatCommand                 *current;
    /// Most recently executed member of the branch.  NULL if branch not executed.
-   GmatCommand             *lastFired;
+   GmatCommand                 *lastFired;
    
    std::vector<GmatCommand*>             
-                           cmdsWithFunctions;
+                               cmdsWithFunctions;
    
    bool  ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber);
    void  SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev, bool skipBranchEnd);

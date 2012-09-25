@@ -19,7 +19,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef While_hpp
 #define While_hpp
 
@@ -52,7 +51,6 @@ public:
    virtual bool         Execute();
 
    // inherited from GmatBase
-   // inherited from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
@@ -84,10 +82,7 @@ protected:
    
    static const Gmat::ParameterType PARAMETER_TYPE[WhileParamCount - ConditionalBranchParamCount];
    
-   /// Counter to track how deep the If nesting is
+   /// Counter to track the depth of the While
    Integer                  nestLevel;
-   /// The object array used in GetRefObjectArray()
-   //ObjectArray              objectArray;
-
 };
 #endif  // While_hpp
