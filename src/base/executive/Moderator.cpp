@@ -41,6 +41,11 @@
 #ifdef __BUILD_GMAT_FUNCTION__
 #include "GmatFunctionFactory.hpp"
 #endif
+#ifdef __BUILD_MATLAB_FUNCTION__
+#include "MatlabInterfaceFactory.hpp"
+#include "MatlabFunctionFactory.hpp"
+#include "CallMatlabFunctionFactory.hpp"
+#endif
 #include "HardwareFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
@@ -214,6 +219,11 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
 //      theFactoryManager->RegisterFactory(new FunctionFactory());
       #ifdef __BUILD_GMAT_FUNCTION__
       theFactoryManager->RegisterFactory(new GmatFunctionFactory());
+      #endif
+      #ifdef __BUILD_MATLAB_FUNCTION__
+      theFactoryManager->RegisterFactory(new MatlabInterfaceFactory());
+      theFactoryManager->RegisterFactory(new MatlabFunctionFactory());
+      theFactoryManager->RegisterFactory(new CallMatlabFunctionFactory());
       #endif
       theFactoryManager->RegisterFactory(new HardwareFactory());
       theFactoryManager->RegisterFactory(new MathFactory());

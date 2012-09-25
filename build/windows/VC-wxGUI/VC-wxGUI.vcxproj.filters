@@ -1722,6 +1722,24 @@
     <ClCompile Include="..\..\..\src\base\interface\InterfaceException.cpp">
       <Filter>Source Files\base\interface</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\interface\MatlabInterface.cpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.cpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.cpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -3355,6 +3373,24 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\interface\InterfaceException.hpp">
       <Filter>Source Files\base\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\interface\MatlabInterface.hpp">
+      <Filter>Source Files\base\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.hpp">
+      <Filter>Source Files\base\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.hpp">
+      <Filter>Source Files\base\factory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
