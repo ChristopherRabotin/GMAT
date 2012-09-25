@@ -35,6 +35,8 @@
 class GMAT_API MessageInterface
 {
 public:
+   static const int MAX_MESSAGE_LENGTH;
+   
    static bool SetMessageReceiver(MessageReceiver *mr);
    static MessageReceiver* GetMessageReceiver();
 
@@ -60,7 +62,6 @@ public:
    
 private:
    static MessageReceiver  *theMessageReceiver;
-   static const int        MAX_MESSAGE_LENGTH;
    
    MessageInterface();
    virtual ~MessageInterface();

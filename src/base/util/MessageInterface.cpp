@@ -24,7 +24,7 @@
 //  static data
 //---------------------------------
 MessageReceiver* MessageInterface::theMessageReceiver = NULL;
-const int MessageInterface::MAX_MESSAGE_LENGTH = 10000;
+const int MessageInterface::MAX_MESSAGE_LENGTH = 30000;
 
 
 //---------------------------------

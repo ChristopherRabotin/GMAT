@@ -154,8 +154,23 @@ bool ScriptInterpreter::Interpret()
    }
    
    // Write any error messages collected
-   for (UnsignedInt i=0; i<errorList.size(); i++)
-      MessageInterface::ShowMessage("%d: %s\n", i+1, errorList[i].c_str());
+   std::string errorMsg;
+   std::string truncMsg = " .......... Message is too long so truncated.\n";
+   Integer truncLength = truncMsg.size();
+   Integer numErrors = errorList.size();
+   Integer errorLength;
+   for (Integer i = 0; i < numErrors; i++)
+   {
+      errorMsg = errorList[i];
+      errorLength = errorMsg.size();
+      // If message is too long truncate it
+      if (errorLength > MessageInterface::MAX_MESSAGE_LENGTH)
+      {
+         errorMsg = errorMsg.substr(0, MessageInterface::MAX_MESSAGE_LENGTH - truncLength);
+         errorMsg = errorMsg + truncMsg;
+      }
+      MessageInterface::ShowMessage("%d: %s\n", i+1, errorMsg.c_str());
+   }
    
    #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
@@ -1409,8 +1424,13 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
          InterpreterException ex
             ("GMAT currently requires that all objects are created before the "
              "mission sequence begins");
+         #if 1
          HandleError(ex, true, true);
          return true; // just a warning, so return true
+         #else
+         HandleError(ex, true, false);
+         return false; // error, so return false
+         #endif
       }
    }
    #endif
