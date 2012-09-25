@@ -1424,7 +1424,8 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
          InterpreterException ex
             ("GMAT currently requires that all objects are created before the "
              "mission sequence begins");
-         #if 1
+         // Changed to show as an error (Fix for GMT-2958 LOJ:2012.09.25)
+         #if 0
          HandleError(ex, true, true);
          return true; // just a warning, so return true
          #else
