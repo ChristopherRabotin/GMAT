@@ -445,6 +445,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    theCommand = cmd;
    theDescription = theCommand->GetGeneratingString(Gmat::NO_COMMENTS);
    continueOnError = contOnError;
+   skipErrorMessage = false;
    lhsParamType = Gmat::UNKNOWN_PARAMETER_TYPE;
    std::string typeName = cmd->GetTypeName();
    
@@ -511,10 +512,14 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
             MessageInterface::ShowMessage
                ("1 Could not create an ElementWrapper for \"" + theDescription + "\"\n");
             #endif
-            theErrorMsg = "Undefined function or variable \"" + theDescription +
-               "\" found ";
-            
-            return HandleError();
+            if (skipErrorMessage)
+               return false;
+            else
+            {
+               theErrorMsg = "Undefined function or variable \"" + theDescription +
+                  "\" found";
+               return HandleError();
+            }
             //}
             //else
             //return false;
@@ -540,8 +545,8 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
                MessageInterface::ShowMessage
                   ("2 Could not create an ElementWrapper for \"" + theDescription + "\"\n");
                #endif
+
                theErrorMsg = " Undefined function or variable \"" + *i + "\" found ";
-               
                return HandleError();
             }
             
@@ -632,6 +637,7 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    std::string noBlanks = GmatStringUtil::Trim(desc);   
    std::string noExtraParen = GmatStringUtil::RemoveExtraParen(noBlanks);
    theDescription = GmatStringUtil::Trim(noExtraParen);
+   skipErrorMessage = false;
    
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
@@ -701,8 +707,22 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
          {
             if ((p = GetParameter(arrayName)) == NULL)
             {
-               theErrorMsg = "The Array \"" + arrayName + "\"" + " does not exist";
-               HandleError();
+               // Try if it is MatlabFunction and write error message (LOJ: 2012.09.24)
+               // Fix for GMT-3072 - disable MATLAB function for now
+               GmatBase *obj = FindObject(arrayName);
+               if (obj && obj->IsOfType("MatlabFunction"))
+               {
+                  theErrorMsg = "Use of MATLAB function \"" + arrayName + "\"" +
+                     " not currently allowed in the math equation";
+                  skipErrorMessage = true;
+                  HandleError();
+               }
+               else
+               {
+                  theErrorMsg = "The Array \"" + arrayName + "\"" + " does not exist";
+                  skipErrorMessage = true;
+                  HandleError();
+               }
             }
             else if (!(p->IsOfType(Gmat::ARRAY)) )
             {
@@ -865,8 +885,10 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       {
          if (!CreateForceModelProperty(theObj, lhs, rhs))
          {
+            #if DBGLVL_WRAPPERS > 1
             MessageInterface::ShowMessage
-               ("==> Validator::ValidateCommand() returning false\n");
+               ("Validator::ValidateCommand() returning false\n");
+            #endif
             return false;
          }
       }
@@ -880,8 +902,10 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       {
          if (!CreateCoordSystemProperty(theObj, lhs, rhs))
          {
+            #if DBGLVL_WRAPPERS > 1
             MessageInterface::ShowMessage
-               ("==> Validator::ValidateCommand() returning false\n");
+               ("Validator::ValidateCommand() returning false\n");
+            #endif
             return false;
          }
       }
@@ -1121,9 +1145,14 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
             #endif
             if (cmd->SetElementWrapper(ew, strToUse) == false)
             {
-               theErrorMsg = "Failed to set ElementWrapper for RHS object \"" + strToUse +
-                  "\" in Assignment";
-               return HandleError();
+               if (skipErrorMessage)
+                  return false;
+               else
+               {
+                  theErrorMsg = "Failed to set ElementWrapper for RHS object \"" + strToUse +
+                     "\" in Assignment";
+                  return HandleError();
+               }
             }
          }
          catch (BaseException &ex)
@@ -3139,6 +3168,7 @@ Validator::Validator()
    theObjectMap = NULL;
    createDefaultStringWrapper = true;
    continueOnError = true;
+   skipErrorMessage = false;
 }
 
 

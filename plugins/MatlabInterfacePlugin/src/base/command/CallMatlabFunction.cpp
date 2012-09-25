@@ -222,22 +222,33 @@ bool CallMatlabFunction::Initialize()
    // since FileManager::GetAllMatlabFunctionPaths() returns in top to bottom order
    if (isMatlabFunction)
    {
-      FileManager *fm = FileManager::Instance();
-      StringArray paths = fm->GetAllMatlabFunctionPaths();
-      
-      // Open Matlab engine first and set calling function name
+      // Get Matlab and FileManager instance
       matlabIf = MatlabInterface::Instance();
-
-      #ifdef DEBUG_CALLING_OBJECT
-      MessageInterface::ShowMessage
-         ("CallMatlabFunction::Initialize() setting calling object '%s'\n",
-          mFunctionPathAndName.c_str());
-      #endif
+      FileManager *fm = FileManager::Instance();
       
-      matlabIf->SetCallingObjectName(mFunctionPathAndName);
-      
+      // Open Matlab engine
       if (!matlabIf->IsOpen())
          matlabIf->Open("GmatMatlab");
+      
+      // Change directory to working directory where GMAT application is so that
+      // relative path specified in the startup file works. (LOJ: 2012.09.24)
+      std::string workingDir = fm->GetWorkingDirectory();
+      #ifdef DEBUG_CALL_FUNCTION_INIT
+      MessageInterface::ShowMessage("   Changing working dir to '%s'\n", workingDir.c_str());
+      #endif
+      workingDir = "cd " + workingDir;
+      matlabIf->EvalString(workingDir);
+      
+      #ifdef DEBUG_CALLING_OBJECT
+      MessageInterface::ShowMessage
+         ("   Setting calling object '%s'\n", mFunctionPathAndName.c_str());
+      #endif
+      
+      // Set calling function name
+      matlabIf->SetCallingObjectName(mFunctionPathAndName);
+      
+      // Get all matlab function paths from the startup file
+      StringArray paths = fm->GetAllMatlabFunctionPaths();
       
       #ifdef DEBUG_CALL_FUNCTION_INIT
       MessageInterface::ShowMessage("   Found %d matlab path\n", paths.size());
@@ -279,7 +290,7 @@ bool CallMatlabFunction::Initialize()
                                    GetGeneratingString(Gmat::SCRIPTING) + "\"");
          
          #ifdef DEBUG_CALL_FUNCTION_INIT
-         MessageInterface::ShowMessage("Adding input parameter %s\n", i->c_str());
+         MessageInterface::ShowMessage("   Adding input parameter '%s'\n", i->c_str());
          #endif
          
          mInputList.push_back((Parameter *)mapObj);
@@ -295,7 +306,7 @@ bool CallMatlabFunction::Initialize()
             throw CommandException("CallMatlabFunction command cannot find Parameter " + (*i));
          
          #ifdef DEBUG_CALL_FUNCTION_INIT
-         MessageInterface::ShowMessage("Adding output parameter %s\n", i->c_str());
+         MessageInterface::ShowMessage("   Adding output parameter '%s'\n", i->c_str());
          #endif
          
          mOutputList.push_back((Parameter *)mapObj);
@@ -322,6 +333,10 @@ bool CallMatlabFunction::Initialize()
          }
    }
    
+   #ifdef DEBUG_CALL_FUNCTION_INIT
+   MessageInterface::ShowMessage
+      ("CallMatlabFunction::Initialize() this=<%p> returning %d\n", this, rv);
+   #endif
    return rv;
 }
 

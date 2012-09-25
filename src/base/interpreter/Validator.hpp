@@ -142,6 +142,7 @@ private:
    
    /// Error handling data
    bool            continueOnError;
+   bool            skipErrorMessage;
    StringArray     theErrorList;
    std::string     theErrorMsg;
    
