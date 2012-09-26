@@ -4728,231 +4728,7 @@ void GmatMainFrame::OnFileCompareNumericLines(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnFileCompareTextLines(wxCommandEvent& event)
 {
-
-   #if 1
-   CompareFiles(3);
-   
-   
-   #else
-   CompareTextDialog dlg(this);
-   dlg.ShowModal();
-
-   if (!dlg.CompareFiles())
-      return;
-
-   Integer numDirsToCompare = dlg.GetNumDirsToCompare();
-   if (numDirsToCompare <= 0)
-      return;
-
-   Integer numFilesToCompare = dlg.GetNumFilesToCompare();
-   if (numFilesToCompare <= 0)
-      return;
-
-   wxString baseDir = dlg.GetBaseDirectory();
-   wxArrayString compDirs = dlg.GetCompareDirectories();
-   bool saveCompareResults = dlg.SaveCompareResults();
-   wxString saveFileName = dlg.GetSaveFilename();
-   wxString basePrefix = dlg.GetBasePrefix();
-   wxArrayString compPrefixes = dlg.GetComparePrefixes();
-
-   #ifdef DEBUG_FILE_COMPARE
-   MessageInterface::ShowMessage
-      ("GmatMainFrame::OnFileCompareTextLines() baseDir=%s\n   "
-       "compDirs[0]=%s\n", baseDir.c_str(), compDirs[0].c_str());
-   MessageInterface::ShowMessage
-      ("   basePrefix='%s', comparePrefixex[0]='%s', numDirsToCompare=%d, "
-       "numFilesToCompare=%d\n", basePrefix.c_str(), compPrefixes[0].c_str(),
-       numDirsToCompare, numFilesToCompare);
-   #endif
-
-   wxTextCtrl *textCtrl = NULL;
-   wxString dir1 = compDirs[0];
-
-   GmatMdiChildFrame *textFrame = GetChild("CompareReport");
-
-   if (textFrame == NULL)
-   {
-      GmatTreeItemData *compareItem =
-         new GmatTreeItemData("CompareReport", GmatTree::OUTPUT_COMPARE_REPORT);
-
-      textFrame = CreateChild(compareItem);
-   }
-
-   textCtrl = textFrame->GetScriptTextCtrl();
-   textCtrl->SetMaxLength(320000); // make long enough
-   textFrame->Show();
-   wxString msg;
-   msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);
-   textCtrl->AppendText(msg);
-
-   //loj: Why Do I need to do this to show whole TextCtrl?
-   // textFrame->Layout() didn't work.
-   int w, h;
-   textFrame->GetSize(&w, &h);
-   textFrame->SetSize(w+1, h+1);
-
-   // Get files in the base directory
-   wxDir dir(baseDir);
-   wxString filename;
-   wxString filepath;
-   wxArrayString baseFileNameArray;
-   wxArrayString noPrefixNameArray;
-   size_t prefixLen = basePrefix.Len();
-
-   //How do I specify multiple file ext?
-   bool cont = dir.GetFirst(&filename);
-   while (cont)
-   {
-      if (filename.Contains(".report") || filename.Contains(".txt") ||
-          filename.Contains(".data") || filename.Contains(".script") ||
-          filename.Contains(".eph"))
-      {
-         // if file has prefix
-         if (filename.Left(prefixLen) == basePrefix)
-         {
-            filepath = baseDir + "/" + filename;
-
-            // remove any backup files
-            if (filename.Last() == 't' || filename.Last() == 'a' ||
-                filename.Last() == 'h')
-            {
-               wxString noPrefixName = filename;
-               noPrefixName.Replace(basePrefix, "", false);
-               noPrefixNameArray.push_back(noPrefixName.c_str());
-               baseFileNameArray.push_back(filepath.c_str());
-            }
-         }
-      }
-
-      cont = dir.GetNext(&filename);
-   }
-
-   wxString tempStr;
-   int fileCount = 0;
-   wxString noPrefixName, baseFileName;
-   int file1DiffCount = 0;
-   int file2DiffCount = 0;
-   int file3DiffCount = 0;
-   wxString summary;
-   std::string cannotOpen;
-
-   // Now call compare utility
-   for (UnsignedInt i=0; i<baseFileNameArray.size(); i++)
-   {
-      if (fileCount > numFilesToCompare)
-         break;
-
-      tempStr.Printf("%d", i+1);
-      textCtrl->AppendText("==> File Compare Count: " + tempStr + "\n");
-
-      baseFileName = baseFileNameArray[i];
-      noPrefixName = noPrefixNameArray[i];
-      wxFileName filename(noPrefixName);
-      wxArrayString compareNames;
-
-      #ifdef DEBUG_FILE_COMPARE
-      MessageInterface::ShowMessage("   baseFileName='%s'\n", baseFileName.c_str());
-      MessageInterface::ShowMessage("   noPrefixName='%s'\n", noPrefixName.c_str());
-      #endif
-
-      for (int j=0; j<numDirsToCompare; j++)
-      {
-         compareNames.Add(filename.GetFullName());
-
-         #ifdef DEBUG_FILE_COMPARE
-         MessageInterface::ShowMessage
-            ("   compareNames[%d]='%s'\n", j, compareNames[j].c_str());
-         #endif
-      }
-
-      // set compare file names
-      wxString filename1;
-      wxString filename2;
-      wxString filename3;
-
-      if (numDirsToCompare >= 1)
-         filename1 = compDirs[0] + "/" + compPrefixes[0] + compareNames[0];
-
-      if (numDirsToCompare >= 2)
-         filename2 = compDirs[1] + "/" + compPrefixes[1] + compareNames[1];
-
-      if (numDirsToCompare >= 3)
-         filename3 = compDirs[2] + "/" + compPrefixes[2] + compareNames[2];
-
-      StringArray output;
-
-      output =
-         GmatFileUtil::CompareTextLines(numDirsToCompare, baseFileName.c_str(), filename1.c_str(),
-                                    filename2.c_str(), filename3.c_str(), file1DiffCount,
-                                    file2DiffCount, file3DiffCount);
-      
-      for (UnsignedInt i=0; i<output.size(); i++)
-      {
-         if (output[i].find("Cannot open") != std::string::npos)
-         {
-            cannotOpen = cannotOpen + output[i];
-            break;
-         }
-      }
-
-      wxString str;
-      // for summary array
-      if (file1DiffCount > 0)
-      {
-         str.Printf("%s: %d\n", filename1.c_str(), file1DiffCount);
-         summary = summary + str;
-      }
-
-      if (file2DiffCount > 0)
-      {
-         str.Printf("%s: %d\n", filename2.c_str(), file2DiffCount);
-         summary = summary + str;
-      }
-
-      if (file3DiffCount > 0)
-      {
-         str.Printf("%s: %d\n", filename3.c_str(), file3DiffCount);
-         summary = summary + str;
-      }
-
-      // append text
-      for (unsigned int i=0; i<output.size(); i++)
-      {
-         textCtrl->AppendText(wxString(output[i].c_str()));
-         textCtrl->AppendText("");
-      }
-
-      textCtrl->AppendText
-         ("========================================================\n\n");
-
-      fileCount++;
-   }
-
-   if (fileCount == 0)
-   {
-      textCtrl->AppendText("** There is no report file to compare.\n\n");
-      MessageInterface::ShowMessage("** There is no files to compare.\n");
-   }
-   else
-   {
-      // show summary report of compare
-      textCtrl->AppendText("The following files are different:\n\n");
-      textCtrl->AppendText(summary);
-
-      // show non-existant reports
-      if (cannotOpen != "")
-      {
-         textCtrl->AppendText("\n\n");
-         textCtrl->AppendText(cannotOpen.c_str());
-      }
-
-      textCtrl->AppendText
-         ("========================================================\n\n");
-
-      if (saveCompareResults)
-         textCtrl->SaveFile(saveFileName);
-   }
-   #endif
+   CompareFiles(3);  
 }
 
 
@@ -6225,15 +6001,33 @@ void GmatMainFrame::CompareFiles(Integer compareType)
    dlg.ShowModal();
    
    if (!dlg.CompareFiles())
+   {
+      #ifdef DEBUG_FILE_COMPARE
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::CompareFiles() leaving, comparing files was canceled\n";
+      #endif
       return;
+   }
    
    Integer numDirsToCompare = dlg.GetNumDirsToCompare();
    if (numDirsToCompare <= 0)
+   {
+      #ifdef DEBUG_FILE_COMPARE
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::CompareFiles() leaving, no directories to compare\n";
+      #endif
       return;
+   }
    
    Integer numFilesToCompare = dlg.GetNumFilesToCompare();
    if (numFilesToCompare <= 0)
+   {
+      #ifdef DEBUG_FILE_COMPARE
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::CompareFiles() leaving, no files to compare\n";
+      #endif
       return;
+   }
    
    wxString baseDir = dlg.GetBaseDirectory();
    wxArrayString compDirs = dlg.GetCompareDirectories();
@@ -6301,6 +6095,10 @@ void GmatMainFrame::CompareFiles(Integer compareType)
    // Now call compare utility
    for (UnsignedInt i=0; i<baseFileNameArray.size(); i++)
    {
+      file1DiffCount = 0;
+      file2DiffCount = 0;
+      file3DiffCount = 0;
+      
       if (fileCount > numFilesToCompare)
          break;
 
@@ -6357,7 +6155,7 @@ void GmatMainFrame::CompareFiles(Integer compareType)
              filename2.c_str(), filename3.c_str(), file1DiffCount,
              file2DiffCount, file3DiffCount);
       }
-      
+           
       for (UnsignedInt i=0; i<output.size(); i++)
       {
          if (output[i].find("Cannot open") != std::string::npos)
@@ -6366,7 +6164,7 @@ void GmatMainFrame::CompareFiles(Integer compareType)
             break;
          }
       }
-
+      
       wxString str;
       // for summary array
       if (file1DiffCount > 0)
