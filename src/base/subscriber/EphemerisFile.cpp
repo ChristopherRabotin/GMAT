@@ -2944,6 +2944,8 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    if (outCoordSystem)
    {
       csType = outCoordSystem->GetStringParameter("Axes");
+      if (csType == "MJ2000Eq")
+         csType = "EME2000";
       origin = outCoordSystem->GetStringParameter("Origin");
       if (origin == "Luna")
          origin = "Moon";
