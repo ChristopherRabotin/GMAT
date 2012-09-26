@@ -439,8 +439,11 @@ void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    
    if (itemType == GmatTree::OUTPUT_REPORT)
    {
-      menu.Append(POPUP_COMPARE_NUMERIC_VALUES, wxT("Compare Numeric Values"));
-      menu.Append(POPUP_COMPARE_TEXT_LINES, wxT("Compare Text Lines"));
+	   if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
+	   {
+		  menu.Append(POPUP_COMPARE_NUMERIC_VALUES, wxT("Compare Numeric Values"));
+		  menu.Append(POPUP_COMPARE_TEXT_LINES, wxT("Compare Text Lines"));
+	   }
    }
    
    PopupMenu(&menu, pt);
