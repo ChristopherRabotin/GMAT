@@ -249,6 +249,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_SASH_DRAGGED (ID_SASH_WINDOW, GmatMainFrame::OnSashDrag)
    EVT_SASH_DRAGGED (ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag)
+   EVT_MENU (ID_MSGWIN_MENU_COPY, GmatMainFrame::OnMsgWinCopy)
+   EVT_MENU (ID_MSGWIN_MENU_SELECTALL, GmatMainFrame::OnMsgWinSelectAll)
 
    EVT_SIZE (GmatMainFrame::OnMainFrameSize)
    EVT_CLOSE (GmatMainFrame::OnClose)
@@ -407,6 +409,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    theMessageWin->SetOrientation(wxLAYOUT_HORIZONTAL);
    theMessageWin->SetAlignment(wxLAYOUT_BOTTOM);
    theMessageWin->SetSashVisible(wxSASH_TOP, TRUE);
+   mMsgWinPopupMenu = new wxMenu();
+   mMsgWinPopupMenu->Append(ID_MSGWIN_MENU_COPY, "Copy");
+   mMsgWinPopupMenu->AppendSeparator();
+   mMsgWinPopupMenu->Append(ID_MSGWIN_MENU_SELECTALL, "Select All");
 
    // create MessageWindow TextCtrl
    // Set additional style wxTE_READONLY and wxTE_RICH to Ctrl + mouse scroll
@@ -414,6 +420,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    wxTextCtrl *msgTextCtrl =
       new wxTextCtrl(theMessageWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
                      wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH);
+   msgTextCtrl->Connect(wxEVT_RIGHT_DOWN,
+                        wxMouseEventHandler(GmatMainFrame::OnMsgWinRightMouseDown), NULL, this);
+
 
    msgTextCtrl->SetMaxLength(320000);
    // Added SetFocus() to automatically show the last line. (LOJ: 2009.03.04)
@@ -5682,6 +5691,37 @@ void GmatMainFrame::OnSelectAll(wxCommandEvent& event)
    wxTextCtrl *scriptTC = child->GetScriptTextCtrl();
    scriptTC->SetSelection(-1, -1);
 #endif
+}
+
+//------------------------------------------------------------------------------
+// void OnMsgWinCopy(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnMsgWinCopy(wxCommandEvent& event)
+{
+    GmatAppData::Instance()->GetMessageTextCtrl()->Copy();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnMsgWinSelectAll(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnMsgWinSelectAll(wxCommandEvent& event)
+{
+	GmatAppData::Instance()->GetMessageTextCtrl()->SelectAll();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnMsgWinRightMouseDown(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnMsgWinRightMouseDown(wxMouseEvent& event)
+{
+	long from, to;
+	GmatAppData::Instance()->GetMessageTextCtrl()->GetSelection( &from, &to );
+	mMsgWinPopupMenu->FindItem(ID_MSGWIN_MENU_COPY)->Enable( from != to );
+	mMsgWinPopupMenu->FindItem(ID_MSGWIN_MENU_SELECTALL)->Enable( !GmatAppData::Instance()->GetMessageTextCtrl()->IsEmpty() );
+
+	GmatAppData::Instance()->GetMessageTextCtrl()->PopupMenu(mMsgWinPopupMenu);
 }
 
 

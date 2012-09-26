@@ -174,6 +174,10 @@ public:
    void OnUncomment(wxCommandEvent& event);
    void OnSelectAll(wxCommandEvent& event);
    
+   void OnMsgWinCopy(wxCommandEvent& event);
+   void OnMsgWinRightMouseDown(wxMouseEvent& event);
+   void OnMsgWinSelectAll(wxCommandEvent& event);
+
    void OnFind(wxCommandEvent& event);
    void OnFindNext(wxCommandEvent& event);
    void OnReplace(wxCommandEvent& event);
@@ -255,6 +259,7 @@ private:
    wxStatusBar *theStatusBar;
    wxMenuBar *theMenuBar;
    wxToolBar *theToolBar;
+   wxMenu *mMsgWinPopupMenu;
    
    wxHelpController *theHelpController;
    
@@ -298,6 +303,8 @@ private:
    enum
    {
       ID_SASH_WINDOW = 100,
+	  ID_MSGWIN_MENU_COPY,
+	  ID_MSGWIN_MENU_SELECTALL,
       ID_MSG_SASH_WINDOW,
    };
    
