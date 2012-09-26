@@ -540,6 +540,13 @@ MathNode* MathParser::Parse(const std::string &str)
        inverseOpStr.c_str(), newEq.c_str());
    #endif
    
+   // Replace chained unary operators to correct operator
+   newEq = GmatStringUtil::ReplaceRepeatedPlusMinusSigns(newEq);
+   #if DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("MathParser::Parse() After replacing chained +- signs\n   newEq=%s\n", newEq.c_str());
+   #endif
+   
    // Remove first + sign which is unary +
    if (newEq[0] == '+')
       newEq = newEq.substr(1);
