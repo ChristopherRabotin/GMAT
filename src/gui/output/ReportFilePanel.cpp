@@ -31,6 +31,8 @@
 
 BEGIN_EVENT_TABLE(ReportFilePanel, wxPanel)
    EVT_BUTTON(ID_BUTTON_CLOSE, ReportFilePanel::OnClose)
+   EVT_MENU (ID_MENU_COPY, ReportFilePanel::OnCopy)
+   EVT_MENU (ID_MENU_SELECTALL, ReportFilePanel::OnSelectAll)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -100,9 +102,16 @@ void ReportFilePanel::Create()
    mFileContentsTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
                                            wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP |
                                            wxTE_READONLY | wxTE_MULTILINE | wxGROW);
+   mFileContentsTextCtrl->Connect(wxEVT_RIGHT_DOWN,
+                        wxMouseEventHandler(ReportFilePanel::OnRightMouseDown), NULL, this);
    
    // set font
    mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
+   // create popup menu
+   mPopupMenu = new wxMenu();
+   mPopupMenu->Append(ID_MENU_COPY, "Copy");
+   mPopupMenu->AppendSeparator();
+   mPopupMenu->Append(ID_MENU_SELECTALL, "Select All");
       
    // create bottom buttons
    theCloseButton =
@@ -195,3 +204,36 @@ void ReportFilePanel::OnHelp()
 {
    // open separate window to show help?
 }
+
+//------------------------------------------------------------------------------
+// void OnCopy(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFilePanel::OnCopy(wxCommandEvent& event)
+{
+    mFileContentsTextCtrl->Copy();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnMsgWinSelectAll(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFilePanel::OnSelectAll(wxCommandEvent& event)
+{
+	mFileContentsTextCtrl->SelectAll();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnMsgWinRightMouseDown(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFilePanel::OnRightMouseDown(wxMouseEvent& event)
+{
+	long from, to;
+	mFileContentsTextCtrl->GetSelection( &from, &to );
+	mPopupMenu->FindItem(ID_MENU_COPY)->Enable( from != to );
+	mPopupMenu->FindItem(ID_MENU_SELECTALL)->Enable( !mFileContentsTextCtrl->IsEmpty() );
+
+	mFileContentsTextCtrl->PopupMenu(mPopupMenu);
+}
+
+

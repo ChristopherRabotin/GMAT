@@ -43,6 +43,9 @@ public:
 
    void OnClose(wxCommandEvent &event);
    void OnHelp();
+   void OnCopy(wxCommandEvent& event);
+   void OnRightMouseDown(wxMouseEvent& event);
+   void OnSelectAll(wxCommandEvent& event);
 
    wxTextCtrl *mFileContentsTextCtrl;
 
@@ -65,6 +68,7 @@ protected:
 
    wxButton *theCloseButton;
    wxButton *theHelpButton;
+   wxMenu *mPopupMenu;
 
    ReportFile *theReport;
 
@@ -76,6 +80,8 @@ protected:
    {  
       ID_BUTTON_CLOSE = 8050,
       ID_BUTTON_HELP,
+	  ID_MENU_COPY,
+	  ID_MENU_SELECTALL,
       ID_TEXTCTRL,
    };
 
