@@ -46,6 +46,9 @@
 #include "MatlabFunctionFactory.hpp"
 #include "CallMatlabFunctionFactory.hpp"
 #endif
+#ifdef __BUILD_FMINCON_OPTIMIZER__
+#include "FminconOptimizerFactory.hpp"
+#endif
 #include "HardwareFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
@@ -224,6 +227,9 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new MatlabInterfaceFactory());
       theFactoryManager->RegisterFactory(new MatlabFunctionFactory());
       theFactoryManager->RegisterFactory(new CallMatlabFunctionFactory());
+      #endif
+      #ifdef __BUILD_FMINCON_OPTIMIZER__
+      theFactoryManager->RegisterFactory(new FminconOptimizerFactory());
       #endif
       theFactoryManager->RegisterFactory(new HardwareFactory());
       theFactoryManager->RegisterFactory(new MathFactory());
