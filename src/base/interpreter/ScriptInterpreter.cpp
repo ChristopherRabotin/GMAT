@@ -861,13 +861,12 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
          emptyChunks++;
    #ifdef DEBUG_PARSE
    MessageInterface::ShowMessage
-      ("   emptyChunks=%d, count=%d\n",
-       emptyChunks, count);
+      ("   emptyChunks=%d, count=%d\n", emptyChunks, count);
    #endif
    
+   // Ignore lines with just a semicolon
    if (emptyChunks == count)
-      return true;   // ignore lines with just a semicolon
- //     return false;
+      return true;
    
    // actual script line
    std::string actualScript = sarray[count-1];
@@ -875,6 +874,15 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    // check for function definition line
    if (currentBlockType == Gmat::FUNCTION_BLOCK)
    {
+      #ifdef DEBUG_PARSE
+      MessageInterface::ShowMessage("   => currentBlockType is FUNCTION_BLOCK\n");
+      #endif
+      
+      // If function keyword is used in the main script, throw an exception
+      // (For GMT-1566 fix, LOJ:2012.09.28)
+      if (!inFunctionMode)
+         throw InterpreterException("The \"function\" keyword is not allowd in the main script");
+      
       // Check if function already defined
       // GMAT function test criteria states:
       // 2.11 The system must only allow one function to be defined inside of a function file. 
