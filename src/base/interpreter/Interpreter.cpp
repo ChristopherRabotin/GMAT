@@ -3326,7 +3326,7 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
    //----------------------------------------------------------------------
    // Check all object names in the Create command for global objects.
    // If object type is automatic global and the same object names found in
-   // the GlobalObjectStore, throw an exception exception
+   // the GlobalObjectStore, throw an exception.
    // Just give warning for now (LOJ: 2010.12.16)
    //----------------------------------------------------------------------
    bool globalObjFound = false;
@@ -4378,6 +4378,10 @@ bool Interpreter::SetObjectToValue(GmatBase *toObj, const std::string &value)
    }
    else if (toObjType == "String")
    {
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("   Checking if value is enclosed with quotes\n");
+      #endif
+      
       // check for unpaired single quotes
       if (GmatStringUtil::HasMissingQuote(value, "'"))
       {
@@ -4386,7 +4390,13 @@ bool Interpreter::SetObjectToValue(GmatBase *toObj, const std::string &value)
          return false;
       }
       
-      std::string valueToUse = GmatStringUtil::RemoveEnclosingString(value, "'");
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("   It is enclosed with quotes, now removing trailing spaces\n");
+      #endif
+      
+      // Remove trailing spaces
+      std::string valueToUse = GmatStringUtil::Trim(value, GmatStringUtil::TRAILING);
+      valueToUse = GmatStringUtil::RemoveEnclosingString(valueToUse, "'");
       
       #ifdef DEBUG_SET
       MessageInterface::ShowMessage

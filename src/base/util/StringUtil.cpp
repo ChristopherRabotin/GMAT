@@ -3547,19 +3547,19 @@ std::string GmatStringUtil::RemoveEnclosingString(const std::string &str,
                                                   const std::string &enStr)
 {
    std::string str1 = str;
-
+      
    // First check if string is enclosed with given string
    if (IsEnclosedWith(str, enStr))
    {
       str1 = str.substr(enStr.size());
       str1 = str1.substr(0, str1.size() - enStr.size());
    }
-
+   
    #ifdef DEBUG_REMOVE_ENCLOSING_STRING
    MessageInterface::ShowMessage
       ("GmatStringUtil::RemoveEnclosingString() returning <%s>\n", str1.c_str());
    #endif
-
+   
    return str1;
 }
 
@@ -3893,25 +3893,66 @@ bool GmatStringUtil::IsBlank(const std::string &text, bool ignoreEol)
 
 
 //------------------------------------------------------------------------------
-// bool HasMissingQuote(const std::string &str, const std::string &quote)
+// bool HasMissingQuote(const std::string &str, const std::string &quote,
+//                      bool ignoreSpaceAfterQuote = true)
 //------------------------------------------------------------------------------
 /*
  * Checks if string has missing starting or ending quote.
  *
  * @param  str    input text
  * @param  quote  quote to be used for checking
+ * @param  ignoreSpace  if this flag is set, it will remove spaces after quote
+ *                      before checking
  *
  * @return true if string has missing quote, false otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::HasMissingQuote(const std::string &str,
-                                     const std::string &quote)
+                                     const std::string &quote, bool ignoreSpaceAfterQuote)
 {
-   if ((StartsWith(str, quote) && !EndsWith(str, quote)) ||
+   #ifdef DEBUG_MISSING_QUOTE
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::HasMissingQuote() entered, str=<%s>, quote=<%s>, ignoreSpaceAfterQuote=%d\n",
+       str.c_str(), quote.c_str(), ignoreSpaceAfterQuote);
+   #endif
+   
+   std::string::size_type begQuote = str.find_first_of(quote);
+   std::string::size_type endQuote = str.find_last_of(quote);
+   #ifdef DEBUG_MISSING_QUOTE
+   MessageInterface::ShowMessage("   begQuote=%u, endQuote=%u\n", begQuote, endQuote);
+   #endif
+   
+   // If there is no quotes, return false
+   if (begQuote == str.npos && endQuote == str.npos)
+      return false;
+   
+   if ((!ignoreSpaceAfterQuote) &&
+       (StartsWith(str, quote) && !EndsWith(str, quote)) ||
        (!StartsWith(str, quote) && EndsWith(str, quote)))
       return true;
-
-   return false;
+   
+   bool retval = true;
+   if (ignoreSpaceAfterQuote)
+   {
+      if ((begQuote != str.npos && endQuote != str.npos) && (begQuote != endQuote))
+      {
+         std::string afterEndQuote = str.substr(endQuote + 1);
+         afterEndQuote = RemoveAllBlanks(afterEndQuote);
+         #ifdef DEBUG_MISSING_QUOTE
+         MessageInterface::ShowMessage("   afterEndQuote=<%s>\n", afterEndQuote.c_str());
+         #endif
+         
+         if (afterEndQuote == "")
+            retval = false;
+      }
+   }
+   
+   #ifdef DEBUG_MISSING_QUOTE
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::HasMissingQuote() returning %d\n", retval);
+   #endif
+   
+   return retval;
 }
 
 

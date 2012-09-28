@@ -34,7 +34,8 @@ namespace GmatStringUtil
    };
    
    GMAT_API std::string RemoveAll(const std::string &str, char ch, Integer start = 0);
-   GMAT_API std::string RemoveAll(const std::string &str, const std::string &removeStr, Integer start = 0);
+   GMAT_API std::string RemoveAll(const std::string &str, const std::string &removeStr,
+                           Integer start = 0);
    GMAT_API std::string RemoveAllBlanks(const std::string &str, bool ignoreSingleQuotes = false);
    GMAT_API std::string RemoveLastNumber(const std::string &str, Integer &lastNumber);
    GMAT_API std::string RemoveLastString(const std::string &str, const std::string &lastStr,
@@ -159,7 +160,8 @@ namespace GmatStringUtil
    GMAT_API bool IsValidNumber(const std::string &str);
    GMAT_API bool IsValidName(const std::string &str, bool ignoreBracket = false);
    GMAT_API bool IsBlank(const std::string &str, bool ignoreEol = false);
-   GMAT_API bool HasMissingQuote(const std::string &str, const std::string &quote);
+   GMAT_API bool HasMissingQuote(const std::string &str, const std::string &quote,
+                                 bool ignoreSpaceAfterQuote = true);
    GMAT_API bool IsMathEquation(const std::string &str, bool checkInvalidOpOnly = false);
    GMAT_API bool IsMathOperator(const char &ch);
    
