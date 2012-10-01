@@ -1450,7 +1450,7 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
    // Even in the function we still need to create automatic Parameters,
    // such sat.X in mySatX = sat.X in the assignment command, in order for Validator
    // to set wrapper reference for auto object used in the function command sequence
-   // during the function initiaization. But we don't want to add to function's
+   // during the function initialization. But we don't want to add to function's
    // automatic store at this time. It will be added during function initialization.
    #ifdef DEBUG_VALIDATE_COMMAND
    MessageInterface::ShowMessage
