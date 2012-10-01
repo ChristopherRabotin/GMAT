@@ -87,8 +87,6 @@ public:
    virtual void         SetCallingFunction(FunctionManager *fm);
    
    // other methods for setting up the object w.r.t the elements needed
-   virtual const StringArray& 
-                        GetWrapperObjectNameArray();
    virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
                         const std::string &withName);
    virtual void         ClearWrappers();
@@ -304,8 +302,6 @@ protected:
    TextParser           parser;
    /// The list of settable entities for the command
    StringArray          settables;
-   /// The list of names of Wrapper objects
-   StringArray          wrapperObjectNames;
    /// List used to initialize the local TextParser
    StringArray          commandNameList;
    

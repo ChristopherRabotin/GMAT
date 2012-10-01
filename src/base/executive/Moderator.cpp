@@ -1781,6 +1781,9 @@ bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
    
    if (!delOnlyIfNotUsed)
    {
+      #if DEBUG_REMOVE
+      MessageInterface::ShowMessage("   No need to check for items using, deleting %s\n", name.c_str());
+      #endif
       return theConfigManager->RemoveItem(type, name);
    }
    else
@@ -1802,12 +1805,12 @@ bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
       {
          #if DEBUG_REMOVE
          MessageInterface::ShowMessage
-            ("   '%s' is not used in resource, checking command\n", name.c_str());
+            ("   '%s' is not used in resource, checking command %s\n", name.c_str(), (cmd->GetName()).c_str());
          #endif
          // remove if object is not used in the command sequence
          std::string cmdName;
          GmatCommand *cmdUsing = NULL;
-         if (GmatCommandUtil::FindObject(cmd, type, name, cmdName, &cmdUsing))
+         if (GmatCommandUtil::FindObject(cmd, type, name, cmdName, &cmdUsing, true))
          {
             MessageInterface::ShowMessage
                ("*** WARNING *** Cannot remove \"%s.\"  It is used in the %s "

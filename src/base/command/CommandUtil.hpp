@@ -44,10 +44,10 @@ namespace GmatCommandUtil
    bool GMAT_API HasBranchCommandChanged(GmatCommand *brCmd, Integer level);
    bool GMAT_API FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
                      const std::string &objName, std::string &cmdName,
-                     GmatCommand **cmdUsing);
+                     GmatCommand **cmdUsing, bool checkWrappers = false);
    bool GMAT_API FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
                      Gmat::ObjectType objType, const std::string &objName,
-                     std::string &cmdName, GmatCommand **cmdUsing);
+                     std::string &cmdName, GmatCommand **cmdUsing, bool checkWrappers = false);
    std::string GMAT_API GetCommandSeqString(GmatCommand *cmd, bool showAddr = true,
                      bool showGenStr = false, bool showSummaryName = false,
                      const std::string &indentStr = "---");

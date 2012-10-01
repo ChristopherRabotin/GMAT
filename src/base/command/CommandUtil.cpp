@@ -979,13 +979,15 @@ bool GmatCommandUtil::HasBranchCommandChanged(GmatCommand *brCmd, Integer level)
  * @param  objName  The object name to look for
  * @param  cmdName  The command name contains the object name if found
  * @param  cmdUsing  The command pointer contains the object name if found
+ * @param  checkWrappers check the wrappers for the object if not found in the
+ *                       reference object list for the command
  *
  * @return  true  if object name found, false, otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
                                  const std::string &objName, std::string &cmdName,
-                                 GmatCommand **cmdUsing)
+                                 GmatCommand **cmdUsing, bool checkWrappers)
 {
    if (cmd == NULL)
       return false;
@@ -1044,7 +1046,7 @@ bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
       // go through sub commands
       if ((current->GetChildCommand(0)) != NULL)
       {
-         if (FindObjectFromSubCommands(current, 0, objType, objName, cmdName, cmdUsing))
+         if (FindObjectFromSubCommands(current, 0, objType, objName, cmdName, cmdUsing, checkWrappers))
          {
             #ifdef DEBUG_COMMAND_FIND_OBJECT
             MessageInterface::ShowMessage
@@ -1057,6 +1059,23 @@ bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
          }
       }
       
+      // Check for references in the wrappers, if requested
+      if (checkWrappers)
+      {
+         if (current->HasOtherReferenceToObject(objName))
+         {
+            cmdName = current->GetTypeName();
+            *cmdUsing = current;
+            #ifdef DEBUG_COMMAND_FIND_OBJECT
+            MessageInterface::ShowMessage
+               ("CommandUtil::FindObject() returning true (for wrappers), cmdName='%s', "
+                "cmdUsing=<%p>'%s'\n", cmdName.c_str(), *cmdUsing,
+                (*cmdUsing)->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+            #endif
+            return true;
+         }
+      }
+
       current = current->GetNext();
    }
    
@@ -1074,24 +1093,25 @@ bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
 /*
  * Finds if object name is referenced in anywhere in the command sequence.
  *
- * @param  brCmd  The starting branch command pointer to search for the object
- * @param  objType  The type of the named object
- * @param  objName  The object name to look for
- * @param  cmdName  The command name contains the object name if found
+ * @param  brCmd     The starting branch command pointer to search for the object
+ * @param  objType   The type of the named object
+ * @param  objName   The object name to look for
+ * @param  cmdName   The command name contains the object name if found
  * @param  cmdUsing  The command pointer contains the object name if found
+ * @param  checkWrappers Check wrappers for object name
  *
  * @return  true  if object name found, false, otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
                          Gmat::ObjectType objType, const std::string &objName,
-                         std::string &cmdName, GmatCommand **cmdUsing)
+                         std::string &cmdName, GmatCommand **cmdUsing, bool checkWrappers)
 {
    GmatCommand* current = brCmd;
-   Integer childNo = 0;
+   Integer      childNo = 0;
    GmatCommand* nextInBranch = NULL;
    GmatCommand* child;
-   std::string cmdstr;
+   std::string  cmdstr;
    
    while((child = current->GetChildCommand(childNo)) != NULL)
    {
@@ -1118,7 +1138,7 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
                
                if (names[i] == objName)
                {
-                  cmdName = nextInBranch->GetTypeName();
+                  cmdName   = nextInBranch->GetTypeName();
                   *cmdUsing = nextInBranch;
                   #ifdef DEBUG_COMMAND_FIND_OBJECT
                   MessageInterface::ShowMessage
@@ -1141,7 +1161,7 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
          
          if (nextInBranch->GetChildCommand() != NULL)
             if (FindObjectFromSubCommands(nextInBranch, level+1, objType, objName, cmdName,
-                                          cmdUsing))
+                                          cmdUsing, checkWrappers))
             {
                #ifdef DEBUG_COMMAND_FIND_OBJECT
                MessageInterface::ShowMessage
@@ -1151,6 +1171,23 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
                #endif
                return true;
             }
+
+         // Check for references in the wrappers, if requested
+         if (checkWrappers)
+         {
+            if (nextInBranch->HasOtherReferenceToObject(objName))
+            {
+               cmdName   = nextInBranch->GetTypeName();
+               *cmdUsing = nextInBranch;
+               #ifdef DEBUG_COMMAND_FIND_OBJECT
+               MessageInterface::ShowMessage
+                  ("CommandUtil::FindObjectFromSubCommands() returning true (for wrappers), cmdName='%s', "
+                   "cmdUsing=<%p>'%s'\n", cmdName.c_str(), *cmdUsing,
+                   (*cmdUsing)->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+               #endif
+               return true;
+            }
+         }
          nextInBranch = nextInBranch->GetNext();
       }
       

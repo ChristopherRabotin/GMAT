@@ -2312,7 +2312,7 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    else
    {
       wxLogWarning("\"%s\" %s", selItemData->GetName().c_str(), "cannot be "
-            "deleted.\nIt is currently used in other resource or command "
+            "deleted.\nIt is currently used in a resource or in the command "
             "sequence");
       wxLog::FlushActive();
    }

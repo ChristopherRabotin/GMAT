@@ -139,6 +139,12 @@ public:
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
+   /// Returns the list of names used in the wrappers
+   virtual const StringArray&
+                        GetWrapperObjectNameArray();
+
+   virtual bool         HasOtherReferenceToObject(const std::string &withName);
+
    virtual bool         IsOwnedObject(Integer id) const;
    virtual Integer      GetOwnedObjectCount();
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
@@ -497,6 +503,9 @@ protected:
    ObjectTypeArray     refObjectTypes;
    /// The list of object names referenced by this class
    StringArray         refObjectNames;
+   /// The list of names of Wrapper objects
+   StringArray         wrapperObjectNames;
+
    /// flag indicating whether or not the object is Global
    bool                isGlobal;
    /// flag indicating whether or not the object is automatic Global

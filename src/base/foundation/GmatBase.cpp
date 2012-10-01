@@ -39,6 +39,7 @@
 #include "GmatBase.hpp"
 #include "GmatGlobal.hpp"  // for GetDataPrecision()
 #include <sstream>         // for StringStream
+#include "StringUtil.hpp"
 
 #include "MessageInterface.hpp"
 
@@ -49,6 +50,7 @@
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_WRITE_PARAM
 //#define DEBUG_CLOAKING
+//#define DEBUG_WRAPPER_REF
 
 /// Set the static "undefined" parameters
 //const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
@@ -810,6 +812,65 @@ ObjectArray& GmatBase::GetRefObjectArray(const std::string& typeString)
 {
    return GetRefObjectArray(Gmat::UNKNOWN_OBJECT);
 }
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the names of the wrapper objects used by the command or object
+ *
+ * @return The array of names
+ *
+ * @note  On the base side, only the Subscribers use wrappers
+ */
+//------------------------------------------------------------------------------
+const StringArray& GmatBase::GetWrapperObjectNameArray()
+{
+   return wrapperObjectNames;
+}
+
+
+//---------------------------------------------------------------------------
+// bool HasOtherReferenceToObject(const std::string &withName)
+//---------------------------------------------------------------------------
+/*
+ * Determines whether or not this object has a hidden or indirect
+ * reference to the input object.  This could be the case when a command has
+ * wrappers and one of those wrappers has the named object as a reference.
+ *
+ * @param  withName   the name of the object we're looking for
+ *
+ * @return  true if it has a reference to the named object
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::HasOtherReferenceToObject(const std::string &withName)
+{
+   #ifdef DEBUG_WRAPPER_REF
+      MessageInterface::ShowMessage(
+            "Entering HasOtherReferenceToObject for item \"%s\" of type \"%s\" and withName \"%s\"\n",
+            instanceName.c_str(), typeName.c_str(), withName.c_str());
+   #endif
+   // Right now, the only "Other" place we look is in the wrappers
+   StringArray wrapNames  = GetWrapperObjectNameArray();
+   Integer     sz         = (Integer) wrapNames.size();
+   std::string objName    = "";
+   StringArray byDots;
+   for (Integer ii = 0; ii < sz; ii++)
+   {
+      byDots  = GmatStringUtil::SeparateDots(wrapNames.at(ii));
+      objName = GmatStringUtil::Trim(GmatStringUtil::GetArrayName(byDots.at(0)));
+      #ifdef DEBUG_WRAPPER_REF
+         MessageInterface::ShowMessage("for object %s, wrapper name %d is: %s\n",
+               instanceName.c_str(), ii, wrapNames.at(ii).c_str());
+         MessageInterface::ShowMessage("... and extracted name is: %s\n", objName.c_str());
+      #endif
+      if (objName == withName) return true;
+   }
+
+   return false;
+}
+
 
 
 //---------------------------------------------------------------------------

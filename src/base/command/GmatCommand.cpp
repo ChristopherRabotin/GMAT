@@ -554,21 +554,6 @@ void GmatCommand::SetCallingFunction(FunctionManager *fm)
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
-//------------------------------------------------------------------------------
-/**
- * Retrieves the names of the wrapper objects used by the command
- *
- * @return The array of names
- */
-//------------------------------------------------------------------------------
-const StringArray& GmatCommand::GetWrapperObjectNameArray()
-{
-   return wrapperObjectNames;
-}
-
-
-//------------------------------------------------------------------------------
 // bool SetElementWrapper(ElementWrapper* toWrapper,
 //          const std::string &withName)
 //------------------------------------------------------------------------------
