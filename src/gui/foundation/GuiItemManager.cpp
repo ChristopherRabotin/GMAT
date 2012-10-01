@@ -908,6 +908,11 @@ void GuiItemManager::UpdateCelestialPoint(bool updateObjectArray)
    UpdateSpacePointList();
    if (updateObjectArray)
       RefreshAllObjectArray();
+   // update the listening GmatPanels
+   for (UnsignedInt i=0; i<mResourceUpdateListeners.size(); i++)
+   {
+	   mResourceUpdateListeners[i]->RefreshObjects(Gmat::CELESTIAL_BODY);
+   }
 }
 
 
@@ -1168,6 +1173,11 @@ void GuiItemManager::UpdateSolarSystem(bool updateObjectArray)
    UpdateSpacePointList();
    if (updateObjectArray)
       RefreshAllObjectArray();
+   // update the listening GmatPanels
+   for (UnsignedInt i=0; i<mResourceUpdateListeners.size(); i++)
+   {
+	   mResourceUpdateListeners[i]->RefreshObjects(Gmat::SOLAR_SYSTEM);
+   }
 }
 
 
