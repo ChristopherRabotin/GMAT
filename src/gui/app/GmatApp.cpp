@@ -372,7 +372,7 @@ bool GmatApp::OnInit()
       std::string nowStr = wxNowStr.c_str();
       
       MessageInterface::LogMessage
-         (nowStr + "Unknown error encounted while launching GMAT GUI.\n\n");
+         (nowStr + "Unknown error encountered while launching GMAT GUI.\n\n");
       return false;
    }
 }
