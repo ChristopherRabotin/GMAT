@@ -339,7 +339,7 @@ void LibrationPointPanel::SaveData()
 //------------------------------------------------------------------------------
 void LibrationPointPanel::UpdateComboBoxes()
 {
-   unsigned int i, count;
+   unsigned int i;
    wxString pIndex = primaryBodyCB->GetStringSelection(); 
    wxString sIndex = secondaryBodyCB->GetStringSelection();
 
@@ -351,8 +351,8 @@ void LibrationPointPanel::UpdateComboBoxes()
    items = theGuiInterpreter->GetListOfObjects(Gmat::CELESTIAL_BODY);
    for (i=0; i<items.size(); i++)
    {
-	   primaryBodyCB->Append(items[i]);
-	   secondaryBodyCB->Append(items[i]);
+	   primaryBodyCB->Append(items[i].c_str());
+	   secondaryBodyCB->Append(items[i].c_str());
    }
 
    // list of calculated points
