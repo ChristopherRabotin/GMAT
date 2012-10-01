@@ -28,6 +28,7 @@ class LibrationPointPanel: public GmatPanel
 public:
     LibrationPointPanel(wxWindow *parent, const wxString &name);
     ~LibrationPointPanel();
+   virtual bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
     
    
 private:
@@ -40,6 +41,7 @@ private:
     
     // member functions
     void OnComboBoxChange(wxCommandEvent& event);
+	void UpdateComboBoxes();
 
     // methods inherited from GmatPanel
     virtual void Create();

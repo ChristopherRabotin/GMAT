@@ -79,6 +79,8 @@ LibrationPointPanel::~LibrationPointPanel()
    // Unregister GUI components
    theGuiManager->UnregisterComboBox("CelestialBody", primaryBodyCB);
    theGuiManager->UnregisterComboBox("CelestialBody", secondaryBodyCB);
+   theGuiManager->RemoveFromResourceUpdateListeners(this);
+
 }
 
 //-------------------------------
@@ -115,7 +117,6 @@ void LibrationPointPanel::Create()
    int bsize = 2; // border size
    
    wxString librationList[] = {"L1", "L2", "L3", "L4", "L5"};
-   
    if (theLibrationPt != NULL)
    {
       // create sizers
@@ -125,9 +126,12 @@ void LibrationPointPanel::Create()
       wxStaticText *primaryBodyLabel = new wxStaticText(this, ID_TEXT,
          wxT("Primary Body:"), wxDefaultPosition, wxDefaultSize, 0);
       
+      // register for updates, in order to refresh
+	  theGuiManager->AddToResourceUpdateListeners(this);
+
       // combo box for avaliable bodies 
       primaryBodyCB = 
-         theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
+		  theGuiManager->GetCelestialPointComboBox(this, ID_COMBOBOX, wxSize(100,-1));
       
       // label for secondary body combobox
       wxStaticText *secondaryBodyLabel = new wxStaticText(this, ID_TEXT,
@@ -135,7 +139,7 @@ void LibrationPointPanel::Create()
       
       // combo box for avaliable bodies 
       secondaryBodyCB = 
-         theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
+         theGuiManager->GetCelestialPointComboBox(this, ID_COMBOBOX, wxSize(100,-1));
       
       // label for libration point combobox
       wxStaticText *librationPointLabel = new wxStaticText(this, ID_TEXT,
@@ -180,37 +184,10 @@ void LibrationPointPanel::Create()
 //------------------------------------------------------------------------------
 void LibrationPointPanel::LoadData()
 {
-   unsigned int i, count;
-   StringArray items;
-
    // load data from the core engine 
    try
    {
-      // list of calculated points
-      items = theGuiInterpreter->GetListOfObjects(Gmat::CALCULATED_POINT);
-      count = items.size();
-      #if DEBUG_LIBRATIONPOINT_PANEL
-      MessageInterface::ShowMessage
-         ("LibrationPointPanel::LoadData() count = %d\n", count);
-      #endif
-
-      if (count > 0)  // check to see if any barycenters exist
-      {
-         for (i=0; i<count; i++)
-         {
-            CalculatedPoint *calpt
-               = (CalculatedPoint*)theGuiInterpreter->GetConfiguredObject(items[i]);
-            wxString objName = wxString(items[i].c_str());
-            wxString objTypeName = wxString(calpt->GetTypeName().c_str());
-
-            // append barycenters to the primary and secondary body lists   
-            if (objTypeName == "Barycenter")
-            {
-               primaryBodyCB->Append(objName);
-               secondaryBodyCB->Append(objName);
-            }
-         }
-      }
+      UpdateComboBoxes();
 
       // load primary body
       std::string primaryBody = theLibrationPt->GetStringParameter("Primary");
@@ -349,6 +326,79 @@ void LibrationPointPanel::SaveData()
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage().c_str());
       canClose = false;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void UpdateComboBoxes()
+//------------------------------------------------------------------------------
+/**
+ * Updates the comboboxes by removing libration points and solar system barycenter
+ */
+//------------------------------------------------------------------------------
+void LibrationPointPanel::UpdateComboBoxes()
+{
+   unsigned int i, count;
+   wxString pIndex = primaryBodyCB->GetStringSelection(); 
+   wxString sIndex = secondaryBodyCB->GetStringSelection();
+
+   primaryBodyCB->Clear();
+   secondaryBodyCB->Clear();
+   StringArray items;
+
+   // list of celestial bodies points
+   items = theGuiInterpreter->GetListOfObjects(Gmat::CELESTIAL_BODY);
+   for (i=0; i<items.size(); i++)
+   {
+	   primaryBodyCB->Append(items[i]);
+	   secondaryBodyCB->Append(items[i]);
+   }
+
+   // list of calculated points
+   items = theGuiInterpreter->GetListOfObjects(Gmat::CALCULATED_POINT);
+   for (i=0; i<items.size(); i++)
+   {
+		CalculatedPoint *calpt
+			= (CalculatedPoint*)theGuiInterpreter->GetConfiguredObject(items[i]);
+		wxString objName = wxString(items[i].c_str());
+		wxString objTypeName = wxString(calpt->GetTypeName().c_str());
+
+		// append barycenters to the primary and secondary body lists   
+		if ((objTypeName == "Barycenter") && (objName != "SolarSystemBarycenter"))
+		{
+			primaryBodyCB->Append(objName);
+			secondaryBodyCB->Append(objName);
+		}
+   }
+
+   // reselect current selection if still there
+   primaryBodyCB->SetStringSelection(pIndex);
+   secondaryBodyCB->SetStringSelection(sIndex);
+}
+
+
+//------------------------------------------------------------------------------
+// bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT)
+//------------------------------------------------------------------------------
+/**
+ * Refreshes the comboboxes.  This is necessary because the comboboxes
+ * must hold celestial bodies and barycenters
+ *
+ * @return true if successful; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool LibrationPointPanel::RefreshObjects(Gmat::ObjectType type)
+{
+	if ((type == Gmat::CALCULATED_POINT) || (type == Gmat::CELESTIAL_BODY) || (type == Gmat::SOLAR_SYSTEM))
+   {
+      // Update comboboxes with Barycenters
+	  UpdateComboBoxes();
+      return true;
+   }
+   else
+   {
+      return GmatPanel::RefreshObjects(type);
    }
 }
 
