@@ -3180,9 +3180,8 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_,
-          "Error opening DE file:%s. \n"
-          "Please check file path. "
-          "The next filetype in the list will be used.\n", fileName.c_str());
+          "Error opening the DE file named: %s.\n"
+          "Please check the path and file name.\n", fileName.c_str());
    }
    else
    {
@@ -3205,9 +3204,7 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
       {
          MessageInterface::PopupMessage
             (Gmat::WARNING_,
-             "SolarSystem::CreateDeFile() Error creating %s. "
-             "The next filetype in the list will "
-             "be created.\n", fileName.c_str());
+             "*** Warning *** The following DE file is invalid and will not be used: %s.", fileName.c_str());
       }
    }
    return status;
