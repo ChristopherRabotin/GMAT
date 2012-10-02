@@ -633,7 +633,7 @@ void CoordPanel::Create()
 
    // wxComboBox
    originComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
-      wxSize(120,-1), false);
+      wxSize(150,-1), false);
    originComboBox->SetToolTip(pConfig->Read(_T("OriginHint")));
    typeComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
