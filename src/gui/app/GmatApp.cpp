@@ -265,11 +265,7 @@ bool GmatApp::OnInit()
                               position, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
          
-         wxDateTime now = wxDateTime::Now();
-         wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-         std::string nowStr = wxNowStr.c_str();
-         
-         MessageInterface::LogMessage(nowStr + "GMAT GUI successfully launched.\n");
+         WriteMessage("GMAT GUI successfully launched.\n", "");
          
          // Show any errors occured during initialization
          std::string savedMsg = MessageInterface::GetQueuedMessage();
@@ -308,22 +304,10 @@ bool GmatApp::OnInit()
             theMainFrame->Show(true);
             theMainFrame->ManageMissionTree();
          }
-
+         
          if (runScript)
          {
-            if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
-               theMainFrame->Iconize(true);
-            
-            theMainFrame->BuildAndRunScript(scriptToRun, true);
-            
-            if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::EXIT_AFTER_RUN)
-            {
-               theMainFrame->Close();
-               #ifdef __LINUX__
-                  // Linux needs this to complete shutdown
-                  MessageInterface::ShowMessage("\n");
-               #endif
-            }
+            BuildAndRunScript();
          }
          else if (runBatch)
          {
@@ -355,25 +339,16 @@ bool GmatApp::OnInit()
    }
    catch (BaseException &e)
    {
-      wxDateTime now = wxDateTime::Now();
-      wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-      std::string nowStr = wxNowStr.c_str();
-      
-      MessageInterface::LogMessage
-         (nowStr + "Error encountered while launching GMAT GUI.\n\n");
-      
-      MessageInterface::LogMessage(e.GetFullMessage());
+      WriteMessage("Following error encountered while launching GMAT GUI.\n",
+                        e.GetFullMessage() + "\n\n");
       return false;
    }
    catch (...)
    {
-      wxDateTime now = wxDateTime::Now();
-      wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-      std::string nowStr = wxNowStr.c_str();
-      
-      MessageInterface::LogMessage
-         (nowStr + "Unknown error encountered while launching GMAT GUI.\n\n");
-      return false;
+      WriteMessage("Unknown error encountered while launching GMAT GUI.\n\n", "");
+      //Re-throw the exception so OS can give a debug opportunity.
+      throw;
+      //return false;
    }
 }
 
@@ -383,6 +358,7 @@ bool GmatApp::OnInit()
 //------------------------------------------------------------------------------
 int GmatApp::OnExit()
 {
+   wxSafeYield();
    // Moderator destructor is private, so just call Finalize()
    theModerator->Finalize();
    
@@ -394,12 +370,7 @@ int GmatApp::OnExit()
       delete globalPageSetupData;
 #endif // wxUSE_PRINTING_ARCHITECTURE
    
-   wxDateTime now = wxDateTime::Now();
-   wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-   std::string nowStr = wxNowStr.c_str();
-
-   MessageInterface::LogMessage(nowStr + "GMAT GUI exiting.\n");
-   
+   WriteMessage("GMAT GUI exiting.\n", "");
    return 0;
 }
 
@@ -425,14 +396,15 @@ int GmatApp::FilterEvent(wxEvent& event)
          if (((wxKeyEvent&)event).GetKeyCode() == WXK_F3)
          {
             theMainFrame->OnFindNext( (wxCommandEvent&)event );
-            return true;
+            return 1;
          }
-
+         
          // Find and Replace
          if (((wxKeyEvent&)event).GetKeyCode() == 'H' &&     
              ((wxKeyEvent&)event).GetModifiers() == wxMOD_CONTROL)
          {
             theMainFrame->OnReplaceNext( (wxCommandEvent&)event );
+            return 1;
          }
       }
    }
@@ -492,7 +464,7 @@ void GmatApp::ProcessCommandLineOptions()
             {
                scriptToRun = argv[i+1];
                // Replace single quotes
-               scriptToRun.Replace("'", "", true);
+               GmatStringUtil::Replace(scriptToRun, "'", "");
                runScript = true;
                ++i;
                #ifdef DEBUG_CMD_LINE
@@ -550,10 +522,95 @@ void GmatApp::ProcessCommandLineOptions()
 
 
 //------------------------------------------------------------------------------
+// void BuildAndRunScript()
+//------------------------------------------------------------------------------
+void GmatApp::BuildAndRunScript()
+{
+   if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
+      theMainFrame->Iconize(true);
+   
+   // Build script
+   bool builtOk = false;
+   try
+   {
+      wxSafeYield();
+      builtOk = theMainFrame->BuildScript(scriptToRun, true);
+   }
+   catch (BaseException &e)
+   {
+      WriteMessage("Following error encountered while building the script\n   ",
+                   scriptToRun + "\n   ", e.GetFullMessage());
+   }
+   catch (...)
+   {
+      WriteMessage("Unknown error encountered while building the script\n   ",
+                   scriptToRun + "\n");
+   }
+   
+   // Run script
+   Integer runStatus = 0;
+   if (builtOk)
+   {
+      try
+      {
+         wxSafeYield();
+         runStatus = theMainFrame->RunCurrentScript();
+         if (runStatus != 1)
+         {
+            WriteMessage("Failed to run the script\n   ", scriptToRun + "\n");
+            MessageInterface::LogMessage("   Run status is %d\n", runStatus);
+         }
+      }
+      catch (BaseException &e)
+      {
+         WriteMessage("Following error encountered while running the script\n   ",
+                      scriptToRun + "\n   ", e.GetFullMessage());
+      }
+      catch (...)
+      {
+         WriteMessage("Unknown error encountered while running the script\n   ",
+                      scriptToRun + "\n");
+      }
+   }
+   else
+   {
+      WriteMessage("Failed to build the script\n   ", scriptToRun + "\n");
+   }
+   
+   wxSafeYield();
+   // Close GMAT on option
+   if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::EXIT_AFTER_RUN)
+   {
+      //Set auto exit mode to GmatMainFrame
+      theMainFrame->SetAutoExitAfterRun(true);
+      theMainFrame->Close();
+      wxSafeYield();
+      #ifdef __LINUX__
+      // Linux needs this to complete shutdown
+      MessageInterface::ShowMessage("\n");
+      #endif
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void RunBatch()
 //------------------------------------------------------------------------------
 void GmatApp::RunBatch()
 {
 }
 
+
+//------------------------------------------------------------------------------
+// void WriteMessage(const std::string &msg1,const std::string &msg2, ... )
+//------------------------------------------------------------------------------
+void GmatApp::WriteMessage(const std::string &msg1, const std::string &msg2,
+                           const std::string &msg3)
+{
+   wxDateTime now = wxDateTime::Now();
+   wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
+   std::string nowStr = wxNowStr.c_str();
+   
+   MessageInterface::LogMessage(nowStr + msg1 + msg2 + msg3);
+}
 

@@ -92,6 +92,7 @@ public:
    bool RenameActiveChild(const wxString &newName);
    bool RemoveChild(const wxString &name, GmatTree::ItemType itemType,
                     bool deleteChild = true);
+   void SetAutoExitAfterRun(bool autoExit);
    void RemoveOutputIfOpened(const wxString &name);
    void CloseChild(const wxString &name, GmatTree::ItemType itemType);
    void CloseChild(GmatMdiChildFrame *child);
@@ -112,7 +113,9 @@ public:
                         Integer scriptOpenOpt = GmatGui::OPEN_SCRIPT_ON_ERROR,
                         bool closeScript = false, bool readBack = false,
                         const wxString &savePath = "", bool multScripts = false);
-   void BuildAndRunScript(const wxString &filename, bool addToResourceTree = false);
+   bool BuildScript(const wxString &filename, bool addToResourceTree = false);
+   Integer RunCurrentScript();
+   Integer BuildAndRunScript(const wxString &filename, bool addToResourceTree = false);
    Integer RunCurrentMission();
    void StopRunningMission();
    void StopAnimation();
@@ -240,6 +243,7 @@ private:
    bool mIsMissionRunning;
    bool mRunPaused;
    bool mRunCompleted;
+   bool mAutoExitAfterRun;
    bool mInterpretFailed;
    bool mExitWithoutConfirm;
    bool mUndockedMissionTreePresized;
@@ -303,8 +307,8 @@ private:
    enum
    {
       ID_SASH_WINDOW = 100,
-	  ID_MSGWIN_MENU_COPY,
-	  ID_MSGWIN_MENU_SELECTALL,
+      ID_MSGWIN_MENU_COPY,
+      ID_MSGWIN_MENU_SELECTALL,
       ID_MSG_SASH_WINDOW,
    };
    

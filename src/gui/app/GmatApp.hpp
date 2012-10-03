@@ -53,7 +53,7 @@ private:
    
    Moderator *theModerator;
    GmatMainFrame *theMainFrame;
-   wxString scriptToRun;
+   std::string scriptToRun;
    wxString batchFile;
    bool showMainFrame;
    bool runScript;
@@ -61,7 +61,10 @@ private:
    bool startMatlabServer;
    
    void ProcessCommandLineOptions();
+   void BuildAndRunScript();
    void RunBatch();
+   void WriteMessage(const std::string &msg1, const std::string &msg2,
+                     const std::string &msg3 = "");
 };
 
 DECLARE_APP(GmatApp)

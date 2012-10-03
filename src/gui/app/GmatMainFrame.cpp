@@ -497,6 +497,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mIsMissionRunning = false;
    mRunPaused = false;
    mRunCompleted = true;
+   mAutoExitAfterRun = false;
    
    // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
@@ -558,7 +559,8 @@ GmatMainFrame::~GmatMainFrame()
       ("GmatMainFrame::~GmatMainFrame() entered. mMatlabServer=%p, theGuiInterpreter=%p\n",
        mMatlabServer, theGuiInterpreter);
    #endif
-   
+
+   wxSafeYield();
    theGuiInterpreter->CloseMatlabEngine();
    
    if (mMatlabServer)
@@ -1450,6 +1452,15 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
 
 
 //------------------------------------------------------------------------------
+// void SetAutoExitAfterRun(bool autoExit)
+//------------------------------------------------------------------------------
+void GmatMainFrame::SetAutoExitAfterRun(bool autoExit)
+{
+   mAutoExitAfterRun = autoExit;
+}
+
+
+//------------------------------------------------------------------------------
 // void RemoveOutputIfOpened(const wxString &name)
 //------------------------------------------------------------------------------
 /*
@@ -2246,55 +2257,60 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
          theGuiInterpreter->ClearCommandSeq();
          theGuiInterpreter->ClearResource();
       }
-      
-      wxSafeYield();
-      
-      if (success)
-      {
-         #ifdef DEBUG_INTERPRET
-         MessageInterface::ShowMessage("   Now updating ResourceTree and MissionTree\n");
-         #endif
-         // Update ResourceTree and MissionTree
-         gmatAppData->GetResourceTree()->UpdateResource(true);
-         gmatAppData->GetMissionTree()->UpdateMission(true);
-         wxSafeYield();
-         
-         #ifdef DEBUG_INTERPRET
-         MessageInterface::ShowMessage("   Now restoring UndockedMissionPanel\n");
-         #endif
-         RestoreUndockedMissionPanel();
-         
-         #ifdef DEBUG_INTERPRET
-         MessageInterface::ShowMessage("   Now updating GUI/Script sync status\n");
-         #endif
-         UpdateGuiScriptSyncStatus(1, 1);
-         
-         // if not running script folder, clear status
-         if (!multiScripts)
-            SetStatusText("", 2);
-         
-         // open script editor
-         if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT)
-            OpenScript(false);
-      }
-      else
-      {
-         SetStatusText("Errors were Found in the Script!!", 2);
-
-         // open script editor
-         if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT ||
-             scriptOpenOpt == GmatGui::OPEN_SCRIPT_ON_ERROR)
-            OpenScript();
-         
-         UpdateGuiScriptSyncStatus(1, 3);
-         
-      }
    }
    catch (BaseException &e)
    {
       wxLogError("%s", e.GetFullMessage().c_str());
       wxLog::FlushActive();
       MessageInterface::ShowMessage(e.GetFullMessage());
+   }
+   catch (...)
+   {
+      MessageInterface::ShowMessage
+         ("Unknown error encountered during interpreting a script in "
+          "GmatMainFrame::InterpretScript\n");
+   }
+   
+   wxSafeYield();
+   
+   if (success)
+   {
+      #ifdef DEBUG_INTERPRET
+      MessageInterface::ShowMessage("   Now updating ResourceTree and MissionTree\n");
+      #endif
+      // Update ResourceTree and MissionTree
+      gmatAppData->GetResourceTree()->UpdateResource(true);
+      gmatAppData->GetMissionTree()->UpdateMission(true);
+      wxSafeYield();
+      
+      #ifdef DEBUG_INTERPRET
+      MessageInterface::ShowMessage("   Now restoring UndockedMissionPanel\n");
+      #endif
+      RestoreUndockedMissionPanel();
+      
+      #ifdef DEBUG_INTERPRET
+      MessageInterface::ShowMessage("   Now updating GUI/Script sync status\n");
+      #endif
+      UpdateGuiScriptSyncStatus(1, 1);
+      
+      // if not running script folder, clear status
+      if (!multiScripts)
+         SetStatusText("", 2);
+      
+      // open script editor
+      if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT)
+         OpenScript(false);
+   }
+   else
+   {
+      SetStatusText("Errors were Found in the Script!!", 2);
+      
+      // open script editor
+      if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT ||
+          scriptOpenOpt == GmatGui::OPEN_SCRIPT_ON_ERROR)
+         OpenScript();
+      
+      UpdateGuiScriptSyncStatus(1, 3);
    }
    
    wxSafeYield();
@@ -2304,17 +2320,88 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    MessageInterface::ShowMessage
       ("GmatMainFrame::InterpretScript() returning %d\n", success);
    #endif
-
+   
    return success;
 }
 
 
 //------------------------------------------------------------------------------
-// void BuildAndRunScript(const wxString &filename, bool addToResourceTree = false)
+// bool BuildScript(const wxString &filename, bool addToResourceTree = false)
 //------------------------------------------------------------------------------
-void GmatMainFrame::BuildAndRunScript(const wxString &filename, bool addToResourceTree)
+bool GmatMainFrame::BuildScript(const wxString &filename, bool addToResourceTree)
 {
+   #ifdef DEBUG_BUILD_RUN
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::BuildScript() entered, filename='%s', addToResourceTree=%d\n",
+       filename.c_str(), addToResourceTree);
+   #endif
+   
    CloseCurrentProject();
+   
+   // Initialize build status
+   bool builtOk = false;
+   
+   // Check if file exist first
+   if (wxFileName::FileExists(filename))
+   {
+      if (addToResourceTree)
+         GmatAppData::Instance()->GetResourceTree()->AddScriptItem(filename);
+      
+      mScriptFilename = filename.c_str();
+      builtOk = InterpretScript(filename, GmatGui::DO_NOT_OPEN_SCRIPT);
+   }
+   else
+   {
+      wxMessageBox(wxT("The script file \"" + filename + "\" does not exist.\n"),
+                   wxT("GMAT Error"));
+   }
+   
+   #ifdef DEBUG_BUILD_RUN
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::BuildScript() returning build status %d\n", buildStatus);
+   #endif
+   
+   return builtOk;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer RunCurrentScript()
+//------------------------------------------------------------------------------
+Integer GmatMainFrame::RunCurrentScript()
+{
+   #ifdef DEBUG_BUILD_RUN
+   MessageInterface::ShowMessage("GmatMainFrame::RunCurrentScript() entered\n");
+   #endif
+   
+   // Initialize run status and run current mission
+   mRunStatus = 0;
+   mRunStatus = RunCurrentMission();
+   
+   #ifdef DEBUG_BUILD_RUN
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::BuildAndRunScript() returning run status %d\n", mRunStatus);
+   #endif
+   
+   return mRunStatus;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer BuildAndRunScript(const wxString &filename, bool addToResourceTree = false)
+//------------------------------------------------------------------------------
+Integer GmatMainFrame::BuildAndRunScript(const wxString &filename, bool addToResourceTree)
+{
+   #ifdef DEBUG_BUILD_RUN
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::BuildAndRunScript() entered, filename='%s', addToResourceTree=%d\n",
+       filename.c_str(), addToResourceTree);
+   #endif
+   
+   CloseCurrentProject();
+   
+   // Initialize run status
+   mRunStatus = 0;
    
    // Check if file exist first
    if (wxFileName::FileExists(filename))
@@ -2325,13 +2412,28 @@ void GmatMainFrame::BuildAndRunScript(const wxString &filename, bool addToResour
       mScriptFilename = filename.c_str();
       
       if (InterpretScript(filename, GmatGui::DO_NOT_OPEN_SCRIPT))
+      {
          mRunStatus = RunCurrentMission();
+         
+         #ifdef DEBUG_BUILD_RUN
+         MessageInterface::ShowMessage
+            ("GmatMainFrame::BuildAndRunScript() Status from RunCurrentMission() is %d\n",
+             mRunStatus);
+         #endif
+      }
    }
    else
    {
       wxMessageBox(wxT("The script file \"" + filename + "\" does not exist.\n"),
                    wxT("GMAT Error"));
    }
+   
+   #ifdef DEBUG_BUILD_RUN
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::BuildAndRunScript() returning run status %d\n", mRunStatus);
+   #endif
+   
+   return mRunStatus;
 }
 
 
@@ -2692,7 +2794,6 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    
    // Check if animation is running
    wxToolBar *toolBar = GetToolBar();
-   //if (toolBar->GetToolState(GmatMenu::TOOL_ANIMATION_PLAY) == true)
    if (IsAnimationRunning())
    {
       int answer =
@@ -2723,11 +2824,18 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    // close all child windows first
    if (CloseAllChildren(true, true, true, true))
    {
-      // if user canceled, veto the event
-      if (ShowSaveMessage())
-         event.Veto();
-      else
+      // If auto exit after run, just skip the event
+      if (mAutoExitAfterRun)
          event.Skip();
+      else
+      {
+         // Check if there are any unsaved panels.
+         // If user canceled, veto the event
+         if (ShowSaveMessage())
+            event.Veto();
+         else
+            event.Skip();
+      }
    }
    else
    {
@@ -3194,7 +3302,6 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
             ("   GuiStatus=%d, ActiveScriptStatus=%d\n", guiStatus, scriptStatus);
          #endif
          if (scriptStatus == 2)
-         //if (guiStaus == 2 && scriptStatus == 2)
          {
             scriptSaved = ShowScriptOverwriteMessage();
          }
