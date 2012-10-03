@@ -722,28 +722,46 @@ bool Assignment::Validate()
                //else if (lhsWrapper->GetWrapperType() == Gmat::VARIABLE_WT)
                else if (lhsDataType == Gmat::REAL_TYPE)
                {
+                  retval = false;
                   if ((rhsDataType != Gmat::STRING_TYPE) &&
                       (rhsDataType != Gmat::REAL_TYPE))
                   {
                      // Setting one element array to a variable is ok, set it to
                      // true so that it can be checked at run time
                      if (rhsDataType == Gmat::RMATRIX_TYPE)
-                        retval = true;
-                     else
-                        retval = false;
+                     {
+                        // Check if RHS is 1x1 array
+                        if (rhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
+                        {
+                           #ifdef DEBUG_VALIDATION
+                           MessageInterface::ShowMessage("   Checking RHS for 1x1 array\n");
+                           #endif
+                           Array *rhsArr = (Array*)(rhsWrapper->GetRefObject());
+                           if (rhsArr->GetRowCount() == 1 && rhsArr->GetColCount() == 1)
+                              retval = true;
+                        }
+                     }
                   }
                }
                else if (lhsDataType == Gmat::RMATRIX_TYPE)
                {
+                  retval = false;
                   if ((rhsDataType != Gmat::STRING_TYPE) &&
                       (rhsDataType != Gmat::RMATRIX_TYPE))
                   {
-                     // Setting scalar to one element array is ok, set it to
-                     // true so that it can be checked at run time
                      if (rhsDataType == Gmat::REAL_TYPE)
-                        retval = true;
-                     else
-                        retval = false;
+                     {
+                        // Check if LHS is 1x1 array
+                        if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
+                        {
+                           #ifdef DEBUG_VALIDATION
+                           MessageInterface::ShowMessage("   Checking LHS for 1x1 array\n");
+                           #endif
+                           Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
+                           if (lhsArr->GetRowCount() == 1 && lhsArr->GetColCount() == 1)
+                              retval = true;
+                        }
+                     }
                   }
                }
                else if (lhsDataType == Gmat::INTEGER_TYPE)
@@ -800,7 +818,7 @@ bool Assignment::Validate()
             if (lhsArr->GetRowCount() != rhsArr->GetRowCount() &&
                 lhsArr->GetColCount() != rhsArr->GetColCount())
             {
-               lastErrorMessage = "Array dimension of LHS and RHS are not the same";
+               lastErrorMessage = "Array dimension of LHS and RHS are not the same.";
                retval = false;
             }
          }
