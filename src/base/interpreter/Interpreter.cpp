@@ -8022,10 +8022,22 @@ bool Interpreter::FinalPass()
       obj = FindObject(*i);
       if (obj != NULL)
       {
-         CoordinateSystem *cs = (CoordinateSystem*)
-               FindObject(obj->GetStringParameter("CoordinateSystem"));
+         GmatBase* csObj = FindObject(obj->GetStringParameter("CoordinateSystem"));
+         if (csObj && (!csObj->IsOfType("CoordinateSystem")))
+         {
+            InterpreterException ex
+               ("The Spacecraft \"" + obj->GetName() + "\" failed to set "
+                "\"CoordinateSystem\" to \"" + csObj->GetName() + "\"");
+            HandleError(ex, false);
+            retval = false;
+            continue;
+         }
+         CoordinateSystem *cs = (CoordinateSystem*) csObj;
          if (cs != NULL)
          {
+            #if DBGLVL_FINAL_PASS > 1
+            MessageInterface::ShowMessage("FinalPass:: cs is %s\n", cs->GetName().c_str());
+            #endif
             if (cs->HasCelestialBodyOrigin())
             {
                scObjects.insert(scObjects.begin(), obj);
@@ -8035,7 +8047,13 @@ bool Interpreter::FinalPass()
                scObjects.push_back(obj);
          }
          else
+         {
+            #if DBGLVL_FINAL_PASS > 1
+            MessageInterface::ShowMessage("FinalPass:: cs \"%s\" is NULL\n",
+                  (obj->GetStringParameter("CoordinateSystem")).c_str());
+            #endif
             scObjects.push_back(obj);
+         }
       }
    }
 
@@ -8046,7 +8064,6 @@ bool Interpreter::FinalPass()
       // Now we have more than one CoordinateSystem from Spacecraft.
       // In additions to Spacecraft's CS, it has to handle CS from Thrusters
       // and Attitude. (LOJ: 2009.09.24)
-      //std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
       StringArray csNames = obj->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
       for (StringArray::iterator csName = csNames.begin();
            csName != csNames.end(); ++csName)
@@ -8161,7 +8178,7 @@ bool Interpreter::FinalPass()
          #if DBGLVL_FINAL_PASS > 1
          MessageInterface::ShowMessage
             ("   Calling '%s'->SetRefObject(%s(%p), %d)\n", obj->GetName().c_str(),
-             csObj->GetName().c_str(), csObj, csObj->GetType());
+             cbObj->GetName().c_str(), cbObj, cbObj->GetType());
          #endif
 
          if (cbObj->GetType() != Gmat::CELESTIAL_BODY)
