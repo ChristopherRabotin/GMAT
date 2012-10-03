@@ -103,7 +103,7 @@ public:
                         GetStringArrayParameter(const std::string &label) const;
 
    virtual const StringArray& 
-                       GetWrapperObjectNameArray();
+                       GetWrapperObjectNameArray(bool completeSet = false);
    virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
                                          const std::string &withName);
    virtual void        ClearWrappers();

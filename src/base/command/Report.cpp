@@ -287,9 +287,9 @@ const StringArray& Report::GetStringArrayParameter(const std::string &label) con
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
-const StringArray& Report::GetWrapperObjectNameArray()
+const StringArray& Report::GetWrapperObjectNameArray(bool completeSet)
 {
    wrapperObjectNames.clear();
    wrapperObjectNames.insert(wrapperObjectNames.end(), actualParmNames.begin(),

@@ -1301,13 +1301,19 @@ void Assignment::SetCallingFunction(FunctionManager *fm)
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
 /*
- * Returns wrapper object names used for creating wrappers in Validator.
+ * Returns wrapper object names used for creating wrappers in Validator and
+ * used to determine if an object can be deleted.
+ *
+ * @param completeSet   return names that would not ordinarily be returned
+ *
+ * @return list of names of wrappers
+ *
  */
 //------------------------------------------------------------------------------
-const StringArray& Assignment::GetWrapperObjectNameArray()
+const StringArray& Assignment::GetWrapperObjectNameArray(bool completeSet)
 {
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
@@ -1324,7 +1330,7 @@ const StringArray& Assignment::GetWrapperObjectNameArray()
       {
          // If LHS has more than 1 dot add to the list and Interpreter::ValidateCommand()
          // will figure out if it is settable Parameter or not.(LOJ: 2009.12.22)
-         if (GmatStringUtil::NumberOfOccurrences(lhs, '.') > 1)
+         if ((GmatStringUtil::NumberOfOccurrences(lhs, '.') > 1) || completeSet)
             wrapperObjectNames.push_back(lhs);
       }
       

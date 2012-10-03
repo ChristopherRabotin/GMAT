@@ -924,9 +924,9 @@ bool Vary::InterpretAction()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
-const StringArray& Vary::GetWrapperObjectNameArray()
+const StringArray& Vary::GetWrapperObjectNameArray(bool completeSet)
 {
    wrapperObjectNames.clear();
 

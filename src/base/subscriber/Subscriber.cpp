@@ -736,9 +736,9 @@ void Subscriber::SetSolarSystem(SolarSystem *ss)
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
-const StringArray& Subscriber::GetWrapperObjectNameArray()
+const StringArray& Subscriber::GetWrapperObjectNameArray(bool completeSet)
 {
    return allWrapperObjectNames;
 }

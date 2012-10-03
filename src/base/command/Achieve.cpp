@@ -671,9 +671,9 @@ bool Achieve::InterpretAction()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
-const StringArray& Achieve::GetWrapperObjectNameArray()
+const StringArray& Achieve::GetWrapperObjectNameArray(bool completeSet)
 {
    wrapperObjectNames.clear();
 

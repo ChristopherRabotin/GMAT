@@ -90,7 +90,7 @@ public:
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
    virtual const StringArray& 
-                       GetWrapperObjectNameArray();
+                       GetWrapperObjectNameArray(bool completeSet = false);
    virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
                                          const std::string &withName);
    virtual void        ClearWrappers();

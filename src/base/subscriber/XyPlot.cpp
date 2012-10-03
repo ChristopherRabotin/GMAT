@@ -1289,9 +1289,9 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
-const StringArray& XyPlot::GetWrapperObjectNameArray()
+const StringArray& XyPlot::GetWrapperObjectNameArray(bool completeSet)
 {
    xWrapperObjectNames.clear();
    yWrapperObjectNames.clear();

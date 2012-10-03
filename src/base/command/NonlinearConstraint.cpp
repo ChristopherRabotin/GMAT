@@ -730,9 +730,9 @@ bool NonlinearConstraint::InterpretAction()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
-const StringArray& NonlinearConstraint::GetWrapperObjectNameArray()
+const StringArray& NonlinearConstraint::GetWrapperObjectNameArray(bool completeSet)
 {
    wrapperObjectNames.clear();
 

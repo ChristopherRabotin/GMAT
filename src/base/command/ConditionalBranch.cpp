@@ -1020,16 +1020,18 @@ ConditionalBranch::GetStringArrayParameter(const std::string &label) const
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
 /**
  * This method returns a list of names of the wrapper objects.
+ *
+ * @param completeSet   return names that would not ordinarily be returned
  *
  * @return  list of names of the wrapper objects
  *
  */
 //------------------------------------------------------------------------------
-const StringArray& ConditionalBranch::GetWrapperObjectNameArray()
+const StringArray& ConditionalBranch::GetWrapperObjectNameArray(bool completeSet)
 {
    wrapperObjectNames.clear();
 

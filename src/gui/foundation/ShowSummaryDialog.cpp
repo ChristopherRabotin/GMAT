@@ -26,6 +26,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_CMD_SUMMARY_COMBOBOX
+//#define DEBUG_CMD_SUMMARY_DIALOG
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -59,6 +60,9 @@ ShowSummaryDialog::ShowSummaryDialog(wxWindow *parent, wxWindowID id,
    summaryForEntireMission(summaryForMission),
    physicsBasedOnly       (physicsOnly)
 {
+   #ifdef DEBUG_CMD_SUMMARY_DIALOG
+      MessageInterface::ShowMessage("Creating ShowSummaryDialog with obj = %s\n", obj->GetTypeName().c_str());
+   #endif
    isCoordSysModified = false;
    theGuiManager      = GuiItemManager::GetInstance();
 

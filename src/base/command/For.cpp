@@ -842,15 +842,17 @@ bool For::SetStringParameter(const std::string &label,
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& For::GetWrapperObjectNameArray()
+// const StringArray& For::GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
 /**
  * This method returns an array of object names for the wrappers.
  *
+ * @param completeSet   return names that would not ordinarily be returned
+ *
  * @return    array of object names for the wrappers
  */
 //------------------------------------------------------------------------------
-const StringArray& For::GetWrapperObjectNameArray()
+const StringArray& For::GetWrapperObjectNameArray(bool completeSet)
 {
    wrapperObjectNames.clear();
    wrapperObjectNames.push_back(indexName);

@@ -1875,9 +1875,9 @@ bool Propagate::InterpretAction()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
-const StringArray& Propagate::GetWrapperObjectNameArray()
+const StringArray& Propagate::GetWrapperObjectNameArray(bool completeSet)
 {
    wrapperObjectNames.clear();
    wrapperObjectNames.insert(wrapperObjectNames.end(), stopNames.begin(),

@@ -105,6 +105,7 @@
 //#define DEBUG_COMMAND_COUNTER
 //#define DEBUG_RENAME
 //#define DEBUG_NODE_NAME
+//#define DEBUG_CMD_SUMMARY
 
 //------------------------------
 // event tables for wxWindows
@@ -661,7 +662,7 @@ bool MissionTree::InsertCommandToSequence(GmatCommand *currCmd, GmatCommand *pre
    // appended/inserted, since cmd->AppendCommand() or
    // cmd->InsertCommand() resets previous command.
    // So when ScriptEvent is modified, the old ScriptEvent is
-   // deleted and new one can be insterted into correct place.
+   // deleted and new one can be inserted into correct place.
    //------------------------------------------------------------
    #if DEBUG_MISSION_TREE_INSERT
    WriteCommand("   ==>", " Resetting previous of ", cmdToInsert, "to ", prevCmd);
@@ -3578,7 +3579,7 @@ void MissionTree::OnShowScript(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnShowCommandSummary(wxCommandEvent &event)
 {
-   #ifdef DEBUG_RENAME
+   #ifdef DEBUG_CMD_SUMMARY
    MessageInterface::ShowMessage("OnShowCommandSummary() entered\n");
    #endif
    
@@ -3597,10 +3598,31 @@ void MissionTree::OnShowCommandSummary(wxCommandEvent &event)
          if (cmd->GetName() != "")
             title += cmd->GetName().c_str();
          else
-            title += cmd->GetTypeName().c_str();
+         {
+            std::string cmdType = cmd->GetTypeName();
+            if (cmdType == "BeginScript") cmdType = "ScriptEvent";
+            title += cmdType.c_str();
+         }
 
-         ShowSummaryDialog ssd(this, -1, title, cmd);
-         ssd.ShowModal();
+         // Handle special case of ScriptEvent - we need the Command Summary of the EndScript
+         if (cmd->GetTypeName() == "BeginScript")
+         {
+            GmatCommand *endCmd = GmatCommandUtil::GetMatchingEnd(cmd);
+            std::string endName = endCmd->GetSummaryName();
+            #ifdef DEBUG_CMD_SUMMARY
+            MessageInterface::ShowMessage("... summary name for BeginScript is \"%s\"\n", (cmd->GetSummaryName()).c_str());
+            #endif
+            endCmd->SetSummaryName(cmd->GetSummaryName());
+            ShowSummaryDialog ssd(this, -1, title, endCmd);
+            ssd.ShowModal();
+            // Set the EndScript command summary name back to what it was
+            endCmd->SetSummaryName(endName);
+         }
+         else
+         {
+            ShowSummaryDialog ssd(this, -1, title, cmd);
+            ssd.ShowModal();
+         }
       }
       catch (BaseException &be)
       {
@@ -3608,7 +3630,7 @@ void MissionTree::OnShowCommandSummary(wxCommandEvent &event)
       }
    }
    
-   #ifdef DEBUG_RENAME
+   #ifdef DEBUG_CMD_SUMMARY
    MessageInterface::ShowMessage("OnShowCommandSummary() leaving\n");
    #endif
 }
@@ -4006,6 +4028,10 @@ wxString MissionTree::ComposeNodeName(GmatCommand *cmd, int cmdCount)
    
    wxString nodeName = cmd->GetName().c_str();
    wxString cmdTypeName = cmd->GetTypeName().c_str();
+   #ifdef DEBUG_NODE_NAME
+   MessageInterface::ShowMessage("MissionTree::ComposeNodeName() - nodeName    = %s\n", nodeName.c_str());
+   MessageInterface::ShowMessage("MissionTree::ComposeNodeName() - cmdTypeName = %s\n", cmdTypeName.c_str());
+   #endif
    
    if (cmdTypeName == "GMAT")
       cmdTypeName = "Equation";

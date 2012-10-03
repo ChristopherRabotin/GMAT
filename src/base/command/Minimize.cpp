@@ -601,7 +601,7 @@ bool Minimize::InterpretAction()
    return true;
 }
 
-const StringArray& Minimize::GetWrapperObjectNameArray()
+const StringArray& Minimize::GetWrapperObjectNameArray(bool completeSet)
 {
    wrapperObjectNames.clear();
    wrapperObjectNames.push_back(objectiveName);

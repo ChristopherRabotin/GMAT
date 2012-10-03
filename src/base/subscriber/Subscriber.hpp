@@ -86,7 +86,7 @@ public:
    
    // methods for element wrappers
    virtual const StringArray&
-                        GetWrapperObjectNameArray();
+                        GetWrapperObjectNameArray(bool completeSet = false);
    virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
                                           const std::string &name);
    virtual void         ClearWrappers(bool clearX = false, bool clearY = true);

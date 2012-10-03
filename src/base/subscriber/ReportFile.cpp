@@ -1299,9 +1299,9 @@ const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetWrapperObjectNameArray()
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
 //------------------------------------------------------------------------------
-const StringArray& ReportFile::GetWrapperObjectNameArray()
+const StringArray& ReportFile::GetWrapperObjectNameArray(bool completeSet)
 {
    yWrapperObjectNames.clear();
    yWrapperObjectNames.insert(yWrapperObjectNames.begin(), mParamNames.begin(),

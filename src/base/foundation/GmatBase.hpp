@@ -141,7 +141,7 @@ public:
 
    /// Returns the list of names used in the wrappers
    virtual const StringArray&
-                        GetWrapperObjectNameArray();
+                        GetWrapperObjectNameArray(bool completeSet = false);
 
    virtual bool         HasOtherReferenceToObject(const std::string &withName);
 

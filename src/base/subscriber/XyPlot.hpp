@@ -115,7 +115,7 @@ public:
    
    // methods for setting up the items to subscribe
    virtual const StringArray&
-                        GetWrapperObjectNameArray();
+                        GetWrapperObjectNameArray(bool completeSet = false);
 
 protected:
 

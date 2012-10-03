@@ -61,6 +61,7 @@
 //#define DEBUG_MISSION_SUMMARY
 //#define DEBUG_SUMMARY_STRINGS
 //#define DEBUG_DEFSTR
+//#define DEBUG_CMD_SUMMARY
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -816,7 +817,7 @@ void GmatCommand::SetInternalCoordSystem(CoordinateSystem *cs)
 
 
 //------------------------------------------------------------------------------
-// void SetSummary(const std::string &csName, bool entireMission,
+// void SetupSummary(const std::string &csName, bool entireMission,
 //       bool physicsOnly)
 //------------------------------------------------------------------------------
 /*
@@ -855,6 +856,10 @@ void GmatCommand::SetupSummary(const std::string &csName, bool entireMission,
 void GmatCommand::SetSummaryName(const std::string &sumName)
 {
    summaryName = sumName;
+   #ifdef DEBUG_CMD_SUMMARY
+      MessageInterface::ShowMessage("Setting summary name for command \"%s\" (type %s) to \"%s\"\n",
+            instanceName.c_str(), typeName.c_str(), summaryName.c_str());
+   #endif
 }
 
 
@@ -2250,7 +2255,15 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    // Write the separator and the name and type of the command first
    if (summaryForEntireMission)
       data << "======  ";
-   data << typeName << " Command: " << summaryName << "\n";
+
+   // Handle special case of EndScript -> we want ScriptEvent for individual command summary
+   if ((!summaryForEntireMission) && (typeName == "EndScript"))
+      data << "ScriptEvent Command: " << summaryName << "\n";
+   // Handle special case of GMAT -> we want Equation for individual command summary
+   else if ((!summaryForEntireMission) && (typeName == "GMAT"))
+      data << "Equation Command: " << summaryName << "\n";
+   else
+      data << typeName << " Command: " << summaryName << "\n";
 
    if (((objectMap == NULL) && (globalObjectMap == NULL)) ||
        (satVector.size() == 0))

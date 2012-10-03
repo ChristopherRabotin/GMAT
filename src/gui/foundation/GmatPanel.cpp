@@ -38,6 +38,7 @@
 
 #include "ShowScriptDialog.hpp"
 #include "ShowSummaryDialog.hpp"
+#include "CommandUtil.hpp"
 
 //#define DEBUG_GMATPANEL
 //#define DEBUG_GMATPANEL_SAVE
@@ -480,15 +481,35 @@ void GmatPanel::OnSummary(wxCommandEvent &event)
 {
    wxString title = "Object Script";
    // open separate window to show scripts?
-   if (mObject != NULL) {
+   if (mObject != NULL)
+   {
       title = "Command Summary for ";
       if (mObject->GetName() != "")
          title += mObject->GetName().c_str();
       else
-         title += mObject->GetTypeName().c_str();
+      {
+         std::string cmdType = mObject->GetTypeName();
+         if (cmdType == "BeginScript") cmdType = "ScriptEvent";
+         title += cmdType.c_str();
+      }
    }
-   ShowSummaryDialog ssd(this, -1, title, (GmatCommand*)mObject);
-   ssd.ShowModal();
+   GmatCommand *cmdObj = (GmatCommand*) mObject;
+   // Handle special case of ScriptEvent - we need the Command Summary of the EndScript
+   if (cmdObj->GetTypeName() == "BeginScript")
+   {
+      GmatCommand *endCmd = GmatCommandUtil::GetMatchingEnd(cmdObj);
+      std::string endName = endCmd->GetSummaryName();
+      endCmd->SetSummaryName(cmdObj->GetSummaryName());
+      ShowSummaryDialog ssd(this, -1, title, endCmd);
+      ssd.ShowModal();
+      // Set the EndScript command summary name back to what it was
+      endCmd->SetSummaryName(endName);
+   }
+   else
+   {
+      ShowSummaryDialog ssd(this, -1, title, cmdObj);
+      ssd.ShowModal();
+   }
 }
 
 
