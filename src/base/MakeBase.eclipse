@@ -229,6 +229,7 @@ OBJECTS = \
     coordsystem/AxisSystem.o \
     coordsystem/BodyFixedAxes.o \
     coordsystem/BodyInertialAxes.o \
+    coordsystem/BodySpinSunAxes.o \
     coordsystem/CoordinateBase.o \
     coordsystem/CoordinateConverter.o \
     coordsystem/CoordinateSystemException.o \
