@@ -534,7 +534,7 @@ void GmatApp::BuildAndRunScript()
    try
    {
       wxSafeYield();
-      builtOk = theMainFrame->BuildScript(scriptToRun, true);
+      builtOk = theMainFrame->BuildScript(scriptToRun.c_str(), true);
    }
    catch (BaseException &e)
    {
