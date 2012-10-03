@@ -378,6 +378,7 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\AxisSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\BodyFixedAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\BodyInertialAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateBase.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateSystem.cpp" />
@@ -822,6 +823,7 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\AxisSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\BodyFixedAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\BodyInertialAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateBase.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateSystem.hpp" />

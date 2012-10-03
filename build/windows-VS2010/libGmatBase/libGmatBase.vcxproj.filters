@@ -1278,6 +1278,9 @@
     <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.cpp">
+      <Filter>Source Files\coordsystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2512,6 +2515,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp">
       <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.hpp">
+      <Filter>Source Files\coordsystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
