@@ -449,6 +449,7 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\HarmonicField.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp" />
@@ -894,6 +895,7 @@
     <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\HarmonicField.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp" />

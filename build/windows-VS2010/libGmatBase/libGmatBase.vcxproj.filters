@@ -1281,6 +1281,9 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.cpp">
       <Filter>Source Files\coordsystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp">
+      <Filter>Source Files\forcemodel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2518,6 +2521,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.hpp">
       <Filter>Source Files\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp">
+      <Filter>Source Files\forcemodel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
