@@ -558,7 +558,7 @@ void OrbitPanel::Create()
    
    // combo box for the epoch format
    epochFormatComboBox = new wxComboBox
-      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
+      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(170,-1), //0,
         emptyList, wxCB_DROPDOWN | wxCB_READONLY );
    epochFormatComboBox->SetToolTip(pConfig->Read(_T("EpochFormatHint")));
    
@@ -568,7 +568,7 @@ void OrbitPanel::Create()
    
    // textfield for the epoch value
    epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-      wxDefaultPosition, wxSize(150,-1), 0 );
+      wxDefaultPosition, wxSize(170,-1), 0 );
    epochValue->SetToolTip(pConfig->Read(_T("EpochHint")));
 
    //-----------------------------------------------------------------
@@ -580,7 +580,7 @@ void OrbitPanel::Create()
 
    //Get CordinateSystem ComboBox from the GuiItemManager.
    mCoordSysComboBox =
-      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(170,-1));
    // register for updates, in order to refresh
    theGuiManager->AddToResourceUpdateListeners(theScPanel);
 
@@ -595,7 +595,7 @@ void OrbitPanel::Create()
 
    // combo box for the state
    stateTypeComboBox = new wxComboBox
-      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(150,-1),
+      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(170,-1),
         emptyList, wxCB_DROPDOWN | wxCB_READONLY);
    stateTypeComboBox->SetToolTip(pConfig->Read(_T("StateTypeHint")));
    
