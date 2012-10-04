@@ -362,7 +362,15 @@ void Editor::OnPaste(wxCommandEvent &WXUNUSED(event))
    if (!CanPaste())
       return;
    
+   #ifdef __WXMSW__
+   // Set EOL mode to wxSTC_EOL_CRLF to make sure endings are correct
+   int m = GetEOLMode();
+   SetEOLMode(wxSTC_EOL_CRLF);
    Paste();
+   SetEOLMode(m);
+   #else
+   Paste();
+   #endif
 }
 
 
