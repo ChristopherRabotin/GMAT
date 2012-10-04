@@ -52,6 +52,7 @@ public:
    void UpdateMission(bool resetCounter, bool viewAll = true, bool collapse = false);
    void UpdateMissionForRename();
    void ChangeNodeLabel(const wxString &oldLabel);
+   void SetMissionTreeDocked(bool docked = false);
    void SetViewAll(bool viewAll = true);
    void SetViewLevel(int level);
    void SetViewCommands(const wxArrayString &viewCmds);
@@ -73,6 +74,7 @@ private:
    wxArrayString   mViewCommands;
    bool            mViewAll;
    bool            mUsingViewLevel;
+   bool            mIsMissionTreeDocked;
    int             mViewLevel;
    
    // For debug or DEBUG_MISSION_TREE = ON in the startup file

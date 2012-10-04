@@ -341,7 +341,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 
    SetMenuBar(theMenuBar);
 
-   // Disble Edit menu, Edit menu will be enable in GmatMdiChildFrame if
+   // Disble Edit menu, Edit menu will be enabled in GmatMdiChildFrame if
    // ItemType is GmatTree::SCRIPT_FILE
    int editIndex = theMenuBar->FindMenu("Edit");
    theMenuBar->EnableTop(editIndex, false);
@@ -712,7 +712,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
 {
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CreateChild() this=<%p>, title='%s', name='%s', type=%d, "
+      ("GmatMainFrame::CreateChild() entered, this=<%p>, title='%s', name='%s', type=%d, "
        "restore=%d\n", this, item->GetTitle().c_str(), item->GetName().c_str(),
        item->GetItemType(), restore);
    #endif
@@ -721,7 +721,13 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    
    // if child already open, just return
    if (IsChildOpen(item, restore))
+   {
+      #ifdef DEBUG_CREATE_CHILD
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::CreateChild() returning NULL, child is already opened\n");
+      #endif
       return NULL;
+   }
    
    GmatTree::ItemType itemType = item->GetItemType();
    
@@ -2904,8 +2910,10 @@ void GmatMainFrame::ManageMissionTree()
    wxString isMissionTreeDocked;
    pConfig->Read("/MissionTree/Docked", &isMissionTreeDocked, "true");
    if (isMissionTreeDocked.Lower() == "false")
+   {
       theNotebook->CreateUndockedMissionPanel();
-
+      GmatAppData::Instance()->GetMissionTree()->SetMissionTreeDocked(false);
+   }
 }
 
 //-------------------------------
@@ -3092,12 +3100,26 @@ bool GmatMainFrame::SaveScriptAs()
 //------------------------------------------------------------------------------
 void GmatMainFrame::OpenScript(bool restore)
 {
-   //MessageInterface::ShowMessage("===> GmatMainFrame::OpenScript() entered\n");
-
+   #ifdef DEBUG_OPEN_SCRIPT
+   MessageInterface::ShowMessage("GmatMainFrame::OpenScript() entered\n");
+   #endif
+   
    GmatTreeItemData *scriptItem =
       new GmatTreeItemData(mScriptFilename.c_str(), GmatTree::SCRIPT_FILE);
    
-   CreateChild(scriptItem, restore);
+   GmatMdiChildFrame *script = NULL;
+   if (!IsChildOpen(scriptItem, restore))
+      script = CreateChild(scriptItem, restore);
+   else
+      script = GetChild(mScriptFilename.c_str());
+   
+   // Update menu and tool bar for script editor
+   if (script)
+      script->UpdateGuiItem(1, 0);
+   
+   #ifdef DEBUG_OPEN_SCRIPT
+   MessageInterface::ShowMessage("GmatMainFrame::OpenScript() leaving\n");
+   #endif
 }
 
 
@@ -4278,10 +4300,10 @@ GmatMainFrame::CreateUndockedMissionPanel(const wxString &title,
    case GmatTree::MISSION_TREE_UNDOCKED:
       {
          UndockedMissionPanel *mtPanel = new UndockedMissionPanel(scrolledWin, name);
-		 if (isMinimized)
-			 newChild->Iconize();
-		 else if (isMaximized)
-			 newChild->Maximize();
+         if (isMinimized)
+            newChild->Iconize();
+         else if (isMaximized)
+            newChild->Maximize();
          MissionTree *newMissionTree = mtPanel->GetMissionTree();
          
          // Now GMAT will work with new mission tree, so set appropriate pointers
@@ -4292,6 +4314,7 @@ GmatMainFrame::CreateUndockedMissionPanel(const wxString &title,
          mtPanel->SetGmatNotebook(theNotebook);
          newMissionTree->SetMainFrame(this);
          newMissionTree->SetNotebook(theNotebook);
+         newMissionTree->SetMissionTreeDocked(false);
          GmatAppData::Instance()->SetMissionTree(newMissionTree);
          sizer->Add(mtPanel, 0, wxGROW|wxALL, 0);
          break;
@@ -5079,11 +5102,15 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
    GmatMdiChildFrame *child = (GmatMdiChildFrame*)GetActiveChild();
    if (child != NULL)
    {
-      child->UpdateGuiItem(true, true);
+      #if DBGLVL_MENUBAR > 0
+      MessageInterface::ShowMessage
+         ("   GmatMainFrame::EnableMenuAndToolBar() calling child->UpdateGuiItem()\n");
+      #endif
+      child->UpdateGuiItem(1, 1);
       wxMenuBar *childMenuBar = child->GetMenuBar();
-
+      
       #if DBGLVL_MENUBAR > 1
-      MessageInterface::ShowMessage("   ==childMenuBar=%p\n", childMenuBar);
+      MessageInterface::ShowMessage("   == childMenuBar=<%p>\n", childMenuBar);
       #endif
 
       int helpIndex = childMenuBar->FindMenu("Help");
@@ -5109,10 +5136,11 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
       if (i != helpIndex)
          theMenuBar->EnableTop(i, enable);
    }
-
+   
    //-----------------------------------
    // Always Disable parent Edit menu
    //-----------------------------------
+   // It will be enabled when script editor is activated
    int editIndex = theMenuBar->FindMenu("Edit");
    theMenuBar->EnableTop(editIndex, false);
 }

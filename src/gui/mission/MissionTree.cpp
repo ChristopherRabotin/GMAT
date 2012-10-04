@@ -209,6 +209,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mViewCommands.Add("All");
    mViewAll = true;
    mUsingViewLevel = true;
+   mIsMissionTreeDocked = true;
    mWriteMissionSeq = false;
    mViewLevel = 10;
    
@@ -435,7 +436,16 @@ void MissionTree::ChangeNodeLabel(const wxString &oldLabel)
 
 
 //------------------------------------------------------------------------------
-// void SetViewAll(bool viewAll)
+// void SetMissionTreeDocked(bool docked = false)
+//------------------------------------------------------------------------------
+void MissionTree::SetMissionTreeDocked(bool docked)
+{
+   mIsMissionTreeDocked = docked;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetViewAll(bool viewAll = true)
 //------------------------------------------------------------------------------
 void MissionTree::SetViewAll(bool viewAll)
 {
@@ -2566,6 +2576,12 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
 //------------------------------------------------------------------------------
 void MissionTree::UpdateGuiManager(const GmatCommand *cmd)
 {
+   #ifdef DEBUG_UPDATE_GUI_MANAGER
+   MessageInterface::ShowMessage
+      ("UpdateGuiManager() entered, this=<%p>, mIsMissionTreeDocked=%d\n",
+       this, mIsMissionTreeDocked);
+   #endif
+   
    // Update GuiItemManger since default commands were created with new default
    // resources if needed
    if (cmd->IsOfType("BurnCommand") || cmd->IsOfType("Vary"))
@@ -2579,6 +2595,17 @@ void MissionTree::UpdateGuiManager(const GmatCommand *cmd)
    
    // Always update parameter, since it is used in many commands
    theGuiManager->UpdateParameter();
+   
+   // If MissionTree is undocked, update ResourceTree
+   // Fix for GMT-310 (LOJ: 2012.10.04)
+   if (!mIsMissionTreeDocked)
+      GmatAppData::Instance()->GetResourceTree()->UpdateResource(false);
+   
+   #ifdef DEBUG_UPDATE_GUI_MANAGER
+   MessageInterface::ShowMessage
+      ("UpdateGuiManager() leaving, this=<%p>, mIsMissionTreeDocked=%d\n",
+       this, mIsMissionTreeDocked);
+   #endif
 }
 
 
@@ -2679,7 +2706,7 @@ void MissionTree::AddIcons()
 {
    #ifdef DEBUG_ADD_ICONS
    MessageInterface::ShowMessage
-      ("ResourceTree::AddIcons() entered, GmatTree::MISSION_ICON_COUNT=%d\n",
+      ("MissionTree::AddIcons() entered, GmatTree::MISSION_ICON_COUNT=%d\n",
        GmatTree::MISSION_ICON_COUNT);
    #endif
    
@@ -2765,7 +2792,7 @@ void MissionTree::AddIcons()
    
    #ifdef DEBUG_ADD_ICONS
    MessageInterface::ShowMessage
-      ("ResourceTree::AddIcons() exiting, %d icons added\n", index + 1);
+      ("MissionTree::AddIcons() exiting, %d icons added\n", index + 1);
    #endif
 }
 

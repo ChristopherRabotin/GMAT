@@ -38,6 +38,7 @@
 //#define DEBUG_CLOSE
 //#define DEBUG_PERSISTENCE
 //#define DEBUG_ACTIVATE
+//#define DEBUG_ICONIZE
 
 
 Integer GmatMdiChildFrame::maxZOrder = 0;
@@ -58,6 +59,7 @@ Integer GmatMdiChildFrame::maxZOrder = 0;
 BEGIN_EVENT_TABLE(GmatMdiChildFrame, wxMDIChildFrame)
    EVT_CLOSE(GmatMdiChildFrame::OnClose) 
    EVT_ACTIVATE(GmatMdiChildFrame::OnActivate)
+   EVT_ICONIZE(GmatMdiChildFrame::OnIconize)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -76,7 +78,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    #ifdef DEBUG_MDI_CHILD_FRAME
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::GmatMdiChildFrame() entered, type=%d\n    "
-       "name='%s'\n   title='%s'", type, name.c_str(), title.c_str());
+       "name='%s'\n   title='%s'\n", type, name.c_str(), title.c_str());
    #endif
    
    relativeZOrder          = maxZOrder++;
@@ -159,7 +161,7 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
 {
    #ifdef DEBUG_MDI_CHILD_FRAME
    MessageInterface::ShowMessage
-      ("GmatMdiChildFrame::~GmatMdiChildFrame() name='%s', title='%s' entered\n",
+      ("GmatMdiChildFrame::~GmatMdiChildFrame() entered, name='%s'\n   title='%s'\n",
        GetName().c_str(), GetTitle().c_str());
    #endif
    
@@ -167,18 +169,17 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
       delete theMenuBar;
    #else
       // There should be only one MenuBar associated with GmatMainFrame,
-      // so we cannot delete it here.
-      // Disable Edit menu and tools
+      // so we cannot delete it here. Enable or disable edit menu and tools.
       #ifdef DEBUG_UPDATE_GUI_ITEM
       MessageInterface::ShowMessage
          ("GmatMdiChildFrame() destructor calling UpdateGuiItem()\n");
       #endif
-      UpdateGuiItem(2, 0);
+      UpdateGuiItem(0, 0);
    #endif
       
    #ifdef DEBUG_MDI_CHILD_FRAME
    MessageInterface::ShowMessage
-      ("GmatMdiChildFrame::~GmatMdiChildFrame() name='%s', title='%s' exiting\n",
+      ("GmatMdiChildFrame::~GmatMdiChildFrame() leaving, name='%s'\n   title='%s'\n",
        GetName().c_str(), GetTitle().c_str());
    #endif
 }
@@ -395,8 +396,46 @@ void GmatMdiChildFrame::OnActivate(wxActivateEvent &event)
    relativeZOrder = maxZOrder++;
    #ifdef DEBUG_ACTIVATE
    MessageInterface::ShowMessage
-      ("GmatMdiChildFrame::OnActivate() leaving, title='%s', zOrder set to %d, and maxZOrder set to %d\n",
+      ("GmatMdiChildFrame::OnActivate() leaving, title='%s'\n   zOrder set to %d, and maxZOrder set to %d\n",
        GetTitle().c_str(), relativeZOrder, maxZOrder);
+   #endif
+   event.Skip();
+}
+
+
+//------------------------------------------------------------------------------
+//void OnIconize(wxIconizeEvent &event)
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::OnIconize(wxIconizeEvent &event)
+{
+   #ifdef DEBUG_ICONIZE
+   MessageInterface::ShowMessage
+      ("\nGmatMdiChildFrame::OnIconize() entered, title='%s', mItemType=%d\n",
+       GetTitle().c_str(), mItemType);
+   #endif
+   
+   // Update both edit and animation tools if frame is restored
+   #ifdef DEBUG_UPDATE_GUI_ITEM
+   MessageInterface::ShowMessage("   Calling UpdateGuiItem()\n");
+   #endif
+   if (event.Iconized())
+   {
+      #ifdef DEBUG_UPDATE_GUI_ITEM
+      MessageInterface::ShowMessage("   Frame is iconized.\n");
+      #endif
+      UpdateGuiItem(0, 0);
+   }
+   else
+   {
+      #ifdef DEBUG_UPDATE_GUI_ITEM
+      MessageInterface::ShowMessage("   Frame is restored.\n");
+      #endif
+      UpdateGuiItem(1, 1);
+   }
+   
+   #ifdef DEBUG_ICONIZE
+   MessageInterface::ShowMessage
+      ("GmatMdiChildFrame::OnIconize() leaving, title='%s'\n", GetTitle().c_str());
    #endif
    event.Skip();
 }
@@ -647,21 +686,20 @@ wxString GmatMdiChildFrame::GetTitle()
  * Updates Edit menu items and tools.
  *
  * @param  updateEdit
- *            0, Ignore edit menu and tools
  *            1, Update edit menu and tools
- *            2, Disable edit menu and tools
+ *            != 1, Disable edit menu and tools
  * @param  updateAnimation
- *            0, Ignore animation tools
  *            1, Update animation tools
- *            2, Disable animation tools
+ *            != 1, Disable animation tools
  */
 //------------------------------------------------------------------------------
 void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
 {
    #ifdef DEBUG_UPDATE_GUI_ITEM
    MessageInterface::ShowMessage
-      ("GmatMdiChildFrame::UpdateGuiItem() entered, updateEdit=%d, updateAnimation=%d\n",
-       updateEdit, updateAnimation);
+      ("GmatMdiChildFrame::UpdateGuiItem() entered, name='%s'\n   updateEdit=%d, "
+       "updateAnimation=%d, iconized=%d\n", mChildName.c_str(), updateEdit,
+       updateAnimation, IsIconized());
    #endif
    
    wxToolBar *toolBar = theParent->GetToolBar();
@@ -683,28 +721,29 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
    // update edit from menubar and toolbar
    //------------------------------------------------------------
    // Update MenuBar for this child
-   if (updateEdit == 1 && (mItemType == GmatTree::SCRIPT_FILE ||
-                           mItemType == GmatTree::GMAT_FUNCTION ||
-                           mItemType == GmatTree::SCRIPT_EVENT))
+   if (updateEdit == 1 && !IsIconized() &&
+       (mItemType == GmatTree::SCRIPT_FILE ||
+        mItemType == GmatTree::GMAT_FUNCTION ||
+        mItemType == GmatTree::SCRIPT_EVENT))
    {
       theMenuBar->EnableTop(editIndex, true);
-      toolBar->EnableTool(GmatMenu::MENU_EDIT_CUT, TRUE);
-      toolBar->EnableTool(GmatMenu::MENU_EDIT_COPY, TRUE);
-      toolBar->EnableTool(GmatMenu::MENU_EDIT_PASTE, TRUE);
+      toolBar->EnableTool(GmatMenu::MENU_EDIT_CUT, true);
+      toolBar->EnableTool(GmatMenu::MENU_EDIT_COPY, true);
+      toolBar->EnableTool(GmatMenu::MENU_EDIT_PASTE, true);
    }
    else
    {
       theMenuBar->EnableTop(editIndex, false);
-      toolBar->EnableTool(GmatMenu::MENU_EDIT_CUT, FALSE);
-      toolBar->EnableTool(GmatMenu::MENU_EDIT_COPY, FALSE);
-      toolBar->EnableTool(GmatMenu::MENU_EDIT_PASTE, FALSE);
+      toolBar->EnableTool(GmatMenu::MENU_EDIT_CUT, false);
+      toolBar->EnableTool(GmatMenu::MENU_EDIT_COPY, false);
+      toolBar->EnableTool(GmatMenu::MENU_EDIT_PASTE, false);
    }
    
    //------------------------------------------------------------
    // update animation icons from toolbar
    //------------------------------------------------------------
    // If mission is running, ignore   
-   if (updateAnimation == 1 &&
+   if (updateAnimation == 1 && !IsIconized() &&
       (mItemType == GmatTree::OUTPUT_ORBIT_VIEW ||
        mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT))
    {

@@ -78,6 +78,7 @@ public:
    virtual void SetAssociatedWindow(wxWindow *win);
    
    virtual void OnActivate(wxActivateEvent &event);
+   virtual void OnIconize(wxIconizeEvent &event);
    virtual void OnClose(wxCloseEvent &event);
    virtual void UpdateScriptActiveStatus(bool isActive);
    
