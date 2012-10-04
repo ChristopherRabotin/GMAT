@@ -821,6 +821,7 @@ void Interpreter::RegisterAliases()
    ODEModel::SetScriptAlias("PointMasses", "PointMassForce");
    ODEModel::SetScriptAlias("Drag", "DragForce");
    ODEModel::SetScriptAlias("SRP", "SolarRadiationPressure");
+   ODEModel::SetScriptAlias("PolyhedralBodies", "PolyhedronGravityModel");
 }
 
 
@@ -6273,7 +6274,8 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    // Create ForceModel owned PhysicalModel
    //------------------------------------------------------------
    
-   else if (pmType == "PrimaryBodies" || pmType == "PointMasses")
+   else if (pmType == "PrimaryBodies" || pmType == "PointMasses" ||
+            pmType == "PolyhedralBodies")
    {
       retval = true;
       StringArray bodies = theTextParser.SeparateBrackets(value, "{}", " ,");

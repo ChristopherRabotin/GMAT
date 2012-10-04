@@ -53,7 +53,7 @@
 #define HarmonicField_hpp
 
 #include "ODEModelException.hpp"
-#include "PhysicalModel.hpp"
+#include "GravityBase.hpp"
 #include "CelestialBody.hpp"
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
@@ -61,21 +61,32 @@
 #include "EopFile.hpp"
 
 
-/* Common header file definitions for execution of gravity, legendreP, and redux routines
+/**
+ * Common header file definitions for execution of gravity, legendreP, and redux routines
  *
  * Steven Queen
  * Goddard Space Flight Center
  * Flight Dynamics Analysis Branch
  * Steven.Z.Queen@nasa.gov
  * Feburary 28, 2003
+ *
+ * Note that in GMAT, this code is derived from GravityBase rather than
+ * PhysicalModel.  That means that is we add other HarmonicField models that are
+ * not gravity fields, we'll need to do some code rearrangement to have the
+ * common harmonic elements separate but usable.
+ *
+ * The GravityBase class was added in Oct 2012 to handle issues with different
+ * types of sophisticated gravity models -- specifically, Polyhedral models and
+ * Spherical Harmonic models -- in the ODEModel collection.
  */
 
 
-class GMAT_API HarmonicField : public PhysicalModel
+class GMAT_API HarmonicField : public GravityBase
 {
 public:
-    HarmonicField(const std::string &name, const std::string &typeName = "HarmonicField",
-                 Integer maxDeg = HF_MAX_DEGREE, Integer maxOrd = HF_MAX_ORDER);
+    HarmonicField(const std::string &name,
+          const std::string &typeName = "HarmonicField",
+          Integer maxDeg = HF_MAX_DEGREE, Integer maxOrd = HF_MAX_ORDER);
     virtual ~HarmonicField(void);
 
     HarmonicField(const HarmonicField& hf);

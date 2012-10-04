@@ -173,6 +173,33 @@ public:
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
    
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+//   virtual Real         GetRealParameter(const Integer id,
+//                                         const Integer index) const;
+//   virtual Real         GetRealParameter(const Integer id, const Integer row,
+//                                         const Integer col) const;
+//   virtual Real         SetRealParameter(const Integer id,
+//                                         const Real value,
+//                                         const Integer index);
+//   virtual Real         SetRealParameter(const Integer id, const Real value,
+//                                         const Integer row, const Integer col);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+//   virtual Real         GetRealParameter(const std::string &label,
+//                                         const Integer index) const;
+//   virtual Real         SetRealParameter(const std::string &label,
+//                                         const Real value,
+//                                         const Integer index);
+//   virtual Real         GetRealParameter(const std::string &label,
+//                                         const Integer row,
+//                                         const Integer col) const;
+//   virtual Real         SetRealParameter(const std::string &label,
+//                                         const Real value, const Integer row,
+//                                         const Integer col);
+
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &value) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -359,6 +386,7 @@ protected:
    {
       CENTRAL_BODY = PhysicalModelParamCount,
       PRIMARY_BODIES,
+      POLYHEDRAL_BODIES,
       POINT_MASSES,
       DRAG,
       SRP,
@@ -370,6 +398,14 @@ protected:
       DEGREE,
       ORDER,
       POTENTIAL_FILE,
+
+      // The polyhedral model settings
+      POLYHEDRAL_BODY,
+      SHAPE_FILE_NAME,
+      BODY_DENSITY,
+
+
+      // Plug-in forces not otherwise handled
       USER_DEFINED,
       ODEModelParamCount
    };

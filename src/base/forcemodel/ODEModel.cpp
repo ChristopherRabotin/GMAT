@@ -115,6 +115,7 @@ ODEModel::PARAMETER_TEXT[ODEModelParamCount - PhysicalModelParamCount] =
 {
    "CentralBody",
    "PrimaryBodies",
+   "PolyhedralBodies",
    "PointMasses",
    "Drag",
    "SRP",
@@ -126,6 +127,12 @@ ODEModel::PARAMETER_TEXT[ODEModelParamCount - PhysicalModelParamCount] =
    "Degree",
    "Order",
    "PotentialFile",
+
+   // Parameters for Polyhedral Gravity
+   "CreateForceBody",
+   "ShapeFileName",
+   "BodyDensity",
+
    "UserDefined"
 };
 
@@ -135,6 +142,7 @@ ODEModel::PARAMETER_TYPE[ODEModelParamCount - PhysicalModelParamCount] =
 {
    Gmat::OBJECT_TYPE,       // "CentralBody",
    Gmat::OBJECTARRAY_TYPE,  // "PrimaryBodies",
+   Gmat::OBJECTARRAY_TYPE,  // "PolyhedralBodies",
    Gmat::OBJECTARRAY_TYPE,  // "PointMasses",
    Gmat::OBJECT_TYPE,       // "Drag",
    Gmat::ON_OFF_TYPE,       // "SRP",
@@ -146,6 +154,14 @@ ODEModel::PARAMETER_TYPE[ODEModelParamCount - PhysicalModelParamCount] =
    Gmat::INTEGER_TYPE,      // "Degree",
    Gmat::INTEGER_TYPE,      // "Order",
    Gmat::STRING_TYPE,       // "PotentialFile",
+
+   // Additions for the polyhedral gravity model
+   Gmat::OBJECT_TYPE,       // "CreateForceBody",
+   Gmat::FILENAME_TYPE,     // "ShapeFileName",
+   Gmat::REAL_TYPE,         // "BodyDensity",
+
+
+   // plugin forces in the style of the solar sail plugin
    Gmat::OBJECTARRAY_TYPE,  // "UserDefined",
 };
 
@@ -177,7 +193,7 @@ std::map<std::string, std::string> ODEModel::scriptAliases;
  */
 //------------------------------------------------------------------------------
 void ODEModel::SetScriptAlias(const std::string& alias,
-                                const std::string& typeName)
+                              const std::string& typeName)
 {
    if (scriptAliases.find(alias) == scriptAliases.end())
    {
@@ -533,7 +549,7 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
    std::string forceBody = pPhysicalModel->GetBodyName();
 
    // Trap multiple instances
-   if ((pmType == "GravityField") || (pmType == "PointMassForce"))
+   if ((pPhysicalModel->IsOfType("GravityBase"))||(pmType == "PointMassForce"))
    {
       std::string compType;
       
@@ -541,7 +557,7 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
            i != forceList.end(); ++i)
       {
          compType = (*i)->GetTypeName();
-         if ((compType == "GravityField") || (compType == "PointMassForce"))
+         if (((*i)->IsOfType("GravityBase")) || (compType == "PointMassForce"))
          {
             if ((*i)->GetBodyName() == forceBody && (*i) != pPhysicalModel)
                throw ODEModelException(
@@ -551,7 +567,8 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
                   " force in place for that body.");
          }
 
-         if ((pmType == "GravityField") && (compType == "GravityField"))
+         if ((pPhysicalModel->IsOfType("GravityBase")) &&
+             ((*i)->IsOfType("GravityBase")))
          {
             throw ODEModelException(
                "Attempted to add a GravityField (aka primary body) force to "
@@ -682,7 +699,7 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
       }
 
       // Full field models come first to facilitate setting their parameters
-      if (pmType == "GravityField")
+      if (pPhysicalModel->IsOfType("GravityBase"))
          forceList.insert(forceList.begin(), pPhysicalModel);
       else if (!skipAdd)
          forceList.push_back(pPhysicalModel);
@@ -3239,7 +3256,8 @@ std::string ODEModel::GetParameterTypeString(const Integer id) const
 bool ODEModel::IsParameterReadOnly(const Integer id) const
 {
    if (id == COORDINATE_SYSTEM_LIST || id == DEGREE || id == ORDER ||
-       id == POTENTIAL_FILE)
+       id == POTENTIAL_FILE || id == POLYHEDRAL_BODY || id == SHAPE_FILE_NAME ||
+       id == BODY_DENSITY)
       return true;
    
    return PhysicalModel::IsParameterReadOnly(id);
@@ -3255,6 +3273,216 @@ bool ODEModel::IsParameterReadOnly(const std::string &label) const
    
    return PhysicalModel::IsParameterReadOnly(label);
 }
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets real parameter data
+ *
+ * @param id The parameter's ID
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+Real ODEModel::GetRealParameter(const Integer id) const
+{
+   if (id == BODY_DENSITY)
+   {
+      // Find a Polyhedral gravity model
+      const PhysicalModel *pm = GetForce("PolyhedronGravityModel");
+      if (pm == NULL)
+         throw ODEModelException("The BodyDensity parameter only applies to "
+               "Polyhedral gravity fields.");
+      // Get the atmosphere model from the drag force
+      Integer id = pm->GetParameterID("BodyDensity");
+      return pm->GetRealParameter(id);
+   }
+
+   return PhysicalModel::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets real parameter data
+ *
+ * @param id The parameter's ID
+ * @param value The new value
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+Real ODEModel::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == BODY_DENSITY)
+   {
+      // Find a Polyhedral gravity model; cast away const for data change
+      PhysicalModel *pm = (PhysicalModel *)GetForce("PolyhedronGravityModel");
+      if (pm == NULL)
+         throw ODEModelException("The BodyDensity parameter only applies to "
+               "Polyhedral gravity fields.");
+
+      if (value <= 0.0)
+      {
+         char msg[1024];
+         std::stringstream val;
+         val.precision(16);
+         val << value;
+         sprintf(msg, errorMessageFormat.c_str(), val.str().c_str(),
+               "BodyDensity", "Real number > 0.0");
+         throw ODEModelException(msg);
+      }
+      // Get the atmosphere model from the drag force
+      Integer id = pm->GetParameterID("BodyDensity");
+      return pm->SetRealParameter(id, value);
+   }
+
+   return PhysicalModel::SetRealParameter(id, value);
+}
+
+////------------------------------------------------------------------------------
+//// Real GetRealParameter(const Integer id, const Integer index) const
+////------------------------------------------------------------------------------
+///**
+// * This method is a pass through method, calling the base class version
+// */
+////------------------------------------------------------------------------------
+//Real ODEModel::GetRealParameter(const Integer id, const Integer index) const
+//{
+//   return PhysicalModel::GetRealParameter(id, index);
+//}
+//
+////------------------------------------------------------------------------------
+//// Real GetRealParameter(const Integer id, const Integer row,
+////       const Integer col) const
+////------------------------------------------------------------------------------
+///**
+// * This method is a pass through method, calling the base class version
+// */
+////------------------------------------------------------------------------------
+//Real ODEModel::GetRealParameter(const Integer id, const Integer row,
+//      const Integer col) const
+//{
+//   return PhysicalModel::GetRealParameter(id, row, col);
+//}
+//
+////------------------------------------------------------------------------------
+//// Real SetRealParameter(const Integer id, const Real value,
+////       const Integer index)
+////------------------------------------------------------------------------------
+///**
+// * This method is a pass through method, calling the base class version
+// */
+////------------------------------------------------------------------------------
+//Real ODEModel::SetRealParameter(const Integer id, const Real value,
+//      const Integer index)
+//{
+//   return PhysicalModel::SetRealParameter(id, value, index);
+//}
+//
+////------------------------------------------------------------------------------
+//// Real SetRealParameter(const Integer id, const Real value,
+////       const Integer row, const Integer col)
+////------------------------------------------------------------------------------
+///**
+// * This method is a pass through method, calling the base class version
+// */
+////------------------------------------------------------------------------------
+//Real ODEModel::SetRealParameter(const Integer id, const Real value,
+//      const Integer row, const Integer col)
+//{
+//   return PhysicalModel::SetRealParameter(id, value, row, col);
+//}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer &label)
+//------------------------------------------------------------------------------
+/**
+ * This method gets real parameter data
+ *
+ * @param label The parameter's scripted string
+ *
+ * @return The parameter value
+ */
+Real ODEModel::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer &label, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets real parameter data
+ *
+ * @param label The parameter's scripted string
+ * @param value The new value
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+Real ODEModel::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
+////------------------------------------------------------------------------------
+//// Real GetRealParameter(const std::string &label,
+////       const Integer index) const
+////------------------------------------------------------------------------------
+///**
+// * This method is a pass through method, calling the base class version
+// */
+////------------------------------------------------------------------------------
+//Real ODEModel::GetRealParameter(const std::string &label,
+//      const Integer index) const
+//{
+//   return GetRealParameter(GetParameterID(label), index);
+//}
+//
+////------------------------------------------------------------------------------
+//// Real SetRealParameter(const std::string &label, const Real value,
+////       const Integer index)
+////------------------------------------------------------------------------------
+///**
+// * This method is a pass through method, calling the base class version
+// */
+////------------------------------------------------------------------------------
+//Real ODEModel::SetRealParameter(const std::string &label, const Real value,
+//      const Integer index)
+//{
+//   return SetRealParameter(GetParameterID(label), value, index);
+//}
+//
+////------------------------------------------------------------------------------
+//// Real GetRealParameter(const std::string &label, const Integer row,
+////       const Integer col) const
+////------------------------------------------------------------------------------
+///**
+// * This method is a pass through method, calling the base class version
+// */
+////------------------------------------------------------------------------------
+//Real ODEModel::GetRealParameter(const std::string &label, const Integer row,
+//      const Integer col) const
+//{
+//   return GetRealParameter(GetParameterID(label), row, col);
+//}
+//
+////------------------------------------------------------------------------------
+//// Real SetRealParameter(const std::string &label, const Real value,
+////       const Integer row, const Integer col)
+////------------------------------------------------------------------------------
+///**
+// * This method is a pass through method, calling the base class version
+// */
+////------------------------------------------------------------------------------
+//Real ODEModel::SetRealParameter(const std::string &label, const Real value,
+//      const Integer row, const Integer col)
+//{
+//   return SetRealParameter(GetParameterID(label), value, row, col);
+//}
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -3347,6 +3575,9 @@ bool ODEModel::SetStringParameter(const Integer id, const std::string &value)
       case PRIMARY_BODIES:
          return false;
          
+      case POLYHEDRAL_BODIES:
+         return false;
+
       case POINT_MASSES:
          return false;
          
@@ -3394,6 +3625,23 @@ bool ODEModel::SetStringParameter(const Integer id, const std::string &value)
             Integer actualId = GetOwnedObjectId(id, &owner);
             return owner->SetStringParameter(actualId, value);
          }
+
+      case POLYHEDRAL_BODY:
+      {
+         // Get actual id
+         GmatBase *owner = NULL;
+         Integer actualId = GetOwnedObjectId(id, &owner);
+         return owner->SetStringParameter(actualId, value);
+      }
+
+      case SHAPE_FILE_NAME:
+      {
+         // Get actual id
+         GmatBase *owner = NULL;
+         Integer actualId = GetOwnedObjectId(id, &owner);
+         return owner->SetStringParameter(actualId, value);
+      }
+
       default:
          return PhysicalModel::SetStringParameter(id, value);
     }
@@ -3559,6 +3807,8 @@ const StringArray& ODEModel::GetStringArrayParameter(const Integer id) const
    {
    case PRIMARY_BODIES:
       return BuildBodyList("GravityField");
+   case POLYHEDRAL_BODIES:
+      return BuildBodyList("PolyhedralBodies");
    case POINT_MASSES:
       return BuildBodyList("PointMassForce");
    case COORDINATE_SYSTEM_LIST:
@@ -3665,10 +3915,12 @@ const StringArray& ODEModel::BuildBodyList(std::string type) const
    
    std::string actualType = GetScriptAlias(type);
    
-   for (i = forceList.begin(); i != forceList.end(); ++i) {
-       if ((*i)->GetTypeName() == actualType) {
-          bodylist.push_back((*i)->GetStringParameter("BodyName"));
-       }
+   for (i = forceList.begin(); i != forceList.end(); ++i)
+   {
+      if ((*i)->GetTypeName() == actualType)
+      {
+         bodylist.push_back((*i)->GetStringParameter("BodyName"));
+      }
    }
    return bodylist;
 }
@@ -3851,9 +4103,11 @@ std::string ODEModel::BuildForceNameString(PhysicalModel *force)
    
    if (forceType == "DragForce")
       retval = "Drag";
-   if (forceType == "GravityField")
-      // Changed "Gravity" to "GravityField" to be consistent with type name (loj: 2007.01.25)
-      retval = "GravityField." + force->GetStringParameter("BodyName");
+//   if (forceType == "GravityField")
+//      // Changed "Gravity" to "GravityField" to be consistent with type name (loj: 2007.01.25)
+//      retval = "GravityField." + force->GetStringParameter("BodyName");
+   if (force->IsOfType("GravityBase"))
+      retval = forceType + "." + force->GetStringParameter("BodyName");
    if (forceType == "PointMassForce")
       retval = force->GetStringParameter("BodyName");
    if (forceType == "SolarRadiationPressure")

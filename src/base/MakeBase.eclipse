@@ -300,6 +300,7 @@ OBJECTS = \
     forcemodel/DragForce.o \
     forcemodel/EventModel.o \
     forcemodel/FiniteThrust.o \
+    forcemodel/GravityBase.o \
     forcemodel/GravityField.o \
     forcemodel/HarmonicField.o \
     forcemodel/ODEModelException.o \

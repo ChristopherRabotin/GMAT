@@ -51,7 +51,7 @@
 
 #include "HarmonicField.hpp"
 
-#include "PhysicalModel.hpp"
+#include "GravityBase.hpp"
 #include "ODEModelException.hpp"
 #include "StringUtil.hpp"     // for ToString()
 #include "RealUtilities.hpp"
@@ -77,7 +77,7 @@ using namespace GmatMathUtil;
 // static data
 //---------------------------------
 const std::string
-HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - PhysicalModelParamCount] =
+HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - GravityBaseParamCount] =
 {
    "MaxDegree",
    "MaxOrder",
@@ -90,7 +90,7 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - PhysicalModelParamCount]
 };
 
 const Gmat::ParameterType
-HarmonicField::PARAMETER_TYPE[HarmonicFieldParamCount - PhysicalModelParamCount] =
+HarmonicField::PARAMETER_TYPE[HarmonicFieldParamCount - GravityBaseParamCount] =
 {
    Gmat::INTEGER_TYPE,   // "MaxDegree",
    Gmat::INTEGER_TYPE,   // "MaxOrder",
@@ -120,7 +120,7 @@ HarmonicField::PARAMETER_TYPE[HarmonicFieldParamCount - PhysicalModelParamCount]
 //------------------------------------------------------------------------------
 HarmonicField::HarmonicField(const std::string &name, const std::string &typeName,
                              Integer maxDeg, Integer maxOrd) :
-PhysicalModel           (Gmat::PHYSICAL_MODEL, typeName, name),
+GravityBase             (typeName, name),
 hMinitialized           (false),
 maxDegree               (maxDeg),
 maxOrder                (maxOrd),
@@ -155,10 +155,9 @@ eop                     (NULL)
 /**
  * This method destroys the HarmonicField object.
  * (destructor).
- *
  */
 //------------------------------------------------------------------------------
-HarmonicField::~HarmonicField(void)
+HarmonicField::~HarmonicField()
 {
 }
 
@@ -174,7 +173,7 @@ HarmonicField::~HarmonicField(void)
  */
 //------------------------------------------------------------------------------
 HarmonicField::HarmonicField(const HarmonicField& hf) :
-PhysicalModel           (hf),
+GravityBase             (hf),
 hMinitialized           (false),
 maxDegree               (hf.maxDegree),
 maxOrder                (hf.maxOrder),
@@ -214,7 +213,7 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    if (&hf == this)
       return *this;
 
-   PhysicalModel::operator=(hf);
+   GravityBase::operator=(hf);
    hMinitialized  = false;  // or hf.hMinitialized?
    maxDegree      = hf.maxDegree;
    maxOrder       = hf.maxOrder;
@@ -250,7 +249,7 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
 //------------------------------------------------------------------------------
 bool HarmonicField::Initialize()
 {
-   if (!PhysicalModel::Initialize())
+   if (!GravityBase::Initialize())
       return false;
 
    // Set body to use the same potential file (loj: 3/24/06)
@@ -440,9 +439,9 @@ bool HarmonicField::SetFilename(const std::string &fn)
 //------------------------------------------------------------------------------
 std::string HarmonicField::GetParameterText(const Integer id) const
 {
-   if ((id >= PhysicalModelParamCount) && (id < HarmonicFieldParamCount))
-      return PARAMETER_TEXT[id - PhysicalModelParamCount];
-   return PhysicalModel::GetParameterText(id);
+   if ((id >= GravityBaseParamCount) && (id < HarmonicFieldParamCount))
+      return PARAMETER_TEXT[id - GravityBaseParamCount];
+   return GravityBase::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -458,12 +457,12 @@ Integer HarmonicField::GetParameterID(const std::string &str) const
    if (useStr == "Model")
       useStr = "PotentialFile";
  
-   for (Integer i = PhysicalModelParamCount; i < HarmonicFieldParamCount; i++)
+   for (Integer i = GravityBaseParamCount; i < HarmonicFieldParamCount; i++)
    {
-      if (useStr == PARAMETER_TEXT[i - PhysicalModelParamCount])
+      if (useStr == PARAMETER_TEXT[i - GravityBaseParamCount])
          return i;
    }
-   return PhysicalModel::GetParameterID(str);
+   return GravityBase::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -475,9 +474,9 @@ Integer HarmonicField::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType HarmonicField::GetParameterType(const Integer id) const
 {
-   if ((id >= PhysicalModelParamCount) && (id < HarmonicFieldParamCount))
-      return PARAMETER_TYPE[id - PhysicalModelParamCount];
-   return PhysicalModel::GetParameterType(id);
+   if ((id >= GravityBaseParamCount) && (id < HarmonicFieldParamCount))
+      return PARAMETER_TYPE[id - GravityBaseParamCount];
+   return GravityBase::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -508,7 +507,7 @@ Integer HarmonicField::GetIntegerParameter(const Integer id) const
    if (id == DEGREE)      return degree;
    if (id == ORDER)       return order;
 
-   return PhysicalModel::GetIntegerParameter(id);
+   return GravityBase::GetIntegerParameter(id);
 }
 
 
@@ -561,7 +560,7 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
       return order;
    }
 
-   return PhysicalModel::SetIntegerParameter(id, value);
+   return GravityBase::SetIntegerParameter(id, value);
 }
 
 
@@ -633,7 +632,7 @@ std::string HarmonicField::GetStringParameter(const Integer id) const
    if (id == INPUT_COORD_SYSTEM)  return inputCSName;
    if (id == FIXED_COORD_SYSTEM)  return fixedCSName;
    if (id == TARGET_COORD_SYSTEM) return targetCSName;
-   return PhysicalModel::GetStringParameter(id);
+   return GravityBase::GetStringParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -699,7 +698,7 @@ bool HarmonicField::SetStringParameter(const Integer id,
    }
    if (id == BODY_NAME)
    {      
-      if (PhysicalModel::SetStringParameter(id, value))
+      if (GravityBase::SetStringParameter(id, value))
       {
          // set default potential file path for the body
          FileManager *fm = FileManager::Instance();
@@ -725,7 +724,7 @@ bool HarmonicField::SetStringParameter(const Integer id,
       return false;
    }
    
-   return PhysicalModel::SetStringParameter(id, value);
+   return GravityBase::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -794,7 +793,7 @@ GmatBase* HarmonicField::GetRefObject(const Gmat::ObjectType type,
    }
    
    // Not handled here -- invoke the next higher GetRefObject call
-   return PhysicalModel::GetRefObject(type, name);
+   return GravityBase::GetRefObject(type, name);
 }
 
 
@@ -820,7 +819,7 @@ const StringArray& HarmonicField::GetRefObjectNameArray(const Gmat::ObjectType t
    
    if (type == Gmat::UNKNOWN_OBJECT)
    {
-      refs = PhysicalModel::GetRefObjectNameArray(type);
+      refs = GravityBase::GetRefObjectNameArray(type);
       //refs.clear(); // why would I want to clear this????
       
       refs.push_back(inputCSName);
@@ -838,7 +837,7 @@ const StringArray& HarmonicField::GetRefObjectNameArray(const Gmat::ObjectType t
    
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-      refs = PhysicalModel::GetRefObjectNameArray(type);
+      refs = GravityBase::GetRefObjectNameArray(type);
       
       refs.push_back(inputCSName);
       refs.push_back(fixedCSName);
@@ -854,7 +853,7 @@ const StringArray& HarmonicField::GetRefObjectNameArray(const Gmat::ObjectType t
    }
    
    // Not handled here -- invoke the next higher GetRefObject call
-   return PhysicalModel::GetRefObjectNameArray(type);
+   return GravityBase::GetRefObjectNameArray(type);
 }
 
 
@@ -907,7 +906,7 @@ bool HarmonicField::SetRefObject(GmatBase *obj,
    }
    
    // Not handled here -- invoke the next higher SetRefObject call
-   return PhysicalModel::SetRefObject(obj, type, name);
+   return GravityBase::SetRefObject(obj, type, name);
 }
 
 
@@ -924,7 +923,7 @@ bool HarmonicField::SetRefObject(GmatBase *obj,
 //------------------------------------------------------------------------------
 void HarmonicField::SetForceOrigin(CelestialBody* toBody)
 {
-   PhysicalModel::SetForceOrigin(toBody);
+   GravityBase::SetForceOrigin(toBody);
    
    std::string originName = toBody->GetName();
    inputCSName = originName + "MJ2000Eq";
@@ -963,8 +962,8 @@ void HarmonicField::SetEopFile(EopFile *eopF)
 //---------------------------------------------------------------------------
 bool HarmonicField::IsParameterReadOnly(const Integer id) const
 {
-   if (id < PhysicalModelParamCount)
-      return PhysicalModel::IsParameterReadOnly(id);
+   if (id < GravityBaseParamCount)
+      return GravityBase::IsParameterReadOnly(id);
    
    if (id >= HarmonicFieldParamCount)
       throw ODEModelException(
