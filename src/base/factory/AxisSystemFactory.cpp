@@ -44,6 +44,7 @@
 
 #include "ITRFAxes.hpp"
 #include "ICRFAxes.hpp"
+#include "BodySpinSunAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -160,6 +161,10 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    {
       withAxes = new ICRFAxes(withName);
    }
+   else if (ofType == "BSS")
+   {
+      withAxes = new BodySpinSunAxes(withName);
+   }
 
    return withAxes;
 }
@@ -200,6 +205,7 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
 
 	  creatables.push_back("ITRF");
 	  creatables.push_back("ICRF");
+	  creatables.push_back("BSS");
    }
 }
 
