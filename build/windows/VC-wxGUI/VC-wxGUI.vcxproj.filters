@@ -1746,6 +1746,12 @@
     <ClCompile Include="..\..\..\plugins\FminconOptimizerPlugin\src\base\factory\FminconOptimizerFactory.cpp">
       <Filter>Source Files\base\factory</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.cpp">
+      <Filter>Source Files\base\coordsystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -3403,6 +3409,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\FminconOptimizerPlugin\src\base\factory\FminconOptimizerFactory.hpp">
       <Filter>Source Files\base\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp">
+      <Filter>Source Files\base\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.hpp">
+      <Filter>Source Files\base\coordsystem</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

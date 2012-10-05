@@ -175,6 +175,7 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\AxisSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\BodyFixedAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\BodyInertialAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateBase.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateSystem.cpp" />
@@ -244,6 +245,7 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\HarmonicField.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp" />
@@ -706,6 +708,7 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\AxisSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\BodyFixedAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\BodyInertialAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateBase.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateSystem.hpp" />
@@ -775,6 +778,7 @@
     <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\HarmonicField.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp" />
