@@ -245,9 +245,9 @@ void OrbitPanel::LoadData()
       
       // get the origin for the output coordinate system
       std::string originName = mOutCoord->GetStringParameter("Origin");
-      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
       
       #ifdef DEBUG_ORBIT_PANEL_LOAD
+         SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
          MessageInterface::ShowMessage
             ("   origin=%s, addr=%d\n", originName.c_str(), origin);
       #endif
@@ -556,9 +556,13 @@ void OrbitPanel::Create()
    wxStaticText *epochFormatStaticText = new wxStaticText( this, ID_TEXT,
       wxT("Epoch "GUI_ACCEL_KEY"Format"), wxDefaultPosition, wxDefaultSize, 0 );
    
+   int epochWidth = 170;
+   #ifdef __WXMAC__
+      epochWidth = 178;
+   #endif
    // combo box for the epoch format
    epochFormatComboBox = new wxComboBox
-      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(170,-1), //0,
+      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(epochWidth,-1),
         emptyList, wxCB_DROPDOWN | wxCB_READONLY );
    epochFormatComboBox->SetToolTip(pConfig->Read(_T("EpochFormatHint")));
    
@@ -568,7 +572,7 @@ void OrbitPanel::Create()
    
    // textfield for the epoch value
    epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-      wxDefaultPosition, wxSize(170,-1), 0 );
+      wxDefaultPosition, wxSize(epochWidth,-1), 0 );
    epochValue->SetToolTip(pConfig->Read(_T("EpochHint")));
 
    //-----------------------------------------------------------------
@@ -580,7 +584,7 @@ void OrbitPanel::Create()
 
    //Get CordinateSystem ComboBox from the GuiItemManager.
    mCoordSysComboBox =
-      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(170,-1));
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(epochWidth,-1));
    // register for updates, in order to refresh
    theGuiManager->AddToResourceUpdateListeners(theScPanel);
 
@@ -595,7 +599,7 @@ void OrbitPanel::Create()
 
    // combo box for the state
    stateTypeComboBox = new wxComboBox
-      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(170,-1),
+      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(epochWidth,-1),
         emptyList, wxCB_DROPDOWN | wxCB_READONLY);
    stateTypeComboBox->SetToolTip(pConfig->Read(_T("StateTypeHint")));
    
