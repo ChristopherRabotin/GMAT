@@ -94,7 +94,7 @@ MessageInterface::ShowMessage("Here is an example showing pi: %lf\n",
 \end{verbatim}
 \end{quote}
 
-\noindent When this code executes, the scripted line appears in teh message window.  The code that we'll use in the plug-in described here uses this framework to create a new GMAT Mission Control Sequence command that wraps this interface into a scriptable instruction for your GMAT missions.  When we are done, you'll be able to pass strings, variables, and some object parameters to the command, which will then write their values to the message window.  The command syntax for this is scripted in GMAT as follows:
+\noindent When this code executes, the scripted line appears in the message window.  The code that we'll use in the plug-in described here uses this framework to create a new GMAT Mission Control Sequence command that wraps this interface into a scriptable instruction for your GMAT missions.  When we are done, you'll be able to pass strings, variables, and some object parameters to the command, which will then write their values to the message window.  The command syntax for this is scripted in GMAT as follows:
 
 \begin{quote}
 \begin{verbatim}
@@ -133,7 +133,7 @@ Set up Visual Studio 2010 (VS2010) using solution and project files are part of 
 \end{center}
 \end{figure} 
 
-If you look closely at Figure~\ref{VS2010PlatformSettings}, you'll see that the factory and plugin folders in the project do not contain any files, and that there is no command folder in teh project.  That is because the project in its configuration in the repository does not yet contain any source code file references.  We need to tell it about the code that we will be compiling.  We set the new folder up as a ``filter'' in VS2010, and the file references using Windows Explorer:
+If you look closely at Figure~\ref{VS2010PlatformSettings}, you'll see that the factory and plugin folders in the project do not contain any files, and that there is no command folder in the project.  That is because the project in its configuration in the repository does not yet contain any source code file references.  We need to tell it about the code that we will be compiling.  We set the new folder up as a ``filter'' in VS2010, and the file references using Windows Explorer:
 
 \begin{enumerate}
 \setcounter{enumi}{\value{saveenum}}
@@ -208,7 +208,7 @@ The second item to look at is the include line at the start of the listing above
 \end{verbatim}
 \end{quote}
 
-\noindent (The full definition in SampleDefs.hpp includes other pieces needed for working with the Standard Template Library string classes in Windows DLL's.  If you'd like to see the full code, open SampleDefs.hpp in VS2010 by double clicking on teh file name we set in the VS2010 Solution Explorer.)  When we build the plug-in, we'll define the preprocessor macros {\_}DYNAMICLINK and SAMPLE{\_}EXPORTS, which will give the compiler the correct definitions to allow export of the ConsolePrint class.
+\noindent (The full definition in SampleDefs.hpp includes other pieces needed for working with the Standard Template Library string classes in Windows DLL's.  If you'd like to see the full code, open SampleDefs.hpp in VS2010 by double clicking on the file name we set in the VS2010 Solution Explorer.)  When we build the plug-in, we'll define the preprocessor macros {\_}DYNAMICLINK and SAMPLE{\_}EXPORTS, which will give the compiler the correct definitions to allow export of the ConsolePrint class.
 
 The code implementing the ConsolePrint command is in the src{\textbackslash}command{\textbackslash}ConsolePrint.cpp file.  If you are interested in how the command performs its function, refer to the code found there.  For now, we are interested in the mechanics of exposing that functionality to GMAT, and will use the ConsolePrint command code without making any changes.  
 
@@ -371,7 +371,7 @@ Finally, we need to be sure that the SampleFactory header file is included in or
 
 \section{Compiling and Running}
 
-All of the coding for the plug-in is now complete.  However, if you try to build the project by right clicking on teh project node and selecting ``Build'' (go ahead and do this!), you'll find that the project cannot build.  The problem is reported in the VS2010 message window:
+All of the coding for the plug-in is now complete.  However, if you try to build the project by right clicking on the project node and selecting ``Build'' (go ahead and do this!), you'll find that the project cannot build.  The problem is reported in the VS2010 message window:
 
 \begin{quote}
 \begin{verbatim}
@@ -422,7 +422,7 @@ PLUGIN                 = ../plugins/libSamplePlugin
 \item Save the file.
 \end{enumerate}
 
-Now start GMAT.  If you select the Mission tab and right click on the top node, then select Append\textgreater, you'll see the ConsolePrint command in the list of commands available for use in teh Mission Control Sequence.   Finally, if you enter this script into GMAT:
+Now start GMAT.  If you select the Mission tab and right click on the top node, then select Append\textgreater, you'll see the ConsolePrint command in the list of commands available for use in the Mission Control Sequence.   Finally, if you enter this script into GMAT:
  
 \begin{quote}
 \begin{verbatim}
@@ -438,14 +438,14 @@ ConsolePrint hi
 \begin{figure}[htb]
 \begin{center}
 \includegraphics[scale=0.54]{images/FinalOutput.png}
-\caption{\label{Results}Results of Running with teh ConsolePrint Command}
+\caption{\label{Results}Results of Running with the ConsolePrint Command}
 \end{center}
 \end{figure}
  
 \appendix
 \section{Mac and Linux Configuration}
 
-Configuration and build settings on the *nix platforms is made using gcc make files.  A sample set of make files is included in the code checked out from the plugins repository.  Each platform has a build environemtn file that is included from the make files, and used to set platform specific information.  This file, SampleEnv.mk, should be copied into your src folder and then edited to identify the locations of the GMAT code and otehr files as indicated in the file.
+Configuration and build settings on the *nix platforms is made using gcc make files.  A sample set of make files is included in the code checked out from the plugins repository.  Each platform has a build environemtn file that is included from the make files, and used to set platform specific information.  This file, SampleEnv.mk, should be copied into your src folder and then edited to identify the locations of the GMAT code and other files as indicated in the file.
 
 Additional instructions for this configuration are TBD.
 
