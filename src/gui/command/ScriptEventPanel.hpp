@@ -68,6 +68,7 @@ private:
    wxGridSizer *mBottomSizer;
    wxBoxSizer  *mPageSizer;
    
+   void SaveComments();
    void ReplaceScriptEvent();
    
    // for Debug

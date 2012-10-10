@@ -23,6 +23,7 @@
 #include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"       // for GetCommandSeqString()
+#include "StringUtil.hpp"        // for MakeCommentLines()
 #include "NoOp.hpp"
 #include <algorithm>             // for sort(), set_difference()
 #include <sstream>               // for std::stringstream
@@ -31,6 +32,7 @@
 //#define __USE_SASH_WINDOW__
 
 //#define DEBUG_CREATE 1
+//#define DEBUG_COMMENTS
 //#define DBGLVL_SEPANEL_CREATE 1
 //#define DBGLVL_SEPANEL_LOAD 1
 //#define DBGLVL_SEPANEL_SAVE 1
@@ -321,19 +323,29 @@ void ScriptEventPanel::LoadData()
    // We don't want to include Begin/EndScript,
    // so pass Gmat::GUI_EDITOR to GetGeneratingString()
    text << theCommand->GetGeneratingString(Gmat::GUI_EDITOR);
-      // TGG: Fix for GMT-2982 
-	  // add comment symbols
-
+   // TGG: Fix for GMT-2982 
+   // add comment symbols
+   
    wxString comments = theCommand->GetCommentLine().c_str();
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage("LoadData() initial comments = \n'%s'\n", comments.c_str());
+   #endif
    if (comments.StartsWith("% "))  // gets rid of first %
      comments = comments.Mid(2, comments.Length()-1);
    
    comments.Replace("\n% ", "\n");
 
+   // Remove last \n since it adds extra blank line as part of comments when saved
+   if (comments.EndsWith("\n"))
+       comments = comments.Mid(0, comments.Length()-1);
+   
    mCommentTextCtrl->AppendText(comments.c_str());
    mCommentTextCtrl->SetModified(false);
    
    wxString scriptText = text.str().c_str();
+   // Remove last \n since it adds extra blank line as part of script when saved
+   if (scriptText.EndsWith("\n"))
+      scriptText = scriptText.Mid(0, scriptText.Length()-1);
    
    #ifdef __USE_STC_EDITOR__
       mEditor->AppendText(scriptText);
@@ -374,16 +386,8 @@ void ScriptEventPanel::SaveData()
    if (!mFileContentsTextCtrl->IsModified() && mCommentTextCtrl->IsModified())
    #endif
    {
-      // TGG: Fix for GMT-2982 
-	  // add comment symbols
-      wxString comments = mCommentTextCtrl->GetValue();
-      if (comments.StartsWith("% "))  // gets rid of first %
-		comments = comments.Mid(2, comments.Length()-1);
-   
-	  comments.Replace("\n% ", "\n");
-	  comments.Replace("\n", "\n% ");
-	  comments = "% " + comments;
-      theCommand->SetCommentLine(comments.c_str());
+      SaveComments();     
+      
       mCommentTextCtrl->SetModified(false);
       EnableUpdate(false);
       canClose = true;
@@ -626,23 +630,10 @@ void ScriptEventPanel::SaveData()
       mObject = mNewCommand;
       theCommand = mNewCommand;
       
-      // Save comment if modified
-      if (mCommentTextCtrl->IsModified())
-      {
-		 wxString comments = mCommentTextCtrl->GetValue();
- 
-		 if (comments.StartsWith("%"))  // gets rid of first %
-			comments = comments.Mid(1, comments.Length()-1);
-   
-		 comments.Replace("\n%", "\n");
-		 comments.Replace("\n", "\n%");
-		 comments = "%" + comments;
-         theCommand->SetCommentLine(comments.c_str());
-         #if DBGLVL_SEPANEL_SAVE
-         MessageInterface::ShowMessage("   saving new comments\n");
-         #endif
-      }
-      
+      // We want to save comments regardless it is modified or not since
+      // new BeginScript command was created.
+      // Fix for GMT-2611 (LOJ: 2012.10.05)
+      SaveComments();
       EnableUpdate(false);
    }
    catch (BaseException &ex)
@@ -781,6 +772,43 @@ void ScriptEventPanel::OnSize(wxSizeEvent& event)
    
    #ifdef DEBUG_SIZE
    MessageInterface::ShowMessage("ScriptEventPanel::OnSize() leaving\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SaveComments()
+//------------------------------------------------------------------------------
+/**
+ * Saves preface comments of BeginScript command.
+ */
+//------------------------------------------------------------------------------
+void ScriptEventPanel::SaveComments()
+{   
+   // TGG: Fix for GMT-2982 
+   // add comment symbols
+   wxString comments = mCommentTextCtrl->GetValue();
+   std::string stdCmts = comments.c_str();
+   
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage
+      ("SaveComments() comments from ctrl = \n'%s'\n", comments.c_str());
+   #endif
+   
+   //if (comments.StartsWith("% "))  // gets rid of first %
+   //   comments = comments.Mid(2, comments.Length()-1);
+   //comments.Replace("\n% ", "\n");
+   //comments.Replace("\n", "\n% ");
+   //comments = "% " + comments;
+   
+   // Prepend % for non-blank lines only (LOJ: 2012.10.10)
+   stdCmts = GmatStringUtil::MakeCommentLines(stdCmts.c_str());
+   
+   theCommand->SetCommentLine(stdCmts);
+   
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage
+      ("SaveComments() comments saved = \n'%s'\n", stdCmts.c_str());
    #endif
 }
 

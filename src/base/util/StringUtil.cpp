@@ -3588,6 +3588,89 @@ std::string GmatStringUtil::RemoveInlineComment(const std::string &str,
       return str1.substr(0, index);
 }
 
+
+//------------------------------------------------------------------------------
+// std::string MakeCommentLines(const std::string &str, bool breakAtCr = false)
+//------------------------------------------------------------------------------
+/**
+ * Converts input string to comment lines by adding % at the beginning of
+ * non blank lines.
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::MakeCommentLines(const std::string &str, bool breakAtCr)
+{
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage
+      ("MakeCommentLines() entered, str = '%s', length = %d\n", str.c_str(), str.size());
+   #endif
+   std::string line, comments;
+   StringArray commentArray;
+   Integer count = str.size(), lineCount = 0;
+   Integer length = 0, start = 0;
+   
+   for (int i = 0; i < count; i++)
+   {
+      if (str[i] == '\n' || (str[i] == '\r' && breakAtCr))
+      {
+         length = i - start;
+         #ifdef DEBUG_COMMENTS
+         MessageInterface::ShowMessage
+            ("'%c', i=%d, start=%d, length=%d\n", str[i], i, start, length);
+         #endif
+         // Added to comment array without adding eol
+         if (length <= 0)
+            commentArray.push_back("");
+         else
+            commentArray.push_back(str.substr(start, length));
+         start = i + 1;
+      }
+   }
+   
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage("   start=%d\n", start);
+   #endif
+   if (start <= count)
+      commentArray.push_back(str.substr(start, count-start));
+   
+   lineCount = commentArray.size();
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage("There are %d lines\n", lineCount);
+   #endif
+   
+   if (lineCount == 0)
+   {
+      comments = "% " + str;
+   }
+   else
+   {
+      for (int i = 0; i < lineCount; i++)
+      {
+         line = commentArray[i];
+         
+         // Remove first %
+         if (GmatStringUtil::StartsWith(line, "% "))
+            line = line.substr(2);
+         else if (GmatStringUtil::StartsWith(line, "%"))
+            line = line.substr(1);
+         
+         #ifdef DEBUG_COMMENTS
+         MessageInterface::ShowMessage("[%d] '%s'\n", i, line.c_str());
+         #endif
+         if (line == "")
+            comments = comments + "\n";
+         else
+            comments = comments + "% " + line + "\n";
+      }
+   }
+   
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage("MakeCommentLines() returning \n'%s'\n", comments.c_str());
+   #endif
+   
+   return comments;
+}
+
+
 //------------------------------------------------------------------------------
 // std::string ParseFunctionName(const std::string &str)
 //------------------------------------------------------------------------------
