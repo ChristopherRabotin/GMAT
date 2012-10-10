@@ -2742,22 +2742,21 @@ bool StateConversionUtil::ValidateValue(const std::string &label,       Real val
             throw ue;
          }
       }
-      else if (labelUpper == "MLONG")
+   }
+   else if (labelUpper == "MLONG")
+   {
+      if ((value < -360.0 - ANGLE_TOL) || (value > 360.0 + ANGLE_TOL))
       {
-         if ((value < -360.0 - ANGLE_TOL) || (value > 360.0 + ANGLE_TOL))
-         {
-            std::stringstream rangeMsg;
-            rangeMsg << "-360.0 <= Real Number <= 360.0";
-            if (ANGLE_TOL != 0.0)
-               rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
-            UtilityException ue;
-            ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
-                          "MLONG", rangeMsg.str().c_str());
-            throw ue;
-         }
+         std::stringstream rangeMsg;
+         rangeMsg << "-360.0 <= Real Number <= 360.0";
+         if (ANGLE_TOL != 0.0)
+            rangeMsg << " (tolerance = " << ANGLE_TOL << ")";
+         UtilityException ue;
+         ue.SetDetails(errorMsgFmt.c_str(), GmatStringUtil::ToString(value, dataPrecision).c_str(),
+                       "MLONG", rangeMsg.str().c_str());
+         throw ue;
       }
    }
-
    return true;
 }
 
