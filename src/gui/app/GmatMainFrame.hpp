@@ -79,6 +79,7 @@ public:
    Integer GetNumberOfActivePlots();
 
    bool IsMissionRunning();
+   bool IsAnimatable();
    bool IsAnimationRunning();
    bool IsMissionTreeUndocked();
    bool IsMissionTreeUndocked(Integer &xPos, Integer &yPos, Integer &width);

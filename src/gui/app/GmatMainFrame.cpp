@@ -1015,6 +1015,14 @@ bool GmatMainFrame::IsMissionRunning()
 }
 
 //------------------------------------------------------------------------------
+// bool IsAnimatable()
+//------------------------------------------------------------------------------
+bool GmatMainFrame::IsAnimatable()
+{
+	return mRunCompleted && (!mRunPaused) && (!mIsMissionRunning);
+}
+
+//------------------------------------------------------------------------------
 // bool IsAnimationRunning()
 //------------------------------------------------------------------------------
 bool GmatMainFrame::IsAnimationRunning()
@@ -2486,14 +2494,17 @@ Integer GmatMainFrame::RunCurrentMission()
    }
    #endif
    
+   // TGG: Moved from after SetFocus to BEFORE so that animation buttons
+   // can be properly turned off
+   mRunCompleted = false;
+   mIsMissionRunning = true;
+
    EnableMenuAndToolBar(false, true);
    EnableNotebookAndMissionTree(false);
    
    wxYield();
    SetFocus();
    
-   mRunCompleted = false;
-   mIsMissionRunning = true;
    
    if (mRunPaused)
    {
@@ -5081,8 +5092,13 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
    }
    else
    {
-      toolBar->EnableTool(TOOL_PAUSE, false);
-      toolBar->EnableTool(TOOL_STOP, false);
+	  toolBar->EnableTool(TOOL_PAUSE, false);
+	  toolBar->EnableTool(TOOL_STOP, false);
+	  bool isAnimatable = IsAnimatable();
+	  toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_PLAY, isAnimatable);
+	  toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_STOP, isAnimatable);
+	  toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_FAST, isAnimatable);
+	  toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_SLOW, isAnimatable);
    }
 
    if (forAnimation)
