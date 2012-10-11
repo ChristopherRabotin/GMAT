@@ -706,7 +706,7 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
    if (toolBar == NULL)
       return;
    
-   bool isMissionRunning = ((GmatMainFrame*)theParent)->IsMissionRunning();
+   bool isAnimatable = ((GmatMainFrame*)theParent)->IsAnimatable();
    bool isAnimationRunning = ((GmatMainFrame*)theParent)->IsAnimationRunning();
    
    #ifdef DEBUG_UPDATE_GUI_ITEM
@@ -748,7 +748,7 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
        mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT))
    {
       // If mission is not running, enable animation tools
-      if (!isMissionRunning)
+      if (isAnimatable)
       {
          toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_PLAY, true);
          toolBar->EnableTool(GmatMenu::TOOL_ANIMATION_STOP, true);
