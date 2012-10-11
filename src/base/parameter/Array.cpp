@@ -1025,7 +1025,7 @@ std::string Array::GetInitialValueString(const std::string &prefix)
             
             // This writes out actual value
             data << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
-               ") = " << GetRealParameter(SINGLE_VALUE, i, j) << ";";
+               ") = " <<  GmatStringUtil::ToString(realVal, 16, false, 1) << ";";
             data << GetInlineComment() + "\n";
             
             //========================================================
