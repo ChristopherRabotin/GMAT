@@ -564,14 +564,24 @@ bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
 {
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("XyPlot::RenameRefObject() this='%s', type=%s, oldName=%s, newName=%s\n",
+      ("\nXyPlot::RenameRefObject() entered, this='%s', type=%s, oldName=%s, newName=%s\n",
        GetName().c_str(), GetObjectTypeString(type).c_str(), oldName.c_str(),
        newName.c_str());
    #endif
    
-   if (type != Gmat::PARAMETER && type != Gmat::COORDINATE_SYSTEM &&
-       type != Gmat::SPACECRAFT)
+   // Check for allowed object types for name change.
+   if (type != Gmat::PARAMETER && type != Gmat::SPACECRAFT &&
+       type != Gmat::COORDINATE_SYSTEM && type != Gmat::BURN &&
+       type != Gmat::IMPULSIVE_BURN && type != Gmat::CALCULATED_POINT &&
+       type != Gmat::HARDWARE)
+   {
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("XyPlot::RenameRefObject() >>>>> returning true, type is not one of Parameter, "
+          "Spacecraft, CS, ImpBurn, CalcPoint, or Hardware\n\n");
+      #endif
       return true;
+   }
    
    if (type == Gmat::PARAMETER)
    {
@@ -620,7 +630,14 @@ bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
       }
    }
    
-   return true;
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("XYFile::RenameRefObject() returning Subscriber::RenameRefObject()\n");
+   #endif
+   
+   // Call Subscriber to rename wrapper object names
+   return Subscriber::RenameRefObject(type, oldName, newName);
+   //return true;
 }
 
 

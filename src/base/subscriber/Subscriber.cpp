@@ -43,11 +43,11 @@
 // Cloning wrapper is not ready
 //#define __ENABLE_CLONING_WRAPPERS__
 
-//#define DEBUG_WRAPPER_CODE
 //#define DEBUG_SUBSCRIBER
 //#define DEBUG_SUBSCRIBER_PARAM
 //#define DEBUG_RECEIVE_DATA
 //#define DEBUG_RENAME
+//#define DEBUG_WRAPPER_CODE
 //#define DEBUG_SUBSCRIBER_PUT
 //#define DEBUG_SUBSCRIBER_SET
 //#ifndef DEBUG_MEMORY
@@ -902,36 +902,96 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
        type, oldName.c_str(), newName.c_str());
    #endif
    
-   // Go through wrapper object names
-   Integer sz = yWrapperObjectNames.size();
+   // Go through X wrapper object names
+   Integer sz = xWrapperObjectNames.size();
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("   =====> Going through X wrapper object names, size=%d\n", sz);
+   #endif
    for (Integer i = 0; i < sz; i++)
    {
-      if (yWrapperObjectNames[i].find(oldName) != oldName.npos)
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   Checking X wrapper name: '%s'\n", xWrapperObjectNames[i].c_str());
+      #endif
+      
+      if (xWrapperObjectNames[i].find(oldName) != oldName.npos)
       {
+         xWrapperObjectNames[i] =
+            GmatStringUtil::ReplaceName(xWrapperObjectNames[i], oldName, newName);
+         
          #ifdef DEBUG_RENAME
          MessageInterface::ShowMessage
-            ("   => Before rename, wrapper name: '%s'\n", yWrapperObjectNames[i].c_str());
+            ("   After rename, wrapper name: '%s'\n", xWrapperObjectNames[i].c_str());
          #endif
-         
+      }
+   }
+   
+   // Go through Y wrapper object names
+   sz = yWrapperObjectNames.size();
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("   =====> Going through Y wrapper object names, size=%d\n", sz);
+   #endif
+   for (Integer i = 0; i < sz; i++)
+   {
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   Checking Y wrapper name: '%s'\n", yWrapperObjectNames[i].c_str());
+      #endif
+      
+      if (yWrapperObjectNames[i].find(oldName) != oldName.npos)
+      {
          yWrapperObjectNames[i] =
             GmatStringUtil::ReplaceName(yWrapperObjectNames[i], oldName, newName);
          
          #ifdef DEBUG_RENAME
          MessageInterface::ShowMessage
-            ("      After  rename, wrapper name: '%s'\n", yWrapperObjectNames[i].c_str());
+            ("   After rename, wrapper name: '%s'\n", yWrapperObjectNames[i].c_str());
          #endif
       }
    }
    
    #ifdef DEBUG_RENAME
-   MessageInterface::ShowMessage("   ===== new wrapper name\n");
+   MessageInterface::ShowMessage("   =====> New Y wrapper names\n");
    for (Integer i = 0; i < sz; i++)
       MessageInterface::ShowMessage
          ("   <%s>\n", yWrapperObjectNames[i].c_str());
    #endif
-
-   // Go through wrappers
+   
+   // Go through X wrappers
+   sz = xParamWrappers.size();
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("   =====> Going through X wrappers, size=%d\n", sz);
+   #endif
+   for (Integer i = 0; i < sz; i++)
+   {
+      if (xParamWrappers[i] == NULL)
+         throw SubscriberException
+            ("Subscriber::RenameRefObject() \"" + GetName() +
+             "\" failed to set reference for object named \"" + oldName +
+             ".\" The wrapper is NULL.\n");
+      
+      std::string desc = xParamWrappers[i]->GetDescription();
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   Checking X wrapper desc: '%s'\n", desc.c_str());
+      #endif
+      if (desc.find(oldName) != oldName.npos)
+      {
+         xParamWrappers[i]->RenameObject(oldName, newName);
+         desc = xParamWrappers[i]->GetDescription();
+         
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   After rename, wrapper desc: '%s'\n", desc.c_str());
+         #endif
+      }
+   }
+   
+   // Go through Y wrappers
    sz = yParamWrappers.size();
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage("   =====> Going through Y wrappers, size=%d\n", sz);
+   #endif
    for (Integer i = 0; i < sz; i++)
    {
       if (yParamWrappers[i] == NULL)
@@ -941,25 +1001,24 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
              ".\" The wrapper is NULL.\n");
       
       std::string desc = yParamWrappers[i]->GetDescription();
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   Checking Y wrapper desc = '%s'\n", desc.c_str());
+      #endif
       if (desc.find(oldName) != oldName.npos)
       {
-         #ifdef DEBUG_RENAME
-         MessageInterface::ShowMessage
-            ("   => Before rename, wrapper desc = '%s'\n", desc.c_str());
-         #endif
-         
          yParamWrappers[i]->RenameObject(oldName, newName);
          desc = yParamWrappers[i]->GetDescription();
          
          #ifdef DEBUG_RENAME
          MessageInterface::ShowMessage
-            ("      After  rename, wrapper desc = '%s'\n", desc.c_str());
+            ("   After rename, wrapper desc = '%s'\n", desc.c_str());
          #endif
       }
    }
    
    #ifdef DEBUG_RENAME
-   MessageInterface::ShowMessage("   ===== new wrapper description\n");
+   MessageInterface::ShowMessage("   =====> New Y wrapper descriptions\n");
    for (Integer i = 0; i < sz; i++)
       MessageInterface::ShowMessage
          ("   <%s>\n", yParamWrappers[i]->GetDescription().c_str());
@@ -1626,7 +1685,7 @@ bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
 {
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("Subscriber::SetWrapperReference() entered, this='%s', obj=<%p>, name='%s'\n",
+      ("\nSubscriber::SetWrapperReference() entered, this='%s', obj=<%p>, name='%s'\n",
        GetName().c_str(), obj, name.c_str());
    MessageInterface::ShowMessage
       ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
@@ -1823,7 +1882,7 @@ bool Subscriber::SetActualWrapperReference(const WrapperArray &wrappers,
    
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("Subscriber::SetActualWrapperReference() entered, obj=<%p>'%s', name='%s', size=%d\n",
+      ("\nSubscriber::SetActualWrapperReference() entered, obj=<%p>'%s', name='%s', size=%d\n",
        obj, obj->GetName().c_str(), name.c_str(), sz);
    for (unsigned int i = 0; i < wrappers.size(); i++)
       MessageInterface::ShowMessage
@@ -1897,7 +1956,7 @@ bool Subscriber::SetActualWrapperReference(const WrapperArray &wrappers,
                wrappers[i]->
                   SetRefObject(param->GetRefObject(param->GetOwnerType(), onames[j]));
             }
-            return true;
+            break;
          }
       case Gmat::ARRAY_ELEMENT_WT:
          // for array element, we need to go through all array elements set
@@ -1922,7 +1981,6 @@ bool Subscriber::SetActualWrapperReference(const WrapperArray &wrappers,
             #endif
             
             wrappers[i]->SetRefObject(obj);
-            return true;
          }
       }
    }
