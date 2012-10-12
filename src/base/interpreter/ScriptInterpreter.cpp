@@ -34,6 +34,7 @@
 //#define DEBUG_READ_FIRST_PASS
 //#define DEBUG_DELAYED_BLOCK
 //#define DEBUG_PARSE
+//#define DEBUG_PARSE_ASSIGNMENT
 //#define DEBUG_PARSE_FOOTER
 //#define DEBUG_SET_COMMENTS
 //#define DEBUG_SCRIPT_WRITING
@@ -675,7 +676,6 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    // Empty header & footer comment data members
    headerComment = "";
    footerComment = "";
-   
    currentBlock = "";
    
    logicalBlockCount = 0;
@@ -1002,12 +1002,12 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
                if (actualScript.find_first_of("(") != actualScript.npos)
                {
                   ex.SetDetails("The object named \"" + substr + "\" of type \"" +
-                                obj->GetTypeName() + "\" cannot be a Function name");
+                                obj->GetTypeName() + "\" cannot be a function name");
                }
                else
                {
                   ex.SetDetails("The object named \"" + substr + "\" of type \"" +
-                                obj->GetTypeName() + "\" is not a valid Command");
+                                obj->GetTypeName() + "\" is not a valid in command");
                }
                HandleError(ex);
                return false;
@@ -1646,7 +1646,7 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
 bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
                                              GmatCommand *inCmd, GmatBase *obj)
 {
-   #ifdef DEBUG_PARSE
+   #ifdef DEBUG_PARSE_ASSIGNMENT
    MessageInterface::ShowMessage
       ("ParseAssignmentBlock() entered, inCmd=<%p>, obj=<%p>\n", inCmd, obj);
    WriteStringArray("ParseAssignmentBlock()", "", chunks);
@@ -1684,6 +1684,10 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    std::string lhs = chunks[0];
    std::string rhs = chunks[1];
    
+   #ifdef DEBUG_PARSE_ASSIGNMENT
+   MessageInterface::ShowMessage("   lhs='%s', rhs='%s'\n", lhs.c_str(), rhs.c_str());
+   #endif
+   
    // check for ElseIf, since it is not yet supported
    if (lhs.find("ElseIf ") != lhs.npos ||
        rhs.find("ElseIf ") != rhs.npos)
@@ -1696,39 +1700,58 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    // if RHS is not enclosed with single quotes, check for unexpected symbols or space
    if (!GmatStringUtil::IsEnclosedWith(rhs, "'"))
    {
-      if (lhs.find_first_of("=~<>") != lhs.npos ||
-          rhs.find_first_of("=~<>") != rhs.npos)
+      #ifdef DEBUG_PARSE_ASSIGNMENT
+      MessageInterface::ShowMessage("   Checking for unexpected symbols\n");
+      #endif
+      InterpreterException ex;
+      std::string cmd, part;
+     
+      if (lhs.find_first_of("=~<>[]{}\"") != lhs.npos ||
+          rhs.find_first_of("=~<>\"") != rhs.npos)
       {
-         std::string cmd;
-         InterpreterException ex;
-         
          if (lhs == "")
          {
             cmd = rhs.substr(0, rhs.find_first_of(" "));
+            #ifdef DEBUG_PARSE_ASSIGNMENT
+            MessageInterface::ShowMessage("   lhs is blank, cmd='%s'\n", cmd.c_str());
+            #endif
             if (!IsCommandType(cmd))
-               ex.SetDetails("\"" + cmd + "\" is not a valid Command");
+            {
+               part = (cmd == "" ? lhs : cmd);
+               ex.SetDetails("\"" + part + "\" is not a valid assignment");
+            }
          }
          else
          {
-            std::string::size_type index = lhs.find_first_of(" ");
-            if (index != lhs.npos)
-            {
-               cmd = lhs.substr(0, index);
-               if (!IsCommandType(cmd))
-                  ex.SetDetails("\"" + cmd + "\" is not a valid Command");
-            }
-            else
-            {
-               if (!IsCommandType(cmd) && lhs.find(".") == lhs.npos)
-                  ex.SetDetails("\"" + cmd + "\" is not a valid Command");
-               else
-                  ex.SetDetails("\"" + rhs + "\" is not a valid RHS of Assignment");
-            }
+            // Check for invalid symbols and brackets in lhs and rhs
+            if (lhs.find_first_of("=~<>[]{}\"") != lhs.npos)
+               ex.SetDetails("\"" + lhs + "\" is not a valid LHS of assignment");
+            
+            if (rhs.find_first_of("=~<>\"") != rhs.npos)
+               ex.SetDetails("\"" + rhs + "\" is not a valid RHS of assignment");
+            
          }
          
          HandleError(ex);
          return false;
-         
+      }
+      else
+      {
+         // Check for numeric in lhs such as 3 = x and invalid name such as $abc = *y
+         #ifdef DEBUG_PARSE_ASSIGNMENT
+         MessageInterface::ShowMessage
+            ("   checking if lhs is a number or invalid name found with no <.(,)'> lhs='%s'\n", lhs.c_str());
+         #endif
+         if (GmatStringUtil::IsNumber(lhs) ||
+             (lhs.find_first_of(".(,)'") == lhs.npos && !GmatStringUtil::IsValidName(lhs)))
+         {
+            #ifdef DEBUG_PARSE_ASSIGNMENT
+            MessageInterface::ShowMessage("   number or invalid name found in lhs, lhs='%s'\n", lhs.c_str());
+            #endif
+            ex.SetDetails("\"" + lhs + "\" is not a valid LHS of assignment");
+            HandleError(ex);
+            return false;
+         }
       }
    }
    
@@ -1739,7 +1762,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       StringArray lhsParts = theTextParser.SeparateDots(lhs);
       if (lhsParts[1] == "LogFile")
       {
-         #ifdef DEBUG_PARSE
+         #ifdef DEBUG_PARSE_ASSIGNMENT
          MessageInterface::ShowMessage
             ("   Found Global.LogFile, so calling MI::SetLogFile(%s)\n",
              rhs.c_str());
@@ -1758,7 +1781,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    Integer paramID = -1;
    Gmat::ParameterType paramType;
    
-   #ifdef DEBUG_PARSE
+   #ifdef DEBUG_PARSE_ASSIGNMENT
    MessageInterface::ShowMessage("   before check, inCommandMode=%d\n", inCommandMode);
    #endif
    
@@ -1791,7 +1814,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
                if (tempLhsObj && tempLhsObj->GetType() == Gmat::PARAMETER)
                {
                   Parameter *tempLhsParam = (Parameter*)tempLhsObj;
-                  #ifdef DEBUG_PARSE
+                  #ifdef DEBUG_PARSE_ASSIGNMENT
                   MessageInterface::ShowMessage
                      ("   LHS return type = %d, Gmat::RMATRIX_TYPE = %d, "
                       "inRealCommandMode = %d\n", tempLhsParam->GetReturnType(),
@@ -1817,14 +1840,14 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       {
          // Use exception to remove Visual C++ warning
          e.GetMessageType();
-         #ifdef DEBUG_PARSE
+         #ifdef DEBUG_PARSE_ASSIGNMENT
          MessageInterface::ShowMessage(e.GetFullMessage());
          #endif
       }
    }
    
    
-   #ifdef DEBUG_PARSE
+   #ifdef DEBUG_PARSE_ASSIGNMENT
    MessageInterface::ShowMessage
       ("    after check, inCommandMode=%d, inFunctionMode=%d\n", inCommandMode, inFunctionMode);
    #endif
@@ -1890,7 +1913,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    
    if (obj == NULL)
    {
-      #ifdef DEBUG_PARSE
+      #ifdef DEBUG_PARSE_ASSIGNMENT
       MessageInterface::ShowMessage
          ("   obj is NULL, and %singoring the error, so returning %s\n",
           ignoreError ? "" : "NOT ", ignoreError ? "true" : "false");
@@ -1923,7 +1946,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       SetComments(obj, preStr, inStr);
    }
    
-   #ifdef DEBUG_PARSE
+   #ifdef DEBUG_PARSE_ASSIGNMENT
    MessageInterface::ShowMessage("ParseAssignmentBlock() returning %d\n", retval);
    #endif
    
@@ -1974,7 +1997,7 @@ void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
 {
    #ifdef DEBUG_SET_COMMENTS
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::SetComments() %s<%s>\n   preStr=%s\n    inStr=%s\n",
+      ("ScriptInterpreter::SetComments() <%s>'%s'\n   preStr=\n'%s'\n    inStr=\n'%s'\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str(), preStr.c_str(),
        inStr.c_str());
    #endif

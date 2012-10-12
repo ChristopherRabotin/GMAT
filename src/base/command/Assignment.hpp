@@ -116,6 +116,8 @@ protected:
    Integer              lhsOwnerID;
    
    // methods
+   bool ValidateArrayElement(ElementWrapper *lhsWrapper,
+                             ElementWrapper *rhsWrapper);
    ElementWrapper* RunMathTree();
    void HandleScPropertyChange(ElementWrapper *lhsWrapper);
 

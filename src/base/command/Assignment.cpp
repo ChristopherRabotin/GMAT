@@ -626,7 +626,7 @@ const StringArray& Assignment::GetObjectList()
 //         objects.push_back(mathObjects[i]);
    }
 
-   #ifdef DEBUG_VALIDATION
+   #ifdef DEBUG_OBJECT
       MessageInterface::ShowMessage("Assignment::GetObjectList() Found %d "
             "object names:\n", objects.size());
       for (UnsignedInt i = 0; i < objects.size(); ++i)
@@ -675,14 +675,14 @@ bool Assignment::Validate()
                MessageInterface::ShowMessage("   rhsWrapper: %d type, \"%s\", rhsDataType: %d\n",
                      rhsWrapper->GetWrapperType(), rhsWrapper->GetDescription().c_str(),
                      rhsDataType);
-               MessageInterface::ShowMessage("Checking compatibility of %s "
+               MessageInterface::ShowMessage("   Checking compatibility of %s "
                      "with %s\n", PARAM_TYPE_STRING[lhsDataType].c_str(),
                      PARAM_TYPE_STRING[rhsDataType].c_str());
             #endif
             if (lhsDataType != rhsDataType)
             {
                // Initially set last error message, if validated ok then blank out.
-               lastErrorMessage = "Types of LHS and RHS are not compatible.";
+               lastErrorMessage = "Types of left and right of the equal sign are not compatible.";
                
                // Object = string is handled separately
                if ((lhsDataType == Gmat::OBJECT_TYPE) ||
@@ -719,7 +719,6 @@ bool Assignment::Validate()
                   if ((rhsDataType != Gmat::STRING_TYPE) )
                      retval = false;
                }
-               //else if (lhsWrapper->GetWrapperType() == Gmat::VARIABLE_WT)
                else if (lhsDataType == Gmat::REAL_TYPE)
                {
                   retval = false;
@@ -733,12 +732,29 @@ bool Assignment::Validate()
                         // Check if RHS is 1x1 array
                         if (rhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
                         {
-                           #ifdef DEBUG_VALIDATION
-                           MessageInterface::ShowMessage("   Checking RHS for 1x1 array\n");
-                           #endif
+                           retval = true;
                            Array *rhsArr = (Array*)(rhsWrapper->GetRefObject());
-                           if (rhsArr->GetRowCount() == 1 && rhsArr->GetColCount() == 1)
-                              retval = true;
+                           #ifdef DEBUG_VALIDATION
+                           MessageInterface::ShowMessage
+                              ("   Checking RHS for 1x1 array, rhsArr=<%p>\n", rhsArr);
+                           #endif
+                           if (rhsArr)
+                           {
+                              #ifdef DEBUG_VALIDATION
+                              MessageInterface::ShowMessage
+                                 ("   rowCount=%d, colCount=%d\n", rhsArr->GetRowCount(), rhsArr->GetColCount());
+                              #endif
+                              if (rhsArr->GetRowCount() != 1 || rhsArr->GetColCount() != 1)
+                              {
+                                 lastErrorMessage = "Right of the equal sign is not 1x1 Array.";
+                                 retval = false;
+                              }
+                           }
+                           else
+                           {
+                              lastErrorMessage = "Right of the euqal sign is not valid.";
+                              retval = false;
+                           }
                         }
                      }
                   }
@@ -754,12 +770,28 @@ bool Assignment::Validate()
                         // Check if LHS is 1x1 array
                         if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
                         {
-                           #ifdef DEBUG_VALIDATION
-                           MessageInterface::ShowMessage("   Checking LHS for 1x1 array\n");
-                           #endif
                            Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
-                           if (lhsArr->GetRowCount() == 1 && lhsArr->GetColCount() == 1)
-                              retval = true;
+                           #ifdef DEBUG_VALIDATION
+                           MessageInterface::ShowMessage
+                              ("   Checking LHS for 1x1 array, lhsArr=<%p>\n", lhsArr);
+                           #endif
+                           if (lhsArr)
+                           {
+                              #ifdef DEBUG_VALIDATION
+                              MessageInterface::ShowMessage
+                                 ("   rowCount=%d, colCount=%d\n", lhsArr->GetRowCount(), lhsArr->GetColCount());
+                              #endif
+                              if (lhsArr->GetRowCount() != 1 || lhsArr->GetColCount() != 1)
+                              {
+                                 lastErrorMessage = "Left of the equal sign is not 1x1 Array.";
+                                 retval = false;
+                              }
+                           }
+                           else
+                           {
+                              lastErrorMessage = "Left of the equal sign is not valid.";
+                              retval = false;
+                           }
                         }
                      }
                   }
@@ -815,76 +847,48 @@ bool Assignment::Validate()
             #endif
             Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
             Array *rhsArr = (Array*)(rhsWrapper->GetRefObject());
-            if (lhsArr->GetRowCount() != rhsArr->GetRowCount() &&
-                lhsArr->GetColCount() != rhsArr->GetColCount())
+            
+            if (lhsArr && rhsArr)
             {
-               lastErrorMessage = "Array dimension of LHS and RHS are not the same.";
+               if ((lhsArr->GetRowCount() == rhsArr->GetRowCount()) &&
+                   (lhsArr->GetColCount() == rhsArr->GetColCount()))
+               {
+                  retval = true;
+               }
+               else
+               {
+                  lastErrorMessage = "Array sizes of left and right of the equal sign are not the same.";
+                  retval = false;
+               }
+            }
+            else
+            {
+               std::string which;
+               if (!lhsArr && !rhsArr)
+                  which = "Left and right";
+               else if (!lhsArr)
+                  which = "Left";
+               else
+                  which = "Right";
+               
+               lastErrorMessage = which + " of the equal sign is not valid.";
                retval = false;
             }
          }
          else if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT &&
                   rhsWrapper->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)
          {
-            #ifdef DEBUG_VALIDATION
-            MessageInterface::ShowMessage("   Both sides are array element\n");
-            #endif
-            ElementWrapper* lhsRowWrapper = ((ArrayElementWrapper*)(lhsWrapper))->GetRowWrapper();
-            ElementWrapper* lhsColWrapper = ((ArrayElementWrapper*)(lhsWrapper))->GetColumnWrapper();
-            ElementWrapper* rhsRowWrapper = ((ArrayElementWrapper*)(rhsWrapper))->GetRowWrapper();
-            ElementWrapper* rhsColWrapper = ((ArrayElementWrapper*)(rhsWrapper))->GetColumnWrapper();
-            #ifdef DEBUG_VALIDATION
-            MessageInterface::ShowMessage
-               ("   lhsRowWrapper=<%p>, lhsColWrapper=<%p>, rhsRowWrapper=<%p>, rhsColWrapper=<%p>\n",
-                lhsRowWrapper, lhsColWrapper, rhsRowWrapper, rhsColWrapper);
-            #endif
-            
-            // Check for valid array index if index is a number. We cannot validate other
-            // wrapper types properly during parsing since those needs to be evaluated in
-            // the mission sequence.   For example: "A(B(3,3), C)"
-            if (lhsRowWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
-                lhsColWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
-                rhsRowWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
-                lhsColWrapper->GetWrapperType() == Gmat::NUMBER_WT)
-            {
-               Real lhsRow = lhsRowWrapper->EvaluateReal();
-               Real lhsCol = lhsColWrapper->EvaluateReal();
-               Real rhsRow = rhsRowWrapper->EvaluateReal();
-               Real rhsCol = rhsColWrapper->EvaluateReal();
-               Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
-               Array *rhsArr = (Array*)(rhsWrapper->GetRefObject());
-               Integer lhsRowCount = lhsArr->GetRowCount();
-               Integer lhsColCount = lhsArr->GetColCount();
-               Integer rhsRowCount = rhsArr->GetRowCount();
-               Integer rhsColCount = rhsArr->GetColCount();
-               
-               #ifdef DEBUG_VALIDATION
-               MessageInterface::ShowMessage
-                  ("   lhsRowCount=%d, lhsColCount=%d, rhsRowCount=%d, rhsColCount=%d, "
-                   "lhsRow=%f, lhsCol=%f, rhsRow=%f, rhsCol=%f\n",
-                   lhsRowCount, lhsColCount, rhsRowCount, rhsColCount,
-                   lhsRow, lhsCol, rhsRow, rhsCol);
-               #endif
-               
-               // Check lhs array index for out of bounds
-               if (lhsRow > lhsRowCount || lhsCol > lhsColCount)
-               {
-                  lastErrorMessage = "Array index of LHS is out-of-bounds. ";
-                  retval = false;
-               }
-               
-               // Check rhs array index for out of bounds
-               if (rhsRow > rhsRowCount || rhsCol > rhsColCount)
-               {
-                  lastErrorMessage = lastErrorMessage + "Array index of RHS is out-of-bounds.";
-                  retval = false;
-               }
-            }
+            retval = ValidateArrayElement(lhsWrapper, rhsWrapper);
          }
       }
       else
       {
          if (mathTree == NULL)
+         {
+            // rhs Wrappers should have been set by now, so validation failed
+            lastErrorMessage = "Right of the euqal sign is not valid.";
             retval = false;
+         }
          else
          {
             // Validate math tree
@@ -894,8 +898,12 @@ bool Assignment::Validate()
          }
       }
    }
-   else  // Wrappers should be set by now
+   else
+   {
+      // lhs Wrappers should have been set by now, so validation failed
+      lastErrorMessage = "Left of the equal sign is not valid.";
       retval = false;
+   }
    
    if (retval)
       lastErrorMessage = "";
@@ -1853,6 +1861,81 @@ GmatBase* Assignment::GetUpdatedObject()
 //---------------------------------
 
 //------------------------------------------------------------------------------
+// bool ValidateArrayElement(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper)
+//------------------------------------------------------------------------------
+bool Assignment::ValidateArrayElement(ElementWrapper *lhsWrapper,
+                                      ElementWrapper *rhsWrapper)
+{
+   bool retval = true;
+   
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage("   Both sides are array element\n");
+   #endif
+   ElementWrapper* lhsRowWrapper = ((ArrayElementWrapper*)(lhsWrapper))->GetRowWrapper();
+   ElementWrapper* lhsColWrapper = ((ArrayElementWrapper*)(lhsWrapper))->GetColumnWrapper();
+   ElementWrapper* rhsRowWrapper = ((ArrayElementWrapper*)(rhsWrapper))->GetRowWrapper();
+   ElementWrapper* rhsColWrapper = ((ArrayElementWrapper*)(rhsWrapper))->GetColumnWrapper();
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("   lhsRowWrapper=<%p>, lhsColWrapper=<%p>, rhsRowWrapper=<%p>, rhsColWrapper=<%p>\n",
+       lhsRowWrapper, lhsColWrapper, rhsRowWrapper, rhsColWrapper);
+   #endif
+   
+   // Check for valid array index if index is a number. We cannot validate other
+   // wrapper types properly during parsing since those needs to be evaluated in
+   // the mission sequence.   For example: "A(B(3,3), C)"
+   if (lhsRowWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
+       lhsColWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
+       rhsRowWrapper->GetWrapperType() == Gmat::NUMBER_WT &&
+       lhsColWrapper->GetWrapperType() == Gmat::NUMBER_WT)
+   {
+      Real lhsRow = lhsRowWrapper->EvaluateReal();
+      Real lhsCol = lhsColWrapper->EvaluateReal();
+      Real rhsRow = rhsRowWrapper->EvaluateReal();
+      Real rhsCol = rhsColWrapper->EvaluateReal();
+      Array *lhsArr = (Array*)(lhsWrapper->GetRefObject());
+      Array *rhsArr = (Array*)(rhsWrapper->GetRefObject());
+      
+      if (lhsArr && rhsArr)
+      {
+         Integer lhsRowCount = lhsArr->GetRowCount();
+         Integer lhsColCount = lhsArr->GetColCount();
+         Integer rhsRowCount = rhsArr->GetRowCount();
+         Integer rhsColCount = rhsArr->GetColCount();
+         
+         #ifdef DEBUG_VALIDATION
+         MessageInterface::ShowMessage
+            ("   lhsRowCount=%d, lhsColCount=%d, rhsRowCount=%d, rhsColCount=%d, "
+             "lhsRow=%f, lhsCol=%f, rhsRow=%f, rhsCol=%f\n",
+             lhsRowCount, lhsColCount, rhsRowCount, rhsColCount,
+             lhsRow, lhsCol, rhsRow, rhsCol);
+         #endif
+         
+         // Check lhs array index for out of bounds
+         if (lhsRow > lhsRowCount || lhsCol > lhsColCount)
+         {
+            lastErrorMessage = "Array index of LHS is out-of-bounds. ";
+            retval = false;
+         }
+         
+         // Check rhs array index for out of bounds
+         if (rhsRow > rhsRowCount || rhsCol > rhsColCount)
+         {
+            lastErrorMessage = lastErrorMessage + "Array index of RHS is out-of-bounds.";
+            retval = false;
+         }
+      }
+      else
+      {
+         lastErrorMessage = "Array of LHS or RHS is not set.";
+         retval = false;
+      }
+   }
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // ElementWrapper* RunMathTree()
 //------------------------------------------------------------------------------
 /*
@@ -1903,7 +1986,7 @@ ElementWrapper* Assignment::RunMathTree()
             Array *array = (Array*)lhsWrapper->GetRefObject();
             
             // It's ok to assign scalar to 1x1 matrix
-            if (array->GetRowCount() == 1 && array->GetColCount() == 1)
+            if (array && array->GetRowCount() == 1 && array->GetColCount() == 1)
                isOk = true;
          }         
          
