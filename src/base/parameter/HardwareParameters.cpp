@@ -563,7 +563,7 @@ GmatBase* FuelDensity::Clone(void) const
 // DutyCycle(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 DutyCycle::DutyCycle(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "DutyCycle", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+   : HardwareReal(name, "DutyCycle", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
                   "Duty Cycle", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -650,7 +650,7 @@ GmatBase* DutyCycle::Clone(void) const
 // ThrustScaleFactor(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 ThrustScaleFactor::ThrustScaleFactor(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "ThrustScaleFactor", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+   : HardwareReal(name, "ThrustScaleFactor", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
                   "Thrust Scale Factor", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -737,7 +737,7 @@ GmatBase* ThrustScaleFactor::Clone(void) const
 // GravitationalAccel(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 GravitationalAccel::GravitationalAccel(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "GravitationalAccel", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+   : HardwareReal(name, "GravitationalAccel", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
                   "Gravitational Acceleration", "")
 {
    #ifdef USE_PREDEFINED_COLORS
