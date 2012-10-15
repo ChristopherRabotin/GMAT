@@ -33,29 +33,32 @@ class Editor: public wxStyledTextCtrl
    friend class EditorPrint;
    
 public:
+   // default constructor
    Editor(wxWindow *parent, bool notifyChange = false,
           wxWindowID id = wxID_ANY, const wxPoint &pos = wxDefaultPosition,
           const wxSize &size = wxDefaultSize,
           long style = wxSUNKEN_BORDER|wxVSCROLL);
    
+   // destructor
    ~Editor();
    
+   // find/replace dialog text
    void SetFindText(const wxString &text);
    void SetReplaceText(const wxString &text);
    
    // event handlers
-   // common
+   // common event handlers
    void OnSize(wxSizeEvent &event);
-   // font
+   // font event handlers
    void OnFont(wxCommandEvent &event);
-   // edit
+   // edit event handlers
    void OnRedo(wxCommandEvent &event);
    void OnUndo(wxCommandEvent &event);
    void OnClear(wxCommandEvent &event);
    void OnCut(wxCommandEvent &event);
    void OnCopy(wxCommandEvent &event);
    void OnPaste(wxCommandEvent &event);
-   // find, replace, goto, select
+   // find, replace, goto, select event handlers
    void OnFind(wxCommandEvent &event);
    void OnFindNext(wxCommandEvent &event);
    void OnFindPrev(wxCommandEvent &event);
@@ -67,10 +70,10 @@ public:
    void OnIndentLess(wxCommandEvent &event);
    void OnSelectAll(wxCommandEvent &event);
    void OnSelectLine(wxCommandEvent &event);
-   // comment, uncomment
+   // comment, uncomment event handlers
    void OnComment(wxCommandEvent &event);
    void OnUncomment(wxCommandEvent &event);
-   // view
+   // view event handlers
    void OnHilightLang(wxCommandEvent &event);
    void OnDisplayEOL(wxCommandEvent &event);
    void OnIndentGuide(wxCommandEvent &event);
@@ -82,10 +85,10 @@ public:
    void OnSetReadOnly(wxCommandEvent &event);
    void OnWrapmodeOn(wxCommandEvent &event);
    void OnUseCharset(wxCommandEvent &event);
-   // extra
+   // extra event handlers
    void OnChangeCase(wxCommandEvent &event);
    void OnConvertEOL(wxCommandEvent &event);
-   // stc
+   // stc event handlers
    void OnMarginClick(wxStyledTextEvent &event);
    void OnTextChange(wxStyledTextEvent &event);
    void OnCharAdded(wxStyledTextEvent &event);
@@ -98,7 +101,7 @@ public:
    wxString GetLine(int lineNumber);
    wxString GetText();
    
-   // load/save file
+   // file operations
    bool LoadFile();
    bool LoadFile(const wxString &filename);
    bool SaveFile();
