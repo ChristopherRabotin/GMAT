@@ -396,6 +396,22 @@ void GmatSavePanel::UpdateScriptActiveStatus(bool isActive)
 
 
 //------------------------------------------------------------------------------
+// void UpdateStatusOnClose()
+//------------------------------------------------------------------------------
+void GmatSavePanel::UpdateStatusOnClose()
+{
+      // For active script, update sync status
+      if (mIsScriptActive)
+      {
+		 // clean up the status since we are going away
+         theGuiManager->SetActiveScriptStatus(1);
+         GmatAppData::Instance()->GetMainFrame()->
+			 UpdateGuiScriptSyncStatus(theGuiManager->GetGuiStatus(), theGuiManager->GetActiveScriptStatus());
+      }
+}
+
+
+//------------------------------------------------------------------------------
 // void ReloadFile()
 //------------------------------------------------------------------------------
 /**

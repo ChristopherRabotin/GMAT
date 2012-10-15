@@ -53,6 +53,7 @@ public:
    
    virtual void SetEditorModified(bool modified, bool updateSyncStatus = true);
    void UpdateScriptActiveStatus(bool isActive);
+   void UpdateStatusOnClose();
    void ReloadFile();
    
 protected:
