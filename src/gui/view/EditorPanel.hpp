@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2012 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,9 +29,12 @@
 class EditorPanel: public GmatSavePanel
 {
 public:
+   // default constructor
    EditorPanel(wxWindow *parent, const wxString &name, bool activeScript = false);
+   // destructor
    ~EditorPanel();
    
+   // method to retrieve the Editor
    Editor* GetEditor() { return mEditor; };
    
 private:

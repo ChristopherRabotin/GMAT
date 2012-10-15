@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2012 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,10 +47,21 @@ BEGIN_EVENT_TABLE(EditorPanel, GmatSavePanel)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// EditorPanel()
+// public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// EditorPanel(wxWindow *parent, const wxString &name, bool isActive)
 //------------------------------------------------------------------------------
 /**
- * A constructor.
+ * Constructs EditorPanel
+ *
+ * @param parent	Parent window (frame) of the panel 
+ * @param name		Filename of the script
+ * @param isActive	Is this script the active script
+ *
+ * @note There is no parameter free constructor for EditorPanel
+ *
  */
 //------------------------------------------------------------------------------
 EditorPanel::EditorPanel(wxWindow *parent, const wxString &name, bool isActive)
@@ -74,7 +85,8 @@ EditorPanel::EditorPanel(wxWindow *parent, const wxString &name, bool isActive)
 // ~EditorPanel()
 //------------------------------------------------------------------------------
 /**
- * A destructor.
+ * Destructor
+ *
  */
 //------------------------------------------------------------------------------
 EditorPanel::~EditorPanel()
@@ -93,8 +105,15 @@ EditorPanel::~EditorPanel()
 
 
 //------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // void Create()
 //------------------------------------------------------------------------------
+/**
+ * Creates and initializes the controls for the EditorPanel
+ */
 void EditorPanel::Create()
 {
    //------------------------------------------------------
@@ -152,6 +171,9 @@ void EditorPanel::Create()
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
+/**
+ * Loads the controls with data (from filename specified in constructor)
+ */
 void EditorPanel::LoadData()
 {
    #ifdef DEBUG_EDITORPANEL_LOAD
@@ -187,6 +209,9 @@ void EditorPanel::LoadData()
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
+/**
+ * Saves the data from the controls to file (from filename specified in constructor)
+ */
 void EditorPanel::SaveData()
 {
    GmatAppData *gmatAppData = GmatAppData::Instance();
@@ -209,6 +234,12 @@ void EditorPanel::SaveData()
 //------------------------------------------------------------------------------
 // void OnTextOverMaxLen(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when User tried to enter more text into the control than 
+ * the limit
+ *
+ * @param event	command event originated by the control
+ */
 void EditorPanel::OnTextOverMaxLen(wxCommandEvent& event)
 {
    wxMessageBox(wxT("Text control is already filled up to the maximum length.\n"
@@ -220,6 +251,11 @@ void EditorPanel::OnTextOverMaxLen(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when User clicks a button
+ *
+ * @param event	command event originated by the button
+ */
 void EditorPanel::OnButton(wxCommandEvent& event)
 {
    if (mEditor->GetText() == "")
