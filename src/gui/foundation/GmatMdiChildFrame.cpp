@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 #include "GuiItemManager.hpp"
 #include "GmatTreeItemData.hpp"
+#include "GmatSavePanel.hpp"
 #include "GmatMenuBar.hpp"       // for namespace GmatMenu
 #include <wx/fileconf.h>
 #include <wx/config.h>
@@ -512,6 +513,11 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
       ("GmatMdiChildFrame::OnClose() will call GmatMainFrame to remove child and exit\n");
    #endif
    SaveChildPositionAndSize();
+
+   GmatSavePanel* panel = ((GmatSavePanel*) GetAssociatedWindow());
+   if (panel != NULL)
+	   panel->UpdateStatusOnClose();
+
    // remove from list of frames
    GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetName(), mItemType);   
    wxSafeYield();
