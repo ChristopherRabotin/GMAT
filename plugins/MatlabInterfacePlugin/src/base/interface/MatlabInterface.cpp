@@ -207,24 +207,59 @@ int MatlabInterface::PutRealArray(const std::string &matlabVarName,
    MessageInterface::ShowMessage
       ("MatlabInterface::PutRealArray() entered, matlabVarName='%s', numRows=%d, "
        "numCols=%d, inArray=%p\n", matlabVarName.c_str(), numRows, numCols, inArray);
+   MessageInterface::ShowMessage("inArray = \n");
+   for (int i = 0; i < numRows; i++)
+      for (int j = 0; j < numCols; j++)
+      {
+         MessageInterface::ShowMessage("%f ", inArray[i*numCols+j]);
+         if (j == numCols-1) MessageInterface::ShowMessage("\n");
+      }
    #endif
+   
+   // Since MATLAB stores array in column major order, it needs to take transpose
+   // before putting to MATLAB workspace
+   Rmatrix rowMajorMat(numRows, numCols);
+   for (int i = 0; i < numRows; i++)
+      for (int j = 0; j < numCols; j++)
+         rowMajorMat(i,j) = inArray[i*numCols+j];
+   
+   #ifdef DEBUG_MATLAB_PUT_REAL
+   MessageInterface::ShowMessage("rowMajorMat=\n%s\n", rowMajorMat.ToString(16));
+   #endif
+   
+   // Create column major matrix
+   Rmatrix colMajorMat(numCols, numRows);
+   colMajorMat = rowMajorMat.Transpose();
+
+   #ifdef DEBUG_MATLAB_PUT_REAL
+   MessageInterface::ShowMessage("colMajorMat=\n%s\n", colMajorMat.ToString(16));
+   #endif
+   
+   const double *inColMajorArr = colMajorMat.GetDataVector();
    
    // create a matlab variable
    mxArray *mxArrayPtr = NULL;
    mxArrayPtr = mxCreateDoubleMatrix(numRows, numCols, mxREAL);
-
-   #ifdef DEBUG_MATLAB_GET_REAL
+   
+   #ifdef DEBUG_MATLAB_PUT_REAL
    MessageInterface::ShowMessage
-      ("   mxArrayPtr <%p> created, now copying from inArray <%p>\n", mxArrayPtr, inArray);
+      ("   mxArrayPtr <%p> created, now copying from inArray <%p>\n", mxArrayPtr, inColMajorArr);
    #endif
    
-   memcpy((char*)mxGetPr(mxArrayPtr), (char*)inArray, numRows*numCols*sizeof(double));
+   // Call mxGetPr to access the real data in the mxArray that pm points to.
+   // Once you have the starting address, you can access any other element in the mxArray.
+   double *putArray = mxGetPr(mxArrayPtr);
+   memcpy((void*)putArray, (void*)inColMajorArr, numRows*numCols*sizeof(double));
+   
+   #ifdef DEBUG_MATLAB_PUT_REAL
+   MessageInterface::ShowMessage("   Now putting mxArrayPtr <%p> to matlab workspace\n");
+   #endif
    
    // place the variable mxArrayPtr into the MATLAB workspace
    engPutVariable(enginePtr, matlabVarName.c_str(), mxArrayPtr);
-
+   
    // Should I destroy after put to matlab?
-   #ifdef DEBUG_MATLAB_GET_REAL
+   #ifdef DEBUG_MATLAB_PUT_REAL
    MessageInterface::ShowMessage("   Now destroying mxArrayPtr <%p>\n", mxArrayPtr);
    #endif
    mxDestroyArray(mxArrayPtr);
@@ -280,22 +315,22 @@ int MatlabInterface::GetRealArray(const std::string &matlabVarName,
          ("MatlabInterface::GetRealArray() matlab double array pointer found <%p>, "
           "so calling mxGetPr()\n", mxArrayPtr);
       #endif
-
+      
       // If real numeric pointer is NULL, throw an exception
       double *realPtr = mxGetPr(mxArrayPtr);
       if (realPtr == NULL)
          throw InterfaceException("Received empty real output from MATLAB");
-
+      
       memcpy((char*)outArray, (char*)mxGetPr(mxArrayPtr),
              numElements*sizeof(double));
-
+           
       #ifdef DEBUG_MATLAB_GET_REAL
       MessageInterface::ShowMessage("      outArray  = \n");
       for (Integer ii=0; ii < numElements; ii++)
          MessageInterface::ShowMessage("         %.12f\n", outArray[ii]);
       MessageInterface::ShowMessage("   Now destroying mxArrayPtr <%p>\n", mxArrayPtr);
       #endif
-
+      
       mxDestroyArray(mxArrayPtr);
       return 1;
    }

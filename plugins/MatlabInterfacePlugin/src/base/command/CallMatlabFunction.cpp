@@ -524,10 +524,7 @@ void CallMatlabFunction::SendInParam(Parameter *param)
       MessageInterface::ShowMessage("Parameter was null");
       return;
    }
-   
-   //MessageInterface::ShowMessage("---> CallMatlabFunction::SendInParam() setting calling object '%s'\n", mFunctionPathAndName.c_str());
-   //matlabIf->SetCallingObjectName(mFunctionPathAndName);
-   
+      
    #ifdef DEBUG_SEND_PARAM
    MessageInterface::ShowMessage
       ("Parameter name=%s, type=%s\n", param->GetName().c_str(),
@@ -540,10 +537,19 @@ void CallMatlabFunction::SendInParam(Parameter *param)
       int numRows = array->GetIntegerParameter("NumRows");
       int numCols = array->GetIntegerParameter("NumCols");
       Rmatrix rmatrix = array->GetRmatrix();
-
+      
+      #ifdef DEBUG_SEND_PARAM
+      MessageInterface::ShowMessage
+         ("numRows=%d, numCols=%d\nrmatrix=\n%s\n", numRows, numCols,
+          rmatrix.ToString(16).c_str());
+      #endif
+      
       //----------------------------------------------------
       #ifdef __USE_EVAL_STRING__
       //----------------------------------------------------
+      #ifdef DEBUG_SEND_PARAM
+      MessageInterface::ShowMessage("===> Using EvalString\n");
+      #endif
       std::ostringstream os;
       os.precision(18);
       
@@ -555,15 +561,26 @@ void CallMatlabFunction::SendInParam(Parameter *param)
          os << "], \n";
       }
       
-      std::string inParamString = array->GetName() + " = [" +os.str() + "];";
+      std::string inParamString = array->GetName() + " = [" + os.str() + "];";
       EvalMatlabString(inParamString);
       
       //----------------------------------------------------
       #else
       //----------------------------------------------------
+      #ifdef DEBUG_SEND_PARAM
+      MessageInterface::ShowMessage("===> Not using EvalString\n");
+      #endif
+      
       const Real *realArray = rmatrix.GetDataVector();
       
       #ifdef DEBUG_SEND_PARAM
+      MessageInterface::ShowMessage("realArray = \n");
+      for (int i = 0; i < numRows; i++)
+         for (int j = 0; j < numCols; j++)
+         {
+            MessageInterface::ShowMessage("%f ", realArray[i*numCols+j]);
+            if (j == numCols-1) MessageInterface::ShowMessage("\n");
+         }
       MessageInterface::ShowMessage
          (".....Putting RealArray data <%p> to Matlab workspace\n", realArray);
       #endif
@@ -666,9 +683,6 @@ void CallMatlabFunction::GetOutParams()
             MemoryTracker::Instance()->Add
                (outArray, "outArray", "CallMatlabFunction::GetOutParams()",
                 "*outArray = new double[totalCells]");
-            //MessageInterface::ShowMessage
-            //   ("+++ CallMatlabFunction::GetOutParams() double *outArray = new double[%d], <%p>\n",
-            //    totalCells, outArray);
             #endif
             
             #ifdef DEBUG_GET_OUTPUT
@@ -685,32 +699,38 @@ void CallMatlabFunction::GetOutParams()
                throw CommandException(msg);
             }
             
-            // create rmatrix
-            Rmatrix rmatrix = Rmatrix (numRows, numCols);
-            // copy value
-            for (int j=0; j<numCols; j++)
-               for (int k=0; k<numRows; k++)
-                  rmatrix(k, j) = outArray[(j*numRows) + k];
-            
-            #ifdef DEBUG_SHOW_ARRAY
-            for (int j=0; j<numRows; j++)
-            {
-               for (int k=0; k<numCols; k++)
-                  MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
-               MessageInterface::ShowMessage("\n");
-            }
+            #ifdef DEBUG_GET_OUTPUT
+            MessageInterface::ShowMessage("outArray  = \n");
+            for (Integer i=0; i < totalCells; i++)
+               MessageInterface::ShowMessage("   %f.12\n", outArray[i]);
             #endif
             
-            // assign rmatrix to array
-            array->SetRmatrixParameter("RmatValue", rmatrix);
+            // Since MATLAB stores array in column major order, it needs to take transpose
+            // before putting array to matrix.
+            Rmatrix colMajorMat(numCols, numRows);
+            for (int i = 0; i < numCols; i++)
+               for (int j = 0; j < numRows; j++)
+                  colMajorMat(i,j) = outArray[i*numRows+j];
+            
+            #ifdef DEBUG_SHOW_ARRAY
+            MessageInterface::ShowMessage("colMajorMat=\n%s\n", colMajorMat.ToString(16));
+            #endif
+            
+            // Create row major matrix
+            Rmatrix rowMajorMat(numRows, numCols);
+            rowMajorMat = colMajorMat.Transpose();
+            
+            #ifdef DEBUG_SHOW_ARRAY
+            MessageInterface::ShowMessage("rowMajorMat=\n%s\n", rowMajorMat.ToString(16).c_str());
+            #endif
+            
+            // assign rowMajorMat to array
+            array->SetRmatrixParameter("RmatValue", rowMajorMat);
             
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Remove
                (outArray, "outArray", "CallMatlabFunction::GetOutParams()",
                 "deletinig outArray");
-            //MessageInterface::ShowMessage
-            //   ("--- CallMatlabFunction::GetOutParams() deleting outArray <%p>\n",
-            //    outArray);
             #endif
             delete [] outArray;
             
@@ -722,9 +742,6 @@ void CallMatlabFunction::GetOutParams()
             MemoryTracker::Instance()->Add
                (outArray, "outArray", "CallMatlabFunction::GetOutParams()",
                 "*outArray = new double[1]");
-            //MessageInterface::ShowMessage
-            //   ("+++ CallMatlabFunction::GetOutParams() double *outArray = new double[1], <%p>\n",
-            //    outArray);
             #endif
             
             #ifdef DEBUG_UPDATE_VAR
@@ -750,9 +767,6 @@ void CallMatlabFunction::GetOutParams()
             MemoryTracker::Instance()->Remove
                (outArray, "outArray", "CallMatlabFunction::GetOutParams()",
                 "deletinig outArray");
-            //MessageInterface::ShowMessage
-            //   ("--- CallMatlabFunction::GetOutParams() deleting outArray <%p>\n",
-            //    outArray);
             #endif
             delete [] outArray;
          }
