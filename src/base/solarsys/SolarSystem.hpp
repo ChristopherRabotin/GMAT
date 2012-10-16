@@ -98,6 +98,8 @@ public:
    CelestialBody*       GetBody(std::string withName);
    // method to remove a body from the solar system
    bool                 DeleteBody(const std::string &withName);
+   /// method to add a special point to the Solar System
+   bool                 AddSpecialPoint(SpecialCelestialPoint *cp);
    /// methods to return a pointer to a specific SpecialCelestialPoint
    SpecialCelestialPoint*
                         GetSpecialPoint(const std::string &withName);

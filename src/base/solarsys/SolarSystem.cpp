@@ -373,7 +373,7 @@ SolarSystem::SolarSystem(std::string withName)
        "Star* theSun = new Star(SUN_NAME)");
    #endif
    theSun->SetCentralBody(EARTH_NAME);  // central body here is a reference body
-   theSun->SetSolarSystem(this);
+//   theSun->SetSolarSystem(this);
    theSun->SetSource(STAR_POS_VEL_SOURCE);
    theSun->SetEquatorialRadius(STAR_EQUATORIAL_RADIUS);
    theSun->SetFlattening(STAR_FLATTENING);
@@ -428,7 +428,7 @@ SolarSystem::SolarSystem(std::string withName)
       #endif
       if (PLANET_NAMES[ii] == EARTH_NAME) theEarth = newPlanet;
       newPlanet->SetCentralBody(SUN_NAME);
-      newPlanet->SetSolarSystem(this);
+//      newPlanet->SetSolarSystem(this);
       newPlanet->SetSource(PLANET_POS_VEL_SOURCE);
       newPlanet->SetEquatorialRadius(PLANET_EQUATORIAL_RADIUS[ii]);
       newPlanet->SetFlattening(PLANET_FLATTENING[ii]);
@@ -510,7 +510,7 @@ SolarSystem::SolarSystem(std::string withName)
          throw SolarSystemException(errMsg);
       }
       newMoon->SetCentralBody(MOON_CENTRAL_BODIES[ii]);
-      newMoon->SetSolarSystem(this);
+//      newMoon->SetSolarSystem(this);
       newMoon->SetRefObject(central, Gmat::CELESTIAL_BODY, MOON_CENTRAL_BODIES[ii]);
 
       newMoon->SetTwoBodyEpoch(MOON_TWO_BODY_EPOCH[ii]);
@@ -555,13 +555,12 @@ SolarSystem::SolarSystem(std::string withName)
    // 1. Create the SolarSystemBarycenter
    SpecialCelestialPoint *ssb = new SpecialCelestialPoint(SOLAR_SYSTEM_BARYCENTER_NAME);
    ssb->SetIntegerParameter(ssb->GetParameterID("NAIFId"), GmatSolarSystemDefaults::SSB_NAIF_ID);
-//   ssb->SetGravitationalConstant(GmatSolarSystemDefaults::SSB_MU);
-   ssb->SetSolarSystem(this);
+   AddSpecialPoint(ssb);
 #ifdef __USE_SPICE__
   // Set the kernel reader on the solar system barycenter
 //   ssb->SetSpiceOrbitKernelReader(planetarySPK);   //  let special points get the pointer from the SS when it's needed
 #endif
-   specialPoints[SOLAR_SYSTEM_BARYCENTER_NAME] = ssb;
+//   specialPoints[SOLAR_SYSTEM_BARYCENTER_NAME] = ssb;
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now DONE creating the Solar System Barycenter special point ...\n");
    #endif
@@ -846,7 +845,7 @@ bool SolarSystem::Initialize()
 			if (theDefaultDeFile == NULL)
 				MessageInterface::ShowMessage(" theDefaultDeFile == NULL\n");
 			else
-				MessageInterface::ShowMessage(" theDefaultDeFile: <%p> name ='%s'\n",theDefaultDeFile, theDefaultDeFile->theFileName.c_str());
+//				MessageInterface::ShowMessage(" theDefaultDeFile: <%p> name ='%s'\n",theDefaultDeFile, theDefaultDeFile->theFileName.c_str());
 		#endif
        
 		for (std::vector<CelestialBody*>::const_iterator cbi = bodiesInUse.begin();
@@ -1270,11 +1269,18 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
          break;
       case Gmat::SPICE:
          if (SetSource(Gmat::SPICE))
+         {
+            #ifdef DEBUG_SS_PLANETARY_FILE
+               MessageInterface::ShowMessage(
+                     "SolarSystem::SetPlanetarySourceTypesInUse() SPICE section theSPKFilename = %s\n",
+                     theSPKFilename.c_str());
+            #endif
             if (theSPKFilename != "")
             {
                SetSPKFile(theSPKFilename);
             }
             retCode = 1;
+         }
          break;
       default:
          break;
@@ -1611,10 +1617,13 @@ bool SolarSystem::AddBody(CelestialBody* cb)
       #endif
      // Set the kernel reader on the celestial bodies
    #ifdef DEBUG_PLANETARY_SPK
-      MessageInterface::ShowMessage("in SS AddBody, setting planetarySPK <%p> on body %s\n", planetarySPK, (cb->GetName()).c_str());
+//      MessageInterface::ShowMessage("in SS AddBody, setting planetarySPK <%p> on body %s\n", planetarySPK, (cb->GetName()).c_str());
    #endif
 //      cb->SetSpiceOrbitKernelReader(planetarySPK);  //  let celestial bodies get the pointer from the SS when it's needed
    #endif
+
+   // Set the pointer to the Solar System
+   cb->SetSolarSystem(this);
 
    return true;
 }
@@ -1666,6 +1675,36 @@ bool SolarSystem::DeleteBody(const std::string &withName)
    }
    return false;
 }
+
+bool SolarSystem::AddSpecialPoint(SpecialCelestialPoint *cp)
+{
+   #ifdef DEBUG_SS_ADD_BODY
+   MessageInterface::ShowMessage
+      ("SolarSystem::AddSpecialPoint() this=<%p> '%s' entered\n", this, GetName().c_str());
+   #endif
+
+   if (cp == NULL)
+   {
+      return false;
+   }
+
+   // Add it to the map of Special Points
+   std::string spName    = cp->GetName();
+   specialPoints.insert(std::make_pair(spName, cp));
+
+   if (!cp->SetSource(pvSrcForAll))  return false;
+   if ((pvSrcForAll == Gmat::DE405)||(pvSrcForAll == Gmat::DE421)||(pvSrcForAll == Gmat::DE424))
+   {
+      if (thePlanetaryEphem)
+         if (!cp->SetSourceFile(thePlanetaryEphem))  return false;
+   }
+   if (!cp->SetOverrideTimeSystem(overrideTimeForAll))  return false;
+   // Set the pointer to the Solar System
+   cp->SetSolarSystem(this);
+
+   return true;
+}
+
 
 SpecialCelestialPoint* SolarSystem::GetSpecialPoint(const std::string &withName)
 {
@@ -1949,7 +1988,9 @@ bool SolarSystem::SetSPKFile(const std::string &spkFile)
          throw sse;
       }
    }
-   
+   #ifdef DEBUG_PLANETARY_SPK
+      MessageInterface::ShowMessage("In SetSPKFile, setting theSPKFilename to %s\n", fullSpkName.c_str());
+   #endif
    theSPKFilename = fullSpkName;
    return true;
 }
@@ -2469,10 +2510,10 @@ std::string SolarSystem::GetStringParameter(const std::string &label) const
 bool SolarSystem::SetStringParameter(const Integer id,
                                      const std::string &value)
 {
-#ifdef DEBUG_SS_SET
-MessageInterface::ShowMessage
-   ("SolarSystem::SetStringParameter(%d, '%s')\n", id, value.c_str());
-#endif
+   #ifdef DEBUG_SS_SET
+   MessageInterface::ShowMessage
+      ("SolarSystem::SetStringParameter(%d, '%s')\n", id, value.c_str());
+   #endif
    if (id == EPHEMERIS)
    {
       StringArray parts = GmatStringUtil::SeparateBy(value, "{}, ");
@@ -2577,6 +2618,10 @@ MessageInterface::ShowMessage
    if (id == SPK_FILE_NAME)
    {
       #ifdef __USE_SPICE__
+         #ifdef DEBUG_SS_SET
+         MessageInterface::ShowMessage
+            ("SolarSystem::SetStringParameter, about to set spk filename to %s\n", value.c_str());
+         #endif
          SetSPKFile(value);
          if (value != thePlanetarySourceNames[Gmat::SPICE])
          {
@@ -3001,11 +3046,10 @@ void SolarSystem::CloneBodiesInUse(const SolarSystem &ss, bool cloneSpecialPoint
       while (spi != (ss.specialPoints).end())
       {
          SpecialCelestialPoint *sp = (SpecialCelestialPoint*)(spi->second)->Clone();
+         AddSpecialPoint(sp);
          #ifdef DEBUG_SS_CLONING
             MessageInterface::ShowMessage("   Object %s cloned for use ...\n",sp->GetName().c_str());
          #endif
-//         specialPoints[spi->first] = sp;
-         specialPoints.insert(std::make_pair(spi->first, sp));
          spi++;
       }
    }
