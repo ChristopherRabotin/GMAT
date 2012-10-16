@@ -7274,7 +7274,7 @@ bool Interpreter::ParseVariableExpression(Parameter *var, const std::string &exp
    StringArray tokens = st.GetAllTokens();
    Real rval;
    
-   // Check if unexisting varibles used in expression
+   // Check if non-existing variables used in expression
    for (unsigned int i=0; i<tokens.size(); i++)
    {
       #ifdef DEBUG_VAR_EXPRESSION
