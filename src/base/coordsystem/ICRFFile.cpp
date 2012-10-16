@@ -61,56 +61,60 @@ ICRFFile* ICRFFile::Instance()
 //------------------------------------------------------------------------------
 void ICRFFile::Initialize()
 {
-	// Allocate buffer to store ICRF rotation vector table:
-	AllocateArrays();
+   if (isInitialized)
+      return;
+
+   // Allocate buffer to store ICRF rotation vector table:
+   AllocateArrays();
 
 	// Open IAU2000/2006 data file:
    FileManager* thefile = FileManager::Instance();
    std::string path = thefile->GetPathname(FileManager::ICRF_FILE);
    std::string name = thefile->GetFilename(FileManager::ICRF_FILE);
    icrfFileName = path+name;
-	FILE* fpt = fopen(icrfFileName.c_str(), "r");
+   FILE* fpt = fopen(icrfFileName.c_str(), "r");
 
-	// Read ICRF Euler rotation vector from data file and store to buffer:
-	Real t;
-	Real rotationvector[3];
-	int c;
-	Integer i;
-	for (i= 0; (c = fscanf(fpt, "%lf, %le, %le, %le\n",&t,
+   // Read ICRF Euler rotation vector from data file and store to buffer:
+   Real t;
+   Real rotationvector[3];
+   int c;
+   Integer i;
+   for (i= 0; (c = fscanf(fpt, "%lf, %le, %le, %le\n",&t,
 	      &rotationvector[0],&rotationvector[1],&rotationvector[2])) != EOF; ++i)
-	{
-		// expend the buffer size when it has no room to contain data:
-		if (i >= tableSz)
-		{
-			// create a new buffer with a larger size:
-			Integer new_size = tableSz*2;
-			Real* ind = new Real[new_size];
-			Real** dep = new Real*[new_size];
+   {
+      // expend the buffer size when it has no room to contain data:
+      if (i >= tableSz)
+      {
+         // create a new buffer with a larger size:
+         Integer new_size = tableSz*2;
+         Real* ind = new Real[new_size];
+         Real** dep = new Real*[new_size];
 
-			// copy contain in the current buffer to the new buffer:
-			memcpy(ind, independence, tableSz*sizeof(Real));
-			memcpy(dep, dependences, tableSz*sizeof(Real*));
-			for (Integer k=tableSz; k < new_size; ++k)
-				dep[k] = NULL;
+         // copy contain in the current buffer to the new buffer:
+         memcpy(ind, independence, tableSz*sizeof(Real));
+         memcpy(dep, dependences, tableSz*sizeof(Real*));
+         for (Integer k=tableSz; k < new_size; ++k)
+            dep[k] = NULL;
 
-			// delete the current buffer and use the new buffer as the current buffer:
-			delete independence;
-			delete dependences;
-			independence = ind;
-			dependences = dep;
-			tableSz = new_size;
-		}
+         // delete the current buffer and use the new buffer as the current buffer:
+         delete independence;
+         delete dependences;
+         independence = ind;
+         dependences = dep;
+         tableSz = new_size;
+      }
 
-		// store data to buffer:
-		independence[i] = t;
-		if (dependences[i] == NULL)
-			dependences[i] = new Real[dimension];
+      // store data to buffer:
+      independence[i] = t;
+      if (dependences[i] == NULL)
+         dependences[i] = new Real[dimension];
 
-		for (Integer j = 0; j < dimension; ++j)
-			dependences[i][j] = rotationvector[j];
-	}
+      for (Integer j = 0; j < dimension; ++j)
+         dependences[i][j] = rotationvector[j];
+   }
 
-	pointsCount = i;
+   pointsCount = i;
+   isInitialized = true;
 }
 
 //------------------------------------------------------------------------------

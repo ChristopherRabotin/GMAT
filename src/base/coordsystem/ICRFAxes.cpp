@@ -144,16 +144,16 @@ bool ICRFAxes::Initialize()
          instanceName.c_str());
    #endif
 
-   if (!isInitialized)
-   {
+//   if (!isInitialized)
+//   {
       InertialAxes::Initialize();
 
       // Create an ICRFFile object in order to read Euler rotation vector:
-      if (icrfFile == NULL)
-         icrfFile = ICRFFile::Instance();
+//      if (icrfFile == NULL)
+      icrfFile = ICRFFile::Instance();
       icrfFile->Initialize();
       isInitialized = true;
-   }
+//   }
 
    #ifdef DEBUG_ICRFAXES_INITIALIZE
    MessageInterface::ShowMessage("End initialize ICRFAxes: with name '%s'\n",
@@ -264,16 +264,23 @@ void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    a[0] = vec[0]/angle; a[1] = vec[1]/angle; a[2] = vec[2]/angle;
    Real c = GmatMathUtil::Cos(angle);
    Real s = GmatMathUtil::Sin(angle);
-   rotMatrix.SetElement(0,0, c+a[0]*a[0]*(1-c));
-   rotMatrix.SetElement(0,1, a[0]*a[1]*(1-c)+a[2]*s);
-   rotMatrix.SetElement(0,2, a[0]*a[2]*(1-c)-a[1]*s);
-   rotMatrix.SetElement(1,0, a[0]*a[1]*(1-c)-a[2]*s);
-   rotMatrix.SetElement(1,1, c+a[1]*a[1]*(1-c));
-   rotMatrix.SetElement(1,2, a[1]*a[2]*(1-c)+a[0]*s);
-   rotMatrix.SetElement(2,0, a[0]*a[2]*(1-c)+a[1]*s);
-   rotMatrix.SetElement(2,1, a[1]*a[2]*(1-c)-a[0]*s);
-   rotMatrix.SetElement(2,2, c+a[2]*a[2]*(1-c));
 
+   // rotation matrix from FK5 to ICRF:
+   Rmatrix33 rotM;
+   rotM.SetElement(0,0, c+a[0]*a[0]*(1-c));
+   rotM.SetElement(0,1, a[0]*a[1]*(1-c)+a[2]*s);
+   rotM.SetElement(0,2, a[0]*a[2]*(1-c)-a[1]*s);
+   rotM.SetElement(1,0, a[0]*a[1]*(1-c)-a[2]*s);
+   rotM.SetElement(1,1, c+a[1]*a[1]*(1-c));
+   rotM.SetElement(1,2, a[1]*a[2]*(1-c)+a[0]*s);
+   rotM.SetElement(2,0, a[0]*a[2]*(1-c)+a[1]*s);
+   rotM.SetElement(2,1, a[1]*a[2]*(1-c)-a[0]*s);
+   rotM.SetElement(2,2, c+a[2]*a[2]*(1-c));
+
+   // rotation matrix from ICRF to FK5:
+   rotMatrix = rotM.Transpose();
+
+   // rotation dot matrix from ICRF to FK5:
    for (int i = 0; i < 3; ++i)
       for (int j = 0; j < 3; ++j)
     	  rotDotMatrix.SetElement(i,j, 0.0);
