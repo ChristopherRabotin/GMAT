@@ -434,10 +434,19 @@ void Planet::Copy(const GmatBase* orig)
 
 bool Planet::NeedsOnlyMainSPK()
 {
+   // If the planet data is included in our "built-in" SPK file,
+   // we don't need another one
    if ((instanceName == GmatSolarSystemDefaults::MERCURY_NAME) ||
-       (instanceName == GmatSolarSystemDefaults::VENUS_NAME) ||
-       (instanceName == GmatSolarSystemDefaults::EARTH_NAME))
+       (instanceName == GmatSolarSystemDefaults::VENUS_NAME)   ||
+       (instanceName == GmatSolarSystemDefaults::EARTH_NAME)   ||
+       (instanceName == GmatSolarSystemDefaults::MARS_NAME)    ||
+       (instanceName == GmatSolarSystemDefaults::JUPITER_NAME) ||
+       (instanceName == GmatSolarSystemDefaults::SATURN_NAME)  ||
+       (instanceName == GmatSolarSystemDefaults::URANUS_NAME)  ||
+       (instanceName == GmatSolarSystemDefaults::NEPTUNE_NAME) ||
+       (instanceName == GmatSolarSystemDefaults::PLUTO_NAME)      )
               return true;
+   // Otherwise, we need an additional SPK file
    return false;
 }
 
