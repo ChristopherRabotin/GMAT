@@ -31,20 +31,10 @@
 //#define DEBUG_ASTEROID 1
 
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
-//const std::string
-//Asteroid::PARAMETER_TEXT[AsteroidParamCount - CelestialBodyParamCount] =
-//{
-//  
-//};
-//
-//const Gmat::ParameterType
-//Asteroid::PARAMETER_TYPE[AsteroidParamCount - CelestialBodyParamCount] =
-//{
-//   
-//};
+//------------------------------------------------------------------------------
+// none at this time
 
 
 //------------------------------------------------------------------------------
@@ -54,7 +44,7 @@
 //  Asteroid(std::string name)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the Asteroid class
+ * This method creates an object of the Asteroid class
  * (default constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
@@ -62,12 +52,10 @@
  */
 //------------------------------------------------------------------------------
 Asteroid::Asteroid(std::string name) :
-CelestialBody     ("Asteroid",name)
+   CelestialBody     ("Asteroid",name)
 {
-//   CelestialBody::InitializeBody("Asteroid");
-   
    objectTypeNames.push_back("Asteroid"); 
-   parameterCount = AsteroidParamCount;
+   parameterCount      = AsteroidParamCount;
    
    theCentralBodyName  = SolarSystem::SUN_NAME; 
    bodyType            = Gmat::ASTEROID;
@@ -90,19 +78,15 @@ CelestialBody     ("Asteroid",name)
 //   sij = s;
 //   cij = c;
 
-   
-   // @todo - add other default values here
-
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
-
 }
 
 //------------------------------------------------------------------------------
 //  Asteroid(std::string name, const std::string &cBody)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the Asteroid class
+ * This method creates an object of the Asteroid class
  * (constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
@@ -113,21 +97,16 @@ CelestialBody     ("Asteroid",name)
 Asteroid::Asteroid(std::string name, const std::string &cBody) :
 CelestialBody     ("Asteroid",name)
 {
-//   CelestialBody::InitializeBody("Asteroid");
-   
    objectTypeNames.push_back("Asteroid");
-   parameterCount = AsteroidParamCount;
+   parameterCount      = AsteroidParamCount;
 
    theCentralBodyName  = cBody; 
    bodyType            = Gmat::ASTEROID;
    bodyNumber          = -1;
    referenceBodyNumber = -1;
 
-   // @todo - add other default values here
-
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
-
 }
 
 //------------------------------------------------------------------------------
@@ -141,7 +120,7 @@ CelestialBody     ("Asteroid",name)
  */
 //------------------------------------------------------------------------------
 Asteroid::Asteroid(const Asteroid &copy) :
-CelestialBody (copy)
+   CelestialBody (copy)
 {
 }
 
@@ -179,13 +158,12 @@ Asteroid::~Asteroid()
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Asteroid.
  *
  * @return clone of the Asteroid.
- *
  */
 //------------------------------------------------------------------------------
 GmatBase* Asteroid::Clone() const
@@ -209,10 +187,10 @@ void Asteroid::Copy(const GmatBase* orig)
 }
 
 
-
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
+// none at this time
 
 //------------------------------------------------------------------------------
 // private methods

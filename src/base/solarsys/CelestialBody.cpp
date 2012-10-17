@@ -4448,9 +4448,6 @@ bool CelestialBody::SetUpSPICE()
       else  // outer planets/moons, comets, and asteroids must have their own SPK file specified
       {
          if (!msgWritten && !NeedsOnlyMainSPK())
-//         if (!msgWritten && ((instanceName != SolarSystem::SUN_NAME) && (instanceName != SolarSystem::MERCURY_NAME) &&
-//             (instanceName != SolarSystem::VENUS_NAME) && (instanceName != SolarSystem::EARTH_NAME) &&
-//             (instanceName != SolarSystem::MOON_NAME)))
          {
             MessageInterface::ShowMessage(
                "An additional body-specific SPK may be required for body %s or its satellites.\n",
@@ -4459,9 +4456,6 @@ bool CelestialBody::SetUpSPICE()
          }
       }
    }
-//   #ifdef DEBUG_CB_SPICE
-//      MessageInterface::ShowMessage("   now loading main SPK kernel ...\n");
-//   #endif
    // make sure the "main" Solar System Kernel(s) are loaded first - DONE in SolarSystem
    theSolarSystem->LoadSpiceKernels();
    // now load the spice kernels specified for this body
@@ -4527,8 +4521,7 @@ bool CelestialBody::SetUpSPICE()
    // get the NAIF Id from the Spice Kernel(s)   @todo - should this be moved to SpacePoint?
    if (!naifIdSet)
    {
-      // SPICE calls Earth's moon "Moon" (like it's the only important one or something - sheesh!)
-      // GMAT calls Earth's moon "Luna"    
+      // SPICE calls Earth's moon "Moon" ; GMAT calls Earth's moon "Luna"
       Integer spiceNaifId; 
       if (instanceName == SolarSystem::MOON_NAME)
          spiceNaifId = kernelReader->GetNaifID("MOON"); 
@@ -4542,12 +4535,8 @@ bool CelestialBody::SetUpSPICE()
             {
                std::stringstream ss("");
                ss << naifId;
-//               spiceNaifId = kernelReader->GetNaifID(ss.str(), true);
-//               if (spiceNaifId != 0)
-                  naifName = ss.str();
-//               else
-//                  naifName = instanceName;  // ??
-                  spiceNaifId = naifId;
+               naifName = ss.str();
+               spiceNaifId = naifId;
             }
             else
             {

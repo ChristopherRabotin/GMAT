@@ -15,12 +15,11 @@
 // Created: 2009.01.12
 //
 /**
- * The Asteroid class will contain all data and methods for any comet that exists in
- * the solar system.
+ * The Asteroid class will contain all data and methods for any comet
+ * that exists in the solar system.
  *
  */
 //------------------------------------------------------------------------------
-
 
 #ifndef Asteroid_hpp
 #define Asteroid_hpp
@@ -58,12 +57,6 @@ protected:
       
    };
    
-   //static const std::string PARAMETER_TEXT[AsteroidParamCount - CelestialBodyParamCount];
-   
-   //static const Gmat::ParameterType 
-   //                         PARAMETER_TYPE[AsteroidParamCount - CelestialBodyParamCount];
-
-
 private:
 
 };

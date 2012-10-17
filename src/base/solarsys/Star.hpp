@@ -58,7 +58,7 @@ public:
    virtual std::string    GetParameterText(const Integer id) const;
    virtual Integer        GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-      GetParameterType(const Integer id) const;
+                          GetParameterType(const Integer id) const;
    virtual std::string    GetParameterTypeString(const Integer id) const;
 
    virtual Real           GetRealParameter(const Integer id) const;
@@ -67,14 +67,9 @@ public:
 
    
    virtual bool           IsParameterReadOnly(const Integer id) const;
-   // add these, if needed later (currently all parameters are read-only anyway
-//   virtual bool           IsParameterCloaked(const Integer id) const;
-//   virtual bool           IsParameterEqualToDefault(const Integer id) const;
-//   virtual bool           SaveAllAsDefault();
-//   virtual bool           SaveParameterAsDefault(const Integer id);
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    // required method for all subclasses that can be copied in a script
    virtual void      Copy(const GmatBase* orig);
    virtual bool      NeedsOnlyMainSPK();
@@ -97,7 +92,7 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[
       StarParamCount - CelestialBodyParamCount];
 
-      // radiant power and reference distance
+   // radiant power, reference distance, and photospher radius
    Real      radiantPower;
    Real      referenceDistance;
    Real      photosphereRadius;  // meters

@@ -26,11 +26,9 @@
 #include "A1Mjd.hpp"
 #include "AngleUtil.hpp"
 
-
-
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 const std::string
 Star::PARAMETER_TEXT[StarParamCount - CelestialBodyParamCount] =
 {
@@ -58,11 +56,11 @@ Star::PARAMETER_TYPE[StarParamCount - CelestialBodyParamCount] =
  * (default constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
- *               body (default is "Sun").
+ *               body (default is the name of the Sun).
  */
 //------------------------------------------------------------------------------
 Star::Star(std::string name) :
-CelestialBody       ("Star",name)
+   CelestialBody       ("Star",name)
 {
    objectTypeNames.push_back("Star");
    parameterCount = StarParamCount;
@@ -89,7 +87,6 @@ CelestialBody       ("Star",name)
 //   cij = c;
 
    SaveAllAsDefault();
-//   InitializeStar();  // should this be the default?
 }
 
 //------------------------------------------------------------------------------
@@ -103,10 +100,10 @@ CelestialBody       ("Star",name)
  */
 //------------------------------------------------------------------------------
 Star::Star(const Star &st) :
-CelestialBody       (st),
-radiantPower        (st.radiantPower),
-referenceDistance   (st.referenceDistance),
-photosphereRadius   (st.photosphereRadius)  
+   CelestialBody       (st),
+   radiantPower        (st.radiantPower),
+   referenceDistance   (st.referenceDistance),
+   photosphereRadius   (st.photosphereRadius)
 {
 }
 
@@ -221,7 +218,7 @@ bool Star::SetPhotosphereRadius(Real rad)
 //------------------------------------------------------------------------------
 /**
  * This method returns a boolean indicating whether or not the parameter
- * referenced by the input id is a read-ony parameter for an object of this class.
+ * referenced by the input id is a read-only parameter for an object of this class.
  *
  * @param <id>    id of specified parameter
  *
@@ -240,7 +237,7 @@ bool Star::IsParameterReadOnly(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Star.
@@ -249,7 +246,7 @@ bool Star::IsParameterReadOnly(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Star::Clone(void) const
+GmatBase* Star::Clone() const
 {
    return (new Star(*this));
 }
@@ -269,12 +266,23 @@ void Star::Copy(const GmatBase* orig)
    operator=(*((Star *)(orig)));
 }
 
+//---------------------------------------------------------------------------
+//  bool NeedsOnlyMainSPK()
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the default SPK file contains
+ * sufficient data for this Star.
+ *
+ * @return flag indicating whether or not an additional SPK file is needed
+ *         for this Star; true, if only the default one is needed; false
+ *         if an additional file is needed.
+ */
+//---------------------------------------------------------------------------
 bool Star::NeedsOnlyMainSPK()
 {
    if (instanceName == GmatSolarSystemDefaults::SUN_NAME)  return true;
    return false;
 }
-
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -307,7 +315,7 @@ std::string Star::GetParameterText(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-Integer     Star::GetParameterID(const std::string &str) const
+Integer Star::GetParameterID(const std::string &str) const
 {
    for (Integer i = CelestialBodyParamCount; i < StarParamCount; i++)
    {
@@ -367,7 +375,7 @@ std::string Star::GetParameterTypeString(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-Real        Star::GetRealParameter(const Integer id) const
+Real Star::GetRealParameter(const Integer id) const
 {
    if (id == RADIANT_POWER)              return radiantPower;
    if (id == REFERENCE_DISTANCE)         return referenceDistance;
@@ -382,14 +390,13 @@ Real        Star::GetRealParameter(const Integer id) const
 /**
  * This method sets the Real parameter value, given the input parameter ID.
  *
- * @param <id> ID for the parameter whose value to change.
+ * @param <id>    ID for the parameter whose value to change.
  * @param <value> value for the parameter.
  *
  * @return  Real value of the requested parameter.
- *
  */
 //------------------------------------------------------------------------------
-Real        Star::SetRealParameter(const Integer id, const Real value)
+Real Star::SetRealParameter(const Integer id, const Real value)
 {
    if (id == RADIANT_POWER)              return (radiantPower        = value);
    if (id == REFERENCE_DISTANCE)         return (referenceDistance   = value);

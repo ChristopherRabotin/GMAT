@@ -15,12 +15,11 @@
 // Created: 2009.01.12
 //
 /**
- * The Comet class will contain all data and methods for any comet that exists in
- * the solar system.
+ * The Comet class will contain all data and methods for any comet that
+ * exists in the solar system.
  *
  */
 //------------------------------------------------------------------------------
-
 
 #ifndef Comet_hpp
 #define Comet_hpp
@@ -57,15 +56,8 @@ protected:
       CometParamCount = CelestialBodyParamCount,
       
    };
-   
-   //static const std::string PARAMETER_TEXT[CometParamCount - CelestialBodyParamCount];
-   
-   //static const Gmat::ParameterType 
-   //                         PARAMETER_TYPE[CometParamCount - CelestialBodyParamCount];
-
 
 private:
 
 };
 #endif // Comet_hpp
-

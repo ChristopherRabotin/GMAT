@@ -13,7 +13,6 @@
 //
 /**
  * Implementation of the Comet class.
- *
  */
 //------------------------------------------------------------------------------
 
@@ -30,22 +29,10 @@
 
 //#define DEBUG_COMET 1
 
-
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
-//const std::string
-//Comet::PARAMETER_TEXT[CometParamCount - CelestialBodyParamCount] =
-//{
-//  
-//};
-//
-//const Gmat::ParameterType
-//Comet::PARAMETER_TYPE[CometParamCount - CelestialBodyParamCount] =
-//{
-//   
-//};
-
+//------------------------------------------------------------------------------
+// none at this time
 
 //------------------------------------------------------------------------------
 // public methods
@@ -54,7 +41,7 @@
 //  Comet(std::string name)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the Comet class
+ * This method creates an object of the Comet class
  * (default constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
@@ -62,12 +49,10 @@
  */
 //------------------------------------------------------------------------------
 Comet::Comet(std::string name) :
-CelestialBody     ("Comet",name)
+   CelestialBody     ("Comet",name)
 {
-//   CelestialBody::InitializeBody("Comet");
-   
    objectTypeNames.push_back("Comet"); 
-   parameterCount = CometParamCount;
+   parameterCount      = CometParamCount;
    
    theCentralBodyName  = SolarSystem::SUN_NAME; 
    bodyType            = Gmat::COMET;
@@ -90,18 +75,15 @@ CelestialBody     ("Comet",name)
 //   sij = s;
 //   cij = c;
 
-   // @todo - add other default values here
-
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
-
 }
 
 //------------------------------------------------------------------------------
 //  Comet(std::string name, const std::string &cBody)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the Comet class
+ * This method creates an object of the Comet class
  * (constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
@@ -110,23 +92,18 @@ CelestialBody     ("Comet",name)
  */
 //------------------------------------------------------------------------------
 Comet::Comet(std::string name, const std::string &cBody) :
-CelestialBody     ("Comet",name)
+   CelestialBody     ("Comet",name)
 {
-//   CelestialBody::InitializeBody("Comet");
-   
    objectTypeNames.push_back("Comet");
-   parameterCount = CometParamCount;
+   parameterCount      = CometParamCount;
 
    theCentralBodyName  = cBody; 
    bodyType            = Gmat::COMET;
    bodyNumber          = -1;
    referenceBodyNumber = -1;
 
-   // @todo - add other default values here
-
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
-
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +117,7 @@ CelestialBody     ("Comet",name)
  */
 //------------------------------------------------------------------------------
 Comet::Comet(const Comet &copy) :
-CelestialBody (copy)
+   CelestialBody (copy)
 {
 }
 
@@ -178,13 +155,12 @@ Comet::~Comet()
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Comet.
  *
  * @return clone of the Comet.
- *
  */
 //------------------------------------------------------------------------------
 GmatBase* Comet::Clone() const
@@ -208,13 +184,12 @@ void Comet::Copy(const GmatBase* orig)
 }
 
 
-
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
+// none at this time
 
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
 // none at this time
-
