@@ -24,9 +24,9 @@
  * @note When the Planet is the Earth, the initial epoch and Keplerian elements
  *       used for the Low Fidelity modeling are set, they must be 'forwarded'
  *       on to the Sun.  This is necessary because:
- *       1. the KeplersProbelm code computes the state of a body with respect to
- *          its central body, then returms it with respect to the Earth
- *       2. the Sun has no cental body, so
+ *       1. the KeplersProblem code computes the state of a body with respect to
+ *          its central body, then returns it with respect to the Earth
+ *       2. the Sun has no central body, so
  *       3. the Sun will have to use the Earth's information to compute and
  *          return its state
  *
@@ -68,7 +68,7 @@ public:
    virtual Real          GetHourAngle(A1Mjd atTime); 
    
    // For the Earth, these methods need to update the Sun's information, as the 
-   // Sun has no cental body and its initial epoch and keplerian elements need 
+   // Sun has no central body and its initial epoch and keplerian elements need
    // to be set and stored differently
    virtual bool          SetTwoBodyEpoch(const A1Mjd &toTime);
    virtual bool          SetTwoBodyElements(const Rvector6 &kepl);
@@ -77,12 +77,12 @@ public:
    virtual bool          SetNutationUpdateInterval(Real val);
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    // required method for all subclasses that can be copied in a script
    virtual void      Copy(const GmatBase* orig);
    virtual bool      NeedsOnlyMainSPK();
 
-   // Parameter access methods - overridden from GmatBase - may need these later??
+   // Parameter access methods - overridden from GmatBase
    virtual std::string     GetParameterText(const Integer id) const;     
    virtual Integer         GetParameterID(const std::string &str) const; 
    virtual Gmat::ParameterType
@@ -114,14 +114,11 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount];
    
    Real     nutationUpdateInterval;
-   /// @todo add other ones as needed
+
    /// default values for the parameter(s)
    Real     default_nutationUpdateInterval;
-
-                                          
 
 private:
 
 };
 #endif // Planet_hpp
-

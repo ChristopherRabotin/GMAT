@@ -38,9 +38,9 @@
 
 using namespace GmatMathUtil;
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
+//------------------------------------------------------------------------------
 const std::string
 Planet::PARAMETER_TEXT[PlanetParamCount - CelestialBodyParamCount] =
 {
@@ -54,7 +54,6 @@ Planet::PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount] =
 };
 
 
-
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -66,7 +65,7 @@ Planet::PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount] =
  * (default constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
- *               body (default is "Sun").
+ *               body (default is "Earth").
  */
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name) :
@@ -74,7 +73,7 @@ Planet::Planet(std::string name) :
    nutationUpdateInterval    (60.0)
 {   
    objectTypeNames.push_back("Planet");
-   parameterCount = PlanetParamCount;
+   parameterCount      = PlanetParamCount;
 
    theCentralBodyName  = SolarSystem::SUN_NAME;
    bodyType            = Gmat::PLANET;
@@ -123,7 +122,7 @@ Planet::Planet(std::string name, const std::string &cBody) :
    nutationUpdateInterval    (60.0)
 {
    objectTypeNames.push_back("Planet");
-   parameterCount = PlanetParamCount;
+   parameterCount      = PlanetParamCount;
    
    theCentralBodyName  = cBody;
    bodyType            = Gmat::PLANET;
@@ -151,7 +150,7 @@ Planet::Planet(std::string name, const std::string &cBody) :
 //------------------------------------------------------------------------------
 Planet::Planet(const Planet &pl) :
    CelestialBody  (pl),
-   nutationUpdateInterval (pl.nutationUpdateInterval),
+   nutationUpdateInterval         (pl.nutationUpdateInterval),
    default_nutationUpdateInterval (pl.default_nutationUpdateInterval)
 {
 }
@@ -165,7 +164,7 @@ Planet::Planet(const Planet &pl) :
  * @param <pl> the Planet object whose data to assign to "this"
  *            solar system.
  *
- * @return "this" Planet with data of input Planet st.
+ * @return "this" Planet with data of input Planet pl.
  */
 //------------------------------------------------------------------------------
 Planet& Planet::operator=(const Planet &pl)
@@ -213,7 +212,7 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    {
       if (rotationSrc == Gmat::IAU_2002)
       {
-      Real d = GetJulianDaysFromTTEpoch(forTime); // interval in Julian days
+      Real d = GetJulianDaysFromTDBEpoch(forTime); // interval in Julian days
       Real T = d / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;  // interval in Julian centuries
       Real N    = 357.85 + 52.316 * T;
       //Real NDot = 52.316 * CelestialBody::TDot;
@@ -244,7 +243,6 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 
    // by default, call the method that handles the IAU_SIMPLIFIED method
    return CelestialBody::GetBodyCartographicCoordinates(forTime);
-   
 }
 
 //------------------------------------------------------------------------------
@@ -259,11 +257,9 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
  * @return hour angle for the body, in degrees, from the Prime Meridian
  *
  * @note algorithm 15, Vallado p. 192
- * @todo move this to Planet?  Add generic calculation here.
- *
  */
 //------------------------------------------------------------------------------
-Real  Planet::GetHourAngle(A1Mjd atTime) 
+Real Planet::GetHourAngle(A1Mjd atTime)
 {
    if (instanceName == SolarSystem::EARTH_NAME)
    {
@@ -275,7 +271,6 @@ Real  Planet::GetHourAngle(A1Mjd atTime)
       Real jdUT1    = mjdUT1 + GmatTimeConstants::JD_JAN_5_1941; // right?
                                                             // Compute elapsed Julian centuries (UT1)
       Real tUT1     = (jdUT1 - GmatTimeConstants::JD_OF_J2000) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
-      //Real timeUt1  = (ut1Jd - GmatTimeConstants::JD_OF_J2000) / GmatTimeUtil::DAYS_PER_JULIAN_CENTURY;
       
       // compute mean sidereal time, in degrees
       // according to Vallado Eq. 3-45, converted to degrees, where
@@ -373,12 +368,33 @@ bool Planet::SetTwoBodyElements(const Rvector6 &kepl)
    return OK;
 }
 
+//------------------------------------------------------------------------------
+//  Real GetNutationUpdateInterval() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the nutation update interval.
+ *
+ * @return nutation update interval (seconds)
+ *
+ */
+//------------------------------------------------------------------------------
 Real Planet::GetNutationUpdateInterval() const 
 {
    return nutationUpdateInterval;
-//   return updateInterval;
 }
 
+//------------------------------------------------------------------------------
+//  bool SetNutationUpdateInterval(Real val)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the nutation update interval.
+ *
+ * @param <val> nutation update interval vlaue to use (seconds)
+ *
+ * @return success flag for the operation
+ *
+ */
+//------------------------------------------------------------------------------
 bool Planet::SetNutationUpdateInterval(Real val)
 {
    #ifdef DEBUG_PLANET_NUTATION_INTERVAL
@@ -396,15 +412,10 @@ bool Planet::SetNutationUpdateInterval(Real val)
    
    nutationUpdateInterval = val;
    return true;
-//   if (val < 0.0) return false;
-//   updateInterval = val;
-//   return true;
 }
 
-
-
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Planet.
@@ -413,7 +424,7 @@ bool Planet::SetNutationUpdateInterval(Real val)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Planet::Clone(void) const
+GmatBase* Planet::Clone() const
 {
    return (new Planet(*this));
 }
@@ -432,6 +443,18 @@ void Planet::Copy(const GmatBase* orig)
    operator=(*((Planet *)(orig)));
 }
 
+//---------------------------------------------------------------------------
+//  bool NeedsOnlyMainSPK()
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the default SPK file contains
+ * sufficient data for this Planet.
+ *
+ * @return flag indicating whether or not an additional SPK file is needed
+ *         for this Planet; true, if only the default one is needed; false
+ *         if an additional file is needed.
+ */
+//---------------------------------------------------------------------------
 bool Planet::NeedsOnlyMainSPK()
 {
    // If the planet data is included in our "built-in" SPK file,
@@ -458,7 +481,7 @@ bool Planet::NeedsOnlyMainSPK()
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the parameter text, given the input parameter ID.
+ * This method returns the parameter text, given the input parameter ID.
  *
  * @param id Id for the requested parameter text.
  *
@@ -477,7 +500,7 @@ std::string Planet::GetParameterText(const Integer id) const
 //  Integer  GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the parameter ID, given the input parameter string.
+ * This method returns the parameter ID, given the input parameter string.
  *
  * @param str string for the requested parameter.
  *
@@ -500,7 +523,7 @@ Integer Planet::GetParameterID(const std::string &str) const
 //  Gmat::ParameterType  GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the parameter type, given the input parameter ID.
+ * This method returns the parameter type, given the input parameter ID.
  *
  * @param id ID for the requested parameter.
  *
@@ -520,7 +543,7 @@ Gmat::ParameterType Planet::GetParameterType(const Integer id) const
 //  std::string  GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the parameter type string, given the input parameter ID.
+ * This method returns the parameter type string, given the input parameter ID.
  *
  * @param id ID for the requested parameter.
  *
@@ -534,6 +557,19 @@ std::string Planet::GetParameterTypeString(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the specified parameter is
+ * read-only.
+ *
+ * @param <id> Id of the parameter
+ *
+ * @return flag indicating whether or not the specified parameter is
+ *         read-only.
+ */
+//---------------------------------------------------------------------------
 bool Planet::IsParameterReadOnly(const Integer id) const
 {
 //   if (id == UPDATE_INTERVAL)
@@ -546,7 +582,7 @@ bool Planet::IsParameterReadOnly(const Integer id) const
 //  Real  GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the real value, given the input parameter ID.
+ * This method returns the real value, given the input parameter ID.
  *
  * @param id ID for the requested parameter.
  *
@@ -556,7 +592,6 @@ bool Planet::IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 Real Planet::GetRealParameter(const Integer id) const
 {
-//   if (id == UPDATE_INTERVAL) return updateInterval;
    if (id == NUTATION_UPDATE_INTERVAL) return nutationUpdateInterval;
    return CelestialBody::GetRealParameter(id);
 }
@@ -565,10 +600,10 @@ Real Planet::GetRealParameter(const Integer id) const
 //  Real  SetRealParameter(const Integer id, const Real value) 
 //------------------------------------------------------------------------------
 /**
-* This method sets the real value, given the input parameter ID.
+ * This method sets the real value, given the input parameter ID.
  *
- * @param id ID for the requested parameter.
- * @param value to use to set the parameter.
+ * @param id    ID for the requested parameter.
+ * @param value value to use to set the parameter.
  *
  * @return real value of the requested parameter.
  *
@@ -576,11 +611,6 @@ Real Planet::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Planet::SetRealParameter(const Integer id, const Real value)
 {
-//   if (id == UPDATE_INTERVAL)
-//   {
-//      updateInterval = value;
-//      return true;
-//   }
    if (id == NUTATION_UPDATE_INTERVAL)
    {
         SetNutationUpdateInterval(value);
@@ -593,7 +623,7 @@ Real Planet::SetRealParameter(const Integer id, const Real value)
 //  Real  GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the real value, given the input parameter label.
+ * This method returns the real value, given the input parameter label.
  *
  * @param label label for the requested parameter.
  *
@@ -610,7 +640,7 @@ Real Planet::GetRealParameter(const std::string &label) const
 //  Real  SetRealParameter(const std::string &label, const Real value) 
 //------------------------------------------------------------------------------
 /**
-* This method sets the real value, given the input parameter label.
+ * This method sets the real value, given the input parameter label.
  *
  * @param label label for the requested parameter.
  * @param value to use to set the parameter.
@@ -624,6 +654,19 @@ Real Planet::SetRealParameter(const std::string &label, const Real value)
    return SetRealParameter(GetParameterID(label), value);
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterCloaked(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the specified parameter is
+ * cloaked, i.e. not written out unless the value is changed by the user.
+ *
+ * @param <id> Id of the parameter
+ *
+ * @return flag indicating whether or not the specified parameter is
+ *         cloaked.
+ */
+//---------------------------------------------------------------------------
 bool Planet::IsParameterCloaked(const Integer id) const
 {
    if (!cloaking) return false;
@@ -636,6 +679,19 @@ bool Planet::IsParameterCloaked(const Integer id) const
    return CelestialBody::IsParameterCloaked(id);
 }
 
+//---------------------------------------------------------------------------
+//  bool IsParameterEqualToDefault(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the current value of the
+ * specified parameter is equal to its default value.
+ *
+ * @param <id> Id of the parameter
+ *
+ * @return flag indicating whether or not the current value of the
+ * specified parameter is equal to its default value.
+ */
+//---------------------------------------------------------------------------
 bool Planet::IsParameterEqualToDefault(const Integer id) const
 {
    if (id == NUTATION_UPDATE_INTERVAL)
@@ -646,6 +702,15 @@ bool Planet::IsParameterEqualToDefault(const Integer id) const
    return CelestialBody::IsParameterEqualToDefault(id);
 }
 
+//---------------------------------------------------------------------------
+//  bool SaveAllAsDefault()
+//---------------------------------------------------------------------------
+/**
+ * Saves all current values to be the default values.
+ *
+ * @return success flag for the operation
+ */
+//---------------------------------------------------------------------------
 bool Planet::SaveAllAsDefault()
 {
    CelestialBody::SaveAllAsDefault();
@@ -653,6 +718,15 @@ bool Planet::SaveAllAsDefault()
    return true;
 }
 
+//---------------------------------------------------------------------------
+//  bool SaveParameterAsDefault(const Integer id)
+//---------------------------------------------------------------------------
+/**
+ * Saves the current value of the specified parameter to be the default value.
+ *
+ * @return success flag for the operation
+ */
+//---------------------------------------------------------------------------
 bool Planet::SaveParameterAsDefault(const Integer id)
 {
    if (id == NUTATION_UPDATE_INTERVAL)  
@@ -664,7 +738,6 @@ bool Planet::SaveParameterAsDefault(const Integer id)
 }
 
 
-
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
@@ -674,4 +747,3 @@ bool Planet::SaveParameterAsDefault(const Integer id)
 // private methods
 //------------------------------------------------------------------------------
 // none at this time
-

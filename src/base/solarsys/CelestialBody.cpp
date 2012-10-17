@@ -178,7 +178,6 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::STRING_TYPE,   //"TextureMapFileName"
 };
 
-const Real    CelestialBody::JD_EPOCH_2000_TT           = GmatTimeConstants::JD_OF_J2000; // @ todo Figure out JD_EPOCH_2000_TT
 const Real    CelestialBody::dDot                       = 1.0;
 const Real    CelestialBody::TDot                       = 1.0;
 const Real    CelestialBody::KEPLER_TOL                 = 1.0e-08;
@@ -2459,7 +2458,7 @@ Rvector CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) cons
       Real delta = 0;
       Real W     = 0;
       Real Wdot  = 0.0; 
-      Real d = GetJulianDaysFromTTEpoch(forTime); // interval in Julian days
+      Real d = GetJulianDaysFromTDBEpoch(forTime); // interval in Julian days
       Real T = d / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY; // interval in Julian centuries
       
       alpha = orientation[0]  + orientation[1] * T;
@@ -4149,7 +4148,32 @@ Real CelestialBody::GetJulianDaysFromTTEpoch(const A1Mjd &forTime) const
                                             TimeConverterUtil::TTMJD, 
                                             GmatTimeConstants::JD_JAN_5_1941);
    jdTime      = mjdTT + GmatTimeConstants::JD_JAN_5_1941; 
-   return (jdTime - JD_EPOCH_2000_TT);
+   return (jdTime - GmatTimeConstants::JD_OF_J2000);
+}
+
+//------------------------------------------------------------------------------
+//  Real GetJulianDaysFromTDBEpoch(const A1Mjd &forTime)
+//------------------------------------------------------------------------------
+/**
+ * This method computes the Julian days from the TDB Epoch.
+ *
+ * @return number of Julian days since the TDB epoch.
+ *
+ * @note This method computes the Julian Days from the TDB epoch.
+ */
+//------------------------------------------------------------------------------
+Real CelestialBody::GetJulianDaysFromTDBEpoch(const A1Mjd &forTime) const
+{
+   Real jdTime  = 0.0;
+   Real mjdTDB  = TimeConverterUtil::Convert(forTime.Get(),
+                                            TimeConverterUtil::A1MJD,
+                                            TimeConverterUtil::TDBMJD,
+                                            GmatTimeConstants::JD_JAN_5_1941);
+   jdTime       = mjdTDB + GmatTimeConstants::JD_JAN_5_1941;
+   // JD_OF_J2000 (2451545.0) TDB is the reference epoch indicated in
+   // Seidelmann et. al. "Report of the IAU/IAGWorking Group on Cartographic
+   // Coordinates and Rotational Elements" for use with cartographic data
+   return (jdTime - GmatTimeConstants::JD_OF_J2000);
 }
 
 //------------------------------------------------------------------------------

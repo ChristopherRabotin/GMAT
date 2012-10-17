@@ -400,7 +400,6 @@ protected:
    static const std::string PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount];
 
    static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount];
-   static const Real    JD_EPOCH_2000_TT;
    static const Real    dDot;
    static const Real    TDot;
    static const Real    KEPLER_TOL;
@@ -557,7 +556,7 @@ protected:
    bool                   msgWritten;
    /// date and time of start of source file
    //A1Mjd                  sourceStart;      // currently unused
-   /// date and time of end of sourcce file
+   /// date and time of end of source file
    //A1Mjd                  sourceEnd;        // currently unused
    //Integer                coefficientSize;      // n   // same as degree, order above?
    //Rmatrix                Cbar, Sbar;
@@ -574,6 +573,7 @@ protected:
    
    bool             IsBlank(char* aLine);
    virtual Real     GetJulianDaysFromTTEpoch(const A1Mjd &forTime) const;
+   virtual Real     GetJulianDaysFromTDBEpoch(const A1Mjd &forTime) const;
    virtual Rvector6 ComputeTwoBody(const A1Mjd &forTime);
    virtual Rvector6 KeplersProblem(const A1Mjd &forTime);
    virtual bool     SetUpSPICE();
