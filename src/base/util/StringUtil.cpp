@@ -4272,7 +4272,9 @@ StringArray GmatStringUtil::GetVarNames(const std::string &str)
 
    for (UnsignedInt i=0; i<str1.size(); i++)
    {
-      if (isalnum(str1[i]) || str1[i] == '_')
+      // Make dot(.) as part of a name (Fix for GMT-1012, LOJ: 2012.10.18)
+      //if (isalnum(str1[i]) || str1[i] == '_')
+      if (isalnum(str1[i]) || str1[i] == '_' || str1[i] == '.')
       {
          name = name + str1[i];
       }

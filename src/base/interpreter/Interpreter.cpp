@@ -2438,12 +2438,21 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       else
       {
          StringArray varNames = GmatStringUtil::GetVarNames(input);
+         
+         #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+         MessageInterface::ShowMessage("   varNames.size()=%d\n", varNames.size());
+         for (unsigned int i = 0; i < varNames.size(); i++)
+            MessageInterface::ShowMessage("   varNames[%d] = '%s'\n", i, varNames[i].c_str());
+         #endif
+         
          if (varNames.size() > 1)
             input = "";
+         
          #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
          MessageInterface::ShowMessage
             ("   Setting <%s> as input to CallFunction\n", input.c_str());
-         #endif      
+         #endif
+         
          retval = cmd->SetStringParameter("AddInput", input);
       }
       #endif
@@ -2473,7 +2482,13 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          {
             Parameter *param = CreateSystemParameter(inArray[i]);
             if (param != NULL)
+            {
+               #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   The parameter <%s> is created\n", inArray[i].c_str());
+               #endif
                validInput = true;
+            }
          }
       }
       // Whole object
@@ -3228,7 +3243,8 @@ bool Interpreter::AssembleReportCommand(GmatCommand *cmd, const std::string &des
          {
             InterpreterException ex
                ("Nonexistent or disallowed Report Variable: \"" + parts[i] +
-                "\";\nIt will not be added to Report");
+                "\";\nCurrently object fields are not allowed to report. "
+                "It will not be added to Report");
             HandleError(ex);
             retval = false;
          }

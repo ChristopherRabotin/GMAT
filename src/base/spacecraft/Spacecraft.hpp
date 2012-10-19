@@ -118,7 +118,14 @@ public:
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value,
                                          const Integer index);
-
+   
+   virtual const Rvector& GetRvectorParameter(const Integer id) const;
+   virtual const Rvector& GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector& SetRvectorParameter(const Integer id,
+                                              const Rvector &value);
+   virtual const Rvector& SetRvectorParameter(const std::string &label,
+                                              const Rvector &value);
+   
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const Integer id, const std::string &value);

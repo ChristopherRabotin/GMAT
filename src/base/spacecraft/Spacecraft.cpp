@@ -2479,6 +2479,91 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    return SpaceObject::SetRealParameter(label, value);
 }
 
+//------------------------------------------------------------------------------
+//  const Rvector& GetRvectorParameter(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * This method gets the Rvector parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  the Rvector parameter (Angles are returned in degrees).
+ *
+ */
+//------------------------------------------------------------------------------
+const Rvector& Spacecraft::GetRvectorParameter(const Integer id) const
+{
+   if (id >= ATTITUDE_ID_OFFSET)
+      if (attitude)
+         return attitude->GetRvectorParameter(id - ATTITUDE_ID_OFFSET);
+   
+   return SpaceObject::GetRvectorParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  const Rvector& GetRvectorParameter(const std::string &label)
+//------------------------------------------------------------------------------
+/**
+ * This method gets the Rvector parameter value, given the input
+ * parameter label.
+ *
+ * @param <label> label for the requested parameter.
+ *
+ * @return  the Rvector parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+const Rvector& Spacecraft::GetRvectorParameter(const std::string &label) const
+{
+   return GetRvectorParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  const Rvector& SetRvectorParameter(const Integer id, const Rvector& value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Rvector parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> Rvector value for the requested parameter (angles are
+ *                expected in degrees).
+ *
+ * @return  Rvector parameter value.
+ *
+ */
+//------------------------------------------------------------------------------
+const Rvector& Spacecraft::SetRvectorParameter(const Integer id,
+                                               const Rvector &value)
+{
+   if (id >= ATTITUDE_ID_OFFSET)
+      if (attitude)
+         return attitude->SetRvectorParameter(id - ATTITUDE_ID_OFFSET, value);
+   
+   return SpaceObject::SetRvectorParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+//  const Rvector& SetRvectorParameter(const std::string &label, 
+//                                     const Rvector& value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Rvector parameter value, given the input
+ * parameter label.
+ *
+ * @param <label> label for the requested parameter.
+ * @param <value> Rvector value for the requested parameter.
+ *
+ * @return  Rvector parameter value.
+ *
+ */
+//------------------------------------------------------------------------------
+const Rvector& Spacecraft::SetRvectorParameter(const std::string &label,
+                                               const Rvector &value)
+{
+   return SetRvectorParameter(GetParameterID(label), value);
+}
 
 //------------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
@@ -3084,8 +3169,8 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
 //                       const Integer col)
 //---------------------------------------------------------------------------
 Real Spacecraft::SetRealParameter(const std::string &label,
-                                      const Real value, const Integer row,
-                                      const Integer col)
+                                  const Real value, const Integer row,
+                                  const Integer col)
 {
    return SetRealParameter(GetParameterID(label), value, row, col);
 }
