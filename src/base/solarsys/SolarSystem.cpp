@@ -2026,13 +2026,15 @@ bool SolarSystem::SetLSKFile(const std::string &lskFile)
          throw sse;
       }
    }
-   if ((planetarySPK != NULL) && (!planetarySPK->IsValidKernel(fullLskName, "lsk")))
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_,
-          "*** Warning *** The following LSK file is invalid and will not be used: %s.", fullLskName.c_str());
-      return false;
-   }
+   #ifdef __USE_SPICE__
+      if ((planetarySPK != NULL) && (!planetarySPK->IsValidKernel(fullLskName, "lsk")))
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "*** Warning *** The following LSK file is invalid and will not be used: %s.", fullLskName.c_str());
+         return false;
+      }
+   #endif
    lskKernelName = fullLskName;
    return true;
 }
