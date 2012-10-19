@@ -37,20 +37,10 @@ using namespace GmatMathUtil;
 
 // initialize static default values
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
-//const std::string
-//Moon::PARAMETER_TEXT[MoonParamCount - CelestialBodyParamCount] =
-//{
-//  
-//};
-//
-//const Gmat::ParameterType
-//Moon::PARAMETER_TYPE[MoonParamCount - CelestialBodyParamCount] =
-//{
-//   
-//};
+//------------------------------------------------------------------------------
+// none at this time
 
 
 //------------------------------------------------------------------------------
@@ -60,21 +50,18 @@ using namespace GmatMathUtil;
 //  Moon(std::string name)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the Moon class
+ * This method creates an object of the Moon class
  * (default constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
- *               body (default is "Earth").
+ *               body (default is "Luna").
  */
 //------------------------------------------------------------------------------
 Moon::Moon(std::string name) :
-CelestialBody     ("Moon",name)
+   CelestialBody     ("Moon",name)
 {
-//   CelestialBody::InitializeBody("Moon");
-   
    objectTypeNames.push_back("Moon");
-//   InitializeMoon(SolarSystem::EARTH_NAME);  
-   parameterCount = MoonParamCount;
+   parameterCount      = MoonParamCount;
    
    theCentralBodyName  = SolarSystem::EARTH_NAME; // by default, the Moon is Luna 
    bodyType            = Gmat::MOON;
@@ -107,22 +94,19 @@ CelestialBody     ("Moon",name)
 //  Moon(std::string name, const std::string &cBody)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the Moon class
+ * This method creates an object of the Moon class
  * (constructor).
  *
- * @param <name> optional parameter indicating the name of the celestial
- *               body.
+ * @param <name>  optional parameter indicating the name of the celestial
+ *                body.
  * @param <cBody> pointer to a central body.
  */
 //------------------------------------------------------------------------------
 Moon::Moon(std::string name, const std::string &cBody) :
-CelestialBody     ("Moon",name)
+   CelestialBody     ("Moon",name)
 {
-//   CelestialBody::InitializeBody("Moon");
-   
    objectTypeNames.push_back("Moon");
-//   InitializeMoon(cBody); 
-   parameterCount = MoonParamCount;
+   parameterCount      = MoonParamCount;
 
    theCentralBodyName  = cBody; 
    bodyType            = Gmat::MOON;
@@ -146,8 +130,7 @@ CelestialBody     ("Moon",name)
  */
 //------------------------------------------------------------------------------
 Moon::Moon(const Moon &m) :
-CelestialBody (m)
-
+   CelestialBody (m)
 {
 }
 
@@ -160,7 +143,7 @@ CelestialBody (m)
  * @param <m> the Moon object whose data to assign to "this"
  *            solar system.
  *
- * @return "this" Moon with data of input Moon st.
+ * @return "this" Moon with data of input Moon m.
  */
 //------------------------------------------------------------------------------
 Moon& Moon::operator=(const Moon &m)
@@ -312,7 +295,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Moon.
@@ -321,7 +304,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Moon::Clone(void) const
+GmatBase* Moon::Clone() const
 {
    return (new Moon(*this));
 }
@@ -341,12 +324,23 @@ void Moon::Copy(const GmatBase* orig)
    operator=(*((Moon *)(orig)));
 }
 
+//---------------------------------------------------------------------------
+//  bool NeedsOnlyMainSPK()
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the default SPK file contains
+ * sufficient data for this Moon.
+ *
+ * @return flag indicating whether or not an additional SPK file is needed
+ *         for this Moon; true, if only the default one is needed; false
+ *         if an additional file is needed.
+ */
+//---------------------------------------------------------------------------
 bool Moon::NeedsOnlyMainSPK()
 {
    if (instanceName == GmatSolarSystemDefaults::MOON_NAME)  return true;
    return false;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -358,4 +352,3 @@ bool Moon::NeedsOnlyMainSPK()
 // private methods
 //------------------------------------------------------------------------------
 // none at this time
-

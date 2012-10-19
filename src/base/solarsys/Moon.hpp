@@ -22,7 +22,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef Moon_hpp
 #define Moon_hpp
 
@@ -49,7 +48,7 @@ public:
    virtual Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
    
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    // required method for all subclasses that can be copied in a script
    virtual void      Copy(const GmatBase* orig);
 
@@ -61,15 +60,8 @@ protected:
       MoonParamCount = CelestialBodyParamCount,
       
    };
-   
-   //static const std::string PARAMETER_TEXT[MoonParamCount - CelestialBodyParamCount];
-   
-   //static const Gmat::ParameterType 
-   //                         PARAMETER_TYPE[MoonParamCount - CelestialBodyParamCount];
-   
 
 private:
 
 };
 #endif // Moon_hpp
-
