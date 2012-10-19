@@ -69,6 +69,7 @@ public:
    virtual bool        UnloadKernels(const StringArray &fileNames);
    virtual bool        UnloadAllKernels();
    virtual bool        IsLoaded(const std::string &fileName);
+   virtual bool        IsValidKernel(const std::string &fileName, const std::string &ofType);
    
    virtual StringArray GetValidAberrationCorrectionFlags();
    virtual StringArray GetValidFrames();

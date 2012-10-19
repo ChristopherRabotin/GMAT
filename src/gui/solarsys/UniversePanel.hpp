@@ -65,6 +65,9 @@ private:
    wxStaticText *lskNameLabel;
    wxStaticText *fileNameLabel;
 
+   std::map<wxString, wxString> mPreviousFileTypeNameMap;
+   wxString      previousLskFile;
+
 
    void OnBrowseButton(wxCommandEvent& event);
    void OnLSKBrowseButton(wxCommandEvent& event);

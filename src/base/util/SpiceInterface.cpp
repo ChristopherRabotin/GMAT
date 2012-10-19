@@ -426,6 +426,51 @@ bool SpiceInterface::IsLoaded(const std::string &fileName)
    return false;
 }
 
+//------------------------------------------------------------------------------
+//  bool IsValidKernel(const std::string &fileName, const std::string &ofType)
+//------------------------------------------------------------------------------
+/**
+ * This method checks to see if the input file is a valid SPICE kernel of the
+ * specified type.
+ *
+ * @param <ofType>    type of kernel
+ * @param <fileName>  full path of the file (kernel) to check
+ *
+ * @return true if the file (kernel) is a valid kernel of the requested type;
+ *         false otherwise
+ *
+ */
+//------------------------------------------------------------------------------
+bool SpiceInterface::IsValidKernel(const std::string &fileName, const std::string &ofType)
+{
+   char             kStr[5] = "    ";
+   char             aStr[4] = "   ";
+   SpiceInt         arclen      = 4;
+   SpiceInt         typlen      = 5;
+   ConstSpiceChar   *kernelName = NULL;
+   SpiceChar        *arch;
+   SpiceChar        *kernelType;
+   ConstSpiceChar   *typeToCheck = NULL;
+   // SPICE expects forward slashes for directory separators
+   std::string kName = GmatStringUtil::Replace(fileName, "\\", "/");
+   kernelName = kName.c_str();
+   // check the type of kernel
+   arch        = aStr;
+   kernelType  = kStr;
+   getfat_c(kernelName, arclen, typlen, arch, kernelType);
+   if (failed_c())
+   {
+      return false;
+   }
+
+   typeToCheck = ofType.c_str();
+
+   if (eqstr_c( kernelType, typeToCheck ))
+   {
+      return true;
+   }
+   return false;
+}
 
 
 //------------------------------------------------------------------------------

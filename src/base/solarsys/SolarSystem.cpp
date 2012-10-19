@@ -1037,6 +1037,15 @@ bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
    {
       if (id == Gmat::SPICE)
       {
+         #ifdef __USE_SPICE__
+            if (planetarySPK != NULL && (!planetarySPK->IsValidKernel(fileName, "spk")))
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::WARNING_,
+                   "*** Warning *** The following SPK file is invalid and will not be used: %s.", fileName.c_str());
+               return false;
+            }
+         #endif
          theSPKFilename = fileName;
          thePlanetarySourceNames[id] = fileName;
          status =  true;
@@ -2017,7 +2026,13 @@ bool SolarSystem::SetLSKFile(const std::string &lskFile)
          throw sse;
       }
    }
-   
+   if ((planetarySPK != NULL) && (!planetarySPK->IsValidKernel(fullLskName, "lsk")))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_,
+          "*** Warning *** The following LSK file is invalid and will not be used: %s.", fullLskName.c_str());
+      return false;
+   }
    lskKernelName = fullLskName;
    return true;
 }
@@ -2636,8 +2651,8 @@ bool SolarSystem::SetStringParameter(const Integer id,
    if (id == LSK_FILE_NAME)
    {
       #ifdef __USE_SPICE__
-         SetLSKFile(value);
-         return true;
+         return SetLSKFile(value);
+//         return true;
       #else
          return false;
       #endif

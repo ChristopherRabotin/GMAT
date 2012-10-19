@@ -311,6 +311,7 @@ void UniversePanel::LoadData()
          wxString type = mAllFileTypes[i].c_str();
          wxString typeName = theGuiInterpreter->GetPlanetarySourceName(mAllFileTypes[i]).c_str();
          mFileTypeNameMap[type] = typeName;
+         mPreviousFileTypeNameMap[type] = typeName;
          mFileTypeComboBox->Append(type);
       }
       
@@ -386,6 +387,7 @@ void UniversePanel::LoadData()
       {
          wxString fileName = mFileTypeNameMap[selStr];
          mFileNameTextCtrl->SetValue(fileName);
+         mPreviousFileTypeNameMap[selStr] = fileName;
          
          #ifdef DEBUG_UNIVERSEPANEL_LOAD
          MessageInterface::ShowMessage
@@ -395,6 +397,7 @@ void UniversePanel::LoadData()
       
       wxString lskFile = (theSolarSystem->GetStringParameter("LSKFilename")).c_str();
       mLSKFileNameTextCtrl->SetValue(lskFile);
+      previousLskFile  = lskFile;
 
       bool useTT = theSolarSystem->GetBooleanParameter("UseTTForEphemeris");
       mOverrideCheckBox->SetValue(useTT);
@@ -500,27 +503,46 @@ void UniversePanel::SaveData()
                (Gmat::ERROR_, mMsgFormat.c_str(),
                 str.c_str(), fieldName.c_str(), "", "File must exist");
             canClose = false;
+            mFileNameTextCtrl->SetValue(mPreviousFileTypeNameMap[type]);
             return;
          }
          filename.close();
          
-         mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()] = str.c_str();
+         #ifdef DEBUG_UNIVERSEPANEL_SAVE
+            MessageInterface::ShowMessage("Now setting file for %s to %s\n",
+                  type.c_str(), str.c_str());
+         #endif
+         mFileTypeNameMap[type] = str.c_str();
          for (unsigned int i=0; i<mAllFileTypes.size(); i++)
          {
             wxString theType = mAllFileTypes[i].c_str();
             std::string name = std::string(mFileTypeNameMap[theType].c_str());
-            theGuiInterpreter->SetPlanetarySourceName(mAllFileTypes[i], name);
+            if (theGuiInterpreter->SetPlanetarySourceName(mAllFileTypes[i], name))
+            {
+               #ifdef DEBUG_UNIVERSEPANEL_SAVE
+                  MessageInterface::ShowMessage("Now setting PREVIOUS file for %s to %s\n",
+                        theType.c_str(), name.c_str());
+               #endif
+               mPreviousFileTypeNameMap[theType] = name.c_str();
+            }
+            else
+            {
+               // if there was an error, set it back to what it was the last time it was saved
+               mFileNameTextCtrl->SetValue(mPreviousFileTypeNameMap[theType]);
+               #ifdef DEBUG_UNIVERSEPANEL_SAVE
+                  MessageInterface::ShowMessage("Now setting file for %s back to %s\n",
+                        theType.c_str(), mPreviousFileTypeNameMap[theType].c_str());
+               #endif
+               mFileTypeNameMap[theType] = mPreviousFileTypeNameMap[theType];
+            }
             #ifdef DEBUG_UNIVERSEPANEL_SAVE
                std::string fieldName = "DEFilename";
                if (type == "SPICE")
                   fieldName = "SPKFilename";
-//               MessageInterface::ShowMessage("theType = %s\n", theType.c_str());
                MessageInterface::ShowMessage("fieldName = %s\n", fieldName.c_str());
                MessageInterface::ShowMessage("str = %s\n", str.c_str());
             #endif
          }
-//         theGuiInterpreter->SetPlanetarySourceName(type.c_str(), str);
-
          
          mHasFileNameChanged = false;
       }
@@ -544,7 +566,15 @@ void UniversePanel::SaveData()
          }
          filename.close();
 
-         theSolarSystem->SetStringParameter("LSKFilename", str);
+         if (theSolarSystem->SetStringParameter("LSKFilename", str))
+         {
+            previousLskFile = str.c_str();
+         }
+         else
+         {
+            // if there was an error, set it back to what it was the last time it was saved
+            mLSKFileNameTextCtrl->SetValue(previousLskFile);
+         }
 
          mHasLSKFileNameChanged = false;
       }
@@ -578,7 +608,7 @@ void UniversePanel::SaveData()
 //------------------------------------------------------------------------------
 void UniversePanel::OnBrowseButton(wxCommandEvent& event)
 {
-   wxString oldname = mFileNameTextCtrl->GetValue();
+   wxString prevFilename = mFileNameTextCtrl->GetValue();
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
    
    if (dialog.ShowModal() == wxID_OK)
@@ -587,7 +617,7 @@ void UniversePanel::OnBrowseButton(wxCommandEvent& event)
       
       filename = dialog.GetPath().c_str();
 
-      if (!filename.IsSameAs(oldname))
+      if (!filename.IsSameAs(prevFilename))
       {
          mFileNameTextCtrl->SetValue(filename);
          mFileTypeNameMap[mFileTypeComboBox->GetStringSelection()] = filename;
