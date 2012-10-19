@@ -42,6 +42,8 @@ public:
    // destructor
    virtual ~BodySpinSunAxes();
 
+   virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
+   virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
    virtual GmatCoordinate::ParameterUsage UsesXAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesYAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
@@ -55,28 +57,6 @@ public:
    // all classes derived from GmatBase must supply this Clone method;
    virtual GmatBase*       Clone() const;
 
-/*
-   // 5 following functions are rewriten in order to apply for any celestial bodies without
-   // precession, nutaion, polar motion, and rotation speed different than earth.
-   virtual void ComputePrecessionMatrix(const Real tTDB, A1Mjd atEpoch);
-   virtual void ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch, 
-                                           Real &dPsi,
-                                           Real &longAscNodeLunar,
-                                           Real &cosEpsbar,
-                                           bool forceComputation = false);
-   virtual void ComputeSiderealTimeRotation(const Real jdTT,
-                                                 const Real tUT1,
-                                                 Real dPsi,
-                                                 Real longAscNodeLunar,
-                                                 Real cosEpsbar,
-                                                 Real &cosAst,
-                                                 Real &sinAst);
-   virtual void ComputeSiderealTimeDotRotation(const Real mjdUTC, A1Mjd atEpoch,
-                                                    Real cosAst, Real sinAst,
-                                                    bool forceComputation = false);
-   virtual void ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,
-                                            bool forceComputation = false);
-*/
     
 protected:
       
@@ -86,10 +66,7 @@ protected:
    };
 
 
-   Rvector3         spinaxisBF;
-   const Real       *spinBF;
    Rvector6         rvSunVec;
-   const Real       *rvSun;
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);
