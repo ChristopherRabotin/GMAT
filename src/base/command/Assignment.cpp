@@ -767,6 +767,7 @@ bool Assignment::Validate()
                   {
                      if (rhsDataType == Gmat::REAL_TYPE)
                      {
+                        retval = true;
                         // Check if LHS is 1x1 array
                         if (lhsWrapper->GetWrapperType() == Gmat::ARRAY_WT)
                         {
