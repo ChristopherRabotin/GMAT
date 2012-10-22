@@ -67,7 +67,7 @@ ICRFAxes::ICRFAxes(const std::string &itsName) :
    icrfFile       (NULL)
 {
    objectTypeNames.push_back("ICRFAxes");
-   baseSystem     = "FK5";
+   baseSystem     = "ICRF";
    parameterCount = ICRFAxesParamCount;
    #ifdef DEBUG_ICRFAXES_CONSTRUCTION
       MessageInterface::ShowMessage("Now constructing ICRFAxes with name '%s'\n",
@@ -247,6 +247,19 @@ GmatBase* ICRFAxes::Clone() const
 void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                             bool forceComputation)
 {
+	rotMatrix.Set(1.0, 0.0, 0.0,
+		          0.0, 1.0, 0.0,
+			      0.0, 0.0, 1.0);
+
+	rotDotMatrix.Set(0.0, 0.0, 0.0,
+		             0.0, 0.0, 0.0,
+			         0.0, 0.0, 0.0);
+}
+
+/*
+void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
+                                            bool forceComputation)
+{
    Real theEpoch = atEpoch.Get();
    #ifdef DEBUG_ICRFAXES_FIRST_CALL
       if (!firstCallFired)
@@ -305,6 +318,8 @@ void ICRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
 
 }
+*/
+
 
 //------------------------------------------------------------------------------
 //  Rmatrix33 GetRotationMatrix(const A1Mjd &atEpoch,

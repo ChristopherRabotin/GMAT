@@ -29,13 +29,14 @@
 #include "CoordinateSystemException.hpp"
 #include "Rvector.hpp"
 #include "TimeTypes.hpp"
-#include "ICRFAxes.hpp"
+#include "ICRFFile.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_TO_FROM
 //#define DEBUG_BASE_SYSTEM
 //#define DEBUG_ROT_DOT_MATRIX
+//#define DEBUG_ICRF_TOFK5
 
 #ifdef DEBUG_TO_FROM
    #include "MessageInterface.hpp"
@@ -532,6 +533,11 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
       return true;
    }
 
+   // Get rotation and rotation dot matrixes:
+   RotationMatrixFromICRFToFK5(epoch, true);
+   const Real* iToF = icrfToFK5.GetDataVector();
+   
+/*
    // Use the matrix from ICRF to FK5
    Real iToF[9];
    ICRFAxes* icrf = new ICRFAxes();
@@ -546,6 +552,7 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
    icrf->GetLastRotationMatrix(&iToF[0]);
 
    delete icrf;
+*/
 
    if ((inBase == "ICRF") && (outBase == "FK5"))
    {
@@ -578,4 +585,63 @@ bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,
 
    return true;
 }
+
+void CoordinateConverter::RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch,
+                                            bool forceComputation)
+{
+   Real theEpoch = atEpoch.Get();
+   #ifdef DEBUG_ICRF_TOFK5
+         MessageInterface::ShowMessage(
+            "Enter CoordinateConverter::RotationMatrixFromICRFToFK5 at epoch %18.12lf; \n\n", theEpoch);
+   #endif
+
+   // Specify Euler rotation vector for theEpoch:
+   Real vec[3];
+   ICRFFile* icrfFile = ICRFFile::Instance();
+   icrfFile->GetICRFRotationVector(theEpoch, &vec[0], 3, 9);
+
+   // Calculate rotation matrix based on Euler rotation vector:
+   Real angle = GmatMathUtil::Sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]);
+   Real a[3];
+   a[0] = vec[0]/angle; a[1] = vec[1]/angle; a[2] = vec[2]/angle;
+   Real c = GmatMathUtil::Cos(angle);
+   Real s = GmatMathUtil::Sin(angle);
+
+   // rotation matrix from FK5 to ICRF:
+   Rmatrix33 rotM;
+   rotM.SetElement(0,0, c+a[0]*a[0]*(1-c));
+   rotM.SetElement(0,1, a[0]*a[1]*(1-c)+a[2]*s);
+   rotM.SetElement(0,2, a[0]*a[2]*(1-c)-a[1]*s);
+   rotM.SetElement(1,0, a[0]*a[1]*(1-c)-a[2]*s);
+   rotM.SetElement(1,1, c+a[1]*a[1]*(1-c));
+   rotM.SetElement(1,2, a[1]*a[2]*(1-c)+a[0]*s);
+   rotM.SetElement(2,0, a[0]*a[2]*(1-c)+a[1]*s);
+   rotM.SetElement(2,1, a[1]*a[2]*(1-c)-a[0]*s);
+   rotM.SetElement(2,2, c+a[2]*a[2]*(1-c));
+
+   // rotation matrix from ICRF to FK5:
+   icrfToFK5 = rotM.Transpose();
+
+   // rotation dot matrix from ICRF to FK5:
+   icrfToFK5Dot.Set(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+   #ifdef DEBUG_ICRF_TOFK5
+      MessageInterface::ShowMessage("theEpoch  = %18.12lf\n",theEpoch);
+
+      MessageInterface::ShowMessage("rotation vector = %18.12e %18.12e %18.12e\n", vec[0], vec[1], vec[2]);
+      MessageInterface::ShowMessage("R(0,0)=%18.12e,  R(0,1)=%18.12e,  R(0,2)=%18.12e\n",icrfToFK5(0,0),icrfToFK5(0,1),icrfToFK5(0,2));
+      MessageInterface::ShowMessage("R(1,0)=%18.12e,  R(1,1)=%18.12e,  R(1,2)=%18.12e\n",icrfToFK5(1,0),icrfToFK5(1,1),icrfToFK5(1,2));
+      MessageInterface::ShowMessage("R(2,0)=%18.12e,  R(2,1)=%18.12e,  R(2,2)=%18.12e\n",icrfToFK5(2,0),icrfToFK5(2,1),icrfToFK5(2,2));
+
+      MessageInterface::ShowMessage("Rdot(0,0)=%18.12e,  Rdot(0,1)=%18.12e,  Rdot(0,2)=%18.12e\n",icrfToFK5Dot(0,0),icrfToFK5Dot(0,1),icrfToFK5Dot(0,2));
+      MessageInterface::ShowMessage("Rdot(1,0)=%18.12e,  Rdot(1,1)=%18.12e,  Rdot(1,2)=%18.12e\n",icrfToFK5Dot(1,0),icrfToFK5Dot(1,1),icrfToFK5Dot(1,2));
+      MessageInterface::ShowMessage("Rdot(2,0)=%18.12e,  Rdot(2,1)=%18.12e,  Rdot(2,2)=%18.12e\n\n\n",icrfToFK5Dot(2,0),icrfToFK5Dot(2,1),icrfToFK5Dot(2,2));
+   #endif
+
+   #ifdef DEBUG_ICRF_TOFK5
+      MessageInterface::ShowMessage("NOW exiting CoordinateConverter::RotationMatrixFromICRFToFK5 ...\n\n");
+   #endif
+
+}
+
 

@@ -69,5 +69,10 @@ protected:
                                       const std::string &inBase,  const std::string &outBase,
                                       const Real *inBaseState,    Real *outBaseState);
    
+private:
+   void         RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch, bool forceComputation);
+   Rmatrix33 icrfToFK5;
+   Rmatrix33 icrfToFK5Dot;
+
 };
 #endif // CoordinateConverter_hpp
