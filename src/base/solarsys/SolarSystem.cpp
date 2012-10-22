@@ -46,6 +46,7 @@
 //#define DEBUG_SS_PARAM_EQUAL
 //#define DEBUG_SS_INIT
 //#define DEBUG_PLANETARY_SPK
+//#define DEBUG_SS_GET
 
 
 //#ifndef DEBUG_MEMORY
@@ -621,14 +622,12 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
    bodyStrings                       (ss.bodyStrings),
    defaultBodyStrings                (ss.defaultBodyStrings),
    userDefinedBodyStrings            (ss.userDefinedBodyStrings),
-//   spiceKernelReader                 (ss.spiceKernelReader),
    allowSpiceForDefaultBodies        (ss.allowSpiceForDefaultBodies),
    spiceAvailable                    (ss.spiceAvailable),
    theSPKFilename                    (ss.theSPKFilename),
    lskKernelName                     (ss.lskKernelName),
    default_planetarySourceTypesInUse (ss.default_planetarySourceTypesInUse), // deprecated!!
    default_ephemerisSource           (ss.default_ephemerisSource),
-   default_DEFilename                (ss.default_DEFilename),
    default_SPKFilename               (ss.default_SPKFilename),
    default_LSKFilename               (ss.default_LSKFilename),
    default_overrideTimeForAll        (ss.default_overrideTimeForAll),
@@ -652,6 +651,11 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
       MessageInterface::ShowMessage("in SS copy constructor, cloning planetarySPK from <%p> to <%p>\n", ss.planetarySPK, planetarySPK);
    #endif
 #endif
+
+   // save all 3 default DE filenames
+   default_DEFilename[0] = ss.default_DEFilename[0];
+   default_DEFilename[1] = ss.default_DEFilename[1];
+   default_DEFilename[2] = ss.default_DEFilename[2];
 
    // create planetary source first, but do not create default
    thePlanetarySourceNames = ss.thePlanetarySourceNames;
@@ -722,7 +726,10 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
 
    default_planetarySourceTypesInUse = ss.default_planetarySourceTypesInUse; // deprecated!!
    default_ephemerisSource           = ss.default_ephemerisSource;
-   default_DEFilename                = ss.default_DEFilename;
+   // save all 3 default DE filenames
+   default_DEFilename[0]             = ss.default_DEFilename[0];
+   default_DEFilename[1]             = ss.default_DEFilename[1];
+   default_DEFilename[2]             = ss.default_DEFilename[2];
    default_SPKFilename               = ss.default_SPKFilename;
    default_LSKFilename               = ss.default_LSKFilename;
    default_overrideTimeForAll        = ss.default_overrideTimeForAll;
@@ -1884,16 +1891,16 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
 
    theCurrentPlanetarySource = srcStr;
 
-   // store the current planetary source on the top of thePlanetarySourceTypesInUse:		// made change by TUAN NGUYEN
-   StringArray temp = thePlanetarySourceTypesInUse;											// made change by TUAN NGUYEN
+   // store the current planetary source on the top of thePlanetarySourceTypesInUse:
+   StringArray temp = thePlanetarySourceTypesInUse;
 
-   thePlanetarySourceTypesInUse.clear();													// made change by TUAN NGUYEN
-   thePlanetarySourceTypesInUse.push_back(srcStr);											// made change by TUAN NGUYEN
-   for(unsigned int i= 0; i < temp.size(); ++i)														// made change by TUAN NGUYEN
-   {																						// made change by TUAN NGUYEN
-	   if (temp[i] != srcStr)																// made change by TUAN NGUYEN
-		   thePlanetarySourceTypesInUse.push_back(temp[i].c_str());							// made change by TUAN NGUYEN
-   }																						// made change by TUAN NGUYEN
+   thePlanetarySourceTypesInUse.clear();
+   thePlanetarySourceTypesInUse.push_back(srcStr);
+   for(unsigned int i= 0; i < temp.size(); ++i)
+   {
+	   if (temp[i] != srcStr)
+		   thePlanetarySourceTypesInUse.push_back(temp[i].c_str());
+   }
 
    return true;
 }
@@ -2482,19 +2489,37 @@ bool SolarSystem::SetBooleanParameter(const std::string &label, const bool value
 //------------------------------------------------------------------------------
 std::string SolarSystem::GetStringParameter(const Integer id) const
 {
+   #ifdef DEBUG_SS_GET
+      MessageInterface::ShowMessage("In GetStringP, id = %s, theCurrentPlanetarySource = %s\n",
+            GetParameterText(id).c_str(), theCurrentPlanetarySource.c_str());
+      for (unsigned int ii = 0; ii < thePlanetarySourceTypesInUse.size(); ii++)
+         MessageInterface::ShowMessage(" planetarySrcTypesInUse at index %d is %s\n",
+               ii, thePlanetarySourceTypesInUse.at(ii).c_str());
+   #endif
    if (id == EPHEMERIS)        return theCurrentPlanetarySource; // deprecated!!!!
    if (id == EPHEMERIS_SOURCE) return theCurrentPlanetarySource;    // pvSrcForAll (string of)?
-//   if (id == DE_FILE_NAME)     return thePlanetarySourceNames[Gmat::DE405];		// made change by TUAN NGUYEN
-   if (id == DE_FILE_NAME)															// made change by TUAN NGUYEN
-   {																				// made change by TUAN NGUYEN 
-	   int index;																	// made change by TUAN NGUYEN
-	   for(index=0; index < Gmat::PosVelSourceCount; ++index)						// made change by TUAN NGUYEN 
-	   {																			// made change by TUAN NGUYEN 
-		   if (Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)	// made change by TUAN NGUYEN 
-			   break;																// made change by TUAN NGUYEN 
-	   }																			// made change by TUAN NGUYEN 
-	   return thePlanetarySourceNames[index];										// made change by TUAN NGUYEN
-   }																				// made change by TUAN NGUYEN
+   if (id == DE_FILE_NAME)
+   {
+      if (theCurrentPlanetarySource == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::SPICE])
+      {
+         // if the current source is SPICE, it should be at the front of the list;
+         // the next one on the list should be the most recently selected DE file
+         std::string lastDeFile = thePlanetarySourceTypesInUse.at(1);
+         for(int index=0; index < Gmat::PosVelSourceCount; ++index)
+         {
+            if (Gmat::POS_VEL_SOURCE_STRINGS[index] == lastDeFile)
+               return thePlanetarySourceNames[index];
+         }
+      }
+      else
+      {
+         for(int index=0; index < Gmat::PosVelSourceCount; ++index)
+         {
+            if (Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)
+               return thePlanetarySourceNames[index];
+         }
+      }
+   }
    if (id == SPK_FILE_NAME)    return theSPKFilename;
    if (id == LSK_FILE_NAME)    return lskKernelName;
 
@@ -2811,14 +2836,33 @@ bool SolarSystem::IsParameterEqualToDefault(const Integer id) const
    }
    if (id == DE_FILE_NAME)
    {
-	  int index;																	//made change by TUAN NGUYEN
-	  for(index=0; index < Gmat::PosVelSourceCount; ++index)						//made change by TUAN NGUYEN
-	  {																				//made change by TUAN NGUYEN
-		  if(Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)		//made change by TUAN NGUYEN
-			  break;																//made change by TUAN NGUYEN
-	  }																				//made change by TUAN NGUYEN
-	  return (default_DEFilename == thePlanetarySourceNames[index]);				//made change by TUAN NGUYEN
-//      return (default_DEFilename == thePlanetarySourceNames[Gmat::DE405]);		//made change by TUAN NGUYEN
+      #ifdef DEBUG_SS_CLOAKING
+         MessageInterface::ShowMessage("... Checking DEFile ... count = %d\n",Gmat::PosVelSourceCount);
+      #endif
+      if (theCurrentPlanetarySource == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::SPICE])
+      {
+         // if the current source is SPICE, it should be at the front of the list;
+         // the next one on the list should be the most recently selected DE file
+         std::string lastDeFile = thePlanetarySourceTypesInUse.at(1);
+         for(int index=0; index < Gmat::PosVelSourceCount - 1; ++index)
+         {
+            #ifdef DEBUG_SS_CLOAKING
+               MessageInterface::ShowMessage("... in loop, index = %d, source name = %s, default = %s\n",
+                     index, thePlanetarySourceNames[index].c_str(), default_DEFilename[index].c_str());
+            #endif
+            if (Gmat::POS_VEL_SOURCE_STRINGS[index] == lastDeFile)
+               return (thePlanetarySourceNames[index] == default_DEFilename[index]);
+         }
+      }
+      else
+      {
+         int index = -1;
+         for(index=0; index < Gmat::PosVelSourceCount - 1; ++index)  // use -1 here to ignore SPICE
+         {
+            if(Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)
+               return (default_DEFilename[index] == thePlanetarySourceNames[index]);
+         }
+      }
    }
    if (id == SPK_FILE_NAME)
    {
@@ -2849,14 +2893,8 @@ bool SolarSystem::SaveAllAsDefault()
    default_planetarySourceTypesInUse = thePlanetarySourceTypesInUse;  // deprecated!!!!
    default_ephemerisSource           = theCurrentPlanetarySource;
 
-   int index;																	// made change by TUAN NGUYEN
-   for(index=0; index <Gmat::PosVelSourceCount; ++index)						// made change by TUAN NGUYEN
-   {																			// made change by TUAN NGUYEN
-	   if (Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)	// made change by TUAN NGUYEN
-		   break;																// made change by TUAN NGUYEN
-   }																			// made change by TUAN NGUYEN
-   default_DEFilename                = thePlanetarySourceNames[index];			// made change by TUAN NGUYEN
-//   default_DEFilename                = thePlanetarySourceNames[Gmat::DE405];	// made change by TUAN NGUYEN
+   for (unsigned int ii = 0; ii < 3; ii++)
+      default_DEFilename[ii]                = thePlanetarySourceNames[ii];
 
    default_SPKFilename               = theSPKFilename;
    default_LSKFilename               = lskKernelName;
@@ -2884,14 +2922,8 @@ bool SolarSystem::SaveParameterAsDefault(const Integer id)
    }
    if (id == DE_FILE_NAME)
    {
-      int index;																	// made change by TUAN NGUYEN
-	  for(index=0; index < Gmat::PosVelSourceCount; ++index)						// made change by TUAN NGUYEN
-	  {																				// made change by TUAN NGUYEN
-		  if (Gmat::POS_VEL_SOURCE_STRINGS[index] == theCurrentPlanetarySource)		// made change by TUAN NGUYEN
-			  break;																// made change by TUAN NGUYEN
-	  }																				// made change by TUAN NGUYEN
-	  default_DEFilename = thePlanetarySourceNames[index];							// made change by TUAN NGUYEN
-//      default_DEFilename = thePlanetarySourceNames[Gmat::DE405];					// made change by TUAN NGUYEN
+      for (unsigned int ii = 0; ii < 3; ii++)
+         default_DEFilename[ii]                = thePlanetarySourceNames[ii];
       return true;
    }
    if (id == SPK_FILE_NAME)

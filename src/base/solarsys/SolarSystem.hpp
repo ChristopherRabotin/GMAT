@@ -333,7 +333,7 @@ private:
    // default values for parameters
    StringArray default_planetarySourceTypesInUse;  // deprecated!!
    std::string default_ephemerisSource;
-   std::string default_DEFilename;
+   std::string default_DEFilename[3];
    std::string default_SPKFilename;
    std::string default_LSKFilename;
    bool        default_overrideTimeForAll;

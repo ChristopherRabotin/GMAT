@@ -308,9 +308,9 @@ void UniversePanel::LoadData()
       // available source
       for (unsigned int i=0; i<mAllFileTypes.size(); i++)
       {
-         wxString type = mAllFileTypes[i].c_str();
-         wxString typeName = theGuiInterpreter->GetPlanetarySourceName(mAllFileTypes[i]).c_str();
-         mFileTypeNameMap[type] = typeName;
+         wxString type                  = mAllFileTypes[i].c_str();
+         wxString typeName              = theGuiInterpreter->GetPlanetarySourceName(mAllFileTypes[i]).c_str();
+         mFileTypeNameMap[type]         = typeName;
          mPreviousFileTypeNameMap[type] = typeName;
          mFileTypeComboBox->Append(type);
       }
@@ -471,9 +471,9 @@ void UniversePanel::SaveData()
       // save planetary file types in use, if changed
       if (mHasFileTypesInUseChanged)
       {
-         mFileTypesInUse.clear();
+//         mFileTypesInUse.clear(); // wcs 2012.10.22 don't change source types in use
          std::string srcSelection = std::string(mFileTypeComboBox->GetStringSelection().c_str());
-         mFileTypesInUse.push_back(srcSelection);
+//         mFileTypesInUse.push_back(srcSelection);
          theSolarSystem->SetStringParameter(theSolarSystem->GetParameterID("EphemerisSource"),
                srcSelection);
          #ifdef DEBUG_UNIVERSEPANEL_SAVE
@@ -481,7 +481,7 @@ void UniversePanel::SaveData()
             ("UniversePanel::SaveData() types=%s\n",
              mFileTypesInUse[0].c_str());
          #endif
-         theGuiInterpreter->SetPlanetarySourceTypesInUse(mFileTypesInUse);
+//         theGuiInterpreter->SetPlanetarySourceTypesInUse(mFileTypesInUse);
          mHasFileTypesInUseChanged = false;
       }
          
