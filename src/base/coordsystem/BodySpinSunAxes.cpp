@@ -251,9 +251,6 @@ GmatBase* BodySpinSunAxes::Clone() const
  *
  * @param atEpoch  epoch at which to compute the rotation matrix
  *
- * @note Code (for Earth) adapted from C code written by Steve Queen/ GSFC, 
- *       based on Vallado, pgs. 211- 227.  Equation references in parentheses
- *       will refer to those of the Vallado book.
  */
 //------------------------------------------------------------------------------
 void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
