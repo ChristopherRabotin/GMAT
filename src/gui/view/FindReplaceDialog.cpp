@@ -49,7 +49,7 @@ END_EVENT_TABLE()
  * @param  parent  parent window
  * @param  id      window id
  * @param  title   window title
- * @param  pos	   window positin
+ * @param  pos	   window position
  * @param  size    window size
  * @param  style   window style
  *
@@ -132,6 +132,9 @@ void FindReplaceDialog::Create()
    pageSizer->SetSizeHints(this);
 }
 
+//----------------------------
+// protected methods
+//----------------------------
 
 //------------------------------------------------------------------------------
 // void OnButtonClick(wxCommandEvent &event)
