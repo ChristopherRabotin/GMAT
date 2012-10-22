@@ -25,6 +25,12 @@
 //------------------------------------------------------------------------------
 // EditorPrintout(Editor *editor, wxChar *title)
 //------------------------------------------------------------------------------
+/**
+ * Constructor
+ * 
+ * @param editor	the editor that supplies the contents
+ * @param title		title of the printout
+ */
 EditorPrintout::EditorPrintout(Editor *editor, wxChar *title)
    : wxPrintout(title)
 {
@@ -41,6 +47,12 @@ EditorPrintout::EditorPrintout(Editor *editor, wxChar *title)
 //------------------------------------------------------------------------------
 // bool OnPrintPage(int page)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when printing a single page 
+ * 
+ * @param page	page number to print
+ * @return		status of the print (true if printed)
+ */
 bool EditorPrintout::OnPrintPage(int page)
 {
    wxDC *dc = GetDC();
@@ -64,6 +76,13 @@ bool EditorPrintout::OnPrintPage(int page)
 //------------------------------------------------------------------------------
 // bool OnBeginDocument(int startPage, int endPage)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when printing a range of pages
+ * 
+ * @param startPage	page number for first page to print
+ * @param endPage	page number for last page to print
+ * @return			status of the print (true if printed)
+ */
 bool EditorPrintout::OnBeginDocument(int startPage, int endPage)
 {
    if(!wxPrintout::OnBeginDocument(startPage, endPage))
@@ -76,6 +95,14 @@ bool EditorPrintout::OnBeginDocument(int startPage, int endPage)
 //------------------------------------------------------------------------------
 // void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo)
 //------------------------------------------------------------------------------
+/**
+ * Gets Page information 
+ * 
+ * @param minPage		returns the minimum number of pages that can be printed
+ * @param minPage		returns the maximum number of pages that can be printed
+ * @param selPageFrom	returns the first page of the selection
+ * @param selPageTo		returns the last page of the selection
+ */
 void EditorPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
                                  int *selPageTo)
 {
@@ -150,6 +177,11 @@ void EditorPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
 //------------------------------------------------------------------------------
 // bool HasPage(int WXUNUSED(page))
 //------------------------------------------------------------------------------
+/**
+ * Returns whether the page exists
+ * 
+ * @return			true if page has been printed
+ */
 bool EditorPrintout::HasPage(int WXUNUSED(page))
 {
    #ifdef DEBUG_PRINTOUT
@@ -172,6 +204,11 @@ bool EditorPrintout::HasPage(int WXUNUSED(page))
 //------------------------------------------------------------------------------
 // bool PrintScaling(wxDC *dc)
 //------------------------------------------------------------------------------
+/**
+ * Scales Print Device context
+ * 
+ * @return			true if scaled
+ */
 bool EditorPrintout::PrintScaling(wxDC *dc)
 {
    #ifdef DEBUG_PRINTOUT
