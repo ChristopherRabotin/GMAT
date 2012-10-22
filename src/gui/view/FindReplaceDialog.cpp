@@ -49,6 +49,9 @@ END_EVENT_TABLE()
  * @param  parent  parent window
  * @param  id      window id
  * @param  title   window title
+ * @param  pos	   window positin
+ * @param  size    window size
+ * @param  style   window style
  *
  */
 //------------------------------------------------------------------------------
@@ -66,6 +69,9 @@ FindReplaceDialog::FindReplaceDialog(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 // void Create()
 //------------------------------------------------------------------------------
+/**
+ * Creates and initializes the controls for the FindReplaceDialog
+ */
 void FindReplaceDialog::Create()
 {
    //---------- find
@@ -132,6 +138,8 @@ void FindReplaceDialog::Create()
 //------------------------------------------------------------------------------
 /**
  * Handles button click event
+ *
+ * @param event		command event originated by the button
  */
 //------------------------------------------------------------------------------
 void FindReplaceDialog::OnButtonClick(wxCommandEvent &event)
@@ -205,6 +213,11 @@ void FindReplaceDialog::OnButtonClick(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnComboBoxEnter(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Handles enter key in combo box
+ *
+ * @param event		command event originated by the control
+ */
 void FindReplaceDialog::OnComboBoxEnter(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mFindComboBox ||
@@ -225,6 +238,11 @@ void FindReplaceDialog::OnComboBoxEnter(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnKeyDown(wxKeyEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Handles key press event
+ *
+ * @param event		key event originated by the control
+ */
 void FindReplaceDialog::OnKeyDown(wxKeyEvent &event)
 {
 }

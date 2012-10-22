@@ -33,7 +33,7 @@ class FindReplaceDialog : public wxDialog
 {
 public:
 
-   // constructors
+   // default constructor
    FindReplaceDialog(wxWindow *parent, wxWindowID id, const wxString& title,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
