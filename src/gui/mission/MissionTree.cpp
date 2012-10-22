@@ -3396,6 +3396,13 @@ void MissionTree::OnRename(wxCommandEvent &event)
       return;
    }
    
+   if (cmd == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("**** INTERNAL ERROR **** Command for item '%s' is NULL\n", oldName.c_str());
+      return;
+   }
+   
    // Do we want to use rename dialog here?
    //=================================================================
    #if 1
@@ -3430,7 +3437,8 @@ void MissionTree::OnRename(wxCommandEvent &event)
    {
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
-         ("   Setting command name to '%s'\n", newName.c_str());
+         ("   Setting command name to '%s' for cmd=<%p>'%s'\n", newName.c_str(),
+          cmd, cmd->GetTypeName().c_str());
       #endif
       SetItemText(currId, newName);
       item->SetName(newName);

@@ -169,7 +169,13 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
       else
       {
          IndentComment(gen, commentLine, prefix);
-         gen << prefix << "BeginScript";   
+         
+         // Insert command name (Fix for GMT-2612, LOJ: 2012.10.22)
+         //gen << prefix << "BeginScript";
+         std::string tempString = prefix + "BeginScript";
+         
+         InsertCommandName(tempString);
+         gen << tempString;
          
          if (inlineComment != "")
             gen << inlineComment << "\n";
