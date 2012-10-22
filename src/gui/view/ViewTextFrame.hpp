@@ -30,6 +30,7 @@ public:
    // constructors
    ViewTextFrame(wxFrame *frame, const wxString& title, int x, int y, int w, int h,
                  const wxString &mode = "Temporary", const wxString &type = "Output");
+   // destructor
    ~ViewTextFrame();
 
    // operations
@@ -53,6 +54,7 @@ private:
 
    DECLARE_EVENT_TABLE();
 
+   // event handlers
    void OnClear(wxCommandEvent& event);
    void OnSaveAs(wxCommandEvent& event);
    void OnExit(wxCommandEvent& event);

@@ -38,6 +38,18 @@ END_EVENT_TABLE()
 // ViewTextFrame(wxFrame *frame, const wxString& title,
 //              int x, int y, int w, int h, const wxString &mode)
 //------------------------------------------------------------------------------
+/**
+ * Constructor
+ *
+ * @param frame			Parent frame
+ * @param title			Title for the frame
+ * @param x				window position x
+ * @param y				window position y
+ * @param w				window width
+ * @param h				window height
+ * @param mode			window mode ("Permanent", "Temporary")
+ * @param type			text type ("Output", "Script")
+ */
 ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
                              int x, int y, int w, int h, const wxString &mode,
                              const wxString &type)
@@ -85,6 +97,10 @@ ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
 //------------------------------------------------------------------------------
 // ~ViewTextFrame()
 //------------------------------------------------------------------------------
+/**
+ * Destructor
+ *
+ */
 ViewTextFrame::~ViewTextFrame()
 {
    if (mWindowMode != "Temporary")
@@ -97,15 +113,54 @@ ViewTextFrame::~ViewTextFrame()
 //------------------------------------------------------------------------------
 // void AppendText(const wxString& text)
 //------------------------------------------------------------------------------
+/**
+ * Appends specified text to the text control
+ *
+ * @param text			text to append
+ */
 void ViewTextFrame::AppendText(const wxString& text)
 {
    mTextCtrl->AppendText(text);
 }
 
 
+//-------------------------------
+// private methods
+//-------------------------------
+
+//------------------------------------------------------------------------------
+// wxMenuBar* CreateMainMenu()
+//------------------------------------------------------------------------------
+/**
+ * Creates the main menu bar for the frame
+ *
+ * @return	wxMenuBar created
+ */
+wxMenuBar* ViewTextFrame::CreateMainMenu()
+{
+   // Make a menubar
+   wxMenuBar *menuBar = new wxMenuBar;
+
+   wxMenu *menuFile = new wxMenu;
+   menuFile->Append(VIEW_TEXT_CLEAR, _T("&Clear"));
+   menuFile->AppendSeparator();
+   menuFile->Append(VIEW_TEXT_SAVE_AS, _T("&Save As..."));
+   menuFile->AppendSeparator();
+   menuFile->Append(VIEW_TEXT_EXIT, _T("E&xit"));
+   menuBar->Append(menuFile, _T("&File"));
+
+   return menuBar;
+}
+
+
 //------------------------------------------------------------------------------
 // void OnClear(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Clear text event handler
+ *
+ * @param event		command event of control
+ */
 void ViewTextFrame::OnClear(wxCommandEvent& WXUNUSED(event))
 {
    mTextCtrl->Clear();
@@ -115,9 +170,13 @@ void ViewTextFrame::OnClear(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnSaveAs(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Save As event handler
+ *
+ * @param event		command event of control
+ */
 void ViewTextFrame::OnSaveAs(wxCommandEvent& WXUNUSED(event))
 {
-   //MessageInterface::ShowMessage("ViewTextFrame::OnSaveAs() entered\n");
 
    wxString filename;
    if (mTextType == "Script")
@@ -143,6 +202,11 @@ void ViewTextFrame::OnSaveAs(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnExit(wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
+/**
+ * Exit window event handler
+ *
+ * @param event		command event of control
+ */
 void ViewTextFrame::OnExit(wxCommandEvent& WXUNUSED(event) )
 {
    if (mWindowMode == "Temporary")
@@ -151,25 +215,3 @@ void ViewTextFrame::OnExit(wxCommandEvent& WXUNUSED(event) )
       Show(false);
 }
 
-//-------------------------------
-// private methods
-//-------------------------------
-
-//------------------------------------------------------------------------------
-// wxMenuBar* CreateMainMenu()
-//------------------------------------------------------------------------------
-wxMenuBar* ViewTextFrame::CreateMainMenu()
-{
-   // Make a menubar
-   wxMenuBar *menuBar = new wxMenuBar;
-
-   wxMenu *menuFile = new wxMenu;
-   menuFile->Append(VIEW_TEXT_CLEAR, _T("&Clear"));
-   menuFile->AppendSeparator();
-   menuFile->Append(VIEW_TEXT_SAVE_AS, _T("&Save As..."));
-   menuFile->AppendSeparator();
-   menuFile->Append(VIEW_TEXT_EXIT, _T("E&xit"));
-   menuBar->Append(menuFile, _T("&File"));
-
-   return menuBar;
-}

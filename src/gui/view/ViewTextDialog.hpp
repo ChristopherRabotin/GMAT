@@ -28,19 +28,21 @@
 class ViewTextDialog : public wxDialog
 {
 public:
+   // default constructor
    ViewTextDialog(wxWindow *parent, const wxString& title,
                   bool isEditable = false,
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
                   long style = wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
    
+   // text manipulation
    void AppendText(const wxString& text);
    bool HasTextChanged() { return hasTextChanged; };
    wxString GetText() { return theText->GetValue(); };
-   
    void SetMaxLength(unsigned long len) { theText->SetMaxLength(len); };
    wxTextCtrl *GetTextCtrl() { return theText; };
    
+   // event handlers
    virtual void OnButtonClick(wxCommandEvent &event);
    
 protected:
@@ -58,6 +60,7 @@ protected:
    wxBoxSizer *theMiddleSizer;
    wxBoxSizer *theBottomSizer;
    
+   // event handlers
    virtual void OnEnterPressed(wxCommandEvent &event);
    
    // any class wishing to process wxWindows events must use this macro

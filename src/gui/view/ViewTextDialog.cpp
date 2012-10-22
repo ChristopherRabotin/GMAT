@@ -28,12 +28,22 @@ BEGIN_EVENT_TABLE(ViewTextDialog, wxDialog)
    EVT_TEXT_ENTER(-1, ViewTextDialog::OnEnterPressed)
 END_EVENT_TABLE()
 
+//----------------------------
+// public methods
+//----------------------------
+
 //------------------------------------------------------------------------------
 //  ViewTextDialog(wxWindow *parent, const wxString& title, ...)
 //------------------------------------------------------------------------------
 /**
- * @param parent  Parent wxWindow for the dialog.
- * @param title  Title for the dialog.
+ * Constructor
+ *
+ * @param parent		Parent wxWindow for the dialog.
+ * @param title			Title for the dialog.
+ * @param isEditable	Is text in dialog editable or read-only
+ * @param pos			window position
+ * @param size			window size
+ * @param style			window style
  */
 //------------------------------------------------------------------------------
 ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
@@ -126,6 +136,11 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
 //------------------------------------------------------------------------------
 // void AppendText(const wxString& text)
 //------------------------------------------------------------------------------
+/**
+ * Append text to view dialog
+ *
+ * param text	text to append
+ */
 void ViewTextDialog::AppendText(const wxString& text)
 {
    if (isTextEditable)
@@ -146,7 +161,9 @@ void ViewTextDialog::AppendText(const wxString& text)
 // void OnButtonClick(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
- * Closes the dialog
+ * Handles button click event to close the dialog
+ *
+ * @param event		command event originated by the control
  */
 //------------------------------------------------------------------------------
 void ViewTextDialog::OnButtonClick(wxCommandEvent &event)
@@ -161,12 +178,17 @@ void ViewTextDialog::OnButtonClick(wxCommandEvent &event)
    Close(true);
 }
 
+//----------------------------
+// protected methods
+//----------------------------
 
 //------------------------------------------------------------------------------
 // void OnEnterPressed(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
- * Closes the dialog
+ * Handles enter key pressed event to close the dialog
+ *
+ * @param event		command event originated by the control
  */
 //------------------------------------------------------------------------------
 void ViewTextDialog::OnEnterPressed(wxCommandEvent &event)
