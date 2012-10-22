@@ -82,14 +82,22 @@ BEGIN_EVENT_TABLE (Editor, wxStyledTextCtrl)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
+// public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
 //        const wxPoint &pos, const wxSize &size, long style)
 //------------------------------------------------------------------------------
 /**
  * Constructor
  *
- * @param  parent  Parent window pointer
- * @param  notifyChange  Set this to true if parent class to be notified of change
+ * @param  parent		Parent window pointer
+ * @param  notifyChange	Set this to true if parent class to be notified of change
+ * @param  id			wxWidgets ID to assign to the Editor
+ * @param  pos			Position of the editor 
+ * @param  size			Size of the editor
+ * @param  style		Editor Window style
  *
  */
 //------------------------------------------------------------------------------
@@ -243,6 +251,10 @@ Editor::Editor(wxWindow *parent, bool notifyChange, wxWindowID id,
 //------------------------------------------------------------------------------
 // ~Editor()
 //------------------------------------------------------------------------------
+/**
+ * Destructor
+ *
+ */
 Editor::~Editor()
 {
    if (mFindReplaceDialog)
@@ -255,6 +267,11 @@ Editor::~Editor()
 //------------------------------------------------------------------------------
 // void SetFindText(const wxString &text)
 //------------------------------------------------------------------------------
+/**
+ * Sets the Find (Search) Text
+ * 
+ * @param text	Text to search for
+ */
 void Editor::SetFindText(const wxString &text)
 {
    mFindText = text;
@@ -264,6 +281,11 @@ void Editor::SetFindText(const wxString &text)
 //------------------------------------------------------------------------------
 // void SetReplaceText(const wxString &text)
 //------------------------------------------------------------------------------
+/**
+ * Sets the Replace Text
+ * 
+ * @param text	Text to use for replacement
+ */
 void Editor::SetReplaceText(const wxString &text)
 {
    mReplaceText = text;
@@ -273,6 +295,11 @@ void Editor::SetReplaceText(const wxString &text)
 //------------------------------------------------------------------------------
 // void OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when Editor size is changed
+ *
+ * @param event		holds information about the size change event
+ */
 void Editor::OnSize(wxSizeEvent& event)
 {
    int x = GetClientSize().x +
@@ -289,6 +316,11 @@ void Editor::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 // void OnFont(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when font is changed
+ *
+ * @param event		command event originated by the control
+ */
 void Editor::OnFont(wxCommandEvent& event)
 {
    //@todo - need implementation
@@ -299,6 +331,11 @@ void Editor::OnFont(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnRedo(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to redo changes
+ *
+ * @param event		command event originated by the control
+ */
 void Editor::OnRedo(wxCommandEvent &WXUNUSED(event))
 {
    if (!CanRedo())
@@ -311,6 +348,11 @@ void Editor::OnRedo(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnUndo(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to undo changes
+ *
+ * @param event		command event originated by the control
+ */
 void Editor::OnUndo(wxCommandEvent &WXUNUSED(event))
 {
    if (!CanUndo())
@@ -321,6 +363,11 @@ void Editor::OnUndo(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnClear(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to be cleared
+ *
+ * @param event		command event originated by the control
+ */
 void Editor::OnClear(wxCommandEvent &WXUNUSED(event))
 {
    if (GetReadOnly())
@@ -333,6 +380,11 @@ void Editor::OnClear(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnCut(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to cut selected text to clipboard
+ *
+ * @param event		command event originated by the control
+ */
 void Editor::OnCut(wxCommandEvent &WXUNUSED(event))
 {
    if (GetReadOnly() ||(GetSelectionEnd()-GetSelectionStart() <= 0))
@@ -345,6 +397,11 @@ void Editor::OnCut(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnCopy(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to copy selected text to clipboard
+ *
+ * @param event		command event originated by the control
+ */
 void Editor::OnCopy(wxCommandEvent &WXUNUSED(event))
 {
    if (GetSelectionEnd()-GetSelectionStart() <= 0)
@@ -357,6 +414,12 @@ void Editor::OnCopy(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnPaste(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to paste clipboard contents into the
+ * editor at the selection point
+ *
+ * @param event		command event originated by the control
+ */
 void Editor::OnPaste(wxCommandEvent &WXUNUSED(event))
 {
    if (!CanPaste())
@@ -377,6 +440,14 @@ void Editor::OnPaste(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnFind(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to find text within editor contents
+ *
+ * @param event		command event originated by the control
+ *
+ * @note The find operation is not performed here.  Rather the find dialog is 
+ * displayed
+ */
 void Editor::OnFind(wxCommandEvent &WXUNUSED(event))
 {
    if (mFindReplaceDialog == NULL)
@@ -408,6 +479,13 @@ void Editor::OnFind(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnFindNext(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to find next occurence of the search
+ * string from the current position
+ *
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
 {
    #ifdef DEBUG_EDITOR_FIND
@@ -472,6 +550,13 @@ void Editor::OnFindNext(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnFindPrev(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when when the editor is requested to find previous occurence of the search
+ * string from the current position
+ *
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
 {
    #ifdef DEBUG_EDITOR_FIND
@@ -522,6 +607,13 @@ void Editor::OnFindPrev(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnReplaceNext(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to replace next occurence of the search
+ * string (from the current position) with the replacement string
+ *
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnReplaceNext(wxCommandEvent &event)
 {
 	if (mFindText != GetSelectedText())
@@ -540,6 +632,13 @@ void Editor::OnReplaceNext(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnReplaceAll(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to replace ALL occurences of the search
+ * string with the replacement string within the editor contents
+ *
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnReplaceAll(wxCommandEvent &event)
 {
    GotoPos(0);
@@ -555,6 +654,12 @@ void Editor::OnReplaceAll(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnBraceMatch(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to find a matching brace
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnBraceMatch(wxCommandEvent &WXUNUSED(event))
 {
    int min = GetCurrentPos();
@@ -574,6 +679,12 @@ void Editor::OnBraceMatch(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnGoToLine(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to go to a specific line number
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnGoToLine(wxCommandEvent &WXUNUSED(event))
 {
    long lineNumber = wxGetNumberFromUser
@@ -590,6 +701,13 @@ void Editor::OnGoToLine(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnIndentMore(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to indent the selected text/current
+ * line
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
 {
    // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
@@ -612,6 +730,13 @@ void Editor::OnIndentMore(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnIndentLess(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to unindent the selected text/current
+ * line
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnIndentLess(wxCommandEvent &WXUNUSED(event))
 {
    // TGG: 2012-08-14, bug GMT-2979, Script editor comment/indent commands don't work in a standard way
@@ -634,6 +759,12 @@ void Editor::OnIndentLess(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnSelectAll(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to select the entire contents
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnSelectAll(wxCommandEvent &WXUNUSED(event))
 {
    SetSelection(0, GetTextLength());
@@ -643,6 +774,12 @@ void Editor::OnSelectAll(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnSelectLine(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to select current line
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnSelectLine(wxCommandEvent &WXUNUSED(event))
 {
    int lineStart = PositionFromLine(GetCurrentLine());
@@ -654,6 +791,13 @@ void Editor::OnSelectLine(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnComment(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to comment selected lines/
+ * current line
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnComment(wxCommandEvent &event)
 {
    #ifdef DEBUG_EDITOR_COMMENT
@@ -718,6 +862,13 @@ void Editor::OnComment(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnUncomment(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is requested to uncomment selected lines/
+ * current line
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnUncomment(wxCommandEvent &event)
 {
    #ifdef DEBUG_EDITOR_COMMENT
@@ -790,6 +941,12 @@ void Editor::OnUncomment(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnHilightLang(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler 
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnHilightLang(wxCommandEvent &event)
 {
    InitializePrefs(GmatEditor::globalLanguagePrefs[event.GetId() -
@@ -800,6 +957,13 @@ void Editor::OnHilightLang(wxCommandEvent &event)
 //--------------------------------------------------------------------------------
 // void OnDisplayEOL(wxCommandEvent &WXUNUSED(event))
 //--------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should turn on/off displaying end-of-line
+ * characters
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnDisplayEOL(wxCommandEvent &WXUNUSED(event))
 {
    SetViewEOL(!GetViewEOL());
@@ -809,6 +973,13 @@ void Editor::OnDisplayEOL(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnIndentGuide(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should toggle displaying indentation
+ * guides
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnIndentGuide(wxCommandEvent &WXUNUSED(event))
 {
    SetIndentationGuides(!GetIndentationGuides());
@@ -818,6 +989,12 @@ void Editor::OnIndentGuide(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnLineNumber(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor handle displaying/not displaying line numbers
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnLineNumber(wxCommandEvent &WXUNUSED(event))
 {
    SetMarginWidth(mLineNumberID,
@@ -828,6 +1005,12 @@ void Editor::OnLineNumber(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnLongLineOn(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should handle long line display
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnLongLineOn(wxCommandEvent &WXUNUSED(event))
 {
    SetEdgeMode(GetEdgeMode() == 0? wxSTC_EDGE_LINE: wxSTC_EDGE_NONE);
@@ -837,6 +1020,12 @@ void Editor::OnLongLineOn(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnWhiteSpace(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should handle display of whitespace characters
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnWhiteSpace(wxCommandEvent &WXUNUSED(event))
 {
    SetViewWhiteSpace(GetViewWhiteSpace() == 0?
@@ -847,6 +1036,12 @@ void Editor::OnWhiteSpace(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnFoldToggle(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should perform code folding
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnFoldToggle(wxCommandEvent &WXUNUSED(event))
 {
    ToggleFold(GetFoldParent(GetCurrentLine()));
@@ -856,6 +1051,12 @@ void Editor::OnFoldToggle(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnSetOverType(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor responds to overtype mode being set
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnSetOverType(wxCommandEvent &WXUNUSED(event))
 {
    SetOvertype(!GetOvertype());
@@ -865,6 +1066,12 @@ void Editor::OnSetOverType(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnSetReadOnly(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor is set to read-only or editable
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnSetReadOnly(wxCommandEvent &WXUNUSED(event))
 {
    SetReadOnly(!GetReadOnly());
@@ -874,6 +1081,12 @@ void Editor::OnSetReadOnly(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnWrapmodeOn(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should handle wrapping mode changed
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnWrapmodeOn(wxCommandEvent &WXUNUSED(event))
 {
    SetWrapMode(GetWrapMode() == 0? wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
@@ -883,20 +1096,16 @@ void Editor::OnWrapmodeOn(wxCommandEvent &WXUNUSED(event))
 //------------------------------------------------------------------------------
 // void OnUseCharset(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should use different character set
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnUseCharset(wxCommandEvent &event)
 {
    int Nr;
    int charset = GetCodePage();
-   
-//    switch(event.GetId())
-//    {
-//    case STC_ID_CHARSETANSI:
-//       charset = wxSTC_CHARSET_ANSI;
-//       break;
-//    case STC_ID_CHARSETMAC:
-//       charset = wxSTC_CHARSET_ANSI;
-//       break;
-//    }
    
    for (Nr = 0; Nr < wxSTC_STYLE_LASTPREDEFINED; Nr++)
       StyleSetCharacterSet(Nr, charset);
@@ -908,38 +1117,29 @@ void Editor::OnUseCharset(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnChangeCase(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should change case of text
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnChangeCase(wxCommandEvent &event)
 {
-//    switch(event.GetId())
-//    {
-//    case STC_ID_CHANGELOWER:
-//       CmdKeyExecute(wxSTC_CMD_LOWERCASE);
-//       break;
-//    case STC_ID_CHANGEUPPER:
-//       CmdKeyExecute(wxSTC_CMD_UPPERCASE);
-//       break;
-//    }
 }
 
 
 //------------------------------------------------------------------------------
 // void OnConvertEOL(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor should convert end of line character mode
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnConvertEOL(wxCommandEvent &event)
 {
    int eolMode = GetEOLMode();
-//    switch(event.GetId())
-//    {
-//    case STC_ID_CONVERTCR:
-//       eolMode = wxSTC_EOL_CR;
-//       break;
-//    case STC_ID_CONVERTCRLF:
-//       eolMode = wxSTC_EOL_CRLF;
-//       break;
-//    case STC_ID_CONVERTLF:
-//       eolMode = wxSTC_EOL_LF;
-//       break;
-//    }
    ConvertEOLs(eolMode);
    SetEOLMode(eolMode);
 }
@@ -948,6 +1148,12 @@ void Editor::OnConvertEOL(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void Editor::OnMarginClick (wxStyledTextEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor's margin is clicked
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnMarginClick (wxStyledTextEvent &event)
 {
    if (event.GetMargin() == 2)
@@ -963,6 +1169,12 @@ void Editor::OnMarginClick (wxStyledTextEvent &event)
 //------------------------------------------------------------------------------
 // void OnTextChange (wxStyledTextEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor's text is changed
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnTextChange (wxStyledTextEvent &event)
 {
    if (mNotifyChange)
@@ -993,6 +1205,12 @@ void Editor::OnTextChange (wxStyledTextEvent &event)
 //------------------------------------------------------------------------------
 // void OnCharAdded (wxStyledTextEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Event handler for when the editor has a character added
+ * 
+ * @param event		command event originated by the control
+ *
+ */
 void Editor::OnCharAdded (wxStyledTextEvent &event)
 {
    char chr = (char)event.GetKey();
@@ -1017,6 +1235,13 @@ void Editor::OnCharAdded (wxStyledTextEvent &event)
 //------------------------------------------------------------------------------
 // wxString DeterminePrefs(const wxString &filename)
 //------------------------------------------------------------------------------
+/**
+ * Determine Preferences for editor based on file extension
+ * 
+ * @param filename		filename to find preferences for
+ * @return string detailing the detected preference
+ *
+ */
 wxString Editor::DeterminePrefs(const wxString &filename)
 {
    #ifdef DEBUG_EDITOR_PREF
@@ -1062,6 +1287,13 @@ wxString Editor::DeterminePrefs(const wxString &filename)
 //------------------------------------------------------------------------------
 // bool InitializePrefs(const wxString &name)
 //------------------------------------------------------------------------------
+/**
+ * Initialize preferences based on preference name
+ * 
+ * @param name		preference name to load/init
+ * @return true if prefernce name is found in globalLanguagePrefs
+ *
+ */
 bool Editor::InitializePrefs(const wxString &name)
 {
    #ifdef DEBUG_EDITOR_PREF
@@ -1223,6 +1455,13 @@ bool Editor::InitializePrefs(const wxString &name)
 //------------------------------------------------------------------------------
 // wxString GetLine(int lineNumber)
 //------------------------------------------------------------------------------
+/**
+ * Return the line at the specified line number
+ * 
+ * @param lineNumber		0-based line number
+ * @return string representation of the line
+ *
+ */
 wxString Editor::GetLine(int lineNumber)
 {
    return wxStyledTextCtrl::GetLine(lineNumber);
@@ -1232,6 +1471,12 @@ wxString Editor::GetLine(int lineNumber)
 //------------------------------------------------------------------------------
 // wxString GetText()
 //------------------------------------------------------------------------------
+/**
+ * Return the text in the editor
+ * 
+ * @return string representation of the editor contents
+ *
+ */
 wxString Editor::GetText()
 {
    return wxStyledTextCtrl::GetText();
@@ -1241,6 +1486,13 @@ wxString Editor::GetText()
 //------------------------------------------------------------------------------
 // bool LoadFile()
 //------------------------------------------------------------------------------
+/**
+ * Load a file (from internal filename) into the editor.  If filename is not defined
+ * show a dialog requesting filename from user
+ * 
+ * @return true if file loaded
+ *
+ */
 bool Editor::LoadFile()
 {
 #if wxUSE_FILEDLG
@@ -1263,6 +1515,13 @@ bool Editor::LoadFile()
 //------------------------------------------------------------------------------
 // bool LoadFile(const wxString &filename)
 //------------------------------------------------------------------------------
+/**
+ * Load the specified file into the editor and initialize editor
+ * 
+ * @param filename	file to be loaded
+ * @return true if file loaded
+ *
+ */
 bool Editor::LoadFile(const wxString &filename)
 {
    #ifdef DEBUG_EDITOR_FILE
@@ -1274,25 +1533,8 @@ bool Editor::LoadFile(const wxString &filename)
    if (!filename.empty())
       mFileName = filename;
    
-   // It's ok to have non-existing file
-   //wxFile file(mFileName);
-   //if (!file.IsOpened())
-   //   return false;
-   
    ClearAll();
 
-   // No file reading
-   //long lng = file.Length();
-   //if (lng > 0)
-   //{
-   //   wxString buf;
-   //   wxChar *buff = buf.GetWriteBuf(lng);
-   //   file.Read(buff, lng);
-   //   buf.UngetWriteBuf();
-   //   InsertText(0, buf);
-   //}
-   //file.Close();
-   
    wxStyledTextCtrl::LoadFile(mFileName);
    EmptyUndoBuffer();
    
@@ -1311,6 +1553,13 @@ bool Editor::LoadFile(const wxString &filename)
 //------------------------------------------------------------------------------
 // bool SaveFile()
 //------------------------------------------------------------------------------
+/**
+ * Save a file from the editor using internal filename.  If filename is not defined
+ * show a dialog requesting filename from user
+ * 
+ * @return true if file saved
+ *
+ */
 bool Editor::SaveFile()
 {
 #if wxUSE_FILEDLG
@@ -1337,33 +1586,28 @@ bool Editor::SaveFile()
 //------------------------------------------------------------------------------
 // bool SaveFile(const wxString &filename)
 //------------------------------------------------------------------------------
+/**
+ * Save a file from the editor using specified filename.  
+ * 
+ * @param filename	file to be saved
+ * @return true if file saved
+ *
+ */
 bool Editor::SaveFile(const wxString &filename)
 {
-   // Always save to file (loj: 2009.01.29)
-   // return if no change
-   //if (!IsModified()) return true;
-   
-   //     // save edit in file and clear undo
-   //     if (!filename.empty()) mFileName = filename;
-   //     wxFile file(mFileName, wxFile::write);
-   //     if (!file.IsOpened()) return false;
-   //     wxString buf = GetText();
-   //     bool okay = file.Write(buf);
-   //     file.Close();
-   //     if (!okay) return false;
-   //     EmptyUndoBuffer();
-   //     SetSavePoint();
-   
-   //     return true;
-   
-   return wxStyledTextCtrl::SaveFile(filename);
-
+	return wxStyledTextCtrl::SaveFile(filename);
 }
 
 
 //------------------------------------------------------------------------------
 // bool IsModified()
 //------------------------------------------------------------------------------
+/**
+ * Return whether editor contents have been modified
+ * 
+ * @return true if editor modified
+ *
+ */
 bool Editor::IsModified()
 {
    bool state = (GetModify() && !GetReadOnly());
