@@ -903,7 +903,7 @@ void Editor::OnUncomment(wxCommandEvent &event)
    // Retrieve the selected text.
    wxString selString = GetSelectedText();
    wxString newString;
-   boolean lookForComment = true;
+   bool lookForComment = true;
    size_t n = 0;
    while ( n < selString.Length() )
    {
