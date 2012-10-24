@@ -39,8 +39,8 @@
  */
 //------------------------------------------------------------------------------
 PlanetaryEphem::PlanetaryEphem(std::string withFileName) :
-   itsName     (withFileName),
-   jdMjdOffset (GmatTimeConstants::JD_JAN_5_1941)
+   jdMjdOffset (GmatTimeConstants::JD_JAN_5_1941),
+   itsName     (withFileName)
 {
    strcpy(g_pef_dcb.full_path,withFileName.c_str());
    g_pef_dcb.recl           = 0;
@@ -59,9 +59,9 @@ PlanetaryEphem::PlanetaryEphem(std::string withFileName) :
  */
 //------------------------------------------------------------------------------
 PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef) :
+   jdMjdOffset   (pef.jdMjdOffset),
    itsName       (pef.itsName),
-   g_pef_dcb     (pef.g_pef_dcb),
-   jdMjdOffset   (pef.jdMjdOffset)
+   g_pef_dcb     (pef.g_pef_dcb)
 {
 }
 
@@ -80,9 +80,9 @@ PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef) :
 PlanetaryEphem& PlanetaryEphem::operator=(const PlanetaryEphem& pef)
 {
    if (this == &pef) return *this;
+   jdMjdOffset = pef.jdMjdOffset;
    itsName     = pef.itsName;
    g_pef_dcb   = pef.g_pef_dcb;
-   jdMjdOffset = pef.jdMjdOffset;
    return *this;
 }
 
