@@ -32,21 +32,10 @@
 //#define DEBUG_EPHEM_SOURCE
 //#define DEBUG_J2000_BODY
 
-
-//---------------------------------
+//------------------------------------------------------------------------------
 // static data
-//---------------------------------
-//const std::string
-//SpecialCelestialPoint::PARAMETER_TEXT[SpecialCelestialPointParamCount - CelestialBodyParamCount] =
-//{
-//
-//};
-//
-//const Gmat::ParameterType
-//SpecialCelestialPoint::PARAMETER_TYPE[SpecialCelestialPointParamCount - CelestialBodyParamCount] =
-//{
-//
-//};
+//------------------------------------------------------------------------------
+// none
 
 
 //------------------------------------------------------------------------------
@@ -56,7 +45,7 @@
 //  SpecialCelestialPoint(std::string name)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the SpecialCelestialPoint class
+ * This method creates an object of the SpecialCelestialPoint class
  * (default constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
@@ -64,7 +53,7 @@
  */
 //------------------------------------------------------------------------------
 SpecialCelestialPoint::SpecialCelestialPoint(std::string name) :
-CelestialBody     ("SpecialCelestialPoint",name)
+   CelestialBody     ("SpecialCelestialPoint",name)
 {
    objectTypeNames.push_back("SpecialCelestialPoint");
    parameterCount = SpecialCelestialPointParamCount;
@@ -85,14 +74,14 @@ CelestialBody     ("SpecialCelestialPoint",name)
 //  SpecialCelestialPoint(const SpecialCelestialPoint &copy)
 //------------------------------------------------------------------------------
 /**
- * This method creates an object of the SpecialCelestialPoint class as a copy of the
- * specified SpecialCelestialPoint class (copy constructor).
+ * This method creates an object of the SpecialCelestialPoint class as a copy
+ * of the specified SpecialCelestialPoint class (copy constructor).
  *
  * @param <copy> SpecialCelestialPoint object to copy.
  */
 //------------------------------------------------------------------------------
 SpecialCelestialPoint::SpecialCelestialPoint(const SpecialCelestialPoint &copy) :
-CelestialBody (copy)
+   CelestialBody (copy)
 {
 }
 
@@ -105,7 +94,8 @@ CelestialBody (copy)
  * @param <copy> the SpecialCelestialPoint object whose data to assign to "this"
  *            solar system.
  *
- * @return "this" SpecialCelestialPoint with data of input SpecialCelestialPoint copy.
+ * @return "this" SpecialCelestialPoint with data of input SpecialCelestialPoint
+ *         copy.
  */
 //------------------------------------------------------------------------------
 SpecialCelestialPoint& SpecialCelestialPoint::operator=(const SpecialCelestialPoint &copy)
@@ -129,7 +119,7 @@ SpecialCelestialPoint::~SpecialCelestialPoint()
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the SpecialCelestialPoint.
@@ -158,40 +148,38 @@ void SpecialCelestialPoint::Copy(const GmatBase* orig)
    operator=(*((SpecialCelestialPoint *)(orig)));
 }
 
+//---------------------------------------------------------------------------
+//  bool NeedsOnlyMainSPK()
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the default SPK file contains
+ * sufficient data for this SpecialCelestialPoint.
+ *
+ * @return flag indicating whether or not an additional SPK file is needed
+ *         for this SpecialCelestialPoint; true, if only the default one
+ *         is needed; false if an additional file is needed.
+ */
+//---------------------------------------------------------------------------
 bool SpecialCelestialPoint::NeedsOnlyMainSPK()
 {
-   if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)  return true;
+   if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+      return true;
    return false;
 }
 
-
-////------------------------------------------------------------------------------
-//// void SetUpBody()
-////------------------------------------------------------------------------------
-//void SpecialCelestialPoint::SetUpBody()
-//{
-//   #ifdef DEBUG_J2000_BODY
-//      MessageInterface::ShowMessage("Entering SetUpBody for %s, and j2000Body is %s\n",
-//            instanceName.c_str(), j2000BodyName.c_str());
-//      MessageInterface::ShowMessage("Does it require the J2000 body? %s\n",
-//            (RequiresJ2000Body()? "YES!" : "Nope"));
-//   #endif
-//   // main thing to do for now is to make sure the central body is set
-//   if (!theSolarSystem)
-//   {
-//      std::string errmsg = "Solar System not set for special celestial point \"";
-//      errmsg += instanceName + "\"\n";
-//      throw SolarSystemException(errmsg);
-//   }
-//   if (RequiresJ2000Body() && j2000Body == NULL)
-//   {
-//      j2000Body = theSolarSystem->GetBody(j2000BodyName);
-//   }
-//   return;
-//}
-
 //------------------------------------------------------------------------------
 // bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a flag indicating whether or not the specified
+ * parameter is read-only.
+ *
+ * @param <id> ID of the specified parameter
+ *
+ * @return flag indicating indicating whether or not the specified
+ *         parameter is read-only
+ *
+ */
 //------------------------------------------------------------------------------
 bool SpecialCelestialPoint::IsParameterReadOnly(const Integer id) const
 {
@@ -220,50 +208,28 @@ bool SpecialCelestialPoint::SetSource(Gmat::PosVelSource pvSrc)
    #endif
 
    if (pvSrc == posVelSrc) return true;
-
-//   if (pvSrc == Gmat::TWO_BODY_PROPAGATION)   // 2012/01/24 - wcs - disallowed for now
-//   {
-//      MessageInterface::ShowMessage(
-//            "Two-Body Propagation not available for built-in SolarSystemBarycenter.  Using DE405 as source.\n");
-//      posVelSrc = Gmat::DE405;
-//   }
-//   else
-      posVelSrc           = pvSrc;
+   posVelSrc           = pvSrc;
    return true;
 }
 
-////------------------------------------------------------------------------------
-////  bool SetSourceFile(PlanetaryEphem *src)
-////------------------------------------------------------------------------------
-///**
-// * This method sets the position/velocity source file for the body.
-// *
-// * @param <src> position/velocity source file for the body.
-// *
-// * @return flag indicating success of the method.
-// *
-// */
-////------------------------------------------------------------------------------
-//bool SpecialCelestialPoint::SetSourceFile(PlanetaryEphem *src)
-//{
-//   #ifdef DEBUG_EPHEM_SOURCE
-//   MessageInterface::ShowMessage
-//      ("SpecialCelestialPoint::SetSourceFile() <%p> %s, Setting source file to %p\n",
-//       this, GetName().c_str(), src);
-//   #endif
-//
-//   theSourceFile  = src;
-//   sourceFilename = theSourceFile->GetName();
-//   bodyNumber     = theSourceFile->GetBodyID(instanceName);
-//   return true;
-//}
 
+//------------------------------------------------------------------------------
+//  bool SetAllowSpice(const bool allow)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the allow spice flag
+ *
+ * @param <allow> allow spice flag
+ *
+ * @return flag indicating success of the method.
+ *
+ */
+//------------------------------------------------------------------------------
 bool SpecialCelestialPoint::SetAllowSpice(const bool allow)
 {
    allowSpice = allow;
    return true;
 }
-
 
 //------------------------------------------------------------------------------
 //  Rvector6 ComputeTwoBody(const A1Mjd &forTime)
@@ -291,9 +257,9 @@ Rvector6 SpecialCelestialPoint::ComputeTwoBody(const A1Mjd &forTime)
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
+// none at this time
 
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
 // none at this time
-

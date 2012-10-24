@@ -25,22 +25,17 @@
 #include "gmatdefs.hpp"
 #include "A1Mjd.hpp"
 
-namespace Gmat  // does this belong in DeFile.hpp???????????????
+namespace Gmat
 {
-   // different types of DE files
+   /// different types of DE files
    enum DeFileType
    {
-//      DE102 = 0,
-//      DE200,
-//      DE202,
-//      DE403,
       DE_DE405,
-//      DE406.
-      DE_DE421,		// made changes by TUAN NGUYEN
-	  DE_DE424,		// made changes by TUAN NGUYEN
+      DE_DE421,
+      DE_DE424,
    };
 
-   // different types of DE files
+   /// DE file can be ASCII or BINARY
    enum DeFileFormat
    {
       DE_ASCII = 0,
@@ -83,20 +78,18 @@ public:
    /**
     * Returns the the position and velocity of the specified body
     * at the specified time.
-	*
-	* @param forBody            body number for which to return the state
-	* @param atTime             time at which to get the state for the body
-	* @param overrideTimeSystem override the TDB time used, with TT?
     *
-    * @return the position and velocity of the specified body at the rerquested
+    * @param forBody            body number for which to return the state
+    * @param atTime             time at which to get the state for the body
+    * @param overrideTimeSystem override the TDB time used, with TT time
+    *
+    * @return the position and velocity of the specified body at the requested
     *         time.
     */
    //------------------------------------------------------------------------------
    virtual Real* GetPosVel(Integer forBody, A1Mjd atTime,
                            bool overrideTimeSystem = false) = 0;
 
-   // method to return the day-of-year and year of the start time of the
-   // file.
    //------------------------------------------------------------------------------
    //  Integer* GetStartDayAndYear()
    //------------------------------------------------------------------------------
@@ -110,33 +103,31 @@ public:
 
 
 protected:
-   // file type (from Swingby - added constructors, operator=, destructor
+   // file type (from Swingby - added constructors, operator=, destructor)
    struct GMAT_API dcb_type
    {
       dcb_type()
-   {
+      {
          strcpy(full_path, "\0");
          recl  = 0;
          fptr  = NULL;
-   }
+      }
       dcb_type(const dcb_type& dcb)
-   {
+      {
          strcpy(full_path, dcb.full_path);
          recl  = dcb.recl;
          fptr  = dcb.fptr;
-   }
+      }
       dcb_type& operator=(const dcb_type dcb)
-   {
+      {
          strcpy(full_path, dcb.full_path);
          recl  = dcb.recl;
          fptr  = dcb.fptr;
          return *this;
-   }
-//      char  full_path[MAX_PATH_LEN+1];
+      }
       char  full_path[261];
       long   recl;
       FILE  *fptr;
-
    };
 
    double      jdMjdOffset;
@@ -147,7 +138,6 @@ protected:
    dcb_type g_pef_dcb;
 
 private:
-
 
 };
 #endif // PlanetaryEphem_hpp

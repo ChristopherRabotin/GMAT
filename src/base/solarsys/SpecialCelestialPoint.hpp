@@ -26,7 +26,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef SpecialCelestialPoint_hpp
 #define SpecialCelestialPoint_hpp
 
@@ -54,10 +53,8 @@ public:
    virtual void      Copy(const GmatBase* orig);
    virtual bool      NeedsOnlyMainSPK();
 
-//   virtual void      SetUpBody();
    virtual bool      IsParameterReadOnly(const Integer id) const;
    virtual bool      SetSource(Gmat::PosVelSource pvSrc);
-//   virtual bool      SetSourceFile(PlanetaryEphem *src);
    virtual bool      SetAllowSpice(const bool allow);
    virtual Rvector6  ComputeTwoBody(const A1Mjd &forTime);
 
@@ -68,14 +65,7 @@ protected:
 
    };
 
-   //static const std::string PARAMETER_TEXT[SpecialCelestialPointParamCount - CelestialBodyParamCount];
-
-   //static const Gmat::ParameterType
-   //                         PARAMETER_TYPE[SpecialCelestialPointParamCount - CelestialBodyParamCount];
-
-
 private:
 
 };
 #endif // SpecialCelestialPoint_hpp
-

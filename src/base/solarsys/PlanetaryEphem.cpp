@@ -38,13 +38,13 @@
  * @param <name> parameter indicating the full path name of the File.
  */
 //------------------------------------------------------------------------------
-PlanetaryEphem::PlanetaryEphem(std::string withFileName)
+PlanetaryEphem::PlanetaryEphem(std::string withFileName) :
+   itsName     (withFileName),
+   jdMjdOffset (GmatTimeConstants::JD_JAN_5_1941)
 {
-   itsName = withFileName;
    strcpy(g_pef_dcb.full_path,withFileName.c_str());
    g_pef_dcb.recl           = 0;
    g_pef_dcb.fptr           = NULL;
-   jdMjdOffset              = GmatTimeConstants::JD_JAN_5_1941;
 }
 
 //------------------------------------------------------------------------------
@@ -54,15 +54,15 @@ PlanetaryEphem::PlanetaryEphem(std::string withFileName)
  * This method creates an object of the PlanetaryEphem class
  * (constructor).
  *
- * @param <pef> SlpFile object whose values to copy to the new File.
+ * @param <pef> PlanetaryEphem object whose values to copy to create a new
+ *              PlanetaryEphem.
  */
 //------------------------------------------------------------------------------
-PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef)
+PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef) :
+   itsName       (pef.itsName),
+   g_pef_dcb     (pef.g_pef_dcb),
+   jdMjdOffset   (pef.jdMjdOffset)
 {
-   // set class data
-   itsName         = pef.itsName;
-   g_pef_dcb       = pef.g_pef_dcb;
-   jdMjdOffset     = pef.jdMjdOffset;
 }
 
 //------------------------------------------------------------------------------
@@ -80,9 +80,9 @@ PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef)
 PlanetaryEphem& PlanetaryEphem::operator=(const PlanetaryEphem& pef)
 {
    if (this == &pef) return *this;
-   itsName = pef.itsName;
-   g_pef_dcb       = pef.g_pef_dcb;
-   jdMjdOffset     = pef.jdMjdOffset;
+   itsName     = pef.itsName;
+   g_pef_dcb   = pef.g_pef_dcb;
+   jdMjdOffset = pef.jdMjdOffset;
    return *this;
 }
 

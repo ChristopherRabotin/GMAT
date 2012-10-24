@@ -21,8 +21,6 @@
  *       is from JPL/JSC (written by David Hoffman of JSC); I have modified
  *       it to not use macros, not print warning messages to the screen,
  *       use MAX_ARRAY_SIZE and arraySize, etc.
- *
- * @note For Build 2, only Sun/Earth/Moon are assumed.
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -82,13 +80,8 @@ const Integer DeFile::EM_BARY_ID          = 12;
 const Integer DeFile::NUTATIONS_ID        = 13;
 const Integer DeFile::LIBRATIONS_ID       = 14;
 
-//const Integer DeFile::ARRAY_SIZE_200      = 826;
-//const Integer DeFile::ARRAY_SIZE_405      = 1018;
-//const Integer DeFile::MAX_ARRAY_SIZE      = 1018;
-
-
-const Real DeFile::JD_MJD_OFFSET = GmatTimeConstants::JD_JAN_5_1941;
-const Real DeFile::TT_OFFSET     = GmatTimeConstants::TT_TAI_OFFSET;
+const Real DeFile::JD_MJD_OFFSET          = GmatTimeConstants::JD_JAN_5_1941;
+const Real DeFile::TT_OFFSET              = GmatTimeConstants::TT_TAI_OFFSET;
 
 //------------------------------------------------------------------------------
 // public methods
@@ -102,7 +95,7 @@ const Real DeFile::TT_OFFSET     = GmatTimeConstants::TT_TAI_OFFSET;
  * (default constructor).
  *
  * @param <ofType>   parameter indicating the type of De File.
- * @param <fileName> parameter indicating the full path nameof the file.
+ * @param <fileName> parameter indicating the full path name of the file.
  * @param <fmt>      parameter indicating the format of the file.
  *
  * @note if an ASCII file is input on creation, it will be converted to
@@ -112,13 +105,13 @@ const Real DeFile::TT_OFFSET     = GmatTimeConstants::TT_TAI_OFFSET;
 //------------------------------------------------------------------------------
 DeFile::DeFile(Gmat::DeFileType ofType, std::string fileName,
                Gmat::DeFileFormat fmt) :
-PlanetaryEphem(fileName)
+   PlanetaryEphem(fileName)
 {
-   defType = ofType;
+   defType       = ofType;
    theFileFormat = fmt;
-   theFileName = fileName;
+   theFileName   = fileName;
    
-   baseEpoch = GmatTimeConstants::JD_JAN_5_1941;
+   baseEpoch     = GmatTimeConstants::JD_JAN_5_1941;
 
    Initialize();
 }
@@ -134,30 +127,31 @@ PlanetaryEphem(fileName)
  */
 //------------------------------------------------------------------------------
 DeFile::DeFile(const DeFile& def) :
-PlanetaryEphem(def)
+   PlanetaryEphem(def),
+   theFileName    (def.theFileName),
+   theFileFormat  (def.theFileFormat),
+   asciiFileName  (def.asciiFileName),
+   binaryFileName (def.binaryFileName),
+   defType        (def.defType),
+   arraySize      (def.arraySize),
+   Ephemeris_File (def.Ephemeris_File),
+   T_beg          (def.T_beg),
+   T_end          (def.T_end),
+   T_span         (def.T_span),
+   baseEpoch      (def.baseEpoch),
+   mFileBeg       (def.mFileBeg),
+   mA1FileBeg     (def.mA1FileBeg),
+   EPHEMERIS      (def.EPHEMERIS)
 {
-   asciiFileName  = def.asciiFileName;
-   binaryFileName = def.binaryFileName;
-   defType        = def.defType;
-   arraySize      = def.arraySize;
-
    /// data from JPL/JSC code (Hoffman) ephem_read.c
    H1.data        = (def.H1).data;
    strcpy(H1.pad, (def.H1).pad);
    H2.data        = (def.H2).data;
    strcpy(H2.pad, (def.H2).pad);
    R1             = def.R1;
-   Ephemeris_File = def.Ephemeris_File;
+
    int i;
    for (i=0;i<MAX_ARRAY_SIZE;i++)  Coeff_Array[i] = def.Coeff_Array[i];
-   T_beg          = def.T_beg;
-   T_end          = def.T_end;
-   T_span         = def.T_span;
-   baseEpoch      = def.baseEpoch;
-   
-   theFileName    = def.theFileName;
-
-   EPHEMERIS      = def.EPHEMERIS; 
 }
 
 //------------------------------------------------------------------------------
@@ -176,6 +170,10 @@ DeFile& DeFile::operator=(const DeFile& def)
 {
    if (this == &def) return *this;
    PlanetaryEphem::operator=(def);
+
+   theFileName    = def.theFileName;
+   theFileFormat  = def.theFileFormat;
+
    asciiFileName  = def.asciiFileName;
    binaryFileName = def.binaryFileName;
    defType        = def.defType;
@@ -194,8 +192,8 @@ DeFile& DeFile::operator=(const DeFile& def)
    T_end          = def.T_end;
    T_span         = def.T_span;
    baseEpoch      = def.baseEpoch;
-
-   theFileName    = def.theFileName;
+   mFileBeg       = def.mFileBeg;
+   mA1FileBeg     = def.mA1FileBeg;
 
    EPHEMERIS      = def.EPHEMERIS;
    return *this;
@@ -240,18 +238,18 @@ void DeFile::Initialize()
       throw PlanetaryEphemException(pe.GetFullMessage());
    }
 
-   #ifdef DEBUG_DEFILE_INIT												// made changes by TUAN NGUYEN
-   MessageInterface::ShowMessage("DeFile::Initialize() leaving\n");		// made changes by TUAN NGUYEN
-   #endif																// made changes by TUAN NGUYEN
+   #ifdef DEBUG_DEFILE_INIT
+   MessageInterface::ShowMessage("DeFile::Initialize() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
 //  Integer GetBodyID(std::string bodyName)
 //------------------------------------------------------------------------------
 /**
-* This method returns the ID for the requested body.
+ * This method returns the ID for the requested body.
  *
- * @param <bodyName> body whose ID is requested.
+ * @param <bodyName> name of body whose ID is requested.
  *
  * @return the ID for the requested body. Returns -1 if invalid body name.
  *
@@ -283,14 +281,14 @@ Integer  DeFile::GetBodyID(std::string bodyName)
  * This method returns the position and velocity of the specified body at the
  * requested time.
  *
- * @param <forbody>  the requested body (ID number on DE file).
- * @param <atTime>   time for which state of the body is requested.
+ * @param <forbody>            the requested body (ID number on DE file).
+ * @param <atTime>             time for which state of the body is requested.
  * @param <overrideTimeSystem> override the TDB time and use TT?
  *
  * @return state of the body at the requested time.
  *
  * @exception <PlanetaryEphemException> thrown if the position or velocity cannot
- *            be obtained due to problems opening or reading the DE Fle;
+ *            be obtained due to problems opening or reading the DE File;
  *            message is based on error
  */
 //------------------------------------------------------------------------------
@@ -367,12 +365,12 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
 
    if (forBody == DeFile::MOON_ID)
    {
-      result[0] = (Real) rv.Position[0]; // temporary
+      result[0] = (Real) rv.Position[0];
       result[1] = (Real) rv.Position[1];
       result[2] = (Real) rv.Position[2];
-      result[3] = (Real) rv.Velocity[0] ; //* GmatTimeConstants::SECS_PER_DAY;
-      result[4] = (Real) rv.Velocity[1] ; //* GmatTimeConstants::SECS_PER_DAY;
-      result[5] = (Real) rv.Velocity[2] ; //* GmatTimeConstants::SECS_PER_DAY;
+      result[3] = (Real) rv.Velocity[0] ;
+      result[4] = (Real) rv.Velocity[1] ;
+      result[5] = (Real) rv.Velocity[2] ;
       return result;
    }
 
@@ -381,7 +379,7 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    // then get the Earth state from that (using the Moon state in
    // geocentric), then figure out the body's state wrt the Earth  << should be checking wrt the J2000Body here??
    stateType emrv, mrv;
-   // earth-moon barycenter rel to solar system barycenter
+   // earth-moon barycenter relative to solar system barycenter
    Interpolate_State(absJD,(int)DeFile::EARTH_ID, &emrv);
    // moon state (geocentric)
    Interpolate_State(absJD,(int)DeFile::MOON_ID, &mrv);
@@ -396,22 +394,6 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
          ("DeFile::GetPosVel() R1.EMRAT = %12.10f\n", R1.EMRAT);
    #endif
 
-//   stateType bwe;
-//
-//   for (int i=0; i<3; i++)
-//   {
-//      bwe.Position[i] = rv.Position[i] -
-//         (emrv.Position[i] - (mrv.Position[i] / (R1.EMRAT + 1.0)));
-//      bwe.Velocity[i] = rv.Velocity[i] -
-//         (emrv.Velocity[i] - (mrv.Velocity[i] / (R1.EMRAT + 1.0)));
-//   }
-//
-//   result[0] = bwe.Position[0];
-//   result[1] = bwe.Position[1];
-//   result[2] = bwe.Position[2];
-//   result[3] = bwe.Position[0];
-//   result[4] = bwe.Velocity[1];
-//   result[5] = bwe.Velocity[2];
    result[0] = rv.Position[0] -(emrv.Position[0] - (mrv.Position[0] / (R1.EMRAT + 1.0)));
    result[1] = rv.Position[1] -(emrv.Position[1] - (mrv.Position[1] / (R1.EMRAT + 1.0)));
    result[2] = rv.Position[2] -(emrv.Position[2] - (mrv.Position[2] / (R1.EMRAT + 1.0)));
@@ -472,16 +454,16 @@ void  DeFile::GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates,
 //------------------------------------------------------------------------------
 Integer* DeFile::GetStartDayAndYear()
 {
-   Integer* res = new Integer[2];
-   // first time on header is start time of file in absolute Julian Days
-   Real mjd = (Real) R1.timeData[0] - jdMjdOffset;
-   A1Mjd *a  = new A1Mjd(mjd);
-   UtcDate uTime = a->ToUtcDate();
    Integer y, doy, h, min;
    Real    sec;
+   Integer* res  = new Integer[2];
+   // first time on header is start time of file in absolute Julian Days
+   Real mjd      = (Real) R1.timeData[0] - jdMjdOffset;
+   A1Mjd *a      = new A1Mjd(mjd);
+   UtcDate uTime = a->ToUtcDate();
    uTime.ToYearDOYHourMinSec(y,doy,h,min,sec);
-   res[0]   = doy;
-   res[1]   = y;
+   res[0]        = doy;
+   res[1]        = y;
    
    delete a;
    return res;
@@ -494,19 +476,19 @@ Integer* DeFile::GetStartDayAndYear()
 /**
  * This method converts the ASCII DE file (input at creation) to a native
  * binary format.  It assumes that an appropriate header file, with the name
- * header.FMT, where FMT is the type of DE file (e.g. 202), exists in the
+ * header.FMT, where FMT is the type of DE file (e.g. 421), exists in the
  * same directory as the ASCII DE file.
  *
- * @param <deFileNaemAscii> ASCII file name (pull path name).
+ * @param <deFileNameAscii> ASCII file name (pull path name).
  *
- * @return the full path name of the binary file; to anme it, thie method will
+ * @return the full path name of the binary file; to name it, this method will
  *        take the input ASCII file name and add 'Bin' at the end (before the
  *        .FMT).
  */
 //------------------------------------------------------------------------------
 std::string DeFile::Convert(std::string deFileNameAscii)
 {
-   // TBD - call VAL methods?  Recode VAL method(s)?
+   // TBD
    return deFileNameAscii;
 }
 
@@ -514,7 +496,7 @@ std::string DeFile::Convert(std::string deFileNameAscii)
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
-
+// none at this time
 
 
 //------------------------------------------------------------------------------
@@ -551,28 +533,21 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
       binaryFileName = fName;
    }
 
-//   if (defType == Gmat::DE200)
-//   {
-//
-//      arraySize = DeFile::ARRAY_SIZE_200;
-//      EPHEMERIS = 200;
-//   }
-//   else if (defType == Gmat::DE_DE405)
    if (defType == Gmat::DE_DE405)
    {
       arraySize = DeFile::ARRAY_SIZE_405;
       EPHEMERIS = 405;
    }
-   else if (defType == Gmat::DE_DE421)		// made changes by TUAN NGUYEN
-   {										// made changes by TUAN NGUYEN
-      arraySize = DeFile::ARRAY_SIZE_421;	// made changes by TUAN NGUYEN
-      EPHEMERIS = 421;						// made changes by TUAN NGUYEN
-   }										// made changes by TUAN NGUYEN
-   else if (defType == Gmat::DE_DE424)		// made changes by TUAN NGUYEN
-   {										// made changes by TUAN NGUYEN
-      arraySize = DeFile::ARRAY_SIZE_424;	// made changes by TUAN NGUYEN
-      EPHEMERIS = 424;						// made changes by TUAN NGUYEN
-   }										// made changes by TUAN NGUYEN
+   else if (defType == Gmat::DE_DE421)
+   {
+      arraySize = DeFile::ARRAY_SIZE_421;
+      EPHEMERIS = 421;
+   }
+   else if (defType == Gmat::DE_DE424)
+   {
+      arraySize = DeFile::ARRAY_SIZE_424;
+      EPHEMERIS = 424;
+   }
    else
    {
       // ERROR!  Other formats not currently supported!!!
@@ -584,15 +559,16 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
       throw PlanetaryEphemException("DE file is not of specified format!!"
                                     "DE file not able to be initialized!");
    }
-   itsName                             = binaryFileName;
+   itsName           = binaryFileName;
    strcpy(g_pef_dcb.full_path,binaryFileName.c_str());
-   g_pef_dcb.recl                      = arraySize;
-   if (Ephemeris_File)  g_pef_dcb.fptr = Ephemeris_File;
-   jdMjdOffset          = (double) DeFile::JD_MJD_OFFSET;
+   g_pef_dcb.recl    = arraySize;
+   if (Ephemeris_File)
+      g_pef_dcb.fptr = Ephemeris_File;
+   jdMjdOffset       = (double) DeFile::JD_MJD_OFFSET;
    
-   // store file begin time (loj: 9/15/05 Added)
-   mFileBeg = T_beg - baseEpoch;
-   mA1FileBeg = T_beg;
+   // store file begin time
+   mFileBeg          = T_beg - baseEpoch;
+   mA1FileBeg        = T_beg;
 
    #ifdef DEBUG_DEFILE_INIT
    MessageInterface::ShowMessage("   T_beg=%.9f, addr=%p\n", T_beg, &T_beg);
@@ -650,84 +626,64 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
 /**  Output: None.                                                           **/
 /**                                                                          **/
 /**==========================================================================**/
-
 void DeFile::Read_Coefficients( double Time )
 {
    #ifdef DEBUG_DEFILE_READ
-   MessageInterface::ShowMessage("DeFile::Read_Coefficients() Time=%.9f)\n", Time);
-   MessageInterface::ShowMessage(" DE filename = '%s'\n",theFileName.c_str());
+      MessageInterface::ShowMessage("DeFile::Read_Coefficients() Time=%.9f)\n", Time);
+      MessageInterface::ShowMessage(" DE filename = '%s'\n",theFileName.c_str());
    #endif
    
-  double  T_delta = 0.0;
-  int     Offset  =  0 ;
+   double  T_delta = 0.0;
+   int     Offset  =  0 ;
 
-  #ifdef DEBUG_DEFILE_READ
-  MessageInterface::ShowMessage
-     ("DeFile::Read_Coefficients() T_beg=%f, T_end=%f\n", T_beg, T_end);
-  #endif
+   #ifdef DEBUG_DEFILE_READ
+      MessageInterface::ShowMessage
+         ("DeFile::Read_Coefficients() T_beg=%f, T_end=%f\n", T_beg, T_end);
+   #endif
 
-  /*--------------------------------------------------------------------------*/
-  /*  Find ephemeris data that record contains input time. Note that one, and */
-  /*  only one, of the following conditional statements will be true (if both */
-  /*  were false, this function would not have been called).                  */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /*  Find ephemeris data that record contains input time. Note that one, and */
+   /*  only one, of the following conditional statements will be true (if both */
+   /*  were false, this function would not have been called).                  */
+   /*--------------------------------------------------------------------------*/
 
-  if ( Time < T_beg )                    /* Compute backwards location offset */
-     {
-       T_delta = T_beg - Time;
-       Offset  = (int) - ceil(T_delta/T_span);
-     }
+   if ( Time < T_beg )                    /* Compute backwards location offset */
+   {
+      T_delta = T_beg - Time;
+      Offset  = (int) - ceil(T_delta/T_span);
+   }
 
-  if ( Time > T_end )                    /* Compute forwards location offset */
-     {
-       T_delta = Time - T_end;
-       Offset  = (int) ceil(T_delta/T_span);
-     }
+   if ( Time > T_end )                    /* Compute forwards location offset */
+   {
+      T_delta = Time - T_end;
+      Offset  = (int) ceil(T_delta/T_span);
+   }
 
-  /*--------------------------------------------------------------------------*/
-  /*  Retrieve ephemeris data from new record.                                */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /*  Retrieve ephemeris data from new record.                                */
+   /*--------------------------------------------------------------------------*/
 
-  //fseek(Ephemeris_File,(Offset-1)*ARRAY_SIZE*sizeof(double),SEEK_CUR);
-  //fread(&Coeff_Array,sizeof(double),ARRAY_SIZE,Ephemeris_File);
-  
-  #ifdef DEBUG_DEFILE_READ
-  MessageInterface::ShowMessage
-     ("DeFile::Read_Coefficients() Offset=%d\n", Offset);
-  #endif
+   #ifdef DEBUG_DEFILE_READ
+      MessageInterface::ShowMessage
+         ("DeFile::Read_Coefficients() Offset=%d\n", Offset);
+   #endif
 
-  // if time is less than file begin time, do not update time info.
-  if (Time > mFileBeg) //loj: 9/15/05 Added
-  {
-     fseek(Ephemeris_File,(Offset-1)*arraySize*sizeof(double),SEEK_CUR);
+   // if time is less than file begin time, do not update time info.
+   if (Time > mFileBeg) //loj: 9/15/05 Added
+   {
+      fseek(Ephemeris_File,(Offset-1)*arraySize*sizeof(double),SEEK_CUR);
 
-     // Intentionally get the return and then ignore it to move warning from
-     // system libraries to GMAT code base.  The "unused variable" warning here
-     // can be safely ignored.
-     size_t len = fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);
-     if ((Integer)len != arraySize)
-        throw PlanetaryEphemException("Requested epoch is not on the DE file");
+      // Intentionally get the return and then ignore it to move warning from
+      // system libraries to GMAT code base.  The "unused variable" warning here
+      // can be safely ignored.
+      size_t len = fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);
+      if ((Integer)len != arraySize)
+         throw PlanetaryEphemException("Requested epoch is not on the DE file");
 
-     T_beg  = Coeff_Array[0] - baseEpoch;
-     T_end  = Coeff_Array[1] - baseEpoch;
-     T_span = T_end - T_beg;
-  }
-  
-  /*--------------------------------------------------------------------------*/
-  /*  Debug print (optional)                                                  */
-  /*--------------------------------------------------------------------------*/
-
-  //if ( Debug ) 
-  //   {
-  //     printf("\n  In: Read_Coefficients \n");
-  //     printf("\n      ARRAY_SIZE = %4d",ARRAY_SIZE);
-  //     printf("\n      Offset  = %3d",Offset);
-  //     printf("\n      T_delta = %7.3f",T_delta);
-  //     printf("\n      T_Beg   = %7.3f",T_beg);
-  //     printf("\n      T_End   = %7.3f",T_end);
-  //     printf("\n      T_Span  = %7.3f\n\n",T_span);
-  //   }
-
+      T_beg  = Coeff_Array[0] - baseEpoch;
+      T_end  = Coeff_Array[1] - baseEpoch;
+      T_span = T_end - T_beg;
+   }
 }
 
 /**==========================================================================**/
@@ -744,7 +700,6 @@ void DeFile::Read_Coefficients( double Time )
 /**  Returns: An integer status code.                                        **/
 /**                                                                          **/
 /**==========================================================================**/
-
 int DeFile::Initialize_Ephemeris( char *fileName )
 {
    #ifdef DEBUG_DEFILE_INIT
@@ -753,97 +708,72 @@ int DeFile::Initialize_Ephemeris( char *fileName )
       ("   fileName=%s, arraySize=%d\n", fileName, arraySize);
    #endif
    
-  int headerID;
+   int headerID;
   
-  /*--------------------------------------------------------------------------*/
-  /*  Open ephemeris file.                                                    */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /*  Open ephemeris file.                                                    */
+   /*--------------------------------------------------------------------------*/
 
-  //loj: Ephemeris_File = fopen(fileName,"r");
-  Ephemeris_File = fopen(fileName,"rb");
+   Ephemeris_File = fopen(fileName,"rb");
 
-
-  /*--------------------------------------------------------------------------*/
-  /*  Read header & first coefficient array, then return status code.         */
-  /*--------------------------------------------------------------------------*/
-
-  if ( Ephemeris_File == NULL ) /*........................No need to continue */
-  {
-       return FAILURE;
-  }
-  else 
-  { /*.................Read first three header records from ephemeris file */
-
-       //fread(&H1,sizeof(double),ARRAY_SIZE,Ephemeris_File);
-       //fread(&H2,sizeof(double),ARRAY_SIZE,Ephemeris_File);
-       //fread(&Coeff_Array,sizeof(double),ARRAY_SIZE,Ephemeris_File);
-       size_t len = fread(&H1,sizeof(double),arraySize,Ephemeris_File);
-       len += fread(&H2,sizeof(double),arraySize,Ephemeris_File);
-       len += fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);
-
-
+   /*--------------------------------------------------------------------------*/
+   /*  Read header & first coefficient array, then return status code.         */
+   /*--------------------------------------------------------------------------*/
+   if ( Ephemeris_File == NULL ) /*........................No need to continue */
+   {
+      return FAILURE;
+   }
+   else  /*.................Read first three header records from ephemeris file */
+   {
+      size_t len = fread(&H1,sizeof(double),arraySize,Ephemeris_File);
+      len       += fread(&H2,sizeof(double),arraySize,Ephemeris_File);
+      len       += fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);
             
-       /*...............................Store header data in global variables */
-       
-       R1 = H1.data;
+      /*...............................Store header data in global variables */
+      R1 = H1.data;
               
-       /*..........................................Set current time variables */
+      /*..........................................Set current time variables */
+      T_beg  = Coeff_Array[0] - baseEpoch;
+      T_end  = Coeff_Array[1] - baseEpoch;
+      T_span = T_end - T_beg;
 
-       T_beg  = Coeff_Array[0] - baseEpoch;
-       T_end  = Coeff_Array[1] - baseEpoch;
-       T_span = T_end - T_beg;
+      /*..............................Convert header ephemeris ID to integer */
+      headerID = (int) R1.DENUM;
 
-       /*..............................Convert header ephemeris ID to integer */
+      #if defined (__UNIT_TEST__)
+         std::ofstream fout;
+         fout.open("TestDeFile.txt");
 
-       headerID = (int) R1.DENUM;
-       
-       /*..............................................Debug Print (optional) */
+         fout << " In: Initialize_Ephemeris" << std::endl;
+         fout << "     ARRAY_SIZE     " << arraySize << std::endl;
+         fout << "     R1.timeData[0] " << R1.timeData[0] << std::endl;
+         fout << "     R1.timeData[1] " << R1.timeData[1] << std::endl;
+         fout << "     R1.timeData[2] " << R1.timeData[2] << std::endl;
+         fout << "     R1.numConst    " << R1.numConst << std::endl;
+         fout << "     R1.AU          " << R1.AU << std::endl;
+         fout << "     R1.EMRAT       " <<  R1.EMRAT << std::endl;
+         fout << "     R1.coeffPtr[0][0] " << R1.coeffPtr[0][0] << std::endl;
+         fout << "     R1.coeffPtr[11][2]" << R1.coeffPtr[11][2] << std::endl;
 
-       //if ( Debug ) 
-       //   {
-       //     printf("\n  In: Initialize_Ephemeris \n");
-       //     printf("\n      ARRAY_SIZE = %4d",ARRAY_SIZE);
-       //     printf("\n      headerID   = %3d",headerID);
-       //     printf("\n      T_Beg      = %7.3f",T_beg);
-       //     printf("\n      T_End      = %7.3f",T_end);
-       //     printf("\n      T_Span     = %7.3f\n\n",T_span);
-       //   }
+         fout << "     R1.DENUM   " << R1.DENUM << std::endl;
+         fout << "     headerID   " << headerID << std::endl;
+         fout << "     EPHEMERIS  " << EPHEMERIS << std::endl;
+         fout << "     T_Beg      " << T_beg << std::endl;
+         fout << "     T_End      " << T_end << std::endl;
+         fout << "     T_Span     " << T_span << std::endl;
 
-#if defined (__UNIT_TEST__)
-       std::ofstream fout;
-       fout.open("TestDeFile.txt");
-                     
-       fout << " In: Initialize_Ephemeris" << std::endl;
-       fout << "     ARRAY_SIZE     " << arraySize << std::endl;
-       fout << "     R1.timeData[0] " << R1.timeData[0] << std::endl;
-       fout << "     R1.timeData[1] " << R1.timeData[1] << std::endl;
-       fout << "     R1.timeData[2] " << R1.timeData[2] << std::endl;
-       fout << "     R1.numConst    " << R1.numConst << std::endl;
-       fout << "     R1.AU          " << R1.AU << std::endl;
-       fout << "     R1.EMRAT       " <<  R1.EMRAT << std::endl;
-       fout << "     R1.coeffPtr[0][0] " << R1.coeffPtr[0][0] << std::endl;
-       fout << "     R1.coeffPtr[11][2]" << R1.coeffPtr[11][2] << std::endl;
-            
-       fout << "     R1.DENUM   " << R1.DENUM << std::endl;
-       fout << "     headerID   " << headerID << std::endl;
-       fout << "     EPHEMERIS  " << EPHEMERIS << std::endl;
-       fout << "     T_Beg      " << T_beg << std::endl;
-       fout << "     T_End      " << T_end << std::endl;
-       fout << "     T_Span     " << T_span << std::endl;
-
-       fout.close();
-#endif
+         fout.close();
+      #endif
   
-       /*..................................................Return status code */
-
-       if ( headerID == EPHEMERIS ) 
-       {
-            return SUCCESS;
-       }
-       else 
-       {
-            return FAILURE;
-       }
+      /*..................................................Return status code */
+      if ( headerID == EPHEMERIS )
+      {
+         return SUCCESS;
+      }
+      else
+      {
+         return FAILURE;
+      }
    }
 }
 
@@ -865,190 +795,128 @@ int DeFile::Initialize_Ephemeris( char *fileName )
 /**  2006.05.19  W. Shoan/GSFC/MAB  added code to compute and return rates   **/
 /**              (cut-and-paste from Interpolate_State & modify )            **/
 /**==========================================================================**/
-
 void DeFile::Interpolate_Libration( double Time , int Target , 
                                     double Libration[3], double rates[3] )
 {
-  double    A[50] , Cp[50]  , Up[50], sum[3] , rateSum[3];
-  double    T_break , T_seg = 0.0 , T_sub = 0.0 , Tc = 0.0;
-  int       i , j;
-  long int  C , G , N , offset = 0;
+   double    A[50] , Cp[50]  , Up[50], sum[3] , rateSum[3];
+   double    T_break , T_seg = 0.0 , T_sub = 0.0 , Tc = 0.0;
+   int       i , j;
+   long int  C , G , N , offset = 0;
 
-  #ifdef DEBUG_DEFILE_LIB
-  MessageInterface::ShowMessage
-     ("DeFile::Interpolate_Libration(%.9f, %d)\n", Time, Target);
-  MessageInterface::ShowMessage("   addr T_beg=%p\n", &T_beg);
-  MessageInterface::ShowMessage("   addr T_end=%p\n", &T_end);
-  #endif
+   #ifdef DEBUG_DEFILE_LIB
+      MessageInterface::ShowMessage
+         ("DeFile::Interpolate_Libration(%.9f, %d)\n", Time, Target);
+      MessageInterface::ShowMessage("   addr T_beg=%p\n", &T_beg);
+      MessageInterface::ShowMessage("   addr T_end=%p\n", &T_end);
+   #endif
   
-  /*--------------------------------------------------------------------------*/
-  /* This function only computes librations.                                  */
-  /*--------------------------------------------------------------------------*/
-
-  if ( Target != 12 )             /* Also protects against weird input errors */
-     {
+   /*--------------------------------------------------------------------------*/
+   /* This function only computes librations.                                  */
+   /*--------------------------------------------------------------------------*/
+   if ( Target != 12 )             /* Also protects against weird input errors */
+   {
       // printf("\n This function only computes librations.\n");
-       return;
-     }
+      return;
+   }
  
-  /*--------------------------------------------------------------------------*/
-  /* Initialize local coefficient array.                                      */
-  /*--------------------------------------------------------------------------*/
-
-  for ( i=0 ; i<50 ; i++ )
-      {
-        A[i] = 0.0;
-      }
+   /*--------------------------------------------------------------------------*/
+   /* Initialize local coefficient array.                                      */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<50 ; i++ )
+   {
+      A[i] = 0.0;
+   }
   
-  /*--------------------------------------------------------------------------*/
-  /* Determine if a new record needs to be input (if so, get it).             */
-  /*--------------------------------------------------------------------------*/
-  
-  if ( Time < T_beg || Time > T_end )
-  {
-     #ifdef DEBUG_DEFILE_LIB
-     MessageInterface::ShowMessage
-        ("DeFile::Interpolate_Libration() Calling Read_Coefficients(%.9f)\n",
-         Time);
-     #endif
+   /*--------------------------------------------------------------------------*/
+   /* Determine if a new record needs to be input (if so, get it).             */
+   /*--------------------------------------------------------------------------*/
+   if ( Time < T_beg || Time > T_end )
+   {
+      #ifdef DEBUG_DEFILE_LIB
+         MessageInterface::ShowMessage
+            ("DeFile::Interpolate_Libration() Calling Read_Coefficients(%.9f)\n",
+             Time);
+      #endif
      
-     Read_Coefficients(Time);
-  }
+      Read_Coefficients(Time);
+   }
   
-  /*--------------------------------------------------------------------------*/
-  /* Read the coefficients from the binary record.                            */
-  /*--------------------------------------------------------------------------*/
-    
-  C = R1.libratPtr[0] - 1;                   /* Coefficient array entry point */
-  N = R1.libratPtr[1];                       /*        Number of coefficients */
-  G = R1.libratPtr[2];                       /*    Granules in current record */
+   /*--------------------------------------------------------------------------*/
+   /* Read the coefficients from the binary record.                            */
+   /*--------------------------------------------------------------------------*/
+   C = R1.libratPtr[0] - 1;                   /* Coefficient array entry point */
+   N = R1.libratPtr[1];                       /*        Number of coefficients */
+   G = R1.libratPtr[2];                       /*    Granules in current record */
 
-  /*...................................................Debug print (optional) */
-    
-  //if ( Debug )
-  //   {
-  //     printf("\n  In: Interpolate_Libration\n");
-  //     printf("\n  Target = %2d",Target);
-  //     printf("\n  C      = %4d (before)",C);
-  //     printf("\n  N      = %4d",N);
-  //     printf("\n  G      = %4d\n",G);
-  //   }
-
-  /*--------------------------------------------------------------------------*/
-  /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
-  /*  into array A[]. If T_span is covered by a single granule this is easy.  */
-  /*  If not, the granule that contains the interpolation time is found, and  */
-  /*  an offset from the array entry point for the libration angles is used   */
-  /*  to load the coefficients.                                               */
-  /*--------------------------------------------------------------------------*/
-
-  //MessageInterface::ShowMessage("===> Compute the normalized time\n");
-  if ( G == 1 ) 
-     {
-       Tc = 2.0*(Time - T_beg) / T_span - 1.0;
-       for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
-     }
-  else if ( G > 1 )
-     {
-       T_sub = T_span / ((double) G);          /* Compute subgranule interval */
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
+   /*  into array A[]. If T_span is covered by a single granule this is easy.  */
+   /*  If not, the granule that contains the interpolation time is found, and  */
+   /*  an offset from the array entry point for the libration angles is used   */
+   /*  to load the coefficients.                                               */
+   /*--------------------------------------------------------------------------*/
+   if ( G == 1 )
+   {
+      Tc = 2.0*(Time - T_beg) / T_span - 1.0;
+      for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
+   }
+   else if ( G > 1 )
+   {
+      T_sub = T_span / ((double) G);          /* Compute subgranule interval */
        
-       for ( j=G ; j>0 ; j-- ) 
-           {
-             T_break = T_beg + ((double) j-1) * T_sub;
-             if ( Time > T_break ) 
-                {
-                  T_seg  = T_break;
-                  offset = j-1;
-                  break;
-                }
+      for ( j=G ; j>0 ; j-- )
+      {
+         T_break = T_beg + ((double) j-1) * T_sub;
+         if ( Time > T_break )
+         {
+            T_seg  = T_break;
+            offset = j-1;
+            break;
             }
+         }
             
-       Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
-       C  = C + 3 * offset * N;  
+      Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
+      C  = C + 3 * offset * N;
        
-       for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
-     }
-  else                                   /* Something has gone terribly wrong */
-     {
-       //printf("\n Number of granules must be >= 1: check header data.\n");
-     }
+      for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
+   }
+   else                                   /* Something has gone terribly wrong */
+   {
+      //printf("\n Number of granules must be >= 1: check header data.\n");
+   }
 
-  /*...................................................Debug print (optional) */
-
-  //MessageInterface::ShowMessage
-  //   ("===> C = %4d, offset = %4d, Time = %12.7f, T_sub = %12.7f, T_seg = %12.7f, "
-  //    "Tc = %12.7f\n", C, offset, Time, T_sub, T_seg, Tc);
-  
-  //if ( Debug )
-  //   {
-  //     printf("\n  C      = %4d (after)",C);
-  //     printf("\n  offset = %4d",offset);
-  //     printf("\n  Time   = %12.7f",Time);
-  //     printf("\n  T_sub  = %12.7f",T_sub);
-  //     printf("\n  T_seg  = %12.7f",T_seg);
-  //     printf("\n  Tc     = %12.7f\n",Tc);
-  //     printf("\n  Array Coefficients:\n");
-  //     for ( i=0 ; i<3*N ; i++ )
-  //         {
-  //           printf("\n  A[%2d] = % 22.15e",i,A[i]);
-  //         }
-  //     printf("\n\n");
-  //   }
-
-  /*..........................................................................*/
-
-  /*--------------------------------------------------------------------------*/
-  /* Compute interpolated the libration angles and rates                                     */
-  /*--------------------------------------------------------------------------*/
-  
-  for ( i=0 ; i<3 ; i++ ) 
-      {  
-         /*                         
-        Cp[0]  = 1.0;                                 // Begin polynomial sum 
-        Cp[1]  = Tc;
-        sum[i] = A[i*N] + A[1+i*N]*Tc;
-
-        for ( j=2 ; j<N ; j++ )                                  // Finish it 
-            {
-              Cp[j]  = 2.0 * Tc * Cp[j-1] - Cp[j-2];
-              sum[i] = sum[i] + A[j+i*N] * Cp[j];
-            }
-        Libration[i] = sum[i];
-        */
-
-        Cp[0] = 1.0;           
-        Cp[1] = Tc;
-        Cp[2] = 2.0 * Tc*Tc - 1.0;
+   /*--------------------------------------------------------------------------*/
+   /* Compute interpolated the libration angles and rates                      */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<3 ; i++ )
+   {
+      Cp[0] = 1.0;
+      Cp[1] = Tc;
+      Cp[2] = 2.0 * Tc*Tc - 1.0;
         
-        Up[0] = 0.0;
-        Up[1] = 1.0;
-        Up[2] = 4.0 * Tc;
+      Up[0] = 0.0;
+      Up[1] = 1.0;
+      Up[2] = 4.0 * Tc;
 
-        for ( j=3 ; j<N ; j++ )
-            {
-              Cp[j] = 2.0 * Tc * Cp[j-1] - Cp[j-2];
-              Up[j] = 2.0 * Tc * Up[j-1] + 2.0 * Cp[j-1] - Up[j-2];
-            }
-
-        //P_Sum[i] = 0.0;           
-        //V_Sum[i] = 0.0;
-        sum[i]     = 0.0;           
-        rateSum[i] = 0.0;
-
-        //for ( j=N-1 ; j>-1 ; j-- )  P_Sum[i] = P_Sum[i] + A[j+i*N] * Cp[j];
-        //for ( j=N-1 ; j>0  ; j-- )  V_Sum[i] = V_Sum[i] + A[j+i*N] * Up[j];
-        for ( j=N-1 ; j>-1 ; j-- )  sum[i]     = sum[i] + A[j+i*N] * Cp[j];
-        for ( j=N-1 ; j>0  ; j-- )  rateSum[i] = rateSum[i] + A[j+i*N] * Up[j];
-        //X.Position[i] = P_Sum[i];
-        //X.Velocity[i] = V_Sum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
-        Libration[i] = sum[i];
-        rates[i]     = rateSum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
+      for ( j=3 ; j<N ; j++ )
+      {
+         Cp[j] = 2.0 * Tc * Cp[j-1] - Cp[j-2];
+         Up[j] = 2.0 * Tc * Up[j-1] + 2.0 * Cp[j-1] - Up[j-2];
       }
-  /*--------------------------------------------------------------------------*/
-  /* Compute interpolated the rates.                                          */
-  /*--------------------------------------------------------------------------*/
+
+      sum[i]     = 0.0;
+      rateSum[i] = 0.0;
+
+      for ( j=N-1 ; j>-1 ; j-- )  sum[i]     = sum[i] + A[j+i*N] * Cp[j];
+      for ( j=N-1 ; j>0  ; j-- )  rateSum[i] = rateSum[i] + A[j+i*N] * Up[j];
+      Libration[i] = sum[i];
+      rates[i]     = rateSum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
+   }
+   /*--------------------------------------------------------------------------*/
+   /* Compute interpolated the rates.                                          */
+   /*--------------------------------------------------------------------------*/
       
-  return;
+   return;
 }
 
 
@@ -1068,134 +936,96 @@ void DeFile::Interpolate_Libration( double Time , int Target ,
 /**  Returns: Nothing explicitly.                                            **/
 /**                                                                          **/
 /**==========================================================================**/
-
 void DeFile::Interpolate_Nutation( double Time , int Target , double Nutation[2] )
 {
-  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
-  int       i , j;
-  long int  C , G , N , offset = 0;
+   double    A[50] , Cp[50]  , sum[3] , T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
+   int       i , j;
+   long int  C , G , N , offset = 0;
 
-  /*--------------------------------------------------------------------------*/
-  /* This function only computes nutations.                                   */
-  /*--------------------------------------------------------------------------*/
-
-  if ( Target != SS_BARY_ID )             /* Also protects against weird input errors */
-     {
+   /*--------------------------------------------------------------------------*/
+   /* This function only computes nutations.                                   */
+   /*--------------------------------------------------------------------------*/
+   if ( Target != SS_BARY_ID )             /* Also protects against weird input errors */
+   {
       // printf("\n This function only computes nutations.\n");
-       return;
-     }
+      return;
+   }
  
-  /*--------------------------------------------------------------------------*/
-  /* Initialize local coefficient array.                                      */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /* Initialize local coefficient array.                                      */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<50 ; i++ )
+   {
+      A[i] = 0.0;
+   }
 
-  for ( i=0 ; i<50 ; i++ )
-      {
-        A[i] = 0.0;
-      }
+   /*--------------------------------------------------------------------------*/
+   /* Determine if a new record needs to be input (if so, get it).             */
+   /*--------------------------------------------------------------------------*/
+   if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
 
-  /*--------------------------------------------------------------------------*/
-  /* Determine if a new record needs to be input (if so, get it).             */
-  /*--------------------------------------------------------------------------*/
-    
-  if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
+   /*--------------------------------------------------------------------------*/
+   /* Read the coefficients from the binary record.                            */
+   /*--------------------------------------------------------------------------*/
+   C = R1.coeffPtr[Target][0] - 1;            /* Coefficient array entry point */
+   N = R1.coeffPtr[Target][1];                /*        Number of coefficients */
+   G = R1.coeffPtr[Target][2];                /*    Granules in current record */
 
-  /*--------------------------------------------------------------------------*/
-  /* Read the coefficients from the binary record.                            */
-  /*--------------------------------------------------------------------------*/
-  
-  C = R1.coeffPtr[Target][0] - 1;            /* Coefficient array entry point */
-  N = R1.coeffPtr[Target][1];                /*        Number of coefficients */
-  G = R1.coeffPtr[Target][2];                /*    Granules in current record */
-
-  /*...................................................Debug print (optional) */
-
-  //if ( Debug )
-  //   {
-  //     printf("\n  In: Interpolate_Nutation\n");
-  //     printf("\n  Target = %2d",Target);
-  //     printf("\n  C      = %4d (before)",C);
-  //     printf("\n  N      = %4d",N);
-  //     printf("\n  G      = %4d\n",G);
-  //   }
-
-  /*--------------------------------------------------------------------------*/
-  /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
-  /*  into array A[]. If T_span is covered by a single granule this is easy.  */
-  /*  If not, the granule that contains the interpolation time is found, and  */
-  /*  an offset from the array entry point for the nutation angles is used    */
-  /*  to load the coefficients.                                               */
-  /*--------------------------------------------------------------------------*/
-
-  if ( G == 1 )
-     {
-       Tc = 2.0*(Time - T_beg) / T_span - 1.0;
-       for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
-     }
-  else if ( G > 1 )
-     {
-       T_sub = T_span / ((double) G);          /* Compute subgranule interval */
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
+   /*  into array A[]. If T_span is covered by a single granule this is easy.  */
+   /*  If not, the granule that contains the interpolation time is found, and  */
+   /*  an offset from the array entry point for the nutation angles is used    */
+   /*  to load the coefficients.                                               */
+   /*--------------------------------------------------------------------------*/
+   if ( G == 1 )
+   {
+      Tc = 2.0*(Time - T_beg) / T_span - 1.0;
+      for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
+   }
+   else if ( G > 1 )
+   {
+      T_sub = T_span / ((double) G);          /* Compute subgranule interval */
        
-       for ( j=G ; j>0 ; j-- ) 
-           {
-             T_break = T_beg + ((double) j-1) * T_sub;
-             if ( Time > T_break ) 
-                {
-                  T_seg  = T_break;
-                  offset = j-1;
-                  break;
-                }
-            }
+      for ( j=G ; j>0 ; j-- )
+      {
+         T_break = T_beg + ((double) j-1) * T_sub;
+         if ( Time > T_break )
+         {
+            T_seg  = T_break;
+            offset = j-1;
+            break;
+         }
+      }
             
-       Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
-       C  = C + 3 * offset * N;
+      Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
+      C  = C + 3 * offset * N;
        
-       for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
-     }
-  else                                   /* Something has gone terribly wrong */
-     {
+      for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
+   }
+   else                                   /* Something has gone terribly wrong */
+   {
        //printf("\n Number of granules must be >= 1: check header data.\n");
-     }
+    }
 
-  /*...................................................Debug print (optional) */
+   /*--------------------------------------------------------------------------*/
+   /* Compute interpolated the nutation.                                       */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<2 ; i++ )
+   {
+      Cp[0]  = 1.0;                                 /* Begin polynomial sum */
+      Cp[1]  = Tc;
+      sum[i] = A[i*N] + A[1+i*N]*Tc;
 
-  //if ( Debug )
-  //   {
-  //     printf("\n  C      = %4d (after)",C);
-  //     printf("\n  offset = %4d",offset);
-  //     printf("\n  Time   = %12.7f",Time);
-  //     printf("\n  T_sub  = %12.7f",T_sub);
-  //     printf("\n  T_seg  = %12.7f",T_seg);
-  //     printf("\n  Tc     = %12.7f\n",Tc);
-  //     printf("\n  Array Coefficients:\n");
-  //     for ( i=0 ; i<3*N ; i++ )
-  //         {
-  //           printf("\n  A[%2d] = % 22.15e",i,A[i]);
-  //         }
-  //     printf("\n\n");
-  //   }
-
-  /*..........................................................................*/
-
-  /*--------------------------------------------------------------------------*/
-  /* Compute interpolated the nutation.                                       */
-  /*--------------------------------------------------------------------------*/
-  
-  for ( i=0 ; i<2 ; i++ )
+      for ( j=2 ; j<N ; j++ )                                  /* Finish it */
       {
-        Cp[0]  = 1.0;                                 /* Begin polynomial sum */
-        Cp[1]  = Tc;
-        sum[i] = A[i*N] + A[1+i*N]*Tc;
-
-        for ( j=2 ; j<N ; j++ )                                  /* Finish it */
-            {
-              Cp[j]  = 2.0 * Tc * Cp[j-1] - Cp[j-2];
-              sum[i] = sum[i] + A[j+i*N] * Cp[j];
-            }
-        Nutation[i] = sum[i];
+         Cp[j]  = 2.0 * Tc * Cp[j-1] - Cp[j-2];
+         sum[i] = sum[i] + A[j+i*N] * Cp[j];
       }
+      Nutation[i] = sum[i];
+   }
       
-  return;
+   return;
 }
 
 /**==========================================================================**/
@@ -1214,134 +1044,97 @@ void DeFile::Interpolate_Nutation( double Time , int Target , double Nutation[2]
 /**  Returns: Nothing explicitly.                                            **/
 /**                                                                          **/
 /**==========================================================================**/
-
 void DeFile::Interpolate_Position( double Time , int Target , double Position[3] )
 {
-  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
-  int       i , j;
-  long int  C , G , N , offset = 0;
+   double    A[50] , Cp[50]  , sum[3] , T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
+   int       i , j;
+   long int  C , G , N , offset = 0;
 
-  /*--------------------------------------------------------------------------*/
-  /* This function doesn't "do" nutations or librations.                      */
-  /*--------------------------------------------------------------------------*/
-
-  if ( Target >= SS_BARY_ID )             /* Also protects against weird input errors */
-     {
-       //printf("\n This function does not compute nutations or librations.\n");
-       return;
-     }
+   /*--------------------------------------------------------------------------*/
+   /* This function doesn't "do" nutations or librations.                      */
+   /*--------------------------------------------------------------------------*/
+   if ( Target >= SS_BARY_ID )             /* Also protects against weird input errors */
+   {
+      //printf("\n This function does not compute nutations or librations.\n");
+      return;
+   }
  
-  /*--------------------------------------------------------------------------*/
-  /* Initialize local coefficient array.                                      */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /* Initialize local coefficient array.                                      */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<50 ; i++ )
+   {
+      A[i] = 0.0;
+   }
 
-  for ( i=0 ; i<50 ; i++ )
+   /*--------------------------------------------------------------------------*/
+   /* Determine if a new record needs to be input (if so, get it).             */
+   /*--------------------------------------------------------------------------*/
+   if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
+
+   /*--------------------------------------------------------------------------*/
+   /* Read the coefficients from the binary record.                            */
+   /*--------------------------------------------------------------------------*/
+   C = R1.coeffPtr[Target][0] - 1;          /*   Coefficient array entry point */
+   N = R1.coeffPtr[Target][1];              /* Number of coeff's per component */
+   G = R1.coeffPtr[Target][2];              /*      Granules in current record */
+
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
+   /*  into array A[]. If T_span is covered by a single granule this is easy.  */
+   /*  If not, the granule that contains the interpolation time is found, and  */
+   /*  an offset from the array entry point for the ephemeris body is used to  */
+   /*  load the coefficients.                                                  */
+   /*--------------------------------------------------------------------------*/
+   if ( G == 1 )
+   {
+      Tc = 2.0*(Time - T_beg) / T_span - 1.0;
+      for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
+   }
+   else if ( G > 1 )
+   {
+      T_sub = T_span / ((double) G);          /* Compute subgranule interval */
+       
+      for ( j=G ; j>0 ; j-- )
       {
-        A[i] = 0.0;
+         T_break = T_beg + ((double) j-1) * T_sub;
+         if ( Time > T_break )
+         {
+            T_seg  = T_break;
+            offset = j-1;
+            break;
+         }
       }
-
-  /*--------------------------------------------------------------------------*/
-  /* Determine if a new record needs to be input (if so, get it).             */
-  /*--------------------------------------------------------------------------*/
-    
-  if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
-
-  /*--------------------------------------------------------------------------*/
-  /* Read the coefficients from the binary record.                            */
-  /*--------------------------------------------------------------------------*/
-  
-  C = R1.coeffPtr[Target][0] - 1;          /*   Coefficient array entry point */
-  N = R1.coeffPtr[Target][1];              /* Number of coeff's per component */
-  G = R1.coeffPtr[Target][2];              /*      Granules in current record */
-
-  /*...................................................Debug print (optional) */
-
-  //if ( Debug )
-  //   {
-  //     printf("\n  In: Interpolate_Position\n");
-  //     printf("\n  Target = %2d",Target);
-  //     printf("\n  C      = %4d (before)",C);
-  //     printf("\n  N      = %4d",N);
-  //     printf("\n  G      = %4d\n",G);
-  //   }
-
-  /*--------------------------------------------------------------------------*/
-  /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
-  /*  into array A[]. If T_span is covered by a single granule this is easy.  */
-  /*  If not, the granule that contains the interpolation time is found, and  */
-  /*  an offset from the array entry point for the ephemeris body is used to  */
-  /*  load the coefficients.                                                  */
-  /*--------------------------------------------------------------------------*/
-
-  if ( G == 1 )
-     {
-       Tc = 2.0*(Time - T_beg) / T_span - 1.0;
-       for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
-     }
-  else if ( G > 1 )
-     {
-       T_sub = T_span / ((double) G);          /* Compute subgranule interval */
-       
-       for ( j=G ; j>0 ; j-- ) 
-           {
-             T_break = T_beg + ((double) j-1) * T_sub;
-             if ( Time > T_break ) 
-                {
-                  T_seg  = T_break;
-                  offset = j-1;
-                  break;
-                }
-            }
             
-       Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
-       C  = C + 3 * offset * N;
+      Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
+      C  = C + 3 * offset * N;
        
-       for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
-     }
-  else                                   /* Something has gone terribly wrong */
-     {
+      for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
+   }
+   else                                   /* Something has gone terribly wrong */
+   {
       // printf("\n Number of granules must be >= 1: check header data.\n");
-     }
+   }
 
-  /*...................................................Debug print (optional) */
 
-  //if ( Debug )
-  //   {
-  //     printf("\n  C      = %4d (after)",C);
-  //     printf("\n  offset = %4d",offset);
-  //     printf("\n  Time   = %12.7f",Time);
-  //     printf("\n  T_sub  = %12.7f",T_sub);
-  //     printf("\n  T_seg  = %12.7f",T_seg);
-  //     printf("\n  Tc     = %12.7f\n",Tc);
-  //     printf("\n  Array Coefficients:\n");
-  //     for ( i=0 ; i<3*N ; i++ )
-  //         {
-  //           printf("\n  A[%2d] = % 22.15e",i,A[i]);
-  //         }
-  //     printf("\n\n");
-  //   }
+   /*--------------------------------------------------------------------------*/
+   /* Compute interpolated the position.                                       */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<3 ; i++ )
+   {
+      Cp[0]  = 1.0;                                 /* Begin polynomial sum */
+      Cp[1]  = Tc;
+      sum[i] = A[i*N] + A[1+i*N]*Tc;
 
-  /*..........................................................................*/
-
-  /*--------------------------------------------------------------------------*/
-  /* Compute interpolated the position.                                       */
-  /*--------------------------------------------------------------------------*/
-  
-  for ( i=0 ; i<3 ; i++ ) 
-      {                           
-        Cp[0]  = 1.0;                                 /* Begin polynomial sum */
-        Cp[1]  = Tc;
-        sum[i] = A[i*N] + A[1+i*N]*Tc;
-
-        for ( j=2 ; j<N ; j++ )                                  /* Finish it */
-            {
-              Cp[j]  = 2.0 * Tc * Cp[j-1] - Cp[j-2];
-              sum[i] = sum[i] + A[j+i*N] * Cp[j];
-            }
-        Position[i] = sum[i];
+      for ( j=2 ; j<N ; j++ )                                  /* Finish it */
+      {
+         Cp[j]  = 2.0 * Tc * Cp[j-1] - Cp[j-2];
+         sum[i] = sum[i] + A[j+i*N] * Cp[j];
       }
+      Position[i] = sum[i];
+   }
 
-  return;
+   return;
 }
 
 /**==========================================================================**/
@@ -1359,167 +1152,129 @@ void DeFile::Interpolate_Position( double Time , int Target , double Position[3]
 /**                                                                          **/
 /**  Returns: Nothing (explicitly)                                           **/
 /**==========================================================================**/
-
 void DeFile::Interpolate_State(double Time , int Target, stateType *p)
 {
-  register double    A[50]   , B[50] , Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
-            T_break , T_seg = 0.0 , T_sub  , Tc = 0.0;
-  register int       i , j;
-  register long int  C , G , N , offset = 0;
-  register stateType X;
+   register double    A[50]   , B[50] , Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
+                      T_break , T_seg = 0.0 , T_sub  , Tc = 0.0;
+   register int       i , j;
+   register long int  C , G , N , offset = 0;
+   register stateType X;
 
-  /*--------------------------------------------------------------------------*/
-  /* This function doesn't "do" nutations or librations.                      */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /* This function doesn't "do" nutations or librations.                      */
+   /*--------------------------------------------------------------------------*/
+   if ( Target >= SS_BARY_ID )             /* Also protects against weird input errors */
+   {
+      //printf("\n This function does not compute nutations or librations.\n");
+      return;
+   }
 
-  if ( Target >= SS_BARY_ID )             /* Also protects against weird input errors */
-     {
-       //printf("\n This function does not compute nutations or librations.\n");
-       return;
-     }
+   /*--------------------------------------------------------------------------*/
+   /* Initialize local coefficient array.                                      */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<50 ; i++ )
+   {
+      A[i] = 0.0;
+      B[i] = 0.0;
+   }
 
-  /*--------------------------------------------------------------------------*/
-  /* Initialize local coefficient array.                                      */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /* Determine if a new record needs to be input.                             */
+   /*--------------------------------------------------------------------------*/
+   #ifdef DEBUG_DEFILE_INTERPOLATE
+   MessageInterface::ShowMessage
+      ("DeFile::Interpolate_State() before Read_Coefficients()\nTime=%f, T_beg=%f, "
+       "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
+   #endif
+  
+   if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
+  
+   #ifdef DEBUG_DEFILE_INTERPOLATE
+   MessageInterface::ShowMessage
+      ("DeFile::Interpolate_State() after  Read_Coefficients()\nTime=%f, T_beg=%f, "
+       "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
+   #endif
+  
+   /*--------------------------------------------------------------------------*/
+   /* Read the coefficients from the binary record.                            */
+   /*--------------------------------------------------------------------------*/
+  
+   C = R1.coeffPtr[Target][0] - 1;               /*    Coeff array entry point */
+   N = R1.coeffPtr[Target][1];                   /*          Number of coeff's */
+   G = R1.coeffPtr[Target][2];                   /* Granules in current record */
 
-  for ( i=0 ; i<50 ; i++ )
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
+   /*  into array A[]. If T_span is covered by a single granule this is easy.  */
+   /*  If not, the granule that contains the interpolation time is found, and  */
+   /*  an offset from the array entry point for the ephemeris body is used to  */
+   /*  load the coefficients.                                                  */
+   /*--------------------------------------------------------------------------*/
+   if ( G == 1 )
+   {
+      Tc = 2.0*(Time - T_beg) / T_span - 1.0;
+      for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
+   }
+   else if ( G > 1 )
+   {
+      T_sub = T_span / ((double) G);          /* Compute subgranule interval */
+      for ( j=G ; j>0 ; j-- )
       {
-        A[i] = 0.0;
-        B[i] = 0.0;
+         T_break = T_beg + ((double) j-1) * T_sub;
+         if ( Time > T_break )
+         {
+            T_seg  = T_break;
+            offset = j-1;
+            break;
+         }
       }
 
-  /*--------------------------------------------------------------------------*/
-  /* Determine if a new record needs to be input.                             */
-  /*--------------------------------------------------------------------------*/
-
-  #ifdef DEBUG_DEFILE_INTERPOLATE
-  MessageInterface::ShowMessage
-     ("DeFile::Interpolate_State() before Read_Coefficients()\nTime=%f, T_beg=%f, "
-      "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
-  #endif
-  
-  if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
-  
-  #ifdef DEBUG_DEFILE_INTERPOLATE
-  MessageInterface::ShowMessage
-     ("DeFile::Interpolate_State() after  Read_Coefficients()\nTime=%f, T_beg=%f, "
-      "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
-  #endif
-  
-
-  /*--------------------------------------------------------------------------*/
-  /* Read the coefficients from the binary record.                            */
-  /*--------------------------------------------------------------------------*/
-  
-  C = R1.coeffPtr[Target][0] - 1;               /*    Coeff array entry point */
-  N = R1.coeffPtr[Target][1];                   /*          Number of coeff's */
-  G = R1.coeffPtr[Target][2];                   /* Granules in current record */
-
-  /*...................................................Debug print (optional) */
-
-  //if ( Debug )
-  //   {
-  //     printf("\n  In: Interpolate_State\n");
-  //     printf("\n  Target = %2d",Target);
-  //     printf("\n  C      = %4ld (before)",C);
-  //     printf("\n  N      = %4ld",N);
-  //     printf("\n  G      = %4ld\n",G);
-  //   }
-
-  /*--------------------------------------------------------------------------*/
-  /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
-  /*  into array A[]. If T_span is covered by a single granule this is easy.  */
-  /*  If not, the granule that contains the interpolation time is found, and  */
-  /*  an offset from the array entry point for the ephemeris body is used to  */
-  /*  load the coefficients.                                                  */
-  /*--------------------------------------------------------------------------*/
-  if ( G == 1 )
-     {
-       Tc = 2.0*(Time - T_beg) / T_span - 1.0;
-       for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
-     }
-  else if ( G > 1 )
-     {
-       T_sub = T_span / ((double) G);          /* Compute subgranule interval */
-       for ( j=G ; j>0 ; j-- ) 
-           {
-             T_break = T_beg + ((double) j-1) * T_sub;
-             if ( Time > T_break ) 
-                {
-                  T_seg  = T_break;
-                  offset = j-1;
-                  break;
-                }
-            }
-
-       Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
-       C  = C + 3 * offset * N;
+      Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
+      C  = C + 3 * offset * N;
        
-       for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
-     }
-  else                                   /* Something has gone terribly wrong */
-     {
-       //printf("\n Number of granules must be >= 1: check header data.\n");
-     }
+      for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
+   }
+   else                                   /* Something has gone terribly wrong */
+   {
+      //printf("\n Number of granules must be >= 1: check header data.\n");
+   }
 
-  /*...................................................Debug print (optional) */
+   /*--------------------------------------------------------------------------*/
+   /* Compute the interpolated position & velocity                             */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<3 ; i++ )                /* Compute interpolating polynomials */
+   {
+      Cp[0] = 1.0;
+      Cp[1] = Tc;
+      Cp[2] = 2.0 * Tc*Tc - 1.0;
 
-  //if ( Debug )
-  //   {
-  //     printf("\n  C      = %4d (after)",C);
-  //     printf("\n  offset = %4d",offset);
-  //     printf("\n  Time   = %12.7f",Time);
-  //     printf("\n  T_sub  = %12.7f",T_sub);
-  //     printf("\n  T_seg  = %12.7f",T_seg);
-  //     printf("\n  Tc     = %12.7f\n",Tc);
-  //     printf("\n  Array Coefficients:\n");
-  //     for ( i=0 ; i<3*N ; i++ )
-  //         {
-  //           printf("\n  A[%2d] = % 22.15e",i,A[i]);
-  //         }
-  //     printf("\n\n");
-  //   }
+      Up[0] = 0.0;
+      Up[1] = 1.0;
+      Up[2] = 4.0 * Tc;
 
-  /*..........................................................................*/
-
-  /*--------------------------------------------------------------------------*/
-  /* Compute the interpolated position & velocity                             */
-  /*--------------------------------------------------------------------------*/
-  
-  for ( i=0 ; i<3 ; i++ )                /* Compute interpolating polynomials */
+      for ( j=3 ; j<N ; j++ )
       {
-
-        Cp[0] = 1.0;           
-        Cp[1] = Tc;
-        Cp[2] = 2.0 * Tc*Tc - 1.0;
-        
-        Up[0] = 0.0;
-        Up[1] = 1.0;
-        Up[2] = 4.0 * Tc;
-
-        for ( j=3 ; j<N ; j++ )
-            {
-              Cp[j] = 2.0 * Tc * Cp[j-1] - Cp[j-2];
-              Up[j] = 2.0 * Tc * Up[j-1] + 2.0 * Cp[j-1] - Up[j-2];
-            }
-
-        P_Sum[i] = 0.0;           /* Compute interpolated position & velocity */
-        V_Sum[i] = 0.0;
-
-        for ( j=N-1 ; j>-1 ; j-- )  P_Sum[i] = P_Sum[i] + A[j+i*N] * Cp[j];
-        for ( j=N-1 ; j>0  ; j-- )  V_Sum[i] = V_Sum[i] + A[j+i*N] * Up[j];
-
-        X.Position[i] = P_Sum[i];
-        X.Velocity[i] = V_Sum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
+         Cp[j] = 2.0 * Tc * Cp[j-1] - Cp[j-2];
+         Up[j] = 2.0 * Tc * Up[j-1] + 2.0 * Cp[j-1] - Up[j-2];
       }
 
-  /*--------------------------------------------------------------------------*/
-  /*  Return computed values.                                                 */
-  /*--------------------------------------------------------------------------*/
+      P_Sum[i] = 0.0;           /* Compute interpolated position & velocity */
+      V_Sum[i] = 0.0;
 
-  *p = X;
+      for ( j=N-1 ; j>-1 ; j-- )  P_Sum[i] = P_Sum[i] + A[j+i*N] * Cp[j];
+      for ( j=N-1 ; j>0  ; j-- )  V_Sum[i] = V_Sum[i] + A[j+i*N] * Up[j];
+
+      X.Position[i] = P_Sum[i];
+      X.Velocity[i] = V_Sum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /*  Return computed values.                                                 */
+   /*--------------------------------------------------------------------------*/
+
+   *p = X;
   
-  return;
+   return;
 }
 
 
@@ -1559,36 +1314,33 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
 /**  Output:                                                                 **/
 /**    A double precision number                                             **/
 /**==========================================================================**/
-
 double DeFile::Find_Value( char    name[], 
                    char    name_array[400][6] , 
                    double  value_array[400]  ) 
 {
-  double value = 0.0;
-  int    found = FALSE;
-  char   target[7];
-  int    i, j;
+   double value = 0.0;
+   int    found = FALSE;
+   char   target[7];
+   int    i, j;
 
-  for ( i=0 ; i<400 ; i++ ) 
+   for ( i=0 ; i<400 ; i++ )
+   {
+      /*.....................Convert current name array element to a string */
+      for ( j=0 ; j<6 ; j++ )  target[j] = name_array[i][j];
+      target[6] = '\0';
+
+      /*................................See if it matches the string sought */
+      if ( !strcmp(name,target) )
       {
-        /*.....................Convert current name array element to a string */
-      
-        for ( j=0 ; j<6 ; j++ )  target[j] = name_array[i][j];
-            target[6] = '\0';
-      
-        /*................................See if it matches the string sought */
-      
-        if ( !strcmp(name,target) ) 
-           {
-             value = value_array[i];
-             found = TRUE;
-             break;                                /* No need to keep looking */
-           }                                       /*   once a match is found */
-      }
+         value = value_array[i];
+         found = TRUE;
+         break;                                /* No need to keep looking */
+      }                                       /*   once a match is found */
+   }
 
-  //if ( (i==399) & (found==FALSE) ) Warning(20);             /* Didn't find it */
+   //if ( (i==399) & (found==FALSE) ) Warning(20);             /* Didn't find it */
 
-  return value;
+   return value;
 }
 
 /**==========================================================================**/
@@ -1617,75 +1369,71 @@ double DeFile::Find_Value( char    name[],
 /**  Output:                                                                 **/
 /**     Julian date (double)                                                 **/
 /**==========================================================================**/
-
 double DeFile::Gregorian_to_Julian( int     year ,  int     month   , 
                             int     day  ,  int     hour    , 
                             int     min  ,  double  seconds )
 {
-  double  A, B, D, H, JD, M, N, Y;
+   double  A, B, D, H, JD, M, N, Y;
 
-  /*--------------------------------------------------------------------------*/
-  /*  Adjust year & month values (if necessary).                              */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /*  Adjust year & month values (if necessary).                              */
+   /*--------------------------------------------------------------------------*/
 
-  if ( month < 3 ) {                                      /* See Muess, p. 61 */
-       month = month + 12;
-       year  = year - 1;
-     }
+   if ( month < 3 )
+   {                                      /* See Muess, p. 61 */
+      month = month + 12;
+      year  = year - 1;
+   }
 
-  /*--------------------------------------------------------------------------*/
-  /*  Perform type casts and adjust the day count.                            */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /*  Perform type casts and adjust the day count.                            */
+   /*--------------------------------------------------------------------------*/
 
-  Y = (double) year;
-  M = (double) month;
-  D = (double) day;
-  H = (double) hour;
-  N = (double) min;
+   Y = (double) year;
+   M = (double) month;
+   D = (double) day;
+   H = (double) hour;
+   N = (double) min;
 
-  /*--------------------------------------------------------------------------*/
-  /*  Compute the day fraction:                                               */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the day fraction:                                               */
+   /*--------------------------------------------------------------------------*/
+   D = D  +  (H / 24.0)  +  (N / 1440.0)  +  (seconds / GmatTimeConstants::SECS_PER_DAY);
 
-  D = D  +  (H / 24.0)  +  (N / 1440.0)  +  (seconds / GmatTimeConstants::SECS_PER_DAY);
-
-  /*--------------------------------------------------------------------------*/
-  /*  Compute the Julian date.                                                */
-  /*--------------------------------------------------------------------------*/
-
-  A  = floor(Y/100.0);
-  B  = 2.0 - A + floor(A/4.0);  
-  JD = floor(GmatTimeConstants::DAYS_PER_YEAR*(Y+4716.0)) + floor(30.6001*(M+1.0)) + D + B - 1524.5;
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the Julian date.                                                */
+   /*--------------------------------------------------------------------------*/
+   A  = floor(Y/100.0);
+   B  = 2.0 - A + floor(A/4.0);
+   JD = floor(GmatTimeConstants::DAYS_PER_YEAR*(Y+4716.0)) + floor(30.6001*(M+1.0)) + D + B - 1524.5;
   
-  return JD;
+   return JD;
 }
                          
 
 /**==========================================================================**/
 /**  Integer modulo function (self-explanatory: returns x mod y)             **/
 /**==========================================================================**/
-
 int mod(int x, int y)
 {
-  double rf, rx, ry;
-     int f;
+   double rf, rx, ry;
+   int f;
   
-  /*--------------------------------------------------------------------------*/
-  /* The basic formula can be found on p.38 of Knuth's The Art of Computer    */
-  /* Programming, volume 1. I still can't believe that C lacks this function, */
-  /* but I can find no mention of it in any of my C books...                  */
-  /*--------------------------------------------------------------------------*/
-
-  if ( y != 0 ) 
-     {
-       rx = (double) x;
-       ry = (double) y;
-       rf = floor(rx/ry);
-       f  = (int) rf;
-       return x - y*f;
-     }
-  else 
-       return x;
+   /*--------------------------------------------------------------------------*/
+   /* The basic formula can be found on p.38 of Knuth's The Art of Computer    */
+   /* Programming, volume 1. I still can't believe that C lacks this function, */
+   /* but I can find no mention of it in any of my C books...                  */
+   /*--------------------------------------------------------------------------*/
+   if ( y != 0 )
+   {
+      rx = (double) x;
+      ry = (double) y;
+      rf = floor(rx/ry);
+      f  = (int) rf;
+      return x - y*f;
+   }
+   else
+      return x;
 }
 
 /**==========================================================================**/
@@ -1705,55 +1453,50 @@ int mod(int x, int y)
 /**  Returns:                                                                **/
 /**     Nothing.                                                             **/
 /**==========================================================================**/
-
 int DeFile::Read_File_Line( FILE *inFile, int filter, char lineBuffer[82])
 {
-  char ignore[40];
-  char *code;
-  int  i, status = 0;
+   char ignore[40];
+   char *code;
+   int  i, status = 0;
 
-  /*--------------------------------------------------------------------------*/
-  /* Read one line (81 characters max) from header file.                      */
-  /*--------------------------------------------------------------------------*/
-  
-  code = fgets(lineBuffer,82,inFile);
+   /*--------------------------------------------------------------------------*/
+   /* Read one line (81 characters max) from header file.                      */
+   /*--------------------------------------------------------------------------*/
+   code = fgets(lineBuffer,82,inFile);
 
-  /*--------------------------------------------------------------------------*/
-  /*  Protect against lines over 80 characters long.                          */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /*  Protect against lines over 80 characters long.                          */
+   /*--------------------------------------------------------------------------*/
+   if ( (strlen(lineBuffer) == 81) && (lineBuffer[80] != '\n') )
+   {
+      // Intentionally get the return and then ignore it to move warning from
+      // system libraries to GMAT code base.  The "unused variable" warning
+      // here can be safely ignored.
+      char* ch = fgets(ignore,40,inFile);      /* Read past next end of line */
+      if (ch == NULL)
+         throw PlanetaryEphemException("Unable to read line from the DE file");
+      lineBuffer[81] = '\0';
+   }
 
-  if ( (strlen(lineBuffer) == 81) && (lineBuffer[80] != '\n') )
-     {
-       // Intentionally get the return and then ignore it to move warning from
-       // system libraries to GMAT code base.  The "unused variable" warning
-       // here can be safely ignored.
-       char* ch = fgets(ignore,40,inFile);      /* Read past next end of line */
-       if (ch == NULL)
-          throw PlanetaryEphemException("Unable to read line from the DE file");
-       lineBuffer[81] = '\0';
-     }
+   /*--------------------------------------------------------------------------*/
+   /* Convert FORTRAN exponential representation to C representation.          */
+   /*--------------------------------------------------------------------------*/
+   if ( filter == TRUE )
+   {
+      for ( i=0 ; i<82 ; i++ )
+      {
+         if (lineBuffer[i] == '\0') break;
+         if (lineBuffer[i] ==  'D') lineBuffer[i] = 'E';
+      }
+   }
 
-  /*--------------------------------------------------------------------------*/
-  /* Convert FORTRAN exponential representation to C representation.          */
-  /*--------------------------------------------------------------------------*/
-  
-  if ( filter == TRUE ) 
-     {
-       for ( i=0 ; i<82 ; i++ )
-           {
-             if (lineBuffer[i] == '\0') break;
-             if (lineBuffer[i] ==  'D') lineBuffer[i] = 'E';
-           }
-     }
+   /*--------------------------------------------------------------------------*/
+   /* Quit when EOF encountered.                                               */
+   /*--------------------------------------------------------------------------*/
 
-  /*--------------------------------------------------------------------------*/
-  /* Quit when EOF encountered.                                               */
-  /*--------------------------------------------------------------------------*/
+   if ( code == NULL ) status = EOF;
 
-  if ( code == NULL ) status = EOF;
-
-  return status;
-
+   return status;
 }
 
 /**==========================================================================**/
@@ -1775,7 +1518,6 @@ int DeFile::Read_File_Line( FILE *inFile, int filter, char lineBuffer[82])
 /**            = 4 for GROUP 1041                                            **/
 /**            = 5 for GROUP 1050                                            **/
 /**==========================================================================**/
-
 int DeFile::Read_Group_Header(FILE *inFile)
 {
    int   count   = 0;                               /* Initial values required */
@@ -1783,53 +1525,50 @@ int DeFile::Read_Group_Header(FILE *inFile)
    char  appStr[2], charIn, headStr[10];
    int   group;
 
-  /*--------------------------------------------------------------------------*/
-  /* Build the group header string.                                           */
-  /*--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------*/
+   /* Build the group header string.                                           */
+   /*--------------------------------------------------------------------------*/
+   headStr[0] = '\0';                               /* Start with empty string */
 
-  headStr[0] = '\0';                               /* Start with empty string */
-
-  do { 
-       /*................................................. Read one character */
+   do
+   {
+      /*................................................. Read one character */
        
-       charIn = fgetc(inFile);
+      charIn = fgetc(inFile);
        
-       /*..........................................Do the right thing with it */
+      /*..........................................Do the right thing with it */
        
-       if ( isgraph(charIn) )          /* Build sting of non-blank characters */
-          {
-            appStr[0] = charIn;
-            appStr[1] = '\0';
-            strcat(headStr,appStr);
-          }
-       else                                              /* Count line breaks */
-          {
-            if (charIn == '\n') count = count + 1;
-          }
+      if ( isgraph(charIn) )          /* Build sting of non-blank characters */
+      {
+         appStr[0] = charIn;
+         appStr[1] = '\0';
+         strcat(headStr,appStr);
+      }
+      else                                              /* Count line breaks */
+      {
+         if (charIn == '\n') count = count + 1;
+      }
             
-       /*.......................................Protect against strange input */
+      /*.......................................Protect against strange input */
+      if (feof(inFile)) break;
+
+      if ( ++tripCnt > 247 )
+      {
+         //Warning(21);
+         break;
+      }
        
-       if (feof(inFile)) break;
+   } while (count < 3);
 
-       if ( ++tripCnt > 247 ) 
-          {
-            //Warning(21);
-            break;
-          }
-       
-     } while (count < 3);
-
-  /*--------------------------------------------------------------------------*/
-  /* Determine the group whose data follows.                                  */
-  /*--------------------------------------------------------------------------*/
-
-       if (!strcmp(headStr,"GROUP1010")) group = 1;
-  else if (!strcmp(headStr,"GROUP1030")) group = 2;
-  else if (!strcmp(headStr,"GROUP1040")) group = 3;
-  else if (!strcmp(headStr,"GROUP1041")) group = 4;
-  else if (!strcmp(headStr,"GROUP1050")) group = 5;
-  else                                   group = 0;
+   /*--------------------------------------------------------------------------*/
+   /* Determine the group whose data follows.                                  */
+   /*--------------------------------------------------------------------------*/
+   if (!strcmp(headStr,"GROUP1010")) group = 1;
+   else if (!strcmp(headStr,"GROUP1030")) group = 2;
+   else if (!strcmp(headStr,"GROUP1040")) group = 3;
+   else if (!strcmp(headStr,"GROUP1041")) group = 4;
+   else if (!strcmp(headStr,"GROUP1050")) group = 5;
+   else                                   group = 0;
   
-  return group;
+   return group;
 }
-

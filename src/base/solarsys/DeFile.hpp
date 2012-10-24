@@ -19,16 +19,14 @@
  *
  * @todo : complete Convert method for converting to binary
  *
- * @note For Build 2, conversion from ASCII to Binary not done
- *       (assume  preprocessed).  Also, only 200 and 405 formats are handled.
- *
  * @note Code reused from or based on JPL/JSC (D. Hoffman) code.
  *
  * @note If an ASCII file is input on creation, the file will be converted to
  *       a file in native binary format, for efficiency.  This conversion
  *       assumes that there is an appropriate header file in the same directory
  *       as the ASCII file.  The header file should be called header.FMT, where
- *       FMT is the format (e.g. 200, etc.) of the DE file.
+ *       FMT is the format (e.g. 405, etc.) of the DE file.  NOTE: Conversion
+ *       not yet done.
  */
 //------------------------------------------------------------------------------
 #ifndef DeFile_hpp
@@ -44,54 +42,45 @@ class GMAT_API DeFile : public PlanetaryEphem
 {
 public:
 
-   // default constructor
+   /// default constructor
    DeFile(Gmat::DeFileType ofType, std::string fileName = "",
           Gmat::DeFileFormat fmt = Gmat::DE_BINARY);  
-   // copy constructor
+   /// copy constructor
    DeFile(const DeFile& def);
-   // operator=
+   /// operator=
    DeFile& operator=(const DeFile& sdef);
-   // destructor
+   /// destructor
    ~DeFile();
 
-   //loj: added so that constructor won't throw an exception
-   // method to initialize the DeFile - must be done before De file can be read
-   void Initialize();
-   
-   
-   // method to return the body ID for the requested body
-   Integer  GetBodyID(std::string bodyName);
-
-   // method to return the ASCII file name (unknown if created with
-   // BINARY file)
-   std::string GetAsciiFileName() const;
-
-   // method to return the BINARY file name
-   std::string GetBinaryFileName() const;
-
-   // method to return the type of De File
+   /// method to initialize the DeFile - must be done before De file can be read
+   void             Initialize();
+   /// method to return the body ID for the requested body
+   Integer          GetBodyID(std::string bodyName);
+   /// method to return the ASCII file name (unknown if created with
+   /// BINARY file)
+   std::string      GetAsciiFileName() const;
+   /// method to return the BINARY file name
+   std::string      GetBinaryFileName() const;
+   /// method to return the type of De File
    Gmat::DeFileType GetDeFileType() const;
-
-   // method to return the position and velocity of the specified body
-   // at the specified time
-   Real* GetPosVel(Integer forBody, A1Mjd atTime, 
-                   bool overrideTimeSystem = false);
-   
+   /// method to return the position and velocity of the specified body
+   /// at the specified time
+   Real*            GetPosVel(Integer forBody, A1Mjd atTime,
+                              bool overrideTimeSystem = false);
    /// method to return angles and rates (for Luna ONLY!!)                
-   void  GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates, 
-                           bool overrideTimeSystem = false);
+   void             GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates,
+                                      bool overrideTimeSystem = false);
+   /// method to return the day-of-year and year of the start time of the
+   /// DE file.
+   Integer*         GetStartDayAndYear();
 
-   // method to return the day-of-year and year of the start time of the
-   // DE file.
-   Integer* GetStartDayAndYear();
-
-   // method to convert an ASCII file to a binary file; this method assumes that
-   // there is  an appropriate header file in the same directory as the
-   // ASCII file.  @todo - code this method, as its implementation is currently TBD
-   std::string Convert(std::string deFileNameAscii); 
+   /// method to convert an ASCII file to a binary file; this method assumes that
+   /// there is  an appropriate header file in the same directory as the
+   /// ASCII file.  @todo - Implementation is currently TBD
+   std::string      Convert(std::string deFileNameAscii);
 
 
-   // static values for the IDs for each celestial body, as used on teh DE files.
+   /// static values for the IDs for each celestial body, as used on the DE files.
    static const Integer SUN_ID;
    static const Integer MERCURY_ID;
    static const Integer VENUS_ID;
@@ -109,13 +98,13 @@ public:
    static const Integer LIBRATIONS_ID;
 
    static const Real    JD_MJD_OFFSET;// = GmatTimeConstants::JD_JAN_5_1941;
-   // seconds offset to get from A1 to TDT (TT)
-   static const Real    TT_OFFSET;//     = 32.184;
+   /// seconds offset to get from A1 to TDT (TT)
+   static const Real    TT_OFFSET;    // = 32.184;
 
    static const Integer ARRAY_SIZE_200 = 826;
    static const Integer ARRAY_SIZE_405 = 1018;
-   static const Integer ARRAY_SIZE_421 = 1018;	// made changes by TUAN NGUYEN
-   static const Integer ARRAY_SIZE_424 = 1018;	// made changes by TUAN NGUYEN
+   static const Integer ARRAY_SIZE_421 = 1018;
+   static const Integer ARRAY_SIZE_424 = 1018;
    static const Integer MAX_ARRAY_SIZE = 1018;
 
    static const Integer FAILURE        = 1; // from JPL/JSC ephem_types.h
@@ -124,11 +113,11 @@ public:
 
 protected:
 
-   // structs representing the state date (position and velocity)
-   // (from JPL/JSC code - Hoffman)
+   /// structs representing the state date (position and velocity)
+   /// (from JPL/JSC code - Hoffman)
    struct GMAT_API stateData
    {
-      // default constructor
+      /// default constructor
       stateData()
       {
          Position[0] = 0.0;
@@ -138,7 +127,7 @@ protected:
          Velocity[1] = 0.0;
          Velocity[2] = 0.0;
       }
-      // copy constructor
+      /// copy constructor
       stateData(const stateData& sd)
       {
          Position[0] = sd.Position[0];
@@ -148,7 +137,7 @@ protected:
          Velocity[1] = sd.Velocity[1];
          Velocity[2] = sd.Velocity[2];
       }
-      // operator=
+      /// operator=
       stateData& operator=(const stateData& sd)
       {
          Position[0] = sd.Position[0];
@@ -159,7 +148,7 @@ protected:
          Velocity[2] = sd.Velocity[2];
          return *this;
       }
-      // data
+      /// data
       double Position[3];
       double Velocity[3];
    };
@@ -240,12 +229,12 @@ protected:
          int coeffPtr[12][3];
          int DENUM;
          int libratPtr[3];
-         int RSize; //loj: 4/14/04 added
+         int RSize;
       #else
          long int coeffPtr[12][3];
          long int DENUM;
          long int libratPtr[3];
-         long int RSize; //loj: 4/14/04 added
+         long int RSize;
       #endif
    };
 
@@ -253,23 +242,23 @@ protected:
    {
       // default constructor
       recTwoData()
-   {
+      {
          int i;
          for (i=0;i<400;i++) constValue[i] = 0.0;
-   }
+      }
       // copy constructor
       recTwoData(const recTwoData& r)
-   {
+      {
          int i;
          for (i=0;i<400;i++) constValue[i] = r.constValue[i];
-   }
+      }
       // operator=
       recTwoData& operator=(const recTwoData& r)
-   {
+      {
          int i;
          for (i=0;i<400;i++) constValue[i] = r.constValue[i];
          return *this;
-   }
+      }
       //data
       double constValue[400];
    };
@@ -279,12 +268,14 @@ protected:
    typedef struct recTwoData recTwoType;
 
    // structs representing the formats of the header records - need ARRAY_SIZE?
-   struct GMAT_API headerOne {
-         recOneType data;
-         char pad[MAX_ARRAY_SIZE*sizeof(double) - sizeof(recOneType)];  // MAX
-      };
+   struct GMAT_API headerOne
+   {
+      recOneType data;
+      char pad[MAX_ARRAY_SIZE*sizeof(double) - sizeof(recOneType)];  // MAX
+   };
 
-   struct GMAT_API headerTwo {
+   struct GMAT_API headerTwo
+   {
       recTwoType data;
       char pad[MAX_ARRAY_SIZE*sizeof(double) - sizeof(recTwoType)];  // MAX
    };
@@ -292,46 +283,43 @@ protected:
    typedef struct headerOne headOneType;
    typedef struct headerTwo headTwoType;
 
-
 private:
-   std::string theFileName;
+   std::string        theFileName;
    Gmat::DeFileFormat theFileFormat;
    
    /// ASCII file name - will be unknown if DeFile created with binary file
-   std::string asciiFileName;
+   std::string        asciiFileName;
 
    /// BINARY file name - may be input on creation, or may be result of
    /// conversion of input ASCII file; date will be read from this file.
-   std::string binaryFileName; 
+   std::string        binaryFileName;
 
    /// type of DE file
-   Gmat::DeFileType defType;
+   Gmat::DeFileType   defType;
 
    /// array size for the file format we're using
-   Integer arraySize;
+   Integer            arraySize;
 
    /// data from JPL/JSC code (Hoffman) ephem_read.c
-   headOneType  H1;
-   headTwoType  H2;
-   recOneType   R1;
-   FILE        *Ephemeris_File;
-   double       Coeff_Array[MAX_ARRAY_SIZE];   // MAX
-   double       T_beg , T_end , T_span;
+   headOneType        H1;
+   headTwoType        H2;
+   recOneType         R1;
+   FILE               *Ephemeris_File;
+   double             Coeff_Array[MAX_ARRAY_SIZE];   // MAX
+   double             T_beg , T_end , T_span;
    /// The base epoch for internal time calculations
-   double       baseEpoch;
-   double       mFileBeg;
+   double             baseEpoch;
+   double             mFileBeg;
    /// File beginning in ModJulian format
-   double       mA1FileBeg;
+   double             mA1FileBeg;
 
-      #if (USE_64_BIT_LONGS == 1)
-         int numConst;
-      #else
-         long int numConst;
-      #endif
+//   #if (USE_64_BIT_LONGS == 1)
+//      int             numConst;   // where is this used?
+//   #else
+//      long int        numConst;   // where is this used?
+//   #endif
    
-   Integer EPHEMERIS; // caps because of reuse from JPL/JSC code (Hoffman)
-
-   
+   Integer            EPHEMERIS; // caps because of reuse from JPL/JSC code (Hoffman)
 
    // method to initialize the DeFile - must be done before De file can be read
    void InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt);
@@ -375,15 +363,15 @@ private:
    /*  Find_Value     - from JPL/JSC code (Hoffman)                           */
    /*-------------------------------------------------------------------------*/
    double Find_Value( char    name[]             ,
-                             char    name_array[400][6] ,
-                             double  value_array[400]   );
+                      char    name_array[400][6] ,
+                      double  value_array[400]   );
 
    /*-------------------------------------------------------------------------*/
    /**  Gregorian_to_Julian     - from JPL/JSC code (Hoffman)                 */
    /*-------------------------------------------------------------------------*/
    double Gregorian_to_Julian( int     year ,   int     month   ,
-                                      int     day  ,   int     hour    ,
-                                      int     min  ,   double  seconds );
+                               int     day  ,   int     hour    ,
+                               int     min  ,   double  seconds );
 
    /*-------------------------------------------------------------------------*/
    /*  Integer modulo function.     - from JPL/JSC code (Hoffman)             */
@@ -405,8 +393,5 @@ private:
    /*-------------------------------------------------------------------------*/
 
    //extern void Warning( int errorCode );
-   
-
-
 };
 #endif // DeFile_hpp

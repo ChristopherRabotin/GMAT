@@ -20,7 +20,6 @@
 //------------------------------------------------------------------------------
 #include "PlanetaryEphemException.hpp"
 
-
 //---------------------------------
 //  public methods
 //---------------------------------
@@ -32,10 +31,8 @@
 * Constructs an PlanetaryEphemException object (default constructor).
  */
 //------------------------------------------------------------------------------
-
 PlanetaryEphemException::PlanetaryEphemException(const std::string &details) :
 BaseException  ("PlanetaryEphem (sub)class exception: ", details)
 {
 
 }
-
