@@ -260,7 +260,6 @@ OBJECTS = \
     solarsys/CelestialBodyPanel.o \
     solarsys/CelestialBodyPropertiesPanel.o \
     solarsys/LibrationPointPanel.o \
-    solarsys/SolarSystemWindow.o \
     solarsys/UniversePanel.o \
     solver/DCSetupPanel.o \
     solver/SQPSetupPanel.o \
@@ -303,6 +302,7 @@ OBJECTS = \
     $(STC_EDITOR_OBJECTS) \
     $(SPICE_OBJECTS)
 #    app/GmatSocketServer.o \
+#    solarsys/SolarSystemWindow.o \
 
 ifeq ($(SHARED_BASE), 1)
 
