@@ -76,8 +76,11 @@ void FindReplaceDialog::Create()
 {
    //---------- find
    wxStaticText *findText = new wxStaticText(this, -1, "Find What");
+   // TGG: Fix for GMT-3198 Can't use Find/Replace dialog after finding very long string
+   // Changed wxDefault Size to wxSize.  Note that none of the sizer options would stop
+   // the combobox from growing if the mFindArray/mReplaceArray contained long strings
    mFindComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize,
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(200,-1),
                      mFindArray, 0);
    mFindNextButton =
       new wxButton(this, ID_BUTTON, wxT("Find Next"),
@@ -89,9 +92,12 @@ void FindReplaceDialog::Create()
 
    //---------- replace
    wxStaticText *replaceText = new wxStaticText(this, -1, "Replace With");
+   // TGG: Fix for GMT-3198 Can't use Find/Replace dialog after finding very long string
+   // Changed wxDefault Size to wxSize.  Note that none of the sizer options would stop
+   // the combobox from growing if the mFindArray/mReplaceArray contained long strings
    mReplaceComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize,
-                     mReplaceArray);
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(200,-1), 
+					 mReplaceArray, 0);
    mReplaceButton =
       new wxButton(this, ID_BUTTON, wxT("Replace"),
                    wxDefaultPosition, wxDefaultSize, 0);
@@ -109,18 +115,18 @@ void FindReplaceDialog::Create()
    //---------- sizer
    wxFlexGridSizer *findSizer = new wxFlexGridSizer(4, 0, 0);
    findSizer->Add(findText, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
-   findSizer->Add(mFindComboBox, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
+   findSizer->Add(mFindComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    findSizer->Add(mFindNextButton, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
    findSizer->Add(mFindPrevButton, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
 
    findSizer->Add(replaceText, 0, wxALIGN_LEFT|wxALIGN_CENTER_HORIZONTAL|wxGROW|wxALL, bsize);
-   findSizer->Add(mReplaceComboBox, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
+   findSizer->Add(mReplaceComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    findSizer->Add(mReplaceButton, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
    findSizer->Add(mReplaceAllButton, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
 
    // Add to page sizer and set sizer to this dialog
    wxStaticBoxSizer *findStaticSizer = new wxStaticBoxSizer(wxVERTICAL, this);
-   findStaticSizer->Add(findSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
+   findStaticSizer->Add(findSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
    pageSizer->Add(findStaticSizer, 0, wxALIGN_CENTER|wxALL, 4);
