@@ -593,7 +593,7 @@ void ParameterSelectDialog::OnListBoxDoubleClick(wxCommandEvent& event)
       if (mAllowWholeObject)
       {
          DisplayWarning("Please uncheck the Select Entire Object check box\n"
-                        "before adding the property to the liset.");
+                        "before adding the property to the list.");
          return;
       }
       
@@ -924,7 +924,8 @@ void ParameterSelectDialog::AddParameter(const wxString &param)
    }
    else
    {
-      DisplayWarning("\"" + param + "\"" + " is already selected");
+      mSelectedListBox->SetStringSelection(param);
+      //DisplayWarning("\"" + param + "\"" + " is already selected");
    }
    
    #ifdef DEBUG_PARAMETER
