@@ -60,7 +60,7 @@ private:
    bool runBatch;
    bool startMatlabServer;
    
-   void ProcessCommandLineOptions();
+   bool ProcessCommandLineOptions();
    void BuildAndRunScript();
    void RunBatch();
    void WriteMessage(const std::string &msg1, const std::string &msg2,

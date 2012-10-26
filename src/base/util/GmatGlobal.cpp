@@ -186,6 +186,22 @@ void GmatGlobal::SetBatchMode(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// bool IsNitsClient()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsNitsClient()
+{
+   return isNitsClient;
+}
+
+//------------------------------------------------------------------------------
+// void SetNitsClient(bool flag)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetNitsClient(bool flag)
+{
+   isNitsClient = flag;
+}
+
+//------------------------------------------------------------------------------
 // bool GetRunInterrupted()
 //------------------------------------------------------------------------------
 bool GmatGlobal::GetRunInterrupted()
@@ -636,6 +652,7 @@ void GmatGlobal::SetItrfCoefficientsFile(ItrfCoefficientsFile *itrf)
 GmatGlobal::GmatGlobal()
 {
    isBatchMode = false;
+   isNitsClient = false;
    runInterrupted = false;
    isMatlabAvailable = false;
    isMatlabDebugOn = false;

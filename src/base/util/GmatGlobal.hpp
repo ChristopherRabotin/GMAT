@@ -91,6 +91,8 @@ public:
    // Run mode
    bool IsBatchMode();
    void SetBatchMode(bool flag);
+   bool IsNitsClient();
+   void SetNitsClient(bool flag);
    bool GetRunInterrupted();
    void SetRunInterrupted(bool flag);
    Integer GetRunMode();
@@ -224,6 +226,7 @@ private:
    Setting currentSetting;
    
    bool isBatchMode;
+   bool isNitsClient;
    bool runInterrupted;
    bool isMatlabAvailable;
    bool isMatlabDebugOn;

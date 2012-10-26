@@ -226,7 +226,8 @@ bool GmatApp::OnInit()
          #endif
             
          
-         ProcessCommandLineOptions();
+         if (!ProcessCommandLineOptions())
+            return false;
          
          if (!showMainFrame)
             return false;
@@ -414,10 +415,14 @@ int GmatApp::FilterEvent(wxEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void ProcessCommandLineOptions()
+// bool ProcessCommandLineOptions()
 //------------------------------------------------------------------------------
-void GmatApp::ProcessCommandLineOptions()
+/// @note Should this be moved to the Moderator so the options are available to
+/// all user interfaces?
+bool GmatApp::ProcessCommandLineOptions()
 {
+   bool retval = true;
+
    wxString commandLineOptions =
       "Valid command line options are:\n"
       "   --help, -h              Shows available options\n"
@@ -425,6 +430,7 @@ void GmatApp::ProcessCommandLineOptions()
       "   --start-server          Starts GMAT server on start-up\n"
       "   --run, -r <scriptname>  Builds and runs the script\n"
       "   --minimize, -m          Minimizes GMAT window\n"
+      "   --nits, -n              Run as a NITS client\n"
       "   --exit, -x              Exits GMAT after a script is run\n\n";
 
    #ifdef DEBUG_CMD_LINE
@@ -487,6 +493,44 @@ void GmatApp::ProcessCommandLineOptions()
          {
             GmatGlobal::Instance()->SetGuiMode(GmatGlobal::MINIMIZED_GUI);
          }
+         else if ((arg == "--nits") || (arg == "-n"))
+         {
+            // NITS Support
+            MessageInterface::ShowMessage("GMAT is running as a NITS client\n");
+            // Check for NITS plugin by checking for a NITS connection command
+            StringArray commands = 
+               theModerator->GetListOfFactoryItems(Gmat::COMMAND);
+            if (find(commands.begin(), commands.end(), "SendMessage") == commands.end())
+            {
+               wxBusyCursor bc;
+               wxLogError(wxT("GMAT was started as a NITS client, but the "
+                  "NITS plugin was not loaded.\n"
+                  "The error occurred during the initialization.  GMAT will exit."));
+               wxLog::FlushActive();
+               retval = false;
+            }
+            else
+            {
+               scriptToRun = "NITS_Config.script";
+               // Replace single quotes
+               GmatStringUtil::Replace(scriptToRun, "'", "");
+               runScript = true;
+               GmatGlobal::Instance()->SetNitsClient(true);
+               GmatGlobal::Instance()->SetRunMode(GmatGlobal::EXIT_AFTER_RUN);
+
+               // When this changes from throw-away prototype mode to NITS compatible
+               // mode, we'll want to do a NITS handshake here to register as a NITS
+               // client.  That mode is not yet ready for use, though.  Here's a start on 
+               // how to do that, via a static method in the command that does not 
+               // (and cannot) yet exist:
+               //SendMessage::ShakeHands();
+
+               ++i;
+               #ifdef DEBUG_CMD_LINE
+                  MessageInterface::ShowMessage("%s\n", scriptToRun.c_str());
+               #endif
+            }
+         }
          else
          {
             bool isArgValid = false;
@@ -518,6 +562,8 @@ void GmatApp::ProcessCommandLineOptions()
          }
       }
    }
+
+   return retval;
 }
 
 
