@@ -1438,10 +1438,16 @@ std::string DifferentialCorrector::GetProgressString()
 
                case SOLVE:
                default:
-                  progress << "\n*** Targeting Completed in " << iterationsTaken
-                           << " iterations";
+                  if (status == CONVERGED)
+                     progress << "\n*** Targeting Completed in "
+                              << iterationsTaken << " iterations.\n"
+                              << "*** The Targeter converged!" ;
+                  else
+                     progress << "\n*** Targeting did not converge in "
+                              << iterationsTaken << " iterations";
 
-                  if (iterationsTaken > maxIterations)
+                  if ((iterationsTaken >= maxIterations) &&
+                      (status != CONVERGED))
                      progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                            << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
                            << "!!! WARNING: Targeter did NOT converge!"

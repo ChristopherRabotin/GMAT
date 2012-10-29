@@ -421,10 +421,15 @@ std::string Optimizer::GetProgressString()
             break;
 
          case FINISHED:
-            progress << "\n*** Optimization Completed in " << iterationsTaken
-                     << " iterations";
+            if (converged)
+               progress << "\n*** Optimization Completed in " << iterationsTaken
+                        << " iterations\n*** The Optimizer Converged!";
+            else
+               progress << "\n*** Optimization did not converge in "
+                        << iterationsTaken
+                        << " iterations";
                      
-            if (iterationsTaken > maxIterations)
+            if ((iterationsTaken >= maxIterations) && (converged == false))
                progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                         << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
                         << "!!! WARNING: Optimizer did NOT converge in "
