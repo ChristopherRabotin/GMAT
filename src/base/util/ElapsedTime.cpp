@@ -174,19 +174,11 @@ void ElapsedTime::Set(Real secs)
 //------------------------------------------------------------------------------
 GmatTimeUtil::ElapsedDate ElapsedTime::ToElapsedDate() const
 {
-   Integer sign;
    Real secs = seconds;
    
    // Compute sign
    if (secs < 0)
-   {
-      sign = (SIGN)(-1);
       secs =  - secs;
-   }
-   else
-   {
-      sign = (SIGN)(1);
-   }
    
    //Compute elapsed days, hours, minutes, seconds 
    Integer days = (Integer)(secs / SECS_PER_DAY); 
