@@ -87,6 +87,7 @@ Achieve::Achieve() :
    targeterDataFinalized   (false)
 {
    objectTypeNames.push_back("SolverCommand");
+   objectTypeNames.push_back("Achieve");
    settables.push_back("Tolerance"); 
    parameterCount = AchieveParamCount;
 }

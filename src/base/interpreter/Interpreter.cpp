@@ -1424,7 +1424,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
 // bool ValidateCommand(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
- * Checks the input command to make sure it wrappers are set up for it
+ * Checks the input command to make sure its wrappers are set up for it
  * correctly through the Validator, if necessary.
  *
  * @param  cmd  the command to validate
@@ -2109,12 +2109,30 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          #endif
          retFlag  = ValidateCommand(cmd);
          
-         // For Optimize command make sure Solver type is Optimizer
-         if (cmd->IsOfType("Optimize") || cmd->IsOfType("Target"))
+         // For Solver commands make sure Solver type is correct
+         if (cmd->IsOfType("Optimize") || cmd->IsOfType("Target") ||
+             cmd->IsOfType("Achieve")  || cmd->IsOfType("Minimize") ||
+             cmd->IsOfType("NonlinearConstraint") )
          {
             std::string expSolverType = "DifferentialCorrector";
-            if (cmd->IsOfType("Optimize")) expSolverType = "Optimizer";
-            std::string solverName = cmd->GetRefObjectName(Gmat::SOLVER);
+            if (cmd->IsOfType("Optimize") || cmd->IsOfType("Minimize") ||
+                cmd->IsOfType("NonlinearConstraint"))
+               expSolverType = "Optimizer";
+
+            std::string solverName;
+            try
+            {
+               solverName = cmd->GetRefObjectName(Gmat::SOLVER);
+            }
+            catch (BaseException &ex)
+            {
+               if (solverName == "")
+                  solverName = cmd->GetStringParameter("SolverName");
+
+               if (solverName == "")
+                  throw;
+            }
+
             GmatBase *obj = FindObject(solverName);
             
             #ifdef DEBUG_CREATE_COMMAND
@@ -2130,9 +2148,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             {
                bool wrongSolver = false;
                
-               if (cmd->IsOfType("Optimize") && !obj->IsOfType(expSolverType))
-                  wrongSolver = true;
-               else if (cmd->IsOfType("Target") && !obj->IsOfType(expSolverType))
+               if (!obj->IsOfType(expSolverType))
                   wrongSolver = true;
                
                if (wrongSolver)

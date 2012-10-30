@@ -77,6 +77,7 @@ Minimize::Minimize() :
    interpreted             (false)
 {
    objectTypeNames.push_back("SolverCommand");
+   objectTypeNames.push_back("Minimize");
    
    // nothing to add to settables here ...
 
