@@ -2311,6 +2311,11 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       return false;
    }
 
+   if ((order == 2) && (fillSTM))
+	   throw ODEModelException("Second order integrators cannot be used when "
+			   "propagating the Orbit State Transition Matrix (STM); please "
+			   "use a different integrator.");
+
    if (dynamicProperties)
    {
       for (UnsignedInt i = 0; i < dynamicsIndex.size(); ++i)
