@@ -161,7 +161,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    {
       withAxes = new ICRFAxes(withName);
    }
-   else if (ofType == "BSS")
+   else if (ofType == "BodySpinSun")
    {
       withAxes = new BodySpinSunAxes(withName);
    }
@@ -205,7 +205,7 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
 
 	  creatables.push_back("ITRF");
 	  creatables.push_back("ICRF");
-	  creatables.push_back("BSS");
+	  creatables.push_back("BodySpinSun");
    }
 }
 
