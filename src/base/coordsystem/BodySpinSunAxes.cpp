@@ -209,6 +209,7 @@ bool BodySpinSunAxes::Initialize()
    ObjectReferencedAxes::Initialize();
    InitializeFK5();
    secondary = origin;							// the secondary is the same as the origin for BodySpinSun coordinate system
+   primary = solar->GetBody(primaryName);
 
    return true;
 }
